@@ -3,6 +3,7 @@ package eu.einfracentral.registry.manager;
 import com.google.gson.JsonArray;
 import eu.einfracentral.domain.*;
 import eu.einfracentral.dto.MonitoringStatus;
+import eu.einfracentral.dto.ServiceType;
 import eu.einfracentral.exception.ValidationException;
 import eu.einfracentral.registry.service.ResourceBundleService;
 import eu.einfracentral.registry.service.MonitoringService;
@@ -104,6 +105,8 @@ public class MonitoringManager extends ResourceManager<MonitoringBundle> impleme
         monitoring.setActive(true);
         // latestOnboardingInfo
         monitoring.setLatestOnboardingInfo(loggingInfo);
+        // default monitoredBy value -> EOSC
+        monitoring.getMonitoring().setMonitoredBy("EOSC");
 
         MonitoringBundle ret;
         ret = super.add(monitoring, null);
@@ -144,6 +147,9 @@ public class MonitoringManager extends ResourceManager<MonitoringBundle> impleme
         // latestUpdateInfo
         monitoring.setLatestUpdateInfo(loggingInfo);
 
+        // default monitoredBy value -> EOSC
+        monitoring.getMonitoring().setMonitoredBy("EOSC");
+
         monitoring.setActive(ex.isActive());
         existing.setPayload(serialize(monitoring));
         existing.setResourceType(resourceType);
@@ -175,13 +181,18 @@ public class MonitoringManager extends ResourceManager<MonitoringBundle> impleme
 
     }
 
-    public List<String> getAvailableServiceTypes() {
-        List<String> serviceTypeList = new ArrayList<>();
+    public List<ServiceType> getAvailableServiceTypes() {
+        List<ServiceType> serviceTypeList = new ArrayList<>();
         String response = CreateArgoGrnetHttpRequest.createHttpRequest(monitoringServiceTypes, monitoringToken);
         JSONObject obj = new JSONObject(response);
         JSONArray arr = obj.getJSONArray("data");
         for (int i = 0; i < arr.length(); i++) {
-            serviceTypeList.add(arr.getJSONObject(i).getString("name"));
+            String date = arr.getJSONObject(i).get("date").toString();
+            String name = arr.getJSONObject(i).get("name").toString();
+            String title = arr.getJSONObject(i).get("title").toString();
+            String description = arr.getJSONObject(i).get("description").toString();
+            ServiceType serviceType = new ServiceType(date, name, title, description);
+            serviceTypeList.add(serviceType);
         }
         return serviceTypeList;
     }
@@ -193,10 +204,14 @@ public class MonitoringManager extends ResourceManager<MonitoringBundle> impleme
     }
 
     public void serviceTypeValidation(Monitoring monitoring){
-        List<String> serviceTypeList = getAvailableServiceTypes();
+        List<ServiceType> serviceTypeList = getAvailableServiceTypes();
+        List<String> serviceTypeNames = new ArrayList<>();
+        for (ServiceType type : serviceTypeList){
+            serviceTypeNames.add(type.getName());
+        }
         for (MonitoringGroup monitoringGroup : monitoring.getMonitoringGroups()){
             String serviceType = monitoringGroup.getServiceType();
-            if (!serviceTypeList.contains(serviceType)){
+            if (!serviceTypeNames.contains(serviceType)){
                 throw new ValidationException(String.format("The serviceType you provided is wrong. Available serviceTypes are: '%s'", serviceTypeList));
             }
         }

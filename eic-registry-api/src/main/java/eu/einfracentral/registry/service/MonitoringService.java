@@ -3,6 +3,7 @@ package eu.einfracentral.registry.service;
 import com.google.gson.JsonArray;
 import eu.einfracentral.domain.MonitoringBundle;
 import eu.einfracentral.dto.MonitoringStatus;
+import eu.einfracentral.dto.ServiceType;
 import org.springframework.security.core.Authentication;
 
 import java.util.List;
@@ -10,7 +11,7 @@ import java.util.List;
 public interface MonitoringService<T, U extends Authentication> extends ResourceService<T, Authentication> {
 
     MonitoringBundle add(MonitoringBundle monitoring, String resourceType, Authentication auth);
-    List<String> getAvailableServiceTypes();
+    List<ServiceType> getAvailableServiceTypes();
 
 
     /**

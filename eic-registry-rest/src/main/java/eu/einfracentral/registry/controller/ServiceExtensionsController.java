@@ -5,6 +5,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import eu.einfracentral.domain.*;
 import eu.einfracentral.dto.MonitoringStatus;
+import eu.einfracentral.dto.ServiceType;
 import eu.einfracentral.registry.service.HelpdeskService;
 import eu.einfracentral.registry.service.MonitoringService;
 import eu.einfracentral.registry.service.ResourceBundleService;
@@ -261,7 +262,7 @@ public class ServiceExtensionsController {
 
     @ApiOperation(value = "Returns all the available Monitoring serviceTypes")
     @GetMapping(path = "/monitoring/serviceTypes", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    public ResponseEntity<List<String>> getAvailableServiceTypes(@ApiIgnore Authentication auth) {
+    public ResponseEntity<List<ServiceType>> getAvailableServiceTypes() {
         return new ResponseEntity<>(monitoringService.getAvailableServiceTypes(), HttpStatus.OK);
     }
 
