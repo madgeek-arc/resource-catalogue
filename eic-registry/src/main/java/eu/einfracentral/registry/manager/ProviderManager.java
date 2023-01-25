@@ -183,7 +183,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         } else {
             loggingInfoList.add(loggingInfo);
         }
-        provider.getProvider().setParticipatingCountries(sortCountries(provider.getProvider().getParticipatingCountries()));
+        sortFields(provider);
         provider.setLoggingInfo(loggingInfoList);
 
         // latestUpdateInfo
