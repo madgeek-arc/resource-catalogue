@@ -106,7 +106,7 @@ public class MonitoringManager extends ResourceManager<MonitoringBundle> impleme
         // latestOnboardingInfo
         monitoring.setLatestOnboardingInfo(loggingInfo);
         // default monitoredBy value -> EOSC
-        monitoring.getMonitoring().setMonitoredBy("EOSC");
+        monitoring.getMonitoring().setMonitoredBy("monitored_by-eosc");
 
         MonitoringBundle ret;
         ret = super.add(monitoring, null);
@@ -148,7 +148,7 @@ public class MonitoringManager extends ResourceManager<MonitoringBundle> impleme
         monitoring.setLatestUpdateInfo(loggingInfo);
 
         // default monitoredBy value -> EOSC
-        monitoring.getMonitoring().setMonitoredBy("EOSC");
+        monitoring.getMonitoring().setMonitoredBy("monitored_by-eosc");
 
         monitoring.setActive(ex.isActive());
         existing.setPayload(serialize(monitoring));
