@@ -32,6 +32,7 @@ import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
 import javax.validation.Valid;
+import java.time.OffsetDateTime;
 import java.util.*;
 
 @RestController
@@ -352,6 +353,24 @@ public class ServiceExtensionsController {
                 url += "?view=details";
             }
         }
+        String response = CreateArgoGrnetHttpRequest.createHttpRequest(url, monitoringToken);
+        List<MonitoringStatus> serviceMonitoringStatuses;
+        if (response != null) {
+            JSONObject obj = new JSONObject(response);
+            Gson gson = new Gson();
+            JsonElement jsonObj = gson.fromJson(String.valueOf(obj), JsonElement.class);
+            JsonArray statuses = jsonObj.getAsJsonObject().get("endpoints").getAsJsonArray().get(0).getAsJsonObject().get("statuses").getAsJsonArray();
+            serviceMonitoringStatuses = monitoringService.createMonitoringStatusObject(statuses);
+            return serviceMonitoringStatuses;
+        }
+        return null;
+    }
+
+    @GetMapping(path = "/monitoring/monitoringStatusOnSpecificPeriod/{serviceId}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    public List<MonitoringStatus> getMonitoringStatusOnSpecificPeriod(@PathVariable String serviceId, @RequestParam String from, @RequestParam String to) {
+        OffsetDateTime odtFrom = OffsetDateTime.parse(from+"T00:00:01Z");
+        OffsetDateTime odtTo = OffsetDateTime.parse(to+"T23:59:59Z");
+        String url = monitoringStatus + serviceId + "?start_time=" + odtFrom + "&end_time=" + odtTo ;
         String response = CreateArgoGrnetHttpRequest.createHttpRequest(url, monitoringToken);
         List<MonitoringStatus> serviceMonitoringStatuses;
         if (response != null) {
