@@ -41,8 +41,12 @@ public class ServiceDatasourceValidator implements Validator {
     @Override
     public void validate(Object target, Errors errors) {
         Service service = ((ResourceBundle<?>) target).getPayload();
-        validateRequiredResources(service, errors);
-        validateRelatedResources(service, errors);
+        if (service.getRelatedResources() != null && !service.getRelatedResources().isEmpty()){
+            validateRelatedResources(service, errors);
+        }
+        if (service.getRequiredResources() != null && !service.getRequiredResources().isEmpty()){
+            validateRequiredResources(service, errors);
+        }
         validateCategories(service.getCategories());
         validateScientificDomains(service.getScientificDomains());
     }

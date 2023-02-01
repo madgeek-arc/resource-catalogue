@@ -2,6 +2,7 @@ package eu.einfracentral.domain;
 
 import eu.einfracentral.annotation.FieldValidation;
 import eu.einfracentral.annotation.VocabularyValidation;
+import io.swagger.annotations.ApiModelProperty;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
@@ -15,14 +16,17 @@ public class ResourceExtras {
 
     @XmlElementWrapper(name = "eoscIFGuidelines")
     @XmlElement(name = "eoscIFGuideline")
+    @ApiModelProperty(position = 1)
     @FieldValidation(nullable = true)
     private List<EOSCIFGuidelines> eoscIFGuidelines;
 
     @XmlElement()
+    @ApiModelProperty(position = 2)
     private boolean horizontalService;
 
     @XmlElementWrapper(name = "researchCategories")
     @XmlElement(name = "researchCategory")
+    @ApiModelProperty(position = 3)
     @FieldValidation(nullable = true, containsId = true, idClass = Vocabulary.class)
     @VocabularyValidation(type = Vocabulary.Type.RESEARCH_CATEGORY)
     private List<String> researchCategories;

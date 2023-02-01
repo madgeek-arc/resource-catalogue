@@ -1,8 +1,15 @@
 package eu.einfracentral.registry.controller;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import eu.einfracentral.domain.*;
+import eu.einfracentral.dto.MonitoringStatus;
+import eu.einfracentral.dto.ServiceType;
+import eu.einfracentral.registry.service.HelpdeskService;
 import eu.einfracentral.registry.service.MonitoringService;
-import eu.einfracentral.registry.service.ResourceService;
+import eu.einfracentral.registry.service.ResourceBundleService;
+import eu.einfracentral.utils.CreateArgoGrnetHttpRequest;
 import eu.einfracentral.validators.HelpdeskValidator;
 import eu.einfracentral.validators.MonitoringValidator;
 import eu.openminted.registry.core.domain.FacetFilter;
@@ -14,11 +21,10 @@ import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.WebDataBinder;
@@ -26,6 +32,7 @@ import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
 import javax.validation.Valid;
+import java.time.OffsetDateTime;
 import java.util.*;
 
 @RestController
@@ -34,8 +41,15 @@ import java.util.*;
 public class ServiceExtensionsController {
 
     private static final Logger logger = LogManager.getLogger(ServiceExtensionsController.class);
-    private final ResourceService<HelpdeskBundle, Authentication> helpdeskService;
+    private final HelpdeskService<HelpdeskBundle, Authentication> helpdeskService;
     private final MonitoringService<MonitoringBundle, Authentication> monitoringService;
+    private final ResourceBundleService<ServiceBundle> serviceBundleService;
+    @Value("${argo.grnet.monitoring.availability}")
+    private String monitoringAvailability;
+    @Value("${argo.grnet.monitoring.status}")
+    private String monitoringStatus;
+    @Value("${argo.grnet.monitoring.token}")
+    private String monitoringToken;
 
     @InitBinder("helpdesk")
     protected void initHelpdeskBinder(WebDataBinder binder) {
@@ -48,10 +62,12 @@ public class ServiceExtensionsController {
     }
 
     @Autowired
-    ServiceExtensionsController(ResourceService<HelpdeskBundle, Authentication> helpdeskService,
-                                MonitoringService<MonitoringBundle, Authentication> monitoringService) {
+    ServiceExtensionsController(HelpdeskService<HelpdeskBundle, Authentication> helpdeskService,
+                                MonitoringService<MonitoringBundle, Authentication> monitoringService,
+                                ResourceBundleService<ServiceBundle> serviceBundleService) {
         this.helpdeskService = helpdeskService;
         this.monitoringService = monitoringService;
+        this.serviceBundleService = serviceBundleService;
     }
 
     //SECTION: HELPDESK
@@ -65,14 +81,14 @@ public class ServiceExtensionsController {
     @ApiOperation(value = "Returns the Helpdesk of the given Service of the given Catalogue.")
     @GetMapping(path = "/helpdesk/byService/{serviceId}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity<Helpdesk> getHelpdeskByServiceId(@PathVariable("serviceId") String serviceId,
-                                                @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueId,
-                                                @ApiIgnore Authentication auth) {
+                                                           @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueId,
+                                                           @ApiIgnore Authentication auth) {
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(1000);
         List<HelpdeskBundle> allHelpdesks = helpdeskService.getAll(ff, auth).getResults();
-        for (HelpdeskBundle helpdesk : allHelpdesks){
+        for (HelpdeskBundle helpdesk : allHelpdesks) {
             if (helpdesk.getCatalogueId().equals(catalogueId) && (helpdesk.getHelpdesk().getServiceId().equals(serviceId)
-                    || (catalogueId+'.'+helpdesk.getHelpdesk().getServiceId()).equals(serviceId))){
+                    || (catalogueId + '.' + helpdesk.getHelpdesk().getServiceId()).equals(serviceId))) {
                 return new ResponseEntity<>(helpdesk.getHelpdesk(), HttpStatus.OK);
             }
         }
@@ -89,8 +105,8 @@ public class ServiceExtensionsController {
     })
     @GetMapping(path = "/helpdesk/all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity<Paging<Helpdesk>> getAllHelpdesks(@ApiIgnore @RequestParam Map<String, Object> allRequestParams,
-                                                                @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueIds,
-                                                                @ApiIgnore Authentication auth) {
+                                                            @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueIds,
+                                                            @ApiIgnore Authentication auth) {
         allRequestParams.putIfAbsent("catalogue_id", catalogueIds);
         if (catalogueIds != null && catalogueIds.equals("all")) {
             allRequestParams.remove("catalogue_id");
@@ -124,8 +140,9 @@ public class ServiceExtensionsController {
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth, #helpdesk.serviceId, #catalogueId)")
     public ResponseEntity<Helpdesk> addHelpdesk(@Valid @RequestBody Helpdesk helpdesk,
                                                 @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueId,
+                                                @RequestParam String resourceType,
                                                 @ApiIgnore Authentication auth) {
-        HelpdeskBundle helpdeskBundle = helpdeskService.add(new HelpdeskBundle(helpdesk, catalogueId), auth);
+        HelpdeskBundle helpdeskBundle = helpdeskService.add(new HelpdeskBundle(helpdesk, catalogueId), resourceType, auth);
         logger.info("User '{}' added the Helpdesk with id '{}'", auth.getName(), helpdesk.getId());
         return new ResponseEntity<>(helpdeskBundle.getHelpdesk(), HttpStatus.CREATED);
     }
@@ -179,7 +196,6 @@ public class ServiceExtensionsController {
     }
 
 
-
     //SECTION: MONITORING
     @ApiOperation(value = "Returns the Monitoring with the given id.")
     @GetMapping(path = "/monitoring/{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
@@ -191,14 +207,14 @@ public class ServiceExtensionsController {
     @ApiOperation(value = "Returns the Monitoring of the given Service of the given Catalogue.")
     @GetMapping(path = "/monitoring/byService/{serviceId}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity<Monitoring> getMonitoringByServiceId(@PathVariable("serviceId") String serviceId,
-                                                                 @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueId,
-                                                                 @ApiIgnore Authentication auth) {
+                                                               @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueId,
+                                                               @ApiIgnore Authentication auth) {
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(1000);
         List<MonitoringBundle> allMonitorings = monitoringService.getAll(ff, auth).getResults();
-        for (MonitoringBundle monitoring : allMonitorings){
+        for (MonitoringBundle monitoring : allMonitorings) {
             if (monitoring.getCatalogueId().equals(catalogueId) && (monitoring.getMonitoring().getServiceId().equals(serviceId)
-                    || (catalogueId+'.'+monitoring.getMonitoring().getServiceId()).equals(serviceId))){
+                    || (catalogueId + '.' + monitoring.getMonitoring().getServiceId()).equals(serviceId))) {
                 return new ResponseEntity<>(monitoring.getMonitoring(), HttpStatus.OK);
             }
         }
@@ -215,8 +231,8 @@ public class ServiceExtensionsController {
     })
     @GetMapping(path = "monitoring/all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity<Paging<Monitoring>> getAllMonitorings(@ApiIgnore @RequestParam Map<String, Object> allRequestParams,
-                                                   @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueIds,
-                                                   @ApiIgnore Authentication auth) {
+                                                                @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueIds,
+                                                                @ApiIgnore Authentication auth) {
         allRequestParams.putIfAbsent("catalogue_id", catalogueIds);
         if (catalogueIds != null && catalogueIds.equals("all")) {
             allRequestParams.remove("catalogue_id");
@@ -247,7 +263,7 @@ public class ServiceExtensionsController {
 
     @ApiOperation(value = "Returns all the available Monitoring serviceTypes")
     @GetMapping(path = "/monitoring/serviceTypes", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    public ResponseEntity<List<String>> getAvailableServiceTypes(@ApiIgnore Authentication auth){
+    public ResponseEntity<List<ServiceType>> getAvailableServiceTypes() {
         return new ResponseEntity<>(monitoringService.getAvailableServiceTypes(), HttpStatus.OK);
     }
 
@@ -256,8 +272,9 @@ public class ServiceExtensionsController {
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth, #monitoring.serviceId, #catalogueId)")
     public ResponseEntity<Monitoring> addMonitoring(@Valid @RequestBody Monitoring monitoring,
                                                     @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueId,
+                                                    @RequestParam String resourceType,
                                                     @ApiIgnore Authentication auth) {
-        MonitoringBundle monitoringBundle = monitoringService.add(new MonitoringBundle(monitoring, catalogueId), auth);
+        MonitoringBundle monitoringBundle = monitoringService.add(new MonitoringBundle(monitoring, catalogueId), resourceType, auth);
         logger.info("User '{}' added the Monitoring with id '{}'", auth.getName(), monitoring.getId());
         return new ResponseEntity<>(monitoringBundle.getMonitoring(), HttpStatus.CREATED);
     }
@@ -295,8 +312,8 @@ public class ServiceExtensionsController {
     @DeleteMapping(path = "/monitoring/{catalogueId}/{serviceId}", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth, #serviceId, #catalogueId)")
     public ResponseEntity<Monitoring> deleteMonitoring(@PathVariable("catalogueId") String catalogueId,
-                                                   @PathVariable("serviceId") String serviceId,
-                                                   @ApiIgnore Authentication auth) throws ResourceNotFoundException {
+                                                       @PathVariable("serviceId") String serviceId,
+                                                       @ApiIgnore Authentication auth) throws ResourceNotFoundException {
         Monitoring monitoring = getMonitoringByServiceId(serviceId, catalogueId, auth).getBody();
         assert monitoring != null;
         MonitoringBundle monitoringBundle = monitoringService.get(monitoring.getId());
@@ -309,4 +326,83 @@ public class ServiceExtensionsController {
         logger.info("User '{}' deleted the Monitoring with id '{}' of the Catalogue '{}'", auth.getName(), monitoringBundle.getMonitoring().getId(), monitoringBundle.getCatalogueId());
         return new ResponseEntity<>(monitoringBundle.getMonitoring(), HttpStatus.OK);
     }
+
+
+    // Argo GRNET Monitoring Status API calls
+    @GetMapping(path = "/monitoring/monitoringAvailability/{serviceId}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    public List<MonitoringStatus> getMonitoringAvailability(@PathVariable String serviceId) {
+        String url = monitoringAvailability + serviceId;
+        String response = CreateArgoGrnetHttpRequest.createHttpRequest(url, monitoringToken);
+        List<MonitoringStatus> serviceMonitoringStatuses;
+        if (response != null) {
+            JSONObject obj = new JSONObject(response);
+            Gson gson = new Gson();
+            JsonElement jsonObj = gson.fromJson(String.valueOf(obj), JsonElement.class);
+            JsonArray results = jsonObj.getAsJsonObject().get("endpoints").getAsJsonArray().get(0).getAsJsonObject().get("results").getAsJsonArray();
+            serviceMonitoringStatuses = monitoringService.createMonitoringAvailabilityObject(results);
+            return serviceMonitoringStatuses;
+        }
+        return null;
+    }
+
+    @GetMapping(path = "/monitoring/monitoringStatus/{serviceId}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    public List<MonitoringStatus> getMonitoringStatus(@PathVariable String serviceId, @RequestParam(defaultValue = "false") Boolean allStatuses) {
+        String url = monitoringStatus + serviceId;
+        if (allStatuses != null) {
+            if (allStatuses) {
+                url += "?view=details";
+            }
+        }
+        String response = CreateArgoGrnetHttpRequest.createHttpRequest(url, monitoringToken);
+        List<MonitoringStatus> serviceMonitoringStatuses;
+        if (response != null) {
+            JSONObject obj = new JSONObject(response);
+            Gson gson = new Gson();
+            JsonElement jsonObj = gson.fromJson(String.valueOf(obj), JsonElement.class);
+            JsonArray statuses = jsonObj.getAsJsonObject().get("endpoints").getAsJsonArray().get(0).getAsJsonObject().get("statuses").getAsJsonArray();
+            serviceMonitoringStatuses = monitoringService.createMonitoringStatusObject(statuses);
+            return serviceMonitoringStatuses;
+        }
+        return null;
+    }
+
+    @GetMapping(path = "/monitoring/monitoringStatusOnSpecificPeriod/{serviceId}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    public List<MonitoringStatus> getMonitoringStatusOnSpecificPeriod(@PathVariable String serviceId, @RequestParam String from, @RequestParam String to) {
+        OffsetDateTime odtFrom = OffsetDateTime.parse(from+"T00:00:01Z");
+        OffsetDateTime odtTo = OffsetDateTime.parse(to+"T23:59:59Z");
+        String url = monitoringStatus + serviceId + "?start_time=" + odtFrom + "&end_time=" + odtTo ;
+        String response = CreateArgoGrnetHttpRequest.createHttpRequest(url, monitoringToken);
+        List<MonitoringStatus> serviceMonitoringStatuses;
+        if (response != null) {
+            JSONObject obj = new JSONObject(response);
+            Gson gson = new Gson();
+            JsonElement jsonObj = gson.fromJson(String.valueOf(obj), JsonElement.class);
+            JsonArray statuses = jsonObj.getAsJsonObject().get("endpoints").getAsJsonArray().get(0).getAsJsonObject().get("statuses").getAsJsonArray();
+            serviceMonitoringStatuses = monitoringService.createMonitoringStatusObject(statuses);
+            return serviceMonitoringStatuses;
+        }
+        return null;
+    }
+
+    @GetMapping(path = "/monitoring/monitoringStatus/all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    public Map<String, String> getMonitoringStatusForAllServices() {
+        FacetFilter ff = new FacetFilter();
+        ff.setQuantity(10000);
+        ff.addFilter("published", false);
+        List<ServiceBundle> allServices = serviceBundleService.getAll(ff, null).getResults();
+        Map<String, String> serviceStatusMap = new HashMap<>();
+        for (ServiceBundle serviceBundle : allServices){
+            serviceStatusMap.put(serviceBundle.getId(), getServiceMonitoringStatusValue(serviceBundle.getId()));
+        }
+        return serviceStatusMap;
+    }
+
+    private String getServiceMonitoringStatusValue(String serviceId){
+        try {
+            return getMonitoringStatus(serviceId, false).get(0).getValue();
+        } catch(NullPointerException e) {
+            return "";
+        }
+    }
+
 }

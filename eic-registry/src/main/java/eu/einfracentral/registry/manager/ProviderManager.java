@@ -154,8 +154,10 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         Resource existing = getResource(provider.getId(), provider.getProvider().getCatalogueId());
         ProviderBundle ex = deserialize(existing);
         // check if there are actual changes in the Provider
-        if (provider.getProvider().equals(ex.getProvider())){
-            throw new ValidationException("There are no changes in the Provider", HttpStatus.OK);
+        if (provider.getTemplateStatus().equals(ex.getTemplateStatus())){
+            if (provider.getProvider().equals(ex.getProvider())){
+                throw new ValidationException("There are no changes in the Provider", HttpStatus.OK);
+            }
         }
 
         if (catalogueId == null || catalogueId.equals("")) {
@@ -181,7 +183,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         } else {
             loggingInfoList.add(loggingInfo);
         }
-        provider.getProvider().setParticipatingCountries(sortCountries(provider.getProvider().getParticipatingCountries()));
+        sortFields(provider);
         provider.setLoggingInfo(loggingInfoList);
 
         // latestUpdateInfo
@@ -1166,7 +1168,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         Vocabulary newHostingLegalEntity = new Vocabulary();
         newHostingLegalEntity.setId("provider_hosting_legal_entity-"+providerBundle.getProvider().getId());
         newHostingLegalEntity.setName(providerBundle.getProvider().getName());
-        newHostingLegalEntity.setType(Vocabulary.Type.PROVIDER_HOSTING_LEGAL_ENTITY);
+        newHostingLegalEntity.setType(Vocabulary.Type.PROVIDER_HOSTING_LEGAL_ENTITY.getKey());
         logger.info(String.format("Creating a new Hosting Legal Entity Vocabulary with id: [%s] and name: [%s]",
                 newHostingLegalEntity.getId(), newHostingLegalEntity.getName()));
         vocabularyService.add(newHostingLegalEntity, null);

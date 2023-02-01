@@ -17,7 +17,7 @@ public class MonitoringValidator implements Validator {
     @Override
     public void validate(Object target, Errors errors) {
         ValidationUtils.rejectIfEmpty(errors, "serviceId", "serviceId.empty", mandatoryField("serviceId"));
-        ValidationUtils.rejectIfEmpty(errors, "monitoredBy", "monitoredBy.empty", mandatoryField("monitoredBy"));
+//        ValidationUtils.rejectIfEmpty(errors, "monitoredBy", "monitoredBy.empty", mandatoryField("monitoredBy"));
         ValidationUtils.rejectIfEmpty(errors, "monitoringGroups", "monitoringGroups.empty", mandatoryField("monitoringGroups"));
     }
 }

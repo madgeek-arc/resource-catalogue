@@ -149,13 +149,6 @@
     },
     {
       "multivalued": true,
-      "name": "use_cases",
-      "label": "Use Case",
-      "path": "//*[local-name()='datasource']//*[local-name()='useCase']/text()",
-      "type": "java.lang.String"
-    },
-    {
-      "multivalued": true,
       "name": "open_source_technologies",
       "label": "Open Source Technology",
       "path": "//*[local-name()='datasource']//*[local-name()='openSourceTechnology']/text()",
@@ -219,9 +212,16 @@
     },
     {
       "multivalued": true,
-      "name": "alternative_identifiers",
-      "label": "Alternative Identifier",
-      "path": "//*[local-name()='identifiers']/*[local-name()='alternativeIdentifiers']/*[local-name()='alternativeIdentifier']/text()",
+      "name": "alternative_identifiers_types",
+      "label": "Alternative Identifier Type",
+      "path": "//*[local-name()='identifiers']/*[local-name()='alternativeIdentifiers']/*[local-name()='alternativeIdentifier']/*[local-name()='type']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": true,
+      "name": "alternative_identifiers_values",
+      "label": "Alternative Identifier Value",
+      "path": "//*[local-name()='identifiers']/*[local-name()='alternativeIdentifiers']/*[local-name()='alternativeIdentifier']/*[local-name()='value']/text()",
       "type": "java.lang.String"
     },
     {
@@ -324,5 +324,5 @@
   "properties": {
     "class": "eu.einfracentral.domain.DatasourceBundle"
   },
-  "schemaUrl": "https://raw.githubusercontent.com/madgeek-arc/resource-catalogue/master/eic-registry-model/src/main/resources/schema1.xsd"
+  "schemaUrl": "https://raw.githubusercontent.com/madgeek-arc/resource-catalogue/interoperability_record/eic-registry-model/src/main/resources/schema1.xsd"
 }

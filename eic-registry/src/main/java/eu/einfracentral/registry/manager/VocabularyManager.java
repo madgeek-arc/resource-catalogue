@@ -130,11 +130,7 @@ public class VocabularyManager extends ResourceManager<Vocabulary> implements Vo
     @CacheEvict(value = {CACHE_VOCABULARIES, CACHE_VOCABULARY_MAP, CACHE_VOCABULARY_TREE}, allEntries = true)
     public void addAll(List<Vocabulary> vocabularies, Authentication auth) {
         for (Vocabulary vocabulary : vocabularies) {
-            try {
-                add(vocabulary, auth);
-            } catch (ResourceException e){
-                logger.info(String.format("Vocabulary [%s] already exists", vocabulary.getId()));
-            }
+            add(vocabulary, auth);
         }
     }
 
@@ -338,7 +334,7 @@ public class VocabularyManager extends ResourceManager<Vocabulary> implements Vo
             Vocabulary newHostingLegalEntity = new Vocabulary();
             newHostingLegalEntity.setId(idCreator.reformatId(newHLE));
             newHostingLegalEntity.setName(newHLE);
-            newHostingLegalEntity.setType(Vocabulary.Type.PROVIDER_HOSTING_LEGAL_ENTITY);
+            newHostingLegalEntity.setType(Vocabulary.Type.PROVIDER_HOSTING_LEGAL_ENTITY.getKey());
             logger.info(String.format("Creating a new Hosting Legal Entity Vocabulary with id: [%s] and name: [%s]",
                     newHostingLegalEntity.getId(), newHostingLegalEntity.getName()));
 //                        add(newHostingLegalEntity, null);

@@ -1,14 +1,14 @@
 package eu.einfracentral.registry.manager;
 
 import eu.einfracentral.domain.*;
-import eu.einfracentral.exception.ResourceNotFoundException;
 import eu.einfracentral.exception.ValidationException;
+import eu.einfracentral.registry.service.HelpdeskService;
 import eu.einfracentral.registry.service.ResourceBundleService;
-import eu.einfracentral.registry.service.ResourceService;
 import eu.einfracentral.service.RegistrationMailService;
 import eu.einfracentral.service.SecurityService;
-import eu.openminted.registry.core.domain.FacetFilter;
+import eu.einfracentral.utils.ResourceValidationUtils;
 import eu.openminted.registry.core.domain.Resource;
+import eu.openminted.registry.core.service.SearchService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,20 +22,23 @@ import java.util.List;
 import java.util.UUID;
 
 @org.springframework.stereotype.Service("helpdeskManager")
-public class HelpdeskManager extends ResourceManager<HelpdeskBundle> implements ResourceService<HelpdeskBundle, Authentication> {
+public class HelpdeskManager extends ResourceManager<HelpdeskBundle> implements HelpdeskService<HelpdeskBundle, Authentication> {
 
     private static final Logger logger = LogManager.getLogger(HelpdeskManager.class);
-    private final ResourceBundleService<ServiceBundle> resourceBundleService;
+    private final ResourceBundleService<ServiceBundle> serviceBundleService;
+    private final ResourceBundleService<DatasourceBundle> datasourceBundleService;
     private final JmsTemplate jmsTopicTemplate;
     private final SecurityService securityService;
     private final RegistrationMailService registrationMailService;
 
     @Autowired
-    public HelpdeskManager(ResourceBundleService<ServiceBundle> resourceBundleService,
+    public HelpdeskManager(ResourceBundleService<ServiceBundle> serviceBundleService,
+                           ResourceBundleService<DatasourceBundle> datasourceBundleService,
                            JmsTemplate jmsTopicTemplate, @Lazy SecurityService securityService,
                            @Lazy RegistrationMailService registrationMailService) {
         super(HelpdeskBundle.class);
-        this.resourceBundleService = resourceBundleService;
+        this.serviceBundleService = serviceBundleService;
+        this.datasourceBundleService = datasourceBundleService;
         this.jmsTopicTemplate = jmsTopicTemplate;
         this.securityService = securityService;
         this.registrationMailService = registrationMailService;
@@ -47,11 +50,30 @@ public class HelpdeskManager extends ResourceManager<HelpdeskBundle> implements 
     }
 
     @Override
-    public HelpdeskBundle add(HelpdeskBundle helpdesk, Authentication auth) {
+    public HelpdeskBundle validate(HelpdeskBundle helpdeskBundle, String resourceType) {
+        String resourceId = helpdeskBundle.getHelpdesk().getServiceId();
+        String catalogueId = helpdeskBundle.getCatalogueId();
 
-        // check if Service exists and if it has already a Helpdesk registered
-        serviceConsistency(helpdesk.getHelpdesk().getServiceId(), helpdesk.getCatalogueId());
-        validate(helpdesk);
+        HelpdeskBundle existingHelpdesk = get(resourceId, catalogueId);
+        if (existingHelpdesk != null) {
+            throw new ValidationException(String.format("Resource [%s] of the Catalogue [%s] has already a Helpdesk " +
+                    "registered, with id: [%s]", resourceId, catalogueId, existingHelpdesk.getId()));
+        }
+
+        // check if Resource exists and if User belongs to Resource's Provider Admins
+        if (resourceType.equals("service")){
+            ResourceValidationUtils.checkIfResourceBundleActiveAndApprovedAndNotPublic(resourceId, catalogueId, serviceBundleService, resourceType);
+        } else if (resourceType.equals("datasource")){
+            ResourceValidationUtils.checkIfResourceBundleActiveAndApprovedAndNotPublic(resourceId, catalogueId, datasourceBundleService, resourceType);
+        } else{
+            throw new ValidationException("Field resourceType should be either 'service' or 'datasource'");
+        }
+        return super.validate(helpdeskBundle);
+    }
+
+    @Override
+    public HelpdeskBundle add(HelpdeskBundle helpdesk, String resourceType, Authentication auth) {
+        validate(helpdesk, resourceType);
 
         helpdesk.setId(UUID.randomUUID().toString());
         logger.trace("User '{}' is attempting to add a new Helpdesk: {}", auth, helpdesk);
@@ -70,10 +92,14 @@ public class HelpdeskManager extends ResourceManager<HelpdeskBundle> implements 
         logger.debug("Adding Helpdesk: {}", helpdesk);
 
         registrationMailService.sendEmailsForHelpdeskExtension(helpdesk, "post");
-        logger.info("Sending JMS with topic 'helpdesk.create'");
-        jmsTopicTemplate.convertAndSend("helpdesk.create", helpdesk);
 
         return helpdesk;
+    }
+
+    @Override
+    public HelpdeskBundle get(String serviceId, String catalogueId) {
+        Resource res = where(false, new SearchService.KeyValue("service_id", serviceId), new SearchService.KeyValue("catalogue_id", catalogueId));
+        return res != null ? deserialize(res) : null;
     }
 
     @Override
@@ -117,44 +143,13 @@ public class HelpdeskManager extends ResourceManager<HelpdeskBundle> implements 
         logger.debug("Updating Helpdesk: {}", helpdesk);
 
         registrationMailService.sendEmailsForHelpdeskExtension(helpdesk, "put");
-        logger.info("Sending JMS with topic 'helpdesk.update'");
-        jmsTopicTemplate.convertAndSend("helpdesk.update", helpdesk);
 
         return helpdesk;
     }
 
-    public void delete(HelpdeskBundle helpdesk, Authentication auth) {
-        logger.trace("User '{}' is attempting to delete the Helpdesk with id '{}'", auth, helpdesk.getId());
-
+    @Override
+    public void delete(HelpdeskBundle helpdesk) {
         super.delete(helpdesk);
         logger.debug("Deleting Helpdesk: {}", helpdesk);
-
-        //TODO: send emails
-        logger.info("Sending JMS with topic 'helpdesk.delete'");
-        jmsTopicTemplate.convertAndSend("helpdesk.delete", helpdesk);
-
-    }
-
-    public void serviceConsistency(String serviceId, String catalogueId){
-        // check if Service exists
-        try{
-            resourceBundleService.get(serviceId, catalogueId);
-            // check if Service is Public
-            if (resourceBundleService.get(serviceId, catalogueId).getMetadata().isPublished()){
-                throw new ValidationException("Please provide a Service ID with no catalogue prefix.");
-            }
-        } catch(ResourceNotFoundException e){
-            throw new ValidationException(String.format("There is no Service with id '%s' in the '%s' Catalogue", serviceId, catalogueId));
-        }
-        // check if Service has already a Helpdesk registered
-        FacetFilter ff = new FacetFilter();
-        ff.setQuantity(maxQuantity);
-        List<HelpdeskBundle> allHelpdesks = getAll(ff, null).getResults();
-        for (HelpdeskBundle helpdesk : allHelpdesks){
-            if (helpdesk.getHelpdesk().getServiceId().equals(serviceId) && helpdesk.getCatalogueId().equals(catalogueId)){
-                throw new ValidationException(String.format("Service [%s] of the Catalogue [%s] has already a Helpdesk " +
-                        "registered, with id: [%s]", serviceId, catalogueId, helpdesk.getId()));
-            }
-        }
     }
 }

@@ -8,7 +8,7 @@ Dear ${project} Portal Onboarding Team,
     <#if providerBundle.status == "approved provider">
         <#if providerBundle.active == true>
             The application by [${user.fullName}] – [${user.email}] for registering [${providerBundle.provider.name}] - ([${providerBundle.provider.id}]) has been approved.
-            You can view the application status here ${endpoint}/dashboard/${providerBundle.provider.id}/info.
+            You can view the application status here ${endpoint}/dashboard/${project?lower_case}/${providerBundle.provider.id}/info.
         <#else>
             The Provider [${providerBundle.provider.name}] - ([${providerBundle.provider.id}]) has been set to inactive.
             You can view the application status here ${endpoint}/dashboard/${project?lower_case}/${providerBundle.provider.id}/info.

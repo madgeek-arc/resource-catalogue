@@ -18,7 +18,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.context.annotation.Lazy;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
@@ -38,6 +37,7 @@ public class PendingDatasourceManager extends ResourceManager<DatasourceBundle> 
     private final SecurityService securityService;
     private final VocabularyService vocabularyService;
     private final ProviderManager providerManager;
+    private DatasourceBundleManager datasourceBundleManager;
 
     @Value("${project.catalogue.name}")
     private String catalogueName;
@@ -45,13 +45,14 @@ public class PendingDatasourceManager extends ResourceManager<DatasourceBundle> 
     @Autowired
     public PendingDatasourceManager(ResourceBundleService<DatasourceBundle> resourceBundleService,
                                     IdCreator idCreator, @Lazy SecurityService securityService, @Lazy VocabularyService vocabularyService,
-                                    @Lazy ProviderManager providerManager) {
+                                    @Lazy ProviderManager providerManager, @Lazy DatasourceBundleManager datasourceBundleManager) {
         super(DatasourceBundle.class);
         this.resourceBundleService = resourceBundleService;
         this.idCreator = idCreator;
         this.securityService = securityService;
         this.vocabularyService = vocabularyService;
         this.providerManager = providerManager;
+        this.datasourceBundleManager = datasourceBundleManager;
     }
 
     @Override
@@ -222,5 +223,15 @@ public class PendingDatasourceManager extends ResourceManager<DatasourceBundle> 
 
     public Resource getPendingResourceViaProviderId(String providerId) {
         return null;
+    }
+
+    public DatasourceBundle getOpenAIREDatasource(Datasource datasource){
+        DatasourceBundle datasourceBundle = new DatasourceBundle(datasource);
+        // if Datasource has ID -> check if it exists in OpenAIRE Datasources list
+        if (datasourceBundle.getId() != null && !datasourceBundle.getId().equals("")
+                && !datasourceBundle.getId().contains(datasource.getResourceOrganisation())){
+            datasourceBundleManager.checkOpenAIREIDExistance(datasourceBundle);
+        }
+        return datasourceBundle;
     }
 }

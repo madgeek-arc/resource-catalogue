@@ -20,12 +20,12 @@ public class Monitoring implements Identifiable {
 
     @XmlElement(required = true)
     @ApiModelProperty(position = 2, notes = "Service ID", required = true)
-    @FieldValidation(containsId = true, idClass = Service.class)
+    @FieldValidation(containsId = true)
     private String serviceId;
 
-    @XmlElement(required = true)
-    @ApiModelProperty(position = 3, notes = "Who is responsible for the monitoring of this Service", required = true)
-    @FieldValidation(containsId = true, idClass = Vocabulary.class)
+    @XmlElement()
+    @ApiModelProperty(position = 3, notes = "Who is responsible for the monitoring of this Service")
+    @FieldValidation(nullable = true, containsId = true, idClass = Vocabulary.class)
     @VocabularyValidation(type = Vocabulary.Type.MONITORING_MONITORED_BY)
     private String monitoredBy;
 

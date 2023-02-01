@@ -80,55 +80,6 @@ public class VocabularyCuration implements Identifiable {
         this.resolutionUser = vocabularyCuration.getResolutionUser();
     }
 
-    public enum Vocab {
-        SUPERCATEGORY("Supercategory"),
-        CATEGORY("Category"),
-        SUBCATEGORY("Subcategory"),
-        LANGUAGE("Language"),
-        COUNTRY("Country"),
-        TRL("Technology readiness level"),
-        SCIENTIFIC_DOMAIN("Scientific domain"),
-        SCIENTIFIC_SUBDOMAIN("Scientific subdomain"),
-        TARGET_USER("Target user"),
-        ACCESS_TYPE("Access type"),
-        ACCESS_MODE("Access mode"),
-        ORDER_TYPE("Order type"),
-        FUNDING_BODY("Funding body"),
-        FUNDING_PROGRAM("Funding program"),
-        LIFE_CYCLE_STATUS("Life cycle status"),
-        PROVIDER_AREA_OF_ACTIVITY("Provider area of activity"),
-        PROVIDER_ESFRI_TYPE("Provider esfri type"),
-        PROVIDER_ESFRI_DOMAIN("Provider esfri domain"),
-        PROVIDER_LEGAL_STATUS("Provider legal status"),
-        PROVIDER_LIFE_CYCLE_STATUS("Provider life cycle status"),
-        PROVIDER_NETWORK("Provider network"),
-        PROVIDER_SOCIETAL_GRAND_CHALLENGE("Provider societal grand challenge"),
-        PROVIDER_STRUCTURE_TYPE("Provider structure type"),
-        PROVIDER_MERIL_SCIENTIFIC_DOMAIN("Provider meril scientific domain"),
-        PROVIDER_MERIL_SCIENTIFIC_SUBDOMAIN("Provider meril scientific subdomain");
-
-        private final String vocabulary;
-
-        Vocab(final String vocabulary) {
-            this.vocabulary = vocabulary;
-        }
-
-        public String getKey() {
-            return vocabulary;
-        }
-
-        /**
-         * @return the Enum representation for the given string.
-         * @throws IllegalArgumentException if unknown string.
-         */
-        public static Vocab fromString(String s) throws IllegalArgumentException {
-            return Arrays.stream(Vocab.values())
-                    .filter(v -> v.vocabulary.equals(s))
-                    .findFirst()
-                    .orElseThrow(() -> new IllegalArgumentException("unknown value: " + s));
-        }
-    }
-
     public enum Status {
         PENDING("Pending"),
         APPROVED("Approved"),

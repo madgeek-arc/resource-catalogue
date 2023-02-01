@@ -2,6 +2,7 @@ package eu.einfracentral.registry.service;
 
 import eu.openminted.registry.core.domain.Resource;
 import eu.openminted.registry.core.service.ResourceCRUDService;
+import eu.openminted.registry.core.service.SearchService;
 import org.springframework.security.core.Authentication;
 
 import java.util.List;
@@ -23,11 +24,11 @@ ResourceService<T, U extends Authentication> extends ResourceCRUDService<T, U> {
     List<T> getSome(String... ids);
 
     /**
-     * @param field
-     * @param value
+     *
+     * @param keyValues
      * @return
      */
-    T get(String field, String value);
+    T get(SearchService.KeyValue... keyValues);
 
     /**
      * @return

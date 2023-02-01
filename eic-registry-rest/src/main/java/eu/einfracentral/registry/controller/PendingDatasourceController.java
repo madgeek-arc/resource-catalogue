@@ -2,6 +2,8 @@ package eu.einfracentral.registry.controller;
 
 import eu.einfracentral.domain.*;
 import eu.einfracentral.exception.ResourceException;
+import eu.einfracentral.exception.ValidationException;
+import eu.einfracentral.registry.service.ProviderService;
 import eu.einfracentral.registry.service.ResourceBundleService;
 import eu.einfracentral.registry.service.PendingResourceService;
 import eu.einfracentral.service.IdCreator;
@@ -36,15 +38,18 @@ public class PendingDatasourceController extends ResourceController<DatasourceBu
     private static final Logger logger = LogManager.getLogger(PendingDatasourceController.class);
     private final PendingResourceService<DatasourceBundle> pendingDatasourceManager;
     private final ResourceBundleService<DatasourceBundle> resourceBundleService;
+    private final ProviderService<ProviderBundle, Authentication> providerService;
     private final IdCreator idCreator;
 
     @Autowired
     PendingDatasourceController(PendingResourceService<DatasourceBundle> pendingDatasourceManager,
                              ResourceBundleService<DatasourceBundle> resourceBundleService,
+                             ProviderService<ProviderBundle, Authentication> providerService,
                              IdCreator idCreator) {
         super(pendingDatasourceManager);
         this.pendingDatasourceManager = pendingDatasourceManager;
         this.resourceBundleService = resourceBundleService;
+        this.providerService = providerService;
         this.idCreator = idCreator;
     }
 
@@ -112,7 +117,8 @@ public class PendingDatasourceController extends ResourceController<DatasourceBu
     @PutMapping(path = "/pending", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PostAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth, returnObject.body)")
     public ResponseEntity<Datasource> temporarySavePending(@RequestBody Datasource datasource, @ApiIgnore Authentication auth) throws NoSuchAlgorithmException {
-        DatasourceBundle datasourceBundle = new DatasourceBundle();
+        // if Datasource has ID -> check if it exists in OpenAIRE Datasources list
+        DatasourceBundle datasourceBundle = pendingDatasourceManager.getOpenAIREDatasource(datasource);
         DatasourceBundle toCreateId = new DatasourceBundle();
         toCreateId.setDatasource(datasource);
         datasource.setId(idCreator.createDatasourceId(toCreateId));
@@ -153,6 +159,13 @@ public class PendingDatasourceController extends ResourceController<DatasourceBu
             datasourceBundle = this.pendingDatasourceManager.get(datasource.getId());
         } catch (ResourceException | eu.einfracentral.exception.ResourceNotFoundException e) {
             // continue with the creation of the service
+        }
+
+        // check Provider's template status -> block transform if it's on 'pending' state
+        String resourceOrgranisation = datasource.getResourceOrganisation();
+        ProviderBundle providerBundle = providerService.get(resourceOrgranisation);
+        if (providerBundle.getTemplateStatus().equals("pending template")){
+            throw new ValidationException(String.format("There is already a Resource waiting to be approved for the Provider [%s]", resourceOrgranisation));
         }
 
         if (datasourceBundle == null) { // if existing Pending Datasource is null, create a new Active Datasource
