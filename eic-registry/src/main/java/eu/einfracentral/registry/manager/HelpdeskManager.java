@@ -92,8 +92,6 @@ public class HelpdeskManager extends ResourceManager<HelpdeskBundle> implements 
         logger.debug("Adding Helpdesk: {}", helpdesk);
 
         registrationMailService.sendEmailsForHelpdeskExtension(helpdesk, "post");
-        logger.info("Sending JMS with topic 'helpdesk.create'");
-        jmsTopicTemplate.convertAndSend("helpdesk.create", helpdesk);
 
         return helpdesk;
     }
@@ -145,21 +143,13 @@ public class HelpdeskManager extends ResourceManager<HelpdeskBundle> implements 
         logger.debug("Updating Helpdesk: {}", helpdesk);
 
         registrationMailService.sendEmailsForHelpdeskExtension(helpdesk, "put");
-        logger.info("Sending JMS with topic 'helpdesk.update'");
-        jmsTopicTemplate.convertAndSend("helpdesk.update", helpdesk);
 
         return helpdesk;
     }
 
-    public void delete(HelpdeskBundle helpdesk, Authentication auth) {
-        logger.trace("User '{}' is attempting to delete the Helpdesk with id '{}'", auth, helpdesk.getId());
-
+    @Override
+    public void delete(HelpdeskBundle helpdesk) {
         super.delete(helpdesk);
         logger.debug("Deleting Helpdesk: {}", helpdesk);
-
-        //TODO: send emails
-        logger.info("Sending JMS with topic 'helpdesk.delete'");
-        jmsTopicTemplate.convertAndSend("helpdesk.delete", helpdesk);
-
     }
 }

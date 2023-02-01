@@ -113,8 +113,6 @@ public class MonitoringManager extends ResourceManager<MonitoringBundle> impleme
         logger.debug("Adding Monitoring: {}", monitoring);
 
         registrationMailService.sendEmailsForMonitoringExtension(monitoring, "post");
-        logger.info("Sending JMS with topic 'monitoring.create'");
-        jmsTopicTemplate.convertAndSend("monitoring.create", monitoring);
 
         return ret;
     }
@@ -163,22 +161,14 @@ public class MonitoringManager extends ResourceManager<MonitoringBundle> impleme
         logger.debug("Updating Monitoring: {}", monitoring);
 
         registrationMailService.sendEmailsForMonitoringExtension(monitoring, "put");
-        logger.info("Sending JMS with topic 'monitoring.update'");
-        jmsTopicTemplate.convertAndSend("monitoring.update", monitoring);
 
         return monitoring;
     }
 
-    public void delete(MonitoringBundle monitoring, Authentication auth) {
-        logger.trace("User '{}' is attempting to delete the Monitoring with id '{}'", auth, monitoring.getId());
-
+    @Override
+    public void delete(MonitoringBundle monitoring) {
         super.delete(monitoring);
         logger.debug("Deleting Monitoring: {}", monitoring);
-
-        //TODO: send emails
-        logger.info("Sending JMS with topic 'monitoring.delete'");
-        jmsTopicTemplate.convertAndSend("monitoring.delete", monitoring);
-
     }
 
     public List<ServiceType> getAvailableServiceTypes() {
