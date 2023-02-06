@@ -86,6 +86,13 @@ public class Vocabulary implements Identifiable {
         DS_JURISDICTION("Jurisdiction"),
         DS_CLASSIFICATION("Classification"),
         DS_COAR_ACCESS_RIGHTS_1_0("COAR access rights 1.0"),
+        // Training Resource
+        TR_URL_TYPE("Training Resource url type"),
+        TR_ACCESS_RIGHT("Training Resource access right"),
+        TR_DCMI_TYPE("Training Resource dcmi type"),
+        TR_EXPERTISE_LEVEL("Training Resource expertise level"),
+        TR_CONTENT_RESOURCE_TYPE("Training Resource content resource type"),
+        TR_QUALIFICATION("Training Resource qualification"),
         // Monitoring
         MONITORING_MONITORED_BY("Monitored by"),
         // Bundle Extras
