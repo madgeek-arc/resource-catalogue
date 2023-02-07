@@ -181,7 +181,7 @@ public class TrainingResource implements Identifiable {
     @ApiModelProperty(position = 18, notes = "Vocabulary ID")
     @FieldValidation(nullable = true, containsId = true, idClass = Vocabulary.class)
     @VocabularyValidation(type = Vocabulary.Type.TR_CONTENT_RESOURCE_TYPE)
-    private String contentResourceTypes;
+    private List<String> contentResourceTypes;
 
     /**
      * Identification of certification, accreditation or badge obtained with course or learning resource.
@@ -191,7 +191,7 @@ public class TrainingResource implements Identifiable {
     @ApiModelProperty(position = 19, notes = "Vocabulary ID")
     @FieldValidation(nullable = true, containsId = true, idClass = Vocabulary.class)
     @VocabularyValidation(type = Vocabulary.Type.TR_QUALIFICATION)
-    private String qualifications;
+    private List<String> qualifications;
 
     /**
      * Approximate or typical time it takes to work with or through the learning resource for the typical intended target audience.
@@ -257,7 +257,7 @@ public class TrainingResource implements Identifiable {
     public TrainingResource() {
     }
 
-    public TrainingResource(String id, String title, String resourceOrganisation, List<String> resourceProviders, List<String> authors, URL url, String urlType, List<String> eoscRelatedServices, String description, List<String> keywords, String license, String accessRights, Date versionDate, List<String> targetGroups, List<String> learningResourceTypes, List<String> learningOutcomes, String expertiseLevel, String contentResourceTypes, String qualifications, String duration, List<String> languages, List<String> geographicalAvailabilities, List<ServiceProviderDomain> scientificDomains, ServiceMainContact contact, String catalogueId) {
+    public TrainingResource(String id, String title, String resourceOrganisation, List<String> resourceProviders, List<String> authors, URL url, String urlType, List<String> eoscRelatedServices, String description, List<String> keywords, String license, String accessRights, Date versionDate, List<String> targetGroups, List<String> learningResourceTypes, List<String> learningOutcomes, String expertiseLevel, List<String> contentResourceTypes, List<String> qualifications, String duration, List<String> languages, List<String> geographicalAvailabilities, List<ServiceProviderDomain> scientificDomains, ServiceMainContact contact, String catalogueId) {
         this.id = id;
         this.title = title;
         this.resourceOrganisation = resourceOrganisation;
@@ -436,19 +436,19 @@ public class TrainingResource implements Identifiable {
         this.expertiseLevel = expertiseLevel;
     }
 
-    public String getContentResourceTypes() {
+    public List<String> getContentResourceTypes() {
         return contentResourceTypes;
     }
 
-    public void setContentResourceTypes(String contentResourceTypes) {
+    public void setContentResourceTypes(List<String> contentResourceTypes) {
         this.contentResourceTypes = contentResourceTypes;
     }
 
-    public String getQualifications() {
+    public List<String> getQualifications() {
         return qualifications;
     }
 
-    public void setQualifications(String qualifications) {
+    public void setQualifications(List<String> qualifications) {
         this.qualifications = qualifications;
     }
 
