@@ -12,6 +12,7 @@ import eu.einfracentral.registry.manager.ProviderManager;
 import eu.einfracentral.registry.service.DatasourceService;
 import eu.einfracentral.registry.service.ResourceBundleService;
 import eu.einfracentral.registry.service.PendingResourceService;
+import eu.einfracentral.registry.service.TrainingResourceService;
 import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.service.ServiceException;
 import org.mitre.openid.connect.model.DefaultUserInfo;
@@ -36,6 +37,7 @@ public class OIDCSecurityService implements SecurityService {
     private final PendingProviderManager pendingProviderManager;
     private final ResourceBundleService<ServiceBundle> resourceBundleService;
     private final DatasourceService<DatasourceBundle> datasourceService;
+    private final TrainingResourceService<TrainingResourceService> trainingResourceService;
     private final PendingResourceService<ServiceBundle> pendingServiceManager;
     private final PendingResourceService<DatasourceBundle> pendingDatasourceManager;
     private OIDCAuthenticationToken adminAccess;
@@ -53,12 +55,15 @@ public class OIDCSecurityService implements SecurityService {
     OIDCSecurityService(ProviderManager providerManager, CatalogueManager catalogueManager,
                         ResourceBundleService<ServiceBundle> resourceBundleService,
                         @Lazy DatasourceService<DatasourceBundle> datasourceService,
-                        @Lazy PendingProviderManager pendingProviderManager, @Lazy PendingResourceService<ServiceBundle> pendingServiceManager,
+                        @Lazy TrainingResourceService<TrainingResourceService> trainingResourceService,
+                        @Lazy PendingProviderManager pendingProviderManager,
+                        @Lazy PendingResourceService<ServiceBundle> pendingServiceManager,
                         @Lazy PendingResourceService<DatasourceBundle> pendingDatasourceManager) {
         this.providerManager = providerManager;
         this.catalogueManager = catalogueManager;
         this.resourceBundleService = resourceBundleService;
         this.datasourceService = datasourceService;
+        this.trainingResourceService = trainingResourceService;
         this.pendingProviderManager = pendingProviderManager;
         this.pendingServiceManager = pendingServiceManager;
         this.pendingDatasourceManager = pendingDatasourceManager;
@@ -265,13 +270,16 @@ public class OIDCSecurityService implements SecurityService {
                 resourceBundle = datasourceService.getOrElseReturnNull(resourceId, catalogueId);
             }
             if (resourceBundle == null){
+                resourceBundle = trainingResourceService.getOrElseReturnNull(resourceId, catalogueId);
+            }
+            if (resourceBundle == null){
                 resourceBundle = pendingServiceManager.get(resourceId);
             }
         } catch (ResourceException | ResourceNotFoundException e) {
             try {
                 resourceBundle = pendingDatasourceManager.get(resourceId);
             } catch (RuntimeException re) {
-                return false;
+                return false; //TODO: try/catch pendingTrainingResourceManager
             }
         } catch (RuntimeException e) {
             return false;

@@ -58,7 +58,7 @@ public class TrainingResource implements Identifiable {
     @XmlElementWrapper(name = "authors", required = true)
     @XmlElement(name = "author")
     @ApiModelProperty(position = 5, required = true)
-    @FieldValidation(containsId = true, idClass = Provider.class)
+    @FieldValidation
     private List<String> authors;
 
     /**

@@ -101,7 +101,7 @@ public class ServiceBundleManager extends AbstractResourceBundleManager<ServiceB
         }
         // check Provider's templateStatus
         if (providerBundle.getTemplateStatus().equals("pending template")) {
-            throw new ValidationException(String.format("The Provider with id %s has already registered a Service Template.", providerBundle.getId()));
+            throw new ValidationException(String.format("The Provider with id %s has already registered a Resource Template.", providerBundle.getId()));
         }
 
         serviceBundle.setId(idCreator.createServiceId(serviceBundle));
@@ -247,7 +247,7 @@ public class ServiceBundleManager extends AbstractResourceBundleManager<ServiceB
                 serviceBundle.setStatus(vocabularyService.get("pending resource").getId());
                 serviceBundle.setActive(false);
                 providerBundle.setTemplateStatus(vocabularyService.get("pending template").getId());
-                providerService.update(providerBundle, serviceBundle.getService().getCatalogueId(), auth);
+                providerService.update(providerBundle, null, auth);
             }
         }
 
@@ -339,7 +339,7 @@ public class ServiceBundleManager extends AbstractResourceBundleManager<ServiceB
             throw new ValidationException(String.format("The Resource with id '%s' does not exist", id));
         }
         serviceBundle.setStatus(vocabularyService.get(status).getId());
-        ProviderBundle resourceProvider = providerService.get(serviceBundle.getService().getResourceOrganisation());
+        ProviderBundle resourceProvider = providerService.get(serviceBundle.getService().getCatalogueId(), serviceBundle.getService().getResourceOrganisation(), auth);
         LoggingInfo loggingInfo;
         List<LoggingInfo> loggingInfoList = new ArrayList<>();
 
@@ -417,7 +417,7 @@ public class ServiceBundleManager extends AbstractResourceBundleManager<ServiceB
             throw new ValidationException(String.format("You cannot activate this Resource, because it's Inactive with status = [%s]", service.getStatus()));
         }
 
-        ProviderBundle providerBundle = providerService.get(service.getService().getResourceOrganisation());
+        ProviderBundle providerBundle = providerService.get(service.getService().getCatalogueId(), service.getService().getResourceOrganisation(), auth);
         if (providerBundle.getStatus().equals("approved provider") && providerBundle.isActive()) {
             activeProvider = service.getService().getResourceOrganisation();
         }

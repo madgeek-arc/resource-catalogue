@@ -107,7 +107,7 @@ public class DatasourceBundleManager extends AbstractResourceBundleManager<Datas
         }
         // check Provider's templateStatus
         if (providerBundle.getTemplateStatus().equals("pending template")){
-            throw new ValidationException(String.format("The Provider with id %s has already registered a Service Template.", providerBundle.getId()));
+            throw new ValidationException(String.format("The Provider with id %s has already registered a Resource Template.", providerBundle.getId()));
         }
 
         // if Datasource has ID -> check if it exists in OpenAIRE Datasources list
@@ -261,7 +261,7 @@ public class DatasourceBundleManager extends AbstractResourceBundleManager<Datas
                 datasourceBundle.setStatus(vocabularyService.get("pending resource").getId());
                 datasourceBundle.setActive(false);
                 providerBundle.setTemplateStatus(vocabularyService.get("pending template").getId());
-                providerService.update(providerBundle, datasourceBundle.getDatasource().getCatalogueId(), auth);
+                providerService.update(providerBundle, null, auth);
             }
         }
 
@@ -354,7 +354,7 @@ public class DatasourceBundleManager extends AbstractResourceBundleManager<Datas
             throw new ValidationException(String.format("The Resource with id '%s' does not exist", id));
         }
         datasourceBundle.setStatus(vocabularyService.get(status).getId());
-        ProviderBundle resourceProvider = providerService.get(datasourceBundle.getDatasource().getResourceOrganisation());
+        ProviderBundle resourceProvider = providerService.get(datasourceBundle.getDatasource().getCatalogueId(), datasourceBundle.getDatasource().getResourceOrganisation(), auth);
         LoggingInfo loggingInfo;
         List<LoggingInfo> loggingInfoList = new ArrayList<>();
 
@@ -432,7 +432,7 @@ public class DatasourceBundleManager extends AbstractResourceBundleManager<Datas
             throw new ValidationException(String.format("You cannot activate this Resource, because it's Inactive with status = [%s]", datasourceBundle.getStatus()));
         }
 
-        ProviderBundle providerBundle = providerService.get(datasourceBundle.getDatasource().getResourceOrganisation());
+        ProviderBundle providerBundle = providerService.get(datasourceBundle.getDatasource().getCatalogueId(), datasourceBundle.getDatasource().getResourceOrganisation(), auth);
         if (providerBundle.getStatus().equals("approved provider") && providerBundle.isActive()) {
             activeProvider = datasourceBundle.getDatasource().getResourceOrganisation();
         }
