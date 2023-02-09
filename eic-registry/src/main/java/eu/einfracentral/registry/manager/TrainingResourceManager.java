@@ -1,38 +1,49 @@
 package eu.einfracentral.registry.manager;
 
 import eu.einfracentral.domain.*;
+import eu.einfracentral.dto.ProviderInfo;
+import eu.einfracentral.dto.ScientificDomain;
+import eu.einfracentral.exception.OIDCAuthenticationException;
 import eu.einfracentral.exception.ResourceException;
 import eu.einfracentral.exception.ResourceNotFoundException;
 import eu.einfracentral.exception.ValidationException;
 import eu.einfracentral.registry.service.*;
+import eu.einfracentral.service.AnalyticsService;
 import eu.einfracentral.service.IdCreator;
 import eu.einfracentral.service.RegistrationMailService;
 import eu.einfracentral.service.SecurityService;
 import eu.einfracentral.utils.FacetFilterUtils;
+import eu.einfracentral.utils.FacetLabelService;
 import eu.einfracentral.utils.SortUtils;
 import eu.openminted.registry.core.domain.Browsing;
 import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.domain.Paging;
 import eu.openminted.registry.core.domain.Resource;
 import eu.openminted.registry.core.service.ParserService;
+import eu.openminted.registry.core.service.SearchService;
+import eu.openminted.registry.core.service.ServiceException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
+import org.springframework.util.MultiValueMap;
 
+import java.net.UnknownHostException;
 import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
+import java.text.DecimalFormat;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static eu.einfracentral.config.CacheConfig.*;
 import static eu.einfracentral.utils.VocabularyValidationUtils.validateScientificDomains;
+import static java.util.stream.Collectors.toList;
 
 @org.springframework.stereotype.Service
 public class TrainingResourceManager extends ResourceManager<TrainingResourceBundle> implements TrainingResourceService<TrainingResourceBundle> {
@@ -45,7 +56,13 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
     private final RegistrationMailService registrationMailService;
     private final VocabularyService vocabularyService;
     private final CatalogueService<CatalogueBundle, Authentication> catalogueService;
-
+    @Autowired
+    private FacetLabelService facetLabelService;
+    @Autowired
+    private AnalyticsService analyticsService;
+    @Autowired
+    private EventService eventService;
+    private List<String> browseBy;
     @Value("${project.catalogue.name}")
     private String catalogueName;
 
@@ -731,4 +748,410 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
         }
         return trainingResourceBundle;
     }
+
+    @Override
+    public Paging<RichResource> getRichResources(FacetFilter ff, Authentication auth) {
+        Browsing<TrainingResourceBundle> resourceBundles = getAll(ff, auth);
+        List<RichResource> richResourceList = createRichResources(resourceBundles.getResults(), auth);
+        return new Browsing<>(resourceBundles.getTotal(), resourceBundles.getFrom(), resourceBundles.getTo(),
+                richResourceList, resourceBundles.getFacets());
+    }
+
+    @Override
+    public RichResource getRichResource(String id, String catalogueId, Authentication auth) {
+        TrainingResourceBundle resourceBundle;
+        resourceBundle = get(id, catalogueId);
+        return createRichResource(resourceBundle, auth);
+    }
+
+    @Override
+    public RichResource createRichResource(TrainingResourceBundle resourceBundle, Authentication auth) {
+        return createRichResources(Collections.singletonList(resourceBundle), auth).get(0);
+    }
+
+    @Override
+    public List<RichResource> createRichResources(List<TrainingResourceBundle> resourceBundleList, Authentication auth) {
+        logger.trace("Creating RichServices from a list of TrainingResourceBundles\nAuthentication: {}", auth);
+        List<RichResource> richResources = createRichVocabularies(resourceBundleList);
+        createRichStatistics(richResources, auth);
+        createProviderInfo(richResources, auth);
+
+        return richResources;
+    }
+
+    private List<RichResource> createRichVocabularies(List<TrainingResourceBundle> trainingResourceBundles) {
+        Map<String, Vocabulary> allVocabularies = vocabularyService.getVocabulariesMap();
+        List<RichResource> richResources = new ArrayList<>();
+
+        for (TrainingResourceBundle trainingResourceBundle : trainingResourceBundles) {
+            RichResource richResource = new RichResource(trainingResourceBundle);
+
+            // LanguageAvailabilities Names
+            if (trainingResourceBundle.getTrainingResource().getLanguages() != null) {
+                richResource.setLanguageAvailabilityNames(trainingResourceBundle.getPayload().getLanguages()
+                        .stream()
+                        .filter(v -> !v.equals(""))
+                        .map(l -> allVocabularies.get(l).getName())
+                        .collect(Collectors.toList())
+                );
+            }
+
+            // GeographicAvailabilities Names
+            if (trainingResourceBundle.getTrainingResource().getGeographicalAvailabilities() != null) {
+                richResource.setGeographicAvailabilityNames(trainingResourceBundle.getTrainingResource().getGeographicalAvailabilities()
+                        .stream()
+                        .filter(v -> !v.equals(""))
+                        .map(p -> allVocabularies.get(p).getName())
+                        .collect(Collectors.toList())
+                );
+            }
+
+            // Domain Tree
+            List<ScientificDomain> domains = new ArrayList<>();
+            if (trainingResourceBundle.getTrainingResource().getScientificDomains() != null) {
+                for (ServiceProviderDomain serviceProviderDomain : trainingResourceBundle.getTrainingResource().getScientificDomains()) {
+                    ScientificDomain domain = new ScientificDomain();
+                    if (serviceProviderDomain.getScientificDomain() != null && !serviceProviderDomain.getScientificDomain().equals("")) {
+                        domain.setDomain(vocabularyService.get(serviceProviderDomain.getScientificDomain()));
+                    } else {
+                        domain.setDomain(null);
+                    }
+                    if (serviceProviderDomain.getScientificSubdomain() != null && !serviceProviderDomain.getScientificSubdomain().equals("")) {
+                        domain.setSubdomain(vocabularyService.get(serviceProviderDomain.getScientificSubdomain()));
+                    } else {
+                        domain.setSubdomain(null);
+                    }
+                    domains.add(domain);
+                }
+            }
+            richResource.setDomains(domains);
+            richResources.add(richResource);
+        }
+        return (richResources);
+    }
+
+    private List<RichResource> createRichStatistics(List<RichResource> richResources, Authentication auth) {
+        Map<String, Integer> resourceVisits = analyticsService.getAllServiceVisits();
+        Map<String, List<Float>> resourceFavorites = eventService.getAllServiceEventValues(Event.UserActionType.FAVOURITE.getKey(), auth);
+        Map<String, List<Float>> resourceRatings = eventService.getAllServiceEventValues(Event.UserActionType.RATING.getKey(), auth);
+
+        for (RichResource richResource : richResources) {
+
+            // set user favourite and rate if auth != null
+            if (auth != null) {
+
+                List<Event> userEvents;
+                try {
+                    userEvents = eventService.getEvents(Event.UserActionType.FAVOURITE.getKey(), richResource.getTrainingResource().getId(), auth);
+                    if (!userEvents.isEmpty()) {
+                        richResource.setIsFavourite(userEvents.get(0).getValue());
+                    }
+                    userEvents = eventService.getEvents(Event.UserActionType.RATING.getKey(), richResource.getTrainingResource().getId(), auth);
+                    if (!userEvents.isEmpty()) {
+                        richResource.setUserRate(userEvents.get(0).getValue());
+                    }
+                } catch (OIDCAuthenticationException e) {
+                    // user not logged in
+                    logger.warn("Authentication Exception", e);
+                } catch (Exception e2) {
+                    logger.error(e2);
+                }
+            }
+
+            if (resourceRatings.containsKey(richResource.getTrainingResource().getId())) {
+                int ratings = resourceRatings.get(richResource.getTrainingResource().getId()).size();
+                float rating = resourceRatings.get(richResource.getTrainingResource().getId()).stream().reduce((float) 0.0, Float::sum) / ratings;
+                richResource.setRatings(ratings);
+                richResource.setHasRate(Float.parseFloat(new DecimalFormat("#.##").format(rating)));
+
+            }
+
+            if (resourceFavorites.containsKey(richResource.getTrainingResource().getId())) {
+                int favourites = resourceFavorites.get(richResource.getTrainingResource().getId()).stream().mapToInt(Float::intValue).sum();
+                richResource.setFavourites(favourites);
+            }
+
+            // set visits
+            Integer views = resourceVisits.get(richResource.getTrainingResource().getId());
+            if (views != null) {
+                richResource.setViews(views);
+            } else {
+                richResource.setViews(0);
+            }
+        }
+        return richResources;
+    }
+
+    private List<RichResource> createProviderInfo(List<RichResource> richResources, Authentication auth) {
+        for (RichResource richResource : richResources) {
+            createProviderInfo(richResource, auth);
+        }
+        return richResources;
+    }
+
+    private RichResource createProviderInfo(RichResource richResource, Authentication auth) {
+        List<ProviderInfo> providerInfoList = new ArrayList<>();
+        Set<String> allProviders = new HashSet<>(richResource.getTrainingResource().getResourceProviders());
+        allProviders.add(richResource.getTrainingResource().getResourceOrganisation());
+        for (String provider : allProviders) {
+            if (!"".equals(provider)) { // ignore providers with empty id "" (fix for pendingServices)
+                ProviderBundle providerBundle = providerService.get(provider, auth);
+                boolean isResourceOrganisation = provider.equals(richResource.getTrainingResource().getResourceOrganisation());
+                ProviderInfo providerInfo = new ProviderInfo(providerBundle.getProvider(), isResourceOrganisation);
+                providerInfoList.add(providerInfo);
+            }
+        }
+        richResource.setProviderInfo(providerInfoList);
+        return richResource;
+    }
+
+    @Override
+    public boolean exists(SearchService.KeyValue... ids) {
+        Resource resource;
+        try {
+            resource = this.searchService.searchId(getResourceType(), ids);
+            return resource != null;
+        } catch (UnknownHostException e) {
+            logger.error(e);
+            throw new ServiceException(e);
+        }
+    }
+
+    @Override
+    public List<String> getChildrenFromParent(String type, String parent, List<Map<String, Object>> rec) {
+        List<String> finalResults = new ArrayList<>();
+        List<String> allSub = new ArrayList<>();
+        List<String> correctedSubs = new ArrayList<>();
+        for (Map<String, Object> map : rec) {
+            for (Map.Entry<String, Object> entry : map.entrySet()) {
+                String trimmed = entry.getValue().toString().replace("{", "").replace("}", "");
+                if (!allSub.contains(trimmed)) {
+                    allSub.add((trimmed));
+                }
+            }
+        }
+        // Required step to fix joint subcategories (sub1,sub2,sub3) who passed as 1 value
+        for (String item : allSub) {
+            if (item.contains(",")) {
+                String[] itemParts = item.split(",");
+                correctedSubs.addAll(Arrays.asList(itemParts));
+            } else {
+                correctedSubs.add(item);
+            }
+        }
+        if (type.equalsIgnoreCase("SCIENTIFIC_DOMAIN")) {
+            String[] parts = parent.split("-");
+            for (String id : correctedSubs) {
+                if (id.contains(parts[1])) {
+                    finalResults.add(id);
+                }
+            }
+        } else {
+            String[] parts = parent.split("-");
+            for (String id : correctedSubs) {
+                if (id.contains(parts[2])) {
+                    finalResults.add(id);
+                }
+            }
+        }
+        return finalResults;
+    }
+
+    @Override
+    public Browsing<TrainingResourceBundle> getAllForAdmin(FacetFilter filter, Authentication auth) {
+        filter.setBrowseBy(browseBy);
+        filter.setResourceType(getResourceType());
+        return getMatchingResources(filter);
+    }
+
+    private Browsing<TrainingResourceBundle> getMatchingResources(FacetFilter ff) {
+        Browsing<TrainingResourceBundle> resources;
+
+        resources = getResults(ff);
+        if (!resources.getResults().isEmpty() && !resources.getFacets().isEmpty()) {
+            resources.setFacets(facetLabelService.createLabels(resources.getFacets()));
+        }
+
+        return resources;
+    }
+
+    @Override
+    public Paging<TrainingResourceBundle> getRandomResources(FacetFilter ff, String auditingInterval, Authentication auth) {
+        FacetFilter facetFilter = new FacetFilter();
+        facetFilter.setQuantity(maxQuantity);
+        facetFilter.addFilter("status", "approved resource");
+        facetFilter.addFilter("published", "false");
+        Browsing<TrainingResourceBundle> trainingResourceBrowsing = getAll(facetFilter, auth);
+        List<TrainingResourceBundle> trainingResourcesToBeAudited = new ArrayList<>();
+        long todayEpochTime = System.currentTimeMillis();
+        long interval = Instant.ofEpochMilli(todayEpochTime).atZone(ZoneId.systemDefault()).minusMonths(Integer.parseInt(auditingInterval)).toEpochSecond();
+        for (TrainingResourceBundle trainingResourceBundle : trainingResourceBrowsing.getResults()) {
+            if (trainingResourceBundle.getLatestAuditInfo() != null) {
+                if (Long.parseLong(trainingResourceBundle.getLatestAuditInfo().getDate()) > interval) {
+                    trainingResourcesToBeAudited.add(trainingResourceBundle);
+                }
+            }
+        }
+        Collections.shuffle(trainingResourcesToBeAudited);
+        for (int i = trainingResourcesToBeAudited.size() - 1; i > ff.getQuantity() - 1; i--) {
+            trainingResourcesToBeAudited.remove(i);
+        }
+        return new Browsing<>(trainingResourcesToBeAudited.size(), 0, trainingResourcesToBeAudited.size(), trainingResourcesToBeAudited, trainingResourceBrowsing.getFacets());
+    }
+
+    @Override
+    public TrainingResourceBundle getResourceTemplate(String providerId, Authentication auth) {
+        FacetFilter ff = new FacetFilter();
+        ff.addFilter("resource_organisation", providerId);
+        ff.addFilter("catalogue_id", catalogueName);
+        List<TrainingResourceBundle> allProviderTrainingResources = getAll(ff, auth).getResults();
+        for (TrainingResourceBundle trainingResourceBundle : allProviderTrainingResources) {
+            if (trainingResourceBundle.getStatus().equals(vocabularyService.get("pending resource").getId())) {
+                return trainingResourceBundle;
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public Paging<TrainingResourceBundle> getAllForAdminWithAuditStates(FacetFilter ff, Set<String> auditState, Authentication auth) {
+        List<TrainingResourceBundle> valid = new ArrayList<>();
+        List<TrainingResourceBundle> notAudited = new ArrayList<>();
+        List<TrainingResourceBundle> invalidAndUpdated = new ArrayList<>();
+        List<TrainingResourceBundle> invalidAndNotUpdated = new ArrayList<>();
+
+        int quantity = ff.getQuantity();
+        int from = ff.getFrom();
+
+        FacetFilter ff2 = new FacetFilter();
+        ff2.setFilter(new HashMap<>(ff.getFilter()));
+        // remove auditState from ff2 filter
+        ((MultiValueMap<String, Object>) ff2.getFilter().get("multi-filter")).remove("auditState");
+        ff2.setQuantity(maxQuantity);
+        ff2.setFrom(0);
+        Paging<TrainingResourceBundle> retPaging = getAllForAdmin(ff, auth);
+        List<TrainingResourceBundle> allWithoutAuditFilterList = getAllForAdmin(ff2, auth).getResults();
+        List<TrainingResourceBundle> ret = new ArrayList<>();
+        for (TrainingResourceBundle trainingResourceBundle : allWithoutAuditFilterList) {
+            String auditVocStatus;
+            try {
+                auditVocStatus = LoggingInfo.createAuditVocabularyStatuses(trainingResourceBundle.getLoggingInfo());
+            } catch (NullPointerException e) { // serviceBundle has null loggingInfo
+                continue;
+            }
+            switch (auditVocStatus) {
+                case "Valid and updated":
+                case "Valid and not updated":
+                    valid.add(trainingResourceBundle);
+                    break;
+                case "Not Audited":
+                    notAudited.add(trainingResourceBundle);
+                    break;
+                case "Invalid and updated":
+                    invalidAndUpdated.add(trainingResourceBundle);
+                    break;
+                case "Invalid and not updated":
+                    invalidAndNotUpdated.add(trainingResourceBundle);
+                    break;
+                default:
+                    throw new IllegalStateException("Unexpected value: " + auditVocStatus);
+            }
+        }
+        for (String state : auditState) {
+            switch (state) {
+                case "Valid":
+                    ret.addAll(valid);
+                    break;
+                case "Not Audited":
+                    ret.addAll(notAudited);
+                    break;
+                case "Invalid and updated":
+                    ret.addAll(invalidAndUpdated);
+                    break;
+                case "Invalid and not updated":
+                    ret.addAll(invalidAndNotUpdated);
+                    break;
+                default:
+                    throw new ValidationException(String.format("The audit state [%s] you have provided is wrong", state));
+            }
+        }
+        if (!ret.isEmpty()) {
+            List<TrainingResourceBundle> retWithCorrectQuantity = new ArrayList<>();
+            if (from == 0) {
+                if (quantity <= ret.size()) {
+                    for (int i = from; i <= quantity - 1; i++) {
+                        retWithCorrectQuantity.add(ret.get(i));
+                    }
+                } else {
+                    retWithCorrectQuantity.addAll(ret);
+                }
+                retPaging.setTo(retWithCorrectQuantity.size());
+            } else {
+                boolean indexOutOfBound = false;
+                if (quantity <= ret.size()) {
+                    for (int i = from; i < quantity + from; i++) {
+                        try {
+                            retWithCorrectQuantity.add(ret.get(i));
+                            if (quantity + from > ret.size()) {
+                                retPaging.setTo(ret.size());
+                            } else {
+                                retPaging.setTo(quantity + from);
+                            }
+                        } catch (IndexOutOfBoundsException e) {
+                            indexOutOfBound = true;
+                        }
+                    }
+                    if (indexOutOfBound) {
+                        retPaging.setTo(ret.size());
+                    }
+                } else {
+                    retWithCorrectQuantity.addAll(ret);
+                    if (quantity + from > ret.size()) {
+                        retPaging.setTo(ret.size());
+                    } else {
+                        retPaging.setTo(quantity + from);
+                    }
+                }
+            }
+            retPaging.setFrom(from);
+            retPaging.setResults(retWithCorrectQuantity);
+            retPaging.setTotal(ret.size());
+        } else {
+            retPaging.setResults(ret);
+            retPaging.setTotal(0);
+            retPaging.setFrom(0);
+            retPaging.setTo(0);
+        }
+        return retPaging;
+    }
+
+
+    @Override
+    public Map<String, List<TrainingResourceBundle>> getBy(String field, Authentication auth) throws NoSuchFieldException {
+        return null;
+    }
+
+    @Override
+    public List<RichResource> getByIds(Authentication auth, String... ids) {
+        List<RichResource> resources;
+        resources = Arrays.stream(ids)
+                .map(id ->
+                {
+                    try {
+                        return getRichResource(id, catalogueName, auth);
+                    } catch (ServiceException | ResourceNotFoundException e) {
+                        return null;
+                    }
+
+                })
+                .filter(Objects::nonNull)
+                .collect(toList());
+        return resources;
+    }
+
+    @Override
+    public Paging<ResourceHistory> getHistory(String id, String catalogueId) {
+        return null;
+    }
+
 }

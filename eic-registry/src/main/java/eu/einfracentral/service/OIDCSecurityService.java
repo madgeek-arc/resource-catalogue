@@ -264,15 +264,16 @@ public class OIDCSecurityService implements SecurityService {
     @Override
     public boolean userIsResourceProviderAdmin(@NotNull User user, String resourceId, String catalogueId) {
         ResourceBundle<?> resourceBundle;
+        TrainingResourceBundle trainingResourceBundle = new TrainingResourceBundle();
         try {
             resourceBundle = resourceBundleService.getOrElseReturnNull(resourceId, catalogueId);
             if (resourceBundle == null){
                 resourceBundle = datasourceService.getOrElseReturnNull(resourceId, catalogueId);
             }
             if (resourceBundle == null){
-                resourceBundle = trainingResourceService.getOrElseReturnNull(resourceId, catalogueId);
+                trainingResourceBundle = trainingResourceService.getOrElseReturnNull(resourceId, catalogueId);
             }
-            if (resourceBundle == null){
+            if (resourceBundle == null && trainingResourceBundle == null){
                 resourceBundle = pendingServiceManager.get(resourceId);
             }
         } catch (ResourceException | ResourceNotFoundException e) {

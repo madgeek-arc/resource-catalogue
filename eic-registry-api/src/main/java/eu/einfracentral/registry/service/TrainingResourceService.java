@@ -146,30 +146,11 @@ public interface TrainingResourceService<T> extends ResourceService<T, Authentic
     Paging<ResourceHistory> getHistory(String id, String catalogueId);
 
     /**
-     * Get the History of a specific resource version of the ResourceBundle with the specified id.
-     *
-     * @param resourceId
-     * @param catalogueId
-     * @param versionId
-     * @return
-     */
-    @Deprecated
-    TrainingResource getVersionHistory(String resourceId, String catalogueId, String versionId);
-
-    /**
      * Get inactive Resources.
      *
      * @return
      */
     Paging<T> getInactiveResources();
-
-    /**
-     * Validates the given resource.
-     *
-     * @param resource
-     * @return
-     */
-    boolean validate(T resource);
 
     /**
      * Sets a Resource as active/inactive.
@@ -234,7 +215,7 @@ public interface TrainingResourceService<T> extends ResourceService<T, Authentic
 
     List<? extends TrainingResource> getActiveResources(String providerId);
 
-    ResourceBundle<?> getResourceTemplate(String providerId, Authentication auth);
+    TrainingResourceBundle getResourceTemplate(String providerId, Authentication auth);
 
     List<T> getInactiveResources(String providerId);
 

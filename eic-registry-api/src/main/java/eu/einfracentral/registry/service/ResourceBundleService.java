@@ -10,7 +10,6 @@ import eu.openminted.registry.core.exception.ResourceNotFoundException;
 import eu.openminted.registry.core.service.ResourceCRUDService;
 import eu.openminted.registry.core.service.SearchService;
 import org.springframework.security.core.Authentication;
-import org.springframework.util.MultiValueMap;
 
 import java.util.List;
 import java.util.Map;

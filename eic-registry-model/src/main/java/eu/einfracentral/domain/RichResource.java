@@ -13,7 +13,8 @@ import java.util.Objects;
 public class RichResource {
 
     private Service service;
-    private Datasource datasourceBundle;
+    private Datasource datasource;
+    private TrainingResource trainingResource;
     private Metadata metadata;
 
     private List<String> languageAvailabilityNames;
@@ -43,8 +44,23 @@ public class RichResource {
         // No arg constructor
     }
 
+    public RichResource(ServiceBundle serviceBundle) {
+        this.service = serviceBundle.getService();
+        this.metadata = serviceBundle.getMetadata();
+    }
+
     public RichResource(Service service, Metadata metadata) {
         this.service = service;
+        this.metadata = metadata;
+    }
+
+    public RichResource(DatasourceBundle dataSourceBundle) {
+        this.datasource = dataSourceBundle.getDatasource();
+        this.metadata = dataSourceBundle.getMetadata();
+    }
+
+    public RichResource(Datasource datasource, Metadata metadata) {
+        this.datasource = datasource;
         this.metadata = metadata;
     }
 
@@ -53,14 +69,14 @@ public class RichResource {
         this.metadata = resource.getMetadata();
     }
 
-    public RichResource(ServiceBundle service) {
-        this.service = service.getService();
-        this.metadata = service.getMetadata();
+    public RichResource(TrainingResourceBundle trainingResourceBundle) {
+        this.trainingResource = trainingResourceBundle.getTrainingResource();
+        this.metadata = trainingResourceBundle.getMetadata();
     }
 
-    public RichResource(DatasourceBundle dataSourceBundle) {
-        this.datasourceBundle = dataSourceBundle.getDatasource();
-        this.metadata = dataSourceBundle.getMetadata();
+    public RichResource(TrainingResource trainingResource, Metadata metadata) {
+        this.trainingResource = trainingResource;
+        this.metadata = metadata;
     }
 
     public Service getService() {
@@ -71,12 +87,20 @@ public class RichResource {
         this.service = service;
     }
 
-    public Datasource getDatasourceBundle() {
-        return datasourceBundle;
+    public Datasource getDatasource() {
+        return datasource;
     }
 
-    public void setDatasourceBundle(Datasource datasourceBundle) {
-        this.datasourceBundle = datasourceBundle;
+    public void setDatasource(Datasource datasource) {
+        this.datasource = datasource;
+    }
+
+    public TrainingResource getTrainingResource() {
+        return trainingResource;
+    }
+
+    public void setTrainingResource(TrainingResource trainingResource) {
+        this.trainingResource = trainingResource;
     }
 
     public Metadata getMetadata() {
@@ -255,11 +279,11 @@ public class RichResource {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         RichResource that = (RichResource) o;
-        return Float.compare(that.views, views) == 0 && Float.compare(that.ratings, ratings) == 0 && Float.compare(that.userRate, userRate) == 0 && Float.compare(that.hasRate, hasRate) == 0 && Float.compare(that.favourites, favourites) == 0 && Float.compare(that.isFavourite, isFavourite) == 0 && Objects.equals(service, that.service) && Objects.equals(metadata, that.metadata) && Objects.equals(languageAvailabilityNames, that.languageAvailabilityNames) && Objects.equals(geographicAvailabilityNames, that.geographicAvailabilityNames) && Objects.equals(trlName, that.trlName) && Objects.equals(phaseName, that.phaseName) && Objects.equals(lifeCycleStatusName, that.lifeCycleStatusName) && Objects.equals(targetUsersNames, that.targetUsersNames) && Objects.equals(accessTypeNames, that.accessTypeNames) && Objects.equals(accessModeNames, that.accessModeNames) && Objects.equals(fundingBodyNames, that.fundingBodyNames) && Objects.equals(fundingProgramNames, that.fundingProgramNames) && Objects.equals(orderTypeName, that.orderTypeName) && Objects.equals(categories, that.categories) && Objects.equals(domains, that.domains) && Objects.equals(providerInfo, that.providerInfo);
+        return Float.compare(that.views, views) == 0 && Float.compare(that.ratings, ratings) == 0 && Float.compare(that.userRate, userRate) == 0 && Float.compare(that.hasRate, hasRate) == 0 && Float.compare(that.favourites, favourites) == 0 && Float.compare(that.isFavourite, isFavourite) == 0 && Objects.equals(service, that.service) && Objects.equals(datasource, that.datasource) && Objects.equals(trainingResource, that.trainingResource) && Objects.equals(metadata, that.metadata) && Objects.equals(languageAvailabilityNames, that.languageAvailabilityNames) && Objects.equals(geographicAvailabilityNames, that.geographicAvailabilityNames) && Objects.equals(trlName, that.trlName) && Objects.equals(phaseName, that.phaseName) && Objects.equals(lifeCycleStatusName, that.lifeCycleStatusName) && Objects.equals(targetUsersNames, that.targetUsersNames) && Objects.equals(accessTypeNames, that.accessTypeNames) && Objects.equals(accessModeNames, that.accessModeNames) && Objects.equals(fundingBodyNames, that.fundingBodyNames) && Objects.equals(fundingProgramNames, that.fundingProgramNames) && Objects.equals(orderTypeName, that.orderTypeName) && Objects.equals(categories, that.categories) && Objects.equals(domains, that.domains) && Objects.equals(providerInfo, that.providerInfo);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(service, metadata, languageAvailabilityNames, geographicAvailabilityNames, trlName, phaseName, lifeCycleStatusName, targetUsersNames, accessTypeNames, accessModeNames, fundingBodyNames, fundingProgramNames, orderTypeName, views, ratings, userRate, hasRate, favourites, isFavourite, categories, domains, providerInfo);
+        return Objects.hash(service, datasource, trainingResource, metadata, languageAvailabilityNames, geographicAvailabilityNames, trlName, phaseName, lifeCycleStatusName, targetUsersNames, accessTypeNames, accessModeNames, fundingBodyNames, fundingProgramNames, orderTypeName, views, ratings, userRate, hasRate, favourites, isFavourite, categories, domains, providerInfo);
     }
 }
