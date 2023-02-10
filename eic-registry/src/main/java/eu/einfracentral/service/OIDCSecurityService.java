@@ -37,7 +37,7 @@ public class OIDCSecurityService implements SecurityService {
     private final PendingProviderManager pendingProviderManager;
     private final ResourceBundleService<ServiceBundle> resourceBundleService;
     private final DatasourceService<DatasourceBundle> datasourceService;
-    private final TrainingResourceService<TrainingResourceService> trainingResourceService;
+    private final TrainingResourceService<TrainingResourceBundle> trainingResourceService;
     private final PendingResourceService<ServiceBundle> pendingServiceManager;
     private final PendingResourceService<DatasourceBundle> pendingDatasourceManager;
     private OIDCAuthenticationToken adminAccess;
@@ -55,7 +55,7 @@ public class OIDCSecurityService implements SecurityService {
     OIDCSecurityService(ProviderManager providerManager, CatalogueManager catalogueManager,
                         ResourceBundleService<ServiceBundle> resourceBundleService,
                         @Lazy DatasourceService<DatasourceBundle> datasourceService,
-                        @Lazy TrainingResourceService<TrainingResourceService> trainingResourceService,
+                        @Lazy TrainingResourceService<TrainingResourceBundle> trainingResourceService,
                         @Lazy PendingProviderManager pendingProviderManager,
                         @Lazy PendingResourceService<ServiceBundle> pendingServiceManager,
                         @Lazy PendingResourceService<DatasourceBundle> pendingDatasourceManager) {
@@ -249,6 +249,14 @@ public class OIDCSecurityService implements SecurityService {
         return userIsResourceProviderAdmin(user, service.getId(), service.getCatalogueId());
     }
 
+    public boolean isResourceProviderAdmin(Authentication auth, TrainingResource trainingResource) {
+        if (hasRole(auth, "ROLE_ANONYMOUS")) {
+            return false;
+        }
+        User user = User.of(auth);
+        return userIsResourceProviderAdmin(user, trainingResource.getId(), trainingResource.getCatalogueId());
+    }
+
     @Override
     public boolean isResourceProviderAdmin(Authentication auth, ResourceBundle<?> resourceBundle, boolean noThrow) {
         if (auth == null && noThrow) {
@@ -355,14 +363,48 @@ public class OIDCSecurityService implements SecurityService {
         return false;
     }
 
+    public boolean providerCanAddResources(Authentication auth, TrainingResource trainingResource) {
+        List<String> providerIds = Collections.singletonList(trainingResource.getResourceOrganisation());
+        if (trainingResource.getCatalogueId() == null || trainingResource.getCatalogueId().equals("")){
+            trainingResource.setCatalogueId(catalogueName);
+        }
+        for (String providerId : providerIds) {
+            ProviderBundle provider = providerManager.get(trainingResource.getCatalogueId(), providerId, auth);
+            if (isProviderAdmin(auth, provider.getId(), trainingResource.getCatalogueId())) {
+                if (provider.getStatus() == null) {
+                    throw new ServiceException("Provider status field is null");
+                }
+                if (provider.isActive() && provider.getStatus().equals("approved provider")) {
+                    return true;
+                } else if (provider.getTemplateStatus().equals("no template status")) {
+                    FacetFilter ff = new FacetFilter();
+                    ff.addFilter("resource_organisation", provider.getId());
+                    if (resourceBundleService.getAll(ff, getAdminAccess()).getResults().isEmpty()) {
+                        return true;
+                    }
+                    throw new ResourceException("You have already created a Service Template.", HttpStatus.CONFLICT);
+                }
+            }
+        }
+        return false;
+    }
+
     @Override
     public boolean providerIsActiveAndUserIsAdmin(Authentication auth, String resourceId){
         return providerIsActiveAndUserIsAdmin(auth, resourceId, catalogueName);
     }
     @Override
     public boolean providerIsActiveAndUserIsAdmin(Authentication auth, String resourceId, String catalogueId) {
-        ResourceBundle<?> resourceBundle = resourceBundleService.get(resourceId, catalogueId);
-        List<String> providerIds = Collections.singletonList(resourceBundle.getPayload().getResourceOrganisation());
+        ResourceBundle<?> resourceBundle;
+        TrainingResourceBundle trainingResourceBundle;
+        List<String> providerIds;
+        try{
+            resourceBundle = resourceBundleService.get(resourceId, catalogueId);
+            providerIds = Collections.singletonList(resourceBundle.getPayload().getResourceOrganisation());
+        } catch (ResourceNotFoundException e) {
+            trainingResourceBundle = trainingResourceService.get(resourceId, catalogueId);
+            providerIds = Collections.singletonList(trainingResourceBundle.getPayload().getResourceOrganisation());
+        }
         for (String providerId : providerIds) {
             ProviderBundle provider = providerManager.get(catalogueId, providerId, auth);
             if (provider != null && provider.isActive()) {
@@ -379,8 +421,8 @@ public class OIDCSecurityService implements SecurityService {
         return resourceBundle.isActive();
     }
 
-    public boolean datasourceIsActive(String resourceId, String catalogueId) {
-        ResourceBundle<?> resourceBundle = datasourceService.get(resourceId, catalogueId);
-        return resourceBundle.isActive();
+    public boolean trainingResourceIsActive(String resourceId, String catalogueId) {
+        TrainingResourceBundle trainingResourceBundle = trainingResourceService.get(resourceId, catalogueId);
+        return trainingResourceBundle.isActive();
     }
 }

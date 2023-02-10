@@ -234,9 +234,9 @@ public class ProviderController {
         List<Map<String, Object>> records = providerManager.createQueryForProviderFilters(ff, orderDirection, orderField);
         List<ProviderBundle> ret = new ArrayList<>();
         Paging<ProviderBundle> retPaging = providerManager.getAll(ff, auth);
-        for (Map<String, Object> record : records){
-            for (Map.Entry<String, Object> entry : record.entrySet()){
-                ret.add(providerManager.get((String) entry.getValue()));
+        if (records != null && !records.isEmpty()){
+            for (Map<String, Object> record : records){
+                ret.add(providerManager.get((String) record.get("catalogue_id"), (String) record.get("provider_id"), auth));
             }
         }
         if (auditState == null){

@@ -127,6 +127,14 @@ public interface TrainingResourceService<T> extends ResourceService<T, Authentic
     boolean exists(SearchService.KeyValue... ids);
 
     /**
+     * Validates the given trainingResourceBundle.
+     *
+     * @param trainingResourceBundle
+     * @return
+     */
+    boolean validateTrainingResource(TrainingResourceBundle trainingResourceBundle);
+
+    /**
      * Get resource.
      *
      * @param id

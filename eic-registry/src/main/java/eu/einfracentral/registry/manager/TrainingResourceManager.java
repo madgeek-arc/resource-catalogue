@@ -15,6 +15,7 @@ import eu.einfracentral.service.SecurityService;
 import eu.einfracentral.utils.FacetFilterUtils;
 import eu.einfracentral.utils.FacetLabelService;
 import eu.einfracentral.utils.SortUtils;
+import eu.einfracentral.validators.FieldValidator;
 import eu.openminted.registry.core.domain.Browsing;
 import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.domain.Paging;
@@ -58,6 +59,8 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
     private final CatalogueService<CatalogueBundle, Authentication> catalogueService;
     @Autowired
     private FacetLabelService facetLabelService;
+    @Autowired
+    private FieldValidator fieldValidator;
     @Autowired
     private AnalyticsService analyticsService;
     @Autowired
@@ -120,11 +123,7 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
         } catch (NoSuchAlgorithmException e) {
             throw new RuntimeException(e);
         }
-        validate(trainingResourceBundle);
-        if (trainingResourceBundle.getTrainingResource().getScientificDomains() != null &&
-                !trainingResourceBundle.getTrainingResource().getScientificDomains().isEmpty()){
-            validateScientificDomains(trainingResourceBundle.getTrainingResource().getScientificDomains());
-        }
+        validateTrainingResource(trainingResourceBundle);
 
         boolean active = providerBundle
                 .getTemplateStatus()
@@ -228,11 +227,7 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
         }
 
         logger.trace("User '{}' is attempting to update the Training Resource with id '{}' of the Catalogue '{}'", auth, trainingResourceBundle.getTrainingResource().getId(), trainingResourceBundle.getTrainingResource().getCatalogueId());
-        validate(trainingResourceBundle);
-        if (trainingResourceBundle.getTrainingResource().getScientificDomains() != null &&
-                !trainingResourceBundle.getTrainingResource().getScientificDomains().isEmpty()){
-            validateScientificDomains(trainingResourceBundle.getTrainingResource().getScientificDomains());
-        }
+        validateTrainingResource(trainingResourceBundle);
 
         ProviderBundle providerBundle = providerService.get(trainingResourceBundle.getTrainingResource().getCatalogueId(),
                 trainingResourceBundle.getTrainingResource().getResourceOrganisation(), auth);
@@ -437,6 +432,24 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
             throw new ResourceNotFoundException(e.getMessage());
         }
         return update(trainingResourceBundle, auth);
+    }
+
+    public boolean validateTrainingResource(TrainingResourceBundle trainingResourceBundle) {
+        TrainingResource trainingResource = trainingResourceBundle.getTrainingResource();
+        //If we want to reject bad vocab ids instead of silently accept, here's where we do it
+        logger.debug("Validating Training Resource with id: {}", trainingResource.getId());
+
+        try {
+            fieldValidator.validate(trainingResourceBundle);
+        } catch (IllegalAccessException e) {
+            logger.error("", e);
+        }
+        if (trainingResourceBundle.getTrainingResource().getScientificDomains() != null &&
+                !trainingResourceBundle.getTrainingResource().getScientificDomains().isEmpty()){
+            validateScientificDomains(trainingResourceBundle.getTrainingResource().getScientificDomains());
+        }
+
+        return true;
     }
 
     @Override
