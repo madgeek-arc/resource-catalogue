@@ -89,6 +89,19 @@ public class SimpleIdCreator implements IdCreator {
         return resourceOrganisation+"."+hashtext;
     }
 
+    public String createTrainingResourceId(TrainingResourceBundle trainingResourceBundle) throws NoSuchAlgorithmException {
+        String resourceOrganisation = trainingResourceBundle.getTrainingResource().getResourceOrganisation();
+        String trainingResourceTitle = trainingResourceBundle.getTrainingResource().getTitle();
+        MessageDigest md = MessageDigest.getInstance("MD5");
+        byte[] messageDigest = md.digest(trainingResourceTitle.getBytes());
+        BigInteger no = new BigInteger(1, messageDigest);
+        String hashtext = no.toString(16);
+        while (hashtext.length() < 32) {
+            hashtext = "0" + hashtext;
+        }
+        return resourceOrganisation+"."+hashtext;
+    }
+
     public String createInteroperabilityRecordId(InteroperabilityRecord interoperabilityRecord) throws NoSuchAlgorithmException {
         String identifier = interoperabilityRecord.getIdentifierInfo().getIdentifier() + '.' + interoperabilityRecord.getIdentifierInfo().getIdentifierType();
         MessageDigest md = MessageDigest.getInstance("MD5");

@@ -1,13 +1,11 @@
 package eu.einfracentral.registry.service;
 
-
 import eu.einfracentral.domain.*;
 import eu.openminted.registry.core.domain.Browsing;
 import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.domain.Paging;
 import eu.openminted.registry.core.domain.Resource;
 import eu.openminted.registry.core.exception.ResourceNotFoundException;
-import eu.openminted.registry.core.service.ResourceCRUDService;
 import eu.openminted.registry.core.service.SearchService;
 import org.springframework.security.core.Authentication;
 
@@ -15,7 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-public interface ResourceBundleService<T> extends ResourceCRUDService<T, Authentication> {
+public interface TrainingResourceService<T> extends ResourceService<T, Authentication> {
 
     /**
      * Method to add a new resource.
@@ -129,6 +127,14 @@ public interface ResourceBundleService<T> extends ResourceCRUDService<T, Authent
     boolean exists(SearchService.KeyValue... ids);
 
     /**
+     * Validates the given trainingResourceBundle.
+     *
+     * @param trainingResourceBundle
+     * @return
+     */
+    boolean validateTrainingResource(TrainingResourceBundle trainingResourceBundle);
+
+    /**
      * Get resource.
      *
      * @param id
@@ -148,30 +154,11 @@ public interface ResourceBundleService<T> extends ResourceCRUDService<T, Authent
     Paging<ResourceHistory> getHistory(String id, String catalogueId);
 
     /**
-     * Get the History of a specific resource version of the ResourceBundle with the specified id.
-     *
-     * @param resourceId
-     * @param catalogueId
-     * @param versionId
-     * @return
-     */
-    @Deprecated
-    Service getVersionHistory(String resourceId, String catalogueId, String versionId);
-
-    /**
      * Get inactive Resources.
      *
      * @return
      */
     Paging<T> getInactiveResources();
-
-    /**
-     * Validates the given resource.
-     *
-     * @param resource
-     * @return
-     */
-    boolean validate(T resource);
 
     /**
      * Sets a Resource as active/inactive.
@@ -232,11 +219,11 @@ public interface ResourceBundleService<T> extends ResourceCRUDService<T, Authent
      */
     Paging<T> getResourceBundles(String catalogueId, String providerId, Authentication auth);
 
-    List<? extends Service> getResources(String providerId, Authentication auth);
+    List<? extends TrainingResource> getResources(String providerId, Authentication auth);
 
-    List<? extends Service> getActiveResources(String providerId);
+    List<? extends TrainingResource> getActiveResources(String providerId);
 
-    ResourceBundle<?> getResourceTemplate(String providerId, Authentication auth);
+    TrainingResourceBundle getResourceTemplate(String providerId, Authentication auth);
 
     List<T> getInactiveResources(String providerId);
 
@@ -274,10 +261,7 @@ public interface ResourceBundleService<T> extends ResourceCRUDService<T, Authent
 
     Paging<T> getAllForAdminWithAuditStates(FacetFilter ff, Set<String> auditState, Authentication authentication);
 
-    ResourceBundle<?> updateEOSCIFGuidelines(String resourceId, String catalogueId, List<EOSCIFGuidelines> eoscIFGuidelines, Authentication auth);
-    ResourceBundle<?> updateResearchCategories(String resourceId, String catalogueId, List<String> researchCategories, Authentication auth);
-    ResourceBundle<?> updateHorizontalService(String resourceId, String catalogueId, boolean horizontalService, Authentication auth);
-    ResourceBundle<?> getOrElseReturnNull(String id, String catalogueId);
+    TrainingResourceBundle getOrElseReturnNull(String id, String catalogueId);
 
     T createPublicResource(T resource, Authentication auth);
 }

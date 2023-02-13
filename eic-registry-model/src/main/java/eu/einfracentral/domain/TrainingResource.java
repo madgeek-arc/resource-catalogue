@@ -1,0 +1,502 @@
+package eu.einfracentral.domain;
+
+import eu.einfracentral.annotation.FieldValidation;
+import eu.einfracentral.annotation.GeoLocationVocValidation;
+import eu.einfracentral.annotation.VocabularyValidation;
+import io.swagger.annotations.ApiModelProperty;
+
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlElementWrapper;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlType;
+import java.net.URL;
+import java.util.Date;
+import java.util.List;
+import java.util.Objects;
+
+@XmlType
+@XmlRootElement(namespace = "http://einfracentral.eu")
+public class TrainingResource implements Identifiable {
+
+    // Basic Information
+    /**
+     * A persistent identifier, a unique reference to the Resource.
+     */
+    @XmlElement
+    @ApiModelProperty(position = 1, example = "(required on PUT only)")
+    @FieldValidation
+    private String id;
+
+    /**
+     * The human readable name of the learning resource.
+     */
+    @XmlElement(required = true)
+    @ApiModelProperty(position = 2, required = true)
+    @FieldValidation
+    private String title;
+
+    /**
+     * The name of the organisation that manages or delivers the resource, or that coordinates the Resource delivery in a federated scenario.
+     */
+    @XmlElement(required = true)
+    @ApiModelProperty(position = 3, required = true)
+    @FieldValidation(containsId = true, idClass = Provider.class)
+    private String resourceOrganisation;
+
+    /**
+     * The name(s) of (all) the Provider(s) that manage or deliver the Resource in federated scenarios.
+     */
+    @XmlElementWrapper(name = "resourceProviders")
+    @XmlElement(name = "resourceProvider")
+    @ApiModelProperty(position = 4)
+    @FieldValidation(nullable = true, containsId = true, idClass = Provider.class)
+    private List<String> resourceProviders;
+
+    /**
+     * The name of entity(ies) authoring the resource.
+     */
+    @XmlElementWrapper(name = "authors", required = true)
+    @XmlElement(name = "author")
+    @ApiModelProperty(position = 5, required = true)
+    @FieldValidation
+    private List<String> authors;
+
+    /**
+     * The URL that resolves to the learning resource or to a "landing page" for the resource that contains important
+     * contextual information including the direct resolvable link to the resource, if applicable.
+     */
+    @XmlElement(required = true)
+    @ApiModelProperty(position = 6, example = "https://example.com", required = true)
+    @FieldValidation
+    private URL url;
+
+    /**
+     * The designation of identifier scheme used for the resource URL. It represents the type of the URL of the resource,
+     * that is the used scheme (e.g., Web Address URL, DOI, ARK, etc.).
+     */
+    @XmlElement
+    @ApiModelProperty(position = 7, notes = "Vocabulary ID")
+    @FieldValidation(nullable = true, containsId = true, idClass = Vocabulary.class)
+    @VocabularyValidation(type = Vocabulary.Type.TR_URL_TYPE)
+    private String urlType;
+
+    /**
+     * The name(s) of (all) the Provider(s) that manage or deliver the Resource in federated scenarios.
+     */
+    @XmlElementWrapper(name = "eoscRelatedServices")
+    @XmlElement(name = "eoscRelatedService")
+    @ApiModelProperty(position = 8)
+    @FieldValidation(nullable = true, containsId = true, idClass = Service.class)
+    private List<String> eoscRelatedServices;
+
+
+    // Detailed & Access Information
+    /**
+     * A brief synopsis about or description of the learning resource.
+     */
+    @XmlElement
+    @ApiModelProperty(position = 9)
+    @FieldValidation(nullable = true)
+    private String description;
+
+    /**
+     * The keyword(s) or tag(s) used to describe the resource.
+     */
+    @XmlElementWrapper(name = "keywords")
+    @XmlElement(name = "keyword")
+    @ApiModelProperty(position = 10)
+    @FieldValidation(nullable = true)
+    private List<String> keywords;
+
+    /**
+     * A license document that applies to this content, typically indicated by URL.
+     */
+    @XmlElement(required = true)
+    @ApiModelProperty(position = 11, required = true)
+    @FieldValidation
+    private String license;
+
+    /**
+     * The access status of a resource (open, restricted, paid).
+     */
+    @XmlElement(required = true)
+    @ApiModelProperty(position = 12, notes = "Vocabulary ID", required = true)
+    @FieldValidation(containsId = true, idClass = Vocabulary.class)
+    @VocabularyValidation(type = Vocabulary.Type.TR_ACCESS_RIGHT)
+    private String accessRights;
+
+    /**
+     * The version date for the most recently published or broadcast resource.
+     */
+    @XmlElement(required = true)
+    @ApiModelProperty(position = 13, example = "2020-01-01", required = true)
+    @FieldValidation
+    private Date versionDate;
+
+
+    // Learning Information
+    /**
+     * The principal users(s) for which the learning resource was designed.
+     */
+    @XmlElementWrapper(name = "targetGroups", required = true)
+    @XmlElement(name = "targetGroup")
+    @ApiModelProperty(position = 14, notes = "Vocabulary ID", required = true)
+    @FieldValidation(containsId = true, idClass = Vocabulary.class)
+    @VocabularyValidation(type = Vocabulary.Type.TARGET_USER)
+    private List<String> targetGroups;
+
+    /**
+     * The predominant type or kind that characterizes the learning resource.
+     */
+    @XmlElementWrapper(name = "learningResourceTypes")
+    @XmlElement(name = "learningResourceType")
+    @ApiModelProperty(position = 15, notes = "Vocabulary ID")
+    @FieldValidation(nullable = true, containsId = true, idClass = Vocabulary.class)
+    @VocabularyValidation(type = Vocabulary.Type.TR_DCMI_TYPE)
+    private List<String> learningResourceTypes;
+
+    /**
+     * The descriptions of what knowledge, skills or abilities students should acquire on completion of the resource.
+     */
+    @XmlElementWrapper(name = "learningOutcomes", required = true)
+    @XmlElement(name = "learningOutcome")
+    @ApiModelProperty(position = 16, notes = "Vocabulary ID", required = true)
+    @FieldValidation
+    private List<String> learningOutcomes;
+
+    /**
+     * Target skill level in the topic being taught.
+     */
+    @XmlElement(required = true)
+    @ApiModelProperty(position = 17, notes = "Vocabulary ID", required = true)
+    @FieldValidation(containsId = true, idClass = Vocabulary.class)
+    @VocabularyValidation(type = Vocabulary.Type.TR_EXPERTISE_LEVEL)
+    private String expertiseLevel;
+
+    /**
+     * The predominant content type of the learning resource (video, game, diagram, slides, etc.).
+     */
+    @XmlElementWrapper(name = "contentResourceTypes")
+    @XmlElement(name = "contentResourceType")
+    @ApiModelProperty(position = 18, notes = "Vocabulary ID")
+    @FieldValidation(nullable = true, containsId = true, idClass = Vocabulary.class)
+    @VocabularyValidation(type = Vocabulary.Type.TR_CONTENT_RESOURCE_TYPE)
+    private List<String> contentResourceTypes;
+
+    /**
+     * Identification of certification, accreditation or badge obtained with course or learning resource.
+     */
+    @XmlElementWrapper(name = "qualifications")
+    @XmlElement(name = "qualification")
+    @ApiModelProperty(position = 19, notes = "Vocabulary ID")
+    @FieldValidation(nullable = true, containsId = true, idClass = Vocabulary.class)
+    @VocabularyValidation(type = Vocabulary.Type.TR_QUALIFICATION)
+    private List<String> qualifications;
+
+    /**
+     * Approximate or typical time it takes to work with or through the learning resource for the typical intended target audience.
+     */
+    @XmlElement
+    @ApiModelProperty(position = 20)
+    @FieldValidation(nullable = true)
+    private String duration;
+
+
+    // Geographical and Language Availability Information
+    /**
+     * The language in which the resource was originally published or made available.
+     */
+    @XmlElementWrapper(name = "languages", required = true)
+    @XmlElement(name = "language")
+    @ApiModelProperty(position = 21, notes = "Vocabulary ID", required = true)
+    @FieldValidation(containsId = true, idClass = Vocabulary.class)
+    @VocabularyValidation(type = Vocabulary.Type.LANGUAGE)
+    private List<String> languages;
+
+    /**
+     * Locations where the Resource is offered.
+     */
+    @XmlElementWrapper(name = "geographicalAvailabilities", required = true)
+    @XmlElement(name = "geographicalAvailability")
+    @ApiModelProperty(position = 22, notes = "Vocabulary ID", required = true)
+    @FieldValidation(containsId = true, idClass = Vocabulary.class)
+    @GeoLocationVocValidation(region = Vocabulary.Type.REGION, country = Vocabulary.Type.COUNTRY)
+    private List<String> geographicalAvailabilities;
+
+
+    // Classification Information
+    /**
+     * The branch of science, scientific discipline that is related to the Resource.
+     */
+    @XmlElementWrapper(name = "scientificDomains", required = true)
+    @XmlElement(name = "scientificDomain")
+    @ApiModelProperty(position = 23, notes = "Vocabulary ID", required = true)
+    @FieldValidation
+    private List<ServiceProviderDomain> scientificDomains;
+
+
+    // Contact Information
+    /**
+     * Training Resource's Main Contact Owner info.
+     */
+    @XmlElement(required = true)
+    @ApiModelProperty(position = 24, required = true)
+    @FieldValidation
+    private ServiceMainContact contact;
+
+
+    // Dependencies Information
+    /**
+     * The Catalogue this Training Resource is originally registered at.
+     */
+    @XmlElement
+    @ApiModelProperty(position = 25)
+    @FieldValidation(nullable = true, containsId = true, idClass = Catalogue.class)
+    private String catalogueId;
+
+    public TrainingResource() {
+    }
+
+    public TrainingResource(String id, String title, String resourceOrganisation, List<String> resourceProviders, List<String> authors, URL url, String urlType, List<String> eoscRelatedServices, String description, List<String> keywords, String license, String accessRights, Date versionDate, List<String> targetGroups, List<String> learningResourceTypes, List<String> learningOutcomes, String expertiseLevel, List<String> contentResourceTypes, List<String> qualifications, String duration, List<String> languages, List<String> geographicalAvailabilities, List<ServiceProviderDomain> scientificDomains, ServiceMainContact contact, String catalogueId) {
+        this.id = id;
+        this.title = title;
+        this.resourceOrganisation = resourceOrganisation;
+        this.resourceProviders = resourceProviders;
+        this.authors = authors;
+        this.url = url;
+        this.urlType = urlType;
+        this.eoscRelatedServices = eoscRelatedServices;
+        this.description = description;
+        this.keywords = keywords;
+        this.license = license;
+        this.accessRights = accessRights;
+        this.versionDate = versionDate;
+        this.targetGroups = targetGroups;
+        this.learningResourceTypes = learningResourceTypes;
+        this.learningOutcomes = learningOutcomes;
+        this.expertiseLevel = expertiseLevel;
+        this.contentResourceTypes = contentResourceTypes;
+        this.qualifications = qualifications;
+        this.duration = duration;
+        this.languages = languages;
+        this.geographicalAvailabilities = geographicalAvailabilities;
+        this.scientificDomains = scientificDomains;
+        this.contact = contact;
+        this.catalogueId = catalogueId;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        TrainingResource that = (TrainingResource) o;
+        return Objects.equals(id, that.id) && Objects.equals(title, that.title) && Objects.equals(resourceOrganisation, that.resourceOrganisation) && Objects.equals(resourceProviders, that.resourceProviders) && Objects.equals(authors, that.authors) && Objects.equals(url, that.url) && Objects.equals(urlType, that.urlType) && Objects.equals(eoscRelatedServices, that.eoscRelatedServices) && Objects.equals(description, that.description) && Objects.equals(keywords, that.keywords) && Objects.equals(license, that.license) && Objects.equals(accessRights, that.accessRights) && Objects.equals(versionDate, that.versionDate) && Objects.equals(targetGroups, that.targetGroups) && Objects.equals(learningResourceTypes, that.learningResourceTypes) && Objects.equals(learningOutcomes, that.learningOutcomes) && Objects.equals(expertiseLevel, that.expertiseLevel) && Objects.equals(contentResourceTypes, that.contentResourceTypes) && Objects.equals(qualifications, that.qualifications) && Objects.equals(duration, that.duration) && Objects.equals(languages, that.languages) && Objects.equals(geographicalAvailabilities, that.geographicalAvailabilities) && Objects.equals(scientificDomains, that.scientificDomains) && Objects.equals(contact, that.contact) && Objects.equals(catalogueId, that.catalogueId);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, title, resourceOrganisation, resourceProviders, authors, url, urlType, eoscRelatedServices, description, keywords, license, accessRights, versionDate, targetGroups, learningResourceTypes, learningOutcomes, expertiseLevel, contentResourceTypes, qualifications, duration, languages, geographicalAvailabilities, scientificDomains, contact, catalogueId);
+    }
+
+    @Override
+    public String getId() {
+        return id;
+    }
+
+    @Override
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public String getResourceOrganisation() {
+        return resourceOrganisation;
+    }
+
+    public void setResourceOrganisation(String resourceOrganisation) {
+        this.resourceOrganisation = resourceOrganisation;
+    }
+
+    public List<String> getResourceProviders() {
+        return resourceProviders;
+    }
+
+    public void setResourceProviders(List<String> resourceProviders) {
+        this.resourceProviders = resourceProviders;
+    }
+
+    public List<String> getAuthors() {
+        return authors;
+    }
+
+    public void setAuthors(List<String> authors) {
+        this.authors = authors;
+    }
+
+    public URL getUrl() {
+        return url;
+    }
+
+    public void setUrl(URL url) {
+        this.url = url;
+    }
+
+    public String getUrlType() {
+        return urlType;
+    }
+
+    public void setUrlType(String urlType) {
+        this.urlType = urlType;
+    }
+
+    public List<String> getEoscRelatedServices() {
+        return eoscRelatedServices;
+    }
+
+    public void setEoscRelatedServices(List<String> eoscRelatedServices) {
+        this.eoscRelatedServices = eoscRelatedServices;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public List<String> getKeywords() {
+        return keywords;
+    }
+
+    public void setKeywords(List<String> keywords) {
+        this.keywords = keywords;
+    }
+
+    public String getLicense() {
+        return license;
+    }
+
+    public void setLicense(String license) {
+        this.license = license;
+    }
+
+    public String getAccessRights() {
+        return accessRights;
+    }
+
+    public void setAccessRights(String accessRights) {
+        this.accessRights = accessRights;
+    }
+
+    public Date getVersionDate() {
+        return versionDate;
+    }
+
+    public void setVersionDate(Date versionDate) {
+        this.versionDate = versionDate;
+    }
+
+    public List<String> getTargetGroups() {
+        return targetGroups;
+    }
+
+    public void setTargetGroups(List<String> targetGroups) {
+        this.targetGroups = targetGroups;
+    }
+
+    public List<String> getLearningResourceTypes() {
+        return learningResourceTypes;
+    }
+
+    public void setLearningResourceTypes(List<String> learningResourceTypes) {
+        this.learningResourceTypes = learningResourceTypes;
+    }
+
+    public List<String> getLearningOutcomes() {
+        return learningOutcomes;
+    }
+
+    public void setLearningOutcomes(List<String> learningOutcomes) {
+        this.learningOutcomes = learningOutcomes;
+    }
+
+    public String getExpertiseLevel() {
+        return expertiseLevel;
+    }
+
+    public void setExpertiseLevel(String expertiseLevel) {
+        this.expertiseLevel = expertiseLevel;
+    }
+
+    public List<String> getContentResourceTypes() {
+        return contentResourceTypes;
+    }
+
+    public void setContentResourceTypes(List<String> contentResourceTypes) {
+        this.contentResourceTypes = contentResourceTypes;
+    }
+
+    public List<String> getQualifications() {
+        return qualifications;
+    }
+
+    public void setQualifications(List<String> qualifications) {
+        this.qualifications = qualifications;
+    }
+
+    public String getDuration() {
+        return duration;
+    }
+
+    public void setDuration(String duration) {
+        this.duration = duration;
+    }
+
+    public List<String> getLanguages() {
+        return languages;
+    }
+
+    public void setLanguages(List<String> languages) {
+        this.languages = languages;
+    }
+
+    public List<String> getGeographicalAvailabilities() {
+        return geographicalAvailabilities;
+    }
+
+    public void setGeographicalAvailabilities(List<String> geographicalAvailabilities) {
+        this.geographicalAvailabilities = geographicalAvailabilities;
+    }
+
+    public List<ServiceProviderDomain> getScientificDomains() {
+        return scientificDomains;
+    }
+
+    public void setScientificDomains(List<ServiceProviderDomain> scientificDomains) {
+        this.scientificDomains = scientificDomains;
+    }
+
+    public ServiceMainContact getContact() {
+        return contact;
+    }
+
+    public void setContact(ServiceMainContact contact) {
+        this.contact = contact;
+    }
+
+    public String getCatalogueId() {
+        return catalogueId;
+    }
+
+    public void setCatalogueId(String catalogueId) {
+        this.catalogueId = catalogueId;
+    }
+}

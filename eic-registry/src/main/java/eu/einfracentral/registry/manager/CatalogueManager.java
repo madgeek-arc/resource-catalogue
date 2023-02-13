@@ -192,8 +192,6 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
 
         registrationMailService.sendEmailsToNewlyAddedCatalogueAdmins(catalogue, null);
 
-//        synchronizerServiceProvider.syncAdd(catalogue.getCatalogue());
-
         return ret;
     }
 
@@ -242,7 +240,6 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
                 registrationMailService.notifyPortalAdminsForInvalidCatalogueUpdate(catalogue);
             }
         }
-//        synchronizerServiceProvider.syncUpdate(catalogue.getCatalogue());
 
         return catalogue;
     }

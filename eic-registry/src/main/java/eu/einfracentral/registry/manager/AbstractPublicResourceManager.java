@@ -2,6 +2,7 @@ package eu.einfracentral.registry.manager;
 
 import eu.einfracentral.domain.Identifiable;
 import eu.einfracentral.domain.ResourceBundle;
+import eu.einfracentral.domain.TrainingResourceBundle;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -51,5 +52,25 @@ public abstract class AbstractPublicResourceManager<T extends Identifiable> exte
                 appendCatalogueId(
                         resourceBundle.getPayload().getRequiredResources(),
                         resourceBundle.getPayload().getCatalogueId()));
+    }
+
+    protected void updateTrainingResourceIdsToPublic(TrainingResourceBundle trainingResourceBundle) {
+        // Resource Organisation
+        trainingResourceBundle.getTrainingResource().setResourceOrganisation(
+                String.format("%s.%s",
+                        trainingResourceBundle.getTrainingResource().getCatalogueId(),
+                        trainingResourceBundle.getTrainingResource().getResourceOrganisation()));
+
+        // Resource Providers
+        trainingResourceBundle.getTrainingResource().setResourceProviders(
+                appendCatalogueId(
+                        trainingResourceBundle.getTrainingResource().getResourceProviders(),
+                        trainingResourceBundle.getTrainingResource().getCatalogueId()));
+
+        // EOSC Related Services
+        trainingResourceBundle.getTrainingResource().setEoscRelatedServices(
+                appendCatalogueId(
+                        trainingResourceBundle.getTrainingResource().getEoscRelatedServices(),
+                        trainingResourceBundle.getTrainingResource().getCatalogueId()));
     }
 }

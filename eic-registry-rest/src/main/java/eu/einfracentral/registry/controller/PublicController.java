@@ -6,6 +6,7 @@ import eu.einfracentral.domain.ServiceBundle;
 import eu.einfracentral.registry.service.ResourceBundleService;
 import eu.einfracentral.registry.service.ProviderService;
 import eu.einfracentral.registry.service.ResourceService;
+import eu.einfracentral.registry.service.TrainingResourceService;
 import eu.einfracentral.service.SecurityService;
 import eu.einfracentral.utils.FacetFilterUtils;
 import eu.openminted.registry.core.domain.FacetFilter;
@@ -33,29 +34,36 @@ import java.util.*;
 @Api(value = "Get information about a published Provider")
 public class PublicController {
 
-    private final ResourceService<ProviderBundle, Authentication> publicProviderManager;
     private final ProviderService<ProviderBundle, Authentication> providerService;
-    private final ResourceService<ServiceBundle, Authentication> publicResourceServiceManager;
-    private final ResourceService<DatasourceBundle, Authentication> publicResourceDatasourceManager;
     private final ResourceBundleService<ServiceBundle> resourceBundleServiceService;
     private final ResourceBundleService<DatasourceBundle> resourceBundleDatasourceService;
+    private final TrainingResourceService<TrainingResourceBundle> trainingResourceService;
+    private final ResourceService<ProviderBundle, Authentication> publicProviderManager;
+    private final ResourceService<ServiceBundle, Authentication> publicResourceServiceManager;
+    private final ResourceService<DatasourceBundle, Authentication> publicResourceDatasourceManager;
+    private final ResourceService<TrainingResourceBundle, Authentication> publicTrainingResourceManager;
     private final SecurityService securityService;
     private static final Gson gson = new Gson();
     private static final Logger logger = LogManager.getLogger(PublicController.class);
 
     @Autowired
-    PublicController(@Qualifier("publicProviderManager") ResourceService<ProviderBundle, Authentication> publicProviderManager,
-                     ProviderService<ProviderBundle, Authentication> providerService, SecurityService securityService,
+    PublicController(ProviderService<ProviderBundle, Authentication> providerService, SecurityService securityService,
+                     ResourceBundleService<ServiceBundle> resourceBundleServiceService,
+                     ResourceBundleService<DatasourceBundle> resourceBundleDatasourceService,
+                     TrainingResourceService<TrainingResourceBundle> trainingResourceService,
+                     @Qualifier("publicProviderManager") ResourceService<ProviderBundle, Authentication> publicProviderManager,
                      @Qualifier("publicServiceManager") ResourceService<ServiceBundle, Authentication> publicResourceServiceManager,
                      @Qualifier("publicDatasourceManager") ResourceService<DatasourceBundle, Authentication> publicResourceDatasourceManager,
-                     ResourceBundleService<ServiceBundle> resourceBundleServiceService, ResourceBundleService<DatasourceBundle> resourceBundleDatasourceService) {
-        this.publicProviderManager = publicProviderManager;
+                     @Qualifier("publicTrainingResourceManager") ResourceService<TrainingResourceBundle, Authentication> publicTrainingResourceManager) {
         this.providerService = providerService;
-        this.securityService = securityService;
-        this.publicResourceServiceManager = publicResourceServiceManager;
-        this.publicResourceDatasourceManager = publicResourceDatasourceManager;
         this.resourceBundleServiceService = resourceBundleServiceService;
         this.resourceBundleDatasourceService = resourceBundleDatasourceService;
+        this.trainingResourceService = trainingResourceService;
+        this.publicProviderManager = publicProviderManager;
+        this.publicResourceServiceManager = publicResourceServiceManager;
+        this.publicResourceDatasourceManager = publicResourceDatasourceManager;
+        this.publicTrainingResourceManager = publicTrainingResourceManager;
+        this.securityService = securityService;
     }
 
     //SECTION: PROVIDER
@@ -385,7 +393,7 @@ public class PublicController {
 
     @GetMapping(path = "/datasource/datasourceBundle/{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth, #id, #catalogueId)")
-    public ResponseEntity<?> getPublicDatasourceBundles(@PathVariable("id") String id,
+    public ResponseEntity<?> getPublicDatasourceBundle(@PathVariable("id") String id,
                                                    @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueId,
                                                    @ApiIgnore Authentication auth) {
         DatasourceBundle datasourceBundle = resourceBundleDatasourceService.get(id, catalogueId);
@@ -505,5 +513,155 @@ public class PublicController {
         ff.addFilter("published", true);
         ff.setOrderBy(FacetFilterUtils.createOrderBy("name", "asc"));
         return new ResponseEntity<>(publicResourceDatasourceManager.getMy(ff, auth).getResults(), HttpStatus.OK);
+    }
+
+
+    //SECTION: TRAINING RESOURCE
+    @ApiOperation(value = "Returns the Public Training Resource with the given id.")
+    @GetMapping(path = "/trainingResource/{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    public ResponseEntity<?> getPublicTrainingResource(@PathVariable("id") String id,
+                                                 @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueId,
+                                                 @ApiIgnore Authentication auth) {
+        TrainingResourceBundle trainingResourceBundle = trainingResourceService.get(id, catalogueId);
+        if (auth != null && auth.isAuthenticated()) {
+            User user = User.of(auth);
+            if (securityService.hasRole(auth, "ROLE_ADMIN") || securityService.hasRole(auth, "ROLE_EPOT")
+                    || securityService.userIsResourceProviderAdmin(user, id, trainingResourceBundle.getTrainingResource().getCatalogueId())) {
+                if (trainingResourceBundle.getMetadata().isPublished()){
+                    return new ResponseEntity<>(trainingResourceBundle.getTrainingResource(), HttpStatus.OK);
+                } else{
+                    return ResponseEntity.status(HttpStatus.FOUND).body(gson.toJson("The specific Training Resource does not consist a Public entity"));
+                }
+            }
+        }
+        if (trainingResourceBundle.getMetadata().isPublished() && trainingResourceBundle.isActive()
+                && trainingResourceBundle.getStatus().equals("approved resource")) {
+            return new ResponseEntity<>(trainingResourceBundle.getTrainingResource(), HttpStatus.OK);
+        }
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(gson.toJson("You cannot view the specific Training Resource."));
+    }
+
+    @GetMapping(path = "/trainingResource/trainingResourceBundle/{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth, #id, #catalogueId)")
+    public ResponseEntity<?> getPublicTrainingResourceBundle(@PathVariable("id") String id,
+                                                        @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueId,
+                                                        @ApiIgnore Authentication auth) {
+        TrainingResourceBundle trainingResourceBundle = trainingResourceService.get(id, catalogueId);
+        if (auth != null && auth.isAuthenticated()) {
+            User user = User.of(auth);
+            if (securityService.hasRole(auth, "ROLE_ADMIN") || securityService.hasRole(auth, "ROLE_EPOT")
+                    || securityService.userIsResourceProviderAdmin(user, id, trainingResourceBundle.getTrainingResource().getCatalogueId())) {
+                if (trainingResourceBundle.getMetadata().isPublished()){
+                    return new ResponseEntity<>(trainingResourceBundle, HttpStatus.OK);
+                } else{
+                    return ResponseEntity.status(HttpStatus.FOUND).body(gson.toJson("The specific Training Resource Bundle does not consist a Public entity"));
+                }
+            }
+        }
+        if (trainingResourceBundle.getMetadata().isPublished() && trainingResourceBundle.isActive()
+                && trainingResourceBundle.getStatus().equals("approved resource")) {
+            return new ResponseEntity<>(trainingResourceBundle, HttpStatus.OK);
+        }
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(gson.toJson("You cannot view the specific Training Resource."));
+    }
+
+    @ApiOperation(value = "Filter a list of Public Training Resources based on a set of filters or get a list of all Public Training Resources in the Catalogue.")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "query", value = "Keyword to refine the search", dataType = "string", paramType = "query"),
+            @ApiImplicitParam(name = "from", value = "Starting index in the result set", dataType = "string", paramType = "query"),
+            @ApiImplicitParam(name = "quantity", value = "Quantity to be fetched", dataType = "string", paramType = "query"),
+            @ApiImplicitParam(name = "order", value = "asc / desc", dataType = "string", paramType = "query"),
+            @ApiImplicitParam(name = "orderField", value = "Order field", dataType = "string", paramType = "query")
+    })
+    @GetMapping(path = "/trainingResource/all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    public ResponseEntity<Paging<TrainingResource>> getAllPublicTrainingResources(@ApiIgnore @RequestParam Map<String, Object> allRequestParams,
+                                                                      @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueIds,
+                                                                      @ApiIgnore Authentication auth) {
+        allRequestParams.putIfAbsent("catalogue_id", catalogueIds);
+        if (catalogueIds != null && catalogueIds.equals("all")) {
+            allRequestParams.remove("catalogue_id");
+        }
+        FacetFilter ff = new FacetFilter();
+        ff.setKeyword(allRequestParams.get("query") != null ? (String) allRequestParams.remove("query") : "");
+        ff.setFrom(allRequestParams.get("from") != null ? Integer.parseInt((String) allRequestParams.remove("from")) : 0);
+        ff.setQuantity(allRequestParams.get("quantity") != null ? Integer.parseInt((String) allRequestParams.remove("quantity")) : 10);
+        Map<String, Object> sort = new HashMap<>();
+        Map<String, Object> order = new HashMap<>();
+        String orderDirection = allRequestParams.get("order") != null ? (String) allRequestParams.remove("order") : "asc";
+        String orderField = allRequestParams.get("orderField") != null ? (String) allRequestParams.remove("orderField") : null;
+        if (orderField != null) {
+            order.put("order", orderDirection);
+            sort.put(orderField, order);
+            ff.setOrderBy(sort);
+        }
+        ff.setFilter(allRequestParams);
+        ff.addFilter("published", true);
+        if (auth != null && auth.isAuthenticated() && (securityService.hasRole(auth, "ROLE_ADMIN") || securityService.hasRole(auth, "ROLE_EPOT"))) {
+            logger.info("Getting all published Training Resources for Admin/Epot");
+        } else{
+            ff.addFilter("active", true);
+            ff.addFilter("status", "approved resource");
+        }
+        List<TrainingResource> trainingResourceList = new LinkedList<>();
+        Paging<TrainingResourceBundle> trainingResourceBundlePaging = publicTrainingResourceManager.getAll(ff, auth);
+        for (TrainingResourceBundle trainingResourceBundle : trainingResourceBundlePaging.getResults()) {
+            trainingResourceList.add(trainingResourceBundle.getTrainingResource());
+        }
+        Paging<TrainingResource> trainingResourcePaging = new Paging<>(trainingResourceBundlePaging.getTotal(), trainingResourceBundlePaging.getFrom(),
+                trainingResourceBundlePaging.getTo(), trainingResourceList, trainingResourceBundlePaging.getFacets());
+        return new ResponseEntity<>(trainingResourcePaging, HttpStatus.OK);
+    }
+
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "query", value = "Keyword to refine the search", dataType = "string", paramType = "query"),
+            @ApiImplicitParam(name = "from", value = "Starting index in the result set", dataType = "string", paramType = "query"),
+            @ApiImplicitParam(name = "quantity", value = "Quantity to be fetched", dataType = "string", paramType = "query"),
+            @ApiImplicitParam(name = "order", value = "asc / desc", dataType = "string", paramType = "query"),
+            @ApiImplicitParam(name = "orderField", value = "Order field", dataType = "string", paramType = "query")
+    })
+    @GetMapping(path = "/trainingResource/adminPage/all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
+    public ResponseEntity<Paging<TrainingResourceBundle>> getAllPublicTrainingResourceBundles(@ApiIgnore @RequestParam Map<String, Object> allRequestParams,
+                                                                                  @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueIds,
+                                                                                  @ApiIgnore Authentication auth) {
+        allRequestParams.putIfAbsent("catalogue_id", catalogueIds);
+        if (catalogueIds != null && catalogueIds.equals("all")) {
+            allRequestParams.remove("catalogue_id");
+        }
+        FacetFilter ff = new FacetFilter();
+        ff.setKeyword(allRequestParams.get("query") != null ? (String) allRequestParams.remove("query") : "");
+        ff.setFrom(allRequestParams.get("from") != null ? Integer.parseInt((String) allRequestParams.remove("from")) : 0);
+        ff.setQuantity(allRequestParams.get("quantity") != null ? Integer.parseInt((String) allRequestParams.remove("quantity")) : 10);
+        Map<String, Object> sort = new HashMap<>();
+        Map<String, Object> order = new HashMap<>();
+        String orderDirection = allRequestParams.get("order") != null ? (String) allRequestParams.remove("order") : "asc";
+        String orderField = allRequestParams.get("orderField") != null ? (String) allRequestParams.remove("orderField") : null;
+        if (orderField != null) {
+            order.put("order", orderDirection);
+            sort.put(orderField, order);
+            ff.setOrderBy(sort);
+        }
+        ff.setFilter(allRequestParams);
+        ff.addFilter("published", true);
+        if (auth != null && auth.isAuthenticated() && (securityService.hasRole(auth, "ROLE_ADMIN") || securityService.hasRole(auth, "ROLE_EPOT"))) {
+            logger.info("Getting all published Training Resources for Admin/Epot");
+        } else{
+            ff.addFilter("active", true);
+            ff.addFilter("status", "approved resource");
+        }
+        Paging<TrainingResourceBundle> trainingResourceBundlePaging = trainingResourceService.getAll(ff, auth);
+        List<TrainingResourceBundle> trainingResourceBundleList = new LinkedList<>(trainingResourceBundlePaging.getResults());
+        Paging<TrainingResourceBundle> trainingResourcePaging = new Paging<>(trainingResourceBundlePaging.getTotal(), trainingResourceBundlePaging.getFrom(),
+                trainingResourceBundlePaging.getTo(), trainingResourceBundleList, trainingResourceBundlePaging.getFacets());
+        return new ResponseEntity<>(trainingResourcePaging, HttpStatus.OK);
+    }
+
+    @GetMapping(path = "/trainingResource/my", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    public ResponseEntity<List<TrainingResourceBundle>> getMyPublicTrainingResources(@ApiIgnore Authentication auth) {
+        FacetFilter ff = new FacetFilter();
+        ff.setQuantity(10000);
+        ff.addFilter("published", true);
+        ff.setOrderBy(FacetFilterUtils.createOrderBy("name", "asc"));
+        return new ResponseEntity<>(publicTrainingResourceManager.getMy(ff, auth).getResults(), HttpStatus.OK);
     }
 }

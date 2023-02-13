@@ -5,6 +5,7 @@ import eu.einfracentral.exception.ValidationException;
 import eu.einfracentral.registry.service.CatalogueService;
 import eu.einfracentral.registry.service.ProviderService;
 import eu.einfracentral.registry.service.ResourceBundleService;
+import eu.einfracentral.registry.service.TrainingResourceService;
 import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.domain.Paging;
 import eu.openminted.registry.core.exception.ResourceNotFoundException;
@@ -18,7 +19,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.jms.core.JmsTemplate;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
@@ -36,16 +36,19 @@ public class CatalogueController {
     private final ProviderService<ProviderBundle, Authentication> providerManager;
     private final ResourceBundleService<ServiceBundle> resourceBundleService;
     private final ResourceBundleService<DatasourceBundle> datasourceBundleService;
+    private final TrainingResourceService<TrainingResourceBundle> trainingResourceService;
 
     @Autowired
     CatalogueController(CatalogueService<CatalogueBundle, Authentication> catalogueManager,
                         ProviderService<ProviderBundle, Authentication> providerManager,
                         ResourceBundleService<ServiceBundle> resourceBundleService,
-                        ResourceBundleService<DatasourceBundle> datasourceBundleService) {
+                        ResourceBundleService<DatasourceBundle> datasourceBundleService,
+                        TrainingResourceService<TrainingResourceBundle> trainingResourceService) {
         this.catalogueManager = catalogueManager;
         this.providerManager = providerManager;
         this.resourceBundleService = resourceBundleService;
         this.datasourceBundleService = datasourceBundleService;
+        this.trainingResourceService = trainingResourceService;
     }
 
     //SECTION: CATALOGUE
@@ -448,5 +451,62 @@ public class CatalogueController {
         datasourceBundleService.delete(datasourceBundle);
         logger.info("User '{}' deleted the Datasource with name '{}' and id '{}'", auth.getName(), datasourceBundle.getDatasource().getName(), datasourceBundle.getId());
         return new ResponseEntity<>(datasourceBundle.getDatasource(), HttpStatus.OK);
+    }
+
+    //SECTION: TRAINING RESOURCE
+    @ApiOperation(value = "Returns the Training Resource of the specific Catalogue with the given id.")
+    @GetMapping(path = "{catalogueId}/trainingResource/{resourceId}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    public ResponseEntity<TrainingResource> getCatalogueTrainingResource(@PathVariable("catalogueId") String catalogueId, @PathVariable("resourceId") String resourceId, @ApiIgnore Authentication auth) {
+        TrainingResource trainingResource = trainingResourceService.getCatalogueResource(catalogueId, resourceId, auth).getTrainingResource();
+        if (trainingResource.getCatalogueId() == null) {
+            throw new ValidationException("Training Resource's catalogueId cannot be null");
+        } else {
+            if (trainingResource.getCatalogueId().equals(catalogueId)) {
+                return new ResponseEntity<>(trainingResource, HttpStatus.OK);
+            } else {
+                throw new ValidationException(String.format("The Training Resource [%s] you requested does not belong to the specific Catalogue [%s]", resourceId, catalogueId));
+            }
+        }
+    }
+
+    @ApiOperation(value = "Creates a new Training Resource for the specific Catalogue.")
+    @PostMapping(path = "{catalogueId}/trainingResource", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.providerCanAddResources(#auth, #trainingResource)")
+    public ResponseEntity<TrainingResource> addCatalogueTrainingResource(@RequestBody TrainingResource trainingResource, @PathVariable String catalogueId, @ApiIgnore Authentication auth) {
+        TrainingResourceBundle ret = this.trainingResourceService.addResource(new TrainingResourceBundle(trainingResource), catalogueId, auth);
+        logger.info("User '{}' added the Training Resource with title '{}' and id '{}' in the Catalogue '{}'", auth.getName(), trainingResource.getTitle(), trainingResource.getId(), catalogueId);
+        return new ResponseEntity<>(ret.getTrainingResource(), HttpStatus.CREATED);
+    }
+
+    @ApiOperation(value = "Updates the Training Resource of the specific Catalogue.")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth,#trainingResource)")
+    @PutMapping(path = "{catalogueId}/trainingResource", produces = {MediaType.APPLICATION_JSON_VALUE})
+    public ResponseEntity<TrainingResource> updateCatalogueTrainingResource(@RequestBody TrainingResource trainingResource, @PathVariable String catalogueId, @RequestParam(required = false) String comment, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
+        TrainingResourceBundle ret = this.trainingResourceService.updateResource(new TrainingResourceBundle(trainingResource), catalogueId, comment, auth);
+        logger.info("User '{}' updated the Training Resource with title '{}' and id '{} of the Catalogue '{}'", auth.getName(), trainingResource.getTitle(), trainingResource.getId(), catalogueId);
+        return new ResponseEntity<>(ret.getTrainingResource(), HttpStatus.OK);
+    }
+
+    @ApiOperation(value = "Get all the Training Resources of a specific Provider of a specific Catalogue")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
+    @GetMapping(path = "{catalogueId}/{providerId}/trainingResource/all", produces = {MediaType.APPLICATION_JSON_VALUE})
+    public ResponseEntity<Paging<TrainingResourceBundle>> getProviderTrainingResources(@PathVariable String catalogueId, @PathVariable String providerId, @ApiIgnore Authentication auth) {
+        Paging<TrainingResourceBundle> trainingResourceBundles = trainingResourceService.getResourceBundles(catalogueId, providerId, auth);
+        return new ResponseEntity<>(trainingResourceBundles, HttpStatus.OK);
+    }
+
+    @ApiOperation(value = "Deletes the Training Resource of the specific Catalogue with the given id.")
+    @DeleteMapping(path = "{catalogueId}/trainingResource/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isCatalogueAdmin(#auth, #catalogueId)")
+    public ResponseEntity<TrainingResource> deleteCatalogueTrainingResource(@PathVariable("catalogueId") String catalogueId,
+                                                                @PathVariable("id") String id,
+                                                                @ApiIgnore Authentication auth) throws ResourceNotFoundException {
+        TrainingResourceBundle trainingResourceBundle = trainingResourceService.get(id, catalogueId);
+        if (trainingResourceBundle == null) {
+            return new ResponseEntity<>(HttpStatus.GONE);
+        }
+        trainingResourceService.delete(trainingResourceBundle);
+        logger.info("User '{}' deleted the Training Resource with title '{}' and id '{}'", auth.getName(), trainingResourceBundle.getTrainingResource().getTitle(), trainingResourceBundle.getId());
+        return new ResponseEntity<>(trainingResourceBundle.getTrainingResource(), HttpStatus.OK);
     }
 }
