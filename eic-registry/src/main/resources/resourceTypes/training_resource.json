@@ -3,7 +3,7 @@
     {
       "multivalued": false,
       "name": "training_resource_id",
-      "path": "//*[local-name()='training_resource']/*[local-name()='id']/text()",
+      "path": "//*[local-name()='trainingResource']/*[local-name()='id']/text()",
       "type": "java.lang.String",
       "primaryKey": true
     },
@@ -11,63 +11,63 @@
       "multivalued": false,
       "name": "title",
       "label": "Title",
-      "path": "//*[local-name()='training_resource']/*[local-name()='title']/text()",
+      "path": "//*[local-name()='trainingResource']/*[local-name()='title']/text()",
       "type": "java.lang.String"
     },
     {
       "multivalued": false,
       "name": "resource_organisation",
       "label": "Resource Organisation",
-      "path": "//*[local-name()='training_resource']/*[local-name()='resourceOrganisation']/text()",
+      "path": "//*[local-name()='trainingResource']/*[local-name()='resourceOrganisation']/text()",
       "type": "java.lang.String"
     },
     {
       "multivalued": true,
       "name": "resource_providers",
       "label": "Resource Provider",
-      "path": "//*[local-name()='training_resource']//*[local-name()='resourceProvider']/text()",
+      "path": "//*[local-name()='trainingResource']//*[local-name()='resourceProvider']/text()",
       "type": "java.lang.String"
     },
     {
       "multivalued": true,
       "name": "authors",
       "label": "Author",
-      "path": "//*[local-name()='training_resource']//*[local-name()='author']/text()",
+      "path": "//*[local-name()='trainingResource']//*[local-name()='author']/text()",
       "type": "java.lang.String"
     },
     {
       "multivalued": true,
       "name": "eosc_related_services",
       "label": "EOSC Related Service",
-      "path": "//*[local-name()='training_resource']//*[local-name()='eoscRelatedService']/text()",
+      "path": "//*[local-name()='trainingResource']//*[local-name()='eoscRelatedService']/text()",
       "type": "java.lang.String"
     },
     {
       "multivalued": true,
       "name": "keywords",
       "label": "Keyword",
-      "path": "//*[local-name()='training_resource']//*[local-name()='keyword']/text()",
+      "path": "//*[local-name()='trainingResource']//*[local-name()='keyword']/text()",
       "type": "java.lang.String"
     },
     {
       "multivalued": true,
       "name": "target_groups",
       "label": "Target Group",
-      "path": "//*[local-name()='training_resource']//*[local-name()='targetGroup']/text()",
+      "path": "//*[local-name()='trainingResource']//*[local-name()='targetGroup']/text()",
       "type": "java.lang.String"
     },
     {
       "multivalued": true,
       "name": "languages",
       "label": "Language",
-      "path": "//*[local-name()='training_resource']//*[local-name()='language']/text()",
+      "path": "//*[local-name()='trainingResource']//*[local-name()='language']/text()",
       "type": "java.lang.String"
     },
     {
       "multivalued": true,
       "name": "geographical_availabilities",
       "label": "Geographical Availability",
-      "path": "//*[local-name()='training_resource']//*[local-name()='geographicalAvailability']/text()",
+      "path": "//*[local-name()='trainingResource']//*[local-name()='geographicalAvailability']/text()",
       "type": "java.lang.String"
     },
     {
