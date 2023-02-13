@@ -234,5 +234,5 @@
   "properties": {
     "class": "eu.einfracentral.domain.TrainingResourceBundle"
   },
-  "schemaUrl": "https://raw.githubusercontent.com/madgeek-arc/resource-catalogue/training_resource/eic-registry-model/src/main/resources/schema1.xsd"
+  "schemaUrl": "https://raw.githubusercontent.com/madgeek-arc/resource-catalogue/training_resources/eic-registry-model/src/main/resources/schema1.xsd"
 }
