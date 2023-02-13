@@ -98,7 +98,7 @@ public class TrainingResourceController {
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.providerCanAddResources(#auth, #trainingResource)")
     public ResponseEntity<TrainingResource> addTrainingResource(@RequestBody TrainingResource trainingResource, @ApiIgnore Authentication auth) {
         TrainingResourceBundle ret = this.trainingResourceService.addResource(new TrainingResourceBundle(trainingResource), auth);
-        logger.info("User '{}' created a new Training Resource with name '{}' and id '{}'", auth.getName(), trainingResource.getTitle(), trainingResource.getId());
+        logger.info("User '{}' created a new Training Resource with title '{}' and id '{}'", auth.getName(), trainingResource.getTitle(), trainingResource.getId());
         return new ResponseEntity<>(ret.getTrainingResource(), HttpStatus.CREATED);
     }
 
@@ -107,7 +107,7 @@ public class TrainingResourceController {
     @PutMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<TrainingResource> updateTrainingResource(@RequestBody TrainingResource trainingResource, @RequestParam(required = false) String comment, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
         TrainingResourceBundle ret = this.trainingResourceService.updateResource(new TrainingResourceBundle(trainingResource), comment, auth);
-        logger.info("User '{}' updated Training Resource with name '{}' and id '{}'", auth.getName(), trainingResource.getTitle(), trainingResource.getId());
+        logger.info("User '{}' updated Training Resource with title '{}' and id '{}'", auth.getName(), trainingResource.getTitle(), trainingResource.getId());
         return new ResponseEntity<>(ret.getTrainingResource(), HttpStatus.OK);
     }
 
@@ -117,7 +117,7 @@ public class TrainingResourceController {
     public ResponseEntity<TrainingResourceBundle> verifyTrainingResource(@PathVariable("id") String id, @RequestParam(required = false) Boolean active,
                                                         @RequestParam(required = false) String status, @ApiIgnore Authentication auth) {
         TrainingResourceBundle trainingResourceBundle = trainingResourceService.verifyResource(id, status, active, auth);
-        logger.info("User '{}' updated Training Resource with name '{}' [status: {}] [active: {}]", auth, trainingResourceBundle.getTrainingResource().getTitle(), status, active);
+        logger.info("User '{}' updated Training Resource with title '{}' [status: {}] [active: {}]", auth, trainingResourceBundle.getTrainingResource().getTitle(), status, active);
         return new ResponseEntity<>(trainingResourceBundle, HttpStatus.OK);
     }
 
@@ -125,7 +125,7 @@ public class TrainingResourceController {
     @PostMapping(path = "validate", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<Boolean> validate(@RequestBody TrainingResource trainingResource) {
         ResponseEntity<Boolean> ret = ResponseEntity.ok(trainingResourceService.validateTrainingResource(new TrainingResourceBundle(trainingResource)));
-        logger.info("Validated Training Resource with name '{}' and id '{}'", trainingResource.getTitle(), trainingResource.getId());
+        logger.info("Validated Training Resource with title '{}' and id '{}'", trainingResource.getTitle(), trainingResource.getId());
         return ret;
     }
 
@@ -354,7 +354,7 @@ public class TrainingResourceController {
     public ResponseEntity<TrainingResourceBundle> auditResource(@PathVariable("id") String id, @RequestParam(required = false) String comment,
                                                        @RequestParam LoggingInfo.ActionType actionType, @ApiIgnore Authentication auth) {
         TrainingResourceBundle trainingResourceBundle = trainingResourceService.auditResource(id, comment, actionType, auth);
-        logger.info("User '{}-{}' audited Training Resource with name '{}' [actionType: {}]", User.of(auth).getFullName(), User.of(auth).getEmail(),
+        logger.info("User '{}-{}' audited Training Resource with title '{}' [actionType: {}]", User.of(auth).getFullName(), User.of(auth).getEmail(),
                 trainingResourceBundle.getTrainingResource().getTitle(), actionType);
         return new ResponseEntity<>(trainingResourceBundle, HttpStatus.OK);
     }

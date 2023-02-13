@@ -290,7 +290,7 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
             Long latestAudit = Long.parseLong(trainingResourceBundle.getLatestAuditInfo().getDate());
             Long latestUpdate = Long.parseLong(trainingResourceBundle.getLatestUpdateInfo().getDate());
             if (latestAudit < latestUpdate && trainingResourceBundle.getLatestAuditInfo().getActionType().equals(LoggingInfo.ActionType.INVALID.getKey())) {
-                // FIXME: registrationMailService.notifyPortalAdminsForInvalidResourceUpdate(trainingResourceBundle, trainingResourceBundle.getTrainingResource().getTitle());
+                //FIXME: registrationMailService.notifyPortalAdminsForInvalidResourceUpdate(trainingResourceBundle, trainingResourceBundle.getTrainingResource().getTitle());
             }
         }
 
@@ -531,7 +531,7 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
         trainingResourceBundle.setLatestAuditInfo(loggingInfo);
 
         // send notification emails to Provider Admins
-        // FIXME: registrationMailService.notifyProviderAdminsForResourceAuditing(trainingResourceBundle);
+        //FIXME: registrationMailService.notifyProviderAdminsForResourceAuditing(trainingResourceBundle);
 
         logger.info("Auditing Resource: {}", trainingResourceBundle);
         return update(trainingResourceBundle, auth);
