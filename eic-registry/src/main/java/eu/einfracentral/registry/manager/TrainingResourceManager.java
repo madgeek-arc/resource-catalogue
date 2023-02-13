@@ -12,14 +12,13 @@ import eu.einfracentral.service.AnalyticsService;
 import eu.einfracentral.service.IdCreator;
 import eu.einfracentral.service.RegistrationMailService;
 import eu.einfracentral.service.SecurityService;
+import eu.einfracentral.service.search.SearchServiceEIC;
 import eu.einfracentral.utils.FacetFilterUtils;
 import eu.einfracentral.utils.FacetLabelService;
 import eu.einfracentral.utils.SortUtils;
 import eu.einfracentral.validators.FieldValidator;
-import eu.openminted.registry.core.domain.Browsing;
-import eu.openminted.registry.core.domain.FacetFilter;
-import eu.openminted.registry.core.domain.Paging;
-import eu.openminted.registry.core.domain.Resource;
+import eu.openminted.registry.core.domain.*;
+import eu.openminted.registry.core.domain.index.IndexField;
 import eu.openminted.registry.core.service.ParserService;
 import eu.openminted.registry.core.service.SearchService;
 import eu.openminted.registry.core.service.ServiceException;
@@ -34,6 +33,8 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.util.MultiValueMap;
 
+import javax.annotation.PostConstruct;
+import javax.validation.constraints.NotNull;
 import java.net.UnknownHostException;
 import java.security.NoSuchAlgorithmException;
 import java.text.DecimalFormat;
@@ -65,9 +66,42 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
     private AnalyticsService analyticsService;
     @Autowired
     private EventService eventService;
+    @Autowired
+    private SearchServiceEIC searchServiceEIC;
     private List<String> browseBy;
+    private Map<String, String> labels;
     @Value("${project.catalogue.name}")
     private String catalogueName;
+
+    @PostConstruct
+    void initLabels() {
+        resourceType = resourceTypeService.getResourceType(getResourceType());
+        Set<String> browseSet = new HashSet<>();
+        Map<String, Set<String>> sets = new HashMap<>();
+        labels = new HashMap<>();
+        labels.put("resourceType", "Resource Type");
+        for (IndexField f : resourceTypeService.getResourceTypeIndexFields(getResourceType())) {
+            sets.putIfAbsent(f.getResourceType().getName(), new HashSet<>());
+            labels.put(f.getName(), f.getLabel());
+            if (f.getLabel() != null) {
+                sets.get(f.getResourceType().getName()).add(f.getName());
+            }
+        }
+        boolean flag = true;
+        for (Map.Entry<String, Set<String>> entry : sets.entrySet()) {
+            if (flag) {
+                browseSet.addAll(entry.getValue());
+                flag = false;
+            } else {
+                browseSet.retainAll(entry.getValue());
+            }
+        }
+        browseBy = new ArrayList<>();
+        browseBy.addAll(browseSet);
+        browseBy.add("resourceType");
+        java.util.Collections.sort(browseBy);
+        logger.info("Generated generic service for '{}'[{}]", getResourceType(), getClass().getSimpleName());
+    }
 
     public TrainingResourceManager(ProviderService<ProviderBundle, Authentication> providerService,
                                    IdCreator idCreator, @Lazy SecurityService securityService,
@@ -971,6 +1005,28 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
     }
 
     @Override
+    public Browsing<TrainingResourceBundle> getAll(FacetFilter ff, Authentication auth) {
+        // if user is Unauthorized, return active/latest ONLY
+        if (auth == null) {
+            ff.addFilter("active", true);
+            ff.addFilter("published", false);
+        }
+        if (auth != null && auth.isAuthenticated()) {
+            // if user is Authorized with ROLE_USER, return active/latest ONLY
+            if (!securityService.hasRole(auth, "ROLE_PROVIDER") && !securityService.hasRole(auth, "ROLE_EPOT") &&
+                    !securityService.hasRole(auth, "ROLE_ADMIN")) {
+                ff.addFilter("active", true);
+                ff.addFilter("published", false);
+            }
+        }
+
+        ff.setBrowseBy(browseBy);
+        ff.setResourceType(getResourceType());
+
+        return getMatchingResources(ff);
+    }
+
+    @Override
     public Browsing<TrainingResourceBundle> getAllForAdmin(FacetFilter filter, Authentication auth) {
         filter.setBrowseBy(browseBy);
         filter.setResourceType(getResourceType());
@@ -986,6 +1042,67 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
         }
 
         return resources;
+    }
+
+    @Override
+    protected Browsing<TrainingResourceBundle> getResults(FacetFilter filter) {
+        Browsing<TrainingResourceBundle> browsing;
+        filter.setResourceType(getResourceType());
+        browsing = convertToBrowsingEIC(searchServiceEIC.search(filter));
+
+        browsing.setFacets(createCorrectFacets(browsing.getFacets(), filter));
+        return browsing;
+    }
+
+    private Browsing<TrainingResourceBundle> convertToBrowsingEIC(@NotNull Paging<Resource> paging) {
+        List<TrainingResourceBundle> results = paging.getResults()
+                .stream()
+                .map(res -> parserPool.deserialize(res, typeParameterClass))
+                .collect(Collectors.toList());
+        return new Browsing<>(paging, results, labels);
+    }
+
+    public List<Facet> createCorrectFacets(List<Facet> serviceFacets, FacetFilter ff) {
+        ff.setQuantity(0);
+
+        Map<String, List<Object>> allFilters = FacetFilterUtils.getFacetFilterFilters(ff);
+
+        List<String> reverseOrderedKeys = new LinkedList<>(allFilters.keySet());
+        Collections.reverse(reverseOrderedKeys);
+
+        for (String filterKey : reverseOrderedKeys) {
+            Map<String, List<Object>> someFilters = new LinkedHashMap<>(allFilters);
+
+            // if last filter is "latest" or "active" continue to next iteration
+            if ("active".equals(filterKey)) {
+                continue;
+            }
+            someFilters.remove(filterKey);
+
+            FacetFilter facetFilter = FacetFilterUtils.createMultiFacetFilter(someFilters);
+            facetFilter.setResourceType(getResourceType());
+            facetFilter.setBrowseBy(Collections.singletonList(filterKey));
+            List<Facet> facetsCategory = convertToBrowsingEIC(searchServiceEIC.search(facetFilter)).getFacets();
+
+            for (Facet facet : serviceFacets) {
+                if (facet.getField().equals(filterKey)) {
+                    for (Facet facetCategory : facetsCategory) {
+                        if (facetCategory.getField().equals(facet.getField())) {
+                            serviceFacets.set(serviceFacets.indexOf(facet), facetCategory);
+                            break;
+                        }
+                    }
+                    break;
+                }
+            }
+            break;
+        }
+
+        return removeEmptyFacets(serviceFacets);
+    }
+
+    private List<Facet> removeEmptyFacets(List<Facet> facetList) {
+        return facetList.stream().filter(facet -> !facet.getValues().isEmpty()).collect(toList());
     }
 
     @Override
