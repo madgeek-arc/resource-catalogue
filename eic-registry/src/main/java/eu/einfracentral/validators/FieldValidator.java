@@ -33,6 +33,7 @@ public class FieldValidator {
     private final ProviderManager providerService;
     private final ResourceBundleService<ServiceBundle> serviceBundleService;
     private final ResourceBundleService<DatasourceBundle> datasourceBundleService;
+    private final TrainingResourceService<TrainingResourceBundle> trainingResourceService;
     private final CatalogueService<CatalogueBundle, Authentication> catalogueService;
     private final ResourceService<InteroperabilityRecord, Authentication> interoperabilityRecordService;
 
@@ -46,6 +47,7 @@ public class FieldValidator {
                           ProviderManager providerService,
                           @Lazy ResourceBundleService<ServiceBundle> serviceBundleService,
                           @Lazy ResourceBundleService<DatasourceBundle> datasourceBundleService,
+                          @Lazy TrainingResourceService<TrainingResourceBundle> trainingResourceService,
                           @Lazy CatalogueService<CatalogueBundle, Authentication> catalogueService,
                           @Lazy ResourceService<InteroperabilityRecord, Authentication> interoperabilityRecordService) {
         this.vocabularyService = vocabularyService;
@@ -54,6 +56,7 @@ public class FieldValidator {
         this.datasourceBundleService = datasourceBundleService;
         this.catalogueService = catalogueService;
         this.interoperabilityRecordService = interoperabilityRecordService;
+        this.trainingResourceService = trainingResourceService;
     }
 
     private String getCurrentLocation() {
@@ -86,7 +89,10 @@ public class FieldValidator {
         if (o instanceof ServiceBundle){
             declaredFields.addAll(Arrays.asList(o.getClass().getSuperclass().getDeclaredFields()));
         }
-        if (o instanceof Datasource){
+        if (o instanceof DatasourceBundle){
+            declaredFields.addAll(Arrays.asList(o.getClass().getSuperclass().getDeclaredFields()));
+        }
+        if (o instanceof TrainingResourceBundle){
             declaredFields.addAll(Arrays.asList(o.getClass().getSuperclass().getDeclaredFields()));
         }
 
@@ -325,6 +331,12 @@ public class FieldValidator {
                             && serviceBundleService.get(o.toString()) == null) {
                         throw new ValidationException(
                                 String.format("Field '%s' should contain the ID of an existing Service",
+                                        field.getName()));
+                    } else if ((eu.einfracentral.domain.TrainingResource.class.equals(annotation.idClass())
+                            || TrainingResourceBundle.class.equals(annotation.idClass()))
+                            && trainingResourceService.get(o.toString()) == null) {
+                        throw new ValidationException(
+                                String.format("Field '%s' should contain the ID of an existing Training Resource",
                                         field.getName()));
                     } else if ((eu.einfracentral.domain.Catalogue.class.equals(annotation.idClass())
                         || CatalogueBundle.class.equals(annotation.idClass()))

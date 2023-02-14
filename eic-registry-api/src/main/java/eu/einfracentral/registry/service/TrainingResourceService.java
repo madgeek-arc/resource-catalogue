@@ -251,13 +251,7 @@ public interface TrainingResourceService<T> extends ResourceService<T, Authentic
      */
     T verifyResource(String id, String status, Boolean active, Authentication auth);
 
-    /**
-     * @param resourceId
-     * @param newProvider
-     * @param comment
-     * @param auth
-     */
-    T changeProvider(String resourceId, String newProvider, String comment, Authentication auth);
+//    T changeProvider(String resourceId, String newProvider, String comment, Authentication auth);
 
     Paging<T> getAllForAdminWithAuditStates(FacetFilter ff, Set<String> auditState, Authentication authentication);
 

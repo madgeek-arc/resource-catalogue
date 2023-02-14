@@ -58,6 +58,7 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
     private final RegistrationMailService registrationMailService;
     private final VocabularyService vocabularyService;
     private final CatalogueService<CatalogueBundle, Authentication> catalogueService;
+    private final PublicTrainingResourceManager publicTrainingResourceManager;
     @Autowired
     private FacetLabelService facetLabelService;
     @Autowired
@@ -107,7 +108,8 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
                                    IdCreator idCreator, @Lazy SecurityService securityService,
                                    @Lazy RegistrationMailService registrationMailService,
                                    @Lazy VocabularyService vocabularyService,
-                                   CatalogueService<CatalogueBundle, Authentication> catalogueService) {
+                                   CatalogueService<CatalogueBundle, Authentication> catalogueService,
+                                   PublicTrainingResourceManager publicTrainingResourceManager) {
         super(TrainingResourceBundle.class);
         this.providerService = providerService;
         this.idCreator = idCreator;
@@ -115,6 +117,7 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
         this.registrationMailService = registrationMailService;
         this.vocabularyService = vocabularyService;
         this.catalogueService = catalogueService;
+        this.publicTrainingResourceManager = publicTrainingResourceManager;
     }
 
     @Override
@@ -324,7 +327,7 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
             Long latestAudit = Long.parseLong(trainingResourceBundle.getLatestAuditInfo().getDate());
             Long latestUpdate = Long.parseLong(trainingResourceBundle.getLatestUpdateInfo().getDate());
             if (latestAudit < latestUpdate && trainingResourceBundle.getLatestAuditInfo().getActionType().equals(LoggingInfo.ActionType.INVALID.getKey())) {
-                //FIXME: registrationMailService.notifyPortalAdminsForInvalidResourceUpdate(trainingResourceBundle, trainingResourceBundle.getTrainingResource().getTitle());
+                registrationMailService.notifyPortalAdminsForInvalidTrainingResourceUpdate(trainingResourceBundle);
             }
         }
 
@@ -565,7 +568,7 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
         trainingResourceBundle.setLatestAuditInfo(loggingInfo);
 
         // send notification emails to Provider Admins
-        //FIXME: registrationMailService.notifyProviderAdminsForResourceAuditing(trainingResourceBundle);
+        registrationMailService.notifyProviderAdminsForTrainingResourceAuditing(trainingResourceBundle);
 
         logger.info("Auditing Resource: {}", trainingResourceBundle);
         return update(trainingResourceBundle, auth);
@@ -663,68 +666,11 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
         String providerId = providerService.get(get(resourceId).getTrainingResource().getResourceOrganisation()).getId();
         String providerName = providerService.get(get(resourceId).getTrainingResource().getResourceOrganisation()).getProvider().getName();
         logger.info(String.format("Mailing provider [%s]-[%s] for outdated Training Resources", providerId, providerName));
-        //FIXME: registrationMailService.sendEmailNotificationsToProvidersWithOutdatedResources(resourceId);
-    }
-
-    public TrainingResourceBundle changeProvider(String resourceId, String newProviderId, String comment, Authentication auth) {
-        TrainingResourceBundle trainingResourceBundle = get(resourceId, catalogueName);
-        // check Training Resource's status
-        if (!trainingResourceBundle.getStatus().equals("approved resource")) {
-            throw new ValidationException(String.format("You cannot move Training Resource with id [%s] to another Provider as it" +
-                    "is not yet Approved", trainingResourceBundle.getId()));
-        }
-        ProviderBundle newProvider = providerService.get(catalogueName, newProviderId, auth);
-        ProviderBundle oldProvider = providerService.get(catalogueName, trainingResourceBundle.getTrainingResource().getResourceOrganisation(), auth);
-
-        User user = User.of(auth);
-
-        // update loggingInfo
-        List<LoggingInfo> loggingInfoList = trainingResourceBundle.getLoggingInfo();
-        LoggingInfo loggingInfo;
-        if (comment == null || "".equals(comment)) {
-            loggingInfo = LoggingInfo.createLoggingInfoEntry(user.getEmail(), user.getFullName(), securityService.getRoleName(auth),
-                    LoggingInfo.Types.MOVE.getKey(), LoggingInfo.ActionType.MOVED.getKey());
-        } else {
-            loggingInfo = LoggingInfo.createLoggingInfoEntry(user.getEmail(), user.getFullName(), securityService.getRoleName(auth),
-                    LoggingInfo.Types.MOVE.getKey(), LoggingInfo.ActionType.MOVED.getKey(), comment);
-        }
-        loggingInfoList.add(loggingInfo);
-        trainingResourceBundle.setLoggingInfo(loggingInfoList);
-
-        // update latestUpdateInfo
-        trainingResourceBundle.setLatestUpdateInfo(loggingInfo);
-
-        // update metadata
-        Metadata metadata = trainingResourceBundle.getMetadata();
-        metadata.setModifiedAt(String.valueOf(System.currentTimeMillis()));
-        metadata.setModifiedBy(user.getFullName());
-        metadata.setTerms(null);
-        trainingResourceBundle.setMetadata(metadata);
-
-        // update ResourceOrganisation
-        trainingResourceBundle.getTrainingResource().setResourceOrganisation(newProviderId);
-
-        // update id
-        String initialId = trainingResourceBundle.getId();
-        String[] parts = initialId.split("\\.");
-        String serviceId = parts[1];
-        String newResourceId = newProviderId + "." + serviceId;
-        trainingResourceBundle.setId(newResourceId);
-        trainingResourceBundle.getTrainingResource().setId(newResourceId);
-
-        // add Resource, delete the old one
-        add(trainingResourceBundle, auth);
-        delete(get(resourceId, catalogueName));
-        //FIXME: publicTrainingResourceManager.delete(get(resourceId, catalogueName)); // FIXME: ProviderManagementAspect's deletePublicDatasource is not triggered
-
-        // emails to EPOT, old and new Provider
-        //FIXME: registrationMailService.sendEmailsForMovedResources(oldProvider, newProvider, trainingResourceBundle, auth);
-
-        return trainingResourceBundle;
+        registrationMailService.sendEmailNotificationsToProvidersWithOutdatedResources(resourceId);
     }
 
     public TrainingResourceBundle createPublicResource(TrainingResourceBundle trainingResourceBundle, Authentication auth){
-        //FIXME: publicTrainingResourceManager.add(trainingResourceBundle, auth);
+        publicTrainingResourceManager.add(trainingResourceBundle, auth);
         return trainingResourceBundle;
     }
 

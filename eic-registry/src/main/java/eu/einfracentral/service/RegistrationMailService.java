@@ -40,8 +40,8 @@ public class RegistrationMailService {
     private final ProviderManager providerManager;
     private final PendingProviderManager pendingProviderManager;
     private final ServiceBundleManager serviceBundleManager;
-
     private final DatasourceBundleManager datasourceBundleManager;
+    private final TrainingResourceManager trainingResourceManager;
     private final PendingServiceManager pendingServiceManager;
     private final SecurityService securityService;
 
@@ -83,6 +83,7 @@ public class RegistrationMailService {
                                    @Lazy PendingProviderManager pendingProviderManager,
                                    ServiceBundleManager serviceBundleManager,
                                    DatasourceBundleManager datasourceBundleManager,
+                                   TrainingResourceManager trainingResourceManager,
                                    PendingServiceManager pendingServiceManager,
                                    SecurityService securityService) {
         this.mailService = mailService;
@@ -91,6 +92,7 @@ public class RegistrationMailService {
         this.pendingProviderManager = pendingProviderManager;
         this.serviceBundleManager = serviceBundleManager;
         this.datasourceBundleManager = datasourceBundleManager;
+        this.trainingResourceManager = trainingResourceManager;
         this.pendingServiceManager = pendingServiceManager;
         this.securityService = securityService;
     }
@@ -297,24 +299,40 @@ public class RegistrationMailService {
 
     public void sendEmailNotificationsToProvidersWithOutdatedResources(String resourceId){
         Map<String, Object> root = new HashMap<>();
+        ProviderBundle providerBundle;
         root.put("project", projectName);
         root.put("endpoint", endpoint);
         ResourceBundle<?> resourceBundle;
+        TrainingResourceBundle trainingResourceBundle = null;
         resourceBundle = serviceBundleManager.getOrElseReturnNull(resourceId, catalogueName);
         if (resourceBundle == null){
             resourceBundle = datasourceBundleManager.getOrElseReturnNull(resourceId, catalogueName);
         }
-        ProviderBundle providerBundle = providerManager.get(resourceBundle.getPayload().getResourceOrganisation());
+        if (resourceBundle == null){
+            trainingResourceBundle = trainingResourceManager.getOrElseReturnNull(resourceId, catalogueName);
+            providerBundle = providerManager.get(trainingResourceBundle.getTrainingResource().getResourceOrganisation());
+        } else{
+            providerBundle = providerManager.get(resourceBundle.getPayload().getResourceOrganisation());
+        }
         if (providerBundle.getProvider().getUsers() == null || providerBundle.getProvider().getUsers().isEmpty()) {
             throw new ValidationException(String.format("Provider [%s]-[%s] has no Users", providerBundle.getId(), providerBundle.getProvider().getName()));
         }
         String subject = String.format("[%s] Your Provider [%s] has one or more outdated Resources", projectName, providerBundle.getProvider().getName());
         root.put("providerBundle", providerBundle);
-        root.put("resourceBundle", resourceBundle);
-        for (User user : providerBundle.getProvider().getUsers()) {
-            root.put("user", user);
-            String userRole = "provider";
-            sendMailsFromTemplate("providerOutdatedResources.ftl", root, subject, user.getEmail(), userRole);
+        if (resourceBundle != null){
+            root.put("resourceBundle", resourceBundle);
+            for (User user : providerBundle.getProvider().getUsers()) {
+                root.put("user", user);
+                String userRole = "provider";
+                sendMailsFromTemplate("providerOutdatedResources.ftl", root, subject, user.getEmail(), userRole);
+            }
+        } else{
+            root.put("trainingResourceBundle", trainingResourceBundle);
+            for (User user : providerBundle.getProvider().getUsers()) {
+                root.put("user", user);
+                String userRole = "provider";
+                sendMailsFromTemplate("providerOutdatedTrainingResources.ftl", root, subject, user.getEmail(), userRole);
+            }
         }
     }
 
@@ -954,6 +972,24 @@ public class RegistrationMailService {
         }
     }
 
+    public void notifyProviderAdminsForTrainingResourceAuditing(TrainingResourceBundle trainingResourceBundle) {
+
+        ProviderBundle providerBundle = providerManager.get(trainingResourceBundle.getTrainingResource().getResourceOrganisation());
+
+        Map<String, Object> root = new HashMap<>();
+        root.put("project", projectName);
+        root.put("endpoint", endpoint);
+        root.put("trainingResourceBundle", trainingResourceBundle);
+
+        String subject = String.format("[%s Portal] Your Training Resource '%s' has been audited by the EPOT team", projectName, trainingResourceBundle.getTrainingResource().getTitle());
+
+        for (User user : providerBundle.getProvider().getUsers()) {
+            root.put("user", user);
+            String userRole = "provider";
+            sendMailsFromTemplate("trainingResourceAudit.ftl", root, subject, user.getEmail(), userRole);
+        }
+    }
+
     public void notifyPortalAdminsForInvalidProviderUpdate(ProviderBundle providerBundle) {
 
         Map<String, Object> root = new HashMap<>();
@@ -991,6 +1027,19 @@ public class RegistrationMailService {
         String subject = String.format("[%s Portal] The Resource [%s] previously marked as [invalid] has been updated", projectName, resourceBundle.getPayload().getName());
         String userRole = "admin";
         sendMailsFromTemplate("invalidResourceUpdate.ftl", root, subject, registrationEmail, userRole);
+    }
+
+    public void notifyPortalAdminsForInvalidTrainingResourceUpdate(TrainingResourceBundle trainingResourceBundle) {
+
+        Map<String, Object> root = new HashMap<>();
+        root.put("project", projectName);
+        root.put("endpoint", endpoint);
+        root.put("trainingResourceBundle", trainingResourceBundle);
+
+        // send email to Admins
+        String subject = String.format("[%s Portal] The Training Resource [%s] previously marked as [invalid] has been updated", projectName, trainingResourceBundle.getTrainingResource().getTitle());
+        String userRole = "admin";
+        sendMailsFromTemplate("invalidTrainingResourceUpdate.ftl", root, subject, registrationEmail, userRole);
     }
 
     public void sendEmailsForHelpdeskExtension(HelpdeskBundle helpdeskBundle, String action){
