@@ -20,15 +20,15 @@ Dear ${project} Portal Onboarding Team,
     </#if>
 <#else>
     <#if providerBundle.templateStatus == "pending template">
-    A new application by [${user.fullName}] – [${user.email}] has been received for registering [${resource.name}] - [${resource.id}], as a new Resource of [${providerBundle.provider.name}] - ([${providerBundle.provider.id}]).
+    A new application by [${user.fullName}] – [${user.email}] has been received for registering [${resourceName}] - [${resourceId}], as a new Resource of [${providerBundle.provider.name}] - ([${providerBundle.provider.id}]).
     You can review the application here ${endpoint}/dashboard/${project?lower_case}/${providerBundle.provider.id}/info and approve or reject it.
     </#if>
     <#if providerBundle.templateStatus == "approved template">
-    The application by [${user.fullName}] – [${user.email}] for registering [${resource.name}] - ([${resource.id}]) of [${providerBundle.provider.name}] - ([${providerBundle.provider.id}]) has been approved.
+    The application by [${user.fullName}] – [${user.email}] for registering [${resourceName}] - ([${resourceId}]) of [${providerBundle.provider.name}] - ([${providerBundle.provider.id}]) has been approved.
     You can view the application status here ${endpoint}/dashboard/${project?lower_case}/${providerBundle.provider.id}/info.
     </#if>
     <#if providerBundle.templateStatus == "rejected template">
-    The Resource: [${resource.id}] provided by [${user.fullName}] – [${user.email}] has been rejected.
+    The Resource: [${resourceId}] provided by [${user.fullName}] – [${user.email}] has been rejected.
     You can view the application status ${endpoint}/dashboard/${project?lower_case}/${providerBundle.provider.id}/info.
     </#if>
 </#if>

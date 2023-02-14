@@ -717,7 +717,7 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
         ff.addFilter("catalogue_id", catalogueName);
         ff.addFilter("published", false);
         ff.setQuantity(maxQuantity);
-        ff.setOrderBy(FacetFilterUtils.createOrderBy("name", "asc"));
+        ff.setOrderBy(FacetFilterUtils.createOrderBy("title", "asc"));
         return this.getAll(ff, securityService.getAdminAccess()).getResults().stream().map(TrainingResourceBundle::getTrainingResource).collect(Collectors.toList());
     }
 

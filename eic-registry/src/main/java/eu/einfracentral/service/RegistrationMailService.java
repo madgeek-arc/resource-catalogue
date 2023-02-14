@@ -112,21 +112,34 @@ public class RegistrationMailService {
         }
 
         List<Service> serviceList = serviceBundleManager.getResources(providerBundle.getId());
-        List<Datasource> datasourceList =datasourceBundleManager.getResources(providerBundle.getId());
+        List<Datasource> datasourceList = datasourceBundleManager.getResources(providerBundle.getId());
+        List<TrainingResource> trainingResourceList = trainingResourceManager.getResources(providerBundle.getId());
         Service serviceTemplate = null;
+        TrainingResource trainingResourceTemplate = null;
         if (!datasourceList.isEmpty()) {
-            root.put("resource", datasourceList.get(0));
+            root.put("resourceId", datasourceList.get(0).getId());
+            root.put("resourceName", datasourceList.get(0).getName());
             serviceTemplate = datasourceList.get(0);
         } else if (!serviceList.isEmpty()){
-            root.put("resource", serviceList.get(0));
+            root.put("resourceId", serviceList.get(0).getId());
+            root.put("resourceName", serviceList.get(0).getName());
             serviceTemplate = serviceList.get(0);
+        } else if (!trainingResourceList.isEmpty()){
+            root.put("resourceId", trainingResourceList.get(0).getId());
+            root.put("resourceName", trainingResourceList.get(0).getTitle());
+            trainingResourceTemplate = trainingResourceList.get(0);
         } else {
             serviceTemplate = new Service();
             serviceTemplate.setName("");
         }
 
-        providerSubject = getProviderSubject(providerBundle, serviceTemplate);
-        regTeamSubject = getRegTeamSubject(providerBundle, serviceTemplate);
+        if (serviceTemplate != null){
+            providerSubject = getProviderSubject(providerBundle, serviceTemplate, serviceTemplate.getName());
+            regTeamSubject = getRegTeamSubject(providerBundle, serviceTemplate, serviceTemplate.getId(), serviceTemplate.getName());
+        } else{
+            providerSubject = getProviderSubject(providerBundle, trainingResourceTemplate, trainingResourceTemplate.getTitle());
+            regTeamSubject = getRegTeamSubject(providerBundle, trainingResourceTemplate, trainingResourceTemplate.getId(), trainingResourceTemplate.getTitle());
+        }
 
         root.put("providerBundle", providerBundle);
         root.put("endpoint", endpoint);
@@ -203,7 +216,7 @@ public class RegistrationMailService {
         String regTeamSubject;
 
         if (catalogueBundle == null || catalogueBundle.getCatalogue() == null) {
-            throw new ResourceNotFoundException("Cataogue is null");
+            throw new ResourceNotFoundException("Catalogue is null");
         }
 
         catalogueSubject = getCatalogueSubject(catalogueBundle);
@@ -582,7 +595,7 @@ public class RegistrationMailService {
         }
     }
 
-    private String getProviderSubject(ProviderBundle providerBundle, Service serviceTemplate) {
+    private String getProviderSubject(ProviderBundle providerBundle, Object serviceTemplate, String name) {
         if (providerBundle == null || providerBundle.getProvider() == null) {
             logger.error("Provider is null");
             return String.format("[%s]", this.projectName);
@@ -621,14 +634,14 @@ public class RegistrationMailService {
                     assert serviceTemplate != null;
                     subject = String.format("[%s Portal] Your application for registering [%s] " +
                                     "as a new %s to the %s Portal has been received and is under review",
-                            this.projectName, serviceTemplate.getName(), serviceOrResource, this.projectName);
+                            this.projectName, name, serviceOrResource, this.projectName);
                     break;
                 case "approved template":
                     if (providerBundle.isActive()) {
                         assert serviceTemplate != null;
                         subject = String.format("[%s Portal] Your application for registering [%s] " +
                                         "as a new %s to the %s Portal has been approved",
-                                this.projectName, serviceTemplate.getName(), serviceOrResource, this.projectName);
+                                this.projectName, name, serviceOrResource, this.projectName);
                         break;
                     } else {
                         assert serviceTemplate != null;
@@ -640,7 +653,7 @@ public class RegistrationMailService {
                     assert serviceTemplate != null;
                     subject = String.format("[%s Portal] Your application for registering [%s] " +
                                     "as a new %s to the %s Portal has been rejected",
-                            this.projectName, serviceTemplate.getName(), serviceOrResource, this.projectName);
+                            this.projectName, name, serviceOrResource, this.projectName);
                     break;
                 default:
                     subject = String.format("[%s Portal] Provider Registration", this.projectName);
@@ -682,7 +695,7 @@ public class RegistrationMailService {
     }
 
 
-    private String getRegTeamSubject(ProviderBundle providerBundle, Service serviceTemplate) {
+    private String getRegTeamSubject(ProviderBundle providerBundle, Object serviceTemplate, String resourceId, String name) {
         if (providerBundle == null || providerBundle.getProvider() == null) {
             logger.error("Provider is null");
             return String.format("[%s]", this.projectName);
@@ -722,14 +735,14 @@ public class RegistrationMailService {
                     assert serviceTemplate != null;
                     subject = String.format("[%s Portal] A new application for registering [%s] " +
                                     "as a new %s to the %s Portal has been received and should be reviewed",
-                            this.projectName, serviceTemplate.getId(), serviceOrResource, this.projectName);
+                            this.projectName, resourceId, serviceOrResource, this.projectName);
                     break;
                 case "approved template":
                     if (providerBundle.isActive()) {
                         assert serviceTemplate != null;
                         subject = String.format("[%s Portal] The application of [%s] - ([%s]) " +
                                         "for registering as a new %s has been approved",
-                                this.projectName, serviceTemplate.getName(), serviceTemplate.getId(), serviceOrResource);
+                                this.projectName, name, resourceId, serviceOrResource);
                         break;
                     } else {
                         assert serviceTemplate != null;
@@ -741,7 +754,7 @@ public class RegistrationMailService {
                     assert serviceTemplate != null;
                     subject = String.format("[%s Portal] The application of [%s] - ([%s]) " +
                                     "for registering as a %s %s has been rejected",
-                            this.projectName, serviceTemplate.getName(), serviceTemplate.getId(), this.projectName, serviceOrResource);
+                            this.projectName, name, resourceId, this.projectName, serviceOrResource);
                     break;
                 default:
                     subject = String.format("[%s Portal] Provider Registration", this.projectName);
