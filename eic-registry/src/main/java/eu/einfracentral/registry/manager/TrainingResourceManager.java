@@ -12,14 +12,13 @@ import eu.einfracentral.service.AnalyticsService;
 import eu.einfracentral.service.IdCreator;
 import eu.einfracentral.service.RegistrationMailService;
 import eu.einfracentral.service.SecurityService;
+import eu.einfracentral.service.search.SearchServiceEIC;
 import eu.einfracentral.utils.FacetFilterUtils;
 import eu.einfracentral.utils.FacetLabelService;
 import eu.einfracentral.utils.SortUtils;
 import eu.einfracentral.validators.FieldValidator;
-import eu.openminted.registry.core.domain.Browsing;
-import eu.openminted.registry.core.domain.FacetFilter;
-import eu.openminted.registry.core.domain.Paging;
-import eu.openminted.registry.core.domain.Resource;
+import eu.openminted.registry.core.domain.*;
+import eu.openminted.registry.core.domain.index.IndexField;
 import eu.openminted.registry.core.service.ParserService;
 import eu.openminted.registry.core.service.SearchService;
 import eu.openminted.registry.core.service.ServiceException;
@@ -34,6 +33,8 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.util.MultiValueMap;
 
+import javax.annotation.PostConstruct;
+import javax.validation.constraints.NotNull;
 import java.net.UnknownHostException;
 import java.security.NoSuchAlgorithmException;
 import java.text.DecimalFormat;
@@ -57,6 +58,7 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
     private final RegistrationMailService registrationMailService;
     private final VocabularyService vocabularyService;
     private final CatalogueService<CatalogueBundle, Authentication> catalogueService;
+    private final PublicTrainingResourceManager publicTrainingResourceManager;
     @Autowired
     private FacetLabelService facetLabelService;
     @Autowired
@@ -65,15 +67,49 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
     private AnalyticsService analyticsService;
     @Autowired
     private EventService eventService;
+    @Autowired
+    private SearchServiceEIC searchServiceEIC;
     private List<String> browseBy;
+    private Map<String, String> labels;
     @Value("${project.catalogue.name}")
     private String catalogueName;
+
+    @PostConstruct
+    void initLabels() {
+        resourceType = resourceTypeService.getResourceType(getResourceType());
+        Set<String> browseSet = new HashSet<>();
+        Map<String, Set<String>> sets = new HashMap<>();
+        labels = new HashMap<>();
+        labels.put("resourceType", "Resource Type");
+        for (IndexField f : resourceTypeService.getResourceTypeIndexFields(getResourceType())) {
+            sets.putIfAbsent(f.getResourceType().getName(), new HashSet<>());
+            labels.put(f.getName(), f.getLabel());
+            if (f.getLabel() != null) {
+                sets.get(f.getResourceType().getName()).add(f.getName());
+            }
+        }
+        boolean flag = true;
+        for (Map.Entry<String, Set<String>> entry : sets.entrySet()) {
+            if (flag) {
+                browseSet.addAll(entry.getValue());
+                flag = false;
+            } else {
+                browseSet.retainAll(entry.getValue());
+            }
+        }
+        browseBy = new ArrayList<>();
+        browseBy.addAll(browseSet);
+        browseBy.add("resourceType");
+        java.util.Collections.sort(browseBy);
+        logger.info("Generated generic service for '{}'[{}]", getResourceType(), getClass().getSimpleName());
+    }
 
     public TrainingResourceManager(ProviderService<ProviderBundle, Authentication> providerService,
                                    IdCreator idCreator, @Lazy SecurityService securityService,
                                    @Lazy RegistrationMailService registrationMailService,
                                    @Lazy VocabularyService vocabularyService,
-                                   CatalogueService<CatalogueBundle, Authentication> catalogueService) {
+                                   CatalogueService<CatalogueBundle, Authentication> catalogueService,
+                                   PublicTrainingResourceManager publicTrainingResourceManager) {
         super(TrainingResourceBundle.class);
         this.providerService = providerService;
         this.idCreator = idCreator;
@@ -81,6 +117,7 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
         this.registrationMailService = registrationMailService;
         this.vocabularyService = vocabularyService;
         this.catalogueService = catalogueService;
+        this.publicTrainingResourceManager = publicTrainingResourceManager;
     }
 
     @Override
@@ -290,7 +327,7 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
             Long latestAudit = Long.parseLong(trainingResourceBundle.getLatestAuditInfo().getDate());
             Long latestUpdate = Long.parseLong(trainingResourceBundle.getLatestUpdateInfo().getDate());
             if (latestAudit < latestUpdate && trainingResourceBundle.getLatestAuditInfo().getActionType().equals(LoggingInfo.ActionType.INVALID.getKey())) {
-                //FIXME: registrationMailService.notifyPortalAdminsForInvalidResourceUpdate(trainingResourceBundle, trainingResourceBundle.getTrainingResource().getTitle());
+                registrationMailService.notifyPortalAdminsForInvalidTrainingResourceUpdate(trainingResourceBundle);
             }
         }
 
@@ -531,7 +568,7 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
         trainingResourceBundle.setLatestAuditInfo(loggingInfo);
 
         // send notification emails to Provider Admins
-        //FIXME: registrationMailService.notifyProviderAdminsForResourceAuditing(trainingResourceBundle);
+        registrationMailService.notifyProviderAdminsForTrainingResourceAuditing(trainingResourceBundle);
 
         logger.info("Auditing Resource: {}", trainingResourceBundle);
         return update(trainingResourceBundle, auth);
@@ -543,7 +580,7 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
         ff.addFilter("resource_organisation", providerId);
         ff.addFilter("catalogue_id", catalogueName);
         ff.setQuantity(maxQuantity);
-        ff.setOrderBy(FacetFilterUtils.createOrderBy("name", "asc"));
+        ff.setOrderBy(FacetFilterUtils.createOrderBy("title", "asc"));
         return this.getAll(ff, auth).getResults();
     }
 
@@ -553,7 +590,7 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
         ff.addFilter("resource_organisation", providerId);
         ff.addFilter("catalogue_id", catalogueId);
         ff.setQuantity(maxQuantity);
-        ff.setOrderBy(FacetFilterUtils.createOrderBy("name", "asc"));
+        ff.setOrderBy(FacetFilterUtils.createOrderBy("title", "asc"));
         return this.getAll(ff, auth);
     }
 
@@ -564,7 +601,7 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
         ff.addFilter("resource_organisation", providerId);
         ff.addFilter("catalogue_id", catalogueName);
         ff.setQuantity(maxQuantity);
-        ff.setOrderBy(FacetFilterUtils.createOrderBy("name", "asc"));
+        ff.setOrderBy(FacetFilterUtils.createOrderBy("title", "asc"));
         if (auth != null && auth.isAuthenticated()) {
             User user = User.of(auth);
             // if user is ADMIN/EPOT or Provider Admin on the specific Provider, return its Training Resources
@@ -587,7 +624,7 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
         ff.addFilter("catalogue_id", catalogueName);
         ff.addFilter("active", true);
         ff.setQuantity(maxQuantity);
-        ff.setOrderBy(FacetFilterUtils.createOrderBy("name", "asc"));
+        ff.setOrderBy(FacetFilterUtils.createOrderBy("title", "asc"));
         return this.getAll(ff, null).getResults().stream().map(TrainingResourceBundle::getTrainingResource).collect(Collectors.toList());
     }
 
@@ -599,7 +636,7 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
         ff.addFilter("active", false);
         ff.setFrom(0);
         ff.setQuantity(maxQuantity);
-        ff.setOrderBy(FacetFilterUtils.createOrderBy("name", "asc"));
+        ff.setOrderBy(FacetFilterUtils.createOrderBy("title", "asc"));
         return this.getAll(ff, null).getResults();
     }
 
@@ -629,68 +666,11 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
         String providerId = providerService.get(get(resourceId).getTrainingResource().getResourceOrganisation()).getId();
         String providerName = providerService.get(get(resourceId).getTrainingResource().getResourceOrganisation()).getProvider().getName();
         logger.info(String.format("Mailing provider [%s]-[%s] for outdated Training Resources", providerId, providerName));
-        //FIXME: registrationMailService.sendEmailNotificationsToProvidersWithOutdatedResources(resourceId);
-    }
-
-    public TrainingResourceBundle changeProvider(String resourceId, String newProviderId, String comment, Authentication auth) {
-        TrainingResourceBundle trainingResourceBundle = get(resourceId, catalogueName);
-        // check Training Resource's status
-        if (!trainingResourceBundle.getStatus().equals("approved resource")) {
-            throw new ValidationException(String.format("You cannot move Training Resource with id [%s] to another Provider as it" +
-                    "is not yet Approved", trainingResourceBundle.getId()));
-        }
-        ProviderBundle newProvider = providerService.get(catalogueName, newProviderId, auth);
-        ProviderBundle oldProvider = providerService.get(catalogueName, trainingResourceBundle.getTrainingResource().getResourceOrganisation(), auth);
-
-        User user = User.of(auth);
-
-        // update loggingInfo
-        List<LoggingInfo> loggingInfoList = trainingResourceBundle.getLoggingInfo();
-        LoggingInfo loggingInfo;
-        if (comment == null || "".equals(comment)) {
-            loggingInfo = LoggingInfo.createLoggingInfoEntry(user.getEmail(), user.getFullName(), securityService.getRoleName(auth),
-                    LoggingInfo.Types.MOVE.getKey(), LoggingInfo.ActionType.MOVED.getKey());
-        } else {
-            loggingInfo = LoggingInfo.createLoggingInfoEntry(user.getEmail(), user.getFullName(), securityService.getRoleName(auth),
-                    LoggingInfo.Types.MOVE.getKey(), LoggingInfo.ActionType.MOVED.getKey(), comment);
-        }
-        loggingInfoList.add(loggingInfo);
-        trainingResourceBundle.setLoggingInfo(loggingInfoList);
-
-        // update latestUpdateInfo
-        trainingResourceBundle.setLatestUpdateInfo(loggingInfo);
-
-        // update metadata
-        Metadata metadata = trainingResourceBundle.getMetadata();
-        metadata.setModifiedAt(String.valueOf(System.currentTimeMillis()));
-        metadata.setModifiedBy(user.getFullName());
-        metadata.setTerms(null);
-        trainingResourceBundle.setMetadata(metadata);
-
-        // update ResourceOrganisation
-        trainingResourceBundle.getTrainingResource().setResourceOrganisation(newProviderId);
-
-        // update id
-        String initialId = trainingResourceBundle.getId();
-        String[] parts = initialId.split("\\.");
-        String serviceId = parts[1];
-        String newResourceId = newProviderId + "." + serviceId;
-        trainingResourceBundle.setId(newResourceId);
-        trainingResourceBundle.getTrainingResource().setId(newResourceId);
-
-        // add Resource, delete the old one
-        add(trainingResourceBundle, auth);
-        delete(get(resourceId, catalogueName));
-        //FIXME: publicTrainingResourceManager.delete(get(resourceId, catalogueName)); // FIXME: ProviderManagementAspect's deletePublicDatasource is not triggered
-
-        // emails to EPOT, old and new Provider
-        //FIXME: registrationMailService.sendEmailsForMovedResources(oldProvider, newProvider, trainingResourceBundle, auth);
-
-        return trainingResourceBundle;
+        registrationMailService.sendEmailNotificationsToProvidersWithOutdatedResources(resourceId);
     }
 
     public TrainingResourceBundle createPublicResource(TrainingResourceBundle trainingResourceBundle, Authentication auth){
-        //FIXME: publicTrainingResourceManager.add(trainingResourceBundle, auth);
+        publicTrainingResourceManager.add(trainingResourceBundle, auth);
         return trainingResourceBundle;
     }
 
@@ -737,7 +717,7 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
         ff.addFilter("catalogue_id", catalogueName);
         ff.addFilter("published", false);
         ff.setQuantity(maxQuantity);
-        ff.setOrderBy(FacetFilterUtils.createOrderBy("name", "asc"));
+        ff.setOrderBy(FacetFilterUtils.createOrderBy("title", "asc"));
         return this.getAll(ff, securityService.getAdminAccess()).getResults().stream().map(TrainingResourceBundle::getTrainingResource).collect(Collectors.toList());
     }
 
@@ -971,6 +951,28 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
     }
 
     @Override
+    public Browsing<TrainingResourceBundle> getAll(FacetFilter ff, Authentication auth) {
+        // if user is Unauthorized, return active/latest ONLY
+        if (auth == null) {
+            ff.addFilter("active", true);
+            ff.addFilter("published", false);
+        }
+        if (auth != null && auth.isAuthenticated()) {
+            // if user is Authorized with ROLE_USER, return active/latest ONLY
+            if (!securityService.hasRole(auth, "ROLE_PROVIDER") && !securityService.hasRole(auth, "ROLE_EPOT") &&
+                    !securityService.hasRole(auth, "ROLE_ADMIN")) {
+                ff.addFilter("active", true);
+                ff.addFilter("published", false);
+            }
+        }
+
+        ff.setBrowseBy(browseBy);
+        ff.setResourceType(getResourceType());
+
+        return getMatchingResources(ff);
+    }
+
+    @Override
     public Browsing<TrainingResourceBundle> getAllForAdmin(FacetFilter filter, Authentication auth) {
         filter.setBrowseBy(browseBy);
         filter.setResourceType(getResourceType());
@@ -986,6 +988,67 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
         }
 
         return resources;
+    }
+
+    @Override
+    protected Browsing<TrainingResourceBundle> getResults(FacetFilter filter) {
+        Browsing<TrainingResourceBundle> browsing;
+        filter.setResourceType(getResourceType());
+        browsing = convertToBrowsingEIC(searchServiceEIC.search(filter));
+
+        browsing.setFacets(createCorrectFacets(browsing.getFacets(), filter));
+        return browsing;
+    }
+
+    private Browsing<TrainingResourceBundle> convertToBrowsingEIC(@NotNull Paging<Resource> paging) {
+        List<TrainingResourceBundle> results = paging.getResults()
+                .stream()
+                .map(res -> parserPool.deserialize(res, typeParameterClass))
+                .collect(Collectors.toList());
+        return new Browsing<>(paging, results, labels);
+    }
+
+    public List<Facet> createCorrectFacets(List<Facet> serviceFacets, FacetFilter ff) {
+        ff.setQuantity(0);
+
+        Map<String, List<Object>> allFilters = FacetFilterUtils.getFacetFilterFilters(ff);
+
+        List<String> reverseOrderedKeys = new LinkedList<>(allFilters.keySet());
+        Collections.reverse(reverseOrderedKeys);
+
+        for (String filterKey : reverseOrderedKeys) {
+            Map<String, List<Object>> someFilters = new LinkedHashMap<>(allFilters);
+
+            // if last filter is "latest" or "active" continue to next iteration
+            if ("active".equals(filterKey)) {
+                continue;
+            }
+            someFilters.remove(filterKey);
+
+            FacetFilter facetFilter = FacetFilterUtils.createMultiFacetFilter(someFilters);
+            facetFilter.setResourceType(getResourceType());
+            facetFilter.setBrowseBy(Collections.singletonList(filterKey));
+            List<Facet> facetsCategory = convertToBrowsingEIC(searchServiceEIC.search(facetFilter)).getFacets();
+
+            for (Facet facet : serviceFacets) {
+                if (facet.getField().equals(filterKey)) {
+                    for (Facet facetCategory : facetsCategory) {
+                        if (facetCategory.getField().equals(facet.getField())) {
+                            serviceFacets.set(serviceFacets.indexOf(facet), facetCategory);
+                            break;
+                        }
+                    }
+                    break;
+                }
+            }
+            break;
+        }
+
+        return removeEmptyFacets(serviceFacets);
+    }
+
+    private List<Facet> removeEmptyFacets(List<Facet> facetList) {
+        return facetList.stream().filter(facet -> !facet.getValues().isEmpty()).collect(toList());
     }
 
     @Override
