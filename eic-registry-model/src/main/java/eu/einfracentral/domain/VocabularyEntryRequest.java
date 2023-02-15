@@ -23,7 +23,7 @@ public class VocabularyEntryRequest {
 
     @XmlElement
     @ApiModelProperty(position = 2)
-    @FieldValidation(nullable = true, containsId = true, idClass = Service.class)
+    @FieldValidation(nullable = true, containsId = true, containsResourceId = true)
     private String resourceId;
 
     @XmlElement

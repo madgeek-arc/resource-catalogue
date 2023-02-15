@@ -295,7 +295,16 @@ public class FieldValidator {
                 }
             } else if (String.class.equals(o.getClass())) {
                 try {
-                    if (Vocabulary.class.equals(annotation.idClass())) {
+                    if (annotation.containsResourceId()) {
+                        DatasourceBundle datasourceBundle = (DatasourceBundle) datasourceBundleService.getOrElseReturnNull(o.toString());
+                        ServiceBundle serviceBundle = (ServiceBundle) serviceBundleService.getOrElseReturnNull(o.toString());
+                        TrainingResourceBundle trainingResourceBundle = trainingResourceService.getOrElseReturnNull(o.toString());
+                        if (datasourceBundle == null && serviceBundle == null && trainingResourceBundle == null){
+                            throw new ValidationException(
+                                    String.format("Field '%s' should ONLY contain the ID of an existing Service, " +
+                                                    "Datasource or Training Resource", field.getName()));
+                        }
+                    } else if (Vocabulary.class.equals(annotation.idClass())) {
                         Vocabulary voc = vocabularyService.get(o.toString());
                         VocabularyValidation vocabularyValidation = field.getAnnotation(VocabularyValidation.class);
                         GeoLocationVocValidation geoLocationVocValidation = field.getAnnotation(GeoLocationVocValidation.class);

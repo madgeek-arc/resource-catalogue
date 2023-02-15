@@ -86,7 +86,7 @@ public class TrainingResource implements Identifiable {
     @XmlElementWrapper(name = "eoscRelatedServices")
     @XmlElement(name = "eoscRelatedService")
     @ApiModelProperty(position = 8)
-    @FieldValidation(nullable = true, containsId = true, idClass = Service.class)
+    @FieldValidation(nullable = true, containsId = true, containsResourceId = true)
     private List<String> eoscRelatedServices;
 
 
