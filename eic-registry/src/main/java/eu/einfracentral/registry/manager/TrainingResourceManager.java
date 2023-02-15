@@ -699,6 +699,31 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
         return deserialize(resource);
     }
 
+    // Needed for FieldValidation
+    public TrainingResourceBundle get(String id) {
+        TrainingResourceBundle resource = null;
+        try {
+            resource = get(id, catalogueName);
+        } catch (ResourceNotFoundException e) {
+            resource = checkIdExistanceInOtherCatalogues(id);
+            if (resource == null) {
+                throw e;
+            }
+        }
+        return resource;
+    }
+
+    private TrainingResourceBundle checkIdExistanceInOtherCatalogues(String id) {
+        FacetFilter ff = new FacetFilter();
+        ff.setQuantity(maxQuantity);
+        ff.addFilter(getResourceType() + "_id", id);
+        List<TrainingResourceBundle> allResources = getAll(ff, null).getResults();
+        if (allResources.size() > 1) {
+            return allResources.get(0);
+        }
+        return null;
+    }
+
     public Resource getResource(String id, String catalogueId) {
         Paging<Resource> resources;
         resources = searchService
@@ -730,6 +755,16 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
             return resources.getResults();
         }
         return Collections.emptyList();
+    }
+
+    public TrainingResourceBundle getOrElseReturnNull(String id) {
+        TrainingResourceBundle trainingResourceBundle;
+        try {
+            trainingResourceBundle = get(id);
+        } catch (ResourceNotFoundException e) {
+            return null;
+        }
+        return trainingResourceBundle;
     }
 
     public TrainingResourceBundle getOrElseReturnNull(String id, String catalogueId) {

@@ -55,5 +55,6 @@ public interface SecurityService {
     boolean providerIsActiveAndUserIsAdmin(Authentication auth, String resourceId, String catalogueId);
 
     boolean resourceIsActive(String resourceId, String catalogueId);
+    boolean datasourceIsActive(String resourceId, String catalogueId);
     boolean trainingResourceIsActive(String resourceId, String catalogueId);
 }

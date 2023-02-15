@@ -16,4 +16,6 @@ public @interface FieldValidation {
     boolean containsId() default false;
 
     Class idClass() default Object.class;
+
+    boolean containsResourceId() default false;
 }

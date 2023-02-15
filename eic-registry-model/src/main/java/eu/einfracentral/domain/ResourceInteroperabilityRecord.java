@@ -19,7 +19,7 @@ public class ResourceInteroperabilityRecord implements Identifiable {
 
     @XmlElement(required = true)
     @ApiModelProperty(position = 2, notes = "Resource ID", required = true)
-    @FieldValidation(containsId = true) //FIXME: need both Datasource/Service
+    @FieldValidation(containsId = true, containsResourceId = true)
     private String resourceId;
 
     @XmlElement(required = true)

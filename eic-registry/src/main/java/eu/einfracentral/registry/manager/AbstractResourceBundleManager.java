@@ -1120,6 +1120,16 @@ public abstract class AbstractResourceBundleManager<T extends ResourceBundle<?>>
         }
     }
 
+    public ResourceBundle<?> getOrElseReturnNull(String id) {
+        ResourceBundle<?> resourceBundle;
+        try {
+            resourceBundle = get(id);
+        } catch (ResourceNotFoundException e) {
+            return null;
+        }
+        return resourceBundle;
+    }
+
     public ResourceBundle<?> getOrElseReturnNull(String id, String catalogueId) {
         ResourceBundle<?> resourceBundle;
         try {

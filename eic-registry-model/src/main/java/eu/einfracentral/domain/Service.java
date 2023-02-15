@@ -327,8 +327,7 @@ public class Service implements Identifiable {
     @XmlElementWrapper(name = "requiredResources")
     @XmlElement(name = "requiredResource")
     @ApiModelProperty(position = 33)
-//    @FieldValidation(nullable = true, containsId = true, idClass = Service.class)
-    @FieldValidation(nullable = true)
+    @FieldValidation(nullable = true, containsId = true, containsResourceId = true)
     private List<String> requiredResources;
 
     /**
@@ -337,8 +336,7 @@ public class Service implements Identifiable {
     @XmlElementWrapper(name = "relatedResources")
     @XmlElement(name = "relatedResource")
     @ApiModelProperty(position = 34)
-//    @FieldValidation(nullable = true, containsId = true, idClass = Service.class)
-    @FieldValidation(nullable = true)
+    @FieldValidation(nullable = true, containsId = true, containsResourceId = true)
     private List<String> relatedResources;
 
     /**
@@ -410,17 +408,17 @@ public class Service implements Identifiable {
     /**
      * Webpage describing the rules, Resource conditions and usage policy which one must agree to abide by in order to use the Resource.
      */
-    @XmlElement
-    @ApiModelProperty(position = 42, example = "https://example.com")
-    @FieldValidation(nullable = true)
+    @XmlElement(required = true)
+    @ApiModelProperty(position = 42, example = "https://example.com", required = true)
+    @FieldValidation
     private URL termsOfUse;
 
     /**
      * Link to the privacy policy applicable to the Resource.
      */
-    @XmlElement
-    @ApiModelProperty(position = 43, example = "https://example.com")
-    @FieldValidation(nullable = true)
+    @XmlElement(required = true)
+    @ApiModelProperty(position = 43, example = "https://example.com", required = true)
+    @FieldValidation
     private URL privacyPolicy;
 
     /**

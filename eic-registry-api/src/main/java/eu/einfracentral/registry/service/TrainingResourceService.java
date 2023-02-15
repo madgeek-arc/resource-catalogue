@@ -255,6 +255,7 @@ public interface TrainingResourceService<T> extends ResourceService<T, Authentic
 
     Paging<T> getAllForAdminWithAuditStates(FacetFilter ff, Set<String> auditState, Authentication authentication);
 
+    TrainingResourceBundle getOrElseReturnNull(String id);
     TrainingResourceBundle getOrElseReturnNull(String id, String catalogueId);
 
     T createPublicResource(T resource, Authentication auth);
