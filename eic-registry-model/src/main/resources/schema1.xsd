@@ -770,7 +770,7 @@ c) list of customers, communities, users, etc. using the Resource.]]></xs:docume
           <xs:documentation><![CDATA[Webpage with the information on the price scheme for this Resource in case the customer is charged for.]]></xs:documentation>
         </xs:annotation>
       </xs:element>
-      <xs:element minOccurs="0" name="privacyPolicy" type="xs:anyURI">
+      <xs:element name="privacyPolicy" type="xs:anyURI">
         <xs:annotation>
           <xs:documentation><![CDATA[Link to the privacy policy applicable to the Resource.]]></xs:documentation>
         </xs:annotation>
@@ -900,7 +900,7 @@ c) list of customers, communities, users, etc. using the Resource.]]></xs:docume
           </xs:sequence>
         </xs:complexType>
       </xs:element>
-      <xs:element minOccurs="0" name="termsOfUse" type="xs:anyURI">
+      <xs:element name="termsOfUse" type="xs:anyURI">
         <xs:annotation>
           <xs:documentation><![CDATA[Webpage describing the rules, Resource conditions and usage policy which one must agree to abide by in order to use the Resource.]]></xs:documentation>
         </xs:annotation>

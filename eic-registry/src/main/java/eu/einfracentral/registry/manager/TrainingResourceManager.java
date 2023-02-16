@@ -8,10 +8,7 @@ import eu.einfracentral.exception.ResourceException;
 import eu.einfracentral.exception.ResourceNotFoundException;
 import eu.einfracentral.exception.ValidationException;
 import eu.einfracentral.registry.service.*;
-import eu.einfracentral.service.AnalyticsService;
-import eu.einfracentral.service.IdCreator;
-import eu.einfracentral.service.RegistrationMailService;
-import eu.einfracentral.service.SecurityService;
+import eu.einfracentral.service.*;
 import eu.einfracentral.service.search.SearchServiceEIC;
 import eu.einfracentral.utils.FacetFilterUtils;
 import eu.einfracentral.utils.FacetLabelService;
@@ -25,6 +22,7 @@ import eu.openminted.registry.core.service.ServiceException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.context.annotation.Lazy;
@@ -69,6 +67,9 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
     private EventService eventService;
     @Autowired
     private SearchServiceEIC searchServiceEIC;
+    @Autowired
+    @Qualifier("trainingResourceSync")
+    private final SynchronizerService<TrainingResource> synchronizerService;
     private List<String> browseBy;
     private Map<String, String> labels;
     @Value("${project.catalogue.name}")
@@ -109,7 +110,8 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
                                    @Lazy RegistrationMailService registrationMailService,
                                    @Lazy VocabularyService vocabularyService,
                                    CatalogueService<CatalogueBundle, Authentication> catalogueService,
-                                   PublicTrainingResourceManager publicTrainingResourceManager) {
+                                   PublicTrainingResourceManager publicTrainingResourceManager,
+                                   SynchronizerService<TrainingResource> synchronizerService){
         super(TrainingResourceBundle.class);
         this.providerService = providerService;
         this.idCreator = idCreator;
@@ -118,6 +120,7 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
         this.vocabularyService = vocabularyService;
         this.catalogueService = catalogueService;
         this.publicTrainingResourceManager = publicTrainingResourceManager;
+        this.synchronizerService = synchronizerService;
     }
 
     @Override
@@ -227,6 +230,7 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
         created.setResourceType(resourceType);
 
         resourceService.addResource(created);
+        synchronizerService.syncAdd(trainingResourceBundle.getTrainingResource());
 
         return trainingResourceBundle;
     }
@@ -350,6 +354,7 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
         existing.setResourceType(resourceType);
 
         resourceService.updateResource(existing);
+        synchronizerService.syncUpdate(trainingResourceBundle.getTrainingResource());
 
         return trainingResourceBundle;
     }
@@ -390,6 +395,7 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
         }
         logger.info("Deleting Training Resource: {}", trainingResourceBundle);
         super.delete(trainingResourceBundle);
+        synchronizerService.syncDelete(trainingResourceBundle.getTrainingResource());
     }
 
     @CacheEvict(cacheNames = {CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)
