@@ -1994,6 +1994,7 @@ that is the used scheme (e.g., Web Address URL, DOI, ARK, etc.).]]></xs:document
     <xs:complexContent>
       <xs:extension base="tns:bundle">
         <xs:sequence>
+          <xs:element minOccurs="0" ref="tns:resourceExtras"/>
           <xs:element minOccurs="0" name="status" type="xs:string"/>
           <xs:element minOccurs="0" ref="tns:trainingResource"/>
         </xs:sequence>
