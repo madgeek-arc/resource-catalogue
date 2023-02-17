@@ -19,6 +19,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.mitre.openid.connect.model.OIDCAuthenticationToken;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -63,8 +64,9 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     //TODO: maybe add description on DB and elastic too
     private final String columnsOfInterest = "provider_id, name, abbreviation, affiliations, tags, areas_of_activity, esfri_domains, meril_scientific_subdomains," +
             " networks, scientific_subdomains, societal_grand_challenges, structure_types, catalogue_id, hosting_legal_entity"; // variable with DB tables a keyword is been searched on
-
-    private final SynchronizerService<Provider> synchronizerServiceProvider;
+    @Autowired
+    @Qualifier("providerSync")
+    private final SynchronizerService<Provider> synchronizerService;
 
     @Value("${project.catalogue.name}")
     private String catalogueName;
@@ -76,7 +78,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
                            @Lazy RegistrationMailService registrationMailService, IdCreator idCreator,
                            EventService eventService, VersionService versionService,
                            VocabularyService vocabularyService, DataSource dataSource,
-                           SynchronizerService<Provider> synchronizerServiceProvider,
+                           SynchronizerService<Provider> synchronizerService,
                            CatalogueService<CatalogueBundle, Authentication> catalogueService,
                            @Lazy PublicServiceManager publicServiceManager,
                            @Lazy PublicDatasourceManager publicDatasourceManager,
@@ -92,7 +94,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         this.versionService = versionService;
         this.vocabularyService = vocabularyService;
         this.dataSource = dataSource;
-        this.synchronizerServiceProvider = synchronizerServiceProvider;
+        this.synchronizerService = synchronizerService;
         this.catalogueService = catalogueService;
         this.publicServiceManager = publicServiceManager;
         this.publicDatasourceManager = publicDatasourceManager;
@@ -135,7 +137,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
 
         registrationMailService.sendEmailsToNewlyAddedAdmins(provider, null);
 
-        synchronizerServiceProvider.syncAdd(provider.getProvider());
+        synchronizerService.syncAdd(provider.getProvider());
 
         return ret;
     }
@@ -215,7 +217,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
             }
         }
 
-        synchronizerServiceProvider.syncUpdate(provider.getProvider());
+        synchronizerService.syncUpdate(provider.getProvider());
 
         return provider;
     }
@@ -416,7 +418,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         // TODO: move to aspect
         registrationMailService.notifyProviderAdmins(provider);
 
-        synchronizerServiceProvider.syncDelete(provider.getProvider());
+        synchronizerService.syncDelete(provider.getProvider());
 
     }
 
