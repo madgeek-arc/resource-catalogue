@@ -1271,4 +1271,60 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
         return null;
     }
 
+    public TrainingResourceBundle changeProvider(String resourceId, String newProviderId, String comment, Authentication auth){
+        TrainingResourceBundle trainingResourceBundle = get(resourceId, catalogueName);
+        // check Datasource's status
+        if (!trainingResourceBundle.getStatus().equals("approved resource")){
+            throw new ValidationException(String.format("You cannot move Training Resource with id [%s] to another Provider as it" +
+                    "is not yet Approved", trainingResourceBundle.getId()));
+        }
+        ProviderBundle newProvider = providerService.get(catalogueName, newProviderId, auth);
+        ProviderBundle oldProvider = providerService.get(catalogueName, trainingResourceBundle.getTrainingResource().getResourceOrganisation(), auth);
+
+        User user = User.of(auth);
+
+        // update loggingInfo
+        List<LoggingInfo> loggingInfoList = trainingResourceBundle.getLoggingInfo();
+        LoggingInfo loggingInfo;
+        if (comment == null || "".equals(comment)) {
+            loggingInfo = LoggingInfo.createLoggingInfoEntry(user.getEmail(), user.getFullName(), securityService.getRoleName(auth),
+                    LoggingInfo.Types.MOVE.getKey(), LoggingInfo.ActionType.MOVED.getKey());
+        } else {
+            loggingInfo = LoggingInfo.createLoggingInfoEntry(user.getEmail(), user.getFullName(), securityService.getRoleName(auth),
+                    LoggingInfo.Types.MOVE.getKey(), LoggingInfo.ActionType.MOVED.getKey(), comment);
+        }
+        loggingInfoList.add(loggingInfo);
+        trainingResourceBundle.setLoggingInfo(loggingInfoList);
+
+        // update latestUpdateInfo
+        trainingResourceBundle.setLatestUpdateInfo(loggingInfo);
+
+        // update metadata
+        Metadata metadata = trainingResourceBundle.getMetadata();
+        metadata.setModifiedAt(String.valueOf(System.currentTimeMillis()));
+        metadata.setModifiedBy(user.getFullName());
+        metadata.setTerms(null);
+        trainingResourceBundle.setMetadata(metadata);
+
+        // update ResourceOrganisation
+        trainingResourceBundle.getTrainingResource().setResourceOrganisation(newProviderId);
+
+        // update id
+        try {
+            trainingResourceBundle.setId(idCreator.createTrainingResourceId(trainingResourceBundle));
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
+        }
+
+        // add Resource, delete the old one
+        add(trainingResourceBundle, auth);
+        delete(get(resourceId, catalogueName));
+        publicTrainingResourceManager.delete(get(resourceId, catalogueName)); // FIXME: ProviderManagementAspect's deletePublicDatasource is not triggered
+
+        // emails to EPOT, old and new Provider
+        registrationMailService.sendEmailsForMovedTrainingResources(oldProvider, newProvider, trainingResourceBundle, auth);
+
+        return trainingResourceBundle;
+    }
+
 }

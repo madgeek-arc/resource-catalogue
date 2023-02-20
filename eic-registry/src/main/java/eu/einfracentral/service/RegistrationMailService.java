@@ -388,6 +388,45 @@ public class RegistrationMailService {
         sendMailsFromTemplate("resourceMovedEPOT.ftl", root, subject, registrationEmail, userRole);
     }
 
+    public void sendEmailsForMovedTrainingResources(ProviderBundle oldProvider, ProviderBundle newProvider, TrainingResourceBundle trainingResourceBundle, Authentication auth){
+        Map<String, Object> root = new HashMap<>();
+        root.put("project", projectName);
+        root.put("endpoint", endpoint);
+        if (oldProvider.getProvider().getUsers() == null || oldProvider.getProvider().getUsers().isEmpty()) {
+            throw new ValidationException(String.format("Provider [%s]-[%s] has no Users", oldProvider.getId(), oldProvider.getProvider().getName()));
+        }
+        if (newProvider.getProvider().getUsers() == null || newProvider.getProvider().getUsers().isEmpty()) {
+            throw new ValidationException(String.format("Provider [%s]-[%s] has no Users", newProvider.getId(), newProvider.getProvider().getName()));
+        }
+        String subject = String.format("[%s] Training Resource [%s] has been moved from Provider [%s] to Provider [%s]", projectName, trainingResourceBundle.getTrainingResource().getTitle(),
+                oldProvider.getProvider().getName(), newProvider.getProvider().getName());
+        String userRole = "provider";
+        root.put("oldProvider", oldProvider);
+        root.put("newProvider", newProvider);
+        root.put("trainingResourceBundle", trainingResourceBundle);
+        root.put("comment", trainingResourceBundle.getLoggingInfo().get(trainingResourceBundle.getLoggingInfo().size() - 1).getComment());
+
+        // emails to old Provider's Users
+        for (User user : oldProvider.getProvider().getUsers()) {
+            root.put("user", user);
+            sendMailsFromTemplate("trainingResourceMovedOldProvider.ftl", root, subject, user.getEmail(), userRole);
+        }
+//        root.remove("user");
+
+        // emails to new Provider's Users
+        for (User user : newProvider.getProvider().getUsers()) {
+            root.put("user", user);
+            sendMailsFromTemplate("trainingResourceMovedNewProvider.ftl", root, subject, user.getEmail(), userRole);
+        }
+
+        // emails to Admins
+        userRole = "admin";
+        root.put("adminFullName", User.of(auth).getFullName());
+        root.put("adminEmail", User.of(auth).getEmail());
+        root.put("adminRole", securityService.getRoleName(auth));
+        sendMailsFromTemplate("trainingResourceMovedEPOT.ftl", root, subject, registrationEmail, userRole);
+    }
+
     @Scheduled(cron = "0 0 12 ? * 2/2") // At 12:00:00pm, every 2 days starting on Monday, every month
     public void sendEmailNotificationsToAdmins() {
         FacetFilter ff = new FacetFilter();
