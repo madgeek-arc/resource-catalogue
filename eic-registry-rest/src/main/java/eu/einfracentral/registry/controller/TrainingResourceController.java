@@ -83,6 +83,12 @@ public class TrainingResourceController {
         return new ResponseEntity<>(trainingResourceService.get(id, catalogueId).getTrainingResource(), HttpStatus.OK);
     }
 
+    @GetMapping(path = "bundle/{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth, #id)")
+    public ResponseEntity<TrainingResourceBundle> getTrainingResourceBundle(@PathVariable("id") String id, @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueId, @ApiIgnore Authentication auth) {
+        return new ResponseEntity<>(trainingResourceService.get(id, catalogueId), HttpStatus.OK);
+    }
+
     // Get the specified version of a RichResource providing the TrainingResource id
     @GetMapping(path = "rich/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("@securityService.trainingResourceIsActive(#id, #catalogueId) or hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') " +
