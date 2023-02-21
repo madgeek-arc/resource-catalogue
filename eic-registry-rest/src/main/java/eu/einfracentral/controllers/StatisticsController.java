@@ -137,4 +137,19 @@ public class StatisticsController {
     public ResponseEntity<Map<String, Float>> datasourceRatings(@PathVariable("id") String id, @RequestParam(defaultValue = "MONTH") StatisticsService.Interval by) {
         return new ResponseEntity<>(statisticsService.ratings(id, by), HttpStatus.OK);
     }
+
+    @GetMapping(path = "trainingResource/visits/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Map<String, Integer>> trainingResourceVisits(@PathVariable("id") String id, @RequestParam(defaultValue = "MONTH") StatisticsService.Interval by) {
+        return new ResponseEntity<>(statisticsService.visits(id, by), HttpStatus.OK);
+    }
+
+    @GetMapping(path = "trainingResource/addToProject/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Map<String, Integer>> trainingResourceAddToProject(@PathVariable("id") String id, @RequestParam(defaultValue = "MONTH") StatisticsService.Interval by) {
+        return new ResponseEntity<>(statisticsService.addToProject(id, by), HttpStatus.OK);
+    }
+
+    @GetMapping(path = "trainingResource/ratings/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Map<String, Float>> trainingResourceRatings(@PathVariable("id") String id, @RequestParam(defaultValue = "MONTH") StatisticsService.Interval by) {
+        return new ResponseEntity<>(statisticsService.ratings(id, by), HttpStatus.OK);
+    }
 }
