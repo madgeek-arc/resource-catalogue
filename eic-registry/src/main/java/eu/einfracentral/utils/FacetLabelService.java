@@ -87,10 +87,11 @@ public class FacetLabelService {
                             value.setLabel(allVocabularies.get(value.getValue()).getName());
                         }
                         else {
+                            //TODO: Find a better way to prettify Labels
                             try {
                                 value.setLabel(toProperCase(toProperCase(value.getValue(), "-", "-"), "_", " "));
                             } catch (StringIndexOutOfBoundsException e){
-                                logger.info(e);
+                                logger.debug(e);
                             }
                         }
                 }
