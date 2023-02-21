@@ -160,7 +160,7 @@ public class TrainingResource implements Identifiable {
      */
     @XmlElementWrapper(name = "learningOutcomes", required = true)
     @XmlElement(name = "learningOutcome")
-    @ApiModelProperty(position = 16, notes = "Vocabulary ID", required = true)
+    @ApiModelProperty(position = 16, required = true)
     @FieldValidation
     private List<String> learningOutcomes;
 

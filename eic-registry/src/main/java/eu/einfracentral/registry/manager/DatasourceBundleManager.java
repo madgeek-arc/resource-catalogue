@@ -607,7 +607,7 @@ public class DatasourceBundleManager extends AbstractResourceBundleManager<Datas
         DatasourceBundle datasourceBundle = get(resourceId, catalogueName);
         // check Datasource's status
         if (!datasourceBundle.getStatus().equals("approved resource")){
-            throw new ValidationException(String.format("You cannot move Service with id [%s] to another Provider as it" +
+            throw new ValidationException(String.format("You cannot move Datasource with id [%s] to another Provider as it" +
                     "is not yet Approved", datasourceBundle.getId()));
         }
         ProviderBundle newProvider = providerService.get(catalogueName, newProviderId, auth);
