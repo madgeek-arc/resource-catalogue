@@ -3,7 +3,6 @@ package eu.einfracentral.registry.manager;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import eu.einfracentral.domain.*;
-import eu.einfracentral.domain.ResourceBundle;
 import eu.einfracentral.exception.ResourceException;
 import eu.einfracentral.exception.ResourceNotFoundException;
 import eu.einfracentral.exception.ValidationException;
@@ -27,12 +26,9 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.http.*;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
-import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
 import java.security.NoSuchAlgorithmException;
-import java.time.Instant;
-import java.time.ZoneId;
 import java.util.*;
 import java.util.stream.Collectors;
 
