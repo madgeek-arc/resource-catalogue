@@ -2,6 +2,7 @@ package eu.einfracentral.service.search;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Service;
@@ -15,8 +16,8 @@ public class SearchServiceEIC extends AbstractSearchService {
 
     private static final Logger logger = LogManager.getLogger(SearchServiceEIC.class);
 
-    public SearchServiceEIC() {
-        super();
+    public SearchServiceEIC(RestHighLevelClient elasticsearchClient) {
+        super(elasticsearchClient);
     }
 
     @Override
