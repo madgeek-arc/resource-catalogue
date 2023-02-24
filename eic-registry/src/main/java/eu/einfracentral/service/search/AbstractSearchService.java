@@ -5,6 +5,7 @@ import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.service.SearchService;
 import eu.openminted.registry.core.service.SearchServiceImpl;
 import org.bouncycastle.util.Strings;
+import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.DisMaxQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
@@ -16,8 +17,8 @@ import static org.elasticsearch.index.query.QueryBuilders.*;
 
 public abstract class AbstractSearchService extends SearchServiceImpl implements SearchService {
 
-    public AbstractSearchService() {
-        super();
+    public AbstractSearchService(RestHighLevelClient client) {
+        super(client);
     }
 
     /**
