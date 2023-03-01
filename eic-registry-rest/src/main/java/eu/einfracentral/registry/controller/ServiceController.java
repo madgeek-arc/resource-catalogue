@@ -422,7 +422,7 @@ public class ServiceController {
 
     // front-end use
     @GetMapping(path = {"resourceIdToNameMap"}, produces = {MediaType.APPLICATION_JSON_VALUE})
-    public ResponseEntity<List<Object>> resourcesIdToNameMap() {
+    public ResponseEntity<List<Object>> getAllProviderRelatedResources() {
         List<Service> services = resourceBundleService.getAll(createFacetFilter(), null).getResults()
                 .stream().map(ServiceBundle::getService).collect(Collectors.toList());
         List<Datasource> datasources = datasourceBundleService.getAll(createFacetFilter(), null).getResults()
