@@ -5,6 +5,7 @@ import eu.einfracentral.domain.ServiceBundle;
 import eu.einfracentral.exception.ValidationException;
 import eu.einfracentral.registry.service.ResourceBundleService;
 import eu.einfracentral.registry.service.ProviderService;
+import eu.einfracentral.registry.service.TrainingResourceService;
 import eu.einfracentral.utils.FacetFilterUtils;
 import eu.openminted.registry.core.domain.Browsing;
 import eu.openminted.registry.core.domain.FacetFilter;
@@ -40,6 +41,8 @@ public class ServiceController {
 
     private static final Logger logger = LogManager.getLogger(ServiceController.class);
     private final ResourceBundleService<ServiceBundle> resourceBundleService;
+    private final ResourceBundleService<DatasourceBundle> datasourceBundleService;
+    private final TrainingResourceService<TrainingResourceBundle> trainingResourceService;
     private final ProviderService<ProviderBundle, Authentication> providerService;
     private final DataSource commonDataSource;
 
@@ -53,9 +56,13 @@ public class ServiceController {
     @Autowired
     ServiceController(ResourceBundleService<ServiceBundle> service,
                       ProviderService<ProviderBundle, Authentication> provider,
+                      ResourceBundleService<DatasourceBundle> datasourceBundleService,
+                      TrainingResourceService<TrainingResourceBundle> trainingResourceService,
                       DataSource commonDataSource) {
         this.resourceBundleService = service;
         this.providerService = provider;
+        this.datasourceBundleService = datasourceBundleService;
+        this.trainingResourceService = trainingResourceService;
         this.commonDataSource = commonDataSource;
     }
 
@@ -411,6 +418,35 @@ public class ServiceController {
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     public void changeProvider(@RequestParam String resourceId, @RequestParam String newProvider, @RequestParam(required = false) String comment, @ApiIgnore Authentication authentication) {
         resourceBundleService.changeProvider(resourceId, newProvider, comment, authentication);
+    }
+
+    @GetMapping(path = {"resourceIdToNameMap"}, produces = {MediaType.APPLICATION_JSON_VALUE})
+    public ResponseEntity<Map<String, String>> resourcesIdToNameMap() {
+        Map<String, String> allResources = new HashMap<>();
+        List<Service> services = resourceBundleService.getAll(createFacetFilter(), null).getResults()
+                .stream().map(ServiceBundle::getService).collect(Collectors.toList());
+        List<Datasource> datasources = datasourceBundleService.getAll(createFacetFilter(), null).getResults()
+                .stream().map(DatasourceBundle::getDatasource).collect(Collectors.toList());
+        List<TrainingResource> trainingResources = trainingResourceService.getAll(createFacetFilter(), null).getResults()
+                .stream().map(TrainingResourceBundle::getTrainingResource).collect(Collectors.toList());
+        for (Service service : services){
+            allResources.put(service.getId(), service.getName());
+        }
+        for (Datasource datasource : datasources){
+            allResources.put(datasource.getId(), datasource.getName());
+        }
+        for (TrainingResource trainingResource : trainingResources){
+            allResources.put(trainingResource.getId(), trainingResource.getTitle());
+        }
+        return ResponseEntity.ok(allResources);
+    }
+
+    //FIXME: FacetFilters reset after one search.
+    private FacetFilter createFacetFilter(){
+        FacetFilter ff = new FacetFilter();
+        ff.setQuantity(10000);
+        ff.addFilter("published", false);
+        return ff;
     }
 
     @ApiImplicitParams({
