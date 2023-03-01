@@ -420,28 +420,22 @@ public class ServiceController {
         resourceBundleService.changeProvider(resourceId, newProvider, comment, authentication);
     }
 
+    // front-end use
     @GetMapping(path = {"resourceIdToNameMap"}, produces = {MediaType.APPLICATION_JSON_VALUE})
-    public ResponseEntity<Map<String, String>> resourcesIdToNameMap() {
-        Map<String, String> allResources = new HashMap<>();
+    public ResponseEntity<List<Object>> resourcesIdToNameMap() {
         List<Service> services = resourceBundleService.getAll(createFacetFilter(), null).getResults()
                 .stream().map(ServiceBundle::getService).collect(Collectors.toList());
         List<Datasource> datasources = datasourceBundleService.getAll(createFacetFilter(), null).getResults()
                 .stream().map(DatasourceBundle::getDatasource).collect(Collectors.toList());
         List<TrainingResource> trainingResources = trainingResourceService.getAll(createFacetFilter(), null).getResults()
                 .stream().map(TrainingResourceBundle::getTrainingResource).collect(Collectors.toList());
-        for (Service service : services){
-            allResources.put(service.getId(), service.getName());
-        }
-        for (Datasource datasource : datasources){
-            allResources.put(datasource.getId(), datasource.getName());
-        }
-        for (TrainingResource trainingResource : trainingResources){
-            allResources.put(trainingResource.getId(), trainingResource.getTitle());
-        }
+        List<Object> allResources = new ArrayList<>(services);
+        allResources.addAll(datasources);
+        allResources.addAll(trainingResources);
         return ResponseEntity.ok(allResources);
     }
 
-    //FIXME: FacetFilters reset after one search.
+    //FIXME: FacetFilters reset after each search.
     private FacetFilter createFacetFilter(){
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(10000);
