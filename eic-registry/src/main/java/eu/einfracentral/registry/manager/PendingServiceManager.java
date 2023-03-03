@@ -166,7 +166,7 @@ public class PendingServiceManager extends ResourceManager<ServiceBundle> implem
 
         serviceBundle.setMetadata(Metadata.updateMetadata(serviceBundle.getMetadata(), User.of(auth).getFullName(), User.of(auth).getEmail()));
 
-        serviceBundle = this.update(serviceBundle, auth);
+//        serviceBundle = this.update(serviceBundle, auth);
         ResourceType infraResourceType = resourceTypeService.getResourceType("service");
         Resource resource = this.getPendingResourceViaServiceId(serviceBundle.getId());
         resource.setResourceType(resourceType);

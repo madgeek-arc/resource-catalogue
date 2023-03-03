@@ -171,7 +171,7 @@ public class PendingDatasourceManager extends ResourceManager<DatasourceBundle> 
 
         datasourceBundle.setMetadata(Metadata.updateMetadata(datasourceBundle.getMetadata(), User.of(auth).getFullName(), User.of(auth).getEmail()));
 
-        datasourceBundle = this.update(datasourceBundle, auth);
+//        datasourceBundle = this.update(datasourceBundle, auth);
         ResourceType infraResourceType = resourceTypeService.getResourceType("datasource");
         Resource resource = this.getPendingResourceViaServiceId(datasourceBundle.getDatasource().getId());
         resource.setResourceType(resourceType);
