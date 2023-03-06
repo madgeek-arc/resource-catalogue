@@ -23,13 +23,6 @@
     },
     {
       "multivalued": false,
-      "name": "version",
-      "label": "Version",
-      "path": "//*[local-name()='datasource']/*[local-name()='version']/text()",
-      "type": "java.lang.String"
-    },
-    {
-      "multivalued": false,
       "name": "resource_organisation",
       "label": "Resource Organisation",
       "path": "//*[local-name()='datasource']/*[local-name()='resourceOrganisation']/text()",
