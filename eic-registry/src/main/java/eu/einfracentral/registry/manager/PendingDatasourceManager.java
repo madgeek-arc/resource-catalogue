@@ -171,7 +171,6 @@ public class PendingDatasourceManager extends ResourceManager<DatasourceBundle> 
 
         datasourceBundle.setMetadata(Metadata.updateMetadata(datasourceBundle.getMetadata(), User.of(auth).getFullName(), User.of(auth).getEmail()));
 
-        datasourceBundle = this.update(datasourceBundle, auth);
         ResourceType infraResourceType = resourceTypeService.getResourceType("datasource");
         Resource resource = this.getPendingResourceViaServiceId(datasourceBundle.getDatasource().getId());
         resource.setResourceType(resourceType);
@@ -180,7 +179,7 @@ public class PendingDatasourceManager extends ResourceManager<DatasourceBundle> 
         try {
             datasourceBundle = resourceBundleService.update(datasourceBundle, auth);
         } catch (ResourceNotFoundException e) {
-            e.printStackTrace();
+            logger.error(e);
         }
 
         return datasourceBundle;
