@@ -2,6 +2,13 @@
   "indexFields": [
     {
       "multivalued": false,
+      "name": "resource_internal_id",
+      "path": "//*[local-name()='id']/text()",
+      "type": "java.lang.String",
+      "primaryKey": true
+    },
+    {
+      "multivalued": false,
       "name": "resource_interoperability_record_id",
       "path": "//*[local-name()='id']/text()",
       "type": "java.lang.String",
@@ -42,5 +49,5 @@
   "properties": {
     "class": "eu.einfracentral.domain.ResourceInteroperabilityRecordBundle"
   },
-  "schemaUrl": "https://raw.githubusercontent.com/madgeek-arc/resource-catalogue/master/eic-registry-model/src/main/resources/schema1.xsd"
+  "schemaUrl": "https://raw.githubusercontent.com/madgeek-arc/resource-catalogue/develop/eic-registry-model/src/main/resources/schema1.xsd"
 }
