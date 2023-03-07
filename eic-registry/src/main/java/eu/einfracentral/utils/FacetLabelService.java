@@ -10,11 +10,20 @@ import eu.openminted.registry.core.domain.Value;
 import org.apache.commons.collections.list.TreeList;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.elasticsearch.action.search.SearchRequest;
+import org.elasticsearch.action.search.SearchResponse;
+import org.elasticsearch.client.RequestOptions;
+import org.elasticsearch.client.RestHighLevelClient;
+import org.elasticsearch.common.document.DocumentField;
+import org.elasticsearch.search.SearchHit;
+import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
+import java.io.IOException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Component
 public class FacetLabelService {
@@ -22,18 +31,68 @@ public class FacetLabelService {
     private static final Logger logger = LogManager.getLogger(FacetLabelService.class);
     private final ProviderService<ProviderBundle, Authentication> providerService;
     private final VocabularyService vocabularyService;
+    private final RestHighLevelClient client;
 
     @org.springframework.beans.factory.annotation.Value("${elastic.index.max_result_window:10000}")
     private int maxQuantity;
 
     @Autowired
-    FacetLabelService(ProviderService<ProviderBundle, Authentication> providerService, VocabularyService vocabularyService) {
+    FacetLabelService(ProviderService<ProviderBundle, Authentication> providerService,
+                      VocabularyService vocabularyService,
+                      RestHighLevelClient client) {
         this.providerService = providerService;
         this.vocabularyService = vocabularyService;
+        this.client = client;
+    }
+
+    public List<Facet> generateLabels(List<Facet> facets) {
+        Map<String, String> vocabularyValues = getIdNameFields();
+
+        for (Facet facet : facets) {
+            facet.getValues().forEach(value -> value.setLabel(getLabelElseKeepValue(value.getValue(), vocabularyValues)));
+        }
+        return facets;
+    }
+
+    private Map<String, String> getIdNameFields() {
+        Map<String, String> idNameMap = new TreeMap<>();
+        SearchRequest searchRequest = new SearchRequest();
+
+        SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
+        searchSourceBuilder
+                .from(0)
+                .size(10000)
+                .docValueField("*_id")
+                .docValueField("resource_internal_id")
+                .docValueField("name")
+                .fetchSource(false)
+                .explain(true);
+        searchRequest.source(searchSourceBuilder);
+
+        SearchResponse response = null;
+        try {
+            response = client.search(searchRequest, RequestOptions.DEFAULT);
+
+            List<SearchHit> hits = Arrays.stream(response.getHits().getHits()).collect(Collectors.toList());
+
+            for (SearchHit hit : hits) {
+                hit.getFields().remove("_id");
+                if (hit.getFields().containsKey("resource_internal_id") && hit.getFields().containsKey("name")) {
+                    idNameMap.put((String) hit.getFields().get("resource_internal_id").getValues().get(0), (String) hit.getFields().get("name").getValues().get(0));
+                } else if (hit.getFields().containsKey("name") && hit.getFields().size() > 1) {
+                    String name = (String) hit.getFields().remove("name").getValues().get(0);
+                    List<DocumentField> id = (List<DocumentField>) hit.getFields().values();
+                    idNameMap.put((String) id.get(0).getValues().get(0), name);
+                }
+            }
+        } catch (IOException e) {
+            logger.error("Error retrieving Id / Name values from all resources.", e);
+        }
+        return idNameMap;
     }
 
     String toProperCase(String str, String delimiter, String newDelimiter) {
-        if (str.equals("")){
+        if (str.equals("")) {
             str = "-";
         }
         StringJoiner joiner = new StringJoiner(newDelimiter);
@@ -45,6 +104,37 @@ public class FacetLabelService {
         return joiner.toString();
     }
 
+    static class IdName {
+
+        private String id;
+        private String name;
+
+        public String getId() {
+            return id;
+        }
+
+        public void setId(String id) {
+            this.id = id;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+    }
+
+    String getLabelElseKeepValue(String value, Map<String, String> labels) {
+        String ret = labels.get(value);
+        if (ret == null) {
+            ret = toProperCase(toProperCase(value, "-", "-"), "_", " ");
+        }
+        return ret;
+    }
+
+    @Deprecated
     @SuppressWarnings("unchecked")
     public List<Facet> createLabels(List<Facet> facets) {
         List<Facet> enrichedFacets = new TreeList(); // unchecked warning here
@@ -85,12 +175,11 @@ public class FacetLabelService {
                     default:
                         if (allVocabularies.containsKey(value.getValue())) {
                             value.setLabel(allVocabularies.get(value.getValue()).getName());
-                        }
-                        else {
+                        } else {
                             //TODO: Find a better way to prettify Labels
                             try {
                                 value.setLabel(toProperCase(toProperCase(value.getValue(), "-", "-"), "_", " "));
-                            } catch (StringIndexOutOfBoundsException e){
+                            } catch (StringIndexOutOfBoundsException e) {
                                 logger.debug(e);
                             }
                         }
@@ -102,6 +191,7 @@ public class FacetLabelService {
         return enrichedFacets;
     }
 
+    @Deprecated
     Facet createCategoriesFacet(Facet subcategories) {
         List<Value> categoriesValues = new ArrayList<>();
 
@@ -128,6 +218,7 @@ public class FacetLabelService {
         return categories;
     }
 
+    @Deprecated
     Facet createSupercategoriesFacet(Facet categories) {
         List<Value> superCategoriesValues = new ArrayList<>();
 
@@ -154,6 +245,7 @@ public class FacetLabelService {
         return superCategories;
     }
 
+    @Deprecated
     Facet createScientificDomainsFacet(Facet scientificSubdomains) {
         List<Value> scientificDomainsValues = new ArrayList<>();
 
