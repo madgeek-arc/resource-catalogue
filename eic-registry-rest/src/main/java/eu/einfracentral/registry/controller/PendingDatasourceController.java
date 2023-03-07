@@ -153,9 +153,9 @@ public class PendingDatasourceController extends ResourceController<DatasourceBu
         DatasourceBundle datasourceBundle = null;
 
         try { // check if Datasource already exists
-            DatasourceBundle toCreateId = new DatasourceBundle();
-            toCreateId.setDatasource(datasource);
-            datasource.setId(idCreator.createDatasourceId(toCreateId));
+            if (datasource.getId() == null || "".equals(datasource.getId())) { // if service id is not given, create it
+                datasource.setId(idCreator.createServiceId(new ResourceBundle<>(datasource)));
+            }
             datasourceBundle = this.pendingDatasourceManager.get(datasource.getId());
         } catch (ResourceException | eu.einfracentral.exception.ResourceNotFoundException e) {
             // continue with the creation of the service

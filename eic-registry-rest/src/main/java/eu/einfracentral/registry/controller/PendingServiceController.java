@@ -149,9 +149,9 @@ public class PendingServiceController extends ResourceController<ServiceBundle, 
         ServiceBundle serviceBundle = null;
 
         try { // check if service already exists
-            ServiceBundle toCreateId = new ServiceBundle();
-            toCreateId.setService(service);
-            service.setId(idCreator.createServiceId(toCreateId));
+            if (service.getId() == null || "".equals(service.getId())) { // if service id is not given, create it
+                service.setId(idCreator.createServiceId(new ResourceBundle<>(service)));
+            }
             serviceBundle = this.pendingServiceManager.get(service.getId());
         } catch (ResourceException | eu.einfracentral.exception.ResourceNotFoundException e) {
             // continue with the creation of the service
