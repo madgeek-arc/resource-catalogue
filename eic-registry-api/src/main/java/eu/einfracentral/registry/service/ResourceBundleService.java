@@ -281,4 +281,5 @@ public interface ResourceBundleService<T> extends ResourceCRUDService<T, Authent
     ResourceBundle<?> getOrElseReturnNull(String id, String catalogueId);
 
     T createPublicResource(T resource, Authentication auth);
+    FacetFilter updateFacetFilterConsideringTheAuthorization(FacetFilter filter, Authentication auth);
 }
