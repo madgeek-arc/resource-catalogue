@@ -436,6 +436,14 @@ public class OIDCSecurityService implements SecurityService {
         return resourceBundle.isActive();
     }
 
+    public boolean resourceOrDatasourceIsActive(String resourceId, String catalogueId){
+        try {
+            return resourceIsActive(resourceId, catalogueId);
+        } catch (ResourceNotFoundException e){
+            return datasourceIsActive(resourceId, catalogueId);
+        }
+    }
+
     public boolean trainingResourceIsActive(String resourceId, String catalogueId) {
         TrainingResourceBundle trainingResourceBundle = trainingResourceService.get(resourceId, catalogueId);
         return trainingResourceBundle.isActive();

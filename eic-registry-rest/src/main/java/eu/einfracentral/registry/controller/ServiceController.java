@@ -1,6 +1,7 @@
 package eu.einfracentral.registry.controller;
 
 import eu.einfracentral.domain.*;
+import eu.einfracentral.domain.ResourceBundle;
 import eu.einfracentral.domain.ServiceBundle;
 import eu.einfracentral.exception.ValidationException;
 import eu.einfracentral.registry.service.ResourceBundleService;
@@ -90,9 +91,13 @@ public class ServiceController {
 
     @ApiOperation(value = "Get the most current version of a specific Resource, providing the Resource id.")
     @GetMapping(path = "{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    @PreAuthorize("@securityService.resourceIsActive(#id, #catalogueId) or hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth, #id)")
-    public ResponseEntity<Service> getService(@PathVariable("id") String id, @RequestParam(defaultValue = "eosc", name = "catalogueId") String catalogueId, @ApiIgnore Authentication auth) {
-        return new ResponseEntity<>(resourceBundleService.get(id, catalogueId).getService(), HttpStatus.OK);
+    @PreAuthorize("@securityService.resourceOrDatasourceIsActive(#id, #catalogueId) or hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth, #id)")
+    public ResponseEntity<?> getService(@PathVariable("id") String id, @RequestParam(defaultValue = "eosc", name = "catalogueId") String catalogueId, @ApiIgnore Authentication auth) {
+        try{
+            return new ResponseEntity<>(resourceBundleService.get(id, catalogueId).getService(), HttpStatus.OK);
+        } catch(eu.einfracentral.exception.ResourceNotFoundException e){
+            return new ResponseEntity<>(datasourceBundleService.get(id, catalogueId).getDatasource(), HttpStatus.OK);
+        }
     }
 
     // Get the specified version of a RichService providing the Service id
