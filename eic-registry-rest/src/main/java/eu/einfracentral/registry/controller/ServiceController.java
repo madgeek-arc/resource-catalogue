@@ -102,12 +102,16 @@ public class ServiceController {
 
     // Get the specified version of a RichService providing the Service id
     @GetMapping(path = "rich/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("@securityService.resourceIsActive(#id, #catalogueId) or hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') " +
+    @PreAuthorize("@securityService.resourceOrDatasourceIsActive(#id, #catalogueId) or hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') " +
             "or @securityService.isResourceProviderAdmin(#auth, #id)")
     public ResponseEntity<RichResource> getRichService(@PathVariable("id") String id,
                                                        @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueId,
                                                        @ApiIgnore Authentication auth) {
-        return new ResponseEntity<>(resourceBundleService.getRichResource(id, catalogueId, auth), HttpStatus.OK);
+        try{
+            return new ResponseEntity<>(resourceBundleService.getRichResource(id, catalogueId, auth), HttpStatus.OK);
+        } catch (eu.einfracentral.exception.ResourceNotFoundException e){
+            return new ResponseEntity<>(datasourceBundleService.getRichResource(id, catalogueId, auth), HttpStatus.OK);
+        }
     }
 
     @ApiOperation(value = "Creates a new Resource.")
