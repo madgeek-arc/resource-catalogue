@@ -414,21 +414,37 @@ public class ServiceController {
     })
     @GetMapping(path = "randomResources", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
-    public ResponseEntity<Paging<ServiceBundle>> getRandomResources(@ApiIgnore @RequestParam Map<String, Object> allRequestParams, @ApiIgnore Authentication auth) {
-        FacetFilter ff = new FacetFilter();
+    public ResponseEntity<Paging<?>> getRandomResources(@ApiIgnore @RequestParam Map<String, Object> allRequestParams,
+                                                        @RequestParam(defaultValue = "service", name = "type") String type,
+                                                        @ApiIgnore Authentication auth) {
+        FacetFilter ff = FacetFilterUtils.createFacetFilter(allRequestParams);
+        allRequestParams.remove("type");
+        if (!type.equals("all")){
+            ff.addFilter("resourceType", type);
+        }
         ff.setQuantity(allRequestParams.get("quantity") != null ? Integer.parseInt((String) allRequestParams.remove("quantity")) : 10);
         ff.setFilter(allRequestParams);
         ff.addFilter("status", "approved resource");
         ff.addFilter("published", false);
-        Paging<ServiceBundle> serviceBundlePaging = resourceBundleService.getRandomResources(ff, auditingInterval, auth);
-        return new ResponseEntity<>(serviceBundlePaging, HttpStatus.OK);
+
+        if (type.equals("service")){
+            return new ResponseEntity<>(resourceBundleService.getRandomResources(ff, auditingInterval, auth), HttpStatus.OK);
+        } else if (type.equals("datasource")){
+            return new ResponseEntity<>(datasourceBundleService.getRandomResources(ff, auditingInterval, auth), HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(null, HttpStatus.NOT_IMPLEMENTED);
+        }
     }
 
     // Get all modification details of a specific Resource based on id.
     @GetMapping(path = {"loggingInfoHistory/{id}"}, produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<Paging<LoggingInfo>> loggingInfoHistory(@PathVariable String id,  @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueId,
                                                                   @ApiIgnore Authentication auth) {
-        Paging<LoggingInfo> loggingInfoHistory = this.resourceBundleService.getLoggingInfoHistory(id, catalogueId);
+        Paging<LoggingInfo> loggingInfoHistory = new Paging<>();
+        loggingInfoHistory = this.resourceBundleService.getLoggingInfoHistory(id, catalogueId);
+        if (loggingInfoHistory == null){
+            loggingInfoHistory = this.datasourceBundleService.getLoggingInfoHistory(id, catalogueId);
+        }
         return ResponseEntity.ok(loggingInfoHistory);
     }
 
@@ -478,10 +494,14 @@ public class ServiceController {
     })
     @GetMapping(path = "getSharedResources/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or @securityService.isProviderAdmin(#auth,#id)")
-    public ResponseEntity<Paging<ServiceBundle>> getSharedResources(@ApiIgnore @RequestParam MultiValueMap<String, Object> allRequestParams, @PathVariable String id, @ApiIgnore Authentication auth) {
+    public ResponseEntity<Paging<?>> getSharedResources(@ApiIgnore @RequestParam MultiValueMap<String, Object> allRequestParams, @PathVariable String id, @ApiIgnore Authentication auth) {
         FacetFilter ff = FacetFilterUtils.createMultiFacetFilter(allRequestParams);
         ff.addFilter("resource_providers", id);
-        return ResponseEntity.ok(resourceBundleService.getAll(ff, null));
+        ff.addFilter("published", false);
+        ff.setResourceType("resources");
+        resourceBundleService.updateFacetFilterConsideringTheAuthorization(ff, auth);
+        Paging<?> paging = genericResourceService.getResults(ff).map(r -> ((eu.einfracentral.domain.ResourceBundle<?>) r).getPayload());
+        return ResponseEntity.ok(paging);
     }
 
     // Create a Public ServiceBundle if something went bad during its creation
