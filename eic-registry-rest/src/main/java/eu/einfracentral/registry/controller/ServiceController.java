@@ -180,16 +180,23 @@ public class ServiceController {
             @ApiImplicitParam(name = "orderField", value = "Order field", dataType = "string", paramType = "query")
     })
     @GetMapping(path = "/rich/all", produces = {MediaType.APPLICATION_JSON_VALUE})
-    public ResponseEntity<Paging<RichResource>> getRichServices(@ApiIgnore @RequestParam MultiValueMap<String, Object> allRequestParams,
+    public ResponseEntity<Paging<?>> getRichServices(@ApiIgnore @RequestParam Map<String, Object> allRequestParams,
                                                                 @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueId,
+                                                                @RequestParam(defaultValue = "service", name = "type") String type,
                                                                 @ApiIgnore Authentication auth) {
-        allRequestParams.addIfAbsent("catalogue_id", catalogueId);
-        if (catalogueId != null && catalogueId.equals("all")) {
-            allRequestParams.remove("catalogue_id");
+        FacetFilter ff = FacetFilterUtils.createFacetFilter(allRequestParams);
+        allRequestParams.remove("catalogue_id");
+        allRequestParams.remove("type");
+        if (!catalogueId.equals("all")){
+            ff.addFilter("catalogue_id", catalogueId);
         }
-        FacetFilter ff = FacetFilterUtils.createMultiFacetFilter(allRequestParams);
+        if (!type.equals("all")){
+            ff.addFilter("resourceType", type);
+        }
         ff.addFilter("active", true);
         ff.addFilter("published", false);
+        ff.setResourceType("resources");
+
         Paging<RichResource> services = resourceBundleService.getRichResources(ff, auth);
         return ResponseEntity.ok(services);
     }

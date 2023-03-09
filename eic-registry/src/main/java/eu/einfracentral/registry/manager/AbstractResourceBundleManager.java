@@ -10,10 +10,7 @@ import eu.einfracentral.exception.ResourceException;
 import eu.einfracentral.exception.ResourceNotFoundException;
 import eu.einfracentral.exception.ValidationException;
 import eu.einfracentral.registry.service.*;
-import eu.einfracentral.service.AnalyticsService;
-import eu.einfracentral.service.IdCreator;
-import eu.einfracentral.service.SecurityService;
-import eu.einfracentral.service.SynchronizerService;
+import eu.einfracentral.service.*;
 import eu.einfracentral.service.search.SearchServiceEIC;
 import eu.einfracentral.utils.FacetFilterUtils;
 import eu.einfracentral.utils.FacetLabelService;
@@ -90,6 +87,8 @@ public abstract class AbstractResourceBundleManager<T extends ResourceBundle<?>>
     @Autowired
     @Qualifier("serviceValidator")
     private Validator serviceValidator;
+    @Autowired
+    private GenericResourceService genericResourceService;
 
     @PostConstruct
     void initLabels() {
@@ -499,10 +498,11 @@ public abstract class AbstractResourceBundleManager<T extends ResourceBundle<?>>
 
     @Override
     public Browsing<RichResource> getRichResources(FacetFilter ff, Authentication auth) {
-        Browsing<T> resourceBundles = getAll(ff, auth);
-        List<RichResource> richResourceList = createRichResources(resourceBundles.getResults(), auth);
-        return new Browsing<>(resourceBundles.getTotal(), resourceBundles.getFrom(), resourceBundles.getTo(),
-                richResourceList, resourceBundles.getFacets());
+        updateFacetFilterConsideringTheAuthorization(ff, auth);
+        Paging<T> paging = genericResourceService.getResults(ff);
+        List<RichResource> richResourceList = createRichResources(paging.getResults(), auth);
+        return new Browsing<>(paging.getTotal(), paging.getFrom(), paging.getTo(),
+                richResourceList, paging.getFacets());
     }
 
     @Override
@@ -528,15 +528,20 @@ public abstract class AbstractResourceBundleManager<T extends ResourceBundle<?>>
     }
 
     private RichResource createProviderInfo(RichResource richResource, Authentication auth) {
+        List<String> allProviderIds = getAllProviderIds();
+        String catalogueId = getRichResourceIdOrCatalogueId(richResource, false);
+        Map<String, Set<String>> organisationAndProvidersMap = getRichResourceProviders(richResource);
+        String resourceOrganisation = organisationAndProvidersMap.keySet().iterator().next();
+        Set<String> resourceProviders = organisationAndProvidersMap.get(resourceOrganisation);
         List<ProviderInfo> providerInfoList = new ArrayList<>();
-        Set<String> allProviders = new HashSet<>(richResource.getService().getResourceProviders());
-        allProviders.add(richResource.getService().getResourceOrganisation());
-        for (String provider : allProviders) {
+        for (String provider : resourceProviders) {
             if (!"".equals(provider)) { // ignore providers with empty id "" (fix for pendingServices)
-                ProviderBundle providerBundle = providerService.get(provider, auth);
-                boolean isResourceOrganisation = provider.equals(richResource.getService().getResourceOrganisation());
-                ProviderInfo providerInfo = new ProviderInfo(providerBundle.getProvider(), isResourceOrganisation);
-                providerInfoList.add(providerInfo);
+                if (allProviderIds.contains(provider)){
+                    ProviderBundle providerBundle = providerService.get(catalogueId, provider, auth);
+                    boolean isResourceOrganisation = provider.equals(resourceOrganisation);
+                    ProviderInfo providerInfo = new ProviderInfo(providerBundle.getProvider(), isResourceOrganisation);
+                    providerInfoList.add(providerInfo);
+                }
             }
         }
         richResource.setProviderInfo(providerInfoList);
@@ -738,17 +743,18 @@ public abstract class AbstractResourceBundleManager<T extends ResourceBundle<?>>
         Map<String, List<Float>> resourceRatings = eventService.getAllServiceEventValues(Event.UserActionType.RATING.getKey(), auth);
 
         for (RichResource richResource : richResources) {
+            String resourceId = getRichResourceIdOrCatalogueId(richResource, true);
 
             // set user favourite and rate if auth != null
             if (auth != null) {
 
                 List<Event> userEvents;
                 try {
-                    userEvents = eventService.getEvents(Event.UserActionType.FAVOURITE.getKey(), richResource.getService().getId(), auth);
+                    userEvents = eventService.getEvents(Event.UserActionType.FAVOURITE.getKey(), resourceId, auth);
                     if (!userEvents.isEmpty()) {
                         richResource.setIsFavourite(userEvents.get(0).getValue());
                     }
-                    userEvents = eventService.getEvents(Event.UserActionType.RATING.getKey(), richResource.getService().getId(), auth);
+                    userEvents = eventService.getEvents(Event.UserActionType.RATING.getKey(), resourceId, auth);
                     if (!userEvents.isEmpty()) {
                         richResource.setUserRate(userEvents.get(0).getValue());
                     }
@@ -760,21 +766,20 @@ public abstract class AbstractResourceBundleManager<T extends ResourceBundle<?>>
                 }
             }
 
-            if (resourceRatings.containsKey(richResource.getService().getId())) {
-                int ratings = resourceRatings.get(richResource.getService().getId()).size();
-                float rating = resourceRatings.get(richResource.getService().getId()).stream().reduce((float) 0.0, Float::sum) / ratings;
+            if (resourceRatings.containsKey(resourceId)) {
+                int ratings = resourceRatings.get(resourceId).size();
+                float rating = resourceRatings.get(resourceId).stream().reduce((float) 0.0, Float::sum) / ratings;
                 richResource.setRatings(ratings);
                 richResource.setHasRate(Float.parseFloat(new DecimalFormat("#.##").format(rating)));
 
             }
-
-            if (resourceFavorites.containsKey(richResource.getService().getId())) {
-                int favourites = resourceFavorites.get(richResource.getService().getId()).stream().mapToInt(Float::intValue).sum();
+            if (resourceFavorites.containsKey(resourceId)) {
+                int favourites = resourceFavorites.get(resourceId).stream().mapToInt(Float::intValue).sum();
                 richResource.setFavourites(favourites);
             }
 
             // set visits
-            Integer views = resourceVisits.get(richResource.getService().getId());
+            Integer views = resourceVisits.get(resourceId);
             if (views != null) {
                 richResource.setViews(views);
             } else {
@@ -1158,4 +1163,44 @@ public abstract class AbstractResourceBundleManager<T extends ResourceBundle<?>>
         return filter;
     }
 
+    private String getRichResourceIdOrCatalogueId(RichResource richResource, boolean trueForIdFalseForCatalogueId){
+        String resourceId = "";
+        if (richResource.getService() != null){
+            if (trueForIdFalseForCatalogueId){
+                resourceId = richResource.getService().getId();
+            } else{
+                resourceId = richResource.getService().getCatalogueId();
+            }
+        } else if (richResource.getDatasource() != null){
+            if (trueForIdFalseForCatalogueId){
+                resourceId = richResource.getDatasource().getId();
+            } else{
+                resourceId = richResource.getDatasource().getCatalogueId();
+            }
+        }
+        return resourceId;
+    }
+
+    private Map<String, Set<String>> getRichResourceProviders(RichResource richResource){
+        Map<String, Set<String>> resourceOrganisationAndProviders = new HashMap<>();
+        String resourceOrganisation = "";
+        Set<String> resourceProviders = new HashSet<>();
+        if (richResource.getService() != null){
+            resourceOrganisation = richResource.getService().getResourceOrganisation();
+            resourceProviders.addAll(richResource.getService().getResourceProviders());
+        } else if (richResource.getDatasource() != null){
+            resourceOrganisation = richResource.getDatasource().getResourceOrganisation();
+            resourceProviders.addAll(richResource.getDatasource().getResourceProviders());
+        }
+        resourceOrganisationAndProviders.put(resourceOrganisation, resourceProviders);
+        return resourceOrganisationAndProviders;
+    }
+
+    private List<String> getAllProviderIds(){
+        FacetFilter ff = new FacetFilter();
+        ff.setQuantity(10000);
+        ff.addFilter("pusblished", false);
+        List<ProviderBundle> allProviders = providerService.getAll(ff, securityService.getAdminAccess()).getResults();
+        return allProviders.stream().map(Bundle::getId).collect(Collectors.toList());
+    }
 }

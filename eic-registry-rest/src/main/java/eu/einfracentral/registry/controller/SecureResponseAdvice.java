@@ -159,11 +159,19 @@ public class SecureResponseAdvice<T> implements ResponseBodyAdvice<T> {
     }
 
 
-    private void modifyRichService(T richService, Authentication auth) {
-        if (!this.securityService.isResourceProviderAdmin(auth, ((RichResource) richService).getService().getId(), ((RichResource) richService).getService().getCatalogueId())) {
-            ((RichResource) richService).getService().setMainContact(null);
-            ((RichResource) richService).getService().setSecurityContactEmail(null);
-            ((RichResource) richService).getMetadata().setTerms(null);
+    private void modifyRichService(T richResource, Authentication auth) {
+        if (((RichResource) richResource).getService() != null){
+            if (!this.securityService.isResourceProviderAdmin(auth, ((RichResource) richResource).getService().getId(), ((RichResource) richResource).getService().getCatalogueId())) {
+                ((RichResource) richResource).getService().setMainContact(null);
+                ((RichResource) richResource).getService().setSecurityContactEmail(null);
+                ((RichResource) richResource).getMetadata().setTerms(null);
+            }
+        } else if (((RichResource) richResource).getDatasource() != null){
+            if (!this.securityService.isResourceProviderAdmin(auth, ((RichResource) richResource).getDatasource().getId(), ((RichResource) richResource).getDatasource().getCatalogueId())) {
+                ((RichResource) richResource).getDatasource().setMainContact(null);
+                ((RichResource) richResource).getDatasource().setSecurityContactEmail(null);
+                ((RichResource) richResource).getMetadata().setTerms(null);
+            }
         }
     }
 
