@@ -1148,7 +1148,26 @@ public abstract class AbstractResourceBundleManager<T extends ResourceBundle<?>>
         bundle.setLoggingInfo(loggingInfoList);
     }
 
-    public FacetFilter updateFacetFilterConsideringTheAuthorization(FacetFilter filter, Authentication auth){
+    public FacetFilter createFacetFilterForFetchingServicesAndDatasources(Map<String, Object> allRequestParams, String catalogueId, String type){
+        FacetFilter ff = FacetFilterUtils.createFacetFilter(allRequestParams);
+        allRequestParams.remove("catalogue_id");
+        allRequestParams.remove("type");
+        if (catalogueId != null){
+            if (!catalogueId.equals("all")){
+                ff.addFilter("catalogue_id", catalogueId);
+            }
+        }
+        if (type != null){
+            if (!type.equals("all")){
+                ff.addFilter("resourceType", type);
+            }
+        }
+        ff.addFilter("published", false);
+        ff.setResourceType("resources");
+        return ff;
+    }
+
+    public void updateFacetFilterConsideringTheAuthorization(FacetFilter filter, Authentication auth){
         // if user is Unauthorized, return active/latest ONLY
         if (auth == null) {
             filter.addFilter("active", true);
@@ -1160,7 +1179,6 @@ public abstract class AbstractResourceBundleManager<T extends ResourceBundle<?>>
                 filter.addFilter("active", true);
             }
         }
-        return filter;
     }
 
     private String getRichResourceIdOrCatalogueId(RichResource richResource, boolean trueForIdFalseForCatalogueId){
