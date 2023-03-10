@@ -1,8 +1,10 @@
 package eu.einfracentral.registry.controller;
 
+import eu.einfracentral.domain.DatasourceBundle;
 import eu.einfracentral.domain.ServiceBundle;
 import eu.einfracentral.domain.Metadata;
 import eu.einfracentral.registry.service.ResourceBundleService;
+import eu.einfracentral.service.GenericResourceService;
 import eu.einfracentral.utils.FacetFilterUtils;
 import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.domain.Paging;
@@ -31,11 +33,17 @@ import java.util.Map;
 public class ServiceBundleController {
 
     private static final Logger logger = LogManager.getLogger(ServiceBundleController.class.getName());
-    private final ResourceBundleService<ServiceBundle> resourceBundleService;
+    private final ResourceBundleService<ServiceBundle> serviceBundleService;
+    private final ResourceBundleService<DatasourceBundle> datasourceBundleService;
+    private final GenericResourceService genericResourceService;
 
     @Autowired
-    ServiceBundleController(ResourceBundleService<ServiceBundle> service) {
-        this.resourceBundleService = service;
+    ServiceBundleController(ResourceBundleService<ServiceBundle> serviceBundleService,
+                            ResourceBundleService<DatasourceBundle> datasourceBundleService,
+                            GenericResourceService genericResourceService) {
+        this.serviceBundleService = serviceBundleService;
+        this.datasourceBundleService = datasourceBundleService;
+        this.genericResourceService = genericResourceService;
     }
 
     @DeleteMapping(path = {"{id}"}, produces = {MediaType.APPLICATION_JSON_VALUE})
@@ -44,11 +52,11 @@ public class ServiceBundleController {
                                                 @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueId,
                                                 @ApiIgnore Authentication authentication) throws ResourceNotFoundException {
         ServiceBundle service;
-        service = resourceBundleService.get(id, catalogueId);
+        service = serviceBundleService.get(id, catalogueId);
         if (service == null) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
-        resourceBundleService.delete(service);
+        serviceBundleService.delete(service);
         logger.info("User '{}' deleted ServiceBundle '{}' with id: '{}' of the Catalogue: '{}'", authentication, service.getService().getName(),
                 service.getService().getId(), service.getService().getCatalogueId());
         return new ResponseEntity<>(HttpStatus.GONE);
@@ -59,26 +67,30 @@ public class ServiceBundleController {
     public ResponseEntity<ServiceBundle> deleteAll(@ApiIgnore Authentication authentication) throws ResourceNotFoundException {
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(10000);
-        List<ServiceBundle> services = resourceBundleService.getAll(ff, null).getResults();
+        List<ServiceBundle> services = serviceBundleService.getAll(ff, null).getResults();
         for (ServiceBundle service : services) {
             logger.info("Deleting service with name: {}", service.getService().getName());
-            resourceBundleService.delete(service);
+            serviceBundleService.delete(service);
         }
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
     @GetMapping(path = "{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth, #id)")
-    public ResponseEntity<ServiceBundle> get(@PathVariable("id") String id,
-                                             @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueId,
-                                             @ApiIgnore Authentication auth) {
-        return new ResponseEntity<>(resourceBundleService.get(id, catalogueId), HttpStatus.OK);
+    public ResponseEntity<?> get(@PathVariable("id") String id,
+                                 @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueId,
+                                 @ApiIgnore Authentication auth) {
+        try{
+            return new ResponseEntity<>(serviceBundleService.get(id, catalogueId), HttpStatus.OK);
+        } catch(eu.einfracentral.exception.ResourceNotFoundException e){
+            return new ResponseEntity<>(datasourceBundleService.get(id, catalogueId), HttpStatus.OK);
+        }
     }
 
     @PostMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<ServiceBundle> add(@RequestBody ServiceBundle service, Authentication authentication) {
-        ResponseEntity<ServiceBundle> ret = new ResponseEntity<>(resourceBundleService.add(service, authentication), HttpStatus.OK);
+        ResponseEntity<ServiceBundle> ret = new ResponseEntity<>(serviceBundleService.add(service, authentication), HttpStatus.OK);
         logger.info("User '{}' added ServiceBundle '{}' with id: {} and version: {}", authentication, service.getService().getName(), service.getService().getId(), service.getService().getVersion());
         logger.info(" Service Organisation: {}", service.getService().getResourceOrganisation());
         return ret;
@@ -87,14 +99,14 @@ public class ServiceBundleController {
     @PutMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<ServiceBundle> update(@RequestBody ServiceBundle service, @ApiIgnore Authentication authentication) throws ResourceNotFoundException {
-        ResponseEntity<ServiceBundle> ret = new ResponseEntity<>(resourceBundleService.update(service, authentication), HttpStatus.OK);
+        ResponseEntity<ServiceBundle> ret = new ResponseEntity<>(serviceBundleService.update(service, authentication), HttpStatus.OK);
         logger.info("User '{}' updated ServiceBundle '{}' with id: {}", authentication, service.getService().getName(), service.getService().getId());
         return ret;
     }
 
     @PostMapping(path = "validate", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<Boolean> validate(@RequestBody ServiceBundle service, @ApiIgnore Authentication auth) {
-        ResponseEntity<Boolean> ret = ResponseEntity.ok(resourceBundleService.validate(service));
+        ResponseEntity<Boolean> ret = ResponseEntity.ok(serviceBundleService.validate(service));
         logger.info("Validating ServiceBundle: {}", service.getService().getName());
         return ret;
     }
@@ -108,15 +120,20 @@ public class ServiceBundleController {
     })
     @GetMapping(path = "all", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
-    public ResponseEntity<Paging<ServiceBundle>> getAll(@ApiIgnore @RequestParam MultiValueMap<String, Object> allRequestParams, @ApiIgnore Authentication authentication) {
-        FacetFilter ff = FacetFilterUtils.createMultiFacetFilter(allRequestParams);
-        return ResponseEntity.ok(resourceBundleService.getAll(ff, authentication));
+    public ResponseEntity<Paging<?>> getAll(@RequestParam(defaultValue = "all", name = "catalogue_id") String catalogueId,
+                                            @RequestParam(defaultValue = "service", name = "type") String type,
+                                            @ApiIgnore @RequestParam Map<String, Object> allRequestParams,
+                                            @ApiIgnore Authentication authentication) {
+        FacetFilter ff = serviceBundleService.createFacetFilterForFetchingServicesAndDatasources(allRequestParams, catalogueId, type);
+        serviceBundleService.updateFacetFilterConsideringTheAuthorization(ff, authentication);
+        Paging<?> paging = genericResourceService.getResults(ff);
+        return ResponseEntity.ok(paging);
     }
 
     @GetMapping(path = "by/{field}", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     public ResponseEntity<Map<String, List<ServiceBundle>>> getBy(@PathVariable String field, @ApiIgnore Authentication auth) throws NoSuchFieldException {
-        return ResponseEntity.ok(resourceBundleService.getBy(field, auth));
+        return ResponseEntity.ok(serviceBundleService.getBy(field, auth));
     }
 
     @PatchMapping(path = "publish/{id}/{version}", produces = {MediaType.APPLICATION_JSON_VALUE})
@@ -124,7 +141,7 @@ public class ServiceBundleController {
     public ResponseEntity<ServiceBundle> setActive(@PathVariable String id, @PathVariable String version,
                                                    @RequestParam boolean active,
                                                    @ApiIgnore Authentication auth) throws ResourceNotFoundException {
-        ServiceBundle service = resourceBundleService.get(id, version);
+        ServiceBundle service = serviceBundleService.get(id, version);
         service.setActive(active);
         Metadata metadata = service.getMetadata();
         metadata.setModifiedBy("system");
@@ -135,7 +152,7 @@ public class ServiceBundleController {
         } else {
             logger.info("User '{}' set ServiceBundle '{}' with id: {} as inactive", auth.getName(), service.getService().getName(), service.getService().getId());
         }
-        return ResponseEntity.ok(resourceBundleService.update(service, auth));
+        return ResponseEntity.ok(serviceBundleService.update(service, auth));
     }
 
 }

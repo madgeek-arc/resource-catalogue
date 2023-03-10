@@ -10,6 +10,7 @@ import eu.openminted.registry.core.exception.ResourceNotFoundException;
 import eu.openminted.registry.core.service.ResourceCRUDService;
 import eu.openminted.registry.core.service.SearchService;
 import org.springframework.security.core.Authentication;
+import org.springframework.util.MultiValueMap;
 
 import java.util.List;
 import java.util.Map;
@@ -282,5 +283,6 @@ public interface ResourceBundleService<T> extends ResourceCRUDService<T, Authent
 
     T createPublicResource(T resource, Authentication auth);
     FacetFilter createFacetFilterForFetchingServicesAndDatasources(Map<String, Object> allRequestParams, String catalogueId, String type);
+    FacetFilter createFacetFilterForFetchingServicesAndDatasources(MultiValueMap<String, Object> allRequestParams, String catalogueId, String type);
     void updateFacetFilterConsideringTheAuthorization(FacetFilter filter, Authentication auth);
 }
