@@ -428,4 +428,20 @@ public class TrainingResourceController {
         return ResponseEntity.ok(trainingResourceService.createPublicResource(trainingResourceBundle, auth));
     }
 
+    @PostMapping(path = "addTrainingResourceBundle", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public ResponseEntity<TrainingResourceBundle> add(@RequestBody TrainingResourceBundle trainingResourceBundle, Authentication authentication) {
+        ResponseEntity<TrainingResourceBundle> ret = new ResponseEntity<>(trainingResourceService.add(trainingResourceBundle, authentication), HttpStatus.OK);
+        logger.info("User '{}' added TrainingResourceBundle '{}' with id: {}", authentication, trainingResourceBundle.getTrainingResource().getTitle(), trainingResourceBundle.getTrainingResource().getId());
+        return ret;
+    }
+
+    @PutMapping(path = "updateTrainingResourceBundle", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public ResponseEntity<TrainingResourceBundle> update(@RequestBody TrainingResourceBundle trainingResourceBundle, @ApiIgnore Authentication authentication) throws ResourceNotFoundException {
+        ResponseEntity<TrainingResourceBundle> ret = new ResponseEntity<>(trainingResourceService.update(trainingResourceBundle, authentication), HttpStatus.OK);
+        logger.info("User '{}' updated TrainingResourceBundle '{}' with id: {}", authentication, trainingResourceBundle.getTrainingResource().getTitle(), trainingResourceBundle.getTrainingResource().getId());
+        return ret;
+    }
+
 }
