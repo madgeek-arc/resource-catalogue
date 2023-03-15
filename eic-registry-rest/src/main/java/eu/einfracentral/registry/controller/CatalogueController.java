@@ -6,6 +6,7 @@ import eu.einfracentral.registry.service.CatalogueService;
 import eu.einfracentral.registry.service.ProviderService;
 import eu.einfracentral.registry.service.ResourceBundleService;
 import eu.einfracentral.registry.service.TrainingResourceService;
+import eu.einfracentral.service.GenericResourceService;
 import eu.einfracentral.utils.FacetFilterUtils;
 import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.domain.Paging;
@@ -38,18 +39,21 @@ public class CatalogueController {
     private final ResourceBundleService<ServiceBundle> resourceBundleService;
     private final ResourceBundleService<DatasourceBundle> datasourceBundleService;
     private final TrainingResourceService<TrainingResourceBundle> trainingResourceService;
+    private final GenericResourceService genericResourceService;
 
     @Autowired
     CatalogueController(CatalogueService<CatalogueBundle, Authentication> catalogueManager,
                         ProviderService<ProviderBundle, Authentication> providerManager,
                         ResourceBundleService<ServiceBundle> resourceBundleService,
                         ResourceBundleService<DatasourceBundle> datasourceBundleService,
-                        TrainingResourceService<TrainingResourceBundle> trainingResourceService) {
+                        TrainingResourceService<TrainingResourceBundle> trainingResourceService,
+                        GenericResourceService genericResourceService) {
         this.catalogueManager = catalogueManager;
         this.providerManager = providerManager;
         this.resourceBundleService = resourceBundleService;
         this.datasourceBundleService = datasourceBundleService;
         this.trainingResourceService = trainingResourceService;
+        this.genericResourceService = genericResourceService;
     }
 
     //SECTION: CATALOGUE
@@ -316,16 +320,11 @@ public class CatalogueController {
     //SECTION: Service
     @ApiOperation(value = "Returns the Service of the specific Catalogue with the given id.")
     @GetMapping(path = "{catalogueId}/resource/{resourceId}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    public ResponseEntity<Service> getCatalogueService(@PathVariable("catalogueId") String catalogueId, @PathVariable("resourceId") String resourceId, @ApiIgnore Authentication auth) {
-        Service resource = resourceBundleService.getCatalogueResource(catalogueId, resourceId, auth).getService();
-        if (resource.getCatalogueId() == null) {
-            throw new ValidationException("Service's catalogueId cannot be null");
-        } else {
-            if (resource.getCatalogueId().equals(catalogueId)) {
-                return new ResponseEntity<>(resource, HttpStatus.OK);
-            } else {
-                throw new ValidationException(String.format("The Service [%s] you requested does not belong to the specific Catalogue [%s]", resourceId, catalogueId));
-            }
+    public ResponseEntity<?> getCatalogueService(@PathVariable("catalogueId") String catalogueId, @PathVariable("resourceId") String resourceId, @ApiIgnore Authentication auth) {
+        try{
+            return new ResponseEntity<>(resourceBundleService.get(resourceId, catalogueId).getService(), HttpStatus.OK);
+        } catch(eu.einfracentral.exception.ResourceNotFoundException e){
+            return new ResponseEntity<>(datasourceBundleService.get(resourceId, catalogueId).getDatasource(), HttpStatus.OK);
         }
     }
 
@@ -350,9 +349,13 @@ public class CatalogueController {
     @ApiOperation(value = "Get all the Services of a specific Provider of a specific Catalogue")
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     @GetMapping(path = "{catalogueId}/{providerId}/resource/all", produces = {MediaType.APPLICATION_JSON_VALUE})
-    public ResponseEntity<Paging<ServiceBundle>> getProviderServices(@PathVariable String catalogueId, @PathVariable String providerId, @ApiIgnore Authentication auth) {
-        Paging<ServiceBundle> serviceBundles = resourceBundleService.getResourceBundles(catalogueId, providerId, auth);
-        return new ResponseEntity<>(serviceBundles, HttpStatus.OK);
+    public ResponseEntity<Paging<?>> getProviderServices(@PathVariable String catalogueId, @PathVariable String providerId,
+                                                         @RequestParam(defaultValue = "service", name = "type") String type,
+                                                         @ApiIgnore @RequestParam Map<String, Object> allRequestParams) {
+        FacetFilter ff =  resourceBundleService.createFacetFilterForFetchingServicesAndDatasources(allRequestParams, catalogueId, type);
+        ff.addFilter("resource_organisation", providerId);
+        Paging<?> paging = genericResourceService.getResults(ff).map(r -> ((eu.einfracentral.domain.ResourceBundle<?>) r).getPayload());
+        return ResponseEntity.ok(paging);
     }
 
     @ApiOperation(value = "Deletes the Service of the specific Catalogue with the given id.")
