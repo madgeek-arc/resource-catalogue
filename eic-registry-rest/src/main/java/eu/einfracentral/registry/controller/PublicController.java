@@ -2,6 +2,7 @@ package eu.einfracentral.registry.controller;
 
 import com.google.gson.Gson;
 import eu.einfracentral.domain.*;
+import eu.einfracentral.domain.ResourceBundle;
 import eu.einfracentral.domain.ServiceBundle;
 import eu.einfracentral.registry.service.ResourceBundleService;
 import eu.einfracentral.registry.service.ProviderService;
@@ -10,6 +11,7 @@ import eu.einfracentral.registry.service.TrainingResourceService;
 import eu.einfracentral.service.GenericResourceService;
 import eu.einfracentral.service.SecurityService;
 import eu.einfracentral.utils.FacetFilterUtils;
+import eu.openminted.registry.core.domain.Browsing;
 import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.domain.Paging;
 import io.swagger.annotations.Api;
@@ -25,6 +27,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.oauth2.common.exceptions.UnauthorizedUserException;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
@@ -262,12 +265,26 @@ public class PublicController {
     }
 
     @GetMapping(path = "/resource/my", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    public ResponseEntity<List<ServiceBundle>> getMyPublicResources(@ApiIgnore Authentication auth) {
+    public ResponseEntity<List<Object>> getMyPublicResources(@ApiIgnore Authentication auth) {
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(10000);
         ff.addFilter("published", true);
+        ff.setResourceType("resources");
         ff.setOrderBy(FacetFilterUtils.createOrderBy("name", "asc"));
-        return new ResponseEntity<>(publicServiceManager.getMy(ff, auth).getResults(), HttpStatus.OK);
+        if (auth == null) {
+            throw new UnauthorizedUserException("Please log in.");
+        }
+        List<Object> resourceBundleList = new ArrayList<>();
+        Paging<?> paging = genericResourceService.getResults(ff);
+        for (Object o : paging.getResults()) {
+            if (o instanceof ResourceBundle<?>){
+                if (securityService.isResourceProviderAdmin(auth, ((ResourceBundle<?>) o).getId(), ((ResourceBundle<?>) o).getPayload().getCatalogueId()) && ((ResourceBundle<?>) o).getMetadata().isPublished()) {
+                    resourceBundleList.add(o);
+                }
+            }
+        }
+        Browsing<Object> browsing = new Browsing<>(paging.getTotal(), paging.getFrom(), paging.getTo(), resourceBundleList, paging.getFacets());
+        return new ResponseEntity<>(browsing.getResults(), HttpStatus.OK);
     }
 
     //SECTION: DATASOURCE

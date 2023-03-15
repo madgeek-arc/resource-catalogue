@@ -293,21 +293,25 @@ public class OIDCSecurityService implements SecurityService {
         } catch (RuntimeException e) {
             return false;
         }
-        List<String> allProviders;
+        List<String> allProviders = new ArrayList<>();
         String catalogue;
         if (resourceBundle != null){
             if (resourceBundle.getPayload().getResourceOrganisation() == null || resourceBundle.getPayload().getResourceOrganisation().equals("")) {
                 throw new ValidationException("Resource has no Resource Organisation");
             }
-            allProviders = new ArrayList<>(resourceBundle.getPayload().getResourceProviders());
             allProviders.add(resourceBundle.getPayload().getResourceOrganisation());
+            if (resourceBundle.getPayload().getResourceProviders() != null){
+                allProviders.addAll(resourceBundle.getPayload().getResourceProviders());
+            }
             catalogue = resourceBundle.getPayload().getCatalogueId();
         } else{
             if (trainingResourceBundle.getTrainingResource().getResourceOrganisation() == null || trainingResourceBundle.getTrainingResource().getResourceOrganisation().equals("")) {
                 throw new ValidationException("Resource has no Resource Organisation");
             }
-            allProviders = new ArrayList<>(trainingResourceBundle.getTrainingResource().getResourceProviders());
             allProviders.add(trainingResourceBundle.getTrainingResource().getResourceOrganisation());
+            if (trainingResourceBundle.getTrainingResource().getResourceProviders() != null){
+                allProviders.addAll(trainingResourceBundle.getTrainingResource().getResourceProviders());
+            }
             catalogue = trainingResourceBundle.getTrainingResource().getCatalogueId();
         }
         return allProviders
