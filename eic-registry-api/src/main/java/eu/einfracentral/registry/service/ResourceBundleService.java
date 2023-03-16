@@ -138,27 +138,6 @@ public interface ResourceBundleService<T> extends ResourceCRUDService<T, Authent
     Resource getResource(String id, String catalogueId);
 
     /**
-     * Get the History of the ResourceBundle with the specified id.
-     *
-     * @param id
-     * @param catalogueId
-     * @return
-     */
-    @Deprecated
-    Paging<ResourceHistory> getHistory(String id, String catalogueId);
-
-    /**
-     * Get the History of a specific resource version of the ResourceBundle with the specified id.
-     *
-     * @param resourceId
-     * @param catalogueId
-     * @param versionId
-     * @return
-     */
-    @Deprecated
-    Service getVersionHistory(String resourceId, String catalogueId, String versionId);
-
-    /**
      * Validates the given resource.
      *
      * @param resource

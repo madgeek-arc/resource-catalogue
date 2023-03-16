@@ -496,15 +496,6 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
     }
 
     @Override
-    public Paging<TrainingResourceBundle> getInactiveResources() {
-        FacetFilter ff = new FacetFilter();
-        ff.addFilter("active", false);
-        ff.setFrom(0);
-        ff.setQuantity(maxQuantity);
-        return getAll(ff, null);
-    }
-
-    @Override
     public TrainingResourceBundle publish(String trainingResourceId, Boolean active, Authentication auth) {
         TrainingResourceBundle trainingResourceBundle;
         String activeProvider = "";
@@ -621,17 +612,6 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
             return this.getAll(ff, null).getResults().stream().map(TrainingResourceBundle::getTrainingResource).collect(Collectors.toList());
         }
         throw new ValidationException("You cannot view the Training Resources of the specific Provider");
-    }
-
-    @Override
-    public List<TrainingResource> getActiveResources(String providerId) {
-        FacetFilter ff = new FacetFilter();
-        ff.addFilter("resource_organisation", providerId);
-        ff.addFilter("catalogue_id", catalogueName);
-        ff.addFilter("active", true);
-        ff.setQuantity(maxQuantity);
-        ff.addOrderBy("title", "asc");
-        return this.getAll(ff, null).getResults().stream().map(TrainingResourceBundle::getTrainingResource).collect(Collectors.toList());
     }
 
     @Override
@@ -1264,11 +1244,6 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
                 .filter(Objects::nonNull)
                 .collect(toList());
         return resources;
-    }
-
-    @Override
-    public Paging<ResourceHistory> getHistory(String id, String catalogueId) {
-        return null;
     }
 
     public TrainingResourceBundle changeProvider(String resourceId, String newProviderId, String comment, Authentication auth){

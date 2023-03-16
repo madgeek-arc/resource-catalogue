@@ -274,15 +274,6 @@ public class TrainingResourceController {
         return ResponseEntity.ok(trainingResourceService.getAll(ff, auth));
     }
 
-    // Get all modification details of a specific Training Resource, providing the Training Resource id.
-    @GetMapping(path = {"history/{id}"}, produces = {MediaType.APPLICATION_JSON_VALUE})
-    public ResponseEntity<Paging<ResourceHistory>> history(@PathVariable String id,
-                                                           @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueId,
-                                                           @ApiIgnore Authentication auth) {
-        Paging<ResourceHistory> history = trainingResourceService.getHistory(id, catalogueId);
-        return ResponseEntity.ok(history);
-    }
-
     // Filter a list of inactive Training Resources based on a set of filters or get a list of all inactive Training Resource in the Catalogue.
     @ApiImplicitParams({
             @ApiImplicitParam(name = "query", value = "Keyword to refine the search", dataType = "string", paramType = "query"),

@@ -283,23 +283,6 @@ public class ServiceController {
         return ResponseEntity.ok(resourceBundleService.getAll(ff, auth));
     }
 
-    // Get all modification details of a specific Service, providing the Service id.
-    @GetMapping(path = {"history/{id}"}, produces = {MediaType.APPLICATION_JSON_VALUE})
-    public ResponseEntity<Paging<ResourceHistory>> history(@PathVariable String id,
-                                                           @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueId,
-                                                           @ApiIgnore Authentication auth) {
-        Paging<ResourceHistory> history = resourceBundleService.getHistory(id, catalogueId);
-        return ResponseEntity.ok(history);
-    }
-
-    // Get all modifications of a specific Service, providing the Service id and the resource Version id.
-    @GetMapping(path = {"history/{resourceId}/{versionId}"}, produces = {MediaType.APPLICATION_JSON_VALUE})
-    public ResponseEntity<Service> getVersionHistory(@PathVariable String resourceId, @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueId,
-                                                     @PathVariable String versionId, @ApiIgnore Authentication auth) {
-        Service service = resourceBundleService.getVersionHistory(resourceId, catalogueId, versionId);
-        return ResponseEntity.ok(service);
-    }
-
     // Filter a list of inactive Services based on a set of filters or get a list of all inactive Services in the Catalogue.
     @ApiImplicitParams({
             @ApiImplicitParam(name = "query", value = "Keyword to refine the search", dataType = "string", paramType = "query"),
