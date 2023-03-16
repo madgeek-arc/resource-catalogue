@@ -33,6 +33,15 @@ public interface StatisticsService {
     Map<String, Integer> visits(String serviceId, Interval by);
 
     /**
+     * Get time series of ratings for a service.
+     *
+     * @param serviceId
+     * @param by
+     * @return
+     */
+    Map<String, Float> ratings(String serviceId, Interval by);
+
+    /**
      * Get time series of aggregate favourites for all services offered by a provider.
      *
      * @param providerId
@@ -58,6 +67,15 @@ public interface StatisticsService {
      * @return
      */
     Map<String, Float> providerVisitation(String providerId, Interval by);
+
+    /**
+     * Get time series of aggregate ratings for all services offered by a provider.
+     *
+     * @param providerId
+     * @param by
+     * @return
+     */
+    Map<String, Float> providerRatings(String providerId, Interval by);
 
     /**
      * Get the time series of the specified Event type.

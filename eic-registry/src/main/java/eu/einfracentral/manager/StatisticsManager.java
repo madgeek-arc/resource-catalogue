@@ -91,6 +91,71 @@ public class StatisticsManager implements StatisticsService {
         this.dataSource = dataSource;
     }
 
+    @Override
+    public Map<String, Float> ratings(String id, Interval by) {
+
+        String dateFormat;
+        String aggregationName;
+        DateHistogramInterval dateHistogramInterval;
+
+        switch (StatisticsService.Interval.fromString(by.getKey())) {
+            case DAY:
+                dateFormat = "yyyy-MM-dd";
+                aggregationName = "day";
+                dateHistogramInterval = DateHistogramInterval.DAY;
+                break;
+            case WEEK:
+                dateFormat = "yyyy-MM-dd";
+                aggregationName = "week";
+                dateHistogramInterval = DateHistogramInterval.WEEK;
+                break;
+            case YEAR:
+                dateFormat = "yyyy";
+                aggregationName = "year";
+                dateHistogramInterval = DateHistogramInterval.YEAR;
+                break;
+            default:
+                dateFormat = "yyyy-MM";
+                aggregationName = "month";
+                dateHistogramInterval = DateHistogramInterval.MONTH;
+        }
+
+        DateHistogramAggregationBuilder dateHistogramAggregationBuilder = AggregationBuilders.dateHistogram(aggregationName)
+                .field("instant")
+                .calendarInterval(dateHistogramInterval)
+                .format(dateFormat)
+                .subAggregation(AggregationBuilders.sum("rating").field("value"))
+                .subAggregation(AggregationBuilders.count("rating_count").field("value"))
+                .subAggregation(PipelineAggregatorBuilders.cumulativeSum("cum_sum", "rating"))
+                .subAggregation(PipelineAggregatorBuilders.cumulativeSum("ratings_num", "rating_count"));
+
+        SearchRequest search = new SearchRequest("event");
+        SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
+        search.searchType(SearchType.DFS_QUERY_THEN_FETCH);
+        searchSourceBuilder.query(getEventQueryBuilder(id, Event.UserActionType.RATING.getKey()));
+        searchSourceBuilder.aggregation(dateHistogramAggregationBuilder);
+        search.source(searchSourceBuilder);
+
+        SearchResponse response = null;
+        try {
+            response = client.search(search, RequestOptions.DEFAULT);
+        } catch (IOException e) {
+            throw new ServiceException(e.getMessage());
+        }
+
+        List<? extends Histogram.Bucket> bucketsDay = ((ParsedDateHistogram) response
+                .getAggregations()
+                .get(aggregationName))
+                .getBuckets();
+
+        Map<String, Float> bucketMap = bucketsDay.stream().collect(Collectors.toMap(
+                MultiBucketsAggregation.Bucket::getKeyAsString,
+                e -> Float.parseFloat(((SimpleValue) e.getAggregations().get("cum_sum")).getValueAsString()) / Float.parseFloat(((SimpleValue) e.getAggregations().get("ratings_num")).getValueAsString())
+        ));
+
+        return new TreeMap<>(bucketMap);
+    }
+
     private ParsedDateHistogram histogram(String id, String eventType, Interval by) {
 
         String dateFormat;
@@ -176,6 +241,23 @@ public class StatisticsManager implements StatisticsService {
                         }
                 )
         ));
+    }
+
+    @Override
+    public Map<String, Float> providerRatings(String id, Interval by) {
+        Map<String, Float> providerRatings = serviceBundleManager.getResources(id)
+                .stream()
+                .flatMap(s -> ratings(s.getId(), by).entrySet().stream())
+                .collect(Collectors.groupingBy(Map.Entry::getKey, Collectors.averagingDouble(e -> (double) e.getValue())))
+                .entrySet()
+                .stream()
+                .collect(Collectors.toMap(Map.Entry::getKey, v -> (float) v.getValue().doubleValue()));
+        //The above 4 lines should be just
+        //.collect(Collectors.groupingBy(Map.Entry::getKey, Collectors.summingFloat(Map.Entry::getValue)));
+        //but Collectors don't offer a summingFloat for some reason
+        //if they ever offer that, you know what to do
+
+        return new TreeMap<>(providerRatings);
     }
 
     @Override
