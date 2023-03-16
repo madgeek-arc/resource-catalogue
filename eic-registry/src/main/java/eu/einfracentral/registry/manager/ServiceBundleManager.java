@@ -598,6 +598,11 @@ public class ServiceBundleManager extends AbstractResourceBundleManager<ServiceB
         ProviderBundle newProvider = providerService.get(catalogueName, newProviderId, auth);
         ProviderBundle oldProvider = providerService.get(catalogueName, serviceBundle.getService().getResourceOrganisation(), auth);
 
+        // check that the 2 Providers co-exist under the same Catalogue
+        if (!oldProvider.getProvider().getCatalogueId().equals(newProvider.getProvider().getCatalogueId())){
+            throw new ValidationException("You cannot move a Service to a Provider of another Catalogue");
+        }
+
         User user = User.of(auth);
 
         // update loggingInfo
@@ -626,6 +631,13 @@ public class ServiceBundleManager extends AbstractResourceBundleManager<ServiceB
         // update ResourceOrganisation
         serviceBundle.getService().setResourceOrganisation(newProviderId);
 
+        // update ResourceProviders
+        List<String> resourceProviders = serviceBundle.getService().getResourceProviders();
+        if (resourceProviders.contains(oldProvider.getId())){
+            resourceProviders.remove(oldProvider.getId());
+            resourceProviders.add(newProviderId);
+        }
+
         // update id
         String initialId = serviceBundle.getId();
         String[] parts = initialId.split("\\.");
@@ -639,6 +651,9 @@ public class ServiceBundleManager extends AbstractResourceBundleManager<ServiceB
         delete(get(resourceId, catalogueName));
         publicServiceManager.delete(get(resourceId, catalogueName)); // FIXME: ProviderManagementAspect's deletePublicDatasource is not triggered
 
+        // update other resources which had the old resource ID on their fields
+//        updateRelatedToTheIdFieldsOfOtherResourcesOfThePortal();
+
         // emails to EPOT, old and new Provider
         registrationMailService.sendEmailsForMovedResources(oldProvider, newProvider, serviceBundle, auth);
 
@@ -648,6 +663,10 @@ public class ServiceBundleManager extends AbstractResourceBundleManager<ServiceB
     public ServiceBundle createPublicResource(ServiceBundle serviceBundle, Authentication auth){
         publicServiceManager.add(serviceBundle, auth);
         return serviceBundle;
+    }
+
+    private void updateRelatedToTheIdFieldsOfOtherResourcesOfThePortal(String oldResourceId, String newResourceId) {
+        // to be implemented -> EOSCP-90
     }
 
 }
