@@ -1140,6 +1140,18 @@ public abstract class AbstractResourceBundleManager<T extends ResourceBundle<?>>
         return resourceBundle;
     }
 
+    @Override
+    public List<T> getInactiveResources(String providerId) {
+        FacetFilter ff = new FacetFilter();
+        ff.addFilter("resource_organisation", providerId);
+        ff.addFilter("catalogue_id", catalogueName);
+        ff.addFilter("active", false);
+        ff.setFrom(0);
+        ff.setQuantity(maxQuantity);
+        ff.addOrderBy("name", "asc");
+        return this.getAll(ff, null).getResults();
+    }
+
     private void createLoggingInfoEntriesForResourceExtraUpdates(T bundle, Authentication auth) {
         List<LoggingInfo> loggingInfoList = new ArrayList<>();
         LoggingInfo loggingInfo;

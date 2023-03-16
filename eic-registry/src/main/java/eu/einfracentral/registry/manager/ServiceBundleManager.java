@@ -398,15 +398,6 @@ public class ServiceBundleManager extends AbstractResourceBundleManager<ServiceB
     }
 
     @Override
-    public Paging<ServiceBundle> getInactiveResources() {
-        FacetFilter ff = new FacetFilter();
-        ff.addFilter("active", false);
-        ff.setFrom(0);
-        ff.setQuantity(maxQuantity);
-        return getAll(ff, null);
-    }
-
-    @Override
     public ServiceBundle publish(String serviceId, Boolean active, Authentication auth) {
         ServiceBundle service;
         String activeProvider = "";
@@ -534,29 +525,6 @@ public class ServiceBundleManager extends AbstractResourceBundleManager<ServiceB
         ff.setQuantity(maxQuantity);
         ff.addOrderBy("name", "asc");
         return this.getAll(ff, securityService.getAdminAccess()).getResults().stream().map(ServiceBundle::getService).collect(Collectors.toList());
-    }
-
-    @Override
-    public List<Service> getActiveResources(String providerId) {
-        FacetFilter ff = new FacetFilter();
-        ff.addFilter("resource_organisation", providerId);
-        ff.addFilter("catalogue_id", catalogueName);
-        ff.addFilter("active", true);
-        ff.setQuantity(maxQuantity);
-        ff.addOrderBy("name", "asc");
-        return this.getAll(ff, null).getResults().stream().map(ServiceBundle::getService).collect(Collectors.toList());
-    }
-
-    @Override
-    public List<ServiceBundle> getInactiveResources(String providerId) {
-        FacetFilter ff = new FacetFilter();
-        ff.addFilter("resource_organisation", providerId);
-        ff.addFilter("catalogue_id", catalogueName);
-        ff.addFilter("active", false);
-        ff.setFrom(0);
-        ff.setQuantity(maxQuantity);
-        ff.addOrderBy("name", "asc");
-        return this.getAll(ff, null).getResults();
     }
 
     //    @Override
