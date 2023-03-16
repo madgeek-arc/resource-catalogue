@@ -89,16 +89,6 @@ public class TrainingResourceController {
         return new ResponseEntity<>(trainingResourceService.get(id, catalogueId), HttpStatus.OK);
     }
 
-    // Get the specified version of a RichResource providing the TrainingResource id
-    @GetMapping(path = "rich/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("@securityService.trainingResourceIsActive(#id, #catalogueId) or hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') " +
-            "or @securityService.isResourceProviderAdmin(#auth, #id)")
-    public ResponseEntity<RichResource> getRichTrainingResource(@PathVariable("id") String id,
-                                                       @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueId,
-                                                       @ApiIgnore Authentication auth) {
-        return new ResponseEntity<>(trainingResourceService.getRichResource(id, catalogueId, auth), HttpStatus.OK);
-    }
-
     @ApiOperation(value = "Creates a new TrainingResource.")
     @PostMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.providerCanAddResources(#auth, #trainingResource)")
@@ -158,29 +148,6 @@ public class TrainingResourceController {
         return ResponseEntity.ok(new Paging<>(trainingResourceBundles.getTotal(), trainingResourceBundles.getFrom(), trainingResourceBundles.getTo(), trainingResources, trainingResourceBundles.getFacets()));
     }
 
-    // Filter a list of Training Resources based on a set of filters or get a list of all Training Resources in the Catalogue.
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "query", value = "Keyword to refine the search", dataType = "string", paramType = "query"),
-            @ApiImplicitParam(name = "from", value = "Starting index in the result set", dataType = "string", paramType = "query"),
-            @ApiImplicitParam(name = "quantity", value = "Quantity to be fetched", dataType = "string", paramType = "query"),
-            @ApiImplicitParam(name = "order", value = "asc / desc", dataType = "string", paramType = "query"),
-            @ApiImplicitParam(name = "orderField", value = "Order field", dataType = "string", paramType = "query")
-    })
-    @GetMapping(path = "/rich/all", produces = {MediaType.APPLICATION_JSON_VALUE})
-    public ResponseEntity<Paging<RichResource>> getRichTrainingResources(@ApiIgnore @RequestParam MultiValueMap<String, Object> allRequestParams,
-                                                                @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueId,
-                                                                @ApiIgnore Authentication auth) {
-        allRequestParams.addIfAbsent("catalogue_id", catalogueId);
-        if (catalogueId != null && catalogueId.equals("all")) {
-            allRequestParams.remove("catalogue_id");
-        }
-        FacetFilter ff = FacetFilterUtils.createMultiFacetFilter(allRequestParams);
-        ff.addFilter("active", true);
-        ff.addFilter("published", false);
-        Paging<RichResource> trainingResources = trainingResourceService.getRichResources(ff, auth);
-        return ResponseEntity.ok(trainingResources);
-    }
-
     @GetMapping(path = "/childrenFromParent", produces = {MediaType.APPLICATION_JSON_VALUE})
     public List<String> getChildrenFromParent(@RequestParam String type, @RequestParam String parent, @ApiIgnore Authentication auth) {
         NamedParameterJdbcTemplate namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(commonDataSource);
@@ -199,17 +166,6 @@ public class TrainingResourceController {
     })
     @GetMapping(path = "byID/{ids}", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<List<TrainingResource>> getSomeTrainingResources(@PathVariable("ids") String[] ids, @ApiIgnore Authentication auth) {
-        return ResponseEntity.ok(
-                trainingResourceService.getByIds(auth, ids) // FIXME: create method that returns Services instead of RichServices
-                        .stream().map(RichResource::getTrainingResource).collect(Collectors.toList()));
-    }
-
-    // Get a list of RichServices based on a set of ids.
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "ids", value = "Comma-separated list of Training Resource ids", dataType = "string", paramType = "path")
-    })
-    @GetMapping(path = "rich/byID/{ids}", produces = {MediaType.APPLICATION_JSON_VALUE})
-    public ResponseEntity<List<RichResource>> getSomeRichTrainingResources(@PathVariable String[] ids, @ApiIgnore Authentication auth) {
         return ResponseEntity.ok(trainingResourceService.getByIds(auth, ids));
     }
 
@@ -272,15 +228,6 @@ public class TrainingResourceController {
         ff.addFilter("catalogue_id", id);
         ff.addFilter("published", false);
         return ResponseEntity.ok(trainingResourceService.getAll(ff, auth));
-    }
-
-    // Get all modification details of a specific Training Resource, providing the Training Resource id.
-    @GetMapping(path = {"history/{id}"}, produces = {MediaType.APPLICATION_JSON_VALUE})
-    public ResponseEntity<Paging<ResourceHistory>> history(@PathVariable String id,
-                                                           @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueId,
-                                                           @ApiIgnore Authentication auth) {
-        Paging<ResourceHistory> history = trainingResourceService.getHistory(id, catalogueId);
-        return ResponseEntity.ok(history);
     }
 
     // Filter a list of inactive Training Resources based on a set of filters or get a list of all inactive Training Resource in the Catalogue.

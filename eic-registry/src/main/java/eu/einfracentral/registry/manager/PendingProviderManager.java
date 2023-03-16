@@ -241,7 +241,7 @@ public class PendingProviderManager extends ResourceManager<ProviderBundle> impl
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(maxQuantity);
         ff.addFilter("users", User.of(auth).getEmail());
-        ff.setOrderBy(FacetFilterUtils.createOrderBy("name", "asc"));
+        ff.addOrderBy("name", "asc");
         return super.getAll(ff, auth).getResults();
     }
 

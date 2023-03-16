@@ -83,39 +83,7 @@ public interface TrainingResourceService<T> extends ResourceService<T, Authentic
      * @param ids
      * @return
      */
-    List<RichResource> getByIds(Authentication authentication, String... ids);
-
-    /**
-     * Gets all Resources with extra fields like views and ratings
-     *
-     * @param ff
-     * @return
-     */
-    Paging<RichResource> getRichResources(FacetFilter ff, Authentication auth);
-
-    /**
-     * Gets the specific Resource with extra fields like views and ratings
-     *
-     * @param id
-     * @param catalogueId
-     * @param auth
-     * @return
-     */
-    RichResource getRichResource(String id, String catalogueId, Authentication auth);
-
-    /**
-     * Creates a RichResource for the specific Resource
-     *
-     * @return
-     */
-    RichResource createRichResource(T resourceBundle, Authentication auth);
-
-    /**
-     * Creates RichResources for a list of given Resources
-     *
-     * @return
-     */
-    List<RichResource> createRichResources(List<T> resourceBundleList, Authentication auth);
+    List<TrainingResource> getByIds(Authentication authentication, String... ids);
 
 
     /**
@@ -142,23 +110,6 @@ public interface TrainingResourceService<T> extends ResourceService<T, Authentic
      * @return Resource
      */
     Resource getResource(String id, String catalogueId);
-
-    /**
-     * Get the History of the ResourceBundle with the specified id.
-     *
-     * @param id
-     * @param catalogueId
-     * @return
-     */
-    @Deprecated
-    Paging<ResourceHistory> getHistory(String id, String catalogueId);
-
-    /**
-     * Get inactive Resources.
-     *
-     * @return
-     */
-    Paging<T> getInactiveResources();
 
     /**
      * Sets a Resource as active/inactive.
@@ -220,8 +171,6 @@ public interface TrainingResourceService<T> extends ResourceService<T, Authentic
     Paging<T> getResourceBundles(String catalogueId, String providerId, Authentication auth);
 
     List<? extends TrainingResource> getResources(String providerId, Authentication auth);
-
-    List<? extends TrainingResource> getActiveResources(String providerId);
 
     TrainingResourceBundle getResourceTemplate(String providerId, Authentication auth);
 

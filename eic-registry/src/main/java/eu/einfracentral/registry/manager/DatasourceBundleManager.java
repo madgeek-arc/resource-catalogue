@@ -409,15 +409,6 @@ public class DatasourceBundleManager extends AbstractResourceBundleManager<Datas
     }
 
     @Override
-    public Paging<DatasourceBundle> getInactiveResources() {
-        FacetFilter ff = new FacetFilter();
-        ff.addFilter("active", false);
-        ff.setFrom(0);
-        ff.setQuantity(maxQuantity);
-        return getAll(ff, null);
-    }
-
-    @Override
     public DatasourceBundle publish(String resourceId, Boolean active, Authentication auth) {
         DatasourceBundle datasourceBundle;
         String activeProvider = "";
@@ -500,7 +491,7 @@ public class DatasourceBundleManager extends AbstractResourceBundleManager<Datas
         ff.addFilter("resource_organisation", providerId);
         ff.addFilter("catalogue_id", catalogueName);
         ff.setQuantity(maxQuantity);
-        ff.setOrderBy(FacetFilterUtils.createOrderBy("name", "asc"));
+        ff.addOrderBy("name", "asc");
         return this.getAll(ff, auth).getResults();
     }
 
@@ -510,7 +501,7 @@ public class DatasourceBundleManager extends AbstractResourceBundleManager<Datas
         ff.addFilter("resource_organisation", providerId);
         ff.addFilter("catalogue_id", catalogueId);
         ff.setQuantity(maxQuantity);
-        ff.setOrderBy(FacetFilterUtils.createOrderBy("name", "asc"));
+        ff.addOrderBy("name", "asc");
         return this.getAll(ff, auth);
     }
 
@@ -521,7 +512,7 @@ public class DatasourceBundleManager extends AbstractResourceBundleManager<Datas
         ff.addFilter("resource_organisation", providerId);
         ff.addFilter("catalogue_id", catalogueName);
         ff.setQuantity(maxQuantity);
-        ff.setOrderBy(FacetFilterUtils.createOrderBy("name", "asc"));
+        ff.addOrderBy("name", "asc");
         if (auth != null && auth.isAuthenticated()) {
             User user = User.of(auth);
             // if user is ADMIN/EPOT or Provider Admin on the specific Provider, return its Services
@@ -543,31 +534,8 @@ public class DatasourceBundleManager extends AbstractResourceBundleManager<Datas
         ff.addFilter("resource_organisation", providerId);
         ff.addFilter("catalogue_id", catalogueName);
         ff.setQuantity(maxQuantity);
-        ff.setOrderBy(FacetFilterUtils.createOrderBy("name", "asc"));
+        ff.addOrderBy("name", "asc");
         return this.getAll(ff, securityService.getAdminAccess()).getResults().stream().map(DatasourceBundle::getDatasource).collect(Collectors.toList());
-    }
-
-    @Override
-    public List<Service> getActiveResources(String providerId) {
-        FacetFilter ff = new FacetFilter();
-        ff.addFilter("resource_organisation", providerId);
-        ff.addFilter("catalogue_id", catalogueName);
-        ff.addFilter("active", true);
-        ff.setQuantity(maxQuantity);
-        ff.setOrderBy(FacetFilterUtils.createOrderBy("name", "asc"));
-        return this.getAll(ff, null).getResults().stream().map(DatasourceBundle::getDatasource).collect(Collectors.toList());
-    }
-
-    @Override
-    public List<DatasourceBundle> getInactiveResources(String providerId) {
-        FacetFilter ff = new FacetFilter();
-        ff.addFilter("resource_organisation", providerId);
-        ff.addFilter("catalogue_id", catalogueName);
-        ff.addFilter("active", false);
-        ff.setFrom(0);
-        ff.setQuantity(maxQuantity);
-        ff.setOrderBy(FacetFilterUtils.createOrderBy("name", "asc"));
-        return this.getAll(ff, null).getResults();
     }
 
     //    @Override

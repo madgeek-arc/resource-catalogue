@@ -347,98 +347,6 @@ public abstract class AbstractResourceBundleManager<T extends ResourceBundle<?>>
         }
     }
 
-    @Override
-    public Browsing<ResourceHistory> getHistory(String resourceId, String catalogueId) {
-        Map<String, ResourceHistory> historyMap = new TreeMap<>();
-
-        // get all resources with the specified Service id
-        List<Resource> resources = getResources(resourceId, catalogueId);
-
-        // for each resource (ServiceBundle), get its versions
-        if (resources != null) {
-            for (Resource resource : resources) {
-                T service;
-                Resource tempResource = resource;
-                List<Version> versions = versionService.getVersionsByResource(resource.getId());
-                versions.sort((version, t1) -> {
-                    if (version.getCreationDate().getTime() < t1.getCreationDate().getTime()) {
-                        return -1;
-                    }
-                    return 1;
-                });
-
-                // create the Major Change entry (when service version has changed)
-                if (!versions.isEmpty()) {
-                    tempResource.setPayload(versions.get(0).getPayload());
-                    service = deserialize(tempResource);
-                    if (service != null && service.getMetadata() != null) {
-                        historyMap.put(service.getMetadata().getModifiedAt(), new ResourceHistory(service, versions.get(0).getId(), true));
-                    }
-                    versions.remove(0);
-                } else {
-                    service = deserialize(tempResource);
-                    if (service != null && service.getMetadata() != null) {
-                        historyMap.put(service.getMetadata().getModifiedAt(), new ResourceHistory(service, true));
-                    }
-                }
-
-                // create service update entries
-                for (Version version : versions) {
-                    tempResource = (version.getResource() == null ? getResourceById(version.getParentId()) : version.getResource());
-                    tempResource.setPayload(version.getPayload());
-                    service = deserialize(tempResource);
-                    if (service != null) {
-                        try {
-                            historyMap.putIfAbsent(service.getMetadata().getModifiedAt(), new ResourceHistory(service, version.getId(), false));
-                        } catch (NullPointerException e) {
-                            logger.warn("ServiceBundle with id '{}' does not have Metadata", service.getPayload().getId());
-                        }
-                    }
-                }
-                service = deserialize(resource);
-                if (service != null && service.getMetadata() != null) {
-                    historyMap.putIfAbsent(service.getMetadata().getModifiedAt(), new ResourceHistory(service, false));
-                }
-            }
-        }
-
-        List<ResourceHistory> history = new ArrayList<>(historyMap.values());
-        history.sort((serviceHistory, t1) -> {
-            if (Long.parseLong(serviceHistory.getModifiedAt()) < Long.parseLong(t1.getModifiedAt())) {
-                return 1;
-            }
-            return -1;
-        });
-
-        return new Browsing<>(history.size(), 0, history.size(), history, null);
-    }
-
-    @Override
-    public Service getVersionHistory(String resourceId, String catalogueId, String versionId) {
-        List<Resource> resources = getResources(resourceId, catalogueId);
-        Service service = new Service();
-        List<Version> versions;
-        List<Version> allVersions = new ArrayList<>();
-
-        if (resources != null) {
-            for (Resource resource : resources) {
-                versions = versionService.getVersionsByResource(resource.getId()); //FIXME -> catalogueId needed
-                allVersions.addAll(versions);
-            }
-            for (Version version : allVersions) {
-                if (version.getId().matches(versionId)) {
-                    Resource tempResource = version.getResource();
-                    tempResource.setPayload(version.getPayload());
-                    service = Objects.requireNonNull(deserialize(tempResource)).getPayload();
-                    break;
-                }
-            }
-            return service;
-        } else {
-            throw new ValidationException("Service with id '" + resourceId + "' does not exist.");
-        }
-    }
-
     String serialize(T resourceBundle) {
         String serialized;
         serialized = parserPool.serialize(resourceBundle, ParserService.ParserServiceTypes.XML);
@@ -739,44 +647,9 @@ public abstract class AbstractResourceBundleManager<T extends ResourceBundle<?>>
 
     private List<RichResource> createRichStatistics(List<RichResource> richResources, Authentication auth) {
         Map<String, Integer> resourceVisits = analyticsService.getAllServiceVisits();
-        Map<String, List<Float>> resourceFavorites = eventService.getAllServiceEventValues(Event.UserActionType.FAVOURITE.getKey(), auth);
-        Map<String, List<Float>> resourceRatings = eventService.getAllServiceEventValues(Event.UserActionType.RATING.getKey(), auth);
 
         for (RichResource richResource : richResources) {
             String resourceId = getRichResourceIdOrCatalogueId(richResource, true);
-
-            // set user favourite and rate if auth != null
-            if (auth != null) {
-
-                List<Event> userEvents;
-                try {
-                    userEvents = eventService.getEvents(Event.UserActionType.FAVOURITE.getKey(), resourceId, auth);
-                    if (!userEvents.isEmpty()) {
-                        richResource.setIsFavourite(userEvents.get(0).getValue());
-                    }
-                    userEvents = eventService.getEvents(Event.UserActionType.RATING.getKey(), resourceId, auth);
-                    if (!userEvents.isEmpty()) {
-                        richResource.setUserRate(userEvents.get(0).getValue());
-                    }
-                } catch (OIDCAuthenticationException e) {
-                    // user not logged in
-                    logger.warn("Authentication Exception", e);
-                } catch (Exception e2) {
-                    logger.error(e2);
-                }
-            }
-
-            if (resourceRatings.containsKey(resourceId)) {
-                int ratings = resourceRatings.get(resourceId).size();
-                float rating = resourceRatings.get(resourceId).stream().reduce((float) 0.0, Float::sum) / ratings;
-                richResource.setRatings(ratings);
-                richResource.setHasRate(Float.parseFloat(new DecimalFormat("#.##").format(rating)));
-
-            }
-            if (resourceFavorites.containsKey(resourceId)) {
-                int favourites = resourceFavorites.get(resourceId).stream().mapToInt(Float::intValue).sum();
-                richResource.setFavourites(favourites);
-            }
 
             // set visits
             Integer views = resourceVisits.get(resourceId);
@@ -1132,6 +1005,18 @@ public abstract class AbstractResourceBundleManager<T extends ResourceBundle<?>>
             return null;
         }
         return resourceBundle;
+    }
+
+    @Override
+    public List<T> getInactiveResources(String providerId) {
+        FacetFilter ff = new FacetFilter();
+        ff.addFilter("resource_organisation", providerId);
+        ff.addFilter("catalogue_id", catalogueName);
+        ff.addFilter("active", false);
+        ff.setFrom(0);
+        ff.setQuantity(maxQuantity);
+        ff.addOrderBy("name", "asc");
+        return this.getAll(ff, null).getResults();
     }
 
     private void createLoggingInfoEntriesForResourceExtraUpdates(T bundle, Authentication auth) {

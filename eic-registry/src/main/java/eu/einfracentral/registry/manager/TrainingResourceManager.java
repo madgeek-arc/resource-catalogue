@@ -496,15 +496,6 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
     }
 
     @Override
-    public Paging<TrainingResourceBundle> getInactiveResources() {
-        FacetFilter ff = new FacetFilter();
-        ff.addFilter("active", false);
-        ff.setFrom(0);
-        ff.setQuantity(maxQuantity);
-        return getAll(ff, null);
-    }
-
-    @Override
     public TrainingResourceBundle publish(String trainingResourceId, Boolean active, Authentication auth) {
         TrainingResourceBundle trainingResourceBundle;
         String activeProvider = "";
@@ -586,7 +577,7 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
         ff.addFilter("resource_organisation", providerId);
         ff.addFilter("catalogue_id", catalogueName);
         ff.setQuantity(maxQuantity);
-        ff.setOrderBy(FacetFilterUtils.createOrderBy("title", "asc"));
+        ff.addOrderBy("title", "asc");
         return this.getAll(ff, auth).getResults();
     }
 
@@ -596,7 +587,7 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
         ff.addFilter("resource_organisation", providerId);
         ff.addFilter("catalogue_id", catalogueId);
         ff.setQuantity(maxQuantity);
-        ff.setOrderBy(FacetFilterUtils.createOrderBy("title", "asc"));
+        ff.addOrderBy("title", "asc");
         return this.getAll(ff, auth);
     }
 
@@ -607,7 +598,7 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
         ff.addFilter("resource_organisation", providerId);
         ff.addFilter("catalogue_id", catalogueName);
         ff.setQuantity(maxQuantity);
-        ff.setOrderBy(FacetFilterUtils.createOrderBy("title", "asc"));
+        ff.addOrderBy("title", "asc");
         if (auth != null && auth.isAuthenticated()) {
             User user = User.of(auth);
             // if user is ADMIN/EPOT or Provider Admin on the specific Provider, return its Training Resources
@@ -624,17 +615,6 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
     }
 
     @Override
-    public List<TrainingResource> getActiveResources(String providerId) {
-        FacetFilter ff = new FacetFilter();
-        ff.addFilter("resource_organisation", providerId);
-        ff.addFilter("catalogue_id", catalogueName);
-        ff.addFilter("active", true);
-        ff.setQuantity(maxQuantity);
-        ff.setOrderBy(FacetFilterUtils.createOrderBy("title", "asc"));
-        return this.getAll(ff, null).getResults().stream().map(TrainingResourceBundle::getTrainingResource).collect(Collectors.toList());
-    }
-
-    @Override
     public List<TrainingResourceBundle> getInactiveResources(String providerId) {
         FacetFilter ff = new FacetFilter();
         ff.addFilter("resource_organisation", providerId);
@@ -642,7 +622,7 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
         ff.addFilter("active", false);
         ff.setFrom(0);
         ff.setQuantity(maxQuantity);
-        ff.setOrderBy(FacetFilterUtils.createOrderBy("title", "asc"));
+        ff.addOrderBy("title", "asc");
         return this.getAll(ff, null).getResults();
     }
 
@@ -748,7 +728,7 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
         ff.addFilter("catalogue_id", catalogueName);
         ff.addFilter("published", false);
         ff.setQuantity(maxQuantity);
-        ff.setOrderBy(FacetFilterUtils.createOrderBy("title", "asc"));
+        ff.addOrderBy("title", "asc");
         return this.getAll(ff, securityService.getAdminAccess()).getResults().stream().map(TrainingResourceBundle::getTrainingResource).collect(Collectors.toList());
     }
 
@@ -781,162 +761,6 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
             return null;
         }
         return trainingResourceBundle;
-    }
-
-    @Override
-    public Paging<RichResource> getRichResources(FacetFilter ff, Authentication auth) {
-        Browsing<TrainingResourceBundle> resourceBundles = getAll(ff, auth);
-        List<RichResource> richResourceList = createRichResources(resourceBundles.getResults(), auth);
-        return new Browsing<>(resourceBundles.getTotal(), resourceBundles.getFrom(), resourceBundles.getTo(),
-                richResourceList, resourceBundles.getFacets());
-    }
-
-    @Override
-    public RichResource getRichResource(String id, String catalogueId, Authentication auth) {
-        TrainingResourceBundle resourceBundle;
-        resourceBundle = get(id, catalogueId);
-        return createRichResource(resourceBundle, auth);
-    }
-
-    @Override
-    public RichResource createRichResource(TrainingResourceBundle resourceBundle, Authentication auth) {
-        return createRichResources(Collections.singletonList(resourceBundle), auth).get(0);
-    }
-
-    @Override
-    public List<RichResource> createRichResources(List<TrainingResourceBundle> resourceBundleList, Authentication auth) {
-        logger.trace("Creating RichServices from a list of TrainingResourceBundles\nAuthentication: {}", auth);
-        List<RichResource> richResources = createRichVocabularies(resourceBundleList);
-        createRichStatistics(richResources, auth);
-        createProviderInfo(richResources, auth);
-
-        return richResources;
-    }
-
-    private List<RichResource> createRichVocabularies(List<TrainingResourceBundle> trainingResourceBundles) {
-        Map<String, Vocabulary> allVocabularies = vocabularyService.getVocabulariesMap();
-        List<RichResource> richResources = new ArrayList<>();
-
-        for (TrainingResourceBundle trainingResourceBundle : trainingResourceBundles) {
-            RichResource richResource = new RichResource(trainingResourceBundle);
-
-            // LanguageAvailabilities Names
-            if (trainingResourceBundle.getTrainingResource().getLanguages() != null) {
-                richResource.setLanguageAvailabilityNames(trainingResourceBundle.getPayload().getLanguages()
-                        .stream()
-                        .filter(v -> !v.equals(""))
-                        .map(l -> allVocabularies.get(l).getName())
-                        .collect(Collectors.toList())
-                );
-            }
-
-            // GeographicAvailabilities Names
-            if (trainingResourceBundle.getTrainingResource().getGeographicalAvailabilities() != null) {
-                richResource.setGeographicAvailabilityNames(trainingResourceBundle.getTrainingResource().getGeographicalAvailabilities()
-                        .stream()
-                        .filter(v -> !v.equals(""))
-                        .map(p -> allVocabularies.get(p).getName())
-                        .collect(Collectors.toList())
-                );
-            }
-
-            // Domain Tree
-            List<ScientificDomain> domains = new ArrayList<>();
-            if (trainingResourceBundle.getTrainingResource().getScientificDomains() != null) {
-                for (ServiceProviderDomain serviceProviderDomain : trainingResourceBundle.getTrainingResource().getScientificDomains()) {
-                    ScientificDomain domain = new ScientificDomain();
-                    if (serviceProviderDomain.getScientificDomain() != null && !serviceProviderDomain.getScientificDomain().equals("")) {
-                        domain.setDomain(vocabularyService.get(serviceProviderDomain.getScientificDomain()));
-                    } else {
-                        domain.setDomain(null);
-                    }
-                    if (serviceProviderDomain.getScientificSubdomain() != null && !serviceProviderDomain.getScientificSubdomain().equals("")) {
-                        domain.setSubdomain(vocabularyService.get(serviceProviderDomain.getScientificSubdomain()));
-                    } else {
-                        domain.setSubdomain(null);
-                    }
-                    domains.add(domain);
-                }
-            }
-            richResource.setDomains(domains);
-            richResources.add(richResource);
-        }
-        return (richResources);
-    }
-
-    private List<RichResource> createRichStatistics(List<RichResource> richResources, Authentication auth) {
-        Map<String, Integer> resourceVisits = analyticsService.getAllServiceVisits();
-        Map<String, List<Float>> resourceFavorites = eventService.getAllServiceEventValues(Event.UserActionType.FAVOURITE.getKey(), auth);
-        Map<String, List<Float>> resourceRatings = eventService.getAllServiceEventValues(Event.UserActionType.RATING.getKey(), auth);
-
-        for (RichResource richResource : richResources) {
-
-            // set user favourite and rate if auth != null
-            if (auth != null) {
-
-                List<Event> userEvents;
-                try {
-                    userEvents = eventService.getEvents(Event.UserActionType.FAVOURITE.getKey(), richResource.getTrainingResource().getId(), auth);
-                    if (!userEvents.isEmpty()) {
-                        richResource.setIsFavourite(userEvents.get(0).getValue());
-                    }
-                    userEvents = eventService.getEvents(Event.UserActionType.RATING.getKey(), richResource.getTrainingResource().getId(), auth);
-                    if (!userEvents.isEmpty()) {
-                        richResource.setUserRate(userEvents.get(0).getValue());
-                    }
-                } catch (OIDCAuthenticationException e) {
-                    // user not logged in
-                    logger.warn("Authentication Exception", e);
-                } catch (Exception e2) {
-                    logger.error(e2);
-                }
-            }
-
-            if (resourceRatings.containsKey(richResource.getTrainingResource().getId())) {
-                int ratings = resourceRatings.get(richResource.getTrainingResource().getId()).size();
-                float rating = resourceRatings.get(richResource.getTrainingResource().getId()).stream().reduce((float) 0.0, Float::sum) / ratings;
-                richResource.setRatings(ratings);
-                richResource.setHasRate(Float.parseFloat(new DecimalFormat("#.##").format(rating)));
-
-            }
-
-            if (resourceFavorites.containsKey(richResource.getTrainingResource().getId())) {
-                int favourites = resourceFavorites.get(richResource.getTrainingResource().getId()).stream().mapToInt(Float::intValue).sum();
-                richResource.setFavourites(favourites);
-            }
-
-            // set visits
-            Integer views = resourceVisits.get(richResource.getTrainingResource().getId());
-            if (views != null) {
-                richResource.setViews(views);
-            } else {
-                richResource.setViews(0);
-            }
-        }
-        return richResources;
-    }
-
-    private List<RichResource> createProviderInfo(List<RichResource> richResources, Authentication auth) {
-        for (RichResource richResource : richResources) {
-            createProviderInfo(richResource, auth);
-        }
-        return richResources;
-    }
-
-    private RichResource createProviderInfo(RichResource richResource, Authentication auth) {
-        List<ProviderInfo> providerInfoList = new ArrayList<>();
-        Set<String> allProviders = new HashSet<>(richResource.getTrainingResource().getResourceProviders());
-        allProviders.add(richResource.getTrainingResource().getResourceOrganisation());
-        for (String provider : allProviders) {
-            if (!"".equals(provider)) { // ignore providers with empty id "" (fix for pendingServices)
-                ProviderBundle providerBundle = providerService.get(provider, auth);
-                boolean isResourceOrganisation = provider.equals(richResource.getTrainingResource().getResourceOrganisation());
-                ProviderInfo providerInfo = new ProviderInfo(providerBundle.getProvider(), isResourceOrganisation);
-                providerInfoList.add(providerInfo);
-            }
-        }
-        richResource.setProviderInfo(providerInfoList);
-        return richResource;
     }
 
     @Override
@@ -1249,13 +1073,13 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
     }
 
     @Override
-    public List<RichResource> getByIds(Authentication auth, String... ids) {
-        List<RichResource> resources;
+    public List<TrainingResource> getByIds(Authentication auth, String... ids) {
+        List<TrainingResource> resources;
         resources = Arrays.stream(ids)
                 .map(id ->
                 {
                     try {
-                        return getRichResource(id, catalogueName, auth);
+                        return get(id, catalogueName).getTrainingResource();
                     } catch (ServiceException | ResourceNotFoundException e) {
                         return null;
                     }
@@ -1264,11 +1088,6 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
                 .filter(Objects::nonNull)
                 .collect(toList());
         return resources;
-    }
-
-    @Override
-    public Paging<ResourceHistory> getHistory(String id, String catalogueId) {
-        return null;
     }
 
     public TrainingResourceBundle changeProvider(String resourceId, String newProviderId, String comment, Authentication auth){

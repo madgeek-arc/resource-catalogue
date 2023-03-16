@@ -65,7 +65,7 @@ public interface ResourceBundleService<T> extends ResourceCRUDService<T, Authent
     /**
      * Returns the Resource with the specified id.
      *
-     * @param id of the Resource.
+     * @param id          of the Resource.
      * @param catalogueId
      * @return resource.
      */
@@ -139,34 +139,6 @@ public interface ResourceBundleService<T> extends ResourceCRUDService<T, Authent
     Resource getResource(String id, String catalogueId);
 
     /**
-     * Get the History of the ResourceBundle with the specified id.
-     *
-     * @param id
-     * @param catalogueId
-     * @return
-     */
-    @Deprecated
-    Paging<ResourceHistory> getHistory(String id, String catalogueId);
-
-    /**
-     * Get the History of a specific resource version of the ResourceBundle with the specified id.
-     *
-     * @param resourceId
-     * @param catalogueId
-     * @param versionId
-     * @return
-     */
-    @Deprecated
-    Service getVersionHistory(String resourceId, String catalogueId, String versionId);
-
-    /**
-     * Get inactive Resources.
-     *
-     * @return
-     */
-    Paging<T> getInactiveResources();
-
-    /**
      * Validates the given resource.
      *
      * @param resource
@@ -235,11 +207,9 @@ public interface ResourceBundleService<T> extends ResourceCRUDService<T, Authent
 
     List<? extends Service> getResources(String providerId, Authentication auth);
 
-    List<? extends Service> getActiveResources(String providerId);
+    List<T> getInactiveResources(String providerId);
 
     ResourceBundle<?> getResourceTemplate(String providerId, Authentication auth);
-
-    List<T> getInactiveResources(String providerId);
 
     /**
      * @param resourceId
@@ -276,9 +246,13 @@ public interface ResourceBundleService<T> extends ResourceCRUDService<T, Authent
     Paging<T> getAllForAdminWithAuditStates(FacetFilter ff, Set<String> auditState, Authentication authentication);
 
     ResourceBundle<?> updateEOSCIFGuidelines(String resourceId, String catalogueId, List<EOSCIFGuidelines> eoscIFGuidelines, Authentication auth);
+
     ResourceBundle<?> updateResearchCategories(String resourceId, String catalogueId, List<String> researchCategories, Authentication auth);
+
     ResourceBundle<?> updateHorizontalService(String resourceId, String catalogueId, boolean horizontalService, Authentication auth);
+
     ResourceBundle<?> getOrElseReturnNull(String id);
+
     ResourceBundle<?> getOrElseReturnNull(String id, String catalogueId);
 
     T createPublicResource(T resource, Authentication auth);
