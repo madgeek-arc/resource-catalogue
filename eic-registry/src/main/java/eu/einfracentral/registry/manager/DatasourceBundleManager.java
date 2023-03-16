@@ -500,7 +500,7 @@ public class DatasourceBundleManager extends AbstractResourceBundleManager<Datas
         ff.addFilter("resource_organisation", providerId);
         ff.addFilter("catalogue_id", catalogueName);
         ff.setQuantity(maxQuantity);
-        ff.setOrderBy(FacetFilterUtils.createOrderBy("name", "asc"));
+        ff.addOrderBy("name", "asc");
         return this.getAll(ff, auth).getResults();
     }
 
@@ -510,7 +510,7 @@ public class DatasourceBundleManager extends AbstractResourceBundleManager<Datas
         ff.addFilter("resource_organisation", providerId);
         ff.addFilter("catalogue_id", catalogueId);
         ff.setQuantity(maxQuantity);
-        ff.setOrderBy(FacetFilterUtils.createOrderBy("name", "asc"));
+        ff.addOrderBy("name", "asc");
         return this.getAll(ff, auth);
     }
 
@@ -521,7 +521,7 @@ public class DatasourceBundleManager extends AbstractResourceBundleManager<Datas
         ff.addFilter("resource_organisation", providerId);
         ff.addFilter("catalogue_id", catalogueName);
         ff.setQuantity(maxQuantity);
-        ff.setOrderBy(FacetFilterUtils.createOrderBy("name", "asc"));
+        ff.addOrderBy("name", "asc");
         if (auth != null && auth.isAuthenticated()) {
             User user = User.of(auth);
             // if user is ADMIN/EPOT or Provider Admin on the specific Provider, return its Services
@@ -543,7 +543,7 @@ public class DatasourceBundleManager extends AbstractResourceBundleManager<Datas
         ff.addFilter("resource_organisation", providerId);
         ff.addFilter("catalogue_id", catalogueName);
         ff.setQuantity(maxQuantity);
-        ff.setOrderBy(FacetFilterUtils.createOrderBy("name", "asc"));
+        ff.addOrderBy("name", "asc");
         return this.getAll(ff, securityService.getAdminAccess()).getResults().stream().map(DatasourceBundle::getDatasource).collect(Collectors.toList());
     }
 
@@ -554,7 +554,7 @@ public class DatasourceBundleManager extends AbstractResourceBundleManager<Datas
         ff.addFilter("catalogue_id", catalogueName);
         ff.addFilter("active", true);
         ff.setQuantity(maxQuantity);
-        ff.setOrderBy(FacetFilterUtils.createOrderBy("name", "asc"));
+        ff.addOrderBy("name", "asc");
         return this.getAll(ff, null).getResults().stream().map(DatasourceBundle::getDatasource).collect(Collectors.toList());
     }
 
@@ -566,7 +566,7 @@ public class DatasourceBundleManager extends AbstractResourceBundleManager<Datas
         ff.addFilter("active", false);
         ff.setFrom(0);
         ff.setQuantity(maxQuantity);
-        ff.setOrderBy(FacetFilterUtils.createOrderBy("name", "asc"));
+        ff.addOrderBy("name", "asc");
         return this.getAll(ff, null).getResults();
     }
 

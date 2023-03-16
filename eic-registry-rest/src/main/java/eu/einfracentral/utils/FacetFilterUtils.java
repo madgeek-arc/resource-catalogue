@@ -20,6 +20,7 @@ public class FacetFilterUtils {
     private FacetFilterUtils() {
     }
 
+    @Deprecated
     public static Map<String, Object> createOrderBy(String field, String orderType) {
         Map<String, Object> sort = new HashMap<>();
         Map<String, Object> order = new HashMap<>();

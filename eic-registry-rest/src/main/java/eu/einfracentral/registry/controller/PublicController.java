@@ -212,7 +212,7 @@ public class PublicController {
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(10000);
         ff.addFilter("published", true);
-        ff.setOrderBy(FacetFilterUtils.createOrderBy("name", "asc"));
+        ff.addOrderBy("name", "asc");
         return new ResponseEntity<>(publicProviderManager.getMy(ff, auth).getResults(), HttpStatus.OK);
     }
 
@@ -362,7 +362,7 @@ public class PublicController {
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(10000);
         ff.addFilter("published", true);
-        ff.setOrderBy(FacetFilterUtils.createOrderBy("name", "asc"));
+        ff.addOrderBy("name", "asc");
         return new ResponseEntity<>(publicResourceServiceManager.getMy(ff, auth).getResults(), HttpStatus.OK);
     }
 
@@ -511,7 +511,7 @@ public class PublicController {
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(10000);
         ff.addFilter("published", true);
-        ff.setOrderBy(FacetFilterUtils.createOrderBy("name", "asc"));
+        ff.addOrderBy("name", "asc");
         return new ResponseEntity<>(publicResourceDatasourceManager.getMy(ff, auth).getResults(), HttpStatus.OK);
     }
 
@@ -661,7 +661,7 @@ public class PublicController {
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(10000);
         ff.addFilter("published", true);
-        ff.setOrderBy(FacetFilterUtils.createOrderBy("name", "asc"));
+        ff.addOrderBy("name", "asc");
         return new ResponseEntity<>(publicTrainingResourceManager.getMy(ff, auth).getResults(), HttpStatus.OK);
     }
 }

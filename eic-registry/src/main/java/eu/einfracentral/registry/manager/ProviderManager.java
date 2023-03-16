@@ -588,7 +588,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
             ff.addFilter("published", false);
         }
         ff.addFilter("users", user.getEmail());
-        ff.setOrderBy(FacetFilterUtils.createOrderBy("name", "asc"));
+        ff.addOrderBy("name", "asc");
         return super.getAll(ff, auth);
     }
 
@@ -599,7 +599,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         ff.addFilter("published", false);
         ff.setFrom(0);
         ff.setQuantity(maxQuantity);
-        ff.setOrderBy(FacetFilterUtils.createOrderBy("name", "asc"));
+        ff.addOrderBy("name", "asc");
         return getAll(ff, null).getResults();
     }
 
