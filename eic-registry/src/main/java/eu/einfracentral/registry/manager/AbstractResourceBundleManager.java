@@ -10,10 +10,7 @@ import eu.einfracentral.exception.ResourceException;
 import eu.einfracentral.exception.ResourceNotFoundException;
 import eu.einfracentral.exception.ValidationException;
 import eu.einfracentral.registry.service.*;
-import eu.einfracentral.service.AnalyticsService;
-import eu.einfracentral.service.IdCreator;
-import eu.einfracentral.service.SecurityService;
-import eu.einfracentral.service.SynchronizerService;
+import eu.einfracentral.service.*;
 import eu.einfracentral.service.search.SearchServiceEIC;
 import eu.einfracentral.utils.FacetFilterUtils;
 import eu.einfracentral.utils.FacetLabelService;
@@ -90,6 +87,8 @@ public abstract class AbstractResourceBundleManager<T extends ResourceBundle<?>>
     @Autowired
     @Qualifier("serviceValidator")
     private Validator serviceValidator;
+    @Autowired
+    private GenericResourceService genericResourceService;
 
     @PostConstruct
     void initLabels() {
@@ -165,18 +164,7 @@ public abstract class AbstractResourceBundleManager<T extends ResourceBundle<?>>
     @Override
     public Browsing<T> getAll(FacetFilter filter, Authentication auth) {
         // if user is Unauthorized, return active/latest ONLY
-        if (auth == null) {
-            filter.addFilter("active", true);
-            filter.addFilter("published", false);
-        }
-        if (auth != null && auth.isAuthenticated()) {
-            // if user is Authorized with ROLE_USER, return active/latest ONLY
-            if (!securityService.hasRole(auth, "ROLE_PROVIDER") && !securityService.hasRole(auth, "ROLE_EPOT") &&
-                    !securityService.hasRole(auth, "ROLE_ADMIN")) {
-                filter.addFilter("active", true);
-                filter.addFilter("published", false);
-            }
-        }
+        updateFacetFilterConsideringTheAuthorization(filter, auth);
 
         filter.setBrowseBy(browseBy);
         filter.setResourceType(getResourceType());
@@ -418,10 +406,11 @@ public abstract class AbstractResourceBundleManager<T extends ResourceBundle<?>>
 
     @Override
     public Browsing<RichResource> getRichResources(FacetFilter ff, Authentication auth) {
-        Browsing<T> resourceBundles = getAll(ff, auth);
-        List<RichResource> richResourceList = createRichResources(resourceBundles.getResults(), auth);
-        return new Browsing<>(resourceBundles.getTotal(), resourceBundles.getFrom(), resourceBundles.getTo(),
-                richResourceList, resourceBundles.getFacets());
+        updateFacetFilterConsideringTheAuthorization(ff, auth);
+        Paging<T> paging = genericResourceService.getResults(ff);
+        List<RichResource> richResourceList = createRichResources(paging.getResults(), auth);
+        return new Browsing<>(paging.getTotal(), paging.getFrom(), paging.getTo(),
+                richResourceList, paging.getFacets());
     }
 
     @Override
@@ -447,15 +436,20 @@ public abstract class AbstractResourceBundleManager<T extends ResourceBundle<?>>
     }
 
     private RichResource createProviderInfo(RichResource richResource, Authentication auth) {
+        List<String> allProviderIds = getAllProviderIds();
+        String catalogueId = getRichResourceIdOrCatalogueId(richResource, false);
+        Map<String, Set<String>> organisationAndProvidersMap = getRichResourceProviders(richResource);
+        String resourceOrganisation = organisationAndProvidersMap.keySet().iterator().next();
+        Set<String> resourceProviders = organisationAndProvidersMap.get(resourceOrganisation);
         List<ProviderInfo> providerInfoList = new ArrayList<>();
-        Set<String> allProviders = new HashSet<>(richResource.getService().getResourceProviders());
-        allProviders.add(richResource.getService().getResourceOrganisation());
-        for (String provider : allProviders) {
+        for (String provider : resourceProviders) {
             if (!"".equals(provider)) { // ignore providers with empty id "" (fix for pendingServices)
-                ProviderBundle providerBundle = providerService.get(provider, auth);
-                boolean isResourceOrganisation = provider.equals(richResource.getService().getResourceOrganisation());
-                ProviderInfo providerInfo = new ProviderInfo(providerBundle.getProvider(), isResourceOrganisation);
-                providerInfoList.add(providerInfo);
+                if (allProviderIds.contains(provider)){
+                    ProviderBundle providerBundle = providerService.get(catalogueId, provider, auth);
+                    boolean isResourceOrganisation = provider.equals(resourceOrganisation);
+                    ProviderInfo providerInfo = new ProviderInfo(providerBundle.getProvider(), isResourceOrganisation);
+                    providerInfoList.add(providerInfo);
+                }
             }
         }
         richResource.setProviderInfo(providerInfoList);
@@ -655,9 +649,10 @@ public abstract class AbstractResourceBundleManager<T extends ResourceBundle<?>>
         Map<String, Integer> resourceVisits = analyticsService.getAllServiceVisits();
 
         for (RichResource richResource : richResources) {
+            String resourceId = getRichResourceIdOrCatalogueId(richResource, true);
 
             // set visits
-            Integer views = resourceVisits.get(richResource.getService().getId());
+            Integer views = resourceVisits.get(resourceId);
             if (views != null) {
                 richResource.setViews(views);
             } else {
@@ -1038,4 +1033,96 @@ public abstract class AbstractResourceBundleManager<T extends ResourceBundle<?>>
         bundle.setLoggingInfo(loggingInfoList);
     }
 
+    public FacetFilter createFacetFilterForFetchingServicesAndDatasources(Map<String, Object> allRequestParams, String catalogueId, String type){
+        FacetFilter ff = FacetFilterUtils.createFacetFilter(allRequestParams);
+        allRequestParams.remove("catalogue_id");
+        allRequestParams.remove("type");
+        if (catalogueId != null){
+            if (!catalogueId.equals("all")){
+                ff.addFilter("catalogue_id", catalogueId);
+            }
+        }
+        if (type != null){
+            if (!type.equals("all")){
+                ff.addFilter("resourceType", type);
+            }
+        }
+        ff.addFilter("published", false);
+        ff.setResourceType("resources");
+        return ff;
+    }
+
+    public FacetFilter createFacetFilterForFetchingServicesAndDatasources(MultiValueMap<String, Object> allRequestParams, String catalogueId, String type){
+        FacetFilter ff = FacetFilterUtils.createMultiFacetFilter(allRequestParams);
+        allRequestParams.remove("catalogue_id");
+        allRequestParams.remove("type");
+        if (catalogueId != null){
+            if (!catalogueId.equals("all")){
+                ff.addFilter("catalogue_id", catalogueId);
+            }
+        }
+        if (type != null){
+            if (!type.equals("all")){
+                ff.addFilter("resourceType", type);
+            }
+        }
+        ff.addFilter("published", false);
+        ff.setResourceType("resources");
+        return ff;
+    }
+
+    public void updateFacetFilterConsideringTheAuthorization(FacetFilter filter, Authentication auth){
+        // if user is Unauthorized, return active/latest ONLY
+        if (auth == null) {
+            filter.addFilter("active", true);
+        }
+        if (auth != null && auth.isAuthenticated()) {
+            // if user is Authorized with ROLE_USER, return active/latest ONLY
+            if (!securityService.hasRole(auth, "ROLE_PROVIDER") && !securityService.hasRole(auth, "ROLE_EPOT") &&
+                    !securityService.hasRole(auth, "ROLE_ADMIN")) {
+                filter.addFilter("active", true);
+            }
+        }
+    }
+
+    private String getRichResourceIdOrCatalogueId(RichResource richResource, boolean trueForIdFalseForCatalogueId){
+        String resourceId = "";
+        if (richResource.getService() != null){
+            if (trueForIdFalseForCatalogueId){
+                resourceId = richResource.getService().getId();
+            } else{
+                resourceId = richResource.getService().getCatalogueId();
+            }
+        } else if (richResource.getDatasource() != null){
+            if (trueForIdFalseForCatalogueId){
+                resourceId = richResource.getDatasource().getId();
+            } else{
+                resourceId = richResource.getDatasource().getCatalogueId();
+            }
+        }
+        return resourceId;
+    }
+
+    private Map<String, Set<String>> getRichResourceProviders(RichResource richResource){
+        Map<String, Set<String>> resourceOrganisationAndProviders = new HashMap<>();
+        String resourceOrganisation = "";
+        Set<String> resourceProviders = new HashSet<>();
+        if (richResource.getService() != null){
+            resourceOrganisation = richResource.getService().getResourceOrganisation();
+            resourceProviders.addAll(richResource.getService().getResourceProviders());
+        } else if (richResource.getDatasource() != null){
+            resourceOrganisation = richResource.getDatasource().getResourceOrganisation();
+            resourceProviders.addAll(richResource.getDatasource().getResourceProviders());
+        }
+        resourceOrganisationAndProviders.put(resourceOrganisation, resourceProviders);
+        return resourceOrganisationAndProviders;
+    }
+
+    private List<String> getAllProviderIds(){
+        FacetFilter ff = new FacetFilter();
+        ff.setQuantity(10000);
+        ff.addFilter("pusblished", false);
+        List<ProviderBundle> allProviders = providerService.getAll(ff, securityService.getAdminAccess()).getResults();
+        return allProviders.stream().map(Bundle::getId).collect(Collectors.toList());
+    }
 }

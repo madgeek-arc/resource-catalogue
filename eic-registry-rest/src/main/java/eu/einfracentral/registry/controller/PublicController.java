@@ -2,13 +2,16 @@ package eu.einfracentral.registry.controller;
 
 import com.google.gson.Gson;
 import eu.einfracentral.domain.*;
+import eu.einfracentral.domain.ResourceBundle;
 import eu.einfracentral.domain.ServiceBundle;
 import eu.einfracentral.registry.service.ResourceBundleService;
 import eu.einfracentral.registry.service.ProviderService;
 import eu.einfracentral.registry.service.ResourceService;
 import eu.einfracentral.registry.service.TrainingResourceService;
+import eu.einfracentral.service.GenericResourceService;
 import eu.einfracentral.service.SecurityService;
 import eu.einfracentral.utils.FacetFilterUtils;
+import eu.openminted.registry.core.domain.Browsing;
 import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.domain.Paging;
 import io.swagger.annotations.Api;
@@ -24,6 +27,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.oauth2.common.exceptions.UnauthorizedUserException;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
@@ -35,35 +39,38 @@ import java.util.*;
 public class PublicController {
 
     private final ProviderService<ProviderBundle, Authentication> providerService;
-    private final ResourceBundleService<ServiceBundle> resourceBundleServiceService;
-    private final ResourceBundleService<DatasourceBundle> resourceBundleDatasourceService;
-    private final TrainingResourceService<TrainingResourceBundle> trainingResourceService;
+    private final ResourceBundleService<ServiceBundle> resourceBundleService;
+    private final ResourceBundleService<DatasourceBundle> datasourceBundleService;
+    private final TrainingResourceService<TrainingResourceBundle> trainingResourceBundleService;
     private final ResourceService<ProviderBundle, Authentication> publicProviderManager;
-    private final ResourceService<ServiceBundle, Authentication> publicResourceServiceManager;
-    private final ResourceService<DatasourceBundle, Authentication> publicResourceDatasourceManager;
+    private final ResourceService<ServiceBundle, Authentication> publicServiceManager;
+    private final ResourceService<DatasourceBundle, Authentication> publicDatasourceManager;
     private final ResourceService<TrainingResourceBundle, Authentication> publicTrainingResourceManager;
     private final SecurityService securityService;
+    private final GenericResourceService genericResourceService;
     private static final Gson gson = new Gson();
     private static final Logger logger = LogManager.getLogger(PublicController.class);
 
     @Autowired
     PublicController(ProviderService<ProviderBundle, Authentication> providerService, SecurityService securityService,
-                     ResourceBundleService<ServiceBundle> resourceBundleServiceService,
-                     ResourceBundleService<DatasourceBundle> resourceBundleDatasourceService,
-                     TrainingResourceService<TrainingResourceBundle> trainingResourceService,
+                     ResourceBundleService<ServiceBundle> resourceBundleService,
+                     ResourceBundleService<DatasourceBundle> datasourceBundleService,
+                     TrainingResourceService<TrainingResourceBundle> trainingResourceBundleService,
                      @Qualifier("publicProviderManager") ResourceService<ProviderBundle, Authentication> publicProviderManager,
-                     @Qualifier("publicServiceManager") ResourceService<ServiceBundle, Authentication> publicResourceServiceManager,
-                     @Qualifier("publicDatasourceManager") ResourceService<DatasourceBundle, Authentication> publicResourceDatasourceManager,
-                     @Qualifier("publicTrainingResourceManager") ResourceService<TrainingResourceBundle, Authentication> publicTrainingResourceManager) {
+                     @Qualifier("publicServiceManager") ResourceService<ServiceBundle, Authentication> publicServiceManager,
+                     @Qualifier("publicDatasourceManager") ResourceService<DatasourceBundle, Authentication> publicDatasourceManager,
+                     @Qualifier("publicTrainingResourceManager") ResourceService<TrainingResourceBundle, Authentication> publicTrainingResourceManager,
+                     GenericResourceService genericResourceService) {
         this.providerService = providerService;
-        this.resourceBundleServiceService = resourceBundleServiceService;
-        this.resourceBundleDatasourceService = resourceBundleDatasourceService;
-        this.trainingResourceService = trainingResourceService;
+        this.resourceBundleService = resourceBundleService;
+        this.datasourceBundleService = datasourceBundleService;
+        this.trainingResourceBundleService = trainingResourceBundleService;
         this.publicProviderManager = publicProviderManager;
-        this.publicResourceServiceManager = publicResourceServiceManager;
-        this.publicResourceDatasourceManager = publicResourceDatasourceManager;
+        this.publicServiceManager = publicServiceManager;
+        this.publicDatasourceManager = publicDatasourceManager;
         this.publicTrainingResourceManager = publicTrainingResourceManager;
         this.securityService = securityService;
+        this.genericResourceService = genericResourceService;
     }
 
     //SECTION: PROVIDER
@@ -132,20 +139,7 @@ public class PublicController {
         if (catalogueIds != null && catalogueIds.equals("all")) {
             allRequestParams.remove("catalogue_id");
         }
-        FacetFilter ff = new FacetFilter();
-        ff.setKeyword(allRequestParams.get("query") != null ? (String) allRequestParams.remove("query") : "");
-        ff.setFrom(allRequestParams.get("from") != null ? Integer.parseInt((String) allRequestParams.remove("from")) : 0);
-        ff.setQuantity(allRequestParams.get("quantity") != null ? Integer.parseInt((String) allRequestParams.remove("quantity")) : 10);
-        Map<String, Object> sort = new HashMap<>();
-        Map<String, Object> order = new HashMap<>();
-        String orderDirection = allRequestParams.get("order") != null ? (String) allRequestParams.remove("order") : "asc";
-        String orderField = allRequestParams.get("orderField") != null ? (String) allRequestParams.remove("orderField") : null;
-        if (orderField != null) {
-            order.put("order", orderDirection);
-            sort.put(orderField, order);
-            ff.setOrderBy(sort);
-        }
-        ff.setFilter(allRequestParams);
+        FacetFilter ff = FacetFilterUtils.createFacetFilter(allRequestParams);
         ff.addFilter("published", true);
         if (auth != null && auth.isAuthenticated() && (securityService.hasRole(auth, "ROLE_ADMIN") || securityService.hasRole(auth, "ROLE_EPOT"))) {
             logger.info("Getting all published Providers for Admin/Epot");
@@ -179,20 +173,7 @@ public class PublicController {
         if (catalogueIds != null && catalogueIds.equals("all")) {
             allRequestParams.remove("catalogue_id");
         }
-        FacetFilter ff = new FacetFilter();
-        ff.setKeyword(allRequestParams.get("query") != null ? (String) allRequestParams.remove("query") : "");
-        ff.setFrom(allRequestParams.get("from") != null ? Integer.parseInt((String) allRequestParams.remove("from")) : 0);
-        ff.setQuantity(allRequestParams.get("quantity") != null ? Integer.parseInt((String) allRequestParams.remove("quantity")) : 10);
-        Map<String, Object> sort = new HashMap<>();
-        Map<String, Object> order = new HashMap<>();
-        String orderDirection = allRequestParams.get("order") != null ? (String) allRequestParams.remove("order") : "asc";
-        String orderField = allRequestParams.get("orderField") != null ? (String) allRequestParams.remove("orderField") : null;
-        if (orderField != null) {
-            order.put("order", orderDirection);
-            sort.put(orderField, order);
-            ff.setOrderBy(sort);
-        }
-        ff.setFilter(allRequestParams);
+        FacetFilter ff = FacetFilterUtils.createFacetFilter(allRequestParams);
         ff.addFilter("published", true);
         if (auth != null && auth.isAuthenticated() && (securityService.hasRole(auth, "ROLE_ADMIN") || securityService.hasRole(auth, "ROLE_EPOT"))) {
             logger.info("Getting all published Providers for Admin/Epot");
@@ -219,26 +200,15 @@ public class PublicController {
     //SECTION: RESOURCE
     @ApiOperation(value = "Returns the Public Resource with the given id.")
     @GetMapping(path = "/resource/{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    @PreAuthorize("@securityService.resourceOrDatasourceIsActive(#id, #catalogueId) or hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth, #id)")
     public ResponseEntity<?> getPublicResource(@PathVariable("id") String id,
                                                @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueId,
                                                @ApiIgnore Authentication auth) {
-        ServiceBundle serviceBundle = resourceBundleServiceService.get(id, catalogueId);
-        if (auth != null && auth.isAuthenticated()) {
-            User user = User.of(auth);
-            if (securityService.hasRole(auth, "ROLE_ADMIN") || securityService.hasRole(auth, "ROLE_EPOT")
-                    || securityService.userIsResourceProviderAdmin(user, id, serviceBundle.getPayload().getCatalogueId())) {
-                if (serviceBundle.getMetadata().isPublished()){
-                    return new ResponseEntity<>(serviceBundle.getService(), HttpStatus.OK);
-                } else{
-                    return ResponseEntity.status(HttpStatus.FOUND).body(gson.toJson("The specific Service does not consist a Public entity"));
-                }
-            }
+        try{
+            return resourceBundleService.get(id, catalogueId).getMetadata().isPublished() ? new ResponseEntity(resourceBundleService.get(id, catalogueId).getService(), HttpStatus.OK) : new ResponseEntity(gson.toJson("The specific Service does not consist a Public entity"), HttpStatus.NOT_FOUND);
+        } catch(eu.einfracentral.exception.ResourceNotFoundException e){
+            return datasourceBundleService.get(id, catalogueId).getMetadata().isPublished() ? new ResponseEntity(datasourceBundleService.get(id, catalogueId).getDatasource(), HttpStatus.OK) : new ResponseEntity(gson.toJson("The specific Service does not consist a Public entity"), HttpStatus.NOT_FOUND);
         }
-        if (serviceBundle.getMetadata().isPublished() && serviceBundle.isActive()
-                && serviceBundle.getStatus().equals("approved resource")) {
-            return new ResponseEntity<>(serviceBundle.getService(), HttpStatus.OK);
-        }
-        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(gson.toJson("You cannot view the specific Resource."));
     }
 
     //    @ApiOperation(value = "Returns the Public ServiceBundle with the given id.")
@@ -247,23 +217,11 @@ public class PublicController {
     public ResponseEntity<?> getPublicServiceBundle(@PathVariable("id") String id,
                                                     @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueId,
                                                     @ApiIgnore Authentication auth) {
-        ServiceBundle serviceBundle = resourceBundleServiceService.get(id, catalogueId);
-        if (auth != null && auth.isAuthenticated()) {
-            User user = User.of(auth);
-            if (securityService.hasRole(auth, "ROLE_ADMIN") || securityService.hasRole(auth, "ROLE_EPOT")
-                    || securityService.userIsResourceProviderAdmin(user, id, serviceBundle.getPayload().getCatalogueId())) {
-                if (serviceBundle.getMetadata().isPublished()){
-                    return new ResponseEntity<>(serviceBundle, HttpStatus.OK);
-                } else{
-                    return ResponseEntity.status(HttpStatus.FOUND).body(gson.toJson("The specific Service Bundle does not consist a Public entity"));
-                }
-            }
+        try{
+            return resourceBundleService.get(id, catalogueId).getMetadata().isPublished() ? new ResponseEntity(resourceBundleService.get(id, catalogueId), HttpStatus.OK) : new ResponseEntity(gson.toJson("The specific Service does not consist a Public entity"), HttpStatus.NOT_FOUND);
+        } catch(eu.einfracentral.exception.ResourceNotFoundException e){
+            return datasourceBundleService.get(id, catalogueId).getMetadata().isPublished() ? new ResponseEntity(datasourceBundleService.get(id, catalogueId), HttpStatus.OK) : new ResponseEntity(gson.toJson("The specific Service does not consist a Public entity"), HttpStatus.NOT_FOUND);
         }
-        if (serviceBundle.getMetadata().isPublished() && serviceBundle.isActive()
-                && serviceBundle.getStatus().equals("approved resource")) {
-            return new ResponseEntity<>(serviceBundle, HttpStatus.OK);
-        }
-        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(gson.toJson("You cannot view the specific Resource."));
     }
 
     @ApiOperation(value = "Filter a list of Public Resources based on a set of filters or get a list of all Public Resources in the Catalogue.")
@@ -275,42 +233,15 @@ public class PublicController {
             @ApiImplicitParam(name = "orderField", value = "Order field", dataType = "string", paramType = "query")
     })
     @GetMapping(path = "/resource/all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    public ResponseEntity<Paging<Service>> getAllPublicResources(@ApiIgnore @RequestParam Map<String, Object> allRequestParams,
-                                                  @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueIds,
-                                                  @ApiIgnore Authentication auth) {
-        allRequestParams.putIfAbsent("catalogue_id", catalogueIds);
-        if (catalogueIds != null && catalogueIds.equals("all")) {
-            allRequestParams.remove("catalogue_id");
-        }
-        FacetFilter ff = new FacetFilter();
-        ff.setKeyword(allRequestParams.get("query") != null ? (String) allRequestParams.remove("query") : "");
-        ff.setFrom(allRequestParams.get("from") != null ? Integer.parseInt((String) allRequestParams.remove("from")) : 0);
-        ff.setQuantity(allRequestParams.get("quantity") != null ? Integer.parseInt((String) allRequestParams.remove("quantity")) : 10);
-        Map<String, Object> sort = new HashMap<>();
-        Map<String, Object> order = new HashMap<>();
-        String orderDirection = allRequestParams.get("order") != null ? (String) allRequestParams.remove("order") : "asc";
-        String orderField = allRequestParams.get("orderField") != null ? (String) allRequestParams.remove("orderField") : null;
-        if (orderField != null) {
-            order.put("order", orderDirection);
-            sort.put(orderField, order);
-            ff.setOrderBy(sort);
-        }
-        ff.setFilter(allRequestParams);
-        ff.addFilter("published", true);
-        if (auth != null && auth.isAuthenticated() && (securityService.hasRole(auth, "ROLE_ADMIN") || securityService.hasRole(auth, "ROLE_EPOT"))) {
-            logger.info("Getting all published Resources for Admin/Epot");
-        } else{
-            ff.addFilter("active", true);
-            ff.addFilter("status", "approved resource");
-        }
-        List<Service> serviceList = new LinkedList<>();
-        Paging<ServiceBundle> serviceBundlePaging = publicResourceServiceManager.getAll(ff, auth);
-        for (ServiceBundle serviceBundle : serviceBundlePaging.getResults()) {
-            serviceList.add(serviceBundle.getService());
-        }
-        Paging<Service> servicePaging = new Paging<>(serviceBundlePaging.getTotal(), serviceBundlePaging.getFrom(),
-                serviceBundlePaging.getTo(), serviceList, serviceBundlePaging.getFacets());
-        return new ResponseEntity<>(servicePaging, HttpStatus.OK);
+    public ResponseEntity<Paging<?>> getAllPublicResources(@RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueId,
+                                                                 @RequestParam(defaultValue = "service", name = "type") String type,
+                                                                 @ApiIgnore @RequestParam Map<String, Object> allRequestParams,
+                                                                 @ApiIgnore Authentication authentication) {
+        FacetFilter ff =  resourceBundleService.createFacetFilterForFetchingServicesAndDatasources(allRequestParams, catalogueId, type);
+        ff.getFilter().put("published", true);
+        resourceBundleService.updateFacetFilterConsideringTheAuthorization(ff, authentication);
+        Paging<?> paging = genericResourceService.getResults(ff).map(r -> ((eu.einfracentral.domain.ResourceBundle<?>) r).getPayload());
+        return ResponseEntity.ok(paging);
     }
 
     @ApiImplicitParams({
@@ -322,48 +253,38 @@ public class PublicController {
     })
     @GetMapping(path = "/resource/adminPage/all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
-    public ResponseEntity<Paging<ServiceBundle>> getAllPublicServiceBundles(@ApiIgnore @RequestParam Map<String, Object> allRequestParams,
-                                                                            @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueIds,
-                                                                            @ApiIgnore Authentication auth) {
-        allRequestParams.putIfAbsent("catalogue_id", catalogueIds);
-        if (catalogueIds != null && catalogueIds.equals("all")) {
-            allRequestParams.remove("catalogue_id");
-        }
-        FacetFilter ff = new FacetFilter();
-        ff.setKeyword(allRequestParams.get("query") != null ? (String) allRequestParams.remove("query") : "");
-        ff.setFrom(allRequestParams.get("from") != null ? Integer.parseInt((String) allRequestParams.remove("from")) : 0);
-        ff.setQuantity(allRequestParams.get("quantity") != null ? Integer.parseInt((String) allRequestParams.remove("quantity")) : 10);
-        Map<String, Object> sort = new HashMap<>();
-        Map<String, Object> order = new HashMap<>();
-        String orderDirection = allRequestParams.get("order") != null ? (String) allRequestParams.remove("order") : "asc";
-        String orderField = allRequestParams.get("orderField") != null ? (String) allRequestParams.remove("orderField") : null;
-        if (orderField != null) {
-            order.put("order", orderDirection);
-            sort.put(orderField, order);
-            ff.setOrderBy(sort);
-        }
-        ff.setFilter(allRequestParams);
-        ff.addFilter("published", true);
-        if (auth != null && auth.isAuthenticated() && (securityService.hasRole(auth, "ROLE_ADMIN") || securityService.hasRole(auth, "ROLE_EPOT"))) {
-            logger.info("Getting all published Resources for Admin/Epot");
-        } else{
-            ff.addFilter("active", true);
-            ff.addFilter("status", "approved resource");
-        }
-        Paging<ServiceBundle> serviceBundlePaging = resourceBundleServiceService.getAll(ff, auth);
-        List<ServiceBundle> serviceList = new LinkedList<>(serviceBundlePaging.getResults());
-        Paging<ServiceBundle> servicePaging = new Paging<>(serviceBundlePaging.getTotal(), serviceBundlePaging.getFrom(),
-                serviceBundlePaging.getTo(), serviceList, serviceBundlePaging.getFacets());
-        return new ResponseEntity<>(servicePaging, HttpStatus.OK);
+    public ResponseEntity<Paging<?>> getAllPublicServiceBundles(@RequestParam(defaultValue = "all", name = "catalogue_id") String catalogueId,
+                                                                            @RequestParam(defaultValue = "service", name = "type") String type,
+                                                                            @ApiIgnore @RequestParam Map<String, Object> allRequestParams,
+                                                                            @ApiIgnore Authentication authentication) {
+        FacetFilter ff = resourceBundleService.createFacetFilterForFetchingServicesAndDatasources(allRequestParams, catalogueId, type);
+        ff.getFilter().put("published", true);
+        resourceBundleService.updateFacetFilterConsideringTheAuthorization(ff, authentication);
+        Paging<?> paging = genericResourceService.getResults(ff);
+        return ResponseEntity.ok(paging);
     }
 
     @GetMapping(path = "/resource/my", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    public ResponseEntity<List<ServiceBundle>> getMyPublicResources(@ApiIgnore Authentication auth) {
+    public ResponseEntity<List<Object>> getMyPublicResources(@ApiIgnore Authentication auth) {
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(10000);
         ff.addFilter("published", true);
+        ff.setResourceType("resources");
         ff.addOrderBy("name", "asc");
-        return new ResponseEntity<>(publicResourceServiceManager.getMy(ff, auth).getResults(), HttpStatus.OK);
+        if (auth == null) {
+            throw new UnauthorizedUserException("Please log in.");
+        }
+        List<Object> resourceBundleList = new ArrayList<>();
+        Paging<?> paging = genericResourceService.getResults(ff);
+        for (Object o : paging.getResults()) {
+            if (o instanceof ResourceBundle<?>){
+                if (securityService.isResourceProviderAdmin(auth, ((ResourceBundle<?>) o).getId(), ((ResourceBundle<?>) o).getPayload().getCatalogueId()) && ((ResourceBundle<?>) o).getMetadata().isPublished()) {
+                    resourceBundleList.add(o);
+                }
+            }
+        }
+        Browsing<Object> browsing = new Browsing<>(paging.getTotal(), paging.getFrom(), paging.getTo(), resourceBundleList, paging.getFacets());
+        return new ResponseEntity<>(browsing.getResults(), HttpStatus.OK);
     }
 
     //SECTION: DATASOURCE
@@ -372,7 +293,7 @@ public class PublicController {
     public ResponseEntity<?> getPublicDatasource(@PathVariable("id") String id,
                                                @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueId,
                                                @ApiIgnore Authentication auth) {
-        DatasourceBundle datasourceBundle = resourceBundleDatasourceService.get(id, catalogueId);
+        DatasourceBundle datasourceBundle = datasourceBundleService.get(id, catalogueId);
         if (auth != null && auth.isAuthenticated()) {
             User user = User.of(auth);
             if (securityService.hasRole(auth, "ROLE_ADMIN") || securityService.hasRole(auth, "ROLE_EPOT")
@@ -396,7 +317,7 @@ public class PublicController {
     public ResponseEntity<?> getPublicDatasourceBundle(@PathVariable("id") String id,
                                                    @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueId,
                                                    @ApiIgnore Authentication auth) {
-        DatasourceBundle datasourceBundle = resourceBundleDatasourceService.get(id, catalogueId);
+        DatasourceBundle datasourceBundle = datasourceBundleService.get(id, catalogueId);
         if (auth != null && auth.isAuthenticated()) {
             User user = User.of(auth);
             if (securityService.hasRole(auth, "ROLE_ADMIN") || securityService.hasRole(auth, "ROLE_EPOT")
@@ -431,20 +352,7 @@ public class PublicController {
         if (catalogueIds != null && catalogueIds.equals("all")) {
             allRequestParams.remove("catalogue_id");
         }
-        FacetFilter ff = new FacetFilter();
-        ff.setKeyword(allRequestParams.get("query") != null ? (String) allRequestParams.remove("query") : "");
-        ff.setFrom(allRequestParams.get("from") != null ? Integer.parseInt((String) allRequestParams.remove("from")) : 0);
-        ff.setQuantity(allRequestParams.get("quantity") != null ? Integer.parseInt((String) allRequestParams.remove("quantity")) : 10);
-        Map<String, Object> sort = new HashMap<>();
-        Map<String, Object> order = new HashMap<>();
-        String orderDirection = allRequestParams.get("order") != null ? (String) allRequestParams.remove("order") : "asc";
-        String orderField = allRequestParams.get("orderField") != null ? (String) allRequestParams.remove("orderField") : null;
-        if (orderField != null) {
-            order.put("order", orderDirection);
-            sort.put(orderField, order);
-            ff.setOrderBy(sort);
-        }
-        ff.setFilter(allRequestParams);
+        FacetFilter ff = FacetFilterUtils.createFacetFilter(allRequestParams);
         ff.addFilter("published", true);
         if (auth != null && auth.isAuthenticated() && (securityService.hasRole(auth, "ROLE_ADMIN") || securityService.hasRole(auth, "ROLE_EPOT"))) {
             logger.info("Getting all published Datasources for Admin/Epot");
@@ -453,7 +361,7 @@ public class PublicController {
             ff.addFilter("status", "approved resource");
         }
         List<Datasource> datasourceList = new LinkedList<>();
-        Paging<DatasourceBundle> datasourceBundlePaging = publicResourceDatasourceManager.getAll(ff, auth);
+        Paging<DatasourceBundle> datasourceBundlePaging = publicDatasourceManager.getAll(ff, auth);
         for (DatasourceBundle datasourceBundle : datasourceBundlePaging.getResults()) {
             datasourceList.add(datasourceBundle.getDatasource());
         }
@@ -478,20 +386,7 @@ public class PublicController {
         if (catalogueIds != null && catalogueIds.equals("all")) {
             allRequestParams.remove("catalogue_id");
         }
-        FacetFilter ff = new FacetFilter();
-        ff.setKeyword(allRequestParams.get("query") != null ? (String) allRequestParams.remove("query") : "");
-        ff.setFrom(allRequestParams.get("from") != null ? Integer.parseInt((String) allRequestParams.remove("from")) : 0);
-        ff.setQuantity(allRequestParams.get("quantity") != null ? Integer.parseInt((String) allRequestParams.remove("quantity")) : 10);
-        Map<String, Object> sort = new HashMap<>();
-        Map<String, Object> order = new HashMap<>();
-        String orderDirection = allRequestParams.get("order") != null ? (String) allRequestParams.remove("order") : "asc";
-        String orderField = allRequestParams.get("orderField") != null ? (String) allRequestParams.remove("orderField") : null;
-        if (orderField != null) {
-            order.put("order", orderDirection);
-            sort.put(orderField, order);
-            ff.setOrderBy(sort);
-        }
-        ff.setFilter(allRequestParams);
+        FacetFilter ff = FacetFilterUtils.createFacetFilter(allRequestParams);
         ff.addFilter("published", true);
         if (auth != null && auth.isAuthenticated() && (securityService.hasRole(auth, "ROLE_ADMIN") || securityService.hasRole(auth, "ROLE_EPOT"))) {
             logger.info("Getting all published Datasources for Admin/Epot");
@@ -499,7 +394,7 @@ public class PublicController {
             ff.addFilter("active", true);
             ff.addFilter("status", "approved resource");
         }
-        Paging<DatasourceBundle> datasourceBundlePaging = resourceBundleDatasourceService.getAll(ff, auth);
+        Paging<DatasourceBundle> datasourceBundlePaging = datasourceBundleService.getAll(ff, auth);
         List<DatasourceBundle> datasourceBundleList = new LinkedList<>(datasourceBundlePaging.getResults());
         Paging<DatasourceBundle> datasourcePaging = new Paging<>(datasourceBundlePaging.getTotal(), datasourceBundlePaging.getFrom(),
                 datasourceBundlePaging.getTo(), datasourceBundleList, datasourceBundlePaging.getFacets());
@@ -512,7 +407,7 @@ public class PublicController {
         ff.setQuantity(10000);
         ff.addFilter("published", true);
         ff.addOrderBy("name", "asc");
-        return new ResponseEntity<>(publicResourceDatasourceManager.getMy(ff, auth).getResults(), HttpStatus.OK);
+        return new ResponseEntity<>(publicDatasourceManager.getMy(ff, auth).getResults(), HttpStatus.OK);
     }
 
 
@@ -522,7 +417,7 @@ public class PublicController {
     public ResponseEntity<?> getPublicTrainingResource(@PathVariable("id") String id,
                                                  @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueId,
                                                  @ApiIgnore Authentication auth) {
-        TrainingResourceBundle trainingResourceBundle = trainingResourceService.get(id, catalogueId);
+        TrainingResourceBundle trainingResourceBundle = trainingResourceBundleService.get(id, catalogueId);
         if (auth != null && auth.isAuthenticated()) {
             User user = User.of(auth);
             if (securityService.hasRole(auth, "ROLE_ADMIN") || securityService.hasRole(auth, "ROLE_EPOT")
@@ -546,7 +441,7 @@ public class PublicController {
     public ResponseEntity<?> getPublicTrainingResourceBundle(@PathVariable("id") String id,
                                                         @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueId,
                                                         @ApiIgnore Authentication auth) {
-        TrainingResourceBundle trainingResourceBundle = trainingResourceService.get(id, catalogueId);
+        TrainingResourceBundle trainingResourceBundle = trainingResourceBundleService.get(id, catalogueId);
         if (auth != null && auth.isAuthenticated()) {
             User user = User.of(auth);
             if (securityService.hasRole(auth, "ROLE_ADMIN") || securityService.hasRole(auth, "ROLE_EPOT")
@@ -581,20 +476,7 @@ public class PublicController {
         if (catalogueIds != null && catalogueIds.equals("all")) {
             allRequestParams.remove("catalogue_id");
         }
-        FacetFilter ff = new FacetFilter();
-        ff.setKeyword(allRequestParams.get("query") != null ? (String) allRequestParams.remove("query") : "");
-        ff.setFrom(allRequestParams.get("from") != null ? Integer.parseInt((String) allRequestParams.remove("from")) : 0);
-        ff.setQuantity(allRequestParams.get("quantity") != null ? Integer.parseInt((String) allRequestParams.remove("quantity")) : 10);
-        Map<String, Object> sort = new HashMap<>();
-        Map<String, Object> order = new HashMap<>();
-        String orderDirection = allRequestParams.get("order") != null ? (String) allRequestParams.remove("order") : "asc";
-        String orderField = allRequestParams.get("orderField") != null ? (String) allRequestParams.remove("orderField") : null;
-        if (orderField != null) {
-            order.put("order", orderDirection);
-            sort.put(orderField, order);
-            ff.setOrderBy(sort);
-        }
-        ff.setFilter(allRequestParams);
+        FacetFilter ff = FacetFilterUtils.createFacetFilter(allRequestParams);
         ff.addFilter("published", true);
         if (auth != null && auth.isAuthenticated() && (securityService.hasRole(auth, "ROLE_ADMIN") || securityService.hasRole(auth, "ROLE_EPOT"))) {
             logger.info("Getting all published Training Resources for Admin/Epot");
@@ -628,20 +510,7 @@ public class PublicController {
         if (catalogueIds != null && catalogueIds.equals("all")) {
             allRequestParams.remove("catalogue_id");
         }
-        FacetFilter ff = new FacetFilter();
-        ff.setKeyword(allRequestParams.get("query") != null ? (String) allRequestParams.remove("query") : "");
-        ff.setFrom(allRequestParams.get("from") != null ? Integer.parseInt((String) allRequestParams.remove("from")) : 0);
-        ff.setQuantity(allRequestParams.get("quantity") != null ? Integer.parseInt((String) allRequestParams.remove("quantity")) : 10);
-        Map<String, Object> sort = new HashMap<>();
-        Map<String, Object> order = new HashMap<>();
-        String orderDirection = allRequestParams.get("order") != null ? (String) allRequestParams.remove("order") : "asc";
-        String orderField = allRequestParams.get("orderField") != null ? (String) allRequestParams.remove("orderField") : null;
-        if (orderField != null) {
-            order.put("order", orderDirection);
-            sort.put(orderField, order);
-            ff.setOrderBy(sort);
-        }
-        ff.setFilter(allRequestParams);
+        FacetFilter ff = FacetFilterUtils.createFacetFilter(allRequestParams);
         ff.addFilter("published", true);
         if (auth != null && auth.isAuthenticated() && (securityService.hasRole(auth, "ROLE_ADMIN") || securityService.hasRole(auth, "ROLE_EPOT"))) {
             logger.info("Getting all published Training Resources for Admin/Epot");
@@ -649,7 +518,7 @@ public class PublicController {
             ff.addFilter("active", true);
             ff.addFilter("status", "approved resource");
         }
-        Paging<TrainingResourceBundle> trainingResourceBundlePaging = trainingResourceService.getAll(ff, auth);
+        Paging<TrainingResourceBundle> trainingResourceBundlePaging = trainingResourceBundleService.getAll(ff, auth);
         List<TrainingResourceBundle> trainingResourceBundleList = new LinkedList<>(trainingResourceBundlePaging.getResults());
         Paging<TrainingResourceBundle> trainingResourcePaging = new Paging<>(trainingResourceBundlePaging.getTotal(), trainingResourceBundlePaging.getFrom(),
                 trainingResourceBundlePaging.getTo(), trainingResourceBundleList, trainingResourceBundlePaging.getFacets());
