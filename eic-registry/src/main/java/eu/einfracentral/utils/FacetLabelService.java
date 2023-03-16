@@ -97,9 +97,13 @@ public class FacetLabelService {
         }
         StringJoiner joiner = new StringJoiner(newDelimiter);
         for (String s : str.split(delimiter)) {
-            String s1;
-            s1 = s.substring(0, 1).toUpperCase() + s.substring(1);
-            joiner.add(s1);
+            try{
+                String s1;
+                s1 = s.substring(0, 1).toUpperCase() + s.substring(1);
+                joiner.add(s1);
+            } catch (IndexOutOfBoundsException e){
+                return str;
+            }
         }
         return joiner.toString();
     }
