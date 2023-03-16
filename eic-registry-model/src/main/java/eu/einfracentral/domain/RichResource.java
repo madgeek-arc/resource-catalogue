@@ -210,46 +210,6 @@ public class RichResource {
         this.views = views;
     }
 
-    public float getRatings() {
-        return ratings;
-    }
-
-    public void setRatings(float ratings) {
-        this.ratings = ratings;
-    }
-
-    public float getUserRate() {
-        return userRate;
-    }
-
-    public void setUserRate(float userRate) {
-        this.userRate = userRate;
-    }
-
-    public float getHasRate() {
-        return hasRate;
-    }
-
-    public void setHasRate(float hasRate) {
-        this.hasRate = hasRate;
-    }
-
-    public float getFavourites() {
-        return favourites;
-    }
-
-    public void setFavourites(float favourites) {
-        this.favourites = favourites;
-    }
-
-    public float getIsFavourite() {
-        return isFavourite;
-    }
-
-    public void setIsFavourite(float isFavourite) {
-        this.isFavourite = isFavourite;
-    }
-
     public List<Category> getCategories() {
         return categories;
     }

@@ -653,44 +653,8 @@ public abstract class AbstractResourceBundleManager<T extends ResourceBundle<?>>
 
     private List<RichResource> createRichStatistics(List<RichResource> richResources, Authentication auth) {
         Map<String, Integer> resourceVisits = analyticsService.getAllServiceVisits();
-        Map<String, List<Float>> resourceFavorites = eventService.getAllServiceEventValues(Event.UserActionType.FAVOURITE.getKey(), auth);
-        Map<String, List<Float>> resourceRatings = eventService.getAllServiceEventValues(Event.UserActionType.RATING.getKey(), auth);
 
         for (RichResource richResource : richResources) {
-
-            // set user favourite and rate if auth != null
-            if (auth != null) {
-
-                List<Event> userEvents;
-                try {
-                    userEvents = eventService.getEvents(Event.UserActionType.FAVOURITE.getKey(), richResource.getService().getId(), auth);
-                    if (!userEvents.isEmpty()) {
-                        richResource.setIsFavourite(userEvents.get(0).getValue());
-                    }
-                    userEvents = eventService.getEvents(Event.UserActionType.RATING.getKey(), richResource.getService().getId(), auth);
-                    if (!userEvents.isEmpty()) {
-                        richResource.setUserRate(userEvents.get(0).getValue());
-                    }
-                } catch (OIDCAuthenticationException e) {
-                    // user not logged in
-                    logger.warn("Authentication Exception", e);
-                } catch (Exception e2) {
-                    logger.error(e2);
-                }
-            }
-
-            if (resourceRatings.containsKey(richResource.getService().getId())) {
-                int ratings = resourceRatings.get(richResource.getService().getId()).size();
-                float rating = resourceRatings.get(richResource.getService().getId()).stream().reduce((float) 0.0, Float::sum) / ratings;
-                richResource.setRatings(ratings);
-                richResource.setHasRate(Float.parseFloat(new DecimalFormat("#.##").format(rating)));
-
-            }
-
-            if (resourceFavorites.containsKey(richResource.getService().getId())) {
-                int favourites = resourceFavorites.get(richResource.getService().getId()).stream().mapToInt(Float::intValue).sum();
-                richResource.setFavourites(favourites);
-            }
 
             // set visits
             Integer views = resourceVisits.get(richResource.getService().getId());
