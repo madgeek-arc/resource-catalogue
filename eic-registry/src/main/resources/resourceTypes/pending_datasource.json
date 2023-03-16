@@ -2,6 +2,13 @@
   "indexFields": [
     {
       "multivalued": false,
+      "name": "resource_internal_id",
+      "path": "//*[local-name()='datasource']/*[local-name()='id']/text()",
+      "type": "java.lang.String",
+      "primaryKey": true
+    },
+    {
+      "multivalued": false,
       "name": "pending_datasource_id",
       "path": "//*[local-name()='datasource']/*[local-name()='id']/text()",
       "type": "java.lang.String",

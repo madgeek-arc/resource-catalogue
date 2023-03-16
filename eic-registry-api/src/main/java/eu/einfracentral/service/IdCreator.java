@@ -31,6 +31,14 @@ public interface IdCreator {
     String createDatasourceId(ResourceBundle<?> resource) throws NoSuchAlgorithmException;
 
     /**
+     * Creates id for {@link TrainingResourceBundle}
+     *
+     * @param trainingResourceBundle
+     * @return
+     */
+    String createTrainingResourceId(TrainingResourceBundle trainingResourceBundle) throws NoSuchAlgorithmException;
+
+    /**
      * Creates id for {@link Catalogue}
      *
      * @param catalogue

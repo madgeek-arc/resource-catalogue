@@ -190,8 +190,9 @@ public class EICAuthoritiesMapper implements OIDCAuthoritiesMapper, AuthoritiesM
     private Set<String> getProviderUserEmails(List<ProviderBundle> providerBundles) {
         return providerBundles
                 .stream()
-                .flatMap(p -> p.getProvider().getUsers()
+                .flatMap(p -> (p.getProvider().getUsers() != null ? p.getProvider().getUsers() : new ArrayList<User>())
                         .stream()
+                        .filter(Objects::nonNull)
                         .map(User::getEmail)
                         .map(String::toLowerCase))
                 .filter(u -> u != null && !"".equals(u))
@@ -201,8 +202,9 @@ public class EICAuthoritiesMapper implements OIDCAuthoritiesMapper, AuthoritiesM
     private Set<String> getCatalogueUserEmails(List<CatalogueBundle> catalogueBundles) {
         return catalogueBundles
                 .stream()
-                .flatMap(p -> p.getCatalogue().getUsers()
+                .flatMap(p -> (p.getCatalogue().getUsers() != null ? p.getCatalogue().getUsers() : new ArrayList<User>())
                         .stream()
+                        .filter(Objects::nonNull)
                         .map(User::getEmail)
                         .map(String::toLowerCase))
                 .collect(Collectors.toSet());

@@ -86,6 +86,13 @@ public class Vocabulary implements Identifiable {
         DS_JURISDICTION("Jurisdiction"),
         DS_CLASSIFICATION("Classification"),
         DS_COAR_ACCESS_RIGHTS_1_0("COAR access rights 1.0"),
+        // Training Resource
+        TR_URL_TYPE("Training Resource url type"),
+        TR_ACCESS_RIGHT("Training Resource access right"),
+        TR_DCMI_TYPE("Training Resource dcmi type"),
+        TR_EXPERTISE_LEVEL("Training Resource expertise level"),
+        TR_CONTENT_RESOURCE_TYPE("Training Resource content resource type"),
+        TR_QUALIFICATION("Training Resource qualification"),
         // Monitoring
         MONITORING_MONITORED_BY("Monitored by"),
         // Bundle Extras
@@ -95,7 +102,6 @@ public class Vocabulary implements Identifiable {
         IR_IDENTIFIER_TYPE("Interoperability Record identifier type"),
         IR_NAME_TYPE("Interoperability Record name type"),
         IR_RESOURCE_TYPE_GENERAL("Interoperability Record resource type general"),
-//        IR_EOSC_RELATED_STANDARDS("Interoperability Record eosc related standards"),
         IR_STATUS("Interoperability Record status"),
         IR_EOSC_GUIDELINE_TYPE("Interoperability Record eosc guideline type");
 

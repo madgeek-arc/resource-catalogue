@@ -3,7 +3,6 @@ package eu.einfracentral.registry.manager;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import eu.einfracentral.domain.*;
-import eu.einfracentral.domain.ResourceBundle;
 import eu.einfracentral.exception.ResourceException;
 import eu.einfracentral.exception.ResourceNotFoundException;
 import eu.einfracentral.exception.ValidationException;
@@ -27,12 +26,9 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.http.*;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
-import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
 import java.security.NoSuchAlgorithmException;
-import java.time.Instant;
-import java.time.ZoneId;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -107,7 +103,7 @@ public class DatasourceBundleManager extends AbstractResourceBundleManager<Datas
         }
         // check Provider's templateStatus
         if (providerBundle.getTemplateStatus().equals("pending template")){
-            throw new ValidationException(String.format("The Provider with id %s has already registered a Service Template.", providerBundle.getId()));
+            throw new ValidationException(String.format("The Provider with id %s has already registered a Resource Template.", providerBundle.getId()));
         }
 
         // if Datasource has ID -> check if it exists in OpenAIRE Datasources list
@@ -261,7 +257,7 @@ public class DatasourceBundleManager extends AbstractResourceBundleManager<Datas
                 datasourceBundle.setStatus(vocabularyService.get("pending resource").getId());
                 datasourceBundle.setActive(false);
                 providerBundle.setTemplateStatus(vocabularyService.get("pending template").getId());
-                providerService.update(providerBundle, datasourceBundle.getDatasource().getCatalogueId(), auth);
+                providerService.update(providerBundle, null, auth);
             }
         }
 
@@ -354,7 +350,7 @@ public class DatasourceBundleManager extends AbstractResourceBundleManager<Datas
             throw new ValidationException(String.format("The Resource with id '%s' does not exist", id));
         }
         datasourceBundle.setStatus(vocabularyService.get(status).getId());
-        ProviderBundle resourceProvider = providerService.get(datasourceBundle.getDatasource().getResourceOrganisation());
+        ProviderBundle resourceProvider = providerService.get(datasourceBundle.getDatasource().getCatalogueId(), datasourceBundle.getDatasource().getResourceOrganisation(), auth);
         LoggingInfo loggingInfo;
         List<LoggingInfo> loggingInfoList = new ArrayList<>();
 
@@ -413,15 +409,6 @@ public class DatasourceBundleManager extends AbstractResourceBundleManager<Datas
     }
 
     @Override
-    public Paging<DatasourceBundle> getInactiveResources() {
-        FacetFilter ff = new FacetFilter();
-        ff.addFilter("active", false);
-        ff.setFrom(0);
-        ff.setQuantity(maxQuantity);
-        return getAll(ff, null);
-    }
-
-    @Override
     public DatasourceBundle publish(String resourceId, Boolean active, Authentication auth) {
         DatasourceBundle datasourceBundle;
         String activeProvider = "";
@@ -432,7 +419,7 @@ public class DatasourceBundleManager extends AbstractResourceBundleManager<Datas
             throw new ValidationException(String.format("You cannot activate this Resource, because it's Inactive with status = [%s]", datasourceBundle.getStatus()));
         }
 
-        ProviderBundle providerBundle = providerService.get(datasourceBundle.getDatasource().getResourceOrganisation());
+        ProviderBundle providerBundle = providerService.get(datasourceBundle.getDatasource().getCatalogueId(), datasourceBundle.getDatasource().getResourceOrganisation(), auth);
         if (providerBundle.getStatus().equals("approved provider") && providerBundle.isActive()) {
             activeProvider = datasourceBundle.getDatasource().getResourceOrganisation();
         }
@@ -504,7 +491,7 @@ public class DatasourceBundleManager extends AbstractResourceBundleManager<Datas
         ff.addFilter("resource_organisation", providerId);
         ff.addFilter("catalogue_id", catalogueName);
         ff.setQuantity(maxQuantity);
-        ff.setOrderBy(FacetFilterUtils.createOrderBy("name", "asc"));
+        ff.addOrderBy("name", "asc");
         return this.getAll(ff, auth).getResults();
     }
 
@@ -514,7 +501,7 @@ public class DatasourceBundleManager extends AbstractResourceBundleManager<Datas
         ff.addFilter("resource_organisation", providerId);
         ff.addFilter("catalogue_id", catalogueId);
         ff.setQuantity(maxQuantity);
-        ff.setOrderBy(FacetFilterUtils.createOrderBy("name", "asc"));
+        ff.addOrderBy("name", "asc");
         return this.getAll(ff, auth);
     }
 
@@ -525,7 +512,7 @@ public class DatasourceBundleManager extends AbstractResourceBundleManager<Datas
         ff.addFilter("resource_organisation", providerId);
         ff.addFilter("catalogue_id", catalogueName);
         ff.setQuantity(maxQuantity);
-        ff.setOrderBy(FacetFilterUtils.createOrderBy("name", "asc"));
+        ff.addOrderBy("name", "asc");
         if (auth != null && auth.isAuthenticated()) {
             User user = User.of(auth);
             // if user is ADMIN/EPOT or Provider Admin on the specific Provider, return its Services
@@ -547,31 +534,8 @@ public class DatasourceBundleManager extends AbstractResourceBundleManager<Datas
         ff.addFilter("resource_organisation", providerId);
         ff.addFilter("catalogue_id", catalogueName);
         ff.setQuantity(maxQuantity);
-        ff.setOrderBy(FacetFilterUtils.createOrderBy("name", "asc"));
+        ff.addOrderBy("name", "asc");
         return this.getAll(ff, securityService.getAdminAccess()).getResults().stream().map(DatasourceBundle::getDatasource).collect(Collectors.toList());
-    }
-
-    @Override
-    public List<Service> getActiveResources(String providerId) {
-        FacetFilter ff = new FacetFilter();
-        ff.addFilter("resource_organisation", providerId);
-        ff.addFilter("catalogue_id", catalogueName);
-        ff.addFilter("active", true);
-        ff.setQuantity(maxQuantity);
-        ff.setOrderBy(FacetFilterUtils.createOrderBy("name", "asc"));
-        return this.getAll(ff, null).getResults().stream().map(DatasourceBundle::getDatasource).collect(Collectors.toList());
-    }
-
-    @Override
-    public List<DatasourceBundle> getInactiveResources(String providerId) {
-        FacetFilter ff = new FacetFilter();
-        ff.addFilter("resource_organisation", providerId);
-        ff.addFilter("catalogue_id", catalogueName);
-        ff.addFilter("active", false);
-        ff.setFrom(0);
-        ff.setQuantity(maxQuantity);
-        ff.setOrderBy(FacetFilterUtils.createOrderBy("name", "asc"));
-        return this.getAll(ff, null).getResults();
     }
 
     //    @Override
@@ -607,7 +571,7 @@ public class DatasourceBundleManager extends AbstractResourceBundleManager<Datas
         DatasourceBundle datasourceBundle = get(resourceId, catalogueName);
         // check Datasource's status
         if (!datasourceBundle.getStatus().equals("approved resource")){
-            throw new ValidationException(String.format("You cannot move Service with id [%s] to another Provider as it" +
+            throw new ValidationException(String.format("You cannot move Datasource with id [%s] to another Provider as it" +
                     "is not yet Approved", datasourceBundle.getId()));
         }
         ProviderBundle newProvider = providerService.get(catalogueName, newProviderId, auth);

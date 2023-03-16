@@ -40,8 +40,8 @@ public class RegistrationMailService {
     private final ProviderManager providerManager;
     private final PendingProviderManager pendingProviderManager;
     private final ServiceBundleManager serviceBundleManager;
-
     private final DatasourceBundleManager datasourceBundleManager;
+    private final TrainingResourceManager trainingResourceManager;
     private final PendingServiceManager pendingServiceManager;
     private final SecurityService securityService;
 
@@ -83,6 +83,7 @@ public class RegistrationMailService {
                                    @Lazy PendingProviderManager pendingProviderManager,
                                    ServiceBundleManager serviceBundleManager,
                                    DatasourceBundleManager datasourceBundleManager,
+                                   TrainingResourceManager trainingResourceManager,
                                    PendingServiceManager pendingServiceManager,
                                    SecurityService securityService) {
         this.mailService = mailService;
@@ -91,6 +92,7 @@ public class RegistrationMailService {
         this.pendingProviderManager = pendingProviderManager;
         this.serviceBundleManager = serviceBundleManager;
         this.datasourceBundleManager = datasourceBundleManager;
+        this.trainingResourceManager = trainingResourceManager;
         this.pendingServiceManager = pendingServiceManager;
         this.securityService = securityService;
     }
@@ -110,21 +112,34 @@ public class RegistrationMailService {
         }
 
         List<Service> serviceList = serviceBundleManager.getResources(providerBundle.getId());
-        List<Datasource> datasourceList =datasourceBundleManager.getResources(providerBundle.getId());
+        List<Datasource> datasourceList = datasourceBundleManager.getResources(providerBundle.getId());
+        List<TrainingResource> trainingResourceList = trainingResourceManager.getResources(providerBundle.getId());
         Service serviceTemplate = null;
+        TrainingResource trainingResourceTemplate = null;
         if (!datasourceList.isEmpty()) {
-            root.put("resource", datasourceList.get(0));
+            root.put("resourceId", datasourceList.get(0).getId());
+            root.put("resourceName", datasourceList.get(0).getName());
             serviceTemplate = datasourceList.get(0);
         } else if (!serviceList.isEmpty()){
-            root.put("resource", serviceList.get(0));
+            root.put("resourceId", serviceList.get(0).getId());
+            root.put("resourceName", serviceList.get(0).getName());
             serviceTemplate = serviceList.get(0);
+        } else if (!trainingResourceList.isEmpty()){
+            root.put("resourceId", trainingResourceList.get(0).getId());
+            root.put("resourceName", trainingResourceList.get(0).getTitle());
+            trainingResourceTemplate = trainingResourceList.get(0);
         } else {
             serviceTemplate = new Service();
             serviceTemplate.setName("");
         }
 
-        providerSubject = getProviderSubject(providerBundle, serviceTemplate);
-        regTeamSubject = getRegTeamSubject(providerBundle, serviceTemplate);
+        if (serviceTemplate != null){
+            providerSubject = getProviderSubject(providerBundle, serviceTemplate, serviceTemplate.getName());
+            regTeamSubject = getRegTeamSubject(providerBundle, serviceTemplate, serviceTemplate.getId(), serviceTemplate.getName());
+        } else{
+            providerSubject = getProviderSubject(providerBundle, trainingResourceTemplate, trainingResourceTemplate.getTitle());
+            regTeamSubject = getRegTeamSubject(providerBundle, trainingResourceTemplate, trainingResourceTemplate.getId(), trainingResourceTemplate.getTitle());
+        }
 
         root.put("providerBundle", providerBundle);
         root.put("endpoint", endpoint);
@@ -201,7 +216,7 @@ public class RegistrationMailService {
         String regTeamSubject;
 
         if (catalogueBundle == null || catalogueBundle.getCatalogue() == null) {
-            throw new ResourceNotFoundException("Cataogue is null");
+            throw new ResourceNotFoundException("Catalogue is null");
         }
 
         catalogueSubject = getCatalogueSubject(catalogueBundle);
@@ -297,24 +312,40 @@ public class RegistrationMailService {
 
     public void sendEmailNotificationsToProvidersWithOutdatedResources(String resourceId){
         Map<String, Object> root = new HashMap<>();
+        ProviderBundle providerBundle;
         root.put("project", projectName);
         root.put("endpoint", endpoint);
         ResourceBundle<?> resourceBundle;
+        TrainingResourceBundle trainingResourceBundle = null;
         resourceBundle = serviceBundleManager.getOrElseReturnNull(resourceId, catalogueName);
         if (resourceBundle == null){
             resourceBundle = datasourceBundleManager.getOrElseReturnNull(resourceId, catalogueName);
         }
-        ProviderBundle providerBundle = providerManager.get(resourceBundle.getPayload().getResourceOrganisation());
+        if (resourceBundle == null){
+            trainingResourceBundle = trainingResourceManager.getOrElseReturnNull(resourceId, catalogueName);
+            providerBundle = providerManager.get(trainingResourceBundle.getTrainingResource().getResourceOrganisation());
+        } else{
+            providerBundle = providerManager.get(resourceBundle.getPayload().getResourceOrganisation());
+        }
         if (providerBundle.getProvider().getUsers() == null || providerBundle.getProvider().getUsers().isEmpty()) {
             throw new ValidationException(String.format("Provider [%s]-[%s] has no Users", providerBundle.getId(), providerBundle.getProvider().getName()));
         }
         String subject = String.format("[%s] Your Provider [%s] has one or more outdated Resources", projectName, providerBundle.getProvider().getName());
         root.put("providerBundle", providerBundle);
-        root.put("resourceBundle", resourceBundle);
-        for (User user : providerBundle.getProvider().getUsers()) {
-            root.put("user", user);
-            String userRole = "provider";
-            sendMailsFromTemplate("providerOutdatedResources.ftl", root, subject, user.getEmail(), userRole);
+        if (resourceBundle != null){
+            root.put("resourceBundle", resourceBundle);
+            for (User user : providerBundle.getProvider().getUsers()) {
+                root.put("user", user);
+                String userRole = "provider";
+                sendMailsFromTemplate("providerOutdatedResources.ftl", root, subject, user.getEmail(), userRole);
+            }
+        } else{
+            root.put("trainingResourceBundle", trainingResourceBundle);
+            for (User user : providerBundle.getProvider().getUsers()) {
+                root.put("user", user);
+                String userRole = "provider";
+                sendMailsFromTemplate("providerOutdatedTrainingResources.ftl", root, subject, user.getEmail(), userRole);
+            }
         }
     }
 
@@ -357,12 +388,51 @@ public class RegistrationMailService {
         sendMailsFromTemplate("resourceMovedEPOT.ftl", root, subject, registrationEmail, userRole);
     }
 
+    public void sendEmailsForMovedTrainingResources(ProviderBundle oldProvider, ProviderBundle newProvider, TrainingResourceBundle trainingResourceBundle, Authentication auth){
+        Map<String, Object> root = new HashMap<>();
+        root.put("project", projectName);
+        root.put("endpoint", endpoint);
+        if (oldProvider.getProvider().getUsers() == null || oldProvider.getProvider().getUsers().isEmpty()) {
+            throw new ValidationException(String.format("Provider [%s]-[%s] has no Users", oldProvider.getId(), oldProvider.getProvider().getName()));
+        }
+        if (newProvider.getProvider().getUsers() == null || newProvider.getProvider().getUsers().isEmpty()) {
+            throw new ValidationException(String.format("Provider [%s]-[%s] has no Users", newProvider.getId(), newProvider.getProvider().getName()));
+        }
+        String subject = String.format("[%s] Training Resource [%s] has been moved from Provider [%s] to Provider [%s]", projectName, trainingResourceBundle.getTrainingResource().getTitle(),
+                oldProvider.getProvider().getName(), newProvider.getProvider().getName());
+        String userRole = "provider";
+        root.put("oldProvider", oldProvider);
+        root.put("newProvider", newProvider);
+        root.put("trainingResourceBundle", trainingResourceBundle);
+        root.put("comment", trainingResourceBundle.getLoggingInfo().get(trainingResourceBundle.getLoggingInfo().size() - 1).getComment());
+
+        // emails to old Provider's Users
+        for (User user : oldProvider.getProvider().getUsers()) {
+            root.put("user", user);
+            sendMailsFromTemplate("trainingResourceMovedOldProvider.ftl", root, subject, user.getEmail(), userRole);
+        }
+//        root.remove("user");
+
+        // emails to new Provider's Users
+        for (User user : newProvider.getProvider().getUsers()) {
+            root.put("user", user);
+            sendMailsFromTemplate("trainingResourceMovedNewProvider.ftl", root, subject, user.getEmail(), userRole);
+        }
+
+        // emails to Admins
+        userRole = "admin";
+        root.put("adminFullName", User.of(auth).getFullName());
+        root.put("adminEmail", User.of(auth).getEmail());
+        root.put("adminRole", securityService.getRoleName(auth));
+        sendMailsFromTemplate("trainingResourceMovedEPOT.ftl", root, subject, registrationEmail, userRole);
+    }
+
     @Scheduled(cron = "0 0 12 ? * 2/2") // At 12:00:00pm, every 2 days starting on Monday, every month
     public void sendEmailNotificationsToAdmins() {
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(maxQuantity);
         ff.addFilter("published", false);
-        List<ProviderBundle> allProviders = providerManager.getAll(ff, null).getResults();
+        List<ProviderBundle> allProviders = providerManager.getAll(ff, securityService.getAdminAccess()).getResults();
 
         List<String> providersWaitingForInitialApproval = new ArrayList<>();
         List<String> providersWaitingForSTApproval = new ArrayList<>();
@@ -564,7 +634,7 @@ public class RegistrationMailService {
         }
     }
 
-    private String getProviderSubject(ProviderBundle providerBundle, Service serviceTemplate) {
+    private String getProviderSubject(ProviderBundle providerBundle, Object serviceTemplate, String name) {
         if (providerBundle == null || providerBundle.getProvider() == null) {
             logger.error("Provider is null");
             return String.format("[%s]", this.projectName);
@@ -603,14 +673,14 @@ public class RegistrationMailService {
                     assert serviceTemplate != null;
                     subject = String.format("[%s Portal] Your application for registering [%s] " +
                                     "as a new %s to the %s Portal has been received and is under review",
-                            this.projectName, serviceTemplate.getName(), serviceOrResource, this.projectName);
+                            this.projectName, name, serviceOrResource, this.projectName);
                     break;
                 case "approved template":
                     if (providerBundle.isActive()) {
                         assert serviceTemplate != null;
                         subject = String.format("[%s Portal] Your application for registering [%s] " +
                                         "as a new %s to the %s Portal has been approved",
-                                this.projectName, serviceTemplate.getName(), serviceOrResource, this.projectName);
+                                this.projectName, name, serviceOrResource, this.projectName);
                         break;
                     } else {
                         assert serviceTemplate != null;
@@ -622,7 +692,7 @@ public class RegistrationMailService {
                     assert serviceTemplate != null;
                     subject = String.format("[%s Portal] Your application for registering [%s] " +
                                     "as a new %s to the %s Portal has been rejected",
-                            this.projectName, serviceTemplate.getName(), serviceOrResource, this.projectName);
+                            this.projectName, name, serviceOrResource, this.projectName);
                     break;
                 default:
                     subject = String.format("[%s Portal] Provider Registration", this.projectName);
@@ -664,7 +734,7 @@ public class RegistrationMailService {
     }
 
 
-    private String getRegTeamSubject(ProviderBundle providerBundle, Service serviceTemplate) {
+    private String getRegTeamSubject(ProviderBundle providerBundle, Object serviceTemplate, String resourceId, String name) {
         if (providerBundle == null || providerBundle.getProvider() == null) {
             logger.error("Provider is null");
             return String.format("[%s]", this.projectName);
@@ -704,14 +774,14 @@ public class RegistrationMailService {
                     assert serviceTemplate != null;
                     subject = String.format("[%s Portal] A new application for registering [%s] " +
                                     "as a new %s to the %s Portal has been received and should be reviewed",
-                            this.projectName, serviceTemplate.getId(), serviceOrResource, this.projectName);
+                            this.projectName, resourceId, serviceOrResource, this.projectName);
                     break;
                 case "approved template":
                     if (providerBundle.isActive()) {
                         assert serviceTemplate != null;
                         subject = String.format("[%s Portal] The application of [%s] - ([%s]) " +
                                         "for registering as a new %s has been approved",
-                                this.projectName, serviceTemplate.getName(), serviceTemplate.getId(), serviceOrResource);
+                                this.projectName, name, resourceId, serviceOrResource);
                         break;
                     } else {
                         assert serviceTemplate != null;
@@ -723,7 +793,7 @@ public class RegistrationMailService {
                     assert serviceTemplate != null;
                     subject = String.format("[%s Portal] The application of [%s] - ([%s]) " +
                                     "for registering as a %s %s has been rejected",
-                            this.projectName, serviceTemplate.getName(), serviceTemplate.getId(), this.projectName, serviceOrResource);
+                            this.projectName, name, resourceId, this.projectName, serviceOrResource);
                     break;
                 default:
                     subject = String.format("[%s Portal] Provider Registration", this.projectName);
@@ -954,6 +1024,24 @@ public class RegistrationMailService {
         }
     }
 
+    public void notifyProviderAdminsForTrainingResourceAuditing(TrainingResourceBundle trainingResourceBundle) {
+
+        ProviderBundle providerBundle = providerManager.get(trainingResourceBundle.getTrainingResource().getResourceOrganisation());
+
+        Map<String, Object> root = new HashMap<>();
+        root.put("project", projectName);
+        root.put("endpoint", endpoint);
+        root.put("trainingResourceBundle", trainingResourceBundle);
+
+        String subject = String.format("[%s Portal] Your Training Resource '%s' has been audited by the EPOT team", projectName, trainingResourceBundle.getTrainingResource().getTitle());
+
+        for (User user : providerBundle.getProvider().getUsers()) {
+            root.put("user", user);
+            String userRole = "provider";
+            sendMailsFromTemplate("trainingResourceAudit.ftl", root, subject, user.getEmail(), userRole);
+        }
+    }
+
     public void notifyPortalAdminsForInvalidProviderUpdate(ProviderBundle providerBundle) {
 
         Map<String, Object> root = new HashMap<>();
@@ -991,6 +1079,19 @@ public class RegistrationMailService {
         String subject = String.format("[%s Portal] The Resource [%s] previously marked as [invalid] has been updated", projectName, resourceBundle.getPayload().getName());
         String userRole = "admin";
         sendMailsFromTemplate("invalidResourceUpdate.ftl", root, subject, registrationEmail, userRole);
+    }
+
+    public void notifyPortalAdminsForInvalidTrainingResourceUpdate(TrainingResourceBundle trainingResourceBundle) {
+
+        Map<String, Object> root = new HashMap<>();
+        root.put("project", projectName);
+        root.put("endpoint", endpoint);
+        root.put("trainingResourceBundle", trainingResourceBundle);
+
+        // send email to Admins
+        String subject = String.format("[%s Portal] The Training Resource [%s] previously marked as [invalid] has been updated", projectName, trainingResourceBundle.getTrainingResource().getTitle());
+        String userRole = "admin";
+        sendMailsFromTemplate("invalidTrainingResourceUpdate.ftl", root, subject, registrationEmail, userRole);
     }
 
     public void sendEmailsForHelpdeskExtension(HelpdeskBundle helpdeskBundle, String action){

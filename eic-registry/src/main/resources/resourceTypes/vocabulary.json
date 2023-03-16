@@ -2,6 +2,15 @@
   "indexFields": [
     {
       "defaultValue": null,
+      "label": "resource_internal_id",
+      "multivalued": false,
+      "name": "resource_internal_id",
+      "path": "//*[local-name()='id']/text()",
+      "primaryKey": true,
+      "type": "java.lang.String"
+    },
+    {
+      "defaultValue": null,
       "label": "vocabulary_id",
       "multivalued": false,
       "name": "vocabulary_id",

@@ -2,6 +2,13 @@
   "indexFields": [
     {
       "multivalued": false,
+      "name": "resource_internal_id",
+      "path": "//*[local-name()='monitoring']/*[local-name()='id']/text()",
+      "type": "java.lang.String",
+      "primaryKey": true
+    },
+    {
+      "multivalued": false,
       "name": "monitoring_id",
       "path": "//*[local-name()='monitoring']/*[local-name()='id']/text()",
       "type": "java.lang.String",

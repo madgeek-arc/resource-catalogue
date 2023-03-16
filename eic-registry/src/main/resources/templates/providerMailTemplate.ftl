@@ -27,20 +27,20 @@ Dear ${user.fullName},
     </#if>
 <#else>
     <#if providerBundle.templateStatus == "pending template">
-        You have applied for registering [${resource.name}] - [${resource.id}] as a new Resource in the ${project} Portal.
+        You have applied for registering [${resourceName}] - [${resourceId}] as a new Resource in the ${project} Portal.
         The Resource description will be reviewed and you will be notified on its approval or rejection, as well as for any further steps you can follow for registering successfully your Resources.
         Thank you for your interest in becoming a member of the ${project} Portal.
     </#if>
     <#if providerBundle.templateStatus == "approved template">
-            You have applied for registering [${resource.name}] - [${resource.id}] as a new Resource in the ${project} Portal.
-            Your application has been approved and the Resource has been successfully listed in the ${project} Portal. You can view the published Resource here ${endpoint}/dashboard/${project?lower_case}/${providerBundle.provider.id}/resource-dashboard/${resource.id}/stats.
+            You have applied for registering [${resourceName}] - [${resourceId}] as a new Resource in the ${project} Portal.
+            Your application has been approved and the Resource has been successfully listed in the ${project} Portal. You can view the published Resource here ${endpoint}/dashboard/${project?lower_case}/${providerBundle.provider.id}/resource-dashboard/${resourceId}/stats.
             [Attached you may find a Resource Description Recommendations Report to further improve your Resource description.]
             You may now proceed with registering more Resources for [${providerBundle.provider.name}] - ([${providerBundle.provider.id}]). You can register all other Resources either manually (via the same web interface) or via the ${project} Portal API ${endpoint}/developers.
             For any clarifications, please contact us at ${registrationEmail}.
             Thank you for your interest in becoming a member of the ${project} Portal.
     </#if>
     <#if providerBundle.templateStatus == "rejected template">
-        You have applied for registering [${resource.name}] - [${resource.id}] as a new Resource in the ${project} Portal.
+        You have applied for registering [${resourceName}] - [${resourceId}] as a new Resource in the ${project} Portal.
         Your application has been rejected, as your Resource description does not comply with the Rules of Participation of the ${project} Portal.
         [Attached you may find a Resource Description Recommendations Report].
         [Option 1: We would like to offer an information webinar or training session to improve your application. If you agree or for any other clarifications, please contact us at ${registrationEmail}]

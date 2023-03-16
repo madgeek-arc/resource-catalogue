@@ -15,24 +15,6 @@ import java.util.stream.Collectors;
 public interface StatisticsService {
 
     /**
-     * Get time series of ratings for a service.
-     *
-     * @param serviceId
-     * @param by
-     * @return
-     */
-    Map<String, Float> ratings(String serviceId, Interval by);
-
-    /**
-     * Get time series of favourites for a service.
-     *
-     * @param serviceId
-     * @param by
-     * @return
-     */
-    Map<String, Integer> favourites(String serviceId, Interval by);
-
-    /**
      * Get time series of addToProject for a service.
      *
      * @param serviceId
@@ -49,24 +31,6 @@ public interface StatisticsService {
      * @return
      */
     Map<String, Integer> visits(String serviceId, Interval by);
-
-    /**
-     * Get time series of aggregate ratings for all services offered by a provider.
-     *
-     * @param providerId
-     * @param by
-     * @return
-     */
-    Map<String, Float> providerRatings(String providerId, Interval by);
-
-    /**
-     * Get time series of aggregate favourites for all services offered by a provider.
-     *
-     * @param providerId
-     * @param by
-     * @return
-     */
-    Map<String, Integer> providerFavourites(String providerId, Interval by);
 
     /**
      * Get time series of aggregate favourites for all services offered by a provider.

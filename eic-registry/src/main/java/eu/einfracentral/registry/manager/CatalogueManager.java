@@ -192,8 +192,6 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
 
         registrationMailService.sendEmailsToNewlyAddedCatalogueAdmins(catalogue, null);
 
-//        synchronizerServiceProvider.syncAdd(catalogue.getCatalogue());
-
         return ret;
     }
 
@@ -242,7 +240,6 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
                 registrationMailService.notifyPortalAdminsForInvalidCatalogueUpdate(catalogue);
             }
         }
-//        synchronizerServiceProvider.syncUpdate(catalogue.getCatalogue());
 
         return catalogue;
     }
@@ -295,7 +292,7 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
         User user = User.of(auth);
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(maxQuantity);
-        ff.setOrderBy(FacetFilterUtils.createOrderBy("name", "asc"));
+        ff.addOrderBy("name", "asc");
         return super.getAll(ff, auth).getResults()
                 .stream().map(p -> {
                     if (securityService.userIsCatalogueAdmin(user, p.getId())) {
@@ -312,7 +309,7 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
         ff.addFilter("active", false);
         ff.setFrom(0);
         ff.setQuantity(maxQuantity);
-        ff.setOrderBy(FacetFilterUtils.createOrderBy("name", "asc"));
+        ff.addOrderBy("name", "asc");
         return getAll(ff, null).getResults();
     }
 

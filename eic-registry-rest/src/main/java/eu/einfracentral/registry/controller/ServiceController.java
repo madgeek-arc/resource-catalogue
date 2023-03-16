@@ -5,6 +5,7 @@ import eu.einfracentral.domain.ServiceBundle;
 import eu.einfracentral.exception.ValidationException;
 import eu.einfracentral.registry.service.ResourceBundleService;
 import eu.einfracentral.registry.service.ProviderService;
+import eu.einfracentral.registry.service.TrainingResourceService;
 import eu.einfracentral.utils.FacetFilterUtils;
 import eu.openminted.registry.core.domain.Browsing;
 import eu.openminted.registry.core.domain.FacetFilter;
@@ -40,6 +41,8 @@ public class ServiceController {
 
     private static final Logger logger = LogManager.getLogger(ServiceController.class);
     private final ResourceBundleService<ServiceBundle> resourceBundleService;
+    private final ResourceBundleService<DatasourceBundle> datasourceBundleService;
+    private final TrainingResourceService<TrainingResourceBundle> trainingResourceService;
     private final ProviderService<ProviderBundle, Authentication> providerService;
     private final DataSource commonDataSource;
 
@@ -53,9 +56,13 @@ public class ServiceController {
     @Autowired
     ServiceController(ResourceBundleService<ServiceBundle> service,
                       ProviderService<ProviderBundle, Authentication> provider,
+                      ResourceBundleService<DatasourceBundle> datasourceBundleService,
+                      TrainingResourceService<TrainingResourceBundle> trainingResourceService,
                       DataSource commonDataSource) {
         this.resourceBundleService = service;
         this.providerService = provider;
+        this.datasourceBundleService = datasourceBundleService;
+        this.trainingResourceService = trainingResourceService;
         this.commonDataSource = commonDataSource;
     }
 
@@ -276,23 +283,6 @@ public class ServiceController {
         return ResponseEntity.ok(resourceBundleService.getAll(ff, auth));
     }
 
-    // Get all modification details of a specific Service, providing the Service id.
-    @GetMapping(path = {"history/{id}"}, produces = {MediaType.APPLICATION_JSON_VALUE})
-    public ResponseEntity<Paging<ResourceHistory>> history(@PathVariable String id,
-                                                           @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueId,
-                                                           @ApiIgnore Authentication auth) {
-        Paging<ResourceHistory> history = resourceBundleService.getHistory(id, catalogueId);
-        return ResponseEntity.ok(history);
-    }
-
-    // Get all modifications of a specific Service, providing the Service id and the resource Version id.
-    @GetMapping(path = {"history/{resourceId}/{versionId}"}, produces = {MediaType.APPLICATION_JSON_VALUE})
-    public ResponseEntity<Service> getVersionHistory(@PathVariable String resourceId, @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueId,
-                                                     @PathVariable String versionId, @ApiIgnore Authentication auth) {
-        Service service = resourceBundleService.getVersionHistory(resourceId, catalogueId, versionId);
-        return ResponseEntity.ok(service);
-    }
-
     // Filter a list of inactive Services based on a set of filters or get a list of all inactive Services in the Catalogue.
     @ApiImplicitParams({
             @ApiImplicitParam(name = "query", value = "Keyword to refine the search", dataType = "string", paramType = "query"),
@@ -411,6 +401,29 @@ public class ServiceController {
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     public void changeProvider(@RequestParam String resourceId, @RequestParam String newProvider, @RequestParam(required = false) String comment, @ApiIgnore Authentication authentication) {
         resourceBundleService.changeProvider(resourceId, newProvider, comment, authentication);
+    }
+
+    // front-end use
+    @GetMapping(path = {"resourceIdToNameMap"}, produces = {MediaType.APPLICATION_JSON_VALUE})
+    public ResponseEntity<List<Object>> getAllProviderRelatedResources() {
+        List<Service> services = resourceBundleService.getAll(createFacetFilter(), null).getResults()
+                .stream().map(ServiceBundle::getService).collect(Collectors.toList());
+        List<Datasource> datasources = datasourceBundleService.getAll(createFacetFilter(), null).getResults()
+                .stream().map(DatasourceBundle::getDatasource).collect(Collectors.toList());
+        List<TrainingResource> trainingResources = trainingResourceService.getAll(createFacetFilter(), null).getResults()
+                .stream().map(TrainingResourceBundle::getTrainingResource).collect(Collectors.toList());
+        List<Object> allResources = new ArrayList<>(services);
+        allResources.addAll(datasources);
+        allResources.addAll(trainingResources);
+        return ResponseEntity.ok(allResources);
+    }
+
+    //FIXME: FacetFilters reset after each search.
+    private FacetFilter createFacetFilter(){
+        FacetFilter ff = new FacetFilter();
+        ff.setQuantity(10000);
+        ff.addFilter("published", false);
+        return ff;
     }
 
     @ApiImplicitParams({

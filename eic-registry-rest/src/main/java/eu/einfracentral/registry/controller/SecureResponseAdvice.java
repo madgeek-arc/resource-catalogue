@@ -82,8 +82,16 @@ public class SecureResponseAdvice<T> implements ResponseBodyAdvice<T> {
             modifyServiceBundle(t, auth);
         } else if (t instanceof Service) {
             modifyService(t, auth);
+        } else if (t instanceof TrainingResourceBundle) {
+            modifyTrainingResourceBundle(t, auth);
+        } else if (t instanceof TrainingResource) {
+            modifyTrainingResource(t, auth);
         } else if (t instanceof RichResource) {
-            modifyRichService(t, auth);
+            if (((RichResource) t).getTrainingResource() != null){
+                modifyRichTrainingResource(t, auth);
+            } else{
+                modifyRichService(t, auth);
+            }
         } else if (t instanceof LoggingInfo) {
             modifyLoggingInfo(t);
         }
@@ -131,11 +139,38 @@ public class SecureResponseAdvice<T> implements ResponseBodyAdvice<T> {
         }
     }
 
+    private void modifyTrainingResource(T trainingResource, Authentication auth) {
+        if (!this.securityService.isResourceProviderAdmin(auth, ((TrainingResource) trainingResource).getId(), ((TrainingResource) trainingResource).getCatalogueId())) {
+            ((TrainingResource) trainingResource).setContact(null);
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private void modifyTrainingResourceBundle(T trainingResourceBunle, Authentication auth) {
+        modifyLoggingInfoList((T) ((TrainingResourceBundle) trainingResourceBunle).getLoggingInfo());
+        modifyLoggingInfo((T) ((TrainingResourceBundle) trainingResourceBunle).getLatestAuditInfo());
+        modifyLoggingInfo((T) ((TrainingResourceBundle) trainingResourceBunle).getLatestUpdateInfo());
+        modifyLoggingInfo((T) ((TrainingResourceBundle) trainingResourceBunle).getLatestOnboardingInfo());
+
+        if (!this.securityService.isResourceProviderAdmin(auth, ((TrainingResourceBundle) trainingResourceBunle).getId(), ((TrainingResourceBundle) trainingResourceBunle).getTrainingResource().getCatalogueId())) {
+            ((TrainingResourceBundle) trainingResourceBunle).getTrainingResource().setContact(null);
+            ((TrainingResourceBundle) trainingResourceBunle).getMetadata().setTerms(null);
+        }
+    }
+
+
     private void modifyRichService(T richService, Authentication auth) {
         if (!this.securityService.isResourceProviderAdmin(auth, ((RichResource) richService).getService().getId(), ((RichResource) richService).getService().getCatalogueId())) {
             ((RichResource) richService).getService().setMainContact(null);
             ((RichResource) richService).getService().setSecurityContactEmail(null);
             ((RichResource) richService).getMetadata().setTerms(null);
+        }
+    }
+
+    private void modifyRichTrainingResource(T richTrainingResource, Authentication auth) {
+        if (!this.securityService.isResourceProviderAdmin(auth, ((RichResource) richTrainingResource).getTrainingResource().getId(), ((RichResource) richTrainingResource).getTrainingResource().getCatalogueId())) {
+            ((RichResource) richTrainingResource).getTrainingResource().setContact(null);
+            ((RichResource) richTrainingResource).getMetadata().setTerms(null);
         }
     }
 

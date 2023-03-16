@@ -1,15 +1,13 @@
 package eu.einfracentral.registry.manager;
 
-import eu.einfracentral.domain.*;
 import eu.einfracentral.domain.ResourceBundle;
-import eu.einfracentral.domain.ServiceBundle;
+import eu.einfracentral.domain.*;
 import eu.einfracentral.exception.ValidationException;
 import eu.einfracentral.registry.service.*;
 import eu.einfracentral.service.IdCreator;
 import eu.einfracentral.service.RegistrationMailService;
 import eu.einfracentral.service.SecurityService;
 import eu.einfracentral.service.SynchronizerService;
-import eu.einfracentral.utils.FacetFilterUtils;
 import eu.einfracentral.validators.FieldValidator;
 import eu.openminted.registry.core.domain.*;
 import eu.openminted.registry.core.exception.ResourceNotFoundException;
@@ -19,6 +17,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.mitre.openid.connect.model.OIDCAuthenticationToken;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -60,11 +59,11 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     private final VocabularyService vocabularyService;
     private final DataSource dataSource;
     private final CatalogueService<CatalogueBundle, Authentication> catalogueService;
+    private final SynchronizerService<Provider> synchronizerService;
+
     //TODO: maybe add description on DB and elastic too
     private final String columnsOfInterest = "provider_id, name, abbreviation, affiliations, tags, areas_of_activity, esfri_domains, meril_scientific_subdomains," +
             " networks, scientific_subdomains, societal_grand_challenges, structure_types, catalogue_id, hosting_legal_entity"; // variable with DB tables a keyword is been searched on
-
-    private final SynchronizerService<Provider> synchronizerServiceProvider;
 
     @Value("${project.catalogue.name}")
     private String catalogueName;
@@ -76,7 +75,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
                            @Lazy RegistrationMailService registrationMailService, IdCreator idCreator,
                            EventService eventService, VersionService versionService,
                            VocabularyService vocabularyService, DataSource dataSource,
-                           SynchronizerService<Provider> synchronizerServiceProvider,
+                           @Qualifier("providerSync") SynchronizerService<Provider> synchronizerService,
                            CatalogueService<CatalogueBundle, Authentication> catalogueService,
                            @Lazy PublicServiceManager publicServiceManager,
                            @Lazy PublicDatasourceManager publicDatasourceManager,
@@ -92,7 +91,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         this.versionService = versionService;
         this.vocabularyService = vocabularyService;
         this.dataSource = dataSource;
-        this.synchronizerServiceProvider = synchronizerServiceProvider;
+        this.synchronizerService = synchronizerService;
         this.catalogueService = catalogueService;
         this.publicServiceManager = publicServiceManager;
         this.publicDatasourceManager = publicDatasourceManager;
@@ -135,7 +134,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
 
         registrationMailService.sendEmailsToNewlyAddedAdmins(provider, null);
 
-        synchronizerServiceProvider.syncAdd(provider.getProvider());
+        synchronizerService.syncAdd(provider.getProvider());
 
         return ret;
     }
@@ -215,7 +214,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
             }
         }
 
-        synchronizerServiceProvider.syncUpdate(provider.getProvider());
+        synchronizerService.syncUpdate(provider.getProvider());
 
         return provider;
     }
@@ -416,7 +415,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         // TODO: move to aspect
         registrationMailService.notifyProviderAdmins(provider);
 
-        synchronizerServiceProvider.syncDelete(provider.getProvider());
+        synchronizerService.syncDelete(provider.getProvider());
 
     }
 
@@ -586,7 +585,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
             ff.addFilter("published", false);
         }
         ff.addFilter("users", user.getEmail());
-        ff.setOrderBy(FacetFilterUtils.createOrderBy("name", "asc"));
+        ff.addOrderBy("name", "asc");
         return super.getAll(ff, auth);
     }
 
@@ -597,7 +596,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         ff.addFilter("published", false);
         ff.setFrom(0);
         ff.setQuantity(maxQuantity);
-        ff.setOrderBy(FacetFilterUtils.createOrderBy("name", "asc"));
+        ff.addOrderBy("name", "asc");
         return getAll(ff, null).getResults();
     }
 

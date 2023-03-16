@@ -41,12 +41,13 @@ public class ServiceDatasourceValidator implements Validator {
     @Override
     public void validate(Object target, Errors errors) {
         Service service = ((ResourceBundle<?>) target).getPayload();
-        if (service.getRelatedResources() != null && !service.getRelatedResources().isEmpty()){
-            validateRelatedResources(service, errors);
-        }
-        if (service.getRequiredResources() != null && !service.getRequiredResources().isEmpty()){
-            validateRequiredResources(service, errors);
-        }
+        //TODO: Probably not needed -> related/required field validation was added on FieldValidator
+//        if (service.getRelatedResources() != null && !service.getRelatedResources().isEmpty()){
+//            validateRelatedResources(service, errors);
+//        }
+//        if (service.getRequiredResources() != null && !service.getRequiredResources().isEmpty()){
+//            validateRequiredResources(service, errors);
+//        }
         validateCategories(service.getCategories());
         validateScientificDomains(service.getScientificDomains());
     }
