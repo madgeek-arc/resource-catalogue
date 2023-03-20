@@ -471,7 +471,7 @@ public abstract class AbstractResourceBundleManager<T extends ResourceBundle<?>>
     private Browsing<T> getMatchingResources(FacetFilter ff) {
         Browsing<T> resources;
 
-        resources = getResults(ff);
+        resources = genericResourceService.getResults(ff);
         if (!resources.getResults().isEmpty() && !resources.getFacets().isEmpty()) {
             resources.setFacets(facetLabelService.createLabels(resources.getFacets()));
         }
@@ -804,6 +804,7 @@ public abstract class AbstractResourceBundleManager<T extends ResourceBundle<?>>
 
         int quantity = ff.getQuantity();
         int from = ff.getFrom();
+        int to = 0;
 
         FacetFilter ff2 = new FacetFilter();
         ff2.setFilter(new HashMap<>(ff.getFilter()));
@@ -811,10 +812,11 @@ public abstract class AbstractResourceBundleManager<T extends ResourceBundle<?>>
         ((MultiValueMap<String, Object>) ff2.getFilter().get("multi-filter")).remove("auditState");
         ff2.setQuantity(maxQuantity);
         ff2.setFrom(0);
-        Paging<T> retPaging = getAllForAdmin(ff, auth);
-        List<T> allWithoutAuditFilterList = getAllForAdmin(ff2, auth).getResults();
+        ff2.setResourceType("resources");
+        Paging<T> retPaging;
+        Paging<T> allResults = genericResourceService.getResults(ff2);
         List<T> ret = new ArrayList<>();
-        for (T serviceBundle : allWithoutAuditFilterList) {
+        for (T serviceBundle : allResults.getResults()) {
             String auditVocStatus;
             try {
                 auditVocStatus = LoggingInfo.createAuditVocabularyStatuses(serviceBundle.getLoggingInfo());
@@ -867,43 +869,35 @@ public abstract class AbstractResourceBundleManager<T extends ResourceBundle<?>>
                 } else {
                     retWithCorrectQuantity.addAll(ret);
                 }
-                retPaging.setTo(retWithCorrectQuantity.size());
+                to = retWithCorrectQuantity.size();
             } else {
+                if (quantity + from > ret.size()) {
+                    to = ret.size();
+                } else {
+                    to = quantity + from;
+                }
                 boolean indexOutOfBound = false;
                 if (quantity <= ret.size()) {
                     for (int i = from; i < quantity + from; i++) {
                         try {
                             retWithCorrectQuantity.add(ret.get(i));
-                            if (quantity + from > ret.size()) {
-                                retPaging.setTo(ret.size());
-                            } else {
-                                retPaging.setTo(quantity + from);
-                            }
                         } catch (IndexOutOfBoundsException e) {
                             indexOutOfBound = true;
+                            break;
                         }
                     }
                     if (indexOutOfBound) {
-                        retPaging.setTo(ret.size());
+                        to = ret.size();
                     }
                 } else {
-                    retWithCorrectQuantity.addAll(ret);
-                    if (quantity + from > ret.size()) {
-                        retPaging.setTo(ret.size());
-                    } else {
-                        retPaging.setTo(quantity + from);
-                    }
+                    retWithCorrectQuantity.addAll(ret.subList(from, ret.size()));
                 }
             }
-            retPaging.setFrom(from);
-            retPaging.setResults(retWithCorrectQuantity);
-            retPaging.setTotal(ret.size());
+            ret = retWithCorrectQuantity;
         } else {
-            retPaging.setResults(ret);
-            retPaging.setTotal(0);
-            retPaging.setFrom(0);
-            retPaging.setTo(0);
+            from = 0;
         }
+        retPaging = new Paging<>(ret.size(), from, to, ret, allResults.getFacets());
         return retPaging;
     }
 

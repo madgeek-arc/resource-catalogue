@@ -1,5 +1,6 @@
 package eu.einfracentral.service.search;
 
+import eu.openminted.registry.core.service.SearchService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.elasticsearch.client.RestHighLevelClient;
@@ -10,9 +11,9 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Map;
 
-@Service
+@Service("eicSearchService")
 @PropertySource({"classpath:application.properties", "classpath:registry.properties"})
-public class SearchServiceEIC extends AbstractSearchService {
+public class SearchServiceEIC extends AbstractSearchService implements SearchService {
 
     private static final Logger logger = LogManager.getLogger(SearchServiceEIC.class);
 

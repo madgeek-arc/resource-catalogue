@@ -1,9 +1,6 @@
 package eu.einfracentral.registry.manager;
 
 import eu.einfracentral.domain.*;
-import eu.einfracentral.dto.ProviderInfo;
-import eu.einfracentral.dto.ScientificDomain;
-import eu.einfracentral.exception.OIDCAuthenticationException;
 import eu.einfracentral.exception.ResourceException;
 import eu.einfracentral.exception.ResourceNotFoundException;
 import eu.einfracentral.exception.ValidationException;
@@ -35,7 +32,6 @@ import javax.annotation.PostConstruct;
 import javax.validation.constraints.NotNull;
 import java.net.UnknownHostException;
 import java.security.NoSuchAlgorithmException;
-import java.text.DecimalFormat;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.util.*;
@@ -1069,7 +1065,7 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
 
     @Override
     public Map<String, List<TrainingResourceBundle>> getBy(String field, Authentication auth) throws NoSuchFieldException {
-        return null;
+        throw new UnsupportedOperationException("Not yet Implemented");
     }
 
     @Override
