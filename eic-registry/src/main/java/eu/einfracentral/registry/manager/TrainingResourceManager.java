@@ -53,6 +53,7 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
     private final VocabularyService vocabularyService;
     private final CatalogueService<CatalogueBundle, Authentication> catalogueService;
     private final PublicTrainingResourceManager publicTrainingResourceManager;
+    private final MigrationService migrationService;
     @Autowired
     private FacetLabelService facetLabelService;
     @Autowired
@@ -107,7 +108,8 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
                                    @Lazy VocabularyService vocabularyService,
                                    CatalogueService<CatalogueBundle, Authentication> catalogueService,
                                    PublicTrainingResourceManager publicTrainingResourceManager,
-                                   SynchronizerService<TrainingResource> synchronizerService){
+                                   SynchronizerService<TrainingResource> synchronizerService,
+                                   @Lazy MigrationService migrationService){
         super(TrainingResourceBundle.class);
         this.providerService = providerService;
         this.idCreator = idCreator;
@@ -117,6 +119,7 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
         this.catalogueService = catalogueService;
         this.publicTrainingResourceManager = publicTrainingResourceManager;
         this.synchronizerService = synchronizerService;
+        this.migrationService = migrationService;
     }
 
     @Override
@@ -1096,6 +1099,11 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
         ProviderBundle newProvider = providerService.get(catalogueName, newProviderId, auth);
         ProviderBundle oldProvider = providerService.get(catalogueName, trainingResourceBundle.getTrainingResource().getResourceOrganisation(), auth);
 
+        // check that the 2 Providers co-exist under the same Catalogue
+        if (!oldProvider.getProvider().getCatalogueId().equals(newProvider.getProvider().getCatalogueId())){
+            throw new ValidationException("You cannot move a Training Resource to a Provider of another Catalogue");
+        }
+
         User user = User.of(auth);
 
         // update loggingInfo
@@ -1124,6 +1132,13 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
         // update ResourceOrganisation
         trainingResourceBundle.getTrainingResource().setResourceOrganisation(newProviderId);
 
+        // update ResourceProviders
+        List<String> resourceProviders = trainingResourceBundle.getTrainingResource().getResourceProviders();
+        if (resourceProviders.contains(oldProvider.getId())){
+            resourceProviders.remove(oldProvider.getId());
+            resourceProviders.add(newProviderId);
+        }
+
         // update id
         try {
             trainingResourceBundle.setId(idCreator.createTrainingResourceId(trainingResourceBundle));
@@ -1133,8 +1148,11 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
 
         // add Resource, delete the old one
         add(trainingResourceBundle, auth);
-        delete(get(resourceId, catalogueName));
         publicTrainingResourceManager.delete(get(resourceId, catalogueName)); // FIXME: ProviderManagementAspect's deletePublicDatasource is not triggered
+        delete(get(resourceId, catalogueName));
+
+        // update other resources which had the old resource ID on their fields
+        migrationService.updateRelatedToTheIdFieldsOfOtherResourcesOfThePortal(resourceId, trainingResourceBundle.getId());
 
         // emails to EPOT, old and new Provider
         registrationMailService.sendEmailsForMovedTrainingResources(oldProvider, newProvider, trainingResourceBundle, auth);

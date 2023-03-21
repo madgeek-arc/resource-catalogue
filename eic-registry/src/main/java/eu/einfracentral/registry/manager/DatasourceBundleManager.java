@@ -47,6 +47,7 @@ public class DatasourceBundleManager extends AbstractResourceBundleManager<Datas
     private final VocabularyService vocabularyService;
     private final CatalogueService<CatalogueBundle, Authentication> catalogueService;
     private final PublicDatasourceManager publicDatasourceManager;
+    private final MigrationService migrationService;
 
     @Value("${project.catalogue.name}")
     private String catalogueName;
@@ -59,7 +60,8 @@ public class DatasourceBundleManager extends AbstractResourceBundleManager<Datas
                                    @Lazy RegistrationMailService registrationMailService,
                                    @Lazy VocabularyService vocabularyService,
                                    CatalogueService<CatalogueBundle, Authentication> catalogueService,
-                                   PublicDatasourceManager publicDatasourceManager) {
+                                   PublicDatasourceManager publicDatasourceManager,
+                                   @Lazy MigrationService migrationService) {
         super(DatasourceBundle.class);
         this.providerService = providerService; // for providers
         this.idCreator = idCreator;
@@ -68,6 +70,7 @@ public class DatasourceBundleManager extends AbstractResourceBundleManager<Datas
         this.vocabularyService = vocabularyService;
         this.catalogueService = catalogueService;
         this.publicDatasourceManager = publicDatasourceManager;
+        this.migrationService = migrationService;
     }
 
     @Override
@@ -577,6 +580,11 @@ public class DatasourceBundleManager extends AbstractResourceBundleManager<Datas
         ProviderBundle newProvider = providerService.get(catalogueName, newProviderId, auth);
         ProviderBundle oldProvider = providerService.get(catalogueName, datasourceBundle.getDatasource().getResourceOrganisation(), auth);
 
+        // check that the 2 Providers co-exist under the same Catalogue
+        if (!oldProvider.getProvider().getCatalogueId().equals(newProvider.getProvider().getCatalogueId())){
+            throw new ValidationException("You cannot move a Datasource to a Provider of another Catalogue");
+        }
+
         User user = User.of(auth);
 
         // update loggingInfo
@@ -605,6 +613,13 @@ public class DatasourceBundleManager extends AbstractResourceBundleManager<Datas
         // update ResourceOrganisation
         datasourceBundle.getDatasource().setResourceOrganisation(newProviderId);
 
+        // update ResourceProviders
+        List<String> resourceProviders = datasourceBundle.getDatasource().getResourceProviders();
+        if (resourceProviders.contains(oldProvider.getId())){
+            resourceProviders.remove(oldProvider.getId());
+            resourceProviders.add(newProviderId);
+        }
+
         // update id
         try {
             datasourceBundle.setId(idCreator.createDatasourceId(datasourceBundle));
@@ -614,8 +629,11 @@ public class DatasourceBundleManager extends AbstractResourceBundleManager<Datas
 
         // add Resource, delete the old one
         add(datasourceBundle, auth);
-        delete(get(resourceId, catalogueName));
         publicDatasourceManager.delete(get(resourceId, catalogueName)); // FIXME: ProviderManagementAspect's deletePublicDatasource is not triggered
+        delete(get(resourceId, catalogueName));
+
+        // update other resources which had the old resource ID on their fields
+        migrationService.updateRelatedToTheIdFieldsOfOtherResourcesOfThePortal(resourceId, datasourceBundle.getId());
 
         // emails to EPOT, old and new Provider
         registrationMailService.sendEmailsForMovedResources(oldProvider, newProvider, datasourceBundle, auth);

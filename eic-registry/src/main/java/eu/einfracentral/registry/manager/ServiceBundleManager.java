@@ -4,10 +4,7 @@ import eu.einfracentral.domain.*;
 import eu.einfracentral.exception.ResourceException;
 import eu.einfracentral.exception.ResourceNotFoundException;
 import eu.einfracentral.exception.ValidationException;
-import eu.einfracentral.registry.service.CatalogueService;
-import eu.einfracentral.registry.service.ProviderService;
-import eu.einfracentral.registry.service.ResourceBundleService;
-import eu.einfracentral.registry.service.VocabularyService;
+import eu.einfracentral.registry.service.*;
 import eu.einfracentral.service.IdCreator;
 import eu.einfracentral.service.RegistrationMailService;
 import eu.einfracentral.service.SecurityService;
@@ -47,6 +44,7 @@ public class ServiceBundleManager extends AbstractResourceBundleManager<ServiceB
     private final VocabularyService vocabularyService;
     private final CatalogueService<CatalogueBundle, Authentication> catalogueService;
     private final PublicServiceManager publicServiceManager;
+    private final MigrationService migrationService;
 
     @Value("${project.catalogue.name}")
     private String catalogueName;
@@ -57,7 +55,8 @@ public class ServiceBundleManager extends AbstractResourceBundleManager<ServiceB
                                 @Lazy RegistrationMailService registrationMailService,
                                 @Lazy VocabularyService vocabularyService,
                                 CatalogueService<CatalogueBundle, Authentication> catalogueService,
-                                @Lazy PublicServiceManager publicServiceManager) {
+                                @Lazy PublicServiceManager publicServiceManager,
+                                @Lazy MigrationService migrationService) {
         super(ServiceBundle.class);
         this.providerService = providerService; // for providers
         this.idCreator = idCreator;
@@ -66,6 +65,7 @@ public class ServiceBundleManager extends AbstractResourceBundleManager<ServiceB
         this.vocabularyService = vocabularyService;
         this.catalogueService = catalogueService;
         this.publicServiceManager = publicServiceManager;
+        this.migrationService = migrationService;
     }
 
     @Override
@@ -616,11 +616,11 @@ public class ServiceBundleManager extends AbstractResourceBundleManager<ServiceB
 
         // add Resource, delete the old one
         add(serviceBundle, auth);
-        delete(get(resourceId, catalogueName));
         publicServiceManager.delete(get(resourceId, catalogueName)); // FIXME: ProviderManagementAspect's deletePublicDatasource is not triggered
+        delete(get(resourceId, catalogueName));
 
         // update other resources which had the old resource ID on their fields
-//        updateRelatedToTheIdFieldsOfOtherResourcesOfThePortal();
+        migrationService.updateRelatedToTheIdFieldsOfOtherResourcesOfThePortal(resourceId, newResourceId);
 
         // emails to EPOT, old and new Provider
         registrationMailService.sendEmailsForMovedResources(oldProvider, newProvider, serviceBundle, auth);
@@ -631,10 +631,6 @@ public class ServiceBundleManager extends AbstractResourceBundleManager<ServiceB
     public ServiceBundle createPublicResource(ServiceBundle serviceBundle, Authentication auth){
         publicServiceManager.add(serviceBundle, auth);
         return serviceBundle;
-    }
-
-    private void updateRelatedToTheIdFieldsOfOtherResourcesOfThePortal(String oldResourceId, String newResourceId) {
-        // to be implemented -> EOSCP-90
     }
 
 }
