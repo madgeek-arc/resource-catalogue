@@ -1,5 +1,6 @@
 package eu.einfracentral.config;
 
+import eu.einfracentral.dto.ServicePaging;
 import eu.einfracentral.utils.MatomoInterceptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -7,7 +8,14 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
+import org.springframework.oxm.jaxb.Jaxb2Marshaller;
+import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.config.annotation.*;
+import org.springframework.web.servlet.view.xml.MarshallingView;
+
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Marshaller;
 
 
 @Configuration
@@ -23,6 +31,21 @@ public class WebMvcConfig implements WebMvcConfigurer {
     @Override
     public void configurePathMatch(PathMatchConfigurer configurer) {
         configurer.setUseSuffixPatternMatch(false);
+    }
+
+    @Override
+    public void configureViewResolvers(ViewResolverRegistry registry) {
+        registry.beanName();
+    }
+
+    @Bean("xmlView")
+    public View marshallingView() {
+        Jaxb2Marshaller marshaller = new Jaxb2Marshaller();
+        marshaller.setClassesToBeBound(ServicePaging.class);
+
+        MarshallingView view = new MarshallingView();
+        view.setMarshaller(marshaller);
+        return view;
     }
 
     @Override
