@@ -447,13 +447,14 @@ public class ServiceController {
     })
     @GetMapping(path = "getSharedResources/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or @securityService.isProviderAdmin(#auth,#id)")
-    public ResponseEntity<Paging<?>> getSharedResources(@ApiIgnore @RequestParam MultiValueMap<String, Object> allRequestParams, @PathVariable String id, @ApiIgnore Authentication auth) {
-        FacetFilter ff = FacetFilterUtils.createMultiFacetFilter(allRequestParams);
+    public ResponseEntity<Paging<?>> getSharedResources(@ApiIgnore @RequestParam MultiValueMap<String, Object> allRequestParams,
+                                                        @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueId,
+                                                        @RequestParam(defaultValue = "service", name = "type") String type,
+                                                        @PathVariable String id, @ApiIgnore Authentication auth) {
+        FacetFilter ff =  resourceBundleService.createFacetFilterForFetchingServicesAndDatasources(allRequestParams, catalogueId, type);
         ff.addFilter("resource_providers", id);
-        ff.addFilter("published", false);
-        ff.setResourceType("resources");
         resourceBundleService.updateFacetFilterConsideringTheAuthorization(ff, auth);
-        Paging<?> paging = genericResourceService.getResults(ff).map(r -> ((eu.einfracentral.domain.ResourceBundle<?>) r).getPayload());
+        Paging<?> paging = genericResourceService.getResults(ff);
         return ResponseEntity.ok(paging);
     }
 
