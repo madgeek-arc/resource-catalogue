@@ -211,8 +211,7 @@ public class MigrationManager implements MigrationService {
                 resource.setPayload(serviceBundleManager.serialize(serviceBundle));
                 resourceService.updateResource(resource);
                 // update Public Service
-                ServiceBundle updatedServiceBundle = serviceBundleManager.get(newResourceId, catalogueName);
-                publicServiceManager.update(updatedServiceBundle, securityService.getAdminAccess());
+                publicServiceManager.update(serviceBundle, securityService.getAdminAccess());
             }
         }
 
@@ -235,8 +234,7 @@ public class MigrationManager implements MigrationService {
                 resource.setPayload(datasourceBundleManager.serialize(datasourceBundle));
                 resourceService.updateResource(resource);
                 // update Public Datasource
-                DatasourceBundle updatedDatasourceBundle = datasourceBundleManager.get(newResourceId, catalogueName);
-                publicDatasourceManager.update(updatedDatasourceBundle, securityService.getAdminAccess());
+                publicDatasourceManager.update(datasourceBundle, securityService.getAdminAccess());
             }
         }
 
@@ -261,8 +259,7 @@ public class MigrationManager implements MigrationService {
                 resource.setPayload(resourceInteroperabilityRecordManager.serialize(resourceInteroperabilityRecordBundle));
                 resourceService.updateResource(resource);
                 // update Public Resource Interoperability Record
-                ResourceInteroperabilityRecordBundle updatedResourceInteroperabilityRecordBundle = resourceInteroperabilityRecordManager.get(newResourceId, catalogueName);
-                publicResourceInteroperabilityManager.update(updatedResourceInteroperabilityRecordBundle, securityService.getAdminAccess());
+                publicResourceInteroperabilityManager.update(resourceInteroperabilityRecordBundle, securityService.getAdminAccess());
             }
         }
 
