@@ -6,8 +6,8 @@ import eu.einfracentral.exception.ValidationException;
 import eu.einfracentral.registry.service.ProviderService;
 import eu.einfracentral.registry.service.ResourceBundleService;
 import eu.einfracentral.registry.service.PendingResourceService;
+import eu.einfracentral.service.GenericResourceService;
 import eu.einfracentral.service.IdCreator;
-import eu.einfracentral.utils.FacetFilterUtils;
 import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.domain.Paging;
 import eu.openminted.registry.core.exception.ResourceNotFoundException;
@@ -18,6 +18,7 @@ import io.swagger.annotations.ApiImplicitParams;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -35,19 +36,31 @@ public class PendingServiceController extends ResourceController<ServiceBundle, 
 
     private static final Logger logger = LogManager.getLogger(PendingServiceController.class);
     private final PendingResourceService<ServiceBundle> pendingServiceManager;
+    private final PendingResourceService<DatasourceBundle> pendingDatasourceManager;
+    private final ResourceBundleService<ServiceBundle> serviceBundleService;
     private final ResourceBundleService<ServiceBundle> resourceBundleService;
     private final ProviderService<ProviderBundle, Authentication> providerService;
+    private GenericResourceService genericResourceService;
     private final IdCreator idCreator;
+
+    @Value("${project.catalogue.name}")
+    private String catalogueName;
 
     @Autowired
     PendingServiceController(PendingResourceService<ServiceBundle> pendingServiceManager,
+                             PendingResourceService<DatasourceBundle> pendingDatasourceManager,
+                             ResourceBundleService<ServiceBundle> serviceBundleService,
                              ResourceBundleService<ServiceBundle> resourceBundleService,
                              ProviderService<ProviderBundle, Authentication> providerService,
+                             GenericResourceService genericResourceService,
                              IdCreator idCreator) {
         super(pendingServiceManager);
         this.pendingServiceManager = pendingServiceManager;
+        this.pendingDatasourceManager = pendingDatasourceManager;
+        this.serviceBundleService = serviceBundleService;
         this.resourceBundleService = resourceBundleService;
         this.providerService = providerService;
+        this.genericResourceService = genericResourceService;
         this.idCreator = idCreator;
     }
 
@@ -61,8 +74,12 @@ public class PendingServiceController extends ResourceController<ServiceBundle, 
     }
 
     @GetMapping(path = "/resource/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
-    public ResponseEntity<Service> getService(@PathVariable String id) {
-        return new ResponseEntity<>(pendingServiceManager.get(id).getService(), HttpStatus.OK);
+    public ResponseEntity<?> getService(@PathVariable String id) {
+        try{
+            return new ResponseEntity<>(pendingServiceManager.get(id).getService(), HttpStatus.OK);
+        } catch(ResourceException | eu.einfracentral.exception.ResourceNotFoundException e){
+            return new ResponseEntity<>(pendingDatasourceManager.get(id).getDatasource(), HttpStatus.OK);
+        }
     }
 
     @GetMapping(path = "/rich/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
@@ -79,10 +96,14 @@ public class PendingServiceController extends ResourceController<ServiceBundle, 
     })
     @GetMapping(path = "/byProvider/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isProviderAdmin(#auth,#id,true)")
-    public ResponseEntity<Paging<ServiceBundle>> getProviderPendingServices(@ApiIgnore @RequestParam MultiValueMap<String, Object> allRequestParams, @PathVariable String id, @ApiIgnore Authentication auth) {
-        FacetFilter ff = FacetFilterUtils.createMultiFacetFilter(allRequestParams);
+    public ResponseEntity<Paging<?>> getProviderPendingServices(@ApiIgnore @RequestParam MultiValueMap<String, Object> allRequestParams,
+                                                                            @RequestParam(defaultValue = "pending_service", name = "type") String type,
+                                                                            @PathVariable String id, @ApiIgnore Authentication auth) {
+        FacetFilter ff = resourceBundleService.createFacetFilterForFetchingServicesAndDatasources(allRequestParams, catalogueName, type);
         ff.addFilter("resource_organisation", id);
-        return new ResponseEntity<>(pendingServiceManager.getAll(ff, auth), HttpStatus.OK);
+        ff.setResourceType("resourceTypes");
+        Paging<?> paging = genericResourceService.getResults(ff);
+        return ResponseEntity.ok(paging);
     }
 
     @PostMapping(path = "/addResource", produces = {MediaType.APPLICATION_JSON_VALUE})
@@ -165,7 +186,7 @@ public class PendingServiceController extends ResourceController<ServiceBundle, 
         }
 
         if (serviceBundle == null) { // if existing Pending Service is null, create a new Active Service
-            serviceBundle = resourceBundleService.addResource(new ServiceBundle(service), auth);
+            serviceBundle = serviceBundleService.addResource(new ServiceBundle(service), auth);
             logger.info("User '{}' added Resource:\n{}", auth.getName(), serviceBundle);
         } else { // else update Pending Service and transform it to Active Service
             if (serviceBundle.getService().getVersion() != null && serviceBundle.getService().getVersion().equals("")) {
