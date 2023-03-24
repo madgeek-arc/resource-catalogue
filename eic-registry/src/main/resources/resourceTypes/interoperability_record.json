@@ -13,6 +13,20 @@
       "path": "//*[local-name()='id']/text()",
       "type": "java.lang.String",
       "primaryKey": true
+    },
+    {
+      "multivalued": false,
+      "name": "catalogue_id",
+      "label": "Catalogue ID",
+      "path": "//*[local-name()='catalogueId']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
+      "name": "provider_id",
+      "label": "Provider ID",
+      "path": "//*[local-name()='providerId']/text()",
+      "type": "java.lang.String"
     }
   ],
   "indexMapperClass": "eu.openminted.registry.core.index.DefaultIndexMapper",
@@ -22,5 +36,5 @@
   "properties": {
     "class": "eu.einfracentral.domain.InteroperabilityRecord"
   },
-  "schemaUrl": "https://raw.githubusercontent.com/madgeek-arc/resource-catalogue/master/eic-registry-model/src/main/resources/schema1.xsd"
+  "schemaUrl": "https://raw.githubusercontent.com/madgeek-arc/resource-catalogue/guidelines_onboarding/eic-registry-model/src/main/resources/schema1.xsd"
 }

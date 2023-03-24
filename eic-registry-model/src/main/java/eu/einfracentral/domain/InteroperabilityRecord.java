@@ -28,10 +28,26 @@ public class InteroperabilityRecord implements Identifiable {
     private String id;
 
     /**
-     * Interoperability Record Identifier Info
+     * The Catalogue this Interoperability Record is originally registered at.
      */
     @XmlElement(required = true)
     @ApiModelProperty(position = 2, required = true)
+    @FieldValidation(containsId = true, idClass = Catalogue.class)
+    private String catalogueId;
+
+    /**
+     * The Provider this Interoperability Record is originally registered at.
+     */
+    @XmlElement(required = true)
+    @ApiModelProperty(position = 3, required = true)
+    @FieldValidation(containsId = true, idClass = Provider.class)
+    private String providerId;
+
+    /**
+     * Interoperability Record Identifier Info
+     */
+    @XmlElement(required = true)
+    @ApiModelProperty(position = 4, required = true)
     private IdentifierInfo identifierInfo;
 
     /**
@@ -40,14 +56,14 @@ public class InteroperabilityRecord implements Identifiable {
      */
     @XmlElementWrapper(required = true, name = "creators")
     @XmlElement(name = "creator")
-    @ApiModelProperty(position = 3, required = true)
+    @ApiModelProperty(position = 5, required = true)
     private List<Creator> creators;
 
     /**
      * A name or title by which a resource is known. May be the title of a dataset or the name of a piece of software.
      */
     @XmlElement(required = true)
-    @ApiModelProperty(position = 4, required = true)
+    @ApiModelProperty(position = 6, required = true)
     @FieldValidation
     private String title;
 
@@ -57,7 +73,7 @@ public class InteroperabilityRecord implements Identifiable {
      * property and sub-properties to provide more information about the publication or release date details.
      */
     @XmlElement(required = true)
-    @ApiModelProperty(position = 5, required = true)
+    @ApiModelProperty(position = 7, required = true)
     @FieldValidation
     private int publicationYear;
 
@@ -66,7 +82,7 @@ public class InteroperabilityRecord implements Identifiable {
      */
     @XmlElementWrapper(name = "resourceTypesInfo")
     @XmlElement(name = "resourceTypeInfo")
-    @ApiModelProperty(position = 6)
+    @ApiModelProperty(position = 8)
     @FieldValidation(nullable = true)
     private List<ResourceTypeInfo> resourceTypesInfo;
 
@@ -74,7 +90,7 @@ public class InteroperabilityRecord implements Identifiable {
      * Time/date the record was created.
      */
     @XmlElement
-    @ApiModelProperty(position = 7)
+    @ApiModelProperty(position = 9)
     @FieldValidation(nullable = true)
     private String created;
 
@@ -82,7 +98,7 @@ public class InteroperabilityRecord implements Identifiable {
      * Time/date the record was last saved, with or without modifications.
      */
     @XmlElement
-    @ApiModelProperty(position = 8)
+    @ApiModelProperty(position = 10)
     @FieldValidation(nullable = true)
     private String updated;
 
@@ -91,7 +107,7 @@ public class InteroperabilityRecord implements Identifiable {
      */
     @XmlElementWrapper(name = "eoscRelatedStandards")
     @XmlElement(name = "eoscRelatedStandard")
-    @ApiModelProperty(position = 9)
+    @ApiModelProperty(position = 11)
     @FieldValidation(nullable = true)
     private List<URL> eoscRelatedStandards;
 
@@ -100,7 +116,7 @@ public class InteroperabilityRecord implements Identifiable {
      */
     @XmlElementWrapper(required = true, name = "rights")
     @XmlElement(name = "right")
-    @ApiModelProperty(position = 10, required = true)
+    @ApiModelProperty(position = 12, required = true)
     @FieldValidation
     private List<Right> rights;
 
@@ -109,7 +125,7 @@ public class InteroperabilityRecord implements Identifiable {
      * May be used for technical information.
      */
     @XmlElement(required = true)
-    @ApiModelProperty(position = 11, required = true)
+    @ApiModelProperty(position = 13, required = true)
     @FieldValidation
     private String description;
 
@@ -117,7 +133,7 @@ public class InteroperabilityRecord implements Identifiable {
      * Status of the resource.
      */
     @XmlElement(required = true)
-    @ApiModelProperty(position = 12, required = true)
+    @ApiModelProperty(position = 14, required = true)
     @FieldValidation(containsId = true, idClass = Vocabulary.class)
     @VocabularyValidation(type = Vocabulary.Type.IR_STATUS)
     private String status;
@@ -126,7 +142,7 @@ public class InteroperabilityRecord implements Identifiable {
      * Intended Audience for the Guideline.
      */
     @XmlElement
-    @ApiModelProperty(position = 13)
+    @ApiModelProperty(position = 15)
     @FieldValidation(nullable = true, containsId = true, idClass = Vocabulary.class)
     @VocabularyValidation(type = Vocabulary.Type.SCIENTIFIC_DOMAIN)
     private String domain;
@@ -135,7 +151,7 @@ public class InteroperabilityRecord implements Identifiable {
      * The type of record within the registry
      */
     @XmlElement(required = true)
-    @ApiModelProperty(position = 14, required = true)
+    @ApiModelProperty(position = 16, required = true)
     @FieldValidation(containsId = true, idClass = Vocabulary.class)
     @VocabularyValidation(type = Vocabulary.Type.IR_EOSC_GUIDELINE_TYPE)
     private String eoscGuidelineType;
@@ -145,15 +161,17 @@ public class InteroperabilityRecord implements Identifiable {
      */
     @XmlElementWrapper(name = "eoscIntegrationOptions")
     @XmlElement(name = "eoscIntegrationOption")
-    @ApiModelProperty(position = 15)
+    @ApiModelProperty(position = 17)
     @FieldValidation(nullable = true)
     private List<String> eoscIntegrationOptions;
 
     public InteroperabilityRecord() {
     }
 
-    public InteroperabilityRecord(String id, IdentifierInfo identifierInfo, List<Creator> creators, String title, int publicationYear, List<ResourceTypeInfo> resourceTypesInfo, String created, String updated, List<URL> eoscRelatedStandards, List<Right> rights, String description, String status, String domain, String eoscGuidelineType, List<String> eoscIntegrationOptions) {
+    public InteroperabilityRecord(String id, String catalogueId, String providerId, IdentifierInfo identifierInfo, List<Creator> creators, String title, int publicationYear, List<ResourceTypeInfo> resourceTypesInfo, String created, String updated, List<URL> eoscRelatedStandards, List<Right> rights, String description, String status, String domain, String eoscGuidelineType, List<String> eoscIntegrationOptions) {
         this.id = id;
+        this.catalogueId = catalogueId;
+        this.providerId = providerId;
         this.identifierInfo = identifierInfo;
         this.creators = creators;
         this.title = title;
@@ -174,6 +192,8 @@ public class InteroperabilityRecord implements Identifiable {
     public String toString() {
         return "InteroperabilityRecord{" +
                 "id='" + id + '\'' +
+                ", catalogueId='" + catalogueId + '\'' +
+                ", providerId='" + providerId + '\'' +
                 ", identifierInfo=" + identifierInfo +
                 ", creators=" + creators +
                 ", title='" + title + '\'' +
@@ -182,7 +202,7 @@ public class InteroperabilityRecord implements Identifiable {
                 ", created='" + created + '\'' +
                 ", updated='" + updated + '\'' +
                 ", eoscRelatedStandards=" + eoscRelatedStandards +
-                ", rightsInfo=" + rights +
+                ", rights=" + rights +
                 ", description='" + description + '\'' +
                 ", status='" + status + '\'' +
                 ", domain='" + domain + '\'' +
@@ -199,6 +219,22 @@ public class InteroperabilityRecord implements Identifiable {
     @Override
     public void setId(String id) {
         this.id = id;
+    }
+
+    public String getCatalogueId() {
+        return catalogueId;
+    }
+
+    public void setCatalogueId(String catalogueId) {
+        this.catalogueId = catalogueId;
+    }
+
+    public String getProviderId() {
+        return providerId;
+    }
+
+    public void setProviderId(String providerId) {
+        this.providerId = providerId;
     }
 
     public IdentifierInfo getIdentifierInfo() {

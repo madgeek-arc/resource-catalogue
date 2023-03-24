@@ -468,4 +468,14 @@ public class ServiceController {
             return ResponseEntity.ok("datasource");
         }
     }
+
+    // Create a Public ServiceBundle if something went bad during its creation
+    @ApiIgnore
+    @PostMapping(path = "createPublicService", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public ResponseEntity<ServiceBundle> createPublicService(@RequestBody ServiceBundle serviceBundle, @ApiIgnore Authentication auth) {
+        logger.info("User '{}-{}' attempts to create a Public Service from Service '{}'-'{}' of the '{}' Catalogue", User.of(auth).getFullName(),
+                User.of(auth).getEmail(), serviceBundle.getId(), serviceBundle.getService().getName(), serviceBundle.getService().getCatalogueId());
+        return ResponseEntity.ok(resourceBundleService.createPublicResource(serviceBundle, auth));
+    }
 }
