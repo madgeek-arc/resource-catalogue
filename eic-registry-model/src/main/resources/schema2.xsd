@@ -273,6 +273,8 @@
             
       <xs:enumeration value="TEMPLATE_STATE"/>
             
+      <xs:enumeration value="INTEROPERABILITY_RECORD_STATE"/>
+            
       <xs:enumeration value="DS_RESEARCH_ENTITY_TYPE"/>
             
       <xs:enumeration value="DS_PERSISTENT_IDENTITY_SCHEME"/>

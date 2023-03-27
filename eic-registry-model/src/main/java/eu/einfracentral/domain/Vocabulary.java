@@ -80,6 +80,7 @@ public class Vocabulary implements Identifiable {
         PROVIDER_STATE("Provider state"),
         RESOURCE_STATE("Resource state"),
         TEMPLATE_STATE("Template state"),
+        INTEROPERABILITY_RECORD_STATE("Interoperability Record state"),
         // Datasource
         DS_RESEARCH_ENTITY_TYPE("Research entity type"),
         DS_PERSISTENT_IDENTITY_SCHEME("Persistent identity scheme"),

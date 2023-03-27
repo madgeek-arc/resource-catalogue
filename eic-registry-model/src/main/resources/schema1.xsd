@@ -37,6 +37,8 @@
     
   <xs:element name="interoperabilityRecord" type="tns:interoperabilityRecord"/>
     
+  <xs:element name="interoperabilityRecordBundle" type="tns:interoperabilityRecordBundle"/>
+    
   <xs:element name="loggingInfo" type="tns:loggingInfo"/>
     
   <xs:element name="metadata" type="tns:metadata"/>
@@ -1853,6 +1855,12 @@ c) list of customers, communities, users, etc. using the Resource.]]></xs:docume
         
     <xs:sequence>
             
+      <xs:element name="catalogueId" type="xs:string">
+        <xs:annotation>
+          <xs:documentation><![CDATA[The Catalogue this Interoperability Record is originally registered at.]]></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+            
       <xs:element minOccurs="0" name="created" type="xs:string">
         <xs:annotation>
           <xs:documentation><![CDATA[Time/date the record was created.]]></xs:documentation>
@@ -1937,6 +1945,12 @@ May be used for technical information.]]></xs:documentation>
       </xs:element>
             
       <xs:element ref="tns:identifierInfo"/>
+            
+      <xs:element name="providerId" type="xs:string">
+        <xs:annotation>
+          <xs:documentation><![CDATA[The Provider this Interoperability Record is originally registered at.]]></xs:documentation>
+        </xs:annotation>
+      </xs:element>
             
       <xs:element name="publicationYear" type="xs:int">
         <xs:annotation>
@@ -2137,6 +2151,26 @@ versions. The record's primary key for locating it in the EOSC-IF database.]]></
       </xs:element>
           
     </xs:sequence>
+      
+  </xs:complexType>
+    
+  <xs:complexType name="interoperabilityRecordBundle">
+        
+    <xs:complexContent>
+            
+      <xs:extension base="tns:bundle">
+                
+        <xs:sequence>
+                    
+          <xs:element minOccurs="0" ref="tns:interoperabilityRecord"/>
+                    
+          <xs:element minOccurs="0" name="status" type="xs:string"/>
+                  
+        </xs:sequence>
+              
+      </xs:extension>
+          
+    </xs:complexContent>
       
   </xs:complexType>
     
