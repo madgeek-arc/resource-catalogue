@@ -4,10 +4,7 @@ import com.google.gson.Gson;
 import eu.einfracentral.domain.*;
 import eu.einfracentral.domain.ResourceBundle;
 import eu.einfracentral.domain.ServiceBundle;
-import eu.einfracentral.registry.service.ResourceBundleService;
-import eu.einfracentral.registry.service.ProviderService;
-import eu.einfracentral.registry.service.ResourceService;
-import eu.einfracentral.registry.service.TrainingResourceService;
+import eu.einfracentral.registry.service.*;
 import eu.einfracentral.service.GenericResourceService;
 import eu.einfracentral.service.SecurityService;
 import eu.einfracentral.utils.FacetFilterUtils;
@@ -42,10 +39,11 @@ public class PublicController {
     private final ResourceBundleService<ServiceBundle> resourceBundleService;
     private final ResourceBundleService<DatasourceBundle> datasourceBundleService;
     private final TrainingResourceService<TrainingResourceBundle> trainingResourceBundleService;
+    private final InteroperabilityRecordService<InteroperabilityRecordBundle> interoperabilityRecordService;
     private final ResourceService<ProviderBundle, Authentication> publicProviderManager;
-    private final ResourceService<ServiceBundle, Authentication> publicServiceManager;
     private final ResourceService<DatasourceBundle, Authentication> publicDatasourceManager;
     private final ResourceService<TrainingResourceBundle, Authentication> publicTrainingResourceManager;
+    private final ResourceService<InteroperabilityRecordBundle, Authentication> publicInteroperabilityRecordManager;
     private final SecurityService securityService;
     private final GenericResourceService genericResourceService;
     private static final Gson gson = new Gson();
@@ -56,19 +54,21 @@ public class PublicController {
                      ResourceBundleService<ServiceBundle> resourceBundleService,
                      ResourceBundleService<DatasourceBundle> datasourceBundleService,
                      TrainingResourceService<TrainingResourceBundle> trainingResourceBundleService,
+                     InteroperabilityRecordService<InteroperabilityRecordBundle> interoperabilityRecordService,
                      @Qualifier("publicProviderManager") ResourceService<ProviderBundle, Authentication> publicProviderManager,
-                     @Qualifier("publicServiceManager") ResourceService<ServiceBundle, Authentication> publicServiceManager,
                      @Qualifier("publicDatasourceManager") ResourceService<DatasourceBundle, Authentication> publicDatasourceManager,
                      @Qualifier("publicTrainingResourceManager") ResourceService<TrainingResourceBundle, Authentication> publicTrainingResourceManager,
+                     @Qualifier("publicInteroperabilityRecordManager") ResourceService<InteroperabilityRecordBundle, Authentication> publicInteroperabilityRecordManager,
                      GenericResourceService genericResourceService) {
         this.providerService = providerService;
         this.resourceBundleService = resourceBundleService;
         this.datasourceBundleService = datasourceBundleService;
         this.trainingResourceBundleService = trainingResourceBundleService;
+        this.interoperabilityRecordService = interoperabilityRecordService;
         this.publicProviderManager = publicProviderManager;
-        this.publicServiceManager = publicServiceManager;
         this.publicDatasourceManager = publicDatasourceManager;
         this.publicTrainingResourceManager = publicTrainingResourceManager;
+        this.publicInteroperabilityRecordManager = publicInteroperabilityRecordManager;
         this.securityService = securityService;
         this.genericResourceService = genericResourceService;
     }
@@ -533,4 +533,92 @@ public class PublicController {
         ff.addOrderBy("name", "asc");
         return new ResponseEntity<>(publicTrainingResourceManager.getMy(ff, auth).getResults(), HttpStatus.OK);
     }
+
+    //SECTION: INTEROPERABILITY RECORD
+    @ApiOperation(value = "Returns the Public Interoperability Record with the given id.")
+    @GetMapping(path = "/interoperabilityRecord/{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    public ResponseEntity<?> getPublicInteroperabilityRecord(@PathVariable("id") String id) {
+        InteroperabilityRecordBundle interoperabilityRecordBundle = interoperabilityRecordService.get(id);
+        if (interoperabilityRecordBundle.getMetadata().isPublished() && interoperabilityRecordBundle.isActive()
+                && interoperabilityRecordBundle.getStatus().equals("approved interoperability record")) {
+            return new ResponseEntity<>(interoperabilityRecordBundle.getInteroperabilityRecord(), HttpStatus.OK);
+        }
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(gson.toJson("You cannot view the specific Interoperability Record."));
+    }
+
+    @GetMapping(path = "/interoperabilityRecord/bundle/{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth, #id, #catalogueId)")
+    public ResponseEntity<?> getPublicInteroperabilityRecordBundle(@PathVariable("id") String id,
+                                                                   @ApiIgnore Authentication auth) {
+        InteroperabilityRecordBundle interoperabilityRecordBundle = interoperabilityRecordService.get(id);
+        if (auth != null && auth.isAuthenticated()) {
+            User user = User.of(auth);
+            if (securityService.hasRole(auth, "ROLE_ADMIN") || securityService.hasRole(auth, "ROLE_EPOT")
+                    || securityService.userIsResourceProviderAdmin(user, id, interoperabilityRecordBundle.getInteroperabilityRecord().getCatalogueId())) {
+                if (interoperabilityRecordBundle.getMetadata().isPublished()){
+                    return new ResponseEntity<>(interoperabilityRecordBundle, HttpStatus.OK);
+                } else{
+                    return ResponseEntity.status(HttpStatus.FOUND).body(gson.toJson("The specific Interoperability Record Bundle does not consist a Public entity"));
+                }
+            }
+        }
+        if (interoperabilityRecordBundle.getMetadata().isPublished() && interoperabilityRecordBundle.isActive()
+                && interoperabilityRecordBundle.getStatus().equals("approved interoperability record")) {
+            return new ResponseEntity<>(interoperabilityRecordBundle, HttpStatus.OK);
+        }
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(gson.toJson("You cannot view the specific Interoperability Record."));
+    }
+
+    @ApiOperation(value = "Filter a list of Public Interoperability Records based on a set of filters or get a list of all Public Interoperability Records in the Catalogue.")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "query", value = "Keyword to refine the search", dataType = "string", paramType = "query"),
+            @ApiImplicitParam(name = "from", value = "Starting index in the result set", dataType = "string", paramType = "query"),
+            @ApiImplicitParam(name = "quantity", value = "Quantity to be fetched", dataType = "string", paramType = "query"),
+            @ApiImplicitParam(name = "order", value = "asc / desc", dataType = "string", paramType = "query"),
+            @ApiImplicitParam(name = "orderField", value = "Order field", dataType = "string", paramType = "query")
+    })
+    @GetMapping(path = "/interoperabilityRecord/all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    public ResponseEntity<Paging<InteroperabilityRecord>> getAllPublicInteroperabilityRecords(@ApiIgnore @RequestParam Map<String, Object> allRequestParams,
+                                                                                              @ApiIgnore Authentication auth) {
+
+        FacetFilter ff = FacetFilterUtils.createFacetFilter(allRequestParams);
+        ff.addFilter("published", true);
+        ff.addFilter("active", true);
+        ff.addFilter("status", "approved interoperability record");
+        List<InteroperabilityRecord> interoperabilityRecordList = new LinkedList<>();
+        Paging<InteroperabilityRecordBundle> interoperabilityRecordBundlePaging = publicInteroperabilityRecordManager.getAll(ff, auth);
+        for (InteroperabilityRecordBundle interoperabilityRecordBundle : interoperabilityRecordBundlePaging.getResults()) {
+            interoperabilityRecordList.add(interoperabilityRecordBundle.getInteroperabilityRecord());
+        }
+        Paging<InteroperabilityRecord> interoperabilityRecordPaging = new Paging<>(interoperabilityRecordBundlePaging.getTotal(), interoperabilityRecordBundlePaging.getFrom(),
+                interoperabilityRecordBundlePaging.getTo(), interoperabilityRecordList, interoperabilityRecordBundlePaging.getFacets());
+        return new ResponseEntity<>(interoperabilityRecordPaging, HttpStatus.OK);
+    }
+
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "query", value = "Keyword to refine the search", dataType = "string", paramType = "query"),
+            @ApiImplicitParam(name = "from", value = "Starting index in the result set", dataType = "string", paramType = "query"),
+            @ApiImplicitParam(name = "quantity", value = "Quantity to be fetched", dataType = "string", paramType = "query"),
+            @ApiImplicitParam(name = "order", value = "asc / desc", dataType = "string", paramType = "query"),
+            @ApiImplicitParam(name = "orderField", value = "Order field", dataType = "string", paramType = "query")
+    })
+    @GetMapping(path = "/interoperabilityRecord/bundle/all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
+    public ResponseEntity<Paging<InteroperabilityRecordBundle>> getAllPublicInteroperabilityRecordBundles(@ApiIgnore @RequestParam Map<String, Object> allRequestParams,
+                                                                                                          @ApiIgnore Authentication auth) {
+        FacetFilter ff = FacetFilterUtils.createFacetFilter(allRequestParams);
+        ff.addFilter("published", true);
+        if (auth != null && auth.isAuthenticated() && (securityService.hasRole(auth, "ROLE_ADMIN") || securityService.hasRole(auth, "ROLE_EPOT"))) {
+            logger.info("Getting all published Interoperability Records for Admin/Epot");
+        } else{
+            ff.addFilter("active", true);
+            ff.addFilter("status", "approved interoperability record");
+        }
+        Paging<InteroperabilityRecordBundle> interoperabilityRecordBundlePaging = interoperabilityRecordService.getAll(ff, auth);
+        List<InteroperabilityRecordBundle> interoperabilityRecordBundleList = new LinkedList<>(interoperabilityRecordBundlePaging.getResults());
+        Paging<InteroperabilityRecordBundle> interoperabilityRecordPaging = new Paging<>(interoperabilityRecordBundlePaging.getTotal(), interoperabilityRecordBundlePaging.getFrom(),
+                interoperabilityRecordBundlePaging.getTo(), interoperabilityRecordBundleList, interoperabilityRecordBundlePaging.getFacets());
+        return new ResponseEntity<>(interoperabilityRecordPaging, HttpStatus.OK);
+    }
+
 }

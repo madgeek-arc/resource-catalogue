@@ -3,6 +3,7 @@ package eu.einfracentral.domain;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
+import java.util.Objects;
 
 @XmlType
 @XmlRootElement(namespace = "http://einfracentral.eu")
@@ -24,6 +25,16 @@ public class InteroperabilityRecordBundle extends Bundle<InteroperabilityRecord>
         this.setMetadata(metadata);
     }
 
+    @Override
+    public String getId() {
+        return super.getId();
+    }
+
+    @Override
+    public void setId(String id) {
+        super.setId(id);
+    }
+
     @XmlElement(name = "interoperabilityRecord")
     public InteroperabilityRecord getInteroperabilityRecord() {
         return this.getPayload();
@@ -39,5 +50,19 @@ public class InteroperabilityRecordBundle extends Bundle<InteroperabilityRecord>
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+        InteroperabilityRecordBundle that = (InteroperabilityRecordBundle) o;
+        return Objects.equals(status, that.status);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), status);
     }
 }

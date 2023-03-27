@@ -37,6 +37,7 @@ public class ProviderManagementAspect {
     private final PublicServiceManager publicServiceManager;
     private final PublicDatasourceManager publicDatasourceManager;
     private final PublicTrainingResourceManager publicTrainingResourceManager;
+    private final PublicInteroperabilityRecordManager publicInteroperabilityRecordManager;
     private final RegistrationMailService registrationMailService;
     private final SecurityService securityService;
     private final PublicResourceInteroperabilityManager publicResourceInteroperabilityManager;
@@ -50,6 +51,7 @@ public class ProviderManagementAspect {
                                     PublicServiceManager publicServiceManager,
                                     PublicDatasourceManager publicDatasourceManager,
                                     PublicTrainingResourceManager publicTrainingResourceManager,
+                                    PublicInteroperabilityRecordManager publicInteroperabilityRecordManager,
                                     PublicResourceInteroperabilityManager publicResourceInteroperabilityManager,
                                     RegistrationMailService registrationMailService,
                                     SecurityService securityService) {
@@ -61,6 +63,7 @@ public class ProviderManagementAspect {
         this.publicServiceManager = publicServiceManager;
         this.publicDatasourceManager = publicDatasourceManager;
         this.publicTrainingResourceManager = publicTrainingResourceManager;
+        this.publicInteroperabilityRecordManager = publicInteroperabilityRecordManager;
         this.publicResourceInteroperabilityManager = publicResourceInteroperabilityManager;
         this.registrationMailService = registrationMailService;
         this.securityService = securityService;
@@ -328,6 +331,23 @@ public class ProviderManagementAspect {
     }
 
     @Async
+    @AfterReturning(pointcut = "(execution(* eu.einfracentral.registry.manager.InteroperabilityRecordManager." +
+            "add(eu.einfracentral.domain.InteroperabilityRecordBundle, org.springframework.security.core.Authentication)))" +
+            "|| (execution(* eu.einfracentral.registry.manager.InteroperabilityRecordManager.verifyResource(String, String, Boolean, " +
+            "org.springframework.security.core.Authentication))))",
+            returning = "interoperabilityRecordBundle")
+    public void addResourceAsPublic(InteroperabilityRecordBundle interoperabilityRecordBundle) {
+        if (interoperabilityRecordBundle.getStatus().equals("approved interoperability record") && interoperabilityRecordBundle.isActive()){
+            try{
+                publicInteroperabilityRecordManager.get(String.format("%s.%s", interoperabilityRecordBundle.getInteroperabilityRecord().getCatalogueId(), interoperabilityRecordBundle.getId()));
+            } catch (ResourceException | ResourceNotFoundException e){
+                delayExecution();
+                publicInteroperabilityRecordManager.add(interoperabilityRecordBundle, null);
+            }
+        }
+    }
+
+    @Async
     @AfterReturning(pointcut = "(execution(* eu.einfracentral.registry.manager.ServiceBundleManager.updateResource(eu.einfracentral.domain.ServiceBundle, String, org.springframework.security.core.Authentication)))" +
             "|| (execution(* eu.einfracentral.registry.manager.ServiceBundleManager.updateResource(eu.einfracentral.domain.ServiceBundle, String, String, org.springframework.security.core.Authentication)))" +
             "|| (execution(* eu.einfracentral.registry.manager.ServiceBundleManager.publish(String, Boolean, org.springframework.security.core.Authentication)))" +
@@ -376,6 +396,20 @@ public class ProviderManagementAspect {
     }
 
     @Async
+    @AfterReturning(pointcut = "(execution(* eu.einfracentral.registry.manager.InteroperabilityRecordManager.update(eu.einfracentral.domain.InteroperabilityRecordBundle, org.springframework.security.core.Authentication)))" +
+            "|| (execution(* eu.einfracentral.registry.manager.InteroperabilityRecordManager.publish(String, Boolean, org.springframework.security.core.Authentication)))" +
+            "|| (execution(* eu.einfracentral.registry.manager.InteroperabilityRecordManager.verifyResource(String, String, Boolean, org.springframework.security.core.Authentication)))",
+            returning = "interoperabilityRecordBundle")
+    public void updatePublicResource(InteroperabilityRecordBundle interoperabilityRecordBundle) {
+        try{
+            publicInteroperabilityRecordManager.get(String.format("%s.%s", interoperabilityRecordBundle.getInteroperabilityRecord().getCatalogueId(), interoperabilityRecordBundle.getId()));
+            delayExecution();
+            publicInteroperabilityRecordManager.update(interoperabilityRecordBundle, null);
+        } catch (ResourceException | ResourceNotFoundException ignore){
+        }
+    }
+
+    @Async
     @After("execution(* eu.einfracentral.registry.manager.ServiceBundleManager.delete(eu.einfracentral.domain.ServiceBundle)))")
     public void deletePublicService(JoinPoint joinPoint) {
         ServiceBundle serviceBundle = (ServiceBundle) joinPoint.getArgs()[0];
@@ -394,6 +428,13 @@ public class ProviderManagementAspect {
     public void deletePublicTrainingResource(JoinPoint joinPoint) {
         TrainingResourceBundle trainingResourceBundle = (TrainingResourceBundle) joinPoint.getArgs()[0];
         publicTrainingResourceManager.delete(trainingResourceBundle);
+    }
+
+    @Async
+    @After("execution(* eu.einfracentral.registry.manager.InteroperabilityRecordManager.delete(eu.einfracentral.domain.InteroperabilityRecordBundle)))")
+    public void deletePublicInteroperabilityRecord(JoinPoint joinPoint) {
+        InteroperabilityRecordBundle interoperabilityRecordBundle = (InteroperabilityRecordBundle) joinPoint.getArgs()[0];
+        publicInteroperabilityRecordManager.delete(interoperabilityRecordBundle);
     }
 
     //TODO: Probably no needed

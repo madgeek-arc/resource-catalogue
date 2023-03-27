@@ -59,9 +59,6 @@ public class InteroperabilityRecordManager extends ResourceManager<Interoperabil
     @CacheEvict(cacheNames = {CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)
     public InteroperabilityRecordBundle add(InteroperabilityRecordBundle interoperabilityRecordBundle, Authentication auth) {
         ProviderBundle providerBundle = providerService.get(interoperabilityRecordBundle.getInteroperabilityRecord().getCatalogueId(), interoperabilityRecordBundle.getInteroperabilityRecord().getProviderId(), auth);
-        if (providerBundle == null) {
-            throw new ValidationException(String.format("Provider with id '%s' and catalogueId '%s' does not exist", interoperabilityRecordBundle.getInteroperabilityRecord().getProviderId(), interoperabilityRecordBundle.getInteroperabilityRecord().getCatalogueId()));
-        }
         // check if Provider is approved
         if (!providerBundle.getStatus().equals("approved provider")) {
             throw new ValidationException(String.format("The Provider ID '%s' you provided is not yet approved",
