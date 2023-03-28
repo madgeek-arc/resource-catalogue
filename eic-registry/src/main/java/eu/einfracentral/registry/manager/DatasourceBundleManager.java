@@ -156,6 +156,9 @@ public class DatasourceBundleManager extends AbstractResourceBundleManager<Datas
         // LoggingInfo
         datasourceBundle.setLoggingInfo(loggingInfoList);
 
+        // serviceType
+        datasourceBundle.getResourceExtras().setServiceType("service_type-datasource");
+
         logger.info("Adding Datasource: {}", datasourceBundle);
         DatasourceBundle ret;
         ret = super.add(datasourceBundle, auth);

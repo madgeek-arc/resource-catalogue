@@ -31,13 +31,20 @@ public class ResourceExtras {
     @VocabularyValidation(type = Vocabulary.Type.RESEARCH_CATEGORY)
     private List<String> researchCategories;
 
+    @XmlElement()
+    @ApiModelProperty(position = 4)
+    @FieldValidation(nullable = true, containsId = true, idClass = Vocabulary.class)
+    @VocabularyValidation(type = Vocabulary.Type.SERVICE_TYPE)
+    private String serviceType;
+
     public ResourceExtras() {
     }
 
-    public ResourceExtras(List<EOSCIFGuidelines> eoscIFGuidelines, boolean horizontalService, List<String> researchCategories) {
+    public ResourceExtras(List<EOSCIFGuidelines> eoscIFGuidelines, boolean horizontalService, List<String> researchCategories, String serviceType) {
         this.eoscIFGuidelines = eoscIFGuidelines;
         this.horizontalService = horizontalService;
         this.researchCategories = researchCategories;
+        this.serviceType = serviceType;
     }
 
     @Override
@@ -46,6 +53,7 @@ public class ResourceExtras {
                 "eoscIFGuidelines=" + eoscIFGuidelines +
                 ", horizontalService=" + horizontalService +
                 ", researchCategories=" + researchCategories +
+                ", serviceType=" + serviceType +
                 '}';
     }
 
@@ -71,5 +79,13 @@ public class ResourceExtras {
 
     public void setResearchCategories(List<String> researchCategories) {
         this.researchCategories = researchCategories;
+    }
+
+    public String getServiceType() {
+        return serviceType;
+    }
+
+    public void setServiceType(String serviceType) {
+        this.serviceType = serviceType;
     }
 }
