@@ -155,13 +155,13 @@ public class InteroperabilityRecordController {
     @GetMapping(path = "byProvider/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<Paging<InteroperabilityRecordBundle>> getInteroperabilityRecordsByProvider(@ApiIgnore @RequestParam MultiValueMap<String, Object> allRequestParams,
                                                                                          @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueId,
-                                                                                         @RequestParam(required = false) Boolean active, @PathVariable String id, @ApiIgnore Authentication auth) {
+                                                                                         @PathVariable String id, @ApiIgnore Authentication auth) {
         allRequestParams.addIfAbsent("catalogue_id", catalogueId);
         if (catalogueId != null && catalogueId.equals("all")) {
             allRequestParams.remove("catalogue_id");
         }
         FacetFilter ff = FacetFilterUtils.createMultiFacetFilter(allRequestParams);
-        ff.addFilter("resource_organisation", id);
+        ff.addFilter("provider_id", id);
         ff.addFilter("published", false);
         return ResponseEntity.ok(interoperabilityRecordService.getAll(ff, auth));
     }
