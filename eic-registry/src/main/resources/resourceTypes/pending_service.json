@@ -244,6 +244,12 @@
       "name": "status",
       "path": "//*[local-name()='serviceBundle']/*[local-name()='status']/text()",
       "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
+      "name": "serviceType",
+      "path": "//*[local-name()='resourceExtras']/*[local-name()='serviceType']/text()",
+      "type": "java.lang.String"
     }
   ],
   "indexMapperClass": "eu.openminted.registry.core.index.DefaultIndexMapper",
