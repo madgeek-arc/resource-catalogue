@@ -144,7 +144,7 @@ public class ServiceBundleManager extends AbstractResourceBundleManager<ServiceB
         serviceBundle.setLoggingInfo(loggingInfoList);
 
         // serviceType
-        serviceBundle.getResourceExtras().setServiceType("service_type-service");
+        createResourceExtras(serviceBundle, "service_type-service");
 
         logger.info("Adding Service: {}", serviceBundle);
         ServiceBundle ret;

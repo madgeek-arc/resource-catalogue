@@ -1119,4 +1119,15 @@ public abstract class AbstractResourceBundleManager<T extends ResourceBundle<?>>
         List<ProviderBundle> allProviders = providerService.getAll(ff, securityService.getAdminAccess()).getResults();
         return allProviders.stream().map(Bundle::getId).collect(Collectors.toList());
     }
+
+    public T createResourceExtras(T resourceBundle, String serviceType){
+        if (resourceBundle.getResourceExtras() == null){
+            ResourceExtras resourceExtras = new ResourceExtras();
+            resourceExtras.setServiceType(serviceType);
+            resourceBundle.setResourceExtras(resourceExtras);
+        } else {
+            resourceBundle.getResourceExtras().setServiceType(serviceType);
+        }
+        return resourceBundle;
+    }
 }
