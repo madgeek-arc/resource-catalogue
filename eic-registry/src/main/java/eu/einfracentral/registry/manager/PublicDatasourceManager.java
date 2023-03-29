@@ -72,7 +72,7 @@ public class PublicDatasourceManager extends AbstractPublicResourceManager<Datas
         updateResourceIdsToPublic(datasourceBundle);
 
         datasourceBundle.getMetadata().setPublished(true);
-        datasourceBundle.getResourceExtras().setServiceType("service_type-service");
+        datasourceBundle.getResourceExtras().setServiceType("service_type-datasource");
         DatasourceBundle ret;
         logger.info(String.format("Datasource [%s] is being published with id [%s]", lowerLevelResourceId, datasourceBundle.getId()));
         ret = super.add(datasourceBundle, null);
@@ -97,7 +97,7 @@ public class PublicDatasourceManager extends AbstractPublicResourceManager<Datas
         ret.setIdentifiers(published.getIdentifiers());
         ret.setId(published.getId());
         ret.setMetadata(published.getMetadata());
-        ret.getResourceExtras().setServiceType("service_type-service");
+        ret.getResourceExtras().setServiceType("service_type-datasource");
         logger.info(String.format("Updating public Datasource with id [%s]", ret.getId()));
         ret = super.update(ret, null);
         logger.info("Sending JMS with topic 'datasource.update'");
