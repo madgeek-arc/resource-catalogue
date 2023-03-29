@@ -27,7 +27,6 @@ import java.util.List;
 
 import static eu.einfracentral.config.CacheConfig.CACHE_FEATURED;
 import static eu.einfracentral.config.CacheConfig.CACHE_PROVIDERS;
-import static eu.einfracentral.utils.VocabularyValidationUtils.validateScientificDomains;
 
 @org.springframework.stereotype.Service("interoperabilityRecordManager")
 public class InteroperabilityRecordManager extends ResourceManager<InteroperabilityRecordBundle> implements InteroperabilityRecordService<InteroperabilityRecordBundle> {

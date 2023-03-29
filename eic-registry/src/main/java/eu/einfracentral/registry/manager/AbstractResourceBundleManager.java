@@ -1115,7 +1115,7 @@ public abstract class AbstractResourceBundleManager<T extends ResourceBundle<?>>
     private List<String> getAllProviderIds(){
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(10000);
-        ff.addFilter("pusblished", false);
+        ff.addFilter("published", false);
         List<ProviderBundle> allProviders = providerService.getAll(ff, securityService.getAdminAccess()).getResults();
         return allProviders.stream().map(Bundle::getId).collect(Collectors.toList());
     }
