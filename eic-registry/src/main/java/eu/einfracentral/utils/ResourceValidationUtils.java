@@ -8,9 +8,9 @@ import org.apache.commons.lang3.StringUtils;
 
 public class ResourceValidationUtils {
 
-    public static <T extends ResourceBundle<?>> void checkIfResourceBundleActiveAndApprovedAndNotPublic(String resourceId, String catalogueId,
-                                                                                                        ResourceBundleService<T> resourceBundleService,
-                                                                                                        String resourceType) {
+    public static <T extends ResourceBundle<?>> void checkIfResourceBundleIsActiveAndApprovedAndNotPublic(String resourceId, String catalogueId,
+                                                                                                          ResourceBundleService<T> resourceBundleService,
+                                                                                                          String resourceType) {
         T resourceBundle;
         resourceType = StringUtils.capitalize(resourceType);
         // check if Resource exists

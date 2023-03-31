@@ -207,7 +207,7 @@ public class InteroperabilityRecordManager extends ResourceManager<Interoperabil
                 break;
         }
         logger.info("Verifying Interoperability Record: {}", interoperabilityRecordBundle);
-        return update(interoperabilityRecordBundle, auth);
+        return super.update(interoperabilityRecordBundle, auth);
     }
 
     @Override

@@ -14,20 +14,26 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.oauth2.common.exceptions.UnauthorizedUserException;
 import org.springframework.stereotype.Service;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
+import java.util.List;
 
-@Service
-public class PublicInteroperabilityRecordManager extends ResourceManager<InteroperabilityRecordBundle> implements ResourceCRUDService<InteroperabilityRecordBundle, Authentication> {
+@Service("publicInteroperabilityRecordManager")
+public class PublicInteroperabilityRecordManager extends ResourceManager<InteroperabilityRecordBundle>
+        implements ResourceCRUDService<InteroperabilityRecordBundle, Authentication> {
 
     private static final Logger logger = LogManager.getLogger(PublicInteroperabilityRecordManager.class);
     private final JmsTemplate jmsTopicTemplate;
+    private final SecurityService securityService;
 
     @Autowired
-    public PublicInteroperabilityRecordManager(JmsTemplate jmsTopicTemplate) {
+    public PublicInteroperabilityRecordManager(JmsTemplate jmsTopicTemplate, SecurityService securityService) {
         super(InteroperabilityRecordBundle.class);
         this.jmsTopicTemplate = jmsTopicTemplate;
+        this.securityService = securityService;
     }
 
     @Override
@@ -38,6 +44,24 @@ public class PublicInteroperabilityRecordManager extends ResourceManager<Interop
     @Override
     public Browsing<InteroperabilityRecordBundle> getAll(FacetFilter facetFilter, Authentication authentication) {
         return super.getAll(facetFilter, authentication);
+    }
+
+    @Override
+    public Browsing<InteroperabilityRecordBundle> getMy(FacetFilter facetFilter, Authentication authentication) {
+        if (authentication == null) {
+            throw new UnauthorizedUserException("Please log in.");
+        }
+
+        List<InteroperabilityRecordBundle> interoperabilityRecordBundleList = new ArrayList<>();
+        Browsing<InteroperabilityRecordBundle> interoperabilityRecordBundleBrowsing = super.getAll(facetFilter, authentication);
+        for (InteroperabilityRecordBundle interoperabilityRecordBundle : interoperabilityRecordBundleBrowsing.getResults()) {
+            if (securityService.isResourceProviderAdmin(authentication, interoperabilityRecordBundle.getId(),
+                    interoperabilityRecordBundle.getInteroperabilityRecord().getCatalogueId()) && interoperabilityRecordBundle.getMetadata().isPublished()) {
+                interoperabilityRecordBundleList.add(interoperabilityRecordBundle);
+            }
+        }
+        return new Browsing<>(interoperabilityRecordBundleBrowsing.getTotal(), interoperabilityRecordBundleBrowsing.getFrom(),
+                interoperabilityRecordBundleBrowsing.getTo(), interoperabilityRecordBundleList, interoperabilityRecordBundleBrowsing.getFacets());
     }
 
     @Override

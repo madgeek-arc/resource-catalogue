@@ -30,6 +30,13 @@
     },
     {
       "multivalued": false,
+      "name": "title",
+      "label": "Title",
+      "path": "//*[local-name()='title']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
       "name": "registeredBy",
       "path": "//*[local-name()='metadata']/*[local-name()='registeredBy']/text()",
       "type": "java.lang.String"

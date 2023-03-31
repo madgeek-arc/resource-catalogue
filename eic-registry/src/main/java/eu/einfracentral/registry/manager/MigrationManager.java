@@ -30,7 +30,7 @@ public class MigrationManager implements MigrationService {
     private final ProviderManager providerService;
     private final ResourceService resourceService;
     private final ResourceInteroperabilityRecordManager resourceInteroperabilityRecordManager;
-    private final PublicResourceInteroperabilityManager publicResourceInteroperabilityManager;
+    private final PublicResourceInteroperabilityRecordManager publicResourceInteroperabilityRecordManager;
     private final HelpdeskManager helpdeskManager;
     private final MonitoringManager monitoringManager;
     private final JmsTemplate jmsTopicTemplate;
@@ -47,7 +47,7 @@ public class MigrationManager implements MigrationService {
                             TrainingResourceManager trainingResourceManager, PublicTrainingResourceManager publicTrainingResourceManager,
                             ProviderManager providerService, ResourceService resourceService,
                             ResourceInteroperabilityRecordManager resourceInteroperabilityRecordManager,
-                            PublicResourceInteroperabilityManager publicResourceInteroperabilityManager,
+                            PublicResourceInteroperabilityRecordManager publicResourceInteroperabilityRecordManager,
                             HelpdeskManager helpdeskManager, MonitoringManager monitoringManager,
                             JmsTemplate jmsTopicTemplate, SecurityService securityService) {
         this.serviceBundleManager = serviceBundleManager;
@@ -59,7 +59,7 @@ public class MigrationManager implements MigrationService {
         this.providerService = providerService;
         this.resourceService = resourceService;
         this.resourceInteroperabilityRecordManager = resourceInteroperabilityRecordManager;
-        this.publicResourceInteroperabilityManager = publicResourceInteroperabilityManager;
+        this.publicResourceInteroperabilityRecordManager = publicResourceInteroperabilityRecordManager;
         this.helpdeskManager = helpdeskManager;
         this.monitoringManager = monitoringManager;
         this.jmsTopicTemplate = jmsTopicTemplate;
@@ -259,7 +259,7 @@ public class MigrationManager implements MigrationService {
                 resource.setPayload(resourceInteroperabilityRecordManager.serialize(resourceInteroperabilityRecordBundle));
                 resourceService.updateResource(resource);
                 // update Public Resource Interoperability Record
-                publicResourceInteroperabilityManager.update(resourceInteroperabilityRecordBundle, securityService.getAdminAccess());
+                publicResourceInteroperabilityRecordManager.update(resourceInteroperabilityRecordBundle, securityService.getAdminAccess());
             }
         }
 

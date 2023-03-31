@@ -40,7 +40,7 @@ public class ProviderManagementAspect {
     private final PublicInteroperabilityRecordManager publicInteroperabilityRecordManager;
     private final RegistrationMailService registrationMailService;
     private final SecurityService securityService;
-    private final PublicResourceInteroperabilityManager publicResourceInteroperabilityManager;
+    private final PublicResourceInteroperabilityRecordManager publicResourceInteroperabilityRecordManager;
 
     @Autowired
     public ProviderManagementAspect(ProviderService<ProviderBundle, Authentication> providerService,
@@ -52,7 +52,7 @@ public class ProviderManagementAspect {
                                     PublicDatasourceManager publicDatasourceManager,
                                     PublicTrainingResourceManager publicTrainingResourceManager,
                                     PublicInteroperabilityRecordManager publicInteroperabilityRecordManager,
-                                    PublicResourceInteroperabilityManager publicResourceInteroperabilityManager,
+                                    PublicResourceInteroperabilityRecordManager publicResourceInteroperabilityRecordManager,
                                     RegistrationMailService registrationMailService,
                                     SecurityService securityService) {
         this.providerService = providerService;
@@ -64,7 +64,7 @@ public class ProviderManagementAspect {
         this.publicDatasourceManager = publicDatasourceManager;
         this.publicTrainingResourceManager = publicTrainingResourceManager;
         this.publicInteroperabilityRecordManager = publicInteroperabilityRecordManager;
-        this.publicResourceInteroperabilityManager = publicResourceInteroperabilityManager;
+        this.publicResourceInteroperabilityRecordManager = publicResourceInteroperabilityRecordManager;
         this.registrationMailService = registrationMailService;
         this.securityService = securityService;
     }
@@ -497,11 +497,11 @@ public class ProviderManagementAspect {
     public void addResourceInteroperabilityRecordAsPublic(ResourceInteroperabilityRecordBundle resourceInteroperabilityRecordBundle) {
         // TODO: check Resource states (publish if only approved/active)
         try{
-            publicResourceInteroperabilityManager.get(String.format("%s.%s", resourceInteroperabilityRecordBundle.getResourceInteroperabilityRecord().getCatalogueId(),
+            publicResourceInteroperabilityRecordManager.get(String.format("%s.%s", resourceInteroperabilityRecordBundle.getResourceInteroperabilityRecord().getCatalogueId(),
                     resourceInteroperabilityRecordBundle.getId()));
         } catch (ResourceException | ResourceNotFoundException e){
             delayExecution();
-            publicResourceInteroperabilityManager.add(resourceInteroperabilityRecordBundle, null);
+            publicResourceInteroperabilityRecordManager.add(resourceInteroperabilityRecordBundle, null);
         }
     }
 
@@ -510,10 +510,10 @@ public class ProviderManagementAspect {
             returning = "resourceInteroperabilityRecordBundle")
     public void updatePublicResourceInteroperabilityRecord(ResourceInteroperabilityRecordBundle resourceInteroperabilityRecordBundle) {
         try{
-            publicResourceInteroperabilityManager.get(String.format("%s.%s", resourceInteroperabilityRecordBundle.getResourceInteroperabilityRecord().getCatalogueId(),
+            publicResourceInteroperabilityRecordManager.get(String.format("%s.%s", resourceInteroperabilityRecordBundle.getResourceInteroperabilityRecord().getCatalogueId(),
                     resourceInteroperabilityRecordBundle.getId()));
             delayExecution();
-            publicResourceInteroperabilityManager.update(resourceInteroperabilityRecordBundle, null);
+            publicResourceInteroperabilityRecordManager.update(resourceInteroperabilityRecordBundle, null);
         } catch (ResourceException | ResourceNotFoundException ignore){
         }
     }
@@ -522,7 +522,7 @@ public class ProviderManagementAspect {
     @After("execution(* eu.einfracentral.registry.manager.ResourceInteroperabilityRecordManager.delete(eu.einfracentral.domain.ResourceInteroperabilityRecordBundle)))")
     public void deletePublicResourceInteroperabilityRecord(JoinPoint joinPoint) {
         ResourceInteroperabilityRecordBundle resourceInteroperabilityRecordBundle = (ResourceInteroperabilityRecordBundle) joinPoint.getArgs()[0];
-        publicResourceInteroperabilityManager.delete(resourceInteroperabilityRecordBundle);
+        publicResourceInteroperabilityRecordManager.delete(resourceInteroperabilityRecordBundle);
     }
 
     private void delayExecution(){
