@@ -139,10 +139,10 @@ public class PublicController {
     })
     @GetMapping(path = "/provider/all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity<Paging<Provider>> getAllPublicProviders(@ApiIgnore @RequestParam Map<String, Object> allRequestParams,
-                                                   @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueIds,
+                                                   @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueId,
                                                    @ApiIgnore Authentication auth) {
-        allRequestParams.putIfAbsent("catalogue_id", catalogueIds);
-        if (catalogueIds != null && catalogueIds.equals("all")) {
+        allRequestParams.putIfAbsent("catalogue_id", catalogueId);
+        if (catalogueId != null && catalogueId.equals("all")) {
             allRequestParams.remove("catalogue_id");
         }
         FacetFilter ff = FacetFilterUtils.createFacetFilter(allRequestParams);
@@ -173,10 +173,10 @@ public class PublicController {
     @GetMapping(path = "/provider/bundle/all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     public ResponseEntity<Paging<ProviderBundle>> getAllPublicProviderBundles(@ApiIgnore @RequestParam Map<String, Object> allRequestParams,
-                                                                  @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueIds,
+                                                                  @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueId,
                                                                   @ApiIgnore Authentication auth) {
-        allRequestParams.putIfAbsent("catalogue_id", catalogueIds);
-        if (catalogueIds != null && catalogueIds.equals("all")) {
+        allRequestParams.putIfAbsent("catalogue_id", catalogueId);
+        if (catalogueId != null && catalogueId.equals("all")) {
             allRequestParams.remove("catalogue_id");
         }
         FacetFilter ff = FacetFilterUtils.createFacetFilter(allRequestParams);
@@ -352,10 +352,10 @@ public class PublicController {
     })
     @GetMapping(path = "/datasource/all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity<Paging<Datasource>> getAllPublicDatasources(@ApiIgnore @RequestParam Map<String, Object> allRequestParams,
-                                                                 @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueIds,
+                                                                 @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueId,
                                                                  @ApiIgnore Authentication auth) {
-        allRequestParams.putIfAbsent("catalogue_id", catalogueIds);
-        if (catalogueIds != null && catalogueIds.equals("all")) {
+        allRequestParams.putIfAbsent("catalogue_id", catalogueId);
+        if (catalogueId != null && catalogueId.equals("all")) {
             allRequestParams.remove("catalogue_id");
         }
         FacetFilter ff = FacetFilterUtils.createFacetFilter(allRequestParams);
@@ -386,10 +386,10 @@ public class PublicController {
     @GetMapping(path = "/datasource/adminPage/all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     public ResponseEntity<Paging<DatasourceBundle>> getAllPublicDatasourceBundles(@ApiIgnore @RequestParam Map<String, Object> allRequestParams,
-                                                                           @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueIds,
+                                                                           @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueId,
                                                                            @ApiIgnore Authentication auth) {
-        allRequestParams.putIfAbsent("catalogue_id", catalogueIds);
-        if (catalogueIds != null && catalogueIds.equals("all")) {
+        allRequestParams.putIfAbsent("catalogue_id", catalogueId);
+        if (catalogueId != null && catalogueId.equals("all")) {
             allRequestParams.remove("catalogue_id");
         }
         FacetFilter ff = FacetFilterUtils.createFacetFilter(allRequestParams);
@@ -476,10 +476,10 @@ public class PublicController {
     })
     @GetMapping(path = "/trainingResource/all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity<Paging<TrainingResource>> getAllPublicTrainingResources(@ApiIgnore @RequestParam Map<String, Object> allRequestParams,
-                                                                      @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueIds,
+                                                                      @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueId,
                                                                       @ApiIgnore Authentication auth) {
-        allRequestParams.putIfAbsent("catalogue_id", catalogueIds);
-        if (catalogueIds != null && catalogueIds.equals("all")) {
+        allRequestParams.putIfAbsent("catalogue_id", catalogueId);
+        if (catalogueId != null && catalogueId.equals("all")) {
             allRequestParams.remove("catalogue_id");
         }
         FacetFilter ff = FacetFilterUtils.createFacetFilter(allRequestParams);
@@ -510,10 +510,10 @@ public class PublicController {
     @GetMapping(path = "/trainingResource/adminPage/all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     public ResponseEntity<Paging<TrainingResourceBundle>> getAllPublicTrainingResourceBundles(@ApiIgnore @RequestParam Map<String, Object> allRequestParams,
-                                                                                  @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueIds,
+                                                                                  @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueId,
                                                                                   @ApiIgnore Authentication auth) {
-        allRequestParams.putIfAbsent("catalogue_id", catalogueIds);
-        if (catalogueIds != null && catalogueIds.equals("all")) {
+        allRequestParams.putIfAbsent("catalogue_id", catalogueId);
+        if (catalogueId != null && catalogueId.equals("all")) {
             allRequestParams.remove("catalogue_id");
         }
         FacetFilter ff = FacetFilterUtils.createFacetFilter(allRequestParams);
@@ -543,8 +543,9 @@ public class PublicController {
     //SECTION: INTEROPERABILITY RECORD
     @ApiOperation(value = "Returns the Public Interoperability Record with the given id.")
     @GetMapping(path = "/interoperabilityRecord/{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    public ResponseEntity<?> getPublicInteroperabilityRecord(@PathVariable("id") String id) {
-        InteroperabilityRecordBundle interoperabilityRecordBundle = interoperabilityRecordService.get(id);
+    public ResponseEntity<?> getPublicInteroperabilityRecord(@PathVariable("id") String id,
+                                                             @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueId) {
+        InteroperabilityRecordBundle interoperabilityRecordBundle = interoperabilityRecordService.get(id, catalogueId);
         if (interoperabilityRecordBundle.getMetadata().isPublished() && interoperabilityRecordBundle.isActive()
                 && interoperabilityRecordBundle.getStatus().equals("approved interoperability record")) {
             return new ResponseEntity<>(interoperabilityRecordBundle.getInteroperabilityRecord(), HttpStatus.OK);
@@ -555,8 +556,9 @@ public class PublicController {
     @GetMapping(path = "/interoperabilityRecord/bundle/{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth, #id, #catalogueId)")
     public ResponseEntity<?> getPublicInteroperabilityRecordBundle(@PathVariable("id") String id,
+                                                                   @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueId,
                                                                    @ApiIgnore Authentication auth) {
-        InteroperabilityRecordBundle interoperabilityRecordBundle = interoperabilityRecordService.get(id);
+        InteroperabilityRecordBundle interoperabilityRecordBundle = interoperabilityRecordService.get(id, catalogueId);
         if (auth != null && auth.isAuthenticated()) {
             User user = User.of(auth);
             if (securityService.hasRole(auth, "ROLE_ADMIN") || securityService.hasRole(auth, "ROLE_EPOT")
@@ -585,8 +587,12 @@ public class PublicController {
     })
     @GetMapping(path = "/interoperabilityRecord/all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity<Paging<InteroperabilityRecord>> getAllPublicInteroperabilityRecords(@ApiIgnore @RequestParam Map<String, Object> allRequestParams,
+                                                                                              @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueId,
                                                                                               @ApiIgnore Authentication auth) {
-
+        allRequestParams.putIfAbsent("catalogue_id", catalogueId);
+        if (catalogueId != null && catalogueId.equals("all")) {
+            allRequestParams.remove("catalogue_id");
+        }
         FacetFilter ff = FacetFilterUtils.createFacetFilter(allRequestParams);
         ff.addFilter("published", true);
         ff.addFilter("active", true);
@@ -611,7 +617,12 @@ public class PublicController {
     @GetMapping(path = "/interoperabilityRecord/bundle/all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     public ResponseEntity<Paging<InteroperabilityRecordBundle>> getAllPublicInteroperabilityRecordBundles(@ApiIgnore @RequestParam Map<String, Object> allRequestParams,
+                                                                                                          @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueId,
                                                                                                           @ApiIgnore Authentication auth) {
+        allRequestParams.putIfAbsent("catalogue_id", catalogueId);
+        if (catalogueId != null && catalogueId.equals("all")) {
+            allRequestParams.remove("catalogue_id");
+        }
         FacetFilter ff = FacetFilterUtils.createFacetFilter(allRequestParams);
         ff.addFilter("published", true);
         if (auth != null && auth.isAuthenticated() && (securityService.hasRole(auth, "ROLE_ADMIN") || securityService.hasRole(auth, "ROLE_EPOT"))) {
@@ -635,7 +646,7 @@ public class PublicController {
         ff.addOrderBy("title", "asc");
         return new ResponseEntity<>(publicInteroperabilityRecordManager.getMy(ff, auth).getResults(), HttpStatus.OK);
     }
-//
+
 //    //SECTION: RESOURCE INTEROPERABILITY RECORD
     @ApiOperation(value = "Returns the Public Resource Interoperability Record with the given id.")
     @GetMapping(path = "/resourceInteroperabilityRecord/{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})

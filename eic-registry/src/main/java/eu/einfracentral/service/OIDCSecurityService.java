@@ -443,13 +443,19 @@ public class OIDCSecurityService implements SecurityService {
     public boolean providerIsActiveAndUserIsAdmin(Authentication auth, String resourceId, String catalogueId) {
         ResourceBundle<?> resourceBundle;
         TrainingResourceBundle trainingResourceBundle;
+        InteroperabilityRecordBundle interoperabilityRecordBundle;
         List<String> providerIds;
         try{
             resourceBundle = resourceBundleService.get(resourceId, catalogueId);
             providerIds = Collections.singletonList(resourceBundle.getPayload().getResourceOrganisation());
         } catch (ResourceNotFoundException e) {
-            trainingResourceBundle = trainingResourceService.get(resourceId, catalogueId);
-            providerIds = Collections.singletonList(trainingResourceBundle.getPayload().getResourceOrganisation());
+            try{
+                trainingResourceBundle = trainingResourceService.get(resourceId, catalogueId);
+                providerIds = Collections.singletonList(trainingResourceBundle.getPayload().getResourceOrganisation());
+            } catch (ResourceNotFoundException j) {
+                interoperabilityRecordBundle = interoperabilityRecordService.get(resourceId, catalogueId);
+                providerIds = Collections.singletonList(interoperabilityRecordBundle.getPayload().getProviderId());
+            }
         }
         for (String providerId : providerIds) {
             ProviderBundle provider = providerManager.get(catalogueId, providerId, auth);

@@ -333,6 +333,8 @@ public class ProviderManagementAspect {
     @Async
     @AfterReturning(pointcut = "(execution(* eu.einfracentral.registry.manager.InteroperabilityRecordManager." +
             "add(eu.einfracentral.domain.InteroperabilityRecordBundle, org.springframework.security.core.Authentication)))" +
+            "|| (execution(* eu.einfracentral.registry.manager.InteroperabilityRecordManager." +
+            "add(eu.einfracentral.domain.InteroperabilityRecordBundle, String, org.springframework.security.core.Authentication)))" +
             "|| (execution(* eu.einfracentral.registry.manager.InteroperabilityRecordManager.verifyResource(String, String, Boolean, " +
             "org.springframework.security.core.Authentication))))",
             returning = "interoperabilityRecordBundle")

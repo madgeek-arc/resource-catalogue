@@ -2,10 +2,7 @@ package eu.einfracentral.registry.controller;
 
 import eu.einfracentral.domain.*;
 import eu.einfracentral.exception.ValidationException;
-import eu.einfracentral.registry.service.CatalogueService;
-import eu.einfracentral.registry.service.ProviderService;
-import eu.einfracentral.registry.service.ResourceBundleService;
-import eu.einfracentral.registry.service.TrainingResourceService;
+import eu.einfracentral.registry.service.*;
 import eu.einfracentral.service.GenericResourceService;
 import eu.einfracentral.utils.FacetFilterUtils;
 import eu.openminted.registry.core.domain.FacetFilter;
@@ -39,6 +36,7 @@ public class CatalogueController {
     private final ResourceBundleService<ServiceBundle> resourceBundleService;
     private final ResourceBundleService<DatasourceBundle> datasourceBundleService;
     private final TrainingResourceService<TrainingResourceBundle> trainingResourceService;
+    private final InteroperabilityRecordService<InteroperabilityRecordBundle> interoperabilityRecordService;
     private final GenericResourceService genericResourceService;
 
     @Autowired
@@ -47,12 +45,14 @@ public class CatalogueController {
                         ResourceBundleService<ServiceBundle> resourceBundleService,
                         ResourceBundleService<DatasourceBundle> datasourceBundleService,
                         TrainingResourceService<TrainingResourceBundle> trainingResourceService,
+                        InteroperabilityRecordService<InteroperabilityRecordBundle> interoperabilityRecordService,
                         GenericResourceService genericResourceService) {
         this.catalogueManager = catalogueManager;
         this.providerManager = providerManager;
         this.resourceBundleService = resourceBundleService;
         this.datasourceBundleService = datasourceBundleService;
         this.trainingResourceService = trainingResourceService;
+        this.interoperabilityRecordService = interoperabilityRecordService;
         this.genericResourceService = genericResourceService;
     }
 
@@ -317,7 +317,7 @@ public class CatalogueController {
         return new ResponseEntity<>(provider.getProvider(), HttpStatus.OK);
     }
 
-    //SECTION: Service
+    //SECTION: SERVICE
     @ApiOperation(value = "Returns the Service of the specific Catalogue with the given id.")
     @GetMapping(path = "{catalogueId}/resource/{resourceId}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity<?> getCatalogueService(@PathVariable("catalogueId") String catalogueId, @PathVariable("resourceId") String resourceId, @ApiIgnore Authentication auth) {
@@ -486,5 +486,64 @@ public class CatalogueController {
         trainingResourceService.delete(trainingResourceBundle);
         logger.info("User '{}' deleted the Training Resource with title '{}' and id '{}'", auth.getName(), trainingResourceBundle.getTrainingResource().getTitle(), trainingResourceBundle.getId());
         return new ResponseEntity<>(trainingResourceBundle.getTrainingResource(), HttpStatus.OK);
+    }
+
+    //SECTION: INTEROPERABILITY RECORD
+    @ApiOperation(value = "Returns the Interoperability Record of the specific Catalogue with the given id.")
+    @GetMapping(path = "{catalogueId}/interoperabilityRecord/{interoperabilityRecordId}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    public ResponseEntity<InteroperabilityRecord> getCatalogueInteroperabilityRecord(@PathVariable("catalogueId") String catalogueId,
+                                                                                     @PathVariable("interoperabilityRecordId") String interoperabilityRecordId,
+                                                                                     @ApiIgnore Authentication auth) {
+        InteroperabilityRecord interoperabilityRecord = interoperabilityRecordService.getCatalogueInteroperabilityRecord(catalogueId, interoperabilityRecordId, auth).getInteroperabilityRecord();
+        if (interoperabilityRecord.getCatalogueId() == null) {
+            throw new ValidationException("Interoperability Record's catalogueId cannot be null");
+        } else {
+            if (interoperabilityRecord.getCatalogueId().equals(catalogueId)) {
+                return new ResponseEntity<>(interoperabilityRecord, HttpStatus.OK);
+            } else {
+                throw new ValidationException(String.format("The Interoperability Record [%s] you requested does not belong to the specific Catalogue [%s]", interoperabilityRecordId, catalogueId));
+            }
+        }
+    }
+
+    @ApiOperation(value = "Creates a new Interoperability Record for the specific Catalogue.")
+    @PostMapping(path = "{catalogueId}/interoperabilityRecord", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth, #interoperabilityRecord)")
+    public ResponseEntity<InteroperabilityRecord> addCatalogueInteroperabilityRecord(@RequestBody InteroperabilityRecord interoperabilityRecord, @PathVariable String catalogueId, @ApiIgnore Authentication auth) {
+        InteroperabilityRecordBundle ret = this.interoperabilityRecordService.add(new InteroperabilityRecordBundle(interoperabilityRecord), catalogueId, auth);
+        logger.info("User '{}' added the Interoperability Record with title '{}' and id '{}' in the Catalogue '{}'", auth.getName(), interoperabilityRecord.getTitle(), interoperabilityRecord.getId(), catalogueId);
+        return new ResponseEntity<>(ret.getInteroperabilityRecord(), HttpStatus.CREATED);
+    }
+
+    @ApiOperation(value = "Updates the Interoperability Record of the specific Catalogue.")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth,#interoperabilityRecord)")
+    @PutMapping(path = "{catalogueId}/interoperabilityRecord", produces = {MediaType.APPLICATION_JSON_VALUE})
+    public ResponseEntity<InteroperabilityRecord> updateCatalogueInteroperabilityRecord(@RequestBody InteroperabilityRecord interoperabilityRecord, @PathVariable String catalogueId, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
+        InteroperabilityRecordBundle ret = this.interoperabilityRecordService.update(new InteroperabilityRecordBundle(interoperabilityRecord), catalogueId, auth);
+        logger.info("User '{}' updated the Interoperability Record with title '{}' and id '{} of the Catalogue '{}'", auth.getName(), interoperabilityRecord.getTitle(), interoperabilityRecord.getId(), catalogueId);
+        return new ResponseEntity<>(ret.getInteroperabilityRecord(), HttpStatus.OK);
+    }
+
+    @ApiOperation(value = "Get all the Interoperability Records of a specific Provider of a specific Catalogue")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
+    @GetMapping(path = "{catalogueId}/{providerId}/interoperabilityRecord/all", produces = {MediaType.APPLICATION_JSON_VALUE})
+    public ResponseEntity<Paging<InteroperabilityRecordBundle>> getProviderInteroperabilityRecords(@PathVariable String catalogueId, @PathVariable String providerId, @ApiIgnore Authentication auth) {
+        Paging<InteroperabilityRecordBundle> interoperabilityRecordBundlePaging = interoperabilityRecordService.getInteroperabilityRecordBundles(catalogueId, providerId, auth);
+        return new ResponseEntity<>(interoperabilityRecordBundlePaging, HttpStatus.OK);
+    }
+
+    @ApiOperation(value = "Deletes the Interoperability Record of the specific Catalogue with the given id.")
+    @DeleteMapping(path = "{catalogueId}/interoperabilityRecord/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PreAuthorize("hasRole('ROLE_ADMIN') or @securityService.isCatalogueAdmin(#auth, #catalogueId)")
+    public ResponseEntity<InteroperabilityRecord> deleteCatalogueInteroperabilityRecord(@PathVariable("catalogueId") String catalogueId,
+                                                                            @PathVariable("id") String id,
+                                                                            @ApiIgnore Authentication auth) throws ResourceNotFoundException {
+        InteroperabilityRecordBundle interoperabilityRecordBundle = interoperabilityRecordService.get(id, catalogueId);
+        if (interoperabilityRecordBundle == null) {
+            return new ResponseEntity<>(HttpStatus.GONE);
+        }
+        interoperabilityRecordService.delete(interoperabilityRecordBundle);
+        logger.info("User '{}' deleted the Interoperability Record with title '{}' and id '{}'", auth.getName(), interoperabilityRecordBundle.getInteroperabilityRecord().getTitle(), interoperabilityRecordBundle.getId());
+        return new ResponseEntity<>(interoperabilityRecordBundle.getInteroperabilityRecord(), HttpStatus.OK);
     }
 }
