@@ -6,6 +6,7 @@ import eu.einfracentral.exception.ResourceNotFoundException;
 import eu.einfracentral.exception.ValidationException;
 import eu.einfracentral.registry.service.*;
 import eu.einfracentral.service.IdCreator;
+import eu.einfracentral.service.RegistrationMailService;
 import eu.einfracentral.service.SecurityService;
 import eu.einfracentral.validators.FieldValidator;
 import eu.openminted.registry.core.domain.Browsing;
@@ -40,6 +41,7 @@ public class InteroperabilityRecordManager extends ResourceManager<Interoperabil
     private final VocabularyService vocabularyService;
     private final PublicInteroperabilityRecordManager publicInteroperabilityRecordManager;
     private final CatalogueService<CatalogueBundle, Authentication> catalogueService;
+    private final RegistrationMailService registrationMailService;
     @Autowired
     private FieldValidator fieldValidator;
     @Value("${project.catalogue.name}")
@@ -48,7 +50,8 @@ public class InteroperabilityRecordManager extends ResourceManager<Interoperabil
     public InteroperabilityRecordManager(ProviderService<ProviderBundle, Authentication> providerService, IdCreator idCreator,
                                          SecurityService securityService, VocabularyService vocabularyService,
                                          PublicInteroperabilityRecordManager publicInteroperabilityRecordManager,
-                                         CatalogueService<CatalogueBundle, Authentication> catalogueService) {
+                                         CatalogueService<CatalogueBundle, Authentication> catalogueService,
+                                         RegistrationMailService registrationMailService) {
         super(InteroperabilityRecordBundle.class);
         this.providerService = providerService;
         this.idCreator = idCreator;
@@ -56,6 +59,7 @@ public class InteroperabilityRecordManager extends ResourceManager<Interoperabil
         this.vocabularyService = vocabularyService;
         this.publicInteroperabilityRecordManager = publicInteroperabilityRecordManager;
         this.catalogueService = catalogueService;
+        this.registrationMailService = registrationMailService;
     }
 
     @Override
@@ -112,6 +116,7 @@ public class InteroperabilityRecordManager extends ResourceManager<Interoperabil
         logger.trace("User '{}' is attempting to add a new Interoperability Record: {}", auth, interoperabilityRecordBundle.getInteroperabilityRecord());
         logger.info("Adding Interoperability Record: {}", interoperabilityRecordBundle.getInteroperabilityRecord());
         super.add(interoperabilityRecordBundle, auth);
+        registrationMailService.sendEmailsForInteroperabilityRecordOnboarding(interoperabilityRecordBundle, User.of(auth));
 
         return interoperabilityRecordBundle;
     }
@@ -241,6 +246,7 @@ public class InteroperabilityRecordManager extends ResourceManager<Interoperabil
                 break;
         }
         logger.info("Verifying Interoperability Record: {}", interoperabilityRecordBundle);
+        registrationMailService.sendEmailsForInteroperabilityRecordOnboarding(interoperabilityRecordBundle, User.of(auth));
         return super.update(interoperabilityRecordBundle, auth);
     }
 

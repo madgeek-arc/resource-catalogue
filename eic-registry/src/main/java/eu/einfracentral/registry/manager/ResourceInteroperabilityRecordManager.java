@@ -5,6 +5,7 @@ import eu.einfracentral.exception.ValidationException;
 import eu.einfracentral.registry.service.InteroperabilityRecordService;
 import eu.einfracentral.registry.service.ResourceBundleService;
 import eu.einfracentral.registry.service.ResourceInteroperabilityRecordService;
+import eu.einfracentral.registry.service.TrainingResourceService;
 import eu.einfracentral.service.SecurityService;
 import eu.einfracentral.utils.ResourceValidationUtils;
 import eu.openminted.registry.core.domain.Resource;
@@ -25,16 +26,19 @@ public class ResourceInteroperabilityRecordManager extends ResourceManager<Resou
     private static final Logger logger = LogManager.getLogger(ResourceInteroperabilityRecordManager.class);
     private final ResourceBundleService<ServiceBundle> serviceBundleService;
     private final ResourceBundleService<DatasourceBundle> datasourceBundleService;
+    private final TrainingResourceService<TrainingResourceBundle> trainingResourceService;
     private final InteroperabilityRecordService<InteroperabilityRecordBundle> interoperabilityRecordService;
     private final SecurityService securityService;
 
     public ResourceInteroperabilityRecordManager(ResourceBundleService<ServiceBundle> serviceBundleService,
                                                  ResourceBundleService<DatasourceBundle> datasourceBundleService,
+                                                 TrainingResourceService<TrainingResourceBundle> trainingResourceService,
                                                  InteroperabilityRecordService<InteroperabilityRecordBundle> interoperabilityRecordService,
                                                  SecurityService securityService) {
         super(ResourceInteroperabilityRecordBundle.class);
         this.serviceBundleService = serviceBundleService;
         this.datasourceBundleService = datasourceBundleService;
+        this.trainingResourceService = trainingResourceService;
         this.interoperabilityRecordService = interoperabilityRecordService;
         this.securityService = securityService;
     }
@@ -60,6 +64,8 @@ public class ResourceInteroperabilityRecordManager extends ResourceManager<Resou
             ResourceValidationUtils.checkIfResourceBundleIsActiveAndApprovedAndNotPublic(resourceId, catalogueId, serviceBundleService, resourceType);
         } else if (resourceType.equals("datasource")){
             ResourceValidationUtils.checkIfResourceBundleIsActiveAndApprovedAndNotPublic(resourceId, catalogueId, datasourceBundleService, resourceType);
+        } else if (resourceType.equals("training_resource")){
+            ResourceValidationUtils.checkIfResourceBundleIsActiveAndApprovedAndNotPublic(resourceId, catalogueId, trainingResourceService, resourceType);
         } else{
             throw new ValidationException("Field 'resourceType' should be either 'service' or 'datasource'");
         }

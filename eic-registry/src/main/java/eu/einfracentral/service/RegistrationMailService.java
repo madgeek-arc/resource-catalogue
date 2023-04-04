@@ -1129,4 +1129,40 @@ public class RegistrationMailService {
         }
         sendMailsFromTemplate("serviceExtensionsMonitoring.ftl", root, subject, monitoringEmail, userRole);
     }
+
+    public void sendEmailsForInteroperabilityRecordOnboarding(InteroperabilityRecordBundle interoperabilityRecordBundle, User registrant){
+        ProviderBundle providerBundle = providerManager.get(interoperabilityRecordBundle.getInteroperabilityRecord().getCatalogueId(), interoperabilityRecordBundle.getInteroperabilityRecord().getProviderId(), securityService.getAdminAccess());
+        List<User> providerAdmins = providerBundle.getProvider().getUsers();
+
+        Map<String, Object> root = new HashMap<>();
+        root.put("project", projectName);
+        root.put("endpoint", endpoint);
+        root.put("interoperabilityRecordBundle", interoperabilityRecordBundle);
+        root.put("registrant", registrant);
+
+        String subjectForPortalAdmins = String.format("[%s Portal] Provider [%s] has created a new Interoperability Record", projectName, interoperabilityRecordBundle.getInteroperabilityRecord().getProviderId());
+        sendMailsFromTemplate("interoperabilityRecordOnboardingForPortalAdmins.ftl", root, subjectForPortalAdmins, monitoringEmail, "admin");
+
+        String subjectForProviderAdmins = getProviderAdminsSubjectForInteroperabilityRecordOnboarding(interoperabilityRecordBundle);
+        for (User user : providerAdmins) {
+            root.put("user", user);
+            sendMailsFromTemplate("interoperabilityRecordOnboardingForProviderAdmins.ftl", root, subjectForProviderAdmins, user.getEmail(), "provider");
+        }
+    }
+
+    private String getProviderAdminsSubjectForInteroperabilityRecordOnboarding(InteroperabilityRecordBundle interoperabilityRecordBundle) {
+        switch (interoperabilityRecordBundle.getStatus()) {
+            case "pending interoperability record":
+                return String.format("[%s Portal] Your application for registering [%s] as a new %s Interoperability Record to the %s Portal has been received and is under review", projectName,
+                        interoperabilityRecordBundle.getInteroperabilityRecord().getTitle(), projectName, projectName);
+            case "rejected interoperability record":
+                return String.format("[%s Portal] Your application for registering [%s] as a new %s Interoperability Record to the %s Portal has been rejected", projectName,
+                        interoperabilityRecordBundle.getInteroperabilityRecord().getTitle(), projectName, projectName);
+            case "approved interoperability record":
+                return String.format("[%s Portal] Your application for registering [%s] as a new %s Interoperability Record to the %s Portal has been approved", projectName,
+                        interoperabilityRecordBundle.getInteroperabilityRecord().getTitle(), projectName, projectName);
+            default:
+                return "[%s Portal] Interoperability Record Registration";
+        }
+    }
 }
