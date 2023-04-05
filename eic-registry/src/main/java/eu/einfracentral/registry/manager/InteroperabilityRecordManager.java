@@ -124,18 +124,27 @@ public class InteroperabilityRecordManager extends ResourceManager<Interoperabil
     @Override
     @PreAuthorize("hasRole('ROLE_ADMIN') or @securityService.isResourceProviderAdmin(#auth, #interoperabilityRecordBundle.payload)")
     @CacheEvict(cacheNames = {CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)
+    public InteroperabilityRecordBundle update(InteroperabilityRecordBundle interoperabilityRecordBundle, Authentication auth) {
+        return update(interoperabilityRecordBundle, interoperabilityRecordBundle.getInteroperabilityRecord().getCatalogueId(), auth);
+    }
+
+    @Override
+    @PreAuthorize("hasRole('ROLE_ADMIN') or @securityService.isResourceProviderAdmin(#auth, #interoperabilityRecordBundle.payload)")
+    @CacheEvict(cacheNames = {CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)
     public InteroperabilityRecordBundle update(InteroperabilityRecordBundle interoperabilityRecordBundle, String catalogueId, Authentication auth) {
         logger.trace("User '{}' is attempting to update the Interoperability Record with id '{}'", auth, interoperabilityRecordBundle.getId());
 
-        Resource existing = getResource(interoperabilityRecordBundle.getInteroperabilityRecord().getId(), interoperabilityRecordBundle.getInteroperabilityRecord().getCatalogueId());
-        if (existing == null) {
-            throw new ResourceNotFoundException(
-                    String.format("Could not update Interoperability Record with id '%s' because it does not exist",
-                            interoperabilityRecordBundle.getInteroperabilityRecord().getId()));
+        InteroperabilityRecordBundle existingInteroperabilityRecord;
+        try {
+            existingInteroperabilityRecord = get(interoperabilityRecordBundle.getInteroperabilityRecord().getId(), interoperabilityRecordBundle.getInteroperabilityRecord().getCatalogueId());
+        } catch (ResourceNotFoundException e) {
+            throw new ResourceNotFoundException(String.format("There is no Interoperability Record with id [%s] on the [%s] Catalogue",
+                    interoperabilityRecordBundle.getInteroperabilityRecord().getId(), interoperabilityRecordBundle.getInteroperabilityRecord().getCatalogueId()));
         }
-        InteroperabilityRecordBundle ex = deserialize(existing);
+
+        // FIXME: DOES NOT WORK
         // check if there are actual changes in the InteroperabilityRecord
-        if (interoperabilityRecordBundle.getInteroperabilityRecord().equals(ex.getInteroperabilityRecord())){
+        if (interoperabilityRecordBundle.getInteroperabilityRecord().equals(existingInteroperabilityRecord.getInteroperabilityRecord())){
             throw new ValidationException("There are no changes in the Interoperability Record", HttpStatus.OK);
         }
 
@@ -148,22 +157,22 @@ public class InteroperabilityRecordManager extends ResourceManager<Interoperabil
         validate(interoperabilityRecordBundle);
 
         // block Public Training Resource update
-        if (ex.getMetadata().isPublished()){
+        if (existingInteroperabilityRecord.getMetadata().isPublished()){
             throw new ValidationException("You cannot directly update a Public Interoperability Record");
         }
 
         User user = User.of(auth);
-        // update existing TrainingResource Metadata, Identifiers, MigrationStatus
-        interoperabilityRecordBundle.setMetadata(Metadata.updateMetadata(interoperabilityRecordBundle.getMetadata(), user.getFullName()));
-        interoperabilityRecordBundle.setMigrationStatus(interoperabilityRecordBundle.getMigrationStatus());
+        // update existing TrainingResource Metadata, MigrationStatus
+        interoperabilityRecordBundle.setMetadata(Metadata.updateMetadata(existingInteroperabilityRecord.getMetadata(), user.getFullName()));
+        interoperabilityRecordBundle.setMigrationStatus(existingInteroperabilityRecord.getMigrationStatus());
 
         LoggingInfo loggingInfo;
         List<LoggingInfo> loggingInfoList = new ArrayList<>();
 
         loggingInfo = LoggingInfo.createLoggingInfoEntry(user.getEmail(), user.getFullName(), securityService.getRoleName(auth), LoggingInfo.Types.UPDATE.getKey(),
                 LoggingInfo.ActionType.UPDATED.getKey());
-        if (ex.getLoggingInfo() != null) {
-            loggingInfoList = ex.getLoggingInfo();
+        if (existingInteroperabilityRecord.getLoggingInfo() != null) {
+            loggingInfoList = existingInteroperabilityRecord.getLoggingInfo();
             loggingInfoList.add(loggingInfo);
             loggingInfoList.sort(Comparator.comparing(LoggingInfo::getDate));
         } else {
@@ -173,20 +182,28 @@ public class InteroperabilityRecordManager extends ResourceManager<Interoperabil
 
         // latestUpdateInfo
         interoperabilityRecordBundle.setLatestUpdateInfo(loggingInfo);
-        interoperabilityRecordBundle.setActive(ex.isActive());
+        interoperabilityRecordBundle.setActive(existingInteroperabilityRecord.isActive());
 
         // status
-        interoperabilityRecordBundle.setStatus(interoperabilityRecordBundle.getStatus());
+        interoperabilityRecordBundle.setStatus(existingInteroperabilityRecord.getStatus());
+
+        // updated && created
+        interoperabilityRecordBundle.getInteroperabilityRecord().setCreated(existingInteroperabilityRecord.getInteroperabilityRecord().getCreated());
+        interoperabilityRecordBundle.getInteroperabilityRecord().setUpdated(String.valueOf(System.currentTimeMillis()));
 
         // block catalogueId updates from Provider Admins
         if (!securityService.hasRole(auth, "ROLE_ADMIN")) {
-            if (!ex.getInteroperabilityRecord().getCatalogueId().equals(interoperabilityRecordBundle.getInteroperabilityRecord().getCatalogueId())) {
+            if (!existingInteroperabilityRecord.getInteroperabilityRecord().getCatalogueId().equals(interoperabilityRecordBundle.getInteroperabilityRecord().getCatalogueId())) {
                 throw new ValidationException("You cannot change catalogueId");
             }
         }
 
-        interoperabilityRecordBundle.getInteroperabilityRecord().setCreated(ex.getInteroperabilityRecord().getCreated());
-        interoperabilityRecordBundle.getInteroperabilityRecord().setUpdated(String.valueOf(System.currentTimeMillis()));
+        Resource existing = getResource(interoperabilityRecordBundle.getInteroperabilityRecord().getId(), interoperabilityRecordBundle.getInteroperabilityRecord().getCatalogueId());
+        if (existing == null) {
+            throw new ResourceNotFoundException(
+                    String.format("Could not update Interoperability Record with id '%s' because it does not exist",
+                            interoperabilityRecordBundle.getInteroperabilityRecord().getId()));
+        }
         existing.setPayload(serialize(interoperabilityRecordBundle));
         existing.setResourceType(resourceType);
 

@@ -14,6 +14,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 import java.net.URL;
 import java.util.List;
+import java.util.Objects;
 
 
 @XmlType
@@ -209,6 +210,19 @@ public class InteroperabilityRecord implements Identifiable {
                 ", eoscGuidelineType='" + eoscGuidelineType + '\'' +
                 ", eoscIntegrationOptions=" + eoscIntegrationOptions +
                 '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        InteroperabilityRecord interoperabilityRecord = (InteroperabilityRecord) o;
+        return Objects.equals(publicationYear, interoperabilityRecord.publicationYear) && Objects.equals(id, interoperabilityRecord.id) && Objects.equals(catalogueId, interoperabilityRecord.catalogueId) && Objects.equals(providerId, interoperabilityRecord.providerId) && Objects.equals(identifierInfo, interoperabilityRecord.identifierInfo) && Objects.equals(creators, interoperabilityRecord.creators) && Objects.equals(title, interoperabilityRecord.title) && Objects.equals(resourceTypesInfo, interoperabilityRecord.resourceTypesInfo) && Objects.equals(created, interoperabilityRecord.created) && Objects.equals(updated, interoperabilityRecord.updated) && Objects.equals(eoscRelatedStandards, interoperabilityRecord.eoscRelatedStandards) && Objects.equals(rights, interoperabilityRecord.rights) && Objects.equals(description, interoperabilityRecord.description) && Objects.equals(status, interoperabilityRecord.status) && Objects.equals(domain, interoperabilityRecord.domain) && Objects.equals(eoscGuidelineType, interoperabilityRecord.eoscGuidelineType) && Objects.equals(eoscIntegrationOptions, interoperabilityRecord.eoscIntegrationOptions);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, catalogueId, providerId, identifierInfo, creators, title, publicationYear, resourceTypesInfo, created, updated, eoscRelatedStandards, rights, description, status, domain, eoscGuidelineType, eoscIntegrationOptions);
     }
 
     @Override
