@@ -8,6 +8,7 @@ import eu.einfracentral.registry.service.*;
 import eu.einfracentral.service.IdCreator;
 import eu.einfracentral.service.RegistrationMailService;
 import eu.einfracentral.service.SecurityService;
+import eu.einfracentral.utils.ProviderResourcesCommonMethods;
 import eu.einfracentral.validators.FieldValidator;
 import eu.openminted.registry.core.domain.Browsing;
 import eu.openminted.registry.core.domain.FacetFilter;
@@ -42,6 +43,7 @@ public class InteroperabilityRecordManager extends ResourceManager<Interoperabil
     private final PublicInteroperabilityRecordManager publicInteroperabilityRecordManager;
     private final CatalogueService<CatalogueBundle, Authentication> catalogueService;
     private final RegistrationMailService registrationMailService;
+    private final ProviderResourcesCommonMethods commonMethods;
     @Autowired
     private FieldValidator fieldValidator;
     @Value("${project.catalogue.name}")
@@ -51,7 +53,7 @@ public class InteroperabilityRecordManager extends ResourceManager<Interoperabil
                                          SecurityService securityService, VocabularyService vocabularyService,
                                          PublicInteroperabilityRecordManager publicInteroperabilityRecordManager,
                                          CatalogueService<CatalogueBundle, Authentication> catalogueService,
-                                         RegistrationMailService registrationMailService) {
+                                         RegistrationMailService registrationMailService, ProviderResourcesCommonMethods commonMethods) {
         super(InteroperabilityRecordBundle.class);
         this.providerService = providerService;
         this.idCreator = idCreator;
@@ -60,6 +62,7 @@ public class InteroperabilityRecordManager extends ResourceManager<Interoperabil
         this.publicInteroperabilityRecordManager = publicInteroperabilityRecordManager;
         this.catalogueService = catalogueService;
         this.registrationMailService = registrationMailService;
+        this.commonMethods = commonMethods;
     }
 
     @Override
@@ -80,8 +83,8 @@ public class InteroperabilityRecordManager extends ResourceManager<Interoperabil
     public InteroperabilityRecordBundle add(InteroperabilityRecordBundle interoperabilityRecordBundle, String catalogueId, Authentication auth) {
         if (catalogueId == null || catalogueId.equals("")) { // add catalogue provider
             interoperabilityRecordBundle.getInteroperabilityRecord().setCatalogueId(catalogueName);
-        } else { // add provider from external catalogue
-            checkCatalogueIdConsistency(interoperabilityRecordBundle, catalogueId);
+        } else { // external catalogue
+            commonMethods.checkCatalogueIdConsistency(interoperabilityRecordBundle, catalogueId);
         }
 
         ProviderBundle providerBundle = providerService.get(interoperabilityRecordBundle.getInteroperabilityRecord().getCatalogueId(), interoperabilityRecordBundle.getInteroperabilityRecord().getProviderId(), auth);
@@ -151,7 +154,7 @@ public class InteroperabilityRecordManager extends ResourceManager<Interoperabil
         if (catalogueId == null || catalogueId.equals("")) {
             interoperabilityRecordBundle.getInteroperabilityRecord().setCatalogueId(catalogueName);
         } else {
-            checkCatalogueIdConsistency(interoperabilityRecordBundle, catalogueId);
+            commonMethods.checkCatalogueIdConsistency(interoperabilityRecordBundle, catalogueId);
         }
 
         validate(interoperabilityRecordBundle);
@@ -384,19 +387,6 @@ public class InteroperabilityRecordManager extends ResourceManager<Interoperabil
         ff.setQuantity(maxQuantity);
         ff.addOrderBy("title", "asc");
         return this.getAll(ff, auth);
-    }
-
-    public void checkCatalogueIdConsistency(InteroperabilityRecordBundle interoperabilityRecordBundle, String catalogueId) {
-        catalogueService.existsOrElseThrow(catalogueId);
-        if (interoperabilityRecordBundle != null) {
-            if (interoperabilityRecordBundle.getInteroperabilityRecord().getCatalogueId() == null || interoperabilityRecordBundle.getInteroperabilityRecord().getCatalogueId().equals("")) {
-                throw new ValidationException("Interoperability Record's 'catalogueId' cannot be null or empty");
-            } else {
-                if (!interoperabilityRecordBundle.getInteroperabilityRecord().getCatalogueId().equals(catalogueId)) {
-                    throw new ValidationException("Parameter 'catalogueId' and Interoperability Record's 'catalogueId' don't match");
-                }
-            }
-        }
     }
 
     public InteroperabilityRecordBundle getCatalogueInteroperabilityRecord(String catalogueId, String interoperabilityRecordId, Authentication auth) {
