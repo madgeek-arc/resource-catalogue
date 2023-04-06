@@ -16,6 +16,7 @@ import org.aspectj.lang.annotation.After;
 import org.aspectj.lang.annotation.AfterReturning;
 import org.aspectj.lang.annotation.Aspect;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.core.Authentication;
@@ -40,6 +41,8 @@ public class ProviderManagementAspect {
     private final RegistrationMailService registrationMailService;
     private final SecurityService securityService;
     private final PublicResourceInteroperabilityManager publicResourceInteroperabilityManager;
+    @Value("${project.catalogue.name}")
+    private String catalogueName;
 
     @Autowired
     public ProviderManagementAspect(ProviderService<ProviderBundle, Authentication> providerService,
@@ -67,6 +70,9 @@ public class ProviderManagementAspect {
     }
 
     @AfterReturning(pointcut = "(execution(* eu.einfracentral.registry.manager.PendingServiceManager.transformToActive(String, org.springframework.security.core.Authentication)) " +
+            "|| execution(* eu.einfracentral.registry.manager.PendingServiceManager.transformToActive(eu.einfracentral.domain.ServiceBundle, org.springframework.security.core.Authentication))" +
+            "|| execution(* eu.einfracentral.registry.manager.ServiceBundleManager.addResource(eu.einfracentral.domain.ServiceBundle, org.springframework.security.core.Authentication))" +
+            "|| execution(* eu.einfracentral.registry.manager.ServiceBundleManager.addResource(eu.einfracentral.domain.ServiceBundle, String, org.springframework.security.core.Authentication))" +
             "|| execution(* eu.einfracentral.registry.manager.ServiceBundleManager.updateResource(eu.einfracentral.domain.ServiceBundle, String, org.springframework.security.core.Authentication)) )",
             returning = "serviceBundle")
     public void updateProviderState(ServiceBundle serviceBundle) {
@@ -74,15 +80,10 @@ public class ProviderManagementAspect {
         updateServiceProviderStates(serviceBundle);
     }
 
-    @AfterReturning(pointcut = "(execution(* eu.einfracentral.registry.manager.ServiceBundleManager.addResource(eu.einfracentral.domain.ServiceBundle, org.springframework.security.core.Authentication)) " +
-            "|| execution(* eu.einfracentral.registry.manager.PendingServiceManager.transformToActive(eu.einfracentral.domain.ServiceBundle, org.springframework.security.core.Authentication)) )" +
-            "&& args(serviceBundle, auth)", argNames = "serviceBundle,auth")
-    public void updateProviderState(ServiceBundle serviceBundle, Authentication auth) {
-        logger.trace("Updating Provider States");
-        updateServiceProviderStates(serviceBundle);
-    }
-
     @AfterReturning(pointcut = "(execution(* eu.einfracentral.registry.manager.PendingDatasourceManager.transformToActive(String, org.springframework.security.core.Authentication)) " +
+            "|| execution(* eu.einfracentral.registry.manager.PendingDatasourceManager.transformToActive(eu.einfracentral.domain.ServiceBundle, org.springframework.security.core.Authentication))" +
+            "|| execution(* eu.einfracentral.registry.manager.DatasourceBundleManager.addResource(eu.einfracentral.domain.DatasourceBundle, org.springframework.security.core.Authentication))" +
+            "|| execution(* eu.einfracentral.registry.manager.DatasourceBundleManager.addResource(eu.einfracentral.domain.DatasourceBundle, String, org.springframework.security.core.Authentication))" +
             "|| execution(* eu.einfracentral.registry.manager.DatasourceBundleManager.updateResource(eu.einfracentral.domain.DatasourceBundle, String, org.springframework.security.core.Authentication)) )",
             returning = "datasourceBundle")
     public void updateProviderState(DatasourceBundle datasourceBundle) {
@@ -90,26 +91,12 @@ public class ProviderManagementAspect {
         updateDatasourceProviderStates(datasourceBundle);
     }
 
-    @AfterReturning(pointcut = "(execution(* eu.einfracentral.registry.manager.DatasourceBundleManager.addResource(eu.einfracentral.domain.DatasourceBundle, org.springframework.security.core.Authentication)) " +
-            "|| execution(* eu.einfracentral.registry.manager.PendingDatasourceManager.transformToActive(eu.einfracentral.domain.DatasourceBundle, org.springframework.security.core.Authentication)) )" +
-            "&& args(datasourceBundle, auth)", argNames = "datasourceBundle,auth")
-    public void updateProviderState(DatasourceBundle datasourceBundle, Authentication auth) {
-        logger.trace("Updating Provider States");
-        updateDatasourceProviderStates(datasourceBundle);
-    }
-
     //TODO: ADD PendingTrainingResourceManager execution
-    @AfterReturning(pointcut = "(execution(* eu.einfracentral.registry.manager.TrainingResourceManager.updateResource(eu.einfracentral.domain.TrainingResourceBundle, String, org.springframework.security.core.Authentication)) )",
+    @AfterReturning(pointcut = "(execution(* eu.einfracentral.registry.manager.TrainingResourceManager.addResource(eu.einfracentral.domain.TrainingResourceBundle, org.springframework.security.core.Authentication))" +
+            "|| execution(* eu.einfracentral.registry.manager.TrainingResourceManager.addResource(eu.einfracentral.domain.TrainingResourceBundle, String, org.springframework.security.core.Authentication))" +
+            "|| execution(* eu.einfracentral.registry.manager.TrainingResourceManager.updateResource(eu.einfracentral.domain.TrainingResourceBundle, String, org.springframework.security.core.Authentication)) )",
             returning = "trainingResourceBundle")
     public void updateProviderState(TrainingResourceBundle trainingResourceBundle) {
-        logger.trace("Updating Provider States");
-        updateTrainingResourceProviderStates(trainingResourceBundle);
-    }
-
-    //TODO: ADD PendingTrainingResourceManager execution
-    @AfterReturning(pointcut = "(execution(* eu.einfracentral.registry.manager.TrainingResourceManager.addResource(eu.einfracentral.domain.TrainingResourceBundle, org.springframework.security.core.Authentication)) )" +
-            "&& args(trainingResourceBundle, auth)", argNames = "trainingResourceBundle,auth")
-    public void updateProviderState(TrainingResourceBundle trainingResourceBundle, Authentication auth) {
         logger.trace("Updating Provider States");
         updateTrainingResourceProviderStates(trainingResourceBundle);
     }
@@ -118,6 +105,8 @@ public class ProviderManagementAspect {
             "String, Boolean, org.springframework.security.core.Authentication)) ||" +
             "execution(* eu.einfracentral.registry.manager.ProviderManager.add(eu.einfracentral.domain.ProviderBundle," +
             "org.springframework.security.core.Authentication)) ||" +
+            "execution(* eu.einfracentral.registry.manager.ProviderManager.add(eu.einfracentral.domain.ProviderBundle," +
+            "String, org.springframework.security.core.Authentication)) ||" +
             "execution(* eu.einfracentral.registry.manager.PendingProviderManager.transformToActive(" +
             "eu.einfracentral.domain.ProviderBundle, org.springframework.security.core.Authentication)) || " +
             "execution(* eu.einfracentral.registry.manager.PendingProviderManager.transformToActive(" +
@@ -125,8 +114,8 @@ public class ProviderManagementAspect {
             returning = "providerBundle")
     public void providerRegistrationEmails(ProviderBundle providerBundle) {
         logger.trace("Sending Registration emails");
-        if (!providerBundle.getId().contains(providerBundle.getProvider().getCatalogueId()+".")){
-            registrationMailService.sendProviderMails(providerBundle);
+        if (!providerBundle.getMetadata().isPublished() && providerBundle.getProvider().getCatalogueId().equals(catalogueName)){
+            registrationMailService.sendProviderMails(providerBundle, "providerManager");
         }
     }
 
@@ -146,7 +135,7 @@ public class ProviderManagementAspect {
     public void providerRegistrationEmails(ServiceBundle serviceBundle) {
         ProviderBundle providerBundle = providerService.get(serviceBundle.getService().getResourceOrganisation());
         logger.trace("Sending Registration emails");
-        registrationMailService.sendProviderMails(providerBundle);
+        registrationMailService.sendProviderMails(providerBundle, "serviceBundleManager");
     }
 
     @AfterReturning(pointcut = "(execution(* eu.einfracentral.registry.manager.DatasourceBundleManager.verifyResource(String, " +
@@ -155,7 +144,7 @@ public class ProviderManagementAspect {
     public void providerRegistrationEmails(DatasourceBundle datasourceBundle) {
         ProviderBundle providerBundle = providerService.get(datasourceBundle.getDatasource().getResourceOrganisation());
         logger.trace("Sending Registration emails");
-        registrationMailService.sendProviderMails(providerBundle);
+        registrationMailService.sendProviderMails(providerBundle, "datasourceBundleManager");
     }
 
     @AfterReturning(pointcut = "(execution(* eu.einfracentral.registry.manager.TrainingResourceManager.verifyResource(String, " +
@@ -164,7 +153,7 @@ public class ProviderManagementAspect {
     public void providerRegistrationEmails(TrainingResourceBundle trainingResourceBundle) {
         ProviderBundle providerBundle = providerService.get(trainingResourceBundle.getTrainingResource().getResourceOrganisation());
         logger.trace("Sending Registration emails");
-        registrationMailService.sendProviderMails(providerBundle);
+        registrationMailService.sendProviderMails(providerBundle, "trainingResourceManager");
     }
 
     @Async
@@ -407,45 +396,51 @@ public class ProviderManagementAspect {
     @Async
     @CacheEvict(value = CACHE_PROVIDERS, allEntries = true)
     public void updateServiceProviderStates(ServiceBundle serviceBundle) {
-        try {
-            ProviderBundle providerBundle = providerService.get(serviceBundle.getService().getResourceOrganisation(), null);
-            if (providerBundle.getTemplateStatus().equals("no template status") || providerBundle.getTemplateStatus().equals("rejected template")) {
-                logger.debug("Updating state of Provider with id '{}' : '{}' --> to '{}'",
-                        serviceBundle.getService().getResourceOrganisation(), providerBundle.getTemplateStatus(), "pending template");
-                serviceBundleService.verifyResource(serviceBundle.getService().getId(), "pending resource", false, securityService.getAdminAccess());
+        if (serviceBundle.getService().getCatalogueId().equals(catalogueName)) {
+            try {
+                ProviderBundle providerBundle = providerService.get(serviceBundle.getService().getResourceOrganisation(), null);
+                if (providerBundle.getTemplateStatus().equals("no template status") || providerBundle.getTemplateStatus().equals("rejected template")) {
+                    logger.debug("Updating state of Provider with id '{}' : '{}' --> to '{}'",
+                            serviceBundle.getService().getResourceOrganisation(), providerBundle.getTemplateStatus(), "pending template");
+                    serviceBundleService.verifyResource(serviceBundle.getService().getId(), "pending resource", false, securityService.getAdminAccess());
+                }
+            } catch (RuntimeException e) {
+                logger.error(e);
             }
-        } catch (RuntimeException e) {
-            logger.error(e);
         }
     }
 
     @Async
     @CacheEvict(value = CACHE_PROVIDERS, allEntries = true)
     public void updateDatasourceProviderStates(DatasourceBundle datasourceBundle) {
-        try {
-            ProviderBundle providerBundle = providerService.get(datasourceBundle.getDatasource().getResourceOrganisation(), null);
-            if (providerBundle.getTemplateStatus().equals("no template status") || providerBundle.getTemplateStatus().equals("rejected template")) {
-                logger.debug("Updating state of Provider with id '{}' : '{}' --> to '{}'",
-                        datasourceBundle.getDatasource().getResourceOrganisation(), providerBundle.getTemplateStatus(), "pending template");
-                datasourceBundleService.verifyResource(datasourceBundle.getDatasource().getId(), "pending resource", false, securityService.getAdminAccess());
+        if (datasourceBundle.getDatasource().getCatalogueId().equals(catalogueName)) {
+            try {
+                ProviderBundle providerBundle = providerService.get(datasourceBundle.getDatasource().getResourceOrganisation(), null);
+                if (providerBundle.getTemplateStatus().equals("no template status") || providerBundle.getTemplateStatus().equals("rejected template")) {
+                    logger.debug("Updating state of Provider with id '{}' : '{}' --> to '{}'",
+                            datasourceBundle.getDatasource().getResourceOrganisation(), providerBundle.getTemplateStatus(), "pending template");
+                    datasourceBundleService.verifyResource(datasourceBundle.getDatasource().getId(), "pending resource", false, securityService.getAdminAccess());
+                }
+            } catch (RuntimeException e) {
+                logger.error(e);
             }
-        } catch (RuntimeException e) {
-            logger.error(e);
         }
     }
 
     @Async
     @CacheEvict(value = CACHE_PROVIDERS, allEntries = true)
     public void updateTrainingResourceProviderStates(TrainingResourceBundle trainingResourceBundle) {
-        try {
-            ProviderBundle providerBundle = providerService.get(trainingResourceBundle.getTrainingResource().getResourceOrganisation(), null);
-            if (providerBundle.getTemplateStatus().equals("no template status") || providerBundle.getTemplateStatus().equals("rejected template")) {
-                logger.debug("Updating state of Provider with id '{}' : '{}' --> to '{}'",
-                        trainingResourceBundle.getTrainingResource().getResourceOrganisation(), providerBundle.getTemplateStatus(), "pending template");
-                trainingResourceService.verifyResource(trainingResourceBundle.getTrainingResource().getId(), "pending resource", false, securityService.getAdminAccess());
+        if (trainingResourceBundle.getTrainingResource().getCatalogueId().equals(catalogueName)) {
+            try {
+                ProviderBundle providerBundle = providerService.get(trainingResourceBundle.getTrainingResource().getResourceOrganisation(), null);
+                if (providerBundle.getTemplateStatus().equals("no template status") || providerBundle.getTemplateStatus().equals("rejected template")) {
+                    logger.debug("Updating state of Provider with id '{}' : '{}' --> to '{}'",
+                            trainingResourceBundle.getTrainingResource().getResourceOrganisation(), providerBundle.getTemplateStatus(), "pending template");
+                    trainingResourceService.verifyResource(trainingResourceBundle.getTrainingResource().getId(), "pending resource", false, securityService.getAdminAccess());
+                }
+            } catch (RuntimeException e) {
+                logger.error(e);
             }
-        } catch (RuntimeException e) {
-            logger.error(e);
         }
     }
 

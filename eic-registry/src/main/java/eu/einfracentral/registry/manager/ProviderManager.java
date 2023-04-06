@@ -1131,7 +1131,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         loggingInfoList.add(LoggingInfo.createLoggingInfoEntry(User.of(auth).getEmail(), User.of(auth).getFullName(), securityService.getRoleName(auth),
                 LoggingInfo.Types.ONBOARD.getKey(), LoggingInfo.ActionType.REGISTERED.getKey()));
         provider.setLoggingInfo(loggingInfoList);
-        if (catalogueId == null || catalogueId.equals("")) {
+        if (catalogueId == null || catalogueId.equals("") || catalogueId.equals(catalogueName)) {
             // set catalogueId = eosc
             provider.getProvider().setCatalogueId(catalogueName);
             provider.setActive(false);
