@@ -98,7 +98,7 @@ public class RegistrationMailService {
     }
 
     @Async
-    public void sendProviderMails(ProviderBundle providerBundle) {
+    public void sendProviderMails(ProviderBundle providerBundle, String afterReturningFrom) {
         Map<String, Object> root = new HashMap<>();
         StringWriter out = new StringWriter();
         String providerMail;
@@ -111,26 +111,30 @@ public class RegistrationMailService {
             throw new ResourceNotFoundException("Provider is null");
         }
 
-        List<Service> serviceList = serviceBundleManager.getResources(providerBundle.getId());
-        List<Datasource> datasourceList = datasourceBundleManager.getResources(providerBundle.getId());
-        List<TrainingResource> trainingResourceList = trainingResourceManager.getResources(providerBundle.getId());
         Service serviceTemplate = null;
         TrainingResource trainingResourceTemplate = null;
-        if (!datasourceList.isEmpty()) {
-            root.put("resourceId", datasourceList.get(0).getId());
-            root.put("resourceName", datasourceList.get(0).getName());
-            serviceTemplate = datasourceList.get(0);
-        } else if (!serviceList.isEmpty()){
-            root.put("resourceId", serviceList.get(0).getId());
-            root.put("resourceName", serviceList.get(0).getName());
-            serviceTemplate = serviceList.get(0);
-        } else if (!trainingResourceList.isEmpty()){
-            root.put("resourceId", trainingResourceList.get(0).getId());
-            root.put("resourceName", trainingResourceList.get(0).getTitle());
-            trainingResourceTemplate = trainingResourceList.get(0);
-        } else {
-            serviceTemplate = new Service();
-            serviceTemplate.setName("");
+        switch (afterReturningFrom){
+            case "providerManager":
+                serviceTemplate = new Service();
+                serviceTemplate.setName("");
+                break;
+            case "serviceBundleManager":
+                serviceTemplate = serviceBundleManager.getResources(providerBundle.getId()).get(0);
+                root.put("resourceId", serviceTemplate.getId());
+                root.put("resourceName", serviceTemplate.getName());
+                break;
+            case "datasourceBundleManager":
+                serviceTemplate = datasourceBundleManager.getResources(providerBundle.getId()).get(0);
+                root.put("resourceId", serviceTemplate.getId());
+                root.put("resourceName", serviceTemplate.getName());
+                break;
+            case "trainingResourceManager":
+                trainingResourceTemplate = trainingResourceManager.getResources(providerBundle.getId()).get(0);
+                root.put("resourceId", trainingResourceTemplate.getId());
+                root.put("resourceName", trainingResourceTemplate.getTitle());
+                break;
+            default:
+                break;
         }
 
         if (serviceTemplate != null){
