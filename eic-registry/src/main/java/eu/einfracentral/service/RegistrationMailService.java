@@ -1137,6 +1137,7 @@ public class RegistrationMailService {
         Map<String, Object> root = new HashMap<>();
         root.put("project", projectName);
         root.put("endpoint", endpoint);
+        root.put("registrationEmail", registrationEmail);
         root.put("interoperabilityRecordBundle", interoperabilityRecordBundle);
         root.put("registrant", registrant);
 
