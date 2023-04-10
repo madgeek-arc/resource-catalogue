@@ -9,6 +9,7 @@ import eu.einfracentral.service.IdCreator;
 import eu.einfracentral.service.RegistrationMailService;
 import eu.einfracentral.service.SecurityService;
 import eu.einfracentral.utils.FacetFilterUtils;
+import eu.einfracentral.utils.ProviderResourcesCommonMethods;
 import eu.openminted.registry.core.domain.Browsing;
 import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.domain.Paging;
@@ -45,6 +46,7 @@ public class ServiceBundleManager extends AbstractResourceBundleManager<ServiceB
     private final CatalogueService<CatalogueBundle, Authentication> catalogueService;
     private final PublicServiceManager publicServiceManager;
     private final MigrationService migrationService;
+    private final ProviderResourcesCommonMethods commonMethods;
 
     @Value("${project.catalogue.name}")
     private String catalogueName;
@@ -56,7 +58,8 @@ public class ServiceBundleManager extends AbstractResourceBundleManager<ServiceB
                                 @Lazy VocabularyService vocabularyService,
                                 CatalogueService<CatalogueBundle, Authentication> catalogueService,
                                 @Lazy PublicServiceManager publicServiceManager,
-                                @Lazy MigrationService migrationService) {
+                                @Lazy MigrationService migrationService,
+                                ProviderResourcesCommonMethods commonMethods) {
         super(ServiceBundle.class);
         this.providerService = providerService; // for providers
         this.idCreator = idCreator;
@@ -66,6 +69,7 @@ public class ServiceBundleManager extends AbstractResourceBundleManager<ServiceB
         this.catalogueService = catalogueService;
         this.publicServiceManager = publicServiceManager;
         this.migrationService = migrationService;
+        this.commonMethods = commonMethods;
     }
 
     @Override
@@ -87,7 +91,7 @@ public class ServiceBundleManager extends AbstractResourceBundleManager<ServiceB
         if (catalogueId == null || catalogueId.equals("")) { // add catalogue provider
             serviceBundle.getService().setCatalogueId(catalogueName);
         } else { // add provider from external catalogue
-            checkCatalogueIdConsistency(serviceBundle, catalogueId);
+            commonMethods.checkCatalogueIdConsistency(serviceBundle, catalogueId);
         }
 
         ProviderBundle providerBundle = providerService.get(serviceBundle.getService().getCatalogueId(), serviceBundle.getService().getResourceOrganisation(), auth);
@@ -182,7 +186,7 @@ public class ServiceBundleManager extends AbstractResourceBundleManager<ServiceB
         if (catalogueId == null || catalogueId.equals("")) {
             serviceBundle.getService().setCatalogueId(catalogueName);
         } else {
-            checkCatalogueIdConsistency(serviceBundle, catalogueId);
+            commonMethods.checkCatalogueIdConsistency(serviceBundle, catalogueId);
         }
 
         logger.trace("User '{}' is attempting to update the Service with id '{}' of the Catalogue '{}'", auth, serviceBundle.getService().getId(), serviceBundle.getService().getCatalogueId());

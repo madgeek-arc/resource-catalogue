@@ -8,6 +8,7 @@ import eu.einfracentral.service.IdCreator;
 import eu.einfracentral.service.RegistrationMailService;
 import eu.einfracentral.service.SecurityService;
 import eu.einfracentral.service.SynchronizerService;
+import eu.einfracentral.utils.ProviderResourcesCommonMethods;
 import eu.einfracentral.validators.FieldValidator;
 import eu.openminted.registry.core.domain.*;
 import eu.openminted.registry.core.exception.ResourceNotFoundException;
@@ -60,6 +61,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     private final DataSource dataSource;
     private final CatalogueService<CatalogueBundle, Authentication> catalogueService;
     private final SynchronizerService<Provider> synchronizerService;
+    private final ProviderResourcesCommonMethods commonMethods;
 
     //TODO: maybe add description on DB and elastic too
     private final String columnsOfInterest = "provider_id, name, abbreviation, affiliations, tags, areas_of_activity, esfri_domains, meril_scientific_subdomains," +
@@ -76,6 +78,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
                            EventService eventService, VersionService versionService,
                            VocabularyService vocabularyService, DataSource dataSource,
                            @Qualifier("providerSync") SynchronizerService<Provider> synchronizerService,
+                           ProviderResourcesCommonMethods commonMethods,
                            CatalogueService<CatalogueBundle, Authentication> catalogueService,
                            @Lazy PublicServiceManager publicServiceManager,
                            @Lazy PublicDatasourceManager publicDatasourceManager,
@@ -92,6 +95,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         this.vocabularyService = vocabularyService;
         this.dataSource = dataSource;
         this.synchronizerService = synchronizerService;
+        this.commonMethods = commonMethods;
         this.catalogueService = catalogueService;
         this.publicServiceManager = publicServiceManager;
         this.publicDatasourceManager = publicDatasourceManager;
@@ -162,7 +166,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         if (catalogueId == null || catalogueId.equals("")) {
             provider.getProvider().setCatalogueId(catalogueName);
         } else {
-            checkCatalogueIdConsistency(provider, catalogueId);
+            commonMethods.checkCatalogueIdConsistency(provider, catalogueId);
         }
 
         // block Public Provider update
@@ -1138,7 +1142,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
             provider.setStatus(vocabularyService.get("pending provider").getId());
             provider.setTemplateStatus(vocabularyService.get("no template status").getId());
         } else {
-            checkCatalogueIdConsistency(provider, catalogueId);
+            commonMethods.checkCatalogueIdConsistency(provider, catalogueId);
             provider.setActive(true);
             provider.setStatus(vocabularyService.get("approved provider").getId());
             provider.setTemplateStatus(vocabularyService.get("approved template").getId());
@@ -1150,17 +1154,6 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         provider.setLatestOnboardingInfo(loggingInfoList.get(loggingInfoList.size()-1));
 
         return provider;
-    }
-
-    private void checkCatalogueIdConsistency(ProviderBundle provider, String catalogueId){
-        catalogueService.existsOrElseThrow(catalogueId);
-        if (provider.getProvider().getCatalogueId() == null || provider.getProvider().getCatalogueId().equals("")){
-            throw new ValidationException("Provider's 'catalogueId' cannot be null or empty");
-        } else{
-            if (!provider.getProvider().getCatalogueId().equals(catalogueId)){
-                throw new ValidationException("Parameter 'catalogueId' and Provider's 'catalogueId' don't match");
-            }
-        }
     }
 
     private void addApprovedProviderToHLEVocabulary(ProviderBundle providerBundle){
