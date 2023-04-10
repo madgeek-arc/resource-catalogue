@@ -2,6 +2,7 @@ package eu.einfracentral.registry.controller;
 
 import eu.einfracentral.domain.*;
 import eu.einfracentral.registry.service.InteroperabilityRecordService;
+import eu.einfracentral.registry.service.ResourceInteroperabilityRecordService;
 import eu.einfracentral.utils.FacetFilterUtils;
 import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.domain.Paging;
@@ -22,6 +23,7 @@ import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
 import javax.validation.Valid;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -33,10 +35,13 @@ public class InteroperabilityRecordController {
 
     private static final Logger logger = LogManager.getLogger(InteroperabilityRecordController.class);
     private final InteroperabilityRecordService<InteroperabilityRecordBundle> interoperabilityRecordService;
+    private final ResourceInteroperabilityRecordService<ResourceInteroperabilityRecordBundle> resourceInteroperabilityRecordService;
 
     @Autowired
-    public InteroperabilityRecordController(InteroperabilityRecordService<InteroperabilityRecordBundle> interoperabilityRecordService) {
+    public InteroperabilityRecordController(InteroperabilityRecordService<InteroperabilityRecordBundle> interoperabilityRecordService,
+                                            ResourceInteroperabilityRecordService<ResourceInteroperabilityRecordBundle> resourceInteroperabilityRecordService) {
         this.interoperabilityRecordService = interoperabilityRecordService;
+        this.resourceInteroperabilityRecordService = resourceInteroperabilityRecordService;
     }
 
     @ApiOperation(value = "Creates a new Interoperability Record.")
@@ -181,10 +186,24 @@ public class InteroperabilityRecordController {
 
     @GetMapping(path = {"loggingInfoHistory/{id}"}, produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<Paging<LoggingInfo>> loggingInfoHistory(@PathVariable String id,
-                                                                  @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueId,
-                                                                  @ApiIgnore Authentication auth) {
+                                                                  @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueId) {
         Paging<LoggingInfo> loggingInfoHistory = this.interoperabilityRecordService.getLoggingInfoHistory(id, catalogueId);
         return ResponseEntity.ok(loggingInfoHistory);
+    }
+
+    @GetMapping(path = {"relatedResources/{id}"}, produces = {MediaType.APPLICATION_JSON_VALUE})
+    public List<String> getAllInteroperabilityRecordRelatedResources(@PathVariable String id) {
+        List<String> allInteroperabilityRecordRelatedResources = new ArrayList<>();
+        FacetFilter ff = new FacetFilter();
+        ff.setQuantity(10000);
+        List<ResourceInteroperabilityRecordBundle> allResourceInteroperabilityRecords = resourceInteroperabilityRecordService.getAll(ff, null).getResults();
+        for (ResourceInteroperabilityRecordBundle resourceInteroperabilityRecordBundle : allResourceInteroperabilityRecords){
+            if (resourceInteroperabilityRecordBundle.getResourceInteroperabilityRecord().getInteroperabilityRecordIds().contains(id)
+                    && !resourceInteroperabilityRecordBundle.getMetadata().isPublished()){
+                allInteroperabilityRecordRelatedResources.add(resourceInteroperabilityRecordBundle.getResourceInteroperabilityRecord().getResourceId());
+            }
+        }
+        return allInteroperabilityRecordRelatedResources;
     }
 
     @PostMapping(path = "addInteroperabilityRecordBundle", produces = {MediaType.APPLICATION_JSON_VALUE})
