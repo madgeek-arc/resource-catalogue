@@ -72,22 +72,18 @@ public class ProviderManagementAspect {
         this.securityService = securityService;
     }
 
-    @AfterReturning(pointcut = "(execution(* eu.einfracentral.registry.manager.PendingServiceManager.transformToActive(String, org.springframework.security.core.Authentication)) " +
-            "|| execution(* eu.einfracentral.registry.manager.PendingServiceManager.transformToActive(eu.einfracentral.domain.ServiceBundle, org.springframework.security.core.Authentication))" +
-            "|| execution(* eu.einfracentral.registry.manager.ServiceBundleManager.addResource(eu.einfracentral.domain.ServiceBundle, org.springframework.security.core.Authentication))" +
-            "|| execution(* eu.einfracentral.registry.manager.ServiceBundleManager.addResource(eu.einfracentral.domain.ServiceBundle, String, org.springframework.security.core.Authentication))" +
-            "|| execution(* eu.einfracentral.registry.manager.ServiceBundleManager.updateResource(eu.einfracentral.domain.ServiceBundle, String, org.springframework.security.core.Authentication)) )",
+    @AfterReturning(pointcut = "execution(* eu.einfracentral.registry.manager.PendingServiceManager.transformToActive(..)) " +
+            "|| execution(* eu.einfracentral.registry.manager.ServiceBundleManager.addResource(..))" +
+            "|| execution(* eu.einfracentral.registry.manager.ServiceBundleManager.updateResource(..))",
             returning = "serviceBundle")
     public void updateProviderState(ServiceBundle serviceBundle) {
         logger.trace("Updating Provider States");
         updateServiceProviderStates(serviceBundle);
     }
 
-    @AfterReturning(pointcut = "(execution(* eu.einfracentral.registry.manager.PendingDatasourceManager.transformToActive(String, org.springframework.security.core.Authentication)) " +
-            "|| execution(* eu.einfracentral.registry.manager.PendingDatasourceManager.transformToActive(eu.einfracentral.domain.ServiceBundle, org.springframework.security.core.Authentication))" +
-            "|| execution(* eu.einfracentral.registry.manager.DatasourceBundleManager.addResource(eu.einfracentral.domain.DatasourceBundle, org.springframework.security.core.Authentication))" +
-            "|| execution(* eu.einfracentral.registry.manager.DatasourceBundleManager.addResource(eu.einfracentral.domain.DatasourceBundle, String, org.springframework.security.core.Authentication))" +
-            "|| execution(* eu.einfracentral.registry.manager.DatasourceBundleManager.updateResource(eu.einfracentral.domain.DatasourceBundle, String, org.springframework.security.core.Authentication)) )",
+    @AfterReturning(pointcut = "execution(* eu.einfracentral.registry.manager.PendingDatasourceManager.transformToActive(..))" +
+            "|| execution(* eu.einfracentral.registry.manager.DatasourceBundleManager.addResource(..))" +
+            "|| execution(* eu.einfracentral.registry.manager.DatasourceBundleManager.updateResource(..))",
             returning = "datasourceBundle")
     public void updateProviderState(DatasourceBundle datasourceBundle) {
         logger.trace("Updating Provider States");
@@ -95,63 +91,42 @@ public class ProviderManagementAspect {
     }
 
     //TODO: ADD PendingTrainingResourceManager execution
-    @AfterReturning(pointcut = "(execution(* eu.einfracentral.registry.manager.TrainingResourceManager.addResource(eu.einfracentral.domain.TrainingResourceBundle, org.springframework.security.core.Authentication))" +
-            "|| execution(* eu.einfracentral.registry.manager.TrainingResourceManager.addResource(eu.einfracentral.domain.TrainingResourceBundle, String, org.springframework.security.core.Authentication))" +
-            "|| execution(* eu.einfracentral.registry.manager.TrainingResourceManager.updateResource(eu.einfracentral.domain.TrainingResourceBundle, String, org.springframework.security.core.Authentication)) )",
+    @AfterReturning(pointcut = "execution(* eu.einfracentral.registry.manager.TrainingResourceManager.addResource(..))" +
+            "|| execution(* eu.einfracentral.registry.manager.TrainingResourceManager.updateResource(..))",
             returning = "trainingResourceBundle")
     public void updateProviderState(TrainingResourceBundle trainingResourceBundle) {
         logger.trace("Updating Provider States");
         updateTrainingResourceProviderStates(trainingResourceBundle);
     }
 
-    @AfterReturning(pointcut = "(execution(* eu.einfracentral.registry.manager.ProviderManager.verifyProvider(String, " +
-            "String, Boolean, org.springframework.security.core.Authentication)) ||" +
-            "execution(* eu.einfracentral.registry.manager.ProviderManager.add(eu.einfracentral.domain.ProviderBundle," +
-            "org.springframework.security.core.Authentication)) ||" +
-            "execution(* eu.einfracentral.registry.manager.ProviderManager.add(eu.einfracentral.domain.ProviderBundle," +
-            "String, org.springframework.security.core.Authentication)) ||" +
-            "execution(* eu.einfracentral.registry.manager.PendingProviderManager.transformToActive(" +
-            "eu.einfracentral.domain.ProviderBundle, org.springframework.security.core.Authentication)) || " +
-            "execution(* eu.einfracentral.registry.manager.PendingProviderManager.transformToActive(" +
-            "String, org.springframework.security.core.Authentication)))",
+    @AfterReturning(pointcut = "execution(* eu.einfracentral.registry.manager.ProviderManager.verifyProvider(..))" +
+            "|| execution(* eu.einfracentral.registry.manager.ProviderManager.add(..))" +
+            "|| execution(* eu.einfracentral.registry.manager.PendingProviderManager.transformToActive(..))",
             returning = "providerBundle")
     public void providerRegistrationEmails(ProviderBundle providerBundle) {
         logger.trace("Sending Registration emails");
-        if (!providerBundle.getMetadata().isPublished() && providerBundle.getProvider().getCatalogueId().equals(catalogueName)){
+        if (!providerBundle.getMetadata().isPublished() && providerBundle.getProvider().getCatalogueId().equals(catalogueName)) {
             registrationMailService.sendProviderMails(providerBundle, "providerManager");
         }
     }
 
-    @AfterReturning(pointcut = "(execution(* eu.einfracentral.registry.manager.CatalogueManager.verifyCatalogue(String, " +
-            "String, Boolean, org.springframework.security.core.Authentication)) ||" +
-            "execution(* eu.einfracentral.registry.manager.CatalogueManager.add(eu.einfracentral.domain.CatalogueBundle," +
-            "org.springframework.security.core.Authentication)))",
+    @AfterReturning(pointcut = "execution(* eu.einfracentral.registry.manager.CatalogueManager.verifyCatalogue(..)) " +
+            "|| execution(* eu.einfracentral.registry.manager.CatalogueManager.add(..))",
             returning = "catalogueBundle")
     public void catalogueRegistrationEmails(CatalogueBundle catalogueBundle) {
         logger.trace("Sending Registration emails");
         registrationMailService.sendCatalogueMails(catalogueBundle);
     }
 
-    @AfterReturning(pointcut = "(execution(* eu.einfracentral.registry.manager.ServiceBundleManager.verifyResource(String, " +
-            "String, Boolean, org.springframework.security.core.Authentication)))",
-            returning = "serviceBundle")
-    public void providerRegistrationEmails(ServiceBundle serviceBundle) {
-        ProviderBundle providerBundle = providerService.get(serviceBundle.getService().getResourceOrganisation());
-        logger.trace("Sending Registration emails");
-        registrationMailService.sendProviderMails(providerBundle, "serviceBundleManager");
-    }
-
-    @AfterReturning(pointcut = "(execution(* eu.einfracentral.registry.manager.DatasourceBundleManager.verifyResource(String, " +
-            "String, Boolean, org.springframework.security.core.Authentication)))",
-            returning = "datasourceBundle")
-    public void providerRegistrationEmails(DatasourceBundle datasourceBundle) {
-        ProviderBundle providerBundle = providerService.get(datasourceBundle.getDatasource().getResourceOrganisation());
+    @AfterReturning(pointcut = "execution(* eu.einfracentral.registry.service.ResourceBundleService.verifyResource(..))",
+            returning = "resource")
+    public void providerRegistrationEmails(ResourceBundle<?> resource) {
+        ProviderBundle providerBundle = providerService.get(resource.getPayload().getResourceOrganisation());
         logger.trace("Sending Registration emails");
         registrationMailService.sendProviderMails(providerBundle, "datasourceBundleManager");
     }
 
-    @AfterReturning(pointcut = "(execution(* eu.einfracentral.registry.manager.TrainingResourceManager.verifyResource(String, " +
-            "String, Boolean, org.springframework.security.core.Authentication)))",
+    @AfterReturning(pointcut = "execution(* eu.einfracentral.registry.manager.TrainingResourceManager.verifyResource(..))",
             returning = "trainingResourceBundle")
     public void providerRegistrationEmails(TrainingResourceBundle trainingResourceBundle) {
         ProviderBundle providerBundle = providerService.get(trainingResourceBundle.getTrainingResource().getResourceOrganisation());
@@ -160,16 +135,14 @@ public class ProviderManagementAspect {
     }
 
     @Async
-    @AfterReturning(pointcut = "(execution(* eu.einfracentral.registry.manager.ProviderManager." +
-            "add(eu.einfracentral.domain.ProviderBundle, String, org.springframework.security.core.Authentication)))" +
-            "|| (execution(* eu.einfracentral.registry.manager.ProviderManager.verifyProvider(String, String, Boolean, " +
-            "org.springframework.security.core.Authentication))))",
+    @AfterReturning(pointcut = "execution(* eu.einfracentral.registry.manager.ProviderManager.add(..))" +
+            "|| execution(* eu.einfracentral.registry.manager.ProviderManager.verifyProvider(..))",
             returning = "providerBundle")
     public void addProviderAsPublic(ProviderBundle providerBundle) {
-        if (providerBundle.getStatus().equals("approved provider") && providerBundle.isActive()){
+        if (providerBundle.getStatus().equals("approved provider") && providerBundle.isActive()) {
             try {
                 publicProviderManager.get(String.format("%s.%s", providerBundle.getProvider().getCatalogueId(), providerBundle.getId()));
-            } catch (ResourceException | ResourceNotFoundException e){
+            } catch (ResourceException | ResourceNotFoundException e) {
                 delayExecution();
                 publicProviderManager.add(providerBundle, null);
             }
@@ -177,30 +150,28 @@ public class ProviderManagementAspect {
     }
 
     @Async
-    @AfterReturning(pointcut = "(execution(* eu.einfracentral.registry.manager.ProviderManager.update(eu.einfracentral.domain.ProviderBundle, String, org.springframework.security.core.Authentication)))" +
-            "|| (execution(* eu.einfracentral.registry.manager.ProviderManager.update(eu.einfracentral.domain.ProviderBundle, String, String, org.springframework.security.core.Authentication)))" +
-            "|| (execution(* eu.einfracentral.registry.manager.ProviderManager.publish(String, Boolean, org.springframework.security.core.Authentication)))" +
-            "|| (execution(* eu.einfracentral.registry.manager.ProviderManager.verifyProvider(String, String, Boolean, org.springframework.security.core.Authentication)))" +
-            "|| (execution(* eu.einfracentral.registry.manager.ProviderManager.auditProvider(String, String, eu.einfracentral.domain.LoggingInfo.ActionType, org.springframework.security.core.Authentication)))",
+    @AfterReturning(pointcut = "execution(* eu.einfracentral.registry.manager.ProviderManager.update(..))" +
+            "|| execution(* eu.einfracentral.registry.manager.ProviderManager.publish(..))" +
+            "|| execution(* eu.einfracentral.registry.manager.ProviderManager.verifyProvider(..))" +
+            "|| execution(* eu.einfracentral.registry.manager.ProviderManager.auditProvider(..))",
             returning = "providerBundle")
     public void updatePublicProvider(ProviderBundle providerBundle) {
-        try{
+        try {
             publicProviderManager.get(String.format("%s.%s", providerBundle.getProvider().getCatalogueId(), providerBundle.getId()));
             delayExecution();
             publicProviderManager.update(providerBundle, null);
-        } catch (ResourceException | ResourceNotFoundException ignore){
+        } catch (ResourceException | ResourceNotFoundException ignore) {
         }
     }
 
     @Async
-    @AfterReturning(pointcut = "(execution(* eu.einfracentral.registry.manager.ServiceBundleManager." +
-            "verifyResource(String, String, Boolean, org.springframework.security.core.Authentication))))",
+    @AfterReturning(pointcut = "execution(* eu.einfracentral.registry.manager.ServiceBundleManager.verifyResource(..))",
             returning = "serviceBundle")
     public void updatePublicProviderTemplateStatus(ServiceBundle serviceBundle) {
         ProviderBundle providerBundle = providerService.get(serviceBundle.getService().getResourceOrganisation());
-        try{
+        try {
             publicProviderManager.get(String.format("%s.%s", providerBundle.getProvider().getCatalogueId(), providerBundle.getId()));
-        } catch (ResourceException | ResourceNotFoundException e){
+        } catch (ResourceException | ResourceNotFoundException e) {
             throw new ResourceNotFoundException(String.format("Provider with id [%s.%s] is not yet published or does not exist",
                     providerBundle.getProvider().getCatalogueId(), providerBundle.getId()));
         }
@@ -209,14 +180,13 @@ public class ProviderManagementAspect {
     }
 
     @Async
-    @AfterReturning(pointcut = "(execution(* eu.einfracentral.registry.manager.DatasourceBundleManager." +
-            "verifyResource(String, String, Boolean, org.springframework.security.core.Authentication))))",
+    @AfterReturning(pointcut = "execution(* eu.einfracentral.registry.manager.DatasourceBundleManager.verifyResource(..))",
             returning = "datasourceBundle")
     public void updatePublicProviderTemplateStatus(DatasourceBundle datasourceBundle) {
         ProviderBundle providerBundle = providerService.get(datasourceBundle.getDatasource().getResourceOrganisation());
-        try{
+        try {
             publicProviderManager.get(String.format("%s.%s", providerBundle.getProvider().getCatalogueId(), providerBundle.getId()));
-        } catch (ResourceException | ResourceNotFoundException e){
+        } catch (ResourceException | ResourceNotFoundException e) {
             throw new ResourceNotFoundException(String.format("Provider with id [%s.%s] is not yet published or does not exist",
                     providerBundle.getProvider().getCatalogueId(), providerBundle.getId()));
         }
@@ -225,14 +195,13 @@ public class ProviderManagementAspect {
     }
 
     @Async
-    @AfterReturning(pointcut = "(execution(* eu.einfracentral.registry.manager.TrainingResourceManager." +
-            "verifyResource(String, String, Boolean, org.springframework.security.core.Authentication))))",
+    @AfterReturning(pointcut = "execution(* eu.einfracentral.registry.manager.TrainingResourceManager.verifyResource(..))",
             returning = "trainingResourceBundle")
     public void updatePublicProviderTemplateStatus(TrainingResourceBundle trainingResourceBundle) {
         ProviderBundle providerBundle = providerService.get(trainingResourceBundle.getTrainingResource().getResourceOrganisation());
-        try{
+        try {
             publicProviderManager.get(String.format("%s.%s", providerBundle.getProvider().getCatalogueId(), providerBundle.getId()));
-        } catch (ResourceException | ResourceNotFoundException e){
+        } catch (ResourceException | ResourceNotFoundException e) {
             throw new ResourceNotFoundException(String.format("Provider with id [%s.%s] is not yet published or does not exist",
                     providerBundle.getProvider().getCatalogueId(), providerBundle.getId()));
         }
@@ -241,31 +210,23 @@ public class ProviderManagementAspect {
     }
 
     @Async
-    @After("execution(* eu.einfracentral.registry.manager.ProviderManager.delete(eu.einfracentral.domain.ProviderBundle)))")
+    @After("execution(* eu.einfracentral.registry.manager.ProviderManager.delete(..))")
     public void deletePublicProvider(JoinPoint joinPoint) {
         ProviderBundle providerBundle = (ProviderBundle) joinPoint.getArgs()[0];
         publicProviderManager.delete(providerBundle);
     }
 
     @Async
-    @AfterReturning(pointcut = "(execution(* eu.einfracentral.registry.manager.ServiceBundleManager." +
-            "addResource(eu.einfracentral.domain.ServiceBundle, String, org.springframework.security.core.Authentication)))" +
-            "|| (execution(* eu.einfracentral.registry.manager.ServiceBundleManager.verifyResource(String, String, Boolean, " +
-            "org.springframework.security.core.Authentication)))" +
-            "|| (execution(* eu.einfracentral.registry.manager.PendingServiceManager.transformToActive(String, " +
-            "org.springframework.security.core.Authentication)))" +
-            "|| (execution(* eu.einfracentral.registry.manager.PendingServiceManager.transformToActive(eu.einfracentral.domain.ServiceBundle, " +
-            "org.springframework.security.core.Authentication)))" +
-            "|| (execution(* eu.einfracentral.registry.manager.ServiceBundleManager.changeProvider(String, " +
-            "String, String, org.springframework.security.core.Authentication)))" +
-            "|| (execution(* eu.einfracentral.registry.manager.ServiceBundleManager.addResource(eu.einfracentral.domain.ServiceBundle, " +
-            "org.springframework.security.core.Authentication))))", // pendingToInfra method
+    @AfterReturning(pointcut = "execution(* eu.einfracentral.registry.manager.ServiceBundleManager.addResource(..))" +
+            "|| execution(* eu.einfracentral.registry.manager.ServiceBundleManager.verifyResource(..))" +
+            "|| execution(* eu.einfracentral.registry.manager.PendingServiceManager.transformToActive(..))" +
+            "|| execution(* eu.einfracentral.registry.manager.ServiceBundleManager.changeProvider(..))",
             returning = "serviceBundle")
     public void addResourceAsPublic(ServiceBundle serviceBundle) {
-        if (serviceBundle.getStatus().equals("approved resource") && serviceBundle.isActive()){
-            try{
+        if (serviceBundle.getStatus().equals("approved resource") && serviceBundle.isActive()) {
+            try {
                 publicServiceManager.get(String.format("%s.%s", serviceBundle.getService().getCatalogueId(), serviceBundle.getId()));
-            } catch (ResourceException | ResourceNotFoundException e){
+            } catch (ResourceException | ResourceNotFoundException e) {
                 delayExecution();
                 publicServiceManager.add(serviceBundle, null);
             }
@@ -273,24 +234,16 @@ public class ProviderManagementAspect {
     }
 
     @Async
-    @AfterReturning(pointcut = "(execution(* eu.einfracentral.registry.manager.DatasourceBundleManager." +
-            "addResource(eu.einfracentral.domain.DatasourceBundle, String, org.springframework.security.core.Authentication)))" +
-            "|| (execution(* eu.einfracentral.registry.manager.DatasourceBundleManager.verifyResource(String, String, Boolean, " +
-            "org.springframework.security.core.Authentication)))" +
-            "|| (execution(* eu.einfracentral.registry.manager.PendingDatasourceManager.transformToActive(String, " +
-            "org.springframework.security.core.Authentication)))" +
-            "|| (execution(* eu.einfracentral.registry.manager.PendingDatasourceManager.transformToActive(eu.einfracentral.domain.DatasourceBundle, " +
-            "org.springframework.security.core.Authentication)))" +
-            "|| (execution(* eu.einfracentral.registry.manager.DatasourceBundleManager.changeProvider(String, " +
-            "String, String, org.springframework.security.core.Authentication)))" +
-            "|| (execution(* eu.einfracentral.registry.manager.DatasourceBundleManager.addResource(eu.einfracentral.domain.DatasourceBundle, " +
-            "org.springframework.security.core.Authentication))))", // pendingToInfra method
+    @AfterReturning(pointcut = "execution(* eu.einfracentral.registry.manager.DatasourceBundleManager.addResource(..))" +
+            "|| execution(* eu.einfracentral.registry.manager.DatasourceBundleManager.verifyResource(..))" +
+            "|| execution(* eu.einfracentral.registry.manager.PendingDatasourceManager.transformToActive(..))" +
+            "|| execution(* eu.einfracentral.registry.manager.DatasourceBundleManager.changeProvider(..))",
             returning = "datasourceBundle")
     public void addResourceAsPublic(DatasourceBundle datasourceBundle) {
-        if (datasourceBundle.getStatus().equals("approved resource") && datasourceBundle.isActive()){
-            try{
+        if (datasourceBundle.getStatus().equals("approved resource") && datasourceBundle.isActive()) {
+            try {
                 publicDatasourceManager.get(String.format("%s.%s", datasourceBundle.getDatasource().getCatalogueId(), datasourceBundle.getId()));
-            } catch (ResourceException | ResourceNotFoundException e){
+            } catch (ResourceException | ResourceNotFoundException e) {
                 delayExecution();
                 publicDatasourceManager.add(datasourceBundle, null);
             }
@@ -299,20 +252,15 @@ public class ProviderManagementAspect {
 
     //TODO: ADD PendingTrainingResourceManager execution
     @Async
-    @AfterReturning(pointcut = "(execution(* eu.einfracentral.registry.manager.TrainingResourceManager." +
-            "addResource(eu.einfracentral.domain.TrainingResourceBundle, String, org.springframework.security.core.Authentication)))" +
-            "|| (execution(* eu.einfracentral.registry.manager.TrainingResourceManager.verifyResource(String, String, Boolean, " +
-            "org.springframework.security.core.Authentication)))" +
-            "|| (execution(* eu.einfracentral.registry.manager.TrainingResourceManager.changeProvider(String, " +
-            "String, String, org.springframework.security.core.Authentication)))" +
-            "|| (execution(* eu.einfracentral.registry.manager.TrainingResourceManager.addResource(eu.einfracentral.domain.TrainingResourceBundle, " +
-            "org.springframework.security.core.Authentication))))",
+    @AfterReturning(pointcut = "execution(* eu.einfracentral.registry.manager.TrainingResourceManager.addResource(..))" +
+            "|| execution(* eu.einfracentral.registry.manager.TrainingResourceManager.verifyResource(..))" +
+            "|| execution(* eu.einfracentral.registry.manager.TrainingResourceManager.changeProvider(..))",
             returning = "trainingResourceBundle")
     public void addResourceAsPublic(TrainingResourceBundle trainingResourceBundle) {
-        if (trainingResourceBundle.getStatus().equals("approved resource") && trainingResourceBundle.isActive()){
-            try{
+        if (trainingResourceBundle.getStatus().equals("approved resource") && trainingResourceBundle.isActive()) {
+            try {
                 publicTrainingResourceManager.get(String.format("%s.%s", trainingResourceBundle.getTrainingResource().getCatalogueId(), trainingResourceBundle.getId()));
-            } catch (ResourceException | ResourceNotFoundException e){
+            } catch (ResourceException | ResourceNotFoundException e) {
                 delayExecution();
                 publicTrainingResourceManager.add(trainingResourceBundle, null);
             }
@@ -320,12 +268,8 @@ public class ProviderManagementAspect {
     }
 
     @Async
-    @AfterReturning(pointcut = "(execution(* eu.einfracentral.registry.manager.InteroperabilityRecordManager." +
-            "add(eu.einfracentral.domain.InteroperabilityRecordBundle, org.springframework.security.core.Authentication)))" +
-            "|| (execution(* eu.einfracentral.registry.manager.InteroperabilityRecordManager." +
-            "add(eu.einfracentral.domain.InteroperabilityRecordBundle, String, org.springframework.security.core.Authentication)))" +
-            "|| (execution(* eu.einfracentral.registry.manager.InteroperabilityRecordManager.verifyResource(String, String, Boolean, " +
-            "org.springframework.security.core.Authentication))))",
+    @AfterReturning(pointcut = "execution(* eu.einfracentral.registry.manager.InteroperabilityRecordManager.add(..))" +
+            "|| execution(* eu.einfracentral.registry.manager.InteroperabilityRecordManager.verifyResource(..))",
             returning = "interoperabilityRecordBundle")
     public void addResourceAsPublic(InteroperabilityRecordBundle interoperabilityRecordBundle) {
         if (interoperabilityRecordBundle.getStatus().equals("approved interoperability record") && interoperabilityRecordBundle.isActive()){
@@ -339,57 +283,54 @@ public class ProviderManagementAspect {
     }
 
     @Async
-    @AfterReturning(pointcut = "(execution(* eu.einfracentral.registry.manager.ServiceBundleManager.updateResource(eu.einfracentral.domain.ServiceBundle, String, org.springframework.security.core.Authentication)))" +
-            "|| (execution(* eu.einfracentral.registry.manager.ServiceBundleManager.updateResource(eu.einfracentral.domain.ServiceBundle, String, String, org.springframework.security.core.Authentication)))" +
-            "|| (execution(* eu.einfracentral.registry.manager.ServiceBundleManager.publish(String, Boolean, org.springframework.security.core.Authentication)))" +
-            "|| (execution(* eu.einfracentral.registry.manager.ServiceBundleManager.verifyResource(String, String, Boolean, org.springframework.security.core.Authentication)))" +
-            "|| (execution(* eu.einfracentral.registry.manager.ServiceBundleManager.auditResource(String, String, eu.einfracentral.domain.LoggingInfo.ActionType, org.springframework.security.core.Authentication)))",
+    @AfterReturning(pointcut = "execution(* eu.einfracentral.registry.manager.ServiceBundleManager.updateResource(..))" +
+            "|| execution(* eu.einfracentral.registry.manager.ServiceBundleManager.publish(..))" +
+            "|| execution(* eu.einfracentral.registry.manager.ServiceBundleManager.verifyResource(..))" +
+            "|| execution(* eu.einfracentral.registry.manager.ServiceBundleManager.auditResource(..))",
             returning = "serviceBundle")
     public void updatePublicResource(ServiceBundle serviceBundle) {
-        try{
+        try {
             publicServiceManager.get(String.format("%s.%s", serviceBundle.getService().getCatalogueId(), serviceBundle.getId()));
             delayExecution();
             publicServiceManager.update(serviceBundle, null);
-        } catch (ResourceException | ResourceNotFoundException ignore){
+        } catch (ResourceException | ResourceNotFoundException ignore) {
         }
     }
 
     @Async
-    @AfterReturning(pointcut = "(execution(* eu.einfracentral.registry.manager.DatasourceBundleManager.updateResource(eu.einfracentral.domain.DatasourceBundle, String, org.springframework.security.core.Authentication)))" +
-            "|| (execution(* eu.einfracentral.registry.manager.DatasourceBundleManager.updateResource(eu.einfracentral.domain.DatasourceBundle, String, String, org.springframework.security.core.Authentication)))" +
-            "|| (execution(* eu.einfracentral.registry.manager.DatasourceBundleManager.publish(String, Boolean, org.springframework.security.core.Authentication)))" +
-            "|| (execution(* eu.einfracentral.registry.manager.DatasourceBundleManager.verifyResource(String, String, Boolean, org.springframework.security.core.Authentication)))" +
-            "|| (execution(* eu.einfracentral.registry.manager.DatasourceBundleManager.auditResource(String, String, eu.einfracentral.domain.LoggingInfo.ActionType, org.springframework.security.core.Authentication)))",
+    @AfterReturning(pointcut = "execution(* eu.einfracentral.registry.manager.DatasourceBundleManager.updateResource(..))" +
+            "|| execution(* eu.einfracentral.registry.manager.DatasourceBundleManager.publish(..))" +
+            "|| execution(* eu.einfracentral.registry.manager.DatasourceBundleManager.verifyResource(..))" +
+            "|| execution(* eu.einfracentral.registry.manager.DatasourceBundleManager.auditResource(..))",
             returning = "datasourceBundle")
     public void updatePublicResource(DatasourceBundle datasourceBundle) {
-        try{
+        try {
             publicDatasourceManager.get(String.format("%s.%s", datasourceBundle.getDatasource().getCatalogueId(), datasourceBundle.getId()));
             delayExecution();
             publicDatasourceManager.update(datasourceBundle, null);
-        } catch (ResourceException | ResourceNotFoundException ignore){
+        } catch (ResourceException | ResourceNotFoundException ignore) {
         }
     }
 
     @Async
-    @AfterReturning(pointcut = "(execution(* eu.einfracentral.registry.manager.TrainingResourceManager.updateResource(eu.einfracentral.domain.TrainingResourceBundle, String, org.springframework.security.core.Authentication)))" +
-            "|| (execution(* eu.einfracentral.registry.manager.TrainingResourceManager.updateResource(eu.einfracentral.domain.TrainingResourceBundle, String, String, org.springframework.security.core.Authentication)))" +
-            "|| (execution(* eu.einfracentral.registry.manager.TrainingResourceManager.publish(String, Boolean, org.springframework.security.core.Authentication)))" +
-            "|| (execution(* eu.einfracentral.registry.manager.TrainingResourceManager.verifyResource(String, String, Boolean, org.springframework.security.core.Authentication)))" +
-            "|| (execution(* eu.einfracentral.registry.manager.TrainingResourceManager.auditResource(String, String, eu.einfracentral.domain.LoggingInfo.ActionType, org.springframework.security.core.Authentication)))",
+    @AfterReturning(pointcut = "execution(* eu.einfracentral.registry.manager.TrainingResourceManager.updateResource(..))" +
+            "|| execution(* eu.einfracentral.registry.manager.TrainingResourceManager.publish(..))" +
+            "|| execution(* eu.einfracentral.registry.manager.TrainingResourceManager.verifyResource(..))" +
+            "|| execution(* eu.einfracentral.registry.manager.TrainingResourceManager.auditResource(..))",
             returning = "trainingResourceBundle")
     public void updatePublicResource(TrainingResourceBundle trainingResourceBundle) {
-        try{
+        try {
             publicTrainingResourceManager.get(String.format("%s.%s", trainingResourceBundle.getTrainingResource().getCatalogueId(), trainingResourceBundle.getId()));
             delayExecution();
             publicTrainingResourceManager.update(trainingResourceBundle, null);
-        } catch (ResourceException | ResourceNotFoundException ignore){
+        } catch (ResourceException | ResourceNotFoundException ignore) {
         }
     }
 
     @Async
-    @AfterReturning(pointcut = "(execution(* eu.einfracentral.registry.manager.InteroperabilityRecordManager.update(eu.einfracentral.domain.InteroperabilityRecordBundle, org.springframework.security.core.Authentication)))" +
-            "|| (execution(* eu.einfracentral.registry.manager.InteroperabilityRecordManager.publish(String, Boolean, org.springframework.security.core.Authentication)))" +
-            "|| (execution(* eu.einfracentral.registry.manager.InteroperabilityRecordManager.verifyResource(String, String, Boolean, org.springframework.security.core.Authentication)))",
+    @AfterReturning(pointcut = "execution(* eu.einfracentral.registry.manager.InteroperabilityRecordManager.update(..))" +
+            "|| execution(* eu.einfracentral.registry.manager.InteroperabilityRecordManager.publish(..))" +
+            "|| execution(* eu.einfracentral.registry.manager.InteroperabilityRecordManager.verifyResource(..))",
             returning = "interoperabilityRecordBundle")
     public void updatePublicResource(InteroperabilityRecordBundle interoperabilityRecordBundle) {
         try{
@@ -401,34 +342,35 @@ public class ProviderManagementAspect {
     }
 
     @Async
-    @After("execution(* eu.einfracentral.registry.manager.ServiceBundleManager.delete(eu.einfracentral.domain.ServiceBundle)))")
+    @After("execution(* eu.einfracentral.registry.manager.ServiceBundleManager.delete(..))")
     public void deletePublicService(JoinPoint joinPoint) {
         ServiceBundle serviceBundle = (ServiceBundle) joinPoint.getArgs()[0];
         publicServiceManager.delete(serviceBundle);
     }
 
     @Async
-    @After("execution(* eu.einfracentral.registry.manager.DatasourceBundleManager.delete(eu.einfracentral.domain.DatasourceBundle)))")
+    @After("execution(* eu.einfracentral.registry.manager.DatasourceBundleManager.delete(..))")
     public void deletePublicDatasource(JoinPoint joinPoint) {
         DatasourceBundle datasourceBundle = (DatasourceBundle) joinPoint.getArgs()[0];
         publicDatasourceManager.delete(datasourceBundle);
     }
 
     @Async
-    @After("execution(* eu.einfracentral.registry.manager.TrainingResourceManager.delete(eu.einfracentral.domain.TrainingResourceBundle)))")
+    @After("execution(* eu.einfracentral.registry.manager.TrainingResourceManager.delete(..))")
     public void deletePublicTrainingResource(JoinPoint joinPoint) {
         TrainingResourceBundle trainingResourceBundle = (TrainingResourceBundle) joinPoint.getArgs()[0];
         publicTrainingResourceManager.delete(trainingResourceBundle);
     }
 
     @Async
-    @After("execution(* eu.einfracentral.registry.manager.InteroperabilityRecordManager.delete(eu.einfracentral.domain.InteroperabilityRecordBundle)))")
+    @After("execution(* eu.einfracentral.registry.manager.InteroperabilityRecordManager.delete(..))")
     public void deletePublicInteroperabilityRecord(JoinPoint joinPoint) {
         InteroperabilityRecordBundle interoperabilityRecordBundle = (InteroperabilityRecordBundle) joinPoint.getArgs()[0];
         publicInteroperabilityRecordManager.delete(interoperabilityRecordBundle);
     }
 
     //TODO: Probably no needed
+
     /**
      * This method is used to update a list of new providers with status
      * 'Provider.States.ST_SUBMISSION' or 'Provider.States.REJECTED_ST'
@@ -488,8 +430,7 @@ public class ProviderManagementAspect {
     }
 
     @Async
-    @AfterReturning(pointcut = "(execution(* eu.einfracentral.registry.manager.ResourceInteroperabilityRecordManager." +
-            "add(eu.einfracentral.domain.ResourceInteroperabilityRecordBundle, String, org.springframework.security.core.Authentication))))",
+    @AfterReturning(pointcut = "execution(* eu.einfracentral.registry.manager.ResourceInteroperabilityRecordManager.add(..))",
             returning = "resourceInteroperabilityRecordBundle")
     public void addResourceInteroperabilityRecordAsPublic(ResourceInteroperabilityRecordBundle resourceInteroperabilityRecordBundle) {
         // TODO: check Resource states (publish if only approved/active)
@@ -503,28 +444,28 @@ public class ProviderManagementAspect {
     }
 
     @Async
-    @AfterReturning(pointcut = "(execution(* eu.einfracentral.registry.manager.ResourceInteroperabilityRecordManager.update(eu.einfracentral.domain.ResourceInteroperabilityRecordBundle, org.springframework.security.core.Authentication)))",
-            returning = "resourceInteroperabilityRecordBundle")
-    public void updatePublicResourceInteroperabilityRecord(ResourceInteroperabilityRecordBundle resourceInteroperabilityRecordBundle) {
-        try{
-            publicResourceInteroperabilityRecordManager.get(String.format("%s.%s", resourceInteroperabilityRecordBundle.getResourceInteroperabilityRecord().getCatalogueId(),
-                    resourceInteroperabilityRecordBundle.getId()));
+    @AfterReturning(pointcut = "execution(* eu.einfracentral.registry.manager.ResourceInteroperabilityRecordManager.update(..))",
+            returning = "interoperabilityBundle")
+    public void updatePublicResourceInteroperabilityRecord(ResourceInteroperabilityRecordBundle interoperabilityBundle) {
+        try {
+            publicResourceInteroperabilityRecordManager.get(String.format("%s.%s", interoperabilityBundle.getResourceInteroperabilityRecord().getCatalogueId(),
+                    interoperabilityBundle.getId()));
             delayExecution();
-            publicResourceInteroperabilityRecordManager.update(resourceInteroperabilityRecordBundle, null);
-        } catch (ResourceException | ResourceNotFoundException ignore){
+            publicResourceInteroperabilityRecordManager.update(interoperabilityBundle, null);
+        } catch (ResourceException | ResourceNotFoundException ignore) {
         }
     }
 
     @Async
-    @After("execution(* eu.einfracentral.registry.manager.ResourceInteroperabilityRecordManager.delete(eu.einfracentral.domain.ResourceInteroperabilityRecordBundle)))")
+    @After("execution(* eu.einfracentral.registry.manager.ResourceInteroperabilityRecordManager.delete(..))")
     public void deletePublicResourceInteroperabilityRecord(JoinPoint joinPoint) {
-        ResourceInteroperabilityRecordBundle resourceInteroperabilityRecordBundle = (ResourceInteroperabilityRecordBundle) joinPoint.getArgs()[0];
-        publicResourceInteroperabilityRecordManager.delete(resourceInteroperabilityRecordBundle);
+        ResourceInteroperabilityRecordBundle interoperabilityBundle = (ResourceInteroperabilityRecordBundle) joinPoint.getArgs()[0];
+        publicResourceInteroperabilityRecordManager.delete(interoperabilityBundle);
     }
 
-    private void delayExecution(){
+    private void delayExecution() {
         try {
-            Thread.sleep(20 * 1000); // 20sec
+            Thread.sleep(20_000); // 20sec
         } catch (InterruptedException ex) {
             logger.error(ex);
         }
