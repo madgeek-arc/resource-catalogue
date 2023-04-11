@@ -126,7 +126,7 @@ public class ProviderManagementAspect {
         registrationMailService.sendProviderMails(providerBundle, "serviceBundleManager");
     }
 
-    @AfterReturning(pointcut = "execution(* eu.einfracentral.registry.service.ResourceBundleService.verifyResource(..))",
+    @AfterReturning(pointcut = "execution(* eu.einfracentral.registry.manager.DatasourceBundleManager.verifyResource(..))",
             returning = "datasourceBundle")
     public void providerRegistrationEmails(DatasourceBundle datasourceBundle) {
         ProviderBundle providerBundle = providerService.get(datasourceBundle.getDatasource().getResourceOrganisation());
