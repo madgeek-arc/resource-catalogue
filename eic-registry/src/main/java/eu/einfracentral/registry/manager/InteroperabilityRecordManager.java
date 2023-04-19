@@ -8,6 +8,7 @@ import eu.einfracentral.registry.service.*;
 import eu.einfracentral.service.IdCreator;
 import eu.einfracentral.service.RegistrationMailService;
 import eu.einfracentral.service.SecurityService;
+import eu.einfracentral.utils.FacetFilterUtils;
 import eu.einfracentral.utils.ProviderResourcesCommonMethods;
 import eu.einfracentral.validators.FieldValidator;
 import eu.openminted.registry.core.domain.Browsing;
@@ -22,6 +23,7 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
+import org.springframework.util.MultiValueMap;
 
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
@@ -420,5 +422,24 @@ public class InteroperabilityRecordManager extends ResourceManager<Interoperabil
     public InteroperabilityRecordBundle createPublicInteroperabilityRecord(InteroperabilityRecordBundle interoperabilityRecordBundle, Authentication auth){
         publicInteroperabilityRecordManager.add(interoperabilityRecordBundle, auth);
         return interoperabilityRecordBundle;
+    }
+
+    public FacetFilter createFacetFilterForFetchingInteroperabilityRecords(MultiValueMap<String, Object> allRequestParams, String catalogueId, String providerId){
+        FacetFilter ff = FacetFilterUtils.createMultiFacetFilter(allRequestParams);
+        allRequestParams.remove("catalogue_id");
+        allRequestParams.remove("provider_id");
+        if (catalogueId != null){
+            if (!catalogueId.equals("all")){
+                ff.addFilter("catalogue_id", catalogueId);
+            }
+        }
+        if (providerId != null){
+            if (!providerId.equals("all")){
+                ff.addFilter("provider_id", providerId);
+            }
+        }
+        ff.addFilter("published", false);
+        ff.setResourceType("interoperability_record");
+        return ff;
     }
 }

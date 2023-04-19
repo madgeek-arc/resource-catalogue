@@ -134,16 +134,9 @@ public class InteroperabilityRecordController {
     @GetMapping(path = "bundle/all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     public ResponseEntity<Paging<InteroperabilityRecordBundle>> getAllBundles(@ApiIgnore @RequestParam MultiValueMap<String, Object> allRequestParams,
-                                                                              @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueId) {
-        FacetFilter ff = FacetFilterUtils.createMultiFacetFilter(allRequestParams);
-        allRequestParams.remove("catalogue_id");
-        if (catalogueId != null){
-            if (!catalogueId.equals("all")){
-                ff.addFilter("catalogue_id", catalogueId);
-            }
-        }
-        ff.addFilter("published", false);
-        ff.setResourceType("interoperability_record");
+                                                                              @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueId,
+                                                                              @RequestParam(defaultValue = "all", name = "provider_id") String providerId) {
+        FacetFilter ff = interoperabilityRecordService.createFacetFilterForFetchingInteroperabilityRecords(allRequestParams, catalogueId, providerId);
         return ResponseEntity.ok(genericResourceService.getResults(ff));
     }
 

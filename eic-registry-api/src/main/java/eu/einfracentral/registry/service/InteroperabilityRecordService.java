@@ -2,9 +2,10 @@ package eu.einfracentral.registry.service;
 
 import eu.einfracentral.domain.InteroperabilityRecordBundle;
 import eu.einfracentral.domain.LoggingInfo;
-import eu.einfracentral.domain.TrainingResourceBundle;
+import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.domain.Paging;
 import org.springframework.security.core.Authentication;
+import org.springframework.util.MultiValueMap;
 
 public interface InteroperabilityRecordService<T> extends ResourceService<T, Authentication> {
 
@@ -19,4 +20,5 @@ public interface InteroperabilityRecordService<T> extends ResourceService<T, Aut
     InteroperabilityRecordBundle createPublicInteroperabilityRecord(InteroperabilityRecordBundle interoperabilityRecordBundle, Authentication auth);
     InteroperabilityRecordBundle getCatalogueInteroperabilityRecord(String catalogueId, String interoperabilityRecordId, Authentication auth);
     Paging<InteroperabilityRecordBundle> getInteroperabilityRecordBundles(String catalogueId, String providerId, Authentication auth);
+    FacetFilter createFacetFilterForFetchingInteroperabilityRecords(MultiValueMap<String, Object> allRequestParams, String catalogueId, String providerId);
 }
