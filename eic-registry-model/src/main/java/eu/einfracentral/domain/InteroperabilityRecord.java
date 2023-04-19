@@ -69,9 +69,10 @@ public class InteroperabilityRecord implements Identifiable {
     private String title;
 
     /**
-     * The year when the data was or will be made publicly available. In the case of resources such as software or
-     * dynamic data where there may be multiple releases in one year, include the Date/dateType/dateInformation
-     * property and sub-properties to provide more information about the publication or release date details.
+     * The year when the guideline was or will be made publicly available.  If an embargo period has been in effect,
+     * use the date when the embargo period ends. In the case of datasets, "publish" is understood to mean making the
+     * data available on a specific date to the community of researchers. If there is no standard publication year value,
+     * use the date that would be preferred from a citation perspective.
      */
     @XmlElement(required = true)
     @ApiModelProperty(position = 7, required = true)
@@ -158,7 +159,7 @@ public class InteroperabilityRecord implements Identifiable {
     private String eoscGuidelineType;
 
     /**
-     * Resources and services that declare compliance with the guideline to the specified level of interoperation.
+     * A short summary of any options to integrate this guideline (if applicable).
      */
     @XmlElementWrapper(name = "eoscIntegrationOptions")
     @XmlElement(name = "eoscIntegrationOption")
