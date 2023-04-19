@@ -3,6 +3,7 @@ package eu.einfracentral.registry.controller;
 import eu.einfracentral.domain.*;
 import eu.einfracentral.registry.service.InteroperabilityRecordService;
 import eu.einfracentral.registry.service.ResourceInteroperabilityRecordService;
+import eu.einfracentral.service.GenericResourceService;
 import eu.einfracentral.utils.FacetFilterUtils;
 import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.domain.Paging;
@@ -19,6 +20,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
@@ -36,12 +38,15 @@ public class InteroperabilityRecordController {
     private static final Logger logger = LogManager.getLogger(InteroperabilityRecordController.class);
     private final InteroperabilityRecordService<InteroperabilityRecordBundle> interoperabilityRecordService;
     private final ResourceInteroperabilityRecordService<ResourceInteroperabilityRecordBundle> resourceInteroperabilityRecordService;
+    private final GenericResourceService genericResourceService;
 
     @Autowired
     public InteroperabilityRecordController(InteroperabilityRecordService<InteroperabilityRecordBundle> interoperabilityRecordService,
-                                            ResourceInteroperabilityRecordService<ResourceInteroperabilityRecordBundle> resourceInteroperabilityRecordService) {
+                                            ResourceInteroperabilityRecordService<ResourceInteroperabilityRecordBundle> resourceInteroperabilityRecordService,
+                                            GenericResourceService genericResourceService) {
         this.interoperabilityRecordService = interoperabilityRecordService;
         this.resourceInteroperabilityRecordService = resourceInteroperabilityRecordService;
+        this.genericResourceService = genericResourceService;
     }
 
     @ApiOperation(value = "Creates a new Interoperability Record.")
@@ -128,16 +133,18 @@ public class InteroperabilityRecordController {
     })
     @GetMapping(path = "bundle/all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
-    public ResponseEntity<Paging<InteroperabilityRecordBundle>> getAllBundles(@ApiIgnore @RequestParam Map<String, Object> allRequestParams,
-                                                                              @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueId,
-                                                                              @ApiIgnore Authentication auth) {
-        allRequestParams.putIfAbsent("catalogue_id", catalogueId);
-        if (catalogueId != null && catalogueId.equals("all")) {
-            allRequestParams.remove("catalogue_id");
+    public ResponseEntity<Paging<InteroperabilityRecordBundle>> getAllBundles(@ApiIgnore @RequestParam MultiValueMap<String, Object> allRequestParams,
+                                                                              @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueId) {
+        FacetFilter ff = FacetFilterUtils.createMultiFacetFilter(allRequestParams);
+        allRequestParams.remove("catalogue_id");
+        if (catalogueId != null){
+            if (!catalogueId.equals("all")){
+                ff.addFilter("catalogue_id", catalogueId);
+            }
         }
-        FacetFilter ff = FacetFilterUtils.createFacetFilter(allRequestParams);
         ff.addFilter("published", false);
-        return ResponseEntity.ok(interoperabilityRecordService.getAll(ff, auth));
+        ff.setResourceType("interoperability_record");
+        return ResponseEntity.ok(genericResourceService.getResults(ff));
     }
 
     @PatchMapping(path = "verify/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
