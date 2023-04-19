@@ -129,8 +129,6 @@ public class ServiceBundleManager extends AbstractResourceBundleManager<ServiceB
         // latestOnboardingInfo
         serviceBundle.setLatestOnboardingInfo(loggingInfo);
 
-        sortFields(serviceBundle);
-
         // resource status & extra loggingInfo for Approval
         if (providerBundle.getTemplateStatus().equals("approved template")) {
             serviceBundle.setStatus(vocabularyService.get("approved resource").getId());
@@ -243,7 +241,6 @@ public class ServiceBundleManager extends AbstractResourceBundleManager<ServiceB
         // latestUpdateInfo
         serviceBundle.setLatestUpdateInfo(loggingInfo);
         serviceBundle.setActive(existingService.isActive());
-        sortFields(serviceBundle);
 
         // set status
         serviceBundle.setStatus(existingService.getStatus());

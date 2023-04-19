@@ -130,7 +130,6 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         addAuthenticatedUser(provider.getProvider(), auth);
         validate(provider);
         provider.setMetadata(Metadata.createMetadata(User.of(auth).getFullName(), User.of(auth).getEmail()));
-        sortFields(provider);
 
         ProviderBundle ret;
         ret = super.add(provider, null);
@@ -186,7 +185,6 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         } else {
             loggingInfoList.add(loggingInfo);
         }
-        sortFields(provider);
         provider.setLoggingInfo(loggingInfoList);
 
         // latestUpdateInfo
@@ -838,11 +836,6 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         }
     }
 
-    public List<String> sortCountries(List<String> countries) {
-        Collections.sort(countries);
-        return countries;
-    }
-
     @CacheEvict(value = CACHE_PROVIDERS, allEntries = true)
     public ProviderBundle auditProvider(String providerId, String comment, LoggingInfo.ActionType actionType, Authentication auth) {
         ProviderBundle provider = getWithCatalogue(providerId, catalogueName);
@@ -1121,12 +1114,6 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
                 .cqlQuery(String.format("provider_id = \"%s\" AND catalogue_id = \"%s\"", providerId, catalogueId), resourceType.getName());
         assert resources != null;
         return resources.getTotal() == 0 ? null : resources.getResults().get(0);
-    }
-
-    private void sortFields(ProviderBundle provider) {
-        if (provider.getProvider().getParticipatingCountries() != null && !provider.getProvider().getParticipatingCountries().isEmpty()){
-            provider.getProvider().setParticipatingCountries(sortCountries(provider.getProvider().getParticipatingCountries()));
-        }
     }
 
     private ProviderBundle onboard(ProviderBundle provider, String catalogueId, Authentication auth) {

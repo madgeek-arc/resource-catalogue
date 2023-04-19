@@ -10,7 +10,6 @@ import eu.einfracentral.service.search.SearchServiceEIC;
 import eu.einfracentral.utils.FacetFilterUtils;
 import eu.einfracentral.utils.FacetLabelService;
 import eu.einfracentral.utils.ProviderResourcesCommonMethods;
-import eu.einfracentral.utils.SortUtils;
 import eu.einfracentral.validators.FieldValidator;
 import eu.openminted.registry.core.domain.*;
 import eu.openminted.registry.core.domain.index.IndexField;
@@ -186,8 +185,6 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
         // latestOnboardingInfo
         trainingResourceBundle.setLatestOnboardingInfo(loggingInfo);
 
-        sortFields(trainingResourceBundle);
-
         // resource status & extra loggingInfo for Approval
         if (providerBundle.getTemplateStatus().equals("approved template")) {
             trainingResourceBundle.setStatus(vocabularyService.get("approved resource").getId());
@@ -304,7 +301,6 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
         // latestUpdateInfo
         trainingResourceBundle.setLatestUpdateInfo(loggingInfo);
         trainingResourceBundle.setActive(existingTrainingResourceBundle.isActive());
-        sortFields(trainingResourceBundle);
 
         // set status
         trainingResourceBundle.setStatus(existingTrainingResourceBundle.getStatus());
@@ -661,10 +657,6 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
     public TrainingResourceBundle createPublicResource(TrainingResourceBundle trainingResourceBundle, Authentication auth){
         publicTrainingResourceManager.add(trainingResourceBundle, auth);
         return trainingResourceBundle;
-    }
-
-    public void sortFields(TrainingResourceBundle trainingResourceBundle) {
-        trainingResourceBundle.getTrainingResource().setGeographicalAvailabilities(SortUtils.sort(trainingResourceBundle.getTrainingResource().getGeographicalAvailabilities()));
     }
 
     public TrainingResourceBundle get(String id, String catalogueId) {

@@ -142,8 +142,6 @@ public class DatasourceBundleManager extends AbstractResourceBundleManager<Datas
         // latestOnboardingInfo
         datasourceBundle.setLatestOnboardingInfo(loggingInfo);
 
-        sortFields(datasourceBundle);
-
         // resource status & extra loggingInfo for Approval
         if (providerBundle.getTemplateStatus().equals("approved template")){
             datasourceBundle.setStatus(vocabularyService.get("approved resource").getId());
@@ -256,7 +254,6 @@ public class DatasourceBundleManager extends AbstractResourceBundleManager<Datas
         // latestUpdateInfo
         datasourceBundle.setLatestUpdateInfo(loggingInfo);
         datasourceBundle.setActive(existingDatasource.isActive());
-        sortFields(datasourceBundle);
 
         // set status
         datasourceBundle.setStatus(existingDatasource.getStatus());
