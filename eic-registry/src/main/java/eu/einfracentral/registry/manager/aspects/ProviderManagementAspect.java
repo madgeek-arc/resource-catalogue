@@ -439,28 +439,28 @@ public class ProviderManagementAspect {
 
     @Async
     @AfterReturning(pointcut = "execution(* eu.einfracentral.registry.manager.ResourceInteroperabilityRecordManager.add(..))",
-            returning = "interoperabilityBundle")
-    public void addResourceInteroperabilityRecordAsPublic(ResourceInteroperabilityRecordBundle interoperabilityBundle) {
+            returning = "resourceInteroperabilityRecordBundle")
+    public void addResourceInteroperabilityRecordAsPublic(ResourceInteroperabilityRecordBundle resourceInteroperabilityRecordBundle) {
         // TODO: check Resource states (publish if only approved/active)
         try {
-            publicResourceInteroperabilityManager.get(String.format("%s.%s",
-                    interoperabilityBundle.getResourceInteroperabilityRecord().getCatalogueId(),
-                    interoperabilityBundle.getId()));
+            publicResourceInteroperabilityRecordManager.get(String.format("%s.%s",
+                    resourceInteroperabilityRecordBundle.getResourceInteroperabilityRecord().getCatalogueId(),
+                    resourceInteroperabilityRecordBundle.getId()));
         } catch (ResourceException | ResourceNotFoundException e) {
             delayExecution();
-            publicResourceInteroperabilityManager.add(interoperabilityBundle, null);
+            publicResourceInteroperabilityRecordManager.add(resourceInteroperabilityRecordBundle, null);
         }
     }
 
     @Async
     @AfterReturning(pointcut = "execution(* eu.einfracentral.registry.manager.ResourceInteroperabilityRecordManager.update(..))",
-            returning = "interoperabilityBundle")
-    public void updatePublicResourceInteroperabilityRecord(ResourceInteroperabilityRecordBundle interoperabilityBundle) {
+            returning = "resourceInteroperabilityRecordBundle")
+    public void updatePublicResourceInteroperabilityRecord(ResourceInteroperabilityRecordBundle resourceInteroperabilityRecordBundle) {
         try {
-            publicResourceInteroperabilityManager.get(String.format("%s.%s", interoperabilityBundle.getResourceInteroperabilityRecord().getCatalogueId(),
-                    interoperabilityBundle.getId()));
+            publicResourceInteroperabilityRecordManager.get(String.format("%s.%s", resourceInteroperabilityRecordBundle.getResourceInteroperabilityRecord().getCatalogueId(),
+                    resourceInteroperabilityRecordBundle.getId()));
             delayExecution();
-            publicResourceInteroperabilityManager.update(interoperabilityBundle, null);
+            publicResourceInteroperabilityRecordManager.update(resourceInteroperabilityRecordBundle, null);
         } catch (ResourceException | ResourceNotFoundException ignore) {
         }
     }
@@ -468,8 +468,8 @@ public class ProviderManagementAspect {
     @Async
     @After("execution(* eu.einfracentral.registry.manager.ResourceInteroperabilityRecordManager.delete(..))")
     public void deletePublicResourceInteroperabilityRecord(JoinPoint joinPoint) {
-        ResourceInteroperabilityRecordBundle interoperabilityBundle = (ResourceInteroperabilityRecordBundle) joinPoint.getArgs()[0];
-        publicResourceInteroperabilityManager.delete(interoperabilityBundle);
+        ResourceInteroperabilityRecordBundle resourceInteroperabilityRecordBundle = (ResourceInteroperabilityRecordBundle) joinPoint.getArgs()[0];
+        publicResourceInteroperabilityRecordManager.delete(resourceInteroperabilityRecordBundle);
     }
 
     private void delayExecution() {
