@@ -1,7 +1,5 @@
 package eu.einfracentral.registry.controller;
 
-import eu.einfracentral.domain.Helpdesk;
-import eu.einfracentral.domain.HelpdeskBundle;
 import eu.einfracentral.domain.ResourceInteroperabilityRecord;
 import eu.einfracentral.domain.ResourceInteroperabilityRecordBundle;
 import eu.einfracentral.registry.service.ResourceInteroperabilityRecordService;
@@ -24,7 +22,6 @@ import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
 import javax.validation.Valid;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -36,9 +33,9 @@ public class ResourceInteroperabilityRecordController {
 
     private static final Logger logger = LogManager.getLogger(ResourceInteroperabilityRecordController.class);
 
-    private final ResourceInteroperabilityRecordService<ResourceInteroperabilityRecordBundle, Authentication> resourceInteroperabilityRecordService;
+    private final ResourceInteroperabilityRecordService<ResourceInteroperabilityRecordBundle> resourceInteroperabilityRecordService;
 
-    public ResourceInteroperabilityRecordController(ResourceInteroperabilityRecordService<ResourceInteroperabilityRecordBundle, Authentication> resourceInteroperabilityRecordService) {
+    public ResourceInteroperabilityRecordController(ResourceInteroperabilityRecordService<ResourceInteroperabilityRecordBundle> resourceInteroperabilityRecordService) {
         this.resourceInteroperabilityRecordService = resourceInteroperabilityRecordService;
     }
 

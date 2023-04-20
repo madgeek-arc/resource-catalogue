@@ -143,6 +143,7 @@
       <xs:enumeration value="PROVIDER_STATE"/>
       <xs:enumeration value="RESOURCE_STATE"/>
       <xs:enumeration value="TEMPLATE_STATE"/>
+      <xs:enumeration value="INTEROPERABILITY_RECORD_STATE"/>
       <xs:enumeration value="DS_RESEARCH_ENTITY_TYPE"/>
       <xs:enumeration value="DS_PERSISTENT_IDENTITY_SCHEME"/>
       <xs:enumeration value="DS_JURISDICTION"/>
@@ -161,8 +162,9 @@
       <xs:enumeration value="IR_NAME_TYPE"/>
       <xs:enumeration value="IR_RESOURCE_TYPE_GENERAL"/>
       <xs:enumeration value="IR_STATUS"/>
-      <xs:enumeration value="IR_EOSC_GUIDELINE_TYPE"/>
+      <xs:enumeration value="IR_EOSC_GUIDELINE_TYPE"/> 
       <xs:enumeration value="SERVICE_TYPE"/>
+
     </xs:restriction>
   </xs:simpleType>
 

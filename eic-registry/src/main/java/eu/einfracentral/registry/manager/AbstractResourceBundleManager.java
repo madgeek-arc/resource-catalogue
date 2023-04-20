@@ -14,7 +14,6 @@ import eu.einfracentral.service.*;
 import eu.einfracentral.service.search.SearchServiceEIC;
 import eu.einfracentral.utils.FacetFilterUtils;
 import eu.einfracentral.utils.FacetLabelService;
-import eu.einfracentral.utils.SortUtils;
 import eu.einfracentral.utils.TextUtils;
 import eu.einfracentral.validators.FieldValidator;
 import eu.openminted.registry.core.domain.*;
@@ -250,19 +249,6 @@ public abstract class AbstractResourceBundleManager<T extends ResourceBundle<?>>
         synchronizerService.syncDelete(resourceBundle.getPayload());
     }
 
-    public void checkCatalogueIdConsistency(T resourceBundle, String catalogueId) {
-        catalogueService.existsOrElseThrow(catalogueId);
-        if (resourceBundle != null) {
-            if (resourceBundle.getPayload().getCatalogueId() == null || resourceBundle.getPayload().getCatalogueId().equals("")) {
-                throw new ValidationException("Resource's 'catalogueId' cannot be null or empty");
-            } else {
-                if (!resourceBundle.getPayload().getCatalogueId().equals(catalogueId)) {
-                    throw new ValidationException("Parameter 'catalogueId' and Resource's 'catalogueId' don't match");
-                }
-            }
-        }
-    }
-
     @Override
     public boolean validate(T resourceBundle) {
         Service service = resourceBundle.getPayload();
@@ -277,11 +263,6 @@ public abstract class AbstractResourceBundleManager<T extends ResourceBundle<?>>
         serviceValidator.validate(resourceBundle, null);
 
         return true;
-    }
-
-    public void sortFields(T resourceBundle) {
-        resourceBundle.getPayload().setGeographicalAvailabilities(SortUtils.sort(resourceBundle.getPayload().getGeographicalAvailabilities()));
-        resourceBundle.getPayload().setResourceGeographicLocations(SortUtils.sort(resourceBundle.getPayload().getResourceGeographicLocations()));
     }
 
     @Override

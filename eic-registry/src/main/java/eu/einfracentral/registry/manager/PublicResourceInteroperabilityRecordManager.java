@@ -21,8 +21,8 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 
-@Service("publicResourceInteroperabilityManager")
-public class PublicResourceInteroperabilityManager extends ResourceManager<ResourceInteroperabilityRecordBundle>
+@Service("publicResourceInteroperabilityRecordManager")
+public class PublicResourceInteroperabilityRecordManager extends ResourceManager<ResourceInteroperabilityRecordBundle>
         implements ResourceCRUDService<ResourceInteroperabilityRecordBundle, Authentication> {
 
     private static final Logger logger = LogManager.getLogger(PublicProviderManager.class);
@@ -30,7 +30,7 @@ public class PublicResourceInteroperabilityManager extends ResourceManager<Resou
     private final SecurityService securityService;
 
     @Autowired
-    public PublicResourceInteroperabilityManager(JmsTemplate jmsTopicTemplate, SecurityService securityService) {
+    public PublicResourceInteroperabilityRecordManager(JmsTemplate jmsTopicTemplate, SecurityService securityService) {
         super(ResourceInteroperabilityRecordBundle.class);
         this.jmsTopicTemplate = jmsTopicTemplate;
         this.securityService = securityService;
@@ -72,6 +72,11 @@ public class PublicResourceInteroperabilityManager extends ResourceManager<Resou
                 resourceInteroperabilityRecordBundle.getId()));
         resourceInteroperabilityRecordBundle.getResourceInteroperabilityRecord().setResourceId(String.format("%s.%s", resourceInteroperabilityRecordBundle.getResourceInteroperabilityRecord().getCatalogueId(),
                 resourceInteroperabilityRecordBundle.getResourceInteroperabilityRecord().getResourceId()));
+        List<String> publicInteroperabilityRecordList = new ArrayList<>();
+        for (String interoperabilityRecord : resourceInteroperabilityRecordBundle.getResourceInteroperabilityRecord().getInteroperabilityRecordIds()){
+            publicInteroperabilityRecordList.add(String.format("%s.%s", resourceInteroperabilityRecordBundle.getResourceInteroperabilityRecord().getCatalogueId(), interoperabilityRecord));
+        }
+        resourceInteroperabilityRecordBundle.getResourceInteroperabilityRecord().setInteroperabilityRecordIds(publicInteroperabilityRecordList);
         resourceInteroperabilityRecordBundle.getMetadata().setPublished(true);
         ResourceInteroperabilityRecordBundle ret;
         logger.info(String.format("ResourceInteroperabilityRecordBundle [%s] is being published with id [%s]", lowerLevelResourceId, resourceInteroperabilityRecordBundle.getId()));

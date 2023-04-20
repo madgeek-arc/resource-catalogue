@@ -21,7 +21,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 
-@Service
+@Service("publicServiceManager")
 public class PublicServiceManager extends AbstractPublicResourceManager<ServiceBundle> implements ResourceCRUDService<ServiceBundle, Authentication> {
 
     private static final Logger logger = LogManager.getLogger(PublicServiceManager.class);

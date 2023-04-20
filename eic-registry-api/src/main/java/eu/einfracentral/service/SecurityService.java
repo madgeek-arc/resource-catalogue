@@ -15,7 +15,6 @@ public interface SecurityService {
 
     boolean hasRole(Authentication auth, String role);
 
-//    boolean isProviderAdmin(Authentication auth, @NotNull String providerId);
     boolean isProviderAdmin(Authentication auth, @NotNull String providerId);
     boolean isProviderAdmin(Authentication auth, @NotNull String providerId, @NotNull String catalogueId);
     boolean isProviderAdmin(Authentication auth, @NotNull String providerId, boolean noThrow);
@@ -25,12 +24,8 @@ public interface SecurityService {
 
     boolean isCatalogueAdmin(Authentication auth, @NotNull String catalogueId, boolean noThrow);
 
-    //    boolean isResourceProviderAdmin(Authentication auth, String resourceId);
-
     boolean isResourceProviderAdmin(Authentication auth, String resourceId);
     boolean isResourceProviderAdmin(Authentication auth, String resourceId, String catalogueId);
-
-//    boolean isResourceProviderAdmin(Authentication auth, String resourceId, boolean noThrow);
 
     boolean isResourceProviderAdmin(Authentication auth, ResourceBundle<?> resourceBundle, boolean noThrow);
     <T extends eu.einfracentral.domain.Service> boolean isResourceProviderAdmin(Authentication auth, T service);
@@ -41,9 +36,6 @@ public interface SecurityService {
 
     boolean userIsCatalogueAdmin(@NotNull User user, @NotNull String catalogueId);
 
-//    boolean userIsResourceProviderAdmin(User user, ResourceBundle<?> resourceBundle);
-
-//    boolean userIsResourceProviderAdmin(User user, String resourceId);
 
     boolean userIsResourceProviderAdmin(User user, String resourceId, String catalogueId);
 

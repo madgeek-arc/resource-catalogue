@@ -11,6 +11,7 @@ import eu.einfracentral.service.IdCreator;
 import eu.einfracentral.service.RegistrationMailService;
 import eu.einfracentral.service.SecurityService;
 import eu.einfracentral.utils.FacetFilterUtils;
+import eu.einfracentral.utils.ProviderResourcesCommonMethods;
 import eu.openminted.registry.core.domain.Browsing;
 import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.domain.Paging;
@@ -48,6 +49,7 @@ public class DatasourceBundleManager extends AbstractResourceBundleManager<Datas
     private final CatalogueService<CatalogueBundle, Authentication> catalogueService;
     private final PublicDatasourceManager publicDatasourceManager;
     private final MigrationService migrationService;
+    private final ProviderResourcesCommonMethods commonMethods;
 
     @Value("${project.catalogue.name}")
     private String catalogueName;
@@ -61,7 +63,8 @@ public class DatasourceBundleManager extends AbstractResourceBundleManager<Datas
                                    @Lazy VocabularyService vocabularyService,
                                    CatalogueService<CatalogueBundle, Authentication> catalogueService,
                                    PublicDatasourceManager publicDatasourceManager,
-                                   @Lazy MigrationService migrationService) {
+                                   @Lazy MigrationService migrationService,
+                                   ProviderResourcesCommonMethods commonMethods) {
         super(DatasourceBundle.class);
         this.providerService = providerService; // for providers
         this.idCreator = idCreator;
@@ -71,6 +74,7 @@ public class DatasourceBundleManager extends AbstractResourceBundleManager<Datas
         this.catalogueService = catalogueService;
         this.publicDatasourceManager = publicDatasourceManager;
         this.migrationService = migrationService;
+        this.commonMethods = commonMethods;
     }
 
     @Override
@@ -92,7 +96,7 @@ public class DatasourceBundleManager extends AbstractResourceBundleManager<Datas
         if (catalogueId == null || catalogueId.equals("")) { // add catalogue provider
             datasourceBundle.getDatasource().setCatalogueId(catalogueName);
         } else { // add provider from external catalogue
-            checkCatalogueIdConsistency(datasourceBundle, catalogueId);
+            commonMethods.checkCatalogueIdConsistency(datasourceBundle, catalogueId);
         }
 
         ProviderBundle providerBundle = providerService.get(datasourceBundle.getDatasource().getCatalogueId(), datasourceBundle.getDatasource().getResourceOrganisation(), auth);
@@ -137,8 +141,6 @@ public class DatasourceBundleManager extends AbstractResourceBundleManager<Datas
 
         // latestOnboardingInfo
         datasourceBundle.setLatestOnboardingInfo(loggingInfo);
-
-        sortFields(datasourceBundle);
 
         // resource status & extra loggingInfo for Approval
         if (providerBundle.getTemplateStatus().equals("approved template")){
@@ -195,7 +197,7 @@ public class DatasourceBundleManager extends AbstractResourceBundleManager<Datas
         if (catalogueId == null || catalogueId.equals("")) {
             datasourceBundle.getDatasource().setCatalogueId(catalogueName);
         } else {
-            checkCatalogueIdConsistency(datasourceBundle, catalogueId);
+            commonMethods.checkCatalogueIdConsistency(datasourceBundle, catalogueId);
         }
 
         logger.trace("User '{}' is attempting to update the Datasource with id '{}' of the Catalogue '{}'", auth, datasourceBundle.getDatasource().getId(), datasourceBundle.getDatasource().getCatalogueId());
@@ -252,7 +254,6 @@ public class DatasourceBundleManager extends AbstractResourceBundleManager<Datas
         // latestUpdateInfo
         datasourceBundle.setLatestUpdateInfo(loggingInfo);
         datasourceBundle.setActive(existingDatasource.isActive());
-        sortFields(datasourceBundle);
 
         // set status
         datasourceBundle.setStatus(existingDatasource.getStatus());
