@@ -67,7 +67,7 @@ public class ResourceInteroperabilityRecordManager extends ResourceManager<Resou
         } else if (resourceType.equals("training_resource")){
             ResourceValidationUtils.checkIfResourceBundleIsActiveAndApprovedAndNotPublic(resourceId, catalogueId, trainingResourceService, resourceType);
         } else{
-            throw new ValidationException("Field 'resourceType' should be either 'service' or 'datasource'");
+            throw new ValidationException("Field 'resourceType' should be either 'service', 'datasource' or 'training_resource'");
         }
 
         super.validate(resourceInteroperabilityRecordBundle);
