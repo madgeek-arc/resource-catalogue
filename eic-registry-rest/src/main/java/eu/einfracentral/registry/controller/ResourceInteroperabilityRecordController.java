@@ -56,7 +56,7 @@ public class ResourceInteroperabilityRecordController {
     })
     @GetMapping(path = "all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity<Paging<ResourceInteroperabilityRecord>> getAllResourceInteroperabilityRecords(@ApiIgnore @RequestParam Map<String, Object> allRequestParams,
-                                                            @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueIds,
+                                                            @RequestParam(defaultValue = "all", name = "catalogue_id") String catalogueIds,
                                                             @ApiIgnore Authentication auth) {
         allRequestParams.putIfAbsent("catalogue_id", catalogueIds);
         if (catalogueIds != null && catalogueIds.equals("all")) {
@@ -77,7 +77,7 @@ public class ResourceInteroperabilityRecordController {
     @ApiOperation(value = "Returns the ResourceInteroperabilityRecord of the given Resource of the given Catalogue.")
     @GetMapping(path = "/byResource/{resourceId}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity<ResourceInteroperabilityRecord> getResourceInteroperabilityRecordByResourceId(@PathVariable("resourceId") String resourceId,
-                                                           @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueId,
+                                                           @RequestParam(defaultValue = "${project.catalogue.name}", name = "catalogue_id") String catalogueId,
                                                            @ApiIgnore Authentication auth) {
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(1000);

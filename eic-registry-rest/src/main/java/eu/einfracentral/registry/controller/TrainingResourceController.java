@@ -60,7 +60,7 @@ public class TrainingResourceController {
     @DeleteMapping(path = {"{id}"}, produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth, #id)")
     public ResponseEntity<TrainingResourceBundle> delete(@PathVariable("id") String id,
-                                                @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueId,
+                                                @RequestParam(defaultValue = "${project.catalogue.name}", name = "catalogue_id") String catalogueId,
                                                 @ApiIgnore Authentication auth) throws ResourceNotFoundException {
         TrainingResourceBundle trainingResourceBundle;
         trainingResourceBundle = trainingResourceService.get(id, catalogueId);
@@ -79,13 +79,13 @@ public class TrainingResourceController {
     @ApiOperation(value = "Get the most current version of a specific Training Resource, providing the Resource id.")
     @GetMapping(path = "{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     @PreAuthorize("@securityService.trainingResourceIsActive(#id, #catalogueId) or hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth, #id)")
-    public ResponseEntity<TrainingResource> getTrainingResource(@PathVariable("id") String id, @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueId, @ApiIgnore Authentication auth) {
+    public ResponseEntity<TrainingResource> getTrainingResource(@PathVariable("id") String id, @RequestParam(defaultValue = "${project.catalogue.name}", name = "catalogue_id") String catalogueId, @ApiIgnore Authentication auth) {
         return new ResponseEntity<>(trainingResourceService.get(id, catalogueId).getTrainingResource(), HttpStatus.OK);
     }
 
     @GetMapping(path = "bundle/{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth, #id)")
-    public ResponseEntity<TrainingResourceBundle> getTrainingResourceBundle(@PathVariable("id") String id, @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueId, @ApiIgnore Authentication auth) {
+    public ResponseEntity<TrainingResourceBundle> getTrainingResourceBundle(@PathVariable("id") String id, @RequestParam(defaultValue = "${project.catalogue.name}", name = "catalogue_id") String catalogueId, @ApiIgnore Authentication auth) {
         return new ResponseEntity<>(trainingResourceService.get(id, catalogueId), HttpStatus.OK);
     }
 
@@ -134,7 +134,7 @@ public class TrainingResourceController {
             @ApiImplicitParam(name = "orderField", value = "Order field", dataType = "string", paramType = "query")
     })
     @GetMapping(path = "all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    public ResponseEntity<Paging<TrainingResource>> getAllTrainingResources(@RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueIds,
+    public ResponseEntity<Paging<TrainingResource>> getAllTrainingResources(@RequestParam(defaultValue = "all", name = "catalogue_id") String catalogueIds,
                                                           @ApiIgnore @RequestParam MultiValueMap<String, Object> allRequestParams,
                                                           @ApiIgnore Authentication authentication) {
         allRequestParams.addIfAbsent("catalogue_id", catalogueIds);
@@ -202,8 +202,8 @@ public class TrainingResourceController {
     @GetMapping(path = "byProvider/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
 //    @PreAuthorize("hasRole('ROLE_ADMIN') or @securityService.isProviderAdmin(#auth,#id,#catalogueId)")
     public ResponseEntity<Paging<TrainingResourceBundle>> getTrainingResourcesByProvider(@ApiIgnore @RequestParam MultiValueMap<String, Object> allRequestParams,
-                                                                       @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueId,
-                                                                       @RequestParam(required = false) Boolean active, @PathVariable String id, @ApiIgnore Authentication auth) {
+                                                                       @RequestParam(defaultValue = "${project.catalogue.name}", name = "catalogue_id") String catalogueId,
+                                                                       @PathVariable String id, @ApiIgnore Authentication auth) {
         allRequestParams.addIfAbsent("catalogue_id", catalogueId);
         if (catalogueId != null && catalogueId.equals("all")) {
             allRequestParams.remove("catalogue_id");
@@ -285,7 +285,7 @@ public class TrainingResourceController {
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     public ResponseEntity<Paging<TrainingResourceBundle>> getAllTrainingResourcesForAdminPage(@ApiIgnore @RequestParam MultiValueMap<String, Object> allRequestParams,
                                                                             @RequestParam(required = false) Set<String> auditState,
-                                                                            @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueId,
+                                                                            @RequestParam(defaultValue = "all", name = "catalogue_id") String catalogueId,
                                                                             @ApiIgnore Authentication authentication) {
 
         allRequestParams.addIfAbsent("catalogue_id", catalogueId);
@@ -330,8 +330,8 @@ public class TrainingResourceController {
 
     // Get all modification details of a specific Resource based on id.
     @GetMapping(path = {"loggingInfoHistory/{id}"}, produces = {MediaType.APPLICATION_JSON_VALUE})
-    public ResponseEntity<Paging<LoggingInfo>> loggingInfoHistory(@PathVariable String id,  @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueId,
-                                                                  @ApiIgnore Authentication auth) {
+    public ResponseEntity<Paging<LoggingInfo>> loggingInfoHistory(@PathVariable String id,
+                                                                  @RequestParam(defaultValue = "${project.catalogue.name}", name = "catalogue_id") String catalogueId) {
         Paging<LoggingInfo> loggingInfoHistory = this.trainingResourceService.getLoggingInfoHistory(id, catalogueId);
         return ResponseEntity.ok(loggingInfoHistory);
     }
