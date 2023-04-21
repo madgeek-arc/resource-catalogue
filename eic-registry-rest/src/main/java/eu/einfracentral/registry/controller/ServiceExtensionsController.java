@@ -82,7 +82,7 @@ public class ServiceExtensionsController {
     @ApiOperation(value = "Returns the Helpdesk of the given Service of the given Catalogue.")
     @GetMapping(path = "/helpdesk/byService/{serviceId}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity<Helpdesk> getHelpdeskByServiceId(@PathVariable("serviceId") String serviceId,
-                                                           @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueId,
+                                                           @RequestParam(defaultValue = "${project.catalogue.name}", name = "catalogue_id") String catalogueId,
                                                            @ApiIgnore Authentication auth) {
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(1000);
@@ -106,7 +106,7 @@ public class ServiceExtensionsController {
     })
     @GetMapping(path = "/helpdesk/all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity<Paging<Helpdesk>> getAllHelpdesks(@ApiIgnore @RequestParam Map<String, Object> allRequestParams,
-                                                            @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueIds,
+                                                            @RequestParam(defaultValue = "all", name = "catalogue_id") String catalogueIds,
                                                             @ApiIgnore Authentication auth) {
         allRequestParams.putIfAbsent("catalogue_id", catalogueIds);
         if (catalogueIds != null && catalogueIds.equals("all")) {
@@ -127,7 +127,7 @@ public class ServiceExtensionsController {
     @PostMapping(path = "/helpdesk", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth, #helpdesk.serviceId, #catalogueId)")
     public ResponseEntity<Helpdesk> addHelpdesk(@Valid @RequestBody Helpdesk helpdesk,
-                                                @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueId,
+                                                @RequestParam(defaultValue = "${project.catalogue.name}", name = "catalogue_id") String catalogueId,
                                                 @RequestParam String resourceType,
                                                 @ApiIgnore Authentication auth) {
         HelpdeskBundle helpdeskBundle = helpdeskService.add(new HelpdeskBundle(helpdesk, catalogueId), resourceType, auth);
@@ -139,7 +139,7 @@ public class ServiceExtensionsController {
     @PutMapping(path = "/helpdesk", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth, #helpdesk.serviceId, #catalogueId)")
     public ResponseEntity<Helpdesk> updateHelpdesk(@Valid @RequestBody Helpdesk helpdesk,
-                                                   @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueId,
+                                                   @RequestParam(defaultValue = "${project.catalogue.name}", name = "catalogue_id") String catalogueId,
                                                    @ApiIgnore Authentication auth) throws ResourceNotFoundException {
         HelpdeskBundle helpdeskBundle = helpdeskService.get(helpdesk.getId());
         helpdeskBundle.setHelpdesk(helpdesk);
@@ -195,7 +195,7 @@ public class ServiceExtensionsController {
     @ApiOperation(value = "Returns the Monitoring of the given Service of the given Catalogue.")
     @GetMapping(path = "/monitoring/byService/{serviceId}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity<Monitoring> getMonitoringByServiceId(@PathVariable("serviceId") String serviceId,
-                                                               @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueId,
+                                                               @RequestParam(defaultValue = "${project.catalogue.name}", name = "catalogue_id") String catalogueId,
                                                                @ApiIgnore Authentication auth) {
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(1000);
@@ -219,7 +219,7 @@ public class ServiceExtensionsController {
     })
     @GetMapping(path = "monitoring/all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity<Paging<Monitoring>> getAllMonitorings(@ApiIgnore @RequestParam Map<String, Object> allRequestParams,
-                                                                @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueIds,
+                                                                @RequestParam(defaultValue = "all", name = "catalogue_id") String catalogueIds,
                                                                 @ApiIgnore Authentication auth) {
         allRequestParams.putIfAbsent("catalogue_id", catalogueIds);
         if (catalogueIds != null && catalogueIds.equals("all")) {
@@ -246,7 +246,7 @@ public class ServiceExtensionsController {
     @PostMapping(path = "/monitoring", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth, #monitoring.serviceId, #catalogueId)")
     public ResponseEntity<Monitoring> addMonitoring(@Valid @RequestBody Monitoring monitoring,
-                                                    @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueId,
+                                                    @RequestParam(defaultValue = "${project.catalogue.name}", name = "catalogue_id") String catalogueId,
                                                     @RequestParam String resourceType,
                                                     @ApiIgnore Authentication auth) {
         MonitoringBundle monitoringBundle = monitoringService.add(new MonitoringBundle(monitoring, catalogueId), resourceType, auth);
@@ -258,7 +258,7 @@ public class ServiceExtensionsController {
     @PutMapping(path = "/monitoring", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth, #monitoring.serviceId, #catalogueId)")
     public ResponseEntity<Monitoring> updateMonitoring(@Valid @RequestBody Monitoring monitoring,
-                                                       @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueId,
+                                                       @RequestParam(defaultValue = "${project.catalogue.name}", name = "catalogue_id") String catalogueId,
                                                        @ApiIgnore Authentication auth) throws ResourceNotFoundException {
         MonitoringBundle monitoringBundle = monitoringService.get(monitoring.getId());
         monitoringBundle.setMonitoring(monitoring);

@@ -71,7 +71,7 @@ public class InteroperabilityRecordController {
     // Deletes the Interoperability Record with the specific ID.
     @DeleteMapping(path = "{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or @securityService.isResourceProviderAdmin(#auth, #id)")
-    public ResponseEntity<InteroperabilityRecord> delete(@PathVariable("id") String id, @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueId,
+    public ResponseEntity<InteroperabilityRecord> delete(@PathVariable("id") String id, @RequestParam(defaultValue = "${project.catalogue.name}", name = "catalogue_id") String catalogueId,
                                                          @ApiIgnore Authentication auth) throws ResourceNotFoundException {
         InteroperabilityRecordBundle interoperabilityRecordBundle = interoperabilityRecordService.get(id, catalogueId);
         if (interoperabilityRecordBundle == null) {
@@ -86,7 +86,7 @@ public class InteroperabilityRecordController {
     @ApiOperation(value = "Returns the Interoperability Record with the given id.")
     @GetMapping(path = "{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity<InteroperabilityRecord> getInteroperabilityRecord(@PathVariable("id") String id,
-                                                                            @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueId) {
+                                                                            @RequestParam(defaultValue = "${project.catalogue.name}", name = "catalogue_id") String catalogueId) {
         InteroperabilityRecord interoperabilityRecord = interoperabilityRecordService.get(id, catalogueId).getInteroperabilityRecord();
         return new ResponseEntity<>(interoperabilityRecord, HttpStatus.OK);
     }
@@ -94,7 +94,7 @@ public class InteroperabilityRecordController {
     @GetMapping(path = "bundle/{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth, #id)")
     public ResponseEntity<InteroperabilityRecordBundle> getInteroperabilityRecordBundle(@PathVariable("id") String id,
-                                                                                        @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueId,
+                                                                                        @RequestParam(defaultValue = "${project.catalogue.name}", name = "catalogue_id") String catalogueId,
                                                                                         @ApiIgnore Authentication auth) {
         return new ResponseEntity<>(interoperabilityRecordService.get(id, catalogueId), HttpStatus.OK);
     }
@@ -108,7 +108,7 @@ public class InteroperabilityRecordController {
             @ApiImplicitParam(name = "orderField", value = "Order field", dataType = "string", paramType = "query")
     })
     @GetMapping(path = "all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    public ResponseEntity<Paging<InteroperabilityRecord>> getAll(@RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueId,
+    public ResponseEntity<Paging<InteroperabilityRecord>> getAll(@RequestParam(defaultValue = "all", name = "catalogue_id") String catalogueId,
                                                                  @ApiIgnore @RequestParam Map<String, Object> allRequestParams,
                                                                  @ApiIgnore Authentication auth) {
         allRequestParams.putIfAbsent("catalogue_id", catalogueId);
@@ -134,7 +134,7 @@ public class InteroperabilityRecordController {
     @GetMapping(path = "bundle/all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     public ResponseEntity<Paging<InteroperabilityRecordBundle>> getAllBundles(@ApiIgnore @RequestParam MultiValueMap<String, Object> allRequestParams,
-                                                                              @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueId,
+                                                                              @RequestParam(defaultValue = "all", name = "catalogue_id") String catalogueId,
                                                                               @RequestParam(defaultValue = "all", name = "provider_id") String providerId) {
         FacetFilter ff = interoperabilityRecordService.createFacetFilterForFetchingInteroperabilityRecords(allRequestParams, catalogueId, providerId);
         return ResponseEntity.ok(genericResourceService.getResults(ff));
@@ -172,7 +172,7 @@ public class InteroperabilityRecordController {
     })
     @GetMapping(path = "byProvider/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<Paging<InteroperabilityRecordBundle>> getInteroperabilityRecordsByProvider(@ApiIgnore @RequestParam MultiValueMap<String, Object> allRequestParams,
-                                                                                         @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueId,
+                                                                                         @RequestParam(defaultValue = "${project.catalogue.name}", name = "catalogue_id") String catalogueId,
                                                                                          @PathVariable String id, @ApiIgnore Authentication auth) {
         FacetFilter ff = interoperabilityRecordService.createFacetFilterForFetchingInteroperabilityRecords(allRequestParams, catalogueId, id);
         interoperabilityRecordService.updateFacetFilterConsideringTheAuthorization(ff, auth);
@@ -181,7 +181,7 @@ public class InteroperabilityRecordController {
 
     @GetMapping(path = {"loggingInfoHistory/{id}"}, produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<Paging<LoggingInfo>> loggingInfoHistory(@PathVariable String id,
-                                                                  @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueId) {
+                                                                  @RequestParam(defaultValue = "${project.catalogue.name}", name = "catalogue_id") String catalogueId) {
         Paging<LoggingInfo> loggingInfoHistory = this.interoperabilityRecordService.getLoggingInfoHistory(id, catalogueId);
         return ResponseEntity.ok(loggingInfoHistory);
     }

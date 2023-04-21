@@ -72,7 +72,7 @@ public class ServiceController {
     @DeleteMapping(path = {"{id}"}, produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth, #id)")
     public ResponseEntity<ServiceBundle> delete(@PathVariable("id") String id,
-                                                @RequestParam(defaultValue = "eosc", name = "catalogueId") String catalogueId,
+                                                @RequestParam(defaultValue = "${project.catalogue.name}", name = "catalogueId") String catalogueId,
                                                 @ApiIgnore Authentication auth) throws ResourceNotFoundException {
         ServiceBundle service;
         service = resourceBundleService.get(id, catalogueId);
@@ -91,7 +91,7 @@ public class ServiceController {
     @ApiOperation(value = "Get the most current version of a specific Resource, providing the Resource id.")
     @GetMapping(path = "{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     @PreAuthorize("@securityService.resourceOrDatasourceIsActive(#id, #catalogueId) or hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth, #id)")
-    public ResponseEntity<?> getService(@PathVariable("id") String id, @RequestParam(defaultValue = "eosc", name = "catalogueId") String catalogueId, @ApiIgnore Authentication auth) {
+    public ResponseEntity<?> getService(@PathVariable("id") String id, @RequestParam(defaultValue = "${project.catalogue.name}", name = "catalogueId") String catalogueId, @ApiIgnore Authentication auth) {
         try{
             return new ResponseEntity<>(resourceBundleService.get(id, catalogueId).getService(), HttpStatus.OK);
         } catch(eu.einfracentral.exception.ResourceNotFoundException e){
@@ -104,7 +104,7 @@ public class ServiceController {
     @PreAuthorize("@securityService.resourceOrDatasourceIsActive(#id, #catalogueId) or hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') " +
             "or @securityService.isResourceProviderAdmin(#auth, #id)")
     public ResponseEntity<RichResource> getRichService(@PathVariable("id") String id,
-                                                       @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueId,
+                                                       @RequestParam(defaultValue = "${project.catalogue.name}", name = "catalogue_id") String catalogueId,
                                                        @ApiIgnore Authentication auth) {
         try{
             return new ResponseEntity<>(resourceBundleService.getRichResource(id, catalogueId, auth), HttpStatus.OK);
@@ -158,7 +158,7 @@ public class ServiceController {
             @ApiImplicitParam(name = "orderField", value = "Order field", dataType = "string", paramType = "query")
     })
     @GetMapping(path = "all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    public ResponseEntity<Paging<?>> getAllServices(@RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueId,
+    public ResponseEntity<Paging<?>> getAllServices(@RequestParam(defaultValue = "all", name = "catalogue_id") String catalogueId,
                                                     @RequestParam(defaultValue = "service", name = "type") String type,
                                                     @ApiIgnore @RequestParam MultiValueMap<String, Object> allRequestParams,
                                                     @ApiIgnore Authentication authentication) {
@@ -179,7 +179,7 @@ public class ServiceController {
     })
     @GetMapping(path = "/rich/all", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<Paging<?>> getRichServices(@ApiIgnore @RequestParam MultiValueMap<String, Object> allRequestParams,
-                                                                @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueId,
+                                                                @RequestParam(defaultValue = "all", name = "catalogue_id") String catalogueId,
                                                                 @RequestParam(defaultValue = "service", name = "type") String type,
                                                                 @ApiIgnore Authentication auth) {
         FacetFilter ff =  resourceBundleService.createFacetFilterForFetchingServicesAndDatasources(allRequestParams, catalogueId, type);
@@ -257,7 +257,7 @@ public class ServiceController {
     })
     @GetMapping(path = "byProvider/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<Paging<?>> getServicesByProvider(@ApiIgnore @RequestParam MultiValueMap<String, Object> allRequestParams,
-                                                                       @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueId,
+                                                                       @RequestParam(defaultValue = "${project.catalogue.name}", name = "catalogue_id") String catalogueId,
                                                                        @RequestParam(defaultValue = "service", name = "type") String type,
                                                                        @PathVariable String id, @ApiIgnore Authentication auth) {
         FacetFilter ff = resourceBundleService.createFacetFilterForFetchingServicesAndDatasources(allRequestParams, catalogueId, type);
@@ -295,7 +295,7 @@ public class ServiceController {
     })
     @GetMapping(path = "inactive/all", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<Paging<?>> getInactiveServices(@ApiIgnore @RequestParam MultiValueMap<String, Object> allRequestParams,
-                                                               @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueId,
+                                                               @RequestParam(defaultValue = "all", name = "catalogue_id") String catalogueId,
                                                                @RequestParam(defaultValue = "service", name = "type") String type,
                                                                @ApiIgnore Authentication auth) throws ResourceNotFoundException {
         FacetFilter ff = resourceBundleService.createFacetFilterForFetchingServicesAndDatasources(allRequestParams, catalogueId, type);
@@ -339,7 +339,7 @@ public class ServiceController {
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     public ResponseEntity<Paging<?>> getAllServicesForAdminPage(@ApiIgnore @RequestParam MultiValueMap<String, Object> allRequestParams,
                                                                             @RequestParam(required = false) Set<String> auditState,
-                                                                            @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueId,
+                                                                            @RequestParam(defaultValue = "all", name = "catalogue_id") String catalogueId,
                                                                             @RequestParam(defaultValue = "service", name = "type") String type,
                                                                             @ApiIgnore Authentication authentication) {
         FacetFilter ff = resourceBundleService.createFacetFilterForFetchingServicesAndDatasources(allRequestParams, catalogueId, type);
@@ -391,8 +391,8 @@ public class ServiceController {
 
     // Get all modification details of a specific Resource based on id.
     @GetMapping(path = {"loggingInfoHistory/{id}"}, produces = {MediaType.APPLICATION_JSON_VALUE})
-    public ResponseEntity<Paging<LoggingInfo>> loggingInfoHistory(@PathVariable String id,  @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueId,
-                                                                  @ApiIgnore Authentication auth) {
+    public ResponseEntity<Paging<LoggingInfo>> loggingInfoHistory(@PathVariable String id,
+                                                                  @RequestParam(defaultValue = "${project.catalogue.name}", name = "catalogue_id") String catalogueId) {
         Paging<LoggingInfo> loggingInfoHistory = new Paging<>();
         loggingInfoHistory = this.resourceBundleService.getLoggingInfoHistory(id, catalogueId);
         if (loggingInfoHistory == null){
@@ -448,7 +448,7 @@ public class ServiceController {
     @GetMapping(path = "getSharedResources/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or @securityService.isProviderAdmin(#auth,#id)")
     public ResponseEntity<Paging<?>> getSharedResources(@ApiIgnore @RequestParam MultiValueMap<String, Object> allRequestParams,
-                                                        @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueId,
+                                                        @RequestParam(defaultValue = "${project.catalogue.name}", name = "catalogue_id") String catalogueId,
                                                         @RequestParam(defaultValue = "service", name = "type") String type,
                                                         @PathVariable String id, @ApiIgnore Authentication auth) {
         FacetFilter ff =  resourceBundleService.createFacetFilterForFetchingServicesAndDatasources(allRequestParams, catalogueId, type);

@@ -83,7 +83,7 @@ public class PublicController {
     @ApiOperation(value = "Returns the Public Provider with the given id.")
     @GetMapping(path = "/provider/{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity<?> getPublicProvider(@PathVariable("id") String id,
-                                               @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueId,
+                                               @RequestParam(defaultValue = "${project.catalogue.name}", name = "catalogue_id") String catalogueId,
                                                @ApiIgnore Authentication auth) {
         ProviderBundle providerBundle = providerService.get(catalogueId, id, auth);
         if (auth != null && auth.isAuthenticated()) {
@@ -108,7 +108,7 @@ public class PublicController {
     @GetMapping(path = "/provider/bundle/{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isProviderAdmin(#auth, #id, #catalogueId)")
     public ResponseEntity<?> getPublicProviderBundle(@PathVariable("id") String id,
-                                                     @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueId,
+                                                     @RequestParam(defaultValue = "${project.catalogue.name}", name = "catalogue_id") String catalogueId,
                                                      @ApiIgnore Authentication auth) {
         ProviderBundle providerBundle = providerService.get(catalogueId, id, auth);
         if (auth != null && auth.isAuthenticated()) {
@@ -139,7 +139,7 @@ public class PublicController {
     })
     @GetMapping(path = "/provider/all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity<Paging<Provider>> getAllPublicProviders(@ApiIgnore @RequestParam Map<String, Object> allRequestParams,
-                                                   @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueId,
+                                                   @RequestParam(defaultValue = "all", name = "catalogue_id") String catalogueId,
                                                    @ApiIgnore Authentication auth) {
         allRequestParams.putIfAbsent("catalogue_id", catalogueId);
         if (catalogueId != null && catalogueId.equals("all")) {
@@ -173,7 +173,7 @@ public class PublicController {
     @GetMapping(path = "/provider/bundle/all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     public ResponseEntity<Paging<ProviderBundle>> getAllPublicProviderBundles(@ApiIgnore @RequestParam Map<String, Object> allRequestParams,
-                                                                  @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueId,
+                                                                  @RequestParam(defaultValue = "all", name = "catalogue_id") String catalogueId,
                                                                   @ApiIgnore Authentication auth) {
         allRequestParams.putIfAbsent("catalogue_id", catalogueId);
         if (catalogueId != null && catalogueId.equals("all")) {
@@ -208,7 +208,7 @@ public class PublicController {
     @GetMapping(path = "/resource/{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     @PreAuthorize("@securityService.resourceOrDatasourceIsActive(#id, #catalogueId) or hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth, #id)")
     public ResponseEntity<?> getPublicResource(@PathVariable("id") String id,
-                                               @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueId,
+                                               @RequestParam(defaultValue = "${project.catalogue.name}", name = "catalogue_id") String catalogueId,
                                                @ApiIgnore Authentication auth) {
         try{
             return resourceBundleService.get(id, catalogueId).getMetadata().isPublished() ? new ResponseEntity(resourceBundleService.get(id, catalogueId).getService(), HttpStatus.OK) : new ResponseEntity(gson.toJson("The specific Service does not consist a Public entity"), HttpStatus.NOT_FOUND);
@@ -221,7 +221,7 @@ public class PublicController {
     @GetMapping(path = "/resource/infraService/{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth, #id, #catalogueId)")
     public ResponseEntity<?> getPublicServiceBundle(@PathVariable("id") String id,
-                                                    @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueId,
+                                                    @RequestParam(defaultValue = "${project.catalogue.name}", name = "catalogue_id") String catalogueId,
                                                     @ApiIgnore Authentication auth) {
         try{
             return resourceBundleService.get(id, catalogueId).getMetadata().isPublished() ? new ResponseEntity(resourceBundleService.get(id, catalogueId), HttpStatus.OK) : new ResponseEntity(gson.toJson("The specific Service does not consist a Public entity"), HttpStatus.NOT_FOUND);
@@ -239,7 +239,7 @@ public class PublicController {
             @ApiImplicitParam(name = "orderField", value = "Order field", dataType = "string", paramType = "query")
     })
     @GetMapping(path = "/resource/all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    public ResponseEntity<Paging<?>> getAllPublicResources(@RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueId,
+    public ResponseEntity<Paging<?>> getAllPublicResources(@RequestParam(defaultValue = "all", name = "catalogue_id") String catalogueId,
                                                                  @RequestParam(defaultValue = "service", name = "type") String type,
                                                                  @ApiIgnore @RequestParam Map<String, Object> allRequestParams,
                                                                  @ApiIgnore Authentication authentication) {
@@ -297,7 +297,7 @@ public class PublicController {
     @ApiOperation(value = "Returns the Public Datasource with the given id.")
     @GetMapping(path = "/datasource/{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity<?> getPublicDatasource(@PathVariable("id") String id,
-                                               @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueId,
+                                               @RequestParam(defaultValue = "${project.catalogue.name}", name = "catalogue_id") String catalogueId,
                                                @ApiIgnore Authentication auth) {
         DatasourceBundle datasourceBundle = datasourceBundleService.get(id, catalogueId);
         if (auth != null && auth.isAuthenticated()) {
@@ -321,7 +321,7 @@ public class PublicController {
     @GetMapping(path = "/datasource/datasourceBundle/{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth, #id, #catalogueId)")
     public ResponseEntity<?> getPublicDatasourceBundle(@PathVariable("id") String id,
-                                                   @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueId,
+                                                   @RequestParam(defaultValue = "${project.catalogue.name}", name = "catalogue_id") String catalogueId,
                                                    @ApiIgnore Authentication auth) {
         DatasourceBundle datasourceBundle = datasourceBundleService.get(id, catalogueId);
         if (auth != null && auth.isAuthenticated()) {
@@ -352,7 +352,7 @@ public class PublicController {
     })
     @GetMapping(path = "/datasource/all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity<Paging<Datasource>> getAllPublicDatasources(@ApiIgnore @RequestParam Map<String, Object> allRequestParams,
-                                                                 @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueId,
+                                                                 @RequestParam(defaultValue = "all", name = "catalogue_id") String catalogueId,
                                                                  @ApiIgnore Authentication auth) {
         allRequestParams.putIfAbsent("catalogue_id", catalogueId);
         if (catalogueId != null && catalogueId.equals("all")) {
@@ -386,7 +386,7 @@ public class PublicController {
     @GetMapping(path = "/datasource/adminPage/all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     public ResponseEntity<Paging<DatasourceBundle>> getAllPublicDatasourceBundles(@ApiIgnore @RequestParam Map<String, Object> allRequestParams,
-                                                                           @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueId,
+                                                                           @RequestParam(defaultValue = "all", name = "catalogue_id") String catalogueId,
                                                                            @ApiIgnore Authentication auth) {
         allRequestParams.putIfAbsent("catalogue_id", catalogueId);
         if (catalogueId != null && catalogueId.equals("all")) {
@@ -421,7 +421,7 @@ public class PublicController {
     @ApiOperation(value = "Returns the Public Training Resource with the given id.")
     @GetMapping(path = "/trainingResource/{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity<?> getPublicTrainingResource(@PathVariable("id") String id,
-                                                 @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueId,
+                                                 @RequestParam(defaultValue = "${project.catalogue.name}", name = "catalogue_id") String catalogueId,
                                                  @ApiIgnore Authentication auth) {
         TrainingResourceBundle trainingResourceBundle = trainingResourceBundleService.get(id, catalogueId);
         if (auth != null && auth.isAuthenticated()) {
@@ -445,7 +445,7 @@ public class PublicController {
     @GetMapping(path = "/trainingResource/trainingResourceBundle/{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth, #id, #catalogueId)")
     public ResponseEntity<?> getPublicTrainingResourceBundle(@PathVariable("id") String id,
-                                                        @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueId,
+                                                        @RequestParam(defaultValue = "${project.catalogue.name}", name = "catalogue_id") String catalogueId,
                                                         @ApiIgnore Authentication auth) {
         TrainingResourceBundle trainingResourceBundle = trainingResourceBundleService.get(id, catalogueId);
         if (auth != null && auth.isAuthenticated()) {
@@ -476,7 +476,7 @@ public class PublicController {
     })
     @GetMapping(path = "/trainingResource/all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity<Paging<TrainingResource>> getAllPublicTrainingResources(@ApiIgnore @RequestParam Map<String, Object> allRequestParams,
-                                                                      @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueId,
+                                                                      @RequestParam(defaultValue = "all", name = "catalogue_id") String catalogueId,
                                                                       @ApiIgnore Authentication auth) {
         allRequestParams.putIfAbsent("catalogue_id", catalogueId);
         if (catalogueId != null && catalogueId.equals("all")) {
@@ -510,7 +510,7 @@ public class PublicController {
     @GetMapping(path = "/trainingResource/adminPage/all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     public ResponseEntity<Paging<TrainingResourceBundle>> getAllPublicTrainingResourceBundles(@ApiIgnore @RequestParam Map<String, Object> allRequestParams,
-                                                                                  @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueId,
+                                                                                  @RequestParam(defaultValue = "all", name = "catalogue_id") String catalogueId,
                                                                                   @ApiIgnore Authentication auth) {
         allRequestParams.putIfAbsent("catalogue_id", catalogueId);
         if (catalogueId != null && catalogueId.equals("all")) {
@@ -544,7 +544,7 @@ public class PublicController {
     @ApiOperation(value = "Returns the Public Interoperability Record with the given id.")
     @GetMapping(path = "/interoperabilityRecord/{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity<?> getPublicInteroperabilityRecord(@PathVariable("id") String id,
-                                                             @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueId) {
+                                                             @RequestParam(defaultValue = "${project.catalogue.name}", name = "catalogue_id") String catalogueId) {
         InteroperabilityRecordBundle interoperabilityRecordBundle = interoperabilityRecordService.get(id, catalogueId);
         if (interoperabilityRecordBundle.getMetadata().isPublished() && interoperabilityRecordBundle.isActive()
                 && interoperabilityRecordBundle.getStatus().equals("approved interoperability record")) {
@@ -556,7 +556,7 @@ public class PublicController {
     @GetMapping(path = "/interoperabilityRecord/bundle/{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth, #id, #catalogueId)")
     public ResponseEntity<?> getPublicInteroperabilityRecordBundle(@PathVariable("id") String id,
-                                                                   @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueId,
+                                                                   @RequestParam(defaultValue = "${project.catalogue.name}", name = "catalogue_id") String catalogueId,
                                                                    @ApiIgnore Authentication auth) {
         InteroperabilityRecordBundle interoperabilityRecordBundle = interoperabilityRecordService.get(id, catalogueId);
         if (auth != null && auth.isAuthenticated()) {
@@ -587,7 +587,7 @@ public class PublicController {
     })
     @GetMapping(path = "/interoperabilityRecord/all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity<Paging<InteroperabilityRecord>> getAllPublicInteroperabilityRecords(@ApiIgnore @RequestParam Map<String, Object> allRequestParams,
-                                                                                              @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueId,
+                                                                                              @RequestParam(defaultValue = "all", name = "catalogue_id") String catalogueId,
                                                                                               @ApiIgnore Authentication auth) {
         allRequestParams.putIfAbsent("catalogue_id", catalogueId);
         if (catalogueId != null && catalogueId.equals("all")) {
@@ -617,7 +617,7 @@ public class PublicController {
     @GetMapping(path = "/interoperabilityRecord/bundle/all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     public ResponseEntity<Paging<InteroperabilityRecordBundle>> getAllPublicInteroperabilityRecordBundles(@ApiIgnore @RequestParam Map<String, Object> allRequestParams,
-                                                                                                          @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueId,
+                                                                                                          @RequestParam(defaultValue = "all", name = "catalogue_id") String catalogueId,
                                                                                                           @ApiIgnore Authentication auth) {
         allRequestParams.putIfAbsent("catalogue_id", catalogueId);
         if (catalogueId != null && catalogueId.equals("all")) {
