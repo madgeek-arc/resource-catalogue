@@ -442,4 +442,18 @@ public class InteroperabilityRecordManager extends ResourceManager<Interoperabil
         ff.setResourceType("interoperability_record");
         return ff;
     }
+
+    public void updateFacetFilterConsideringTheAuthorization(FacetFilter filter, Authentication auth){
+        // if user is Unauthorized, return active/latest ONLY
+        if (auth == null) {
+            filter.addFilter("active", true);
+        }
+        if (auth != null && auth.isAuthenticated()) {
+            // if user is Authorized with ROLE_USER, return active/latest ONLY
+            if (!securityService.hasRole(auth, "ROLE_PROVIDER") && !securityService.hasRole(auth, "ROLE_EPOT") &&
+                    !securityService.hasRole(auth, "ROLE_ADMIN")) {
+                filter.addFilter("active", true);
+            }
+        }
+    }
 }

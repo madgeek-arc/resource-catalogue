@@ -171,17 +171,12 @@ public class InteroperabilityRecordController {
             @ApiImplicitParam(name = "orderField", value = "Order field", dataType = "string", paramType = "query")
     })
     @GetMapping(path = "byProvider/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
-    public ResponseEntity<Paging<InteroperabilityRecordBundle>> getInteroperabilityRecordsByProvider(@ApiIgnore @RequestParam Map<String, Object> allRequestParams,
+    public ResponseEntity<Paging<InteroperabilityRecordBundle>> getInteroperabilityRecordsByProvider(@ApiIgnore @RequestParam MultiValueMap<String, Object> allRequestParams,
                                                                                          @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueId,
                                                                                          @PathVariable String id, @ApiIgnore Authentication auth) {
-        allRequestParams.putIfAbsent("catalogue_id", catalogueId);
-        if (catalogueId != null && catalogueId.equals("all")) {
-            allRequestParams.remove("catalogue_id");
-        }
-        FacetFilter ff = FacetFilterUtils.createFacetFilter(allRequestParams);
-        ff.addFilter("provider_id", id);
-        ff.addFilter("published", false);
-        return ResponseEntity.ok(interoperabilityRecordService.getAll(ff, auth));
+        FacetFilter ff = interoperabilityRecordService.createFacetFilterForFetchingInteroperabilityRecords(allRequestParams, catalogueId, id);
+        interoperabilityRecordService.updateFacetFilterConsideringTheAuthorization(ff, auth);
+        return ResponseEntity.ok(genericResourceService.getResults(ff));
     }
 
     @GetMapping(path = {"loggingInfoHistory/{id}"}, produces = {MediaType.APPLICATION_JSON_VALUE})

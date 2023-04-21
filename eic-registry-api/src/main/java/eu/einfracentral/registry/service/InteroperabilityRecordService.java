@@ -21,4 +21,5 @@ public interface InteroperabilityRecordService<T> extends ResourceService<T, Aut
     InteroperabilityRecordBundle getCatalogueInteroperabilityRecord(String catalogueId, String interoperabilityRecordId, Authentication auth);
     Paging<InteroperabilityRecordBundle> getInteroperabilityRecordBundles(String catalogueId, String providerId, Authentication auth);
     FacetFilter createFacetFilterForFetchingInteroperabilityRecords(MultiValueMap<String, Object> allRequestParams, String catalogueId, String providerId);
+    void updateFacetFilterConsideringTheAuthorization(FacetFilter filter, Authentication auth);
 }
