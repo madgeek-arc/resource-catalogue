@@ -2,10 +2,7 @@ package eu.einfracentral.domain;
 
 import eu.einfracentral.annotation.FieldValidation;
 import eu.einfracentral.annotation.VocabularyValidation;
-import eu.einfracentral.domain.interoperabilityRecordInternalFields.Creator;
-import eu.einfracentral.domain.interoperabilityRecordInternalFields.IdentifierInfo;
-import eu.einfracentral.domain.interoperabilityRecordInternalFields.ResourceTypeInfo;
-import eu.einfracentral.domain.interoperabilityRecordInternalFields.Right;
+import eu.einfracentral.domain.interoperabilityRecordInternalFields.*;
 import io.swagger.annotations.ApiModelProperty;
 
 import javax.xml.bind.annotation.XmlElement;
@@ -107,13 +104,15 @@ public class InteroperabilityRecord implements Identifiable {
     private String updated;
 
     /**
-     * Standards related to the guideline.
+     * Standards related to the guideline
+     * This should point out to related standards only when it is a prerequisitite/depenendency, and likely to influence
+     * a Provider's design towards interoperability based on the guideline.
      */
-    @XmlElementWrapper(name = "eoscRelatedStandards")
-    @XmlElement(name = "eoscRelatedStandard")
+    @XmlElementWrapper(name = "relatedStandards")
+    @XmlElement(name = "relatedStandard")
     @ApiModelProperty(position = 11)
     @FieldValidation(nullable = true)
-    private List<URL> eoscRelatedStandards;
+    private List<RelatedStandard> relatedStandards;
 
     /**
      * Any rights information for this resource. The property may be repeated to record complex rights characteristics.
@@ -172,7 +171,7 @@ public class InteroperabilityRecord implements Identifiable {
     public InteroperabilityRecord() {
     }
 
-    public InteroperabilityRecord(String id, String catalogueId, String providerId, IdentifierInfo identifierInfo, List<Creator> creators, String title, int publicationYear, List<ResourceTypeInfo> resourceTypesInfo, String created, String updated, List<URL> eoscRelatedStandards, List<Right> rights, String description, String status, String domain, String eoscGuidelineType, List<String> eoscIntegrationOptions) {
+    public InteroperabilityRecord(String id, String catalogueId, String providerId, IdentifierInfo identifierInfo, List<Creator> creators, String title, int publicationYear, List<ResourceTypeInfo> resourceTypesInfo, String created, String updated, List<RelatedStandard> relatedStandards, List<Right> rights, String description, String status, String domain, String eoscGuidelineType, List<String> eoscIntegrationOptions) {
         this.id = id;
         this.catalogueId = catalogueId;
         this.providerId = providerId;
@@ -183,7 +182,7 @@ public class InteroperabilityRecord implements Identifiable {
         this.resourceTypesInfo = resourceTypesInfo;
         this.created = created;
         this.updated = updated;
-        this.eoscRelatedStandards = eoscRelatedStandards;
+        this.relatedStandards = relatedStandards;
         this.rights = rights;
         this.description = description;
         this.status = status;
@@ -205,7 +204,7 @@ public class InteroperabilityRecord implements Identifiable {
                 ", resourceTypesInfo=" + resourceTypesInfo +
                 ", created='" + created + '\'' +
                 ", updated='" + updated + '\'' +
-                ", eoscRelatedStandards=" + eoscRelatedStandards +
+                ", relatedStandards=" + relatedStandards +
                 ", rights=" + rights +
                 ", description='" + description + '\'' +
                 ", status='" + status + '\'' +
@@ -220,12 +219,12 @@ public class InteroperabilityRecord implements Identifiable {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         InteroperabilityRecord interoperabilityRecord = (InteroperabilityRecord) o;
-        return Objects.equals(publicationYear, interoperabilityRecord.publicationYear) && Objects.equals(id, interoperabilityRecord.id) && Objects.equals(catalogueId, interoperabilityRecord.catalogueId) && Objects.equals(providerId, interoperabilityRecord.providerId) && Objects.equals(identifierInfo, interoperabilityRecord.identifierInfo) && Objects.equals(creators, interoperabilityRecord.creators) && Objects.equals(title, interoperabilityRecord.title) && Objects.equals(resourceTypesInfo, interoperabilityRecord.resourceTypesInfo) && Objects.equals(created, interoperabilityRecord.created) && Objects.equals(updated, interoperabilityRecord.updated) && Objects.equals(eoscRelatedStandards, interoperabilityRecord.eoscRelatedStandards) && Objects.equals(rights, interoperabilityRecord.rights) && Objects.equals(description, interoperabilityRecord.description) && Objects.equals(status, interoperabilityRecord.status) && Objects.equals(domain, interoperabilityRecord.domain) && Objects.equals(eoscGuidelineType, interoperabilityRecord.eoscGuidelineType) && Objects.equals(eoscIntegrationOptions, interoperabilityRecord.eoscIntegrationOptions);
+        return Objects.equals(publicationYear, interoperabilityRecord.publicationYear) && Objects.equals(id, interoperabilityRecord.id) && Objects.equals(catalogueId, interoperabilityRecord.catalogueId) && Objects.equals(providerId, interoperabilityRecord.providerId) && Objects.equals(identifierInfo, interoperabilityRecord.identifierInfo) && Objects.equals(creators, interoperabilityRecord.creators) && Objects.equals(title, interoperabilityRecord.title) && Objects.equals(resourceTypesInfo, interoperabilityRecord.resourceTypesInfo) && Objects.equals(created, interoperabilityRecord.created) && Objects.equals(updated, interoperabilityRecord.updated) && Objects.equals(relatedStandards, interoperabilityRecord.relatedStandards) && Objects.equals(rights, interoperabilityRecord.rights) && Objects.equals(description, interoperabilityRecord.description) && Objects.equals(status, interoperabilityRecord.status) && Objects.equals(domain, interoperabilityRecord.domain) && Objects.equals(eoscGuidelineType, interoperabilityRecord.eoscGuidelineType) && Objects.equals(eoscIntegrationOptions, interoperabilityRecord.eoscIntegrationOptions);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, catalogueId, providerId, identifierInfo, creators, title, publicationYear, resourceTypesInfo, created, updated, eoscRelatedStandards, rights, description, status, domain, eoscGuidelineType, eoscIntegrationOptions);
+        return Objects.hash(id, catalogueId, providerId, identifierInfo, creators, title, publicationYear, resourceTypesInfo, created, updated, relatedStandards, rights, description, status, domain, eoscGuidelineType, eoscIntegrationOptions);
     }
 
     @Override
@@ -310,12 +309,12 @@ public class InteroperabilityRecord implements Identifiable {
         this.updated = updated;
     }
 
-    public List<URL> getEoscRelatedStandards() {
-        return eoscRelatedStandards;
+    public List<RelatedStandard> getRelatedStandards() {
+        return relatedStandards;
     }
 
-    public void setEoscRelatedStandards(List<URL> eoscRelatedStandards) {
-        this.eoscRelatedStandards = eoscRelatedStandards;
+    public void setRelatedStandards(List<RelatedStandard> relatedStandards) {
+        this.relatedStandards = relatedStandards;
     }
 
     public List<Right> getRights() {

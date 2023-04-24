@@ -69,6 +69,8 @@
     
   <xs:element name="providerRequest" type="tns:providerRequest"/>
     
+  <xs:element name="relatedStandard" type="tns:relatedStandard"/>
+    
   <xs:element name="resourceExtras" type="tns:resourceExtras"/>
     
   <xs:element name="resourceInteroperabilityRecord" type="tns:resourceInteroperabilityRecord"/>
@@ -1941,23 +1943,6 @@ May be used for technical information.]]></xs:documentation>
               
       </xs:element>
             
-      <xs:element minOccurs="0" name="eoscRelatedStandards">
-        <xs:annotation>
-          <xs:documentation><![CDATA[Standards related to the guideline.]]></xs:documentation>
-        </xs:annotation>
-                
-        <xs:complexType>
-                    
-          <xs:sequence>
-                        
-            <xs:element maxOccurs="unbounded" minOccurs="0" name="eoscRelatedStandard" type="xs:anyURI"/>
-                      
-          </xs:sequence>
-                  
-        </xs:complexType>
-              
-      </xs:element>
-            
       <xs:element name="id" type="xs:string">
         <xs:annotation>
           <xs:documentation><![CDATA[EOSC Interoperability ID (auto-assigned).]]></xs:documentation>
@@ -1979,6 +1964,25 @@ use the date when the embargo period ends. In the case of datasets, "publish" is
 data available on a specific date to the community of researchers. If there is no standard publication year value,
 use the date that would be preferred from a citation perspective.]]></xs:documentation>
         </xs:annotation>
+      </xs:element>
+            
+      <xs:element minOccurs="0" name="relatedStandards">
+        <xs:annotation>
+          <xs:documentation><![CDATA[Standards related to the guideline
+This should point out to related standards only when it is a prerequisitite/depenendency, and likely to influence
+a Provider's design towards interoperability based on the guideline.]]></xs:documentation>
+        </xs:annotation>
+                
+        <xs:complexType>
+                    
+          <xs:sequence>
+                        
+            <xs:element maxOccurs="unbounded" minOccurs="0" ref="tns:relatedStandard"/>
+                      
+          </xs:sequence>
+                  
+        </xs:complexType>
+              
       </xs:element>
             
       <xs:element name="resourceTypesInfo">
@@ -2122,6 +2126,26 @@ versions. The record's primary key for locating it in the EOSC-IF database.]]></
       <xs:element name="identifierType" type="xs:string">
         <xs:annotation>
           <xs:documentation><![CDATA[The type of Identifier.]]></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+          
+    </xs:sequence>
+      
+  </xs:complexType>
+    
+  <xs:complexType name="relatedStandard">
+        
+    <xs:sequence>
+            
+      <xs:element minOccurs="0" name="relatedStandardIdentifier" type="xs:string">
+        <xs:annotation>
+          <xs:documentation><![CDATA[The name of the related standard.]]></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+            
+      <xs:element minOccurs="0" name="relatedStandardURI" type="xs:anyURI">
+        <xs:annotation>
+          <xs:documentation><![CDATA[The URI of the related standard.]]></xs:documentation>
         </xs:annotation>
       </xs:element>
           
