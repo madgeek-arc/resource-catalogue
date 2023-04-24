@@ -16,17 +16,17 @@ public class ResourceTypeInfo {
     /**
      * A description of the resource.
      */
-    @XmlElement
-    @ApiModelProperty(position = 1)
-    @FieldValidation(nullable = true)
+    @XmlElement(required = true)
+    @ApiModelProperty(position = 1, required = true)
+    @FieldValidation
     private String resourceType;
 
     /**
      * The general type of a resource.
      */
-    @XmlElement
-    @ApiModelProperty(position = 2)
-    @FieldValidation(nullable = true, containsId = true, idClass = Vocabulary.class)
+    @XmlElement(required = true)
+    @ApiModelProperty(position = 2, required = true)
+    @FieldValidation(containsId = true, idClass = Vocabulary.class)
     @VocabularyValidation(type = Vocabulary.Type.IR_RESOURCE_TYPE_GENERAL)
     private String resourceTypeGeneral;
 

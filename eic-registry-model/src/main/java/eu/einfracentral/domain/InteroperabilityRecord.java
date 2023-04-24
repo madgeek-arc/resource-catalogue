@@ -49,6 +49,7 @@ public class InteroperabilityRecord implements Identifiable {
      */
     @XmlElement(required = true)
     @ApiModelProperty(position = 4, required = true)
+    @FieldValidation
     private IdentifierInfo identifierInfo;
 
     /**
@@ -58,6 +59,7 @@ public class InteroperabilityRecord implements Identifiable {
     @XmlElementWrapper(required = true, name = "creators")
     @XmlElement(name = "creator")
     @ApiModelProperty(position = 5, required = true)
+    @FieldValidation
     private List<Creator> creators;
 
     /**
@@ -82,10 +84,10 @@ public class InteroperabilityRecord implements Identifiable {
     /**
      * Interoperability Record Resource Type Info
      */
-    @XmlElementWrapper(name = "resourceTypesInfo")
+    @XmlElementWrapper(required = true, name = "resourceTypesInfo")
     @XmlElement(name = "resourceTypeInfo")
-    @ApiModelProperty(position = 8)
-    @FieldValidation(nullable = true)
+    @ApiModelProperty(position = 8, required = true)
+    @FieldValidation
     private List<ResourceTypeInfo> resourceTypesInfo;
 
     /**

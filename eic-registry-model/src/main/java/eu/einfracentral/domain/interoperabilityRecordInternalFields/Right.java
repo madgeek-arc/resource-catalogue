@@ -15,7 +15,7 @@ public class Right {
     /**
      * Right title.
      */
-    @XmlElement
+    @XmlElement(required = true)
     @ApiModelProperty(position = 1, required = true)
     @FieldValidation
     private String rightTitle;
@@ -23,7 +23,7 @@ public class Right {
     /**
      * The URI of the license.
      */
-    @XmlElement
+    @XmlElement(required = true)
     @ApiModelProperty(position = 2, required = true)
     @FieldValidation
     private URL rightURI;
@@ -31,7 +31,7 @@ public class Right {
     /**
      * A short, standardized version of the license name.
      */
-    @XmlElement
+    @XmlElement(required = true)
     @ApiModelProperty(position = 3, required = true)
     @FieldValidation
     private String rightIdentifier;
