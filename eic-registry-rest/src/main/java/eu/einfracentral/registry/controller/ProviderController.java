@@ -8,6 +8,7 @@ import eu.einfracentral.exception.ValidationException;
 import eu.einfracentral.registry.service.ResourceBundleService;
 import eu.einfracentral.registry.service.MigrationService;
 import eu.einfracentral.registry.service.ProviderService;
+import eu.einfracentral.registry.service.TrainingResourceService;
 import eu.einfracentral.utils.FacetFilterUtils;
 import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.domain.Paging;
@@ -42,6 +43,7 @@ public class ProviderController {
     private final ProviderService<ProviderBundle, Authentication> providerManager;
     private final ResourceBundleService<ServiceBundle> resourceBundleService;
     private final ResourceBundleService<DatasourceBundle> datasourceBundleService;
+    private final TrainingResourceService<TrainingResourceBundle> trainingResourceService;
     private final MigrationService migrationService;
 
     @Value("${project.catalogue.name}")
@@ -54,10 +56,12 @@ public class ProviderController {
     ProviderController(ProviderService<ProviderBundle, Authentication> service,
                        ResourceBundleService<ServiceBundle> resourceBundleService,
                        ResourceBundleService<DatasourceBundle> datasourceBundleService,
+                       TrainingResourceService<TrainingResourceBundle> trainingResourceService,
                        MigrationService migrationService) {
         this.providerManager = service;
         this.resourceBundleService = resourceBundleService;
         this.datasourceBundleService = datasourceBundleService;
+        this.trainingResourceService = trainingResourceService;
         this.migrationService = migrationService;
     }
 
@@ -281,14 +285,20 @@ public class ProviderController {
 
     // Get the pending services of the given Provider.
     @GetMapping(path = "services/pending/{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    public ResponseEntity<List<Service>> getInactiveServices(@PathVariable("id") String id, @ApiIgnore Authentication auth) {
+    public ResponseEntity<List<Service>> getInactiveServices(@PathVariable("id") String id) {
         List<Service> ret = resourceBundleService.getInactiveResources(id).stream().map(ServiceBundle::getService).collect(Collectors.toList());
         return new ResponseEntity<>(ret, HttpStatus.OK);
     }
 
     @GetMapping(path = "datasources/pending/{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    public ResponseEntity<List<Datasource>> getInactiveDatasources(@PathVariable("id") String id, @ApiIgnore Authentication auth) {
+    public ResponseEntity<List<Datasource>> getInactiveDatasources(@PathVariable("id") String id) {
         List<Datasource> ret = datasourceBundleService.getInactiveResources(id).stream().map(DatasourceBundle::getDatasource).collect(Collectors.toList());
+        return new ResponseEntity<>(ret, HttpStatus.OK);
+    }
+
+    @GetMapping(path = "trainingResources/pending/{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    public ResponseEntity<List<TrainingResource>> getInactiveTrainingResources(@PathVariable("id") String id) {
+        List<TrainingResource> ret = trainingResourceService.getInactiveResources(id).stream().map(TrainingResourceBundle::getTrainingResource).collect(Collectors.toList());
         return new ResponseEntity<>(ret, HttpStatus.OK);
     }
 
