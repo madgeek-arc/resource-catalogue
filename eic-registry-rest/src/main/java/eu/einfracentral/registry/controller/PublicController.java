@@ -647,6 +647,22 @@ public class PublicController {
         return new ResponseEntity<>(publicInteroperabilityRecordManager.getMy(ff, auth).getResults(), HttpStatus.OK);
     }
 
+    @ApiOperation(value = "Returns the Related Resources of a specific Interoperability Record given its id.")
+    @GetMapping(path = {"/interoperabilityRecord/relatedResources/{id}"}, produces = {MediaType.APPLICATION_JSON_VALUE})
+    public List<String> getAllInteroperabilityRecordRelatedResources(@PathVariable String id) {
+        List<String> allInteroperabilityRecordRelatedResources = new ArrayList<>();
+        FacetFilter ff = new FacetFilter();
+        ff.setQuantity(10000);
+        List<ResourceInteroperabilityRecordBundle> allResourceInteroperabilityRecords = resourceInteroperabilityRecordService.getAll(ff, null).getResults();
+        for (ResourceInteroperabilityRecordBundle resourceInteroperabilityRecordBundle : allResourceInteroperabilityRecords){
+            if (resourceInteroperabilityRecordBundle.getResourceInteroperabilityRecord().getInteroperabilityRecordIds().contains(id)
+                    && resourceInteroperabilityRecordBundle.getMetadata().isPublished()){
+                allInteroperabilityRecordRelatedResources.add(resourceInteroperabilityRecordBundle.getResourceInteroperabilityRecord().getResourceId());
+            }
+        }
+        return allInteroperabilityRecordRelatedResources;
+    }
+
 //    //SECTION: RESOURCE INTEROPERABILITY RECORD
     @ApiOperation(value = "Returns the Public Resource Interoperability Record with the given id.")
     @GetMapping(path = "/resourceInteroperabilityRecord/{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
