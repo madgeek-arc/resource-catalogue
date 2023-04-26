@@ -314,6 +314,12 @@
       <xs:enumeration value="IR_EOSC_GUIDELINE_TYPE"/>
             
       <xs:enumeration value="SERVICE_TYPE"/>
+            
+      <xs:enumeration value="CT_PROTOCOL"/>
+            
+      <xs:enumeration value="CT_COMPATIBILITY"/>
+            
+      <xs:enumeration value="CT_PARAM"/>
           
     </xs:restriction>
       

@@ -2,14 +2,13 @@ package eu.einfracentral.domain;
 
 import eu.einfracentral.annotation.FieldValidation;
 import eu.einfracentral.annotation.VocabularyValidation;
-import eu.einfracentral.domain.interoperabilityRecordInternalFields.*;
+import eu.einfracentral.domain.interoperabilityRecord.internalFields.*;
 import io.swagger.annotations.ApiModelProperty;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
-import java.net.URL;
 import java.util.List;
 import java.util.Objects;
 

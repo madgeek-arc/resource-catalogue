@@ -106,7 +106,11 @@ public class Vocabulary implements Identifiable {
         IR_STATUS("Interoperability Record status"),
         IR_EOSC_GUIDELINE_TYPE("Interoperability Record eosc guideline type"),
         // serviceType
-        SERVICE_TYPE("Service type");
+        SERVICE_TYPE("Service type"),
+        // Configuration Template
+        CT_PROTOCOL("Configuration Template protocol"),
+        CT_COMPATIBILITY("Configuration Template compatibility"),
+        CT_PARAM("Configuration Template param");
 
         private final String type;
 

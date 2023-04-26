@@ -55,6 +55,8 @@
     
   <xs:element name="multimediaPair" type="tns:multimediaPair"/>
     
+  <xs:element name="paramValuePair" type="tns:paramValuePair"/>
+    
   <xs:element name="provider" type="tns:provider"/>
     
   <xs:element name="providerBundle" type="tns:providerBundle"/>
@@ -3163,6 +3165,50 @@ that is the used scheme (e.g., Web Address URL, DOI, ARK, etc.).]]></xs:document
       <xs:element name="resourceType" type="xs:string"/>
             
       <xs:element name="userId" type="xs:string"/>
+          
+    </xs:sequence>
+      
+  </xs:complexType>
+    
+  <xs:complexType name="configurationTemplate">
+        
+    <xs:sequence>
+            
+      <xs:element name="baseURL" type="xs:anyURI"/>
+            
+      <xs:element minOccurs="0" name="compatibility" type="xs:string"/>
+            
+      <xs:element minOccurs="0" name="id" type="xs:string"/>
+            
+      <xs:element name="interoperabilityRecordId" type="xs:string"/>
+            
+      <xs:element name="paramValuePairs">
+                
+        <xs:complexType>
+                    
+          <xs:sequence>
+                        
+            <xs:element maxOccurs="unbounded" minOccurs="0" ref="tns:paramValuePair"/>
+                      
+          </xs:sequence>
+                  
+        </xs:complexType>
+              
+      </xs:element>
+            
+      <xs:element name="protocol" type="xs:string"/>
+          
+    </xs:sequence>
+      
+  </xs:complexType>
+    
+  <xs:complexType name="paramValuePair">
+        
+    <xs:sequence>
+            
+      <xs:element name="param" type="xs:string"/>
+            
+      <xs:element minOccurs="0" name="value" type="xs:string"/>
           
     </xs:sequence>
       
