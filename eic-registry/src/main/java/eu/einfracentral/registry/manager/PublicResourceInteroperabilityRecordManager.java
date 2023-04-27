@@ -97,6 +97,11 @@ public class PublicResourceInteroperabilityRecordManager extends ResourceManager
         }
         ret.getResourceInteroperabilityRecord().setResourceId(String.format("%s.%s", resourceInteroperabilityRecordBundle.getResourceInteroperabilityRecord().getCatalogueId(),
                 resourceInteroperabilityRecordBundle.getResourceInteroperabilityRecord().getResourceId()));
+        List<String> publicInteroperabilityRecordList = new ArrayList<>();
+        for (String interoperabilityRecord : resourceInteroperabilityRecordBundle.getResourceInteroperabilityRecord().getInteroperabilityRecordIds()){
+            publicInteroperabilityRecordList.add(String.format("%s.%s", resourceInteroperabilityRecordBundle.getResourceInteroperabilityRecord().getCatalogueId(), interoperabilityRecord));
+        }
+        ret.getResourceInteroperabilityRecord().setInteroperabilityRecordIds(publicInteroperabilityRecordList);
         ret.setIdentifiers(published.getIdentifiers());
         ret.setId(published.getId());
         ret.setMetadata(published.getMetadata());

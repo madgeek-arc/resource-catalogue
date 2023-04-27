@@ -139,7 +139,7 @@ public abstract class AbstractResourceBundleManager<T extends ResourceBundle<?>>
         ff.setQuantity(maxQuantity);
         ff.addFilter(getResourceType() + "_id", id);
         List<T> allResources = getAll(ff, null).getResults();
-        if (allResources.size() > 1) {
+        if (allResources.size() > 0) {
             return allResources.get(0);
         }
         return null;

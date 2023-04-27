@@ -686,7 +686,7 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
         ff.setQuantity(maxQuantity);
         ff.addFilter(getResourceType() + "_id", id);
         List<TrainingResourceBundle> allResources = getAll(ff, null).getResults();
-        if (allResources.size() > 1) {
+        if (allResources.size() > 0) {
             return allResources.get(0);
         }
         return null;
