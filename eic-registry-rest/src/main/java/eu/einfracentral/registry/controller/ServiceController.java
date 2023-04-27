@@ -37,7 +37,7 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping({"resource", "service"})
-@Api(description = "Operations for Resources/Services", tags = {"resource-controller"})
+@Api(description = "Operations for Services", tags = {"service-controller"})
 public class ServiceController {
 
     private static final Logger logger = LogManager.getLogger(ServiceController.class);
