@@ -11,6 +11,10 @@
     
   <xs:element name="catalogueBundle" type="tns:catalogueBundle"/>
     
+  <xs:element name="configurationTemplate" type="tns:configurationTemplate"/>
+    
+  <xs:element name="configurationTemplateBundle" type="tns:configurationTemplateBundle"/>
+    
   <xs:element name="creator" type="tns:creator"/>
     
   <xs:element name="creatorAffiliationInfo" type="tns:creatorAffiliationInfo"/>
@@ -54,8 +58,6 @@
   <xs:element name="monitoringGroup" type="tns:monitoringGroup"/>
     
   <xs:element name="multimediaPair" type="tns:multimediaPair"/>
-    
-  <xs:element name="paramValuePair" type="tns:paramValuePair"/>
     
   <xs:element name="provider" type="tns:provider"/>
     
@@ -3178,39 +3180,47 @@ that is the used scheme (e.g., Web Address URL, DOI, ARK, etc.).]]></xs:document
             
       <xs:element minOccurs="0" name="compatibility" type="xs:string"/>
             
+      <xs:element name="format" type="xs:string"/>
+            
       <xs:element minOccurs="0" name="id" type="xs:string"/>
             
       <xs:element name="interoperabilityRecordId" type="xs:string"/>
             
-      <xs:element name="paramValuePairs">
+      <xs:element name="protocol" type="xs:string"/>
+            
+      <xs:element minOccurs="0" name="sets">
                 
         <xs:complexType>
                     
           <xs:sequence>
                         
-            <xs:element maxOccurs="unbounded" minOccurs="0" ref="tns:paramValuePair"/>
+            <xs:element maxOccurs="unbounded" minOccurs="0" name="set" type="xs:string"/>
                       
           </xs:sequence>
                   
         </xs:complexType>
               
       </xs:element>
-            
-      <xs:element name="protocol" type="xs:string"/>
           
     </xs:sequence>
       
   </xs:complexType>
     
-  <xs:complexType name="paramValuePair">
+  <xs:complexType name="configurationTemplateBundle">
         
-    <xs:sequence>
+    <xs:complexContent>
             
-      <xs:element name="param" type="xs:string"/>
-            
-      <xs:element minOccurs="0" name="value" type="xs:string"/>
+      <xs:extension base="tns:bundle">
+                
+        <xs:sequence>
+                    
+          <xs:element minOccurs="0" ref="tns:configurationTemplate"/>
+                  
+        </xs:sequence>
+              
+      </xs:extension>
           
-    </xs:sequence>
+    </xs:complexContent>
       
   </xs:complexType>
   

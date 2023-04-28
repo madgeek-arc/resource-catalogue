@@ -1,0 +1,54 @@
+{
+  "indexFields": [
+    {
+      "multivalued": false,
+      "name": "resource_internal_id",
+      "path": "//*[local-name()='id']/text()",
+      "type": "java.lang.String",
+      "primaryKey": true
+    },
+    {
+      "multivalued": false,
+      "name": "configuration_template_id",
+      "path": "//*[local-name()='id']/text()",
+      "type": "java.lang.String",
+      "primaryKey": true
+    },
+    {
+      "multivalued": false,
+      "name": "interoperability_record_id",
+      "label": "Interoperability Record ID",
+      "path": "//*[local-name()='interoperabilityRecordId']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
+      "name": "protocol",
+      "label": "Protocol",
+      "path": "//*[local-name()='protocol']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
+      "name": "compatibility",
+      "label": "Compatibility",
+      "path": "//*[local-name()='compatibility']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
+      "name": "format",
+      "label": "Format",
+      "path": "//*[local-name()='format']/text()",
+      "type": "java.lang.String"
+    }
+  ],
+  "indexMapperClass": "eu.openminted.registry.core.index.DefaultIndexMapper",
+  "name": "configuration_template",
+  "aliasGroup": "resourceTypes",
+  "payloadType": "xml",
+  "properties": {
+    "class": "eu.einfracentral.domain.ConfigurationTemplate"
+  },
+  "schemaUrl": "https://raw.githubusercontent.com/madgeek-arc/resource-catalogue/guidelines_v2/eic-registry-model/src/main/resources/schema1.xsd"
+}

@@ -109,9 +109,7 @@ public class Vocabulary implements Identifiable {
         SERVICE_TYPE("Service type"),
         // Configuration Template
         CT_PROTOCOL("Configuration Template protocol"),
-        CT_COMPATIBILITY("Configuration Template compatibility"),
-        CT_PARAM("Configuration Template param");
-
+        CT_COMPATIBILITY("Configuration Template compatibility");
         private final String type;
 
         Type(final String type) {

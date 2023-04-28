@@ -318,8 +318,6 @@
       <xs:enumeration value="CT_PROTOCOL"/>
             
       <xs:enumeration value="CT_COMPATIBILITY"/>
-            
-      <xs:enumeration value="CT_PARAM"/>
           
     </xs:restriction>
       
