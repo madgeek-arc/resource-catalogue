@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import eu.einfracentral.domain.*;
 import eu.einfracentral.domain.ResourceBundle;
 import eu.einfracentral.domain.ServiceBundle;
+import eu.einfracentral.exception.ValidationException;
 import eu.einfracentral.registry.service.*;
 import eu.einfracentral.service.GenericResourceService;
 import eu.einfracentral.service.SecurityService;
@@ -35,6 +36,7 @@ import java.util.*;
 @Api(value = "Get information about a published Provider")
 public class PublicController {
 
+    private final CatalogueService<CatalogueBundle, Authentication> catalogueService;
     private final ProviderService<ProviderBundle, Authentication> providerService;
     private final ResourceBundleService<ServiceBundle> resourceBundleService;
     private final ResourceBundleService<DatasourceBundle> datasourceBundleService;
@@ -52,7 +54,8 @@ public class PublicController {
     private static final Logger logger = LogManager.getLogger(PublicController.class);
 
     @Autowired
-    PublicController(ProviderService<ProviderBundle, Authentication> providerService, SecurityService securityService,
+    PublicController(CatalogueService<CatalogueBundle, Authentication> catalogueService,
+                     ProviderService<ProviderBundle, Authentication> providerService, SecurityService securityService,
                      ResourceBundleService<ServiceBundle> resourceBundleService,
                      ResourceBundleService<DatasourceBundle> datasourceBundleService,
                      TrainingResourceService<TrainingResourceBundle> trainingResourceBundleService,
@@ -64,6 +67,7 @@ public class PublicController {
                      @Qualifier("publicInteroperabilityRecordManager") ResourceService<InteroperabilityRecordBundle, Authentication> publicInteroperabilityRecordManager,
                      @Qualifier("publicResourceInteroperabilityRecordManager") ResourceService<ResourceInteroperabilityRecordBundle, Authentication> publicResourceInteroperabilityRecordManager,
                      GenericResourceService genericResourceService) {
+        this.catalogueService = catalogueService;
         this.providerService = providerService;
         this.resourceBundleService = resourceBundleService;
         this.datasourceBundleService = datasourceBundleService;
@@ -215,6 +219,33 @@ public class PublicController {
         } catch(eu.einfracentral.exception.ResourceNotFoundException e){
             return datasourceBundleService.get(id, catalogueId).getMetadata().isPublished() ? new ResponseEntity(datasourceBundleService.get(id, catalogueId).getDatasource(), HttpStatus.OK) : new ResponseEntity(gson.toJson("The specific Service does not consist a Public entity"), HttpStatus.NOT_FOUND);
         }
+    }
+
+    @ApiOperation(value = "Get a list of Public Resources based on a set of Public Resource IDs.")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "ids", value = "Comma-separated list of Resource ids", dataType = "string", paramType = "path")
+    })
+    @GetMapping(path = "/resource/byID/{ids}", produces = {MediaType.APPLICATION_JSON_VALUE})
+    public List<Object> getSomeResources(@PathVariable("ids") String[] ids) {
+        List<String> allCatalogueIds = catalogueService.getAllCatalogueIds();
+        List<Object> ret = new ArrayList<>();
+        for (String id : ids){
+            String[] parts = id.split("\\.");
+            String catalogueId = parts[0];
+            if (!allCatalogueIds.contains(catalogueId)){
+                throw new ValidationException("Please provide Public Resource IDs of existing Catalogues");
+            }
+            try{
+                ret.add(resourceBundleService.get(id, catalogueId).getService());
+            } catch(eu.einfracentral.exception.ResourceNotFoundException e){
+                try{
+                    ret.add(datasourceBundleService.get(id, catalogueId).getDatasource());
+                } catch(eu.einfracentral.exception.ResourceNotFoundException j){
+                    throw new ValidationException(String.format("There is no Public Service or Datasource with ID [%s] on the [%s] Catalogue", id, catalogueId));
+                }
+            }
+        }
+        return ret;
     }
 
     //    @ApiOperation(value = "Returns the Public ServiceBundle with the given id.")
