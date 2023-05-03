@@ -74,7 +74,7 @@ public class ServiceControllerDeprecated {
     @DeleteMapping(path = {"{id}"}, produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth, #id)")
     public ResponseEntity<ServiceBundle> delete(@PathVariable("id") String id,
-                                                @RequestParam(defaultValue = "${project.catalogue.name}", name = "catalogueId") String catalogueId,
+                                                @RequestParam(defaultValue = "${project.catalogue.name}", name = "catalogue_id") String catalogueId,
                                                 @ApiIgnore Authentication auth) throws ResourceNotFoundException {
         ServiceBundle service;
         service = resourceBundleService.get(id, catalogueId);
@@ -94,7 +94,7 @@ public class ServiceControllerDeprecated {
     @ApiOperation(value = "Get the most current version of a specific Resource, providing the Resource id.")
     @GetMapping(path = "{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     @PreAuthorize("@securityService.resourceOrDatasourceIsActive(#id, #catalogueId) or hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth, #id)")
-    public ResponseEntity<?> getService(@PathVariable("id") String id, @RequestParam(defaultValue = "${project.catalogue.name}", name = "catalogueId") String catalogueId, @ApiIgnore Authentication auth) {
+    public ResponseEntity<?> getService(@PathVariable("id") String id, @RequestParam(defaultValue = "${project.catalogue.name}", name = "catalogue_id") String catalogueId, @ApiIgnore Authentication auth) {
         try{
             return new ResponseEntity<>(resourceBundleService.get(id, catalogueId).getService(), HttpStatus.OK);
         } catch(eu.einfracentral.exception.ResourceNotFoundException e){
