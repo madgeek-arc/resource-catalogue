@@ -36,9 +36,9 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("service")
+@RequestMapping("resource")
 @Api(description = "Operations for Services", tags = {"service-controller"})
-public class ServiceController {
+public class ServiceControllerDeprecated {
 
     private static final Logger logger = LogManager.getLogger(ServiceController.class);
     private final ResourceBundleService<ServiceBundle> resourceBundleService;
@@ -56,7 +56,7 @@ public class ServiceController {
 
 
     @Autowired
-    ServiceController(ResourceBundleService<ServiceBundle> service,
+    ServiceControllerDeprecated(ResourceBundleService<ServiceBundle> service,
                       ProviderService<ProviderBundle, Authentication> provider,
                       ResourceBundleService<DatasourceBundle> datasourceBundleService,
                       TrainingResourceService<TrainingResourceBundle> trainingResourceService,
@@ -69,6 +69,8 @@ public class ServiceController {
         this.genericResourceService = genericResourceService;
     }
 
+
+    @Deprecated
     @DeleteMapping(path = {"{id}"}, produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth, #id)")
     public ResponseEntity<ServiceBundle> delete(@PathVariable("id") String id,
@@ -88,6 +90,7 @@ public class ServiceController {
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
+    @Deprecated
     @ApiOperation(value = "Get the most current version of a specific Resource, providing the Resource id.")
     @GetMapping(path = "{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     @PreAuthorize("@securityService.resourceOrDatasourceIsActive(#id, #catalogueId) or hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth, #id)")
@@ -100,6 +103,7 @@ public class ServiceController {
     }
 
     // Get the specified version of a RichService providing the Service id
+    @Deprecated
     @GetMapping(path = "rich/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("@securityService.resourceOrDatasourceIsActive(#id, #catalogueId) or hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') " +
             "or @securityService.isResourceProviderAdmin(#auth, #id)")
@@ -113,6 +117,7 @@ public class ServiceController {
         }
     }
 
+    @Deprecated
     @ApiOperation(value = "Creates a new Resource.")
     @PostMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.providerCanAddResources(#auth, #service)")
@@ -122,6 +127,7 @@ public class ServiceController {
         return new ResponseEntity<>(ret.getService(), HttpStatus.CREATED);
     }
 
+    @Deprecated
     @ApiOperation(value = "Updates the Resource assigned the given id with the given Resource, keeping a version of revisions.")
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth,#service)")
     @PutMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
@@ -132,6 +138,7 @@ public class ServiceController {
     }
 
     // Accept/Reject a Resource.
+    @Deprecated
     @PatchMapping(path = "verifyResource/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     public ResponseEntity<ServiceBundle> verifyResource(@PathVariable("id") String id, @RequestParam(required = false) Boolean active,
@@ -141,6 +148,7 @@ public class ServiceController {
         return new ResponseEntity<>(resource, HttpStatus.OK);
     }
 
+    @Deprecated
     @ApiOperation(value = "Validates the Resource without actually changing the repository.")
     @PostMapping(path = "validate", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<Boolean> validate(@RequestBody Service service) {
@@ -149,6 +157,7 @@ public class ServiceController {
         return ret;
     }
 
+    @Deprecated
     @ApiOperation(value = "Filter a list of Resources based on a set of filters or get a list of all Resources in the Catalogue.")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "query", value = "Keyword to refine the search", dataType = "string", paramType = "query"),
@@ -170,6 +179,7 @@ public class ServiceController {
 
 
     // Filter a list of Services based on a set of filters or get a list of all Services in the Catalogue.
+    @Deprecated
     @ApiImplicitParams({
             @ApiImplicitParam(name = "query", value = "Keyword to refine the search", dataType = "string", paramType = "query"),
             @ApiImplicitParam(name = "from", value = "Starting index in the result set", dataType = "string", paramType = "query"),
@@ -179,15 +189,16 @@ public class ServiceController {
     })
     @GetMapping(path = "/rich/all", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<Paging<?>> getRichServices(@ApiIgnore @RequestParam MultiValueMap<String, Object> allRequestParams,
-                                                                @RequestParam(defaultValue = "all", name = "catalogue_id") String catalogueId,
-                                                                @RequestParam(defaultValue = "service", name = "type") String type,
-                                                                @ApiIgnore Authentication auth) {
+                                                     @RequestParam(defaultValue = "all", name = "catalogue_id") String catalogueId,
+                                                     @RequestParam(defaultValue = "service", name = "type") String type,
+                                                     @ApiIgnore Authentication auth) {
         FacetFilter ff =  resourceBundleService.createFacetFilterForFetchingServicesAndDatasources(allRequestParams, catalogueId, type);
         ff.addFilter("active", true);
         Paging<RichResource> services = resourceBundleService.getRichResources(ff, auth);
         return ResponseEntity.ok(services);
     }
 
+    @Deprecated
     @GetMapping(path = "/childrenFromParent", produces = {MediaType.APPLICATION_JSON_VALUE})
     public List<String> getChildrenFromParent(@RequestParam String type, @RequestParam String parent, @ApiIgnore Authentication auth) {
         NamedParameterJdbcTemplate namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(commonDataSource);
@@ -206,7 +217,8 @@ public class ServiceController {
         return resourceBundleService.getChildrenFromParent(type, parent, rec);
     }
 
-//    @ApiOperation(value = "Get a list of Resources based on a set of ids.")
+    //    @ApiOperation(value = "Get a list of Resources based on a set of ids.")
+    @Deprecated
     @ApiImplicitParams({
             @ApiImplicitParam(name = "ids", value = "Comma-separated list of Resource ids", dataType = "string", paramType = "path")
     })
@@ -218,6 +230,7 @@ public class ServiceController {
     }
 
     // Get a list of RichServices based on a set of ids.
+    @Deprecated
     @ApiImplicitParams({
             @ApiImplicitParam(name = "ids", value = "Comma-separated list of Resource ids", dataType = "string", paramType = "path")
     })
@@ -226,6 +239,7 @@ public class ServiceController {
         return ResponseEntity.ok(resourceBundleService.getByIds(auth, ids));
     }
 
+    @Deprecated
     @ApiOperation(value = "Get all Resources in the catalogue organized by an attribute, e.g. get Resources organized in categories.")
     @GetMapping(path = "by/{field}", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<Map<String, List<Service>>> getServicesBy(@PathVariable (value = "field") Service.Field field, @ApiIgnore Authentication auth) throws NoSuchFieldException {
@@ -248,6 +262,7 @@ public class ServiceController {
         return ResponseEntity.ok(serviceResults);
     }
 
+    @Deprecated
     @ApiImplicitParams({
             @ApiImplicitParam(name = "query", value = "Keyword to refine the search", dataType = "string", paramType = "query"),
             @ApiImplicitParam(name = "from", value = "Starting index in the result set", dataType = "string", paramType = "query"),
@@ -257,9 +272,9 @@ public class ServiceController {
     })
     @GetMapping(path = "byProvider/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<Paging<?>> getServicesByProvider(@ApiIgnore @RequestParam MultiValueMap<String, Object> allRequestParams,
-                                                                       @RequestParam(defaultValue = "${project.catalogue.name}", name = "catalogue_id") String catalogueId,
-                                                                       @RequestParam(defaultValue = "service", name = "type") String type,
-                                                                       @PathVariable String id, @ApiIgnore Authentication auth) {
+                                                           @RequestParam(defaultValue = "${project.catalogue.name}", name = "catalogue_id") String catalogueId,
+                                                           @RequestParam(defaultValue = "service", name = "type") String type,
+                                                           @PathVariable String id, @ApiIgnore Authentication auth) {
         FacetFilter ff = resourceBundleService.createFacetFilterForFetchingServicesAndDatasources(allRequestParams, catalogueId, type);
         ff.addFilter("resource_organisation", id);
         resourceBundleService.updateFacetFilterConsideringTheAuthorization(ff, auth);
@@ -267,6 +282,7 @@ public class ServiceController {
         return ResponseEntity.ok(paging);
     }
 
+    @Deprecated
     @ApiImplicitParams({
             @ApiImplicitParam(name = "query", value = "Keyword to refine the search", dataType = "string", paramType = "query"),
             @ApiImplicitParam(name = "from", value = "Starting index in the result set", dataType = "string", paramType = "query"),
@@ -286,6 +302,7 @@ public class ServiceController {
     }
 
     // Filter a list of inactive Services based on a set of filters or get a list of all inactive Services in the Catalogue.
+    @Deprecated
     @ApiImplicitParams({
             @ApiImplicitParam(name = "query", value = "Keyword to refine the search", dataType = "string", paramType = "query"),
             @ApiImplicitParam(name = "from", value = "Starting index in the result set", dataType = "string", paramType = "query"),
@@ -295,9 +312,9 @@ public class ServiceController {
     })
     @GetMapping(path = "inactive/all", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<Paging<?>> getInactiveServices(@ApiIgnore @RequestParam MultiValueMap<String, Object> allRequestParams,
-                                                               @RequestParam(defaultValue = "all", name = "catalogue_id") String catalogueId,
-                                                               @RequestParam(defaultValue = "service", name = "type") String type,
-                                                               @ApiIgnore Authentication auth) throws ResourceNotFoundException {
+                                                         @RequestParam(defaultValue = "all", name = "catalogue_id") String catalogueId,
+                                                         @RequestParam(defaultValue = "service", name = "type") String type,
+                                                         @ApiIgnore Authentication auth) throws ResourceNotFoundException {
         FacetFilter ff = resourceBundleService.createFacetFilterForFetchingServicesAndDatasources(allRequestParams, catalogueId, type);
         ff.addFilter("active", false);
         Paging<?> paging = genericResourceService.getResults(ff).map(r -> ((eu.einfracentral.domain.ResourceBundle<?>) r).getPayload());
@@ -305,6 +322,7 @@ public class ServiceController {
     }
 
     // Providing the Service id, set the Service to active or inactive.
+    @Deprecated
     @PatchMapping(path = "publish/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.providerIsActiveAndUserIsAdmin(#auth, #id)")
     public ResponseEntity<ServiceBundle> setActive(@PathVariable String id, @RequestParam Boolean active, @ApiIgnore Authentication auth) {
@@ -313,6 +331,7 @@ public class ServiceController {
     }
 
     // Get all pending Service Templates.
+    @Deprecated
     @GetMapping(path = "pending/all", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     public ResponseEntity<Browsing<Service>> pendingTemplates(@ApiIgnore Authentication auth) {
@@ -328,6 +347,7 @@ public class ServiceController {
     }
 
     // FIXME: query doesn't work when auditState != null.
+    @Deprecated
     @ApiImplicitParams({
             @ApiImplicitParam(name = "query", value = "Keyword to refine the search", dataType = "string", paramType = "query"),
             @ApiImplicitParam(name = "from", value = "Starting index in the result set", dataType = "string", paramType = "query"),
@@ -338,10 +358,10 @@ public class ServiceController {
     @GetMapping(path = "adminPage/all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     public ResponseEntity<Paging<?>> getAllServicesForAdminPage(@ApiIgnore @RequestParam MultiValueMap<String, Object> allRequestParams,
-                                                                            @RequestParam(required = false) Set<String> auditState,
-                                                                            @RequestParam(defaultValue = "all", name = "catalogue_id") String catalogueId,
-                                                                            @RequestParam(defaultValue = "service", name = "type") String type,
-                                                                            @ApiIgnore Authentication authentication) {
+                                                                @RequestParam(required = false) Set<String> auditState,
+                                                                @RequestParam(defaultValue = "all", name = "catalogue_id") String catalogueId,
+                                                                @RequestParam(defaultValue = "service", name = "type") String type,
+                                                                @ApiIgnore Authentication authentication) {
         FacetFilter ff = resourceBundleService.createFacetFilterForFetchingServicesAndDatasources(allRequestParams, catalogueId, type);
         if (auditState == null) {
             Paging<?> paging = genericResourceService.getResults(ff);
@@ -351,6 +371,7 @@ public class ServiceController {
         }
     }
 
+    @Deprecated
     @PatchMapping(path = "auditResource/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     public ResponseEntity<ServiceBundle> auditResource(@PathVariable("id") String id, @RequestParam(required = false) String comment,
@@ -361,7 +382,7 @@ public class ServiceController {
         return new ResponseEntity<>(service, HttpStatus.OK);
     }
 
-
+    @Deprecated
     @ApiImplicitParams({
             @ApiImplicitParam(name = "quantity", value = "Quantity to be fetched", dataType = "string", paramType = "query")
     })
@@ -390,6 +411,7 @@ public class ServiceController {
     }
 
     // Get all modification details of a specific Resource based on id.
+    @Deprecated
     @GetMapping(path = {"loggingInfoHistory/{id}"}, produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<Paging<LoggingInfo>> loggingInfoHistory(@PathVariable String id,
                                                                   @RequestParam(defaultValue = "${project.catalogue.name}", name = "catalogue_id") String catalogueId) {
@@ -402,6 +424,7 @@ public class ServiceController {
     }
 
     // Send emails to Providers whose Resources are outdated
+    @Deprecated
     @GetMapping(path = {"sendEmailForOutdatedResource/{resourceId}"}, produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     public void sendEmailNotificationsToProvidersWithOutdatedResources(@PathVariable String resourceId, @ApiIgnore Authentication authentication) {
@@ -409,6 +432,7 @@ public class ServiceController {
     }
 
     // Move a Resource to another Provider
+    @Deprecated
     @PostMapping(path = {"changeProvider"}, produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     public void changeProvider(@RequestParam String resourceId, @RequestParam String newProvider, @RequestParam(required = false) String comment, @ApiIgnore Authentication authentication) {
@@ -416,6 +440,7 @@ public class ServiceController {
     }
 
     // front-end use
+    @Deprecated
     @GetMapping(path = {"resourceIdToNameMap"}, produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<List<Object>> getAllProviderRelatedResources() {
         List<Service> services = resourceBundleService.getAll(createFacetFilter(), null).getResults()
@@ -438,6 +463,7 @@ public class ServiceController {
         return ff;
     }
 
+    @Deprecated
     @ApiImplicitParams({
             @ApiImplicitParam(name = "query", value = "Keyword to refine the search", dataType = "string", paramType = "query"),
             @ApiImplicitParam(name = "from", value = "Starting index in the result set", dataType = "string", paramType = "query"),
@@ -459,17 +485,19 @@ public class ServiceController {
     }
 
     //front-end
+    @Deprecated
     @GetMapping(path = "isServiceOrDatasource")
     public ResponseEntity<String> isServiceOrDatasource(@RequestParam String resourceId, @RequestParam String catalogueId) {
         try{
-           resourceBundleService.get(resourceId, catalogueId);
-           return ResponseEntity.ok("service");
+            resourceBundleService.get(resourceId, catalogueId);
+            return ResponseEntity.ok("service");
         } catch(eu.einfracentral.exception.ResourceNotFoundException e){
             return ResponseEntity.ok("datasource");
         }
     }
 
     // Create a Public ServiceBundle if something went bad during its creation
+    @Deprecated
     @ApiIgnore
     @PostMapping(path = "createPublicService", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
