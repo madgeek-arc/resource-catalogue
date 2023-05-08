@@ -3,7 +3,6 @@ package eu.einfracentral.domain;
 import eu.einfracentral.annotation.FieldValidation;
 import eu.einfracentral.domain.interoperabilityRecord.configurationTemplates.ConfigurationTemplate;
 import io.swagger.annotations.ApiModelProperty;
-import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 
 import javax.xml.bind.annotation.XmlElement;
@@ -12,7 +11,7 @@ import javax.xml.bind.annotation.XmlType;
 
 @XmlType
 @XmlRootElement(namespace = "http://einfracentral.eu")
-public abstract class ConfigurationTemplateInstance implements Identifiable {
+public class ConfigurationTemplateInstance implements Identifiable {
 
     @XmlElement
     @ApiModelProperty(position = 1, example = "(required on PUT only)")
@@ -32,12 +31,12 @@ public abstract class ConfigurationTemplateInstance implements Identifiable {
     @XmlElement(required = true)
     @ApiModelProperty(position = 4, required = true)
     @FieldValidation
-    private JSONObject payload;
+    private String payload;
 
     public ConfigurationTemplateInstance() {
     }
 
-    public ConfigurationTemplateInstance(String id, String resourceId, String configurationTemplateId, JSONObject payload) {
+    public ConfigurationTemplateInstance(String id, String resourceId, String configurationTemplateId, String payload) {
         this.id = id;
         this.resourceId = resourceId;
         this.configurationTemplateId = configurationTemplateId;
@@ -70,11 +69,11 @@ public abstract class ConfigurationTemplateInstance implements Identifiable {
         this.configurationTemplateId = configurationTemplateId;
     }
 
-    public JSONObject getPayload() {
+    public String getPayload() {
         return payload;
     }
 
-    public void setPayload(JSONObject payload) {
+    public void setPayload(String payload) {
         this.payload = payload;
     }
 }
