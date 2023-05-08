@@ -30,9 +30,9 @@
     },
     {
       "multivalued": false,
-      "name": "Configuration Template Payload",
+      "name": "configuration_template_payload",
       "label": "Configuration Template Payload",
-      "path": "//*[local-name()='payload']/text()",
+      "path": "//*[local-name()='configurationTemplateInstance']/*[local-name()='payload']/text()",
       "type": "java.lang.String"
     },
     {

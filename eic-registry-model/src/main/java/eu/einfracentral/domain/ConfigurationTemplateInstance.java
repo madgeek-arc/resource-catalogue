@@ -3,11 +3,16 @@ package eu.einfracentral.domain;
 import eu.einfracentral.annotation.FieldValidation;
 import eu.einfracentral.domain.interoperabilityRecord.configurationTemplates.ConfigurationTemplate;
 import io.swagger.annotations.ApiModelProperty;
+import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 
 import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlType;
 
-public class ConfigurationTemplateInstance implements Identifiable {
+@XmlType
+@XmlRootElement(namespace = "http://einfracentral.eu")
+public abstract class ConfigurationTemplateInstance implements Identifiable {
 
     @XmlElement
     @ApiModelProperty(position = 1, example = "(required on PUT only)")

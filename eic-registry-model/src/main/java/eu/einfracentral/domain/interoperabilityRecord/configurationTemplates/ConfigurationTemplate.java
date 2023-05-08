@@ -15,7 +15,7 @@ import java.net.URL;
 import java.util.List;
 
 @XmlType
-@XmlRootElement
+@XmlRootElement(namespace = "http://einfracentral.eu")
 public class ConfigurationTemplate implements Identifiable {
 
     @XmlElement

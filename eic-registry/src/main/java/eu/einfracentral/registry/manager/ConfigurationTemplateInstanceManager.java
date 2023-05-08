@@ -1,5 +1,6 @@
 package eu.einfracentral.registry.manager;
 
+import com.google.gson.JsonObject;
 import eu.einfracentral.domain.*;
 import eu.einfracentral.domain.interoperabilityRecord.configurationTemplates.ConfigurationTemplate;
 import eu.einfracentral.domain.interoperabilityRecord.configurationTemplates.ConfigurationTemplateBundle;
@@ -12,6 +13,7 @@ import eu.einfracentral.service.SecurityService;
 import eu.openminted.registry.core.domain.FacetFilter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.security.core.Authentication;
 
 import java.util.ArrayList;
@@ -30,10 +32,10 @@ public class ConfigurationTemplateInstanceManager extends ResourceManager<Config
     private final ResourceBundleService<ServiceBundle> resourceBundleService;
     private final SecurityService securityService;
 
-    public ConfigurationTemplateInstanceManager(ConfigurationTemplateInstanceService<ConfigurationTemplateInstanceBundle> configurationTemplateInstanceService,
-                                                ConfigurationTemplateService<ConfigurationTemplateBundle> configurationTemplateService,
-                                                ResourceInteroperabilityRecordService<ResourceInteroperabilityRecordBundle> resourceInteroperabilityRecordService,
-                                                ResourceBundleService<ServiceBundle> resourceBundleService, SecurityService securityService) {
+    public ConfigurationTemplateInstanceManager(@Lazy ConfigurationTemplateInstanceService<ConfigurationTemplateInstanceBundle> configurationTemplateInstanceService,
+                                                @Lazy ConfigurationTemplateService<ConfigurationTemplateBundle> configurationTemplateService,
+                                                @Lazy ResourceInteroperabilityRecordService<ResourceInteroperabilityRecordBundle> resourceInteroperabilityRecordService,
+                                                @Lazy ResourceBundleService<ServiceBundle> resourceBundleService, SecurityService securityService) {
         super(ConfigurationTemplateInstanceBundle.class);
         this.configurationTemplateInstanceService = configurationTemplateInstanceService;
         this.configurationTemplateService = configurationTemplateService;
@@ -52,7 +54,7 @@ public class ConfigurationTemplateInstanceManager extends ResourceManager<Config
     @Override
     public ConfigurationTemplateInstanceBundle add(ConfigurationTemplateInstanceBundle configurationTemplateInstanceBundle, Authentication auth) {
         validate(configurationTemplateInstanceBundle);
-        checkResourceIdAndConfigurationTemplateIdConsistency(configurationTemplateInstanceBundle, auth);
+//        checkResourceIdAndConfigurationTemplateIdConsistency(configurationTemplateInstanceBundle, auth);
 
         configurationTemplateInstanceBundle.setId(UUID.randomUUID().toString());
         logger.trace("User '{}' is attempting to add a new ConfigurationTemplateInstance: {}", auth, configurationTemplateInstanceBundle);
