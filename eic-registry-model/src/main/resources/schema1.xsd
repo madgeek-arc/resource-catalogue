@@ -15,6 +15,8 @@
     
   <xs:element name="configurationTemplateBundle" type="tns:configurationTemplateBundle"/>
     
+  <xs:element name="configurationTemplateInstanceBundle" type="tns:configurationTemplateInstanceBundle"/>
+    
   <xs:element name="creator" type="tns:creator"/>
     
   <xs:element name="creatorAffiliationInfo" type="tns:creatorAffiliationInfo"/>
@@ -665,6 +667,66 @@ It is also possible to select Not a legal entity.]]></xs:documentation>
           <xs:element minOccurs="0" ref="tns:catalogue"/>
                     
           <xs:element minOccurs="0" name="status" type="xs:string"/>
+                  
+        </xs:sequence>
+              
+      </xs:extension>
+          
+    </xs:complexContent>
+      
+  </xs:complexType>
+    
+  <xs:complexType name="configurationTemplateInstance">
+        
+    <xs:sequence>
+            
+      <xs:element name="configurationTemplateId" type="xs:string"/>
+            
+      <xs:element minOccurs="0" name="id" type="xs:string"/>
+            
+      <xs:element name="payload">
+                
+        <xs:complexType>
+                    
+          <xs:sequence>
+                        
+            <xs:element maxOccurs="unbounded" minOccurs="0" name="entry">
+                            
+              <xs:complexType>
+                                
+                <xs:sequence>
+                                    
+                  <xs:element minOccurs="0" name="key" type="xs:string"/>
+                                    
+                  <xs:element minOccurs="0" name="value" type="xs:anyType"/>
+                                  
+                </xs:sequence>
+                              
+              </xs:complexType>
+                          
+            </xs:element>
+                      
+          </xs:sequence>
+                  
+        </xs:complexType>
+              
+      </xs:element>
+            
+      <xs:element name="resourceId" type="xs:string"/>
+          
+    </xs:sequence>
+      
+  </xs:complexType>
+    
+  <xs:complexType name="configurationTemplateInstanceBundle">
+        
+    <xs:complexContent>
+            
+      <xs:extension base="tns:bundle">
+                
+        <xs:sequence>
+                    
+          <xs:element minOccurs="0" name="configurationTemplateInstance" type="tns:configurationTemplateInstance"/>
                   
         </xs:sequence>
               
