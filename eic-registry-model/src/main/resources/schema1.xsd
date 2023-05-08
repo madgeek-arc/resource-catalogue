@@ -3301,6 +3301,10 @@ that is the used scheme (e.g., Web Address URL, DOI, ARK, etc.).]]></xs:document
         <xs:complexType>
                     
           <xs:sequence minOccurs="0">
+
+            <xs:element maxOccurs="unbounded" minOccurs="0" name="tns:entry" type="xs:string">
+
+            </xs:element>
                       
           </xs:sequence>
                   
