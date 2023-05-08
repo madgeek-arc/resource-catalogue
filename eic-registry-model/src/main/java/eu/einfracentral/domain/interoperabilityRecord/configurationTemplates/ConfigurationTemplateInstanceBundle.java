@@ -1,4 +1,8 @@
-package eu.einfracentral.domain;
+package eu.einfracentral.domain.interoperabilityRecord.configurationTemplates;
+
+import eu.einfracentral.domain.Bundle;
+import eu.einfracentral.domain.Metadata;
+import eu.einfracentral.domain.interoperabilityRecord.configurationTemplates.ConfigurationTemplateInstance;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;

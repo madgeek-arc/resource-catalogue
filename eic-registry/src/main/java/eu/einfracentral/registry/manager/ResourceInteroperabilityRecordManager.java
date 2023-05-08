@@ -96,8 +96,6 @@ public class ResourceInteroperabilityRecordManager extends ResourceManager<Resou
         ret = super.add(resourceInteroperabilityRecordBundle, null);
         logger.debug("Adding ResourceInteroperabilityRecord: {}", resourceInteroperabilityRecordBundle);
 
-        // TODO: emails?
-
         return ret;
     }
 
@@ -154,8 +152,6 @@ public class ResourceInteroperabilityRecordManager extends ResourceManager<Resou
         resourceService.updateResource(existing);
         logger.debug("Updating ResourceInteroperabilityRecord: {}", resourceInteroperabilityRecordBundle);
 
-        // TODO: emails?
-
         return resourceInteroperabilityRecordBundle;
     }
 
@@ -168,8 +164,6 @@ public class ResourceInteroperabilityRecordManager extends ResourceManager<Resou
                 resourceInteroperabilityRecordBundle.getId());
         super.delete(resourceInteroperabilityRecordBundle);
         logger.debug("Deleting ResourceInteroperabilityRecord: {}", resourceInteroperabilityRecordBundle);
-
-        // TODO: send emails
 
     }
 

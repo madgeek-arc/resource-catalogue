@@ -1,12 +1,13 @@
 package eu.einfracentral.registry.controller;
 
-import eu.einfracentral.domain.ConfigurationTemplateInstance;
-import eu.einfracentral.domain.ConfigurationTemplateInstanceBundle;
-import eu.einfracentral.domain.interoperabilityRecord.configurationTemplates.ConfigurationTemplateBundle;
+import eu.einfracentral.domain.interoperabilityRecord.configurationTemplates.ConfigurationTemplateInstance;
+import eu.einfracentral.domain.interoperabilityRecord.configurationTemplates.ConfigurationTemplateInstanceBundle;
+import eu.einfracentral.domain.interoperabilityRecord.configurationTemplates.ConfigurationTemplateInstanceDto;
 import eu.einfracentral.registry.service.ConfigurationTemplateInstanceService;
 import eu.einfracentral.utils.FacetFilterUtils;
 import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.domain.Paging;
+import eu.openminted.registry.core.exception.ResourceNotFoundException;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -16,12 +17,12 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
 import javax.validation.Valid;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -40,9 +41,10 @@ public class ConfigurationTemplateInstanceController {
 
     @ApiOperation(value = "Returns the ConfigurationTemplateInstance with the given id.")
     @GetMapping(path = "{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    public ResponseEntity<ConfigurationTemplateInstance> getConfigurationTemplateInstance(@PathVariable("id") String id) {
+    public ResponseEntity<ConfigurationTemplateInstanceDto> getConfigurationTemplateInstance(@PathVariable("id") String id) {
         ConfigurationTemplateInstance configurationTemplateInstance = configurationTemplateInstanceService.get(id).getConfigurationTemplateInstance();
-        return new ResponseEntity<>(configurationTemplateInstance, HttpStatus.OK);
+        ConfigurationTemplateInstanceDto ret = configurationTemplateInstanceService.createConfigurationTemplateInstanceDto(configurationTemplateInstance);
+        return new ResponseEntity<>(ret, HttpStatus.OK);
     }
 
     @ApiOperation(value = "Filter a list of ConfigurationTemplateInstances based on a set of filters or get a list of all ConfigurationTemplateInstances in the Catalogue.")
@@ -68,6 +70,28 @@ public class ConfigurationTemplateInstanceController {
         return new ResponseEntity<>(configurationTemplateInstancePaging, HttpStatus.OK);
     }
 
+    @ApiOperation(value = "Returns a List of ConfigurationTemplateInstance associated with the given 'resourceId'")
+    @GetMapping(path = "getAllByResourceId/{resourceId}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    public ResponseEntity<List<ConfigurationTemplateInstanceDto>> getConfigurationTemplateInstancesByResourceId(@PathVariable("resourceId") String resourceId) {
+        List<ConfigurationTemplateInstanceDto> ret = new ArrayList<>();
+        List<ConfigurationTemplateInstance> configurationTemplateInstances = configurationTemplateInstanceService.getConfigurationTemplateInstancesByResourceId(resourceId);
+        for (ConfigurationTemplateInstance configurationTemplateInstance : configurationTemplateInstances){
+            ret.add(configurationTemplateInstanceService.createConfigurationTemplateInstanceDto(configurationTemplateInstance));
+        }
+        return new ResponseEntity<>(ret, HttpStatus.OK);
+    }
+
+    @ApiOperation(value = "Returns a List of ConfigurationTemplateInstance associated with the given 'configurationTemplateId'")
+    @GetMapping(path = "getAllByConfigurationTemplateId/{configurationTemplateId}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    public ResponseEntity<List<ConfigurationTemplateInstanceDto>> getConfigurationTemplateInstancesByConfigurationTemplateId(@PathVariable("configurationTemplateId") String configurationTemplateId) {
+        List<ConfigurationTemplateInstanceDto> ret = new ArrayList<>();
+        List<ConfigurationTemplateInstance> configurationTemplateInstances = configurationTemplateInstanceService.getConfigurationTemplateInstancesByConfigurationTemplateId(configurationTemplateId);
+        for (ConfigurationTemplateInstance configurationTemplateInstance : configurationTemplateInstances){
+            ret.add(configurationTemplateInstanceService.createConfigurationTemplateInstanceDto(configurationTemplateInstance));
+        }
+        return new ResponseEntity<>(ret, HttpStatus.OK);
+    }
+
     @ApiOperation(value = "Create a new ConfigurationTemplateInstance.")
     @PostMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
 //    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth, #configurationTemplateInstance)")
@@ -78,30 +102,30 @@ public class ConfigurationTemplateInstanceController {
         return new ResponseEntity<>(configurationTemplateInstanceBundle.getConfigurationTemplateInstance(), HttpStatus.CREATED);
     }
 
-//    @ApiOperation(value = "Updates the ConfigurationTemplateInstance with the given id.")
-//    @PutMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
+    @ApiOperation(value = "Updates the ConfigurationTemplateInstance with the given id.")
+    @PutMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
 //    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth, #configurationTemplate)")
-//    public ResponseEntity<ConfigurationTemplateInstance> updateConfigurationTemplate(@Valid @RequestBody ConfigurationTemplateInstance configurationTemplate,
-//                                                                             @ApiIgnore Authentication auth) throws ResourceNotFoundException {
-//        ConfigurationTemplateBundle configurationTemplateBundle = configurationTemplateInstanceService.get(configurationTemplate.getId());
-//        configurationTemplateBundle.setConfigurationTemplate(configurationTemplate);
-//        configurationTemplateBundle = configurationTemplateInstanceService.update(configurationTemplateBundle, auth);
-//        logger.info("User '{}' updated the Configuration Template with id '{}'", auth.getName(), configurationTemplateBundle.getId());
-//        return new ResponseEntity<>(configurationTemplateBundle.getConfigurationTemplate(), HttpStatus.OK);
-//    }
-//
-//    @DeleteMapping(path = "{configurationTemplateId}", produces = {MediaType.APPLICATION_JSON_VALUE})
+    public ResponseEntity<ConfigurationTemplateInstance> updateConfigurationTemplateInstance(@Valid @RequestBody ConfigurationTemplateInstance configurationTemplateInstance,
+                                                                             @ApiIgnore Authentication auth) throws ResourceNotFoundException, ResourceNotFoundException {
+        ConfigurationTemplateInstanceBundle configurationTemplateInstanceBundle = configurationTemplateInstanceService.get(configurationTemplateInstance.getId());
+        configurationTemplateInstanceBundle.setConfigurationTemplateInstance(configurationTemplateInstance);
+        configurationTemplateInstanceBundle = configurationTemplateInstanceService.update(configurationTemplateInstanceBundle, auth);
+        logger.info("User '{}' updated the Configuration Template Instance with id '{}'", auth.getName(), configurationTemplateInstanceBundle.getId());
+        return new ResponseEntity<>(configurationTemplateInstanceBundle.getConfigurationTemplateInstance(), HttpStatus.OK);
+    }
+
+    @DeleteMapping(path = "{configurationTemplateInstanceId}", produces = {MediaType.APPLICATION_JSON_VALUE})
 //    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth, #configurationTemplateId)")
-//    public ResponseEntity<ConfigurationTemplateInstance> deleteConfigurationTemplate(@PathVariable("configurationTemplateId") String configurationTemplateId,
-//                                                                             @ApiIgnore Authentication auth) throws ResourceNotFoundException {
-//        ConfigurationTemplateBundle configurationTemplateBundle = configurationTemplateInstanceService.get(configurationTemplateId);
-//        if (configurationTemplateBundle == null) {
-//            return new ResponseEntity<>(HttpStatus.GONE);
-//        }
-//        logger.info("Deleting Configuration Template: {}", configurationTemplateBundle.getConfigurationTemplate().getId());
-//        configurationTemplateInstanceService.delete(configurationTemplateBundle);
-//        logger.info("User '{}' deleted the Configuration Template with id '{}'", auth.getName(),
-//                configurationTemplateBundle.getConfigurationTemplate().getId());
-//        return new ResponseEntity<>(configurationTemplateBundle.getConfigurationTemplate(), HttpStatus.OK);
-//    }
+    public ResponseEntity<ConfigurationTemplateInstance> deleteConfigurationTemplateInstance(@PathVariable("configurationTemplateInstanceId") String configurationTemplateInstanceId,
+                                                                             @ApiIgnore Authentication auth) throws ResourceNotFoundException {
+        ConfigurationTemplateInstanceBundle configurationTemplateInstanceBundle = configurationTemplateInstanceService.get(configurationTemplateInstanceId);
+        if (configurationTemplateInstanceBundle == null) {
+            return new ResponseEntity<>(HttpStatus.GONE);
+        }
+        logger.info("Deleting Configuration Template Instance: {}", configurationTemplateInstanceBundle.getConfigurationTemplateInstance().getId());
+        configurationTemplateInstanceService.delete(configurationTemplateInstanceBundle);
+        logger.info("User '{}' deleted the Configuration Template Instance with id '{}'", auth.getName(),
+                configurationTemplateInstanceBundle.getConfigurationTemplateInstance().getId());
+        return new ResponseEntity<>(configurationTemplateInstanceBundle.getConfigurationTemplateInstance(), HttpStatus.OK);
+    }
 }

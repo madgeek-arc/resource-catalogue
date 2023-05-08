@@ -1,19 +1,24 @@
 package eu.einfracentral.registry.manager;
 
-import com.google.gson.JsonObject;
 import eu.einfracentral.domain.*;
-import eu.einfracentral.domain.interoperabilityRecord.configurationTemplates.ConfigurationTemplate;
 import eu.einfracentral.domain.interoperabilityRecord.configurationTemplates.ConfigurationTemplateBundle;
+import eu.einfracentral.domain.interoperabilityRecord.configurationTemplates.ConfigurationTemplateInstance;
+import eu.einfracentral.domain.interoperabilityRecord.configurationTemplates.ConfigurationTemplateInstanceBundle;
+import eu.einfracentral.domain.interoperabilityRecord.configurationTemplates.ConfigurationTemplateInstanceDto;
 import eu.einfracentral.exception.ValidationException;
 import eu.einfracentral.registry.service.ConfigurationTemplateInstanceService;
 import eu.einfracentral.registry.service.ConfigurationTemplateService;
-import eu.einfracentral.registry.service.ResourceBundleService;
 import eu.einfracentral.registry.service.ResourceInteroperabilityRecordService;
 import eu.einfracentral.service.SecurityService;
 import eu.openminted.registry.core.domain.FacetFilter;
+import eu.openminted.registry.core.domain.Resource;
+import net.minidev.json.JSONObject;
+import net.minidev.json.parser.JSONParser;
+import net.minidev.json.parser.ParseException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 
 import java.util.ArrayList;
@@ -29,18 +34,16 @@ public class ConfigurationTemplateInstanceManager extends ResourceManager<Config
     private final ResourceInteroperabilityRecordService<ResourceInteroperabilityRecordBundle> resourceInteroperabilityRecordService;
 
     private final ConfigurationTemplateService<ConfigurationTemplateBundle> configurationTemplateService;
-    private final ResourceBundleService<ServiceBundle> resourceBundleService;
     private final SecurityService securityService;
 
     public ConfigurationTemplateInstanceManager(@Lazy ConfigurationTemplateInstanceService<ConfigurationTemplateInstanceBundle> configurationTemplateInstanceService,
                                                 @Lazy ConfigurationTemplateService<ConfigurationTemplateBundle> configurationTemplateService,
                                                 @Lazy ResourceInteroperabilityRecordService<ResourceInteroperabilityRecordBundle> resourceInteroperabilityRecordService,
-                                                @Lazy ResourceBundleService<ServiceBundle> resourceBundleService, SecurityService securityService) {
+                                                SecurityService securityService) {
         super(ConfigurationTemplateInstanceBundle.class);
         this.configurationTemplateInstanceService = configurationTemplateInstanceService;
         this.configurationTemplateService = configurationTemplateService;
         this.resourceInteroperabilityRecordService = resourceInteroperabilityRecordService;
-        this.resourceBundleService = resourceBundleService;
         this.securityService = securityService;
     }
 
@@ -77,34 +80,98 @@ public class ConfigurationTemplateInstanceManager extends ResourceManager<Config
         return ret;
     }
 
-    public ConfigurationTemplateInstance getConfigurationTemplateInstanceByResourceId(String resourceId, Authentication auth){
-        FacetFilter ff = new FacetFilter();
-        ff.setQuantity(10000);
-        List<ConfigurationTemplateInstanceBundle> configurationTemplateInstanceBundles = configurationTemplateInstanceService.getAll(ff, auth).getResults();
-        for (ConfigurationTemplateInstanceBundle configurationTemplateInstanceBundle : configurationTemplateInstanceBundles){
-            if (configurationTemplateInstanceBundle.getConfigurationTemplateInstance().getResourceId().equals(resourceId)){
-                return configurationTemplateInstanceBundle.getConfigurationTemplateInstance();
-            }
+    @Override
+    public ConfigurationTemplateInstanceBundle update(ConfigurationTemplateInstanceBundle configurationTemplateInstanceBundle, Authentication auth) {
+        logger.trace("User '{}' is attempting to update the ConfigurationTemplateInstance with id '{}'", auth, configurationTemplateInstanceBundle.getId());
+
+        Resource existing = whereID(configurationTemplateInstanceBundle.getId(), true);
+        ConfigurationTemplateInstanceBundle ex = deserialize(existing);
+        // check if there are actual changes in the ConfigurationTemplateInstance
+        if (configurationTemplateInstanceBundle.getConfigurationTemplateInstance().equals(ex.getConfigurationTemplateInstance())){
+            throw new ValidationException("There are no changes in the Configuration Template Instance", HttpStatus.OK);
         }
-        return null;
+
+        // block Public ConfigurationTemplateInstanceBundle updates
+        if (configurationTemplateInstanceBundle.getMetadata().isPublished()){
+            throw new ValidationException("You cannot directly update a Public Configuration Template Instance");
+        }
+
+        validate(configurationTemplateInstanceBundle);
+
+        configurationTemplateInstanceBundle.setMetadata(Metadata.updateMetadata(configurationTemplateInstanceBundle.getMetadata(), User.of(auth).getFullName(), User.of(auth).getEmail()));
+        List<LoggingInfo> loggingInfoList = new ArrayList<>();
+        LoggingInfo loggingInfo;
+        loggingInfo = LoggingInfo.createLoggingInfoEntry(User.of(auth).getEmail(), User.of(auth).getFullName(), securityService.getRoleName(auth),
+                LoggingInfo.Types.UPDATE.getKey(), LoggingInfo.ActionType.UPDATED.getKey());
+        if (configurationTemplateInstanceBundle.getLoggingInfo() != null) {
+            loggingInfoList = configurationTemplateInstanceBundle.getLoggingInfo();
+            loggingInfoList.add(loggingInfo);
+        } else {
+            loggingInfoList.add(loggingInfo);
+        }
+        configurationTemplateInstanceBundle.setLoggingInfo(loggingInfoList);
+
+        // latestUpdateInfo
+        configurationTemplateInstanceBundle.setLatestUpdateInfo(loggingInfo);
+
+        existing.setPayload(serialize(configurationTemplateInstanceBundle));
+        existing.setResourceType(resourceType);
+
+        // block user from updating resourceId
+        if (!configurationTemplateInstanceBundle.getConfigurationTemplateInstance().getResourceId().equals(ex.getConfigurationTemplateInstance().getResourceId())
+                && !securityService.hasRole(auth, "ROLE_ADMIN")){
+            throw new ValidationException("You cannot change the Resource Id with which this ConfigurationTemplateInstance is related");
+        }
+
+        resourceService.updateResource(existing);
+        logger.debug("Updating ResourceInteroperabilityRecord: {}", configurationTemplateInstanceBundle);
+
+        return configurationTemplateInstanceBundle;
     }
 
-    public ConfigurationTemplateInstance getConfigurationTemplateInstanceByConfigurationTemplateId(String configurationTemplateId, Authentication auth){
+    public void delete(ConfigurationTemplateInstanceBundle configurationTemplateInstanceBundle) {
+        // block Public ConfigurationTemplateInstanceBundle deletions
+        if (configurationTemplateInstanceBundle.getMetadata().isPublished()){
+            throw new ValidationException("You cannot directly delete a Public Configuration Template Instance");
+        }
+        logger.trace("User is attempting to delete the ConfigurationTemplateInstance with id '{}'",
+                configurationTemplateInstanceBundle.getId());
+        super.delete(configurationTemplateInstanceBundle);
+        logger.debug("Deleting ConfigurationTemplateInstanceBundle: {}", configurationTemplateInstanceBundle);
+
+    }
+
+    public List<ConfigurationTemplateInstance> getConfigurationTemplateInstancesByResourceId(String resourceId){
+        List<ConfigurationTemplateInstance> ret = new ArrayList<>();
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(10000);
-        List<ConfigurationTemplateInstanceBundle> configurationTemplateInstanceBundles = configurationTemplateInstanceService.getAll(ff, auth).getResults();
+        List<ConfigurationTemplateInstanceBundle> configurationTemplateInstanceBundles = configurationTemplateInstanceService.getAll(ff, null).getResults();
         for (ConfigurationTemplateInstanceBundle configurationTemplateInstanceBundle : configurationTemplateInstanceBundles){
-            if (configurationTemplateInstanceBundle.getConfigurationTemplateInstance().getResourceId().equals(configurationTemplateId)){
-                return configurationTemplateInstanceBundle.getConfigurationTemplateInstance();
+            if (configurationTemplateInstanceBundle.getConfigurationTemplateInstance().getResourceId().equals(resourceId)){
+                ret.add(configurationTemplateInstanceBundle.getConfigurationTemplateInstance());
             }
         }
-        return null;
+        return ret;
+    }
+
+    public List<ConfigurationTemplateInstance> getConfigurationTemplateInstancesByConfigurationTemplateId(String configurationTemplateId){
+        List<ConfigurationTemplateInstance> ret = new ArrayList<>();
+        FacetFilter ff = new FacetFilter();
+        ff.setQuantity(10000);
+        List<ConfigurationTemplateInstanceBundle> configurationTemplateInstanceBundles = configurationTemplateInstanceService.getAll(ff, null).getResults();
+        for (ConfigurationTemplateInstanceBundle configurationTemplateInstanceBundle : configurationTemplateInstanceBundles){
+            if (configurationTemplateInstanceBundle.getConfigurationTemplateInstance().getConfigurationTemplateId().equals(configurationTemplateId)){
+                ret.add(configurationTemplateInstanceBundle.getConfigurationTemplateInstance());
+            }
+        }
+        return ret;
     }
 
     private void checkResourceIdAndConfigurationTemplateIdConsistency(ConfigurationTemplateInstanceBundle configurationTemplateInstanceBundle, Authentication auth){
         // check if the configuration template ID is related to the resource ID
         boolean found = false;
         FacetFilter ff = new FacetFilter();
+        ff.addFilter("published", false);
         ff.setQuantity(10000);
         List<ResourceInteroperabilityRecordBundle> resourceInteroperabilityRecordBundleList = resourceInteroperabilityRecordService.getAll(ff, auth).getResults();
         for (ResourceInteroperabilityRecordBundle resourceInteroperabilityRecordBundle : resourceInteroperabilityRecordBundleList){
@@ -122,4 +189,18 @@ public class ConfigurationTemplateInstanceManager extends ResourceManager<Config
         }
     }
 
+    public ConfigurationTemplateInstanceDto createConfigurationTemplateInstanceDto(ConfigurationTemplateInstance configurationTemplateInstance) {
+        ConfigurationTemplateInstanceDto ret = new ConfigurationTemplateInstanceDto();
+        ret.setId(configurationTemplateInstance.getId());
+        ret.setConfigurationTemplateId(configurationTemplateInstance.getConfigurationTemplateId());
+        ret.setResourceId(configurationTemplateInstance.getResourceId());
+        JSONParser parser = new JSONParser();
+        JSONObject json = null;
+        try {
+            json = (JSONObject) parser.parse(configurationTemplateInstance.getPayload());
+        } catch (ParseException e) {
+        }
+        ret.setPayload(json);
+        return ret;
+    }
 }
