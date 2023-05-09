@@ -10,6 +10,7 @@
     <xs:element name="loggingInfo" type="tns:loggingInfo"/>
     <xs:element name="identifiers" type="tns:identifiers"/>
 
+
     <xs:complexType name="configurationTemplateInstance">
         <xs:sequence>
             <xs:element name="configurationTemplateId" type="xs:string"/>
