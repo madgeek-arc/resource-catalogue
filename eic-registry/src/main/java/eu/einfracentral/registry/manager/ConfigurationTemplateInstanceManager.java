@@ -189,18 +189,18 @@ public class ConfigurationTemplateInstanceManager extends ResourceManager<Config
         }
     }
 
-    public ConfigurationTemplateInstanceDto createConfigurationTemplateInstanceDto(ConfigurationTemplateInstance configurationTemplateInstance) {
-        ConfigurationTemplateInstanceDto ret = new ConfigurationTemplateInstanceDto();
-        ret.setId(configurationTemplateInstance.getId());
-        ret.setConfigurationTemplateId(configurationTemplateInstance.getConfigurationTemplateId());
-        ret.setResourceId(configurationTemplateInstance.getResourceId());
-        JSONParser parser = new JSONParser();
-        JSONObject json = null;
-        try {
-            json = (JSONObject) parser.parse(configurationTemplateInstance.getPayload());
-        } catch (ParseException e) {
-        }
-        ret.setPayload(json);
-        return ret;
-    }
+//    public ConfigurationTemplateInstanceDto createConfigurationTemplateInstanceDto(ConfigurationTemplateInstance configurationTemplateInstance) {
+//        ConfigurationTemplateInstanceDto ret = new ConfigurationTemplateInstanceDto();
+//        ret.setId(configurationTemplateInstance.getId());
+//        ret.setConfigurationTemplateId(configurationTemplateInstance.getConfigurationTemplateId());
+//        ret.setResourceId(configurationTemplateInstance.getResourceId());
+//        JSONParser parser = new JSONParser();
+//        JSONObject json = null;
+//        try {
+//            json = (JSONObject) parser.parse(configurationTemplateInstance.getPayload());
+//        } catch (ParseException e) {
+//        }
+//        ret.setPayload(json);
+//        return ret;
+//    }
 }

@@ -10,5 +10,5 @@ public interface ConfigurationTemplateInstanceService<T> extends ResourceService
 
     List<ConfigurationTemplateInstance> getConfigurationTemplateInstancesByResourceId(String resourceId);
     List<ConfigurationTemplateInstance> getConfigurationTemplateInstancesByConfigurationTemplateId(String configurationTemplateId);
-    ConfigurationTemplateInstanceDto createConfigurationTemplateInstanceDto(ConfigurationTemplateInstance configurationTemplateInstance);
+//    ConfigurationTemplateInstanceDto createConfigurationTemplateInstanceDto(ConfigurationTemplateInstance configurationTemplateInstance);
 }

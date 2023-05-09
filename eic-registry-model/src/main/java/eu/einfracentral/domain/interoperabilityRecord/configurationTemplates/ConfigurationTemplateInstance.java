@@ -3,7 +3,7 @@ package eu.einfracentral.domain.interoperabilityRecord.configurationTemplates;
 import eu.einfracentral.annotation.FieldValidation;
 import eu.einfracentral.domain.Identifiable;
 import io.swagger.annotations.ApiModelProperty;
-import net.minidev.json.JSONObject;
+import org.json.simple.JSONObject;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;

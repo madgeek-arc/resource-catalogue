@@ -41,10 +41,10 @@ public class ConfigurationTemplateInstanceController {
 
     @ApiOperation(value = "Returns the ConfigurationTemplateInstance with the given id.")
     @GetMapping(path = "{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    public ResponseEntity<ConfigurationTemplateInstanceDto> getConfigurationTemplateInstance(@PathVariable("id") String id) {
+    public ResponseEntity<ConfigurationTemplateInstance> getConfigurationTemplateInstance(@PathVariable("id") String id) {
         ConfigurationTemplateInstance configurationTemplateInstance = configurationTemplateInstanceService.get(id).getConfigurationTemplateInstance();
-        ConfigurationTemplateInstanceDto ret = configurationTemplateInstanceService.createConfigurationTemplateInstanceDto(configurationTemplateInstance);
-        return new ResponseEntity<>(ret, HttpStatus.OK);
+//        ConfigurationTemplateInstanceDto ret = configurationTemplateInstanceService.createConfigurationTemplateInstanceDto(configurationTemplateInstance);
+        return new ResponseEntity<>(configurationTemplateInstance, HttpStatus.OK);
     }
 
     @ApiOperation(value = "Filter a list of ConfigurationTemplateInstances based on a set of filters or get a list of all ConfigurationTemplateInstances in the Catalogue.")
@@ -72,24 +72,24 @@ public class ConfigurationTemplateInstanceController {
 
     @ApiOperation(value = "Returns a List of ConfigurationTemplateInstance associated with the given 'resourceId'")
     @GetMapping(path = "getAllByResourceId/{resourceId}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    public ResponseEntity<List<ConfigurationTemplateInstanceDto>> getConfigurationTemplateInstancesByResourceId(@PathVariable("resourceId") String resourceId) {
-        List<ConfigurationTemplateInstanceDto> ret = new ArrayList<>();
+    public ResponseEntity<List<ConfigurationTemplateInstance>> getConfigurationTemplateInstancesByResourceId(@PathVariable("resourceId") String resourceId) {
         List<ConfigurationTemplateInstance> configurationTemplateInstances = configurationTemplateInstanceService.getConfigurationTemplateInstancesByResourceId(resourceId);
-        for (ConfigurationTemplateInstance configurationTemplateInstance : configurationTemplateInstances){
-            ret.add(configurationTemplateInstanceService.createConfigurationTemplateInstanceDto(configurationTemplateInstance));
-        }
-        return new ResponseEntity<>(ret, HttpStatus.OK);
+//        List<ConfigurationTemplateInstanceDto> ret = new ArrayList<>();
+//        for (ConfigurationTemplateInstance configurationTemplateInstance : configurationTemplateInstances){
+//            ret.add(configurationTemplateInstanceService.createConfigurationTemplateInstanceDto(configurationTemplateInstance));
+//        }
+        return new ResponseEntity<>(configurationTemplateInstances, HttpStatus.OK);
     }
 
     @ApiOperation(value = "Returns a List of ConfigurationTemplateInstance associated with the given 'configurationTemplateId'")
     @GetMapping(path = "getAllByConfigurationTemplateId/{configurationTemplateId}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    public ResponseEntity<List<ConfigurationTemplateInstanceDto>> getConfigurationTemplateInstancesByConfigurationTemplateId(@PathVariable("configurationTemplateId") String configurationTemplateId) {
-        List<ConfigurationTemplateInstanceDto> ret = new ArrayList<>();
+    public ResponseEntity<List<ConfigurationTemplateInstance>> getConfigurationTemplateInstancesByConfigurationTemplateId(@PathVariable("configurationTemplateId") String configurationTemplateId) {
         List<ConfigurationTemplateInstance> configurationTemplateInstances = configurationTemplateInstanceService.getConfigurationTemplateInstancesByConfigurationTemplateId(configurationTemplateId);
-        for (ConfigurationTemplateInstance configurationTemplateInstance : configurationTemplateInstances){
-            ret.add(configurationTemplateInstanceService.createConfigurationTemplateInstanceDto(configurationTemplateInstance));
-        }
-        return new ResponseEntity<>(ret, HttpStatus.OK);
+//        List<ConfigurationTemplateInstanceDto> ret = new ArrayList<>();
+//        for (ConfigurationTemplateInstance configurationTemplateInstance : configurationTemplateInstances){
+//            ret.add(configurationTemplateInstanceService.createConfigurationTemplateInstanceDto(configurationTemplateInstance));
+//        }
+        return new ResponseEntity<>(configurationTemplateInstances, HttpStatus.OK);
     }
 
     @ApiOperation(value = "Create a new ConfigurationTemplateInstance.")
