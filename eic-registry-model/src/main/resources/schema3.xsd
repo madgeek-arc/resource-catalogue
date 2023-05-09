@@ -1,15 +1,14 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:tns="http://einfracentral.eu" elementFormDefault="qualified" targetNamespace="http://einfracentral.eu" version="1.0">
 
-    <xs:element name="configurationTemplateInstanceBundle"/>
+    <xs:element name="configurationTemplateInstanceBundle" type="tns:configurationTemplateInstanceBundle"/>
     <xs:element name="configurationTemplateInstance"/>
-    <xs:element name="alternativeIdentifier"/>
-    <xs:element name="bundle"/>
-    <xs:element name="metadata"/>
-    <xs:element name="migrationStatus"/>
-    <xs:element name="loggingInfo"/>
-    <xs:element name="identifiers"/>
-
+    <xs:element name="alternativeIdentifier" type="tns:alternativeIdentifier"/>
+    <xs:element name="bundle" type="tns:bundle"/>
+    <xs:element name="metadata" type="tns:metadata"/>
+    <xs:element name="migrationStatus" type="tns:migrationStatus"/>
+    <xs:element name="loggingInfo" type="tns:loggingInfo"/>
+    <xs:element name="identifiers" type="tns:identifiers"/>
 
     <xs:complexType name="configurationTemplateInstance">
         <xs:sequence>
@@ -46,9 +45,9 @@
 
     <xs:complexType name="configurationTemplateInstanceBundle">
         <xs:complexContent>
-            <xs:extension base="bundle">
+            <xs:extension base="tns:bundle">
                 <xs:sequence>
-                    <xs:element minOccurs="0" ref="configurationTemplateInstance"/>
+                    <xs:element minOccurs="0" ref="tns:configurationTemplateInstance"/>
                 </xs:sequence>
             </xs:extension>
         </xs:complexContent>
@@ -57,13 +56,13 @@
     <xs:complexType abstract="true" name="bundle">
         <xs:sequence>
             <xs:element name="active" type="xs:boolean"/>
-            <xs:element minOccurs="0" name="identifiers"/>
-            <xs:element minOccurs="0" name="latestAuditInfo" type="loggingInfo"/>
-            <xs:element minOccurs="0" name="latestOnboardingInfo" type="loggingInfo"/>
-            <xs:element minOccurs="0" name="latestUpdateInfo" type="loggingInfo"/>
-            <xs:element maxOccurs="unbounded" minOccurs="0" ref="loggingInfo"/>
-            <xs:element minOccurs="0" ref="metadata"/>
-            <xs:element minOccurs="0" ref="migrationStatus"/>
+            <xs:element minOccurs="0" ref="tns:identifiers"/>
+            <xs:element minOccurs="0" name="latestAuditInfo" type="tns:loggingInfo"/>
+            <xs:element minOccurs="0" name="latestOnboardingInfo" type="tns:loggingInfo"/>
+            <xs:element minOccurs="0" name="latestUpdateInfo" type="tns:loggingInfo"/>
+            <xs:element maxOccurs="unbounded" minOccurs="0" ref="tns:loggingInfo"/>
+            <xs:element minOccurs="0" ref="tns:metadata"/>
+            <xs:element minOccurs="0" ref="tns:migrationStatus"/>
             <xs:element name="suspended" type="xs:boolean"/>
         </xs:sequence>
     </xs:complexType>
@@ -89,7 +88,7 @@
             <xs:element minOccurs="0" name="alternativeIdentifiers">
                 <xs:complexType>
                     <xs:sequence>
-                        <xs:element maxOccurs="unbounded" minOccurs="0" ref="alternativeIdentifier"/>
+                        <xs:element maxOccurs="unbounded" minOccurs="0" ref="tns:alternativeIdentifier"/>
                     </xs:sequence>
                 </xs:complexType>
             </xs:element>
