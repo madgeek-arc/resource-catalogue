@@ -124,5 +124,5 @@
   "properties": {
     "class": "eu.einfracentral.domain.ConfigurationTemplateInstance"
   },
-  "schemaUrl": "https://raw.githubusercontent.com/madgeek-arc/resource-catalogue/guidelines_v2/eic-registry-model/src/main/resources/schema1.xsd"
+  "schemaUrl": "https://raw.githubusercontent.com/madgeek-arc/resource-catalogue/guidelines_v2/eic-registry-model/src/main/resources/schema3.xsd"
 }

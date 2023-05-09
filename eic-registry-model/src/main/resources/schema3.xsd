@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:tns="http://einfracentral.eu" elementFormDefault="qualified" targetNamespace="http://einfracentral.eu" version="1.0">
+
+    <xs:element name="configurationTemplateInstance" type="tns:configurationTemplateInstance"/>
+
+    <xs:complexType name="configurationTemplateInstance">
+
+        <xs:sequence>
+
+            <xs:element name="configurationTemplateId" type="xs:string"/>
+
+            <xs:element name="id" type="xs:string"/>
+
+            <xs:element name="payload">
+
+                <xs:complexType>
+
+                    <xs:sequence>
+
+                        <xs:element maxOccurs="unbounded" minOccurs="0" name="entry">
+
+                            <xs:complexType>
+
+                                <xs:sequence>
+
+                                    <xs:element name="baseURL" type="xs:string"/>
+
+                                    <xs:element name="compatibility" type="xs:string"/>
+
+                                    <xs:element name="format" type="xs:string"/>
+
+                                    <xs:element name="id" type="xs:string"/>
+
+                                    <xs:element name="interoperabilityRecordId" type="xs:string"/>
+
+                                    <xs:element name="protocol" type="xs:string"/>
+
+                                    <xs:element name="sets">
+
+                                        <xs:complexType>
+
+                                            <xs:sequence>
+
+                                                <xs:element name="set" type="xs:string"/>
+
+                                            </xs:sequence>
+
+                                        </xs:complexType>
+
+                                    </xs:element>
+
+                                </xs:sequence>
+
+                            </xs:complexType>
+
+                        </xs:element>
+
+                    </xs:sequence>
+
+                </xs:complexType>
+
+            </xs:element>
+
+            <xs:element name="resourceId" type="xs:string"/>
+
+        </xs:sequence>
+
+    </xs:complexType>
+
+</xs:schema>

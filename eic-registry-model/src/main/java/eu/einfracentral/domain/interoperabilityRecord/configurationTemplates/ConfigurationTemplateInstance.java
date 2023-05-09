@@ -3,6 +3,7 @@ package eu.einfracentral.domain.interoperabilityRecord.configurationTemplates;
 import eu.einfracentral.annotation.FieldValidation;
 import eu.einfracentral.domain.Identifiable;
 import io.swagger.annotations.ApiModelProperty;
+import net.minidev.json.JSONObject;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -30,12 +31,12 @@ public class ConfigurationTemplateInstance implements Identifiable {
     @XmlElement(required = true)
     @ApiModelProperty(position = 4, required = true)
     @FieldValidation
-    private String payload;
+    private JSONObject payload;
 
     public ConfigurationTemplateInstance() {
     }
 
-    public ConfigurationTemplateInstance(String id, String resourceId, String configurationTemplateId, String payload) {
+    public ConfigurationTemplateInstance(String id, String resourceId, String configurationTemplateId, JSONObject payload) {
         this.id = id;
         this.resourceId = resourceId;
         this.configurationTemplateId = configurationTemplateId;
@@ -68,11 +69,11 @@ public class ConfigurationTemplateInstance implements Identifiable {
         this.configurationTemplateId = configurationTemplateId;
     }
 
-    public String getPayload() {
+    public JSONObject getPayload() {
         return payload;
     }
 
-    public void setPayload(String payload) {
+    public void setPayload(JSONObject payload) {
         this.payload = payload;
     }
 }
