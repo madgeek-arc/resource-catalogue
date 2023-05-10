@@ -30,12 +30,12 @@ public class ConfigurationTemplateInstance implements Identifiable {
     @XmlElement(required = true)
     @ApiModelProperty(position = 4, required = true)
     @FieldValidation
-    private JSONObject payload;
+    private String payload;
 
     public ConfigurationTemplateInstance() {
     }
 
-    public ConfigurationTemplateInstance(String id, String resourceId, String configurationTemplateId, JSONObject payload) {
+    public ConfigurationTemplateInstance(String id, String resourceId, String configurationTemplateId, String payload) {
         this.id = id;
         this.resourceId = resourceId;
         this.configurationTemplateId = configurationTemplateId;
@@ -68,11 +68,11 @@ public class ConfigurationTemplateInstance implements Identifiable {
         this.configurationTemplateId = configurationTemplateId;
     }
 
-    public JSONObject getPayload() {
+    public String getPayload() {
         return payload;
     }
 
-    public void setPayload(JSONObject payload) {
+    public void setPayload(String payload) {
         this.payload = payload;
     }
 }

@@ -107,7 +107,6 @@
                     <sources>
                         <source>${basedir}/src/main/java/eu/einfracentral/domain</source>
                     </sources>
-                    <clearOutputDir>false</clearOutputDir>
                     <outputDirectory>${basedir}/src/main/resources</outputDirectory>
                 </configuration>
             </plugin>
