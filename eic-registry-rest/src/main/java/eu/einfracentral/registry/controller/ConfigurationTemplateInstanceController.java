@@ -103,6 +103,18 @@ public class ConfigurationTemplateInstanceController {
         return new ResponseEntity<>(configurationTemplateInstanceBundle.getConfigurationTemplateInstance(), HttpStatus.CREATED);
     }
 
+    @ApiOperation(value = "Add a List of ConfigurationTemplateInstances.")
+    @PostMapping(path ="addAll", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public ResponseEntity<List<ConfigurationTemplateInstance>> addConfigurationTemplateInstances(@Valid @RequestBody List<ConfigurationTemplateInstance> configurationTemplateInstances,
+                                                                                          @ApiIgnore Authentication auth) {
+        for (ConfigurationTemplateInstance configurationTemplateInstance : configurationTemplateInstances){
+            configurationTemplateInstanceService.add(new ConfigurationTemplateInstanceBundle(configurationTemplateInstance), auth);
+            logger.info("User '{}' added the Configuration Template Instance with id '{}'", auth.getName(), configurationTemplateInstance.getId());
+        }
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
     @ApiOperation(value = "Updates the ConfigurationTemplateInstance with the given id.")
     @PutMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")

@@ -4,6 +4,8 @@ import com.google.gson.Gson;
 import eu.einfracentral.domain.*;
 import eu.einfracentral.domain.ResourceBundle;
 import eu.einfracentral.domain.ServiceBundle;
+import eu.einfracentral.domain.interoperabilityRecord.configurationTemplates.ConfigurationTemplateInstance;
+import eu.einfracentral.domain.interoperabilityRecord.configurationTemplates.ConfigurationTemplateInstanceBundle;
 import eu.einfracentral.registry.service.*;
 import eu.einfracentral.service.GenericResourceService;
 import eu.einfracentral.service.SecurityService;
@@ -46,6 +48,7 @@ public class PublicController {
     private final ResourceService<TrainingResourceBundle, Authentication> publicTrainingResourceManager;
     private final ResourceService<InteroperabilityRecordBundle, Authentication> publicInteroperabilityRecordManager;
     private final ResourceService<ResourceInteroperabilityRecordBundle, Authentication> publicResourceInteroperabilityRecordManager;
+    private final ConfigurationTemplateInstanceService<ConfigurationTemplateInstanceBundle> configurationTemplateInstanceService;
     private final SecurityService securityService;
     private final GenericResourceService genericResourceService;
     private static final Gson gson = new Gson();
@@ -63,6 +66,7 @@ public class PublicController {
                      @Qualifier("publicTrainingResourceManager") ResourceService<TrainingResourceBundle, Authentication> publicTrainingResourceManager,
                      @Qualifier("publicInteroperabilityRecordManager") ResourceService<InteroperabilityRecordBundle, Authentication> publicInteroperabilityRecordManager,
                      @Qualifier("publicResourceInteroperabilityRecordManager") ResourceService<ResourceInteroperabilityRecordBundle, Authentication> publicResourceInteroperabilityRecordManager,
+                     ConfigurationTemplateInstanceService<ConfigurationTemplateInstanceBundle> configurationTemplateInstanceService,
                      GenericResourceService genericResourceService) {
         this.providerService = providerService;
         this.resourceBundleService = resourceBundleService;
@@ -75,6 +79,7 @@ public class PublicController {
         this.publicTrainingResourceManager = publicTrainingResourceManager;
         this.publicInteroperabilityRecordManager = publicInteroperabilityRecordManager;
         this.publicResourceInteroperabilityRecordManager = publicResourceInteroperabilityRecordManager;
+        this.configurationTemplateInstanceService = configurationTemplateInstanceService;
         this.securityService = securityService;
         this.genericResourceService = genericResourceService;
     }
@@ -737,5 +742,81 @@ public class PublicController {
         ff.addFilter("published", true);
         ff.addOrderBy("title", "asc");
         return new ResponseEntity<>(publicResourceInteroperabilityRecordManager.getMy(ff, auth).getResults(), HttpStatus.OK);
+    }
+
+    //SECTION: CONFIGURATION TEMPLATE INSTANCE
+    @ApiOperation(value = "Returns the Public Configuration Template Instance with the given id.")
+    @GetMapping(path = "/configurationTemplateInstance/{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    public ResponseEntity<?> getPublicConfigurationTemplateInstance(@PathVariable("id") String id) {
+        ConfigurationTemplateInstanceBundle configurationTemplateInstanceBundle = configurationTemplateInstanceService.get(id);
+        if (configurationTemplateInstanceBundle.getMetadata().isPublished()) {
+            return new ResponseEntity<>(configurationTemplateInstanceBundle.getConfigurationTemplateInstance(), HttpStatus.OK);
+        }
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(gson.toJson("You cannot view the specific Configuration Template Instance."));
+    }
+
+    @GetMapping(path = "/configurationTemplateInstance/bundle/{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
+    public ResponseEntity<?> getPublicConfigurationTemplateInstanceBundle(@PathVariable("id") String id,
+                                                                          @ApiIgnore Authentication auth) {
+        ConfigurationTemplateInstanceBundle configurationTemplateInstanceBundle = configurationTemplateInstanceService.get(id);
+        if (auth != null && auth.isAuthenticated()) {
+            User user = User.of(auth);
+            if (securityService.hasRole(auth, "ROLE_ADMIN") || securityService.hasRole(auth, "ROLE_EPOT")) {
+                if (configurationTemplateInstanceBundle.getMetadata().isPublished()){
+                    return new ResponseEntity<>(configurationTemplateInstanceBundle, HttpStatus.OK);
+                } else{
+                    return ResponseEntity.status(HttpStatus.FOUND).body(gson.toJson("The specific Configuration Template Instance Bundle does not consist a Public entity"));
+                }
+            }
+        }
+        if (configurationTemplateInstanceBundle.getMetadata().isPublished()) {
+            return new ResponseEntity<>(configurationTemplateInstanceBundle, HttpStatus.OK);
+        }
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(gson.toJson("You cannot view the specific Configuration Template Instance."));
+    }
+
+    @ApiOperation(value = "Filter a list of Public Configuration Template Instances based on a set of filters or get a list of all Public Configuration Template Instances in the Catalogue.")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "query", value = "Keyword to refine the search", dataType = "string", paramType = "query"),
+            @ApiImplicitParam(name = "from", value = "Starting index in the result set", dataType = "string", paramType = "query"),
+            @ApiImplicitParam(name = "quantity", value = "Quantity to be fetched", dataType = "string", paramType = "query"),
+            @ApiImplicitParam(name = "order", value = "asc / desc", dataType = "string", paramType = "query"),
+            @ApiImplicitParam(name = "orderField", value = "Order field", dataType = "string", paramType = "query")
+    })
+    @GetMapping(path = "/configurationTemplateInstance/all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    public ResponseEntity<Paging<ConfigurationTemplateInstance>> getAllPublicConfigurationTemplateInstances(@ApiIgnore @RequestParam Map<String, Object> allRequestParams,
+                                                                                                            @ApiIgnore Authentication auth) {
+
+        FacetFilter ff = FacetFilterUtils.createFacetFilter(allRequestParams);
+        ff.addFilter("published", true);
+        List<ConfigurationTemplateInstance> configurationTemplateInstanceList = new LinkedList<>();
+        Paging<ConfigurationTemplateInstanceBundle> configurationTemplateInstanceBundlePaging = configurationTemplateInstanceService.getAll(ff, auth);
+        for (ConfigurationTemplateInstanceBundle configurationTemplateInstanceBundle : configurationTemplateInstanceBundlePaging.getResults()) {
+            configurationTemplateInstanceList.add(configurationTemplateInstanceBundle.getConfigurationTemplateInstance());
+        }
+        Paging<ConfigurationTemplateInstance> configurationTemplateInstancePaging = new Paging<>(configurationTemplateInstanceBundlePaging.getTotal(), configurationTemplateInstanceBundlePaging.getFrom(),
+                configurationTemplateInstanceBundlePaging.getTo(), configurationTemplateInstanceList, configurationTemplateInstanceBundlePaging.getFacets());
+        return new ResponseEntity<>(configurationTemplateInstancePaging, HttpStatus.OK);
+    }
+
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "query", value = "Keyword to refine the search", dataType = "string", paramType = "query"),
+            @ApiImplicitParam(name = "from", value = "Starting index in the result set", dataType = "string", paramType = "query"),
+            @ApiImplicitParam(name = "quantity", value = "Quantity to be fetched", dataType = "string", paramType = "query"),
+            @ApiImplicitParam(name = "order", value = "asc / desc", dataType = "string", paramType = "query"),
+            @ApiImplicitParam(name = "orderField", value = "Order field", dataType = "string", paramType = "query")
+    })
+    @GetMapping(path = "/configurationTemplateInstance/bundle/all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
+    public ResponseEntity<Paging<ConfigurationTemplateInstanceBundle>> getAllPublicConfigurationTemplateInstanceBundles(@ApiIgnore @RequestParam Map<String, Object> allRequestParams,
+                                                                                                                        @ApiIgnore Authentication auth) {
+        FacetFilter ff = FacetFilterUtils.createFacetFilter(allRequestParams);
+        ff.addFilter("published", true);
+        Paging<ConfigurationTemplateInstanceBundle> configurationTemplateInstanceBundlePaging = configurationTemplateInstanceService.getAll(ff, auth);
+        List<ConfigurationTemplateInstanceBundle> configurationTemplateInstanceBundleList = new LinkedList<>(configurationTemplateInstanceBundlePaging.getResults());
+        Paging<ConfigurationTemplateInstanceBundle> configurationTemplateInstancePaging = new Paging<>(configurationTemplateInstanceBundlePaging.getTotal(), configurationTemplateInstanceBundlePaging.getFrom(),
+                configurationTemplateInstanceBundlePaging.getTo(), configurationTemplateInstanceBundleList, configurationTemplateInstanceBundlePaging.getFacets());
+        return new ResponseEntity<>(configurationTemplateInstancePaging, HttpStatus.OK);
     }
 }
