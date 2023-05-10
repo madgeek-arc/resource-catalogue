@@ -15,7 +15,6 @@ public class ConfigurationTemplateInstance implements Identifiable {
 
     @XmlElement
     @ApiModelProperty(position = 1, example = "(required on PUT only)")
-    @FieldValidation
     private String id;
 
     @XmlElement(required = true)
