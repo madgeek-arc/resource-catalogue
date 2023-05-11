@@ -978,18 +978,16 @@ public class RegistrationMailService {
         root.put("project", projectName);
         root.put("vocabularyCuration", vocabularyCuration);
         root.put("userEmail", vocabularyCuration.getVocabularyEntryRequests().get(0).getUserId());
-
+        String userRole = "provider";
         if (vocabularyCuration.getStatus().equals(VocabularyCuration.Status.APPROVED.getKey())){
             // send email of Approval
             String subject = String.format("[%s] Your Vocabulary [%s]-[%s] has been approved", projectName,
                     vocabularyCuration.getVocabulary(), vocabularyCuration.getEntryValueName());
-            String userRole = "provider";
             sendMailsFromTemplate("vocabularyCurationApproval.ftl", root, subject, vocabularyCuration.getVocabularyEntryRequests().get(0).getUserId(), userRole);
         } else{
             // send email of Rejection
             String subject = String.format("[%s] Your Vocabulary [%s]-[%s] has been rejected", projectName,
                     vocabularyCuration.getVocabulary(), vocabularyCuration.getEntryValueName());
-            String userRole = "provider";
             sendMailsFromTemplate("vocabularyCurationRejection.ftl", root, subject, vocabularyCuration.getVocabularyEntryRequests().get(0).getUserId(), userRole);
         }
     }
