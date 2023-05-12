@@ -6,6 +6,7 @@ import eu.einfracentral.domain.ResourceBundle;
 import eu.einfracentral.domain.ServiceBundle;
 import eu.einfracentral.domain.interoperabilityRecord.configurationTemplates.ConfigurationTemplateInstance;
 import eu.einfracentral.domain.interoperabilityRecord.configurationTemplates.ConfigurationTemplateInstanceBundle;
+import eu.einfracentral.exception.ResourceNotFoundException;
 import eu.einfracentral.registry.service.*;
 import eu.einfracentral.service.GenericResourceService;
 import eu.einfracentral.service.SecurityService;
@@ -818,5 +819,22 @@ public class PublicController {
         Paging<ConfigurationTemplateInstanceBundle> configurationTemplateInstancePaging = new Paging<>(configurationTemplateInstanceBundlePaging.getTotal(), configurationTemplateInstanceBundlePaging.getFrom(),
                 configurationTemplateInstanceBundlePaging.getTo(), configurationTemplateInstanceBundleList, configurationTemplateInstanceBundlePaging.getFacets());
         return new ResponseEntity<>(configurationTemplateInstancePaging, HttpStatus.OK);
+    }
+
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "ids", value = "Comma-separated list of Resource ids", dataType = "string", paramType = "path")
+    })
+    @GetMapping(path = "resources/{ids}", produces = {MediaType.APPLICATION_JSON_VALUE})
+    public ResponseEntity<List<?>> getSomeResources(@PathVariable("ids") String[] ids, @ApiIgnore Authentication auth) {
+        String resourceTypeNames[] = new String[] {"service", "datasource", "training_resource"};
+        List<?> someResources = new ArrayList<>();
+        for (String id : ids){
+            for (String resourceType : resourceTypeNames){
+                try{
+                    someResources.add(genericResourceService.get(resourceType, id));
+                } catch (ResourceNotFoundException e){}
+            }
+        }
+        return new ResponseEntity<>(someResources, HttpStatus.OK);
     }
 }
