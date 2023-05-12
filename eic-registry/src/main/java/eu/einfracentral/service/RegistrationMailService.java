@@ -970,7 +970,7 @@ public class RegistrationMailService {
         String adminSubject = String.format("[%s] A new Vocabulary Request [%s]-[%s] has been submitted", projectName,
                 vocabularyCuration.getVocabulary(), vocabularyCuration.getEntryValueName());
         userRole = "admin";
-        sendMailsFromTemplate("vocabularyCurationAdmin.ftl", root, adminSubject, registrationEmail, userRole);
+        sendMailsFromTemplate("vocabularyCurationEPOT.ftl", root, adminSubject, registrationEmail, userRole);
     }
 
     public void approveOrRejectVocabularyCurationEmails(VocabularyCuration vocabularyCuration){
@@ -978,17 +978,18 @@ public class RegistrationMailService {
         root.put("project", projectName);
         root.put("vocabularyCuration", vocabularyCuration);
         root.put("userEmail", vocabularyCuration.getVocabularyEntryRequests().get(0).getUserId());
-        String userRole = "provider";
         if (vocabularyCuration.getStatus().equals(VocabularyCuration.Status.APPROVED.getKey())){
-            // send email of Approval
-            String subject = String.format("[%s] Your Vocabulary [%s]-[%s] has been approved", projectName,
+            // send emails of Approval
+            String subject = String.format("[%s] Vocabulary [%s]-[%s] has been approved", projectName,
                     vocabularyCuration.getVocabulary(), vocabularyCuration.getEntryValueName());
-            sendMailsFromTemplate("vocabularyCurationApproval.ftl", root, subject, vocabularyCuration.getVocabularyEntryRequests().get(0).getUserId(), userRole);
+            sendMailsFromTemplate("vocabularyCurationApprovalEPOT.ftl", root, subject, vocabularyCuration.getVocabularyEntryRequests().get(0).getUserId(), "admin");
+            sendMailsFromTemplate("vocabularyCurationApprovalUser.ftl", root, subject, vocabularyCuration.getVocabularyEntryRequests().get(0).getUserId(), "provider");
         } else{
-            // send email of Rejection
-            String subject = String.format("[%s] Your Vocabulary [%s]-[%s] has been rejected", projectName,
+            // send emails of Rejection
+            String subject = String.format("[%s] Vocabulary [%s]-[%s] has been rejected", projectName,
                     vocabularyCuration.getVocabulary(), vocabularyCuration.getEntryValueName());
-            sendMailsFromTemplate("vocabularyCurationRejection.ftl", root, subject, vocabularyCuration.getVocabularyEntryRequests().get(0).getUserId(), userRole);
+            sendMailsFromTemplate("vocabularyCurationRejectionEPOT.ftl", root, subject, vocabularyCuration.getVocabularyEntryRequests().get(0).getUserId(), "admin");
+            sendMailsFromTemplate("vocabularyCurationRejectionUser.ftl", root, subject, vocabularyCuration.getVocabularyEntryRequests().get(0).getUserId(), "provider");
         }
     }
 
