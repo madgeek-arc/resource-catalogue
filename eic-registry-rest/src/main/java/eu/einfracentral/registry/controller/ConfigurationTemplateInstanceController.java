@@ -141,4 +141,18 @@ public class ConfigurationTemplateInstanceController {
                 configurationTemplateInstanceBundle.getConfigurationTemplateInstance().getId());
         return new ResponseEntity<>(configurationTemplateInstanceBundle.getConfigurationTemplateInstance(), HttpStatus.OK);
     }
+
+    @GetMapping(path = "getBundle/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public ResponseEntity<ConfigurationTemplateInstanceBundle> getBundle(@PathVariable("id") String id) {
+        return new ResponseEntity<>(configurationTemplateInstanceService.get(id), HttpStatus.OK);
+    }
+
+    @PutMapping(path = "updateBundle", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public ResponseEntity<ConfigurationTemplateInstanceBundle> updateBundle(@RequestBody ConfigurationTemplateInstanceBundle configurationTemplateInstanceBundle, @ApiIgnore Authentication authentication) throws ResourceNotFoundException {
+        ResponseEntity<ConfigurationTemplateInstanceBundle> ret = new ResponseEntity<>(configurationTemplateInstanceService.update(configurationTemplateInstanceBundle, authentication), HttpStatus.OK);
+        logger.info("User '{}' updated ConfigurationTemplateInstanceBundle with id: {}", authentication, configurationTemplateInstanceBundle.getConfigurationTemplateInstance().getId());
+        return ret;
+    }
 }

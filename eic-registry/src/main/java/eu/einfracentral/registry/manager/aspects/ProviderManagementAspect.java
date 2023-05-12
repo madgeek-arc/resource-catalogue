@@ -1,6 +1,7 @@
 package eu.einfracentral.registry.manager.aspects;
 
 import eu.einfracentral.domain.*;
+import eu.einfracentral.domain.interoperabilityRecord.configurationTemplates.ConfigurationTemplateInstanceBundle;
 import eu.einfracentral.exception.ResourceException;
 import eu.einfracentral.exception.ResourceNotFoundException;
 import eu.einfracentral.registry.manager.*;
@@ -39,6 +40,7 @@ public class ProviderManagementAspect {
     private final PublicDatasourceManager publicDatasourceManager;
     private final PublicTrainingResourceManager publicTrainingResourceManager;
     private final PublicInteroperabilityRecordManager publicInteroperabilityRecordManager;
+    private final PublicConfigurationTemplateImplementationManager publicConfigurationTemplateImplementationManager;
     private final RegistrationMailService registrationMailService;
     private final SecurityService securityService;
     private final PublicResourceInteroperabilityRecordManager publicResourceInteroperabilityRecordManager;
@@ -56,6 +58,7 @@ public class ProviderManagementAspect {
                                     PublicTrainingResourceManager publicTrainingResourceManager,
                                     PublicInteroperabilityRecordManager publicInteroperabilityRecordManager,
                                     PublicResourceInteroperabilityRecordManager publicResourceInteroperabilityRecordManager,
+                                    PublicConfigurationTemplateImplementationManager publicConfigurationTemplateImplementationManager,
                                     RegistrationMailService registrationMailService,
                                     SecurityService securityService) {
         this.providerService = providerService;
@@ -68,6 +71,7 @@ public class ProviderManagementAspect {
         this.publicTrainingResourceManager = publicTrainingResourceManager;
         this.publicInteroperabilityRecordManager = publicInteroperabilityRecordManager;
         this.publicResourceInteroperabilityRecordManager = publicResourceInteroperabilityRecordManager;
+        this.publicConfigurationTemplateImplementationManager = publicConfigurationTemplateImplementationManager;
         this.registrationMailService = registrationMailService;
         this.securityService = securityService;
     }
@@ -470,6 +474,37 @@ public class ProviderManagementAspect {
     public void deletePublicResourceInteroperabilityRecord(JoinPoint joinPoint) {
         ResourceInteroperabilityRecordBundle resourceInteroperabilityRecordBundle = (ResourceInteroperabilityRecordBundle) joinPoint.getArgs()[0];
         publicResourceInteroperabilityRecordManager.delete(resourceInteroperabilityRecordBundle);
+    }
+
+    @Async
+    @AfterReturning(pointcut = "execution(* eu.einfracentral.registry.manager.ConfigurationTemplateInstanceManager.add(..))",
+            returning = "configurationTemplateInstanceBundle")
+    public void addConfigurationTemplateInstanceAsPublic(ConfigurationTemplateInstanceBundle configurationTemplateInstanceBundle) {
+        try{
+            publicConfigurationTemplateImplementationManager.get(String.format("%s.%s", catalogueName, configurationTemplateInstanceBundle.getId()));
+        } catch (ResourceException | ResourceNotFoundException e){
+            delayExecution();
+            publicConfigurationTemplateImplementationManager.add(configurationTemplateInstanceBundle, null);
+        }
+    }
+
+    @Async
+    @AfterReturning(pointcut = "execution(* eu.einfracentral.registry.manager.ConfigurationTemplateInstanceManager.update(..))",
+            returning = "configurationTemplateInstanceBundle")
+    public void updatePublicConfigurationTemplateInstance(ConfigurationTemplateInstanceBundle configurationTemplateInstanceBundle) {
+        try {
+            publicConfigurationTemplateImplementationManager.get(String.format("%s.%s", catalogueName, configurationTemplateInstanceBundle.getId()));
+            delayExecution();
+            publicConfigurationTemplateImplementationManager.update(configurationTemplateInstanceBundle, null);
+        } catch (ResourceException | ResourceNotFoundException ignore) {
+        }
+    }
+
+    @Async
+    @After("execution(* eu.einfracentral.registry.manager.ConfigurationTemplateInstanceManager.delete(..))")
+    public void deletePublicConfigurationTemplateInstance(JoinPoint joinPoint) {
+        ConfigurationTemplateInstanceBundle configurationTemplateInstanceBundle = (ConfigurationTemplateInstanceBundle) joinPoint.getArgs()[0];
+        publicConfigurationTemplateImplementationManager.delete(configurationTemplateInstanceBundle);
     }
 
     private void delayExecution() {

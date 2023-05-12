@@ -25,7 +25,7 @@ import java.util.List;
 public class PublicResourceInteroperabilityRecordManager extends ResourceManager<ResourceInteroperabilityRecordBundle>
         implements ResourceCRUDService<ResourceInteroperabilityRecordBundle, Authentication> {
 
-    private static final Logger logger = LogManager.getLogger(PublicProviderManager.class);
+    private static final Logger logger = LogManager.getLogger(PublicResourceInteroperabilityRecordManager.class);
     private final JmsTemplate jmsTopicTemplate;
     private final SecurityService securityService;
 
