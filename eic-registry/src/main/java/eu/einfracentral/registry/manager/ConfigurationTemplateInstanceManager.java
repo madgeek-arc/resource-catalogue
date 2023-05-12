@@ -168,16 +168,15 @@ public class ConfigurationTemplateInstanceManager extends ResourceManager<Config
     }
 
     private void checkResourceIdAndConfigurationTemplateIdConsistency(ConfigurationTemplateInstanceBundle configurationTemplateInstanceBundle, Authentication auth){
+        String resourceId = configurationTemplateInstanceBundle.getConfigurationTemplateInstance().getResourceId();
+        String configurationTemplateId = configurationTemplateInstanceBundle.getConfigurationTemplateInstance().getConfigurationTemplateId();
         // check if the configuration template ID is related to the resource ID
         boolean found = false;
-        FacetFilter ff = new FacetFilter();
-        ff.addFilter("published", false);
-        ff.setQuantity(10000);
-        List<ResourceInteroperabilityRecordBundle> resourceInteroperabilityRecordBundleList = resourceInteroperabilityRecordService.getAll(ff, auth).getResults();
+        List<ResourceInteroperabilityRecordBundle> resourceInteroperabilityRecordBundleList = resourceInteroperabilityRecordService.getAll(createFacetFilter(), auth).getResults();
         for (ResourceInteroperabilityRecordBundle resourceInteroperabilityRecordBundle : resourceInteroperabilityRecordBundleList){
             if (resourceInteroperabilityRecordBundle.getResourceInteroperabilityRecord().getResourceId().
-                    equals(configurationTemplateInstanceBundle.getConfigurationTemplateInstance().getResourceId())){
-                ConfigurationTemplateBundle configurationTemplateBundle = configurationTemplateService.get(configurationTemplateInstanceBundle.getConfigurationTemplateInstance().getConfigurationTemplateId());
+                    equals(resourceId)){
+                ConfigurationTemplateBundle configurationTemplateBundle = configurationTemplateService.get(configurationTemplateId);
                 if (resourceInteroperabilityRecordBundle.getResourceInteroperabilityRecord().getInteroperabilityRecordIds().contains(configurationTemplateBundle.getConfigurationTemplate().getInteroperabilityRecordId())){
                     found = true;
                     break;
@@ -187,6 +186,24 @@ public class ConfigurationTemplateInstanceManager extends ResourceManager<Config
         if (!found){
             throw new ValidationException("Fields resourceId and configurationTemplateId are not related.");
         }
+
+        // check if a Configuration Template Implementation with the same resourceId, configurationTemplateId and payload already exists
+        List<ConfigurationTemplateInstanceBundle> configurationTemplateInstanceBundleList = configurationTemplateInstanceService.getAll(createFacetFilter(), auth).getResults();
+        for (ConfigurationTemplateInstanceBundle ctiBundle : configurationTemplateInstanceBundleList){
+            if (ctiBundle.getConfigurationTemplateInstance().getResourceId().equals(resourceId) &&
+                ctiBundle.getConfigurationTemplateInstance().getConfigurationTemplateId().equals(configurationTemplateId) &&
+                ctiBundle.getConfigurationTemplateInstance().getPayload().equals(configurationTemplateInstanceBundle.getConfigurationTemplateInstance().getPayload())){
+                throw new ValidationException(String.format("There is already a Configuration Template Instance registered for Resource [%s] under [%s] Configuration Template with the same payload",
+                        resourceId, configurationTemplateId));
+            }
+        }
+    }
+
+    private FacetFilter createFacetFilter(){
+        FacetFilter ff = new FacetFilter();
+        ff.setQuantity(10000);
+        ff.addFilter("published", false);
+        return ff;
     }
 
     public ConfigurationTemplateInstanceDto createConfigurationTemplateInstanceDto(ConfigurationTemplateInstance configurationTemplateInstance) {
