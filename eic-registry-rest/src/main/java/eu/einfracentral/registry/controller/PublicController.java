@@ -841,4 +841,87 @@ public class PublicController {
         List<?> ret = someResources.stream().map(r -> ((eu.einfracentral.domain.Bundle<?>) r).getPayload()).collect(Collectors.toList());
         return new ResponseEntity<>(ret, HttpStatus.OK);
     }
+
+    @ApiOperation(value = "getInconsistentIdRelationsForServices")
+    @GetMapping(path = "getInconsistentIdRelationsForServices", produces = {MediaType.APPLICATION_JSON_VALUE})
+    public void getInconsistentIdRelationsForServices() {
+        FacetFilter ff = new FacetFilter();
+        ff.setQuantity(10000);
+        ff.addFilter("published", true);
+        List<ServiceBundle> allServices = resourceBundleService.getAll(ff, securityService.getAdminAccess()).getResults();
+        for (ServiceBundle serviceBundle : allServices){
+            String serviceId = serviceBundle.getId();
+            String catalogueId = serviceBundle.getService().getCatalogueId();
+            String providerId = serviceBundle.getService().getResourceOrganisation();
+            List<String> resourceProviders = serviceBundle.getService().getResourceProviders();
+            List<String> relatedResources = serviceBundle.getService().getRelatedResources();
+            List<String> requiredResources = serviceBundle.getService().getRequiredResources();
+
+            logger.info(String.format("Service [%s] of the Provider [%s] of the Catalogue [%s] has the following related resources",
+                    serviceId, providerId, catalogueId));
+            if (!resourceProviders.isEmpty()){
+                logger.info(String.format("Resource Providers [%s]", resourceProviders));
+            }
+            if (!relatedResources.isEmpty()){
+                logger.info(String.format("Related Resources [%s]", relatedResources));
+            }
+            if (!requiredResources.isEmpty()){
+                logger.info(String.format("Required Resources [%s]", requiredResources));
+            }
+        }
+    }
+
+    @ApiOperation(value = "getInconsistentIdRelationsForDatasources")
+    @GetMapping(path = "getInconsistentIdRelationsForDatasources", produces = {MediaType.APPLICATION_JSON_VALUE})
+    public void getInconsistentIdRelationsForDatasources() {
+        FacetFilter ff = new FacetFilter();
+        ff.setQuantity(10000);
+        ff.addFilter("published", true);
+        List<DatasourceBundle> allDatasources = datasourceBundleService.getAll(ff, securityService.getAdminAccess()).getResults();
+        for (DatasourceBundle datasourceBundle : allDatasources){
+            String datasourceId = datasourceBundle.getId();
+            String catalogueId = datasourceBundle.getDatasource().getCatalogueId();
+            String providerId = datasourceBundle.getDatasource().getResourceOrganisation();
+            List<String> resourceProviders = datasourceBundle.getDatasource().getResourceProviders();
+            List<String> relatedResources = datasourceBundle.getDatasource().getRelatedResources();
+            List<String> requiredResources = datasourceBundle.getDatasource().getRequiredResources();
+
+            logger.info(String.format("Datasource [%s] of the Provider [%s] of the Catalogue [%s] has the following related resources",
+                    datasourceId, providerId, catalogueId));
+            if (!resourceProviders.isEmpty()){
+                logger.info(String.format("Resource Providers [%s]", resourceProviders));
+            }
+            if (!relatedResources.isEmpty()){
+                logger.info(String.format("Related Resources [%s]", relatedResources));
+            }
+            if (!requiredResources.isEmpty()){
+                logger.info(String.format("Required Resources [%s]", requiredResources));
+            }
+        }
+    }
+
+    @ApiOperation(value = "getInconsistentIdRelationsForTrainingResources")
+    @GetMapping(path = "getInconsistentIdRelationsForTrainingResources", produces = {MediaType.APPLICATION_JSON_VALUE})
+    public void getInconsistentIdRelationsForTrainingResources() {
+        FacetFilter ff = new FacetFilter();
+        ff.setQuantity(10000);
+        ff.addFilter("published", true);
+        List<TrainingResourceBundle> allTrainingResources = trainingResourceBundleService.getAll(ff, securityService.getAdminAccess()).getResults();
+        for (TrainingResourceBundle trainingResourceBundle : allTrainingResources){
+            String trainingResourceId = trainingResourceBundle.getId();
+            String catalogueId = trainingResourceBundle.getTrainingResource().getCatalogueId();
+            String providerId = trainingResourceBundle.getTrainingResource().getResourceOrganisation();
+            List<String> resourceProviders = trainingResourceBundle.getTrainingResource().getResourceProviders();
+            List<String> eoscRelatedServices = trainingResourceBundle.getTrainingResource().getEoscRelatedServices();
+
+            logger.info(String.format("Training Resource [%s] of the Provider [%s] of the Catalogue [%s] has the following related resources",
+                    trainingResourceId, providerId, catalogueId));
+            if (!resourceProviders.isEmpty()){
+                logger.info(String.format("Resource Providers [%s]", resourceProviders));
+            }
+            if (!eoscRelatedServices.isEmpty()){
+                logger.info(String.format("EOSC Related Services [%s]", eoscRelatedServices));
+            }
+        }
+    }
 }
