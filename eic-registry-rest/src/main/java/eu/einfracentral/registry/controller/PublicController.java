@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import eu.einfracentral.domain.*;
 import eu.einfracentral.domain.ResourceBundle;
 import eu.einfracentral.domain.ServiceBundle;
+import eu.einfracentral.exception.ResourceNotFoundException;
 import eu.einfracentral.exception.ValidationException;
 import eu.einfracentral.registry.service.*;
 import eu.einfracentral.service.GenericResourceService;
@@ -30,6 +31,7 @@ import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("public/")
@@ -908,5 +910,23 @@ public class PublicController {
         ff.addFilter("published", true);
         ff.addOrderBy("title", "asc");
         return new ResponseEntity<>(publicResourceInteroperabilityRecordManager.getMy(ff, auth).getResults(), HttpStatus.OK);
+    }
+
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "ids", value = "Comma-separated list of Resource ids", dataType = "string", paramType = "path")
+    })
+    @GetMapping(path = "resources/{ids}", produces = {MediaType.APPLICATION_JSON_VALUE})
+    public ResponseEntity<List<?>> getSomeResources(@PathVariable("ids") String[] ids, @ApiIgnore Authentication auth) {
+        String[] resourceTypeNames = new String[] {"service", "datasource", "training_resource"};
+        List<?> someResources = new ArrayList<>();
+        for (String id : ids){
+            for (String resourceType : resourceTypeNames){
+                try{
+                    someResources.add(genericResourceService.get(resourceType, id));
+                } catch (ResourceNotFoundException e){}
+            }
+        }
+        List<?> ret = someResources.stream().map(r -> ((eu.einfracentral.domain.Bundle<?>) r).getPayload()).collect(Collectors.toList());
+        return new ResponseEntity<>(ret, HttpStatus.OK);
     }
 }
