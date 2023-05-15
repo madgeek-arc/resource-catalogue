@@ -33,6 +33,7 @@ import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("public/")
@@ -837,6 +838,7 @@ public class PublicController {
                 } catch (ResourceNotFoundException e){}
             }
         }
-        return new ResponseEntity<>(someResources, HttpStatus.OK);
+        List<?> ret = someResources.stream().map(r -> ((eu.einfracentral.domain.Bundle<?>) r).getPayload()).collect(Collectors.toList());
+        return new ResponseEntity<>(ret, HttpStatus.OK);
     }
 }
