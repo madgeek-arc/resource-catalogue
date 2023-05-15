@@ -828,7 +828,7 @@ public class PublicController {
     })
     @GetMapping(path = "resources/{ids}", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<List<?>> getSomeResources(@PathVariable("ids") String[] ids, @ApiIgnore Authentication auth) {
-        String resourceTypeNames[] = new String[] {"service", "datasource", "training_resource"};
+        String[] resourceTypeNames = new String[] {"service", "datasource", "training_resource"};
         List<?> someResources = new ArrayList<>();
         for (String id : ids){
             for (String resourceType : resourceTypeNames){
