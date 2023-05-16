@@ -804,16 +804,16 @@ public class PublicController {
         return new ResponseEntity<>(publicInteroperabilityRecordManager.getMy(ff, auth).getResults(), HttpStatus.OK);
     }
 
-    @ApiOperation(value = "Returns the Related Resources of a specific Interoperability Record given its id.")
+    @ApiOperation(value = "Returns the Public Related Resources of a specific Interoperability Record given its id.")
     @GetMapping(path = {"/interoperabilityRecord/relatedResources/{id}"}, produces = {MediaType.APPLICATION_JSON_VALUE})
     public List<String> getAllInteroperabilityRecordRelatedResources(@PathVariable String id) {
         List<String> allInteroperabilityRecordRelatedResources = new ArrayList<>();
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(10000);
+        ff.addFilter("published", true);
         List<ResourceInteroperabilityRecordBundle> allResourceInteroperabilityRecords = resourceInteroperabilityRecordService.getAll(ff, null).getResults();
         for (ResourceInteroperabilityRecordBundle resourceInteroperabilityRecordBundle : allResourceInteroperabilityRecords){
-            if (resourceInteroperabilityRecordBundle.getResourceInteroperabilityRecord().getInteroperabilityRecordIds().contains(id)
-                    && resourceInteroperabilityRecordBundle.getMetadata().isPublished()){
+            if (resourceInteroperabilityRecordBundle.getResourceInteroperabilityRecord().getInteroperabilityRecordIds().contains(id)){
                 allInteroperabilityRecordRelatedResources.add(resourceInteroperabilityRecordBundle.getResourceInteroperabilityRecord().getResourceId());
             }
         }
