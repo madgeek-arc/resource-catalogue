@@ -420,7 +420,7 @@ public class ServiceController {
         resourceBundleService.changeProvider(resourceId, newProvider, comment, authentication);
     }
 
-    // front-end use
+    // front-end use (Service/Datasource/TR forms)
     @GetMapping(path = {"resourceIdToNameMap"}, produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<List<eu.einfracentral.dto.Value>> getAllProviderRelatedResources(String catalogueId) {
         List<eu.einfracentral.dto.Value> allResources = new ArrayList<>();
