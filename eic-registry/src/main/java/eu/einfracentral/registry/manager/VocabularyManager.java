@@ -7,6 +7,7 @@ import eu.einfracentral.dto.VocabularyTree;
 import eu.einfracentral.exception.ResourceException;
 import eu.einfracentral.registry.service.VocabularyService;
 import eu.einfracentral.service.IdCreator;
+import eu.einfracentral.service.SecurityService;
 import eu.openminted.registry.core.domain.Browsing;
 import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.domain.Resource;
@@ -38,6 +39,8 @@ public class VocabularyManager extends ResourceManager<Vocabulary> implements Vo
     private Map<String, Region> regions = new HashMap<>();
 
     private ProviderManager providerManager;
+
+    private SecurityService securityService;
 
     private IdCreator idCreator;
 
@@ -310,7 +313,7 @@ public class VocabularyManager extends ResourceManager<Vocabulary> implements Vo
         ff.addFilter("active", true);
         ff.addFilter("status", "approved provider");
         ff.addFilter("published", "false");
-        List<ProviderBundle> allActiveAndApprovedProviders = providerManager.getAll(ff, null).getResults();
+        List<ProviderBundle> allActiveAndApprovedProviders = providerManager.getAll(ff, securityService.getAdminAccess()).getResults();
         List<String> providerNames = new ArrayList<>();
         for (ProviderBundle providerBundle : allActiveAndApprovedProviders) {
             if (providerBundle.getProvider().isLegalEntity()){
@@ -335,6 +338,7 @@ public class VocabularyManager extends ResourceManager<Vocabulary> implements Vo
             newHostingLegalEntity.setId(idCreator.reformatId(newHLE));
             newHostingLegalEntity.setName(newHLE);
             newHostingLegalEntity.setType(Vocabulary.Type.PROVIDER_HOSTING_LEGAL_ENTITY.getKey());
+            //TODO: Also add catalogueId as extras if this method gets activated
             logger.info(String.format("Creating a new Hosting Legal Entity Vocabulary with id: [%s] and name: [%s]",
                     newHostingLegalEntity.getId(), newHostingLegalEntity.getName()));
 //                        add(newHostingLegalEntity, null);
