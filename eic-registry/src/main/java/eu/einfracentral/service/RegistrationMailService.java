@@ -122,16 +122,19 @@ public class RegistrationMailService {
                 serviceTemplate = serviceBundleManager.getResources(providerBundle.getId()).get(0);
                 root.put("resourceId", serviceTemplate.getId());
                 root.put("resourceName", serviceTemplate.getName());
+                root.put("resourceType", "resource");
                 break;
             case "datasourceBundleManager":
                 serviceTemplate = datasourceBundleManager.getResources(providerBundle.getId()).get(0);
                 root.put("resourceId", serviceTemplate.getId());
                 root.put("resourceName", serviceTemplate.getName());
+                root.put("resourceType", "datasource");
                 break;
             case "trainingResourceManager":
                 trainingResourceTemplate = trainingResourceManager.getResources(providerBundle.getId()).get(0);
                 root.put("resourceId", trainingResourceTemplate.getId());
                 root.put("resourceName", trainingResourceTemplate.getTitle());
+                root.put("resourceType", "training-resource");
                 break;
             default:
                 break;
