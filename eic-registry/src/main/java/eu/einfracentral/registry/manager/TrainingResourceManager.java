@@ -146,6 +146,7 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
         } else { // add provider from external catalogue
             commonMethods.checkCatalogueIdConsistency(trainingResourceBundle, catalogueId);
         }
+        commonMethods.checkRelatedResourceIDsConsistency(trainingResourceBundle);
 
         ProviderBundle providerBundle = providerService.get(trainingResourceBundle.getTrainingResource().getCatalogueId(), trainingResourceBundle.getTrainingResource().getResourceOrganisation(), auth);
         if (providerBundle == null) {
@@ -266,6 +267,7 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
         } else {
             commonMethods.checkCatalogueIdConsistency(trainingResourceBundle, catalogueId);
         }
+        commonMethods.checkRelatedResourceIDsConsistency(trainingResourceBundle);
 
         logger.trace("User '{}' is attempting to update the Training Resource with id '{}' of the Catalogue '{}'", auth, trainingResourceBundle.getTrainingResource().getId(), trainingResourceBundle.getTrainingResource().getCatalogueId());
         validateTrainingResource(trainingResourceBundle);

@@ -98,6 +98,7 @@ public class DatasourceBundleManager extends AbstractResourceBundleManager<Datas
         } else { // add provider from external catalogue
             commonMethods.checkCatalogueIdConsistency(datasourceBundle, catalogueId);
         }
+        commonMethods.checkRelatedResourceIDsConsistency(datasourceBundle);
 
         ProviderBundle providerBundle = providerService.get(datasourceBundle.getDatasource().getCatalogueId(), datasourceBundle.getDatasource().getResourceOrganisation(), auth);
         if (providerBundle == null) {
@@ -199,6 +200,7 @@ public class DatasourceBundleManager extends AbstractResourceBundleManager<Datas
         } else {
             commonMethods.checkCatalogueIdConsistency(datasourceBundle, catalogueId);
         }
+        commonMethods.checkRelatedResourceIDsConsistency(datasourceBundle);
 
         logger.trace("User '{}' is attempting to update the Datasource with id '{}' of the Catalogue '{}'", auth, datasourceBundle.getDatasource().getId(), datasourceBundle.getDatasource().getCatalogueId());
         validate(datasourceBundle);

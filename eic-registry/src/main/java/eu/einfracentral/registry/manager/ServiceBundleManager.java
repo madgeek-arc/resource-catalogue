@@ -93,6 +93,7 @@ public class ServiceBundleManager extends AbstractResourceBundleManager<ServiceB
         } else { // add provider from external catalogue
             commonMethods.checkCatalogueIdConsistency(serviceBundle, catalogueId);
         }
+        commonMethods.checkRelatedResourceIDsConsistency(serviceBundle);
 
         ProviderBundle providerBundle = providerService.get(serviceBundle.getService().getCatalogueId(), serviceBundle.getService().getResourceOrganisation(), auth);
         if (providerBundle == null) {
@@ -186,6 +187,7 @@ public class ServiceBundleManager extends AbstractResourceBundleManager<ServiceB
         } else {
             commonMethods.checkCatalogueIdConsistency(serviceBundle, catalogueId);
         }
+        commonMethods.checkRelatedResourceIDsConsistency(serviceBundle);
 
         logger.trace("User '{}' is attempting to update the Service with id '{}' of the Catalogue '{}'", auth, serviceBundle.getService().getId(), serviceBundle.getService().getCatalogueId());
         validate(serviceBundle);
