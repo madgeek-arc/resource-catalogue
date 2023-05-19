@@ -702,7 +702,7 @@ public class PublicController {
 
         FacetFilter ff = FacetFilterUtils.createFacetFilter(allRequestParams);
         ff.addFilter("published", true);
-        ff.addFilter("active", true);
+//        ff.addFilter("active", true); //TODO: Enable if we need it. If we do, also add active field as index on RIR resourceType
         List<ResourceInteroperabilityRecord> resourceInteroperabilityRecordList = new LinkedList<>();
         Paging<ResourceInteroperabilityRecordBundle> resourceInteroperabilityRecordBundlePaging = publicResourceInteroperabilityRecordManager.getAll(ff, auth);
         for (ResourceInteroperabilityRecordBundle resourceInteroperabilityRecordBundle : resourceInteroperabilityRecordBundlePaging.getResults()) {
@@ -828,7 +828,7 @@ public class PublicController {
             @ApiImplicitParam(name = "ids", value = "Comma-separated list of Resource ids", dataType = "string", paramType = "path")
     })
     @GetMapping(path = "resources/{ids}", produces = {MediaType.APPLICATION_JSON_VALUE})
-    public ResponseEntity<List<?>> getSomeResources(@PathVariable("ids") String[] ids, @ApiIgnore Authentication auth) {
+    public ResponseEntity<List<?>> getSomeResources(@PathVariable("ids") String[] ids) {
         String[] resourceTypeNames = new String[] {"service", "datasource", "training_resource"};
         List<?> someResources = new ArrayList<>();
         for (String id : ids){
@@ -842,7 +842,8 @@ public class PublicController {
         return new ResponseEntity<>(ret, HttpStatus.OK);
     }
 
-    @ApiOperation(value = "getInconsistentIdRelationsForServices")
+    //TODO: Remove after finalizing relations
+//    @ApiOperation(value = "getInconsistentIdRelationsForServices")
     @GetMapping(path = "getInconsistentIdRelationsForServices", produces = {MediaType.APPLICATION_JSON_VALUE})
     public void getInconsistentIdRelationsForServices() {
         FacetFilter ff = new FacetFilter();
@@ -871,7 +872,7 @@ public class PublicController {
         }
     }
 
-    @ApiOperation(value = "getInconsistentIdRelationsForDatasources")
+//    @ApiOperation(value = "getInconsistentIdRelationsForDatasources")
     @GetMapping(path = "getInconsistentIdRelationsForDatasources", produces = {MediaType.APPLICATION_JSON_VALUE})
     public void getInconsistentIdRelationsForDatasources() {
         FacetFilter ff = new FacetFilter();
@@ -900,7 +901,7 @@ public class PublicController {
         }
     }
 
-    @ApiOperation(value = "getInconsistentIdRelationsForTrainingResources")
+//    @ApiOperation(value = "getInconsistentIdRelationsForTrainingResources")
     @GetMapping(path = "getInconsistentIdRelationsForTrainingResources", produces = {MediaType.APPLICATION_JSON_VALUE})
     public void getInconsistentIdRelationsForTrainingResources() {
         FacetFilter ff = new FacetFilter();
