@@ -867,7 +867,7 @@ public class PublicController {
 
         FacetFilter ff = FacetFilterUtils.createFacetFilter(allRequestParams);
         ff.addFilter("published", true);
-        ff.addFilter("active", true);
+//        ff.addFilter("active", true); //TODO: Enable if we need it. If we do, also add active field as index on RIR resourceType
         List<ResourceInteroperabilityRecord> resourceInteroperabilityRecordList = new LinkedList<>();
         Paging<ResourceInteroperabilityRecordBundle> resourceInteroperabilityRecordBundlePaging = publicResourceInteroperabilityRecordManager.getAll(ff, auth);
         for (ResourceInteroperabilityRecordBundle resourceInteroperabilityRecordBundle : resourceInteroperabilityRecordBundlePaging.getResults()) {
