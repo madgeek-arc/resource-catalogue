@@ -92,11 +92,13 @@ public class ServiceController {
     @GetMapping(path = "{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     @PreAuthorize("@securityService.resourceOrDatasourceIsActive(#id, #catalogueId) or hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth, #id)")
     public ResponseEntity<?> getService(@PathVariable("id") String id, @RequestParam(defaultValue = "${project.catalogue.name}", name = "catalogue_id") String catalogueId, @ApiIgnore Authentication auth) {
-        try{
-            return new ResponseEntity<>(resourceBundleService.get(id, catalogueId).getService(), HttpStatus.OK);
-        } catch(eu.einfracentral.exception.ResourceNotFoundException e){
-            return new ResponseEntity<>(datasourceBundleService.get(id, catalogueId).getDatasource(), HttpStatus.OK);
-        }
+        FacetFilter ff = new FacetFilter();
+        ff.addFilter("resource_internal_id", id);
+        ff.addFilter("catalogue_id", catalogueId);
+        ff.setResourceType("resources");
+        List<?> results = genericResourceService.getResults(ff).map(r -> ((eu.einfracentral.domain.ResourceBundle<?>) r).getPayload()).getResults();
+        assert results.size() <= 1;
+        return new ResponseEntity<>(results.get(0), HttpStatus.OK);
     }
 
     // Get the specified version of a RichService providing the Service id
