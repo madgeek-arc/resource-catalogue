@@ -65,7 +65,11 @@ public class RichResource {
     }
 
     public RichResource(ResourceBundle<?> resource) {
-        this.service = resource.getPayload();
+        if (resource.getPayload() instanceof Datasource){
+            this.datasource = (Datasource) resource.getPayload();
+        } else {
+            this.service = resource.getPayload();
+        }
         this.metadata = resource.getMetadata();
     }
 

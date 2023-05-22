@@ -609,4 +609,11 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
         }
         return catalogueBundlePaging;
     }
+
+    public List<String> getAllCatalogueIds(){
+        FacetFilter ff = new FacetFilter();
+        ff.setQuantity(1000);
+        List<String> allCatalogueIds = getAll(ff, null).getResults().stream().map(CatalogueBundle::getId).collect(Collectors.toList());
+        return allCatalogueIds;
+    }
 }

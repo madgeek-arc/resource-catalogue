@@ -1,10 +1,9 @@
 package eu.einfracentral.registry.controller;
 
-import eu.einfracentral.domain.Helpdesk;
-import eu.einfracentral.domain.HelpdeskBundle;
 import eu.einfracentral.domain.ResourceInteroperabilityRecord;
 import eu.einfracentral.domain.ResourceInteroperabilityRecordBundle;
 import eu.einfracentral.registry.service.ResourceInteroperabilityRecordService;
+import eu.einfracentral.utils.FacetFilterUtils;
 import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.domain.Paging;
 import eu.openminted.registry.core.exception.ResourceNotFoundException;
@@ -23,7 +22,6 @@ import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
 import javax.validation.Valid;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -35,9 +33,9 @@ public class ResourceInteroperabilityRecordController {
 
     private static final Logger logger = LogManager.getLogger(ResourceInteroperabilityRecordController.class);
 
-    private final ResourceInteroperabilityRecordService<ResourceInteroperabilityRecordBundle, Authentication> resourceInteroperabilityRecordService;
+    private final ResourceInteroperabilityRecordService<ResourceInteroperabilityRecordBundle> resourceInteroperabilityRecordService;
 
-    public ResourceInteroperabilityRecordController(ResourceInteroperabilityRecordService<ResourceInteroperabilityRecordBundle, Authentication> resourceInteroperabilityRecordService) {
+    public ResourceInteroperabilityRecordController(ResourceInteroperabilityRecordService<ResourceInteroperabilityRecordBundle> resourceInteroperabilityRecordService) {
         this.resourceInteroperabilityRecordService = resourceInteroperabilityRecordService;
     }
 
@@ -58,26 +56,13 @@ public class ResourceInteroperabilityRecordController {
     })
     @GetMapping(path = "all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity<Paging<ResourceInteroperabilityRecord>> getAllResourceInteroperabilityRecords(@ApiIgnore @RequestParam Map<String, Object> allRequestParams,
-                                                            @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueIds,
+                                                            @RequestParam(defaultValue = "all", name = "catalogue_id") String catalogueIds,
                                                             @ApiIgnore Authentication auth) {
         allRequestParams.putIfAbsent("catalogue_id", catalogueIds);
         if (catalogueIds != null && catalogueIds.equals("all")) {
             allRequestParams.remove("catalogue_id");
         }
-        FacetFilter ff = new FacetFilter();
-        ff.setKeyword(allRequestParams.get("query") != null ? (String) allRequestParams.remove("query") : "");
-        ff.setFrom(allRequestParams.get("from") != null ? Integer.parseInt((String) allRequestParams.remove("from")) : 0);
-        ff.setQuantity(allRequestParams.get("quantity") != null ? Integer.parseInt((String) allRequestParams.remove("quantity")) : 10);
-        Map<String, Object> sort = new HashMap<>();
-        Map<String, Object> order = new HashMap<>();
-        String orderDirection = allRequestParams.get("order") != null ? (String) allRequestParams.remove("order") : "asc";
-        String orderField = allRequestParams.get("orderField") != null ? (String) allRequestParams.remove("orderField") : null;
-        if (orderField != null) {
-            order.put("order", orderDirection);
-            sort.put(orderField, order);
-            ff.setOrderBy(sort);
-        }
-        ff.setFilter(allRequestParams);
+        FacetFilter ff = FacetFilterUtils.createFacetFilter(allRequestParams);
         ff.addFilter("published", false);
         List<ResourceInteroperabilityRecord> resourceInteroperabilityRecordList = new LinkedList<>();
         Paging<ResourceInteroperabilityRecordBundle> resourceInteroperabilityRecordBundlePaging = resourceInteroperabilityRecordService.getAll(ff, auth);
@@ -92,7 +77,7 @@ public class ResourceInteroperabilityRecordController {
     @ApiOperation(value = "Returns the ResourceInteroperabilityRecord of the given Resource of the given Catalogue.")
     @GetMapping(path = "/byResource/{resourceId}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity<ResourceInteroperabilityRecord> getResourceInteroperabilityRecordByResourceId(@PathVariable("resourceId") String resourceId,
-                                                           @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueId,
+                                                           @RequestParam(defaultValue = "${project.catalogue.name}", name = "catalogue_id") String catalogueId,
                                                            @ApiIgnore Authentication auth) {
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(1000);

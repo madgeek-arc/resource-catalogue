@@ -37,6 +37,8 @@
     
   <xs:element name="interoperabilityRecord" type="tns:interoperabilityRecord"/>
     
+  <xs:element name="interoperabilityRecordBundle" type="tns:interoperabilityRecordBundle"/>
+    
   <xs:element name="loggingInfo" type="tns:loggingInfo"/>
     
   <xs:element name="metadata" type="tns:metadata"/>
@@ -66,6 +68,8 @@
   <xs:element name="providerPublicContact" type="tns:providerPublicContact"/>
     
   <xs:element name="providerRequest" type="tns:providerRequest"/>
+    
+  <xs:element name="relatedStandard" type="tns:relatedStandard"/>
     
   <xs:element name="resourceExtras" type="tns:resourceExtras"/>
     
@@ -282,6 +286,12 @@
         </xs:annotation>
       </xs:element>
             
+      <xs:element name="endOfLife" type="xs:string">
+        <xs:annotation>
+          <xs:documentation><![CDATA[In terms of sustainability, what is the expected life of the catalogue]]></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+            
       <xs:element minOccurs="0" name="hostingLegalEntity" type="xs:string">
         <xs:annotation>
           <xs:documentation><![CDATA[Name of the organisation legally hosting (housing) the Catalogue or its coordinating centre.]]></xs:documentation>
@@ -291,6 +301,12 @@
       <xs:element name="id" type="xs:string">
         <xs:annotation>
           <xs:documentation><![CDATA[A persistent identifier, a unique reference to the  (Multi-Provider Regional or Thematic) Catalogue in the context of the EOSC Portal.]]></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+            
+      <xs:element name="inclusionCriteria" type="xs:anyURI">
+        <xs:annotation>
+          <xs:documentation><![CDATA[Inclusion Criteria]]></xs:documentation>
         </xs:annotation>
       </xs:element>
             
@@ -446,6 +462,12 @@ It is also possible to select Not a legal entity.]]></xs:documentation>
                   
         </xs:complexType>
               
+      </xs:element>
+            
+      <xs:element name="validationProcess" type="xs:anyURI">
+        <xs:annotation>
+          <xs:documentation><![CDATA[Validation Process]]></xs:documentation>
+        </xs:annotation>
       </xs:element>
             
       <xs:element name="website" type="xs:anyURI">
@@ -1642,6 +1664,8 @@ c) list of customers, communities, users, etc. using the Resource.]]></xs:docume
         </xs:complexType>
               
       </xs:element>
+            
+      <xs:element minOccurs="0" name="serviceType" type="xs:string"/>
           
     </xs:sequence>
       
@@ -1853,6 +1877,12 @@ c) list of customers, communities, users, etc. using the Resource.]]></xs:docume
         
     <xs:sequence>
             
+      <xs:element name="catalogueId" type="xs:string">
+        <xs:annotation>
+          <xs:documentation><![CDATA[The Catalogue this Interoperability Record is originally registered at.]]></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+            
       <xs:element minOccurs="0" name="created" type="xs:string">
         <xs:annotation>
           <xs:documentation><![CDATA[Time/date the record was created.]]></xs:documentation>
@@ -1898,7 +1928,7 @@ May be used for technical information.]]></xs:documentation>
             
       <xs:element minOccurs="0" name="eoscIntegrationOptions">
         <xs:annotation>
-          <xs:documentation><![CDATA[Resources and services that declare compliance with the guideline to the specified level of interoperation.]]></xs:documentation>
+          <xs:documentation><![CDATA[A short summary of any options to integrate this guideline (if applicable).]]></xs:documentation>
         </xs:annotation>
                 
         <xs:complexType>
@@ -1906,23 +1936,6 @@ May be used for technical information.]]></xs:documentation>
           <xs:sequence>
                         
             <xs:element maxOccurs="unbounded" minOccurs="0" name="eoscIntegrationOption" type="xs:string"/>
-                      
-          </xs:sequence>
-                  
-        </xs:complexType>
-              
-      </xs:element>
-            
-      <xs:element minOccurs="0" name="eoscRelatedStandards">
-        <xs:annotation>
-          <xs:documentation><![CDATA[Standards related to the guideline.]]></xs:documentation>
-        </xs:annotation>
-                
-        <xs:complexType>
-                    
-          <xs:sequence>
-                        
-            <xs:element maxOccurs="unbounded" minOccurs="0" name="eoscRelatedStandard" type="xs:anyURI"/>
                       
           </xs:sequence>
                   
@@ -1938,15 +1951,41 @@ May be used for technical information.]]></xs:documentation>
             
       <xs:element ref="tns:identifierInfo"/>
             
-      <xs:element name="publicationYear" type="xs:int">
+      <xs:element name="providerId" type="xs:string">
         <xs:annotation>
-          <xs:documentation><![CDATA[The year when the data was or will be made publicly available. In the case of resources such as software or
-dynamic data where there may be multiple releases in one year, include the Date/dateType/dateInformation
-property and sub-properties to provide more information about the publication or release date details.]]></xs:documentation>
+          <xs:documentation><![CDATA[The Provider this Interoperability Record is originally registered at.]]></xs:documentation>
         </xs:annotation>
       </xs:element>
             
-      <xs:element minOccurs="0" name="resourceTypesInfo">
+      <xs:element name="publicationYear" type="xs:int">
+        <xs:annotation>
+          <xs:documentation><![CDATA[The year when the guideline was or will be made publicly available.  If an embargo period has been in effect,
+use the date when the embargo period ends. In the case of datasets, "publish" is understood to mean making the
+data available on a specific date to the community of researchers. If there is no standard publication year value,
+use the date that would be preferred from a citation perspective.]]></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+            
+      <xs:element minOccurs="0" name="relatedStandards">
+        <xs:annotation>
+          <xs:documentation><![CDATA[Standards related to the guideline
+This should point out to related standards only when it is a prerequisitite/depenendency, and likely to influence
+a Provider's design towards interoperability based on the guideline.]]></xs:documentation>
+        </xs:annotation>
+                
+        <xs:complexType>
+                    
+          <xs:sequence>
+                        
+            <xs:element maxOccurs="unbounded" minOccurs="0" ref="tns:relatedStandard"/>
+                      
+          </xs:sequence>
+                  
+        </xs:complexType>
+              
+      </xs:element>
+            
+      <xs:element name="resourceTypesInfo">
         <xs:annotation>
           <xs:documentation><![CDATA[Interoperability Record Resource Type Info]]></xs:documentation>
         </xs:annotation>
@@ -2056,7 +2095,7 @@ property and sub-properties to provide more information about the publication or
         
     <xs:sequence>
             
-      <xs:element name="creatorName" type="xs:string">
+      <xs:element minOccurs="0" name="creatorName" type="xs:string">
         <xs:annotation>
           <xs:documentation><![CDATA[The full name of the creator.]]></xs:documentation>
         </xs:annotation>
@@ -2094,17 +2133,37 @@ versions. The record's primary key for locating it in the EOSC-IF database.]]></
       
   </xs:complexType>
     
+  <xs:complexType name="relatedStandard">
+        
+    <xs:sequence>
+            
+      <xs:element minOccurs="0" name="relatedStandardIdentifier" type="xs:string">
+        <xs:annotation>
+          <xs:documentation><![CDATA[The name of the related standard.]]></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+            
+      <xs:element minOccurs="0" name="relatedStandardURI" type="xs:anyURI">
+        <xs:annotation>
+          <xs:documentation><![CDATA[The URI of the related standard.]]></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+          
+    </xs:sequence>
+      
+  </xs:complexType>
+    
   <xs:complexType name="resourceTypeInfo">
         
     <xs:sequence>
             
-      <xs:element minOccurs="0" name="resourceType" type="xs:string">
+      <xs:element name="resourceType" type="xs:string">
         <xs:annotation>
           <xs:documentation><![CDATA[A description of the resource.]]></xs:documentation>
         </xs:annotation>
       </xs:element>
             
-      <xs:element minOccurs="0" name="resourceTypeGeneral" type="xs:string">
+      <xs:element name="resourceTypeGeneral" type="xs:string">
         <xs:annotation>
           <xs:documentation><![CDATA[The general type of a resource.]]></xs:documentation>
         </xs:annotation>
@@ -2118,25 +2177,45 @@ versions. The record's primary key for locating it in the EOSC-IF database.]]></
         
     <xs:sequence>
             
-      <xs:element minOccurs="0" name="rightIdentifier" type="xs:string">
+      <xs:element name="rightIdentifier" type="xs:string">
         <xs:annotation>
           <xs:documentation><![CDATA[A short, standardized version of the license name.]]></xs:documentation>
         </xs:annotation>
       </xs:element>
             
-      <xs:element minOccurs="0" name="rightTitle" type="xs:string">
+      <xs:element name="rightTitle" type="xs:string">
         <xs:annotation>
           <xs:documentation><![CDATA[Right title.]]></xs:documentation>
         </xs:annotation>
       </xs:element>
             
-      <xs:element minOccurs="0" name="rightURI" type="xs:anyURI">
+      <xs:element name="rightURI" type="xs:anyURI">
         <xs:annotation>
           <xs:documentation><![CDATA[The URI of the license.]]></xs:documentation>
         </xs:annotation>
       </xs:element>
           
     </xs:sequence>
+      
+  </xs:complexType>
+    
+  <xs:complexType name="interoperabilityRecordBundle">
+        
+    <xs:complexContent>
+            
+      <xs:extension base="tns:bundle">
+                
+        <xs:sequence>
+                    
+          <xs:element minOccurs="0" ref="tns:interoperabilityRecord"/>
+                    
+          <xs:element minOccurs="0" name="status" type="xs:string"/>
+                  
+        </xs:sequence>
+              
+      </xs:extension>
+          
+    </xs:complexContent>
       
   </xs:complexType>
     

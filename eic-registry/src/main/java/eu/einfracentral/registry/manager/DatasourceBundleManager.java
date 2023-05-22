@@ -11,6 +11,7 @@ import eu.einfracentral.service.IdCreator;
 import eu.einfracentral.service.RegistrationMailService;
 import eu.einfracentral.service.SecurityService;
 import eu.einfracentral.utils.FacetFilterUtils;
+import eu.einfracentral.utils.ProviderResourcesCommonMethods;
 import eu.openminted.registry.core.domain.Browsing;
 import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.domain.Paging;
@@ -47,6 +48,8 @@ public class DatasourceBundleManager extends AbstractResourceBundleManager<Datas
     private final VocabularyService vocabularyService;
     private final CatalogueService<CatalogueBundle, Authentication> catalogueService;
     private final PublicDatasourceManager publicDatasourceManager;
+    private final MigrationService migrationService;
+    private final ProviderResourcesCommonMethods commonMethods;
 
     @Value("${project.catalogue.name}")
     private String catalogueName;
@@ -59,7 +62,9 @@ public class DatasourceBundleManager extends AbstractResourceBundleManager<Datas
                                    @Lazy RegistrationMailService registrationMailService,
                                    @Lazy VocabularyService vocabularyService,
                                    CatalogueService<CatalogueBundle, Authentication> catalogueService,
-                                   PublicDatasourceManager publicDatasourceManager) {
+                                   PublicDatasourceManager publicDatasourceManager,
+                                   @Lazy MigrationService migrationService,
+                                   ProviderResourcesCommonMethods commonMethods) {
         super(DatasourceBundle.class);
         this.providerService = providerService; // for providers
         this.idCreator = idCreator;
@@ -68,6 +73,8 @@ public class DatasourceBundleManager extends AbstractResourceBundleManager<Datas
         this.vocabularyService = vocabularyService;
         this.catalogueService = catalogueService;
         this.publicDatasourceManager = publicDatasourceManager;
+        this.migrationService = migrationService;
+        this.commonMethods = commonMethods;
     }
 
     @Override
@@ -89,7 +96,7 @@ public class DatasourceBundleManager extends AbstractResourceBundleManager<Datas
         if (catalogueId == null || catalogueId.equals("")) { // add catalogue provider
             datasourceBundle.getDatasource().setCatalogueId(catalogueName);
         } else { // add provider from external catalogue
-            checkCatalogueIdConsistency(datasourceBundle, catalogueId);
+            commonMethods.checkCatalogueIdConsistency(datasourceBundle, catalogueId);
         }
 
         ProviderBundle providerBundle = providerService.get(datasourceBundle.getDatasource().getCatalogueId(), datasourceBundle.getDatasource().getResourceOrganisation(), auth);
@@ -135,8 +142,6 @@ public class DatasourceBundleManager extends AbstractResourceBundleManager<Datas
         // latestOnboardingInfo
         datasourceBundle.setLatestOnboardingInfo(loggingInfo);
 
-        sortFields(datasourceBundle);
-
         // resource status & extra loggingInfo for Approval
         if (providerBundle.getTemplateStatus().equals("approved template")){
             datasourceBundle.setStatus(vocabularyService.get("approved resource").getId());
@@ -152,6 +157,9 @@ public class DatasourceBundleManager extends AbstractResourceBundleManager<Datas
 
         // LoggingInfo
         datasourceBundle.setLoggingInfo(loggingInfoList);
+
+        // serviceType
+        createResourceExtras(datasourceBundle, "service_type-datasource");
 
         logger.info("Adding Datasource: {}", datasourceBundle);
         DatasourceBundle ret;
@@ -189,7 +197,7 @@ public class DatasourceBundleManager extends AbstractResourceBundleManager<Datas
         if (catalogueId == null || catalogueId.equals("")) {
             datasourceBundle.getDatasource().setCatalogueId(catalogueName);
         } else {
-            checkCatalogueIdConsistency(datasourceBundle, catalogueId);
+            commonMethods.checkCatalogueIdConsistency(datasourceBundle, catalogueId);
         }
 
         logger.trace("User '{}' is attempting to update the Datasource with id '{}' of the Catalogue '{}'", auth, datasourceBundle.getDatasource().getId(), datasourceBundle.getDatasource().getCatalogueId());
@@ -246,7 +254,6 @@ public class DatasourceBundleManager extends AbstractResourceBundleManager<Datas
         // latestUpdateInfo
         datasourceBundle.setLatestUpdateInfo(loggingInfo);
         datasourceBundle.setActive(existingDatasource.isActive());
-        sortFields(datasourceBundle);
 
         // set status
         datasourceBundle.setStatus(existingDatasource.getStatus());
@@ -577,6 +584,11 @@ public class DatasourceBundleManager extends AbstractResourceBundleManager<Datas
         ProviderBundle newProvider = providerService.get(catalogueName, newProviderId, auth);
         ProviderBundle oldProvider = providerService.get(catalogueName, datasourceBundle.getDatasource().getResourceOrganisation(), auth);
 
+        // check that the 2 Providers co-exist under the same Catalogue
+        if (!oldProvider.getProvider().getCatalogueId().equals(newProvider.getProvider().getCatalogueId())){
+            throw new ValidationException("You cannot move a Datasource to a Provider of another Catalogue");
+        }
+
         User user = User.of(auth);
 
         // update loggingInfo
@@ -605,6 +617,13 @@ public class DatasourceBundleManager extends AbstractResourceBundleManager<Datas
         // update ResourceOrganisation
         datasourceBundle.getDatasource().setResourceOrganisation(newProviderId);
 
+        // update ResourceProviders
+        List<String> resourceProviders = datasourceBundle.getDatasource().getResourceProviders();
+        if (resourceProviders.contains(oldProvider.getId())){
+            resourceProviders.remove(oldProvider.getId());
+            resourceProviders.add(newProviderId);
+        }
+
         // update id
         try {
             datasourceBundle.setId(idCreator.createDatasourceId(datasourceBundle));
@@ -614,8 +633,11 @@ public class DatasourceBundleManager extends AbstractResourceBundleManager<Datas
 
         // add Resource, delete the old one
         add(datasourceBundle, auth);
-        delete(get(resourceId, catalogueName));
         publicDatasourceManager.delete(get(resourceId, catalogueName)); // FIXME: ProviderManagementAspect's deletePublicDatasource is not triggered
+        delete(get(resourceId, catalogueName));
+
+        // update other resources which had the old resource ID on their fields
+        migrationService.updateRelatedToTheIdFieldsOfOtherResourcesOfThePortal(resourceId, datasourceBundle.getId());
 
         // emails to EPOT, old and new Provider
         registrationMailService.sendEmailsForMovedResources(oldProvider, newProvider, datasourceBundle, auth);

@@ -2,6 +2,7 @@ package eu.einfracentral.registry.controller;
 
 import eu.einfracentral.domain.Identifiable;
 import eu.einfracentral.registry.service.ResourceService;
+import eu.einfracentral.utils.FacetFilterUtils;
 import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.domain.Paging;
 import eu.openminted.registry.core.exception.ResourceNotFoundException;
@@ -85,20 +86,7 @@ public abstract class ResourceController<T extends Identifiable, U extends Authe
     })
     @GetMapping(path = "all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity<Paging<T>> getAll(@ApiIgnore @RequestParam Map<String, Object> allRequestParams, @ApiIgnore U auth) {
-        FacetFilter ff = new FacetFilter();
-        ff.setKeyword(allRequestParams.get("query") != null ? (String) allRequestParams.remove("query") : "");
-        ff.setFrom(allRequestParams.get("from") != null ? Integer.parseInt((String) allRequestParams.remove("from")) : 0);
-        ff.setQuantity(allRequestParams.get("quantity") != null ? Integer.parseInt((String) allRequestParams.remove("quantity")) : 10);
-        Map<String, Object> sort = new HashMap<>();
-        Map<String, Object> order = new HashMap<>();
-        String orderDirection = allRequestParams.get("order") != null ? (String) allRequestParams.remove("order") : "asc";
-        String orderField = allRequestParams.get("orderField") != null ? (String) allRequestParams.remove("orderField") : null;
-        if (orderField != null) {
-            order.put("order", orderDirection);
-            sort.put(orderField, order);
-            ff.setOrderBy(sort);
-        }
-        ff.setFilter(allRequestParams);
+        FacetFilter ff = FacetFilterUtils.createFacetFilter(allRequestParams);
         return new ResponseEntity<>(service.getAll(ff, null), HttpStatus.OK);
     }
 

@@ -21,7 +21,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 
-@Service
+@Service("publicTrainingResourceManager")
 public class PublicTrainingResourceManager extends AbstractPublicResourceManager<TrainingResourceBundle> implements ResourceCRUDService<TrainingResourceBundle, Authentication> {
 
     private static final Logger logger = LogManager.getLogger(PublicTrainingResourceManager.class);

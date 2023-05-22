@@ -38,6 +38,7 @@ public class ProviderManagementAspect {
     private final PublicServiceManager publicServiceManager;
     private final PublicDatasourceManager publicDatasourceManager;
     private final PublicTrainingResourceManager publicTrainingResourceManager;
+    private final PublicInteroperabilityRecordManager publicInteroperabilityRecordManager;
     private final RegistrationMailService registrationMailService;
     private final SecurityService securityService;
     private final PublicResourceInteroperabilityRecordManager publicResourceInteroperabilityRecordManager;
@@ -53,6 +54,7 @@ public class ProviderManagementAspect {
                                     PublicServiceManager publicServiceManager,
                                     PublicDatasourceManager publicDatasourceManager,
                                     PublicTrainingResourceManager publicTrainingResourceManager,
+                                    PublicInteroperabilityRecordManager publicInteroperabilityRecordManager,
                                     PublicResourceInteroperabilityRecordManager publicResourceInteroperabilityRecordManager,
                                     RegistrationMailService registrationMailService,
                                     SecurityService securityService) {
@@ -64,6 +66,7 @@ public class ProviderManagementAspect {
         this.publicServiceManager = publicServiceManager;
         this.publicDatasourceManager = publicDatasourceManager;
         this.publicTrainingResourceManager = publicTrainingResourceManager;
+        this.publicInteroperabilityRecordManager = publicInteroperabilityRecordManager;
         this.publicResourceInteroperabilityRecordManager = publicResourceInteroperabilityRecordManager;
         this.registrationMailService = registrationMailService;
         this.securityService = securityService;
@@ -215,7 +218,7 @@ public class ProviderManagementAspect {
     }
 
     @Async
-    @After("execution(* eu.einfracentral.registry.manager.ProviderManager.delete(eu.einfracentral.domain.ProviderBundle))")
+    @After("execution(* eu.einfracentral.registry.manager.ProviderManager.delete(..))")
     public void deletePublicProvider(JoinPoint joinPoint) {
         ProviderBundle providerBundle = (ProviderBundle) joinPoint.getArgs()[0];
         publicProviderManager.delete(providerBundle);
@@ -273,6 +276,21 @@ public class ProviderManagementAspect {
     }
 
     @Async
+    @AfterReturning(pointcut = "execution(* eu.einfracentral.registry.manager.InteroperabilityRecordManager.add(..))" +
+            "|| execution(* eu.einfracentral.registry.manager.InteroperabilityRecordManager.verifyResource(..))",
+            returning = "interoperabilityRecordBundle")
+    public void addResourceAsPublic(InteroperabilityRecordBundle interoperabilityRecordBundle) {
+        if (interoperabilityRecordBundle.getStatus().equals("approved interoperability record") && interoperabilityRecordBundle.isActive()){
+            try{
+                publicInteroperabilityRecordManager.get(String.format("%s.%s", interoperabilityRecordBundle.getInteroperabilityRecord().getCatalogueId(), interoperabilityRecordBundle.getId()));
+            } catch (ResourceException | ResourceNotFoundException e){
+                delayExecution();
+                publicInteroperabilityRecordManager.add(interoperabilityRecordBundle, null);
+            }
+        }
+    }
+
+    @Async
     @AfterReturning(pointcut = "execution(* eu.einfracentral.registry.manager.ServiceBundleManager.updateResource(..))" +
             "|| execution(* eu.einfracentral.registry.manager.ServiceBundleManager.publish(..))" +
             "|| execution(* eu.einfracentral.registry.manager.ServiceBundleManager.verifyResource(..))" +
@@ -318,24 +336,45 @@ public class ProviderManagementAspect {
     }
 
     @Async
-    @After("execution(* eu.einfracentral.registry.manager.ServiceBundleManager.delete(..)))")
+    @AfterReturning(pointcut = "execution(* eu.einfracentral.registry.manager.InteroperabilityRecordManager.update(..))" +
+            "|| execution(* eu.einfracentral.registry.manager.InteroperabilityRecordManager.publish(..))" +
+            "|| execution(* eu.einfracentral.registry.manager.InteroperabilityRecordManager.verifyResource(..))",
+            returning = "interoperabilityRecordBundle")
+    public void updatePublicResource(InteroperabilityRecordBundle interoperabilityRecordBundle) {
+        try{
+            publicInteroperabilityRecordManager.get(String.format("%s.%s", interoperabilityRecordBundle.getInteroperabilityRecord().getCatalogueId(), interoperabilityRecordBundle.getId()));
+            delayExecution();
+            publicInteroperabilityRecordManager.update(interoperabilityRecordBundle, null);
+        } catch (ResourceException | ResourceNotFoundException ignore){
+        }
+    }
+
+    @Async
+    @After("execution(* eu.einfracentral.registry.manager.ServiceBundleManager.delete(..))")
     public void deletePublicService(JoinPoint joinPoint) {
         ServiceBundle serviceBundle = (ServiceBundle) joinPoint.getArgs()[0];
         publicServiceManager.delete(serviceBundle);
     }
 
     @Async
-    @After("execution(* eu.einfracentral.registry.manager.DatasourceBundleManager.delete(..)))")
+    @After("execution(* eu.einfracentral.registry.manager.DatasourceBundleManager.delete(..))")
     public void deletePublicDatasource(JoinPoint joinPoint) {
         DatasourceBundle datasourceBundle = (DatasourceBundle) joinPoint.getArgs()[0];
         publicDatasourceManager.delete(datasourceBundle);
     }
 
     @Async
-    @After("execution(* eu.einfracentral.registry.manager.TrainingResourceManager.delete(..)))")
+    @After("execution(* eu.einfracentral.registry.manager.TrainingResourceManager.delete(..))")
     public void deletePublicTrainingResource(JoinPoint joinPoint) {
         TrainingResourceBundle trainingResourceBundle = (TrainingResourceBundle) joinPoint.getArgs()[0];
         publicTrainingResourceManager.delete(trainingResourceBundle);
+    }
+
+    @Async
+    @After("execution(* eu.einfracentral.registry.manager.InteroperabilityRecordManager.delete(..))")
+    public void deletePublicInteroperabilityRecord(JoinPoint joinPoint) {
+        InteroperabilityRecordBundle interoperabilityRecordBundle = (InteroperabilityRecordBundle) joinPoint.getArgs()[0];
+        publicInteroperabilityRecordManager.delete(interoperabilityRecordBundle);
     }
 
     //TODO: Probably no needed

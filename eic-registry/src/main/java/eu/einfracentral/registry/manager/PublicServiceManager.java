@@ -21,7 +21,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 
-@Service
+@Service("publicServiceManager")
 public class PublicServiceManager extends AbstractPublicResourceManager<ServiceBundle> implements ResourceCRUDService<ServiceBundle, Authentication> {
 
     private static final Logger logger = LogManager.getLogger(PublicServiceManager.class);
@@ -72,6 +72,7 @@ public class PublicServiceManager extends AbstractPublicResourceManager<ServiceB
         updateResourceIdsToPublic(serviceBundle);
 
         serviceBundle.getMetadata().setPublished(true);
+        serviceBundle.getResourceExtras().setServiceType("service_type-service");
         ServiceBundle ret;
         logger.info(String.format("Service [%s] is being published with id [%s]", lowerLevelResourceId, serviceBundle.getId()));
         ret = super.add(serviceBundle, null);
@@ -96,6 +97,7 @@ public class PublicServiceManager extends AbstractPublicResourceManager<ServiceB
         ret.setIdentifiers(published.getIdentifiers());
         ret.setId(published.getId());
         ret.setMetadata(published.getMetadata());
+        ret.getResourceExtras().setServiceType("service_type-service");
         logger.info(String.format("Updating public Service with id [%s]", ret.getId()));
         ret = super.update(ret, null);
         logger.info("Sending JMS with topic 'service.update'");

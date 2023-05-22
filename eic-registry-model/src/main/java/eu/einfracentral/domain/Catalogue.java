@@ -76,13 +76,37 @@ public class Catalogue implements Identifiable {
     @VocabularyValidation(type = Vocabulary.Type.PROVIDER_HOSTING_LEGAL_ENTITY)
     private String hostingLegalEntity;
 
+    /**
+     * Inclusion Criteria
+     */
+    @XmlElement(required = true)
+    @ApiModelProperty(position = 8, example = "https://example.com", required = true)
+    @FieldValidation
+    private URL inclusionCriteria;
+
+    /**
+     * Validation Process
+     */
+    @XmlElement(required = true)
+    @ApiModelProperty(position = 9, example = "https://example.com", required = true)
+    @FieldValidation
+    private URL validationProcess;
+
+    /**
+     * In terms of sustainability, what is the expected life of the catalogue
+     */
+    @XmlElement(required = true)
+    @ApiModelProperty(position = 10, required = true)
+    @FieldValidation
+    private String endOfLife;
+
 
     // Marketing Information
     /**
      * A high-level description of the Catalogue in fairly non-technical terms, with the vision, mission, objectives, background, experience.
      */
     @XmlElement(required = true)
-    @ApiModelProperty(position = 8, required = true)
+    @ApiModelProperty(position = 11, required = true)
     @FieldValidation
     private String description;
 
@@ -90,7 +114,7 @@ public class Catalogue implements Identifiable {
      * Link to the logo/visual identity of the Catalogue.
      */
     @XmlElement(required = true)
-    @ApiModelProperty(position = 9, example = "https://example.com", required = true)
+    @ApiModelProperty(position = 12, example = "https://example.com", required = true)
     @FieldValidation
     private URL logo;
 
@@ -99,7 +123,7 @@ public class Catalogue implements Identifiable {
      */
     @XmlElementWrapper(name = "multimedia")
     @XmlElement(name = "multimedia")
-    @ApiModelProperty(position = 10)
+    @ApiModelProperty(position = 13)
     @FieldValidation(nullable = true)
     private List<MultimediaPair> multimedia;
 
@@ -110,7 +134,7 @@ public class Catalogue implements Identifiable {
      */
     @XmlElementWrapper(name = "scientificDomains")
     @XmlElement(name = "scientificDomain")
-    @ApiModelProperty(position = 11, notes = "Vocabulary ID")
+    @ApiModelProperty(position = 14, notes = "Vocabulary ID")
     @FieldValidation(nullable = true)
     private List<ServiceProviderDomain> scientificDomains;
 
@@ -119,7 +143,7 @@ public class Catalogue implements Identifiable {
      */
     @XmlElementWrapper(name = "tags")
     @XmlElement(name = "tag")
-    @ApiModelProperty(position = 12)
+    @ApiModelProperty(position = 15)
     @FieldValidation(nullable = true)
     private List<String> tags;
 
@@ -129,7 +153,7 @@ public class Catalogue implements Identifiable {
      * Physical location of the Catalogue.
      */
     @XmlElement(required = true)
-    @ApiModelProperty(position = 13, required = true)
+    @ApiModelProperty(position = 16, required = true)
     @FieldValidation
     private ProviderLocation location;
 
@@ -139,7 +163,7 @@ public class Catalogue implements Identifiable {
      * Catalogue's main contact info.
      */
     @XmlElement(required = true)
-    @ApiModelProperty(position = 14, required = true)
+    @ApiModelProperty(position = 17, required = true)
     @FieldValidation
     private ProviderMainContact mainContact;
 
@@ -148,7 +172,7 @@ public class Catalogue implements Identifiable {
      */
     @XmlElementWrapper(required = true, name = "publicContacts")
     @XmlElement(name = "publicContact")
-    @ApiModelProperty(position = 15, required = true)
+    @ApiModelProperty(position = 18, required = true)
     @FieldValidation
     private List<ProviderPublicContact> publicContacts;
 
@@ -159,7 +183,7 @@ public class Catalogue implements Identifiable {
      */
     @XmlElementWrapper(name = "participatingCountries")
     @XmlElement(name = "participatingCountry")
-    @ApiModelProperty(position = 16, notes = "Vocabulary ID")
+    @ApiModelProperty(position = 19, notes = "Vocabulary ID")
     @FieldValidation(nullable = true, containsId = true, idClass = Vocabulary.class)
     @VocabularyValidation(type = Vocabulary.Type.COUNTRY)
     private List<String> participatingCountries;
@@ -169,7 +193,7 @@ public class Catalogue implements Identifiable {
      */
     @XmlElementWrapper(name = "affiliations")
     @XmlElement(name = "affiliation")
-    @ApiModelProperty(position = 17)
+    @ApiModelProperty(position = 20)
     @FieldValidation(nullable = true)
     private List<String> affiliations;
 
@@ -178,7 +202,7 @@ public class Catalogue implements Identifiable {
      */
     @XmlElementWrapper(name = "networks")
     @XmlElement(name = "network")
-    @ApiModelProperty(position = 18, notes = "Vocabulary ID")
+    @ApiModelProperty(position = 21, notes = "Vocabulary ID")
     @FieldValidation(nullable = true, containsId = true, idClass = Vocabulary.class)
     @VocabularyValidation(type = Vocabulary.Type.PROVIDER_NETWORK)
     private List<String> networks;
@@ -187,7 +211,7 @@ public class Catalogue implements Identifiable {
     // Extra needed fields
     @XmlElementWrapper(name = "users", required = true)
     @XmlElement(name = "user")
-    @ApiModelProperty(position = 19, required = true)
+    @ApiModelProperty(position = 22, required = true)
     @FieldValidation
     private List<User> users;
 
@@ -205,6 +229,9 @@ public class Catalogue implements Identifiable {
                 ", legalEntity=" + legalEntity +
                 ", legalStatus='" + legalStatus + '\'' +
                 ", hostingLegalEntity='" + hostingLegalEntity + '\'' +
+                ", inclusionCriteria=" + inclusionCriteria +
+                ", validationProcess=" + validationProcess +
+                ", endOfLife='" + endOfLife + '\'' +
                 ", description='" + description + '\'' +
                 ", logo=" + logo +
                 ", multimedia=" + multimedia +
@@ -276,6 +303,30 @@ public class Catalogue implements Identifiable {
 
     public void setHostingLegalEntity(String hostingLegalEntity) {
         this.hostingLegalEntity = hostingLegalEntity;
+    }
+
+    public URL getInclusionCriteria() {
+        return inclusionCriteria;
+    }
+
+    public void setInclusionCriteria(URL inclusionCriteria) {
+        this.inclusionCriteria = inclusionCriteria;
+    }
+
+    public URL getValidationProcess() {
+        return validationProcess;
+    }
+
+    public void setValidationProcess(URL validationProcess) {
+        this.validationProcess = validationProcess;
+    }
+
+    public String getEndOfLife() {
+        return endOfLife;
+    }
+
+    public void setEndOfLife(String endOfLife) {
+        this.endOfLife = endOfLife;
     }
 
     public String getDescription() {

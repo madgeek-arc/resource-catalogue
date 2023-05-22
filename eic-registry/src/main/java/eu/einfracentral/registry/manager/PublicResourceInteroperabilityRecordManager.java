@@ -72,6 +72,11 @@ public class PublicResourceInteroperabilityRecordManager extends ResourceManager
                 resourceInteroperabilityRecordBundle.getId()));
         resourceInteroperabilityRecordBundle.getResourceInteroperabilityRecord().setResourceId(String.format("%s.%s", resourceInteroperabilityRecordBundle.getResourceInteroperabilityRecord().getCatalogueId(),
                 resourceInteroperabilityRecordBundle.getResourceInteroperabilityRecord().getResourceId()));
+        List<String> publicInteroperabilityRecordList = new ArrayList<>();
+        for (String interoperabilityRecord : resourceInteroperabilityRecordBundle.getResourceInteroperabilityRecord().getInteroperabilityRecordIds()){
+            publicInteroperabilityRecordList.add(String.format("%s.%s", resourceInteroperabilityRecordBundle.getResourceInteroperabilityRecord().getCatalogueId(), interoperabilityRecord));
+        }
+        resourceInteroperabilityRecordBundle.getResourceInteroperabilityRecord().setInteroperabilityRecordIds(publicInteroperabilityRecordList);
         resourceInteroperabilityRecordBundle.getMetadata().setPublished(true);
         ResourceInteroperabilityRecordBundle ret;
         logger.info(String.format("ResourceInteroperabilityRecordBundle [%s] is being published with id [%s]", lowerLevelResourceId, resourceInteroperabilityRecordBundle.getId()));
@@ -92,6 +97,11 @@ public class PublicResourceInteroperabilityRecordManager extends ResourceManager
         }
         ret.getResourceInteroperabilityRecord().setResourceId(String.format("%s.%s", resourceInteroperabilityRecordBundle.getResourceInteroperabilityRecord().getCatalogueId(),
                 resourceInteroperabilityRecordBundle.getResourceInteroperabilityRecord().getResourceId()));
+        List<String> publicInteroperabilityRecordList = new ArrayList<>();
+        for (String interoperabilityRecord : resourceInteroperabilityRecordBundle.getResourceInteroperabilityRecord().getInteroperabilityRecordIds()){
+            publicInteroperabilityRecordList.add(String.format("%s.%s", resourceInteroperabilityRecordBundle.getResourceInteroperabilityRecord().getCatalogueId(), interoperabilityRecord));
+        }
+        ret.getResourceInteroperabilityRecord().setInteroperabilityRecordIds(publicInteroperabilityRecordList);
         ret.setIdentifiers(published.getIdentifiers());
         ret.setId(published.getId());
         ret.setMetadata(published.getMetadata());

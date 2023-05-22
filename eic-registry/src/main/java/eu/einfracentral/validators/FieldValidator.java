@@ -35,7 +35,7 @@ public class FieldValidator {
     private final ResourceBundleService<DatasourceBundle> datasourceBundleService;
     private final TrainingResourceService<TrainingResourceBundle> trainingResourceService;
     private final CatalogueService<CatalogueBundle, Authentication> catalogueService;
-    private final ResourceService<InteroperabilityRecord, Authentication> interoperabilityRecordService;
+    private final InteroperabilityRecordService<InteroperabilityRecordBundle> interoperabilityRecordService;
 
     private static final String MANDATORY_FIELD = "Field '%s' is mandatory.";
     private static final String NULL_OBJECT = "Attempt to validate null object..";
@@ -49,7 +49,7 @@ public class FieldValidator {
                           @Lazy ResourceBundleService<DatasourceBundle> datasourceBundleService,
                           @Lazy TrainingResourceService<TrainingResourceBundle> trainingResourceService,
                           @Lazy CatalogueService<CatalogueBundle, Authentication> catalogueService,
-                          @Lazy ResourceService<InteroperabilityRecord, Authentication> interoperabilityRecordService) {
+                          @Lazy InteroperabilityRecordService<InteroperabilityRecordBundle> interoperabilityRecordService) {
         this.vocabularyService = vocabularyService;
         this.providerService = providerService;
         this.serviceBundleService = serviceBundleService;
@@ -93,6 +93,9 @@ public class FieldValidator {
             declaredFields.addAll(Arrays.asList(o.getClass().getSuperclass().getDeclaredFields()));
         }
         if (o instanceof TrainingResourceBundle){
+            declaredFields.addAll(Arrays.asList(o.getClass().getSuperclass().getDeclaredFields()));
+        }
+        if (o instanceof InteroperabilityRecordBundle){
             declaredFields.addAll(Arrays.asList(o.getClass().getSuperclass().getDeclaredFields()));
         }
 
@@ -246,7 +249,6 @@ public class FieldValidator {
             if (URL.class.equals(clazz)) {
                 URL url = (URL) o;
                 validateUrl(field, url);
-                //FIXME: List<URL> with a single empty String value never enters.
             } else if (ArrayList.class.equals(clazz) && !((ArrayList) o).isEmpty() && URL.class.equals(((ArrayList) o).get(0).getClass())) {
                 for (int i = 0; i < ((ArrayList) o).size(); i++) {
                     URL url = (URL) ((ArrayList) o).get(i);
@@ -353,7 +355,8 @@ public class FieldValidator {
                         throw new ValidationException(
                                 String.format("Field '%s' should contain the ID of an existing Catalogue",
                                         field.getName()));
-                    } else if ((eu.einfracentral.domain.InteroperabilityRecord.class.equals(annotation.idClass()))
+                    } else if ((eu.einfracentral.domain.InteroperabilityRecord.class.equals(annotation.idClass())
+                            || InteroperabilityRecordBundle.class.equals(annotation.idClass()))
                             && interoperabilityRecordService.get(o.toString()) == null) {
                         throw new ValidationException(
                                 String.format("Field '%s' should contain the ID of an existing InteroperabilityRecord",

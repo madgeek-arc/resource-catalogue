@@ -57,4 +57,5 @@ public interface CatalogueService<T, U extends Authentication> extends ResourceS
     Paging<CatalogueBundle> createCorrectQuantityFacets(List<CatalogueBundle> catalogueBundle, Paging<CatalogueBundle> catalogueBundlePaging, int quantity, int from);
 
     <T, I extends ResourceCRUDService<T, Authentication>> void deleteCatalogueResources(String id, I service, Authentication auth);
+    List<String> getAllCatalogueIds();
 }

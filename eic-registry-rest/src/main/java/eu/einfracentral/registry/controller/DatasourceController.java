@@ -53,7 +53,7 @@ public class DatasourceController {
     @DeleteMapping(path = {"{id}"}, produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth, #id)")
     public ResponseEntity<DatasourceBundle> delete(@PathVariable("id") String id,
-                                                   @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueId,
+                                                   @RequestParam(defaultValue = "${project.catalogue.name}", name = "catalogue_id") String catalogueId,
                                                    @ApiIgnore Authentication auth) throws ResourceNotFoundException {
         DatasourceBundle datasource;
         datasource = resourceBundleService.get(id, catalogueId);
@@ -72,13 +72,13 @@ public class DatasourceController {
     @ApiOperation(value = "Get the most current version of a specific Datasource, providing the Resource id.")
     @GetMapping(path = "{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     @PreAuthorize("@securityService.datasourceIsActive(#id, #catalogueId) or hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth, #id)")
-    public ResponseEntity<Datasource> getDatasource(@PathVariable("id") String id, @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueId, @ApiIgnore Authentication auth) {
+    public ResponseEntity<Datasource> getDatasource(@PathVariable("id") String id, @RequestParam(defaultValue = "${project.catalogue.name}", name = "catalogue_id") String catalogueId, @ApiIgnore Authentication auth) {
         return new ResponseEntity<>(resourceBundleService.get(id, catalogueId).getDatasource(), HttpStatus.OK);
     }
 
     @GetMapping(path = "bundle/{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth, #id)")
-    public ResponseEntity<DatasourceBundle> getDatasourceBundle(@PathVariable("id") String id, @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueId, @ApiIgnore Authentication auth) {
+    public ResponseEntity<DatasourceBundle> getDatasourceBundle(@PathVariable("id") String id, @RequestParam(defaultValue = "${project.catalogue.name}", name = "catalogue_id") String catalogueId, @ApiIgnore Authentication auth) {
         return new ResponseEntity<>(resourceBundleService.get(id, catalogueId), HttpStatus.OK);
     }
 
@@ -87,7 +87,7 @@ public class DatasourceController {
     @PreAuthorize("@securityService.datasourceIsActive(#id, #catalogueId) or hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') " +
             "or @securityService.isResourceProviderAdmin(#auth, #id)")
     public ResponseEntity<RichResource> getRichDatasource(@PathVariable("id") String id,
-                                                          @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueId,
+                                                          @RequestParam(defaultValue = "${project.catalogue.name}", name = "catalogue_id") String catalogueId,
                                                           @ApiIgnore Authentication auth) {
         return new ResponseEntity<>(resourceBundleService.getRichResource(id, catalogueId, auth), HttpStatus.OK);
     }
@@ -137,7 +137,7 @@ public class DatasourceController {
             @ApiImplicitParam(name = "orderField", value = "Order field", dataType = "string", paramType = "query")
     })
     @GetMapping(path = "all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    public ResponseEntity<Paging<Datasource>> getAllDatasources(@RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueIds,
+    public ResponseEntity<Paging<Datasource>> getAllDatasources(@RequestParam(defaultValue = "all", name = "catalogue_id") String catalogueIds,
                                                                 @ApiIgnore @RequestParam MultiValueMap<String, Object> allRequestParams,
                                                                 @ApiIgnore Authentication authentication) {
         allRequestParams.addIfAbsent("catalogue_id", catalogueIds);
@@ -161,7 +161,7 @@ public class DatasourceController {
     })
     @GetMapping(path = "/rich/all", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<Paging<RichResource>> getRichDatasources(@ApiIgnore @RequestParam MultiValueMap<String, Object> allRequestParams,
-                                                                   @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueId,
+                                                                   @RequestParam(defaultValue = "all", name = "catalogue_id") String catalogueId,
                                                                    @ApiIgnore Authentication auth) {
         allRequestParams.addIfAbsent("catalogue_id", catalogueId);
         if (catalogueId != null && catalogueId.equals("all")) {
@@ -184,8 +184,8 @@ public class DatasourceController {
     @GetMapping(path = "byProvider/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
 //    @PreAuthorize("hasRole('ROLE_ADMIN') or @securityService.isProviderAdmin(#auth,#id,#catalogueId)")
     public ResponseEntity<Paging<DatasourceBundle>> getDatasourcesByProvider(@ApiIgnore @RequestParam MultiValueMap<String, Object> allRequestParams,
-                                                                             @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueId,
-                                                                             @RequestParam(required = false) Boolean active, @PathVariable String id, @ApiIgnore Authentication auth) {
+                                                                             @RequestParam(defaultValue = "${project.catalogue.name}", name = "catalogue_id") String catalogueId,
+                                                                             @PathVariable String id, @ApiIgnore Authentication auth) {
         allRequestParams.addIfAbsent("catalogue_id", catalogueId);
         if (catalogueId != null && catalogueId.equals("all")) {
             allRequestParams.remove("catalogue_id");
@@ -271,8 +271,8 @@ public class DatasourceController {
 
     // Get all modification details of a specific Resource based on id.
     @GetMapping(path = {"loggingInfoHistory/{id}"}, produces = {MediaType.APPLICATION_JSON_VALUE})
-    public ResponseEntity<Paging<LoggingInfo>> loggingInfoHistory(@PathVariable String id,  @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueId,
-                                                                  @ApiIgnore Authentication auth) {
+    public ResponseEntity<Paging<LoggingInfo>> loggingInfoHistory(@PathVariable String id,
+                                                                  @RequestParam(defaultValue = "${project.catalogue.name}", name = "catalogue_id") String catalogueId) {
         Paging<LoggingInfo> loggingInfoHistory = this.resourceBundleService.getLoggingInfoHistory(id, catalogueId);
         return ResponseEntity.ok(loggingInfoHistory);
     }
@@ -288,7 +288,7 @@ public class DatasourceController {
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     public ResponseEntity<Paging<DatasourceBundle>> getAllDatasourcesForAdminPage(@ApiIgnore @RequestParam MultiValueMap<String, Object> allRequestParams,
                                                                                   @RequestParam(required = false) Set<String> auditState,
-                                                                                  @RequestParam(defaultValue = "eosc", name = "catalogue_id") String catalogueId,
+                                                                                  @RequestParam(defaultValue = "all", name = "catalogue_id") String catalogueId,
                                                                                   @ApiIgnore Authentication authentication) {
 
         allRequestParams.addIfAbsent("catalogue_id", catalogueId);

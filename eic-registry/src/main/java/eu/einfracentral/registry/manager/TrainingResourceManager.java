@@ -1,9 +1,6 @@
 package eu.einfracentral.registry.manager;
 
 import eu.einfracentral.domain.*;
-import eu.einfracentral.dto.ProviderInfo;
-import eu.einfracentral.dto.ScientificDomain;
-import eu.einfracentral.exception.OIDCAuthenticationException;
 import eu.einfracentral.exception.ResourceException;
 import eu.einfracentral.exception.ResourceNotFoundException;
 import eu.einfracentral.exception.ValidationException;
@@ -12,7 +9,7 @@ import eu.einfracentral.service.*;
 import eu.einfracentral.service.search.SearchServiceEIC;
 import eu.einfracentral.utils.FacetFilterUtils;
 import eu.einfracentral.utils.FacetLabelService;
-import eu.einfracentral.utils.SortUtils;
+import eu.einfracentral.utils.ProviderResourcesCommonMethods;
 import eu.einfracentral.validators.FieldValidator;
 import eu.openminted.registry.core.domain.*;
 import eu.openminted.registry.core.domain.index.IndexField;
@@ -35,7 +32,6 @@ import javax.annotation.PostConstruct;
 import javax.validation.constraints.NotNull;
 import java.net.UnknownHostException;
 import java.security.NoSuchAlgorithmException;
-import java.text.DecimalFormat;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.util.*;
@@ -57,6 +53,7 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
     private final VocabularyService vocabularyService;
     private final CatalogueService<CatalogueBundle, Authentication> catalogueService;
     private final PublicTrainingResourceManager publicTrainingResourceManager;
+    private final MigrationService migrationService;
     @Autowired
     private FacetLabelService facetLabelService;
     @Autowired
@@ -70,6 +67,7 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
     @Autowired
     @Qualifier("trainingResourceSync")
     private final SynchronizerService<TrainingResource> synchronizerService;
+    private final ProviderResourcesCommonMethods commonMethods;
     private List<String> browseBy;
     private Map<String, String> labels;
     @Value("${project.catalogue.name}")
@@ -111,7 +109,9 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
                                    @Lazy VocabularyService vocabularyService,
                                    CatalogueService<CatalogueBundle, Authentication> catalogueService,
                                    PublicTrainingResourceManager publicTrainingResourceManager,
-                                   SynchronizerService<TrainingResource> synchronizerService){
+                                   SynchronizerService<TrainingResource> synchronizerService,
+                                   ProviderResourcesCommonMethods commonMethods,
+                                   @Lazy MigrationService migrationService){
         super(TrainingResourceBundle.class);
         this.providerService = providerService;
         this.idCreator = idCreator;
@@ -121,6 +121,8 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
         this.catalogueService = catalogueService;
         this.publicTrainingResourceManager = publicTrainingResourceManager;
         this.synchronizerService = synchronizerService;
+        this.commonMethods = commonMethods;
+        this.migrationService = migrationService;
     }
 
     @Override
@@ -142,7 +144,7 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
         if (catalogueId == null || catalogueId.equals("")) { // add catalogue provider
             trainingResourceBundle.getTrainingResource().setCatalogueId(catalogueName);
         } else { // add provider from external catalogue
-            checkCatalogueIdConsistency(trainingResourceBundle, catalogueId);
+            commonMethods.checkCatalogueIdConsistency(trainingResourceBundle, catalogueId);
         }
 
         ProviderBundle providerBundle = providerService.get(trainingResourceBundle.getTrainingResource().getCatalogueId(), trainingResourceBundle.getTrainingResource().getResourceOrganisation(), auth);
@@ -182,8 +184,6 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
 
         // latestOnboardingInfo
         trainingResourceBundle.setLatestOnboardingInfo(loggingInfo);
-
-        sortFields(trainingResourceBundle);
 
         // resource status & extra loggingInfo for Approval
         if (providerBundle.getTemplateStatus().equals("approved template")) {
@@ -264,7 +264,7 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
         if (catalogueId == null || catalogueId.equals("")) {
             trainingResourceBundle.getTrainingResource().setCatalogueId(catalogueName);
         } else {
-            checkCatalogueIdConsistency(trainingResourceBundle, catalogueId);
+            commonMethods.checkCatalogueIdConsistency(trainingResourceBundle, catalogueId);
         }
 
         logger.trace("User '{}' is attempting to update the Training Resource with id '{}' of the Catalogue '{}'", auth, trainingResourceBundle.getTrainingResource().getId(), trainingResourceBundle.getTrainingResource().getCatalogueId());
@@ -301,7 +301,6 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
         // latestUpdateInfo
         trainingResourceBundle.setLatestUpdateInfo(loggingInfo);
         trainingResourceBundle.setActive(existingTrainingResourceBundle.isActive());
-        sortFields(trainingResourceBundle);
 
         // set status
         trainingResourceBundle.setStatus(existingTrainingResourceBundle.getStatus());
@@ -660,23 +659,6 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
         return trainingResourceBundle;
     }
 
-    public void checkCatalogueIdConsistency(TrainingResourceBundle trainingResourceBundle, String catalogueId) {
-        catalogueService.existsOrElseThrow(catalogueId);
-        if (trainingResourceBundle != null) {
-            if (trainingResourceBundle.getTrainingResource().getCatalogueId() == null || trainingResourceBundle.getTrainingResource().getCatalogueId().equals("")) {
-                throw new ValidationException("Training Resource's 'catalogueId' cannot be null or empty");
-            } else {
-                if (!trainingResourceBundle.getTrainingResource().getCatalogueId().equals(catalogueId)) {
-                    throw new ValidationException("Parameter 'catalogueId' and Training Resource's 'catalogueId' don't match");
-                }
-            }
-        }
-    }
-
-    public void sortFields(TrainingResourceBundle trainingResourceBundle) {
-        trainingResourceBundle.getTrainingResource().setGeographicalAvailabilities(SortUtils.sort(trainingResourceBundle.getTrainingResource().getGeographicalAvailabilities()));
-    }
-
     public TrainingResourceBundle get(String id, String catalogueId) {
         Resource resource = getResource(id, catalogueId);
         if (resource == null) {
@@ -704,7 +686,7 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
         ff.setQuantity(maxQuantity);
         ff.addFilter(getResourceType() + "_id", id);
         List<TrainingResourceBundle> allResources = getAll(ff, null).getResults();
-        if (allResources.size() > 1) {
+        if (allResources.size() > 0) {
             return allResources.get(0);
         }
         return null;
@@ -1069,7 +1051,7 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
 
     @Override
     public Map<String, List<TrainingResourceBundle>> getBy(String field, Authentication auth) throws NoSuchFieldException {
-        return null;
+        throw new UnsupportedOperationException("Not yet Implemented");
     }
 
     @Override
@@ -1100,6 +1082,11 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
         ProviderBundle newProvider = providerService.get(catalogueName, newProviderId, auth);
         ProviderBundle oldProvider = providerService.get(catalogueName, trainingResourceBundle.getTrainingResource().getResourceOrganisation(), auth);
 
+        // check that the 2 Providers co-exist under the same Catalogue
+        if (!oldProvider.getProvider().getCatalogueId().equals(newProvider.getProvider().getCatalogueId())){
+            throw new ValidationException("You cannot move a Training Resource to a Provider of another Catalogue");
+        }
+
         User user = User.of(auth);
 
         // update loggingInfo
@@ -1128,6 +1115,13 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
         // update ResourceOrganisation
         trainingResourceBundle.getTrainingResource().setResourceOrganisation(newProviderId);
 
+        // update ResourceProviders
+        List<String> resourceProviders = trainingResourceBundle.getTrainingResource().getResourceProviders();
+        if (resourceProviders.contains(oldProvider.getId())){
+            resourceProviders.remove(oldProvider.getId());
+            resourceProviders.add(newProviderId);
+        }
+
         // update id
         try {
             trainingResourceBundle.setId(idCreator.createTrainingResourceId(trainingResourceBundle));
@@ -1137,8 +1131,11 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
 
         // add Resource, delete the old one
         add(trainingResourceBundle, auth);
-        delete(get(resourceId, catalogueName));
         publicTrainingResourceManager.delete(get(resourceId, catalogueName)); // FIXME: ProviderManagementAspect's deletePublicDatasource is not triggered
+        delete(get(resourceId, catalogueName));
+
+        // update other resources which had the old resource ID on their fields
+        migrationService.updateRelatedToTheIdFieldsOfOtherResourcesOfThePortal(resourceId, trainingResourceBundle.getId());
 
         // emails to EPOT, old and new Provider
         registrationMailService.sendEmailsForMovedTrainingResources(oldProvider, newProvider, trainingResourceBundle, auth);

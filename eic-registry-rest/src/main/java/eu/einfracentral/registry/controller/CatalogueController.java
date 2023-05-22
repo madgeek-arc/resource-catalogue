@@ -2,10 +2,9 @@ package eu.einfracentral.registry.controller;
 
 import eu.einfracentral.domain.*;
 import eu.einfracentral.exception.ValidationException;
-import eu.einfracentral.registry.service.CatalogueService;
-import eu.einfracentral.registry.service.ProviderService;
-import eu.einfracentral.registry.service.ResourceBundleService;
-import eu.einfracentral.registry.service.TrainingResourceService;
+import eu.einfracentral.registry.service.*;
+import eu.einfracentral.service.GenericResourceService;
+import eu.einfracentral.utils.FacetFilterUtils;
 import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.domain.Paging;
 import eu.openminted.registry.core.exception.ResourceNotFoundException;
@@ -37,18 +36,24 @@ public class CatalogueController {
     private final ResourceBundleService<ServiceBundle> resourceBundleService;
     private final ResourceBundleService<DatasourceBundle> datasourceBundleService;
     private final TrainingResourceService<TrainingResourceBundle> trainingResourceService;
+    private final InteroperabilityRecordService<InteroperabilityRecordBundle> interoperabilityRecordService;
+    private final GenericResourceService genericResourceService;
 
     @Autowired
     CatalogueController(CatalogueService<CatalogueBundle, Authentication> catalogueManager,
                         ProviderService<ProviderBundle, Authentication> providerManager,
                         ResourceBundleService<ServiceBundle> resourceBundleService,
                         ResourceBundleService<DatasourceBundle> datasourceBundleService,
-                        TrainingResourceService<TrainingResourceBundle> trainingResourceService) {
+                        TrainingResourceService<TrainingResourceBundle> trainingResourceService,
+                        InteroperabilityRecordService<InteroperabilityRecordBundle> interoperabilityRecordService,
+                        GenericResourceService genericResourceService) {
         this.catalogueManager = catalogueManager;
         this.providerManager = providerManager;
         this.resourceBundleService = resourceBundleService;
         this.datasourceBundleService = datasourceBundleService;
         this.trainingResourceService = trainingResourceService;
+        this.interoperabilityRecordService = interoperabilityRecordService;
+        this.genericResourceService = genericResourceService;
     }
 
     //SECTION: CATALOGUE
@@ -108,20 +113,7 @@ public class CatalogueController {
     })
     @GetMapping(path = "all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity<Paging<Catalogue>> getAllCatalogues(@ApiIgnore @RequestParam Map<String, Object> allRequestParams, @ApiIgnore Authentication auth) {
-        FacetFilter ff = new FacetFilter();
-        ff.setKeyword(allRequestParams.get("query") != null ? (String) allRequestParams.remove("query") : "");
-        ff.setFrom(allRequestParams.get("from") != null ? Integer.parseInt((String) allRequestParams.remove("from")) : 0);
-        ff.setQuantity(allRequestParams.get("quantity") != null ? Integer.parseInt((String) allRequestParams.remove("quantity")) : 10);
-        Map<String, Object> sort = new HashMap<>();
-        Map<String, Object> order = new HashMap<>();
-        String orderDirection = allRequestParams.get("order") != null ? (String) allRequestParams.remove("order") : "asc";
-        String orderField = allRequestParams.get("orderField") != null ? (String) allRequestParams.remove("orderField") : null;
-        if (orderField != null) {
-            order.put("order", orderDirection);
-            sort.put(orderField, order);
-            ff.setOrderBy(sort);
-        }
-        ff.setFilter(allRequestParams);
+        FacetFilter ff = FacetFilterUtils.createFacetFilter(allRequestParams);
         List<Catalogue> catalogueList = new LinkedList<>();
         Paging<CatalogueBundle> catalogueBundlePaging = catalogueManager.getAll(ff, auth);
         for (CatalogueBundle catalogueBundle : catalogueBundlePaging.getResults()) {
@@ -257,20 +249,7 @@ public class CatalogueController {
     })
     @GetMapping(path = "{catalogueId}/provider/all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity<Paging<Provider>> getAllCatalogueProviders(@ApiIgnore @RequestParam Map<String, Object> allRequestParams, @PathVariable("catalogueId") String catalogueId, @ApiIgnore Authentication auth) {
-        FacetFilter ff = new FacetFilter();
-        ff.setKeyword(allRequestParams.get("query") != null ? (String) allRequestParams.remove("query") : "");
-        ff.setFrom(allRequestParams.get("from") != null ? Integer.parseInt((String) allRequestParams.remove("from")) : 0);
-        ff.setQuantity(allRequestParams.get("quantity") != null ? Integer.parseInt((String) allRequestParams.remove("quantity")) : 10);
-        Map<String, Object> sort = new HashMap<>();
-        Map<String, Object> order = new HashMap<>();
-        String orderDirection = allRequestParams.get("order") != null ? (String) allRequestParams.remove("order") : "asc";
-        String orderField = allRequestParams.get("orderField") != null ? (String) allRequestParams.remove("orderField") : null;
-        if (orderField != null) {
-            order.put("order", orderDirection);
-            sort.put(orderField, order);
-            ff.setOrderBy(sort);
-        }
-        ff.setFilter(allRequestParams);
+        FacetFilter ff = FacetFilterUtils.createFacetFilter(allRequestParams);
         if (!catalogueId.equals("all")) {
             ff.addFilter("catalogue_id", catalogueId);
         }
@@ -338,24 +317,81 @@ public class CatalogueController {
         return new ResponseEntity<>(provider.getProvider(), HttpStatus.OK);
     }
 
-    //SECTION: Service
+    //SECTION: RESOURCE (TO BE DELETED)
+    @Deprecated
     @ApiOperation(value = "Returns the Service of the specific Catalogue with the given id.")
     @GetMapping(path = "{catalogueId}/resource/{resourceId}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    public ResponseEntity<Service> getCatalogueService(@PathVariable("catalogueId") String catalogueId, @PathVariable("resourceId") String resourceId, @ApiIgnore Authentication auth) {
-        Service resource = resourceBundleService.getCatalogueResource(catalogueId, resourceId, auth).getService();
-        if (resource.getCatalogueId() == null) {
-            throw new ValidationException("Service's catalogueId cannot be null");
-        } else {
-            if (resource.getCatalogueId().equals(catalogueId)) {
-                return new ResponseEntity<>(resource, HttpStatus.OK);
-            } else {
-                throw new ValidationException(String.format("The Service [%s] you requested does not belong to the specific Catalogue [%s]", resourceId, catalogueId));
-            }
+    public ResponseEntity<?> getCatalogueResource(@PathVariable("catalogueId") String catalogueId, @PathVariable("resourceId") String resourceId, @ApiIgnore Authentication auth) {
+        try{
+            return new ResponseEntity<>(resourceBundleService.get(resourceId, catalogueId).getService(), HttpStatus.OK);
+        } catch(eu.einfracentral.exception.ResourceNotFoundException e){
+            return new ResponseEntity<>(datasourceBundleService.get(resourceId, catalogueId).getDatasource(), HttpStatus.OK);
+        }
+    }
+
+    @Deprecated
+    @ApiOperation(value = "Creates a new Service for the specific Catalogue.")
+    @PostMapping(path = "{catalogueId}/resource", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.providerCanAddResources(#auth, #service)")
+    public ResponseEntity<Service> addCatalogueResource(@RequestBody Service service, @PathVariable String catalogueId, @ApiIgnore Authentication auth) {
+        ServiceBundle ret = this.resourceBundleService.addResource(new ServiceBundle(service), catalogueId, auth);
+        logger.info("User '{}' added the Service with name '{}' and id '{}' in the Catalogue '{}'", auth.getName(), service.getName(), service.getId(), catalogueId);
+        return new ResponseEntity<>(ret.getService(), HttpStatus.CREATED);
+    }
+
+    @Deprecated
+    @ApiOperation(value = "Updates the Service of the specific Catalogue.")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth,#service)")
+    @PutMapping(path = "{catalogueId}/resource", produces = {MediaType.APPLICATION_JSON_VALUE})
+    public ResponseEntity<Service> updateCatalogueResource(@RequestBody Service service, @PathVariable String catalogueId, @RequestParam(required = false) String comment, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
+        ServiceBundle ret = this.resourceBundleService.updateResource(new ServiceBundle(service), catalogueId, comment, auth);
+        logger.info("User '{}' updated the Service with name '{}' and id '{} of the Catalogue '{}'", auth.getName(), service.getName(), service.getId(), catalogueId);
+        return new ResponseEntity<>(ret.getService(), HttpStatus.OK);
+    }
+
+    @Deprecated
+    @ApiOperation(value = "Get all the Services of a specific Provider of a specific Catalogue")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
+    @GetMapping(path = "{catalogueId}/{providerId}/resource/all", produces = {MediaType.APPLICATION_JSON_VALUE})
+    public ResponseEntity<Paging<?>> getProviderResources(@PathVariable String catalogueId, @PathVariable String providerId,
+                                                         @RequestParam(defaultValue = "service", name = "type") String type,
+                                                         @ApiIgnore @RequestParam Map<String, Object> allRequestParams) {
+        FacetFilter ff =  resourceBundleService.createFacetFilterForFetchingServicesAndDatasources(allRequestParams, catalogueId, type);
+        ff.addFilter("resource_organisation", providerId);
+        Paging<?> paging = genericResourceService.getResults(ff).map(r -> ((eu.einfracentral.domain.ResourceBundle<?>) r).getPayload());
+        return ResponseEntity.ok(paging);
+    }
+
+    @Deprecated
+    @ApiOperation(value = "Deletes the Service of the specific Catalogue with the given id.")
+    @DeleteMapping(path = "{catalogueId}/resource/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isCatalogueAdmin(#auth, #catalogueId)")
+    public ResponseEntity<Service> deleteCatalogueResource(@PathVariable("catalogueId") String catalogueId,
+                                                          @PathVariable("id") String id,
+                                                          @ApiIgnore Authentication auth) throws ResourceNotFoundException {
+        ServiceBundle serviceBundle = resourceBundleService.get(id, catalogueId);
+        if (serviceBundle == null) {
+            return new ResponseEntity<>(HttpStatus.GONE);
+        }
+        resourceBundleService.delete(serviceBundle);
+        logger.info("User '{}' deleted the Service with name '{}' and id '{}'", auth.getName(), serviceBundle.getService().getName(), serviceBundle.getId());
+        return new ResponseEntity<>(serviceBundle.getService(), HttpStatus.OK);
+    }
+
+
+    //SECTION: SERVICE
+    @ApiOperation(value = "Returns the Service of the specific Catalogue with the given id.")
+    @GetMapping(path = "{catalogueId}/service/{resourceId}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    public ResponseEntity<?> getCatalogueService(@PathVariable("catalogueId") String catalogueId, @PathVariable("resourceId") String resourceId, @ApiIgnore Authentication auth) {
+        try{
+            return new ResponseEntity<>(resourceBundleService.get(resourceId, catalogueId).getService(), HttpStatus.OK);
+        } catch(eu.einfracentral.exception.ResourceNotFoundException e){
+            return new ResponseEntity<>(datasourceBundleService.get(resourceId, catalogueId).getDatasource(), HttpStatus.OK);
         }
     }
 
     @ApiOperation(value = "Creates a new Service for the specific Catalogue.")
-    @PostMapping(path = "{catalogueId}/resource", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PostMapping(path = "{catalogueId}/service", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.providerCanAddResources(#auth, #service)")
     public ResponseEntity<Service> addCatalogueService(@RequestBody Service service, @PathVariable String catalogueId, @ApiIgnore Authentication auth) {
         ServiceBundle ret = this.resourceBundleService.addResource(new ServiceBundle(service), catalogueId, auth);
@@ -365,7 +401,7 @@ public class CatalogueController {
 
     @ApiOperation(value = "Updates the Service of the specific Catalogue.")
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth,#service)")
-    @PutMapping(path = "{catalogueId}/resource", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PutMapping(path = "{catalogueId}/service", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<Service> updateCatalogueService(@RequestBody Service service, @PathVariable String catalogueId, @RequestParam(required = false) String comment, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
         ServiceBundle ret = this.resourceBundleService.updateResource(new ServiceBundle(service), catalogueId, comment, auth);
         logger.info("User '{}' updated the Service with name '{}' and id '{} of the Catalogue '{}'", auth.getName(), service.getName(), service.getId(), catalogueId);
@@ -374,14 +410,18 @@ public class CatalogueController {
 
     @ApiOperation(value = "Get all the Services of a specific Provider of a specific Catalogue")
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
-    @GetMapping(path = "{catalogueId}/{providerId}/resource/all", produces = {MediaType.APPLICATION_JSON_VALUE})
-    public ResponseEntity<Paging<ServiceBundle>> getProviderServices(@PathVariable String catalogueId, @PathVariable String providerId, @ApiIgnore Authentication auth) {
-        Paging<ServiceBundle> serviceBundles = resourceBundleService.getResourceBundles(catalogueId, providerId, auth);
-        return new ResponseEntity<>(serviceBundles, HttpStatus.OK);
+    @GetMapping(path = "{catalogueId}/{providerId}/service/all", produces = {MediaType.APPLICATION_JSON_VALUE})
+    public ResponseEntity<Paging<?>> getProviderServices(@PathVariable String catalogueId, @PathVariable String providerId,
+                                                         @RequestParam(defaultValue = "service", name = "type") String type,
+                                                         @ApiIgnore @RequestParam Map<String, Object> allRequestParams) {
+        FacetFilter ff =  resourceBundleService.createFacetFilterForFetchingServicesAndDatasources(allRequestParams, catalogueId, type);
+        ff.addFilter("resource_organisation", providerId);
+        Paging<?> paging = genericResourceService.getResults(ff).map(r -> ((eu.einfracentral.domain.ResourceBundle<?>) r).getPayload());
+        return ResponseEntity.ok(paging);
     }
 
     @ApiOperation(value = "Deletes the Service of the specific Catalogue with the given id.")
-    @DeleteMapping(path = "{catalogueId}/resource/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @DeleteMapping(path = "{catalogueId}/service/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isCatalogueAdmin(#auth, #catalogueId)")
     public ResponseEntity<Service> deleteCatalogueService(@PathVariable("catalogueId") String catalogueId,
                                                           @PathVariable("id") String id,
@@ -508,5 +548,64 @@ public class CatalogueController {
         trainingResourceService.delete(trainingResourceBundle);
         logger.info("User '{}' deleted the Training Resource with title '{}' and id '{}'", auth.getName(), trainingResourceBundle.getTrainingResource().getTitle(), trainingResourceBundle.getId());
         return new ResponseEntity<>(trainingResourceBundle.getTrainingResource(), HttpStatus.OK);
+    }
+
+    //SECTION: INTEROPERABILITY RECORD
+    @ApiOperation(value = "Returns the Interoperability Record of the specific Catalogue with the given id.")
+    @GetMapping(path = "{catalogueId}/interoperabilityRecord/{interoperabilityRecordId}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    public ResponseEntity<InteroperabilityRecord> getCatalogueInteroperabilityRecord(@PathVariable("catalogueId") String catalogueId,
+                                                                                     @PathVariable("interoperabilityRecordId") String interoperabilityRecordId,
+                                                                                     @ApiIgnore Authentication auth) {
+        InteroperabilityRecord interoperabilityRecord = interoperabilityRecordService.getCatalogueInteroperabilityRecord(catalogueId, interoperabilityRecordId, auth).getInteroperabilityRecord();
+        if (interoperabilityRecord.getCatalogueId() == null) {
+            throw new ValidationException("Interoperability Record's catalogueId cannot be null");
+        } else {
+            if (interoperabilityRecord.getCatalogueId().equals(catalogueId)) {
+                return new ResponseEntity<>(interoperabilityRecord, HttpStatus.OK);
+            } else {
+                throw new ValidationException(String.format("The Interoperability Record [%s] you requested does not belong to the specific Catalogue [%s]", interoperabilityRecordId, catalogueId));
+            }
+        }
+    }
+
+    @ApiOperation(value = "Creates a new Interoperability Record for the specific Catalogue.")
+    @PostMapping(path = "{catalogueId}/interoperabilityRecord", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth, #interoperabilityRecord)")
+    public ResponseEntity<InteroperabilityRecord> addCatalogueInteroperabilityRecord(@RequestBody InteroperabilityRecord interoperabilityRecord, @PathVariable String catalogueId, @ApiIgnore Authentication auth) {
+        InteroperabilityRecordBundle ret = this.interoperabilityRecordService.add(new InteroperabilityRecordBundle(interoperabilityRecord), catalogueId, auth);
+        logger.info("User '{}' added the Interoperability Record with title '{}' and id '{}' in the Catalogue '{}'", auth.getName(), interoperabilityRecord.getTitle(), interoperabilityRecord.getId(), catalogueId);
+        return new ResponseEntity<>(ret.getInteroperabilityRecord(), HttpStatus.CREATED);
+    }
+
+    @ApiOperation(value = "Updates the Interoperability Record of the specific Catalogue.")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth,#interoperabilityRecord)")
+    @PutMapping(path = "{catalogueId}/interoperabilityRecord", produces = {MediaType.APPLICATION_JSON_VALUE})
+    public ResponseEntity<InteroperabilityRecord> updateCatalogueInteroperabilityRecord(@RequestBody InteroperabilityRecord interoperabilityRecord, @PathVariable String catalogueId, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
+        InteroperabilityRecordBundle ret = this.interoperabilityRecordService.update(new InteroperabilityRecordBundle(interoperabilityRecord), catalogueId, auth);
+        logger.info("User '{}' updated the Interoperability Record with title '{}' and id '{} of the Catalogue '{}'", auth.getName(), interoperabilityRecord.getTitle(), interoperabilityRecord.getId(), catalogueId);
+        return new ResponseEntity<>(ret.getInteroperabilityRecord(), HttpStatus.OK);
+    }
+
+    @ApiOperation(value = "Get all the Interoperability Records of a specific Provider of a specific Catalogue")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
+    @GetMapping(path = "{catalogueId}/{providerId}/interoperabilityRecord/all", produces = {MediaType.APPLICATION_JSON_VALUE})
+    public ResponseEntity<Paging<InteroperabilityRecordBundle>> getProviderInteroperabilityRecords(@PathVariable String catalogueId, @PathVariable String providerId, @ApiIgnore Authentication auth) {
+        Paging<InteroperabilityRecordBundle> interoperabilityRecordBundlePaging = interoperabilityRecordService.getInteroperabilityRecordBundles(catalogueId, providerId, auth);
+        return new ResponseEntity<>(interoperabilityRecordBundlePaging, HttpStatus.OK);
+    }
+
+    @ApiOperation(value = "Deletes the Interoperability Record of the specific Catalogue with the given id.")
+    @DeleteMapping(path = "{catalogueId}/interoperabilityRecord/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PreAuthorize("hasRole('ROLE_ADMIN') or @securityService.isCatalogueAdmin(#auth, #catalogueId)")
+    public ResponseEntity<InteroperabilityRecord> deleteCatalogueInteroperabilityRecord(@PathVariable("catalogueId") String catalogueId,
+                                                                            @PathVariable("id") String id,
+                                                                            @ApiIgnore Authentication auth) throws ResourceNotFoundException {
+        InteroperabilityRecordBundle interoperabilityRecordBundle = interoperabilityRecordService.get(id, catalogueId);
+        if (interoperabilityRecordBundle == null) {
+            return new ResponseEntity<>(HttpStatus.GONE);
+        }
+        interoperabilityRecordService.delete(interoperabilityRecordBundle);
+        logger.info("User '{}' deleted the Interoperability Record with title '{}' and id '{}'", auth.getName(), interoperabilityRecordBundle.getInteroperabilityRecord().getTitle(), interoperabilityRecordBundle.getId());
+        return new ResponseEntity<>(interoperabilityRecordBundle.getInteroperabilityRecord(), HttpStatus.OK);
     }
 }

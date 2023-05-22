@@ -4,14 +4,12 @@ import eu.einfracentral.domain.*;
 import eu.einfracentral.exception.ResourceException;
 import eu.einfracentral.exception.ResourceNotFoundException;
 import eu.einfracentral.exception.ValidationException;
-import eu.einfracentral.registry.service.CatalogueService;
-import eu.einfracentral.registry.service.ProviderService;
-import eu.einfracentral.registry.service.ResourceBundleService;
-import eu.einfracentral.registry.service.VocabularyService;
+import eu.einfracentral.registry.service.*;
 import eu.einfracentral.service.IdCreator;
 import eu.einfracentral.service.RegistrationMailService;
 import eu.einfracentral.service.SecurityService;
 import eu.einfracentral.utils.FacetFilterUtils;
+import eu.einfracentral.utils.ProviderResourcesCommonMethods;
 import eu.openminted.registry.core.domain.Browsing;
 import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.domain.Paging;
@@ -47,6 +45,8 @@ public class ServiceBundleManager extends AbstractResourceBundleManager<ServiceB
     private final VocabularyService vocabularyService;
     private final CatalogueService<CatalogueBundle, Authentication> catalogueService;
     private final PublicServiceManager publicServiceManager;
+    private final MigrationService migrationService;
+    private final ProviderResourcesCommonMethods commonMethods;
 
     @Value("${project.catalogue.name}")
     private String catalogueName;
@@ -57,7 +57,9 @@ public class ServiceBundleManager extends AbstractResourceBundleManager<ServiceB
                                 @Lazy RegistrationMailService registrationMailService,
                                 @Lazy VocabularyService vocabularyService,
                                 CatalogueService<CatalogueBundle, Authentication> catalogueService,
-                                @Lazy PublicServiceManager publicServiceManager) {
+                                @Lazy PublicServiceManager publicServiceManager,
+                                @Lazy MigrationService migrationService,
+                                ProviderResourcesCommonMethods commonMethods) {
         super(ServiceBundle.class);
         this.providerService = providerService; // for providers
         this.idCreator = idCreator;
@@ -66,6 +68,8 @@ public class ServiceBundleManager extends AbstractResourceBundleManager<ServiceB
         this.vocabularyService = vocabularyService;
         this.catalogueService = catalogueService;
         this.publicServiceManager = publicServiceManager;
+        this.migrationService = migrationService;
+        this.commonMethods = commonMethods;
     }
 
     @Override
@@ -87,7 +91,7 @@ public class ServiceBundleManager extends AbstractResourceBundleManager<ServiceB
         if (catalogueId == null || catalogueId.equals("")) { // add catalogue provider
             serviceBundle.getService().setCatalogueId(catalogueName);
         } else { // add provider from external catalogue
-            checkCatalogueIdConsistency(serviceBundle, catalogueId);
+            commonMethods.checkCatalogueIdConsistency(serviceBundle, catalogueId);
         }
 
         ProviderBundle providerBundle = providerService.get(serviceBundle.getService().getCatalogueId(), serviceBundle.getService().getResourceOrganisation(), auth);
@@ -125,8 +129,6 @@ public class ServiceBundleManager extends AbstractResourceBundleManager<ServiceB
         // latestOnboardingInfo
         serviceBundle.setLatestOnboardingInfo(loggingInfo);
 
-        sortFields(serviceBundle);
-
         // resource status & extra loggingInfo for Approval
         if (providerBundle.getTemplateStatus().equals("approved template")) {
             serviceBundle.setStatus(vocabularyService.get("approved resource").getId());
@@ -142,6 +144,9 @@ public class ServiceBundleManager extends AbstractResourceBundleManager<ServiceB
 
         // LoggingInfo
         serviceBundle.setLoggingInfo(loggingInfoList);
+
+        // serviceType
+        createResourceExtras(serviceBundle, "service_type-service");
 
         logger.info("Adding Service: {}", serviceBundle);
         ServiceBundle ret;
@@ -179,7 +184,7 @@ public class ServiceBundleManager extends AbstractResourceBundleManager<ServiceB
         if (catalogueId == null || catalogueId.equals("")) {
             serviceBundle.getService().setCatalogueId(catalogueName);
         } else {
-            checkCatalogueIdConsistency(serviceBundle, catalogueId);
+            commonMethods.checkCatalogueIdConsistency(serviceBundle, catalogueId);
         }
 
         logger.trace("User '{}' is attempting to update the Service with id '{}' of the Catalogue '{}'", auth, serviceBundle.getService().getId(), serviceBundle.getService().getCatalogueId());
@@ -236,7 +241,6 @@ public class ServiceBundleManager extends AbstractResourceBundleManager<ServiceB
         // latestUpdateInfo
         serviceBundle.setLatestUpdateInfo(loggingInfo);
         serviceBundle.setActive(existingService.isActive());
-        sortFields(serviceBundle);
 
         // set status
         serviceBundle.setStatus(existingService.getStatus());
@@ -616,11 +620,11 @@ public class ServiceBundleManager extends AbstractResourceBundleManager<ServiceB
 
         // add Resource, delete the old one
         add(serviceBundle, auth);
-        delete(get(resourceId, catalogueName));
         publicServiceManager.delete(get(resourceId, catalogueName)); // FIXME: ProviderManagementAspect's deletePublicDatasource is not triggered
+        delete(get(resourceId, catalogueName));
 
         // update other resources which had the old resource ID on their fields
-//        updateRelatedToTheIdFieldsOfOtherResourcesOfThePortal();
+        migrationService.updateRelatedToTheIdFieldsOfOtherResourcesOfThePortal(resourceId, newResourceId);
 
         // emails to EPOT, old and new Provider
         registrationMailService.sendEmailsForMovedResources(oldProvider, newProvider, serviceBundle, auth);
@@ -631,10 +635,6 @@ public class ServiceBundleManager extends AbstractResourceBundleManager<ServiceB
     public ServiceBundle createPublicResource(ServiceBundle serviceBundle, Authentication auth){
         publicServiceManager.add(serviceBundle, auth);
         return serviceBundle;
-    }
-
-    private void updateRelatedToTheIdFieldsOfOtherResourcesOfThePortal(String oldResourceId, String newResourceId) {
-        // to be implemented -> EOSCP-90
     }
 
 }

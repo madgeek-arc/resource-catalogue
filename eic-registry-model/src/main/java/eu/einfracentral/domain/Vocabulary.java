@@ -80,6 +80,7 @@ public class Vocabulary implements Identifiable {
         PROVIDER_STATE("Provider state"),
         RESOURCE_STATE("Resource state"),
         TEMPLATE_STATE("Template state"),
+        INTEROPERABILITY_RECORD_STATE("Interoperability Record state"),
         // Datasource
         DS_RESEARCH_ENTITY_TYPE("Research entity type"),
         DS_PERSISTENT_IDENTITY_SCHEME("Persistent identity scheme"),
@@ -103,7 +104,9 @@ public class Vocabulary implements Identifiable {
         IR_NAME_TYPE("Interoperability Record name type"),
         IR_RESOURCE_TYPE_GENERAL("Interoperability Record resource type general"),
         IR_STATUS("Interoperability Record status"),
-        IR_EOSC_GUIDELINE_TYPE("Interoperability Record eosc guideline type");
+        IR_EOSC_GUIDELINE_TYPE("Interoperability Record eosc guideline type"),
+        // serviceType
+        SERVICE_TYPE("Service type");
 
         private final String type;
 

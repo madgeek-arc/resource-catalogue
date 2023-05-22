@@ -273,6 +273,8 @@
             
       <xs:enumeration value="TEMPLATE_STATE"/>
             
+      <xs:enumeration value="INTEROPERABILITY_RECORD_STATE"/>
+            
       <xs:enumeration value="DS_RESEARCH_ENTITY_TYPE"/>
             
       <xs:enumeration value="DS_PERSISTENT_IDENTITY_SCHEME"/>
@@ -310,6 +312,8 @@
       <xs:enumeration value="IR_STATUS"/>
             
       <xs:enumeration value="IR_EOSC_GUIDELINE_TYPE"/>
+            
+      <xs:enumeration value="SERVICE_TYPE"/>
           
     </xs:restriction>
       

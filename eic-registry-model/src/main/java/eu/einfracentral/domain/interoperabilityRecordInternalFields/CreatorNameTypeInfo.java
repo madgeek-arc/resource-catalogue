@@ -16,8 +16,8 @@ public class CreatorNameTypeInfo {
     /**
      * The full name of the creator.
      */
-    @XmlElement(required = true)
-    @ApiModelProperty(position = 1, required = true)
+    @XmlElement
+    @ApiModelProperty(position = 1)
     @FieldValidation(nullable = true)
     private String creatorName;
 
