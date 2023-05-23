@@ -211,10 +211,10 @@ public class InteroperabilityRecordController {
 
     @PutMapping(path = "updateInteroperabilityRecordBundle", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public ResponseEntity<InteroperabilityRecordBundle> update(@RequestBody InteroperabilityRecordBundle interoperabilityRecordBundle, @ApiIgnore Authentication authentication) throws ResourceNotFoundException {
-        ResponseEntity<InteroperabilityRecordBundle> ret = new ResponseEntity<>(interoperabilityRecordService.update(interoperabilityRecordBundle, authentication), HttpStatus.OK);
+    public ResponseEntity<InteroperabilityRecordBundle> update(@RequestBody InteroperabilityRecordBundle interoperabilityRecord, @ApiIgnore Authentication authentication) throws ResourceNotFoundException {
+        InteroperabilityRecordBundle interoperabilityRecordBundle = interoperabilityRecordService.update(interoperabilityRecord, authentication);
         logger.info("User '{}' updated InteroperabilityRecordBundle '{}' with id: {}", authentication, interoperabilityRecordBundle.getInteroperabilityRecord().getTitle(), interoperabilityRecordBundle.getId());
-        return ret;
+        return new ResponseEntity<>(interoperabilityRecordBundle, HttpStatus.OK);
     }
 
     // Create a Public InteroperabilityRecord if something went bad during its creation
