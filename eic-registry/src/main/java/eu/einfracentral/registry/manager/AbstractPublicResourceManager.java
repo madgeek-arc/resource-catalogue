@@ -88,6 +88,21 @@ public abstract class AbstractPublicResourceManager<T extends Identifiable> exte
                         allCatalogueIds));
     }
 
+    protected void updateResourceInteroperabilityRecordIdsToPublic(ResourceInteroperabilityRecordBundle resourceInteroperabilityRecordBundle) {
+        List<String> allCatalogueIds = getAllCatalogueIds();
+        // Resource Organisation
+        resourceInteroperabilityRecordBundle.getResourceInteroperabilityRecord().setResourceId(
+                String.format("%s.%s",
+                        resourceInteroperabilityRecordBundle.getResourceInteroperabilityRecord().getCatalogueId(),
+                        resourceInteroperabilityRecordBundle.getResourceInteroperabilityRecord().getResourceId()));
+        // Interoperability Record IDs
+        resourceInteroperabilityRecordBundle.getResourceInteroperabilityRecord().setInteroperabilityRecordIds(
+                appendCatalogueId(
+                        resourceInteroperabilityRecordBundle.getResourceInteroperabilityRecord().getInteroperabilityRecordIds(),
+                        resourceInteroperabilityRecordBundle.getResourceInteroperabilityRecord().getCatalogueId(),
+                        allCatalogueIds));
+    }
+
     protected List<String> getAllCatalogueIds() {
         List<String> catalogueIds = new ArrayList<>();
         FacetFilter ff = new FacetFilter();

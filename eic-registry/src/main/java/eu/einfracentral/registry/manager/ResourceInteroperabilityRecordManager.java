@@ -7,6 +7,7 @@ import eu.einfracentral.registry.service.ResourceBundleService;
 import eu.einfracentral.registry.service.ResourceInteroperabilityRecordService;
 import eu.einfracentral.registry.service.TrainingResourceService;
 import eu.einfracentral.service.SecurityService;
+import eu.einfracentral.utils.ProviderResourcesCommonMethods;
 import eu.einfracentral.utils.ResourceValidationUtils;
 import eu.openminted.registry.core.domain.Resource;
 import eu.openminted.registry.core.service.SearchService;
@@ -29,18 +30,20 @@ public class ResourceInteroperabilityRecordManager extends ResourceManager<Resou
     private final TrainingResourceService<TrainingResourceBundle> trainingResourceService;
     private final InteroperabilityRecordService<InteroperabilityRecordBundle> interoperabilityRecordService;
     private final SecurityService securityService;
+    private final ProviderResourcesCommonMethods commonMethods;
 
     public ResourceInteroperabilityRecordManager(ResourceBundleService<ServiceBundle> serviceBundleService,
                                                  ResourceBundleService<DatasourceBundle> datasourceBundleService,
                                                  TrainingResourceService<TrainingResourceBundle> trainingResourceService,
                                                  InteroperabilityRecordService<InteroperabilityRecordBundle> interoperabilityRecordService,
-                                                 SecurityService securityService) {
+                                                 SecurityService securityService, ProviderResourcesCommonMethods commonMethods) {
         super(ResourceInteroperabilityRecordBundle.class);
         this.serviceBundleService = serviceBundleService;
         this.datasourceBundleService = datasourceBundleService;
         this.trainingResourceService = trainingResourceService;
         this.interoperabilityRecordService = interoperabilityRecordService;
         this.securityService = securityService;
+        this.commonMethods = commonMethods;
     }
 
     @Override
@@ -71,12 +74,13 @@ public class ResourceInteroperabilityRecordManager extends ResourceManager<Resou
         }
 
         super.validate(resourceInteroperabilityRecordBundle);
-        return checkIfEachInteroperabilityRecordIsApprovedAndNotPublic(resourceInteroperabilityRecordBundle);
+        return checkIfEachInteroperabilityRecordIsApproved(resourceInteroperabilityRecordBundle);
     }
 
     @Override
     public ResourceInteroperabilityRecordBundle add(ResourceInteroperabilityRecordBundle resourceInteroperabilityRecordBundle, String resourceType, Authentication auth) {
         validate(resourceInteroperabilityRecordBundle, resourceType);
+        commonMethods.checkRelatedResourceIDsConsistency(resourceInteroperabilityRecordBundle);
 
         resourceInteroperabilityRecordBundle.setId(UUID.randomUUID().toString());
         logger.trace("User '{}' is attempting to add a new ResourceInteroperabilityRecord: {}", auth, resourceInteroperabilityRecordBundle);
@@ -109,6 +113,7 @@ public class ResourceInteroperabilityRecordManager extends ResourceManager<Resou
     public ResourceInteroperabilityRecordBundle update(ResourceInteroperabilityRecordBundle resourceInteroperabilityRecordBundle, Authentication auth) {
         logger.trace("User '{}' is attempting to update the ResourceInteroperabilityRecord with id '{}'", auth, resourceInteroperabilityRecordBundle.getId());
 
+        commonMethods.checkRelatedResourceIDsConsistency(resourceInteroperabilityRecordBundle);
         Resource existing = whereID(resourceInteroperabilityRecordBundle.getId(), true);
         ResourceInteroperabilityRecordBundle ex = deserialize(existing);
         // check if there are actual changes in the ResourceInteroperabilityRecord
@@ -122,7 +127,7 @@ public class ResourceInteroperabilityRecordManager extends ResourceManager<Resou
         }
 
         validate(resourceInteroperabilityRecordBundle);
-        checkIfEachInteroperabilityRecordIsApprovedAndNotPublic(resourceInteroperabilityRecordBundle);
+        checkIfEachInteroperabilityRecordIsApproved(resourceInteroperabilityRecordBundle);
 
         resourceInteroperabilityRecordBundle.setMetadata(Metadata.updateMetadata(resourceInteroperabilityRecordBundle.getMetadata(), User.of(auth).getFullName(), User.of(auth).getEmail()));
         List<LoggingInfo> loggingInfoList = new ArrayList<>();
@@ -167,13 +172,10 @@ public class ResourceInteroperabilityRecordManager extends ResourceManager<Resou
 
     }
 
-    private ResourceInteroperabilityRecordBundle checkIfEachInteroperabilityRecordIsApprovedAndNotPublic (ResourceInteroperabilityRecordBundle resourceInteroperabilityRecordBundle){
+    private ResourceInteroperabilityRecordBundle checkIfEachInteroperabilityRecordIsApproved(ResourceInteroperabilityRecordBundle resourceInteroperabilityRecordBundle){
         for (String interoperabilityRecord : resourceInteroperabilityRecordBundle.getResourceInteroperabilityRecord().getInteroperabilityRecordIds()) {
             if (!interoperabilityRecordService.get(interoperabilityRecord).getStatus().equals("approved interoperability record")){
-                throw new ValidationException("One ore more of the Interoperability Records you have provided is not yet approved");
-            }
-            if (interoperabilityRecord.contains(resourceInteroperabilityRecordBundle.getResourceInteroperabilityRecord().getCatalogueId())) {
-                throw new ValidationException("Field 'interoperabilityRecordIds' should not contain a Public Interoperability Record ID");
+                throw new ValidationException("One ore more of the Interoperability Records you have provided is not yet approved.");
             }
         }
         return resourceInteroperabilityRecordBundle;

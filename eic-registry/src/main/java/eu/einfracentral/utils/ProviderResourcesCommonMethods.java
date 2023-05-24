@@ -82,6 +82,7 @@ public class ProviderResourcesCommonMethods {
         List<String> requiredResources = new ArrayList<>();
         List<String> relatedResources = new ArrayList<>();
         List<String> eoscRelatedServices = new ArrayList<>();
+        List<String> interoperabilityRecordIds = new ArrayList<>();
         if (o != null) {
             if (o instanceof DatasourceBundle) {
                 catalogueId = ((DatasourceBundle) o).getDatasource().getCatalogueId();
@@ -99,6 +100,10 @@ public class ProviderResourcesCommonMethods {
                 catalogueId = ((TrainingResourceBundle) o).getTrainingResource().getCatalogueId();
                 resourceProviders = ((TrainingResourceBundle) o).getTrainingResource().getResourceProviders();
                 eoscRelatedServices = ((TrainingResourceBundle) o).getTrainingResource().getEoscRelatedServices();
+            }
+            if (o instanceof ResourceInteroperabilityRecordBundle) {
+                catalogueId = ((ResourceInteroperabilityRecordBundle) o).getResourceInteroperabilityRecord().getCatalogueId();
+                interoperabilityRecordIds = ((ResourceInteroperabilityRecordBundle) o).getResourceInteroperabilityRecord().getInteroperabilityRecordIds();
             }
             if (resourceProviders != null && !resourceProviders.isEmpty()) {
                 for (String resourceProvider : resourceProviders) {
@@ -183,6 +188,16 @@ public class ProviderResourcesCommonMethods {
                             }
                         }
                     }
+                }
+            }
+            if (interoperabilityRecordIds != null && !interoperabilityRecordIds.isEmpty()) {
+                for (String interoperabilityRecordId : interoperabilityRecordIds) {
+                    try {
+                        InteroperabilityRecordBundle interoperabilityRecordBundle = genericResourceService.get("interoperability_record", interoperabilityRecordId);
+                        if (!interoperabilityRecordBundle.getMetadata().isPublished() && !interoperabilityRecordBundle.getInteroperabilityRecord().getCatalogueId().equals(catalogueId)) {
+                            throw new ValidationException("Cross Catalogue reference is prohibited. Found in field 'interoperabilityRecordIds");
+                        }
+                    } catch (ResourceNotFoundException e) {}
                 }
             }
         }
