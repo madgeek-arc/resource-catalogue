@@ -4,6 +4,7 @@ import eu.einfracentral.domain.*;
 import eu.einfracentral.registry.service.InteroperabilityRecordService;
 import eu.einfracentral.registry.service.ResourceInteroperabilityRecordService;
 import eu.einfracentral.service.GenericResourceService;
+import eu.einfracentral.service.SecurityService;
 import eu.einfracentral.utils.FacetFilterUtils;
 import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.domain.Paging;
@@ -39,14 +40,16 @@ public class InteroperabilityRecordController {
     private final InteroperabilityRecordService<InteroperabilityRecordBundle> interoperabilityRecordService;
     private final ResourceInteroperabilityRecordService<ResourceInteroperabilityRecordBundle> resourceInteroperabilityRecordService;
     private final GenericResourceService genericResourceService;
+    private final SecurityService securityService;
 
     @Autowired
     public InteroperabilityRecordController(InteroperabilityRecordService<InteroperabilityRecordBundle> interoperabilityRecordService,
                                             ResourceInteroperabilityRecordService<ResourceInteroperabilityRecordBundle> resourceInteroperabilityRecordService,
-                                            GenericResourceService genericResourceService) {
+                                            GenericResourceService genericResourceService, SecurityService securityService) {
         this.interoperabilityRecordService = interoperabilityRecordService;
         this.resourceInteroperabilityRecordService = resourceInteroperabilityRecordService;
         this.genericResourceService = genericResourceService;
+        this.securityService = securityService;
     }
 
     @ApiOperation(value = "Creates a new Interoperability Record.")
@@ -59,7 +62,7 @@ public class InteroperabilityRecordController {
     }
 
     @ApiOperation(value = "Updates the InteroperabilityRecord with the given id.")
-    @PreAuthorize("hasRole('ROLE_ADMIN') or @securityService.isResourceProviderAdmin(#auth,#interoperabilityRecord)")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth,#interoperabilityRecord)")
     @PutMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<InteroperabilityRecord> update(@Valid @RequestBody InteroperabilityRecord interoperabilityRecord,
                                                    @ApiIgnore Authentication auth) throws ResourceNotFoundException {
@@ -199,6 +202,44 @@ public class InteroperabilityRecordController {
             }
         }
         return allInteroperabilityRecordRelatedResources;
+    }
+
+    // front-end use (Interoperability Record form)
+    @GetMapping(path = {"interoperabilityRecordIdToNameMap"}, produces = {MediaType.APPLICATION_JSON_VALUE})
+    public ResponseEntity<List<eu.einfracentral.dto.Value>> providerIdToNameMap(String catalogueId) {
+        List<eu.einfracentral.dto.Value> allInteroperabilityRecords = new ArrayList<>();
+        // fetch catalogueId related non-public Interoperability Records
+        List<eu.einfracentral.dto.Value> catalogueRelatedInteroperabilityRecords = interoperabilityRecordService
+                .getAll(createFacetFilter(catalogueId, false), securityService.getAdminAccess()).getResults()
+                .stream().map(InteroperabilityRecordBundle::getInteroperabilityRecord)
+                .map(c -> new eu.einfracentral.dto.Value(c.getId(), c.getTitle()))
+                .collect(Collectors.toList());
+        // fetch non-catalogueId related public Interoperability Records
+        List<eu.einfracentral.dto.Value> publicInteroperabilityRecords = interoperabilityRecordService
+                .getAll(createFacetFilter(catalogueId, true), securityService.getAdminAccess()).getResults()
+                .stream().map(InteroperabilityRecordBundle::getInteroperabilityRecord)
+                .filter(c -> !c.getCatalogueId().equals(catalogueId))
+                .map(c -> new eu.einfracentral.dto.Value(c.getId(), c.getTitle()))
+                .collect(Collectors.toList());
+
+        allInteroperabilityRecords.addAll(catalogueRelatedInteroperabilityRecords);
+        allInteroperabilityRecords.addAll(publicInteroperabilityRecords);
+
+        return ResponseEntity.ok(allInteroperabilityRecords);
+    }
+
+    private FacetFilter createFacetFilter(String catalogueId, boolean isPublic) {
+        FacetFilter ff = new FacetFilter();
+        ff.setQuantity(10000);
+        ff.addFilter("status", "approved interoperability record");
+        ff.addFilter("active", true);
+        if (isPublic) {
+            ff.addFilter("published", true);
+        } else {
+            ff.addFilter("catalogue_id", catalogueId);
+            ff.addFilter("published", false);
+        }
+        return ff;
     }
 
     @PostMapping(path = "addInteroperabilityRecordBundle", produces = {MediaType.APPLICATION_JSON_VALUE})
