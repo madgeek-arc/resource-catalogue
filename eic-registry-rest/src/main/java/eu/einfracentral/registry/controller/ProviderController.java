@@ -551,4 +551,11 @@ public class ProviderController {
                 User.of(auth).getEmail(), providerBundle.getId(), providerBundle.getProvider().getName(), providerBundle.getProvider().getCatalogueId());
         return ResponseEntity.ok(providerService.createPublicProvider(providerBundle, auth));
     }
+
+    @ApiOperation(value = "Suspends a Provider")
+    @PutMapping(path = "suspend", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
+    public ProviderBundle suspendProvider(@RequestParam String providerId, @RequestParam String catalogueId, @RequestParam boolean suspend, @ApiIgnore Authentication auth) {
+        return providerService.suspend(providerId, catalogueId, suspend, auth);
+    }
 }

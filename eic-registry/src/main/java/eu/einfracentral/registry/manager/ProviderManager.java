@@ -1198,4 +1198,12 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         publicProviderManager.add(providerBundle, auth);
         return providerBundle;
     }
+
+    public ProviderBundle suspend(String providerId, String catalogueId, boolean suspend, Authentication auth) {
+        ProviderBundle providerBundle = get(catalogueId, providerId, auth);
+        commonMethods.suspendResource(providerBundle, catalogueId, suspend, auth);
+        //TODO: Update Public Provider
+        //TODO: JMS
+        return update(providerBundle, auth); //TODO: super.updates get only ID into consideration
+    }
 }

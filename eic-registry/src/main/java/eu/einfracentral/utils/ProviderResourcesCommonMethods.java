@@ -5,6 +5,10 @@ import eu.einfracentral.exception.ResourceNotFoundException;
 import eu.einfracentral.exception.ValidationException;
 import eu.einfracentral.registry.service.*;
 import eu.einfracentral.service.GenericResourceService;
+import eu.openminted.registry.core.service.ResourceService;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
@@ -14,6 +18,8 @@ import java.util.List;
 
 @Component
 public class ProviderResourcesCommonMethods {
+
+    private static final Logger logger = LogManager.getLogger(ProviderResourcesCommonMethods.class);
 
     private final CatalogueService<CatalogueBundle, Authentication> catalogueService;
     private final GenericResourceService genericResourceService;
@@ -200,6 +206,15 @@ public class ProviderResourcesCommonMethods {
                     } catch (ResourceNotFoundException e) {}
                 }
             }
+        }
+    }
+
+    public void suspendResource(Bundle<?> bundle, String catalogueId, boolean suspend, Authentication auth) {
+        if (bundle != null) {
+            bundle.setSuspended(suspend);
+            String[] parts = bundle.getPayload().getClass().getName().split("\\.");
+            logger.info(String.format("User [%s] set 'suspended' of [%s] [%s]-[%s] to [%s]",
+                    User.of(auth).getEmail(), parts[3], catalogueId, bundle.getId(), suspend));
         }
     }
 }
