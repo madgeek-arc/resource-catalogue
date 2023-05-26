@@ -461,7 +461,7 @@ public class StatisticsManager implements StatisticsService {
 
         in.addValue("resource_organisation", providerId);
         in.addValue("geographical_availabilities", place);
-        String query = "SELECT service_id, name FROM service_view WHERE active=true ";
+        String query = "SELECT resource_internal_id, name FROM service_view WHERE active=true ";
 
         if (providerId != null) {
             query += " AND :resource_organisation=resource_organisation";
@@ -487,7 +487,7 @@ public class StatisticsManager implements StatisticsService {
 
         placeServices = records
                 .stream()
-                .map(record -> new Value(record.get("service_id").toString(), record.get("name").toString()))
+                .map(record -> new Value(record.get("resource_internal_id").toString(), record.get("name").toString()))
                 .collect(Collectors.toList());
         return placeServices;
     }
@@ -508,7 +508,7 @@ public class StatisticsManager implements StatisticsService {
         MapSqlParameterSource in = new MapSqlParameterSource();
         in.addValue("resource_organisation", providerId);
 
-        String query = "SELECT service_id, name, geographical_availabilities FROM service_view WHERE active=true ";
+        String query = "SELECT resource_internal_id, name, geographical_availabilities FROM service_view WHERE active=true ";
         if (providerId != null) {
             query += " AND :resource_organisation=resource_organisation";
         }
@@ -518,7 +518,7 @@ public class StatisticsManager implements StatisticsService {
         try {
             for (Map<String, Object> entry : records) {
                 Value value = new Value();
-                value.setId(entry.get("service_id").toString());
+                value.setId(entry.get("resource_internal_id").toString());
                 value.setName(entry.get("name").toString());
                 PgArray pgArray = ((PgArray) entry.get("geographical_availabilities"));
 
@@ -588,7 +588,7 @@ public class StatisticsManager implements StatisticsService {
         MapSqlParameterSource in = new MapSqlParameterSource();
         in.addValue("resource_organisation", providerId);
 
-        String query = "SELECT service_id, name, " + vocabulary.getKey()
+        String query = "SELECT resource_internal_id, name, " + vocabulary.getKey()
                 + " FROM service_view WHERE active=true ";
         if (providerId != null) {
             query += " AND :resource_organisation=resource_organisation";
@@ -599,7 +599,7 @@ public class StatisticsManager implements StatisticsService {
         try {
             for (Map<String, Object> entry : records) {
                 Value value = new Value();
-                value.setId(entry.get("service_id").toString());
+                value.setId(entry.get("resource_internal_id").toString());
                 value.setName(entry.get("name").toString());
 
                 // TODO: refactor this code and Vocabulary enum
