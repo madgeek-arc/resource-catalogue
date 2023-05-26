@@ -426,7 +426,7 @@ public abstract class AbstractResourceBundleManager<T extends ResourceBundle<?>>
         for (String provider : resourceProviders) {
             if (!"".equals(provider)) { // ignore providers with empty id "" (fix for pendingServices)
                 if (allProviderIds.contains(provider)){
-                    ProviderBundle providerBundle = providerService.get(catalogueId, provider, auth);
+                    ProviderBundle providerBundle = genericResourceService.get("provider", provider);
                     boolean isResourceOrganisation = provider.equals(resourceOrganisation);
                     ProviderInfo providerInfo = new ProviderInfo(providerBundle.getProvider(), isResourceOrganisation);
                     providerInfoList.add(providerInfo);
