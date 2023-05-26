@@ -552,7 +552,7 @@ public class ProviderController {
         return ResponseEntity.ok(providerService.createPublicProvider(providerBundle, auth));
     }
 
-    @ApiOperation(value = "Suspends a Provider")
+    @ApiOperation(value = "Suspends a Provider and all its resources")
     @PutMapping(path = "suspend", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     public ProviderBundle suspendProvider(@RequestParam String providerId, @RequestParam String catalogueId, @RequestParam boolean suspend, @ApiIgnore Authentication auth) {
