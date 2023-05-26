@@ -9,13 +9,6 @@
     },
     {
       "multivalued": false,
-      "name": "service_id",
-      "path": "//*[local-name()='service']/*[local-name()='id']/text()",
-      "type": "java.lang.String",
-      "primaryKey": true
-    },
-    {
-      "multivalued": false,
       "name": "name",
       "label": "Service Name",
       "path": "//*[local-name()='service']/*[local-name()='name']/text()",
