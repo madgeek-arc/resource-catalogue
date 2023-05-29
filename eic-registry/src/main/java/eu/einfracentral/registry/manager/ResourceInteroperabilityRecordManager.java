@@ -1,6 +1,7 @@
 package eu.einfracentral.registry.manager;
 
 import eu.einfracentral.domain.*;
+import eu.einfracentral.exception.ResourceNotFoundException;
 import eu.einfracentral.exception.ValidationException;
 import eu.einfracentral.registry.service.InteroperabilityRecordService;
 import eu.einfracentral.registry.service.ResourceBundleService;
@@ -9,8 +10,8 @@ import eu.einfracentral.registry.service.TrainingResourceService;
 import eu.einfracentral.service.SecurityService;
 import eu.einfracentral.utils.ProviderResourcesCommonMethods;
 import eu.einfracentral.utils.ResourceValidationUtils;
+import eu.openminted.registry.core.domain.Paging;
 import eu.openminted.registry.core.domain.Resource;
-import eu.openminted.registry.core.service.SearchService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.http.HttpStatus;
@@ -29,6 +30,7 @@ public class ResourceInteroperabilityRecordManager extends ResourceManager<Resou
     private final ResourceBundleService<DatasourceBundle> datasourceBundleService;
     private final TrainingResourceService<TrainingResourceBundle> trainingResourceService;
     private final InteroperabilityRecordService<InteroperabilityRecordBundle> interoperabilityRecordService;
+    private final PublicResourceInteroperabilityRecordManager publicResourceInteroperabilityRecordManager;
     private final SecurityService securityService;
     private final ProviderResourcesCommonMethods commonMethods;
 
@@ -36,7 +38,8 @@ public class ResourceInteroperabilityRecordManager extends ResourceManager<Resou
                                                  ResourceBundleService<DatasourceBundle> datasourceBundleService,
                                                  TrainingResourceService<TrainingResourceBundle> trainingResourceService,
                                                  InteroperabilityRecordService<InteroperabilityRecordBundle> interoperabilityRecordService,
-                                                 SecurityService securityService, ProviderResourcesCommonMethods commonMethods) {
+                                                 SecurityService securityService, ProviderResourcesCommonMethods commonMethods,
+                                                 PublicResourceInteroperabilityRecordManager publicResourceInteroperabilityRecordManager) {
         super(ResourceInteroperabilityRecordBundle.class);
         this.serviceBundleService = serviceBundleService;
         this.datasourceBundleService = datasourceBundleService;
@@ -44,6 +47,7 @@ public class ResourceInteroperabilityRecordManager extends ResourceManager<Resou
         this.interoperabilityRecordService = interoperabilityRecordService;
         this.securityService = securityService;
         this.commonMethods = commonMethods;
+        this.publicResourceInteroperabilityRecordManager = publicResourceInteroperabilityRecordManager;
     }
 
     @Override
@@ -103,10 +107,23 @@ public class ResourceInteroperabilityRecordManager extends ResourceManager<Resou
         return ret;
     }
 
-    @Override
-    public ResourceInteroperabilityRecordBundle get(String resourceId, String catalogueId) {
-        Resource res = where(false, new SearchService.KeyValue("resource_id", resourceId), new SearchService.KeyValue("catalogue_id", catalogueId));
-        return res != null ? deserialize(res) : null;
+    public ResourceInteroperabilityRecordBundle get(String id, String catalogueId) {
+        Resource resource = getResource(id, catalogueId);
+        if (resource == null) {
+            throw new ResourceNotFoundException(String.format("Could not find Resource Interoperability Record with id: %s and catalogueId: %s", id, catalogueId));
+        }
+        return deserialize(resource);
+    }
+
+    public Resource getResource(String id, String catalogueId) {
+        Paging<Resource> resources;
+        resources = searchService
+                .cqlQuery(String.format("%s_id = \"%s\"  AND catalogue_id = \"%s\"", resourceType.getName(), id, catalogueId),
+                        resourceType.getName(), maxQuantity, 0, "resource_internal_id", "DESC");
+        if (resources.getTotal() > 0) {
+            return resources.getResults().get(0);
+        }
+        return null;
     }
 
     @Override
@@ -178,6 +195,11 @@ public class ResourceInteroperabilityRecordManager extends ResourceManager<Resou
                 throw new ValidationException("One ore more of the Interoperability Records you have provided is not yet approved.");
             }
         }
+        return resourceInteroperabilityRecordBundle;
+    }
+
+    public ResourceInteroperabilityRecordBundle createPublicResourceInteroperabilityRecord(ResourceInteroperabilityRecordBundle resourceInteroperabilityRecordBundle, Authentication auth){
+        publicResourceInteroperabilityRecordManager.add(resourceInteroperabilityRecordBundle, auth);
         return resourceInteroperabilityRecordBundle;
     }
 }
