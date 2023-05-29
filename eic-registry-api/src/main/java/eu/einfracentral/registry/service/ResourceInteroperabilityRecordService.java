@@ -8,4 +8,5 @@ public interface ResourceInteroperabilityRecordService<T> extends ResourceServic
     ResourceInteroperabilityRecordBundle add(ResourceInteroperabilityRecordBundle resourceInteroperabilityRecord, String resourceType, Authentication auth);
     ResourceInteroperabilityRecordBundle get(String resourceId, String catalogueId);
     ResourceInteroperabilityRecordBundle validate(ResourceInteroperabilityRecordBundle resourceInteroperabilityRecordBundle, String resourceType);
+    ResourceInteroperabilityRecordBundle createPublicResourceInteroperabilityRecord(ResourceInteroperabilityRecordBundle resourceInteroperabilityRecordBundle, Authentication auth);
 }
