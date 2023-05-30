@@ -2,6 +2,8 @@ package eu.einfracentral.registry.manager;
 
 import eu.einfracentral.domain.DatasourceBundle;
 import eu.einfracentral.domain.Identifiers;
+import eu.einfracentral.domain.ResourceExtras;
+import eu.einfracentral.domain.ServiceBundle;
 import eu.einfracentral.exception.ResourceException;
 import eu.einfracentral.exception.ResourceNotFoundException;
 import eu.einfracentral.service.SecurityService;
@@ -72,7 +74,7 @@ public class PublicDatasourceManager extends AbstractPublicResourceManager<Datas
         updateResourceIdsToPublic(datasourceBundle);
 
         datasourceBundle.getMetadata().setPublished(true);
-        datasourceBundle.getResourceExtras().setServiceType("service_type-datasource");
+        createResourceExtras(datasourceBundle);
         DatasourceBundle ret;
         logger.info(String.format("Datasource [%s] is being published with id [%s]", lowerLevelResourceId, datasourceBundle.getId()));
         ret = super.add(datasourceBundle, null);
@@ -114,6 +116,16 @@ public class PublicDatasourceManager extends AbstractPublicResourceManager<Datas
             logger.info("Sending JMS with topic 'datasource.delete'");
             jmsTopicTemplate.convertAndSend("datasource.delete", publicDatasourceBundle);
         } catch (ResourceException | ResourceNotFoundException ignore){
+        }
+    }
+
+    private void createResourceExtras(DatasourceBundle datasourceBundle){
+        if (datasourceBundle.getResourceExtras() == null){
+            ResourceExtras resourceExtras = new ResourceExtras();
+            resourceExtras.setServiceType("service_type-datasource");
+            datasourceBundle.setResourceExtras(resourceExtras);
+        } else {
+            datasourceBundle.getResourceExtras().setServiceType("service_type-datasource");
         }
     }
 }
