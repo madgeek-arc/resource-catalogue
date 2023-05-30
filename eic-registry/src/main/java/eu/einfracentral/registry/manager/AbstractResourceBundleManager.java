@@ -358,7 +358,7 @@ public abstract class AbstractResourceBundleManager<T extends ResourceBundle<?>>
     public Resource getResource(String id, String catalogueId) {
         Paging<Resource> resources;
         resources = searchService
-                .cqlQuery(String.format("%s_id = \"%s\"  AND catalogue_id = \"%s\"", resourceType.getName(), id, catalogueId),
+                .cqlQuery(String.format("resource_internal_id = \"%s\"  AND catalogue_id = \"%s\"", id, catalogueId),
                         resourceType.getName(), maxQuantity, 0, "modifiedAt", "DESC");
         if (resources.getTotal() > 0) {
             return resources.getResults().get(0);
@@ -370,7 +370,7 @@ public abstract class AbstractResourceBundleManager<T extends ResourceBundle<?>>
     public List<Resource> getResources(String id, String catalogueId) {
         Paging<Resource> resources;
         resources = searchService
-                .cqlQuery(String.format("%s_id = \"%s\"  AND catalogue_id = \"%s\"", resourceType.getName(), id, catalogueId),
+                .cqlQuery(String.format("resource_internal_id = \"%s\"  AND catalogue_id = \"%s\"", id, catalogueId),
                         resourceType.getName(), maxQuantity, 0, "modifiedAt", "DESC");
         if (resources != null) {
             return resources.getResults();
