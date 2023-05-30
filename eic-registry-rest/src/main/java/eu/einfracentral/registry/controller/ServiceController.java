@@ -525,4 +525,24 @@ public class ServiceController {
                 User.of(auth).getEmail(), serviceBundle.getId(), serviceBundle.getService().getName(), serviceBundle.getService().getCatalogueId());
         return ResponseEntity.ok(resourceBundleService.createPublicResource(serviceBundle, auth));
     }
+
+    //TODO: Remove after fix + PROD release
+//    @ApiOperation("getResourcesWithNullExtras")
+    @GetMapping(path= "getResourcesWithNullExtras", produces = {MediaType.APPLICATION_JSON_VALUE})
+    public void getResourcesWithNullExtras() {
+        FacetFilter ff = new FacetFilter();
+        ff.setQuantity(10000);
+        List<ServiceBundle> allServices = resourceBundleService.getAll(ff, securityService.getAdminAccess()).getResults();
+        List<DatasourceBundle> allDatasources = datasourceBundleService.getAll(ff, securityService.getAdminAccess()).getResults();
+        for (ServiceBundle serviceBundle : allServices) {
+            if (serviceBundle.getResourceExtras() == null) {
+                logger.info(String.format("Service with id [%s] has null ResourceExtras", serviceBundle.getId()));
+            }
+        }
+        for (DatasourceBundle datasourceBundle : allDatasources) {
+            if (datasourceBundle.getResourceExtras() == null) {
+                logger.info(String.format("Datasource with id [%s] has null ResourceExtras", datasourceBundle.getId()));
+            }
+        }
+    }
 }
