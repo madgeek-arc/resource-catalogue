@@ -19,7 +19,7 @@ public abstract class AbstractPublicResourceManager<T extends Identifiable> exte
         Set<String> transformed = new HashSet<>();
         if (items != null) {
             for (String item : items) {
-                if (!item.contains(catalogueId)) {
+                if (!item.equals("") && !item.contains(catalogueId)) {
                     item = catalogueId + "." + item;
                 }
                 transformed.add(item);
