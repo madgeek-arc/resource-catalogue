@@ -104,7 +104,7 @@ public class SimpleMailService implements MailService {
     }
 
     @Override
-    public void sendMail(@NotNull List<String> to, @NotNull List<String> cc, @NotNull List<String> bcc, String subject, String text) throws MessagingException {
+    public void sendMail(List<String> to, List<String> cc, List<String> bcc, String subject, String text) throws MessagingException {
         if (enableEmails) {
             Transport transport = null;
             Message message;
@@ -113,9 +113,15 @@ public class SimpleMailService implements MailService {
                 InternetAddress sender = new InternetAddress(from);
                 message = new MimeMessage(session);
                 message.setFrom(sender);
-                message.setRecipients(Message.RecipientType.TO, createAddresses(to));
-                message.setRecipients(Message.RecipientType.CC, createAddresses(cc));
-                message.setRecipients(Message.RecipientType.BCC, createAddresses(bcc));
+                if (to != null) {
+                    message.setRecipients(Message.RecipientType.TO, createAddresses(to));
+                }
+                if (cc != null) {
+                    message.setRecipients(Message.RecipientType.CC, createAddresses(cc));
+                }
+                if (bcc != null) {
+                    message.setRecipients(Message.RecipientType.BCC, createAddresses(bcc));
+                }
                 message.setSubject(subject);
                 message.setText(text);
                 transport.connect();
