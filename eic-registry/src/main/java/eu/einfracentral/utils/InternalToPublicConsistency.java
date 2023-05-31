@@ -50,6 +50,8 @@ public class InternalToPublicConsistency {
 
     @Value("${project.name}")
     private String projectName;
+    @Value("${resource.consistency.enable}")
+    private boolean enableConsistencyEmails;
     @Value("${resource.consistency.email}")
     private String consistencyEmail;
     @Value("${resource.consistency.cc}")
@@ -199,7 +201,9 @@ public class InternalToPublicConsistency {
             temp.process(root, out);
             String teamMail = out.getBuffer().toString();
             String subject = String.format("[%s Portal] Internal to Public Resource Consistency Logs", projectName);
-            mailService.sendMail(Collections.singletonList(consistencyEmail), null, Collections.singletonList(consistencyCC), subject, teamMail);
+            if (enableConsistencyEmails) {
+                mailService.sendMail(Collections.singletonList(consistencyEmail), null, Collections.singletonList(consistencyCC), subject, teamMail);
+            }
             logger.info("\nRecipient: {}\nCC: {}\nTitle: {}\nMail body: \n{}", consistencyEmail, consistencyCC, subject, teamMail);
             out.close();
         } catch (IOException e) {
