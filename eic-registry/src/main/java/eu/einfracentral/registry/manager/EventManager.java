@@ -104,7 +104,7 @@ public class EventManager extends ResourceManager<Event> implements EventService
     @Override
     @CacheEvict(value = {CACHE_EVENTS, CACHE_SERVICE_EVENTS}, allEntries = true)
     public Event setFavourite(String serviceId, Float value, Authentication authentication) throws ResourceNotFoundException {
-        if (!resourceBundleService.exists(new SearchService.KeyValue("service_id", serviceId))) {
+        if (!resourceBundleService.exists(new SearchService.KeyValue("resource_internal_id", serviceId))) {
             throw new ResourceNotFoundException("service", serviceId);
         }
         if (value != 1 && value != 0) {
@@ -130,7 +130,7 @@ public class EventManager extends ResourceManager<Event> implements EventService
     @Override
     @CacheEvict(value = {CACHE_EVENTS, CACHE_SERVICE_EVENTS}, allEntries = true)
     public Event setRating(String serviceId, Float value, Authentication authentication) throws ResourceNotFoundException, NumberParseException {
-        if (!resourceBundleService.exists(new SearchService.KeyValue("service_id", serviceId))) {
+        if (!resourceBundleService.exists(new SearchService.KeyValue("resource_internal_id", serviceId))) {
             throw new ResourceNotFoundException("service", serviceId);
         }
         if (value <= 0 || value > 5) {
@@ -274,7 +274,7 @@ public class EventManager extends ResourceManager<Event> implements EventService
 
     @CacheEvict(value = {CACHE_EVENTS, CACHE_SERVICE_EVENTS}, allEntries = true)
     public Event setVisit(String serviceId, Float value) throws ResourceNotFoundException {
-        if (!resourceBundleService.exists(new SearchService.KeyValue("service_id", serviceId))) {
+        if (!resourceBundleService.exists(new SearchService.KeyValue("resource_internal_id", serviceId))) {
             throw new ResourceNotFoundException("service", serviceId);
         }
         Event event;
@@ -289,7 +289,7 @@ public class EventManager extends ResourceManager<Event> implements EventService
 
     @CacheEvict(value = {CACHE_EVENTS, CACHE_SERVICE_EVENTS}, allEntries = true)
     public Event setAddToProject(String serviceId, Float value) throws ResourceNotFoundException {
-        if (!resourceBundleService.exists(new SearchService.KeyValue("service_id", serviceId))) {
+        if (!resourceBundleService.exists(new SearchService.KeyValue("resource_internal_id", serviceId))) {
             throw new ResourceNotFoundException("service", serviceId);
         }
         Event event;
@@ -304,7 +304,7 @@ public class EventManager extends ResourceManager<Event> implements EventService
 
     @CacheEvict(value = {CACHE_EVENTS, CACHE_SERVICE_EVENTS}, allEntries = true)
     public Event setOrder(String serviceId, Float value) throws ResourceNotFoundException {
-        if (!resourceBundleService.exists(new SearchService.KeyValue("service_id", serviceId))) {
+        if (!resourceBundleService.exists(new SearchService.KeyValue("resource_internal_id", serviceId))) {
             throw new ResourceNotFoundException("service", serviceId);
         }
         Event event;
@@ -319,7 +319,7 @@ public class EventManager extends ResourceManager<Event> implements EventService
 
     @CacheEvict(value = {CACHE_EVENTS, CACHE_SERVICE_EVENTS}, allEntries = true)
     public Event setScheduledFavourite(String serviceId, Float value) throws ResourceNotFoundException {
-        if (!resourceBundleService.exists(new SearchService.KeyValue("service_id", serviceId))) {
+        if (!resourceBundleService.exists(new SearchService.KeyValue("resource_internal_id", serviceId))) {
             throw new ResourceNotFoundException("service", serviceId);
         }
         Event event;
@@ -334,7 +334,7 @@ public class EventManager extends ResourceManager<Event> implements EventService
 
     @CacheEvict(value = {CACHE_EVENTS, CACHE_SERVICE_EVENTS}, allEntries = true)
     public Event setScheduledRating(String serviceId, Float value) throws ResourceNotFoundException {
-        if (!resourceBundleService.exists(new SearchService.KeyValue("service_id", serviceId))) {
+        if (!resourceBundleService.exists(new SearchService.KeyValue("resource_internal_id", serviceId))) {
             throw new ResourceNotFoundException("service", serviceId);
         }
         Event event;
