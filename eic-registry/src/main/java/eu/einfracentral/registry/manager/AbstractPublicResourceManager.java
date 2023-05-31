@@ -23,13 +23,15 @@ public abstract class AbstractPublicResourceManager<T extends Identifiable> exte
 
     protected List<String> appendCatalogueId(List<String> items, String catalogueId, List<String> allCatalogueIds) {
         Set<String> transformed = new HashSet<>();
-        if (items != null) {
+        if (items != null && !items.isEmpty()) {
             for (String item : items) {
-                boolean result = checkIfItemContainsAnyOfTheCatalogueIds(item, allCatalogueIds);
-                if (!result) {
-                    item = catalogueId + "." + item;
+                if (!item.equals("")) {
+                    boolean result = checkIfItemContainsAnyOfTheCatalogueIds(item, allCatalogueIds);
+                    if (!result) {
+                        item = catalogueId + "." + item;
+                    }
+                    transformed.add(item);
                 }
-                transformed.add(item);
             }
         }
         return new ArrayList<>(transformed);
