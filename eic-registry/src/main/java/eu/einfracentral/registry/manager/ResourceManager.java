@@ -170,7 +170,7 @@ public abstract class ResourceManager<T extends Identifiable> extends AbstractGe
     }
 
     protected Resource whereID(String id, boolean throwOnNull) {
-        return where(throwOnNull, new SearchService.KeyValue(String.format("%s_id", resourceType.getName()), id));
+        return where(throwOnNull, new SearchService.KeyValue("resource_internal_id", id));
     }
 
     protected Resource where(boolean throwOnNull, SearchService.KeyValue... keyValues) {
