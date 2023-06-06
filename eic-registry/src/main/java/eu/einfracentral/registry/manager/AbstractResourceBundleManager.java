@@ -1101,7 +1101,7 @@ public abstract class AbstractResourceBundleManager<T extends ResourceBundle<?>>
         return allProviders.stream().map(Bundle::getId).collect(Collectors.toList());
     }
 
-    public T createResourceExtras(T resourceBundle, String serviceType){
+    public void createResourceExtras(T resourceBundle, String serviceType){
         if (resourceBundle.getResourceExtras() == null){
             ResourceExtras resourceExtras = new ResourceExtras();
             resourceExtras.setServiceType(serviceType);
@@ -1109,6 +1109,5 @@ public abstract class AbstractResourceBundleManager<T extends ResourceBundle<?>>
         } else {
             resourceBundle.getResourceExtras().setServiceType(serviceType);
         }
-        return resourceBundle;
     }
 }

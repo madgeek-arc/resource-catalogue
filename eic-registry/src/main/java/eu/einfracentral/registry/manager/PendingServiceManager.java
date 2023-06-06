@@ -38,6 +38,7 @@ public class PendingServiceManager extends ResourceManager<ServiceBundle> implem
     private final SecurityService securityService;
     private final VocabularyService vocabularyService;
     private final ProviderManager providerManager;
+    private ServiceBundleManager serviceBundleManager;
 
     @Value("${project.catalogue.name}")
     private String catalogueName;
@@ -45,13 +46,14 @@ public class PendingServiceManager extends ResourceManager<ServiceBundle> implem
     @Autowired
     public PendingServiceManager(ResourceBundleService<ServiceBundle> resourceBundleService,
                                  IdCreator idCreator, @Lazy SecurityService securityService, @Lazy VocabularyService vocabularyService,
-                                 @Lazy ProviderManager providerManager) {
+                                 @Lazy ProviderManager providerManager, @Lazy ServiceBundleManager serviceBundleManager) {
         super(ServiceBundle.class);
         this.resourceBundleService = resourceBundleService;
         this.idCreator = idCreator;
         this.securityService = securityService;
         this.vocabularyService = vocabularyService;
         this.providerManager = providerManager;
+        this.serviceBundleManager = serviceBundleManager;
     }
 
     @Override
@@ -149,6 +151,9 @@ public class PendingServiceManager extends ResourceManager<ServiceBundle> implem
 
         // latestOnboardInfo
         serviceBundle.setLatestOnboardingInfo(loggingInfo);
+
+        // serviceType
+        serviceBundleManager.createResourceExtras(serviceBundle, "service_type-service");
 
         // set resource status according to Provider's templateStatus
         if (providerManager.get(serviceBundle.getService().getResourceOrganisation()).getTemplateStatus().equals("approved template")){
