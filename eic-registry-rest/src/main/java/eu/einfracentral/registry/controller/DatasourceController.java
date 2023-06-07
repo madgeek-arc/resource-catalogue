@@ -82,6 +82,14 @@ public class DatasourceController {
         return new ResponseEntity<>(resourceBundleService.get(id, catalogueId), HttpStatus.OK);
     }
 
+    @PutMapping(path = "bundle/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public ResponseEntity<DatasourceBundle> update(@RequestBody DatasourceBundle datasource, @ApiIgnore Authentication authentication) throws ResourceNotFoundException {
+        ResponseEntity<DatasourceBundle> ret = new ResponseEntity<>(resourceBundleService.update(datasource, authentication), HttpStatus.OK);
+        logger.info("User '{}' updated DatasourceBundle '{}' with id: {}", authentication, datasource.getDatasource().getName(), datasource.getDatasource().getId());
+        return ret;
+    }
+
     // Get the specified version of a RichResource providing the Datasource id
     @GetMapping(path = "rich/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("@securityService.datasourceIsActive(#id, #catalogueId) or hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') " +
