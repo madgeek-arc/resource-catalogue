@@ -1,18 +1,14 @@
 package eu.einfracentral.domain.interoperabilityRecord.configurationTemplates;
 
 import eu.einfracentral.annotation.FieldValidation;
-import eu.einfracentral.annotation.VocabularyValidation;
 import eu.einfracentral.domain.Identifiable;
 import eu.einfracentral.domain.InteroperabilityRecord;
-import eu.einfracentral.domain.Vocabulary;
 import io.swagger.annotations.ApiModelProperty;
+import org.json.simple.JSONObject;
 
 import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
-import java.net.URL;
-import java.util.List;
 
 @XmlType
 @XmlRootElement(namespace = "http://einfracentral.eu")
@@ -30,56 +26,29 @@ public class ConfigurationTemplate implements Identifiable {
 
     @XmlElement(required = true)
     @ApiModelProperty(position = 3, required = true)
-    @FieldValidation(containsId = true, idClass = Vocabulary.class)
-    @VocabularyValidation(type = Vocabulary.Type.CT_PROTOCOL)
-    private String protocol;
-
-    @XmlElement
-    @ApiModelProperty(position = 4)
-    @FieldValidation(nullable = true, containsId = true, idClass = Vocabulary.class)
-    @VocabularyValidation(type = Vocabulary.Type.CT_COMPATIBILITY)
-    private String compatibility;
+    @FieldValidation
+    private String name;
 
     @XmlElement(required = true)
-    @ApiModelProperty(position = 5, example = "https://example.com", required = true)
+    @ApiModelProperty(position = 4, required = true)
     @FieldValidation
-    private URL baseURL;
+    private String description;
 
     @XmlElement(required = true)
-    @ApiModelProperty(position = 6, required = true)
+    @ApiModelProperty(position = 4, required = true)
     @FieldValidation
-    private String format;
-
-    @XmlElementWrapper(name = "sets")
-    @XmlElement(name = "set")
-    @ApiModelProperty(position = 7)
-    @FieldValidation(nullable = true)
-    private List<String> sets;
+    private JSONObject formModel;
 
     public ConfigurationTemplate() {
     }
 
-    public ConfigurationTemplate(String id, String interoperabilityRecordId, String protocol, String compatibility, URL baseURL, String format, List<String> sets) {
+    public ConfigurationTemplate(String id, String interoperabilityRecordId, String name, String description,
+                                 JSONObject formModel) {
         this.id = id;
         this.interoperabilityRecordId = interoperabilityRecordId;
-        this.protocol = protocol;
-        this.compatibility = compatibility;
-        this.baseURL = baseURL;
-        this.format = format;
-        this.sets = sets;
-    }
-
-    @Override
-    public String toString() {
-        return "ConfigurationTemplate{" +
-                "id='" + id + '\'' +
-                ", interoperabilityRecordId='" + interoperabilityRecordId + '\'' +
-                ", protocol='" + protocol + '\'' +
-                ", compatibility='" + compatibility + '\'' +
-                ", baseURL=" + baseURL +
-                ", format='" + format + '\'' +
-                ", sets=" + sets +
-                '}';
+        this.name = name;
+        this.description = description;
+        this.formModel = formModel;
     }
 
     @Override
@@ -100,43 +69,27 @@ public class ConfigurationTemplate implements Identifiable {
         this.interoperabilityRecordId = interoperabilityRecordId;
     }
 
-    public String getProtocol() {
-        return protocol;
+    public String getName() {
+        return name;
     }
 
-    public void setProtocol(String protocol) {
-        this.protocol = protocol;
+    public void setName(String name) {
+        this.name = name;
     }
 
-    public String getCompatibility() {
-        return compatibility;
+    public String getDescription() {
+        return description;
     }
 
-    public void setCompatibility(String compatibility) {
-        this.compatibility = compatibility;
+    public void setDescription(String description) {
+        this.description = description;
     }
 
-    public URL getBaseURL() {
-        return baseURL;
+    public JSONObject getFormModel() {
+        return formModel;
     }
 
-    public void setBaseURL(URL baseURL) {
-        this.baseURL = baseURL;
-    }
-
-    public String getFormat() {
-        return format;
-    }
-
-    public void setFormat(String format) {
-        this.format = format;
-    }
-
-    public List<String> getSets() {
-        return sets;
-    }
-
-    public void setSets(List<String> sets) {
-        this.sets = sets;
+    public void setFormModel(JSONObject formModel) {
+        this.formModel = formModel;
     }
 }

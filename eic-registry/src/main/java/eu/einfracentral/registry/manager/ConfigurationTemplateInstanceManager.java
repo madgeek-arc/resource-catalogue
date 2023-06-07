@@ -174,8 +174,7 @@ public class ConfigurationTemplateInstanceManager extends ResourceManager<Config
         boolean found = false;
         List<ResourceInteroperabilityRecordBundle> resourceInteroperabilityRecordBundleList = resourceInteroperabilityRecordService.getAll(createFacetFilter(), auth).getResults();
         for (ResourceInteroperabilityRecordBundle resourceInteroperabilityRecordBundle : resourceInteroperabilityRecordBundleList){
-            if (resourceInteroperabilityRecordBundle.getResourceInteroperabilityRecord().getResourceId().
-                    equals(resourceId)){
+            if (resourceInteroperabilityRecordBundle.getResourceInteroperabilityRecord().getResourceId().equals(resourceId)){
                 ConfigurationTemplateBundle configurationTemplateBundle = configurationTemplateService.get(configurationTemplateId);
                 if (resourceInteroperabilityRecordBundle.getResourceInteroperabilityRecord().getInteroperabilityRecordIds().contains(configurationTemplateBundle.getConfigurationTemplate().getInteroperabilityRecordId())){
                     found = true;

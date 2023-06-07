@@ -23,23 +23,16 @@
     },
     {
       "multivalued": false,
-      "name": "protocol",
-      "label": "Protocol",
-      "path": "//*[local-name()='protocol']/text()",
+      "name": "name",
+      "label": "Name",
+      "path": "//*[local-name()='name']/text()",
       "type": "java.lang.String"
     },
     {
       "multivalued": false,
-      "name": "compatibility",
-      "label": "Compatibility",
-      "path": "//*[local-name()='compatibility']/text()",
-      "type": "java.lang.String"
-    },
-    {
-      "multivalued": false,
-      "name": "format",
-      "label": "Format",
-      "path": "//*[local-name()='format']/text()",
+      "name": "description",
+      "label": "Description",
+      "path": "//*[local-name()='description']/text()",
       "type": "java.lang.String"
     },
     {
@@ -131,5 +124,5 @@
   "properties": {
     "class": "eu.einfracentral.domain.ConfigurationTemplate"
   },
-  "schemaUrl": "https://raw.githubusercontent.com/madgeek-arc/resource-catalogue/guidelines_v2/eic-registry-model/src/main/resources/schema1.xsd"
+  "schemaUrl": "https://raw.githubusercontent.com/madgeek-arc/resource-catalogue/pids/eic-registry-model/src/main/resources/schema1.xsd"
 }
