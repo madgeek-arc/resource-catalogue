@@ -393,7 +393,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
                 try {
                     resourceBundleService.delete(s);
                 } catch (ResourceNotFoundException e) {
-                    logger.error("Error deleting Service", e);
+                    logger.error(String.format("Error deleting Service with ID [%s]", s.getId()));
                 }
             }
         });
@@ -403,7 +403,27 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
                 try {
                     datasourceBundleService.delete(s);
                 } catch (ResourceNotFoundException e) {
-                    logger.error("Error deleting Datasource", e);
+                    logger.error(String.format("Error deleting Datasource with ID [%s]", s.getId()));
+                }
+            }
+        });
+        List<TrainingResourceBundle> trainingResources = trainingResourceService.getResourceBundles(provider.getProvider().getCatalogueId(), provider.getId(), authentication).getResults();
+        trainingResources.forEach(s -> {
+            if (!s.getMetadata().isPublished()){
+                try {
+                    trainingResourceService.delete(s);
+                } catch (ResourceNotFoundException e) {
+                    logger.error(String.format("Error deleting Training Resource with ID [%s]", s.getId()));
+                }
+            }
+        });
+        List<InteroperabilityRecordBundle> interoperabilityRecords = interoperabilityRecordService.getInteroperabilityRecordBundles(provider.getProvider().getCatalogueId(), provider.getId(), authentication).getResults();
+        interoperabilityRecords.forEach(s -> {
+            if (!s.getMetadata().isPublished()){
+                try {
+                    interoperabilityRecordService.delete(s);
+                } catch (ResourceNotFoundException e) {
+                    logger.error(String.format("Error deleting Interoperability Record with ID [%s]", s.getId()));
                 }
             }
         });
@@ -1311,36 +1331,33 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         ProviderBundle providerBundle = get(catalogueId, providerId, auth);
         commonMethods.suspendResource(providerBundle, catalogueId, suspend, auth);
 
-        LoggingInfo loggingInfo;
-        List<LoggingInfo> loggingInfoList = new ArrayList<>();
+        // Suspend Provider's resources
+        List<ServiceBundle> services = resourceBundleService.getResourceBundles(catalogueId, providerId, auth).getResults();
+        List<DatasourceBundle> datasources = datasourceBundleService.getResourceBundles(catalogueId, providerId, auth).getResults();
+        List<TrainingResourceBundle> trainingResources = trainingResourceService.getResourceBundles(catalogueId, providerId, auth).getResults();
+        List<InteroperabilityRecordBundle> interoperabilityRecords = interoperabilityRecordService.getInteroperabilityRecordBundles(catalogueId, providerId, auth).getResults();
 
-        // Create basic REGISTERED LoggingInfo if LoggingInfo is null
-        if (providerBundle.getLoggingInfo() != null) {
-            loggingInfoList = providerBundle.getLoggingInfo();
-        } else {
-            LoggingInfo oldProviderRegistration = LoggingInfo.createLoggingInfoEntry(User.of(auth).getEmail(), User.of(auth).getFullName(), securityService.getRoleName(auth),
-                    LoggingInfo.Types.ONBOARD.getKey(), LoggingInfo.ActionType.REGISTERED.getKey());
-            loggingInfoList.add(oldProviderRegistration);
+        if (services != null && !services.isEmpty()) {
+            for (ServiceBundle serviceBundle : services) {
+                resourceBundleService.suspend(serviceBundle.getId(), catalogueId, suspend, auth);
+            }
+        }
+        if (datasources != null && !datasources.isEmpty()) {
+            for (DatasourceBundle datasourceBundle : datasources) {
+                datasourceBundleService.suspend(datasourceBundle.getId(), catalogueId, suspend, auth);
+            }
+        }
+        if (trainingResources != null && !trainingResources.isEmpty()) {
+            for (TrainingResourceBundle trainingResourceBundle : trainingResources) {
+                trainingResourceService.suspend(trainingResourceBundle.getId(), catalogueId, suspend, auth);
+            }
+        }
+        if (interoperabilityRecords != null && !interoperabilityRecords.isEmpty()) {
+            for (InteroperabilityRecordBundle interoperabilityRecordBundle : interoperabilityRecords) {
+                interoperabilityRecordService.suspend(interoperabilityRecordBundle.getId(), catalogueId, suspend, auth);
+            }
         }
 
-        // Create SUSPEND LoggingInfo
-        if (suspend) {
-            loggingInfo = LoggingInfo.createLoggingInfoEntry(User.of(auth).getEmail(), User.of(auth).getFullName(), securityService.getRoleName(auth),
-                    LoggingInfo.Types.UPDATE.getKey(), LoggingInfo.ActionType.SUSPENDED.getKey());
-        } else {
-            loggingInfo = LoggingInfo.createLoggingInfoEntry(User.of(auth).getEmail(), User.of(auth).getFullName(), securityService.getRoleName(auth),
-                    LoggingInfo.Types.UPDATE.getKey(), LoggingInfo.ActionType.REENABLED.getKey());
-        }
-        loggingInfoList.add(loggingInfo);
-        providerBundle.setLoggingInfo(loggingInfoList);
-        // latestOnboardingInfo
-        providerBundle.setLatestUpdateInfo(loggingInfo);
-
-        //TODO: suspend/reenable Provider's resources
-//        suspendProviderResources(providerBundle, suspend, auth);
-
-        //TODO: Update all related Public Entry
-        //TODO: JMS
         return super.update(providerBundle, auth);
     }
 }

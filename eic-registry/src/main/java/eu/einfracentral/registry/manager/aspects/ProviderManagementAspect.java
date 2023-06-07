@@ -165,6 +165,7 @@ public class ProviderManagementAspect {
     @AfterReturning(pointcut = "execution(* eu.einfracentral.registry.manager.ProviderManager.update(..))" +
             "|| execution(* eu.einfracentral.registry.manager.ProviderManager.publish(..))" +
             "|| execution(* eu.einfracentral.registry.manager.ProviderManager.verifyProvider(..))" +
+            "|| execution(* eu.einfracentral.registry.manager.ProviderManager.suspend(..))" +
             "|| execution(* eu.einfracentral.registry.manager.ProviderManager.auditProvider(..))",
             returning = "providerBundle")
     public void updatePublicProvider(ProviderBundle providerBundle) {
@@ -298,6 +299,7 @@ public class ProviderManagementAspect {
     @AfterReturning(pointcut = "execution(* eu.einfracentral.registry.manager.ServiceBundleManager.updateResource(..))" +
             "|| execution(* eu.einfracentral.registry.manager.ServiceBundleManager.publish(..))" +
             "|| execution(* eu.einfracentral.registry.manager.ServiceBundleManager.verifyResource(..))" +
+            "|| execution(* eu.einfracentral.registry.manager.ServiceBundleManager.suspend(..))" +
             "|| execution(* eu.einfracentral.registry.manager.ServiceBundleManager.auditResource(..))",
             returning = "serviceBundle")
     public void updatePublicResource(ServiceBundle serviceBundle) {
@@ -313,6 +315,7 @@ public class ProviderManagementAspect {
     @AfterReturning(pointcut = "execution(* eu.einfracentral.registry.manager.DatasourceBundleManager.updateResource(..))" +
             "|| execution(* eu.einfracentral.registry.manager.DatasourceBundleManager.publish(..))" +
             "|| execution(* eu.einfracentral.registry.manager.DatasourceBundleManager.verifyResource(..))" +
+            "|| execution(* eu.einfracentral.registry.manager.DatasourceBundleManager.suspend(..))" +
             "|| execution(* eu.einfracentral.registry.manager.DatasourceBundleManager.auditResource(..))",
             returning = "datasourceBundle")
     public void updatePublicResource(DatasourceBundle datasourceBundle) {
@@ -328,6 +331,7 @@ public class ProviderManagementAspect {
     @AfterReturning(pointcut = "execution(* eu.einfracentral.registry.manager.TrainingResourceManager.updateResource(..))" +
             "|| execution(* eu.einfracentral.registry.manager.TrainingResourceManager.publish(..))" +
             "|| execution(* eu.einfracentral.registry.manager.TrainingResourceManager.verifyResource(..))" +
+            "|| execution(* eu.einfracentral.registry.manager.TrainingResourceManager.suspend(..))" +
             "|| execution(* eu.einfracentral.registry.manager.TrainingResourceManager.auditResource(..))",
             returning = "trainingResourceBundle")
     public void updatePublicResource(TrainingResourceBundle trainingResourceBundle) {
@@ -342,6 +346,7 @@ public class ProviderManagementAspect {
     @Async
     @AfterReturning(pointcut = "execution(* eu.einfracentral.registry.manager.InteroperabilityRecordManager.update(..))" +
             "|| execution(* eu.einfracentral.registry.manager.InteroperabilityRecordManager.publish(..))" +
+            "|| execution(* eu.einfracentral.registry.manager.InteroperabilityRecordManager.suspend(..))" +
             "|| execution(* eu.einfracentral.registry.manager.InteroperabilityRecordManager.verifyResource(..))",
             returning = "interoperabilityRecordBundle")
     public void updatePublicResource(InteroperabilityRecordBundle interoperabilityRecordBundle) {

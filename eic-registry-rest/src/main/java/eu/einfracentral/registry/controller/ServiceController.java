@@ -35,7 +35,6 @@ import springfox.documentation.annotations.ApiIgnore;
 import javax.sql.DataSource;
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @RestController
 @RequestMapping({"resource", "service"})
@@ -422,7 +421,7 @@ public class ServiceController {
 
     // front-end use (Service/Datasource/TR forms)
     @GetMapping(path = {"resourceIdToNameMap"}, produces = {MediaType.APPLICATION_JSON_VALUE})
-    public ResponseEntity<List<eu.einfracentral.dto.Value>> getAllProviderRelatedResources(String catalogueId) {
+    public ResponseEntity<List<eu.einfracentral.dto.Value>> resourceIdToNameMap(String catalogueId) {
         List<eu.einfracentral.dto.Value> allResources = new ArrayList<>();
         // fetch catalogueId related non-public Resources
         List<eu.einfracentral.dto.Value> catalogueRelatedServices = resourceBundleService
@@ -430,12 +429,12 @@ public class ServiceController {
                 .stream().map(ServiceBundle::getService)
                 .map(c -> new eu.einfracentral.dto.Value(c.getId(), c.getResourceOrganisation() + " - " + c.getName()))
                 .collect(Collectors.toList());
-        List<eu.einfracentral.dto.Value> catalogueRelateddatasources = datasourceBundleService
+        List<eu.einfracentral.dto.Value> catalogueRelatedDatasources = datasourceBundleService
                 .getAll(createFacetFilter(catalogueId, false), securityService.getAdminAccess()).getResults()
                 .stream().map(DatasourceBundle::getDatasource)
                 .map(c -> new eu.einfracentral.dto.Value(c.getId(), c.getResourceOrganisation() + " - " + c.getName()))
                 .collect(Collectors.toList());
-        List<eu.einfracentral.dto.Value> catalogueRelatedtrainingResources = trainingResourceService
+        List<eu.einfracentral.dto.Value> catalogueRelatedTrainingResources = trainingResourceService
                 .getAll(createFacetFilter(catalogueId, false), securityService.getAdminAccess()).getResults()
                 .stream().map(TrainingResourceBundle::getTrainingResource)
                 .map(c -> new eu.einfracentral.dto.Value(c.getId(), c.getResourceOrganisation() + " - " + c.getTitle()))
@@ -461,8 +460,8 @@ public class ServiceController {
                 .collect(Collectors.toList());
 
         allResources.addAll(catalogueRelatedServices);
-        allResources.addAll(catalogueRelateddatasources);
-        allResources.addAll(catalogueRelatedtrainingResources);
+        allResources.addAll(catalogueRelatedDatasources);
+        allResources.addAll(catalogueRelatedTrainingResources);
         allResources.addAll(publicServices);
         allResources.addAll(publicDatasources);
         allResources.addAll(publicTrainingResources);
@@ -544,5 +543,12 @@ public class ServiceController {
                 logger.info(String.format("Datasource with id [%s] has null ResourceExtras", datasourceBundle.getId()));
             }
         }
+    }
+
+    @ApiOperation(value = "Suspends a specific Service.")
+    @PutMapping(path = "suspend", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
+    public ServiceBundle suspendService(@RequestParam String serviceId, @RequestParam String catalogueId, @RequestParam boolean suspend, @ApiIgnore Authentication auth) {
+        return (ServiceBundle) resourceBundleService.suspend(serviceId, catalogueId, suspend, auth);
     }
 }

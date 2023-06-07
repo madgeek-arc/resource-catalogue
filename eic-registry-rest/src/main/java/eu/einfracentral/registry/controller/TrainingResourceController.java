@@ -391,4 +391,11 @@ public class TrainingResourceController {
         return ret;
     }
 
+    @ApiOperation(value = "Suspends a specific Training Resource.")
+    @PutMapping(path = "suspend", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
+    public TrainingResourceBundle suspendTrainingResource(@RequestParam String trainingResourceId, @RequestParam String catalogueId, @RequestParam boolean suspend, @ApiIgnore Authentication auth) {
+        return trainingResourceService.suspend(trainingResourceId, catalogueId, suspend, auth);
+    }
+
 }

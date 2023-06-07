@@ -208,4 +208,5 @@ public interface TrainingResourceService<T> extends ResourceService<T, Authentic
     TrainingResourceBundle getOrElseReturnNull(String id, String catalogueId);
 
     T createPublicResource(T resource, Authentication auth);
+    TrainingResourceBundle suspend(String trainingResourceId, String catalogueId, boolean suspend, Authentication auth);
 }

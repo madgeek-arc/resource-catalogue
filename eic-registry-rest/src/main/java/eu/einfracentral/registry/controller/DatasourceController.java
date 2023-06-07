@@ -356,4 +356,11 @@ public class DatasourceController {
                 User.of(auth).getEmail(), datasourceBundle.getId(), datasourceBundle.getDatasource().getName(), datasourceBundle.getDatasource().getCatalogueId());
         return ResponseEntity.ok(resourceBundleService.createPublicResource(datasourceBundle, auth));
     }
+
+    @ApiOperation(value = "Suspends a specific Datasource.")
+    @PutMapping(path = "suspend", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
+    public DatasourceBundle suspendDatasource(@RequestParam String datasourceId, @RequestParam String catalogueId, @RequestParam boolean suspend, @ApiIgnore Authentication auth) {
+        return (DatasourceBundle) resourceBundleService.suspend(datasourceId, catalogueId, suspend, auth);
+    }
 }

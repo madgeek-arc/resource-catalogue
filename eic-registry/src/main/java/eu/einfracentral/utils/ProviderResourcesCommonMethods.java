@@ -5,6 +5,7 @@ import eu.einfracentral.exception.ResourceNotFoundException;
 import eu.einfracentral.exception.ValidationException;
 import eu.einfracentral.registry.service.*;
 import eu.einfracentral.service.GenericResourceService;
+import eu.einfracentral.service.SecurityService;
 import eu.openminted.registry.core.service.ResourceService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -23,11 +24,14 @@ public class ProviderResourcesCommonMethods {
 
     private final CatalogueService<CatalogueBundle, Authentication> catalogueService;
     private final GenericResourceService genericResourceService;
+    private final SecurityService securityService;
 
     public ProviderResourcesCommonMethods(CatalogueService<CatalogueBundle, Authentication> catalogueService,
-                                          @Lazy GenericResourceService genericResourceService) {
+                                          @Lazy GenericResourceService genericResourceService,
+                                          @Lazy SecurityService securityService) {
         this.catalogueService = catalogueService;
         this.genericResourceService = genericResourceService;
+        this.securityService = securityService;
     }
 
     public void checkCatalogueIdConsistency(Object o, String catalogueId) {
@@ -212,6 +216,32 @@ public class ProviderResourcesCommonMethods {
     public void suspendResource(Bundle<?> bundle, String catalogueId, boolean suspend, Authentication auth) {
         if (bundle != null) {
             bundle.setSuspended(suspend);
+
+            LoggingInfo loggingInfo;
+            List<LoggingInfo> loggingInfoList = new ArrayList<>();
+
+            // Create basic REGISTERED LoggingInfo if LoggingInfo is null
+            if (bundle.getLoggingInfo() != null) {
+                loggingInfoList = bundle.getLoggingInfo();
+            } else {
+                LoggingInfo oldProviderRegistration = LoggingInfo.createLoggingInfoEntry(User.of(auth).getEmail(), User.of(auth).getFullName(), securityService.getRoleName(auth),
+                        LoggingInfo.Types.ONBOARD.getKey(), LoggingInfo.ActionType.REGISTERED.getKey());
+                loggingInfoList.add(oldProviderRegistration);
+            }
+
+            // Create SUSPEND LoggingInfo
+            if (suspend) {
+                loggingInfo = LoggingInfo.createLoggingInfoEntry(User.of(auth).getEmail(), User.of(auth).getFullName(), securityService.getRoleName(auth),
+                        LoggingInfo.Types.UPDATE.getKey(), LoggingInfo.ActionType.SUSPENDED.getKey());
+            } else {
+                loggingInfo = LoggingInfo.createLoggingInfoEntry(User.of(auth).getEmail(), User.of(auth).getFullName(), securityService.getRoleName(auth),
+                        LoggingInfo.Types.UPDATE.getKey(), LoggingInfo.ActionType.REENABLED.getKey());
+            }
+            loggingInfoList.add(loggingInfo);
+            bundle.setLoggingInfo(loggingInfoList);
+            // latestOnboardingInfo
+            bundle.setLatestUpdateInfo(loggingInfo);
+
             String[] parts = bundle.getPayload().getClass().getName().split("\\.");
             logger.info(String.format("User [%s] set 'suspended' of [%s] [%s]-[%s] to [%s]",
                     User.of(auth).getEmail(), parts[3], catalogueId, bundle.getId(), suspend));

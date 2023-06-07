@@ -639,4 +639,10 @@ public class ServiceBundleManager extends AbstractResourceBundleManager<ServiceB
         return serviceBundle;
     }
 
+    public ServiceBundle suspend(String serviceId, String catalogueId, boolean suspend, Authentication auth) {
+        ServiceBundle serviceBundle = get(serviceId, catalogueId);
+        commonMethods.suspendResource(serviceBundle, catalogueId, suspend, auth);
+        return super.update(serviceBundle, auth);
+    }
+
 }

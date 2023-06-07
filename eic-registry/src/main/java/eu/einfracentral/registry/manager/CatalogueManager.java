@@ -8,6 +8,7 @@ import eu.einfracentral.service.IdCreator;
 import eu.einfracentral.service.RegistrationMailService;
 import eu.einfracentral.service.SecurityService;
 import eu.einfracentral.utils.FacetFilterUtils;
+import eu.einfracentral.utils.ProviderResourcesCommonMethods;
 import eu.einfracentral.validators.FieldValidator;
 import eu.openminted.registry.core.domain.Browsing;
 import eu.openminted.registry.core.domain.FacetFilter;
@@ -48,6 +49,7 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
     private final ProviderService<ProviderBundle, Authentication> providerManager;
     private final ResourceBundleService<ServiceBundle> serviceBundleService;
     private final ResourceBundleService<DatasourceBundle> datasourceBundleService;
+    private final ProviderResourcesCommonMethods commonMethods;
     private final String columnsOfInterest = "catalogue_id, name, abbreviation, affiliations, tags, networks," +
             "scientific_subdomains, hosting_legal_entity"; // variable with DB tables a keyword is been searched on
 
@@ -62,7 +64,8 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
                             @Lazy FieldValidator fieldValidator,
                             @Lazy SecurityService securityService,
                             @Lazy VocabularyService vocabularyService,
-                            @Lazy RegistrationMailService registrationMailService) {
+                            @Lazy RegistrationMailService registrationMailService,
+                            @Lazy ProviderResourcesCommonMethods commonMethods) {
         super(CatalogueBundle.class);
         this.securityService = securityService;
         this.vocabularyService = vocabularyService;
@@ -74,6 +77,7 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
         this.providerManager = providerManager;
         this.serviceBundleService = serviceBundleService;
         this.datasourceBundleService = datasourceBundleService;
+        this.commonMethods = commonMethods;
     }
 
     @Override
@@ -608,5 +612,19 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
             catalogueBundlePaging.setTo(0);
         }
         return catalogueBundlePaging;
+    }
+
+    @Override
+    public Paging<ProviderBundle> getAllCatalogueProviders(String catalogueId, Authentication auth) {
+        FacetFilter ff = new FacetFilter();
+        ff.addFilter("catalogue_id", catalogueId);
+        ff.setQuantity(maxQuantity);
+        ff.addOrderBy("name", "asc");
+        return providerManager.getAll(ff, auth);
+    }
+
+    public CatalogueBundle suspend(String catalogueId, boolean suspend, Authentication auth) {
+        //TODO: implement
+        return null;
     }
 }

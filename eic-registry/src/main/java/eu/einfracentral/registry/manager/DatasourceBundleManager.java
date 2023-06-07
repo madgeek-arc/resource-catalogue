@@ -830,4 +830,10 @@ public class DatasourceBundleManager extends AbstractResourceBundleManager<Datas
         publicDatasourceManager.add(datasourceBundle, auth);
         return datasourceBundle;
     }
+
+    public DatasourceBundle suspend(String datasourceId, String catalogueId, boolean suspend, Authentication auth) {
+        DatasourceBundle datasourceBundle = get(datasourceId, catalogueId);
+        commonMethods.suspendResource(datasourceBundle, catalogueId, suspend, auth);
+        return super.update(datasourceBundle, auth);
+    }
 }

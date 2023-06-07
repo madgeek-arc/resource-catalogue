@@ -206,7 +206,7 @@ public class InteroperabilityRecordController {
 
     // front-end use (Interoperability Record form)
     @GetMapping(path = {"interoperabilityRecordIdToNameMap"}, produces = {MediaType.APPLICATION_JSON_VALUE})
-    public ResponseEntity<List<eu.einfracentral.dto.Value>> providerIdToNameMap(String catalogueId) {
+    public ResponseEntity<List<eu.einfracentral.dto.Value>> interoperabilityRecordIdToNameMap(String catalogueId) {
         List<eu.einfracentral.dto.Value> allInteroperabilityRecords = new ArrayList<>();
         // fetch catalogueId related non-public Interoperability Records
         List<eu.einfracentral.dto.Value> catalogueRelatedInteroperabilityRecords = interoperabilityRecordService
@@ -266,5 +266,12 @@ public class InteroperabilityRecordController {
         logger.info("User '{}-{}' attempts to create a Public Interoperability Record from Interoperability Record '{}'-'{}' of the '{}' Catalogue", User.of(auth).getFullName(),
                 User.of(auth).getEmail(), interoperabilityRecordBundle.getId(), interoperabilityRecordBundle.getInteroperabilityRecord().getTitle(), interoperabilityRecordBundle.getInteroperabilityRecord().getCatalogueId());
         return ResponseEntity.ok(interoperabilityRecordService.createPublicInteroperabilityRecord(interoperabilityRecordBundle, auth));
+    }
+
+    @ApiOperation(value = "Suspends a specific Interoperability Record.")
+    @PutMapping(path = "suspend", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
+    public InteroperabilityRecordBundle suspendInteroperabilityRecord(@RequestParam String interoperabilityRecordId, @RequestParam String catalogueId, @RequestParam boolean suspend, @ApiIgnore Authentication auth) {
+        return interoperabilityRecordService.suspend(interoperabilityRecordId, catalogueId, suspend, auth);
     }
 }
