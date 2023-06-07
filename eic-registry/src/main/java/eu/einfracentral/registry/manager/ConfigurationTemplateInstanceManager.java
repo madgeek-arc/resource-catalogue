@@ -57,7 +57,7 @@ public class ConfigurationTemplateInstanceManager extends ResourceManager<Config
     @Override
     public ConfigurationTemplateInstanceBundle add(ConfigurationTemplateInstanceBundle configurationTemplateInstanceBundle, Authentication auth) {
         validate(configurationTemplateInstanceBundle);
-//        checkResourceIdAndConfigurationTemplateIdConsistency(configurationTemplateInstanceBundle, auth);
+        checkResourceIdAndConfigurationTemplateIdConsistency(configurationTemplateInstanceBundle, auth);
 
         configurationTemplateInstanceBundle.setId(UUID.randomUUID().toString());
         logger.trace("User '{}' is attempting to add a new ConfigurationTemplateInstance: {}", auth, configurationTemplateInstanceBundle);
@@ -121,6 +121,12 @@ public class ConfigurationTemplateInstanceManager extends ResourceManager<Config
         if (!configurationTemplateInstanceBundle.getConfigurationTemplateInstance().getResourceId().equals(ex.getConfigurationTemplateInstance().getResourceId())
                 && !securityService.hasRole(auth, "ROLE_ADMIN")){
             throw new ValidationException("You cannot change the Resource Id with which this ConfigurationTemplateInstance is related");
+        }
+
+        // block user from updating configurationTemplateId
+        if (!configurationTemplateInstanceBundle.getConfigurationTemplateInstance().getConfigurationTemplateId().equals(ex.getConfigurationTemplateInstance().getConfigurationTemplateId())
+                && !securityService.hasRole(auth, "ROLE_ADMIN")){
+            throw new ValidationException("You cannot change the Configuration Template Id with which this ConfigurationTemplateInstance is related");
         }
 
         resourceService.updateResource(existing);
