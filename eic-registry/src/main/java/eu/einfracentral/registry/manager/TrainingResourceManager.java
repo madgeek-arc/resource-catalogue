@@ -686,7 +686,7 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
     private TrainingResourceBundle checkIdExistanceInOtherCatalogues(String id) {
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(maxQuantity);
-        ff.addFilter(getResourceType() + "_id", id);
+        ff.addFilter("resource_internal_id", id);
         List<TrainingResourceBundle> allResources = getAll(ff, null).getResults();
         if (allResources.size() > 1) {
             return allResources.get(0);
@@ -1143,6 +1143,12 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
         registrationMailService.sendEmailsForMovedTrainingResources(oldProvider, newProvider, trainingResourceBundle, auth);
 
         return trainingResourceBundle;
+    }
+
+    public TrainingResourceBundle suspend(String trainingResourceId, String catalogueId, boolean suspend, Authentication auth) {
+        TrainingResourceBundle trainingResourceBundle = get(trainingResourceId, catalogueId);
+        commonMethods.suspendResource(trainingResourceBundle, catalogueId, suspend, auth);
+        return super.update(trainingResourceBundle, auth);
     }
 
 }

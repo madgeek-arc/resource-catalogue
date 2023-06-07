@@ -137,7 +137,7 @@ public abstract class AbstractResourceBundleManager<T extends ResourceBundle<?>>
     private T checkIdExistanceInOtherCatalogues(String id) {
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(maxQuantity);
-        ff.addFilter(getResourceType() + "_id", id);
+        ff.addFilter("resource_internal_id", id);
         List<T> allResources = getAll(ff, null).getResults();
         if (allResources.size() > 0) {
             return allResources.get(0);
