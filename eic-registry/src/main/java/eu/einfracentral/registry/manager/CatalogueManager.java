@@ -7,7 +7,6 @@ import eu.einfracentral.registry.service.*;
 import eu.einfracentral.service.IdCreator;
 import eu.einfracentral.service.RegistrationMailService;
 import eu.einfracentral.service.SecurityService;
-import eu.einfracentral.utils.FacetFilterUtils;
 import eu.einfracentral.utils.ProviderResourcesCommonMethods;
 import eu.einfracentral.validators.FieldValidator;
 import eu.openminted.registry.core.domain.Browsing;
@@ -23,7 +22,6 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
-import org.springframework.jms.core.JmsTemplate;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.common.exceptions.UnauthorizedUserException;
 import org.springframework.stereotype.Service;
@@ -42,13 +40,14 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
     private final SecurityService securityService;
     private final VocabularyService vocabularyService;
     private final IdCreator idCreator;
-    private final JmsTemplate jmsTopicTemplate;
     private final FieldValidator fieldValidator;
     private final RegistrationMailService registrationMailService;
     private final DataSource dataSource;
-    private final ProviderService<ProviderBundle, Authentication> providerManager;
+    private final ProviderService<ProviderBundle, Authentication> providerService;
     private final ResourceBundleService<ServiceBundle> serviceBundleService;
     private final ResourceBundleService<DatasourceBundle> datasourceBundleService;
+    private final TrainingResourceService<TrainingResourceBundle> trainingResourceService;
+    private final InteroperabilityRecordService<InteroperabilityRecordBundle> interoperabilityRecordService;
     private final ProviderResourcesCommonMethods commonMethods;
     private final String columnsOfInterest = "catalogue_id, name, abbreviation, affiliations, tags, networks," +
             "scientific_subdomains, hosting_legal_entity"; // variable with DB tables a keyword is been searched on
@@ -57,10 +56,12 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
     private String catalogueName;
 
     @Autowired
-    public CatalogueManager(IdCreator idCreator, JmsTemplate jmsTopicTemplate, DataSource dataSource,
-                            @Lazy ProviderService<ProviderBundle, Authentication> providerManager,
+    public CatalogueManager(IdCreator idCreator, DataSource dataSource,
+                            @Lazy ProviderService<ProviderBundle, Authentication> providerService,
                             @Lazy ResourceBundleService<ServiceBundle> serviceBundleService,
                             @Lazy ResourceBundleService<DatasourceBundle> datasourceBundleService,
+                            @Lazy TrainingResourceService<TrainingResourceBundle> trainingResourceService,
+                            @Lazy InteroperabilityRecordService<InteroperabilityRecordBundle> interoperabilityRecordService,
                             @Lazy FieldValidator fieldValidator,
                             @Lazy SecurityService securityService,
                             @Lazy VocabularyService vocabularyService,
@@ -70,13 +71,14 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
         this.securityService = securityService;
         this.vocabularyService = vocabularyService;
         this.idCreator = idCreator;
-        this.jmsTopicTemplate = jmsTopicTemplate;
         this.fieldValidator = fieldValidator;
         this.dataSource = dataSource;
         this.registrationMailService = registrationMailService;
-        this.providerManager = providerManager;
+        this.providerService = providerService;
         this.serviceBundleService = serviceBundleService;
         this.datasourceBundleService = datasourceBundleService;
+        this.trainingResourceService = trainingResourceService;
+        this.interoperabilityRecordService = interoperabilityRecordService;
         this.commonMethods = commonMethods;
     }
 
@@ -276,13 +278,19 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
 
         // Delete Catalogue along with all its related Resources
         logger.info("Deleting all Catalogue's Providers...");
-        deleteCatalogueResources(id, providerManager, securityService.getAdminAccess());
+        deleteCatalogueResources(id, providerService, securityService.getAdminAccess());
 
         logger.info("Deleting all Catalogue's Services...");
         deleteCatalogueResources(id, serviceBundleService, securityService.getAdminAccess());
 
         logger.info("Deleting all Catalogue's Datasources...");
         deleteCatalogueResources(id, datasourceBundleService, securityService.getAdminAccess());
+
+        logger.info("Deleting all Catalogue's Training Resources...");
+        deleteCatalogueResources(id, trainingResourceService, securityService.getAdminAccess());
+
+        logger.info("Deleting all Catalogue's Interoperability Records...");
+        deleteCatalogueResources(id, interoperabilityRecordService, securityService.getAdminAccess());
 
         logger.info("Deleting Catalogue...");
         super.delete(catalogueBundle);
@@ -620,11 +628,30 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
         ff.addFilter("catalogue_id", catalogueId);
         ff.setQuantity(maxQuantity);
         ff.addOrderBy("name", "asc");
-        return providerManager.getAll(ff, auth);
+        return providerService.getAll(ff, auth);
     }
 
     public CatalogueBundle suspend(String catalogueId, boolean suspend, Authentication auth) {
-        //TODO: implement
-        return null;
+        CatalogueBundle catalogueBundle = get(catalogueId, auth);
+
+        // Suspend Catalogue's resources
+        List<ProviderBundle> providers = providerService.getAll(createFacetFilter(catalogueId), auth).getResults();
+
+        if (providers != null && !providers.isEmpty()) {
+            for (ProviderBundle providerBundle : providers) {
+                providerService.suspend(providerBundle.getId(), catalogueId, suspend, auth);
+            }
+        }
+
+        commonMethods.suspendResource(catalogueBundle, catalogueId, suspend, auth);
+        return super.update(catalogueBundle, auth);
+    }
+
+    private FacetFilter createFacetFilter(String catalogueId){
+        FacetFilter ff = new FacetFilter();
+        ff.setQuantity(10000);
+        ff.addFilter("published", false);
+        ff.addFilter("catalogue_id", catalogueId);
+        return ff;
     }
 }

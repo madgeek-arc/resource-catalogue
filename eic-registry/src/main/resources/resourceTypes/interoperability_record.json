@@ -142,6 +142,13 @@
     },
     {
       "multivalued": false,
+      "name": "suspended",
+      "path": "//*[local-name()='suspended']/text()",
+      "defaultValue": false,
+      "type": "java.lang.Boolean"
+    },
+    {
+      "multivalued": false,
       "name": "status",
       "path": "//*[local-name()='interoperabilityRecordBundle']/*[local-name()='status']/text()",
       "type": "java.lang.String"
@@ -154,5 +161,5 @@
   "properties": {
     "class": "eu.einfracentral.domain.InteroperabilityRecord"
   },
-  "schemaUrl": "https://raw.githubusercontent.com/madgeek-arc/resource-catalogue/develop/eic-registry-model/src/main/resources/schema1.xsd"
+  "schemaUrl": "https://raw.githubusercontent.com/madgeek-arc/resource-catalogue/pids/eic-registry-model/src/main/resources/schema1.xsd"
 }

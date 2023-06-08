@@ -6,10 +6,8 @@ import eu.einfracentral.exception.ValidationException;
 import eu.einfracentral.registry.service.*;
 import eu.einfracentral.service.GenericResourceService;
 import eu.einfracentral.service.SecurityService;
-import eu.openminted.registry.core.service.ResourceService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
@@ -118,6 +116,7 @@ public class ProviderResourcesCommonMethods {
             if (resourceProviders != null && !resourceProviders.isEmpty()) {
                 for (String resourceProvider : resourceProviders) {
                     try {
+                        //FIXME: get(resourceTypeName, id) won't work as intended if there are 2 or more resources with the same ID
                         ProviderBundle providerBundle = genericResourceService.get("provider", resourceProvider);
                         if (!providerBundle.getMetadata().isPublished() && !providerBundle.getProvider().getCatalogueId().equals(catalogueId)) {
                             throw new ValidationException("Cross Catalogue reference is prohibited. Found in field 'resourceProviders");
@@ -243,7 +242,7 @@ public class ProviderResourcesCommonMethods {
             bundle.setLatestUpdateInfo(loggingInfo);
 
             String[] parts = bundle.getPayload().getClass().getName().split("\\.");
-            logger.info(String.format("User [%s] set 'suspended' of [%s] [%s]-[%s] to [%s]",
+            logger.info(String.format("User [%s] set 'suspended' of %s [%s]-[%s] to [%s]",
                     User.of(auth).getEmail(), parts[3], catalogueId, bundle.getId(), suspend));
         }
     }
