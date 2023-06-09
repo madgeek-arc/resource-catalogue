@@ -1329,7 +1329,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
 
     public ProviderBundle suspend(String providerId, String catalogueId, boolean suspend, Authentication auth) {
         ProviderBundle providerBundle = get(catalogueId, providerId, auth);
-        commonMethods.checkIfResourceCanBeUnsuspended(providerBundle, catalogueId,
+        commonMethods.suspensionValidation(providerBundle, catalogueId,
                 providerId, suspend, auth);
 
         // Suspend Provider's resources

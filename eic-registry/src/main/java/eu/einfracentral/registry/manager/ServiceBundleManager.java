@@ -8,7 +8,6 @@ import eu.einfracentral.registry.service.*;
 import eu.einfracentral.service.IdCreator;
 import eu.einfracentral.service.RegistrationMailService;
 import eu.einfracentral.service.SecurityService;
-import eu.einfracentral.utils.FacetFilterUtils;
 import eu.einfracentral.utils.ProviderResourcesCommonMethods;
 import eu.openminted.registry.core.domain.Browsing;
 import eu.openminted.registry.core.domain.FacetFilter;
@@ -641,7 +640,7 @@ public class ServiceBundleManager extends AbstractResourceBundleManager<ServiceB
 
     public ServiceBundle suspend(String serviceId, String catalogueId, boolean suspend, Authentication auth) {
         ServiceBundle serviceBundle = get(serviceId, catalogueId);
-        commonMethods.checkIfResourceCanBeUnsuspended(serviceBundle, catalogueId,
+        commonMethods.suspensionValidation(serviceBundle, catalogueId,
                 serviceBundle.getService().getResourceOrganisation(), suspend, auth);
         commonMethods.suspendResource(serviceBundle, catalogueId, suspend, auth);
         return super.update(serviceBundle, auth);

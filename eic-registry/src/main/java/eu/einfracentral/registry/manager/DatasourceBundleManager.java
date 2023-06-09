@@ -10,7 +10,6 @@ import eu.einfracentral.registry.service.*;
 import eu.einfracentral.service.IdCreator;
 import eu.einfracentral.service.RegistrationMailService;
 import eu.einfracentral.service.SecurityService;
-import eu.einfracentral.utils.FacetFilterUtils;
 import eu.einfracentral.utils.ProviderResourcesCommonMethods;
 import eu.openminted.registry.core.domain.Browsing;
 import eu.openminted.registry.core.domain.FacetFilter;
@@ -833,7 +832,7 @@ public class DatasourceBundleManager extends AbstractResourceBundleManager<Datas
 
     public DatasourceBundle suspend(String datasourceId, String catalogueId, boolean suspend, Authentication auth) {
         DatasourceBundle datasourceBundle = get(datasourceId, catalogueId);
-        commonMethods.checkIfResourceCanBeUnsuspended(datasourceBundle, catalogueId,
+        commonMethods.suspensionValidation(datasourceBundle, catalogueId,
                 datasourceBundle.getDatasource().getResourceOrganisation(), suspend, auth);
         commonMethods.suspendResource(datasourceBundle, catalogueId, suspend, auth);
         return super.update(datasourceBundle, auth);

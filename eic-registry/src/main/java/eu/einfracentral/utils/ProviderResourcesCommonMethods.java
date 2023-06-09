@@ -250,7 +250,7 @@ public class ProviderResourcesCommonMethods {
         }
     }
 
-    public void checkIfResourceCanBeUnsuspended(Bundle<?> bundle, String catalogueId, String providerId, boolean suspend, Authentication auth) {
+    public void suspensionValidation(Bundle<?> bundle, String catalogueId, String providerId, boolean suspend, Authentication auth) {
         if (bundle.getMetadata().isPublished()) {
             throw new ValidationException("You cannot directly suspend a Public resource");
         }

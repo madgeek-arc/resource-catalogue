@@ -459,7 +459,7 @@ public class InteroperabilityRecordManager extends ResourceManager<Interoperabil
 
     public InteroperabilityRecordBundle suspend(String interoperabilityRecordId, String catalogueId, boolean suspend, Authentication auth) {
         InteroperabilityRecordBundle interoperabilityRecordBundle = get(interoperabilityRecordId, catalogueId);
-        commonMethods.checkIfResourceCanBeUnsuspended(interoperabilityRecordBundle, catalogueId,
+        commonMethods.suspensionValidation(interoperabilityRecordBundle, catalogueId,
                 interoperabilityRecordBundle.getInteroperabilityRecord().getProviderId(), suspend, auth);
         commonMethods.suspendResource(interoperabilityRecordBundle, catalogueId, suspend, auth);
         return super.update(interoperabilityRecordBundle, auth);
