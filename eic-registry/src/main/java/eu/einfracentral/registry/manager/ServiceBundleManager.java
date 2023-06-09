@@ -641,6 +641,8 @@ public class ServiceBundleManager extends AbstractResourceBundleManager<ServiceB
 
     public ServiceBundle suspend(String serviceId, String catalogueId, boolean suspend, Authentication auth) {
         ServiceBundle serviceBundle = get(serviceId, catalogueId);
+        commonMethods.checkIfResourceCanBeUnsuspended(serviceBundle, catalogueId,
+                serviceBundle.getService().getResourceOrganisation(), suspend, auth);
         commonMethods.suspendResource(serviceBundle, catalogueId, suspend, auth);
         return super.update(serviceBundle, auth);
     }

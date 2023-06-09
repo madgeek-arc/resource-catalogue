@@ -89,7 +89,7 @@ public class LoggingInfo {
         ACTIVATED("activated"),
         DEACTIVATED("deactivated"),
         SUSPENDED("suspended"),
-        REENABLED("reenabled"),
+        UNSUSPENDED("unsuspended"),
         // Audit
         VALID("valid"),
         INVALID("invalid"),

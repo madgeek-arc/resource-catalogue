@@ -81,7 +81,7 @@
             
       <xs:enumeration value="SUSPENDED"/>
             
-      <xs:enumeration value="REENABLED"/>
+      <xs:enumeration value="UNSUSPENDED"/>
             
       <xs:enumeration value="VALID"/>
             

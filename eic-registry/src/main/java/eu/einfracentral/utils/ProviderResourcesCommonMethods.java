@@ -21,13 +21,16 @@ public class ProviderResourcesCommonMethods {
     private static final Logger logger = LogManager.getLogger(ProviderResourcesCommonMethods.class);
 
     private final CatalogueService<CatalogueBundle, Authentication> catalogueService;
+    private final ProviderService<ProviderBundle, Authentication> providerService;
     private final GenericResourceService genericResourceService;
     private final SecurityService securityService;
 
-    public ProviderResourcesCommonMethods(CatalogueService<CatalogueBundle, Authentication> catalogueService,
+    public ProviderResourcesCommonMethods(@Lazy CatalogueService<CatalogueBundle, Authentication> catalogueService,
+                                          @Lazy ProviderService<ProviderBundle, Authentication> providerService,
                                           @Lazy GenericResourceService genericResourceService,
                                           @Lazy SecurityService securityService) {
         this.catalogueService = catalogueService;
+        this.providerService = providerService;
         this.genericResourceService = genericResourceService;
         this.securityService = securityService;
     }
@@ -234,7 +237,7 @@ public class ProviderResourcesCommonMethods {
                         LoggingInfo.Types.UPDATE.getKey(), LoggingInfo.ActionType.SUSPENDED.getKey());
             } else {
                 loggingInfo = LoggingInfo.createLoggingInfoEntry(User.of(auth).getEmail(), User.of(auth).getFullName(), securityService.getRoleName(auth),
-                        LoggingInfo.Types.UPDATE.getKey(), LoggingInfo.ActionType.REENABLED.getKey());
+                        LoggingInfo.Types.UPDATE.getKey(), LoggingInfo.ActionType.UNSUSPENDED.getKey());
             }
             loggingInfoList.add(loggingInfo);
             bundle.setLoggingInfo(loggingInfoList);
@@ -244,6 +247,24 @@ public class ProviderResourcesCommonMethods {
             String[] parts = bundle.getPayload().getClass().getName().split("\\.");
             logger.info(String.format("User [%s] set 'suspended' of %s [%s]-[%s] to [%s]",
                     User.of(auth).getEmail(), parts[3], catalogueId, bundle.getId(), suspend));
+        }
+    }
+
+    public void checkIfResourceCanBeUnsuspended(Bundle<?> bundle, String catalogueId, String providerId, boolean suspend, Authentication auth) {
+        if (bundle.getMetadata().isPublished()) {
+            throw new ValidationException("You cannot directly suspend a Public resource");
+        }
+
+        CatalogueBundle catalogueBundle = catalogueService.get(catalogueId, auth);
+        if (bundle instanceof ProviderBundle) {
+            if (catalogueBundle.isSuspended() && !suspend) {
+                throw new ValidationException("You cannot unsuspend a Provider when its Catalogue is suspended");
+            }
+        } else {
+            ProviderBundle providerBundle = providerService.get(catalogueId, providerId, auth);
+            if ((catalogueBundle.isSuspended() || providerBundle.isSuspended()) && !suspend) {
+                throw new ValidationException("You cannot unsuspend a Resource when its Provider and/or Catalogue are suspended");
+            }
         }
     }
 }

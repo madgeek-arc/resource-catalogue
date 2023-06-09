@@ -1147,6 +1147,8 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
 
     public TrainingResourceBundle suspend(String trainingResourceId, String catalogueId, boolean suspend, Authentication auth) {
         TrainingResourceBundle trainingResourceBundle = get(trainingResourceId, catalogueId);
+        commonMethods.checkIfResourceCanBeUnsuspended(trainingResourceBundle, catalogueId,
+                trainingResourceBundle.getTrainingResource().getResourceOrganisation(), suspend, auth);
         commonMethods.suspendResource(trainingResourceBundle, catalogueId, suspend, auth);
         return super.update(trainingResourceBundle, auth);
     }
