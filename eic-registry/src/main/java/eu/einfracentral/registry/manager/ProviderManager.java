@@ -345,7 +345,6 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     @Override
     @Cacheable(value = CACHE_PROVIDERS, key="#ff.hashCode()+(#auth!=null?#auth.hashCode():0)")
     public Browsing<ProviderBundle> getAll(FacetFilter ff, Authentication auth) {
-        List<ProviderBundle> userProviders = null;
         List<ProviderBundle> retList = new ArrayList<>();
 
         // if user is ADMIN or EPOT return everything
@@ -1150,6 +1149,18 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         boolean firstTime = true;
         for (Map.Entry<String, Object> entry : ff.getFilter().entrySet()) {
             in.addValue(entry.getKey(), entry.getValue());
+            // suspended
+            if (entry.getKey().equals("suspended")) {
+                if (firstTime) {
+                    query += String.format(" (suspended=%s)", entry.getValue().toString());
+                    firstTime = false;
+                } else {
+                    query += String.format(" AND (suspended=%s)", entry.getValue().toString());
+                }
+                if (query.contains(",")){
+                    query = query.replaceAll(", ", "' OR suspended='");
+                }
+            }
             // published
             if (entry.getKey().equals("published")) {
                 if (firstTime) {

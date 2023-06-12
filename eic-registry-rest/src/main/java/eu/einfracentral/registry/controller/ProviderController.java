@@ -145,6 +145,7 @@ public class ProviderController {
 
     @ApiOperation(value = "Filter a list of Providers based on a set of filters or get a list of all Providers in the Catalogue.")
     @ApiImplicitParams({
+            @ApiImplicitParam(name = "suspended", value = "Suspended", defaultValue = "false", dataType = "boolean", paramType = "query"),
             @ApiImplicitParam(name = "query", value = "Keyword to refine the search", dataType = "string", paramType = "query"),
             @ApiImplicitParam(name = "from", value = "Starting index in the result set", dataType = "string", paramType = "query"),
             @ApiImplicitParam(name = "quantity", value = "Quantity to be fetched", dataType = "string", paramType = "query"),
@@ -181,6 +182,7 @@ public class ProviderController {
 
     // Filter a list of Providers based on a set of filters or get a list of all Providers in the Catalogue.
     @ApiImplicitParams({
+            @ApiImplicitParam(name = "suspended", value = "Suspended", defaultValue = "false", dataType = "boolean", paramType = "query"),
             @ApiImplicitParam(name = "query", value = "Keyword to refine the search", dataType = "string", paramType = "query"),
             @ApiImplicitParam(name = "from", value = "Starting index in the result set", dataType = "string", paramType = "query"),
             @ApiImplicitParam(name = "quantity", value = "Quantity to be fetched", dataType = "string", paramType = "query"),
@@ -193,6 +195,9 @@ public class ProviderController {
                                                                         @RequestParam(required = false) Set<String> status, @RequestParam(required = false) Set<String> templateStatus,
                                                                         @RequestParam(required = false) Set<String> auditState, @RequestParam(required = false) Set<String> catalogue_id) {
         FacetFilter ff = new FacetFilter();
+        if (allRequestParams.get("suspended") != null) {
+            ff.addFilter("suspended", allRequestParams.get("suspended"));
+        }
         ff.setKeyword(allRequestParams.get("query") != null ? (String) allRequestParams.remove("query") : "");
         ff.setFrom(allRequestParams.get("from") != null ? Integer.parseInt((String) allRequestParams.remove("from")) : 0);
         ff.setQuantity(allRequestParams.get("quantity") != null ? Integer.parseInt((String) allRequestParams.remove("quantity")) : 10);

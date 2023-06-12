@@ -516,7 +516,6 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
 
     public List<Map<String, Object>> createQueryForCatalogueFilters (FacetFilter ff, String orderDirection, String orderField){
         String keyword = ff.getKeyword();
-        Map<String, Object> order = ff.getOrderBy();
         NamedParameterJdbcTemplate namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(dataSource);
         MapSqlParameterSource in = new MapSqlParameterSource();
 
@@ -528,17 +527,28 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
         }
 
         boolean firstTime = true;
-        boolean hasStatus = false;
         for (Map.Entry<String, Object> entry : ff.getFilter().entrySet()) {
             in.addValue(entry.getKey(), entry.getValue());
             if (entry.getKey().equals("status")) {
-                hasStatus = true;
                 if (firstTime) {
                     query += String.format(" (status=%s)", entry.getValue().toString());
                     firstTime = false;
+                } else {
+                    query += String.format(" AND (status=%s)", entry.getValue().toString());
                 }
                 if (query.contains(",")){
                     query = query.replaceAll(", ", "' OR status='");
+                }
+            }
+            if (entry.getKey().equals("suspended")) {
+                if (firstTime) {
+                    query += String.format(" (suspended=%s)", entry.getValue().toString());
+                    firstTime = false;
+                } else {
+                    query += String.format(" AND (suspended=%s)", entry.getValue().toString());
+                }
+                if (query.contains(",")){
+                    query = query.replaceAll(", ", "' OR suspended='");
                 }
             }
         }

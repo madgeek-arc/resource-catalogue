@@ -104,6 +104,7 @@ public class InteroperabilityRecordController {
 
     @ApiOperation(value = "Get all Interoperability Records")
     @ApiImplicitParams({
+            @ApiImplicitParam(name = "suspended", value = "Suspended", defaultValue = "false", dataType = "boolean", paramType = "query"),
             @ApiImplicitParam(name = "query", value = "Keyword to refine the search", dataType = "string", paramType = "query"),
             @ApiImplicitParam(name = "from", value = "Starting index in the result set", dataType = "string", paramType = "query"),
             @ApiImplicitParam(name = "quantity", value = "Quantity to be fetched", dataType = "string", paramType = "query"),
@@ -128,6 +129,7 @@ public class InteroperabilityRecordController {
 
     @ApiOperation(value = "Get all Interoperability Record Bundles")
     @ApiImplicitParams({
+            @ApiImplicitParam(name = "suspended", value = "Suspended", defaultValue = "false", dataType = "boolean", paramType = "query"),
             @ApiImplicitParam(name = "query", value = "Keyword to refine the search", dataType = "string", paramType = "query"),
             @ApiImplicitParam(name = "from", value = "Starting index in the result set", dataType = "string", paramType = "query"),
             @ApiImplicitParam(name = "quantity", value = "Quantity to be fetched", dataType = "string", paramType = "query"),
@@ -204,7 +206,7 @@ public class InteroperabilityRecordController {
         return allInteroperabilityRecordRelatedResources;
     }
 
-    // front-end use (Interoperability Record form)
+    // front-end use (Resource Interoperability Record form)
     @GetMapping(path = {"interoperabilityRecordIdToNameMap"}, produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<List<eu.einfracentral.dto.Value>> interoperabilityRecordIdToNameMap(String catalogueId) {
         List<eu.einfracentral.dto.Value> allInteroperabilityRecords = new ArrayList<>();
