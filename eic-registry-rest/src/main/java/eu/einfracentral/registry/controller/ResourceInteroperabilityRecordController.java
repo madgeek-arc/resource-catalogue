@@ -80,17 +80,9 @@ public class ResourceInteroperabilityRecordController {
     public ResponseEntity<ResourceInteroperabilityRecord> getResourceInteroperabilityRecordByResourceId(@PathVariable("resourceId") String resourceId,
                                                            @RequestParam(defaultValue = "${project.catalogue.name}", name = "catalogue_id") String catalogueId,
                                                            @ApiIgnore Authentication auth) {
-        FacetFilter ff = new FacetFilter();
-        ff.setQuantity(1000);
-        ff.addFilter("published", false);
-        List<ResourceInteroperabilityRecordBundle> allResourceInteroperabilityRecords = resourceInteroperabilityRecordService.getAll(ff, auth).getResults();
-        for (ResourceInteroperabilityRecordBundle resourceInteroperabilityRecord : allResourceInteroperabilityRecords){
-            if (resourceInteroperabilityRecord.getResourceInteroperabilityRecord().getCatalogueId().equals(catalogueId)
-                    && (resourceInteroperabilityRecord.getResourceInteroperabilityRecord().getResourceId().equals(resourceId))){
-                return new ResponseEntity<>(resourceInteroperabilityRecord.getResourceInteroperabilityRecord(), HttpStatus.OK);
-            }
-        }
-        return new ResponseEntity<>(null, HttpStatus.OK);
+        ResourceInteroperabilityRecord resourceInteroperabilityRecord = resourceInteroperabilityRecordService.
+                getResourceInteroperabilityRecordByResourceId(resourceId, catalogueId, auth).getResourceInteroperabilityRecord();
+        return new ResponseEntity<>(resourceInteroperabilityRecord, HttpStatus.OK);
     }
 
     @ApiOperation(value = "Creates a new ResourceInteroperabilityRecord.")

@@ -10,6 +10,7 @@ import eu.einfracentral.registry.service.TrainingResourceService;
 import eu.einfracentral.service.SecurityService;
 import eu.einfracentral.utils.ProviderResourcesCommonMethods;
 import eu.einfracentral.utils.ResourceValidationUtils;
+import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.domain.Paging;
 import eu.openminted.registry.core.domain.Resource;
 import org.apache.logging.log4j.LogManager;
@@ -60,7 +61,7 @@ public class ResourceInteroperabilityRecordManager extends ResourceManager<Resou
         String resourceId = resourceInteroperabilityRecordBundle.getResourceInteroperabilityRecord().getResourceId();
         String catalogueId = resourceInteroperabilityRecordBundle.getResourceInteroperabilityRecord().getCatalogueId();
 
-        ResourceInteroperabilityRecordBundle existing = get(resourceId, catalogueId);
+        ResourceInteroperabilityRecordBundle existing = getResourceInteroperabilityRecordByResourceId(resourceId, catalogueId, securityService.getAdminAccess());
         if (existing != null) {
             throw new ValidationException(String.format("Resource [%s] of the Catalogue [%s] has already a Resource " +
                                 "Interoperability Record registered, with id: [%s]", resourceId, catalogueId, existing.getId()));
@@ -187,6 +188,20 @@ public class ResourceInteroperabilityRecordManager extends ResourceManager<Resou
         super.delete(resourceInteroperabilityRecordBundle);
         logger.debug("Deleting ResourceInteroperabilityRecord: {}", resourceInteroperabilityRecordBundle);
 
+    }
+
+    public ResourceInteroperabilityRecordBundle getResourceInteroperabilityRecordByResourceId(String resourceId, String catalogueId, Authentication auth) {
+        FacetFilter ff = new FacetFilter();
+        ff.setQuantity(1000);
+        ff.addFilter("published", false);
+        List<ResourceInteroperabilityRecordBundle> allResourceInteroperabilityRecords = getAll(ff, auth).getResults();
+        for (ResourceInteroperabilityRecordBundle resourceInteroperabilityRecord : allResourceInteroperabilityRecords){
+            if (resourceInteroperabilityRecord.getResourceInteroperabilityRecord().getCatalogueId().equals(catalogueId)
+                    && (resourceInteroperabilityRecord.getResourceInteroperabilityRecord().getResourceId().equals(resourceId))){
+                return resourceInteroperabilityRecord;
+            }
+        }
+        return null;
     }
 
     private ResourceInteroperabilityRecordBundle checkIfEachInteroperabilityRecordIsApproved(ResourceInteroperabilityRecordBundle resourceInteroperabilityRecordBundle){
