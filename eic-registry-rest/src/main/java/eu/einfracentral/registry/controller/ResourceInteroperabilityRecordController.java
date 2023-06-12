@@ -80,9 +80,12 @@ public class ResourceInteroperabilityRecordController {
     public ResponseEntity<ResourceInteroperabilityRecord> getResourceInteroperabilityRecordByResourceId(@PathVariable("resourceId") String resourceId,
                                                            @RequestParam(defaultValue = "${project.catalogue.name}", name = "catalogue_id") String catalogueId,
                                                            @ApiIgnore Authentication auth) {
-        ResourceInteroperabilityRecord resourceInteroperabilityRecord = resourceInteroperabilityRecordService.
-                getResourceInteroperabilityRecordByResourceId(resourceId, catalogueId, auth).getResourceInteroperabilityRecord();
-        return new ResponseEntity<>(resourceInteroperabilityRecord, HttpStatus.OK);
+        ResourceInteroperabilityRecordBundle resourceInteroperabilityRecordBundle = resourceInteroperabilityRecordService.
+                getResourceInteroperabilityRecordByResourceId(resourceId, catalogueId, auth);
+        if (resourceInteroperabilityRecordBundle != null) {
+            return new ResponseEntity<>(resourceInteroperabilityRecordBundle.getResourceInteroperabilityRecord(), HttpStatus.OK);
+        }
+        return new ResponseEntity<>(null, HttpStatus.OK);
     }
 
     @ApiOperation(value = "Creates a new ResourceInteroperabilityRecord.")
