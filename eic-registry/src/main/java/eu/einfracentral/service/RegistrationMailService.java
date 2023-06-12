@@ -996,55 +996,20 @@ public class RegistrationMailService {
         }
     }
 
-    public void notifyProviderAdminsForProviderAuditing(ProviderBundle providerBundle) {
-
+    public void notifyProviderAdminsForBundleAuditing(Bundle<?> bundle, String resourceType, String bundleName, List<User> users) {
         Map<String, Object> root = new HashMap<>();
         root.put("project", projectName);
         root.put("endpoint", endpoint);
-        root.put("providerBundle", providerBundle);
+        root.put("resourceType", resourceType);
+        root.put("bundleName", bundleName);
+        root.put("bundle", bundle);
 
-        String subject = String.format("[%s Portal] Your Provider '%s' has been audited by the EPOT team", projectName, providerBundle.getProvider().getName());
+        String subject = String.format("[%s Portal] Your %s '%s' has been audited by the EPOT team", projectName, resourceType, bundleName);
 
-        for (User user : providerBundle.getProvider().getUsers()) {
+        for (User user : users) {
             root.put("user", user);
             String userRole = "provider";
-            sendMailsFromTemplate("providerAudit.ftl", root, subject, user.getEmail(), userRole);
-        }
-    }
-
-    public void notifyProviderAdminsForResourceAuditing(ResourceBundle<?> resourceBundle) {
-
-        ProviderBundle providerBundle = providerManager.get(resourceBundle.getPayload().getResourceOrganisation());
-
-        Map<String, Object> root = new HashMap<>();
-        root.put("project", projectName);
-        root.put("endpoint", endpoint);
-        root.put("resourceBundle", resourceBundle);
-
-        String subject = String.format("[%s Portal] Your Resource '%s' has been audited by the EPOT team", projectName, resourceBundle.getPayload().getName());
-
-        for (User user : providerBundle.getProvider().getUsers()) {
-            root.put("user", user);
-            String userRole = "provider";
-            sendMailsFromTemplate("resourceAudit.ftl", root, subject, user.getEmail(), userRole);
-        }
-    }
-
-    public void notifyProviderAdminsForTrainingResourceAuditing(TrainingResourceBundle trainingResourceBundle) {
-
-        ProviderBundle providerBundle = providerManager.get(trainingResourceBundle.getTrainingResource().getResourceOrganisation());
-
-        Map<String, Object> root = new HashMap<>();
-        root.put("project", projectName);
-        root.put("endpoint", endpoint);
-        root.put("trainingResourceBundle", trainingResourceBundle);
-
-        String subject = String.format("[%s Portal] Your Training Resource '%s' has been audited by the EPOT team", projectName, trainingResourceBundle.getTrainingResource().getTitle());
-
-        for (User user : providerBundle.getProvider().getUsers()) {
-            root.put("user", user);
-            String userRole = "provider";
-            sendMailsFromTemplate("trainingResourceAudit.ftl", root, subject, user.getEmail(), userRole);
+            sendMailsFromTemplate("bundleAudit.ftl", root, subject, user.getEmail(), userRole);
         }
     }
 

@@ -145,7 +145,7 @@ public interface TrainingResourceService<T> extends ResourceService<T, Authentic
      * @param auth
      * @return
      */
-    T auditResource(String resourceId, String comment, LoggingInfo.ActionType actionType, Authentication auth);
+    T auditResource(String resourceId, String catalogueId, String comment, LoggingInfo.ActionType actionType, Authentication auth);
 
     /**
      * @param ff

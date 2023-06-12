@@ -964,30 +964,15 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     }
 
     @CacheEvict(value = CACHE_PROVIDERS, allEntries = true)
-    public ProviderBundle auditProvider(String providerId, String comment, LoggingInfo.ActionType actionType, Authentication auth) {
-        ProviderBundle provider = getWithCatalogue(providerId, catalogueName);
-        LoggingInfo loggingInfo;
-        List<LoggingInfo> loggingInfoList = new ArrayList<>();
-        if (provider.getLoggingInfo() != null) {
-            loggingInfoList = provider.getLoggingInfo();
-        } else {
-            LoggingInfo oldProviderRegistration = LoggingInfo.createLoggingInfoEntry(User.of(auth).getEmail(), User.of(auth).getFullName(), securityService.getRoleName(auth), LoggingInfo.Types.ONBOARD.getKey(),
-                    LoggingInfo.ActionType.REGISTERED.getKey());
-            loggingInfoList.add(oldProviderRegistration);
-        }
-
-        loggingInfo = LoggingInfo.createLoggingInfoEntry(User.of(auth).getEmail(), User.of(auth).getFullName(), securityService.getRoleName(auth), LoggingInfo.Types.AUDIT.getKey(),
-                actionType.getKey(), comment);
-        loggingInfoList.add(loggingInfo);
-        provider.setLoggingInfo(loggingInfoList);
-
-        // latestAuditInfo
-        provider.setLatestAuditInfo(loggingInfo);
+    public ProviderBundle auditProvider(String providerId, String catalogueId, String comment, LoggingInfo.ActionType actionType, Authentication auth) {
+        ProviderBundle provider = getWithCatalogue(providerId, catalogueId);
+        commonMethods.auditResource(provider, comment, actionType, auth);
 
         // send notification emails to Provider Admins
-        registrationMailService.notifyProviderAdminsForProviderAuditing(provider);
+        registrationMailService.notifyProviderAdminsForBundleAuditing(provider, "Provider",
+                provider.getProvider().getName(), provider.getProvider().getUsers());
 
-        logger.info("Auditing Provider: {}", provider);
+        logger.info(String.format("Auditing Provider [%s]-[%s]", catalogueId, provider));
         return super.update(provider, auth);
     }
 

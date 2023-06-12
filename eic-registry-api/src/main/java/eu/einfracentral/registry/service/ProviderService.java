@@ -154,11 +154,12 @@ public interface ProviderService<T, U extends Authentication> extends ResourceSe
 
     /**
      * @param providerId
+     * @param catalogueId
      * @param actionType
      * @param auth
      * @return
      */
-    ProviderBundle auditProvider(String providerId, String comment, LoggingInfo.ActionType actionType, Authentication auth);
+    ProviderBundle auditProvider(String providerId, String catalogueId, String comment, LoggingInfo.ActionType actionType, Authentication auth);
 
     /**
      * @param ff

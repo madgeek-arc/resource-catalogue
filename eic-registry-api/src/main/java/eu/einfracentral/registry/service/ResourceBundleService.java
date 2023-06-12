@@ -180,7 +180,7 @@ public interface ResourceBundleService<T> extends ResourceCRUDService<T, Authent
      * @param auth
      * @return
      */
-    T auditResource(String resourceId, String comment, LoggingInfo.ActionType actionType, Authentication auth);
+    T auditResource(String resourceId, String catalogueId, String comment, LoggingInfo.ActionType actionType, Authentication auth);
 
     /**
      * @param ff

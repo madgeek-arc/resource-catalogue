@@ -462,11 +462,12 @@ public class ProviderController {
 
     @PatchMapping(path = "auditProvider/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
-    public ResponseEntity<ProviderBundle> auditProvider(@PathVariable("id") String id, @RequestParam(required = false) String comment,
+    public ResponseEntity<ProviderBundle> auditProvider(@PathVariable("id") String id, @RequestParam("catalogueId") String catalogueId,
+                                                        @RequestParam(required = false) String comment,
                                                         @RequestParam LoggingInfo.ActionType actionType, @ApiIgnore Authentication auth) {
-        ProviderBundle provider = providerService.auditProvider(id, comment, actionType, auth);
-        logger.info("User '{}-{}' audited Provider with name '{}' [actionType: {}]", User.of(auth).getFullName(), User.of(auth).getEmail(),
-                provider.getProvider().getName(), actionType);
+        ProviderBundle provider = providerService.auditProvider(id, catalogueId, comment, actionType, auth);
+        logger.info("User '{}-{}' audited Provider with name '{}' of the '{}' Catalogue - [actionType: {}]", User.of(auth).getFullName(), User.of(auth).getEmail(),
+                provider.getProvider().getName(), provider.getProvider().getCatalogueId(), actionType);
         return new ResponseEntity<>(provider, HttpStatus.OK);
     }
 

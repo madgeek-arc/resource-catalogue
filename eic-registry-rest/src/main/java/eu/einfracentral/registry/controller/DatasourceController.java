@@ -253,14 +253,15 @@ public class DatasourceController {
         return ResponseEntity.ok(resourceBundleService.publish(id, active, auth));
     }
 
-    @PatchMapping(path = "auditDatasource/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PatchMapping(path = "auditResource/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
-    public ResponseEntity<DatasourceBundle> auditDatasource(@PathVariable("id") String id, @RequestParam(required = false) String comment,
+    public ResponseEntity<DatasourceBundle> auditDatasource(@PathVariable("id") String id, @RequestParam("catalogueId") String catalogueId,
+                                                            @RequestParam(required = false) String comment,
                                                             @RequestParam LoggingInfo.ActionType actionType, @ApiIgnore Authentication auth) {
-        DatasourceBundle datasourceBundle = resourceBundleService.auditResource(id, comment, actionType, auth);
-        logger.info("User '{}-{}' audited Datasource with name '{}' [actionType: {}]", User.of(auth).getFullName(), User.of(auth).getEmail(),
-                datasourceBundle.getDatasource().getName(), actionType);
-        return new ResponseEntity<>(datasourceBundle, HttpStatus.OK);
+        DatasourceBundle datasource = resourceBundleService.auditResource(id, catalogueId, comment, actionType, auth);
+        logger.info("User '{}-{}' audited Datasource with name '{}' of the '{}' Catalogue - [actionType: {}]", User.of(auth).getFullName(), User.of(auth).getEmail(),
+                datasource.getDatasource().getName(), datasource.getDatasource().getCatalogueId(), actionType);
+        return new ResponseEntity<>(datasource, HttpStatus.OK);
     }
 
     @ApiImplicitParams({

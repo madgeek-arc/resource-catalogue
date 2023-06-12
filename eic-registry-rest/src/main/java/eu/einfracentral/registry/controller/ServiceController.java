@@ -359,11 +359,12 @@ public class ServiceController {
 
     @PatchMapping(path = "auditResource/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
-    public ResponseEntity<ServiceBundle> auditResource(@PathVariable("id") String id, @RequestParam(required = false) String comment,
+    public ResponseEntity<ServiceBundle> auditService(@PathVariable("id") String id, @RequestParam("catalogueId") String catalogueId,
+                                                       @RequestParam(required = false) String comment,
                                                        @RequestParam LoggingInfo.ActionType actionType, @ApiIgnore Authentication auth) {
-        ServiceBundle service = resourceBundleService.auditResource(id, comment, actionType, auth);
-        logger.info("User '{}-{}' audited Service with name '{}' [actionType: {}]", User.of(auth).getFullName(), User.of(auth).getEmail(),
-                service.getService().getName(), actionType);
+        ServiceBundle service = resourceBundleService.auditResource(id, catalogueId, comment, actionType, auth);
+        logger.info("User '{}-{}' audited Service with name '{}' of the '{}' Catalogue - [actionType: {}]", User.of(auth).getFullName(), User.of(auth).getEmail(),
+                service.getService().getName(), service.getService().getCatalogueId(), actionType);
         return new ResponseEntity<>(service, HttpStatus.OK);
     }
 

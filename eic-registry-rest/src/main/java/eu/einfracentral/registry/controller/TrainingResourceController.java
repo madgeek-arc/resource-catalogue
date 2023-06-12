@@ -306,12 +306,13 @@ public class TrainingResourceController {
 
     @PatchMapping(path = "auditResource/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
-    public ResponseEntity<TrainingResourceBundle> auditResource(@PathVariable("id") String id, @RequestParam(required = false) String comment,
-                                                       @RequestParam LoggingInfo.ActionType actionType, @ApiIgnore Authentication auth) {
-        TrainingResourceBundle trainingResourceBundle = trainingResourceService.auditResource(id, comment, actionType, auth);
-        logger.info("User '{}-{}' audited Training Resource with title '{}' [actionType: {}]", User.of(auth).getFullName(), User.of(auth).getEmail(),
-                trainingResourceBundle.getTrainingResource().getTitle(), actionType);
-        return new ResponseEntity<>(trainingResourceBundle, HttpStatus.OK);
+    public ResponseEntity<TrainingResourceBundle> auditResource(@PathVariable("id") String id, @RequestParam("catalogueId") String catalogueId,
+                                                                @RequestParam(required = false) String comment,
+                                                                @RequestParam LoggingInfo.ActionType actionType, @ApiIgnore Authentication auth) {
+        TrainingResourceBundle trainingResource = trainingResourceService.auditResource(id, catalogueId, comment, actionType, auth);
+        logger.info("User '{}-{}' audited Training Resource with name '{}' of the '{}' Catalogue - [actionType: {}]", User.of(auth).getFullName(), User.of(auth).getEmail(),
+                trainingResource.getTrainingResource().getTitle(), trainingResource.getTrainingResource().getCatalogueId(), actionType);
+        return new ResponseEntity<>(trainingResource, HttpStatus.OK);
     }
 
 

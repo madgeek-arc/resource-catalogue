@@ -267,4 +267,24 @@ public class ProviderResourcesCommonMethods {
             }
         }
     }
+
+    public void auditResource(Bundle<?> bundle, String comment, LoggingInfo.ActionType actionType, Authentication auth) {
+        LoggingInfo loggingInfo;
+        List<LoggingInfo> loggingInfoList = new ArrayList<>();
+        if (bundle.getLoggingInfo() != null) {
+            loggingInfoList = bundle.getLoggingInfo();
+        } else {
+            LoggingInfo oldProviderRegistration = LoggingInfo.createLoggingInfoEntry(User.of(auth).getEmail(), User.of(auth).getFullName(), securityService.getRoleName(auth), LoggingInfo.Types.ONBOARD.getKey(),
+                    LoggingInfo.ActionType.REGISTERED.getKey());
+            loggingInfoList.add(oldProviderRegistration);
+        }
+
+        loggingInfo = LoggingInfo.createLoggingInfoEntry(User.of(auth).getEmail(), User.of(auth).getFullName(), securityService.getRoleName(auth), LoggingInfo.Types.AUDIT.getKey(),
+                actionType.getKey(), comment);
+        loggingInfoList.add(loggingInfo);
+        bundle.setLoggingInfo(loggingInfoList);
+
+        // latestAuditInfo
+        bundle.setLatestAuditInfo(loggingInfo);
+    }
 }

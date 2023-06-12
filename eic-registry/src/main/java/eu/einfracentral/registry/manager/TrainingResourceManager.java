@@ -545,31 +545,17 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
         return trainingResourceBundle;
     }
 
-    public TrainingResourceBundle auditResource(String trainingResourceId, String comment, LoggingInfo.ActionType actionType, Authentication auth) {
-        TrainingResourceBundle trainingResourceBundle = get(trainingResourceId, catalogueName);
-        User user = User.of(auth);
-        LoggingInfo loggingInfo;
-        List<LoggingInfo> loggingInfoList = new ArrayList<>();
-        if (trainingResourceBundle.getLoggingInfo() != null) {
-            loggingInfoList = trainingResourceBundle.getLoggingInfo();
-        } else {
-            LoggingInfo oldServiceRegistration = LoggingInfo.createLoggingInfoEntry(user.getEmail(), user.getFullName(), securityService.getRoleName(auth),
-                    LoggingInfo.Types.ONBOARD.getKey(), LoggingInfo.ActionType.REGISTERED.getKey());
-            loggingInfoList.add(oldServiceRegistration);
-        }
-
-        loggingInfo = LoggingInfo.createLoggingInfoEntry(user.getEmail(), user.getFullName(), securityService.getRoleName(auth), LoggingInfo.Types.AUDIT.getKey(), actionType.getKey(), comment);
-        loggingInfoList.add(loggingInfo);
-        trainingResourceBundle.setLoggingInfo(loggingInfoList);
-
-        // latestAuditInfo
-        trainingResourceBundle.setLatestAuditInfo(loggingInfo);
+    public TrainingResourceBundle auditResource(String trainingResourceId, String catalogueId, String comment, LoggingInfo.ActionType actionType, Authentication auth) {
+        TrainingResourceBundle trainingResource = get(trainingResourceId, catalogueId);
+        ProviderBundle provider = providerService.get(catalogueId, trainingResource.getTrainingResource().getResourceOrganisation(), auth);
+        commonMethods.auditResource(trainingResource, comment, actionType, auth);
 
         // send notification emails to Provider Admins
-        registrationMailService.notifyProviderAdminsForTrainingResourceAuditing(trainingResourceBundle);
+        registrationMailService.notifyProviderAdminsForBundleAuditing(trainingResource, "Training Resource",
+                trainingResource.getTrainingResource().getTitle(), provider.getProvider().getUsers());
 
-        logger.info("Auditing Resource: {}", trainingResourceBundle);
-        return update(trainingResourceBundle, auth);
+        logger.info(String.format("Auditing Training Resource [%s]-[%s]", catalogueId, trainingResourceId));
+        return super.update(trainingResource, auth);
     }
 
     @Override

@@ -466,31 +466,17 @@ public class DatasourceBundleManager extends AbstractResourceBundleManager<Datas
         return datasourceBundle;
     }
 
-    public DatasourceBundle auditResource(String resourceId, String comment, LoggingInfo.ActionType actionType, Authentication auth) {
-        DatasourceBundle resource = get(resourceId, catalogueName);
-        User user = User.of(auth);
-        LoggingInfo loggingInfo; // TODO: extract method
-        List<LoggingInfo> loggingInfoList = new ArrayList<>();
-        if (resource.getLoggingInfo() != null) {
-            loggingInfoList = resource.getLoggingInfo();
-        } else {
-            LoggingInfo oldServiceRegistration = LoggingInfo.createLoggingInfoEntry(user.getEmail(), user.getFullName(), securityService.getRoleName(auth),
-                    LoggingInfo.Types.ONBOARD.getKey(), LoggingInfo.ActionType.REGISTERED.getKey());
-            loggingInfoList.add(oldServiceRegistration);
-        }
-
-        loggingInfo = LoggingInfo.createLoggingInfoEntry(user.getEmail(), user.getFullName(), securityService.getRoleName(auth), LoggingInfo.Types.AUDIT.getKey(), actionType.getKey(), comment);
-        loggingInfoList.add(loggingInfo);
-        resource.setLoggingInfo(loggingInfoList);
-
-        // latestAuditInfo
-        resource.setLatestAuditInfo(loggingInfo);
+    public DatasourceBundle auditResource(String datasourceId, String catalogueId, String comment, LoggingInfo.ActionType actionType, Authentication auth) {
+        DatasourceBundle datasource = get(datasourceId, catalogueId);
+        ProviderBundle provider = providerService.get(catalogueId, datasource.getDatasource().getResourceOrganisation(), auth);
+        commonMethods.auditResource(datasource, comment, actionType, auth);
 
         // send notification emails to Provider Admins
-        registrationMailService.notifyProviderAdminsForResourceAuditing(resource);
+        registrationMailService.notifyProviderAdminsForBundleAuditing(datasource, "Datasource",
+                datasource.getDatasource().getName(), provider.getProvider().getUsers());
 
-        logger.info("Auditing Resource: {}", resource);
-        return super.update(resource, auth);
+        logger.info(String.format("Auditing Datasource [%s]-[%s]", catalogueId, datasourceId));
+        return super.update(datasource, auth);
     }
 
     @Override
