@@ -82,7 +82,7 @@ public class DatasourceController {
         return new ResponseEntity<>(resourceBundleService.get(id, catalogueId), HttpStatus.OK);
     }
 
-    @PutMapping(path = "bundle/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PutMapping(path = "bundle", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<DatasourceBundle> update(@RequestBody DatasourceBundle datasource, @ApiIgnore Authentication authentication) throws ResourceNotFoundException {
         ResponseEntity<DatasourceBundle> ret = new ResponseEntity<>(resourceBundleService.update(datasource, authentication), HttpStatus.OK);
