@@ -60,13 +60,13 @@ public abstract class AbstractSearchService extends SearchServiceImpl implements
             phrases.add(keyword);
 
             // create phrase query to match search phrase and quoted phrases
-            qBuilder.should(createPhraseQuery(searchFields, phrases, 4f, 1f));
+            qBuilder.should(createPhraseQuery(phrases, 4f, 1f));
 
             // split search phrase to keywords using delimiters
             List<String> longKeywords = new ArrayList<>();
             List<String> shortKeywords = new ArrayList<>();
             if (keyword.split("[\\s-_,./;:'\\[\\]]").length == 1) {
-                qBuilder.should(createMatchQuery(searchFields, Collections.singletonList(keyword), 1f, 0.5f));
+                qBuilder.should(createMatchQuery(Collections.singletonList(keyword), 1f, 0.5f));
             } else {
                 for (char delimiter : " -_,./;:'[]".toCharArray()) {
                     if (keyword.contains("" + delimiter)) {
@@ -83,12 +83,12 @@ public abstract class AbstractSearchService extends SearchServiceImpl implements
 
             // create fuzzy query for long keywords
             if (!longKeywords.isEmpty()) {
-                qBuilder.should(createMatchQuery(searchFields, longKeywords, 1f, 0.2f));
+                qBuilder.should(createMatchQuery(longKeywords, 1f, 0.2f));
             }
 
             // create fuzzy query for short keywords
             if (!shortKeywords.isEmpty()) {
-                qBuilder.should(createMatchQuery(searchFields, shortKeywords, 0.2f, 0.1f));
+                qBuilder.should(createMatchQuery(shortKeywords, 0.2f, 0.1f));
             }
 
             qBuilder.minimumShouldMatch(1);
@@ -115,14 +115,15 @@ public abstract class AbstractSearchService extends SearchServiceImpl implements
     /**
      * Creates a query for the keywords in all given search fields.
      *
-     * @param fields     The search fields.
+//     * @param fields     The search fields.
      * @param keywords   The search keywords.
      * @param boost      A multiplier for the score of the query (parameter of the {@link DisMaxQueryBuilder}).
      * @param tieBreaker (parameter of the {@link DisMaxQueryBuilder})
      * @return {@link DisMaxQueryBuilder}
      */
-    protected DisMaxQueryBuilder createMatchQuery(List<Object> fields, List<String> keywords, Float boost, Float tieBreaker) {
+    protected DisMaxQueryBuilder createMatchQuery(List<String> keywords, Float boost, Float tieBreaker) {
         DisMaxQueryBuilder qb = QueryBuilders.disMaxQuery();
+        List<Object> fields = createCustomSearchFields();
         for (Object field : fields) {
             for (String keyword : keywords) {
                 /*for (int i = 0; i < keyword.length(); i++) {
@@ -150,14 +151,15 @@ public abstract class AbstractSearchService extends SearchServiceImpl implements
     /**
      * Creates a phrase query for all the given phrases in all the given search fields.
      *
-     * @param fields     The search fields.
+//     * @param fields     The search fields.
      * @param phrases    The search phrases.
      * @param boost      A multiplier for the score of the query (parameter of the {@link DisMaxQueryBuilder}).
      * @param tieBreaker (parameter of the {@link DisMaxQueryBuilder})
      * @return {@link DisMaxQueryBuilder}
      */
-    protected DisMaxQueryBuilder createPhraseQuery(List<Object> fields, List<String> phrases, Float boost, Float tieBreaker) {
+    protected DisMaxQueryBuilder createPhraseQuery(List<String> phrases, Float boost, Float tieBreaker) {
         DisMaxQueryBuilder qb = QueryBuilders.disMaxQuery();
+        List<Object> fields = createCustomSearchFields();
         for (Object field : fields) {
             for (String phrase : phrases) {
                 qb.add(matchPhraseQuery((String) field, phrase));
@@ -166,5 +168,14 @@ public abstract class AbstractSearchService extends SearchServiceImpl implements
         qb.boost(boost);
         qb.tieBreaker(tieBreaker);
         return qb;
+    }
+
+    //TODO: Delete this when registry-core enables SEARCHABLE_AREA custom configuration
+    protected List<Object> createCustomSearchFields() {
+        List<Object> fields = new ArrayList<>();
+        fields.add("resource_internal_id");
+        fields.add("name");
+        fields.add("title"); //training_resource, interoperability_record
+        return fields;
     }
 }

@@ -68,8 +68,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     private final ProviderResourcesCommonMethods commonMethods;
 
     //TODO: maybe add description on DB and elastic too
-    private final String columnsOfInterest = "provider_id, name, abbreviation, affiliations, tags, areas_of_activity, esfri_domains, meril_scientific_subdomains," +
-            " networks, scientific_subdomains, societal_grand_challenges, structure_types, catalogue_id, hosting_legal_entity"; // variable with DB tables a keyword is been searched on
+    private final String columnsOfInterest = "provider_id, name"; // variable with DB tables a keyword is been searched on
 
     @Value("${project.catalogue.name}")
     private String catalogueName;
