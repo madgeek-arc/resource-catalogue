@@ -15,12 +15,12 @@ import io.swagger.annotations.ApiOperation;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
-import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
@@ -39,6 +39,8 @@ public class CatalogueController {
     private final TrainingResourceService<TrainingResourceBundle> trainingResourceService;
     private final InteroperabilityRecordService<InteroperabilityRecordBundle> interoperabilityRecordService;
     private final GenericResourceService genericResourceService;
+    @Value("${project.catalogue.name}")
+    private String catalogueName;
 
     @Autowired
     CatalogueController(CatalogueService<CatalogueBundle, Authentication> catalogueManager,
@@ -234,6 +236,9 @@ public class CatalogueController {
     @PutMapping(path = "suspend", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     public CatalogueBundle suspendCatalogue(@RequestParam String catalogueId, @RequestParam boolean suspend, @ApiIgnore Authentication auth) {
+        if (catalogueId.equalsIgnoreCase(catalogueName)) {
+            throw new ValidationException(String.format("You cannot suspend the [%s] Catalogue", catalogueName));
+        }
         return catalogueManager.suspend(catalogueId, suspend, auth);
     }
 
