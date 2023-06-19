@@ -508,6 +508,7 @@ public class ServiceController {
     }
 
     //front-end
+    @Deprecated
     @GetMapping(path = "isServiceOrDatasource")
     public ResponseEntity<String> isServiceOrDatasource(@RequestParam String resourceId, @RequestParam String catalogueId) {
         try {
