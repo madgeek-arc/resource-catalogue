@@ -46,7 +46,11 @@ public class FacetFilterUtils {
 
         // fill the variable with the rest of the filters
         for (Map.Entry<String, Object> ffEntry : filters.entrySet()) {
-            allFilters.put(ffEntry.getKey(), Collections.singletonList(ffEntry.getValue().toString()));
+            if (ffEntry.getValue() instanceof List) {
+                allFilters.put(ffEntry.getKey(), (List) ffEntry.getValue());
+            } else {
+                allFilters.put(ffEntry.getKey(), Collections.singletonList(ffEntry.getValue().toString()));
+            }
         }
 
         return allFilters;
@@ -115,6 +119,9 @@ public class FacetFilterUtils {
             ff.setOrderBy(sort);
         }
         ff.setFilter(params);
+        if (ff.getFilter().get("searchFields") == null) {
+            ff.addFilter("searchFields", List.of("resource_internal_id", "name", "title"));
+        }
         return ff;
     }
 
@@ -153,6 +160,9 @@ public class FacetFilterUtils {
             Map<String, Object> multiFilter = new LinkedHashMap<>();
             multiFilter.put(MULTI_FILTER, allRequestParams);
             facetFilter.setFilter(multiFilter);
+            if (facetFilter.getFilter().get("searchFields") == null) {
+                facetFilter.addFilter("searchFields", List.of("resource_internal_id", "name", "title"));
+            }
         }
         return facetFilter;
     }
