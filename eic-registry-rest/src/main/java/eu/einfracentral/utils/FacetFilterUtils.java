@@ -119,9 +119,6 @@ public class FacetFilterUtils {
             ff.setOrderBy(sort);
         }
         ff.setFilter(params);
-        if (ff.getFilter().get("searchFields") == null) {
-            ff.addFilter("searchFields", List.of("resource_internal_id", "name", "title"));
-        }
         return ff;
     }
 
@@ -160,9 +157,6 @@ public class FacetFilterUtils {
             Map<String, Object> multiFilter = new LinkedHashMap<>();
             multiFilter.put(MULTI_FILTER, allRequestParams);
             facetFilter.setFilter(multiFilter);
-            if (facetFilter.getFilter().get("searchFields") == null) {
-                facetFilter.addFilter("searchFields", List.of("resource_internal_id", "name", "title"));
-            }
         }
         return facetFilter;
     }

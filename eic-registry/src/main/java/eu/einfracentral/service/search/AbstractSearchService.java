@@ -40,7 +40,9 @@ public abstract class AbstractSearchService extends SearchServiceImpl implements
 
         List<Object> searchFields = allFilters.remove(FacetFilterUtils.SEARCH_FIELDS);
         if (searchFields == null || searchFields.isEmpty()) {
-            searchFields = Collections.singletonList(FacetFilterUtils.SEARCHABLE_AREA);
+            searchFields = Arrays.asList("resource_internal_id", "name", "title");
+            // TODO: enable when searchable_area is configurable
+            // searchFields = Collections.singletonList(FacetFilterUtils.SEARCHABLE_AREA);
         }
 
         if (filter.getKeyword() != null && !filter.getKeyword().equals("")) {
