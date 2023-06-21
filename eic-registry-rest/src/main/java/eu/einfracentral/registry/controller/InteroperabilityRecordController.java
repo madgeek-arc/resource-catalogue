@@ -27,6 +27,7 @@ import springfox.documentation.annotations.ApiIgnore;
 
 import javax.validation.Valid;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -191,15 +192,16 @@ public class InteroperabilityRecordController {
         return ResponseEntity.ok(loggingInfoHistory);
     }
 
+    @ApiOperation(value = "Returns the Related Resources of a specific Interoperability Record given its id.")
     @GetMapping(path = {"relatedResources/{id}"}, produces = {MediaType.APPLICATION_JSON_VALUE})
     public List<String> getAllInteroperabilityRecordRelatedResources(@PathVariable String id) {
         List<String> allInteroperabilityRecordRelatedResources = new ArrayList<>();
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(10000);
+        ff.addFilter("published", false);
         List<ResourceInteroperabilityRecordBundle> allResourceInteroperabilityRecords = resourceInteroperabilityRecordService.getAll(ff, null).getResults();
         for (ResourceInteroperabilityRecordBundle resourceInteroperabilityRecordBundle : allResourceInteroperabilityRecords){
-            if (resourceInteroperabilityRecordBundle.getResourceInteroperabilityRecord().getInteroperabilityRecordIds().contains(id)
-                    && !resourceInteroperabilityRecordBundle.getMetadata().isPublished()){
+            if (resourceInteroperabilityRecordBundle.getResourceInteroperabilityRecord().getInteroperabilityRecordIds().contains(id)){
                 allInteroperabilityRecordRelatedResources.add(resourceInteroperabilityRecordBundle.getResourceInteroperabilityRecord().getResourceId());
             }
         }

@@ -60,5 +60,6 @@ public interface CatalogueService<T, U extends Authentication> extends ResourceS
     <T, I extends ResourceCRUDService<T, Authentication>> void deleteCatalogueResources(String id, I service, Authentication auth);
 
     Paging<ProviderBundle> getAllCatalogueProviders(String catalogueId, Authentication auth);
+
     CatalogueBundle suspend(String catalogueId, boolean suspend, Authentication auth);
 }
