@@ -560,8 +560,8 @@ public class CatalogueController {
     @DeleteMapping(path = "{catalogueId}/trainingResource/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isCatalogueAdmin(#auth, #catalogueId)")
     public ResponseEntity<TrainingResource> deleteCatalogueTrainingResource(@PathVariable("catalogueId") String catalogueId,
-                                                                @PathVariable("id") String id,
-                                                                @ApiIgnore Authentication auth) throws ResourceNotFoundException {
+                                                                            @PathVariable("id") String id,
+                                                                            @ApiIgnore Authentication auth) throws ResourceNotFoundException {
         TrainingResourceBundle trainingResourceBundle = trainingResourceService.get(id, catalogueId);
         if (trainingResourceBundle == null) {
             return new ResponseEntity<>(HttpStatus.GONE);
@@ -619,8 +619,8 @@ public class CatalogueController {
     @DeleteMapping(path = "{catalogueId}/interoperabilityRecord/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or @securityService.isCatalogueAdmin(#auth, #catalogueId)")
     public ResponseEntity<InteroperabilityRecord> deleteCatalogueInteroperabilityRecord(@PathVariable("catalogueId") String catalogueId,
-                                                                            @PathVariable("id") String id,
-                                                                            @ApiIgnore Authentication auth) throws ResourceNotFoundException {
+                                                                                        @PathVariable("id") String id,
+                                                                                        @ApiIgnore Authentication auth) throws ResourceNotFoundException {
         InteroperabilityRecordBundle interoperabilityRecordBundle = interoperabilityRecordService.get(id, catalogueId);
         if (interoperabilityRecordBundle == null) {
             return new ResponseEntity<>(HttpStatus.GONE);
