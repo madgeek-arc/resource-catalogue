@@ -7,6 +7,6 @@
 )
 @XmlAccessorOrder(XmlAccessOrder.ALPHABETICAL)
 @XmlAccessorType(XmlAccessType.FIELD)
-package eu.einfracentral.domain.interoperabilityRecordInternalFields;
+package eu.einfracentral.domain.interoperabilityRecord.configurationTemplates;
 
 import javax.xml.bind.annotation.*;

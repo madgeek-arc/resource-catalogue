@@ -145,7 +145,7 @@ public interface TrainingResourceService<T> extends ResourceService<T, Authentic
      * @param auth
      * @return
      */
-    T auditResource(String resourceId, String comment, LoggingInfo.ActionType actionType, Authentication auth);
+    T auditResource(String resourceId, String catalogueId, String comment, LoggingInfo.ActionType actionType, Authentication auth);
 
     /**
      * @param ff
@@ -208,4 +208,5 @@ public interface TrainingResourceService<T> extends ResourceService<T, Authentic
     TrainingResourceBundle getOrElseReturnNull(String id, String catalogueId);
 
     T createPublicResource(T resource, Authentication auth);
+    TrainingResourceBundle suspend(String trainingResourceId, String catalogueId, boolean suspend, Authentication auth);
 }

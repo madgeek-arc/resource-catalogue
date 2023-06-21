@@ -10,7 +10,6 @@ import eu.einfracentral.registry.service.*;
 import eu.einfracentral.service.IdCreator;
 import eu.einfracentral.service.RegistrationMailService;
 import eu.einfracentral.service.SecurityService;
-import eu.einfracentral.utils.FacetFilterUtils;
 import eu.einfracentral.utils.ProviderResourcesCommonMethods;
 import eu.openminted.registry.core.domain.Browsing;
 import eu.openminted.registry.core.domain.FacetFilter;
@@ -98,6 +97,7 @@ public class DatasourceBundleManager extends AbstractResourceBundleManager<Datas
         } else { // add provider from external catalogue
             commonMethods.checkCatalogueIdConsistency(datasourceBundle, catalogueId);
         }
+        commonMethods.checkRelatedResourceIDsConsistency(datasourceBundle);
 
         ProviderBundle providerBundle = providerService.get(datasourceBundle.getDatasource().getCatalogueId(), datasourceBundle.getDatasource().getResourceOrganisation(), auth);
         if (providerBundle == null) {
@@ -199,6 +199,7 @@ public class DatasourceBundleManager extends AbstractResourceBundleManager<Datas
         } else {
             commonMethods.checkCatalogueIdConsistency(datasourceBundle, catalogueId);
         }
+        commonMethods.checkRelatedResourceIDsConsistency(datasourceBundle);
 
         logger.trace("User '{}' is attempting to update the Datasource with id '{}' of the Catalogue '{}'", auth, datasourceBundle.getDatasource().getId(), datasourceBundle.getDatasource().getCatalogueId());
         validate(datasourceBundle);
@@ -465,31 +466,17 @@ public class DatasourceBundleManager extends AbstractResourceBundleManager<Datas
         return datasourceBundle;
     }
 
-    public DatasourceBundle auditResource(String resourceId, String comment, LoggingInfo.ActionType actionType, Authentication auth) {
-        DatasourceBundle resource = get(resourceId, catalogueName);
-        User user = User.of(auth);
-        LoggingInfo loggingInfo; // TODO: extract method
-        List<LoggingInfo> loggingInfoList = new ArrayList<>();
-        if (resource.getLoggingInfo() != null) {
-            loggingInfoList = resource.getLoggingInfo();
-        } else {
-            LoggingInfo oldServiceRegistration = LoggingInfo.createLoggingInfoEntry(user.getEmail(), user.getFullName(), securityService.getRoleName(auth),
-                    LoggingInfo.Types.ONBOARD.getKey(), LoggingInfo.ActionType.REGISTERED.getKey());
-            loggingInfoList.add(oldServiceRegistration);
-        }
-
-        loggingInfo = LoggingInfo.createLoggingInfoEntry(user.getEmail(), user.getFullName(), securityService.getRoleName(auth), LoggingInfo.Types.AUDIT.getKey(), actionType.getKey(), comment);
-        loggingInfoList.add(loggingInfo);
-        resource.setLoggingInfo(loggingInfoList);
-
-        // latestAuditInfo
-        resource.setLatestAuditInfo(loggingInfo);
+    public DatasourceBundle auditResource(String datasourceId, String catalogueId, String comment, LoggingInfo.ActionType actionType, Authentication auth) {
+        DatasourceBundle datasource = get(datasourceId, catalogueId);
+        ProviderBundle provider = providerService.get(catalogueId, datasource.getDatasource().getResourceOrganisation(), auth);
+        commonMethods.auditResource(datasource, comment, actionType, auth);
 
         // send notification emails to Provider Admins
-        registrationMailService.notifyProviderAdminsForResourceAuditing(resource);
+        registrationMailService.notifyProviderAdminsForBundleAuditing(datasource, "Datasource",
+                datasource.getDatasource().getName(), provider.getProvider().getUsers());
 
-        logger.info("Auditing Resource: {}", resource);
-        return super.update(resource, auth);
+        logger.info(String.format("Auditing Datasource [%s]-[%s]", catalogueId, datasourceId));
+        return super.update(datasource, auth);
     }
 
     @Override
@@ -827,5 +814,13 @@ public class DatasourceBundleManager extends AbstractResourceBundleManager<Datas
     public DatasourceBundle createPublicResource(DatasourceBundle datasourceBundle, Authentication auth){
         publicDatasourceManager.add(datasourceBundle, auth);
         return datasourceBundle;
+    }
+
+    public DatasourceBundle suspend(String datasourceId, String catalogueId, boolean suspend, Authentication auth) {
+        DatasourceBundle datasourceBundle = get(datasourceId, catalogueId);
+        commonMethods.suspensionValidation(datasourceBundle, catalogueId,
+                datasourceBundle.getDatasource().getResourceOrganisation(), suspend, auth);
+        commonMethods.suspendResource(datasourceBundle, catalogueId, suspend, auth);
+        return super.update(datasourceBundle, auth);
     }
 }

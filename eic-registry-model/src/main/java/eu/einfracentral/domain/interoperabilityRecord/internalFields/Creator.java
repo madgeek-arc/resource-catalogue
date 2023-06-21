@@ -1,4 +1,4 @@
-package eu.einfracentral.domain.interoperabilityRecordInternalFields;
+package eu.einfracentral.domain.interoperabilityRecord.internalFields;
 
 import eu.einfracentral.annotation.FieldValidation;
 import io.swagger.annotations.ApiModelProperty;

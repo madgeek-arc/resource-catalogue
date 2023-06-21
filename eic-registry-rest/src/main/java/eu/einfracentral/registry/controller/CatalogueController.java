@@ -15,6 +15,7 @@ import io.swagger.annotations.ApiOperation;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -38,6 +39,8 @@ public class CatalogueController {
     private final TrainingResourceService<TrainingResourceBundle> trainingResourceService;
     private final InteroperabilityRecordService<InteroperabilityRecordBundle> interoperabilityRecordService;
     private final GenericResourceService genericResourceService;
+    @Value("${project.catalogue.name}")
+    private String catalogueName;
 
     @Autowired
     CatalogueController(CatalogueService<CatalogueBundle, Authentication> catalogueManager,
@@ -105,6 +108,7 @@ public class CatalogueController {
 
     @ApiOperation(value = "Get a list of all Catalogues in the Portal.")
     @ApiImplicitParams({
+            @ApiImplicitParam(name = "suspended", value = "Suspended", defaultValue = "false", dataType = "boolean", paramType = "query"),
             @ApiImplicitParam(name = "query", value = "Keyword to refine the search", dataType = "string", paramType = "query"),
             @ApiImplicitParam(name = "from", value = "Starting index in the result set", dataType = "string", paramType = "query"),
             @ApiImplicitParam(name = "quantity", value = "Quantity to be fetched", dataType = "string", paramType = "query"),
@@ -112,7 +116,8 @@ public class CatalogueController {
             @ApiImplicitParam(name = "orderField", value = "Order field", dataType = "string", paramType = "query")
     })
     @GetMapping(path = "all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    public ResponseEntity<Paging<Catalogue>> getAllCatalogues(@ApiIgnore @RequestParam Map<String, Object> allRequestParams, @ApiIgnore Authentication auth) {
+    public ResponseEntity<Paging<Catalogue>> getAllCatalogues(@ApiIgnore @RequestParam Map<String, Object> allRequestParams,
+                                                              @ApiIgnore Authentication auth) {
         FacetFilter ff = FacetFilterUtils.createFacetFilter(allRequestParams);
         List<Catalogue> catalogueList = new LinkedList<>();
         Paging<CatalogueBundle> catalogueBundlePaging = catalogueManager.getAll(ff, auth);
@@ -158,6 +163,7 @@ public class CatalogueController {
 
     // Filter a list of Catalogues based on a set of filters or get a list of all Catalogues in the Portal.
     @ApiImplicitParams({
+            @ApiImplicitParam(name = "suspended", value = "Suspended", defaultValue = "false", dataType = "boolean", paramType = "query"),
             @ApiImplicitParam(name = "query", value = "Keyword to refine the search", dataType = "string", paramType = "query"),
             @ApiImplicitParam(name = "from", value = "Starting index in the result set", dataType = "string", paramType = "query"),
             @ApiImplicitParam(name = "quantity", value = "Quantity to be fetched", dataType = "string", paramType = "query"),
@@ -169,6 +175,9 @@ public class CatalogueController {
     public ResponseEntity<Paging<CatalogueBundle>> getAllCatalogueBundles(@ApiIgnore @RequestParam Map<String, Object> allRequestParams, @ApiIgnore Authentication auth,
                                                                           @RequestParam(required = false) Set<String> status) {
         FacetFilter ff = new FacetFilter();
+        if (allRequestParams.get("suspended") != null) {
+            ff.addFilter("suspended", allRequestParams.get("suspended"));
+        }
         ff.setKeyword(allRequestParams.get("query") != null ? (String) allRequestParams.remove("query") : "");
         ff.setFrom(allRequestParams.get("from") != null ? Integer.parseInt((String) allRequestParams.remove("from")) : 0);
         ff.setQuantity(allRequestParams.get("quantity") != null ? Integer.parseInt((String) allRequestParams.remove("quantity")) : 10);
@@ -223,6 +232,16 @@ public class CatalogueController {
         return new ResponseEntity<>(catalogueBundle.getCatalogue(), HttpStatus.OK);
     }
 
+    @ApiOperation(value = "Suspends a Catalogue and all its resources")
+    @PutMapping(path = "suspend", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
+    public CatalogueBundle suspendCatalogue(@RequestParam String catalogueId, @RequestParam boolean suspend, @ApiIgnore Authentication auth) {
+        if (catalogueId.equalsIgnoreCase(catalogueName)) {
+            throw new ValidationException(String.format("You cannot suspend the [%s] Catalogue", catalogueName));
+        }
+        return catalogueManager.suspend(catalogueId, suspend, auth);
+    }
+
     //SECTION: PROVIDER
     @ApiOperation(value = "Returns the Provider of the specific Catalogue with the given id.")
     @GetMapping(path = "{catalogueId}/provider/{providerId}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
@@ -241,6 +260,7 @@ public class CatalogueController {
 
     @ApiOperation(value = "Filter a list of Providers based on a set of filters or get a list of all Providers in the Catalogue.")
     @ApiImplicitParams({
+            @ApiImplicitParam(name = "suspended", value = "Suspended", defaultValue = "false", dataType = "boolean", paramType = "query"),
             @ApiImplicitParam(name = "query", value = "Keyword to refine the search", dataType = "string", paramType = "query"),
             @ApiImplicitParam(name = "from", value = "Starting index in the result set", dataType = "string", paramType = "query"),
             @ApiImplicitParam(name = "quantity", value = "Quantity to be fetched", dataType = "string", paramType = "query"),
@@ -250,6 +270,7 @@ public class CatalogueController {
     @GetMapping(path = "{catalogueId}/provider/all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity<Paging<Provider>> getAllCatalogueProviders(@ApiIgnore @RequestParam Map<String, Object> allRequestParams, @PathVariable("catalogueId") String catalogueId, @ApiIgnore Authentication auth) {
         FacetFilter ff = FacetFilterUtils.createFacetFilter(allRequestParams);
+        ff.addFilter("published", "false");
         if (!catalogueId.equals("all")) {
             ff.addFilter("catalogue_id", catalogueId);
         }
@@ -539,8 +560,8 @@ public class CatalogueController {
     @DeleteMapping(path = "{catalogueId}/trainingResource/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isCatalogueAdmin(#auth, #catalogueId)")
     public ResponseEntity<TrainingResource> deleteCatalogueTrainingResource(@PathVariable("catalogueId") String catalogueId,
-                                                                @PathVariable("id") String id,
-                                                                @ApiIgnore Authentication auth) throws ResourceNotFoundException {
+                                                                            @PathVariable("id") String id,
+                                                                            @ApiIgnore Authentication auth) throws ResourceNotFoundException {
         TrainingResourceBundle trainingResourceBundle = trainingResourceService.get(id, catalogueId);
         if (trainingResourceBundle == null) {
             return new ResponseEntity<>(HttpStatus.GONE);
@@ -598,8 +619,8 @@ public class CatalogueController {
     @DeleteMapping(path = "{catalogueId}/interoperabilityRecord/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or @securityService.isCatalogueAdmin(#auth, #catalogueId)")
     public ResponseEntity<InteroperabilityRecord> deleteCatalogueInteroperabilityRecord(@PathVariable("catalogueId") String catalogueId,
-                                                                            @PathVariable("id") String id,
-                                                                            @ApiIgnore Authentication auth) throws ResourceNotFoundException {
+                                                                                        @PathVariable("id") String id,
+                                                                                        @ApiIgnore Authentication auth) throws ResourceNotFoundException {
         InteroperabilityRecordBundle interoperabilityRecordBundle = interoperabilityRecordService.get(id, catalogueId);
         if (interoperabilityRecordBundle == null) {
             return new ResponseEntity<>(HttpStatus.GONE);

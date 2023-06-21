@@ -1,6 +1,7 @@
 package eu.einfracentral.registry.manager;
 
 import eu.einfracentral.domain.Identifiers;
+import eu.einfracentral.domain.ResourceExtras;
 import eu.einfracentral.domain.ServiceBundle;
 import eu.einfracentral.exception.ResourceException;
 import eu.einfracentral.exception.ResourceNotFoundException;
@@ -72,7 +73,7 @@ public class PublicServiceManager extends AbstractPublicResourceManager<ServiceB
         updateResourceIdsToPublic(serviceBundle);
 
         serviceBundle.getMetadata().setPublished(true);
-        serviceBundle.getResourceExtras().setServiceType("service_type-service");
+        createResourceExtras(serviceBundle);
         ServiceBundle ret;
         logger.info(String.format("Service [%s] is being published with id [%s]", lowerLevelResourceId, serviceBundle.getId()));
         ret = super.add(serviceBundle, null);
@@ -114,6 +115,16 @@ public class PublicServiceManager extends AbstractPublicResourceManager<ServiceB
             logger.info("Sending JMS with topic 'service.delete'");
             jmsTopicTemplate.convertAndSend("service.delete", publicServiceBundle);
         } catch (ResourceException | ResourceNotFoundException ignore){
+        }
+    }
+
+    private void createResourceExtras(ServiceBundle serviceBundle){
+        if (serviceBundle.getResourceExtras() == null){
+            ResourceExtras resourceExtras = new ResourceExtras();
+            resourceExtras.setServiceType("service_type-service");
+            serviceBundle.setResourceExtras(resourceExtras);
+        } else {
+            serviceBundle.getResourceExtras().setServiceType("service_type-service");
         }
     }
 }

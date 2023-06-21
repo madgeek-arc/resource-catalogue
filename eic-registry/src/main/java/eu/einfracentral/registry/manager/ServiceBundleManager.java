@@ -8,7 +8,6 @@ import eu.einfracentral.registry.service.*;
 import eu.einfracentral.service.IdCreator;
 import eu.einfracentral.service.RegistrationMailService;
 import eu.einfracentral.service.SecurityService;
-import eu.einfracentral.utils.FacetFilterUtils;
 import eu.einfracentral.utils.ProviderResourcesCommonMethods;
 import eu.openminted.registry.core.domain.Browsing;
 import eu.openminted.registry.core.domain.FacetFilter;
@@ -93,6 +92,7 @@ public class ServiceBundleManager extends AbstractResourceBundleManager<ServiceB
         } else { // add provider from external catalogue
             commonMethods.checkCatalogueIdConsistency(serviceBundle, catalogueId);
         }
+        commonMethods.checkRelatedResourceIDsConsistency(serviceBundle);
 
         ProviderBundle providerBundle = providerService.get(serviceBundle.getService().getCatalogueId(), serviceBundle.getService().getResourceOrganisation(), auth);
         if (providerBundle == null) {
@@ -186,6 +186,7 @@ public class ServiceBundleManager extends AbstractResourceBundleManager<ServiceB
         } else {
             commonMethods.checkCatalogueIdConsistency(serviceBundle, catalogueId);
         }
+        commonMethods.checkRelatedResourceIDsConsistency(serviceBundle);
 
         logger.trace("User '{}' is attempting to update the Service with id '{}' of the Catalogue '{}'", auth, serviceBundle.getService().getId(), serviceBundle.getService().getCatalogueId());
         validate(serviceBundle);
@@ -450,30 +451,16 @@ public class ServiceBundleManager extends AbstractResourceBundleManager<ServiceB
         return service;
     }
 
-    public ServiceBundle auditResource(String serviceId, String comment, LoggingInfo.ActionType actionType, Authentication auth) {
-        ServiceBundle service = get(serviceId, catalogueName);
-        User user = User.of(auth);
-        LoggingInfo loggingInfo; // TODO: extract method
-        List<LoggingInfo> loggingInfoList = new ArrayList<>();
-        if (service.getLoggingInfo() != null) {
-            loggingInfoList = service.getLoggingInfo();
-        } else {
-            LoggingInfo oldServiceRegistration = LoggingInfo.createLoggingInfoEntry(user.getEmail(), user.getFullName(), securityService.getRoleName(auth),
-                    LoggingInfo.Types.ONBOARD.getKey(), LoggingInfo.ActionType.REGISTERED.getKey());
-            loggingInfoList.add(oldServiceRegistration);
-        }
-
-        loggingInfo = LoggingInfo.createLoggingInfoEntry(user.getEmail(), user.getFullName(), securityService.getRoleName(auth), LoggingInfo.Types.AUDIT.getKey(), actionType.getKey(), comment);
-        loggingInfoList.add(loggingInfo);
-        service.setLoggingInfo(loggingInfoList);
-
-        // latestAuditInfo
-        service.setLatestAuditInfo(loggingInfo);
+    public ServiceBundle auditResource(String serviceId, String catalogueId, String comment, LoggingInfo.ActionType actionType, Authentication auth) {
+        ServiceBundle service = get(serviceId, catalogueId);
+        ProviderBundle provider = providerService.get(catalogueId, service.getService().getResourceOrganisation(), auth);
+        commonMethods.auditResource(service, comment, actionType, auth);
 
         // send notification emails to Provider Admins
-        registrationMailService.notifyProviderAdminsForResourceAuditing(service);
+        registrationMailService.notifyProviderAdminsForBundleAuditing(service, "Service",
+                service.getService().getName(), provider.getProvider().getUsers());
 
-        logger.info("Auditing Resource: {}", service);
+        logger.info(String.format("Auditing Service [%s]-[%s]", catalogueId, serviceId));
         return super.update(service, auth);
     }
 
@@ -635,6 +622,14 @@ public class ServiceBundleManager extends AbstractResourceBundleManager<ServiceB
     public ServiceBundle createPublicResource(ServiceBundle serviceBundle, Authentication auth){
         publicServiceManager.add(serviceBundle, auth);
         return serviceBundle;
+    }
+
+    public ServiceBundle suspend(String serviceId, String catalogueId, boolean suspend, Authentication auth) {
+        ServiceBundle serviceBundle = get(serviceId, catalogueId);
+        commonMethods.suspensionValidation(serviceBundle, catalogueId,
+                serviceBundle.getService().getResourceOrganisation(), suspend, auth);
+        commonMethods.suspendResource(serviceBundle, catalogueId, suspend, auth);
+        return super.update(serviceBundle, auth);
     }
 
 }

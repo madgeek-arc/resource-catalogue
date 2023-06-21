@@ -137,7 +137,7 @@ public abstract class AbstractResourceBundleManager<T extends ResourceBundle<?>>
     private T checkIdExistanceInOtherCatalogues(String id) {
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(maxQuantity);
-        ff.addFilter(getResourceType() + "_id", id);
+        ff.addFilter("resource_internal_id", id);
         List<T> allResources = getAll(ff, null).getResults();
         if (allResources.size() > 0) {
             return allResources.get(0);
@@ -1101,7 +1101,7 @@ public abstract class AbstractResourceBundleManager<T extends ResourceBundle<?>>
         return allProviders.stream().map(Bundle::getId).collect(Collectors.toList());
     }
 
-    public T createResourceExtras(T resourceBundle, String serviceType){
+    public void createResourceExtras(T resourceBundle, String serviceType){
         if (resourceBundle.getResourceExtras() == null){
             ResourceExtras resourceExtras = new ResourceExtras();
             resourceExtras.setServiceType(serviceType);
@@ -1109,6 +1109,5 @@ public abstract class AbstractResourceBundleManager<T extends ResourceBundle<?>>
         } else {
             resourceBundle.getResourceExtras().setServiceType(serviceType);
         }
-        return resourceBundle;
     }
 }

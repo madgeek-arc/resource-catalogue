@@ -82,6 +82,14 @@ public class DatasourceController {
         return new ResponseEntity<>(resourceBundleService.get(id, catalogueId), HttpStatus.OK);
     }
 
+    @PutMapping(path = "bundle", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public ResponseEntity<DatasourceBundle> update(@RequestBody DatasourceBundle datasource, @ApiIgnore Authentication authentication) throws ResourceNotFoundException {
+        ResponseEntity<DatasourceBundle> ret = new ResponseEntity<>(resourceBundleService.update(datasource, authentication), HttpStatus.OK);
+        logger.info("User '{}' updated DatasourceBundle '{}' with id: {}", authentication, datasource.getDatasource().getName(), datasource.getDatasource().getId());
+        return ret;
+    }
+
     // Get the specified version of a RichResource providing the Datasource id
     @GetMapping(path = "rich/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("@securityService.datasourceIsActive(#id, #catalogueId) or hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') " +
@@ -130,6 +138,7 @@ public class DatasourceController {
 
     @ApiOperation(value = "Filter a list of Resources based on a set of filters or get a list of all Datasources in the Catalogue.")
     @ApiImplicitParams({
+            @ApiImplicitParam(name = "suspended", value = "Suspended", defaultValue = "false", dataType = "boolean", paramType = "query"),
             @ApiImplicitParam(name = "query", value = "Keyword to refine the search", dataType = "string", paramType = "query"),
             @ApiImplicitParam(name = "from", value = "Starting index in the result set", dataType = "string", paramType = "query"),
             @ApiImplicitParam(name = "quantity", value = "Quantity to be fetched", dataType = "string", paramType = "query"),
@@ -244,14 +253,15 @@ public class DatasourceController {
         return ResponseEntity.ok(resourceBundleService.publish(id, active, auth));
     }
 
-    @PatchMapping(path = "auditDatasource/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PatchMapping(path = "auditResource/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
-    public ResponseEntity<DatasourceBundle> auditDatasource(@PathVariable("id") String id, @RequestParam(required = false) String comment,
+    public ResponseEntity<DatasourceBundle> auditDatasource(@PathVariable("id") String id, @RequestParam("catalogueId") String catalogueId,
+                                                            @RequestParam(required = false) String comment,
                                                             @RequestParam LoggingInfo.ActionType actionType, @ApiIgnore Authentication auth) {
-        DatasourceBundle datasourceBundle = resourceBundleService.auditResource(id, comment, actionType, auth);
-        logger.info("User '{}-{}' audited Datasource with name '{}' [actionType: {}]", User.of(auth).getFullName(), User.of(auth).getEmail(),
-                datasourceBundle.getDatasource().getName(), actionType);
-        return new ResponseEntity<>(datasourceBundle, HttpStatus.OK);
+        DatasourceBundle datasource = resourceBundleService.auditResource(id, catalogueId, comment, actionType, auth);
+        logger.info("User '{}-{}' audited Datasource with name '{}' of the '{}' Catalogue - [actionType: {}]", User.of(auth).getFullName(), User.of(auth).getEmail(),
+                datasource.getDatasource().getName(), datasource.getDatasource().getCatalogueId(), actionType);
+        return new ResponseEntity<>(datasource, HttpStatus.OK);
     }
 
     @ApiImplicitParams({
@@ -278,6 +288,7 @@ public class DatasourceController {
     }
 
     @ApiImplicitParams({
+            @ApiImplicitParam(name = "suspended", value = "Suspended", defaultValue = "false", dataType = "boolean", paramType = "query"),
             @ApiImplicitParam(name = "query", value = "Keyword to refine the search", dataType = "string", paramType = "query"),
             @ApiImplicitParam(name = "from", value = "Starting index in the result set", dataType = "string", paramType = "query"),
             @ApiImplicitParam(name = "quantity", value = "Quantity to be fetched", dataType = "string", paramType = "query"),
@@ -347,5 +358,12 @@ public class DatasourceController {
         logger.info("User '{}-{}' attempts to create a Public Datasource from Datasource '{}'-'{}' of the '{}' Catalogue", User.of(auth).getFullName(),
                 User.of(auth).getEmail(), datasourceBundle.getId(), datasourceBundle.getDatasource().getName(), datasourceBundle.getDatasource().getCatalogueId());
         return ResponseEntity.ok(resourceBundleService.createPublicResource(datasourceBundle, auth));
+    }
+
+    @ApiOperation(value = "Suspends a specific Datasource.")
+    @PutMapping(path = "suspend", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
+    public DatasourceBundle suspendDatasource(@RequestParam String datasourceId, @RequestParam String catalogueId, @RequestParam boolean suspend, @ApiIgnore Authentication auth) {
+        return (DatasourceBundle) resourceBundleService.suspend(datasourceId, catalogueId, suspend, auth);
     }
 }

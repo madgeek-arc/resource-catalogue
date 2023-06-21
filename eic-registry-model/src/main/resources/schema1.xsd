@@ -11,6 +11,14 @@
     
   <xs:element name="catalogueBundle" type="tns:catalogueBundle"/>
     
+  <xs:element name="configurationTemplate" type="tns:configurationTemplate"/>
+    
+  <xs:element name="configurationTemplateBundle" type="tns:configurationTemplateBundle"/>
+    
+  <xs:element name="configurationTemplateInstance" type="tns:configurationTemplateInstance"/>
+    
+  <xs:element name="configurationTemplateInstanceBundle" type="tns:configurationTemplateInstanceBundle"/>
+    
   <xs:element name="creator" type="tns:creator"/>
     
   <xs:element name="creatorAffiliationInfo" type="tns:creatorAffiliationInfo"/>
@@ -3163,6 +3171,144 @@ that is the used scheme (e.g., Web Address URL, DOI, ARK, etc.).]]></xs:document
       <xs:element name="resourceType" type="xs:string"/>
             
       <xs:element name="userId" type="xs:string"/>
+          
+    </xs:sequence>
+      
+  </xs:complexType>
+    
+  <xs:complexType name="configurationTemplate">
+        
+    <xs:sequence>
+            
+      <xs:element name="description" type="xs:string"/>
+            
+      <xs:element name="formModel">
+                
+        <xs:complexType>
+                    
+          <xs:sequence>
+                        
+            <xs:element maxOccurs="unbounded" minOccurs="0" name="entry">
+                            
+              <xs:complexType>
+                                
+                <xs:sequence>
+                                    
+                  <xs:element minOccurs="0" name="key" type="xs:anyType"/>
+                                    
+                  <xs:element minOccurs="0" name="value" type="xs:anyType"/>
+                                  
+                </xs:sequence>
+                              
+              </xs:complexType>
+                          
+            </xs:element>
+                      
+          </xs:sequence>
+                  
+        </xs:complexType>
+              
+      </xs:element>
+            
+      <xs:element minOccurs="0" name="id" type="xs:string"/>
+            
+      <xs:element name="interoperabilityRecordId" type="xs:string"/>
+            
+      <xs:element name="name" type="xs:string"/>
+          
+    </xs:sequence>
+      
+  </xs:complexType>
+    
+  <xs:complexType name="configurationTemplateBundle">
+        
+    <xs:complexContent>
+            
+      <xs:extension base="tns:bundle">
+                
+        <xs:sequence>
+                    
+          <xs:element minOccurs="0" ref="tns:configurationTemplate"/>
+                  
+        </xs:sequence>
+              
+      </xs:extension>
+          
+    </xs:complexContent>
+      
+  </xs:complexType>
+    
+  <xs:complexType name="configurationTemplateInstance">
+        
+    <xs:sequence>
+            
+      <xs:element name="configurationTemplateId" type="xs:string"/>
+            
+      <xs:element minOccurs="0" name="id" type="xs:string"/>
+            
+      <xs:element name="payload" type="xs:string"/>
+            
+      <xs:element name="resourceId" type="xs:string"/>
+          
+    </xs:sequence>
+      
+  </xs:complexType>
+    
+  <xs:complexType name="configurationTemplateInstanceBundle">
+        
+    <xs:complexContent>
+            
+      <xs:extension base="tns:bundle">
+                
+        <xs:sequence>
+                    
+          <xs:element minOccurs="0" ref="tns:configurationTemplateInstance"/>
+                  
+        </xs:sequence>
+              
+      </xs:extension>
+          
+    </xs:complexContent>
+      
+  </xs:complexType>
+    
+  <xs:complexType name="configurationTemplateInstanceDto">
+        
+    <xs:sequence>
+            
+      <xs:element minOccurs="0" name="configurationTemplateId" type="xs:string"/>
+            
+      <xs:element minOccurs="0" name="id" type="xs:string"/>
+            
+      <xs:element name="payload">
+                
+        <xs:complexType>
+                    
+          <xs:sequence>
+                        
+            <xs:element maxOccurs="unbounded" minOccurs="0" name="entry">
+                            
+              <xs:complexType>
+                                
+                <xs:sequence>
+                                    
+                  <xs:element minOccurs="0" name="key" type="xs:string"/>
+                                    
+                  <xs:element minOccurs="0" name="value" type="xs:anyType"/>
+                                  
+                </xs:sequence>
+                              
+              </xs:complexType>
+                          
+            </xs:element>
+                      
+          </xs:sequence>
+                  
+        </xs:complexType>
+              
+      </xs:element>
+            
+      <xs:element minOccurs="0" name="resourceId" type="xs:string"/>
           
     </xs:sequence>
       

@@ -155,6 +155,9 @@ public class PendingDatasourceManager extends ResourceManager<DatasourceBundle> 
         // latestOnboardInfo
         datasourceBundle.setLatestOnboardingInfo(loggingInfo);
 
+        // serviceType
+        datasourceBundleManager.createResourceExtras(datasourceBundle, "service_type-datasource");
+
         // set resource status according to Provider's templateStatus
         if (providerManager.get(datasourceBundle.getDatasource().getResourceOrganisation()).getTemplateStatus().equals("approved template")){
             datasourceBundle.setStatus(vocabularyService.get("approved resource").getId());
