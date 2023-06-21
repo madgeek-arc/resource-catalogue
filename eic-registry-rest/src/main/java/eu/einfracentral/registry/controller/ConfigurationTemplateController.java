@@ -36,7 +36,7 @@ public class ConfigurationTemplateController {
     @ApiOperation(value = "Create a new ConfigurationTemplate.")
     @PostMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public ResponseEntity<ConfigurationTemplate> addConfigurationTemplate(@Valid @RequestBody ConfigurationTemplate configurationTemplate,
+    public ResponseEntity<ConfigurationTemplate> addConfigurationTemplate(@RequestBody ConfigurationTemplate configurationTemplate,
                                                                           @ApiIgnore Authentication auth) {
         ConfigurationTemplateBundle configurationTemplateBundle = configurationTemplateService.addConfigurationTemplate(new ConfigurationTemplateBundle(configurationTemplate), auth);
         logger.info("User '{}' added the Configuration Template Instance with id '{}'", auth.getName(), configurationTemplate.getId());

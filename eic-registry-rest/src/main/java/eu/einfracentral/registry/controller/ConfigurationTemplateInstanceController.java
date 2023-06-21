@@ -96,7 +96,7 @@ public class ConfigurationTemplateInstanceController {
     @ApiOperation(value = "Create a new ConfigurationTemplateInstance.")
     @PostMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public ResponseEntity<ConfigurationTemplateInstance> addConfigurationTemplateInstance(@Valid @RequestBody ConfigurationTemplateInstance configurationTemplateInstance,
+    public ResponseEntity<ConfigurationTemplateInstance> addConfigurationTemplateInstance(@RequestBody ConfigurationTemplateInstance configurationTemplateInstance,
                                                                           @ApiIgnore Authentication auth) {
         ConfigurationTemplateInstanceBundle configurationTemplateInstanceBundle = configurationTemplateInstanceService.add(new ConfigurationTemplateInstanceBundle(configurationTemplateInstance), auth);
         logger.info("User '{}' added the Configuration Template Instance with id '{}'", auth.getName(), configurationTemplateInstance.getId());
@@ -106,7 +106,7 @@ public class ConfigurationTemplateInstanceController {
     @ApiOperation(value = "Add a List of ConfigurationTemplateInstances.")
     @PostMapping(path ="addAll", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public ResponseEntity<List<ConfigurationTemplateInstance>> addConfigurationTemplateInstances(@Valid @RequestBody List<ConfigurationTemplateInstance> configurationTemplateInstances,
+    public ResponseEntity<List<ConfigurationTemplateInstance>> addConfigurationTemplateInstances(@RequestBody List<ConfigurationTemplateInstance> configurationTemplateInstances,
                                                                                           @ApiIgnore Authentication auth) {
         for (ConfigurationTemplateInstance configurationTemplateInstance : configurationTemplateInstances){
             configurationTemplateInstanceService.add(new ConfigurationTemplateInstanceBundle(configurationTemplateInstance), auth);
@@ -118,7 +118,7 @@ public class ConfigurationTemplateInstanceController {
     @ApiOperation(value = "Updates the ConfigurationTemplateInstance with the given id.")
     @PutMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public ResponseEntity<ConfigurationTemplateInstance> updateConfigurationTemplateInstance(@Valid @RequestBody ConfigurationTemplateInstance configurationTemplateInstance,
+    public ResponseEntity<ConfigurationTemplateInstance> updateConfigurationTemplateInstance(@RequestBody ConfigurationTemplateInstance configurationTemplateInstance,
                                                                              @ApiIgnore Authentication auth) throws ResourceNotFoundException {
         ConfigurationTemplateInstanceBundle configurationTemplateInstanceBundle = configurationTemplateInstanceService.get(configurationTemplateInstance.getId());
         configurationTemplateInstanceBundle.setConfigurationTemplateInstance(configurationTemplateInstance);
