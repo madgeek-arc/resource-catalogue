@@ -1,11 +1,12 @@
 package eu.einfracentral.registry.controller;
 
+import eu.einfracentral.annotations.Browse;
 import eu.einfracentral.domain.*;
 import eu.einfracentral.exception.ResourceException;
 import eu.einfracentral.exception.ValidationException;
+import eu.einfracentral.registry.service.PendingResourceService;
 import eu.einfracentral.registry.service.ProviderService;
 import eu.einfracentral.registry.service.ResourceBundleService;
-import eu.einfracentral.registry.service.PendingResourceService;
 import eu.einfracentral.service.IdCreator;
 import eu.einfracentral.utils.FacetFilterUtils;
 import eu.openminted.registry.core.domain.FacetFilter;
@@ -13,8 +14,6 @@ import eu.openminted.registry.core.domain.Paging;
 import eu.openminted.registry.core.exception.ResourceNotFoundException;
 import eu.openminted.registry.core.service.ServiceException;
 import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiImplicitParams;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,9 +42,9 @@ public class PendingDatasourceController extends ResourceController<DatasourceBu
 
     @Autowired
     PendingDatasourceController(PendingResourceService<DatasourceBundle> pendingDatasourceManager,
-                             ResourceBundleService<DatasourceBundle> resourceBundleService,
-                             ProviderService<ProviderBundle, Authentication> providerService,
-                             IdCreator idCreator) {
+                                ResourceBundleService<DatasourceBundle> resourceBundleService,
+                                ProviderService<ProviderBundle, Authentication> providerService,
+                                IdCreator idCreator) {
         super(pendingDatasourceManager);
         this.pendingDatasourceManager = pendingDatasourceManager;
         this.resourceBundleService = resourceBundleService;
@@ -72,13 +71,7 @@ public class PendingDatasourceController extends ResourceController<DatasourceBu
         return new ResponseEntity<>((RichResource) pendingDatasourceManager.getPendingRich(id, auth), HttpStatus.OK);
     }
 
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "query", value = "Keyword to refine the search", dataType = "string", paramType = "query"),
-            @ApiImplicitParam(name = "from", value = "Starting index in the result set", dataType = "string", paramType = "query"),
-            @ApiImplicitParam(name = "quantity", value = "Quantity to be fetched", dataType = "string", paramType = "query"),
-            @ApiImplicitParam(name = "order", value = "asc / desc", dataType = "string", paramType = "query"),
-            @ApiImplicitParam(name = "orderField", value = "Order field", dataType = "string", paramType = "query")
-    })
+    @Browse
     @GetMapping(path = "/byProvider/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isProviderAdmin(#auth,#id,true)")
     public ResponseEntity<Paging<DatasourceBundle>> getProviderPendingDatasources(@ApiIgnore @RequestParam MultiValueMap<String, Object> allRequestParams, @PathVariable String id, @ApiIgnore Authentication auth) {
@@ -164,7 +157,7 @@ public class PendingDatasourceController extends ResourceController<DatasourceBu
         // check Provider's template status -> block transform if it's on 'pending' state
         String resourceOrgranisation = datasource.getResourceOrganisation();
         ProviderBundle providerBundle = providerService.get(resourceOrgranisation);
-        if (providerBundle.getTemplateStatus().equals("pending template")){
+        if (providerBundle.getTemplateStatus().equals("pending template")) {
             throw new ValidationException(String.format("There is already a Resource waiting to be approved for the Provider [%s]", resourceOrgranisation));
         }
 
@@ -172,7 +165,7 @@ public class PendingDatasourceController extends ResourceController<DatasourceBu
             datasourceBundle = resourceBundleService.addResource(new DatasourceBundle(datasource), auth);
             logger.info("User '{}' added Datasource:\n{}", auth.getName(), datasourceBundle);
         } else { // else update Pending Datasource and transform it to Active Datasource
-            if (datasourceBundle.getDatasource().getVersion() != null && datasourceBundle.getDatasource().getVersion().equals("")){
+            if (datasourceBundle.getDatasource().getVersion() != null && datasourceBundle.getDatasource().getVersion().equals("")) {
                 datasourceBundle.getDatasource().setVersion(null);
             }
             datasourceBundle.setDatasource(datasource); // important to keep other fields of DatasourceBundle

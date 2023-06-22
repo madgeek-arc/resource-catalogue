@@ -1,10 +1,10 @@
 package eu.einfracentral.registry.controller;
 
 import com.google.gson.Gson;
-import eu.einfracentral.domain.ServiceBundle;
 import eu.einfracentral.domain.ProviderBundle;
-import eu.einfracentral.registry.service.ResourceBundleService;
+import eu.einfracentral.domain.ServiceBundle;
 import eu.einfracentral.registry.service.ProviderService;
+import eu.einfracentral.registry.service.ResourceBundleService;
 import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.domain.Paging;
 import org.apache.logging.log4j.LogManager;
@@ -79,8 +79,8 @@ public class CSVController {
         rows[0] = "id;abbreviation;name;" + String.join(";", header);
         for (int i = 1; i < rows.length; i++) {
             rows[i] = replaceDelimiters(rows[i], ',', ';');
-            rows[i] = String.format("%s;%s;%s;%s", list.get(i-1).getId(), list.get(i-1).getProvider().getAbbreviation(),
-                    list.get(i-1).getProvider().getName(), rows[i]);
+            rows[i] = String.format("%s;%s;%s;%s", list.get(i - 1).getId(), list.get(i - 1).getProvider().getAbbreviation(),
+                    list.get(i - 1).getProvider().getName(), rows[i]);
         }
         return String.join("\n", rows);
     }
@@ -92,7 +92,7 @@ public class CSVController {
         rows[0] = "id;name;" + String.join(";", header);
         for (int i = 1; i < rows.length; i++) {
             rows[i] = replaceDelimiters(rows[i], ',', ';');
-            rows[i] = String.format("%s;%s;%s", list.get(i-1).getId(), list.get(i-1).getService().getName(), rows[i]);
+            rows[i] = String.format("%s;%s;%s", list.get(i - 1).getId(), list.get(i - 1).getService().getName(), rows[i]);
         }
         return String.join("\n", rows);
     }
@@ -104,9 +104,9 @@ public class CSVController {
         // instead wait for the closing counterpart }" and after that replace all delimiters found.
         boolean openedField = false;
         for (int i = 1; i < row.length(); i++) {
-            if (!openedField && rowInChars[i-1] == '"' && rowInChars[i] == '{') {
+            if (!openedField && rowInChars[i - 1] == '"' && rowInChars[i] == '{') {
                 openedField = true;
-            } else if (openedField && rowInChars[i-1] == '}' && rowInChars[i] == '"') {
+            } else if (openedField && rowInChars[i - 1] == '}' && rowInChars[i] == '"') {
                 openedField = false;
             } else if (!openedField && rowInChars[i] == delimiter) {
                 rowInChars[i] = newDelimiter;

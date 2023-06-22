@@ -1,5 +1,6 @@
 package eu.einfracentral.registry.controller;
 
+import eu.einfracentral.annotations.Browse;
 import eu.einfracentral.domain.*;
 import eu.einfracentral.exception.ValidationException;
 import eu.einfracentral.registry.service.ProviderService;
@@ -60,13 +61,13 @@ public class TrainingResourceController {
     @DeleteMapping(path = {"{id}"}, produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth, #id)")
     public ResponseEntity<TrainingResourceBundle> delete(@PathVariable("id") String id,
-                                                @RequestParam(defaultValue = "${project.catalogue.name}", name = "catalogue_id") String catalogueId,
-                                                @ApiIgnore Authentication auth) throws ResourceNotFoundException {
+                                                         @RequestParam(defaultValue = "${project.catalogue.name}", name = "catalogue_id") String catalogueId,
+                                                         @ApiIgnore Authentication auth) throws ResourceNotFoundException {
         TrainingResourceBundle trainingResourceBundle;
         trainingResourceBundle = trainingResourceService.get(id, catalogueId);
 
         // Block users of deleting Services of another Catalogue
-        if (!trainingResourceBundle.getTrainingResource().getCatalogueId().equals(catalogueName)){
+        if (!trainingResourceBundle.getTrainingResource().getCatalogueId().equals(catalogueName)) {
             throw new ValidationException("You cannot delete a Training Resource of a non EOSC Catalogue.");
         }
         //TODO: Maybe return Provider's template status to 'no template status' if this was its only TR
@@ -111,7 +112,7 @@ public class TrainingResourceController {
     @PatchMapping(path = "verifyTrainingResource/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     public ResponseEntity<TrainingResourceBundle> verifyTrainingResource(@PathVariable("id") String id, @RequestParam(required = false) Boolean active,
-                                                        @RequestParam(required = false) String status, @ApiIgnore Authentication auth) {
+                                                                         @RequestParam(required = false) String status, @ApiIgnore Authentication auth) {
         TrainingResourceBundle trainingResourceBundle = trainingResourceService.verifyResource(id, status, active, auth);
         logger.info("User '{}' updated Training Resource with title '{}' [status: {}] [active: {}]", auth, trainingResourceBundle.getTrainingResource().getTitle(), status, active);
         return new ResponseEntity<>(trainingResourceBundle, HttpStatus.OK);
@@ -126,18 +127,12 @@ public class TrainingResourceController {
     }
 
     @ApiOperation(value = "Filter a list of Training Resources based on a set of filters or get a list of all Training Resources in the Catalogue.")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "suspended", value = "Suspended", defaultValue = "false", dataType = "boolean", paramType = "query"),
-            @ApiImplicitParam(name = "query", value = "Keyword to refine the search", dataType = "string", paramType = "query"),
-            @ApiImplicitParam(name = "from", value = "Starting index in the result set", dataType = "string", paramType = "query"),
-            @ApiImplicitParam(name = "quantity", value = "Quantity to be fetched", dataType = "string", paramType = "query"),
-            @ApiImplicitParam(name = "order", value = "asc / desc", dataType = "string", paramType = "query"),
-            @ApiImplicitParam(name = "orderField", value = "Order field", dataType = "string", paramType = "query")
-    })
+    @Browse
+    @ApiImplicitParam(name = "suspended", value = "Suspended", defaultValue = "false", dataType = "boolean", paramType = "query")
     @GetMapping(path = "all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity<Paging<TrainingResource>> getAllTrainingResources(@RequestParam(defaultValue = "all", name = "catalogue_id") String catalogueIds,
-                                                          @ApiIgnore @RequestParam MultiValueMap<String, Object> allRequestParams,
-                                                          @ApiIgnore Authentication authentication) {
+                                                                            @ApiIgnore @RequestParam MultiValueMap<String, Object> allRequestParams,
+                                                                            @ApiIgnore Authentication authentication) {
         allRequestParams.addIfAbsent("catalogue_id", catalogueIds);
         if (catalogueIds != null && catalogueIds.equals("all")) {
             allRequestParams.remove("catalogue_id");
@@ -172,7 +167,7 @@ public class TrainingResourceController {
 
     @ApiOperation(value = "Get all Training Resources in the catalogue organized by an attribute, e.g. get Training Resources organized in categories.")
     @GetMapping(path = "by/{field}", produces = {MediaType.APPLICATION_JSON_VALUE})
-    public ResponseEntity<Map<String, List<TrainingResource>>> getTrainingResourcesBy(@PathVariable (value = "field") Service.Field field, @ApiIgnore Authentication auth) throws NoSuchFieldException {
+    public ResponseEntity<Map<String, List<TrainingResource>>> getTrainingResourcesBy(@PathVariable(value = "field") Service.Field field, @ApiIgnore Authentication auth) throws NoSuchFieldException {
         Map<String, List<TrainingResourceBundle>> results;
         try {
             results = trainingResourceService.getBy(field.getKey(), auth);
@@ -193,18 +188,12 @@ public class TrainingResourceController {
     }
 
     // FIXME: active parameter for EPOT/ADMINS doesn't work, we always return everything to them
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "query", value = "Keyword to refine the search", dataType = "string", paramType = "query"),
-            @ApiImplicitParam(name = "from", value = "Starting index in the result set", dataType = "string", paramType = "query"),
-            @ApiImplicitParam(name = "quantity", value = "Quantity to be fetched", dataType = "string", paramType = "query"),
-            @ApiImplicitParam(name = "order", value = "asc / desc", dataType = "string", paramType = "query"),
-            @ApiImplicitParam(name = "orderField", value = "Order field", dataType = "string", paramType = "query")
-    })
+    @Browse
     @GetMapping(path = "byProvider/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
 //    @PreAuthorize("hasRole('ROLE_ADMIN') or @securityService.isProviderAdmin(#auth,#id,#catalogueId)")
     public ResponseEntity<Paging<TrainingResourceBundle>> getTrainingResourcesByProvider(@ApiIgnore @RequestParam MultiValueMap<String, Object> allRequestParams,
-                                                                       @RequestParam(defaultValue = "${project.catalogue.name}", name = "catalogue_id") String catalogueId,
-                                                                       @PathVariable String id, @ApiIgnore Authentication auth) {
+                                                                                         @RequestParam(defaultValue = "${project.catalogue.name}", name = "catalogue_id") String catalogueId,
+                                                                                         @PathVariable String id, @ApiIgnore Authentication auth) {
         allRequestParams.addIfAbsent("catalogue_id", catalogueId);
         if (catalogueId != null && catalogueId.equals("all")) {
             allRequestParams.remove("catalogue_id");
@@ -215,13 +204,7 @@ public class TrainingResourceController {
         return ResponseEntity.ok(trainingResourceService.getAll(ff, auth));
     }
 
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "query", value = "Keyword to refine the search", dataType = "string", paramType = "query"),
-            @ApiImplicitParam(name = "from", value = "Starting index in the result set", dataType = "string", paramType = "query"),
-            @ApiImplicitParam(name = "quantity", value = "Quantity to be fetched", dataType = "string", paramType = "query"),
-            @ApiImplicitParam(name = "order", value = "asc / desc", dataType = "string", paramType = "query"),
-            @ApiImplicitParam(name = "orderField", value = "Order field", dataType = "string", paramType = "query")
-    })
+    @Browse
     @GetMapping(path = "byCatalogue/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isCatalogueAdmin(#auth,#id)")
     public ResponseEntity<Paging<TrainingResourceBundle>> getTrainingResourcesByCatalogue(@ApiIgnore @RequestParam MultiValueMap<String, Object> allRequestParams, @RequestParam(required = false) Boolean active, @PathVariable String id, @ApiIgnore Authentication auth) {
@@ -232,13 +215,7 @@ public class TrainingResourceController {
     }
 
     // Filter a list of inactive Training Resources based on a set of filters or get a list of all inactive Training Resource in the Catalogue.
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "query", value = "Keyword to refine the search", dataType = "string", paramType = "query"),
-            @ApiImplicitParam(name = "from", value = "Starting index in the result set", dataType = "string", paramType = "query"),
-            @ApiImplicitParam(name = "quantity", value = "Quantity to be fetched", dataType = "string", paramType = "query"),
-            @ApiImplicitParam(name = "order", value = "asc / desc", dataType = "string", paramType = "query"),
-            @ApiImplicitParam(name = "orderField", value = "Order field", dataType = "string", paramType = "query")
-    })
+    @Browse
     @GetMapping(path = "inactive/all", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<Paging<TrainingResource>> getInactiveTrainingResources(@ApiIgnore @RequestParam MultiValueMap<String, Object> allRequestParams, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
         FacetFilter ff = FacetFilterUtils.createMultiFacetFilter(allRequestParams);
@@ -275,20 +252,14 @@ public class TrainingResourceController {
     }
 
     // FIXME: query doesn't work when auditState != null.
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "suspended", value = "Suspended", defaultValue = "false", dataType = "boolean", paramType = "query"),
-            @ApiImplicitParam(name = "query", value = "Keyword to refine the search", dataType = "string", paramType = "query"),
-            @ApiImplicitParam(name = "from", value = "Starting index in the result set", dataType = "string", paramType = "query"),
-            @ApiImplicitParam(name = "quantity", value = "Quantity to be fetched", dataType = "string", paramType = "query"),
-            @ApiImplicitParam(name = "order", value = "asc / desc", dataType = "string", paramType = "query"),
-            @ApiImplicitParam(name = "orderField", value = "Order field", dataType = "string", paramType = "query")
-    })
+    @Browse
+    @ApiImplicitParam(name = "suspended", value = "Suspended", defaultValue = "false", dataType = "boolean", paramType = "query")
     @GetMapping(path = "adminPage/all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     public ResponseEntity<Paging<TrainingResourceBundle>> getAllTrainingResourcesForAdminPage(@ApiIgnore @RequestParam MultiValueMap<String, Object> allRequestParams,
-                                                                            @RequestParam(required = false) Set<String> auditState,
-                                                                            @RequestParam(defaultValue = "all", name = "catalogue_id") String catalogueId,
-                                                                            @ApiIgnore Authentication authentication) {
+                                                                                              @RequestParam(required = false) Set<String> auditState,
+                                                                                              @RequestParam(defaultValue = "all", name = "catalogue_id") String catalogueId,
+                                                                                              @ApiIgnore Authentication authentication) {
 
         allRequestParams.addIfAbsent("catalogue_id", catalogueId);
         if (catalogueId != null && catalogueId.equals("all")) {
@@ -353,13 +324,7 @@ public class TrainingResourceController {
         trainingResourceService.changeProvider(resourceId, newProvider, comment, authentication);
     }
 
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "query", value = "Keyword to refine the search", dataType = "string", paramType = "query"),
-            @ApiImplicitParam(name = "from", value = "Starting index in the result set", dataType = "string", paramType = "query"),
-            @ApiImplicitParam(name = "quantity", value = "Quantity to be fetched", dataType = "string", paramType = "query"),
-            @ApiImplicitParam(name = "order", value = "asc / desc", dataType = "string", paramType = "query"),
-            @ApiImplicitParam(name = "orderField", value = "Order field", dataType = "string", paramType = "query")
-    })
+    @Browse
     @GetMapping(path = "getSharedResources/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or @securityService.isProviderAdmin(#auth,#id)")
     public ResponseEntity<Paging<TrainingResourceBundle>> getSharedResources(@ApiIgnore @RequestParam MultiValueMap<String, Object> allRequestParams, @PathVariable String id, @ApiIgnore Authentication auth) {

@@ -1,15 +1,19 @@
 package eu.einfracentral.registry.controller;
 
-import eu.einfracentral.domain.*;
+import eu.einfracentral.domain.Bundle;
+import eu.einfracentral.domain.DatasourceBundle;
+import eu.einfracentral.domain.ServiceBundle;
+import eu.einfracentral.domain.TrainingResourceBundle;
 import eu.einfracentral.registry.service.ResourceBundleService;
 import eu.einfracentral.registry.service.TrainingResourceService;
 import io.swagger.annotations.Api;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.Authentication;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 import springfox.documentation.annotations.ApiIgnore;
 
 @RestController

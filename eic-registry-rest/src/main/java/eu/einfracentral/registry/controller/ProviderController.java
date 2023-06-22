@@ -1,13 +1,13 @@
 package eu.einfracentral.registry.controller;
 
-import eu.einfracentral.domain.*;
+import eu.einfracentral.annotations.Browse;
 import eu.einfracentral.domain.ResourceBundle;
-import eu.einfracentral.domain.ServiceBundle;
+import eu.einfracentral.domain.*;
 import eu.einfracentral.exception.ResourceException;
 import eu.einfracentral.exception.ValidationException;
-import eu.einfracentral.registry.service.ResourceBundleService;
 import eu.einfracentral.registry.service.MigrationService;
 import eu.einfracentral.registry.service.ProviderService;
+import eu.einfracentral.registry.service.ResourceBundleService;
 import eu.einfracentral.registry.service.TrainingResourceService;
 import eu.einfracentral.service.SecurityService;
 import eu.einfracentral.utils.FacetFilterUtils;
@@ -79,7 +79,7 @@ public class ProviderController {
             return new ResponseEntity<>(HttpStatus.GONE);
         }
         // Block users of deleting Providers of another Catalogue
-        if (!provider.getProvider().getCatalogueId().equals(catalogueName)){
+        if (!provider.getProvider().getCatalogueId().equals(catalogueName)) {
             throw new ValidationException("You cannot delete a Provider of a non EOSC Catalogue.");
         }
         logger.info("Deleting provider: {} of the catalogue: {}", provider.getProvider().getName(), provider.getProvider().getCatalogueId());
@@ -144,14 +144,8 @@ public class ProviderController {
     }
 
     @ApiOperation(value = "Filter a list of Providers based on a set of filters or get a list of all Providers in the Catalogue.")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "suspended", value = "Suspended", defaultValue = "false", dataType = "boolean", paramType = "query"),
-            @ApiImplicitParam(name = "query", value = "Keyword to refine the search", dataType = "string", paramType = "query"),
-            @ApiImplicitParam(name = "from", value = "Starting index in the result set", dataType = "string", paramType = "query"),
-            @ApiImplicitParam(name = "quantity", value = "Quantity to be fetched", dataType = "string", paramType = "query"),
-            @ApiImplicitParam(name = "order", value = "asc / desc", dataType = "string", paramType = "query"),
-            @ApiImplicitParam(name = "orderField", value = "Order field", dataType = "string", paramType = "query")
-    })
+    @Browse
+    @ApiImplicitParam(name = "suspended", value = "Suspended", defaultValue = "false", dataType = "boolean", paramType = "query")
     @GetMapping(path = "all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity<Paging<Provider>> getAll(@ApiIgnore @RequestParam Map<String, Object> allRequestParams,
                                                    @RequestParam(defaultValue = "all", name = "catalogue_id") String catalogueIds,
@@ -181,14 +175,8 @@ public class ProviderController {
     }
 
     // Filter a list of Providers based on a set of filters or get a list of all Providers in the Catalogue.
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "suspended", value = "Suspended", defaultValue = "false", dataType = "boolean", paramType = "query"),
-            @ApiImplicitParam(name = "query", value = "Keyword to refine the search", dataType = "string", paramType = "query"),
-            @ApiImplicitParam(name = "from", value = "Starting index in the result set", dataType = "string", paramType = "query"),
-            @ApiImplicitParam(name = "quantity", value = "Quantity to be fetched", dataType = "string", paramType = "query"),
-            @ApiImplicitParam(name = "order", value = "asc / desc", dataType = "string", paramType = "query"),
-            @ApiImplicitParam(name = "orderField", value = "Order field", dataType = "string", paramType = "query")
-    })
+    @Browse
+    @ApiImplicitParam(name = "suspended", value = "Suspended", defaultValue = "false", dataType = "boolean", paramType = "query")
     @GetMapping(path = "bundle/all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     public ResponseEntity<Paging<ProviderBundle>> getAllProviderBundles(@ApiIgnore @RequestParam Map<String, Object> allRequestParams, @ApiIgnore Authentication auth,
@@ -221,10 +209,10 @@ public class ProviderController {
             if (catalogue_id.contains("all")) {
                 catalogueNameToSet.add("all");
                 ff.addFilter("catalogue_id", catalogueNameToSet);
-            } else{
+            } else {
                 ff.addFilter("catalogue_id", catalogue_id);
             }
-        } else{
+        } else {
             catalogueNameToSet.add(catalogueName);
             ff.addFilter("catalogue_id", catalogueNameToSet);
         }
@@ -233,14 +221,14 @@ public class ProviderController {
         List<Map<String, Object>> records = providerService.createQueryForProviderFilters(ff, orderDirection, orderField);
         List<ProviderBundle> ret = new ArrayList<>();
         Paging<ProviderBundle> retPaging = providerService.getAll(ff, auth);
-        if (records != null && !records.isEmpty()){
-            for (Map<String, Object> record : records){
+        if (records != null && !records.isEmpty()) {
+            for (Map<String, Object> record : records) {
                 ret.add(providerService.get((String) record.get("catalogue_id"), (String) record.get("provider_id"), auth));
             }
         }
-        if (auditState == null){
+        if (auditState == null) {
             return ResponseEntity.ok(providerService.createCorrectQuantityFacets(ret, retPaging, ff.getQuantity(), ff.getFrom()));
-        } else{
+        } else {
             Paging<ProviderBundle> retWithAuditState = providerService.determineAuditState(auditState, ff, ret, auth);
             return ResponseEntity.ok(retWithAuditState);
         }
@@ -258,13 +246,7 @@ public class ProviderController {
         return new ResponseEntity<>(datasourceBundleService.getResources(id, auth), HttpStatus.OK);
     }
 
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "query", value = "Keyword to refine the search", dataType = "string", paramType = "query"),
-            @ApiImplicitParam(name = "from", value = "Starting index in the result set", dataType = "string", paramType = "query"),
-            @ApiImplicitParam(name = "quantity", value = "Quantity to be fetched", dataType = "string", paramType = "query"),
-            @ApiImplicitParam(name = "order", value = "asc / desc", dataType = "string", paramType = "query"),
-            @ApiImplicitParam(name = "orderField", value = "Order field", dataType = "string", paramType = "query")
-    })
+    @Browse
     @GetMapping(path = "byCatalogue/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isCatalogueAdmin(#auth,#id)")
     public ResponseEntity<Paging<ProviderBundle>> getProvidersByCatalogue(@ApiIgnore @RequestParam Map<String, Object> allRequestParams, @ApiIgnore Authentication auth,
@@ -311,13 +293,7 @@ public class ProviderController {
     }
 
     // Get the rejected services of the given Provider.
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "query", value = "Keyword to refine the search", dataType = "string", paramType = "query"),
-            @ApiImplicitParam(name = "from", value = "Starting index in the result set", dataType = "string", paramType = "query"),
-            @ApiImplicitParam(name = "quantity", value = "Quantity to be fetched", dataType = "string", paramType = "query"),
-            @ApiImplicitParam(name = "order", value = "asc / desc", dataType = "string", paramType = "query"),
-            @ApiImplicitParam(name = "orderField", value = "Order field", dataType = "string", paramType = "query")
-    })
+    @Browse
     @GetMapping(path = "resources/rejected/{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity<Paging<ResourceBundle<?>>> getRejectedResources(@PathVariable("id") String providerId, @ApiIgnore @RequestParam MultiValueMap<String, Object> allRequestParams,
                                                                           @RequestParam String resourceType, @ApiIgnore Authentication auth) {
@@ -328,16 +304,10 @@ public class ProviderController {
         return ResponseEntity.ok(providerService.getRejectedResources(ff, resourceType, auth));
     }
 
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "query", value = "Keyword to refine the search", dataType = "string", paramType = "query"),
-            @ApiImplicitParam(name = "from", value = "Starting index in the result set", dataType = "string", paramType = "query"),
-            @ApiImplicitParam(name = "quantity", value = "Quantity to be fetched", dataType = "string", paramType = "query"),
-            @ApiImplicitParam(name = "order", value = "asc / desc", dataType = "string", paramType = "query"),
-            @ApiImplicitParam(name = "orderField", value = "Order field", dataType = "string", paramType = "query")
-    })
+    @Browse
     @GetMapping(path = "datasources/rejected/{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity<Paging<DatasourceBundle>> getRejectedDatasources(@PathVariable("id") String providerId, @ApiIgnore @RequestParam MultiValueMap<String, Object> allRequestParams,
-                                                                     @ApiIgnore Authentication auth) {
+                                                                           @ApiIgnore Authentication auth) {
         FacetFilter ff = FacetFilterUtils.createMultiFacetFilter(allRequestParams);
         ff.addFilter("resource_organisation", providerId);
         ff.addFilter("status", "rejected resource");
@@ -404,7 +374,7 @@ public class ProviderController {
     @PatchMapping(path = "publishDatasources", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     public ResponseEntity<List<DatasourceBundle>> publishDatasources(@RequestParam String id, @RequestParam Boolean active,
-                                                               @ApiIgnore Authentication auth) throws ResourceNotFoundException {
+                                                                     @ApiIgnore Authentication auth) throws ResourceNotFoundException {
         ProviderBundle provider = providerService.get(catalogueName, id, auth);
         if (provider == null) {
             throw new ResourceException("Provider with id '" + id + "' does not exist.", HttpStatus.NOT_FOUND);

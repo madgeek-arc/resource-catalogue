@@ -54,13 +54,13 @@ public class VocabularyController extends ResourceController<Vocabulary, Authent
         return new ResponseEntity<>(vocabularyService.get(id), HttpStatus.OK);
     }
 
-//    @ApiOperation(value = "Returns a tree structure of Categories")
+    //    @ApiOperation(value = "Returns a tree structure of Categories")
     @GetMapping(path = "vocabularyTree/{type}", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<VocabularyTree> getVocabularyTree(@PathVariable("type") Vocabulary.Type type) {
         return new ResponseEntity<>(vocabularyService.getVocabulariesTree(type), HttpStatus.OK);
     }
 
-//    @ApiOperation(value = "Returns a map structure of vocabularies")
+    //    @ApiOperation(value = "Returns a map structure of vocabularies")
     @GetMapping(path = "vocabularyMap", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<Map<String, Vocabulary>> getVocabularyMap() {
         return new ResponseEntity<>(vocabularyService.getVocabulariesMap(), HttpStatus.OK);
@@ -91,7 +91,7 @@ public class VocabularyController extends ResourceController<Vocabulary, Authent
         return super.add(vocabulary, auth);
     }
 
-//    @ApiOperation(value = "Updates a Vocabulary")
+    //    @ApiOperation(value = "Updates a Vocabulary")
     @PutMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     @Override
@@ -99,7 +99,7 @@ public class VocabularyController extends ResourceController<Vocabulary, Authent
         return super.update(vocabulary, auth);
     }
 
-//    @ApiOperation(value = "Deletes a Vocabulary")
+    //    @ApiOperation(value = "Deletes a Vocabulary")
     @DeleteMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     @Override
@@ -107,26 +107,26 @@ public class VocabularyController extends ResourceController<Vocabulary, Authent
         return super.delete(vocabulary, auth);
     }
 
-//    @ApiOperation(value = "Adds all new Vocabularies")
+    //    @ApiOperation(value = "Adds all new Vocabularies")
     @PostMapping(path = "/addAll", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     public void addAll(@RequestBody List<Vocabulary> newVocabularies, @ApiIgnore Authentication auth) {
         vocabularyService.addAll(newVocabularies, auth);
     }
 
-//    @ApiOperation(value = "Delete All Vocs")
+    //    @ApiOperation(value = "Delete All Vocs")
     @DeleteMapping(path = "/deleteAll", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public void deleteAll(@ApiIgnore Authentication auth) {
         vocabularyService.deleteAll(auth);
     }
 
-//    @ApiOperation(value = "Delete all Vocs of a specific type")
+    //    @ApiOperation(value = "Delete all Vocs of a specific type")
     @DeleteMapping(path = "/deleteByType/{type}", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public void deleteByType(@PathVariable(value = "type") Vocabulary.Type type, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
         List<Vocabulary> toBeDeleted = vocabularyService.getByType(type);
-        for (Vocabulary vocabulary : toBeDeleted){
+        for (Vocabulary vocabulary : toBeDeleted) {
             super.delete(vocabulary, auth);
         }
 

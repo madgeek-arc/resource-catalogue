@@ -1,5 +1,6 @@
 package eu.einfracentral.registry.controller;
 
+import eu.einfracentral.annotations.Browse;
 import eu.einfracentral.domain.interoperabilityRecord.configurationTemplates.ConfigurationTemplateInstance;
 import eu.einfracentral.domain.interoperabilityRecord.configurationTemplates.ConfigurationTemplateInstanceBundle;
 import eu.einfracentral.domain.interoperabilityRecord.configurationTemplates.ConfigurationTemplateInstanceDto;
@@ -9,8 +10,6 @@ import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.domain.Paging;
 import eu.openminted.registry.core.exception.ResourceNotFoundException;
 import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -22,7 +21,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
-import javax.validation.Valid;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -49,16 +47,10 @@ public class ConfigurationTemplateInstanceController {
     }
 
     @ApiOperation(value = "Filter a list of ConfigurationTemplateInstances based on a set of filters or get a list of all ConfigurationTemplateInstances in the Catalogue.")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "query", value = "Keyword to refine the search", dataType = "string", paramType = "query"),
-            @ApiImplicitParam(name = "from", value = "Starting index in the result set", dataType = "string", paramType = "query"),
-            @ApiImplicitParam(name = "quantity", value = "Quantity to be fetched", dataType = "string", paramType = "query"),
-            @ApiImplicitParam(name = "order", value = "asc / desc", dataType = "string", paramType = "query"),
-            @ApiImplicitParam(name = "orderField", value = "Order field", dataType = "string", paramType = "query")
-    })
+    @Browse
     @GetMapping(path = "all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity<Paging<ConfigurationTemplateInstanceDto>> getAllConfigurationTemplateInstances(@ApiIgnore @RequestParam Map<String, Object> allRequestParams,
-                                                                                      @ApiIgnore Authentication auth) {
+                                                                                                         @ApiIgnore Authentication auth) {
         FacetFilter ff = FacetFilterUtils.createFacetFilter(allRequestParams);
         ff.addFilter("published", false);
         List<ConfigurationTemplateInstanceDto> configurationTemplateInstanceList = new LinkedList<>();
@@ -76,7 +68,7 @@ public class ConfigurationTemplateInstanceController {
     public ResponseEntity<List<ConfigurationTemplateInstanceDto>> getConfigurationTemplateInstancesByResourceId(@PathVariable("resourceId") String resourceId) {
         List<ConfigurationTemplateInstance> configurationTemplateInstances = configurationTemplateInstanceService.getConfigurationTemplateInstancesByResourceId(resourceId);
         List<ConfigurationTemplateInstanceDto> ret = new ArrayList<>();
-        for (ConfigurationTemplateInstance configurationTemplateInstance : configurationTemplateInstances){
+        for (ConfigurationTemplateInstance configurationTemplateInstance : configurationTemplateInstances) {
             ret.add(configurationTemplateInstanceService.createConfigurationTemplateInstanceDto(configurationTemplateInstance));
         }
         return new ResponseEntity<>(ret, HttpStatus.OK);
@@ -87,7 +79,7 @@ public class ConfigurationTemplateInstanceController {
     public ResponseEntity<List<ConfigurationTemplateInstanceDto>> getConfigurationTemplateInstancesByConfigurationTemplateId(@PathVariable("configurationTemplateId") String configurationTemplateId) {
         List<ConfigurationTemplateInstance> configurationTemplateInstances = configurationTemplateInstanceService.getConfigurationTemplateInstancesByConfigurationTemplateId(configurationTemplateId);
         List<ConfigurationTemplateInstanceDto> ret = new ArrayList<>();
-        for (ConfigurationTemplateInstance configurationTemplateInstance : configurationTemplateInstances){
+        for (ConfigurationTemplateInstance configurationTemplateInstance : configurationTemplateInstances) {
             ret.add(configurationTemplateInstanceService.createConfigurationTemplateInstanceDto(configurationTemplateInstance));
         }
         return new ResponseEntity<>(ret, HttpStatus.OK);
@@ -97,18 +89,18 @@ public class ConfigurationTemplateInstanceController {
     @PostMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<ConfigurationTemplateInstance> addConfigurationTemplateInstance(@RequestBody ConfigurationTemplateInstance configurationTemplateInstance,
-                                                                          @ApiIgnore Authentication auth) {
+                                                                                          @ApiIgnore Authentication auth) {
         ConfigurationTemplateInstanceBundle configurationTemplateInstanceBundle = configurationTemplateInstanceService.add(new ConfigurationTemplateInstanceBundle(configurationTemplateInstance), auth);
         logger.info("User '{}' added the Configuration Template Instance with id '{}'", auth.getName(), configurationTemplateInstance.getId());
         return new ResponseEntity<>(configurationTemplateInstanceBundle.getConfigurationTemplateInstance(), HttpStatus.CREATED);
     }
 
     @ApiOperation(value = "Add a List of ConfigurationTemplateInstances.")
-    @PostMapping(path ="addAll", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PostMapping(path = "addAll", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<List<ConfigurationTemplateInstance>> addConfigurationTemplateInstances(@RequestBody List<ConfigurationTemplateInstance> configurationTemplateInstances,
-                                                                                          @ApiIgnore Authentication auth) {
-        for (ConfigurationTemplateInstance configurationTemplateInstance : configurationTemplateInstances){
+                                                                                                 @ApiIgnore Authentication auth) {
+        for (ConfigurationTemplateInstance configurationTemplateInstance : configurationTemplateInstances) {
             configurationTemplateInstanceService.add(new ConfigurationTemplateInstanceBundle(configurationTemplateInstance), auth);
             logger.info("User '{}' added the Configuration Template Instance with id '{}'", auth.getName(), configurationTemplateInstance.getId());
         }
@@ -119,7 +111,7 @@ public class ConfigurationTemplateInstanceController {
     @PutMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<ConfigurationTemplateInstance> updateConfigurationTemplateInstance(@RequestBody ConfigurationTemplateInstance configurationTemplateInstance,
-                                                                             @ApiIgnore Authentication auth) throws ResourceNotFoundException {
+                                                                                             @ApiIgnore Authentication auth) throws ResourceNotFoundException {
         ConfigurationTemplateInstanceBundle configurationTemplateInstanceBundle = configurationTemplateInstanceService.get(configurationTemplateInstance.getId());
         configurationTemplateInstanceBundle.setConfigurationTemplateInstance(configurationTemplateInstance);
         configurationTemplateInstanceBundle = configurationTemplateInstanceService.update(configurationTemplateInstanceBundle, auth);
@@ -130,7 +122,7 @@ public class ConfigurationTemplateInstanceController {
     @DeleteMapping(path = "{configurationTemplateInstanceId}", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<ConfigurationTemplateInstance> deleteConfigurationTemplateInstance(@PathVariable("configurationTemplateInstanceId") String configurationTemplateInstanceId,
-                                                                             @ApiIgnore Authentication auth) throws ResourceNotFoundException {
+                                                                                             @ApiIgnore Authentication auth) throws ResourceNotFoundException {
         ConfigurationTemplateInstanceBundle configurationTemplateInstanceBundle = configurationTemplateInstanceService.get(configurationTemplateInstanceId);
         if (configurationTemplateInstanceBundle == null) {
             return new ResponseEntity<>(HttpStatus.GONE);

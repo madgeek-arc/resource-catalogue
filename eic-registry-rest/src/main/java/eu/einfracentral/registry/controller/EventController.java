@@ -166,7 +166,7 @@ public class EventController extends ResourceController<Event, Authentication> {
 
     @PutMapping(path = "addVisitsOnDay", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public void addVisitsOnDay(@RequestParam @DateTimeFormat(pattern="yyyy-MM-dd") Date date, @RequestParam String serviceId,
+    public void addVisitsOnDay(@RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") Date date, @RequestParam String serviceId,
                                @RequestParam Float noOfVisits, Authentication auth) {
         logger.info("User '{}' attempting to add '{}' visits on date '{}' for service '{}'", auth.getName(), noOfVisits, date, serviceId);
         eventService.addVisitsOnDay(date, serviceId, noOfVisits, auth);

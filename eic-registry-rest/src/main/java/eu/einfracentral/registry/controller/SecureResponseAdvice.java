@@ -89,9 +89,9 @@ public class SecureResponseAdvice<T> implements ResponseBodyAdvice<T> {
         } else if (t instanceof InteroperabilityRecordBundle) {
             modifyInteroperabilityRecordBundle(t, auth);
         } else if (t instanceof RichResource) {
-            if (((RichResource) t).getTrainingResource() != null){
+            if (((RichResource) t).getTrainingResource() != null) {
                 modifyRichTrainingResource(t, auth);
-            } else{
+            } else {
                 modifyRichService(t, auth);
             }
         } else if (t instanceof LoggingInfo) {
@@ -173,13 +173,13 @@ public class SecureResponseAdvice<T> implements ResponseBodyAdvice<T> {
     }
 
     private void modifyRichService(T richResource, Authentication auth) {
-        if (((RichResource) richResource).getService() != null){
+        if (((RichResource) richResource).getService() != null) {
             if (!this.securityService.isResourceProviderAdmin(auth, ((RichResource) richResource).getService().getId(), ((RichResource) richResource).getService().getCatalogueId())) {
                 ((RichResource) richResource).getService().setMainContact(null);
                 ((RichResource) richResource).getService().setSecurityContactEmail(null);
                 ((RichResource) richResource).getMetadata().setTerms(null);
             }
-        } else if (((RichResource) richResource).getDatasource() != null){
+        } else if (((RichResource) richResource).getDatasource() != null) {
             if (!this.securityService.isResourceProviderAdmin(auth, ((RichResource) richResource).getDatasource().getId(), ((RichResource) richResource).getDatasource().getCatalogueId())) {
                 ((RichResource) richResource).getDatasource().setMainContact(null);
                 ((RichResource) richResource).getDatasource().setSecurityContactEmail(null);
@@ -196,7 +196,7 @@ public class SecureResponseAdvice<T> implements ResponseBodyAdvice<T> {
     }
 
     private void modifyProvider(T provider, Authentication auth) {
-        if(!this.securityService.isProviderAdmin(auth, ((Provider) provider).getId(), ((Provider) provider).getCatalogueId())) {
+        if (!this.securityService.isProviderAdmin(auth, ((Provider) provider).getId(), ((Provider) provider).getCatalogueId())) {
             ((Provider) provider).setMainContact(null);
             ((Provider) provider).setUsers(null);
         }
@@ -209,7 +209,7 @@ public class SecureResponseAdvice<T> implements ResponseBodyAdvice<T> {
         modifyLoggingInfo((T) ((ProviderBundle) bundle).getLatestUpdateInfo());
         modifyLoggingInfo((T) ((ProviderBundle) bundle).getLatestOnboardingInfo());
 
-        if(!this.securityService.isProviderAdmin(auth, ((ProviderBundle) bundle).getId(), ((Bundle<Provider>) bundle).getPayload().getCatalogueId())) {
+        if (!this.securityService.isProviderAdmin(auth, ((ProviderBundle) bundle).getId(), ((Bundle<Provider>) bundle).getPayload().getCatalogueId())) {
             ((ProviderBundle) bundle).getProvider().setMainContact(null);
             ((ProviderBundle) bundle).getProvider().setUsers(null);
             ((ProviderBundle) bundle).getMetadata().setTerms(null);
@@ -217,7 +217,7 @@ public class SecureResponseAdvice<T> implements ResponseBodyAdvice<T> {
     }
 
     private void modifyCatalogue(T catalogue, Authentication auth) {
-        if(!this.securityService.isCatalogueAdmin(auth, ((Catalogue) catalogue).getId(), true)) {
+        if (!this.securityService.isCatalogueAdmin(auth, ((Catalogue) catalogue).getId(), true)) {
             ((Catalogue) catalogue).setMainContact(null);
             ((Catalogue) catalogue).setUsers(null);
         }
@@ -230,7 +230,7 @@ public class SecureResponseAdvice<T> implements ResponseBodyAdvice<T> {
         modifyLoggingInfo((T) ((CatalogueBundle) bundle).getLatestUpdateInfo());
         modifyLoggingInfo((T) ((CatalogueBundle) bundle).getLatestOnboardingInfo());
 
-        if(!this.securityService.isCatalogueAdmin(auth, ((CatalogueBundle) bundle).getId(), true)) {
+        if (!this.securityService.isCatalogueAdmin(auth, ((CatalogueBundle) bundle).getId(), true)) {
             ((CatalogueBundle) bundle).getCatalogue().setMainContact(null);
             ((CatalogueBundle) bundle).getCatalogue().setUsers(null);
             ((CatalogueBundle) bundle).getMetadata().setTerms(null);

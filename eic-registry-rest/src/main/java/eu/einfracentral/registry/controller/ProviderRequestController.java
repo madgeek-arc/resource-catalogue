@@ -69,7 +69,7 @@ public class ProviderRequestController extends ResourceController<ProviderReques
         return new ResponseEntity<>(providerRequest, HttpStatus.OK);
     }
 
-//    @ApiOperation(value = "Returns a list with all the requests made on a specific Provider.")
+    //    @ApiOperation(value = "Returns a list with all the requests made on a specific Provider.")
     @GetMapping(path = "allProviderRequests", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_USER')")
     public List<ProviderRequest> getAllProviderRequests(@RequestParam String providerId, @ApiIgnore Authentication auth) {
@@ -77,7 +77,7 @@ public class ProviderRequestController extends ResourceController<ProviderReques
 
     }
 
-//    @ApiOperation(value = "Send mails to all providers and creates the Provider Requests.")
+    //    @ApiOperation(value = "Send mails to all providers and creates the Provider Requests.")
     @PostMapping("{serviceIds}/sendMailsToProviders")
     public void sendMailsToProviders(@PathVariable("serviceIds") List<String> serviceIds,
                                      @RequestBody EmailMessage message,

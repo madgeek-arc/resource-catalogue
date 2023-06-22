@@ -1,9 +1,8 @@
 package eu.einfracentral.registry.controller;
 
 import com.google.gson.Gson;
+import eu.einfracentral.annotations.Browse;
 import eu.einfracentral.domain.*;
-import eu.einfracentral.domain.ResourceBundle;
-import eu.einfracentral.domain.ServiceBundle;
 import eu.einfracentral.domain.interoperabilityRecord.configurationTemplates.ConfigurationTemplateInstanceBundle;
 import eu.einfracentral.domain.interoperabilityRecord.configurationTemplates.ConfigurationTemplateInstanceDto;
 import eu.einfracentral.exception.ResourceNotFoundException;
@@ -31,7 +30,10 @@ import org.springframework.security.oauth2.common.exceptions.UnauthorizedUserExc
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestController
@@ -97,9 +99,9 @@ public class PublicController {
             User user = User.of(auth);
             if (securityService.hasRole(auth, "ROLE_ADMIN") || securityService.hasRole(auth, "ROLE_EPOT")
                     || securityService.userIsProviderAdmin(user, providerBundle)) {
-                if (providerBundle.getMetadata().isPublished()){
+                if (providerBundle.getMetadata().isPublished()) {
                     return new ResponseEntity<>(providerBundle.getProvider(), HttpStatus.OK);
-                } else{
+                } else {
                     return ResponseEntity.status(HttpStatus.FOUND).body(gson.toJson("The specific Provider does not consist a Public entity"));
                 }
             }
@@ -111,7 +113,7 @@ public class PublicController {
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(gson.toJson("You cannot view the specific Provider."));
     }
 
-//    @ApiOperation(value = "Returns the Public Provider bundle with the given id.")
+    //    @ApiOperation(value = "Returns the Public Provider bundle with the given id.")
     @GetMapping(path = "/provider/bundle/{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isProviderAdmin(#auth, #id, #catalogueId)")
     public ResponseEntity<?> getPublicProviderBundle(@PathVariable("id") String id,
@@ -122,9 +124,9 @@ public class PublicController {
             User user = User.of(auth);
             if (securityService.hasRole(auth, "ROLE_ADMIN") || securityService.hasRole(auth, "ROLE_EPOT")
                     || securityService.userIsProviderAdmin(user, providerBundle)) {
-                if (providerBundle.getMetadata().isPublished()){
+                if (providerBundle.getMetadata().isPublished()) {
                     return new ResponseEntity<>(providerBundle, HttpStatus.OK);
-                } else{
+                } else {
                     return ResponseEntity.status(HttpStatus.FOUND).body(gson.toJson("The specific Provider Bundle does not consist a Public entity"));
                 }
             }
@@ -137,14 +139,8 @@ public class PublicController {
     }
 
     @ApiOperation(value = "Filter a list of Public Providers based on a set of filters or get a list of all Public Providers in the Catalogue.")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "suspended", value = "Suspended", defaultValue = "false", dataType = "boolean", paramType = "query"),
-            @ApiImplicitParam(name = "query", value = "Keyword to refine the search", dataType = "string", paramType = "query"),
-            @ApiImplicitParam(name = "from", value = "Starting index in the result set", dataType = "string", paramType = "query"),
-            @ApiImplicitParam(name = "quantity", value = "Quantity to be fetched", dataType = "string", paramType = "query"),
-            @ApiImplicitParam(name = "order", value = "asc / desc", dataType = "string", paramType = "query"),
-            @ApiImplicitParam(name = "orderField", value = "Order field", dataType = "string", paramType = "query")
-    })
+    @Browse
+    @ApiImplicitParam(name = "suspended", value = "Suspended", defaultValue = "false", dataType = "boolean", paramType = "query")
     @GetMapping(path = "/provider/all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity<Paging<Provider>> getAllPublicProviders(@ApiIgnore @RequestParam Map<String, Object> allRequestParams,
                                                                   @RequestParam(defaultValue = "all", name = "catalogue_id") String catalogueId,
@@ -157,7 +153,7 @@ public class PublicController {
         ff.addFilter("published", true);
         if (auth != null && auth.isAuthenticated() && (securityService.hasRole(auth, "ROLE_ADMIN") || securityService.hasRole(auth, "ROLE_EPOT"))) {
             logger.info("Getting all published Providers for Admin/Epot");
-        } else{
+        } else {
             ff.addFilter("active", true);
             ff.addFilter("status", "approved provider");
         }
@@ -171,14 +167,8 @@ public class PublicController {
         return new ResponseEntity<>(providerPaging, HttpStatus.OK);
     }
 
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "suspended", value = "Suspended", defaultValue = "false", dataType = "boolean", paramType = "query"),
-            @ApiImplicitParam(name = "query", value = "Keyword to refine the search", dataType = "string", paramType = "query"),
-            @ApiImplicitParam(name = "from", value = "Starting index in the result set", dataType = "string", paramType = "query"),
-            @ApiImplicitParam(name = "quantity", value = "Quantity to be fetched", dataType = "string", paramType = "query"),
-            @ApiImplicitParam(name = "order", value = "asc / desc", dataType = "string", paramType = "query"),
-            @ApiImplicitParam(name = "orderField", value = "Order field", dataType = "string", paramType = "query")
-    })
+    @Browse
+    @ApiImplicitParam(name = "suspended", value = "Suspended", defaultValue = "false", dataType = "boolean", paramType = "query")
     @GetMapping(path = "/provider/bundle/all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     public ResponseEntity<Paging<ProviderBundle>> getAllPublicProviderBundles(@ApiIgnore @RequestParam Map<String, Object> allRequestParams,
@@ -192,7 +182,7 @@ public class PublicController {
         ff.addFilter("published", true);
         if (auth != null && auth.isAuthenticated() && (securityService.hasRole(auth, "ROLE_ADMIN") || securityService.hasRole(auth, "ROLE_EPOT"))) {
             logger.info("Getting all published Providers for Admin/Epot");
-        } else{
+        } else {
             ff.addFilter("active", true);
             ff.addFilter("status", "approved provider");
         }
@@ -220,9 +210,9 @@ public class PublicController {
     public ResponseEntity<?> getPublicResource(@PathVariable("id") String id,
                                                @RequestParam(defaultValue = "${project.catalogue.name}", name = "catalogue_id") String catalogueId,
                                                @ApiIgnore Authentication auth) {
-        try{
+        try {
             return resourceBundleService.get(id, catalogueId).getMetadata().isPublished() ? new ResponseEntity(resourceBundleService.get(id, catalogueId).getService(), HttpStatus.OK) : new ResponseEntity(gson.toJson("The specific Service does not consist a Public entity"), HttpStatus.NOT_FOUND);
-        } catch(eu.einfracentral.exception.ResourceNotFoundException e){
+        } catch (eu.einfracentral.exception.ResourceNotFoundException e) {
             return datasourceBundleService.get(id, catalogueId).getMetadata().isPublished() ? new ResponseEntity(datasourceBundleService.get(id, catalogueId).getDatasource(), HttpStatus.OK) : new ResponseEntity(gson.toJson("The specific Service does not consist a Public entity"), HttpStatus.NOT_FOUND);
         }
     }
@@ -232,31 +222,25 @@ public class PublicController {
     @GetMapping(path = "/resource/infraService/{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth, #id, #catalogueId)")
     public ResponseEntity<?> getPublicResourceBundle(@PathVariable("id") String id,
-                                                    @RequestParam(defaultValue = "${project.catalogue.name}", name = "catalogue_id") String catalogueId,
-                                                    @ApiIgnore Authentication auth) {
-        try{
+                                                     @RequestParam(defaultValue = "${project.catalogue.name}", name = "catalogue_id") String catalogueId,
+                                                     @ApiIgnore Authentication auth) {
+        try {
             return resourceBundleService.get(id, catalogueId).getMetadata().isPublished() ? new ResponseEntity(resourceBundleService.get(id, catalogueId), HttpStatus.OK) : new ResponseEntity(gson.toJson("The specific Service does not consist a Public entity"), HttpStatus.NOT_FOUND);
-        } catch(eu.einfracentral.exception.ResourceNotFoundException e){
+        } catch (eu.einfracentral.exception.ResourceNotFoundException e) {
             return datasourceBundleService.get(id, catalogueId).getMetadata().isPublished() ? new ResponseEntity(datasourceBundleService.get(id, catalogueId), HttpStatus.OK) : new ResponseEntity(gson.toJson("The specific Service does not consist a Public entity"), HttpStatus.NOT_FOUND);
         }
     }
 
     @Deprecated
     @ApiOperation(value = "Filter a list of Public Resources based on a set of filters or get a list of all Public Resources in the Catalogue.")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "suspended", value = "Suspended", defaultValue = "false", dataType = "boolean", paramType = "query"),
-            @ApiImplicitParam(name = "query", value = "Keyword to refine the search", dataType = "string", paramType = "query"),
-            @ApiImplicitParam(name = "from", value = "Starting index in the result set", dataType = "string", paramType = "query"),
-            @ApiImplicitParam(name = "quantity", value = "Quantity to be fetched", dataType = "string", paramType = "query"),
-            @ApiImplicitParam(name = "order", value = "asc / desc", dataType = "string", paramType = "query"),
-            @ApiImplicitParam(name = "orderField", value = "Order field", dataType = "string", paramType = "query")
-    })
+    @Browse
+    @ApiImplicitParam(name = "suspended", value = "Suspended", defaultValue = "false", dataType = "boolean", paramType = "query")
     @GetMapping(path = "/resource/all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity<Paging<?>> getAllPublicResources(@RequestParam(defaultValue = "all", name = "catalogue_id") String catalogueId,
                                                            @RequestParam(defaultValue = "service", name = "type") String type,
                                                            @ApiIgnore @RequestParam Map<String, Object> allRequestParams,
                                                            @ApiIgnore Authentication authentication) {
-        FacetFilter ff =  resourceBundleService.createFacetFilterForFetchingServicesAndDatasources(allRequestParams, catalogueId, type);
+        FacetFilter ff = resourceBundleService.createFacetFilterForFetchingServicesAndDatasources(allRequestParams, catalogueId, type);
         ff.getFilter().put("published", true);
         resourceBundleService.updateFacetFilterConsideringTheAuthorization(ff, authentication);
         Paging<?> paging = genericResourceService.getResults(ff).map(r -> ((eu.einfracentral.domain.ResourceBundle<?>) r).getPayload());
@@ -264,14 +248,8 @@ public class PublicController {
     }
 
     @Deprecated
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "suspended", value = "Suspended", defaultValue = "false", dataType = "boolean", paramType = "query"),
-            @ApiImplicitParam(name = "query", value = "Keyword to refine the search", dataType = "string", paramType = "query"),
-            @ApiImplicitParam(name = "from", value = "Starting index in the result set", dataType = "string", paramType = "query"),
-            @ApiImplicitParam(name = "quantity", value = "Quantity to be fetched", dataType = "string", paramType = "query"),
-            @ApiImplicitParam(name = "order", value = "asc / desc", dataType = "string", paramType = "query"),
-            @ApiImplicitParam(name = "orderField", value = "Order field", dataType = "string", paramType = "query")
-    })
+    @Browse
+    @ApiImplicitParam(name = "suspended", value = "Suspended", defaultValue = "false", dataType = "boolean", paramType = "query")
     @GetMapping(path = "/resource/adminPage/all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     public ResponseEntity<Paging<?>> getAllPublicResourceBundles(@RequestParam(defaultValue = "all", name = "catalogue_id") String catalogueId,
@@ -299,7 +277,7 @@ public class PublicController {
         List<Object> resourceBundleList = new ArrayList<>();
         Paging<?> paging = genericResourceService.getResults(ff);
         for (Object o : paging.getResults()) {
-            if (o instanceof ResourceBundle<?>){
+            if (o instanceof ResourceBundle<?>) {
                 if (securityService.isResourceProviderAdmin(auth, ((ResourceBundle<?>) o).getId(), ((ResourceBundle<?>) o).getPayload().getCatalogueId()) && ((ResourceBundle<?>) o).getMetadata().isPublished()) {
                     resourceBundleList.add(o);
                 }
@@ -315,11 +293,11 @@ public class PublicController {
     @GetMapping(path = "/service/{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     @PreAuthorize("@securityService.resourceOrDatasourceIsActive(#id, #catalogueId) or hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth, #id)")
     public ResponseEntity<?> getPublicService(@PathVariable("id") String id,
-                                               @RequestParam(defaultValue = "${project.catalogue.name}", name = "catalogue_id") String catalogueId,
-                                               @ApiIgnore Authentication auth) {
-        try{
+                                              @RequestParam(defaultValue = "${project.catalogue.name}", name = "catalogue_id") String catalogueId,
+                                              @ApiIgnore Authentication auth) {
+        try {
             return resourceBundleService.get(id, catalogueId).getMetadata().isPublished() ? new ResponseEntity(resourceBundleService.get(id, catalogueId).getService(), HttpStatus.OK) : new ResponseEntity(gson.toJson("The specific Service does not consist a Public entity"), HttpStatus.NOT_FOUND);
-        } catch(eu.einfracentral.exception.ResourceNotFoundException e){
+        } catch (eu.einfracentral.exception.ResourceNotFoundException e) {
             return datasourceBundleService.get(id, catalogueId).getMetadata().isPublished() ? new ResponseEntity(datasourceBundleService.get(id, catalogueId).getDatasource(), HttpStatus.OK) : new ResponseEntity(gson.toJson("The specific Service does not consist a Public entity"), HttpStatus.NOT_FOUND);
         }
     }
@@ -330,40 +308,28 @@ public class PublicController {
     public ResponseEntity<?> getPublicServiceBundle(@PathVariable("id") String id,
                                                     @RequestParam(defaultValue = "${project.catalogue.name}", name = "catalogue_id") String catalogueId,
                                                     @ApiIgnore Authentication auth) {
-        try{
+        try {
             return resourceBundleService.get(id, catalogueId).getMetadata().isPublished() ? new ResponseEntity(resourceBundleService.get(id, catalogueId), HttpStatus.OK) : new ResponseEntity(gson.toJson("The specific Service does not consist a Public entity"), HttpStatus.NOT_FOUND);
-        } catch(eu.einfracentral.exception.ResourceNotFoundException e){
+        } catch (eu.einfracentral.exception.ResourceNotFoundException e) {
             return datasourceBundleService.get(id, catalogueId).getMetadata().isPublished() ? new ResponseEntity(datasourceBundleService.get(id, catalogueId), HttpStatus.OK) : new ResponseEntity(gson.toJson("The specific Service does not consist a Public entity"), HttpStatus.NOT_FOUND);
         }
     }
 
     @ApiOperation(value = "Filter a list of Public Resources based on a set of filters or get a list of all Public Resources in the Catalogue.")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "query", value = "Keyword to refine the search", dataType = "string", paramType = "query"),
-            @ApiImplicitParam(name = "from", value = "Starting index in the result set", dataType = "string", paramType = "query"),
-            @ApiImplicitParam(name = "quantity", value = "Quantity to be fetched", dataType = "string", paramType = "query"),
-            @ApiImplicitParam(name = "order", value = "asc / desc", dataType = "string", paramType = "query"),
-            @ApiImplicitParam(name = "orderField", value = "Order field", dataType = "string", paramType = "query")
-    })
+    @Browse
     @GetMapping(path = "/service/all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity<Paging<?>> getAllPublicServices(@RequestParam(defaultValue = "all", name = "catalogue_id") String catalogueId,
-                                                           @RequestParam(defaultValue = "service", name = "type") String type,
-                                                           @ApiIgnore @RequestParam Map<String, Object> allRequestParams,
-                                                           @ApiIgnore Authentication authentication) {
-        FacetFilter ff =  resourceBundleService.createFacetFilterForFetchingServicesAndDatasources(allRequestParams, catalogueId, type);
+                                                          @RequestParam(defaultValue = "service", name = "type") String type,
+                                                          @ApiIgnore @RequestParam Map<String, Object> allRequestParams,
+                                                          @ApiIgnore Authentication authentication) {
+        FacetFilter ff = resourceBundleService.createFacetFilterForFetchingServicesAndDatasources(allRequestParams, catalogueId, type);
         ff.getFilter().put("published", true);
         resourceBundleService.updateFacetFilterConsideringTheAuthorization(ff, authentication);
         Paging<?> paging = genericResourceService.getResults(ff).map(r -> ((eu.einfracentral.domain.ResourceBundle<?>) r).getPayload());
         return ResponseEntity.ok(paging);
     }
 
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "query", value = "Keyword to refine the search", dataType = "string", paramType = "query"),
-            @ApiImplicitParam(name = "from", value = "Starting index in the result set", dataType = "string", paramType = "query"),
-            @ApiImplicitParam(name = "quantity", value = "Quantity to be fetched", dataType = "string", paramType = "query"),
-            @ApiImplicitParam(name = "order", value = "asc / desc", dataType = "string", paramType = "query"),
-            @ApiImplicitParam(name = "orderField", value = "Order field", dataType = "string", paramType = "query")
-    })
+    @Browse
     @GetMapping(path = "/service/adminPage/all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     public ResponseEntity<Paging<?>> getAllPublicServiceBundles(@RequestParam(defaultValue = "all", name = "catalogue_id") String catalogueId,
@@ -390,7 +356,7 @@ public class PublicController {
         List<Object> resourceBundleList = new ArrayList<>();
         Paging<?> paging = genericResourceService.getResults(ff);
         for (Object o : paging.getResults()) {
-            if (o instanceof ResourceBundle<?>){
+            if (o instanceof ResourceBundle<?>) {
                 if (securityService.isResourceProviderAdmin(auth, ((ResourceBundle<?>) o).getId(), ((ResourceBundle<?>) o).getPayload().getCatalogueId()) && ((ResourceBundle<?>) o).getMetadata().isPublished()) {
                     resourceBundleList.add(o);
                 }
@@ -411,9 +377,9 @@ public class PublicController {
             User user = User.of(auth);
             if (securityService.hasRole(auth, "ROLE_ADMIN") || securityService.hasRole(auth, "ROLE_EPOT")
                     || securityService.userIsResourceProviderAdmin(user, id, datasourceBundle.getPayload().getCatalogueId())) {
-                if (datasourceBundle.getMetadata().isPublished()){
+                if (datasourceBundle.getMetadata().isPublished()) {
                     return new ResponseEntity<>(datasourceBundle.getDatasource(), HttpStatus.OK);
-                } else{
+                } else {
                     return ResponseEntity.status(HttpStatus.FOUND).body(gson.toJson("The specific Datasource does not consist a Public entity"));
                 }
             }
@@ -435,9 +401,9 @@ public class PublicController {
             User user = User.of(auth);
             if (securityService.hasRole(auth, "ROLE_ADMIN") || securityService.hasRole(auth, "ROLE_EPOT")
                     || securityService.userIsResourceProviderAdmin(user, id, datasourceBundle.getPayload().getCatalogueId())) {
-                if (datasourceBundle.getMetadata().isPublished()){
+                if (datasourceBundle.getMetadata().isPublished()) {
                     return new ResponseEntity<>(datasourceBundle, HttpStatus.OK);
-                } else{
+                } else {
                     return ResponseEntity.status(HttpStatus.FOUND).body(gson.toJson("The specific Datasource Bundle does not consist a Public entity"));
                 }
             }
@@ -450,14 +416,8 @@ public class PublicController {
     }
 
     @ApiOperation(value = "Filter a list of Public Datasources based on a set of filters or get a list of all Public Resources in the Catalogue.")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "suspended", value = "Suspended", defaultValue = "false", dataType = "boolean", paramType = "query"),
-            @ApiImplicitParam(name = "query", value = "Keyword to refine the search", dataType = "string", paramType = "query"),
-            @ApiImplicitParam(name = "from", value = "Starting index in the result set", dataType = "string", paramType = "query"),
-            @ApiImplicitParam(name = "quantity", value = "Quantity to be fetched", dataType = "string", paramType = "query"),
-            @ApiImplicitParam(name = "order", value = "asc / desc", dataType = "string", paramType = "query"),
-            @ApiImplicitParam(name = "orderField", value = "Order field", dataType = "string", paramType = "query")
-    })
+    @Browse
+    @ApiImplicitParam(name = "suspended", value = "Suspended", defaultValue = "false", dataType = "boolean", paramType = "query")
     @GetMapping(path = "/datasource/all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity<Paging<Datasource>> getAllPublicDatasources(@ApiIgnore @RequestParam Map<String, Object> allRequestParams,
                                                                       @RequestParam(defaultValue = "all", name = "catalogue_id") String catalogueId,
@@ -470,7 +430,7 @@ public class PublicController {
         ff.addFilter("published", true);
         if (auth != null && auth.isAuthenticated() && (securityService.hasRole(auth, "ROLE_ADMIN") || securityService.hasRole(auth, "ROLE_EPOT"))) {
             logger.info("Getting all published Datasources for Admin/Epot");
-        } else{
+        } else {
             ff.addFilter("active", true);
             ff.addFilter("status", "approved resource");
         }
@@ -484,14 +444,8 @@ public class PublicController {
         return new ResponseEntity<>(datasourcePaging, HttpStatus.OK);
     }
 
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "suspended", value = "Suspended", defaultValue = "false", dataType = "boolean", paramType = "query"),
-            @ApiImplicitParam(name = "query", value = "Keyword to refine the search", dataType = "string", paramType = "query"),
-            @ApiImplicitParam(name = "from", value = "Starting index in the result set", dataType = "string", paramType = "query"),
-            @ApiImplicitParam(name = "quantity", value = "Quantity to be fetched", dataType = "string", paramType = "query"),
-            @ApiImplicitParam(name = "order", value = "asc / desc", dataType = "string", paramType = "query"),
-            @ApiImplicitParam(name = "orderField", value = "Order field", dataType = "string", paramType = "query")
-    })
+    @Browse
+    @ApiImplicitParam(name = "suspended", value = "Suspended", defaultValue = "false", dataType = "boolean", paramType = "query")
     @GetMapping(path = "/datasource/adminPage/all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     public ResponseEntity<Paging<DatasourceBundle>> getAllPublicDatasourceBundles(@ApiIgnore @RequestParam Map<String, Object> allRequestParams,
@@ -505,7 +459,7 @@ public class PublicController {
         ff.addFilter("published", true);
         if (auth != null && auth.isAuthenticated() && (securityService.hasRole(auth, "ROLE_ADMIN") || securityService.hasRole(auth, "ROLE_EPOT"))) {
             logger.info("Getting all published Datasources for Admin/Epot");
-        } else{
+        } else {
             ff.addFilter("active", true);
             ff.addFilter("status", "approved resource");
         }
@@ -537,9 +491,9 @@ public class PublicController {
             User user = User.of(auth);
             if (securityService.hasRole(auth, "ROLE_ADMIN") || securityService.hasRole(auth, "ROLE_EPOT")
                     || securityService.userIsResourceProviderAdmin(user, id, trainingResourceBundle.getTrainingResource().getCatalogueId())) {
-                if (trainingResourceBundle.getMetadata().isPublished()){
+                if (trainingResourceBundle.getMetadata().isPublished()) {
                     return new ResponseEntity<>(trainingResourceBundle.getTrainingResource(), HttpStatus.OK);
-                } else{
+                } else {
                     return ResponseEntity.status(HttpStatus.FOUND).body(gson.toJson("The specific Training Resource does not consist a Public entity"));
                 }
             }
@@ -561,9 +515,9 @@ public class PublicController {
             User user = User.of(auth);
             if (securityService.hasRole(auth, "ROLE_ADMIN") || securityService.hasRole(auth, "ROLE_EPOT")
                     || securityService.userIsResourceProviderAdmin(user, id, trainingResourceBundle.getTrainingResource().getCatalogueId())) {
-                if (trainingResourceBundle.getMetadata().isPublished()){
+                if (trainingResourceBundle.getMetadata().isPublished()) {
                     return new ResponseEntity<>(trainingResourceBundle, HttpStatus.OK);
-                } else{
+                } else {
                     return ResponseEntity.status(HttpStatus.FOUND).body(gson.toJson("The specific Training Resource Bundle does not consist a Public entity"));
                 }
             }
@@ -576,14 +530,8 @@ public class PublicController {
     }
 
     @ApiOperation(value = "Filter a list of Public Training Resources based on a set of filters or get a list of all Public Training Resources in the Catalogue.")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "suspended", value = "Suspended", defaultValue = "false", dataType = "boolean", paramType = "query"),
-            @ApiImplicitParam(name = "query", value = "Keyword to refine the search", dataType = "string", paramType = "query"),
-            @ApiImplicitParam(name = "from", value = "Starting index in the result set", dataType = "string", paramType = "query"),
-            @ApiImplicitParam(name = "quantity", value = "Quantity to be fetched", dataType = "string", paramType = "query"),
-            @ApiImplicitParam(name = "order", value = "asc / desc", dataType = "string", paramType = "query"),
-            @ApiImplicitParam(name = "orderField", value = "Order field", dataType = "string", paramType = "query")
-    })
+    @Browse
+    @ApiImplicitParam(name = "suspended", value = "Suspended", defaultValue = "false", dataType = "boolean", paramType = "query")
     @GetMapping(path = "/trainingResource/all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity<Paging<TrainingResource>> getAllPublicTrainingResources(@ApiIgnore @RequestParam Map<String, Object> allRequestParams,
                                                                                   @RequestParam(defaultValue = "all", name = "catalogue_id") String catalogueId,
@@ -596,7 +544,7 @@ public class PublicController {
         ff.addFilter("published", true);
         if (auth != null && auth.isAuthenticated() && (securityService.hasRole(auth, "ROLE_ADMIN") || securityService.hasRole(auth, "ROLE_EPOT"))) {
             logger.info("Getting all published Training Resources for Admin/Epot");
-        } else{
+        } else {
             ff.addFilter("active", true);
             ff.addFilter("status", "approved resource");
         }
@@ -610,14 +558,8 @@ public class PublicController {
         return new ResponseEntity<>(trainingResourcePaging, HttpStatus.OK);
     }
 
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "suspended", value = "Suspended", defaultValue = "false", dataType = "boolean", paramType = "query"),
-            @ApiImplicitParam(name = "query", value = "Keyword to refine the search", dataType = "string", paramType = "query"),
-            @ApiImplicitParam(name = "from", value = "Starting index in the result set", dataType = "string", paramType = "query"),
-            @ApiImplicitParam(name = "quantity", value = "Quantity to be fetched", dataType = "string", paramType = "query"),
-            @ApiImplicitParam(name = "order", value = "asc / desc", dataType = "string", paramType = "query"),
-            @ApiImplicitParam(name = "orderField", value = "Order field", dataType = "string", paramType = "query")
-    })
+    @Browse
+    @ApiImplicitParam(name = "suspended", value = "Suspended", defaultValue = "false", dataType = "boolean", paramType = "query")
     @GetMapping(path = "/trainingResource/adminPage/all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     public ResponseEntity<Paging<TrainingResourceBundle>> getAllPublicTrainingResourceBundles(@ApiIgnore @RequestParam Map<String, Object> allRequestParams,
@@ -631,7 +573,7 @@ public class PublicController {
         ff.addFilter("published", true);
         if (auth != null && auth.isAuthenticated() && (securityService.hasRole(auth, "ROLE_ADMIN") || securityService.hasRole(auth, "ROLE_EPOT"))) {
             logger.info("Getting all published Training Resources for Admin/Epot");
-        } else{
+        } else {
             ff.addFilter("active", true);
             ff.addFilter("status", "approved resource");
         }
@@ -674,9 +616,9 @@ public class PublicController {
             User user = User.of(auth);
             if (securityService.hasRole(auth, "ROLE_ADMIN") || securityService.hasRole(auth, "ROLE_EPOT")
                     || securityService.userIsResourceProviderAdmin(user, id, interoperabilityRecordBundle.getInteroperabilityRecord().getCatalogueId())) {
-                if (interoperabilityRecordBundle.getMetadata().isPublished()){
+                if (interoperabilityRecordBundle.getMetadata().isPublished()) {
                     return new ResponseEntity<>(interoperabilityRecordBundle, HttpStatus.OK);
-                } else{
+                } else {
                     return ResponseEntity.status(HttpStatus.FOUND).body(gson.toJson("The specific Interoperability Record Bundle does not consist a Public entity"));
                 }
             }
@@ -689,14 +631,8 @@ public class PublicController {
     }
 
     @ApiOperation(value = "Filter a list of Public Interoperability Records based on a set of filters or get a list of all Public Interoperability Records in the Catalogue.")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "suspended", value = "Suspended", defaultValue = "false", dataType = "boolean", paramType = "query"),
-            @ApiImplicitParam(name = "query", value = "Keyword to refine the search", dataType = "string", paramType = "query"),
-            @ApiImplicitParam(name = "from", value = "Starting index in the result set", dataType = "string", paramType = "query"),
-            @ApiImplicitParam(name = "quantity", value = "Quantity to be fetched", dataType = "string", paramType = "query"),
-            @ApiImplicitParam(name = "order", value = "asc / desc", dataType = "string", paramType = "query"),
-            @ApiImplicitParam(name = "orderField", value = "Order field", dataType = "string", paramType = "query")
-    })
+    @Browse
+    @ApiImplicitParam(name = "suspended", value = "Suspended", defaultValue = "false", dataType = "boolean", paramType = "query")
     @GetMapping(path = "/interoperabilityRecord/all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity<Paging<InteroperabilityRecord>> getAllPublicInteroperabilityRecords(@ApiIgnore @RequestParam Map<String, Object> allRequestParams,
                                                                                               @RequestParam(defaultValue = "all", name = "catalogue_id") String catalogueId,
@@ -719,14 +655,8 @@ public class PublicController {
         return new ResponseEntity<>(interoperabilityRecordPaging, HttpStatus.OK);
     }
 
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "suspended", value = "Suspended", defaultValue = "false", dataType = "boolean", paramType = "query"),
-            @ApiImplicitParam(name = "query", value = "Keyword to refine the search", dataType = "string", paramType = "query"),
-            @ApiImplicitParam(name = "from", value = "Starting index in the result set", dataType = "string", paramType = "query"),
-            @ApiImplicitParam(name = "quantity", value = "Quantity to be fetched", dataType = "string", paramType = "query"),
-            @ApiImplicitParam(name = "order", value = "asc / desc", dataType = "string", paramType = "query"),
-            @ApiImplicitParam(name = "orderField", value = "Order field", dataType = "string", paramType = "query")
-    })
+    @Browse
+    @ApiImplicitParam(name = "suspended", value = "Suspended", defaultValue = "false", dataType = "boolean", paramType = "query")
     @GetMapping(path = "/interoperabilityRecord/bundle/all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     public ResponseEntity<Paging<InteroperabilityRecordBundle>> getAllPublicInteroperabilityRecordBundles(@ApiIgnore @RequestParam Map<String, Object> allRequestParams,
@@ -740,7 +670,7 @@ public class PublicController {
         ff.addFilter("published", true);
         if (auth != null && auth.isAuthenticated() && (securityService.hasRole(auth, "ROLE_ADMIN") || securityService.hasRole(auth, "ROLE_EPOT"))) {
             logger.info("Getting all published Interoperability Records for Admin/Epot");
-        } else{
+        } else {
             ff.addFilter("active", true);
             ff.addFilter("status", "approved interoperability record");
         }
@@ -759,8 +689,8 @@ public class PublicController {
         ff.setQuantity(10000);
         ff.addFilter("published", true);
         List<ResourceInteroperabilityRecordBundle> allResourceInteroperabilityRecords = resourceInteroperabilityRecordService.getAll(ff, null).getResults();
-        for (ResourceInteroperabilityRecordBundle resourceInteroperabilityRecordBundle : allResourceInteroperabilityRecords){
-            if (resourceInteroperabilityRecordBundle.getResourceInteroperabilityRecord().getInteroperabilityRecordIds().contains(id)){
+        for (ResourceInteroperabilityRecordBundle resourceInteroperabilityRecordBundle : allResourceInteroperabilityRecords) {
+            if (resourceInteroperabilityRecordBundle.getResourceInteroperabilityRecord().getInteroperabilityRecordIds().contains(id)) {
                 allInteroperabilityRecordRelatedResources.add(resourceInteroperabilityRecordBundle.getResourceInteroperabilityRecord().getResourceId());
             }
         }
@@ -796,9 +726,9 @@ public class PublicController {
             User user = User.of(auth);
             if (securityService.hasRole(auth, "ROLE_ADMIN") || securityService.hasRole(auth, "ROLE_EPOT")
                     || securityService.userIsResourceProviderAdmin(user, id, resourceInteroperabilityRecordBundle.getResourceInteroperabilityRecord().getCatalogueId())) {
-                if (resourceInteroperabilityRecordBundle.getMetadata().isPublished()){
+                if (resourceInteroperabilityRecordBundle.getMetadata().isPublished()) {
                     return new ResponseEntity<>(resourceInteroperabilityRecordBundle, HttpStatus.OK);
-                } else{
+                } else {
                     return ResponseEntity.status(HttpStatus.FOUND).body(gson.toJson("The specific Resource Interoperability Record Bundle does not consist a Public entity"));
                 }
             }
@@ -810,13 +740,7 @@ public class PublicController {
     }
 
     @ApiOperation(value = "Filter a list of Public Resource Interoperability Records based on a set of filters or get a list of all Public Resource Interoperability Records in the Catalogue.")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "query", value = "Keyword to refine the search", dataType = "string", paramType = "query"),
-            @ApiImplicitParam(name = "from", value = "Starting index in the result set", dataType = "string", paramType = "query"),
-            @ApiImplicitParam(name = "quantity", value = "Quantity to be fetched", dataType = "string", paramType = "query"),
-            @ApiImplicitParam(name = "order", value = "asc / desc", dataType = "string", paramType = "query"),
-            @ApiImplicitParam(name = "orderField", value = "Order field", dataType = "string", paramType = "query")
-    })
+    @Browse
     @GetMapping(path = "/resourceInteroperabilityRecord/all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity<Paging<ResourceInteroperabilityRecord>> getAllPublicResourceInteroperabilityRecords(@ApiIgnore @RequestParam Map<String, Object> allRequestParams,
                                                                                                               @ApiIgnore Authentication auth) {
@@ -834,13 +758,7 @@ public class PublicController {
         return new ResponseEntity<>(resourceInteroperabilityRecordPaging, HttpStatus.OK);
     }
 
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "query", value = "Keyword to refine the search", dataType = "string", paramType = "query"),
-            @ApiImplicitParam(name = "from", value = "Starting index in the result set", dataType = "string", paramType = "query"),
-            @ApiImplicitParam(name = "quantity", value = "Quantity to be fetched", dataType = "string", paramType = "query"),
-            @ApiImplicitParam(name = "order", value = "asc / desc", dataType = "string", paramType = "query"),
-            @ApiImplicitParam(name = "orderField", value = "Order field", dataType = "string", paramType = "query")
-    })
+    @Browse
     @GetMapping(path = "/resourceInteroperabilityRecord/bundle/all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     public ResponseEntity<Paging<ResourceInteroperabilityRecordBundle>> getAllPublicResourceInteroperabilityRecordBundles(@ApiIgnore @RequestParam Map<String, Object> allRequestParams,
@@ -849,7 +767,7 @@ public class PublicController {
         ff.addFilter("published", true);
         if (auth != null && auth.isAuthenticated() && (securityService.hasRole(auth, "ROLE_ADMIN") || securityService.hasRole(auth, "ROLE_EPOT"))) {
             logger.info("Getting all published Resource Interoperability Records for Admin/Epot");
-        } else{
+        } else {
             ff.addFilter("active", true);
         }
         Paging<ResourceInteroperabilityRecordBundle> resourceInteroperabilityRecordBundlePaging = resourceInteroperabilityRecordService.getAll(ff, auth);
@@ -888,9 +806,9 @@ public class PublicController {
         if (auth != null && auth.isAuthenticated()) {
             User user = User.of(auth);
             if (securityService.hasRole(auth, "ROLE_ADMIN") || securityService.hasRole(auth, "ROLE_EPOT")) {
-                if (configurationTemplateInstanceBundle.getMetadata().isPublished()){
+                if (configurationTemplateInstanceBundle.getMetadata().isPublished()) {
                     return new ResponseEntity<>(configurationTemplateInstanceBundle, HttpStatus.OK);
-                } else{
+                } else {
                     return ResponseEntity.status(HttpStatus.FOUND).body(gson.toJson("The specific Configuration Template Instance Bundle does not consist a Public entity"));
                 }
             }
@@ -902,13 +820,7 @@ public class PublicController {
     }
 
     @ApiOperation(value = "Filter a list of Public Configuration Template Instances based on a set of filters or get a list of all Public Configuration Template Instances in the Catalogue.")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "query", value = "Keyword to refine the search", dataType = "string", paramType = "query"),
-            @ApiImplicitParam(name = "from", value = "Starting index in the result set", dataType = "string", paramType = "query"),
-            @ApiImplicitParam(name = "quantity", value = "Quantity to be fetched", dataType = "string", paramType = "query"),
-            @ApiImplicitParam(name = "order", value = "asc / desc", dataType = "string", paramType = "query"),
-            @ApiImplicitParam(name = "orderField", value = "Order field", dataType = "string", paramType = "query")
-    })
+    @Browse
     @GetMapping(path = "/configurationTemplateInstance/all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity<Paging<ConfigurationTemplateInstanceDto>> getAllPublicConfigurationTemplateInstances(@ApiIgnore @RequestParam Map<String, Object> allRequestParams,
                                                                                                                @ApiIgnore Authentication auth) {
@@ -925,13 +837,7 @@ public class PublicController {
         return new ResponseEntity<>(configurationTemplateInstancePaging, HttpStatus.OK);
     }
 
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "query", value = "Keyword to refine the search", dataType = "string", paramType = "query"),
-            @ApiImplicitParam(name = "from", value = "Starting index in the result set", dataType = "string", paramType = "query"),
-            @ApiImplicitParam(name = "quantity", value = "Quantity to be fetched", dataType = "string", paramType = "query"),
-            @ApiImplicitParam(name = "order", value = "asc / desc", dataType = "string", paramType = "query"),
-            @ApiImplicitParam(name = "orderField", value = "Order field", dataType = "string", paramType = "query")
-    })
+    @Browse
     @GetMapping(path = "/configurationTemplateInstance/bundle/all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     public ResponseEntity<Paging<ConfigurationTemplateInstanceBundle>> getAllPublicConfigurationTemplateInstanceBundles(@ApiIgnore @RequestParam Map<String, Object> allRequestParams,
@@ -950,13 +856,14 @@ public class PublicController {
     })
     @GetMapping(path = "resources/{ids}", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<List<?>> getSomeResources(@PathVariable("ids") String[] ids) {
-        String[] resourceTypeNames = new String[] {"service", "datasource", "training_resource"};
+        String[] resourceTypeNames = new String[]{"service", "datasource", "training_resource"};
         List<?> someResources = new ArrayList<>();
-        for (String id : ids){
-            for (String resourceType : resourceTypeNames){
-                try{
+        for (String id : ids) {
+            for (String resourceType : resourceTypeNames) {
+                try {
                     someResources.add(genericResourceService.get(resourceType, id));
-                } catch (ResourceNotFoundException e){}
+                } catch (ResourceNotFoundException e) {
+                }
             }
         }
         List<?> ret = someResources.stream().map(r -> ((eu.einfracentral.domain.Bundle<?>) r).getPayload()).collect(Collectors.toList());
@@ -971,7 +878,7 @@ public class PublicController {
         ff.setQuantity(10000);
         ff.addFilter("published", true);
         List<ServiceBundle> allServices = resourceBundleService.getAll(ff, securityService.getAdminAccess()).getResults();
-        for (ServiceBundle serviceBundle : allServices){
+        for (ServiceBundle serviceBundle : allServices) {
             String serviceId = serviceBundle.getId();
             String catalogueId = serviceBundle.getService().getCatalogueId();
             String providerId = serviceBundle.getService().getResourceOrganisation();
@@ -981,13 +888,13 @@ public class PublicController {
 
             logger.info(String.format("Service [%s] of the Provider [%s] of the Catalogue [%s] has the following related resources",
                     serviceId, providerId, catalogueId));
-            if (!resourceProviders.isEmpty()){
+            if (!resourceProviders.isEmpty()) {
                 logger.info(String.format("Resource Providers [%s]", resourceProviders));
             }
-            if (!relatedResources.isEmpty()){
+            if (!relatedResources.isEmpty()) {
                 logger.info(String.format("Related Resources [%s]", relatedResources));
             }
-            if (!requiredResources.isEmpty()){
+            if (!requiredResources.isEmpty()) {
                 logger.info(String.format("Required Resources [%s]", requiredResources));
             }
         }
@@ -1000,7 +907,7 @@ public class PublicController {
         ff.setQuantity(10000);
         ff.addFilter("published", true);
         List<DatasourceBundle> allDatasources = datasourceBundleService.getAll(ff, securityService.getAdminAccess()).getResults();
-        for (DatasourceBundle datasourceBundle : allDatasources){
+        for (DatasourceBundle datasourceBundle : allDatasources) {
             String datasourceId = datasourceBundle.getId();
             String catalogueId = datasourceBundle.getDatasource().getCatalogueId();
             String providerId = datasourceBundle.getDatasource().getResourceOrganisation();
@@ -1010,13 +917,13 @@ public class PublicController {
 
             logger.info(String.format("Datasource [%s] of the Provider [%s] of the Catalogue [%s] has the following related resources",
                     datasourceId, providerId, catalogueId));
-            if (!resourceProviders.isEmpty()){
+            if (!resourceProviders.isEmpty()) {
                 logger.info(String.format("Resource Providers [%s]", resourceProviders));
             }
-            if (!relatedResources.isEmpty()){
+            if (!relatedResources.isEmpty()) {
                 logger.info(String.format("Related Resources [%s]", relatedResources));
             }
-            if (!requiredResources.isEmpty()){
+            if (!requiredResources.isEmpty()) {
                 logger.info(String.format("Required Resources [%s]", requiredResources));
             }
         }
@@ -1029,7 +936,7 @@ public class PublicController {
         ff.setQuantity(10000);
         ff.addFilter("published", true);
         List<TrainingResourceBundle> allTrainingResources = trainingResourceBundleService.getAll(ff, securityService.getAdminAccess()).getResults();
-        for (TrainingResourceBundle trainingResourceBundle : allTrainingResources){
+        for (TrainingResourceBundle trainingResourceBundle : allTrainingResources) {
             String trainingResourceId = trainingResourceBundle.getId();
             String catalogueId = trainingResourceBundle.getTrainingResource().getCatalogueId();
             String providerId = trainingResourceBundle.getTrainingResource().getResourceOrganisation();
@@ -1038,10 +945,10 @@ public class PublicController {
 
             logger.info(String.format("Training Resource [%s] of the Provider [%s] of the Catalogue [%s] has the following related resources",
                     trainingResourceId, providerId, catalogueId));
-            if (!resourceProviders.isEmpty()){
+            if (!resourceProviders.isEmpty()) {
                 logger.info(String.format("Resource Providers [%s]", resourceProviders));
             }
-            if (!eoscRelatedServices.isEmpty()){
+            if (!eoscRelatedServices.isEmpty()) {
                 logger.info(String.format("EOSC Related Services [%s]", eoscRelatedServices));
             }
         }

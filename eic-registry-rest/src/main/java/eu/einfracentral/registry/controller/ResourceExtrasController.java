@@ -1,9 +1,10 @@
 package eu.einfracentral.registry.controller;
 
-import eu.einfracentral.domain.*;
+import eu.einfracentral.domain.DatasourceBundle;
+import eu.einfracentral.domain.EOSCIFGuidelines;
 import eu.einfracentral.domain.ResourceBundle;
+import eu.einfracentral.domain.ServiceBundle;
 import eu.einfracentral.registry.service.ResourceBundleService;
-import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -15,7 +16,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
-import java.util.*;
+import java.util.List;
 
 @RestController
 @RequestMapping("resource-extras")
@@ -38,10 +39,10 @@ public class ResourceExtrasController {
     @PutMapping(path = "/update/eoscIFGuidelines", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     public ResponseEntity<ResourceBundle<?>> updateEOSCIFGuidelines(@RequestParam String resourceId, @RequestParam String catalogueId,
-                                                    @RequestBody List<EOSCIFGuidelines> eoscIFGuidelines, @RequestParam String type,
-                                                    @ApiIgnore Authentication auth) {
+                                                                    @RequestBody List<EOSCIFGuidelines> eoscIFGuidelines, @RequestParam String type,
+                                                                    @ApiIgnore Authentication auth) {
         ResourceBundle<?> bundle;
-        switch (type){
+        switch (type) {
             case "service":
                 bundle = serviceBundleService.updateEOSCIFGuidelines(resourceId, catalogueId, eoscIFGuidelines, auth);
                 break;
@@ -58,10 +59,10 @@ public class ResourceExtrasController {
     @PutMapping(path = "/update/researchCategories", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     public ResponseEntity<ResourceBundle<?>> updateResearchCategories(@RequestParam String resourceId, @RequestParam String catalogueId,
-                                                                  @RequestBody List<String> researchCategories, @RequestParam String type,
-                                                                  @ApiIgnore Authentication auth) {
+                                                                      @RequestBody List<String> researchCategories, @RequestParam String type,
+                                                                      @ApiIgnore Authentication auth) {
         ResourceBundle<?> bundle;
-        switch (type){
+        switch (type) {
             case "service":
                 bundle = serviceBundleService.updateResearchCategories(resourceId, catalogueId, researchCategories, auth);
                 break;
@@ -78,10 +79,10 @@ public class ResourceExtrasController {
     @PutMapping(path = "/update/horizontalService", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     public ResponseEntity<ResourceBundle<?>> updateHorizontalService(@RequestParam String resourceId, @RequestParam String catalogueId,
-                                                                 @RequestParam boolean horizontalService, @RequestParam String type,
-                                                                 @ApiIgnore Authentication auth) {
+                                                                     @RequestParam boolean horizontalService, @RequestParam String type,
+                                                                     @ApiIgnore Authentication auth) {
         ResourceBundle<?> bundle;
-        switch (type){
+        switch (type) {
             case "service":
                 bundle = serviceBundleService.updateHorizontalService(resourceId, catalogueId, horizontalService, auth);
                 break;

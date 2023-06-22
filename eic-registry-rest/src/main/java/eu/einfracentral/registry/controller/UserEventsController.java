@@ -1,8 +1,8 @@
 package eu.einfracentral.registry.controller;
 
 import eu.einfracentral.domain.Event;
-import eu.einfracentral.domain.ServiceBundle;
 import eu.einfracentral.domain.RichResource;
+import eu.einfracentral.domain.ServiceBundle;
 import eu.einfracentral.registry.service.EventService;
 import eu.einfracentral.registry.service.ResourceBundleService;
 import eu.openminted.registry.core.domain.FacetFilter;
@@ -46,7 +46,7 @@ public class UserEventsController {
     @GetMapping(path = "favourites", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<List<RichResource>> favourites(Authentication auth) {
 
-            Map<String, Float> favouriteServices = new HashMap<>();
+        Map<String, Float> favouriteServices = new HashMap<>();
         List<Event> userEvents = eventService.getUserEvents(Event.UserActionType.FAVOURITE.getKey(), auth);
         List<RichResource> services = new ArrayList<>();
 

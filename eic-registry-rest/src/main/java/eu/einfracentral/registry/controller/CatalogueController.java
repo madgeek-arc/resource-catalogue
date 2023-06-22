@@ -1,5 +1,6 @@
 package eu.einfracentral.registry.controller;
 
+import eu.einfracentral.annotations.Browse;
 import eu.einfracentral.domain.*;
 import eu.einfracentral.exception.ValidationException;
 import eu.einfracentral.registry.service.*;
@@ -10,7 +11,6 @@ import eu.openminted.registry.core.domain.Paging;
 import eu.openminted.registry.core.exception.ResourceNotFoundException;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -107,14 +107,8 @@ public class CatalogueController {
     }
 
     @ApiOperation(value = "Get a list of all Catalogues in the Portal.")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "suspended", value = "Suspended", defaultValue = "false", dataType = "boolean", paramType = "query"),
-            @ApiImplicitParam(name = "query", value = "Keyword to refine the search", dataType = "string", paramType = "query"),
-            @ApiImplicitParam(name = "from", value = "Starting index in the result set", dataType = "string", paramType = "query"),
-            @ApiImplicitParam(name = "quantity", value = "Quantity to be fetched", dataType = "string", paramType = "query"),
-            @ApiImplicitParam(name = "order", value = "asc / desc", dataType = "string", paramType = "query"),
-            @ApiImplicitParam(name = "orderField", value = "Order field", dataType = "string", paramType = "query")
-    })
+    @Browse
+    @ApiImplicitParam(name = "suspended", value = "Suspended", defaultValue = "false", dataType = "boolean", paramType = "query")
     @GetMapping(path = "all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity<Paging<Catalogue>> getAllCatalogues(@ApiIgnore @RequestParam Map<String, Object> allRequestParams,
                                                               @ApiIgnore Authentication auth) {
@@ -162,14 +156,8 @@ public class CatalogueController {
     }
 
     // Filter a list of Catalogues based on a set of filters or get a list of all Catalogues in the Portal.
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "suspended", value = "Suspended", defaultValue = "false", dataType = "boolean", paramType = "query"),
-            @ApiImplicitParam(name = "query", value = "Keyword to refine the search", dataType = "string", paramType = "query"),
-            @ApiImplicitParam(name = "from", value = "Starting index in the result set", dataType = "string", paramType = "query"),
-            @ApiImplicitParam(name = "quantity", value = "Quantity to be fetched", dataType = "string", paramType = "query"),
-            @ApiImplicitParam(name = "order", value = "asc / desc", dataType = "string", paramType = "query"),
-            @ApiImplicitParam(name = "orderField", value = "Order field", dataType = "string", paramType = "query")
-    })
+    @Browse
+    @ApiImplicitParam(name = "suspended", value = "Suspended", defaultValue = "false", dataType = "boolean", paramType = "query")
     @GetMapping(path = "bundle/all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     public ResponseEntity<Paging<CatalogueBundle>> getAllCatalogueBundles(@ApiIgnore @RequestParam Map<String, Object> allRequestParams, @ApiIgnore Authentication auth,
@@ -259,14 +247,8 @@ public class CatalogueController {
     }
 
     @ApiOperation(value = "Filter a list of Providers based on a set of filters or get a list of all Providers in the Catalogue.")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "suspended", value = "Suspended", defaultValue = "false", dataType = "boolean", paramType = "query"),
-            @ApiImplicitParam(name = "query", value = "Keyword to refine the search", dataType = "string", paramType = "query"),
-            @ApiImplicitParam(name = "from", value = "Starting index in the result set", dataType = "string", paramType = "query"),
-            @ApiImplicitParam(name = "quantity", value = "Quantity to be fetched", dataType = "string", paramType = "query"),
-            @ApiImplicitParam(name = "order", value = "asc / desc", dataType = "string", paramType = "query"),
-            @ApiImplicitParam(name = "orderField", value = "Order field", dataType = "string", paramType = "query")
-    })
+    @Browse
+    @ApiImplicitParam(name = "suspended", value = "Suspended", defaultValue = "false", dataType = "boolean", paramType = "query")
     @GetMapping(path = "{catalogueId}/provider/all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity<Paging<Provider>> getAllCatalogueProviders(@ApiIgnore @RequestParam Map<String, Object> allRequestParams, @PathVariable("catalogueId") String catalogueId, @ApiIgnore Authentication auth) {
         FacetFilter ff = FacetFilterUtils.createFacetFilter(allRequestParams);
@@ -343,9 +325,9 @@ public class CatalogueController {
     @ApiOperation(value = "Returns the Service of the specific Catalogue with the given id.")
     @GetMapping(path = "{catalogueId}/resource/{resourceId}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity<?> getCatalogueResource(@PathVariable("catalogueId") String catalogueId, @PathVariable("resourceId") String resourceId, @ApiIgnore Authentication auth) {
-        try{
+        try {
             return new ResponseEntity<>(resourceBundleService.get(resourceId, catalogueId).getService(), HttpStatus.OK);
-        } catch(eu.einfracentral.exception.ResourceNotFoundException e){
+        } catch (eu.einfracentral.exception.ResourceNotFoundException e) {
             return new ResponseEntity<>(datasourceBundleService.get(resourceId, catalogueId).getDatasource(), HttpStatus.OK);
         }
     }
@@ -375,9 +357,9 @@ public class CatalogueController {
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     @GetMapping(path = "{catalogueId}/{providerId}/resource/all", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<Paging<?>> getProviderResources(@PathVariable String catalogueId, @PathVariable String providerId,
-                                                         @RequestParam(defaultValue = "service", name = "type") String type,
-                                                         @ApiIgnore @RequestParam Map<String, Object> allRequestParams) {
-        FacetFilter ff =  resourceBundleService.createFacetFilterForFetchingServicesAndDatasources(allRequestParams, catalogueId, type);
+                                                          @RequestParam(defaultValue = "service", name = "type") String type,
+                                                          @ApiIgnore @RequestParam Map<String, Object> allRequestParams) {
+        FacetFilter ff = resourceBundleService.createFacetFilterForFetchingServicesAndDatasources(allRequestParams, catalogueId, type);
         ff.addFilter("resource_organisation", providerId);
         Paging<?> paging = genericResourceService.getResults(ff).map(r -> ((eu.einfracentral.domain.ResourceBundle<?>) r).getPayload());
         return ResponseEntity.ok(paging);
@@ -388,8 +370,8 @@ public class CatalogueController {
     @DeleteMapping(path = "{catalogueId}/resource/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isCatalogueAdmin(#auth, #catalogueId)")
     public ResponseEntity<Service> deleteCatalogueResource(@PathVariable("catalogueId") String catalogueId,
-                                                          @PathVariable("id") String id,
-                                                          @ApiIgnore Authentication auth) throws ResourceNotFoundException {
+                                                           @PathVariable("id") String id,
+                                                           @ApiIgnore Authentication auth) throws ResourceNotFoundException {
         ServiceBundle serviceBundle = resourceBundleService.get(id, catalogueId);
         if (serviceBundle == null) {
             return new ResponseEntity<>(HttpStatus.GONE);
@@ -404,9 +386,9 @@ public class CatalogueController {
     @ApiOperation(value = "Returns the Service of the specific Catalogue with the given id.")
     @GetMapping(path = "{catalogueId}/service/{resourceId}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity<?> getCatalogueService(@PathVariable("catalogueId") String catalogueId, @PathVariable("resourceId") String resourceId, @ApiIgnore Authentication auth) {
-        try{
+        try {
             return new ResponseEntity<>(resourceBundleService.get(resourceId, catalogueId).getService(), HttpStatus.OK);
-        } catch(eu.einfracentral.exception.ResourceNotFoundException e){
+        } catch (eu.einfracentral.exception.ResourceNotFoundException e) {
             return new ResponseEntity<>(datasourceBundleService.get(resourceId, catalogueId).getDatasource(), HttpStatus.OK);
         }
     }
@@ -435,7 +417,7 @@ public class CatalogueController {
     public ResponseEntity<Paging<?>> getProviderServices(@PathVariable String catalogueId, @PathVariable String providerId,
                                                          @RequestParam(defaultValue = "service", name = "type") String type,
                                                          @ApiIgnore @RequestParam Map<String, Object> allRequestParams) {
-        FacetFilter ff =  resourceBundleService.createFacetFilterForFetchingServicesAndDatasources(allRequestParams, catalogueId, type);
+        FacetFilter ff = resourceBundleService.createFacetFilterForFetchingServicesAndDatasources(allRequestParams, catalogueId, type);
         ff.addFilter("resource_organisation", providerId);
         Paging<?> paging = genericResourceService.getResults(ff).map(r -> ((eu.einfracentral.domain.ResourceBundle<?>) r).getPayload());
         return ResponseEntity.ok(paging);

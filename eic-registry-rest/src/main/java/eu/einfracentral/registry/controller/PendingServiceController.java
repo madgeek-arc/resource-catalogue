@@ -1,11 +1,12 @@
 package eu.einfracentral.registry.controller;
 
+import eu.einfracentral.annotations.Browse;
 import eu.einfracentral.domain.*;
 import eu.einfracentral.exception.ResourceException;
 import eu.einfracentral.exception.ValidationException;
+import eu.einfracentral.registry.service.PendingResourceService;
 import eu.einfracentral.registry.service.ProviderService;
 import eu.einfracentral.registry.service.ResourceBundleService;
-import eu.einfracentral.registry.service.PendingResourceService;
 import eu.einfracentral.service.GenericResourceService;
 import eu.einfracentral.service.IdCreator;
 import eu.openminted.registry.core.domain.FacetFilter;
@@ -13,8 +14,6 @@ import eu.openminted.registry.core.domain.Paging;
 import eu.openminted.registry.core.exception.ResourceNotFoundException;
 import eu.openminted.registry.core.service.ServiceException;
 import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiImplicitParams;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -75,9 +74,9 @@ public class PendingServiceController extends ResourceController<ServiceBundle, 
 
     @GetMapping(path = "/resource/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<?> getService(@PathVariable String id) {
-        try{
+        try {
             return new ResponseEntity<>(pendingServiceManager.get(id).getService(), HttpStatus.OK);
-        } catch(ResourceException | eu.einfracentral.exception.ResourceNotFoundException e){
+        } catch (ResourceException | eu.einfracentral.exception.ResourceNotFoundException e) {
             return new ResponseEntity<>(pendingDatasourceManager.get(id).getDatasource(), HttpStatus.OK);
         }
     }
@@ -87,18 +86,12 @@ public class PendingServiceController extends ResourceController<ServiceBundle, 
         return new ResponseEntity<>((RichResource) pendingServiceManager.getPendingRich(id, auth), HttpStatus.OK);
     }
 
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "query", value = "Keyword to refine the search", dataType = "string", paramType = "query"),
-            @ApiImplicitParam(name = "from", value = "Starting index in the result set", dataType = "string", paramType = "query"),
-            @ApiImplicitParam(name = "quantity", value = "Quantity to be fetched", dataType = "string", paramType = "query"),
-            @ApiImplicitParam(name = "order", value = "asc / desc", dataType = "string", paramType = "query"),
-            @ApiImplicitParam(name = "orderField", value = "Order field", dataType = "string", paramType = "query")
-    })
+    @Browse
     @GetMapping(path = "/byProvider/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isProviderAdmin(#auth,#id,true)")
     public ResponseEntity<Paging<?>> getProviderPendingServices(@ApiIgnore @RequestParam MultiValueMap<String, Object> allRequestParams,
-                                                                            @RequestParam(defaultValue = "pending_service", name = "type") String type,
-                                                                            @PathVariable String id, @ApiIgnore Authentication auth) {
+                                                                @RequestParam(defaultValue = "pending_service", name = "type") String type,
+                                                                @PathVariable String id, @ApiIgnore Authentication auth) {
         FacetFilter ff = resourceBundleService.createFacetFilterForFetchingServicesAndDatasources(allRequestParams, catalogueName, type);
         ff.addFilter("resource_organisation", id);
         ff.setResourceType("resourceTypes");
@@ -181,7 +174,7 @@ public class PendingServiceController extends ResourceController<ServiceBundle, 
         // check Provider's template status -> block transform if it's on 'pending' state
         String resourceOrgranisation = service.getResourceOrganisation();
         ProviderBundle providerBundle = providerService.get(resourceOrgranisation);
-        if (providerBundle.getTemplateStatus().equals("pending template")){
+        if (providerBundle.getTemplateStatus().equals("pending template")) {
             throw new ValidationException(String.format("There is already a Resource waiting to be approved for the Provider [%s]", resourceOrgranisation));
         }
 

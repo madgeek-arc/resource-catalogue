@@ -3,6 +3,7 @@ package eu.einfracentral.registry.controller;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
+import eu.einfracentral.annotations.Browse;
 import eu.einfracentral.domain.*;
 import eu.einfracentral.dto.MonitoringStatus;
 import eu.einfracentral.dto.ServiceType;
@@ -17,15 +18,15 @@ import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.domain.Paging;
 import eu.openminted.registry.core.exception.ResourceNotFoundException;
 import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.*;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.WebDataBinder;
@@ -34,7 +35,10 @@ import springfox.documentation.annotations.ApiIgnore;
 
 import javax.validation.Valid;
 import java.time.OffsetDateTime;
-import java.util.*;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("service-extensions")
@@ -97,13 +101,7 @@ public class ServiceExtensionsController {
     }
 
     @ApiOperation(value = "Filter a list of Helpdesks based on a set of filters or get a list of all Helpdesks in the Catalogue.")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "query", value = "Keyword to refine the search", dataType = "string", paramType = "query"),
-            @ApiImplicitParam(name = "from", value = "Starting index in the result set", dataType = "string", paramType = "query"),
-            @ApiImplicitParam(name = "quantity", value = "Quantity to be fetched", dataType = "string", paramType = "query"),
-            @ApiImplicitParam(name = "order", value = "asc / desc", dataType = "string", paramType = "query"),
-            @ApiImplicitParam(name = "orderField", value = "Order field", dataType = "string", paramType = "query")
-    })
+    @Browse
     @GetMapping(path = "/helpdesk/all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity<Paging<Helpdesk>> getAllHelpdesks(@ApiIgnore @RequestParam Map<String, Object> allRequestParams,
                                                             @RequestParam(defaultValue = "all", name = "catalogue_id") String catalogueIds,
@@ -210,13 +208,7 @@ public class ServiceExtensionsController {
     }
 
     @ApiOperation(value = "Filter a list of Monitorings based on a set of filters or get a list of all Monitorings in the Catalogue.")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "query", value = "Keyword to refine the search", dataType = "string", paramType = "query"),
-            @ApiImplicitParam(name = "from", value = "Starting index in the result set", dataType = "string", paramType = "query"),
-            @ApiImplicitParam(name = "quantity", value = "Quantity to be fetched", dataType = "string", paramType = "query"),
-            @ApiImplicitParam(name = "order", value = "asc / desc", dataType = "string", paramType = "query"),
-            @ApiImplicitParam(name = "orderField", value = "Order field", dataType = "string", paramType = "query")
-    })
+    @Browse
     @GetMapping(path = "monitoring/all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity<Paging<Monitoring>> getAllMonitorings(@ApiIgnore @RequestParam Map<String, Object> allRequestParams,
                                                                 @RequestParam(defaultValue = "all", name = "catalogue_id") String catalogueIds,
@@ -306,7 +298,7 @@ public class ServiceExtensionsController {
     // Argo GRNET Monitoring Status API calls
     @GetMapping(path = "/monitoring/monitoringAvailability/{serviceId}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public List<MonitoringStatus> getMonitoringAvailability(@PathVariable String serviceId, @RequestParam String start_time, @RequestParam String end_time) {
-        String url = monitoringAvailability + serviceId + "?start_time=" + start_time + "&end_time=" + end_time ;
+        String url = monitoringAvailability + serviceId + "?start_time=" + start_time + "&end_time=" + end_time;
         String response = CreateArgoGrnetHttpRequest.createHttpRequest(url, monitoringToken);
         List<MonitoringStatus> serviceMonitoringStatuses;
         if (response != null) {
@@ -343,9 +335,9 @@ public class ServiceExtensionsController {
 
     @GetMapping(path = "/monitoring/monitoringStatusOnSpecificPeriod/{serviceId}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public List<MonitoringStatus> getMonitoringStatusOnSpecificPeriod(@PathVariable String serviceId, @RequestParam String from, @RequestParam String to) {
-        OffsetDateTime odtFrom = OffsetDateTime.parse(from+"T00:00:01Z");
-        OffsetDateTime odtTo = OffsetDateTime.parse(to+"T23:59:59Z");
-        String url = monitoringStatus + serviceId + "?start_time=" + odtFrom + "&end_time=" + odtTo ;
+        OffsetDateTime odtFrom = OffsetDateTime.parse(from + "T00:00:01Z");
+        OffsetDateTime odtTo = OffsetDateTime.parse(to + "T23:59:59Z");
+        String url = monitoringStatus + serviceId + "?start_time=" + odtFrom + "&end_time=" + odtTo;
         String response = CreateArgoGrnetHttpRequest.createHttpRequest(url, monitoringToken);
         List<MonitoringStatus> serviceMonitoringStatuses;
         if (response != null) {
@@ -366,16 +358,16 @@ public class ServiceExtensionsController {
         ff.addFilter("published", false);
         List<ServiceBundle> allServices = serviceBundleService.getAll(ff, null).getResults();
         Map<String, String> serviceStatusMap = new HashMap<>();
-        for (ServiceBundle serviceBundle : allServices){
+        for (ServiceBundle serviceBundle : allServices) {
             serviceStatusMap.put(serviceBundle.getId(), getServiceMonitoringStatusValue(serviceBundle.getId()));
         }
         return serviceStatusMap;
     }
 
-    private String getServiceMonitoringStatusValue(String serviceId){
+    private String getServiceMonitoringStatusValue(String serviceId) {
         try {
             return getMonitoringStatus(serviceId, false).get(0).getValue();
-        } catch(NullPointerException e) {
+        } catch (NullPointerException e) {
             return "";
         }
     }
