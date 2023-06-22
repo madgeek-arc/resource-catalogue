@@ -751,6 +751,22 @@ public class PublicController {
         return new ResponseEntity<>(interoperabilityRecordPaging, HttpStatus.OK);
     }
 
+    @ApiOperation(value = "Returns the Public Related Resources of a specific Interoperability Record given its id.")
+    @GetMapping(path = {"/interoperabilityRecord/relatedResources/{id}"}, produces = {MediaType.APPLICATION_JSON_VALUE})
+    public List<String> getAllInteroperabilityRecordRelatedResources(@PathVariable String id) {
+        List<String> allInteroperabilityRecordRelatedResources = new ArrayList<>();
+        FacetFilter ff = new FacetFilter();
+        ff.setQuantity(10000);
+        ff.addFilter("published", true);
+        List<ResourceInteroperabilityRecordBundle> allResourceInteroperabilityRecords = resourceInteroperabilityRecordService.getAll(ff, null).getResults();
+        for (ResourceInteroperabilityRecordBundle resourceInteroperabilityRecordBundle : allResourceInteroperabilityRecords){
+            if (resourceInteroperabilityRecordBundle.getResourceInteroperabilityRecord().getInteroperabilityRecordIds().contains(id)){
+                allInteroperabilityRecordRelatedResources.add(resourceInteroperabilityRecordBundle.getResourceInteroperabilityRecord().getResourceId());
+            }
+        }
+        return allInteroperabilityRecordRelatedResources;
+    }
+
     @GetMapping(path = "/interoperabilityRecord/my", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity<List<InteroperabilityRecordBundle>> getMyPublicInteroperabilityRecords(@ApiIgnore Authentication auth) {
         FacetFilter ff = new FacetFilter();
