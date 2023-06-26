@@ -1,6 +1,8 @@
 package eu.einfracentral.domain;
 
 
+import org.springframework.security.core.Authentication;
+
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
@@ -85,7 +87,6 @@ public class LoggingInfo {
         // Update
         UPDATED("updated"),
         UPDATED_VERSION("updated version"),
-        DELETED("deleted"),
         ACTIVATED("activated"),
         DEACTIVATED("deactivated"),
         SUSPENDED("suspended"),
@@ -120,25 +121,26 @@ public class LoggingInfo {
         }
     }
 
-    public static LoggingInfo createLoggingInfoEntry(String userEmail, String userFullName, String role, String type, String actionType){
+    public static LoggingInfo createLoggingInfoEntry(Authentication auth, String userRole, String type, String actionType) {
         LoggingInfo ret = new LoggingInfo();
         ret.setDate(String.valueOf(System.currentTimeMillis()));
         ret.setType(type);
         ret.setActionType(actionType);
-        ret.setUserEmail(userEmail);
-        ret.setUserFullName(userFullName);
-        ret.setUserRole(role);
+        ret.setUserEmail(User.of(auth).getEmail());
+        ret.setUserFullName(User.of(auth).getFullName());
+        ret.setUserRole(userRole);
         return ret;
     }
 
-    public static LoggingInfo createLoggingInfoEntry(String userEmail, String userFullName, String role, String type, String actionType, String comment){
+    public static LoggingInfo createLoggingInfoEntry(Authentication auth, String userRole, String type, String actionType,
+                                                     String comment) {
         LoggingInfo ret = new LoggingInfo();
         ret.setDate(String.valueOf(System.currentTimeMillis()));
         ret.setType(type);
         ret.setActionType(actionType);
-        ret.setUserEmail(userEmail);
-        ret.setUserFullName(userFullName);
-        ret.setUserRole(role);
+        ret.setUserEmail(User.of(auth).getEmail());
+        ret.setUserFullName(User.of(auth).getFullName());
+        ret.setUserRole(userRole);
         ret.setComment(comment);
         return ret;
     }

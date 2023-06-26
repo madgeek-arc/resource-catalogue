@@ -10,6 +10,7 @@ import eu.einfracentral.registry.service.ConfigurationTemplateInstanceService;
 import eu.einfracentral.registry.service.ConfigurationTemplateService;
 import eu.einfracentral.registry.service.ResourceInteroperabilityRecordService;
 import eu.einfracentral.service.SecurityService;
+import eu.einfracentral.utils.ProviderResourcesCommonMethods;
 import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.domain.Resource;
 import net.minidev.json.JSONObject;
@@ -22,6 +23,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
 
@@ -35,16 +37,18 @@ public class ConfigurationTemplateInstanceManager extends ResourceManager<Config
 
     private final ConfigurationTemplateService<ConfigurationTemplateBundle> configurationTemplateService;
     private final SecurityService securityService;
+    private final ProviderResourcesCommonMethods commonMethods;
 
     public ConfigurationTemplateInstanceManager(@Lazy ConfigurationTemplateInstanceService<ConfigurationTemplateInstanceBundle> configurationTemplateInstanceService,
                                                 @Lazy ConfigurationTemplateService<ConfigurationTemplateBundle> configurationTemplateService,
                                                 @Lazy ResourceInteroperabilityRecordService<ResourceInteroperabilityRecordBundle> resourceInteroperabilityRecordService,
-                                                SecurityService securityService) {
+                                                SecurityService securityService, ProviderResourcesCommonMethods commonMethods) {
         super(ConfigurationTemplateInstanceBundle.class);
         this.configurationTemplateInstanceService = configurationTemplateInstanceService;
         this.configurationTemplateService = configurationTemplateService;
         this.resourceInteroperabilityRecordService = resourceInteroperabilityRecordService;
         this.securityService = securityService;
+        this.commonMethods = commonMethods;
     }
 
     @Override
@@ -63,15 +67,12 @@ public class ConfigurationTemplateInstanceManager extends ResourceManager<Config
         logger.trace("User '{}' is attempting to add a new ConfigurationTemplateInstance: {}", auth, configurationTemplateInstanceBundle);
 
         configurationTemplateInstanceBundle.setMetadata(Metadata.createMetadata(User.of(auth).getFullName(), User.of(auth).getEmail()));
-        LoggingInfo loggingInfo = LoggingInfo.createLoggingInfoEntry(User.of(auth).getEmail(), User.of(auth).getFullName(), securityService.getRoleName(auth),
-                LoggingInfo.Types.ONBOARD.getKey(), LoggingInfo.ActionType.REGISTERED.getKey());
-        List<LoggingInfo> loggingInfoList = new ArrayList<>();
-        loggingInfoList.add(loggingInfo);
+        List<LoggingInfo> loggingInfoList = commonMethods.returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(configurationTemplateInstanceBundle, auth);
         configurationTemplateInstanceBundle.setLoggingInfo(loggingInfoList);
-        configurationTemplateInstanceBundle.setActive(true);
+        configurationTemplateInstanceBundle.setLatestOnboardingInfo(loggingInfoList.get(0));
 
-        // latestOnboardingInfo
-        configurationTemplateInstanceBundle.setLatestOnboardingInfo(loggingInfo);
+        // active
+        configurationTemplateInstanceBundle.setActive(true);
 
         ConfigurationTemplateInstanceBundle ret;
         ret = super.add(configurationTemplateInstanceBundle, null);
@@ -99,16 +100,11 @@ public class ConfigurationTemplateInstanceManager extends ResourceManager<Config
         validate(configurationTemplateInstanceBundle);
 
         configurationTemplateInstanceBundle.setMetadata(Metadata.updateMetadata(configurationTemplateInstanceBundle.getMetadata(), User.of(auth).getFullName(), User.of(auth).getEmail()));
-        List<LoggingInfo> loggingInfoList = new ArrayList<>();
-        LoggingInfo loggingInfo;
-        loggingInfo = LoggingInfo.createLoggingInfoEntry(User.of(auth).getEmail(), User.of(auth).getFullName(), securityService.getRoleName(auth),
-                LoggingInfo.Types.UPDATE.getKey(), LoggingInfo.ActionType.UPDATED.getKey());
-        if (configurationTemplateInstanceBundle.getLoggingInfo() != null) {
-            loggingInfoList = configurationTemplateInstanceBundle.getLoggingInfo();
-            loggingInfoList.add(loggingInfo);
-        } else {
-            loggingInfoList.add(loggingInfo);
-        }
+        List<LoggingInfo> loggingInfoList = commonMethods.returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(ex, auth);
+        LoggingInfo loggingInfo = commonMethods.createLoggingInfo(auth, LoggingInfo.Types.UPDATE.getKey(),
+                LoggingInfo.ActionType.UPDATED.getKey());
+        loggingInfoList.add(loggingInfo);
+        loggingInfoList.sort(Comparator.comparing(LoggingInfo::getDate));
         configurationTemplateInstanceBundle.setLoggingInfo(loggingInfoList);
 
         // latestUpdateInfo

@@ -14,6 +14,7 @@ import eu.einfracentral.service.*;
 import eu.einfracentral.service.search.SearchServiceEIC;
 import eu.einfracentral.utils.FacetFilterUtils;
 import eu.einfracentral.utils.FacetLabelService;
+import eu.einfracentral.utils.ProviderResourcesCommonMethods;
 import eu.einfracentral.utils.TextUtils;
 import eu.einfracentral.validators.FieldValidator;
 import eu.openminted.registry.core.domain.*;
@@ -88,6 +89,8 @@ public abstract class AbstractResourceBundleManager<T extends ResourceBundle<?>>
     private Validator serviceValidator;
     @Autowired
     private GenericResourceService genericResourceService;
+    @Autowired
+    private ProviderResourcesCommonMethods commonMethods;
 
     @PostConstruct
     void initLabels() {
@@ -995,16 +998,10 @@ public abstract class AbstractResourceBundleManager<T extends ResourceBundle<?>>
     }
 
     private void createLoggingInfoEntriesForResourceExtraUpdates(T bundle, Authentication auth) {
-        List<LoggingInfo> loggingInfoList = new ArrayList<>();
-        LoggingInfo loggingInfo;
-        loggingInfo = LoggingInfo.createLoggingInfoEntry(User.of(auth).getEmail(), User.of(auth).getFullName(), securityService.getRoleName(auth),
-                LoggingInfo.Types.UPDATE.getKey(), LoggingInfo.ActionType.UPDATED.getKey(), null);
-        if (bundle.getLoggingInfo() != null) {
-            loggingInfoList = bundle.getLoggingInfo();
-            loggingInfoList.add(loggingInfo);
-        } else {
-            loggingInfoList.add(loggingInfo);
-        }
+        List<LoggingInfo> loggingInfoList = commonMethods.returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(bundle, auth);
+        LoggingInfo loggingInfo = commonMethods.createLoggingInfo(auth, LoggingInfo.Types.UPDATE.getKey(),
+                LoggingInfo.ActionType.UPDATED.getKey());
+        loggingInfoList.add(loggingInfo);
         bundle.setLoggingInfo(loggingInfoList);
     }
 

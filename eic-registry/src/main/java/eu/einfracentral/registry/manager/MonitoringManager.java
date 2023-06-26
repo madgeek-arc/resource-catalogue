@@ -10,6 +10,7 @@ import eu.einfracentral.registry.service.MonitoringService;
 import eu.einfracentral.service.RegistrationMailService;
 import eu.einfracentral.service.SecurityService;
 import eu.einfracentral.utils.CreateArgoGrnetHttpRequest;
+import eu.einfracentral.utils.ProviderResourcesCommonMethods;
 import eu.einfracentral.utils.ResourceValidationUtils;
 import eu.openminted.registry.core.domain.Resource;
 import eu.openminted.registry.core.service.SearchService;
@@ -37,6 +38,7 @@ public class MonitoringManager extends ResourceManager<MonitoringBundle> impleme
     private final JmsTemplate jmsTopicTemplate;
     private final SecurityService securityService;
     private final RegistrationMailService registrationMailService;
+    private final ProviderResourcesCommonMethods commonMethods;
 
     @Value("${argo.grnet.monitoring.token}")
     private String monitoringToken;
@@ -47,13 +49,15 @@ public class MonitoringManager extends ResourceManager<MonitoringBundle> impleme
     public MonitoringManager(ResourceBundleService<ServiceBundle> serviceBundleService,
                              ResourceBundleService<DatasourceBundle> datasourceBundleService,
                              JmsTemplate jmsTopicTemplate, @Lazy SecurityService securityService,
-                             @Lazy RegistrationMailService registrationMailService) {
+                             @Lazy RegistrationMailService registrationMailService,
+                             ProviderResourcesCommonMethods commonMethods) {
         super(MonitoringBundle.class);
         this.serviceBundleService = serviceBundleService;
         this.datasourceBundleService = datasourceBundleService;
         this.jmsTopicTemplate = jmsTopicTemplate;
         this.securityService = securityService;
         this.registrationMailService = registrationMailService;
+        this.commonMethods = commonMethods;
     }
 
     @Override
@@ -97,14 +101,11 @@ public class MonitoringManager extends ResourceManager<MonitoringBundle> impleme
         logger.trace("User '{}' is attempting to add a new Monitoring: {}", auth, monitoring);
 
         monitoring.setMetadata(Metadata.createMetadata(User.of(auth).getFullName(), User.of(auth).getEmail()));
-        LoggingInfo loggingInfo = LoggingInfo.createLoggingInfoEntry(User.of(auth).getEmail(), User.of(auth).getFullName(), securityService.getRoleName(auth),
-                LoggingInfo.Types.ONBOARD.getKey(), LoggingInfo.ActionType.REGISTERED.getKey());
-        List<LoggingInfo> loggingInfoList = new ArrayList<>();
-        loggingInfoList.add(loggingInfo);
+        List<LoggingInfo> loggingInfoList = commonMethods.returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(monitoring, auth);
         monitoring.setLoggingInfo(loggingInfoList);
         monitoring.setActive(true);
         // latestOnboardingInfo
-        monitoring.setLatestOnboardingInfo(loggingInfo);
+        monitoring.setLatestOnboardingInfo(loggingInfoList.get(0));
         // default monitoredBy value -> EOSC
         monitoring.getMonitoring().setMonitoredBy("monitored_by-eosc");
 
@@ -130,16 +131,10 @@ public class MonitoringManager extends ResourceManager<MonitoringBundle> impleme
 
         validate(monitoring);
         monitoring.setMetadata(Metadata.updateMetadata(monitoring.getMetadata(), User.of(auth).getFullName(), User.of(auth).getEmail()));
-        List<LoggingInfo> loggingInfoList = new ArrayList<>();
-        LoggingInfo loggingInfo;
-        loggingInfo = LoggingInfo.createLoggingInfoEntry(User.of(auth).getEmail(), User.of(auth).getFullName(), securityService.getRoleName(auth),
-                LoggingInfo.Types.UPDATE.getKey(), LoggingInfo.ActionType.UPDATED.getKey());
-        if (monitoring.getLoggingInfo() != null) {
-            loggingInfoList = monitoring.getLoggingInfo();
-            loggingInfoList.add(loggingInfo);
-        } else {
-            loggingInfoList.add(loggingInfo);
-        }
+        List<LoggingInfo> loggingInfoList = commonMethods.returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(monitoring, auth);
+        LoggingInfo loggingInfo = commonMethods.createLoggingInfo(auth, LoggingInfo.Types.UPDATE.getKey(),
+                LoggingInfo.ActionType.UPDATED.getKey());
+        loggingInfoList.add(loggingInfo);
         monitoring.setLoggingInfo(loggingInfoList);
 
         // latestUpdateInfo

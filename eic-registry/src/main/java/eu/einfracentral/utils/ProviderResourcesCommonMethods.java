@@ -9,6 +9,7 @@ import eu.einfracentral.service.SecurityService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
@@ -220,24 +221,13 @@ public class ProviderResourcesCommonMethods {
             bundle.setSuspended(suspend);
 
             LoggingInfo loggingInfo;
-            List<LoggingInfo> loggingInfoList = new ArrayList<>();
-
-            // Create basic REGISTERED LoggingInfo if LoggingInfo is null
-            if (bundle.getLoggingInfo() != null) {
-                loggingInfoList = bundle.getLoggingInfo();
-            } else {
-                LoggingInfo oldProviderRegistration = LoggingInfo.createLoggingInfoEntry(User.of(auth).getEmail(), User.of(auth).getFullName(), securityService.getRoleName(auth),
-                        LoggingInfo.Types.ONBOARD.getKey(), LoggingInfo.ActionType.REGISTERED.getKey());
-                loggingInfoList.add(oldProviderRegistration);
-            }
+            List<LoggingInfo> loggingInfoList = returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(bundle, auth);
 
             // Create SUSPEND LoggingInfo
             if (suspend) {
-                loggingInfo = LoggingInfo.createLoggingInfoEntry(User.of(auth).getEmail(), User.of(auth).getFullName(), securityService.getRoleName(auth),
-                        LoggingInfo.Types.UPDATE.getKey(), LoggingInfo.ActionType.SUSPENDED.getKey());
+                loggingInfo = createLoggingInfo(auth, LoggingInfo.Types.UPDATE.getKey(), LoggingInfo.ActionType.SUSPENDED.getKey());
             } else {
-                loggingInfo = LoggingInfo.createLoggingInfoEntry(User.of(auth).getEmail(), User.of(auth).getFullName(), securityService.getRoleName(auth),
-                        LoggingInfo.Types.UPDATE.getKey(), LoggingInfo.ActionType.UNSUSPENDED.getKey());
+                loggingInfo = createLoggingInfo(auth, LoggingInfo.Types.UPDATE.getKey(), LoggingInfo.ActionType.UNSUSPENDED.getKey());
             }
             loggingInfoList.add(loggingInfo);
             bundle.setLoggingInfo(loggingInfoList);
@@ -270,16 +260,8 @@ public class ProviderResourcesCommonMethods {
 
     public void auditResource(Bundle<?> bundle, String comment, LoggingInfo.ActionType actionType, Authentication auth) {
         LoggingInfo loggingInfo;
-        List<LoggingInfo> loggingInfoList = new ArrayList<>();
-        if (bundle.getLoggingInfo() != null) {
-            loggingInfoList = bundle.getLoggingInfo();
-        } else {
-            LoggingInfo oldProviderRegistration = LoggingInfo.createLoggingInfoEntry(User.of(auth).getEmail(), User.of(auth).getFullName(), securityService.getRoleName(auth), LoggingInfo.Types.ONBOARD.getKey(),
-                    LoggingInfo.ActionType.REGISTERED.getKey());
-            loggingInfoList.add(oldProviderRegistration);
-        }
-
-        loggingInfo = LoggingInfo.createLoggingInfoEntry(User.of(auth).getEmail(), User.of(auth).getFullName(), securityService.getRoleName(auth), LoggingInfo.Types.AUDIT.getKey(),
+        List<LoggingInfo> loggingInfoList = returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(bundle, auth);
+        loggingInfo = LoggingInfo.createLoggingInfoEntry(auth, securityService.getRoleName(auth), LoggingInfo.Types.AUDIT.getKey(),
                 actionType.getKey(), comment);
         loggingInfoList.add(loggingInfo);
         bundle.setLoggingInfo(loggingInfoList);
@@ -287,4 +269,48 @@ public class ProviderResourcesCommonMethods {
         // latestAuditInfo
         bundle.setLatestAuditInfo(loggingInfo);
     }
+
+    public List<LoggingInfo> returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(Bundle<?> bundle, Authentication auth) {
+        List<LoggingInfo> loggingInfoList = new ArrayList<>();
+        if (bundle.getLoggingInfo() != null && !bundle.getLoggingInfo().isEmpty()) {
+            loggingInfoList = bundle.getLoggingInfo();
+        } else {
+            loggingInfoList.add(createLoggingInfo(auth, LoggingInfo.Types.ONBOARD.getKey(),
+                    LoggingInfo.ActionType.REGISTERED.getKey()));
+        }
+        return loggingInfoList;
+    }
+
+    public LoggingInfo createLoggingInfo(Authentication auth, String type, String actionType) {
+        return LoggingInfo.createLoggingInfoEntry(auth, securityService.getRoleName(auth), type, actionType);
+    }
+
+    public LoggingInfo createLoggingInfo(Authentication auth, String type, String actionType, String comment) {
+        return LoggingInfo.createLoggingInfoEntry(auth, securityService.getRoleName(auth), type, actionType, comment);
+    }
+
+    public List<LoggingInfo> createActivationLoggingInfo(Bundle<?> bundle, boolean active, Authentication auth) {
+        List<LoggingInfo> loggingInfoList = returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(bundle, auth);
+        LoggingInfo loggingInfo;
+
+        // distinction between system's (onboarding stage) and user's activation
+        if (active){
+            try {
+                loggingInfo = createLoggingInfo(auth, LoggingInfo.Types.UPDATE.getKey(),
+                        LoggingInfo.ActionType.ACTIVATED.getKey());
+            } catch (InsufficientAuthenticationException e) {
+                loggingInfo = LoggingInfo.systemUpdateLoggingInfo(LoggingInfo.ActionType.ACTIVATED.getKey());
+            }
+        } else{
+            try {
+                loggingInfo = createLoggingInfo(auth, LoggingInfo.Types.UPDATE.getKey(),
+                        LoggingInfo.ActionType.DEACTIVATED.getKey());
+            } catch (InsufficientAuthenticationException e) {
+                loggingInfo = LoggingInfo.systemUpdateLoggingInfo(LoggingInfo.ActionType.DEACTIVATED.getKey());
+            }
+        }
+        loggingInfoList.add(loggingInfo);
+        return loggingInfoList;
+    }
+
 }
