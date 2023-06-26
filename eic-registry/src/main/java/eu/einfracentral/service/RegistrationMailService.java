@@ -1065,40 +1065,57 @@ public class RegistrationMailService {
         sendMailsFromTemplate("invalidTrainingResourceUpdate.ftl", root, subject, registrationEmail, userRole);
     }
 
-    public void sendEmailsForHelpdeskExtension(HelpdeskBundle helpdeskBundle, String action){
+    public void sendEmailsForHelpdeskExtension(HelpdeskBundle helpdeskBundle, String resourceType, String action){
+        String resourceName = getResourceNameFromResourceType(resourceType);
         Map<String, Object> root = new HashMap<>();
         root.put("project", projectName);
         root.put("endpoint", endpoint);
         root.put("helpdeskBundle", helpdeskBundle);
+        root.put("resourceName", resourceName);
         root.put("action", action);
 
         // send email to help@eosc-future.eu
         String userRole = "admin";
         String subject = "";
         if (action.equals("post")){
-            subject = String.format("[%s Portal] The Service [%s] has created a new Helpdesk Extension", projectName, helpdeskBundle.getHelpdesk().getServiceId());
+            subject = String.format("[%s Portal] The %s [%s] has created a new Helpdesk Extension", projectName, resourceName, helpdeskBundle.getHelpdesk().getServiceId());
         } else{
-            subject = String.format("[%s Portal] The Service [%s] updated its Helpdesk Extension", projectName, helpdeskBundle.getHelpdesk().getServiceId());
+            subject = String.format("[%s Portal] The %s [%s] updated its Helpdesk Extension", projectName, resourceName, helpdeskBundle.getHelpdesk().getServiceId());
         }
         sendMailsFromTemplate("serviceExtensionsHelpdesk.ftl", root, subject, helpdeskEmail, Collections.singletonList(helpdeskCC), userRole);
     }
 
-    public void sendEmailsForMonitoringExtension(MonitoringBundle monitoringBundle, String action){
+    public void sendEmailsForMonitoringExtension(MonitoringBundle monitoringBundle, String resourceType, String action){
+        String resourceName = getResourceNameFromResourceType(resourceType);
         Map<String, Object> root = new HashMap<>();
         root.put("project", projectName);
         root.put("endpoint", endpoint);
         root.put("monitoringBundle", monitoringBundle);
+        root.put("resourceName", resourceName);
         root.put("action", action);
 
         // send email to argo@einfra.grnet.gr
         String userRole = "admin";
         String subject = "";
         if (action.equals("post")){
-            subject = String.format("[%s Portal] The Service [%s] has created a new Monitoring Extension", projectName, monitoringBundle.getMonitoring().getServiceId());
+            subject = String.format("[%s Portal] The %s [%s] has created a new Monitoring Extension", projectName, resourceName, monitoringBundle.getMonitoring().getServiceId());
         } else{
-            subject = String.format("[%s Portal] The Service [%s] updated its Monitoring Extension", projectName, monitoringBundle.getMonitoring().getServiceId());
+            subject = String.format("[%s Portal] The %s [%s] updated its Monitoring Extension", projectName, resourceName, monitoringBundle.getMonitoring().getServiceId());
         }
         sendMailsFromTemplate("serviceExtensionsMonitoring.ftl", root, subject, monitoringEmail, userRole);
+    }
+
+    private String getResourceNameFromResourceType(String resourceType) {
+        switch (resourceType) {
+            case "service":
+                return "Service";
+            case "datasource":
+                return "Datasource";
+            case "training_resource":
+                return "Training Resource";
+            default:
+                return "Resource";
+        }
     }
 
     public void sendEmailsForInteroperabilityRecordOnboarding(InteroperabilityRecordBundle interoperabilityRecordBundle, User registrant){

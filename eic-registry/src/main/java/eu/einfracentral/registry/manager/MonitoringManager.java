@@ -7,6 +7,7 @@ import eu.einfracentral.dto.ServiceType;
 import eu.einfracentral.exception.ValidationException;
 import eu.einfracentral.registry.service.ResourceBundleService;
 import eu.einfracentral.registry.service.MonitoringService;
+import eu.einfracentral.registry.service.TrainingResourceService;
 import eu.einfracentral.service.RegistrationMailService;
 import eu.einfracentral.service.SecurityService;
 import eu.einfracentral.utils.CreateArgoGrnetHttpRequest;
@@ -35,7 +36,7 @@ public class MonitoringManager extends ResourceManager<MonitoringBundle> impleme
     private static final Logger logger = LogManager.getLogger(MonitoringManager.class);
     private final ResourceBundleService<ServiceBundle> serviceBundleService;
     private final ResourceBundleService<DatasourceBundle> datasourceBundleService;
-    private final JmsTemplate jmsTopicTemplate;
+    private final TrainingResourceService<TrainingResourceBundle> trainingResourceService;
     private final SecurityService securityService;
     private final RegistrationMailService registrationMailService;
     private final ProviderResourcesCommonMethods commonMethods;
@@ -48,13 +49,14 @@ public class MonitoringManager extends ResourceManager<MonitoringBundle> impleme
 
     public MonitoringManager(ResourceBundleService<ServiceBundle> serviceBundleService,
                              ResourceBundleService<DatasourceBundle> datasourceBundleService,
-                             JmsTemplate jmsTopicTemplate, @Lazy SecurityService securityService,
+                             TrainingResourceService<TrainingResourceBundle> trainingResourceService,
+                             @Lazy SecurityService securityService,
                              @Lazy RegistrationMailService registrationMailService,
                              ProviderResourcesCommonMethods commonMethods) {
         super(MonitoringBundle.class);
         this.serviceBundleService = serviceBundleService;
         this.datasourceBundleService = datasourceBundleService;
-        this.jmsTopicTemplate = jmsTopicTemplate;
+        this.trainingResourceService = trainingResourceService;
         this.securityService = securityService;
         this.registrationMailService = registrationMailService;
         this.commonMethods = commonMethods;
@@ -81,8 +83,10 @@ public class MonitoringManager extends ResourceManager<MonitoringBundle> impleme
             ResourceValidationUtils.checkIfResourceBundleIsActiveAndApprovedAndNotPublic(resourceId, catalogueId, serviceBundleService, resourceType);
         } else if (resourceType.equals("datasource")){
             ResourceValidationUtils.checkIfResourceBundleIsActiveAndApprovedAndNotPublic(resourceId, catalogueId, datasourceBundleService, resourceType);
+        } else if (resourceType.equals("training_resource")){
+            ResourceValidationUtils.checkIfResourceBundleIsActiveAndApprovedAndNotPublic(resourceId, catalogueId, trainingResourceService, resourceType);
         } else{
-            throw new ValidationException("Field resourceType should be either 'service' or 'datasource'");
+            throw new ValidationException("Field resourceType should be either 'service', 'datasource' or 'training_resource'");
         }
 
         super.validate(monitoringBundle);
@@ -113,7 +117,7 @@ public class MonitoringManager extends ResourceManager<MonitoringBundle> impleme
         ret = super.add(monitoring, null);
         logger.debug("Adding Monitoring: {}", monitoring);
 
-        registrationMailService.sendEmailsForMonitoringExtension(monitoring, "post");
+        registrationMailService.sendEmailsForMonitoringExtension(monitoring, resourceType, "post");
 
         return ret;
     }
@@ -155,7 +159,7 @@ public class MonitoringManager extends ResourceManager<MonitoringBundle> impleme
         resourceService.updateResource(existing);
         logger.debug("Updating Monitoring: {}", monitoring);
 
-        registrationMailService.sendEmailsForMonitoringExtension(monitoring, "put");
+        registrationMailService.sendEmailsForMonitoringExtension(monitoring, "Resource", "put");
 
         return monitoring;
     }
