@@ -67,7 +67,7 @@ public class PublicResourceInteroperabilityRecordManager extends AbstractPublicR
     @Override
     public ResourceInteroperabilityRecordBundle add(ResourceInteroperabilityRecordBundle resourceInteroperabilityRecordBundle, Authentication authentication) {
         String lowerLevelResourceId = resourceInteroperabilityRecordBundle.getId();
-        resourceInteroperabilityRecordBundle.setIdentifiers(Identifiers.createIdentifier(resourceInteroperabilityRecordBundle.getId()));
+        Identifiers.createOriginalId(resourceInteroperabilityRecordBundle);
         resourceInteroperabilityRecordBundle.setId(String.format("%s.%s", resourceInteroperabilityRecordBundle.getResourceInteroperabilityRecord().getCatalogueId(),
                 resourceInteroperabilityRecordBundle.getId()));
 

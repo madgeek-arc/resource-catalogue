@@ -5,6 +5,7 @@ import eu.einfracentral.domain.InteroperabilityRecordBundle;
 import eu.einfracentral.exception.ResourceException;
 import eu.einfracentral.exception.ResourceNotFoundException;
 import eu.einfracentral.service.SecurityService;
+import eu.einfracentral.utils.ProviderResourcesCommonMethods;
 import eu.openminted.registry.core.domain.Browsing;
 import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.service.ResourceCRUDService;
@@ -28,12 +29,15 @@ public class PublicInteroperabilityRecordManager extends ResourceManager<Interop
     private static final Logger logger = LogManager.getLogger(PublicInteroperabilityRecordManager.class);
     private final JmsTemplate jmsTopicTemplate;
     private final SecurityService securityService;
+    private final ProviderResourcesCommonMethods commonMethods;
 
     @Autowired
-    public PublicInteroperabilityRecordManager(JmsTemplate jmsTopicTemplate, SecurityService securityService) {
+    public PublicInteroperabilityRecordManager(JmsTemplate jmsTopicTemplate, SecurityService securityService,
+                                               ProviderResourcesCommonMethods commonMethods) {
         super(InteroperabilityRecordBundle.class);
         this.jmsTopicTemplate = jmsTopicTemplate;
         this.securityService = securityService;
+        this.commonMethods = commonMethods;
     }
 
     @Override
@@ -67,7 +71,7 @@ public class PublicInteroperabilityRecordManager extends ResourceManager<Interop
     @Override
     public InteroperabilityRecordBundle add(InteroperabilityRecordBundle interoperabilityRecordBundle, Authentication authentication) {
         String lowerLevelResourceId = interoperabilityRecordBundle.getId();
-        interoperabilityRecordBundle.setIdentifiers(Identifiers.createIdentifier(interoperabilityRecordBundle.getId()));
+        Identifiers.createOriginalId(interoperabilityRecordBundle);
         interoperabilityRecordBundle.setId(String.format("%s.%s", interoperabilityRecordBundle.getInteroperabilityRecord().getCatalogueId(), interoperabilityRecordBundle.getId()));
 
         // set providerId to Public
@@ -76,6 +80,8 @@ public class PublicInteroperabilityRecordManager extends ResourceManager<Interop
                 interoperabilityRecordBundle.getInteroperabilityRecord().getProviderId()));
 
         interoperabilityRecordBundle.getMetadata().setPublished(true);
+        // create PID and set it as Alternative Identifier
+        interoperabilityRecordBundle.getIdentifiers().setAlternativeIdentifiers(commonMethods.createAlternativeIdentifierForPID(interoperabilityRecordBundle));
         InteroperabilityRecordBundle ret;
         logger.info(String.format("Interoperability Record [%s] is being published with id [%s]", lowerLevelResourceId, interoperabilityRecordBundle.getId()));
         ret = super.add(interoperabilityRecordBundle, null);

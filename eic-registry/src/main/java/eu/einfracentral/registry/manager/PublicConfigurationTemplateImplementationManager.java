@@ -55,7 +55,7 @@ public class PublicConfigurationTemplateImplementationManager extends ResourceMa
     @Override
     public ConfigurationTemplateInstanceBundle add(ConfigurationTemplateInstanceBundle configurationTemplateInstanceBundle, Authentication authentication) {
         String lowerLevelResourceId = configurationTemplateInstanceBundle.getId();
-        configurationTemplateInstanceBundle.setIdentifiers(Identifiers.createIdentifier(configurationTemplateInstanceBundle.getId()));
+        Identifiers.createOriginalId(configurationTemplateInstanceBundle);
         configurationTemplateInstanceBundle.setId(String.format("%s.%s", catalogueName, configurationTemplateInstanceBundle.getId()));
         configurationTemplateInstanceBundle.getConfigurationTemplateInstance().setResourceId(String.format("%s.%s", catalogueName,
                 configurationTemplateInstanceBundle.getConfigurationTemplateInstance().getResourceId()));

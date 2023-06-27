@@ -5,6 +5,7 @@ import eu.einfracentral.domain.ProviderBundle;
 import eu.einfracentral.exception.ResourceException;
 import eu.einfracentral.exception.ResourceNotFoundException;
 import eu.einfracentral.service.SecurityService;
+import eu.einfracentral.utils.ProviderResourcesCommonMethods;
 import eu.openminted.registry.core.domain.Browsing;
 import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.service.ResourceCRUDService;
@@ -27,12 +28,15 @@ public class PublicProviderManager extends ResourceManager<ProviderBundle> imple
     private static final Logger logger = LogManager.getLogger(PublicProviderManager.class);
     private final JmsTemplate jmsTopicTemplate;
     private final SecurityService securityService;
+    private final ProviderResourcesCommonMethods commonMethods;
 
     @Autowired
-    public PublicProviderManager(JmsTemplate jmsTopicTemplate, SecurityService securityService) {
+    public PublicProviderManager(JmsTemplate jmsTopicTemplate, SecurityService securityService,
+                                 ProviderResourcesCommonMethods commonMethods) {
         super(ProviderBundle.class);
         this.jmsTopicTemplate = jmsTopicTemplate;
         this.securityService = securityService;
+        this.commonMethods = commonMethods;
     }
 
     @Override
@@ -65,9 +69,11 @@ public class PublicProviderManager extends ResourceManager<ProviderBundle> imple
     @Override
     public ProviderBundle add(ProviderBundle providerBundle, Authentication authentication) {
         String lowerLevelProviderId = providerBundle.getId();
-        providerBundle.setIdentifiers(Identifiers.createIdentifier(providerBundle.getId()));
+        Identifiers.createOriginalId(providerBundle);
         providerBundle.setId(String.format("%s.%s", providerBundle.getProvider().getCatalogueId(), providerBundle.getId()));
         providerBundle.getMetadata().setPublished(true);
+        // create PID and set it as Alternative Identifier
+        providerBundle.getIdentifiers().setAlternativeIdentifiers(commonMethods.createAlternativeIdentifierForPID(providerBundle));
         ProviderBundle ret;
         logger.info(String.format("Provider [%s] is being published with id [%s]", lowerLevelProviderId, providerBundle.getId()));
         ret = super.add(providerBundle, null);
