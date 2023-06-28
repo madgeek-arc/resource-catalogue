@@ -165,6 +165,17 @@ public class InteroperabilityRecordController {
         return ResponseEntity.ok(genericResourceService.getResults(ff));
     }
 
+    @PatchMapping(path = "auditResource/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
+    public ResponseEntity<InteroperabilityRecordBundle> auditResource(@PathVariable("id") String id, @RequestParam("catalogueId") String catalogueId,
+                                                                @RequestParam(required = false) String comment,
+                                                                @RequestParam LoggingInfo.ActionType actionType, @ApiIgnore Authentication auth) {
+        InteroperabilityRecordBundle interoperabilityRecordBundle = interoperabilityRecordService.auditResource(id, catalogueId, comment, actionType, auth);
+        logger.info("User '{}-{}' audited Interoperability Record with name '{}' of the '{}' Catalogue - [actionType: {}]", User.of(auth).getFullName(), User.of(auth).getEmail(),
+                interoperabilityRecordBundle.getInteroperabilityRecord().getTitle(), interoperabilityRecordBundle.getInteroperabilityRecord().getCatalogueId(), actionType);
+        return new ResponseEntity<>(interoperabilityRecordBundle, HttpStatus.OK);
+    }
+
     @GetMapping(path = {"loggingInfoHistory/{id}"}, produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<Paging<LoggingInfo>> loggingInfoHistory(@PathVariable String id,
                                                                   @RequestParam(defaultValue = "${project.catalogue.name}", name = "catalogue_id") String catalogueId) {
