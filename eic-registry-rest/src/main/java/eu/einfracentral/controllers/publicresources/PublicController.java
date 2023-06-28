@@ -62,9 +62,6 @@ public class PublicController {
         this.genericResourceService = genericResourceService;
     }
 
-    //SECTION: PROVIDER
-
-
     //SECTION: RESOURCE (TO BE DELETED)
     @Deprecated
     @ApiOperation(value = "Returns the Public Resource with the given id.")
@@ -149,25 +146,6 @@ public class PublicController {
         Browsing<Object> browsing = new Browsing<>(paging.getTotal(), paging.getFrom(), paging.getTo(), resourceBundleList, paging.getFacets());
         return new ResponseEntity<>(browsing.getResults(), HttpStatus.OK);
     }
-
-
-    //SECTION: SERVICE
-    // MOVED TO PublicServiceControler
-
-    //SECTION: DATASOURCE
-    // MOVED TO PublicDatasourceControler
-
-    //SECTION: TRAINING RESOURCE
-    // MOVED TO PublicTrainingResourceControler
-
-    //SECTION: INTEROPERABILITY RECORD
-    // MOVED TO PublicInteroperabilityRecordControler
-
-    //    //SECTION: RESOURCE INTEROPERABILITY RECORD
-    // MOVED TO PublicResourceInteroperabilityRecordControler
-
-    //SECTION: CONFIGURATION TEMPLATE INSTANCE
-    // MOVED TO PublicConfigurationTemplateInstanceControler
 
     @ApiImplicitParams({
             @ApiImplicitParam(name = "ids", value = "Comma-separated list of Resource ids", dataType = "string", paramType = "path")
