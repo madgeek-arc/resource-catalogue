@@ -328,8 +328,9 @@ public class ProviderManagementAspect {
     @Async
     @AfterReturning(pointcut = "execution(* eu.einfracentral.registry.manager.InteroperabilityRecordManager.update(..))" +
             "|| execution(* eu.einfracentral.registry.manager.InteroperabilityRecordManager.publish(..))" +
+            "|| execution(* eu.einfracentral.registry.manager.InteroperabilityRecordManager.verifyResource(..))" +
             "|| execution(* eu.einfracentral.registry.manager.InteroperabilityRecordManager.suspend(..))" +
-            "|| execution(* eu.einfracentral.registry.manager.InteroperabilityRecordManager.verifyResource(..))",
+            "|| execution(* eu.einfracentral.registry.manager.InteroperabilityRecordManager.auditResource(..))",
             returning = "interoperabilityRecordBundle")
     public void updatePublicResource(final InteroperabilityRecordBundle interoperabilityRecordBundle) {
         try{
