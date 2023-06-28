@@ -5,7 +5,6 @@ import eu.einfracentral.domain.*;
 import eu.einfracentral.dto.Category;
 import eu.einfracentral.dto.ProviderInfo;
 import eu.einfracentral.dto.ScientificDomain;
-import eu.einfracentral.exception.OIDCAuthenticationException;
 import eu.einfracentral.exception.ResourceException;
 import eu.einfracentral.exception.ResourceNotFoundException;
 import eu.einfracentral.exception.ValidationException;
@@ -37,7 +36,6 @@ import javax.validation.constraints.NotNull;
 import java.lang.reflect.Field;
 import java.net.UnknownHostException;
 import java.security.NoSuchAlgorithmException;
-import java.text.DecimalFormat;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.util.*;
@@ -131,7 +129,12 @@ public abstract class AbstractResourceBundleManager<T extends ResourceBundle<?>>
     public T get(String id, String catalogueId) {
         Resource resource = getResource(id, catalogueId);
         if (resource == null) {
-            throw new ResourceNotFoundException(String.format("Could not find Resource with id: %s and catalogueId: %s", id, catalogueId));
+            T resourceBundle = (T) commonMethods.getPublicResourceViaPID("resources", id);
+            if (resourceBundle == null) {
+                throw new ResourceNotFoundException(String.format("Could not find Resource with id: %s and catalogueId: %s", id, catalogueId));
+            } else {
+                return resourceBundle;
+            }
         }
         return deserialize(resource);
     }

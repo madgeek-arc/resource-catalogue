@@ -26,7 +26,6 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
-import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.common.exceptions.UnauthorizedUserException;
@@ -242,15 +241,18 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
 
     @Cacheable(value = CACHE_PROVIDERS, key = "#catalogueId+#providerId+(#auth!=null?#auth:'')")
     public ProviderBundle get(String catalogueId, String providerId, Authentication auth) {
-        ProviderBundle providerBundle = getWithCatalogue(providerId, catalogueId);
         CatalogueBundle catalogueBundle = catalogueService.get(catalogueId);
-        if (providerBundle == null) {
-            throw new eu.einfracentral.exception.ResourceNotFoundException(
-                    String.format("Could not find provider with id: %s", providerId));
-        }
         if (catalogueBundle == null) {
             throw new eu.einfracentral.exception.ResourceNotFoundException(
                     String.format("Could not find catalogue with id: %s", catalogueId));
+        }
+        ProviderBundle providerBundle = (ProviderBundle) commonMethods.getPublicResourceViaPID("provider", providerId);
+        if (providerBundle == null) {
+            providerBundle = getWithCatalogue(providerId, catalogueId);
+            if (providerBundle == null) {
+                throw new eu.einfracentral.exception.ResourceNotFoundException(
+                        String.format("Could not find provider with id: %s", providerId));
+            }
         }
         if (!providerBundle.getProvider().getCatalogueId().equals(catalogueId)){
             throw new ValidationException(String.format("Provider with id [%s] does not belong to the catalogue with id [%s]", providerId, catalogueId));

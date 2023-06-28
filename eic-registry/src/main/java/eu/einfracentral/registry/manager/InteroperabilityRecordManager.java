@@ -329,7 +329,12 @@ public class InteroperabilityRecordManager extends ResourceManager<Interoperabil
     public InteroperabilityRecordBundle get(String id, String catalogueId) {
         Resource resource = getResource(id, catalogueId);
         if (resource == null) {
-            throw new ResourceNotFoundException(String.format("Could not find Interoperability Record with id: %s and catalogueId: %s", id, catalogueId));
+            InteroperabilityRecordBundle interoperabilityRecordBundle = (InteroperabilityRecordBundle) commonMethods.getPublicResourceViaPID("interoperability_record", id);
+            if (interoperabilityRecordBundle == null) {
+                throw new ResourceNotFoundException(String.format("Could not find Interoperability Record with id: %s and catalogueId: %s", id, catalogueId));
+            } else {
+                return interoperabilityRecordBundle;
+            }
         }
         return deserialize(resource);
     }
@@ -381,6 +386,19 @@ public class InteroperabilityRecordManager extends ResourceManager<Interoperabil
             return interoperabilityRecordBundle;
         }
         throw new ValidationException("You cannot view the specific Interoperability Record");
+    }
+
+    public InteroperabilityRecordBundle auditResource(String interoperabilityRecordId, String catalogueId, String comment, LoggingInfo.ActionType actionType, Authentication auth) {
+        InteroperabilityRecordBundle interoperabilityRecordBundle = get(interoperabilityRecordId, catalogueId);
+        ProviderBundle provider = providerService.get(catalogueId, interoperabilityRecordBundle.getInteroperabilityRecord().getProviderId(), auth);
+        commonMethods.auditResource(interoperabilityRecordBundle, comment, actionType, auth);
+
+        // send notification emails to Provider Admins
+        registrationMailService.notifyProviderAdminsForBundleAuditing(interoperabilityRecordBundle, "Interoperability Record",
+                interoperabilityRecordBundle.getInteroperabilityRecord().getTitle(), provider.getProvider().getUsers());
+
+        logger.info(String.format("Auditing Interoperability Record [%s]-[%s]", catalogueId, interoperabilityRecordId));
+        return super.update(interoperabilityRecordBundle, auth);
     }
 
     public InteroperabilityRecordBundle createPublicInteroperabilityRecord(InteroperabilityRecordBundle interoperabilityRecordBundle, Authentication auth){

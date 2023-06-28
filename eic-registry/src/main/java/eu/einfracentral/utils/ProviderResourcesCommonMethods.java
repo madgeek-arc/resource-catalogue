@@ -6,17 +6,15 @@ import eu.einfracentral.exception.ValidationException;
 import eu.einfracentral.registry.service.*;
 import eu.einfracentral.service.GenericResourceService;
 import eu.einfracentral.service.SecurityService;
+import eu.openminted.registry.core.domain.Browsing;
+import eu.openminted.registry.core.domain.FacetFilter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.RestTemplate;
 
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
@@ -24,7 +22,6 @@ import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
 
-import java.util.*;
 import java.net.*;
 import java.io.*;
 import org.json.*;
@@ -442,6 +439,18 @@ public class ProviderResourcesCommonMethods {
         values.put(id);
         data.put("values", values);
         return data.toString();
+    }
+
+    public Bundle<?> getPublicResourceViaPID(String resourceType, String pid) {
+        FacetFilter ff = new FacetFilter();
+        ff.setQuantity(10000);
+        ff.setResourceType(resourceType);
+        ff.addFilter("alternative_identifiers_values", pid);
+        Browsing<Bundle<?>> browsing = genericResourceService.getResults(ff);
+        if (browsing.getResults().size() > 0) {
+            return browsing.getResults().get(0);
+        }
+        return null;
     }
 
 }
