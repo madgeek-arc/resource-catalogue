@@ -413,8 +413,7 @@ public class ProviderResourcesCommonMethods {
             while ((responseLine = br.readLine()) != null) {
                 response.append(responseLine.trim());
             }
-            System.out.println(payload);
-            System.out.println(response);
+            logger.info("Resource with ID [{}] has been posted with PID [{}]", resourceId, pid);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -424,15 +423,18 @@ public class ProviderResourcesCommonMethods {
         JSONObject data = new JSONObject();
         JSONArray values = new JSONArray();
         JSONObject hs_admin = new JSONObject();
-        JSONObject hs_admin_value = new JSONObject();
+        JSONObject hs_admin_data = new JSONObject();
+        JSONObject hs_admin_data_value = new JSONObject();
         JSONObject id = new JSONObject();
-        hs_admin_value.put("index", 301);
-        hs_admin_value.put("handle", pidPrefix + "/" + pidUsername);
-        hs_admin_value.put("permissions", "011111110011");
-        hs_admin_value.put("format", "admin");
-        hs_admin.put("value", hs_admin_value);
-        hs_admin.put("format", "admin");
+        hs_admin_data_value.put("index", 301);
+        hs_admin_data_value.put("handle", pidPrefix + "/" + pidUsername);
+        hs_admin_data_value.put("permissions", "011111110011");
+        hs_admin_data_value.put("format", "admin");
+        hs_admin_data.put("value", hs_admin_data_value);
+        hs_admin_data.put("format", "admin");
         hs_admin.put("index", 100);
+        hs_admin.put("type", "HS_ADMIN");
+        hs_admin.put("data", hs_admin_data);
         values.put(hs_admin);
         id.put("index", 1);
         id.put("type", "id");
