@@ -774,6 +774,7 @@ public class DatasourceBundleManager extends AbstractResourceBundleManager<Datas
         return datasourceBundle;
     }
 
+    @CacheEvict(cacheNames = {CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)
     public DatasourceBundle suspend(String datasourceId, String catalogueId, boolean suspend, Authentication auth) {
         DatasourceBundle datasourceBundle = get(datasourceId, catalogueId);
         commonMethods.suspensionValidation(datasourceBundle, catalogueId,

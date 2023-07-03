@@ -434,6 +434,7 @@ public class InteroperabilityRecordManager extends ResourceManager<Interoperabil
         }
     }
 
+    @CacheEvict(cacheNames = {CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)
     public InteroperabilityRecordBundle suspend(String interoperabilityRecordId, String catalogueId, boolean suspend, Authentication auth) {
         InteroperabilityRecordBundle interoperabilityRecordBundle = get(interoperabilityRecordId, catalogueId);
         commonMethods.suspensionValidation(interoperabilityRecordBundle, catalogueId,

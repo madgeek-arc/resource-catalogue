@@ -1095,6 +1095,7 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
         return trainingResourceBundle;
     }
 
+    @CacheEvict(cacheNames = {CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)
     public TrainingResourceBundle suspend(String trainingResourceId, String catalogueId, boolean suspend, Authentication auth) {
         TrainingResourceBundle trainingResourceBundle = get(trainingResourceId, catalogueId);
         commonMethods.suspensionValidation(trainingResourceBundle, catalogueId,

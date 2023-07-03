@@ -607,6 +607,10 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
     public CatalogueBundle suspend(String catalogueId, boolean suspend, Authentication auth) {
         CatalogueBundle catalogueBundle = get(catalogueId, auth);
 
+        // Suspend Catalogue
+        commonMethods.suspendResource(catalogueBundle, catalogueId, suspend, auth);
+        super.update(catalogueBundle, auth);
+
         // Suspend Catalogue's resources
         List<ProviderBundle> providers = providerService.getAll(createFacetFilter(catalogueId), auth).getResults();
 
@@ -616,8 +620,7 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
             }
         }
 
-        commonMethods.suspendResource(catalogueBundle, catalogueId, suspend, auth);
-        return super.update(catalogueBundle, auth);
+        return catalogueBundle;
     }
 
     private FacetFilter createFacetFilter(String catalogueId){

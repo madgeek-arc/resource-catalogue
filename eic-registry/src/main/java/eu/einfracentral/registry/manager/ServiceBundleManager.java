@@ -583,6 +583,7 @@ public class ServiceBundleManager extends AbstractResourceBundleManager<ServiceB
         return serviceBundle;
     }
 
+    @CacheEvict(cacheNames = {CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)
     public ServiceBundle suspend(String serviceId, String catalogueId, boolean suspend, Authentication auth) {
         ServiceBundle serviceBundle = get(serviceId, catalogueId);
         commonMethods.suspensionValidation(serviceBundle, catalogueId,

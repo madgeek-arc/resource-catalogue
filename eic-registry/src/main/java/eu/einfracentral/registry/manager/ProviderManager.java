@@ -20,6 +20,7 @@ import org.mitre.openid.connect.model.OIDCAuthenticationToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.annotation.Lazy;
@@ -65,6 +66,8 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     private final CatalogueService<CatalogueBundle, Authentication> catalogueService;
     private final SynchronizerService<Provider> synchronizerService;
     private final ProviderResourcesCommonMethods commonMethods;
+    @Autowired
+    CacheManager cacheManager;
 
     //TODO: maybe add description on DB and elastic too
     private final String columnsOfInterest = "provider_id, name"; // variable with DB tables a keyword is been searched on
@@ -1187,9 +1190,15 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         return providerBundle;
     }
 
+    @CacheEvict(value = CACHE_PROVIDERS, allEntries = true)
     public ProviderBundle suspend(String providerId, String catalogueId, boolean suspend, Authentication auth) {
         ProviderBundle providerBundle = get(catalogueId, providerId, auth);
         commonMethods.suspensionValidation(providerBundle, catalogueId, providerId, suspend, auth);
+
+        // Suspend Provider
+        commonMethods.suspendResource(providerBundle, catalogueId, suspend, auth);
+        super.update(providerBundle, auth);
+        Objects.requireNonNull(cacheManager.getCache(CACHE_PROVIDERS)).clear();
 
         // Suspend Provider's resources
         List<ServiceBundle> services = resourceBundleService.getResourceBundles(catalogueId, providerId, auth).getResults();
@@ -1218,7 +1227,6 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
             }
         }
 
-        commonMethods.suspendResource(providerBundle, catalogueId, suspend, auth);
-        return super.update(providerBundle, auth);
+        return providerBundle;
     }
 }
