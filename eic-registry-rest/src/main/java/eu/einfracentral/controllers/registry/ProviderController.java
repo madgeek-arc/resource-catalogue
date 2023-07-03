@@ -176,7 +176,10 @@ public class ProviderController {
 
     // Filter a list of Providers based on a set of filters or get a list of all Providers in the Catalogue.
     @Browse
-    @ApiImplicitParam(name = "suspended", value = "Suspended", defaultValue = "false", dataType = "boolean", paramType = "query")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "suspended", value = "Suspended", defaultValue = "false", dataType = "boolean", paramType = "query"),
+            @ApiImplicitParam(name = "active", value = "Active", defaultValue = "true", dataType = "boolean", paramType = "query")
+    })
     @GetMapping(path = "bundle/all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     public ResponseEntity<Paging<ProviderBundle>> getAllProviderBundles(@ApiIgnore @RequestParam Map<String, Object> allRequestParams, @ApiIgnore Authentication auth,
@@ -185,6 +188,9 @@ public class ProviderController {
         FacetFilter ff = new FacetFilter();
         if (allRequestParams.get("suspended") != null) {
             ff.addFilter("suspended", allRequestParams.get("suspended"));
+        }
+        if (allRequestParams.get("active") != null) {
+            ff.addFilter("active", allRequestParams.get("active"));
         }
         ff.setKeyword(allRequestParams.get("query") != null ? (String) allRequestParams.remove("query") : "");
         ff.setFrom(allRequestParams.get("from") != null ? Integer.parseInt((String) allRequestParams.remove("from")) : 0);

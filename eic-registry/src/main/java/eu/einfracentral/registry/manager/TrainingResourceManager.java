@@ -614,12 +614,7 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
     public TrainingResourceBundle get(String id, String catalogueId) {
         Resource resource = getResource(id, catalogueId);
         if (resource == null) {
-            TrainingResourceBundle trainingResourceBundle = (TrainingResourceBundle) commonMethods.getPublicResourceViaPID("training_resource", id);
-            if (trainingResourceBundle == null) {
-                throw new ResourceNotFoundException(String.format("Could not find Training Resource with id: %s and catalogueId: %s", id, catalogueId));
-            } else {
-                return trainingResourceBundle;
-            }
+            throw new ResourceNotFoundException(String.format("Could not find Training Resource with id: %s and catalogueId: %s", id, catalogueId));
         }
         return deserialize(resource);
     }

@@ -129,12 +129,7 @@ public abstract class AbstractResourceBundleManager<T extends ResourceBundle<?>>
     public T get(String id, String catalogueId) {
         Resource resource = getResource(id, catalogueId);
         if (resource == null) {
-            T resourceBundle = (T) commonMethods.getPublicResourceViaPID("resources", id);
-            if (resourceBundle == null) {
-                throw new ResourceNotFoundException(String.format("Could not find Resource with id: %s and catalogueId: %s", id, catalogueId));
-            } else {
-                return resourceBundle;
-            }
+            throw new ResourceNotFoundException(String.format("Could not find Resource with id: %s and catalogueId: %s", id, catalogueId));
         }
         return deserialize(resource);
     }

@@ -329,12 +329,7 @@ public class InteroperabilityRecordManager extends ResourceManager<Interoperabil
     public InteroperabilityRecordBundle get(String id, String catalogueId) {
         Resource resource = getResource(id, catalogueId);
         if (resource == null) {
-            InteroperabilityRecordBundle interoperabilityRecordBundle = (InteroperabilityRecordBundle) commonMethods.getPublicResourceViaPID("interoperability_record", id);
-            if (interoperabilityRecordBundle == null) {
-                throw new ResourceNotFoundException(String.format("Could not find Interoperability Record with id: %s and catalogueId: %s", id, catalogueId));
-            } else {
-                return interoperabilityRecordBundle;
-            }
+            throw new ResourceNotFoundException(String.format("Could not find Interoperability Record with id: %s and catalogueId: %s", id, catalogueId));
         }
         return deserialize(resource);
     }

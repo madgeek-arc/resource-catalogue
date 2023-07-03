@@ -241,18 +241,15 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
 
     @Cacheable(value = CACHE_PROVIDERS, key = "#catalogueId+#providerId+(#auth!=null?#auth:'')")
     public ProviderBundle get(String catalogueId, String providerId, Authentication auth) {
+        ProviderBundle providerBundle = getWithCatalogue(providerId, catalogueId);
         CatalogueBundle catalogueBundle = catalogueService.get(catalogueId);
+        if (providerBundle == null) {
+            throw new eu.einfracentral.exception.ResourceNotFoundException(
+                    String.format("Could not find provider with id: %s", providerId));
+        }
         if (catalogueBundle == null) {
             throw new eu.einfracentral.exception.ResourceNotFoundException(
                     String.format("Could not find catalogue with id: %s", catalogueId));
-        }
-        ProviderBundle providerBundle = (ProviderBundle) commonMethods.getPublicResourceViaPID("provider", providerId);
-        if (providerBundle == null) {
-            providerBundle = getWithCatalogue(providerId, catalogueId);
-            if (providerBundle == null) {
-                throw new eu.einfracentral.exception.ResourceNotFoundException(
-                        String.format("Could not find provider with id: %s", providerId));
-            }
         }
         if (!providerBundle.getProvider().getCatalogueId().equals(catalogueId)){
             throw new ValidationException(String.format("Provider with id [%s] does not belong to the catalogue with id [%s]", providerId, catalogueId));
@@ -1001,6 +998,18 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
                 }
                 if (query.contains(",")){
                     query = query.replaceAll(", ", "' OR suspended='");
+                }
+            }
+            // active
+            if (entry.getKey().equals("active")) {
+                if (firstTime) {
+                    query += String.format(" (active=%s)", entry.getValue().toString());
+                    firstTime = false;
+                } else {
+                    query += String.format(" AND (active=%s)", entry.getValue().toString());
+                }
+                if (query.contains(",")){
+                    query = query.replaceAll(", ", "' OR active='");
                 }
             }
             // published
