@@ -20,6 +20,7 @@ import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import java.net.*;
@@ -442,6 +443,11 @@ public class ProviderResourcesCommonMethods {
     }
 
     public Bundle<?> getPublicResourceViaPID(String resourceType, String pid) {
+        List<String> resourceTypes = Arrays.asList("catalogue", "provider", "service", "datasource",
+                "training_resource", "interoperability_record", "resources");
+        if (!resourceTypes.contains(resourceType)) {
+            throw new ValidationException("The resource type you provided does not exist -> " + resourceType);
+        }
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(10000);
         ff.setResourceType(resourceType);
