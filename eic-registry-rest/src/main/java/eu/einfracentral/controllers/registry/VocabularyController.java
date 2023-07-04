@@ -6,6 +6,8 @@ import eu.einfracentral.registry.service.VocabularyService;
 import eu.openminted.registry.core.exception.ResourceNotFoundException;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -15,14 +17,15 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("vocabulary")
 @Api(value = "Get information about the vocabularies")
 public class VocabularyController extends ResourceController<Vocabulary, Authentication> {
 
+    private static final Logger logger = LogManager.getLogger(VocabularyController.class);
     private final VocabularyService vocabularyService;
 
     @Autowired
@@ -129,6 +132,18 @@ public class VocabularyController extends ResourceController<Vocabulary, Authent
         for (Vocabulary vocabulary : toBeDeleted) {
             super.delete(vocabulary, auth);
         }
+    }
 
+    @GetMapping(path = "getSimilarHLEVocabularies", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public void getSimilarHLEVocabularies() {
+        List<Vocabulary> allHLE = vocabularyService.getByType(Vocabulary.Type.PROVIDER_HOSTING_LEGAL_ENTITY);
+        List<String> allHLENames = new ArrayList<>();
+        for (Vocabulary voc : allHLE){
+            allHLENames.add(voc.getName());
+        }
+        List<String> duplicateNames = allHLENames.stream()
+                .filter(i -> Collections.frequency(allHLENames, i) > 1).distinct().collect(Collectors.toList());
+        logger.info("Duplicate Names" + duplicateNames);
     }
 }

@@ -1146,13 +1146,16 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     }
 
     private void checkAndAddProviderToHLEVocabulary(ProviderBundle providerBundle){
-        List<String> allHLEIDs = new ArrayList<>();
         List<Vocabulary> allHLE = vocabularyService.getByType(Vocabulary.Type.PROVIDER_HOSTING_LEGAL_ENTITY);
+        List<String> allHLEIDs = new ArrayList<>();
+        List<String> allHLENames = new ArrayList<>();
         for (Vocabulary voc : allHLE){
             allHLEIDs.add(voc.getId());
+            allHLENames.add(voc.getName());
         }
         if (providerBundle.getStatus().equals("approved provider") && providerBundle.getProvider().isLegalEntity()){
-            if (!allHLEIDs.contains("provider_hosting_legal_entity-" + providerBundle.getProvider().getId())){
+            if (!allHLEIDs.contains("provider_hosting_legal_entity-" + providerBundle.getProvider().getId()) &&
+                    !allHLENames.contains(providerBundle.getProvider().getName())) {
                 addApprovedProviderToHLEVocabulary(providerBundle);
             }
         }
