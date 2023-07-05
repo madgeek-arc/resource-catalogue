@@ -6,6 +6,7 @@ import eu.einfracentral.domain.ServiceBundle;
 import eu.einfracentral.exception.ResourceException;
 import eu.einfracentral.exception.ResourceNotFoundException;
 import eu.einfracentral.service.SecurityService;
+import eu.einfracentral.utils.ProviderResourcesCommonMethods;
 import eu.openminted.registry.core.domain.Browsing;
 import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.service.ResourceCRUDService;
@@ -28,12 +29,15 @@ public class PublicServiceManager extends AbstractPublicResourceManager<ServiceB
     private static final Logger logger = LogManager.getLogger(PublicServiceManager.class);
     private final JmsTemplate jmsTopicTemplate;
     private final SecurityService securityService;
+    private final ProviderResourcesCommonMethods commonMethods;
 
     @Autowired
-    public PublicServiceManager(JmsTemplate jmsTopicTemplate, SecurityService securityService) {
+    public PublicServiceManager(JmsTemplate jmsTopicTemplate, SecurityService securityService,
+                                ProviderResourcesCommonMethods commonMethods) {
         super(ServiceBundle.class);
         this.jmsTopicTemplate = jmsTopicTemplate;
         this.securityService = securityService;
+        this.commonMethods = commonMethods;
     }
 
     @Override
@@ -66,13 +70,15 @@ public class PublicServiceManager extends AbstractPublicResourceManager<ServiceB
     @Override
     public ServiceBundle add(ServiceBundle serviceBundle, Authentication authentication) {
         String lowerLevelResourceId = serviceBundle.getId();
-        serviceBundle.setIdentifiers(Identifiers.createIdentifier(serviceBundle.getId()));
+        Identifiers.createOriginalId(serviceBundle);
         serviceBundle.setId(String.format("%s.%s", serviceBundle.getService().getCatalogueId(), serviceBundle.getId()));
 
         // sets public ids to resource organisation, resource providers and related/required resources
         updateResourceIdsToPublic(serviceBundle);
 
         serviceBundle.getMetadata().setPublished(true);
+        // create PID and set it as Alternative Identifier
+        serviceBundle.getIdentifiers().setAlternativeIdentifiers(commonMethods.createAlternativeIdentifierForPID(serviceBundle));
         createResourceExtras(serviceBundle);
         ServiceBundle ret;
         logger.info(String.format("Service [%s] is being published with id [%s]", lowerLevelResourceId, serviceBundle.getId()));

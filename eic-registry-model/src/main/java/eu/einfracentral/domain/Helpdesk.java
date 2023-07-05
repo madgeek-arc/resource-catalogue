@@ -20,7 +20,7 @@ public class Helpdesk implements Identifiable {
 
     @XmlElement(required = true)
     @ApiModelProperty(position = 2, notes = "Service ID", required = true)
-    @FieldValidation(containsId = true)
+    @FieldValidation(containsId = true, containsResourceId = true)
     private String serviceId;
 
     @XmlElementWrapper(name = "services")

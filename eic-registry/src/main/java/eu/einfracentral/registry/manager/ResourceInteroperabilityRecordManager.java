@@ -19,6 +19,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
 
@@ -91,15 +92,12 @@ public class ResourceInteroperabilityRecordManager extends ResourceManager<Resou
         logger.trace("User '{}' is attempting to add a new ResourceInteroperabilityRecord: {}", auth, resourceInteroperabilityRecordBundle);
 
         resourceInteroperabilityRecordBundle.setMetadata(Metadata.createMetadata(User.of(auth).getFullName(), User.of(auth).getEmail()));
-        LoggingInfo loggingInfo = LoggingInfo.createLoggingInfoEntry(User.of(auth).getEmail(), User.of(auth).getFullName(), securityService.getRoleName(auth),
-                LoggingInfo.Types.ONBOARD.getKey(), LoggingInfo.ActionType.REGISTERED.getKey());
-        List<LoggingInfo> loggingInfoList = new ArrayList<>();
-        loggingInfoList.add(loggingInfo);
+        List<LoggingInfo> loggingInfoList = commonMethods.returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(resourceInteroperabilityRecordBundle, auth);
         resourceInteroperabilityRecordBundle.setLoggingInfo(loggingInfoList);
-        resourceInteroperabilityRecordBundle.setActive(true);
+        resourceInteroperabilityRecordBundle.setLatestOnboardingInfo(loggingInfoList.get(0));
 
-        // latestOnboardingInfo
-        resourceInteroperabilityRecordBundle.setLatestOnboardingInfo(loggingInfo);
+        // active
+        resourceInteroperabilityRecordBundle.setActive(true);
 
         ResourceInteroperabilityRecordBundle ret;
         ret = super.add(resourceInteroperabilityRecordBundle, null);
@@ -148,16 +146,11 @@ public class ResourceInteroperabilityRecordManager extends ResourceManager<Resou
         checkIfEachInteroperabilityRecordIsApproved(resourceInteroperabilityRecordBundle);
 
         resourceInteroperabilityRecordBundle.setMetadata(Metadata.updateMetadata(resourceInteroperabilityRecordBundle.getMetadata(), User.of(auth).getFullName(), User.of(auth).getEmail()));
-        List<LoggingInfo> loggingInfoList = new ArrayList<>();
-        LoggingInfo loggingInfo;
-        loggingInfo = LoggingInfo.createLoggingInfoEntry(User.of(auth).getEmail(), User.of(auth).getFullName(), securityService.getRoleName(auth),
-                LoggingInfo.Types.UPDATE.getKey(), LoggingInfo.ActionType.UPDATED.getKey());
-        if (resourceInteroperabilityRecordBundle.getLoggingInfo() != null) {
-            loggingInfoList = resourceInteroperabilityRecordBundle.getLoggingInfo();
-            loggingInfoList.add(loggingInfo);
-        } else {
-            loggingInfoList.add(loggingInfo);
-        }
+        List<LoggingInfo> loggingInfoList = commonMethods.returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(ex, auth);
+        LoggingInfo loggingInfo = commonMethods.createLoggingInfo(auth, LoggingInfo.Types.UPDATE.getKey(),
+                LoggingInfo.ActionType.UPDATED.getKey());
+        loggingInfoList.add(loggingInfo);
+        loggingInfoList.sort(Comparator.comparing(LoggingInfo::getDate));
         resourceInteroperabilityRecordBundle.setLoggingInfo(loggingInfoList);
 
         // latestUpdateInfo

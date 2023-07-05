@@ -6,14 +6,26 @@ import eu.einfracentral.exception.ValidationException;
 import eu.einfracentral.registry.service.*;
 import eu.einfracentral.service.GenericResourceService;
 import eu.einfracentral.service.SecurityService;
+import eu.openminted.registry.core.domain.Browsing;
+import eu.openminted.registry.core.domain.FacetFilter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+
+import java.net.*;
+import java.io.*;
+import org.json.*;
 
 @Component
 public class ProviderResourcesCommonMethods {
@@ -24,6 +36,17 @@ public class ProviderResourcesCommonMethods {
     private final ProviderService<ProviderBundle, Authentication> providerService;
     private final GenericResourceService genericResourceService;
     private final SecurityService securityService;
+
+    @Value("${pid.username}")
+    private String pidUsername;
+    @Value("${pid.key}")
+    private String pidKey;
+    @Value("${pid.auth}")
+    private String pidAuth;
+    @Value("${pid.prefix}")
+    private String pidPrefix;
+    @Value("${pid.api}")
+    private String pidApi;
 
     public ProviderResourcesCommonMethods(@Lazy CatalogueService<CatalogueBundle, Authentication> catalogueService,
                                           @Lazy ProviderService<ProviderBundle, Authentication> providerService,
@@ -220,24 +243,13 @@ public class ProviderResourcesCommonMethods {
             bundle.setSuspended(suspend);
 
             LoggingInfo loggingInfo;
-            List<LoggingInfo> loggingInfoList = new ArrayList<>();
-
-            // Create basic REGISTERED LoggingInfo if LoggingInfo is null
-            if (bundle.getLoggingInfo() != null) {
-                loggingInfoList = bundle.getLoggingInfo();
-            } else {
-                LoggingInfo oldProviderRegistration = LoggingInfo.createLoggingInfoEntry(User.of(auth).getEmail(), User.of(auth).getFullName(), securityService.getRoleName(auth),
-                        LoggingInfo.Types.ONBOARD.getKey(), LoggingInfo.ActionType.REGISTERED.getKey());
-                loggingInfoList.add(oldProviderRegistration);
-            }
+            List<LoggingInfo> loggingInfoList = returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(bundle, auth);
 
             // Create SUSPEND LoggingInfo
             if (suspend) {
-                loggingInfo = LoggingInfo.createLoggingInfoEntry(User.of(auth).getEmail(), User.of(auth).getFullName(), securityService.getRoleName(auth),
-                        LoggingInfo.Types.UPDATE.getKey(), LoggingInfo.ActionType.SUSPENDED.getKey());
+                loggingInfo = createLoggingInfo(auth, LoggingInfo.Types.UPDATE.getKey(), LoggingInfo.ActionType.SUSPENDED.getKey());
             } else {
-                loggingInfo = LoggingInfo.createLoggingInfoEntry(User.of(auth).getEmail(), User.of(auth).getFullName(), securityService.getRoleName(auth),
-                        LoggingInfo.Types.UPDATE.getKey(), LoggingInfo.ActionType.UNSUSPENDED.getKey());
+                loggingInfo = createLoggingInfo(auth, LoggingInfo.Types.UPDATE.getKey(), LoggingInfo.ActionType.UNSUSPENDED.getKey());
             }
             loggingInfoList.add(loggingInfo);
             bundle.setLoggingInfo(loggingInfoList);
@@ -270,16 +282,8 @@ public class ProviderResourcesCommonMethods {
 
     public void auditResource(Bundle<?> bundle, String comment, LoggingInfo.ActionType actionType, Authentication auth) {
         LoggingInfo loggingInfo;
-        List<LoggingInfo> loggingInfoList = new ArrayList<>();
-        if (bundle.getLoggingInfo() != null) {
-            loggingInfoList = bundle.getLoggingInfo();
-        } else {
-            LoggingInfo oldProviderRegistration = LoggingInfo.createLoggingInfoEntry(User.of(auth).getEmail(), User.of(auth).getFullName(), securityService.getRoleName(auth), LoggingInfo.Types.ONBOARD.getKey(),
-                    LoggingInfo.ActionType.REGISTERED.getKey());
-            loggingInfoList.add(oldProviderRegistration);
-        }
-
-        loggingInfo = LoggingInfo.createLoggingInfoEntry(User.of(auth).getEmail(), User.of(auth).getFullName(), securityService.getRoleName(auth), LoggingInfo.Types.AUDIT.getKey(),
+        List<LoggingInfo> loggingInfoList = returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(bundle, auth);
+        loggingInfo = LoggingInfo.createLoggingInfoEntry(auth, securityService.getRoleName(auth), LoggingInfo.Types.AUDIT.getKey(),
                 actionType.getKey(), comment);
         loggingInfoList.add(loggingInfo);
         bundle.setLoggingInfo(loggingInfoList);
@@ -287,4 +291,172 @@ public class ProviderResourcesCommonMethods {
         // latestAuditInfo
         bundle.setLatestAuditInfo(loggingInfo);
     }
+
+    public List<LoggingInfo> returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(Bundle<?> bundle, Authentication auth) {
+        List<LoggingInfo> loggingInfoList = new ArrayList<>();
+        if (bundle.getLoggingInfo() != null && !bundle.getLoggingInfo().isEmpty()) {
+            loggingInfoList = bundle.getLoggingInfo();
+        } else {
+            loggingInfoList.add(createLoggingInfo(auth, LoggingInfo.Types.ONBOARD.getKey(),
+                    LoggingInfo.ActionType.REGISTERED.getKey()));
+        }
+        return loggingInfoList;
+    }
+
+    public LoggingInfo createLoggingInfo(Authentication auth, String type, String actionType) {
+        return LoggingInfo.createLoggingInfoEntry(auth, securityService.getRoleName(auth), type, actionType);
+    }
+
+    public LoggingInfo createLoggingInfo(Authentication auth, String type, String actionType, String comment) {
+        return LoggingInfo.createLoggingInfoEntry(auth, securityService.getRoleName(auth), type, actionType, comment);
+    }
+
+    public List<LoggingInfo> createActivationLoggingInfo(Bundle<?> bundle, boolean active, Authentication auth) {
+        List<LoggingInfo> loggingInfoList = returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(bundle, auth);
+        LoggingInfo loggingInfo;
+
+        // distinction between system's (onboarding stage) and user's activation
+        if (active){
+            try {
+                loggingInfo = createLoggingInfo(auth, LoggingInfo.Types.UPDATE.getKey(),
+                        LoggingInfo.ActionType.ACTIVATED.getKey());
+            } catch (InsufficientAuthenticationException e) {
+                loggingInfo = LoggingInfo.systemUpdateLoggingInfo(LoggingInfo.ActionType.ACTIVATED.getKey());
+            }
+        } else{
+            try {
+                loggingInfo = createLoggingInfo(auth, LoggingInfo.Types.UPDATE.getKey(),
+                        LoggingInfo.ActionType.DEACTIVATED.getKey());
+            } catch (InsufficientAuthenticationException e) {
+                loggingInfo = LoggingInfo.systemUpdateLoggingInfo(LoggingInfo.ActionType.DEACTIVATED.getKey());
+            }
+        }
+        loggingInfoList.add(loggingInfo);
+        return loggingInfoList;
+    }
+
+    public List<AlternativeIdentifier> createAlternativeIdentifierForPID(Bundle<?> bundle) {
+        if (bundle.getMetadata().isPublished()) {
+            String pid = ShortHashGenerator(bundle.getId());
+            AlternativeIdentifier alternativeIdentifier = new AlternativeIdentifier();
+            alternativeIdentifier.setType("PID");
+            alternativeIdentifier.setValue(pid);
+            if (bundle.getIdentifiers() != null) {
+                postPID(bundle.getId(), pid);
+                List<AlternativeIdentifier> alternativeIdentifiers = bundle.getIdentifiers().getAlternativeIdentifiers();
+                if (alternativeIdentifiers != null && !alternativeIdentifiers.isEmpty()) {
+                    alternativeIdentifiers.add(alternativeIdentifier);
+                    return alternativeIdentifiers;
+                } else {
+                    List<AlternativeIdentifier> newAlternativeIdentifiers = new ArrayList<>();
+                    newAlternativeIdentifiers.add(alternativeIdentifier);
+                    return newAlternativeIdentifiers;
+                }
+            } else {
+                throw new ValidationException("Public Resource with ID {} has null Identifiers (originalId)" + bundle.getId());
+            }
+        } else {
+            return null;
+        }
+    }
+
+    private String ShortHashGenerator(String resourceId) {
+        try {
+            // Create MD5 hash instance
+            MessageDigest md = MessageDigest.getInstance("MD5");
+
+            // Generate hash value for the input string
+            byte[] hashBytes = md.digest(resourceId.getBytes());
+
+            // Convert byte array to a hexadecimal string
+            StringBuilder sb = new StringBuilder();
+            for (byte hashByte : hashBytes) {
+                sb.append(Integer.toString((hashByte & 0xff) + 0x100, 16).substring(1));
+            }
+
+            // Return the first 8 characters of the hash string
+            return sb.substring(0, 8);
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private void postPID(String resourceId, String pid) {
+        String url = pidApi + pidPrefix + "/" + pid;
+        String payload = createPID(resourceId);
+        HttpURLConnection con;
+        try {
+            con = (HttpURLConnection) new URL(url).openConnection();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        try {
+            con.setRequestMethod("PUT");
+        } catch (ProtocolException e) {
+            throw new RuntimeException(e);
+        }
+        con.setRequestProperty("Content-Type", "application/json");
+        con.setRequestProperty("Authorization", pidAuth);
+        con.setDoOutput(true);
+        try (OutputStream os = con.getOutputStream()) {
+            byte[] input = payload.getBytes(StandardCharsets.UTF_8);
+            os.write(input, 0, input.length);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        try (BufferedReader br = new BufferedReader(
+                new InputStreamReader(con.getInputStream(), StandardCharsets.UTF_8))) {
+            StringBuilder response = new StringBuilder();
+            String responseLine;
+            while ((responseLine = br.readLine()) != null) {
+                response.append(responseLine.trim());
+            }
+            logger.info("Resource with ID [{}] has been posted with PID [{}]", resourceId, pid);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private String createPID(String resourceId) {
+        JSONObject data = new JSONObject();
+        JSONArray values = new JSONArray();
+        JSONObject hs_admin = new JSONObject();
+        JSONObject hs_admin_data = new JSONObject();
+        JSONObject hs_admin_data_value = new JSONObject();
+        JSONObject id = new JSONObject();
+        hs_admin_data_value.put("index", 301);
+        hs_admin_data_value.put("handle", pidPrefix + "/" + pidUsername);
+        hs_admin_data_value.put("permissions", "011111110011");
+        hs_admin_data_value.put("format", "admin");
+        hs_admin_data.put("value", hs_admin_data_value);
+        hs_admin_data.put("format", "admin");
+        hs_admin.put("index", 100);
+        hs_admin.put("type", "HS_ADMIN");
+        hs_admin.put("data", hs_admin_data);
+        values.put(hs_admin);
+        id.put("index", 1);
+        id.put("type", "id");
+        id.put("data", resourceId);
+        values.put(id);
+        data.put("values", values);
+        return data.toString();
+    }
+
+    public Bundle<?> getPublicResourceViaPID(String resourceType, String pid) {
+        List<String> resourceTypes = Arrays.asList("catalogue", "provider", "service", "datasource",
+                "training_resource", "interoperability_record", "resources");
+        if (!resourceTypes.contains(resourceType)) {
+            throw new ValidationException("The resource type you provided does not exist -> " + resourceType);
+        }
+        FacetFilter ff = new FacetFilter();
+        ff.setQuantity(10000);
+        ff.setResourceType(resourceType);
+        ff.addFilter("alternative_identifiers_values", pid);
+        Browsing<Bundle<?>> browsing = genericResourceService.getResults(ff);
+        if (browsing.getResults().size() > 0) {
+            return browsing.getResults().get(0);
+        }
+        return null;
+    }
+
 }

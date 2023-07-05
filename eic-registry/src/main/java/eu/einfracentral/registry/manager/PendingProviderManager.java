@@ -9,7 +9,7 @@ import eu.einfracentral.registry.service.VocabularyService;
 import eu.einfracentral.service.IdCreator;
 import eu.einfracentral.service.RegistrationMailService;
 import eu.einfracentral.service.SecurityService;
-import eu.einfracentral.utils.FacetFilterUtils;
+import eu.einfracentral.utils.ProviderResourcesCommonMethods;
 import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.domain.Paging;
 import eu.openminted.registry.core.domain.Resource;
@@ -30,7 +30,6 @@ import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 import static eu.einfracentral.config.CacheConfig.CACHE_PROVIDERS;
 
@@ -44,6 +43,7 @@ public class PendingProviderManager extends ResourceManager<ProviderBundle> impl
     private final RegistrationMailService registrationMailService;
     private final SecurityService securityService;
     private final VocabularyService vocabularyService;
+    private final ProviderResourcesCommonMethods commonMethods;
 
     @Value("${project.catalogue.name}")
     private String catalogueName;
@@ -51,13 +51,15 @@ public class PendingProviderManager extends ResourceManager<ProviderBundle> impl
     @Autowired
     public PendingProviderManager(ProviderService<ProviderBundle, Authentication> providerManager,
                                   IdCreator idCreator, @Lazy RegistrationMailService registrationMailService,
-                                  @Lazy SecurityService securityService, @Lazy VocabularyService vocabularyService) {
+                                  @Lazy SecurityService securityService, @Lazy VocabularyService vocabularyService,
+                                  ProviderResourcesCommonMethods commonMethods) {
         super(ProviderBundle.class);
         this.providerManager = providerManager;
         this.idCreator = idCreator;
         this.registrationMailService = registrationMailService;
         this.securityService = securityService;
         this.vocabularyService = vocabularyService;
+        this.commonMethods = commonMethods;
     }
 
 
@@ -96,9 +98,9 @@ public class PendingProviderManager extends ResourceManager<ProviderBundle> impl
         logger.trace("User '{}' is attempting to add a new Pending Provider: {}", auth, providerBundle);
         providerBundle.setMetadata(Metadata.updateMetadata(providerBundle.getMetadata(), User.of(auth).getFullName(), User.of(auth).getEmail()));
 
-        LoggingInfo loggingInfo = LoggingInfo.createLoggingInfoEntry(User.of(auth).getEmail(), User.of(auth).getFullName(), securityService.getRoleName(auth),
-                LoggingInfo.Types.DRAFT.getKey(), LoggingInfo.ActionType.CREATED.getKey());
         List<LoggingInfo> loggingInfoList = new ArrayList<>();
+        LoggingInfo loggingInfo = commonMethods.createLoggingInfo(auth, LoggingInfo.Types.DRAFT.getKey(),
+                LoggingInfo.ActionType.CREATED.getKey());
         loggingInfoList.add(loggingInfo);
         providerBundle.setLoggingInfo(loggingInfoList);
 
@@ -163,15 +165,10 @@ public class PendingProviderManager extends ResourceManager<ProviderBundle> impl
         }
 
         // update loggingInfo
-        LoggingInfo loggingInfo = LoggingInfo.createLoggingInfoEntry(User.of(auth).getEmail(), User.of(auth).getFullName(), securityService.getRoleName(auth),
-                LoggingInfo.Types.ONBOARD.getKey(), LoggingInfo.ActionType.REGISTERED.getKey());
-        List<LoggingInfo> loggingInfoList  = new ArrayList<>();
-        if (providerBundle.getLoggingInfo() != null) {
-            loggingInfoList = providerBundle.getLoggingInfo();
-            loggingInfoList.add(loggingInfo);
-        } else {
-            loggingInfoList.add(loggingInfo);
-        }
+        List<LoggingInfo> loggingInfoList  = commonMethods.returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(providerBundle, auth);
+        LoggingInfo loggingInfo = commonMethods.createLoggingInfo(auth, LoggingInfo.Types.ONBOARD.getKey(),
+                LoggingInfo.ActionType.REGISTERED.getKey());
+        loggingInfoList.add(loggingInfo);
         providerBundle.setLoggingInfo(loggingInfoList);
 
         // latestOnboardInfo
@@ -237,7 +234,6 @@ public class PendingProviderManager extends ResourceManager<ProviderBundle> impl
         if (auth == null) {
             return new ArrayList<>();
         }
-        User user = User.of(auth);
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(maxQuantity);
         ff.addFilter("users", User.of(auth).getEmail());

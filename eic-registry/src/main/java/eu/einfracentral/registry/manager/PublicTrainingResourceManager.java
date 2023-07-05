@@ -5,6 +5,7 @@ import eu.einfracentral.domain.TrainingResourceBundle;
 import eu.einfracentral.exception.ResourceException;
 import eu.einfracentral.exception.ResourceNotFoundException;
 import eu.einfracentral.service.SecurityService;
+import eu.einfracentral.utils.ProviderResourcesCommonMethods;
 import eu.openminted.registry.core.domain.Browsing;
 import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.service.ResourceCRUDService;
@@ -27,12 +28,15 @@ public class PublicTrainingResourceManager extends AbstractPublicResourceManager
     private static final Logger logger = LogManager.getLogger(PublicTrainingResourceManager.class);
     private final JmsTemplate jmsTopicTemplate;
     private final SecurityService securityService;
+    private ProviderResourcesCommonMethods commonMethods;
 
     @Autowired
-    public PublicTrainingResourceManager(JmsTemplate jmsTopicTemplate, SecurityService securityService) {
+    public PublicTrainingResourceManager(JmsTemplate jmsTopicTemplate, SecurityService securityService,
+                                         ProviderResourcesCommonMethods commonMethods) {
         super(TrainingResourceBundle.class);
         this.jmsTopicTemplate = jmsTopicTemplate;
         this.securityService = securityService;
+        this.commonMethods = commonMethods;
     }
 
     @Override
@@ -66,13 +70,15 @@ public class PublicTrainingResourceManager extends AbstractPublicResourceManager
     @Override
     public TrainingResourceBundle add(TrainingResourceBundle trainingResourceBundle, Authentication authentication) {
         String lowerLevelResourceId = trainingResourceBundle.getId();
-        trainingResourceBundle.setIdentifiers(Identifiers.createIdentifier(trainingResourceBundle.getId()));
+        Identifiers.createOriginalId(trainingResourceBundle);
         trainingResourceBundle.setId(String.format("%s.%s", trainingResourceBundle.getTrainingResource().getCatalogueId(), trainingResourceBundle.getId()));
 
         // sets public ids to resource organisation, resource providers and EOSC related services
         updateTrainingResourceIdsToPublic(trainingResourceBundle);
 
         trainingResourceBundle.getMetadata().setPublished(true);
+        // create PID and set it as Alternative Identifier
+        trainingResourceBundle.getIdentifiers().setAlternativeIdentifiers(commonMethods.createAlternativeIdentifierForPID(trainingResourceBundle));
         TrainingResourceBundle ret;
         logger.info(String.format("Training Resource [%s] is being published with id [%s]", lowerLevelResourceId, trainingResourceBundle.getId()));
         ret = super.add(trainingResourceBundle, null);

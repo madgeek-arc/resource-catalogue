@@ -73,8 +73,6 @@
             
       <xs:enumeration value="UPDATED_VERSION"/>
             
-      <xs:enumeration value="DELETED"/>
-            
       <xs:enumeration value="ACTIVATED"/>
             
       <xs:enumeration value="DEACTIVATED"/>

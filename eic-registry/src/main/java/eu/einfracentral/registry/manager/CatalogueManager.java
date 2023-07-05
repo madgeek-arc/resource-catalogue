@@ -176,16 +176,13 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
         addAuthenticatedUser(catalogue.getCatalogue(), auth);
         validate(catalogue);
         catalogue.setMetadata(Metadata.createMetadata(User.of(auth).getFullName(), User.of(auth).getEmail()));
-        LoggingInfo loggingInfo = LoggingInfo.createLoggingInfoEntry(User.of(auth).getEmail(), User.of(auth).getFullName(), securityService.getRoleName(auth),
-                LoggingInfo.Types.ONBOARD.getKey(), LoggingInfo.ActionType.REGISTERED.getKey());
-        List<LoggingInfo> loggingInfoList = new ArrayList<>();
-        loggingInfoList.add((loggingInfo));
+        List<LoggingInfo> loggingInfoList = commonMethods.returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(catalogue, auth);
         catalogue.setLoggingInfo(loggingInfoList);
         catalogue.setActive(false);
         catalogue.setStatus(vocabularyService.get("pending catalogue").getId());
 
         // latestOnboardingInfo
-        catalogue.setLatestOnboardingInfo(loggingInfo);
+        catalogue.setLatestOnboardingInfo(loggingInfoList.get(0));
 
         if (catalogue.getCatalogue().getParticipatingCountries() != null && !catalogue.getCatalogue().getParticipatingCountries().isEmpty()){
             catalogue.getCatalogue().setParticipatingCountries(sortCountries(catalogue.getCatalogue().getParticipatingCountries()));
@@ -212,16 +209,10 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
 
         validate(catalogue);
         catalogue.setMetadata(Metadata.updateMetadata(catalogue.getMetadata(), User.of(auth).getFullName(), User.of(auth).getEmail()));
-        List<LoggingInfo> loggingInfoList = new ArrayList<>();
-        LoggingInfo loggingInfo;
-        loggingInfo = LoggingInfo.createLoggingInfoEntry(User.of(auth).getEmail(), User.of(auth).getFullName(), securityService.getRoleName(auth),
-                LoggingInfo.Types.UPDATE.getKey(), LoggingInfo.ActionType.UPDATED.getKey(), comment);
-        if (catalogue.getLoggingInfo() != null) {
-            loggingInfoList = catalogue.getLoggingInfo();
-            loggingInfoList.add(loggingInfo);
-        } else {
-            loggingInfoList.add(loggingInfo);
-        }
+        List<LoggingInfo> loggingInfoList = commonMethods.returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(catalogue, auth);
+        LoggingInfo loggingInfo = commonMethods.createLoggingInfo(auth, LoggingInfo.Types.UPDATE.getKey(),
+                LoggingInfo.ActionType.UPDATED.getKey(), comment);
+        loggingInfoList.add(loggingInfo);
         catalogue.getCatalogue().setParticipatingCountries(sortCountries(catalogue.getCatalogue().getParticipatingCountries()));
         catalogue.setLoggingInfo(loggingInfoList);
 
@@ -427,45 +418,33 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
         logger.trace("verifyCatalogue with id: '{}' | status -> '{}' | active -> '{}'", id, status, active);
         CatalogueBundle catalogue = get(id);
         catalogue.setStatus(vocabularyService.get(status).getId());
-        LoggingInfo loggingInfo;
-        List<LoggingInfo> loggingInfoList = new ArrayList<>();
+        List<LoggingInfo> loggingInfoList = commonMethods.returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(catalogue, auth);
+        LoggingInfo loggingInfo = null;
 
-        if (catalogue.getLoggingInfo() != null) {
-            loggingInfoList = catalogue.getLoggingInfo();
-        } else {
-            LoggingInfo oldProviderRegistration = LoggingInfo.createLoggingInfoEntry(User.of(auth).getEmail(), User.of(auth).getFullName(), securityService.getRoleName(auth),
-                    LoggingInfo.Types.ONBOARD.getKey(), LoggingInfo.ActionType.REGISTERED.getKey());
-            loggingInfoList.add(oldProviderRegistration);
-        }
         switch (status) {
             case "approved catalogue":
                 if (active == null) {
                     active = true;
                 }
                 catalogue.setActive(active);
-                loggingInfo = LoggingInfo.createLoggingInfoEntry(User.of(auth).getEmail(), User.of(auth).getFullName(), securityService.getRoleName(auth),
-                        LoggingInfo.Types.ONBOARD.getKey(), LoggingInfo.ActionType.APPROVED.getKey());
-                loggingInfoList.add(loggingInfo);
-                loggingInfoList.sort(Comparator.comparing(LoggingInfo::getDate));
-                catalogue.setLoggingInfo(loggingInfoList);
-
-                // latestOnboardingInfo
-                catalogue.setLatestOnboardingInfo(loggingInfo);
+                loggingInfo = commonMethods.createLoggingInfo(auth, LoggingInfo.Types.ONBOARD.getKey(),
+                        LoggingInfo.ActionType.APPROVED.getKey());
                 break;
             case "rejected catalogue":
                 catalogue.setActive(false);
-                loggingInfo = LoggingInfo.createLoggingInfoEntry(User.of(auth).getEmail(), User.of(auth).getFullName(), securityService.getRoleName(auth),
-                        LoggingInfo.Types.ONBOARD.getKey(), LoggingInfo.ActionType.REJECTED.getKey());
-                loggingInfoList.add(loggingInfo);
-                loggingInfoList.sort(Comparator.comparing(LoggingInfo::getDate));
-                catalogue.setLoggingInfo(loggingInfoList);
-
-                // latestOnboardingInfo
-                catalogue.setLatestOnboardingInfo(loggingInfo);
+                loggingInfo = commonMethods.createLoggingInfo(auth, LoggingInfo.Types.ONBOARD.getKey(),
+                        LoggingInfo.ActionType.REJECTED.getKey());
                 break;
             default:
                 break;
         }
+        loggingInfoList.add(loggingInfo);
+        loggingInfoList.sort(Comparator.comparing(LoggingInfo::getDate));
+        catalogue.setLoggingInfo(loggingInfoList);
+
+        // latestOnboardingInfo
+        catalogue.setLatestOnboardingInfo(loggingInfo);
+
         logger.info("Verifying Catalogue: {}", catalogue);
         return super.update(catalogue, auth);
     }
@@ -477,38 +456,23 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
                 catalogue.getStatus().equals(vocabularyService.get("rejected catalogue").getId())) && !catalogue.isActive()){
             throw new ValidationException(String.format("You cannot activate this Catalogue, because it's Inactive with status = [%s]", catalogue.getStatus()));
         }
+        List<LoggingInfo> loggingInfoList = commonMethods.returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(catalogue, auth);
         LoggingInfo loggingInfo;
-        List<LoggingInfo> loggingInfoList = new ArrayList<>();
-
-        if (catalogue.getLoggingInfo() != null) {
-            loggingInfoList = catalogue.getLoggingInfo();
-        } else {
-            LoggingInfo oldProviderRegistration = LoggingInfo.createLoggingInfoEntry(User.of(auth).getEmail(), User.of(auth).getFullName(), securityService.getRoleName(auth),
-                    LoggingInfo.Types.ONBOARD.getKey(), LoggingInfo.ActionType.REGISTERED.getKey());
-            loggingInfoList.add(oldProviderRegistration);
-        }
 
         if (active == null) {
             active = false;
         }
-
         catalogue.setActive(active);
         if (!active) {
             loggingInfo = LoggingInfo.systemUpdateLoggingInfo(LoggingInfo.ActionType.DEACTIVATED.getKey());
-            loggingInfoList.add(loggingInfo);
-            catalogue.setLoggingInfo(loggingInfoList);
-
-            // latestOnboardingInfo
-            catalogue.setLatestUpdateInfo(loggingInfo);
-
         } else {
             loggingInfo = LoggingInfo.systemUpdateLoggingInfo(LoggingInfo.ActionType.ACTIVATED.getKey());
-            loggingInfoList.add(loggingInfo);
-            catalogue.setLoggingInfo(loggingInfoList);
-
-            // latestOnboardingInfo
-            catalogue.setLatestUpdateInfo(loggingInfo);
         }
+        loggingInfoList.add(loggingInfo);
+        catalogue.setLoggingInfo(loggingInfoList);
+
+        // latestOnboardingInfo
+        catalogue.setLatestUpdateInfo(loggingInfo);
 
         return super.update(catalogue, auth);
     }
@@ -643,6 +607,10 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
     public CatalogueBundle suspend(String catalogueId, boolean suspend, Authentication auth) {
         CatalogueBundle catalogueBundle = get(catalogueId, auth);
 
+        // Suspend Catalogue
+        commonMethods.suspendResource(catalogueBundle, catalogueId, suspend, auth);
+        super.update(catalogueBundle, auth);
+
         // Suspend Catalogue's resources
         List<ProviderBundle> providers = providerService.getAll(createFacetFilter(catalogueId), auth).getResults();
 
@@ -652,8 +620,7 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
             }
         }
 
-        commonMethods.suspendResource(catalogueBundle, catalogueId, suspend, auth);
-        return super.update(catalogueBundle, auth);
+        return catalogueBundle;
     }
 
     private FacetFilter createFacetFilter(String catalogueId){
