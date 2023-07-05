@@ -122,24 +122,18 @@ public class LoggingInfo {
     }
 
     public static LoggingInfo createLoggingInfoEntry(Authentication auth, String userRole, String type, String actionType) {
-        LoggingInfo ret = new LoggingInfo();
-        ret.setDate(String.valueOf(System.currentTimeMillis()));
-        ret.setType(type);
-        ret.setActionType(actionType);
-        ret.setUserEmail(User.of(auth).getEmail());
-        ret.setUserFullName(User.of(auth).getFullName());
-        ret.setUserRole(userRole);
-        return ret;
+        return createLoggingInfoEntry(auth, userRole, type, actionType, null);
     }
 
     public static LoggingInfo createLoggingInfoEntry(Authentication auth, String userRole, String type, String actionType,
                                                      String comment) {
         LoggingInfo ret = new LoggingInfo();
+        User user = User.of(auth);
         ret.setDate(String.valueOf(System.currentTimeMillis()));
         ret.setType(type);
         ret.setActionType(actionType);
-        ret.setUserEmail(User.of(auth).getEmail());
-        ret.setUserFullName(User.of(auth).getFullName());
+        ret.setUserEmail(user.getEmail());
+        ret.setUserFullName(user.getFullName());
         ret.setUserRole(userRole);
         ret.setComment(comment);
         return ret;
