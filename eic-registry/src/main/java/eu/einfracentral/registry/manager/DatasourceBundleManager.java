@@ -314,10 +314,7 @@ public class DatasourceBundleManager extends AbstractResourceBundleManager<Datas
 
     @Override
     public void delete(DatasourceBundle datasourceBundle) {
-        // block Public Datasource deletion
-        if (datasourceBundle.getMetadata().isPublished()){
-            throw new ValidationException("You cannot directly delete a Public Service");
-        }
+        commonMethods.blockResourceDeletion(datasourceBundle.getStatus(), datasourceBundle.getMetadata().isPublished());
         logger.info("Deleting Datasource: {}", datasourceBundle);
         super.delete(datasourceBundle);
     }

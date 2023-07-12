@@ -379,10 +379,7 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
 
     @Override
     public void delete(TrainingResourceBundle trainingResourceBundle) {
-        // block Public Training Resource deletion
-        if (trainingResourceBundle.getMetadata().isPublished()){
-            throw new ValidationException("You cannot directly delete a Public Training Resource");
-        }
+        commonMethods.blockResourceDeletion(trainingResourceBundle.getStatus(), trainingResourceBundle.getMetadata().isPublished());
         logger.info("Deleting Training Resource: {}", trainingResourceBundle);
         super.delete(trainingResourceBundle);
         synchronizerService.syncDelete(trainingResourceBundle.getTrainingResource());

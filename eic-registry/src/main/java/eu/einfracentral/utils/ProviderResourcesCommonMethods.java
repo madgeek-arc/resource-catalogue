@@ -35,6 +35,7 @@ public class ProviderResourcesCommonMethods {
     private final CatalogueService<CatalogueBundle, Authentication> catalogueService;
     private final ProviderService<ProviderBundle, Authentication> providerService;
     private final GenericResourceService genericResourceService;
+    private final VocabularyService vocabularyService;
     private final SecurityService securityService;
 
     @Value("${pid.username}")
@@ -51,10 +52,12 @@ public class ProviderResourcesCommonMethods {
     public ProviderResourcesCommonMethods(@Lazy CatalogueService<CatalogueBundle, Authentication> catalogueService,
                                           @Lazy ProviderService<ProviderBundle, Authentication> providerService,
                                           @Lazy GenericResourceService genericResourceService,
+                                          @Lazy VocabularyService vocabularyService,
                                           @Lazy SecurityService securityService) {
         this.catalogueService = catalogueService;
         this.providerService = providerService;
         this.genericResourceService = genericResourceService;
+        this.vocabularyService = vocabularyService;
         this.securityService = securityService;
     }
 
@@ -459,4 +462,12 @@ public class ProviderResourcesCommonMethods {
         return null;
     }
 
+    public void blockResourceDeletion(String status, boolean isPublished) {
+        if (status.equals(vocabularyService.get("pending resource").getId())) {
+            throw new ValidationException("You cannot delete a Template that is under review");
+        }
+        if (isPublished){
+            throw new ValidationException("You cannot directly delete a Public Resource");
+        }
+    }
 }
