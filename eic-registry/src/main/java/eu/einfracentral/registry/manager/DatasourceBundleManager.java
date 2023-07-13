@@ -779,4 +779,8 @@ public class DatasourceBundleManager extends AbstractResourceBundleManager<Datas
         commonMethods.suspendResource(datasourceBundle, catalogueId, suspend, auth);
         return super.update(datasourceBundle, auth);
     }
+    public List<ServiceBundle> transformDatasourcesToServices(List<?> resourceBundles) {
+        throw new UnsupportedOperationException("Not yet Implemented");
+    }
+
 }

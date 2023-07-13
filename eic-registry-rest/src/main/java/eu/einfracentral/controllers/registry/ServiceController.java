@@ -167,6 +167,25 @@ public class ServiceController {
         return ResponseEntity.ok(paging);
     }
 
+    @ApiOperation(value = "Get all Service and Datasource Bundles as ServiceBundles.")
+    @Browse
+    @ApiImplicitParam(name = "suspended", value = "Suspended", defaultValue = "false", dataType = "boolean", paramType = "query")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
+    @GetMapping(path = "getAllAsServices", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    public ResponseEntity<Paging<?>> getAllAsServices(@RequestParam(defaultValue = "all", name = "catalogue_id") String catalogueId,
+                                                      @RequestParam(defaultValue = "all", name = "type") String type,
+                                                      @ApiIgnore @RequestParam MultiValueMap<String, Object> allRequestParams,
+                                                      @ApiIgnore Authentication authentication) {
+        FacetFilter ff = resourceBundleService.createFacetFilterForFetchingServicesAndDatasources(allRequestParams, catalogueId, type);
+        resourceBundleService.updateFacetFilterConsideringTheAuthorization(ff, authentication);
+        Paging<?> resourceBundlesPaging = genericResourceService.getResults(ff);
+        List<?> resourceBundles = resourceBundlesPaging.getResults();
+        List<ServiceBundle> serviceBundles = resourceBundleService.transformDatasourcesToServices(resourceBundles);
+        return ResponseEntity.ok(new Paging<>(resourceBundlesPaging.getTotal(), resourceBundlesPaging.getFrom(), resourceBundlesPaging.getTo(),
+                serviceBundles, resourceBundlesPaging.getFacets()));
+
+    }
+
 
     // Filter a list of Services based on a set of filters or get a list of all Services in the Catalogue.
     @Browse

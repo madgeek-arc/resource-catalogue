@@ -23,6 +23,22 @@ public class ServiceBundle extends ResourceBundle<Service> {
         this.setMetadata(metadata);
     }
 
+    public ServiceBundle(DatasourceBundle datasourceBundle) {
+        this.setId(datasourceBundle.getId());
+        this.setService(datasourceBundle.getDatasource());
+        this.setMetadata(datasourceBundle.getMetadata());
+        this.setStatus(datasourceBundle.getStatus());
+        this.setActive(datasourceBundle.isActive());
+        this.setLoggingInfo(datasourceBundle.getLoggingInfo());
+        this.setLatestAuditInfo(datasourceBundle.getLatestAuditInfo());
+        this.setLatestOnboardingInfo(datasourceBundle.getLatestOnboardingInfo());
+        this.setLatestUpdateInfo(datasourceBundle.getLatestUpdateInfo());
+        this.setIdentifiers(datasourceBundle.getIdentifiers());
+        this.setResourceExtras(datasourceBundle.getResourceExtras());
+        this.setSuspended(datasourceBundle.isSuspended());
+        this.setMigrationStatus(datasourceBundle.getMigrationStatus());
+    }
+
     @XmlElement(name = "service")
     public Service getService() {
         return this.getPayload();

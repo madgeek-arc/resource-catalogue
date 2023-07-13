@@ -589,4 +589,17 @@ public class ServiceBundleManager extends AbstractResourceBundleManager<ServiceB
         return super.update(serviceBundle, auth);
     }
 
+    public List<ServiceBundle> transformDatasourcesToServices(List<?> resourceBundles) {
+        List<ServiceBundle> serviceBundles = new ArrayList<>();
+        for (Object obj : resourceBundles) {
+            if (obj instanceof DatasourceBundle) {
+                ServiceBundle serviceBundle = new ServiceBundle((DatasourceBundle) obj);
+                serviceBundles.add(serviceBundle);
+            } else {
+                serviceBundles.add((ServiceBundle) obj);
+            }
+        }
+        return serviceBundles;
+    }
+
 }
