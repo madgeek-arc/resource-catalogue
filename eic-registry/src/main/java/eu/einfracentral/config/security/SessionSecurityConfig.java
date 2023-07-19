@@ -120,6 +120,9 @@ public class SessionSecurityConfig extends WebSecurityConfigurerAdapter {
                     .invalidateHttpSession(true)
                     .logoutUrl("/openid_logout")
                     .logoutSuccessUrl(oidcLogoutURL + "?redirect=" + webappFrontUrl)
+//                    .logoutSuccessUrl(oidcLogoutURL +
+//                        "?post_logout_redirect_uri=" + webappFrontUrl +
+//                        "&client_id=" + oidcClientId)
                     .deleteCookies("info")
                 .and().exceptionHandling()
                 .and().csrf().disable()
