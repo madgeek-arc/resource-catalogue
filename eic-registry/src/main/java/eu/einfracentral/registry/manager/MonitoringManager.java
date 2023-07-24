@@ -5,7 +5,7 @@ import eu.einfracentral.domain.*;
 import eu.einfracentral.dto.MonitoringStatus;
 import eu.einfracentral.dto.ServiceType;
 import eu.einfracentral.exception.ValidationException;
-import eu.einfracentral.registry.service.ResourceBundleService;
+import eu.einfracentral.registry.service.ServiceBundleService;
 import eu.einfracentral.registry.service.MonitoringService;
 import eu.einfracentral.registry.service.TrainingResourceService;
 import eu.einfracentral.service.RegistrationMailService;
@@ -22,7 +22,6 @@ import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.http.*;
-import org.springframework.jms.core.JmsTemplate;
 import org.springframework.security.core.Authentication;
 
 import java.util.ArrayList;
@@ -34,8 +33,7 @@ import java.util.UUID;
 public class MonitoringManager extends ResourceManager<MonitoringBundle> implements MonitoringService<MonitoringBundle, Authentication> {
 
     private static final Logger logger = LogManager.getLogger(MonitoringManager.class);
-    private final ResourceBundleService<ServiceBundle> serviceBundleService;
-    private final ResourceBundleService<DatasourceBundle> datasourceBundleService;
+    private final ServiceBundleService<ServiceBundle> serviceBundleService;
     private final TrainingResourceService<TrainingResourceBundle> trainingResourceService;
     private final SecurityService securityService;
     private final RegistrationMailService registrationMailService;
@@ -47,15 +45,13 @@ public class MonitoringManager extends ResourceManager<MonitoringBundle> impleme
     private String monitoringServiceTypes;
 
 
-    public MonitoringManager(ResourceBundleService<ServiceBundle> serviceBundleService,
-                             ResourceBundleService<DatasourceBundle> datasourceBundleService,
+    public MonitoringManager(ServiceBundleService<ServiceBundle> serviceBundleService,
                              TrainingResourceService<TrainingResourceBundle> trainingResourceService,
                              @Lazy SecurityService securityService,
                              @Lazy RegistrationMailService registrationMailService,
                              ProviderResourcesCommonMethods commonMethods) {
         super(MonitoringBundle.class);
         this.serviceBundleService = serviceBundleService;
-        this.datasourceBundleService = datasourceBundleService;
         this.trainingResourceService = trainingResourceService;
         this.securityService = securityService;
         this.registrationMailService = registrationMailService;
@@ -81,8 +77,6 @@ public class MonitoringManager extends ResourceManager<MonitoringBundle> impleme
         // check if Resource exists and if User belongs to Resource's Provider Admins
         if (resourceType.equals("service")){
             ResourceValidationUtils.checkIfResourceBundleIsActiveAndApprovedAndNotPublic(resourceId, catalogueId, serviceBundleService, resourceType);
-        } else if (resourceType.equals("datasource")){
-            ResourceValidationUtils.checkIfResourceBundleIsActiveAndApprovedAndNotPublic(resourceId, catalogueId, datasourceBundleService, resourceType);
         } else if (resourceType.equals("training_resource")){
             ResourceValidationUtils.checkIfResourceBundleIsActiveAndApprovedAndNotPublic(resourceId, catalogueId, trainingResourceService, resourceType);
         } else{

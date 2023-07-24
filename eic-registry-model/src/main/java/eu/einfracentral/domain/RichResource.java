@@ -13,7 +13,6 @@ import java.util.Objects;
 public class RichResource {
 
     private Service service;
-    private Datasource datasource;
     private TrainingResource trainingResource;
     private Metadata metadata;
 
@@ -54,25 +53,6 @@ public class RichResource {
         this.metadata = metadata;
     }
 
-    public RichResource(DatasourceBundle dataSourceBundle) {
-        this.datasource = dataSourceBundle.getDatasource();
-        this.metadata = dataSourceBundle.getMetadata();
-    }
-
-    public RichResource(Datasource datasource, Metadata metadata) {
-        this.datasource = datasource;
-        this.metadata = metadata;
-    }
-
-    public RichResource(ResourceBundle<?> resource) {
-        if (resource.getPayload() instanceof Datasource){
-            this.datasource = (Datasource) resource.getPayload();
-        } else {
-            this.service = resource.getPayload();
-        }
-        this.metadata = resource.getMetadata();
-    }
-
     public RichResource(TrainingResourceBundle trainingResourceBundle) {
         this.trainingResource = trainingResourceBundle.getTrainingResource();
         this.metadata = trainingResourceBundle.getMetadata();
@@ -89,14 +69,6 @@ public class RichResource {
 
     public void setService(Service service) {
         this.service = service;
-    }
-
-    public Datasource getDatasource() {
-        return datasource;
-    }
-
-    public void setDatasource(Datasource datasource) {
-        this.datasource = datasource;
     }
 
     public TrainingResource getTrainingResource() {
@@ -243,11 +215,11 @@ public class RichResource {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         RichResource that = (RichResource) o;
-        return Float.compare(that.views, views) == 0 && Float.compare(that.ratings, ratings) == 0 && Float.compare(that.userRate, userRate) == 0 && Float.compare(that.hasRate, hasRate) == 0 && Float.compare(that.favourites, favourites) == 0 && Float.compare(that.isFavourite, isFavourite) == 0 && Objects.equals(service, that.service) && Objects.equals(datasource, that.datasource) && Objects.equals(trainingResource, that.trainingResource) && Objects.equals(metadata, that.metadata) && Objects.equals(languageAvailabilityNames, that.languageAvailabilityNames) && Objects.equals(geographicAvailabilityNames, that.geographicAvailabilityNames) && Objects.equals(trlName, that.trlName) && Objects.equals(phaseName, that.phaseName) && Objects.equals(lifeCycleStatusName, that.lifeCycleStatusName) && Objects.equals(targetUsersNames, that.targetUsersNames) && Objects.equals(accessTypeNames, that.accessTypeNames) && Objects.equals(accessModeNames, that.accessModeNames) && Objects.equals(fundingBodyNames, that.fundingBodyNames) && Objects.equals(fundingProgramNames, that.fundingProgramNames) && Objects.equals(orderTypeName, that.orderTypeName) && Objects.equals(categories, that.categories) && Objects.equals(domains, that.domains) && Objects.equals(providerInfo, that.providerInfo);
+        return Float.compare(that.views, views) == 0 && Float.compare(that.ratings, ratings) == 0 && Float.compare(that.userRate, userRate) == 0 && Float.compare(that.hasRate, hasRate) == 0 && Float.compare(that.favourites, favourites) == 0 && Float.compare(that.isFavourite, isFavourite) == 0 && Objects.equals(service, that.service) && Objects.equals(trainingResource, that.trainingResource) && Objects.equals(metadata, that.metadata) && Objects.equals(languageAvailabilityNames, that.languageAvailabilityNames) && Objects.equals(geographicAvailabilityNames, that.geographicAvailabilityNames) && Objects.equals(trlName, that.trlName) && Objects.equals(phaseName, that.phaseName) && Objects.equals(lifeCycleStatusName, that.lifeCycleStatusName) && Objects.equals(targetUsersNames, that.targetUsersNames) && Objects.equals(accessTypeNames, that.accessTypeNames) && Objects.equals(accessModeNames, that.accessModeNames) && Objects.equals(fundingBodyNames, that.fundingBodyNames) && Objects.equals(fundingProgramNames, that.fundingProgramNames) && Objects.equals(orderTypeName, that.orderTypeName) && Objects.equals(categories, that.categories) && Objects.equals(domains, that.domains) && Objects.equals(providerInfo, that.providerInfo);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(service, datasource, trainingResource, metadata, languageAvailabilityNames, geographicAvailabilityNames, trlName, phaseName, lifeCycleStatusName, targetUsersNames, accessTypeNames, accessModeNames, fundingBodyNames, fundingProgramNames, orderTypeName, views, ratings, userRate, hasRate, favourites, isFavourite, categories, domains, providerInfo);
+        return Objects.hash(service, trainingResource, metadata, languageAvailabilityNames, geographicAvailabilityNames, trlName, phaseName, lifeCycleStatusName, targetUsersNames, accessTypeNames, accessModeNames, fundingBodyNames, fundingProgramNames, orderTypeName, views, ratings, userRate, hasRate, favourites, isFavourite, categories, domains, providerInfo);
     }
 }

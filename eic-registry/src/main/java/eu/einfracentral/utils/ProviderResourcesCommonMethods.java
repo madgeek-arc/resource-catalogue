@@ -73,15 +73,6 @@ public class ProviderResourcesCommonMethods {
                     }
                 }
             }
-            if (o instanceof DatasourceBundle){
-                if (((DatasourceBundle) o).getPayload().getCatalogueId() == null || ((DatasourceBundle) o).getPayload().getCatalogueId().equals("")) {
-                    throw new ValidationException("Datasource's 'catalogueId' cannot be null or empty");
-                } else {
-                    if (!((DatasourceBundle) o).getPayload().getCatalogueId().equals(catalogueId)) {
-                        throw new ValidationException("Parameter 'catalogueId' and Datasource's 'catalogueId' don't match");
-                    }
-                }
-            }
             if (o instanceof ServiceBundle){
                 if (((ServiceBundle) o).getPayload().getCatalogueId() == null || ((ServiceBundle) o).getPayload().getCatalogueId().equals("")) {
                     throw new ValidationException("Service's 'catalogueId' cannot be null or empty");
@@ -121,12 +112,6 @@ public class ProviderResourcesCommonMethods {
         List<String> eoscRelatedServices = new ArrayList<>();
         List<String> interoperabilityRecordIds = new ArrayList<>();
         if (o != null) {
-            if (o instanceof DatasourceBundle) {
-                catalogueId = ((DatasourceBundle) o).getDatasource().getCatalogueId();
-                resourceProviders = ((DatasourceBundle) o).getDatasource().getResourceProviders();
-                requiredResources = ((DatasourceBundle) o).getDatasource().getRequiredResources();
-                relatedResources = ((DatasourceBundle) o).getDatasource().getRelatedResources();
-            }
             if (o instanceof ServiceBundle) {
                 catalogueId = ((ServiceBundle) o).getService().getCatalogueId();
                 resourceProviders = ((ServiceBundle) o).getService().getResourceProviders();
@@ -160,20 +145,13 @@ public class ProviderResourcesCommonMethods {
                         if (!serviceBundle.getMetadata().isPublished() && !serviceBundle.getService().getCatalogueId().equals(catalogueId)) {
                             throw new ValidationException("Cross Catalogue reference is prohibited. Found in field 'requiredResources");
                         }
-                    } catch (ResourceNotFoundException e) {
+                    } catch (ResourceNotFoundException j) {
                         try {
-                            DatasourceBundle datasourceBundle = genericResourceService.get("datasource", requiredResource);
-                            if (!datasourceBundle.getMetadata().isPublished() && !datasourceBundle.getDatasource().getCatalogueId().equals(catalogueId)) {
+                            TrainingResourceBundle trainingResourceBundle = genericResourceService.get("training_resource", requiredResource);
+                            if (!trainingResourceBundle.getMetadata().isPublished() && !trainingResourceBundle.getTrainingResource().getCatalogueId().equals(catalogueId)) {
                                 throw new ValidationException("Cross Catalogue reference is prohibited. Found in field 'requiredResources");
                             }
-                        } catch (ResourceNotFoundException j) {
-                            try {
-                                TrainingResourceBundle trainingResourceBundle = genericResourceService.get("training_resource", requiredResource);
-                                if (!trainingResourceBundle.getMetadata().isPublished() && !trainingResourceBundle.getTrainingResource().getCatalogueId().equals(catalogueId)) {
-                                    throw new ValidationException("Cross Catalogue reference is prohibited. Found in field 'requiredResources");
-                                }
-                            } catch (ResourceNotFoundException k) {
-                            }
+                        } catch (ResourceNotFoundException k) {
                         }
                     }
                 }
@@ -185,20 +163,13 @@ public class ProviderResourcesCommonMethods {
                         if (!serviceBundle.getMetadata().isPublished() && !serviceBundle.getService().getCatalogueId().equals(catalogueId)) {
                             throw new ValidationException("Cross Catalogue reference is prohibited. Found in field 'relatedResources");
                         }
-                    } catch (ResourceNotFoundException e) {
+                    } catch (ResourceNotFoundException j) {
                         try {
-                            DatasourceBundle datasourceBundle = genericResourceService.get("datasource", relatedResource);
-                            if (!datasourceBundle.getMetadata().isPublished() && !datasourceBundle.getDatasource().getCatalogueId().equals(catalogueId)) {
+                            TrainingResourceBundle trainingResourceBundle = genericResourceService.get("training_resource", relatedResource);
+                            if (!trainingResourceBundle.getMetadata().isPublished() && !trainingResourceBundle.getTrainingResource().getCatalogueId().equals(catalogueId)) {
                                 throw new ValidationException("Cross Catalogue reference is prohibited. Found in field 'relatedResources");
                             }
-                        } catch (ResourceNotFoundException j) {
-                            try {
-                                TrainingResourceBundle trainingResourceBundle = genericResourceService.get("training_resource", relatedResource);
-                                if (!trainingResourceBundle.getMetadata().isPublished() && !trainingResourceBundle.getTrainingResource().getCatalogueId().equals(catalogueId)) {
-                                    throw new ValidationException("Cross Catalogue reference is prohibited. Found in field 'relatedResources");
-                                }
-                            } catch (ResourceNotFoundException k) {
-                            }
+                        } catch (ResourceNotFoundException k) {
                         }
                     }
                 }
@@ -210,20 +181,13 @@ public class ProviderResourcesCommonMethods {
                         if (!serviceBundle.getMetadata().isPublished() && !serviceBundle.getService().getCatalogueId().equals(catalogueId)) {
                             throw new ValidationException("Cross Catalogue reference is prohibited. Found in field 'eoscRelatedServices");
                         }
-                    } catch (ResourceNotFoundException e) {
+                    } catch (ResourceNotFoundException j) {
                         try {
-                            DatasourceBundle datasourceBundle = genericResourceService.get("datasource", eoscRelatedService);
-                            if (!datasourceBundle.getMetadata().isPublished() && !datasourceBundle.getDatasource().getCatalogueId().equals(catalogueId)) {
+                            TrainingResourceBundle trainingResourceBundle = genericResourceService.get("training_resource", eoscRelatedService);
+                            if (!trainingResourceBundle.getMetadata().isPublished() && !trainingResourceBundle.getTrainingResource().getCatalogueId().equals(catalogueId)) {
                                 throw new ValidationException("Cross Catalogue reference is prohibited. Found in field 'eoscRelatedServices");
                             }
-                        } catch (ResourceNotFoundException j) {
-                            try {
-                                TrainingResourceBundle trainingResourceBundle = genericResourceService.get("training_resource", eoscRelatedService);
-                                if (!trainingResourceBundle.getMetadata().isPublished() && !trainingResourceBundle.getTrainingResource().getCatalogueId().equals(catalogueId)) {
-                                    throw new ValidationException("Cross Catalogue reference is prohibited. Found in field 'eoscRelatedServices");
-                                }
-                            } catch (ResourceNotFoundException k) {
-                            }
+                        } catch (ResourceNotFoundException k) {
                         }
                     }
                 }

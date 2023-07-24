@@ -1,10 +1,9 @@
 package eu.einfracentral.controllers.registry;
 
 import eu.einfracentral.domain.Bundle;
-import eu.einfracentral.domain.DatasourceBundle;
 import eu.einfracentral.domain.ServiceBundle;
 import eu.einfracentral.domain.TrainingResourceBundle;
-import eu.einfracentral.registry.service.ResourceBundleService;
+import eu.einfracentral.registry.service.ServiceBundleService;
 import eu.einfracentral.registry.service.TrainingResourceService;
 import io.swagger.annotations.Api;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,20 +16,17 @@ import org.springframework.web.bind.annotation.RestController;
 import springfox.documentation.annotations.ApiIgnore;
 
 @RestController
-@RequestMapping({"resourceBundles"})
-@Api(description = "Operations for Provider Resource Templates", tags = {"resource-bundle-controller"})
-public class ResourceBundleController {
+@RequestMapping({"serviceTemplateBundles"})
+@Api(description = "Operations for Provider Service Templates", tags = {"service-template-bundle-controller"})
+public class ServiceTemplateBundleController {
 
-    private final ResourceBundleService<ServiceBundle> serviceBundleService;
-    private final ResourceBundleService<DatasourceBundle> datasourceBundleService;
+    private final ServiceBundleService<ServiceBundle> serviceBundleService;
     private final TrainingResourceService<TrainingResourceBundle> trainingResourceService;
 
     @Autowired
-    public ResourceBundleController(ResourceBundleService<ServiceBundle> serviceBundleService,
-                                    ResourceBundleService<DatasourceBundle> datasourceBundleService,
-                                    TrainingResourceService<TrainingResourceBundle> trainingResourceService) {
+    public ServiceTemplateBundleController(ServiceBundleService<ServiceBundle> serviceBundleService,
+                                           TrainingResourceService<TrainingResourceBundle> trainingResourceService) {
         this.serviceBundleService = serviceBundleService;
-        this.datasourceBundleService = datasourceBundleService;
         this.trainingResourceService = trainingResourceService;
     }
 
@@ -39,10 +35,7 @@ public class ResourceBundleController {
     public Bundle getProviderTemplate(@RequestParam String id, @ApiIgnore Authentication auth) {
         Bundle template = serviceBundleService.getResourceTemplate(id, auth);
         if (template == null) {
-            template = datasourceBundleService.getResourceTemplate(id, auth);
-            if (template == null) {
-                template = trainingResourceService.getResourceTemplate(id, auth);
-            }
+            template = trainingResourceService.getResourceTemplate(id, auth);
         }
         return template;
     }

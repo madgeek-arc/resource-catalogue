@@ -275,7 +275,7 @@ public class PendingProviderManager extends ResourceManager<ProviderBundle> impl
     public Resource getPendingResourceViaServiceId(String serviceId){
         return null;
     }
-    public DatasourceBundle getOpenAIREDatasource(Datasource datasource){
-        return null;
-    }
+//    public DatasourceBundle getOpenAIREDatasource(Datasource datasource){
+//        return null;
+//    }
 }

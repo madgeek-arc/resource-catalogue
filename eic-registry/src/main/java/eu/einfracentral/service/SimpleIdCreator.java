@@ -56,17 +56,17 @@ public class SimpleIdCreator implements IdCreator {
     }
 
     @Override
-    public String createServiceId(ResourceBundle<?> resource) {
-        if (resource.getPayload().getResourceOrganisation() == null || resource.getPayload().getResourceOrganisation().equals("")) {
+    public String createServiceId(ServiceBundle serviceBundle) {
+        if (serviceBundle.getService().getResourceOrganisation() == null || serviceBundle.getService().getResourceOrganisation().equals("")) {
             throw new ValidationException("Resource must have a Resource Organisation.");
         }
         String serviceId;
-        if (resource.getPayload().getAbbreviation() != null && !"".equals(resource.getPayload().getAbbreviation()) && !"null".equals(resource.getPayload().getAbbreviation())) {
-            serviceId = resource.getPayload().getAbbreviation();
+        if (serviceBundle.getService().getAbbreviation() != null && !"".equals(serviceBundle.getService().getAbbreviation()) && !"null".equals(serviceBundle.getService().getAbbreviation())) {
+            serviceId = serviceBundle.getService().getAbbreviation();
         } else {
             throw new ValidationException("Resource must have an abbreviation.");
         }
-        String provider = resource.getPayload().getResourceOrganisation();
+        String provider = serviceBundle.getService().getResourceOrganisation();
         return String.format("%s.%s", provider, StringUtils
                 .stripAccents(serviceId)
                 .replaceAll("[\n\t\\s]+", " ")
@@ -74,19 +74,6 @@ public class SimpleIdCreator implements IdCreator {
                 .replaceAll("[^a-zA-Z0-9\\s\\-\\_]+", "")
                 .replace(" ", "_")
                 .toLowerCase());
-    }
-
-    public String createDatasourceId(ResourceBundle<?> resource) throws NoSuchAlgorithmException {
-        String resourceOrganisation = resource.getPayload().getResourceOrganisation();
-        String datasourceName = resource.getPayload().getName();
-        MessageDigest md = MessageDigest.getInstance("MD5");
-        byte[] messageDigest = md.digest(datasourceName.getBytes());
-        BigInteger no = new BigInteger(1, messageDigest);
-        String hashtext = no.toString(16);
-        while (hashtext.length() < 32) {
-            hashtext = "0" + hashtext;
-        }
-        return resourceOrganisation+"."+hashtext;
     }
 
     public String createTrainingResourceId(TrainingResourceBundle trainingResourceBundle) throws NoSuchAlgorithmException {

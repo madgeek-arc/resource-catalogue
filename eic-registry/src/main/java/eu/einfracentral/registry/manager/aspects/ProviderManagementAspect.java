@@ -5,7 +5,7 @@ import eu.einfracentral.domain.interoperabilityRecord.configurationTemplates.Con
 import eu.einfracentral.exception.ResourceException;
 import eu.einfracentral.exception.ResourceNotFoundException;
 import eu.einfracentral.registry.manager.*;
-import eu.einfracentral.registry.service.ResourceBundleService;
+import eu.einfracentral.registry.service.ServiceBundleService;
 import eu.einfracentral.registry.service.ProviderService;
 import eu.einfracentral.registry.service.TrainingResourceService;
 import eu.einfracentral.service.RegistrationMailService;
@@ -32,12 +32,10 @@ public class ProviderManagementAspect {
     private static final Logger logger = LogManager.getLogger(ProviderManagementAspect.class);
 
     private final ProviderService<ProviderBundle, Authentication> providerService;
-    private final ResourceBundleService<ServiceBundle> serviceBundleService;
-    private final ResourceBundleService<DatasourceBundle> datasourceBundleService;
+    private final ServiceBundleService<ServiceBundle> serviceBundleService;
     private final TrainingResourceService<TrainingResourceBundle> trainingResourceService;
     private final PublicProviderManager publicProviderManager;
     private final PublicServiceManager publicServiceManager;
-    private final PublicDatasourceManager publicDatasourceManager;
     private final PublicTrainingResourceManager publicTrainingResourceManager;
     private final PublicInteroperabilityRecordManager publicInteroperabilityRecordManager;
     private final PublicConfigurationTemplateImplementationManager publicConfigurationTemplateImplementationManager;
@@ -49,12 +47,10 @@ public class ProviderManagementAspect {
 
     @Autowired
     public ProviderManagementAspect(ProviderService<ProviderBundle, Authentication> providerService,
-                                    ResourceBundleService<ServiceBundle> serviceBundleService,
-                                    ResourceBundleService<DatasourceBundle> datasourceBundleService,
+                                    ServiceBundleService<ServiceBundle> serviceBundleService,
                                     TrainingResourceService<TrainingResourceBundle> trainingResourceService,
                                     PublicProviderManager publicProviderManager,
                                     PublicServiceManager publicServiceManager,
-                                    PublicDatasourceManager publicDatasourceManager,
                                     PublicTrainingResourceManager publicTrainingResourceManager,
                                     PublicInteroperabilityRecordManager publicInteroperabilityRecordManager,
                                     PublicResourceInteroperabilityRecordManager publicResourceInteroperabilityRecordManager,
@@ -63,11 +59,9 @@ public class ProviderManagementAspect {
                                     SecurityService securityService) {
         this.providerService = providerService;
         this.serviceBundleService = serviceBundleService;
-        this.datasourceBundleService = datasourceBundleService;
         this.trainingResourceService = trainingResourceService;
         this.publicProviderManager = publicProviderManager;
         this.publicServiceManager = publicServiceManager;
-        this.publicDatasourceManager = publicDatasourceManager;
         this.publicTrainingResourceManager = publicTrainingResourceManager;
         this.publicInteroperabilityRecordManager = publicInteroperabilityRecordManager;
         this.publicResourceInteroperabilityRecordManager = publicResourceInteroperabilityRecordManager;
@@ -83,15 +77,6 @@ public class ProviderManagementAspect {
     public void updateProviderState(ServiceBundle serviceBundle) {
         logger.trace("Updating Provider States");
         updateServiceProviderStates(serviceBundle);
-    }
-
-    @AfterReturning(pointcut = "execution(* eu.einfracentral.registry.manager.PendingDatasourceManager.transformToActive(..))" +
-            "|| execution(* eu.einfracentral.registry.manager.DatasourceBundleManager.addResource(..))" +
-            "|| execution(* eu.einfracentral.registry.manager.DatasourceBundleManager.updateResource(..))",
-            returning = "datasourceBundle")
-    public void updateProviderState(final DatasourceBundle datasourceBundle) {
-        logger.trace("Updating Provider States");
-        updateDatasourceProviderStates(datasourceBundle);
     }
 
     //TODO: ADD PendingTrainingResourceManager execution
@@ -128,14 +113,6 @@ public class ProviderManagementAspect {
         ProviderBundle providerBundle = providerService.get(serviceBundle.getService().getResourceOrganisation());
         logger.trace("Sending Registration emails");
         registrationMailService.sendProviderMails(providerBundle, "serviceBundleManager");
-    }
-
-    @AfterReturning(pointcut = "execution(* eu.einfracentral.registry.manager.DatasourceBundleManager.verifyResource(..))",
-            returning = "datasourceBundle")
-    public void providerRegistrationEmails(final DatasourceBundle datasourceBundle) {
-        ProviderBundle providerBundle = providerService.get(datasourceBundle.getDatasource().getResourceOrganisation());
-        logger.trace("Sending Registration emails");
-        registrationMailService.sendProviderMails(providerBundle, "datasourceBundleManager");
     }
 
     @AfterReturning(pointcut = "execution(* eu.einfracentral.registry.manager.TrainingResourceManager.verifyResource(..))",
@@ -185,15 +162,6 @@ public class ProviderManagementAspect {
     }
 
     @Async
-    @AfterReturning(pointcut = "execution(* eu.einfracentral.registry.manager.DatasourceBundleManager.verifyResource(..))",
-            returning = "datasourceBundle")
-    public void updatePublicProviderTemplateStatus(final DatasourceBundle datasourceBundle) {
-        ProviderBundle providerBundle = providerService.get(datasourceBundle.getDatasource().getResourceOrganisation());
-        checkIfPublicProviderExistsOrElseThrow(providerBundle);
-        publicProviderManager.update(providerBundle, null);
-    }
-
-    @Async
     @AfterReturning(pointcut = "execution(* eu.einfracentral.registry.manager.TrainingResourceManager.verifyResource(..))",
             returning = "trainingResourceBundle")
     public void updatePublicProviderTemplateStatus(final TrainingResourceBundle trainingResourceBundle) {
@@ -230,22 +198,6 @@ public class ProviderManagementAspect {
                 publicServiceManager.get(String.format("%s.%s", serviceBundle.getService().getCatalogueId(), serviceBundle.getId()));
             } catch (ResourceException | ResourceNotFoundException e) {
                 publicServiceManager.add(serviceBundle, null);
-            }
-        }
-    }
-
-    @Async
-    @AfterReturning(pointcut = "execution(* eu.einfracentral.registry.manager.DatasourceBundleManager.addResource(..))" +
-            "|| execution(* eu.einfracentral.registry.manager.DatasourceBundleManager.verifyResource(..))" +
-            "|| execution(* eu.einfracentral.registry.manager.PendingDatasourceManager.transformToActive(..))" +
-            "|| execution(* eu.einfracentral.registry.manager.DatasourceBundleManager.changeProvider(..))",
-            returning = "datasourceBundle")
-    public void addResourceAsPublic(final DatasourceBundle datasourceBundle) {
-        if (datasourceBundle.getStatus().equals("approved resource") && datasourceBundle.isActive()) {
-            try {
-                publicDatasourceManager.get(String.format("%s.%s", datasourceBundle.getDatasource().getCatalogueId(), datasourceBundle.getId()));
-            } catch (ResourceException | ResourceNotFoundException e) {
-                publicDatasourceManager.add(datasourceBundle, null);
             }
         }
     }
@@ -296,21 +248,6 @@ public class ProviderManagementAspect {
     }
 
     @Async
-    @AfterReturning(pointcut = "execution(* eu.einfracentral.registry.manager.DatasourceBundleManager.updateResource(..))" +
-            "|| execution(* eu.einfracentral.registry.manager.DatasourceBundleManager.publish(..))" +
-            "|| execution(* eu.einfracentral.registry.manager.DatasourceBundleManager.verifyResource(..))" +
-            "|| execution(* eu.einfracentral.registry.manager.DatasourceBundleManager.suspend(..))" +
-            "|| execution(* eu.einfracentral.registry.manager.DatasourceBundleManager.auditResource(..))",
-            returning = "datasourceBundle")
-    public void updatePublicResource(final DatasourceBundle datasourceBundle) {
-        try {
-            publicDatasourceManager.get(String.format("%s.%s", datasourceBundle.getDatasource().getCatalogueId(), datasourceBundle.getId()));
-            publicDatasourceManager.update(datasourceBundle, null);
-        } catch (ResourceException | ResourceNotFoundException ignore) {
-        }
-    }
-
-    @Async
     @AfterReturning(pointcut = "execution(* eu.einfracentral.registry.manager.TrainingResourceManager.updateResource(..))" +
             "|| execution(* eu.einfracentral.registry.manager.TrainingResourceManager.publish(..))" +
             "|| execution(* eu.einfracentral.registry.manager.TrainingResourceManager.verifyResource(..))" +
@@ -348,13 +285,6 @@ public class ProviderManagementAspect {
     }
 
     @Async
-    @After("execution(* eu.einfracentral.registry.manager.DatasourceBundleManager.delete(..))")
-    public void deletePublicDatasource(JoinPoint joinPoint) {
-        DatasourceBundle datasourceBundle = (DatasourceBundle) joinPoint.getArgs()[0];
-        publicDatasourceManager.delete(datasourceBundle);
-    }
-
-    @Async
     @After("execution(* eu.einfracentral.registry.manager.TrainingResourceManager.delete(..))")
     public void deletePublicTrainingResource(JoinPoint joinPoint) {
         TrainingResourceBundle trainingResourceBundle = (TrainingResourceBundle) joinPoint.getArgs()[0];
@@ -387,23 +317,6 @@ public class ProviderManagementAspect {
                     logger.debug("Updating state of Provider with id '{}' : '{}' --> to '{}'",
                             serviceBundle.getService().getResourceOrganisation(), providerBundle.getTemplateStatus(), "pending template");
                     serviceBundleService.verifyResource(serviceBundle.getService().getId(), "pending resource", false, securityService.getAdminAccess());
-                }
-            } catch (RuntimeException e) {
-                logger.error(e);
-            }
-        }
-    }
-
-    @Async
-    @CacheEvict(value = CACHE_PROVIDERS, allEntries = true)
-    public void updateDatasourceProviderStates(DatasourceBundle datasourceBundle) {
-        if (datasourceBundle.getDatasource().getCatalogueId().equals(catalogueName)) {
-            try {
-                ProviderBundle providerBundle = providerService.get(datasourceBundle.getDatasource().getResourceOrganisation(), null);
-                if (providerBundle.getTemplateStatus().equals("no template status") || providerBundle.getTemplateStatus().equals("rejected template")) {
-                    logger.debug("Updating state of Provider with id '{}' : '{}' --> to '{}'",
-                            datasourceBundle.getDatasource().getResourceOrganisation(), providerBundle.getTemplateStatus(), "pending template");
-                    datasourceBundleService.verifyResource(datasourceBundle.getDatasource().getId(), "pending resource", false, securityService.getAdminAccess());
                 }
             } catch (RuntimeException e) {
                 logger.error(e);

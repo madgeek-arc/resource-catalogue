@@ -1,7 +1,6 @@
 package eu.einfracentral.service;
 
 import eu.einfracentral.domain.*;
-import eu.einfracentral.domain.ResourceBundle;
 import eu.einfracentral.domain.ServiceBundle;
 import eu.einfracentral.exception.ResourceException;
 import eu.einfracentral.exception.ResourceNotFoundException;
@@ -32,11 +31,9 @@ public class OIDCSecurityService implements SecurityService {
     private final ProviderManager providerManager;
     private final CatalogueManager catalogueManager;
     private final PendingProviderManager pendingProviderManager;
-    private final ResourceBundleService<ServiceBundle> resourceBundleService;
-    private final DatasourceService<DatasourceBundle> datasourceService;
+    private final ServiceBundleService<ServiceBundle> serviceBundleService;
     private final TrainingResourceService<TrainingResourceBundle> trainingResourceService;
     private final PendingResourceService<ServiceBundle> pendingServiceManager;
-    private final PendingResourceService<DatasourceBundle> pendingDatasourceManager;
     private final InteroperabilityRecordService<InteroperabilityRecordBundle> interoperabilityRecordService;
     private OIDCAuthenticationToken adminAccess;
 
@@ -51,21 +48,17 @@ public class OIDCSecurityService implements SecurityService {
 
     @Autowired
     OIDCSecurityService(ProviderManager providerManager, CatalogueManager catalogueManager,
-                        ResourceBundleService<ServiceBundle> resourceBundleService,
-                        @Lazy DatasourceService<DatasourceBundle> datasourceService,
+                        ServiceBundleService<ServiceBundle> serviceBundleService,
                         @Lazy TrainingResourceService<TrainingResourceBundle> trainingResourceService,
                         @Lazy PendingProviderManager pendingProviderManager,
                         @Lazy PendingResourceService<ServiceBundle> pendingServiceManager,
-                        @Lazy PendingResourceService<DatasourceBundle> pendingDatasourceManager,
                         @Lazy InteroperabilityRecordService<InteroperabilityRecordBundle> interoperabilityRecordService) {
         this.providerManager = providerManager;
         this.catalogueManager = catalogueManager;
-        this.resourceBundleService = resourceBundleService;
-        this.datasourceService = datasourceService;
+        this.serviceBundleService = serviceBundleService;
         this.trainingResourceService = trainingResourceService;
         this.pendingProviderManager = pendingProviderManager;
         this.pendingServiceManager = pendingServiceManager;
-        this.pendingDatasourceManager = pendingDatasourceManager;
         this.interoperabilityRecordService = interoperabilityRecordService;
 
         // create admin access
@@ -266,7 +259,7 @@ public class OIDCSecurityService implements SecurityService {
     }
 
     @Override
-    public boolean isResourceProviderAdmin(Authentication auth, ResourceBundle<?> resourceBundle, boolean noThrow) {
+    public boolean isResourceProviderAdmin(Authentication auth, ServiceBundle serviceBundle, boolean noThrow) {
         if (auth == null && noThrow) {
             return false;
         }
@@ -274,48 +267,39 @@ public class OIDCSecurityService implements SecurityService {
             return false;
         }
         User user = User.of(auth);
-        return userIsResourceProviderAdmin(user, resourceBundle.getId(), resourceBundle.getPayload().getCatalogueId());
+        return userIsResourceProviderAdmin(user, serviceBundle.getId(), serviceBundle.getService().getCatalogueId());
     }
 
     @Override
     public boolean userIsResourceProviderAdmin(@NotNull User user, String resourceId, String catalogueId) {
-        ResourceBundle<?> resourceBundle;
+        ServiceBundle serviceBundle;
         TrainingResourceBundle trainingResourceBundle = new TrainingResourceBundle();
         InteroperabilityRecordBundle interoperabilityRecordBundle = new InteroperabilityRecordBundle();
         try {
-            resourceBundle = resourceBundleService.getOrElseReturnNull(resourceId, catalogueId);
-            if (resourceBundle == null){
-                resourceBundle = datasourceService.getOrElseReturnNull(resourceId, catalogueId);
-            }
-            if (resourceBundle == null){
+            serviceBundle = serviceBundleService.getOrElseReturnNull(resourceId, catalogueId);
+            if (serviceBundle == null){
                 trainingResourceBundle = trainingResourceService.getOrElseReturnNull(resourceId, catalogueId);
             }
-            if (resourceBundle == null && trainingResourceBundle == null){
+            if (serviceBundle == null && trainingResourceBundle == null){
                 interoperabilityRecordBundle = interoperabilityRecordService.getOrElseReturnNull(resourceId, catalogueId);
             }
-            if (resourceBundle == null && trainingResourceBundle == null && interoperabilityRecordBundle == null){
-                resourceBundle = pendingServiceManager.get(resourceId);
-            }
-        } catch (ResourceException | ResourceNotFoundException e) {
-            try {
-                resourceBundle = pendingDatasourceManager.get(resourceId);
-            } catch (RuntimeException re) {
-                return false; //TODO: try/catch pendingTrainingResourceManager
+            if (serviceBundle == null && trainingResourceBundle == null && interoperabilityRecordBundle == null){
+                serviceBundle = pendingServiceManager.get(resourceId);
             }
         } catch (RuntimeException e) {
             return false;
         }
         List<String> allProviders = new ArrayList<>();
         String catalogue;
-        if (resourceBundle != null){
-            if (resourceBundle.getPayload().getResourceOrganisation() == null || resourceBundle.getPayload().getResourceOrganisation().equals("")) {
+        if (serviceBundle != null){
+            if (serviceBundle.getService().getResourceOrganisation() == null || serviceBundle.getService().getResourceOrganisation().equals("")) {
                 throw new ValidationException("Resource has no Resource Organisation");
             }
-            allProviders.add(resourceBundle.getPayload().getResourceOrganisation());
-            if (resourceBundle.getPayload().getResourceProviders() != null){
-                allProviders.addAll(resourceBundle.getPayload().getResourceProviders());
+            allProviders.add(serviceBundle.getService().getResourceOrganisation());
+            if (serviceBundle.getService().getResourceProviders() != null){
+                allProviders.addAll(serviceBundle.getService().getResourceProviders());
             }
-            catalogue = resourceBundle.getPayload().getCatalogueId();
+            catalogue = serviceBundle.getService().getCatalogueId();
         } else if (trainingResourceBundle != null) {
             if (trainingResourceBundle.getTrainingResource().getResourceOrganisation() == null || trainingResourceBundle.getTrainingResource().getResourceOrganisation().equals("")) {
                 throw new ValidationException("Training Resource has no Resource Organisation");
@@ -344,12 +328,12 @@ public class OIDCSecurityService implements SecurityService {
     }
 
     @Override
-    public boolean providerCanAddResources(Authentication auth, ResourceBundle<?> resourceBundle) {
-        String providerId = resourceBundle.getPayload().getResourceOrganisation();
-        if (resourceBundle.getPayload().getCatalogueId() == null || resourceBundle.getPayload().getCatalogueId().equals("")){
-            resourceBundle.getPayload().setCatalogueId(catalogueName);
+    public boolean providerCanAddResources(Authentication auth, ServiceBundle serviceBundle) {
+        String providerId = serviceBundle.getService().getResourceOrganisation();
+        if (serviceBundle.getService().getCatalogueId() == null || serviceBundle.getService().getCatalogueId().equals("")){
+            serviceBundle.getService().setCatalogueId(catalogueName);
         }
-        ProviderBundle provider = providerManager.get(resourceBundle.getPayload().getCatalogueId(), providerId, auth);
+        ProviderBundle provider = providerManager.get(serviceBundle.getService().getCatalogueId(), providerId, auth);
         if (isProviderAdmin(auth, provider.getId(), provider.getPayload().getCatalogueId())) {
             if (provider.getStatus() == null) {
                 throw new ServiceException("Provider status field is null");
@@ -359,7 +343,7 @@ public class OIDCSecurityService implements SecurityService {
             } else if (provider.getTemplateStatus().equals("no template status")) {
                 FacetFilter ff = new FacetFilter();
                 ff.addFilter("resource_organisation", provider.getId());
-                if (resourceBundleService.getAll(ff, getAdminAccess()).getResults().isEmpty()) {
+                if (serviceBundleService.getAll(ff, getAdminAccess()).getResults().isEmpty()) {
                     return true;
                 }
                 throw new ResourceException("You have already created a Service Template.", HttpStatus.CONFLICT);
@@ -385,7 +369,7 @@ public class OIDCSecurityService implements SecurityService {
                 } else if (provider.getTemplateStatus().equals("no template status")) {
                     FacetFilter ff = new FacetFilter();
                     ff.addFilter("resource_organisation", provider.getId());
-                    if (resourceBundleService.getAll(ff, getAdminAccess()).getResults().isEmpty()) {
+                    if (serviceBundleService.getAll(ff, getAdminAccess()).getResults().isEmpty()) {
                         return true;
                     }
                     throw new ResourceException("You have already created a Service Template.", HttpStatus.CONFLICT);
@@ -411,7 +395,7 @@ public class OIDCSecurityService implements SecurityService {
                 } else if (provider.getTemplateStatus().equals("no template status")) {
                     FacetFilter ff = new FacetFilter();
                     ff.addFilter("resource_organisation", provider.getId());
-                    if (resourceBundleService.getAll(ff, getAdminAccess()).getResults().isEmpty()) {
+                    if (serviceBundleService.getAll(ff, getAdminAccess()).getResults().isEmpty()) {
                         return true;
                     }
                     throw new ResourceException("You have already created a Service Template.", HttpStatus.CONFLICT);
@@ -441,13 +425,13 @@ public class OIDCSecurityService implements SecurityService {
     }
     @Override
     public boolean providerIsActiveAndUserIsAdmin(Authentication auth, String resourceId, String catalogueId) {
-        ResourceBundle<?> resourceBundle;
+        ServiceBundle serviceBundle;
         TrainingResourceBundle trainingResourceBundle;
         InteroperabilityRecordBundle interoperabilityRecordBundle;
         List<String> providerIds;
         try{
-            resourceBundle = resourceBundleService.get(resourceId, catalogueId);
-            providerIds = Collections.singletonList(resourceBundle.getPayload().getResourceOrganisation());
+            serviceBundle = serviceBundleService.get(resourceId, catalogueId);
+            providerIds = Collections.singletonList(serviceBundle.getService().getResourceOrganisation());
         } catch (ResourceNotFoundException e) {
             try{
                 trainingResourceBundle = trainingResourceService.get(resourceId, catalogueId);
@@ -469,21 +453,8 @@ public class OIDCSecurityService implements SecurityService {
     }
 
     public boolean resourceIsActive(String resourceId, String catalogueId) {
-        ResourceBundle<?> resourceBundle = resourceBundleService.get(resourceId, catalogueId);
-        return resourceBundle.isActive();
-    }
-
-    public boolean datasourceIsActive(String resourceId, String catalogueId) {
-        ResourceBundle<?> resourceBundle = datasourceService.get(resourceId, catalogueId);
-        return resourceBundle.isActive();
-    }
-
-    public boolean resourceOrDatasourceIsActive(String resourceId, String catalogueId){
-        try {
-            return resourceIsActive(resourceId, catalogueId);
-        } catch (ResourceNotFoundException e){
-            return datasourceIsActive(resourceId, catalogueId);
-        }
+        ServiceBundle serviceBundle = serviceBundleService.get(resourceId, catalogueId);
+        return serviceBundle.isActive();
     }
 
     public boolean trainingResourceIsActive(String resourceId, String catalogueId) {

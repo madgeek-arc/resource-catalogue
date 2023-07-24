@@ -1,6 +1,5 @@
 package eu.einfracentral.registry.manager;
 
-import eu.einfracentral.domain.ResourceBundle;
 import eu.einfracentral.domain.*;
 import eu.einfracentral.dto.Category;
 import eu.einfracentral.dto.ProviderInfo;
@@ -35,7 +34,6 @@ import javax.annotation.PostConstruct;
 import javax.validation.constraints.NotNull;
 import java.lang.reflect.Field;
 import java.net.UnknownHostException;
-import java.security.NoSuchAlgorithmException;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.util.*;
@@ -44,22 +42,18 @@ import java.util.stream.Collectors;
 import static eu.einfracentral.config.CacheConfig.*;
 import static java.util.stream.Collectors.toList;
 
-public abstract class AbstractResourceBundleManager<T extends ResourceBundle<?>> extends AbstractGenericService<T> implements ResourceBundleService<T> {
+public abstract class AbstractServiceBundleManager<T extends ServiceBundle> extends AbstractGenericService<T> implements ServiceBundleService<T> {
 
-    private static final Logger logger = LogManager.getLogger(AbstractResourceBundleManager.class);
+    private static final Logger logger = LogManager.getLogger(AbstractServiceBundleManager.class);
 
-    public AbstractResourceBundleManager(Class<T> typeParameterClass) {
+    public AbstractServiceBundleManager(Class<T> typeParameterClass) {
         super(typeParameterClass);
     }
 
     @Autowired
-    private VersionService versionService;
-    @Autowired
     private VocabularyService vocabularyService;
     @Autowired
     private ProviderService<ProviderBundle, Authentication> providerService;
-    @Autowired
-    private EventService eventService;
     @Autowired
     private FacetLabelService facetLabelService;
     @Autowired
@@ -75,8 +69,6 @@ public abstract class AbstractResourceBundleManager<T extends ResourceBundle<?>>
     private Map<String, String> labels;
     @Autowired
     private SecurityService securityService;
-    @Autowired
-    private CatalogueService<CatalogueBundle, Authentication> catalogueService;
     @Autowired
     private FieldValidator fieldValidator;
     @Value("${project.catalogue.name}")
@@ -179,89 +171,81 @@ public abstract class AbstractResourceBundleManager<T extends ResourceBundle<?>>
 
     @Override
     @CacheEvict(cacheNames = {CACHE_VISITS, CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)
-    public T add(T resourceBundle, Authentication auth) {
-        logger.trace("User '{}' is attempting to add a new Resource: {}", auth, resourceBundle);
-        if (resourceBundle.getPayload().getId() == null) {
-            if (resourceBundle.getPayload() instanceof Datasource) {
-                try {
-                    resourceBundle.getPayload().setId(idCreator.createDatasourceId(resourceBundle));
-                } catch (NoSuchAlgorithmException e) {
-                    throw new RuntimeException(e);
-                }
-            } else if (resourceBundle.getPayload() instanceof Service) {
-                resourceBundle.getPayload().setId(idCreator.createServiceId(resourceBundle));
-            }
+    public T add(T serviceBundle, Authentication auth) {
+        logger.trace("User '{}' is attempting to add a new Resource: {}", auth, serviceBundle);
+        if (serviceBundle.getService().getId() == null) {
+            serviceBundle.getService().setId(idCreator.createServiceId(serviceBundle));
         }
         // if Resource version is empty set it null
-        if ("".equals(resourceBundle.getPayload().getVersion())) {
-            resourceBundle.getPayload().setVersion(null);
+        if ("".equals(serviceBundle.getService().getVersion())) {
+            serviceBundle.getService().setVersion(null);
         }
-        if (exists(resourceBundle)) {
+        if (exists(serviceBundle)) {
             throw new ResourceException("Resource already exists!", HttpStatus.CONFLICT);
         }
 
-        prettifyServiceTextFields(resourceBundle, ",");
+        prettifyServiceTextFields(serviceBundle, ",");
 
         String serialized;
-        serialized = parserPool.serialize(resourceBundle, ParserService.ParserServiceTypes.XML);
+        serialized = parserPool.serialize(serviceBundle, ParserService.ParserServiceTypes.XML);
         Resource created = new Resource();
         created.setPayload(serialized);
         created.setResourceType(resourceType);
 
         resourceService.addResource(created);
-        synchronizerService.syncAdd(resourceBundle.getPayload());
+        synchronizerService.syncAdd(serviceBundle.getPayload());
 
-        return resourceBundle;
+        return serviceBundle;
     }
 
     @Override
     @CacheEvict(cacheNames = {CACHE_VISITS, CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)
-    public T update(T resourceBundle, Authentication auth) {
-        logger.trace("User '{}' is attempting to update the Resource: {}", auth, resourceBundle);
+    public T update(T serviceBundle, Authentication auth) {
+        logger.trace("User '{}' is attempting to update the Resource: {}", auth, serviceBundle);
         // if Resource version is empty set it null
-        if ("".equals(resourceBundle.getPayload().getVersion())) {
-            resourceBundle.getPayload().setVersion(null);
+        if ("".equals(serviceBundle.getService().getVersion())) {
+            serviceBundle.getService().setVersion(null);
         }
-        Resource existing = getResource(resourceBundle.getPayload().getId(), resourceBundle.getPayload().getCatalogueId());
+        Resource existing = getResource(serviceBundle.getService().getId(), serviceBundle.getService().getCatalogueId());
         if (existing == null) {
             throw new ResourceNotFoundException(
                     String.format("Could not update Resource with id '%s' because it does not exist",
-                            resourceBundle.getPayload().getId()));
+                            serviceBundle.getService().getId()));
         }
 
-        prettifyServiceTextFields(resourceBundle, ",");
-        existing.setPayload(serialize(resourceBundle));
+        prettifyServiceTextFields(serviceBundle, ",");
+        existing.setPayload(serialize(serviceBundle));
         existing.setResourceType(resourceType);
 
         resourceService.updateResource(existing);
-        synchronizerService.syncUpdate(resourceBundle.getPayload());
+        synchronizerService.syncUpdate(serviceBundle.getPayload());
 
-        return resourceBundle;
+        return serviceBundle;
     }
 
     @Override
     @CacheEvict(cacheNames = {CACHE_VISITS, CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)
-    public void delete(T resourceBundle) {
-        logger.trace("User is attempting to delete the Resource: {}", resourceBundle);
-        if (resourceBundle == null || resourceBundle.getPayload().getId() == null) {
+    public void delete(T serviceBundle) {
+        logger.trace("User is attempting to delete the Resource: {}", serviceBundle);
+        if (serviceBundle == null || serviceBundle.getService().getId() == null) {
             throw new ServiceException("You cannot delete a null Resource or Resource with null id field");
         }
-        resourceService.deleteResource(getResource(resourceBundle.getPayload().getId(), resourceBundle.getPayload().getCatalogueId()).getId());
-        synchronizerService.syncDelete(resourceBundle.getPayload());
+        resourceService.deleteResource(getResource(serviceBundle.getService().getId(), serviceBundle.getService().getCatalogueId()).getId());
+        synchronizerService.syncDelete(serviceBundle.getPayload());
     }
 
     @Override
-    public boolean validate(T resourceBundle) {
-        Service service = resourceBundle.getPayload();
+    public boolean validate(ServiceBundle serviceBundle) {
+        Service service = serviceBundle.getService();
         //If we want to reject bad vocab ids instead of silently accept, here's where we do it
         logger.debug("Validating Resource with id: {}", service.getId());
 
         try {
-            fieldValidator.validate(resourceBundle);
+            fieldValidator.validate(serviceBundle);
         } catch (IllegalAccessException e) {
             logger.error("", e);
         }
-        serviceValidator.validate(resourceBundle, null);
+        serviceValidator.validate(serviceBundle, null);
 
         return true;
     }
@@ -329,9 +313,9 @@ public abstract class AbstractResourceBundleManager<T extends ResourceBundle<?>>
         }
     }
 
-    String serialize(T resourceBundle) {
+    String serialize(T serviceBundle) {
         String serialized;
-        serialized = parserPool.serialize(resourceBundle, ParserService.ParserServiceTypes.XML);
+        serialized = parserPool.serialize(serviceBundle, ParserService.ParserServiceTypes.XML);
         return serialized;
     }
 
@@ -343,8 +327,8 @@ public abstract class AbstractResourceBundleManager<T extends ResourceBundle<?>>
         return parserPool.deserialize(resource, typeParameterClass);
     }
 
-    private boolean exists(T resourceBundle) {
-        return getResource(resourceBundle.getPayload().getId(), resourceBundle.getPayload().getCatalogueId()) != null;
+    private boolean exists(T serviceBundle) {
+        return getResource(serviceBundle.getService().getId(), serviceBundle.getService().getCatalogueId()) != null;
     }
 
     public Resource getResourceById(String resourceId) {
@@ -381,9 +365,9 @@ public abstract class AbstractResourceBundleManager<T extends ResourceBundle<?>>
 
     @Override
     public RichResource getRichResource(String id, String catalogueId, Authentication auth) {
-        T resourceBundle;
-        resourceBundle = get(id, catalogueId);
-        return createRichResource(resourceBundle, auth);
+        T serviceBundle;
+        serviceBundle = get(id, catalogueId);
+        return createRichResource(serviceBundle, auth);
     }
 
     @Override
@@ -396,8 +380,8 @@ public abstract class AbstractResourceBundleManager<T extends ResourceBundle<?>>
     }
 
     @Override
-    public RichResource createRichResource(T resourceBundle, Authentication auth) {
-        return createRichResources(Collections.singletonList(resourceBundle), auth).get(0);
+    public RichResource createRichResource(T serviceBundle, Authentication auth) {
+        return createRichResources(Collections.singletonList(serviceBundle), auth).get(0);
     }
 
     @Override
@@ -441,13 +425,13 @@ public abstract class AbstractResourceBundleManager<T extends ResourceBundle<?>>
     /**
      * Adds spaces after ',' if they don't already exist and removes spaces before
      *
-     * @param resourceBundle
+     * @param serviceBundle
      * @param specialCharacters
      * @return
      */
-    protected T prettifyServiceTextFields(T resourceBundle, String specialCharacters) {
-        resourceBundle.getPayload().setTagline(TextUtils.prettifyText(resourceBundle.getPayload().getTagline(), specialCharacters));
-        return resourceBundle;
+    protected T prettifyServiceTextFields(T serviceBundle, String specialCharacters) {
+        serviceBundle.getService().setTagline(TextUtils.prettifyText(serviceBundle.getService().getTagline(), specialCharacters));
+        return serviceBundle;
     }
 
     private Browsing<T> getMatchingResources(FacetFilter ff) {
@@ -465,12 +449,12 @@ public abstract class AbstractResourceBundleManager<T extends ResourceBundle<?>>
         Map<String, Vocabulary> allVocabularies = vocabularyService.getVocabulariesMap();
         List<RichResource> richResources = new ArrayList<>();
 
-        for (T resourceBundle : resourceBundles) {
-            RichResource richResource = new RichResource(resourceBundle);
+        for (T serviceBundle : resourceBundles) {
+            RichResource richResource = new RichResource(serviceBundle);
 
             // LanguageAvailabilities Names
-            if (resourceBundle.getPayload().getLanguageAvailabilities() != null) {
-                richResource.setLanguageAvailabilityNames(resourceBundle.getPayload().getLanguageAvailabilities()
+            if (serviceBundle.getService().getLanguageAvailabilities() != null) {
+                richResource.setLanguageAvailabilityNames(serviceBundle.getService().getLanguageAvailabilities()
                         .stream()
                         .filter(v -> !v.equals(""))
                         .map(l -> allVocabularies.get(l).getName())
@@ -479,8 +463,8 @@ public abstract class AbstractResourceBundleManager<T extends ResourceBundle<?>>
             }
 
             // GeographicAvailabilities Names
-            if (resourceBundle.getPayload().getGeographicalAvailabilities() != null) {
-                richResource.setGeographicAvailabilityNames(resourceBundle.getPayload().getGeographicalAvailabilities()
+            if (serviceBundle.getService().getGeographicalAvailabilities() != null) {
+                richResource.setGeographicAvailabilityNames(serviceBundle.getService().getGeographicalAvailabilities()
                         .stream()
                         .filter(v -> !v.equals(""))
                         .map(p -> allVocabularies.get(p).getName())
@@ -489,24 +473,24 @@ public abstract class AbstractResourceBundleManager<T extends ResourceBundle<?>>
             }
 
             // TRL Name
-            if (resourceBundle.getPayload().getTrl() != null && !resourceBundle.getPayload().getTrl().equals("")) {
-                richResource.setTrlName(allVocabularies.get(resourceBundle.getPayload().getTrl()).getName());
+            if (serviceBundle.getService().getTrl() != null && !serviceBundle.getService().getTrl().equals("")) {
+                richResource.setTrlName(allVocabularies.get(serviceBundle.getService().getTrl()).getName());
             }
 
             // LifeCycleStatus Name
-            if (resourceBundle.getPayload().getLifeCycleStatus() != null && !resourceBundle.getPayload().getLifeCycleStatus().equals("")) {
-                richResource.setLifeCycleStatusName(allVocabularies.get(resourceBundle.getPayload().getLifeCycleStatus()).getName());
+            if (serviceBundle.getService().getLifeCycleStatus() != null && !serviceBundle.getService().getLifeCycleStatus().equals("")) {
+                richResource.setLifeCycleStatusName(allVocabularies.get(serviceBundle.getService().getLifeCycleStatus()).getName());
             }
 
             // OrderType Name
-            if (resourceBundle.getPayload().getOrderType() != null && !resourceBundle.getPayload().getOrderType().equals("")) {
-                richResource.setOrderTypeName(allVocabularies.get(resourceBundle.getPayload().getOrderType()).getName());
+            if (serviceBundle.getService().getOrderType() != null && !serviceBundle.getService().getOrderType().equals("")) {
+                richResource.setOrderTypeName(allVocabularies.get(serviceBundle.getService().getOrderType()).getName());
             }
 
             // TargetUsers Names
-            if (resourceBundle.getPayload().getTargetUsers() != null) {
-                resourceBundle.getPayload().getTargetUsers().removeIf(targetUser -> targetUser == null || targetUser.equals(""));
-                richResource.setTargetUsersNames(resourceBundle.getPayload().getTargetUsers()
+            if (serviceBundle.getService().getTargetUsers() != null) {
+                serviceBundle.getService().getTargetUsers().removeIf(targetUser -> targetUser == null || targetUser.equals(""));
+                richResource.setTargetUsersNames(serviceBundle.getService().getTargetUsers()
                         .stream()
                         .filter(v -> !v.equals(""))
                         .map(p -> allVocabularies.get(p).getName())
@@ -515,9 +499,9 @@ public abstract class AbstractResourceBundleManager<T extends ResourceBundle<?>>
             }
 
             // AccessTypes Names
-            if (resourceBundle.getPayload().getAccessTypes() != null) {
-                resourceBundle.getPayload().getAccessTypes().removeIf(accessType -> accessType == null || accessType.equals(""));
-                richResource.setAccessTypeNames(resourceBundle.getPayload().getAccessTypes()
+            if (serviceBundle.getService().getAccessTypes() != null) {
+                serviceBundle.getService().getAccessTypes().removeIf(accessType -> accessType == null || accessType.equals(""));
+                richResource.setAccessTypeNames(serviceBundle.getService().getAccessTypes()
                         .stream()
                         .filter(v -> !v.equals(""))
                         .map(p -> allVocabularies.get(p).getName())
@@ -526,9 +510,9 @@ public abstract class AbstractResourceBundleManager<T extends ResourceBundle<?>>
             }
 
             // AccessModes Names
-            if (resourceBundle.getPayload().getAccessModes() != null) {
-                resourceBundle.getPayload().getAccessModes().removeIf(accessMode -> accessMode == null || accessMode.equals(""));
-                richResource.setAccessModeNames(resourceBundle.getPayload().getAccessModes()
+            if (serviceBundle.getService().getAccessModes() != null) {
+                serviceBundle.getService().getAccessModes().removeIf(accessMode -> accessMode == null || accessMode.equals(""));
+                richResource.setAccessModeNames(serviceBundle.getService().getAccessModes()
                         .stream()
                         .filter(v -> !v.equals(""))
                         .map(p -> allVocabularies.get(p).getName())
@@ -537,9 +521,9 @@ public abstract class AbstractResourceBundleManager<T extends ResourceBundle<?>>
             }
 
             // FundingBodies Names
-            if (resourceBundle.getPayload().getFundingBody() != null) {
-                resourceBundle.getPayload().getFundingBody().removeIf(fundingBody -> fundingBody == null || fundingBody.equals(""));
-                richResource.setFundingBodyNames(resourceBundle.getPayload().getFundingBody()
+            if (serviceBundle.getService().getFundingBody() != null) {
+                serviceBundle.getService().getFundingBody().removeIf(fundingBody -> fundingBody == null || fundingBody.equals(""));
+                richResource.setFundingBodyNames(serviceBundle.getService().getFundingBody()
                         .stream()
                         .filter(v -> !v.equals(""))
                         .map(p -> allVocabularies.get(p).getName())
@@ -548,9 +532,9 @@ public abstract class AbstractResourceBundleManager<T extends ResourceBundle<?>>
             }
 
             // FundingPrograms Names
-            if (resourceBundle.getPayload().getFundingPrograms() != null) {
-                resourceBundle.getPayload().getFundingPrograms().removeIf(fundingProgram -> fundingProgram == null || fundingProgram.equals(""));
-                richResource.setFundingProgramNames(resourceBundle.getPayload().getFundingPrograms()
+            if (serviceBundle.getService().getFundingPrograms() != null) {
+                serviceBundle.getService().getFundingPrograms().removeIf(fundingProgram -> fundingProgram == null || fundingProgram.equals(""));
+                richResource.setFundingProgramNames(serviceBundle.getService().getFundingPrograms()
                         .stream()
                         .filter(v -> !v.equals(""))
                         .map(p -> allVocabularies.get(p).getName())
@@ -560,8 +544,8 @@ public abstract class AbstractResourceBundleManager<T extends ResourceBundle<?>>
 
             // Domain Tree
             List<ScientificDomain> domains = new ArrayList<>();
-            if (resourceBundle.getPayload().getScientificDomains() != null) {
-                for (ServiceProviderDomain serviceProviderDomain : resourceBundle.getPayload().getScientificDomains()) {
+            if (serviceBundle.getService().getScientificDomains() != null) {
+                for (ServiceProviderDomain serviceProviderDomain : serviceBundle.getService().getScientificDomains()) {
                     ScientificDomain domain = new ScientificDomain();
                     if (serviceProviderDomain.getScientificDomain() != null && !serviceProviderDomain.getScientificDomain().equals("")) {
                         domain.setDomain(vocabularyService.get(serviceProviderDomain.getScientificDomain()));
@@ -580,8 +564,8 @@ public abstract class AbstractResourceBundleManager<T extends ResourceBundle<?>>
 
             // Category Tree
             List<Category> categories = new ArrayList<>();
-            if (resourceBundle.getPayload().getCategories() != null) {
-                for (ServiceCategory serviceCategory : resourceBundle.getPayload().getCategories()) {
+            if (serviceBundle.getService().getCategories() != null) {
+                for (ServiceCategory serviceCategory : serviceBundle.getService().getCategories()) {
                     Category category = new Category();
                     if (serviceCategory.getCategory() != null && !serviceCategory.getCategory().equals("")) {
                         String[] parts = serviceCategory.getCategory().split("-"); //subcategory-access_physical_and_eInfrastructures-instrument_and_equipment-spectrometer
@@ -614,14 +598,14 @@ public abstract class AbstractResourceBundleManager<T extends ResourceBundle<?>>
     }
 
     @Override
-    public ResourceBundle<?> getResourceTemplate(String providerId, Authentication auth) {
+    public ServiceBundle getResourceTemplate(String providerId, Authentication auth) {
         FacetFilter ff = new FacetFilter();
         ff.addFilter("resource_organisation", providerId);
         ff.addFilter("catalogue_id", catalogueName);
-        List<T> allProviderServices = getAll(ff, auth).getResults();
-        for (T resourceBundle : allProviderServices) {
-            if (resourceBundle.getStatus().equals(vocabularyService.get("pending resource").getId())) {
-                return resourceBundle;
+        List<ServiceBundle> allProviderServices = (List<ServiceBundle>) getAll(ff, auth).getResults();
+        for (ServiceBundle serviceBundle : allProviderServices) {
+            if (serviceBundle.getStatus().equals(vocabularyService.get("pending resource").getId())) {
+                return serviceBundle;
             }
         }
         return null;
@@ -762,10 +746,10 @@ public abstract class AbstractResourceBundleManager<T extends ResourceBundle<?>>
         List<T> servicesToBeAudited = new ArrayList<>();
         long todayEpochTime = System.currentTimeMillis();
         long interval = Instant.ofEpochMilli(todayEpochTime).atZone(ZoneId.systemDefault()).minusMonths(Integer.parseInt(auditingInterval)).toEpochSecond();
-        for (T resourceBundle : serviceBrowsing.getResults()) {
-            if (resourceBundle.getLatestAuditInfo() != null) {
-                if (Long.parseLong(resourceBundle.getLatestAuditInfo().getDate()) > interval) {
-                    servicesToBeAudited.add(resourceBundle);
+        for (T serviceBundle : serviceBrowsing.getResults()) {
+            if (serviceBundle.getLatestAuditInfo() != null) {
+                if (Long.parseLong(serviceBundle.getLatestAuditInfo().getDate()) > interval) {
+                    servicesToBeAudited.add(serviceBundle);
                 }
             }
         }
@@ -884,7 +868,7 @@ public abstract class AbstractResourceBundleManager<T extends ResourceBundle<?>>
     }
 
     @Override
-    public ResourceBundle<?> updateEOSCIFGuidelines(String resourceId, String catalogueId, List<EOSCIFGuidelines> eoscIFGuidelines, Authentication auth) {
+    public ServiceBundle updateEOSCIFGuidelines(String resourceId, String catalogueId, List<EOSCIFGuidelines> eoscIFGuidelines, Authentication auth) {
         T bundle = get(resourceId, catalogueId);
         blockUpdateIfResourceIsPublished(bundle);
         ResourceExtras resourceExtras = bundle.getResourceExtras();
@@ -907,7 +891,7 @@ public abstract class AbstractResourceBundleManager<T extends ResourceBundle<?>>
         return bundle;
     }
 
-    public ResourceBundle<?> updateResearchCategories(String resourceId, String catalogueId, List<String> researchCategories, Authentication auth) {
+    public ServiceBundle updateResearchCategories(String resourceId, String catalogueId, List<String> researchCategories, Authentication auth) {
         T bundle = get(resourceId, catalogueId);
         blockUpdateIfResourceIsPublished(bundle);
         ResourceExtras resourceExtras = bundle.getResourceExtras();
@@ -927,7 +911,7 @@ public abstract class AbstractResourceBundleManager<T extends ResourceBundle<?>>
         return bundle;
     }
 
-    public ResourceBundle<?> updateHorizontalService(String resourceId, String catalogueId, boolean horizontalService, Authentication auth) {
+    public ServiceBundle updateHorizontalService(String resourceId, String catalogueId, boolean horizontalService, Authentication auth) {
         T bundle = get(resourceId, catalogueId);
         blockUpdateIfResourceIsPublished(bundle);
         ResourceExtras resourceExtras = bundle.getResourceExtras();
@@ -946,15 +930,15 @@ public abstract class AbstractResourceBundleManager<T extends ResourceBundle<?>>
         return bundle;
     }
 
-    private void blockUpdateIfResourceIsPublished(ResourceBundle<?> resourceBundle) { //FIXME: DOES NOT WORK AS INTENDED
-        if (resourceBundle.getMetadata().isPublished()) {
+    private void blockUpdateIfResourceIsPublished(ServiceBundle serviceBundle) { //FIXME: DOES NOT WORK AS INTENDED
+        if (serviceBundle.getMetadata().isPublished()) {
             throw new AccessDeniedException("You cannot directly update a Public Resource.");
         }
     }
 
-    private void checkEOSCIFGuidelinesPIDConsistency(ResourceBundle<?> resourceBundle) {
+    private void checkEOSCIFGuidelinesPIDConsistency(ServiceBundle serviceBundle) {
         List<String> pidList = new ArrayList<>();
-        for (EOSCIFGuidelines eoscIFGuideline : resourceBundle.getResourceExtras().getEoscIFGuidelines()) {
+        for (EOSCIFGuidelines eoscIFGuideline : serviceBundle.getResourceExtras().getEoscIFGuidelines()) {
             pidList.add(eoscIFGuideline.getPid());
         }
         Set<String> pidSet = new HashSet<>(pidList);
@@ -963,24 +947,24 @@ public abstract class AbstractResourceBundleManager<T extends ResourceBundle<?>>
         }
     }
 
-    public ResourceBundle<?> getOrElseReturnNull(String id) {
-        ResourceBundle<?> resourceBundle;
+    public T getOrElseReturnNull(String id) {
+        T serviceBundle;
         try {
-            resourceBundle = get(id);
+            serviceBundle = get(id);
         } catch (ResourceNotFoundException e) {
             return null;
         }
-        return resourceBundle;
+        return serviceBundle;
     }
 
-    public ResourceBundle<?> getOrElseReturnNull(String id, String catalogueId) {
-        ResourceBundle<?> resourceBundle;
+    public T getOrElseReturnNull(String id, String catalogueId) {
+        T serviceBundle;
         try {
-            resourceBundle = get(id, catalogueId);
+            serviceBundle = get(id, catalogueId);
         } catch (ResourceNotFoundException e) {
             return null;
         }
-        return resourceBundle;
+        return serviceBundle;
     }
 
     @Override
@@ -995,7 +979,7 @@ public abstract class AbstractResourceBundleManager<T extends ResourceBundle<?>>
         return this.getAll(ff, null).getResults();
     }
 
-    private void createLoggingInfoEntriesForResourceExtraUpdates(T bundle, Authentication auth) {
+    private void createLoggingInfoEntriesForResourceExtraUpdates(ServiceBundle bundle, Authentication auth) {
         List<LoggingInfo> loggingInfoList = commonMethods.returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(bundle, auth);
         LoggingInfo loggingInfo = commonMethods.createLoggingInfo(auth, LoggingInfo.Types.UPDATE.getKey(),
                 LoggingInfo.ActionType.UPDATED.getKey());
@@ -1003,7 +987,7 @@ public abstract class AbstractResourceBundleManager<T extends ResourceBundle<?>>
         bundle.setLoggingInfo(loggingInfoList);
     }
 
-    public FacetFilter createFacetFilterForFetchingServicesAndDatasources(Map<String, Object> allRequestParams, String catalogueId, String type){
+    public FacetFilter createFacetFilterForFetchingServices(Map<String, Object> allRequestParams, String catalogueId){
         FacetFilter ff = FacetFilterUtils.createFacetFilter(allRequestParams);
         allRequestParams.remove("catalogue_id");
         allRequestParams.remove("type");
@@ -1012,28 +996,18 @@ public abstract class AbstractResourceBundleManager<T extends ResourceBundle<?>>
                 ff.addFilter("catalogue_id", catalogueId);
             }
         }
-        if (type != null){
-            if (!type.equals("all")){
-                ff.addFilter("resourceType", type);
-            }
-        }
         ff.addFilter("published", false);
         ff.setResourceType("resources");
         return ff;
     }
 
-    public FacetFilter createFacetFilterForFetchingServicesAndDatasources(MultiValueMap<String, Object> allRequestParams, String catalogueId, String type){
+    public FacetFilter createFacetFilterForFetchingServices(MultiValueMap<String, Object> allRequestParams, String catalogueId){
         FacetFilter ff = FacetFilterUtils.createMultiFacetFilter(allRequestParams);
         allRequestParams.remove("catalogue_id");
         allRequestParams.remove("type");
         if (catalogueId != null){
             if (!catalogueId.equals("all")){
                 ff.addFilter("catalogue_id", catalogueId);
-            }
-        }
-        if (type != null){
-            if (!type.equals("all")){
-                ff.addFilter("resourceType", type);
             }
         }
         ff.addFilter("published", false);
@@ -1063,12 +1037,6 @@ public abstract class AbstractResourceBundleManager<T extends ResourceBundle<?>>
             } else{
                 resourceId = richResource.getService().getCatalogueId();
             }
-        } else if (richResource.getDatasource() != null){
-            if (trueForIdFalseForCatalogueId){
-                resourceId = richResource.getDatasource().getId();
-            } else{
-                resourceId = richResource.getDatasource().getCatalogueId();
-            }
         }
         return resourceId;
     }
@@ -1080,9 +1048,6 @@ public abstract class AbstractResourceBundleManager<T extends ResourceBundle<?>>
         if (richResource.getService() != null){
             resourceOrganisation = richResource.getService().getResourceOrganisation();
             resourceProviders.addAll(richResource.getService().getResourceProviders());
-        } else if (richResource.getDatasource() != null){
-            resourceOrganisation = richResource.getDatasource().getResourceOrganisation();
-            resourceProviders.addAll(richResource.getDatasource().getResourceProviders());
         }
         resourceOrganisationAndProviders.put(resourceOrganisation, resourceProviders);
         return resourceOrganisationAndProviders;
@@ -1096,13 +1061,13 @@ public abstract class AbstractResourceBundleManager<T extends ResourceBundle<?>>
         return allProviders.stream().map(Bundle::getId).collect(Collectors.toList());
     }
 
-    public void createResourceExtras(T resourceBundle, String serviceType){
-        if (resourceBundle.getResourceExtras() == null){
+    public void createResourceExtras(T serviceBundle, String serviceType){
+        if (serviceBundle.getResourceExtras() == null){
             ResourceExtras resourceExtras = new ResourceExtras();
             resourceExtras.setServiceType(serviceType);
-            resourceBundle.setResourceExtras(resourceExtras);
+            serviceBundle.setResourceExtras(resourceExtras);
         } else {
-            resourceBundle.getResourceExtras().setServiceType(serviceType);
+            serviceBundle.getResourceExtras().setServiceType(serviceType);
         }
     }
 }

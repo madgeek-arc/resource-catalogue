@@ -4,7 +4,7 @@ import eu.einfracentral.domain.Event;
 import eu.einfracentral.domain.RichResource;
 import eu.einfracentral.domain.ServiceBundle;
 import eu.einfracentral.registry.service.EventService;
-import eu.einfracentral.registry.service.ResourceBundleService;
+import eu.einfracentral.registry.service.ServiceBundleService;
 import eu.openminted.registry.core.domain.FacetFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -26,15 +26,15 @@ import java.util.Map;
 public class UserEventsController {
 
     private final EventService eventService;
-    private final ResourceBundleService<ServiceBundle> resourceBundleService;
+    private final ServiceBundleService<ServiceBundle> serviceBundleService;
 
     @Value("${project.catalogue.name}")
     private String catalogueName;
 
     @Autowired
-    UserEventsController(EventService eventService, ResourceBundleService<ServiceBundle> resourceBundleService) {
+    UserEventsController(EventService eventService, ServiceBundleService<ServiceBundle> serviceBundleService) {
         this.eventService = eventService;
-        this.resourceBundleService = resourceBundleService;
+        this.serviceBundleService = serviceBundleService;
     }
 
     /**
@@ -54,7 +54,7 @@ public class UserEventsController {
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(10000);
         List<String> serviceIds = new ArrayList<>();
-        for (ServiceBundle serviceBundle : resourceBundleService.getAll(ff, auth).getResults()) {
+        for (ServiceBundle serviceBundle : serviceBundleService.getAll(ff, auth).getResults()) {
             serviceIds.add(serviceBundle.getService().getId());
         }
 
@@ -65,7 +65,7 @@ public class UserEventsController {
         }
         for (Map.Entry<String, Float> favouriteService : favouriteServices.entrySet()) {
             if (favouriteService.getValue() == 1) { // "1" is true
-                services.add(resourceBundleService.getRichResource(favouriteService.getKey(), catalogueName, auth));
+                services.add(serviceBundleService.getRichResource(favouriteService.getKey(), catalogueName, auth));
             }
         }
         return new ResponseEntity<>(services, HttpStatus.OK);
@@ -87,7 +87,7 @@ public class UserEventsController {
             serviceRatings.putIfAbsent(userEvent.getService(), userEvent.getValue());
         }
         for (Map.Entry<String, Float> serviceRating : serviceRatings.entrySet()) {
-            services.add(resourceBundleService.getRichResource(serviceRating.getKey(), catalogueName, auth));
+            services.add(serviceBundleService.getRichResource(serviceRating.getKey(), catalogueName, auth));
         }
         return new ResponseEntity<>(services, HttpStatus.OK);
     }

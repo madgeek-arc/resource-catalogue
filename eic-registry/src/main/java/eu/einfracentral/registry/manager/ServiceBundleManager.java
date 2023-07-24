@@ -33,7 +33,7 @@ import static eu.einfracentral.config.CacheConfig.CACHE_FEATURED;
 import static eu.einfracentral.config.CacheConfig.CACHE_PROVIDERS;
 
 @org.springframework.stereotype.Service
-public class ServiceBundleManager extends AbstractResourceBundleManager<ServiceBundle> implements ResourceBundleService<ServiceBundle> {
+public class ServiceBundleManager extends AbstractServiceBundleManager<ServiceBundle> implements ServiceBundleService<ServiceBundle> {
 
     private static final Logger logger = LogManager.getLogger(ServiceBundleManager.class);
 
@@ -587,19 +587,6 @@ public class ServiceBundleManager extends AbstractResourceBundleManager<ServiceB
                 serviceBundle.getService().getResourceOrganisation(), suspend, auth);
         commonMethods.suspendResource(serviceBundle, catalogueId, suspend, auth);
         return super.update(serviceBundle, auth);
-    }
-
-    public List<ServiceBundle> transformDatasourcesToServices(List<?> resourceBundles) {
-        List<ServiceBundle> serviceBundles = new ArrayList<>();
-        for (Object obj : resourceBundles) {
-            if (obj instanceof DatasourceBundle) {
-                ServiceBundle serviceBundle = new ServiceBundle((DatasourceBundle) obj);
-                serviceBundles.add(serviceBundle);
-            } else {
-                serviceBundles.add((ServiceBundle) obj);
-            }
-        }
-        return serviceBundles;
     }
 
 }

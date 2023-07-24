@@ -6,10 +6,19 @@ import javax.xml.bind.annotation.XmlType;
 
 @XmlType
 @XmlRootElement(namespace = "http://einfracentral.eu")
-public class DatasourceBundle extends ResourceBundle<Datasource> {
+public class DatasourceBundle extends Bundle<Datasource> {
+
+    @XmlElement
+    private String datasourceStatus;
 
     public DatasourceBundle() {
         // No arg constructor
+    }
+
+    public DatasourceBundle(Datasource datasource, String datasourceStatus) {
+        this.setDatasource(datasource);
+        this.datasourceStatus = datasourceStatus;
+        this.setMetadata(null);
     }
 
     public DatasourceBundle(Datasource datasource) {
@@ -22,6 +31,13 @@ public class DatasourceBundle extends ResourceBundle<Datasource> {
         this.setMetadata(metadata);
     }
 
+    @Override
+    public String toString() {
+        return "DatasourceBundle{" +
+                "datasourceStatus='" + datasourceStatus + '\'' +
+                '}';
+    }
+
     @XmlElement(name = "datasource")
     public Datasource getDatasource() {
         return this.getPayload();
@@ -32,7 +48,21 @@ public class DatasourceBundle extends ResourceBundle<Datasource> {
     }
 
     @Override
-    public String toString() {
-        return "DatasourceBundle{} " + super.toString();
+    public String getId() {
+        return super.getId();
     }
+
+    @Override
+    public void setId(String id) {
+        super.setId(id);
+    }
+
+    public String getDatasourceStatus() {
+        return datasourceStatus;
+    }
+
+    public void setDatasourceStatus(String datasourceStatus) {
+        this.datasourceStatus = datasourceStatus;
+    }
+
 }

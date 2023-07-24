@@ -7,9 +7,10 @@ import eu.einfracentral.annotations.Browse;
 import eu.einfracentral.domain.*;
 import eu.einfracentral.dto.MonitoringStatus;
 import eu.einfracentral.dto.ServiceType;
+import eu.einfracentral.registry.service.DatasourceService;
 import eu.einfracentral.registry.service.HelpdeskService;
 import eu.einfracentral.registry.service.MonitoringService;
-import eu.einfracentral.registry.service.ResourceBundleService;
+import eu.einfracentral.registry.service.ServiceBundleService;
 import eu.einfracentral.utils.CreateArgoGrnetHttpRequest;
 import eu.einfracentral.utils.FacetFilterUtils;
 import eu.einfracentral.validators.HelpdeskValidator;
@@ -48,7 +49,8 @@ public class ServiceExtensionsController {
     private static final Logger logger = LogManager.getLogger(ServiceExtensionsController.class);
     private final HelpdeskService<HelpdeskBundle, Authentication> helpdeskService;
     private final MonitoringService<MonitoringBundle, Authentication> monitoringService;
-    private final ResourceBundleService<ServiceBundle> serviceBundleService;
+    private final DatasourceService<DatasourceBundle, Authentication> datasourceService;
+    private final ServiceBundleService<ServiceBundle> serviceBundleService;
     @Value("${argo.grnet.monitoring.availability}")
     private String monitoringAvailability;
     @Value("${argo.grnet.monitoring.status}")
@@ -69,9 +71,11 @@ public class ServiceExtensionsController {
     @Autowired
     ServiceExtensionsController(HelpdeskService<HelpdeskBundle, Authentication> helpdeskService,
                                 MonitoringService<MonitoringBundle, Authentication> monitoringService,
-                                ResourceBundleService<ServiceBundle> serviceBundleService) {
+                                DatasourceService<DatasourceBundle, Authentication> datasourceService,
+                                ServiceBundleService<ServiceBundle> serviceBundleService) {
         this.helpdeskService = helpdeskService;
         this.monitoringService = monitoringService;
+        this.datasourceService = datasourceService;
         this.serviceBundleService = serviceBundleService;
     }
 

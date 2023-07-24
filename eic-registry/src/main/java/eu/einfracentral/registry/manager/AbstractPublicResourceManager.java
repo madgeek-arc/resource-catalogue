@@ -1,7 +1,6 @@
 package eu.einfracentral.registry.manager;
 
 import eu.einfracentral.domain.*;
-import eu.einfracentral.domain.ResourceBundle;
 import eu.einfracentral.registry.service.CatalogueService;
 import eu.einfracentral.service.SecurityService;
 import eu.openminted.registry.core.domain.FacetFilter;
@@ -37,33 +36,33 @@ public abstract class AbstractPublicResourceManager<T extends Identifiable> exte
         return new ArrayList<>(transformed);
     }
 
-    protected void updateResourceIdsToPublic(ResourceBundle<?> resourceBundle) {
+    protected void updateResourceIdsToPublic(ServiceBundle serviceBundle) {
         List<String> allCatalogueIds = getAllCatalogueIds();
         // Resource Organisation
-        resourceBundle.getPayload().setResourceOrganisation(
+        serviceBundle.getService().setResourceOrganisation(
                 String.format("%s.%s",
-                        resourceBundle.getPayload().getCatalogueId(),
-                        resourceBundle.getPayload().getResourceOrganisation()));
+                        serviceBundle.getService().getCatalogueId(),
+                        serviceBundle.getService().getResourceOrganisation()));
 
         // Resource Providers
-        resourceBundle.getPayload().setResourceProviders(
+        serviceBundle.getService().setResourceProviders(
                 appendCatalogueId(
-                        resourceBundle.getPayload().getResourceProviders(),
-                        resourceBundle.getPayload().getCatalogueId(),
+                        serviceBundle.getService().getResourceProviders(),
+                        serviceBundle.getService().getCatalogueId(),
                         allCatalogueIds));
 
         // Related Resources
-        resourceBundle.getPayload().setRelatedResources(
+        serviceBundle.getService().setRelatedResources(
                 appendCatalogueId(
-                        resourceBundle.getPayload().getRelatedResources(),
-                        resourceBundle.getPayload().getCatalogueId(),
+                        serviceBundle.getService().getRelatedResources(),
+                        serviceBundle.getService().getCatalogueId(),
                         allCatalogueIds));
 
         // Required Resources
-        resourceBundle.getPayload().setRequiredResources(
+        serviceBundle.getService().setRequiredResources(
                 appendCatalogueId(
-                        resourceBundle.getPayload().getRequiredResources(),
-                        resourceBundle.getPayload().getCatalogueId(),
+                        serviceBundle.getService().getRequiredResources(),
+                        serviceBundle.getService().getCatalogueId(),
                         allCatalogueIds));
     }
 

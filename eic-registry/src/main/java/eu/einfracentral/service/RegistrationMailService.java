@@ -1,7 +1,6 @@
 package eu.einfracentral.service;
 
 import eu.einfracentral.domain.*;
-import eu.einfracentral.domain.ResourceBundle;
 import eu.einfracentral.domain.ServiceBundle;
 import eu.einfracentral.exception.ResourceNotFoundException;
 import eu.einfracentral.exception.ValidationException;
@@ -40,7 +39,6 @@ public class RegistrationMailService {
     private final ProviderManager providerManager;
     private final PendingProviderManager pendingProviderManager;
     private final ServiceBundleManager serviceBundleManager;
-    private final DatasourceBundleManager datasourceBundleManager;
     private final TrainingResourceManager trainingResourceManager;
     private final PendingServiceManager pendingServiceManager;
     private final SecurityService securityService;
@@ -82,7 +80,6 @@ public class RegistrationMailService {
                                    ProviderManager providerManager,
                                    @Lazy PendingProviderManager pendingProviderManager,
                                    ServiceBundleManager serviceBundleManager,
-                                   DatasourceBundleManager datasourceBundleManager,
                                    TrainingResourceManager trainingResourceManager,
                                    PendingServiceManager pendingServiceManager,
                                    SecurityService securityService) {
@@ -91,7 +88,6 @@ public class RegistrationMailService {
         this.providerManager = providerManager;
         this.pendingProviderManager = pendingProviderManager;
         this.serviceBundleManager = serviceBundleManager;
-        this.datasourceBundleManager = datasourceBundleManager;
         this.trainingResourceManager = trainingResourceManager;
         this.pendingServiceManager = pendingServiceManager;
         this.securityService = securityService;
@@ -123,12 +119,6 @@ public class RegistrationMailService {
                 root.put("resourceId", serviceTemplate.getId());
                 root.put("resourceName", serviceTemplate.getName());
                 root.put("resourceType", "resource");
-                break;
-            case "datasourceBundleManager":
-                serviceTemplate = datasourceBundleManager.getResources(providerBundle.getId()).get(0);
-                root.put("resourceId", serviceTemplate.getId());
-                root.put("resourceName", serviceTemplate.getName());
-                root.put("resourceType", "datasource");
                 break;
             case "trainingResourceManager":
                 trainingResourceTemplate = trainingResourceManager.getResources(providerBundle.getId()).get(0);
@@ -322,25 +312,22 @@ public class RegistrationMailService {
         ProviderBundle providerBundle;
         root.put("project", projectName);
         root.put("endpoint", endpoint);
-        ResourceBundle<?> resourceBundle;
+        ServiceBundle serviceBundle;
         TrainingResourceBundle trainingResourceBundle = null;
-        resourceBundle = serviceBundleManager.getOrElseReturnNull(resourceId, catalogueName);
-        if (resourceBundle == null){
-            resourceBundle = datasourceBundleManager.getOrElseReturnNull(resourceId, catalogueName);
-        }
-        if (resourceBundle == null){
+        serviceBundle = serviceBundleManager.getOrElseReturnNull(resourceId, catalogueName);
+        if (serviceBundle == null){
             trainingResourceBundle = trainingResourceManager.getOrElseReturnNull(resourceId, catalogueName);
             providerBundle = providerManager.get(trainingResourceBundle.getTrainingResource().getResourceOrganisation());
         } else{
-            providerBundle = providerManager.get(resourceBundle.getPayload().getResourceOrganisation());
+            providerBundle = providerManager.get(serviceBundle.getService().getResourceOrganisation());
         }
         if (providerBundle.getProvider().getUsers() == null || providerBundle.getProvider().getUsers().isEmpty()) {
             throw new ValidationException(String.format("Provider [%s]-[%s] has no Users", providerBundle.getId(), providerBundle.getProvider().getName()));
         }
         String subject = String.format("[%s] Your Provider [%s] has one or more outdated Resources", projectName, providerBundle.getProvider().getName());
         root.put("providerBundle", providerBundle);
-        if (resourceBundle != null){
-            root.put("resourceBundle", resourceBundle);
+        if (serviceBundle != null){
+            root.put("serviceBundle", serviceBundle);
             for (User user : providerBundle.getProvider().getUsers()) {
                 root.put("user", user);
                 String userRole = "provider";
@@ -356,7 +343,7 @@ public class RegistrationMailService {
         }
     }
 
-    public void sendEmailsForMovedResources(ProviderBundle oldProvider, ProviderBundle newProvider, ResourceBundle<?> resourceBundle, Authentication auth){
+    public void sendEmailsForMovedResources(ProviderBundle oldProvider, ProviderBundle newProvider, ServiceBundle serviceBundle, Authentication auth){
         Map<String, Object> root = new HashMap<>();
         root.put("project", projectName);
         root.put("endpoint", endpoint);
@@ -366,13 +353,13 @@ public class RegistrationMailService {
         if (newProvider.getProvider().getUsers() == null || newProvider.getProvider().getUsers().isEmpty()) {
             throw new ValidationException(String.format("Provider [%s]-[%s] has no Users", newProvider.getId(), newProvider.getProvider().getName()));
         }
-        String subject = String.format("[%s] Resource [%s] has been moved from Provider [%s] to Provider [%s]", projectName, resourceBundle.getPayload().getName(),
+        String subject = String.format("[%s] Resource [%s] has been moved from Provider [%s] to Provider [%s]", projectName, serviceBundle.getService().getName(),
                 oldProvider.getProvider().getName(), newProvider.getProvider().getName());
         String userRole = "provider";
         root.put("oldProvider", oldProvider);
         root.put("newProvider", newProvider);
-        root.put("resourceBundle", resourceBundle);
-        root.put("comment", resourceBundle.getLoggingInfo().get(resourceBundle.getLoggingInfo().size() - 1).getComment());
+        root.put("serviceBundle", serviceBundle);
+        root.put("comment", serviceBundle.getLoggingInfo().get(serviceBundle.getLoggingInfo().size() - 1).getComment());
 
         // emails to old Provider's Users
         for (User user : oldProvider.getProvider().getUsers()) {
@@ -1039,15 +1026,15 @@ public class RegistrationMailService {
         sendMailsFromTemplate("invalidCatalogueUpdate.ftl", root, subject, registrationEmail, userRole);
     }
 
-    public void notifyPortalAdminsForInvalidResourceUpdate(ResourceBundle<?> resourceBundle) {
+    public void notifyPortalAdminsForInvalidResourceUpdate(ServiceBundle serviceBundle) {
 
         Map<String, Object> root = new HashMap<>();
         root.put("project", projectName);
         root.put("endpoint", endpoint);
-        root.put("resourceBundle", resourceBundle);
+        root.put("serviceBundle", serviceBundle);
 
         // send email to Admins
-        String subject = String.format("[%s Portal] The Resource [%s] previously marked as [invalid] has been updated", projectName, resourceBundle.getPayload().getName());
+        String subject = String.format("[%s Portal] The Resource [%s] previously marked as [invalid] has been updated", projectName, serviceBundle.getService().getName());
         String userRole = "admin";
         sendMailsFromTemplate("invalidResourceUpdate.ftl", root, subject, registrationEmail, userRole);
     }
@@ -1109,8 +1096,6 @@ public class RegistrationMailService {
         switch (resourceType) {
             case "service":
                 return "Service";
-            case "datasource":
-                return "Datasource";
             case "training_resource":
                 return "Training Resource";
             default:
