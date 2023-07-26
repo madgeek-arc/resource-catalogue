@@ -79,6 +79,7 @@ public class Vocabulary implements Identifiable {
         CATALOGUE_STATE("Catalogue state"),
         PROVIDER_STATE("Provider state"),
         RESOURCE_STATE("Resource state"),
+        DATASOURCE_STATE("Datasource state"),
         TEMPLATE_STATE("Template state"),
         INTEROPERABILITY_RECORD_STATE("Interoperability Record state"),
         // Datasource

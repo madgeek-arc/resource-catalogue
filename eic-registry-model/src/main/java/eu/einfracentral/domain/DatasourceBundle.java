@@ -15,12 +15,6 @@ public class DatasourceBundle extends Bundle<Datasource> {
         // No arg constructor
     }
 
-    public DatasourceBundle(Datasource datasource, String datasourceStatus) {
-        this.setDatasource(datasource);
-        this.datasourceStatus = datasourceStatus;
-        this.setMetadata(null);
-    }
-
     public DatasourceBundle(Datasource datasource) {
         this.setDatasource(datasource);
         this.setMetadata(null);
@@ -29,6 +23,12 @@ public class DatasourceBundle extends Bundle<Datasource> {
     public DatasourceBundle(Datasource datasource, Metadata metadata) {
         this.setDatasource(datasource);
         this.setMetadata(metadata);
+    }
+
+    public DatasourceBundle(Datasource datasource, String datasourceStatus) {
+        this.setDatasource(datasource);
+        this.datasourceStatus = datasourceStatus;
+        this.setMetadata(null);
     }
 
     @Override

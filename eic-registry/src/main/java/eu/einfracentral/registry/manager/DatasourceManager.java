@@ -33,6 +33,7 @@ public class DatasourceManager extends ResourceManager<DatasourceBundle> impleme
     private final ServiceBundleService<ServiceBundle> serviceBundleService;
     private final SecurityService securityService;
     private final RegistrationMailService registrationMailService;
+    private final VocabularyService vocabularyService;
     private final ProviderResourcesCommonMethods commonMethods;
     @Value("${openaire.dsm.api}")
     private String openaireAPI;
@@ -41,17 +42,50 @@ public class DatasourceManager extends ResourceManager<DatasourceBundle> impleme
     public DatasourceManager(ServiceBundleService<ServiceBundle> serviceBundleService,
                              @Lazy SecurityService securityService,
                              @Lazy RegistrationMailService registrationMailService,
+                             @Lazy VocabularyService vocabularyService,
                              ProviderResourcesCommonMethods commonMethods) {
         super(DatasourceBundle.class);
         this.serviceBundleService = serviceBundleService;
         this.securityService = securityService;
         this.registrationMailService = registrationMailService;
+        this.vocabularyService = vocabularyService;
         this.commonMethods = commonMethods;
     }
 
     @Override
     public String getResourceType() {
         return "datasource";
+    }
+
+    private DatasourceBundle get(String serviceId, String catalogueId) {
+        Resource res = where(false, new SearchService.KeyValue("service_id", serviceId), new SearchService.KeyValue("catalogue_id", catalogueId));
+        return res != null ? deserialize(res) : null;
+    }
+
+    @Override
+    public DatasourceBundle add(DatasourceBundle datasourceBundle, Authentication auth) {
+        validate(datasourceBundle);
+
+        // if Datasource has ID -> check if it exists in OpenAIRE Datasources list
+        if (datasourceBundle.getId() != null && !datasourceBundle.getId().equals("")){
+            checkOpenAIREIDExistance(datasourceBundle);
+        }
+        datasourceBundle.setId(UUID.randomUUID().toString());
+        logger.trace("User '{}' is attempting to add a new Datasource: {}", auth, datasourceBundle);
+
+        datasourceBundle.setMetadata(Metadata.createMetadata(User.of(auth).getFullName(), User.of(auth).getEmail()));
+        List<LoggingInfo> loggingInfoList = commonMethods.returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(datasourceBundle, auth);
+        datasourceBundle.setLoggingInfo(loggingInfoList);
+        datasourceBundle.setActive(false);
+        datasourceBundle.setDatasourceStatus(vocabularyService.get("pending datasource").getId());
+        // latestOnboardingInfo
+        datasourceBundle.setLatestOnboardingInfo(loggingInfoList.get(0));
+
+        super.add(datasourceBundle, null);
+        logger.debug("Adding Datasource for Service: {}", datasourceBundle.getDatasource().getServiceId());
+
+        //TODO: emails, jms
+        return datasourceBundle;
     }
 
     @Override
@@ -68,33 +102,6 @@ public class DatasourceManager extends ResourceManager<DatasourceBundle> impleme
         // check if Service exists and if User belongs to Resource's Provider Admins
         ResourceValidationUtils.checkIfResourceBundleIsActiveAndApprovedAndNotPublic(serviceId, catalogueId, serviceBundleService, "service");
         return super.validate(datasourceBundle);
-    }
-
-    @Override
-    public DatasourceBundle add(DatasourceBundle datasourceBundle, Authentication auth) {
-        validate(datasourceBundle);
-
-        datasourceBundle.setId(UUID.randomUUID().toString());
-        logger.trace("User '{}' is attempting to add a new Datasource: {}", auth, datasourceBundle);
-
-        datasourceBundle.setMetadata(Metadata.createMetadata(User.of(auth).getFullName(), User.of(auth).getEmail()));
-        List<LoggingInfo> loggingInfoList = commonMethods.returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(datasourceBundle, auth);
-        datasourceBundle.setLoggingInfo(loggingInfoList);
-        datasourceBundle.setActive(true);
-        // latestOnboardingInfo
-        datasourceBundle.setLatestOnboardingInfo(loggingInfoList.get(0));
-
-        super.add(datasourceBundle, null);
-        logger.debug("Adding Datasource: {}", datasourceBundle);
-
-        //TODO: emails
-        return datasourceBundle;
-    }
-
-//    @Override
-    public DatasourceBundle get(String serviceId, String catalogueId) {
-        Resource res = where(false, new SearchService.KeyValue("service_id", serviceId), new SearchService.KeyValue("catalogue_id", catalogueId));
-        return res != null ? deserialize(res) : null;
     }
 
     @Override
@@ -118,15 +125,27 @@ public class DatasourceManager extends ResourceManager<DatasourceBundle> impleme
 
         // latestUpdateInfo
         datasourceBundle.setLatestUpdateInfo(loggingInfo);
-
         datasourceBundle.setActive(ex.isActive());
-        existing.setPayload(serialize(datasourceBundle));
-        existing.setResourceType(resourceType);
+
+        // if datasourceStatus = "rejected datasource", update to "pending datasource"
+        if (ex.getDatasourceStatus().equals(vocabularyService.get("rejected datasource").getId())) {
+            datasourceBundle.setDatasourceStatus(vocabularyService.get("pending datasource").getId());
+        }
 
         // block user from updating serviceId
         if (!datasourceBundle.getDatasource().getServiceId().equals(ex.getDatasource().getServiceId()) && !securityService.hasRole(auth, "ROLE_ADMIN")){
             throw new ValidationException("You cannot change the Service Id with which this Datasource is related");
         }
+
+        // block catalogueId updates from Provider Admins
+        if (!securityService.hasRole(auth, "ROLE_ADMIN")){
+            if (!ex.getDatasource().getCatalogueId().equals(datasourceBundle.getDatasource().getCatalogueId())){
+                throw new ValidationException("You cannot change catalogueId");
+            }
+        }
+
+        existing.setPayload(serialize(datasourceBundle));
+        existing.setResourceType(resourceType);
 
         resourceService.updateResource(existing);
         logger.debug("Updating Datasource: {}", datasourceBundle);
@@ -136,37 +155,92 @@ public class DatasourceManager extends ResourceManager<DatasourceBundle> impleme
         return datasourceBundle;
     }
 
+    public DatasourceBundle verifyDatasource(String id, String status, Boolean active, Authentication auth) {
+        Vocabulary statusVocabulary = vocabularyService.getOrElseThrow(status);
+        if (!statusVocabulary.getType().equals("Datasource state")) {
+            throw new ValidationException(String.format("Vocabulary %s does not consist an Datasource state!", status));
+        }
+        logger.trace("Verifying Datasource with id: '{}' | status -> '{}' | active -> '{}'", id, status, active);
+        DatasourceBundle datasourceBundle = get(id);
+        datasourceBundle.setDatasourceStatus(vocabularyService.get(status).getId());
+
+        List<LoggingInfo> loggingInfoList = commonMethods.returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(datasourceBundle, auth);
+        LoggingInfo loggingInfo;
+
+        switch (status) {
+            case "pending datasource":
+                break;
+            case "approved datasource":
+                datasourceBundle.setActive(active);
+                loggingInfo = commonMethods.createLoggingInfo(auth, LoggingInfo.Types.ONBOARD.getKey(),
+                        LoggingInfo.ActionType.APPROVED.getKey());
+                loggingInfoList.add(loggingInfo);
+                loggingInfoList.sort(Comparator.comparing(LoggingInfo::getDate));
+                datasourceBundle.setLoggingInfo(loggingInfoList);
+
+                // latestOnboardingInfo
+                datasourceBundle.setLatestOnboardingInfo(loggingInfo);
+                break;
+            case "rejected datasource":
+                datasourceBundle.setActive(false);
+                loggingInfo = commonMethods.createLoggingInfo(auth, LoggingInfo.Types.ONBOARD.getKey(),
+                        LoggingInfo.ActionType.REJECTED.getKey());
+                loggingInfoList.add(loggingInfo);
+                loggingInfoList.sort(Comparator.comparing(LoggingInfo::getDate));
+                datasourceBundle.setLoggingInfo(loggingInfoList);
+
+                // latestOnboardingInfo
+                datasourceBundle.setLatestOnboardingInfo(loggingInfo);
+                break;
+            default:
+                break;
+        }
+
+        logger.info("Verifying Datasource: {}", datasourceBundle);
+        //TODO: emails?
+        return super.update(datasourceBundle, auth);
+    }
+
     @Override
     public void delete(DatasourceBundle datasourceBundle) {
         super.delete(datasourceBundle);
         logger.debug("Deleting Datasource: {}", datasourceBundle);
     }
 
-    public Map<Integer, List<Datasource>> getAllOpenAIREDatasources(FacetFilter ff) {
-        Map<Integer, List<Datasource>> datasourceMap = new HashMap<>();
-        List<Datasource> allDatasources = new ArrayList<>();
-        String[] datasourcesAsJSON = getOpenAIREDatasourcesAsJSON(ff);
-        int total = Integer.parseInt(datasourcesAsJSON[0]);
-        String allOpenAIREDatasources = datasourcesAsJSON[1];
-        if (allOpenAIREDatasources != null){
-            JSONObject obj = new JSONObject(allOpenAIREDatasources);
-            JSONArray arr = obj.getJSONArray("datasourceInfo");
-            for(int i = 0; i < arr .length(); i++) {
-                JSONObject map = arr.getJSONObject(i);
-                Gson gson = new Gson();
-                JsonElement jsonObj = gson.fromJson(String.valueOf(map), JsonElement.class);
-                Datasource datasource = transformOpenAIREToEOSCDatasource(jsonObj);
-                if (datasource != null){
-                    allDatasources.add(datasource);
-                }
-            }
-            datasourceMap.put(total, allDatasources);
-            return datasourceMap;
+
+    // OpenAIRE related methods
+    private DatasourceBundle checkOpenAIREIDExistance(DatasourceBundle datasourceBundle){
+        Datasource datasource = getOpenAIREDatasourceById(datasourceBundle.getId());
+        if (datasource != null){
+            createOpenAIREAlternativeIdentifiers(datasourceBundle);
+        } else{
+            throw new ValidationException(String.format("The ID [%s] you provided does not belong to an OpenAIRE Datasource", datasourceBundle.getId()));
         }
-        throw new ResourceNotFoundException("There are no OpenAIRE Datasources");
+        return datasourceBundle;
     }
 
-    public String[] getOpenAIREDatasourcesAsJSON(FacetFilter ff) {
+    public Datasource getOpenAIREDatasourceById(String openaireDatasourceID) {
+        FacetFilter ff = new FacetFilter();
+        ff.addFilter("id", openaireDatasourceID);
+        String datasource = getOpenAIREDatasourcesAsJSON(ff)[1];
+        if (datasource != null){
+            JSONObject obj = new JSONObject(datasource);
+            JSONArray arr = obj.getJSONArray("datasourceInfo");
+            if (arr != null) {
+                if (arr.length() == 0) {
+                    throw new ResourceNotFoundException(String.format("There is no OpenAIRE Datasource with the given id [%s]", openaireDatasourceID));
+                } else {
+                    JSONObject map = arr.getJSONObject(0);
+                    Gson gson = new Gson();
+                    JsonElement jsonObj = gson.fromJson(String.valueOf(map), JsonElement.class);
+                    return transformOpenAIREToEOSCDatasource(jsonObj);
+                }
+            }
+        }
+        throw new ResourceNotFoundException(String.format("There is no OpenAIRE Datasource with the given id [%s]", openaireDatasourceID));
+    }
+
+    private String[] getOpenAIREDatasourcesAsJSON(FacetFilter ff) {
         String[] pagination = createPagination(ff);
         int page = Integer.parseInt(pagination[0]);
         int quantity = Integer.parseInt(pagination[1]);
@@ -214,7 +288,7 @@ public class DatasourceManager extends ResourceManager<DatasourceBundle> impleme
         return new String[]{Integer.toString(page), Integer.toString(quantity), ordering, data};
     }
 
-    public String createHttpRequest(String url, String data){
+    private String createHttpRequest(String url, String data){
         RestTemplate restTemplate = new RestTemplate();
         HttpHeaders headers = new HttpHeaders();
         headers.add("accept", "application/json");
@@ -223,32 +297,72 @@ public class DatasourceManager extends ResourceManager<DatasourceBundle> impleme
         return restTemplate.exchange(url, HttpMethod.POST, entity, String.class).getBody();
     }
 
-    public Datasource getOpenAIREDatasourceById(String openaireDatasourceID) {
-        FacetFilter ff = new FacetFilter();
-        ff.addFilter("id", openaireDatasourceID);
-        String datasource = getOpenAIREDatasourcesAsJSON(ff)[1];
-        if (datasource != null){
-            JSONObject obj = new JSONObject(datasource);
-            JSONArray arr = obj.getJSONArray("datasourceInfo");
-            if (arr != null) {
-                if (arr.length() == 0) {
-                    throw new ResourceNotFoundException(String.format("There is no OpenAIRE Datasource with the given id [%s]", openaireDatasourceID));
-                } else {
-                    JSONObject map = arr.getJSONObject(0);
-                    Gson gson = new Gson();
-                    JsonElement jsonObj = gson.fromJson(String.valueOf(map), JsonElement.class);
-                    return transformOpenAIREToEOSCDatasource(jsonObj);
-                }
-            }
-        }
-        throw new ResourceNotFoundException(String.format("There is no OpenAIRE Datasource with the given id [%s]", openaireDatasourceID));
+    private DatasourceBundle createOpenAIREAlternativeIdentifiers(DatasourceBundle datasourceBundle) {
+        Identifiers datasourceIdentifiers = new Identifiers();
+        List<AlternativeIdentifier> datasourceAlternativeIdentifiers = new ArrayList<>();
+        AlternativeIdentifier alternativeIdentifier = new AlternativeIdentifier();
+        alternativeIdentifier.setType("openaire");
+        alternativeIdentifier.setValue(datasourceBundle.getId());
+        datasourceAlternativeIdentifiers.add(alternativeIdentifier);
+        datasourceIdentifiers.setAlternativeIdentifiers(datasourceAlternativeIdentifiers);
+        datasourceBundle.setIdentifiers(datasourceIdentifiers);
+        return datasourceBundle;
     }
 
-    public Datasource transformOpenAIREToEOSCDatasource(JsonElement openaireDatasource){
+    public Map<Integer, List<Datasource>> getAllOpenAIREDatasources(FacetFilter ff) {
+        Map<Integer, List<Datasource>> datasourceMap = new HashMap<>();
+        List<Datasource> allDatasources = new ArrayList<>();
+        String[] datasourcesAsJSON = getOpenAIREDatasourcesAsJSON(ff);
+        int total = Integer.parseInt(datasourcesAsJSON[0]);
+        String allOpenAIREDatasources = datasourcesAsJSON[1];
+        if (allOpenAIREDatasources != null){
+            JSONObject obj = new JSONObject(allOpenAIREDatasources);
+            JSONArray arr = obj.getJSONArray("datasourceInfo");
+            for(int i = 0; i < arr .length(); i++) {
+                JSONObject map = arr.getJSONObject(i);
+                Gson gson = new Gson();
+                JsonElement jsonObj = gson.fromJson(String.valueOf(map), JsonElement.class);
+                Datasource datasource = transformOpenAIREToEOSCDatasource(jsonObj);
+                if (datasource != null){
+                    allDatasources.add(datasource);
+                }
+            }
+            datasourceMap.put(total, allDatasources);
+            return datasourceMap;
+        }
+        throw new ResourceNotFoundException("There are no OpenAIRE Datasources");
+    }
+
+    private Datasource transformOpenAIREToEOSCDatasource(JsonElement openaireDatasource){
         Datasource datasource = new Datasource();
         String id = openaireDatasource.getAsJsonObject().get("id").getAsString().replaceAll("\"", "");
         datasource.setId(id);
         return datasource;
+    }
+
+    private boolean isDatasourceRegisteredOnOpenAIRE(String eoscId){
+        DatasourceBundle datasourceBundle = get(eoscId);
+        boolean found = false;
+        String registerBy;
+        if (datasourceBundle != null){
+            Identifiers identifiers = datasourceBundle.getIdentifiers();
+            if (identifiers != null){
+                List<AlternativeIdentifier> alternativeIdentifiers = identifiers.getAlternativeIdentifiers();
+                if (alternativeIdentifiers != null && !alternativeIdentifiers.isEmpty()){
+                    for (AlternativeIdentifier alternativeIdentifier : alternativeIdentifiers){
+                        if (alternativeIdentifier.getType().equals("openaire")){
+                            registerBy = getOpenAIREDatasourceRegisterBy(alternativeIdentifier.getValue());
+                            if(registerBy != null && !registerBy.equals("")){
+                                found = true;
+                            }
+                        }
+                    }
+                }
+            }
+        } else{
+            throw new ResourceNotFoundException(String.format("There is no Datasource with ID [%s]", eoscId));
+        }
+        return found;
     }
 
     private String getOpenAIREDatasourceRegisterBy(String openaireDatasourceID) {
@@ -275,48 +389,6 @@ public class DatasourceManager extends ResourceManager<DatasourceBundle> impleme
             }
         }
         return registerBy;
-    }
-
-    public DatasourceBundle checkOpenAIREIDExistance(DatasourceBundle datasourceBundle){
-        Datasource datasource = getOpenAIREDatasourceById(datasourceBundle.getId());
-        if (datasource != null){
-            Identifiers datasourceIdentifiers = new Identifiers();
-            List<AlternativeIdentifier> datasourceAlternativeIdentifiers = new ArrayList<>();
-            AlternativeIdentifier alternativeIdentifier = new AlternativeIdentifier();
-            alternativeIdentifier.setType("openaire");
-            alternativeIdentifier.setValue(datasourceBundle.getId());
-            datasourceAlternativeIdentifiers.add(alternativeIdentifier);
-            datasourceIdentifiers.setAlternativeIdentifiers(datasourceAlternativeIdentifiers);
-            datasourceBundle.setIdentifiers(datasourceIdentifiers);
-        } else{
-            throw new ValidationException(String.format("The ID [%s] you provided does not belong to an OpenAIRE Datasource", datasourceBundle.getId()));
-        }
-        return datasourceBundle;
-    }
-
-    public boolean isDatasourceRegisteredOnOpenAIRE(String eoscId){
-        DatasourceBundle datasourceBundle = get(eoscId);
-        boolean found = false;
-        String registerBy;
-        if (datasourceBundle != null){
-            Identifiers identifiers = datasourceBundle.getIdentifiers();
-            if (identifiers != null){
-                List<AlternativeIdentifier> alternativeIdentifiers = identifiers.getAlternativeIdentifiers();
-                if (alternativeIdentifiers != null && !alternativeIdentifiers.isEmpty()){
-                    for (AlternativeIdentifier alternativeIdentifier : alternativeIdentifiers){
-                        if (alternativeIdentifier.getType().equals("openaire")){
-                            registerBy = getOpenAIREDatasourceRegisterBy(alternativeIdentifier.getValue());
-                            if(registerBy != null && !registerBy.equals("")){
-                                found = true;
-                            }
-                        }
-                    }
-                }
-            }
-        } else{
-            throw new ResourceNotFoundException(String.format("There is no Datasource with ID [%s]", eoscId));
-        }
-        return found;
     }
 
 //    public DatasourceBundle createPublicResource(DatasourceBundle datasourceBundle, Authentication auth){

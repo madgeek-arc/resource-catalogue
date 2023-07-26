@@ -113,6 +113,12 @@
       "path": "//*[local-name()='suspended']/text()",
       "defaultValue": false,
       "type": "java.lang.Boolean"
+    },
+    {
+      "multivalued": false,
+      "name": "datasource_status",
+      "path": "//*[local-name()='datasourceBundle']/*[local-name()='datasourceStatus']/text()",
+      "type": "java.lang.String"
     }
   ],
   "indexMapperClass": "eu.openminted.registry.core.index.DefaultIndexMapper",
