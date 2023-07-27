@@ -63,8 +63,7 @@ public class FieldValidator {
     public void validate(Object o) throws IllegalAccessException {
         validationLocation = new ArrayDeque<>();
         validateFields(o);
-        if (o.getClass().getSuperclass() != null && (o.getClass().getSuperclass().getCanonicalName().contains("eu.einfracentral.domain.Bundle")
-                || o.getClass().getSuperclass().getCanonicalName().contains("eu.einfracentral.domain.ResourceBundle"))) {
+        if (o.getClass().getSuperclass() != null && (o.getClass().getSuperclass().getCanonicalName().contains("eu.einfracentral.domain.Bundle"))) {
             try {
                 Field payload = Bundle.class.getDeclaredField("payload");
                 payload.setAccessible(true);

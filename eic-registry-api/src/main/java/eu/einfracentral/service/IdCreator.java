@@ -15,7 +15,7 @@ public interface IdCreator {
     String createProviderId(Provider provider);
 
     /**
-     * Creates id for {@link ResourceBundle}
+     * Creates id for {@link ServiceBundle}
      *
      * @param serviceBundle
      * @return
