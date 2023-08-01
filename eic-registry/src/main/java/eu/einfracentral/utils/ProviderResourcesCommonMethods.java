@@ -1,18 +1,64 @@
 package eu.einfracentral.utils;
 
 import eu.einfracentral.domain.*;
+import eu.einfracentral.exception.ResourceNotFoundException;
 import eu.einfracentral.exception.ValidationException;
 import eu.einfracentral.registry.service.*;
+import eu.einfracentral.service.GenericResourceService;
+import eu.einfracentral.service.SecurityService;
+import eu.openminted.registry.core.domain.Browsing;
+import eu.openminted.registry.core.domain.FacetFilter;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
+
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+import java.net.*;
+import java.io.*;
+import org.json.*;
 
 @Component
 public class ProviderResourcesCommonMethods {
 
-    private final CatalogueService<CatalogueBundle, Authentication> catalogueService;
+    private static final Logger logger = LogManager.getLogger(ProviderResourcesCommonMethods.class);
 
-    public ProviderResourcesCommonMethods(CatalogueService<CatalogueBundle, Authentication> catalogueService) {
+    private final CatalogueService<CatalogueBundle, Authentication> catalogueService;
+    private final ProviderService<ProviderBundle, Authentication> providerService;
+    private final GenericResourceService genericResourceService;
+    private final VocabularyService vocabularyService;
+    private final SecurityService securityService;
+
+    @Value("${pid.username}")
+    private String pidUsername;
+    @Value("${pid.key}")
+    private String pidKey;
+    @Value("${pid.auth}")
+    private String pidAuth;
+    @Value("${pid.prefix}")
+    private String pidPrefix;
+    @Value("${pid.api}")
+    private String pidApi;
+
+    public ProviderResourcesCommonMethods(@Lazy CatalogueService<CatalogueBundle, Authentication> catalogueService,
+                                          @Lazy ProviderService<ProviderBundle, Authentication> providerService,
+                                          @Lazy GenericResourceService genericResourceService,
+                                          @Lazy VocabularyService vocabularyService,
+                                          @Lazy SecurityService securityService) {
         this.catalogueService = catalogueService;
+        this.providerService = providerService;
+        this.genericResourceService = genericResourceService;
+        this.vocabularyService = vocabularyService;
+        this.securityService = securityService;
     }
 
     public void checkCatalogueIdConsistency(Object o, String catalogueId) {
@@ -63,6 +109,365 @@ public class ProviderResourcesCommonMethods {
                     }
                 }
             }
+        }
+    }
+
+    // check if the lower level resource ID is from an external catalogue
+    public void checkRelatedResourceIDsConsistency(Object o) {
+        String catalogueId = null;
+        List<String> resourceProviders = new ArrayList<>();
+        List<String> requiredResources = new ArrayList<>();
+        List<String> relatedResources = new ArrayList<>();
+        List<String> eoscRelatedServices = new ArrayList<>();
+        List<String> interoperabilityRecordIds = new ArrayList<>();
+        if (o != null) {
+            if (o instanceof DatasourceBundle) {
+                catalogueId = ((DatasourceBundle) o).getDatasource().getCatalogueId();
+                resourceProviders = ((DatasourceBundle) o).getDatasource().getResourceProviders();
+                requiredResources = ((DatasourceBundle) o).getDatasource().getRequiredResources();
+                relatedResources = ((DatasourceBundle) o).getDatasource().getRelatedResources();
+            }
+            if (o instanceof ServiceBundle) {
+                catalogueId = ((ServiceBundle) o).getService().getCatalogueId();
+                resourceProviders = ((ServiceBundle) o).getService().getResourceProviders();
+                requiredResources = ((ServiceBundle) o).getService().getRequiredResources();
+                relatedResources = ((ServiceBundle) o).getService().getRelatedResources();
+            }
+            if (o instanceof TrainingResourceBundle) {
+                catalogueId = ((TrainingResourceBundle) o).getTrainingResource().getCatalogueId();
+                resourceProviders = ((TrainingResourceBundle) o).getTrainingResource().getResourceProviders();
+                eoscRelatedServices = ((TrainingResourceBundle) o).getTrainingResource().getEoscRelatedServices();
+            }
+            if (o instanceof ResourceInteroperabilityRecordBundle) {
+                catalogueId = ((ResourceInteroperabilityRecordBundle) o).getResourceInteroperabilityRecord().getCatalogueId();
+                interoperabilityRecordIds = ((ResourceInteroperabilityRecordBundle) o).getResourceInteroperabilityRecord().getInteroperabilityRecordIds();
+            }
+            if (resourceProviders != null && !resourceProviders.isEmpty()) {
+                for (String resourceProvider : resourceProviders) {
+                    try {
+                        //FIXME: get(resourceTypeName, id) won't work as intended if there are 2 or more resources with the same ID
+                        ProviderBundle providerBundle = genericResourceService.get("provider", resourceProvider);
+                        if (!providerBundle.getMetadata().isPublished() && !providerBundle.getProvider().getCatalogueId().equals(catalogueId)) {
+                            throw new ValidationException("Cross Catalogue reference is prohibited. Found in field 'resourceProviders");
+                        }
+                    } catch (ResourceNotFoundException e) {}
+                }
+            }
+            if (requiredResources != null && !requiredResources.isEmpty()) {
+                for (String requiredResource : requiredResources) {
+                    try {
+                        ServiceBundle serviceBundle = genericResourceService.get("service", requiredResource);
+                        if (!serviceBundle.getMetadata().isPublished() && !serviceBundle.getService().getCatalogueId().equals(catalogueId)) {
+                            throw new ValidationException("Cross Catalogue reference is prohibited. Found in field 'requiredResources");
+                        }
+                    } catch (ResourceNotFoundException e) {
+                        try {
+                            DatasourceBundle datasourceBundle = genericResourceService.get("datasource", requiredResource);
+                            if (!datasourceBundle.getMetadata().isPublished() && !datasourceBundle.getDatasource().getCatalogueId().equals(catalogueId)) {
+                                throw new ValidationException("Cross Catalogue reference is prohibited. Found in field 'requiredResources");
+                            }
+                        } catch (ResourceNotFoundException j) {
+                            try {
+                                TrainingResourceBundle trainingResourceBundle = genericResourceService.get("training_resource", requiredResource);
+                                if (!trainingResourceBundle.getMetadata().isPublished() && !trainingResourceBundle.getTrainingResource().getCatalogueId().equals(catalogueId)) {
+                                    throw new ValidationException("Cross Catalogue reference is prohibited. Found in field 'requiredResources");
+                                }
+                            } catch (ResourceNotFoundException k) {
+                            }
+                        }
+                    }
+                }
+            }
+            if (relatedResources != null && !relatedResources.isEmpty()) {
+                for (String relatedResource : relatedResources) {
+                    try {
+                        ServiceBundle serviceBundle = genericResourceService.get("service", relatedResource);
+                        if (!serviceBundle.getMetadata().isPublished() && !serviceBundle.getService().getCatalogueId().equals(catalogueId)) {
+                            throw new ValidationException("Cross Catalogue reference is prohibited. Found in field 'relatedResources");
+                        }
+                    } catch (ResourceNotFoundException e) {
+                        try {
+                            DatasourceBundle datasourceBundle = genericResourceService.get("datasource", relatedResource);
+                            if (!datasourceBundle.getMetadata().isPublished() && !datasourceBundle.getDatasource().getCatalogueId().equals(catalogueId)) {
+                                throw new ValidationException("Cross Catalogue reference is prohibited. Found in field 'relatedResources");
+                            }
+                        } catch (ResourceNotFoundException j) {
+                            try {
+                                TrainingResourceBundle trainingResourceBundle = genericResourceService.get("training_resource", relatedResource);
+                                if (!trainingResourceBundle.getMetadata().isPublished() && !trainingResourceBundle.getTrainingResource().getCatalogueId().equals(catalogueId)) {
+                                    throw new ValidationException("Cross Catalogue reference is prohibited. Found in field 'relatedResources");
+                                }
+                            } catch (ResourceNotFoundException k) {
+                            }
+                        }
+                    }
+                }
+            }
+            if (eoscRelatedServices != null && !eoscRelatedServices.isEmpty()) {
+                for (String eoscRelatedService : eoscRelatedServices) {
+                    try {
+                        ServiceBundle serviceBundle = genericResourceService.get("service", eoscRelatedService);
+                        if (!serviceBundle.getMetadata().isPublished() && !serviceBundle.getService().getCatalogueId().equals(catalogueId)) {
+                            throw new ValidationException("Cross Catalogue reference is prohibited. Found in field 'eoscRelatedServices");
+                        }
+                    } catch (ResourceNotFoundException e) {
+                        try {
+                            DatasourceBundle datasourceBundle = genericResourceService.get("datasource", eoscRelatedService);
+                            if (!datasourceBundle.getMetadata().isPublished() && !datasourceBundle.getDatasource().getCatalogueId().equals(catalogueId)) {
+                                throw new ValidationException("Cross Catalogue reference is prohibited. Found in field 'eoscRelatedServices");
+                            }
+                        } catch (ResourceNotFoundException j) {
+                            try {
+                                TrainingResourceBundle trainingResourceBundle = genericResourceService.get("training_resource", eoscRelatedService);
+                                if (!trainingResourceBundle.getMetadata().isPublished() && !trainingResourceBundle.getTrainingResource().getCatalogueId().equals(catalogueId)) {
+                                    throw new ValidationException("Cross Catalogue reference is prohibited. Found in field 'eoscRelatedServices");
+                                }
+                            } catch (ResourceNotFoundException k) {
+                            }
+                        }
+                    }
+                }
+            }
+            if (interoperabilityRecordIds != null && !interoperabilityRecordIds.isEmpty()) {
+                for (String interoperabilityRecordId : interoperabilityRecordIds) {
+                    try {
+                        InteroperabilityRecordBundle interoperabilityRecordBundle = genericResourceService.get("interoperability_record", interoperabilityRecordId);
+                        if (!interoperabilityRecordBundle.getMetadata().isPublished() && !interoperabilityRecordBundle.getInteroperabilityRecord().getCatalogueId().equals(catalogueId)) {
+                            throw new ValidationException("Cross Catalogue reference is prohibited. Found in field 'interoperabilityRecordIds");
+                        }
+                    } catch (ResourceNotFoundException e) {}
+                }
+            }
+        }
+    }
+
+    public void suspendResource(Bundle<?> bundle, String catalogueId, boolean suspend, Authentication auth) {
+        if (bundle != null) {
+            bundle.setSuspended(suspend);
+
+            LoggingInfo loggingInfo;
+            List<LoggingInfo> loggingInfoList = returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(bundle, auth);
+
+            // Create SUSPEND LoggingInfo
+            if (suspend) {
+                loggingInfo = createLoggingInfo(auth, LoggingInfo.Types.UPDATE.getKey(), LoggingInfo.ActionType.SUSPENDED.getKey());
+            } else {
+                loggingInfo = createLoggingInfo(auth, LoggingInfo.Types.UPDATE.getKey(), LoggingInfo.ActionType.UNSUSPENDED.getKey());
+            }
+            loggingInfoList.add(loggingInfo);
+            bundle.setLoggingInfo(loggingInfoList);
+            // latestOnboardingInfo
+            bundle.setLatestUpdateInfo(loggingInfo);
+
+            String[] parts = bundle.getPayload().getClass().getName().split("\\.");
+            logger.info(String.format("User [%s] set 'suspended' of %s [%s]-[%s] to [%s]",
+                    User.of(auth).getEmail(), parts[3], catalogueId, bundle.getId(), suspend));
+        }
+    }
+
+    public void suspensionValidation(Bundle<?> bundle, String catalogueId, String providerId, boolean suspend, Authentication auth) {
+        if (bundle.getMetadata().isPublished()) {
+            throw new ValidationException("You cannot directly suspend a Public resource");
+        }
+
+        CatalogueBundle catalogueBundle = catalogueService.get(catalogueId, auth);
+        if (bundle instanceof ProviderBundle) {
+            if (catalogueBundle.isSuspended() && !suspend) {
+                throw new ValidationException("You cannot unsuspend a Provider when its Catalogue is suspended");
+            }
+        } else {
+            ProviderBundle providerBundle = providerService.get(catalogueId, providerId, auth);
+            if ((catalogueBundle.isSuspended() || providerBundle.isSuspended()) && !suspend) {
+                throw new ValidationException("You cannot unsuspend a Resource when its Provider and/or Catalogue are suspended");
+            }
+        }
+    }
+
+    public void auditResource(Bundle<?> bundle, String comment, LoggingInfo.ActionType actionType, Authentication auth) {
+        LoggingInfo loggingInfo;
+        List<LoggingInfo> loggingInfoList = returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(bundle, auth);
+        loggingInfo = LoggingInfo.createLoggingInfoEntry(auth, securityService.getRoleName(auth), LoggingInfo.Types.AUDIT.getKey(),
+                actionType.getKey(), comment);
+        loggingInfoList.add(loggingInfo);
+        bundle.setLoggingInfo(loggingInfoList);
+
+        // latestAuditInfo
+        bundle.setLatestAuditInfo(loggingInfo);
+    }
+
+    public List<LoggingInfo> returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(Bundle<?> bundle, Authentication auth) {
+        List<LoggingInfo> loggingInfoList = new ArrayList<>();
+        if (bundle.getLoggingInfo() != null && !bundle.getLoggingInfo().isEmpty()) {
+            loggingInfoList = bundle.getLoggingInfo();
+        } else {
+            loggingInfoList.add(createLoggingInfo(auth, LoggingInfo.Types.ONBOARD.getKey(),
+                    LoggingInfo.ActionType.REGISTERED.getKey()));
+        }
+        return loggingInfoList;
+    }
+
+    public LoggingInfo createLoggingInfo(Authentication auth, String type, String actionType) {
+        return LoggingInfo.createLoggingInfoEntry(auth, securityService.getRoleName(auth), type, actionType);
+    }
+
+    public LoggingInfo createLoggingInfo(Authentication auth, String type, String actionType, String comment) {
+        return LoggingInfo.createLoggingInfoEntry(auth, securityService.getRoleName(auth), type, actionType, comment);
+    }
+
+    public List<LoggingInfo> createActivationLoggingInfo(Bundle<?> bundle, boolean active, Authentication auth) {
+        List<LoggingInfo> loggingInfoList = returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(bundle, auth);
+        LoggingInfo loggingInfo;
+
+        // distinction between system's (onboarding stage) and user's activation
+        if (active){
+            try {
+                loggingInfo = createLoggingInfo(auth, LoggingInfo.Types.UPDATE.getKey(),
+                        LoggingInfo.ActionType.ACTIVATED.getKey());
+            } catch (InsufficientAuthenticationException e) {
+                loggingInfo = LoggingInfo.systemUpdateLoggingInfo(LoggingInfo.ActionType.ACTIVATED.getKey());
+            }
+        } else{
+            try {
+                loggingInfo = createLoggingInfo(auth, LoggingInfo.Types.UPDATE.getKey(),
+                        LoggingInfo.ActionType.DEACTIVATED.getKey());
+            } catch (InsufficientAuthenticationException e) {
+                loggingInfo = LoggingInfo.systemUpdateLoggingInfo(LoggingInfo.ActionType.DEACTIVATED.getKey());
+            }
+        }
+        loggingInfoList.add(loggingInfo);
+        return loggingInfoList;
+    }
+
+    public List<AlternativeIdentifier> createAlternativeIdentifierForPID(Bundle<?> bundle) {
+        if (bundle.getMetadata().isPublished()) {
+            String pid = ShortHashGenerator(bundle.getId());
+            AlternativeIdentifier alternativeIdentifier = new AlternativeIdentifier();
+            alternativeIdentifier.setType("PID");
+            alternativeIdentifier.setValue(pid);
+            if (bundle.getIdentifiers() != null) {
+                postPID(bundle.getId(), pid);
+                List<AlternativeIdentifier> alternativeIdentifiers = bundle.getIdentifiers().getAlternativeIdentifiers();
+                if (alternativeIdentifiers != null && !alternativeIdentifiers.isEmpty()) {
+                    alternativeIdentifiers.add(alternativeIdentifier);
+                    return alternativeIdentifiers;
+                } else {
+                    List<AlternativeIdentifier> newAlternativeIdentifiers = new ArrayList<>();
+                    newAlternativeIdentifiers.add(alternativeIdentifier);
+                    return newAlternativeIdentifiers;
+                }
+            } else {
+                throw new ValidationException("Public Resource with ID {} has null Identifiers (originalId)" + bundle.getId());
+            }
+        } else {
+            return null;
+        }
+    }
+
+    private String ShortHashGenerator(String resourceId) {
+        try {
+            // Create MD5 hash instance
+            MessageDigest md = MessageDigest.getInstance("MD5");
+
+            // Generate hash value for the input string
+            byte[] hashBytes = md.digest(resourceId.getBytes());
+
+            // Convert byte array to a hexadecimal string
+            StringBuilder sb = new StringBuilder();
+            for (byte hashByte : hashBytes) {
+                sb.append(Integer.toString((hashByte & 0xff) + 0x100, 16).substring(1));
+            }
+
+            // Return the first 8 characters of the hash string
+            return sb.substring(0, 8);
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private void postPID(String resourceId, String pid) {
+        String url = pidApi + pidPrefix + "/" + pid;
+        String payload = createPID(resourceId);
+        HttpURLConnection con;
+        try {
+            con = (HttpURLConnection) new URL(url).openConnection();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        try {
+            con.setRequestMethod("PUT");
+        } catch (ProtocolException e) {
+            throw new RuntimeException(e);
+        }
+        con.setRequestProperty("Content-Type", "application/json");
+        con.setRequestProperty("Authorization", pidAuth);
+        con.setDoOutput(true);
+        try (OutputStream os = con.getOutputStream()) {
+            byte[] input = payload.getBytes(StandardCharsets.UTF_8);
+            os.write(input, 0, input.length);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        try (BufferedReader br = new BufferedReader(
+                new InputStreamReader(con.getInputStream(), StandardCharsets.UTF_8))) {
+            StringBuilder response = new StringBuilder();
+            String responseLine;
+            while ((responseLine = br.readLine()) != null) {
+                response.append(responseLine.trim());
+            }
+            logger.info("Resource with ID [{}] has been posted with PID [{}]", resourceId, pid);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private String createPID(String resourceId) {
+        JSONObject data = new JSONObject();
+        JSONArray values = new JSONArray();
+        JSONObject hs_admin = new JSONObject();
+        JSONObject hs_admin_data = new JSONObject();
+        JSONObject hs_admin_data_value = new JSONObject();
+        JSONObject id = new JSONObject();
+        hs_admin_data_value.put("index", 301);
+        hs_admin_data_value.put("handle", pidPrefix + "/" + pidUsername);
+        hs_admin_data_value.put("permissions", "011111110011");
+        hs_admin_data_value.put("format", "admin");
+        hs_admin_data.put("value", hs_admin_data_value);
+        hs_admin_data.put("format", "admin");
+        hs_admin.put("index", 100);
+        hs_admin.put("type", "HS_ADMIN");
+        hs_admin.put("data", hs_admin_data);
+        values.put(hs_admin);
+        id.put("index", 1);
+        id.put("type", "id");
+        id.put("data", resourceId);
+        values.put(id);
+        data.put("values", values);
+        return data.toString();
+    }
+
+    public Bundle<?> getPublicResourceViaPID(String resourceType, String pid) {
+        List<String> resourceTypes = Arrays.asList("catalogue", "provider", "service", "datasource",
+                "training_resource", "interoperability_record", "resources");
+        if (!resourceTypes.contains(resourceType)) {
+            throw new ValidationException("The resource type you provided does not exist -> " + resourceType);
+        }
+        FacetFilter ff = new FacetFilter();
+        ff.setQuantity(10000);
+        ff.setResourceType(resourceType);
+        ff.addFilter("alternative_identifiers_values", pid);
+        Browsing<Bundle<?>> browsing = genericResourceService.getResults(ff);
+        if (browsing.getResults().size() > 0) {
+            return browsing.getResults().get(0);
+        }
+        return null;
+    }
+
+    public void blockResourceDeletion(String status, boolean isPublished) {
+        if (status.equals(vocabularyService.get("pending resource").getId())) {
+            throw new ValidationException("You cannot delete a Template that is under review");
+        }
+        if (isPublished){
+            throw new ValidationException("You cannot directly delete a Public Resource");
         }
     }
 }

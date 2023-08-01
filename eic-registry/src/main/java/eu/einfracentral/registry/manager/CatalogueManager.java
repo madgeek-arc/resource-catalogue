@@ -7,7 +7,7 @@ import eu.einfracentral.registry.service.*;
 import eu.einfracentral.service.IdCreator;
 import eu.einfracentral.service.RegistrationMailService;
 import eu.einfracentral.service.SecurityService;
-import eu.einfracentral.utils.FacetFilterUtils;
+import eu.einfracentral.utils.ProviderResourcesCommonMethods;
 import eu.einfracentral.validators.FieldValidator;
 import eu.openminted.registry.core.domain.Browsing;
 import eu.openminted.registry.core.domain.FacetFilter;
@@ -22,7 +22,6 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
-import org.springframework.jms.core.JmsTemplate;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.common.exceptions.UnauthorizedUserException;
 import org.springframework.stereotype.Service;
@@ -41,39 +40,45 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
     private final SecurityService securityService;
     private final VocabularyService vocabularyService;
     private final IdCreator idCreator;
-    private final JmsTemplate jmsTopicTemplate;
     private final FieldValidator fieldValidator;
     private final RegistrationMailService registrationMailService;
     private final DataSource dataSource;
-    private final ProviderService<ProviderBundle, Authentication> providerManager;
+    private final ProviderService<ProviderBundle, Authentication> providerService;
     private final ResourceBundleService<ServiceBundle> serviceBundleService;
     private final ResourceBundleService<DatasourceBundle> datasourceBundleService;
-    private final String columnsOfInterest = "catalogue_id, name, abbreviation, affiliations, tags, networks," +
-            "scientific_subdomains, hosting_legal_entity"; // variable with DB tables a keyword is been searched on
+    private final TrainingResourceService<TrainingResourceBundle> trainingResourceService;
+    private final InteroperabilityRecordService<InteroperabilityRecordBundle> interoperabilityRecordService;
+    private final ProviderResourcesCommonMethods commonMethods;
+    private final String columnsOfInterest = "catalogue_id, name"; // variable with DB tables a keyword is been searched on
 
     @Value("${project.catalogue.name}")
     private String catalogueName;
 
     @Autowired
-    public CatalogueManager(IdCreator idCreator, JmsTemplate jmsTopicTemplate, DataSource dataSource,
-                            @Lazy ProviderService<ProviderBundle, Authentication> providerManager,
+    public CatalogueManager(IdCreator idCreator, DataSource dataSource,
+                            @Lazy ProviderService<ProviderBundle, Authentication> providerService,
                             @Lazy ResourceBundleService<ServiceBundle> serviceBundleService,
                             @Lazy ResourceBundleService<DatasourceBundle> datasourceBundleService,
+                            @Lazy TrainingResourceService<TrainingResourceBundle> trainingResourceService,
+                            @Lazy InteroperabilityRecordService<InteroperabilityRecordBundle> interoperabilityRecordService,
                             @Lazy FieldValidator fieldValidator,
                             @Lazy SecurityService securityService,
                             @Lazy VocabularyService vocabularyService,
-                            @Lazy RegistrationMailService registrationMailService) {
+                            @Lazy RegistrationMailService registrationMailService,
+                            @Lazy ProviderResourcesCommonMethods commonMethods) {
         super(CatalogueBundle.class);
         this.securityService = securityService;
         this.vocabularyService = vocabularyService;
         this.idCreator = idCreator;
-        this.jmsTopicTemplate = jmsTopicTemplate;
         this.fieldValidator = fieldValidator;
         this.dataSource = dataSource;
         this.registrationMailService = registrationMailService;
-        this.providerManager = providerManager;
+        this.providerService = providerService;
         this.serviceBundleService = serviceBundleService;
         this.datasourceBundleService = datasourceBundleService;
+        this.trainingResourceService = trainingResourceService;
+        this.interoperabilityRecordService = interoperabilityRecordService;
+        this.commonMethods = commonMethods;
     }
 
     @Override
@@ -171,16 +176,13 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
         addAuthenticatedUser(catalogue.getCatalogue(), auth);
         validate(catalogue);
         catalogue.setMetadata(Metadata.createMetadata(User.of(auth).getFullName(), User.of(auth).getEmail()));
-        LoggingInfo loggingInfo = LoggingInfo.createLoggingInfoEntry(User.of(auth).getEmail(), User.of(auth).getFullName(), securityService.getRoleName(auth),
-                LoggingInfo.Types.ONBOARD.getKey(), LoggingInfo.ActionType.REGISTERED.getKey());
-        List<LoggingInfo> loggingInfoList = new ArrayList<>();
-        loggingInfoList.add((loggingInfo));
+        List<LoggingInfo> loggingInfoList = commonMethods.returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(catalogue, auth);
         catalogue.setLoggingInfo(loggingInfoList);
         catalogue.setActive(false);
         catalogue.setStatus(vocabularyService.get("pending catalogue").getId());
 
         // latestOnboardingInfo
-        catalogue.setLatestOnboardingInfo(loggingInfo);
+        catalogue.setLatestOnboardingInfo(loggingInfoList.get(0));
 
         if (catalogue.getCatalogue().getParticipatingCountries() != null && !catalogue.getCatalogue().getParticipatingCountries().isEmpty()){
             catalogue.getCatalogue().setParticipatingCountries(sortCountries(catalogue.getCatalogue().getParticipatingCountries()));
@@ -207,16 +209,10 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
 
         validate(catalogue);
         catalogue.setMetadata(Metadata.updateMetadata(catalogue.getMetadata(), User.of(auth).getFullName(), User.of(auth).getEmail()));
-        List<LoggingInfo> loggingInfoList = new ArrayList<>();
-        LoggingInfo loggingInfo;
-        loggingInfo = LoggingInfo.createLoggingInfoEntry(User.of(auth).getEmail(), User.of(auth).getFullName(), securityService.getRoleName(auth),
-                LoggingInfo.Types.UPDATE.getKey(), LoggingInfo.ActionType.UPDATED.getKey(), comment);
-        if (catalogue.getLoggingInfo() != null) {
-            loggingInfoList = catalogue.getLoggingInfo();
-            loggingInfoList.add(loggingInfo);
-        } else {
-            loggingInfoList.add(loggingInfo);
-        }
+        List<LoggingInfo> loggingInfoList = commonMethods.returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(catalogue, auth);
+        LoggingInfo loggingInfo = commonMethods.createLoggingInfo(auth, LoggingInfo.Types.UPDATE.getKey(),
+                LoggingInfo.ActionType.UPDATED.getKey(), comment);
+        loggingInfoList.add(loggingInfo);
         catalogue.getCatalogue().setParticipatingCountries(sortCountries(catalogue.getCatalogue().getParticipatingCountries()));
         catalogue.setLoggingInfo(loggingInfoList);
 
@@ -272,13 +268,19 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
 
         // Delete Catalogue along with all its related Resources
         logger.info("Deleting all Catalogue's Providers...");
-        deleteCatalogueResources(id, providerManager, securityService.getAdminAccess());
+        deleteCatalogueResources(id, providerService, securityService.getAdminAccess());
 
         logger.info("Deleting all Catalogue's Services...");
         deleteCatalogueResources(id, serviceBundleService, securityService.getAdminAccess());
 
         logger.info("Deleting all Catalogue's Datasources...");
         deleteCatalogueResources(id, datasourceBundleService, securityService.getAdminAccess());
+
+        logger.info("Deleting all Catalogue's Training Resources...");
+        deleteCatalogueResources(id, trainingResourceService, securityService.getAdminAccess());
+
+        logger.info("Deleting all Catalogue's Interoperability Records...");
+        deleteCatalogueResources(id, interoperabilityRecordService, securityService.getAdminAccess());
 
         logger.info("Deleting Catalogue...");
         super.delete(catalogueBundle);
@@ -416,45 +418,33 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
         logger.trace("verifyCatalogue with id: '{}' | status -> '{}' | active -> '{}'", id, status, active);
         CatalogueBundle catalogue = get(id);
         catalogue.setStatus(vocabularyService.get(status).getId());
-        LoggingInfo loggingInfo;
-        List<LoggingInfo> loggingInfoList = new ArrayList<>();
+        List<LoggingInfo> loggingInfoList = commonMethods.returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(catalogue, auth);
+        LoggingInfo loggingInfo = null;
 
-        if (catalogue.getLoggingInfo() != null) {
-            loggingInfoList = catalogue.getLoggingInfo();
-        } else {
-            LoggingInfo oldProviderRegistration = LoggingInfo.createLoggingInfoEntry(User.of(auth).getEmail(), User.of(auth).getFullName(), securityService.getRoleName(auth),
-                    LoggingInfo.Types.ONBOARD.getKey(), LoggingInfo.ActionType.REGISTERED.getKey());
-            loggingInfoList.add(oldProviderRegistration);
-        }
         switch (status) {
             case "approved catalogue":
                 if (active == null) {
                     active = true;
                 }
                 catalogue.setActive(active);
-                loggingInfo = LoggingInfo.createLoggingInfoEntry(User.of(auth).getEmail(), User.of(auth).getFullName(), securityService.getRoleName(auth),
-                        LoggingInfo.Types.ONBOARD.getKey(), LoggingInfo.ActionType.APPROVED.getKey());
-                loggingInfoList.add(loggingInfo);
-                loggingInfoList.sort(Comparator.comparing(LoggingInfo::getDate));
-                catalogue.setLoggingInfo(loggingInfoList);
-
-                // latestOnboardingInfo
-                catalogue.setLatestOnboardingInfo(loggingInfo);
+                loggingInfo = commonMethods.createLoggingInfo(auth, LoggingInfo.Types.ONBOARD.getKey(),
+                        LoggingInfo.ActionType.APPROVED.getKey());
                 break;
             case "rejected catalogue":
                 catalogue.setActive(false);
-                loggingInfo = LoggingInfo.createLoggingInfoEntry(User.of(auth).getEmail(), User.of(auth).getFullName(), securityService.getRoleName(auth),
-                        LoggingInfo.Types.ONBOARD.getKey(), LoggingInfo.ActionType.REJECTED.getKey());
-                loggingInfoList.add(loggingInfo);
-                loggingInfoList.sort(Comparator.comparing(LoggingInfo::getDate));
-                catalogue.setLoggingInfo(loggingInfoList);
-
-                // latestOnboardingInfo
-                catalogue.setLatestOnboardingInfo(loggingInfo);
+                loggingInfo = commonMethods.createLoggingInfo(auth, LoggingInfo.Types.ONBOARD.getKey(),
+                        LoggingInfo.ActionType.REJECTED.getKey());
                 break;
             default:
                 break;
         }
+        loggingInfoList.add(loggingInfo);
+        loggingInfoList.sort(Comparator.comparing(LoggingInfo::getDate));
+        catalogue.setLoggingInfo(loggingInfoList);
+
+        // latestOnboardingInfo
+        catalogue.setLatestOnboardingInfo(loggingInfo);
+
         logger.info("Verifying Catalogue: {}", catalogue);
         return super.update(catalogue, auth);
     }
@@ -466,45 +456,29 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
                 catalogue.getStatus().equals(vocabularyService.get("rejected catalogue").getId())) && !catalogue.isActive()){
             throw new ValidationException(String.format("You cannot activate this Catalogue, because it's Inactive with status = [%s]", catalogue.getStatus()));
         }
+        List<LoggingInfo> loggingInfoList = commonMethods.returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(catalogue, auth);
         LoggingInfo loggingInfo;
-        List<LoggingInfo> loggingInfoList = new ArrayList<>();
-
-        if (catalogue.getLoggingInfo() != null) {
-            loggingInfoList = catalogue.getLoggingInfo();
-        } else {
-            LoggingInfo oldProviderRegistration = LoggingInfo.createLoggingInfoEntry(User.of(auth).getEmail(), User.of(auth).getFullName(), securityService.getRoleName(auth),
-                    LoggingInfo.Types.ONBOARD.getKey(), LoggingInfo.ActionType.REGISTERED.getKey());
-            loggingInfoList.add(oldProviderRegistration);
-        }
 
         if (active == null) {
             active = false;
         }
-
         catalogue.setActive(active);
         if (!active) {
             loggingInfo = LoggingInfo.systemUpdateLoggingInfo(LoggingInfo.ActionType.DEACTIVATED.getKey());
-            loggingInfoList.add(loggingInfo);
-            catalogue.setLoggingInfo(loggingInfoList);
-
-            // latestOnboardingInfo
-            catalogue.setLatestUpdateInfo(loggingInfo);
-
         } else {
             loggingInfo = LoggingInfo.systemUpdateLoggingInfo(LoggingInfo.ActionType.ACTIVATED.getKey());
-            loggingInfoList.add(loggingInfo);
-            catalogue.setLoggingInfo(loggingInfoList);
-
-            // latestOnboardingInfo
-            catalogue.setLatestUpdateInfo(loggingInfo);
         }
+        loggingInfoList.add(loggingInfo);
+        catalogue.setLoggingInfo(loggingInfoList);
+
+        // latestOnboardingInfo
+        catalogue.setLatestUpdateInfo(loggingInfo);
 
         return super.update(catalogue, auth);
     }
 
     public List<Map<String, Object>> createQueryForCatalogueFilters (FacetFilter ff, String orderDirection, String orderField){
         String keyword = ff.getKeyword();
-        Map<String, Object> order = ff.getOrderBy();
         NamedParameterJdbcTemplate namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(dataSource);
         MapSqlParameterSource in = new MapSqlParameterSource();
 
@@ -516,17 +490,28 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
         }
 
         boolean firstTime = true;
-        boolean hasStatus = false;
         for (Map.Entry<String, Object> entry : ff.getFilter().entrySet()) {
             in.addValue(entry.getKey(), entry.getValue());
             if (entry.getKey().equals("status")) {
-                hasStatus = true;
                 if (firstTime) {
                     query += String.format(" (status=%s)", entry.getValue().toString());
                     firstTime = false;
+                } else {
+                    query += String.format(" AND (status=%s)", entry.getValue().toString());
                 }
                 if (query.contains(",")){
                     query = query.replaceAll(", ", "' OR status='");
+                }
+            }
+            if (entry.getKey().equals("suspended")) {
+                if (firstTime) {
+                    query += String.format(" (suspended=%s)", entry.getValue().toString());
+                    firstTime = false;
+                } else {
+                    query += String.format(" AND (suspended=%s)", entry.getValue().toString());
+                }
+                if (query.contains(",")){
+                    query = query.replaceAll(", ", "' OR suspended='");
                 }
             }
         }
@@ -610,10 +595,39 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
         return catalogueBundlePaging;
     }
 
-    public List<String> getAllCatalogueIds(){
+    @Override
+    public Paging<ProviderBundle> getAllCatalogueProviders(String catalogueId, Authentication auth) {
         FacetFilter ff = new FacetFilter();
-        ff.setQuantity(1000);
-        List<String> allCatalogueIds = getAll(ff, null).getResults().stream().map(CatalogueBundle::getId).collect(Collectors.toList());
-        return allCatalogueIds;
+        ff.addFilter("catalogue_id", catalogueId);
+        ff.setQuantity(maxQuantity);
+        ff.addOrderBy("name", "asc");
+        return providerService.getAll(ff, auth);
+    }
+
+    public CatalogueBundle suspend(String catalogueId, boolean suspend, Authentication auth) {
+        CatalogueBundle catalogueBundle = get(catalogueId, auth);
+
+        // Suspend Catalogue
+        commonMethods.suspendResource(catalogueBundle, catalogueId, suspend, auth);
+        super.update(catalogueBundle, auth);
+
+        // Suspend Catalogue's resources
+        List<ProviderBundle> providers = providerService.getAll(createFacetFilter(catalogueId), auth).getResults();
+
+        if (providers != null && !providers.isEmpty()) {
+            for (ProviderBundle providerBundle : providers) {
+                providerService.suspend(providerBundle.getId(), catalogueId, suspend, auth);
+            }
+        }
+
+        return catalogueBundle;
+    }
+
+    private FacetFilter createFacetFilter(String catalogueId){
+        FacetFilter ff = new FacetFilter();
+        ff.setQuantity(10000);
+        ff.addFilter("published", false);
+        ff.addFilter("catalogue_id", catalogueId);
+        return ff;
     }
 }

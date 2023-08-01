@@ -2,9 +2,11 @@ package eu.einfracentral.registry.manager;
 
 import eu.einfracentral.domain.DatasourceBundle;
 import eu.einfracentral.domain.Identifiers;
+import eu.einfracentral.domain.ResourceExtras;
 import eu.einfracentral.exception.ResourceException;
 import eu.einfracentral.exception.ResourceNotFoundException;
 import eu.einfracentral.service.SecurityService;
+import eu.einfracentral.utils.ProviderResourcesCommonMethods;
 import eu.openminted.registry.core.domain.Browsing;
 import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.service.ResourceCRUDService;
@@ -27,12 +29,15 @@ public class PublicDatasourceManager extends AbstractPublicResourceManager<Datas
     private static final Logger logger = LogManager.getLogger(PublicDatasourceManager.class);
     private final JmsTemplate jmsTopicTemplate;
     private final SecurityService securityService;
+    private final ProviderResourcesCommonMethods commonMethods;
 
     @Autowired
-    public PublicDatasourceManager(JmsTemplate jmsTopicTemplate, SecurityService securityService) {
+    public PublicDatasourceManager(JmsTemplate jmsTopicTemplate, SecurityService securityService,
+                                   ProviderResourcesCommonMethods commonMethods) {
         super(DatasourceBundle.class);
         this.jmsTopicTemplate = jmsTopicTemplate;
         this.securityService = securityService;
+        this.commonMethods = commonMethods;
     }
 
     @Override
@@ -65,14 +70,16 @@ public class PublicDatasourceManager extends AbstractPublicResourceManager<Datas
     @Override
     public DatasourceBundle add(DatasourceBundle datasourceBundle, Authentication authentication) {
         String lowerLevelResourceId = datasourceBundle.getId();
-        datasourceBundle.setIdentifiers(Identifiers.createIdentifier(datasourceBundle.getId()));
+        Identifiers.createOriginalId(datasourceBundle);
         datasourceBundle.setId(String.format("%s.%s", datasourceBundle.getDatasource().getCatalogueId(), datasourceBundle.getId()));
 
         // sets public ids to resource organisation, resource providers and related/required resources
         updateResourceIdsToPublic(datasourceBundle);
 
         datasourceBundle.getMetadata().setPublished(true);
-        datasourceBundle.getResourceExtras().setServiceType("service_type-datasource");
+        // create PID and set it as Alternative Identifier
+        datasourceBundle.getIdentifiers().setAlternativeIdentifiers(commonMethods.createAlternativeIdentifierForPID(datasourceBundle));
+        createResourceExtras(datasourceBundle);
         DatasourceBundle ret;
         logger.info(String.format("Datasource [%s] is being published with id [%s]", lowerLevelResourceId, datasourceBundle.getId()));
         ret = super.add(datasourceBundle, null);
@@ -114,6 +121,16 @@ public class PublicDatasourceManager extends AbstractPublicResourceManager<Datas
             logger.info("Sending JMS with topic 'datasource.delete'");
             jmsTopicTemplate.convertAndSend("datasource.delete", publicDatasourceBundle);
         } catch (ResourceException | ResourceNotFoundException ignore){
+        }
+    }
+
+    private void createResourceExtras(DatasourceBundle datasourceBundle){
+        if (datasourceBundle.getResourceExtras() == null){
+            ResourceExtras resourceExtras = new ResourceExtras();
+            resourceExtras.setServiceType("service_type-datasource");
+            datasourceBundle.setResourceExtras(resourceExtras);
+        } else {
+            datasourceBundle.getResourceExtras().setServiceType("service_type-datasource");
         }
     }
 }

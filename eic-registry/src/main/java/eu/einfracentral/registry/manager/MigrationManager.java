@@ -26,6 +26,7 @@ public class MigrationManager implements MigrationService {
     private final DatasourceBundleManager datasourceBundleManager;
     private final PublicDatasourceManager publicDatasourceManager;
     private final TrainingResourceManager trainingResourceManager;
+    private final InteroperabilityRecordManager interoperabilityRecordManager;
     private final PublicTrainingResourceManager publicTrainingResourceManager;
     private final ProviderManager providerService;
     private final ResourceService resourceService;
@@ -44,7 +45,8 @@ public class MigrationManager implements MigrationService {
     @Autowired
     public MigrationManager(ServiceBundleManager serviceBundleManager, PublicServiceManager publicServiceManager,
                             DatasourceBundleManager datasourceBundleManager, PublicDatasourceManager publicDatasourceManager,
-                            TrainingResourceManager trainingResourceManager, PublicTrainingResourceManager publicTrainingResourceManager,
+                            TrainingResourceManager trainingResourceManager, InteroperabilityRecordManager interoperabilityRecordManager,
+                            PublicTrainingResourceManager publicTrainingResourceManager,
                             ProviderManager providerService, ResourceService resourceService,
                             ResourceInteroperabilityRecordManager resourceInteroperabilityRecordManager,
                             PublicResourceInteroperabilityRecordManager publicResourceInteroperabilityRecordManager,
@@ -55,6 +57,7 @@ public class MigrationManager implements MigrationService {
         this.datasourceBundleManager = datasourceBundleManager;
         this.publicDatasourceManager = publicDatasourceManager;
         this.trainingResourceManager = trainingResourceManager;
+        this.interoperabilityRecordManager = interoperabilityRecordManager;
         this.publicTrainingResourceManager = publicTrainingResourceManager;
         this.providerService = providerService;
         this.resourceService = resourceService;
@@ -99,12 +102,13 @@ public class MigrationManager implements MigrationService {
         changeServiceCatalogue(providerId, catalogueId, newCatalogueId, authentication);
         changeDatasourceCatalogue(providerId, catalogueId, newCatalogueId, authentication);
         changeTrainingResourceCatalogue(providerId, catalogueId, newCatalogueId, authentication);
+        changeInteroperabilityRecordCatalogue(providerId, catalogueId, newCatalogueId, authentication);
 
         return providerBundle;
     }
 
     private void changeServiceCatalogue(String providerId, String catalogueId, String newCatalogueId, Authentication authentication) {
-        List<ServiceBundle> serviceBundles = serviceBundleManager.getResourceBundles(providerId, authentication);
+        List<ServiceBundle> serviceBundles = serviceBundleManager.getResourceBundles(catalogueId, providerId, authentication).getResults();
         // Services
         String jmsTopic = "service.update";
         boolean sendJMS;
@@ -123,14 +127,14 @@ public class MigrationManager implements MigrationService {
             logger.debug("Migrating Service: {} of Catalogue: {} to Catalogue: {}", serviceBundle.getId(), catalogueId, newCatalogueId);
             resourceService.updateResource(resource);
             if (sendJMS){
-                logger.info("Sending JMS with topic 'service.update'");
+                logger.info(String.format("Sending JMS with topic '%s'", jmsTopic));
                 jmsTopicTemplate.convertAndSend(jmsTopic, serviceBundle);
             }
         }
     }
 
     private void changeDatasourceCatalogue(String providerId, String catalogueId, String newCatalogueId, Authentication authentication) {
-        List<DatasourceBundle> datasourceBundles = datasourceBundleManager.getResourceBundles(providerId, authentication);
+        List<DatasourceBundle> datasourceBundles = datasourceBundleManager.getResourceBundles(catalogueId, providerId, authentication).getResults();
         // Datasources
         String jmsTopic = "datasource.update";
         boolean sendJMS;
@@ -149,14 +153,14 @@ public class MigrationManager implements MigrationService {
             logger.debug("Migrating Datasource: {} of Catalogue: {} to Catalogue: {}", datasourceBundle.getId(), catalogueId, newCatalogueId);
             resourceService.updateResource(resource);
             if (sendJMS){
-                logger.info("Sending JMS with topic 'datasource.update'");
+                logger.info(String.format("Sending JMS with topic '%s'", jmsTopic));
                 jmsTopicTemplate.convertAndSend(jmsTopic, datasourceBundle);
             }
         }
     }
 
     private void changeTrainingResourceCatalogue(String providerId, String catalogueId, String newCatalogueId, Authentication authentication) {
-        List<TrainingResourceBundle> trainingResourceBundles = trainingResourceManager.getResourceBundles(providerId, authentication);
+        List<TrainingResourceBundle> trainingResourceBundles = trainingResourceManager.getResourceBundles(catalogueId, providerId, authentication).getResults();
         // Training Resources
         String jmsTopic = "training_resource.update";
         boolean sendJMS;
@@ -175,8 +179,33 @@ public class MigrationManager implements MigrationService {
             logger.debug("Migrating Training Resource: {} of Catalogue: {} to Catalogue: {}", trainingResourceBundle.getId(), catalogueId, newCatalogueId);
             resourceService.updateResource(resource);
             if (sendJMS){
-                logger.info("Sending JMS with topic 'training_resource.update'");
+                logger.info(String.format("Sending JMS with topic '%s'", jmsTopic));
                 jmsTopicTemplate.convertAndSend(jmsTopic, trainingResourceBundle);
+            }
+        }
+    }
+
+    private void changeInteroperabilityRecordCatalogue(String providerId, String catalogueId, String newCatalogueId, Authentication authentication) {
+        List<InteroperabilityRecordBundle> interoperabilityRecordBundles = interoperabilityRecordManager.getInteroperabilityRecordBundles(catalogueId, providerId, authentication).getResults();
+        String jmsTopic = "interoperability_record.update";
+        boolean sendJMS;
+        for (InteroperabilityRecordBundle interoperabilityRecordBundle : interoperabilityRecordBundles) {
+            sendJMS = false;
+            String oldResourceId = interoperabilityRecordBundle.getId();
+            if (interoperabilityRecordBundle.getInteroperabilityRecord().getId().startsWith(catalogueId)) {
+                // if Interoperability Record is Public, update its id
+                sendJMS = true;
+                String id = interoperabilityRecordBundle.getId().replaceFirst(catalogueId, newCatalogueId);
+                interoperabilityRecordBundle.getInteroperabilityRecord().setId(id);
+            }
+            interoperabilityRecordBundle.getInteroperabilityRecord().setCatalogueId(newCatalogueId);
+            Resource resource = interoperabilityRecordManager.getResource(oldResourceId, catalogueId);
+            resource.setPayload(interoperabilityRecordManager.serialize(interoperabilityRecordBundle));
+            logger.debug("Migrating Interoperability Record: {} of Catalogue: {} to Catalogue: {}", interoperabilityRecordBundle.getId(), catalogueId, newCatalogueId);
+            resourceService.updateResource(resource);
+            if (sendJMS){
+                logger.info(String.format("Sending JMS with topic '%s'", jmsTopic));
+                jmsTopicTemplate.convertAndSend(jmsTopic, interoperabilityRecordBundle);
             }
         }
     }

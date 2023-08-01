@@ -8,7 +8,6 @@ import eu.einfracentral.registry.service.*;
 import eu.einfracentral.service.IdCreator;
 import eu.einfracentral.service.RegistrationMailService;
 import eu.einfracentral.service.SecurityService;
-import eu.einfracentral.utils.FacetFilterUtils;
 import eu.einfracentral.utils.ProviderResourcesCommonMethods;
 import eu.openminted.registry.core.domain.Browsing;
 import eu.openminted.registry.core.domain.FacetFilter;
@@ -93,6 +92,7 @@ public class ServiceBundleManager extends AbstractResourceBundleManager<ServiceB
         } else { // add provider from external catalogue
             commonMethods.checkCatalogueIdConsistency(serviceBundle, catalogueId);
         }
+        commonMethods.checkRelatedResourceIDsConsistency(serviceBundle);
 
         ProviderBundle providerBundle = providerService.get(serviceBundle.getService().getCatalogueId(), serviceBundle.getService().getResourceOrganisation(), auth);
         if (providerBundle == null) {
@@ -121,19 +121,16 @@ public class ServiceBundleManager extends AbstractResourceBundleManager<ServiceB
             serviceBundle.setMetadata(Metadata.createMetadata(User.of(auth).getFullName()));
         }
 
-        List<LoggingInfo> loggingInfoList = new ArrayList<>();
-        LoggingInfo loggingInfo = LoggingInfo.createLoggingInfoEntry(User.of(auth).getEmail(), User.of(auth).getFullName(), securityService.getRoleName(auth),
-                LoggingInfo.Types.ONBOARD.getKey(), LoggingInfo.ActionType.REGISTERED.getKey());
-        loggingInfoList.add(loggingInfo);
+        List<LoggingInfo> loggingInfoList = commonMethods.returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(serviceBundle, auth);
 
         // latestOnboardingInfo
-        serviceBundle.setLatestOnboardingInfo(loggingInfo);
+        serviceBundle.setLatestOnboardingInfo(loggingInfoList.get(0));
 
         // resource status & extra loggingInfo for Approval
         if (providerBundle.getTemplateStatus().equals("approved template")) {
             serviceBundle.setStatus(vocabularyService.get("approved resource").getId());
-            LoggingInfo loggingInfoApproved = LoggingInfo.createLoggingInfoEntry(User.of(auth).getEmail(), User.of(auth).getFullName(), securityService.getRoleName(auth),
-                    LoggingInfo.Types.ONBOARD.getKey(), LoggingInfo.ActionType.APPROVED.getKey());
+            LoggingInfo loggingInfoApproved = commonMethods.createLoggingInfo(auth, LoggingInfo.Types.ONBOARD.getKey(),
+                    LoggingInfo.ActionType.APPROVED.getKey());
             loggingInfoList.add(loggingInfoApproved);
 
             // latestOnboardingInfo
@@ -186,6 +183,7 @@ public class ServiceBundleManager extends AbstractResourceBundleManager<ServiceB
         } else {
             commonMethods.checkCatalogueIdConsistency(serviceBundle, catalogueId);
         }
+        commonMethods.checkRelatedResourceIDsConsistency(serviceBundle);
 
         logger.trace("User '{}' is attempting to update the Service with id '{}' of the Catalogue '{}'", auth, serviceBundle.getService().getId(), serviceBundle.getService().getCatalogueId());
         validate(serviceBundle);
@@ -210,39 +208,27 @@ public class ServiceBundleManager extends AbstractResourceBundleManager<ServiceB
 //        serviceBundle.setIdentifiers(existingService.getIdentifiers());
         serviceBundle.setMigrationStatus(existingService.getMigrationStatus());
 
+        List<LoggingInfo> loggingInfoList = commonMethods.returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(existingService, auth);
         LoggingInfo loggingInfo;
-        List<LoggingInfo> loggingInfoList = new ArrayList<>();
 
         // update VS version update
         if (((serviceBundle.getService().getVersion() == null) && (existingService.getService().getVersion() == null)) ||
                 (serviceBundle.getService().getVersion().equals(existingService.getService().getVersion()))) {
-            loggingInfo = LoggingInfo.createLoggingInfoEntry(user.getEmail(), user.getFullName(), securityService.getRoleName(auth), LoggingInfo.Types.UPDATE.getKey(),
+            loggingInfo = commonMethods.createLoggingInfo(auth, LoggingInfo.Types.UPDATE.getKey(),
                     LoggingInfo.ActionType.UPDATED.getKey(), comment);
-            if (existingService.getLoggingInfo() != null) {
-                loggingInfoList = existingService.getLoggingInfo();
-                loggingInfoList.add(loggingInfo);
-                loggingInfoList.sort(Comparator.comparing(LoggingInfo::getDate));
-            } else {
-                loggingInfoList.add(loggingInfo);
-            }
         } else {
-            loggingInfo = LoggingInfo.createLoggingInfoEntry(User.of(auth).getEmail(), user.getFullName(), securityService.getRoleName(auth), LoggingInfo.Types.UPDATE.getKey(),
+            loggingInfo = commonMethods.createLoggingInfo(auth, LoggingInfo.Types.UPDATE.getKey(),
                     LoggingInfo.ActionType.UPDATED_VERSION.getKey(), comment);
-            if (existingService.getLoggingInfo() != null) {
-                loggingInfoList = existingService.getLoggingInfo();
-                loggingInfoList.add(loggingInfo);
-                loggingInfoList.sort(Comparator.comparing(LoggingInfo::getDate));
-            } else {
-                loggingInfoList.add(loggingInfo);
-            }
         }
+        loggingInfoList.add(loggingInfo);
+        loggingInfoList.sort(Comparator.comparing(LoggingInfo::getDate));
         serviceBundle.setLoggingInfo(loggingInfoList);
 
         // latestUpdateInfo
         serviceBundle.setLatestUpdateInfo(loggingInfo);
-        serviceBundle.setActive(existingService.isActive());
 
-        // set status
+        // set active/status
+        serviceBundle.setActive(existingService.isActive());
         serviceBundle.setStatus(existingService.getStatus());
 
         // if Resource's status = "rejected resource", update to "pending resource" & Provider templateStatus to "pending template"
@@ -315,10 +301,7 @@ public class ServiceBundleManager extends AbstractResourceBundleManager<ServiceB
 
     @Override
     public void delete(ServiceBundle serviceBundle) {
-        // block Public Service deletion
-        if (serviceBundle.getMetadata().isPublished()){
-            throw new ValidationException("You cannot directly delete a Public Service");
-        }
+        commonMethods.blockResourceDeletion(serviceBundle.getStatus(), serviceBundle.getMetadata().isPublished());
         logger.info("Deleting Service: {}", serviceBundle);
         super.delete(serviceBundle);
     }
@@ -344,18 +327,9 @@ public class ServiceBundleManager extends AbstractResourceBundleManager<ServiceB
         }
         serviceBundle.setStatus(vocabularyService.get(status).getId());
         ProviderBundle resourceProvider = providerService.get(serviceBundle.getService().getCatalogueId(), serviceBundle.getService().getResourceOrganisation(), auth);
+        List<LoggingInfo> loggingInfoList = commonMethods.returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(serviceBundle, auth);
         LoggingInfo loggingInfo;
-        List<LoggingInfo> loggingInfoList = new ArrayList<>();
 
-        User user = User.of(auth);
-
-        if (serviceBundle.getLoggingInfo() != null) {
-            loggingInfoList = serviceBundle.getLoggingInfo();
-        } else {
-            LoggingInfo oldProviderRegistration = LoggingInfo.createLoggingInfoEntry(user.getEmail(), user.getFullName(), securityService.getRoleName(auth),
-                    LoggingInfo.Types.ONBOARD.getKey(), LoggingInfo.ActionType.REGISTERED.getKey());
-            loggingInfoList.add(oldProviderRegistration);
-        }
         switch (status) {
             case "pending resource":
                 // update Provider's templateStatus
@@ -363,8 +337,8 @@ public class ServiceBundleManager extends AbstractResourceBundleManager<ServiceB
                 break;
             case "approved resource":
                 serviceBundle.setActive(active);
-                loggingInfo = LoggingInfo.createLoggingInfoEntry(user.getEmail(), user.getFullName(), securityService.getRoleName(auth),
-                        LoggingInfo.Types.ONBOARD.getKey(), LoggingInfo.ActionType.APPROVED.getKey());
+                loggingInfo = commonMethods.createLoggingInfo(auth, LoggingInfo.Types.ONBOARD.getKey(),
+                        LoggingInfo.ActionType.APPROVED.getKey());
                 loggingInfoList.add(loggingInfo);
                 loggingInfoList.sort(Comparator.comparing(LoggingInfo::getDate));
                 serviceBundle.setLoggingInfo(loggingInfoList);
@@ -377,8 +351,8 @@ public class ServiceBundleManager extends AbstractResourceBundleManager<ServiceB
                 break;
             case "rejected resource":
                 serviceBundle.setActive(false);
-                loggingInfo = LoggingInfo.createLoggingInfoEntry(user.getEmail(), user.getFullName(), securityService.getRoleName(auth),
-                        LoggingInfo.Types.ONBOARD.getKey(), LoggingInfo.ActionType.REJECTED.getKey());
+                loggingInfo = commonMethods.createLoggingInfo(auth, LoggingInfo.Types.ONBOARD.getKey(),
+                        LoggingInfo.ActionType.REJECTED.getKey());
                 loggingInfoList.add(loggingInfo);
                 loggingInfoList.sort(Comparator.comparing(LoggingInfo::getDate));
                 serviceBundle.setLoggingInfo(loggingInfoList);
@@ -392,6 +366,7 @@ public class ServiceBundleManager extends AbstractResourceBundleManager<ServiceB
             default:
                 break;
         }
+
         logger.info("Verifying Resource: {}", serviceBundle);
         try {
             providerService.update(resourceProvider, auth);
@@ -421,59 +396,27 @@ public class ServiceBundleManager extends AbstractResourceBundleManager<ServiceB
         }
         service.setActive(active);
 
-        User user = User.of(auth);
-        List<LoggingInfo> loggingInfoList = new ArrayList<>();
-        LoggingInfo loggingInfo;
-        if (active) {
-            loggingInfo = LoggingInfo.createLoggingInfoEntry(user.getEmail(), user.getFullName(), securityService.getRoleName(auth),
-                    LoggingInfo.Types.UPDATE.getKey(), LoggingInfo.ActionType.ACTIVATED.getKey());
-        } else {
-            loggingInfo = LoggingInfo.createLoggingInfoEntry(user.getEmail(), user.getFullName(), securityService.getRoleName(auth),
-                    LoggingInfo.Types.UPDATE.getKey(), LoggingInfo.ActionType.DEACTIVATED.getKey());
-        }
-        if (service.getLoggingInfo() != null) {
-            loggingInfoList = service.getLoggingInfo();
-            loggingInfoList.add(loggingInfo);
-        } else {
-            LoggingInfo oldServiceRegistration = LoggingInfo.createLoggingInfoEntry(user.getEmail(), user.getFullName(), securityService.getRoleName(auth),
-                    LoggingInfo.Types.ONBOARD.getKey(), LoggingInfo.ActionType.REGISTERED.getKey());
-            loggingInfoList.add(oldServiceRegistration);
-            loggingInfoList.add(loggingInfo);
-        }
+        List<LoggingInfo> loggingInfoList = commonMethods.createActivationLoggingInfo(service, active, auth);
         loggingInfoList.sort(Comparator.comparing(LoggingInfo::getDate));
         service.setLoggingInfo(loggingInfoList);
 
         // latestOnboardingInfo
-        service.setLatestUpdateInfo(loggingInfo);
+        service.setLatestUpdateInfo(loggingInfoList.get(0)); //TODO: check this
 
         this.update(service, auth);
         return service;
     }
 
-    public ServiceBundle auditResource(String serviceId, String comment, LoggingInfo.ActionType actionType, Authentication auth) {
-        ServiceBundle service = get(serviceId, catalogueName);
-        User user = User.of(auth);
-        LoggingInfo loggingInfo; // TODO: extract method
-        List<LoggingInfo> loggingInfoList = new ArrayList<>();
-        if (service.getLoggingInfo() != null) {
-            loggingInfoList = service.getLoggingInfo();
-        } else {
-            LoggingInfo oldServiceRegistration = LoggingInfo.createLoggingInfoEntry(user.getEmail(), user.getFullName(), securityService.getRoleName(auth),
-                    LoggingInfo.Types.ONBOARD.getKey(), LoggingInfo.ActionType.REGISTERED.getKey());
-            loggingInfoList.add(oldServiceRegistration);
-        }
-
-        loggingInfo = LoggingInfo.createLoggingInfoEntry(user.getEmail(), user.getFullName(), securityService.getRoleName(auth), LoggingInfo.Types.AUDIT.getKey(), actionType.getKey(), comment);
-        loggingInfoList.add(loggingInfo);
-        service.setLoggingInfo(loggingInfoList);
-
-        // latestAuditInfo
-        service.setLatestAuditInfo(loggingInfo);
+    public ServiceBundle auditResource(String serviceId, String catalogueId, String comment, LoggingInfo.ActionType actionType, Authentication auth) {
+        ServiceBundle service = get(serviceId, catalogueId);
+        ProviderBundle provider = providerService.get(catalogueId, service.getService().getResourceOrganisation(), auth);
+        commonMethods.auditResource(service, comment, actionType, auth);
 
         // send notification emails to Provider Admins
-        registrationMailService.notifyProviderAdminsForResourceAuditing(service);
+        registrationMailService.notifyProviderAdminsForBundleAuditing(service, "Service",
+                service.getService().getName(), provider.getProvider().getUsers());
 
-        logger.info("Auditing Resource: {}", service);
+        logger.info(String.format("Auditing Service [%s]-[%s]", catalogueId, serviceId));
         return super.update(service, auth);
     }
 
@@ -533,7 +476,7 @@ public class ServiceBundleManager extends AbstractResourceBundleManager<ServiceB
 
     //    @Override
     public Paging<LoggingInfo> getLoggingInfoHistory(String id, String catalogueId) {
-        ServiceBundle serviceBundle = new ServiceBundle();
+        ServiceBundle serviceBundle;
         try {
             serviceBundle = get(id, catalogueId);
             List<Resource> allResources = getResources(serviceBundle.getService().getId(), serviceBundle.getService().getCatalogueId()); // get all versions of a specific Service
@@ -581,11 +524,11 @@ public class ServiceBundleManager extends AbstractResourceBundleManager<ServiceB
         List<LoggingInfo> loggingInfoList = serviceBundle.getLoggingInfo();
         LoggingInfo loggingInfo;
         if (comment == null || "".equals(comment)) {
-            loggingInfo = LoggingInfo.createLoggingInfoEntry(user.getEmail(), user.getFullName(), securityService.getRoleName(auth),
-                    LoggingInfo.Types.MOVE.getKey(), LoggingInfo.ActionType.MOVED.getKey());
+            loggingInfo = commonMethods.createLoggingInfo(auth, LoggingInfo.Types.MOVE.getKey(),
+                    LoggingInfo.ActionType.MOVED.getKey());
         } else {
-            loggingInfo = LoggingInfo.createLoggingInfoEntry(user.getEmail(), user.getFullName(), securityService.getRoleName(auth),
-                    LoggingInfo.Types.MOVE.getKey(), LoggingInfo.ActionType.MOVED.getKey(), comment);
+            loggingInfo = commonMethods.createLoggingInfo(auth, LoggingInfo.Types.MOVE.getKey(),
+                    LoggingInfo.ActionType.MOVED.getKey(), comment);
         }
         loggingInfoList.add(loggingInfo);
         serviceBundle.setLoggingInfo(loggingInfoList);
@@ -635,6 +578,28 @@ public class ServiceBundleManager extends AbstractResourceBundleManager<ServiceB
     public ServiceBundle createPublicResource(ServiceBundle serviceBundle, Authentication auth){
         publicServiceManager.add(serviceBundle, auth);
         return serviceBundle;
+    }
+
+    @CacheEvict(cacheNames = {CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)
+    public ServiceBundle suspend(String serviceId, String catalogueId, boolean suspend, Authentication auth) {
+        ServiceBundle serviceBundle = get(serviceId, catalogueId);
+        commonMethods.suspensionValidation(serviceBundle, catalogueId,
+                serviceBundle.getService().getResourceOrganisation(), suspend, auth);
+        commonMethods.suspendResource(serviceBundle, catalogueId, suspend, auth);
+        return super.update(serviceBundle, auth);
+    }
+
+    public List<ServiceBundle> transformDatasourcesToServices(List<?> resourceBundles) {
+        List<ServiceBundle> serviceBundles = new ArrayList<>();
+        for (Object obj : resourceBundles) {
+            if (obj instanceof DatasourceBundle) {
+                ServiceBundle serviceBundle = new ServiceBundle((DatasourceBundle) obj);
+                serviceBundles.add(serviceBundle);
+            } else {
+                serviceBundles.add((ServiceBundle) obj);
+            }
+        }
+        return serviceBundles;
     }
 
 }

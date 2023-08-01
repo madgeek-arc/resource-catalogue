@@ -180,7 +180,7 @@ public interface ResourceBundleService<T> extends ResourceCRUDService<T, Authent
      * @param auth
      * @return
      */
-    T auditResource(String resourceId, String comment, LoggingInfo.ActionType actionType, Authentication auth);
+    T auditResource(String resourceId, String catalogueId, String comment, LoggingInfo.ActionType actionType, Authentication auth);
 
     /**
      * @param ff
@@ -259,4 +259,6 @@ public interface ResourceBundleService<T> extends ResourceCRUDService<T, Authent
     FacetFilter createFacetFilterForFetchingServicesAndDatasources(Map<String, Object> allRequestParams, String catalogueId, String type);
     FacetFilter createFacetFilterForFetchingServicesAndDatasources(MultiValueMap<String, Object> allRequestParams, String catalogueId, String type);
     void updateFacetFilterConsideringTheAuthorization(FacetFilter filter, Authentication auth);
+    ResourceBundle<?> suspend(String resourceId, String catalogueId, boolean suspend, Authentication auth);
+    List<ServiceBundle> transformDatasourcesToServices(List<?> resourceBundles);
 }

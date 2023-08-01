@@ -73,11 +73,13 @@
             
       <xs:enumeration value="UPDATED_VERSION"/>
             
-      <xs:enumeration value="DELETED"/>
-            
       <xs:enumeration value="ACTIVATED"/>
             
       <xs:enumeration value="DEACTIVATED"/>
+            
+      <xs:enumeration value="SUSPENDED"/>
+            
+      <xs:enumeration value="UNSUSPENDED"/>
             
       <xs:enumeration value="VALID"/>
             
@@ -314,6 +316,10 @@
       <xs:enumeration value="IR_EOSC_GUIDELINE_TYPE"/>
             
       <xs:enumeration value="SERVICE_TYPE"/>
+            
+      <xs:enumeration value="CT_PROTOCOL"/>
+            
+      <xs:enumeration value="CT_COMPATIBILITY"/>
           
     </xs:restriction>
       

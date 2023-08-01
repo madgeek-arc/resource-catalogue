@@ -1,13 +1,13 @@
 package eu.einfracentral.registry.manager;
 
 import eu.einfracentral.domain.*;
-import eu.einfracentral.exception.ResourceException;
 import eu.einfracentral.exception.ValidationException;
 import eu.einfracentral.registry.service.ResourceBundleService;
 import eu.einfracentral.registry.service.PendingResourceService;
 import eu.einfracentral.registry.service.VocabularyService;
 import eu.einfracentral.service.IdCreator;
 import eu.einfracentral.service.SecurityService;
+import eu.einfracentral.utils.ProviderResourcesCommonMethods;
 import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.domain.Paging;
 import eu.openminted.registry.core.domain.Resource;
@@ -19,7 +19,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.context.annotation.Lazy;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
@@ -38,6 +37,8 @@ public class PendingServiceManager extends ResourceManager<ServiceBundle> implem
     private final SecurityService securityService;
     private final VocabularyService vocabularyService;
     private final ProviderManager providerManager;
+    private ServiceBundleManager serviceBundleManager;
+    private final ProviderResourcesCommonMethods commonMethods;
 
     @Value("${project.catalogue.name}")
     private String catalogueName;
@@ -45,13 +46,16 @@ public class PendingServiceManager extends ResourceManager<ServiceBundle> implem
     @Autowired
     public PendingServiceManager(ResourceBundleService<ServiceBundle> resourceBundleService,
                                  IdCreator idCreator, @Lazy SecurityService securityService, @Lazy VocabularyService vocabularyService,
-                                 @Lazy ProviderManager providerManager) {
+                                 @Lazy ProviderManager providerManager, @Lazy ServiceBundleManager serviceBundleManager,
+                                 ProviderResourcesCommonMethods commonMethods) {
         super(ServiceBundle.class);
         this.resourceBundleService = resourceBundleService;
         this.idCreator = idCreator;
         this.securityService = securityService;
         this.vocabularyService = vocabularyService;
         this.providerManager = providerManager;
+        this.serviceBundleManager = serviceBundleManager;
+        this.commonMethods = commonMethods;
     }
 
     @Override
@@ -79,13 +83,11 @@ public class PendingServiceManager extends ResourceManager<ServiceBundle> implem
         if (service.getMetadata() == null) {
             service.setMetadata(Metadata.createMetadata(User.of(auth).getFullName()));
         }
-        if (service.getLoggingInfo() == null){
-            LoggingInfo loggingInfo = LoggingInfo.createLoggingInfoEntry(User.of(auth).getEmail(), User.of(auth).getFullName(), securityService.getRoleName(auth),
-                    LoggingInfo.Types.DRAFT.getKey(), LoggingInfo.ActionType.CREATED.getKey());
-            List<LoggingInfo> loggingInfoList = new ArrayList<>();
-            loggingInfoList.add(loggingInfo);
-            service.setLoggingInfo(loggingInfoList);
-        }
+        List<LoggingInfo> loggingInfoList = new ArrayList<>();
+        LoggingInfo loggingInfo = commonMethods.createLoggingInfo(auth, LoggingInfo.Types.DRAFT.getKey(),
+                LoggingInfo.ActionType.CREATED.getKey());
+        loggingInfoList.add(loggingInfo);
+        service.setLoggingInfo(loggingInfoList);
 
         service.getService().setCatalogueId(catalogueName);
         service.setActive(false);
@@ -136,33 +138,27 @@ public class PendingServiceManager extends ResourceManager<ServiceBundle> implem
         resourceBundleService.validate(serviceBundle);
 
         // update loggingInfo
-        LoggingInfo loggingInfo = LoggingInfo.createLoggingInfoEntry(User.of(auth).getEmail(), User.of(auth).getFullName(), securityService.getRoleName(auth),
-                LoggingInfo.Types.ONBOARD.getKey(), LoggingInfo.ActionType.REGISTERED.getKey());
-        List<LoggingInfo> loggingInfoList  = new ArrayList<>();
-        if (serviceBundle.getLoggingInfo() != null) {
-            loggingInfoList = serviceBundle.getLoggingInfo();
-            loggingInfoList.add(loggingInfo);
-        } else {
-            loggingInfoList.add(loggingInfo);
-        }
-        serviceBundle.setLoggingInfo(loggingInfoList);
+        List<LoggingInfo> loggingInfoList  = commonMethods.returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(serviceBundle, auth);
+        LoggingInfo loggingInfo = commonMethods.createLoggingInfo(auth, LoggingInfo.Types.ONBOARD.getKey(),
+                LoggingInfo.ActionType.REGISTERED.getKey());
+        loggingInfoList.add(loggingInfo);
 
-        // latestOnboardInfo
-        serviceBundle.setLatestOnboardingInfo(loggingInfo);
+        // serviceType
+        serviceBundleManager.createResourceExtras(serviceBundle, "service_type-service");
 
         // set resource status according to Provider's templateStatus
         if (providerManager.get(serviceBundle.getService().getResourceOrganisation()).getTemplateStatus().equals("approved template")){
             serviceBundle.setStatus(vocabularyService.get("approved resource").getId());
-            LoggingInfo loggingInfoApproved = LoggingInfo.createLoggingInfoEntry(User.of(auth).getEmail(), User.of(auth).getFullName(), securityService.getRoleName(auth),
-                    LoggingInfo.Types.ONBOARD.getKey(), LoggingInfo.ActionType.APPROVED.getKey());
+            LoggingInfo loggingInfoApproved = commonMethods.createLoggingInfo(auth, LoggingInfo.Types.ONBOARD.getKey(),
+                    LoggingInfo.ActionType.APPROVED.getKey());
             loggingInfoList.add(loggingInfoApproved);
             serviceBundle.setActive(true);
-
-            // latestOnboardingInfo
-            serviceBundle.setLatestOnboardingInfo(loggingInfoApproved);
         } else{
             serviceBundle.setStatus(vocabularyService.get("pending resource").getId());
         }
+        serviceBundle.setLoggingInfo(loggingInfoList);
+        // latestOnboardingInfo
+        serviceBundle.setLatestOnboardingInfo(loggingInfoList.get(loggingInfoList.size()-1));
 
         serviceBundle.setMetadata(Metadata.updateMetadata(serviceBundle.getMetadata(), User.of(auth).getFullName(), User.of(auth).getEmail()));
 

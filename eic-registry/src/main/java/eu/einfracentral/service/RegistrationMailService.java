@@ -122,16 +122,19 @@ public class RegistrationMailService {
                 serviceTemplate = serviceBundleManager.getResources(providerBundle.getId()).get(0);
                 root.put("resourceId", serviceTemplate.getId());
                 root.put("resourceName", serviceTemplate.getName());
+                root.put("resourceType", "resource");
                 break;
             case "datasourceBundleManager":
                 serviceTemplate = datasourceBundleManager.getResources(providerBundle.getId()).get(0);
                 root.put("resourceId", serviceTemplate.getId());
                 root.put("resourceName", serviceTemplate.getName());
+                root.put("resourceType", "datasource");
                 break;
             case "trainingResourceManager":
                 trainingResourceTemplate = trainingResourceManager.getResources(providerBundle.getId()).get(0);
                 root.put("resourceId", trainingResourceTemplate.getId());
                 root.put("resourceName", trainingResourceTemplate.getTitle());
+                root.put("resourceType", "training-resource");
                 break;
             default:
                 break;
@@ -970,7 +973,7 @@ public class RegistrationMailService {
         String adminSubject = String.format("[%s] A new Vocabulary Request [%s]-[%s] has been submitted", projectName,
                 vocabularyCuration.getVocabulary(), vocabularyCuration.getEntryValueName());
         userRole = "admin";
-        sendMailsFromTemplate("vocabularyCurationAdmin.ftl", root, adminSubject, registrationEmail, userRole);
+        sendMailsFromTemplate("vocabularyCurationEPOT.ftl", root, adminSubject, registrationEmail, userRole);
     }
 
     public void approveOrRejectVocabularyCurationEmails(VocabularyCuration vocabularyCuration){
@@ -978,71 +981,35 @@ public class RegistrationMailService {
         root.put("project", projectName);
         root.put("vocabularyCuration", vocabularyCuration);
         root.put("userEmail", vocabularyCuration.getVocabularyEntryRequests().get(0).getUserId());
-
         if (vocabularyCuration.getStatus().equals(VocabularyCuration.Status.APPROVED.getKey())){
-            // send email of Approval
-            String subject = String.format("[%s] Your Vocabulary [%s]-[%s] has been approved", projectName,
+            // send emails of Approval
+            String subject = String.format("[%s] Vocabulary [%s]-[%s] has been approved", projectName,
                     vocabularyCuration.getVocabulary(), vocabularyCuration.getEntryValueName());
-            String userRole = "provider";
-            sendMailsFromTemplate("vocabularyCurationApproval.ftl", root, subject, vocabularyCuration.getVocabularyEntryRequests().get(0).getUserId(), userRole);
+            sendMailsFromTemplate("vocabularyCurationApprovalEPOT.ftl", root, subject, vocabularyCuration.getVocabularyEntryRequests().get(0).getUserId(), "admin");
+            sendMailsFromTemplate("vocabularyCurationApprovalUser.ftl", root, subject, vocabularyCuration.getVocabularyEntryRequests().get(0).getUserId(), "provider");
         } else{
-            // send email of Rejection
-            String subject = String.format("[%s] Your Vocabulary [%s]-[%s] has been rejected", projectName,
+            // send emails of Rejection
+            String subject = String.format("[%s] Vocabulary [%s]-[%s] has been rejected", projectName,
                     vocabularyCuration.getVocabulary(), vocabularyCuration.getEntryValueName());
-            String userRole = "provider";
-            sendMailsFromTemplate("vocabularyCurationRejection.ftl", root, subject, vocabularyCuration.getVocabularyEntryRequests().get(0).getUserId(), userRole);
+            sendMailsFromTemplate("vocabularyCurationRejectionEPOT.ftl", root, subject, vocabularyCuration.getVocabularyEntryRequests().get(0).getUserId(), "admin");
+            sendMailsFromTemplate("vocabularyCurationRejectionUser.ftl", root, subject, vocabularyCuration.getVocabularyEntryRequests().get(0).getUserId(), "provider");
         }
     }
 
-    public void notifyProviderAdminsForProviderAuditing(ProviderBundle providerBundle) {
-
+    public void notifyProviderAdminsForBundleAuditing(Bundle<?> bundle, String resourceType, String bundleName, List<User> users) {
         Map<String, Object> root = new HashMap<>();
         root.put("project", projectName);
         root.put("endpoint", endpoint);
-        root.put("providerBundle", providerBundle);
+        root.put("resourceType", resourceType);
+        root.put("bundleName", bundleName);
+        root.put("bundle", bundle);
 
-        String subject = String.format("[%s Portal] Your Provider '%s' has been audited by the EPOT team", projectName, providerBundle.getProvider().getName());
+        String subject = String.format("[%s Portal] Your %s '%s' has been audited by the EPOT team", projectName, resourceType, bundleName);
 
-        for (User user : providerBundle.getProvider().getUsers()) {
+        for (User user : users) {
             root.put("user", user);
             String userRole = "provider";
-            sendMailsFromTemplate("providerAudit.ftl", root, subject, user.getEmail(), userRole);
-        }
-    }
-
-    public void notifyProviderAdminsForResourceAuditing(ResourceBundle<?> resourceBundle) {
-
-        ProviderBundle providerBundle = providerManager.get(resourceBundle.getPayload().getResourceOrganisation());
-
-        Map<String, Object> root = new HashMap<>();
-        root.put("project", projectName);
-        root.put("endpoint", endpoint);
-        root.put("resourceBundle", resourceBundle);
-
-        String subject = String.format("[%s Portal] Your Resource '%s' has been audited by the EPOT team", projectName, resourceBundle.getPayload().getName());
-
-        for (User user : providerBundle.getProvider().getUsers()) {
-            root.put("user", user);
-            String userRole = "provider";
-            sendMailsFromTemplate("resourceAudit.ftl", root, subject, user.getEmail(), userRole);
-        }
-    }
-
-    public void notifyProviderAdminsForTrainingResourceAuditing(TrainingResourceBundle trainingResourceBundle) {
-
-        ProviderBundle providerBundle = providerManager.get(trainingResourceBundle.getTrainingResource().getResourceOrganisation());
-
-        Map<String, Object> root = new HashMap<>();
-        root.put("project", projectName);
-        root.put("endpoint", endpoint);
-        root.put("trainingResourceBundle", trainingResourceBundle);
-
-        String subject = String.format("[%s Portal] Your Training Resource '%s' has been audited by the EPOT team", projectName, trainingResourceBundle.getTrainingResource().getTitle());
-
-        for (User user : providerBundle.getProvider().getUsers()) {
-            root.put("user", user);
-            String userRole = "provider";
-            sendMailsFromTemplate("trainingResourceAudit.ftl", root, subject, user.getEmail(), userRole);
+            sendMailsFromTemplate("bundleAudit.ftl", root, subject, user.getEmail(), userRole);
         }
     }
 
@@ -1098,40 +1065,57 @@ public class RegistrationMailService {
         sendMailsFromTemplate("invalidTrainingResourceUpdate.ftl", root, subject, registrationEmail, userRole);
     }
 
-    public void sendEmailsForHelpdeskExtension(HelpdeskBundle helpdeskBundle, String action){
+    public void sendEmailsForHelpdeskExtension(HelpdeskBundle helpdeskBundle, String resourceType, String action){
+        String resourceName = getResourceNameFromResourceType(resourceType);
         Map<String, Object> root = new HashMap<>();
         root.put("project", projectName);
         root.put("endpoint", endpoint);
         root.put("helpdeskBundle", helpdeskBundle);
+        root.put("resourceName", resourceName);
         root.put("action", action);
 
         // send email to help@eosc-future.eu
         String userRole = "admin";
         String subject = "";
         if (action.equals("post")){
-            subject = String.format("[%s Portal] The Service [%s] has created a new Helpdesk Extension", projectName, helpdeskBundle.getHelpdesk().getServiceId());
+            subject = String.format("[%s Portal] The %s [%s] has created a new Helpdesk Extension", projectName, resourceName, helpdeskBundle.getHelpdesk().getServiceId());
         } else{
-            subject = String.format("[%s Portal] The Service [%s] updated its Helpdesk Extension", projectName, helpdeskBundle.getHelpdesk().getServiceId());
+            subject = String.format("[%s Portal] The %s [%s] updated its Helpdesk Extension", projectName, resourceName, helpdeskBundle.getHelpdesk().getServiceId());
         }
         sendMailsFromTemplate("serviceExtensionsHelpdesk.ftl", root, subject, helpdeskEmail, Collections.singletonList(helpdeskCC), userRole);
     }
 
-    public void sendEmailsForMonitoringExtension(MonitoringBundle monitoringBundle, String action){
+    public void sendEmailsForMonitoringExtension(MonitoringBundle monitoringBundle, String resourceType, String action){
+        String resourceName = getResourceNameFromResourceType(resourceType);
         Map<String, Object> root = new HashMap<>();
         root.put("project", projectName);
         root.put("endpoint", endpoint);
         root.put("monitoringBundle", monitoringBundle);
+        root.put("resourceName", resourceName);
         root.put("action", action);
 
         // send email to argo@einfra.grnet.gr
         String userRole = "admin";
         String subject = "";
         if (action.equals("post")){
-            subject = String.format("[%s Portal] The Service [%s] has created a new Monitoring Extension", projectName, monitoringBundle.getMonitoring().getServiceId());
+            subject = String.format("[%s Portal] The %s [%s] has created a new Monitoring Extension", projectName, resourceName, monitoringBundle.getMonitoring().getServiceId());
         } else{
-            subject = String.format("[%s Portal] The Service [%s] updated its Monitoring Extension", projectName, monitoringBundle.getMonitoring().getServiceId());
+            subject = String.format("[%s Portal] The %s [%s] updated its Monitoring Extension", projectName, resourceName, monitoringBundle.getMonitoring().getServiceId());
         }
         sendMailsFromTemplate("serviceExtensionsMonitoring.ftl", root, subject, monitoringEmail, userRole);
+    }
+
+    private String getResourceNameFromResourceType(String resourceType) {
+        switch (resourceType) {
+            case "service":
+                return "Service";
+            case "datasource":
+                return "Datasource";
+            case "training_resource":
+                return "Training Resource";
+            default:
+                return "Resource";
+        }
     }
 
     public void sendEmailsForInteroperabilityRecordOnboarding(InteroperabilityRecordBundle interoperabilityRecordBundle, User registrant){

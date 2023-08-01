@@ -146,6 +146,7 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
         } else { // add provider from external catalogue
             commonMethods.checkCatalogueIdConsistency(trainingResourceBundle, catalogueId);
         }
+        commonMethods.checkRelatedResourceIDsConsistency(trainingResourceBundle);
 
         ProviderBundle providerBundle = providerService.get(trainingResourceBundle.getTrainingResource().getCatalogueId(), trainingResourceBundle.getTrainingResource().getResourceOrganisation(), auth);
         if (providerBundle == null) {
@@ -177,19 +178,16 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
             trainingResourceBundle.setMetadata(Metadata.createMetadata(User.of(auth).getFullName()));
         }
 
-        List<LoggingInfo> loggingInfoList = new ArrayList<>();
-        LoggingInfo loggingInfo = LoggingInfo.createLoggingInfoEntry(User.of(auth).getEmail(), User.of(auth).getFullName(), securityService.getRoleName(auth),
-                LoggingInfo.Types.ONBOARD.getKey(), LoggingInfo.ActionType.REGISTERED.getKey());
-        loggingInfoList.add(loggingInfo);
+        List<LoggingInfo> loggingInfoList = commonMethods.returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(trainingResourceBundle, auth);
 
         // latestOnboardingInfo
-        trainingResourceBundle.setLatestOnboardingInfo(loggingInfo);
+        trainingResourceBundle.setLatestOnboardingInfo(loggingInfoList.get(0));
 
         // resource status & extra loggingInfo for Approval
         if (providerBundle.getTemplateStatus().equals("approved template")) {
             trainingResourceBundle.setStatus(vocabularyService.get("approved resource").getId());
-            LoggingInfo loggingInfoApproved = LoggingInfo.createLoggingInfoEntry(User.of(auth).getEmail(), User.of(auth).getFullName(), securityService.getRoleName(auth),
-                    LoggingInfo.Types.ONBOARD.getKey(), LoggingInfo.ActionType.APPROVED.getKey());
+            LoggingInfo loggingInfoApproved = commonMethods.createLoggingInfo(auth, LoggingInfo.Types.ONBOARD.getKey(),
+                    LoggingInfo.ActionType.APPROVED.getKey());
             loggingInfoList.add(loggingInfoApproved);
 
             // latestOnboardingInfo
@@ -266,6 +264,7 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
         } else {
             commonMethods.checkCatalogueIdConsistency(trainingResourceBundle, catalogueId);
         }
+        commonMethods.checkRelatedResourceIDsConsistency(trainingResourceBundle);
 
         logger.trace("User '{}' is attempting to update the Training Resource with id '{}' of the Catalogue '{}'", auth, trainingResourceBundle.getTrainingResource().getId(), trainingResourceBundle.getTrainingResource().getCatalogueId());
         validateTrainingResource(trainingResourceBundle);
@@ -284,25 +283,17 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
         trainingResourceBundle.setMetadata(Metadata.updateMetadata(trainingResourceBundle.getMetadata(), user.getFullName()));
         trainingResourceBundle.setMigrationStatus(trainingResourceBundle.getMigrationStatus());
 
-        LoggingInfo loggingInfo;
-        List<LoggingInfo> loggingInfoList = new ArrayList<>();
-
-        loggingInfo = LoggingInfo.createLoggingInfoEntry(user.getEmail(), user.getFullName(), securityService.getRoleName(auth), LoggingInfo.Types.UPDATE.getKey(),
+        List<LoggingInfo> loggingInfoList = commonMethods.returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(existingTrainingResourceBundle, auth);
+        LoggingInfo loggingInfo = commonMethods.createLoggingInfo(auth, LoggingInfo.Types.UPDATE.getKey(),
                 LoggingInfo.ActionType.UPDATED.getKey(), comment);
-        if (existingTrainingResourceBundle.getLoggingInfo() != null) {
-            loggingInfoList = existingTrainingResourceBundle.getLoggingInfo();
-            loggingInfoList.add(loggingInfo);
-            loggingInfoList.sort(Comparator.comparing(LoggingInfo::getDate));
-        } else {
-            loggingInfoList.add(loggingInfo);
-        }
+        loggingInfoList.add(loggingInfo);
         trainingResourceBundle.setLoggingInfo(loggingInfoList);
 
         // latestUpdateInfo
         trainingResourceBundle.setLatestUpdateInfo(loggingInfo);
-        trainingResourceBundle.setActive(existingTrainingResourceBundle.isActive());
 
-        // set status
+        // set active/status
+        trainingResourceBundle.setActive(existingTrainingResourceBundle.isActive());
         trainingResourceBundle.setStatus(existingTrainingResourceBundle.getStatus());
 
         // if Resource's status = "rejected resource", update to "pending resource" & Provider templateStatus to "pending template"
@@ -388,10 +379,7 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
 
     @Override
     public void delete(TrainingResourceBundle trainingResourceBundle) {
-        // block Public Training Resource deletion
-        if (trainingResourceBundle.getMetadata().isPublished()){
-            throw new ValidationException("You cannot directly delete a Public Training Resource");
-        }
+        commonMethods.blockResourceDeletion(trainingResourceBundle.getStatus(), trainingResourceBundle.getMetadata().isPublished());
         logger.info("Deleting Training Resource: {}", trainingResourceBundle);
         super.delete(trainingResourceBundle);
         synchronizerService.syncDelete(trainingResourceBundle.getTrainingResource());
@@ -419,18 +407,9 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
         trainingResourceBundle.setStatus(vocabularyService.get(status).getId());
         ProviderBundle resourceProvider = providerService.get(trainingResourceBundle.getTrainingResource().getCatalogueId(),
                 trainingResourceBundle.getTrainingResource().getResourceOrganisation(), auth);
+        List<LoggingInfo> loggingInfoList = commonMethods.returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(trainingResourceBundle, auth);
         LoggingInfo loggingInfo;
-        List<LoggingInfo> loggingInfoList = new ArrayList<>();
 
-        User user = User.of(auth);
-
-        if (trainingResourceBundle.getLoggingInfo() != null) {
-            loggingInfoList = trainingResourceBundle.getLoggingInfo();
-        } else {
-            LoggingInfo oldProviderRegistration = LoggingInfo.createLoggingInfoEntry(user.getEmail(), user.getFullName(), securityService.getRoleName(auth),
-                    LoggingInfo.Types.ONBOARD.getKey(), LoggingInfo.ActionType.REGISTERED.getKey());
-            loggingInfoList.add(oldProviderRegistration);
-        }
         switch (status) {
             case "pending resource":
                 // update Provider's templateStatus
@@ -438,8 +417,8 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
                 break;
             case "approved resource":
                 trainingResourceBundle.setActive(active);
-                loggingInfo = LoggingInfo.createLoggingInfoEntry(user.getEmail(), user.getFullName(), securityService.getRoleName(auth),
-                        LoggingInfo.Types.ONBOARD.getKey(), LoggingInfo.ActionType.APPROVED.getKey());
+                loggingInfo = commonMethods.createLoggingInfo(auth, LoggingInfo.Types.ONBOARD.getKey(),
+                        LoggingInfo.ActionType.APPROVED.getKey());
                 loggingInfoList.add(loggingInfo);
                 loggingInfoList.sort(Comparator.comparing(LoggingInfo::getDate));
                 trainingResourceBundle.setLoggingInfo(loggingInfoList);
@@ -452,8 +431,8 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
                 break;
             case "rejected resource":
                 trainingResourceBundle.setActive(false);
-                loggingInfo = LoggingInfo.createLoggingInfoEntry(user.getEmail(), user.getFullName(), securityService.getRoleName(auth),
-                        LoggingInfo.Types.ONBOARD.getKey(), LoggingInfo.ActionType.REJECTED.getKey());
+                loggingInfo = commonMethods.createLoggingInfo(auth, LoggingInfo.Types.ONBOARD.getKey(),
+                        LoggingInfo.ActionType.REJECTED.getKey());
                 loggingInfoList.add(loggingInfo);
                 loggingInfoList.sort(Comparator.comparing(LoggingInfo::getDate));
                 trainingResourceBundle.setLoggingInfo(loggingInfoList);
@@ -467,6 +446,7 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
             default:
                 break;
         }
+
         logger.info("Verifying Training Resource: {}", trainingResourceBundle);
         try {
             providerService.update(resourceProvider, auth);
@@ -515,59 +495,28 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
         trainingResourceBundle.setActive(active);
 
         User user = User.of(auth);
-        List<LoggingInfo> loggingInfoList = new ArrayList<>();
-        LoggingInfo loggingInfo;
-        if (active) {
-            loggingInfo = LoggingInfo.createLoggingInfoEntry(user.getEmail(), user.getFullName(), securityService.getRoleName(auth),
-                    LoggingInfo.Types.UPDATE.getKey(), LoggingInfo.ActionType.ACTIVATED.getKey());
-        } else {
-            loggingInfo = LoggingInfo.createLoggingInfoEntry(user.getEmail(), user.getFullName(), securityService.getRoleName(auth),
-                    LoggingInfo.Types.UPDATE.getKey(), LoggingInfo.ActionType.DEACTIVATED.getKey());
-        }
-        if (trainingResourceBundle.getLoggingInfo() != null) {
-            loggingInfoList = trainingResourceBundle.getLoggingInfo();
-            loggingInfoList.add(loggingInfo);
-        } else {
-            LoggingInfo oldServiceRegistration = LoggingInfo.createLoggingInfoEntry(user.getEmail(), user.getFullName(), securityService.getRoleName(auth),
-                    LoggingInfo.Types.ONBOARD.getKey(), LoggingInfo.ActionType.REGISTERED.getKey());
-            loggingInfoList.add(oldServiceRegistration);
-            loggingInfoList.add(loggingInfo);
-        }
+        List<LoggingInfo> loggingInfoList = commonMethods.createActivationLoggingInfo(trainingResourceBundle, active, auth);
         loggingInfoList.sort(Comparator.comparing(LoggingInfo::getDate));
         trainingResourceBundle.setLoggingInfo(loggingInfoList);
 
         // latestOnboardingInfo
-        trainingResourceBundle.setLatestUpdateInfo(loggingInfo);
+        trainingResourceBundle.setLatestUpdateInfo(loggingInfoList.get(0)); //TODO: check this
 
         update(trainingResourceBundle, auth);
         return trainingResourceBundle;
     }
 
-    public TrainingResourceBundle auditResource(String trainingResourceId, String comment, LoggingInfo.ActionType actionType, Authentication auth) {
-        TrainingResourceBundle trainingResourceBundle = get(trainingResourceId, catalogueName);
-        User user = User.of(auth);
-        LoggingInfo loggingInfo;
-        List<LoggingInfo> loggingInfoList = new ArrayList<>();
-        if (trainingResourceBundle.getLoggingInfo() != null) {
-            loggingInfoList = trainingResourceBundle.getLoggingInfo();
-        } else {
-            LoggingInfo oldServiceRegistration = LoggingInfo.createLoggingInfoEntry(user.getEmail(), user.getFullName(), securityService.getRoleName(auth),
-                    LoggingInfo.Types.ONBOARD.getKey(), LoggingInfo.ActionType.REGISTERED.getKey());
-            loggingInfoList.add(oldServiceRegistration);
-        }
-
-        loggingInfo = LoggingInfo.createLoggingInfoEntry(user.getEmail(), user.getFullName(), securityService.getRoleName(auth), LoggingInfo.Types.AUDIT.getKey(), actionType.getKey(), comment);
-        loggingInfoList.add(loggingInfo);
-        trainingResourceBundle.setLoggingInfo(loggingInfoList);
-
-        // latestAuditInfo
-        trainingResourceBundle.setLatestAuditInfo(loggingInfo);
+    public TrainingResourceBundle auditResource(String trainingResourceId, String catalogueId, String comment, LoggingInfo.ActionType actionType, Authentication auth) {
+        TrainingResourceBundle trainingResource = get(trainingResourceId, catalogueId);
+        ProviderBundle provider = providerService.get(catalogueId, trainingResource.getTrainingResource().getResourceOrganisation(), auth);
+        commonMethods.auditResource(trainingResource, comment, actionType, auth);
 
         // send notification emails to Provider Admins
-        registrationMailService.notifyProviderAdminsForTrainingResourceAuditing(trainingResourceBundle);
+        registrationMailService.notifyProviderAdminsForBundleAuditing(trainingResource, "Training Resource",
+                trainingResource.getTrainingResource().getTitle(), provider.getProvider().getUsers());
 
-        logger.info("Auditing Resource: {}", trainingResourceBundle);
-        return update(trainingResourceBundle, auth);
+        logger.info(String.format("Auditing Training Resource [%s]-[%s]", catalogueId, trainingResourceId));
+        return super.update(trainingResource, auth);
     }
 
     @Override
@@ -627,7 +576,7 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
 
     //    @Override
     public Paging<LoggingInfo> getLoggingInfoHistory(String id, String catalogueId) {
-        TrainingResourceBundle trainingResourceBundle = new TrainingResourceBundle();
+        TrainingResourceBundle trainingResourceBundle;
         try {
             trainingResourceBundle = get(id, catalogueId);
             List<Resource> allResources = getResources(trainingResourceBundle.getTrainingResource().getId(), trainingResourceBundle.getTrainingResource().getCatalogueId()); // get all versions of a specific Service
@@ -684,7 +633,7 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
     private TrainingResourceBundle checkIdExistanceInOtherCatalogues(String id) {
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(maxQuantity);
-        ff.addFilter(getResourceType() + "_id", id);
+        ff.addFilter("resource_internal_id", id);
         List<TrainingResourceBundle> allResources = getAll(ff, null).getResults();
         if (allResources.size() > 0) {
             return allResources.get(0);
@@ -1093,11 +1042,11 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
         List<LoggingInfo> loggingInfoList = trainingResourceBundle.getLoggingInfo();
         LoggingInfo loggingInfo;
         if (comment == null || "".equals(comment)) {
-            loggingInfo = LoggingInfo.createLoggingInfoEntry(user.getEmail(), user.getFullName(), securityService.getRoleName(auth),
-                    LoggingInfo.Types.MOVE.getKey(), LoggingInfo.ActionType.MOVED.getKey());
+            loggingInfo = commonMethods.createLoggingInfo(auth, LoggingInfo.Types.MOVE.getKey(),
+                    LoggingInfo.ActionType.MOVED.getKey());
         } else {
-            loggingInfo = LoggingInfo.createLoggingInfoEntry(user.getEmail(), user.getFullName(), securityService.getRoleName(auth),
-                    LoggingInfo.Types.MOVE.getKey(), LoggingInfo.ActionType.MOVED.getKey(), comment);
+            loggingInfo = commonMethods.createLoggingInfo(auth, LoggingInfo.Types.MOVE.getKey(),
+                    LoggingInfo.ActionType.MOVED.getKey(), comment);
         }
         loggingInfoList.add(loggingInfo);
         trainingResourceBundle.setLoggingInfo(loggingInfoList);
@@ -1141,6 +1090,15 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
         registrationMailService.sendEmailsForMovedTrainingResources(oldProvider, newProvider, trainingResourceBundle, auth);
 
         return trainingResourceBundle;
+    }
+
+    @CacheEvict(cacheNames = {CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)
+    public TrainingResourceBundle suspend(String trainingResourceId, String catalogueId, boolean suspend, Authentication auth) {
+        TrainingResourceBundle trainingResourceBundle = get(trainingResourceId, catalogueId);
+        commonMethods.suspensionValidation(trainingResourceBundle, catalogueId,
+                trainingResourceBundle.getTrainingResource().getResourceOrganisation(), suspend, auth);
+        commonMethods.suspendResource(trainingResourceBundle, catalogueId, suspend, auth);
+        return super.update(trainingResourceBundle, auth);
     }
 
 }

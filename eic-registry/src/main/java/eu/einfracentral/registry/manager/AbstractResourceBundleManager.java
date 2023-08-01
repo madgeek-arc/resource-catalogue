@@ -5,7 +5,6 @@ import eu.einfracentral.domain.*;
 import eu.einfracentral.dto.Category;
 import eu.einfracentral.dto.ProviderInfo;
 import eu.einfracentral.dto.ScientificDomain;
-import eu.einfracentral.exception.OIDCAuthenticationException;
 import eu.einfracentral.exception.ResourceException;
 import eu.einfracentral.exception.ResourceNotFoundException;
 import eu.einfracentral.exception.ValidationException;
@@ -14,6 +13,7 @@ import eu.einfracentral.service.*;
 import eu.einfracentral.service.search.SearchServiceEIC;
 import eu.einfracentral.utils.FacetFilterUtils;
 import eu.einfracentral.utils.FacetLabelService;
+import eu.einfracentral.utils.ProviderResourcesCommonMethods;
 import eu.einfracentral.utils.TextUtils;
 import eu.einfracentral.validators.FieldValidator;
 import eu.openminted.registry.core.domain.*;
@@ -36,7 +36,6 @@ import javax.validation.constraints.NotNull;
 import java.lang.reflect.Field;
 import java.net.UnknownHostException;
 import java.security.NoSuchAlgorithmException;
-import java.text.DecimalFormat;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.util.*;
@@ -88,6 +87,8 @@ public abstract class AbstractResourceBundleManager<T extends ResourceBundle<?>>
     private Validator serviceValidator;
     @Autowired
     private GenericResourceService genericResourceService;
+    @Autowired
+    private ProviderResourcesCommonMethods commonMethods;
 
     @PostConstruct
     void initLabels() {
@@ -137,7 +138,7 @@ public abstract class AbstractResourceBundleManager<T extends ResourceBundle<?>>
     private T checkIdExistanceInOtherCatalogues(String id) {
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(maxQuantity);
-        ff.addFilter(getResourceType() + "_id", id);
+        ff.addFilter("resource_internal_id", id);
         List<T> allResources = getAll(ff, null).getResults();
         if (allResources.size() > 0) {
             return allResources.get(0);
@@ -995,16 +996,10 @@ public abstract class AbstractResourceBundleManager<T extends ResourceBundle<?>>
     }
 
     private void createLoggingInfoEntriesForResourceExtraUpdates(T bundle, Authentication auth) {
-        List<LoggingInfo> loggingInfoList = new ArrayList<>();
-        LoggingInfo loggingInfo;
-        loggingInfo = LoggingInfo.createLoggingInfoEntry(User.of(auth).getEmail(), User.of(auth).getFullName(), securityService.getRoleName(auth),
-                LoggingInfo.Types.UPDATE.getKey(), LoggingInfo.ActionType.UPDATED.getKey(), null);
-        if (bundle.getLoggingInfo() != null) {
-            loggingInfoList = bundle.getLoggingInfo();
-            loggingInfoList.add(loggingInfo);
-        } else {
-            loggingInfoList.add(loggingInfo);
-        }
+        List<LoggingInfo> loggingInfoList = commonMethods.returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(bundle, auth);
+        LoggingInfo loggingInfo = commonMethods.createLoggingInfo(auth, LoggingInfo.Types.UPDATE.getKey(),
+                LoggingInfo.ActionType.UPDATED.getKey());
+        loggingInfoList.add(loggingInfo);
         bundle.setLoggingInfo(loggingInfoList);
     }
 
@@ -1101,7 +1096,7 @@ public abstract class AbstractResourceBundleManager<T extends ResourceBundle<?>>
         return allProviders.stream().map(Bundle::getId).collect(Collectors.toList());
     }
 
-    public T createResourceExtras(T resourceBundle, String serviceType){
+    public void createResourceExtras(T resourceBundle, String serviceType){
         if (resourceBundle.getResourceExtras() == null){
             ResourceExtras resourceExtras = new ResourceExtras();
             resourceExtras.setServiceType(serviceType);
@@ -1109,6 +1104,5 @@ public abstract class AbstractResourceBundleManager<T extends ResourceBundle<?>>
         } else {
             resourceBundle.getResourceExtras().setServiceType(serviceType);
         }
-        return resourceBundle;
     }
 }

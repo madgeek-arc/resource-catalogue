@@ -119,7 +119,10 @@ public class SessionSecurityConfig extends WebSecurityConfigurerAdapter {
                     .deleteCookies("SESSION")
                     .invalidateHttpSession(true)
                     .logoutUrl("/openid_logout")
-                    .logoutSuccessUrl(oidcLogoutURL + "?redirect=" + webappFrontUrl)
+                    .logoutSuccessUrl(oidcLogoutURL +
+                        "?post_logout_redirect_uri=" + webappFrontUrl +
+                        "&client_id=" + oidcClientId) // Keycloak
+//                    .logoutSuccessUrl(oidcLogoutURL + "?redirect=" + webappFrontUrl) // MITREid
                     .deleteCookies("info")
                 .and().exceptionHandling()
                 .and().csrf().disable()

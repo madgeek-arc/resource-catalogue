@@ -33,10 +33,14 @@ public class Identifiers {
                 '}';
     }
 
-    public static Identifiers createIdentifier(String originalId){
-        Identifiers ret = new Identifiers();
-        ret.setOriginalId(originalId);
-        return ret;
+    public static void createOriginalId(Bundle<?> bundle){
+        if (bundle.getIdentifiers() != null) {
+            bundle.getIdentifiers().setOriginalId(bundle.getId());
+        } else {
+            Identifiers identifiers = new Identifiers();
+            identifiers.setOriginalId(bundle.getId());
+            bundle.setIdentifiers(identifiers);
+        }
     }
 
     public List<AlternativeIdentifier> getAlternativeIdentifiers() {

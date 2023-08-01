@@ -46,7 +46,11 @@ public class FacetFilterUtils {
 
         // fill the variable with the rest of the filters
         for (Map.Entry<String, Object> ffEntry : filters.entrySet()) {
-            allFilters.put(ffEntry.getKey(), Collections.singletonList(ffEntry.getValue().toString()));
+            if (ffEntry.getValue() instanceof List) {
+                allFilters.put(ffEntry.getKey(), (List) ffEntry.getValue());
+            } else {
+                allFilters.put(ffEntry.getKey(), Collections.singletonList(ffEntry.getValue().toString()));
+            }
         }
 
         return allFilters;

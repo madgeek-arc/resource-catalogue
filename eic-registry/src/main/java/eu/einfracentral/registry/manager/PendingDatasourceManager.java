@@ -7,6 +7,7 @@ import eu.einfracentral.registry.service.PendingResourceService;
 import eu.einfracentral.registry.service.VocabularyService;
 import eu.einfracentral.service.IdCreator;
 import eu.einfracentral.service.SecurityService;
+import eu.einfracentral.utils.ProviderResourcesCommonMethods;
 import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.domain.Paging;
 import eu.openminted.registry.core.domain.Resource;
@@ -38,6 +39,7 @@ public class PendingDatasourceManager extends ResourceManager<DatasourceBundle> 
     private final VocabularyService vocabularyService;
     private final ProviderManager providerManager;
     private DatasourceBundleManager datasourceBundleManager;
+    private ProviderResourcesCommonMethods commonMethods;
 
     @Value("${project.catalogue.name}")
     private String catalogueName;
@@ -45,7 +47,8 @@ public class PendingDatasourceManager extends ResourceManager<DatasourceBundle> 
     @Autowired
     public PendingDatasourceManager(ResourceBundleService<DatasourceBundle> resourceBundleService,
                                     IdCreator idCreator, @Lazy SecurityService securityService, @Lazy VocabularyService vocabularyService,
-                                    @Lazy ProviderManager providerManager, @Lazy DatasourceBundleManager datasourceBundleManager) {
+                                    @Lazy ProviderManager providerManager, @Lazy DatasourceBundleManager datasourceBundleManager,
+                                    ProviderResourcesCommonMethods commonMethods) {
         super(DatasourceBundle.class);
         this.resourceBundleService = resourceBundleService;
         this.idCreator = idCreator;
@@ -53,6 +56,7 @@ public class PendingDatasourceManager extends ResourceManager<DatasourceBundle> 
         this.vocabularyService = vocabularyService;
         this.providerManager = providerManager;
         this.datasourceBundleManager = datasourceBundleManager;
+        this.commonMethods = commonMethods;
     }
 
     @Override
@@ -84,13 +88,11 @@ public class PendingDatasourceManager extends ResourceManager<DatasourceBundle> 
         if (datasourceBundle.getMetadata() == null) {
             datasourceBundle.setMetadata(Metadata.createMetadata(User.of(auth).getFullName()));
         }
-        if (datasourceBundle.getLoggingInfo() == null){
-            LoggingInfo loggingInfo = LoggingInfo.createLoggingInfoEntry(User.of(auth).getEmail(), User.of(auth).getFullName(), securityService.getRoleName(auth),
-                    LoggingInfo.Types.DRAFT.getKey(), LoggingInfo.ActionType.CREATED.getKey());
-            List<LoggingInfo> loggingInfoList = new ArrayList<>();
-            loggingInfoList.add(loggingInfo);
-            datasourceBundle.setLoggingInfo(loggingInfoList);
-        }
+        List<LoggingInfo> loggingInfoList = new ArrayList<>();
+        LoggingInfo loggingInfo = commonMethods.createLoggingInfo(auth, LoggingInfo.Types.DRAFT.getKey(),
+                LoggingInfo.ActionType.CREATED.getKey());
+        loggingInfoList.add(loggingInfo);
+        datasourceBundle.setLoggingInfo(loggingInfoList);
 
         datasourceBundle.getDatasource().setCatalogueId(catalogueName);
         datasourceBundle.setActive(false);
@@ -141,33 +143,27 @@ public class PendingDatasourceManager extends ResourceManager<DatasourceBundle> 
         resourceBundleService.validate(datasourceBundle);
 
         // update loggingInfo
-        LoggingInfo loggingInfo = LoggingInfo.createLoggingInfoEntry(User.of(auth).getEmail(), User.of(auth).getFullName(), securityService.getRoleName(auth),
-                LoggingInfo.Types.ONBOARD.getKey(), LoggingInfo.ActionType.REGISTERED.getKey());
-        List<LoggingInfo> loggingInfoList  = new ArrayList<>();
-        if (datasourceBundle.getLoggingInfo() != null) {
-            loggingInfoList = datasourceBundle.getLoggingInfo();
-            loggingInfoList.add(loggingInfo);
-        } else {
-            loggingInfoList.add(loggingInfo);
-        }
-        datasourceBundle.setLoggingInfo(loggingInfoList);
+        List<LoggingInfo> loggingInfoList  = commonMethods.returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(datasourceBundle, auth);
+        LoggingInfo loggingInfo = commonMethods.createLoggingInfo(auth, LoggingInfo.Types.ONBOARD.getKey(),
+                LoggingInfo.ActionType.REGISTERED.getKey());
+        loggingInfoList.add(loggingInfo);
 
-        // latestOnboardInfo
-        datasourceBundle.setLatestOnboardingInfo(loggingInfo);
+        // serviceType
+        datasourceBundleManager.createResourceExtras(datasourceBundle, "service_type-datasource");
 
         // set resource status according to Provider's templateStatus
         if (providerManager.get(datasourceBundle.getDatasource().getResourceOrganisation()).getTemplateStatus().equals("approved template")){
             datasourceBundle.setStatus(vocabularyService.get("approved resource").getId());
-            LoggingInfo loggingInfoApproved = LoggingInfo.createLoggingInfoEntry(User.of(auth).getEmail(), User.of(auth).getFullName(), securityService.getRoleName(auth),
-                    LoggingInfo.Types.ONBOARD.getKey(), LoggingInfo.ActionType.APPROVED.getKey());
+            LoggingInfo loggingInfoApproved = commonMethods.createLoggingInfo(auth, LoggingInfo.Types.ONBOARD.getKey(),
+                    LoggingInfo.ActionType.APPROVED.getKey());
             loggingInfoList.add(loggingInfoApproved);
             datasourceBundle.setActive(true);
-
-            // latestOnboardingInfo
-            datasourceBundle.setLatestOnboardingInfo(loggingInfoApproved);
         } else{
             datasourceBundle.setStatus(vocabularyService.get("pending resource").getId());
         }
+        datasourceBundle.setLoggingInfo(loggingInfoList);
+        // latestOnboardingInfo
+        datasourceBundle.setLatestOnboardingInfo(loggingInfoList.get(loggingInfoList.size()-1));
 
         datasourceBundle.setMetadata(Metadata.updateMetadata(datasourceBundle.getMetadata(), User.of(auth).getFullName(), User.of(auth).getEmail()));
 
