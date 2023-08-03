@@ -610,9 +610,11 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
             try {
                 logger.debug("Setting Service '{}'-'{}' of the '{}' Catalogue to active: '{}'", service.getId(),
                         service.getService().getName(), service.getService().getCatalogueId(), service.isActive());
-                resourceBundleService.update(service, null);
+                resourceBundleService.update(service, auth);
                 // TODO: FIX ON ProviderManagementAspect
-                publicServiceManager.update(service, null);
+                if (service.getStatus().equals("approved resource")) {
+                    publicServiceManager.update(service, auth);
+                }
             } catch (ResourceNotFoundException e) {
                 logger.error("Could not update Service '{}'-'{}' of the '{}' Catalogue", service.getId(),
                         service.getService().getName(), service.getService().getCatalogueId());
@@ -632,9 +634,11 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
             try {
                 logger.debug("Setting Datasource '{}'-'{}' of the '{}' Catalogue to active: '{}'", datasource.getId(),
                         datasource.getDatasource().getName(), datasource.getDatasource().getCatalogueId(), datasource.isActive());
-                datasourceBundleService.update(datasource, null);
+                datasourceBundleService.update(datasource, auth);
                 // TODO: FIX ON ProviderManagementAspect
-                publicDatasourceManager.update(datasource, null);
+                if (datasource.getStatus().equals("approved resource")) {
+                    publicDatasourceManager.update(datasource, auth);
+                }
             } catch (ResourceNotFoundException e) {
                 logger.error("Could not update Datasource '{}'-'{}' of the '{}' Catalogue", datasource.getId(),
                         datasource.getDatasource().getName(), datasource.getDatasource().getCatalogueId());
@@ -655,9 +659,11 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
                 logger.debug("Setting Training Resource '{}'-'{}' of the '{}' Catalogue to active: '{}'", trainingResourceBundle.getId(),
                         trainingResourceBundle.getTrainingResource().getTitle(), trainingResourceBundle.getTrainingResource().getCatalogueId(),
                         trainingResourceBundle.isActive());
-                trainingResourceService.update(trainingResourceBundle, null);
+                trainingResourceService.update(trainingResourceBundle, auth);
                 // TODO: FIX ON ProviderManagementAspect
-                publicTrainingResourceManager.update(trainingResourceBundle, null);
+                if (trainingResourceBundle.getStatus().equals("approved resource")) {
+                    publicTrainingResourceManager.update(trainingResourceBundle, auth);
+                }
             } catch (ResourceNotFoundException e) {
                 logger.error("Could not update Training Resource '{}'-'{}' of the '{}' Catalogue", trainingResourceBundle.getId(),
                         trainingResourceBundle.getTrainingResource().getTitle(), trainingResourceBundle.getTrainingResource().getCatalogueId());
@@ -678,9 +684,11 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
                 logger.debug("Setting Interoperability Record '{}'-'{}' of the '{}' Catalogue to active: '{}'", interoperabilityRecordBundle.getId(),
                         interoperabilityRecordBundle.getInteroperabilityRecord().getTitle(), interoperabilityRecordBundle.getInteroperabilityRecord().getCatalogueId(),
                         interoperabilityRecordBundle.isActive());
-                interoperabilityRecordService.update(interoperabilityRecordBundle, null);
+                interoperabilityRecordService.update(interoperabilityRecordBundle, auth);
                 // TODO: FIX ON ProviderManagementAspect
-                publicInteroperabilityRecordManager.update(interoperabilityRecordBundle, null);
+                if (interoperabilityRecordBundle.getStatus().equals("approved interoperability record")) {
+                    publicInteroperabilityRecordManager.update(interoperabilityRecordBundle, auth);
+                }
             } catch (ResourceNotFoundException e) {
                 logger.error("Could not update Interoperability Record '{}'-'{}' of the '{}' Catalogue", interoperabilityRecordBundle.getId(),
                         interoperabilityRecordBundle.getInteroperabilityRecord().getTitle(), interoperabilityRecordBundle.getInteroperabilityRecord().getCatalogueId());
