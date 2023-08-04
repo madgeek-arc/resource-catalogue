@@ -74,7 +74,7 @@ public class ConfigurationTemplateInstanceController {
         return new ResponseEntity<>(ret, HttpStatus.OK);
     }
 
-    @ApiOperation(value = "Returns a List of ConfigurationTemplateInstance associated with the given 'configurationTemplateId'")
+//    @ApiOperation(value = "Returns a List of ConfigurationTemplateInstance associated with the given 'configurationTemplateId'")
     @GetMapping(path = "getAllByConfigurationTemplateId/{configurationTemplateId}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity<List<ConfigurationTemplateInstanceDto>> getConfigurationTemplateInstancesByConfigurationTemplateId(@PathVariable("configurationTemplateId") String configurationTemplateId) {
         List<ConfigurationTemplateInstance> configurationTemplateInstances = configurationTemplateInstanceService.getConfigurationTemplateInstancesByConfigurationTemplateId(configurationTemplateId);
@@ -85,7 +85,7 @@ public class ConfigurationTemplateInstanceController {
         return new ResponseEntity<>(ret, HttpStatus.OK);
     }
 
-    @ApiOperation(value = "Create a new ConfigurationTemplateInstance.")
+//    @ApiOperation(value = "Create a new ConfigurationTemplateInstance.")
     @PostMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<ConfigurationTemplateInstance> addConfigurationTemplateInstance(@RequestBody ConfigurationTemplateInstance configurationTemplateInstance,
@@ -95,7 +95,7 @@ public class ConfigurationTemplateInstanceController {
         return new ResponseEntity<>(configurationTemplateInstanceBundle.getConfigurationTemplateInstance(), HttpStatus.CREATED);
     }
 
-    @ApiOperation(value = "Add a List of ConfigurationTemplateInstances.")
+//    @ApiOperation(value = "Add a List of ConfigurationTemplateInstances.")
     @PostMapping(path = "addAll", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<List<ConfigurationTemplateInstance>> addConfigurationTemplateInstances(@RequestBody List<ConfigurationTemplateInstance> configurationTemplateInstances,
@@ -107,7 +107,7 @@ public class ConfigurationTemplateInstanceController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    @ApiOperation(value = "Updates the ConfigurationTemplateInstance with the given id.")
+//    @ApiOperation(value = "Updates the ConfigurationTemplateInstance with the given id.")
     @PutMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<ConfigurationTemplateInstance> updateConfigurationTemplateInstance(@RequestBody ConfigurationTemplateInstance configurationTemplateInstance,
@@ -119,7 +119,7 @@ public class ConfigurationTemplateInstanceController {
         return new ResponseEntity<>(configurationTemplateInstanceBundle.getConfigurationTemplateInstance(), HttpStatus.OK);
     }
 
-    @DeleteMapping(path = "{configurationTemplateInstanceId}", produces = {MediaType.APPLICATION_JSON_VALUE})
+//    @DeleteMapping(path = "{configurationTemplateInstanceId}", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<ConfigurationTemplateInstance> deleteConfigurationTemplateInstance(@PathVariable("configurationTemplateInstanceId") String configurationTemplateInstanceId,
                                                                                              @ApiIgnore Authentication auth) throws ResourceNotFoundException {
@@ -140,7 +140,7 @@ public class ConfigurationTemplateInstanceController {
         return new ResponseEntity<>(configurationTemplateInstanceService.get(id), HttpStatus.OK);
     }
 
-    @PutMapping(path = "updateBundle", produces = {MediaType.APPLICATION_JSON_VALUE})
+//    @PutMapping(path = "updateBundle", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<ConfigurationTemplateInstanceBundle> updateBundle(@RequestBody ConfigurationTemplateInstanceBundle configurationTemplateInstanceBundle, @ApiIgnore Authentication authentication) throws ResourceNotFoundException {
         ResponseEntity<ConfigurationTemplateInstanceBundle> ret = new ResponseEntity<>(configurationTemplateInstanceService.update(configurationTemplateInstanceBundle, authentication), HttpStatus.OK);

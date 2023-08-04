@@ -53,7 +53,7 @@ public class InteroperabilityRecordController {
 
     @ApiOperation(value = "Creates a new Interoperability Record.")
     @PostMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or @securityService.providerCanAddResources(#auth, #interoperabilityRecord)")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.providerCanAddResources(#auth, #interoperabilityRecord)")
     public ResponseEntity<InteroperabilityRecord> add(@RequestBody InteroperabilityRecord interoperabilityRecord, @ApiIgnore Authentication auth) {
         InteroperabilityRecordBundle ret = this.interoperabilityRecordService.add(new InteroperabilityRecordBundle(interoperabilityRecord), auth);
         logger.info("User '{}' added a new Interoperability Record with id '{}' and title '{}'", auth.getName(), interoperabilityRecord.getId(), interoperabilityRecord.getTitle());
@@ -72,7 +72,7 @@ public class InteroperabilityRecordController {
 
     // Deletes the Interoperability Record with the specific ID.
     @DeleteMapping(path = "{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or @securityService.isResourceProviderAdmin(#auth, #id)")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth, #id)")
     public ResponseEntity<InteroperabilityRecord> delete(@PathVariable("id") String id, @RequestParam(defaultValue = "${project.catalogue.name}", name = "catalogue_id") String catalogueId,
                                                          @ApiIgnore Authentication auth) throws ResourceNotFoundException {
         InteroperabilityRecordBundle interoperabilityRecordBundle = interoperabilityRecordService.get(id, catalogueId);
