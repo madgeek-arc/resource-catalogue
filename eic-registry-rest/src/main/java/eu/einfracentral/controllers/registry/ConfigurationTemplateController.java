@@ -20,7 +20,7 @@ import springfox.documentation.annotations.ApiIgnore;
 
 @RestController
 @RequestMapping("configurationTemplate")
-@Api(value = "Operations for Configuration Templates")
+//@Api(value = "Operations for Configuration Templates")
 public class ConfigurationTemplateController {
 
     private static final Logger logger = LogManager.getLogger(ConfigurationTemplateController.class);
@@ -30,7 +30,7 @@ public class ConfigurationTemplateController {
         this.configurationTemplateService = configurationTemplateService;
     }
 
-    @ApiOperation(value = "Create a new ConfigurationTemplate.")
+//    @ApiOperation(value = "Create a new ConfigurationTemplate.")
     @PostMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<ConfigurationTemplate> addConfigurationTemplate(@RequestBody ConfigurationTemplate configurationTemplate,
