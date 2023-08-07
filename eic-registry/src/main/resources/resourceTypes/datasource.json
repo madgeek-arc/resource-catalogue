@@ -116,8 +116,8 @@
     },
     {
       "multivalued": false,
-      "name": "datasource_status",
-      "path": "//*[local-name()='datasourceBundle']/*[local-name()='datasourceStatus']/text()",
+      "name": "status",
+      "path": "//*[local-name()='datasourceBundle']/*[local-name()='status']/text()",
       "type": "java.lang.String"
     }
   ],

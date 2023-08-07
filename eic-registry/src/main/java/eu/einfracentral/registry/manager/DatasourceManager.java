@@ -77,7 +77,7 @@ public class DatasourceManager extends ResourceManager<DatasourceBundle> impleme
         List<LoggingInfo> loggingInfoList = commonMethods.returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(datasourceBundle, auth);
         datasourceBundle.setLoggingInfo(loggingInfoList);
         datasourceBundle.setActive(false);
-        datasourceBundle.setDatasourceStatus(vocabularyService.get("pending datasource").getId());
+        datasourceBundle.setStatus(vocabularyService.get("pending datasource").getId());
         // latestOnboardingInfo
         datasourceBundle.setLatestOnboardingInfo(loggingInfoList.get(0));
 
@@ -127,9 +127,9 @@ public class DatasourceManager extends ResourceManager<DatasourceBundle> impleme
         datasourceBundle.setLatestUpdateInfo(loggingInfo);
         datasourceBundle.setActive(ex.isActive());
 
-        // if datasourceStatus = "rejected datasource", update to "pending datasource"
-        if (ex.getDatasourceStatus().equals(vocabularyService.get("rejected datasource").getId())) {
-            datasourceBundle.setDatasourceStatus(vocabularyService.get("pending datasource").getId());
+        // if status = "rejected datasource", update to "pending datasource"
+        if (ex.getStatus().equals(vocabularyService.get("rejected datasource").getId())) {
+            datasourceBundle.setStatus(vocabularyService.get("pending datasource").getId());
         }
 
         // block user from updating serviceId
@@ -162,7 +162,7 @@ public class DatasourceManager extends ResourceManager<DatasourceBundle> impleme
         }
         logger.trace("Verifying Datasource with id: '{}' | status -> '{}' | active -> '{}'", id, status, active);
         DatasourceBundle datasourceBundle = get(id);
-        datasourceBundle.setDatasourceStatus(vocabularyService.get(status).getId());
+        datasourceBundle.setStatus(vocabularyService.get(status).getId());
 
         List<LoggingInfo> loggingInfoList = commonMethods.returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(datasourceBundle, auth);
         LoggingInfo loggingInfo;

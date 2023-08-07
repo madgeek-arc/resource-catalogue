@@ -9,7 +9,7 @@ import javax.xml.bind.annotation.XmlType;
 public class DatasourceBundle extends Bundle<Datasource> {
 
     @XmlElement
-    private String datasourceStatus;
+    private String status;
 
     public DatasourceBundle() {
         // No arg constructor
@@ -25,16 +25,16 @@ public class DatasourceBundle extends Bundle<Datasource> {
         this.setMetadata(metadata);
     }
 
-    public DatasourceBundle(Datasource datasource, String datasourceStatus) {
+    public DatasourceBundle(Datasource datasource, String status) {
         this.setDatasource(datasource);
-        this.datasourceStatus = datasourceStatus;
+        this.status = status;
         this.setMetadata(null);
     }
 
     @Override
     public String toString() {
         return "DatasourceBundle{" +
-                "datasourceStatus='" + datasourceStatus + '\'' +
+                "status='" + status + '\'' +
                 '}';
     }
 
@@ -57,12 +57,12 @@ public class DatasourceBundle extends Bundle<Datasource> {
         super.setId(id);
     }
 
-    public String getDatasourceStatus() {
-        return datasourceStatus;
+    public String getStatus() {
+        return status;
     }
 
-    public void setDatasourceStatus(String datasourceStatus) {
-        this.datasourceStatus = datasourceStatus;
+    public void setStatus(String status) {
+        this.status = status;
     }
 
 }
