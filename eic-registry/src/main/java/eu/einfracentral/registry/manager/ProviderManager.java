@@ -1122,15 +1122,20 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         }
     }
 
-    public Paging<?> getRejectedResources(FacetFilter ff, Authentication auth){
-        Browsing<ServiceBundle> providerRejectedServices = getResourceBundles(ff, serviceBundleService, auth);
-        Browsing<TrainingResourceBundle> providerRejectedTrainingResources = getResourceBundles(ff, trainingResourceService, auth);
-        List<ServiceBundle> rejectedServices = new ArrayList<>(providerRejectedServices.getResults());
-        List<TrainingResourceBundle> rejectedTrainingResources = new ArrayList<>(providerRejectedTrainingResources.getResults());
-        List<?> ret = Stream.concat(rejectedServices.stream(), rejectedTrainingResources.stream()).collect(Collectors.toList());
-        List<Facet> facets = Stream.concat(providerRejectedServices.getFacets().stream(), providerRejectedTrainingResources.getFacets().stream()).collect(Collectors.toList());
-        return new Paging<>(providerRejectedServices.getTotal() + providerRejectedTrainingResources.getTotal(), 0,
-                providerRejectedServices.getTo() + providerRejectedTrainingResources.getTo(), ret, facets);
+    public Paging<?> getRejectedResources(FacetFilter ff, String resourceType, Authentication auth){
+        List<Bundle<?>> ret = new ArrayList<>();
+        if (resourceType.equals("service")){
+            Browsing<ServiceBundle> providerRejectedResources = getResourceBundles(ff, serviceBundleService, auth);
+            ret.addAll(providerRejectedResources.getResults());
+            return new Paging<>(providerRejectedResources.getTotal(), providerRejectedResources.getFrom(),
+                    providerRejectedResources.getTo(), ret, providerRejectedResources.getFacets());
+        } else if (resourceType.equals("training_resource")){
+            Browsing<TrainingResourceBundle> providerRejectedResources = getResourceBundles(ff, trainingResourceService, auth);
+            ret.addAll(providerRejectedResources.getResults());
+            return new Paging<>(providerRejectedResources.getTotal(), providerRejectedResources.getFrom(),
+                    providerRejectedResources.getTo(), ret, providerRejectedResources.getFacets());
+        }
+        return null;
     }
 
     private <T extends Bundle<?>, I extends ResourceCRUDService<T, Authentication>> Browsing<T> getResourceBundles(FacetFilter ff, I service, Authentication auth) {
