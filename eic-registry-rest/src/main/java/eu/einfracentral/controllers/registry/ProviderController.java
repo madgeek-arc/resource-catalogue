@@ -285,7 +285,7 @@ public class ProviderController {
     // Get the rejected services of the given Provider.
     @Browse
     @GetMapping(path = "resources/rejected/{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    public ResponseEntity<Paging<ServiceBundle>> getRejectedResources(@PathVariable("id") String providerId, @ApiIgnore @RequestParam MultiValueMap<String, Object> allRequestParams,
+    public ResponseEntity<Paging<?>> getRejectedResources(@PathVariable("id") String providerId, @ApiIgnore @RequestParam MultiValueMap<String, Object> allRequestParams,
                                                                       @ApiIgnore Authentication auth) {
         allRequestParams.add("resource_organisation", providerId);
         allRequestParams.add("status", "rejected resource");

@@ -36,6 +36,7 @@ import java.time.Instant;
 import java.time.ZoneId;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static eu.einfracentral.config.CacheConfig.*;
 import static eu.einfracentral.utils.VocabularyValidationUtils.validateMerilScientificDomains;
@@ -1121,12 +1122,15 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         }
     }
 
-    public Paging<ServiceBundle> getRejectedResources(FacetFilter ff, Authentication auth){
-        List<ServiceBundle> ret = new ArrayList<>();
-        Browsing<ServiceBundle> providerRejectedResources = getResourceBundles(ff, serviceBundleService, auth);
-        ret.addAll(providerRejectedResources.getResults());
-        return new Paging<>(providerRejectedResources.getTotal(), providerRejectedResources.getFrom(),
-                providerRejectedResources.getTo(), ret, providerRejectedResources.getFacets());
+    public Paging<?> getRejectedResources(FacetFilter ff, Authentication auth){
+        Browsing<ServiceBundle> providerRejectedServices = getResourceBundles(ff, serviceBundleService, auth);
+        Browsing<TrainingResourceBundle> providerRejectedTrainingResources = getResourceBundles(ff, trainingResourceService, auth);
+        List<ServiceBundle> rejectedServices = new ArrayList<>(providerRejectedServices.getResults());
+        List<TrainingResourceBundle> rejectedTrainingResources = new ArrayList<>(providerRejectedTrainingResources.getResults());
+        List<?> ret = Stream.concat(rejectedServices.stream(), rejectedTrainingResources.stream()).collect(Collectors.toList());
+        List<Facet> facets = Stream.concat(providerRejectedServices.getFacets().stream(), providerRejectedTrainingResources.getFacets().stream()).collect(Collectors.toList());
+        return new Paging<>(providerRejectedServices.getTotal() + providerRejectedTrainingResources.getTotal(), 0,
+                providerRejectedServices.getTo() + providerRejectedTrainingResources.getTo(), ret, facets);
     }
 
     private <T extends Bundle<?>, I extends ResourceCRUDService<T, Authentication>> Browsing<T> getResourceBundles(FacetFilter ff, I service, Authentication auth) {

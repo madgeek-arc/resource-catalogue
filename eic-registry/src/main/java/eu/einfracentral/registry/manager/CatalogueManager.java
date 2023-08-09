@@ -270,8 +270,6 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
         logger.info("Deleting all Catalogue's Services...");
         deleteCatalogueResources(id, serviceBundleService, securityService.getAdminAccess());
 
-        //TODO: DELETE DATASOURCES?
-
         logger.info("Deleting all Catalogue's Training Resources...");
         deleteCatalogueResources(id, trainingResourceService, securityService.getAdminAccess());
 
