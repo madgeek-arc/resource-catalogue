@@ -16,24 +16,24 @@ import org.springframework.web.bind.annotation.RestController;
 import springfox.documentation.annotations.ApiIgnore;
 
 @RestController
-@RequestMapping({"serviceTemplateBundles"})
-@Api(description = "Operations for Provider Service Templates", tags = {"service-template-bundle-controller"})
-public class ServiceTemplateBundleController {
+@RequestMapping({"resourceTemplateBundles"})
+@Api(description = "Operations for Provider Templates", tags = {"resource-template-bundle-controller"})
+public class ResourceTemplateBundleController {
 
     private final ServiceBundleService<ServiceBundle> serviceBundleService;
     private final TrainingResourceService<TrainingResourceBundle> trainingResourceService;
 
     @Autowired
-    public ServiceTemplateBundleController(ServiceBundleService<ServiceBundle> serviceBundleService,
-                                           TrainingResourceService<TrainingResourceBundle> trainingResourceService) {
+    public ResourceTemplateBundleController(ServiceBundleService<ServiceBundle> serviceBundleService,
+                                            TrainingResourceService<TrainingResourceBundle> trainingResourceService) {
         this.serviceBundleService = serviceBundleService;
         this.trainingResourceService = trainingResourceService;
     }
 
     // Get the Provider's Template (status = "pending provider" or "rejected provider")
     @GetMapping(path = {"templates"}, produces = {MediaType.APPLICATION_JSON_VALUE})
-    public Bundle getProviderTemplate(@RequestParam String id, @ApiIgnore Authentication auth) {
-        Bundle template = serviceBundleService.getResourceTemplate(id, auth);
+    public Bundle<?> getProviderTemplate(@RequestParam String id, @ApiIgnore Authentication auth) {
+        Bundle<?> template = serviceBundleService.getResourceTemplate(id, auth);
         if (template == null) {
             template = trainingResourceService.getResourceTemplate(id, auth);
         }

@@ -598,14 +598,14 @@ public abstract class AbstractServiceBundleManager<T extends ServiceBundle> exte
     }
 
     @Override
-    public ServiceBundle getResourceTemplate(String providerId, Authentication auth) {
+    public Bundle<?> getResourceTemplate(String providerId, Authentication auth) {
         FacetFilter ff = new FacetFilter();
         ff.addFilter("resource_organisation", providerId);
         ff.addFilter("catalogue_id", catalogueName);
-        List<ServiceBundle> allProviderServices = (List<ServiceBundle>) getAll(ff, auth).getResults();
-        for (ServiceBundle serviceBundle : allProviderServices) {
-            if (serviceBundle.getStatus().equals(vocabularyService.get("pending resource").getId())) {
-                return serviceBundle;
+        List<T> allProviderResources = getAll(ff, auth).getResults();
+        for (T resourceBundle : allProviderResources) {
+            if (resourceBundle.getStatus().equals(vocabularyService.get("pending resource").getId())) {
+                return resourceBundle;
             }
         }
         return null;
