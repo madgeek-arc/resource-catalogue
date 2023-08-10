@@ -85,24 +85,9 @@ public class DatasourceManager extends ResourceManager<DatasourceBundle> impleme
         super.add(datasourceBundle, null);
         logger.debug("Adding Datasource for Service: {}", datasourceBundle.getDatasource().getServiceId());
 
-        //TODO: emails, jms
+        //TODO: jms
+        registrationMailService.sendEmailsForDatasourceExtension(datasourceBundle, "post");
         return datasourceBundle;
-    }
-
-    @Override
-    public DatasourceBundle validate(DatasourceBundle datasourceBundle) {
-        String serviceId = datasourceBundle.getDatasource().getServiceId();
-        String catalogueId = datasourceBundle.getDatasource().getCatalogueId();
-
-        DatasourceBundle existingDatasource = get(serviceId, catalogueId);
-        if (existingDatasource != null) {
-            throw new ValidationException(String.format("Service [%s] of the Catalogue [%s] has already a Datasource " +
-                    "registered, with id: [%s]", serviceId, catalogueId, existingDatasource.getId()));
-        }
-
-        // check if Service exists and if User belongs to Resource's Provider Admins
-        ResourceValidationUtils.checkIfResourceBundleIsActiveAndApprovedAndNotPublic(serviceId, catalogueId, serviceBundleService, "service");
-        return super.validate(datasourceBundle);
     }
 
     @Override
@@ -151,9 +136,25 @@ public class DatasourceManager extends ResourceManager<DatasourceBundle> impleme
         resourceService.updateResource(existing);
         logger.debug("Updating Datasource: {}", datasourceBundle);
 
-        //TODO: emails, jms
-
+        //TODO: jms
+        registrationMailService.sendEmailsForDatasourceExtension(datasourceBundle, "put");
         return datasourceBundle;
+    }
+
+    @Override
+    public DatasourceBundle validate(DatasourceBundle datasourceBundle) {
+        String serviceId = datasourceBundle.getDatasource().getServiceId();
+        String catalogueId = datasourceBundle.getDatasource().getCatalogueId();
+
+        DatasourceBundle existingDatasource = get(serviceId, catalogueId);
+        if (existingDatasource != null) {
+            throw new ValidationException(String.format("Service [%s] of the Catalogue [%s] has already a Datasource " +
+                    "registered, with id: [%s]", serviceId, catalogueId, existingDatasource.getId()));
+        }
+
+        // check if Service exists and if User belongs to Resource's Provider Admins
+        ResourceValidationUtils.checkIfResourceBundleIsActiveAndApprovedAndNotPublic(serviceId, catalogueId, serviceBundleService, "service");
+        return super.validate(datasourceBundle);
     }
 
     public DatasourceBundle verifyDatasource(String id, String status, Boolean active, Authentication auth) {

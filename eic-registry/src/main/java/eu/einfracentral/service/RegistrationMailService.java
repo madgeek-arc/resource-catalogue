@@ -1052,6 +1052,24 @@ public class RegistrationMailService {
         sendMailsFromTemplate("invalidTrainingResourceUpdate.ftl", root, subject, registrationEmail, userRole);
     }
 
+    public void sendEmailsForDatasourceExtension(DatasourceBundle datasourceBundle, String action){
+        Map<String, Object> root = new HashMap<>();
+        root.put("project", projectName);
+        root.put("endpoint", endpoint);
+        root.put("datasourceBundle", datasourceBundle);
+        root.put("action", action);
+
+        // send emails
+        String userRole = "admin";
+        String subject = "";
+        if (action.equals("post")){
+            subject = String.format("[%s Portal] The Service [%s] has created a new Datasource Extension", projectName, datasourceBundle.getDatasource().getServiceId());
+        } else{
+            subject = String.format("[%s Portal] The Service [%s] updated its Datasource Extension", projectName, datasourceBundle.getDatasource().getServiceId());
+        }
+        sendMailsFromTemplate("serviceExtensionsDatasource.ftl", root, subject, registrationEmail, userRole);
+    }
+
     public void sendEmailsForHelpdeskExtension(HelpdeskBundle helpdeskBundle, String resourceType, String action){
         String resourceName = getResourceNameFromResourceType(resourceType);
         Map<String, Object> root = new HashMap<>();
