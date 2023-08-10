@@ -124,7 +124,7 @@ public class DatasourceController {
 
     // Deletes the Datasource of the specific Service of the specific Catalogue.
     @ApiOperation(value = "Deletes the Datasource of the specific Service of the specific Catalogue.")
-    @DeleteMapping(path = "/helpdesk/{catalogueId}/{serviceId}", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @DeleteMapping(path = "/datasource/{catalogueId}/{serviceId}", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth, #serviceId, #catalogueId)")
     public ResponseEntity<Datasource> deleteDatasource(@PathVariable("catalogueId") String catalogueId,
                                                        @PathVariable("serviceId") String serviceId,

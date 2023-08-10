@@ -64,7 +64,6 @@ public class DatasourceManager extends ResourceManager<DatasourceBundle> impleme
 
     @Override
     public DatasourceBundle add(DatasourceBundle datasourceBundle, Authentication auth) {
-        validate(datasourceBundle);
 
         // if Datasource has ID -> check if it exists in OpenAIRE Datasources list
         if (datasourceBundle.getId() != null && !datasourceBundle.getId().equals("")){
@@ -72,6 +71,8 @@ public class DatasourceManager extends ResourceManager<DatasourceBundle> impleme
         }
         datasourceBundle.setId(UUID.randomUUID().toString());
         logger.trace("User '{}' is attempting to add a new Datasource: {}", auth, datasourceBundle);
+
+        validate(datasourceBundle);
 
         datasourceBundle.setMetadata(Metadata.createMetadata(User.of(auth).getFullName(), User.of(auth).getEmail()));
         List<LoggingInfo> loggingInfoList = commonMethods.returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(datasourceBundle, auth);
@@ -115,7 +116,7 @@ public class DatasourceManager extends ResourceManager<DatasourceBundle> impleme
             throw new ValidationException("There are no changes in the Datasource", HttpStatus.OK);
         }
 
-        validate(datasourceBundle);
+        super.validate(datasourceBundle);
         datasourceBundle.setMetadata(Metadata.updateMetadata(datasourceBundle.getMetadata(), User.of(auth).getFullName(), User.of(auth).getEmail()));
         List<LoggingInfo> loggingInfoList = commonMethods.returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(datasourceBundle, auth);
         LoggingInfo loggingInfo = commonMethods.createLoggingInfo(auth, LoggingInfo.Types.UPDATE.getKey(),
