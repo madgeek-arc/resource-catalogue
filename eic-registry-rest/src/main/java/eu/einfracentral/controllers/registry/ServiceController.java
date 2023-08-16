@@ -96,16 +96,6 @@ public class ServiceController {
         return new ResponseEntity<>(serviceBundleService.get(id, catalogueId).getService(), HttpStatus.OK);
     }
 
-    // Get the specified version of a RichService providing the Service id
-    @GetMapping(path = "rich/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("@securityService.resourceIsActive(#id, #catalogueId) or hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') " +
-            "or @securityService.isResourceProviderAdmin(#auth, #id)")
-    public ResponseEntity<RichResource> getRichService(@PathVariable("id") String id,
-                                                       @RequestParam(defaultValue = "${project.catalogue.name}", name = "catalogue_id") String catalogueId,
-                                                       @ApiIgnore Authentication auth) {
-        return new ResponseEntity<>(serviceBundleService.getRichResource(id, catalogueId, auth), HttpStatus.OK);
-    }
-
     @ApiOperation(value = "Creates a new Resource.")
     @PostMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.providerCanAddResources(#auth, #service)")
@@ -171,18 +161,6 @@ public class ServiceController {
 
     }
 
-    // Filter a list of Services based on a set of filters or get a list of all Services in the Catalogue.
-    @Browse
-    @GetMapping(path = "/rich/all", produces = {MediaType.APPLICATION_JSON_VALUE})
-    public ResponseEntity<Paging<?>> getRichServices(@ApiIgnore @RequestParam MultiValueMap<String, Object> allRequestParams,
-                                                     @RequestParam(defaultValue = "all", name = "catalogue_id") String catalogueId,
-                                                     @ApiIgnore Authentication auth) {
-        FacetFilter ff = serviceBundleService.createFacetFilterForFetchingServices(allRequestParams, catalogueId);
-        ff.addFilter("active", true);
-        Paging<RichResource> services = serviceBundleService.getRichResources(ff, auth);
-        return ResponseEntity.ok(services);
-    }
-
     @GetMapping(path = "/childrenFromParent", produces = {MediaType.APPLICATION_JSON_VALUE})
     public List<String> getChildrenFromParent(@RequestParam String type, @RequestParam String parent, @ApiIgnore Authentication auth) {
         NamedParameterJdbcTemplate namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(commonDataSource);
@@ -208,17 +186,7 @@ public class ServiceController {
     @GetMapping(path = "byID/{ids}", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<List<Service>> getSomeServices(@PathVariable("ids") String[] ids, @ApiIgnore Authentication auth) {
         return ResponseEntity.ok(
-                serviceBundleService.getByIds(auth, ids) // FIXME: create method that returns Services instead of RichServices
-                        .stream().map(RichResource::getService).collect(Collectors.toList()));
-    }
-
-    // Get a list of RichServices based on a set of ids.
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "ids", value = "Comma-separated list of Resource ids", dataType = "string", paramType = "path")
-    })
-    @GetMapping(path = "rich/byID/{ids}", produces = {MediaType.APPLICATION_JSON_VALUE})
-    public ResponseEntity<List<RichResource>> getSomeRichServices(@PathVariable String[] ids, @ApiIgnore Authentication auth) {
-        return ResponseEntity.ok(serviceBundleService.getByIds(auth, ids));
+                serviceBundleService.getByIds(auth, ids).stream().map(ServiceBundle::getService).collect(Collectors.toList()));
     }
 
     @ApiOperation(value = "Get all Resources in the catalogue organized by an attribute, e.g. get Resources organized in categories.")

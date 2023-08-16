@@ -181,10 +181,6 @@ public class PendingServiceManager extends ResourceManager<ServiceBundle> implem
         return transformToActive(serviceBundle, auth);
     }
 
-    public Object getPendingRich(String id, Authentication auth) {
-        return serviceBundleService.createRichResource(get(id), auth);
-    }
-
     public List<ServiceBundle> getMy(Authentication auth) {
         List<ServiceBundle> re = new ArrayList<>();
         return re;

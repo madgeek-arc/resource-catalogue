@@ -47,15 +47,6 @@ public interface PendingResourceService<T extends Bundle> extends ResourceServic
     T transformToActive(String id, Authentication auth);
 
     /**
-     * Create a Rich Object from a Pending Resource
-     *
-     * @param id
-     * @param auth
-     * @return
-     */
-    Object getPendingRich(String id, Authentication auth);
-
-    /**
      * Get the id using the originalId of the resource.
      *
      * @param originalId

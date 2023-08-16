@@ -66,10 +66,6 @@
 //        return new ResponseEntity<>(pendingDatasourceManager.get(id).getDatasource(), HttpStatus.OK);
 //    }
 //
-//    @GetMapping(path = "/rich/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
-//    public ResponseEntity<RichResource> getPendingRich(@PathVariable("id") String id, Authentication auth) {
-//        return new ResponseEntity<>((RichResource) pendingDatasourceManager.getPendingRich(id, auth), HttpStatus.OK);
-//    }
 //
 //    @Browse
 //    @GetMapping(path = "/byProvider/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})

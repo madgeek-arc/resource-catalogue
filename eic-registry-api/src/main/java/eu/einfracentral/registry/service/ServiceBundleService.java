@@ -81,45 +81,12 @@ public interface ServiceBundleService<T> extends ResourceCRUDService<T, Authenti
     Map<String, List<T>> getBy(String field, Authentication auth) throws NoSuchFieldException;
 
     /**
-     * Get RichResources with the specified ids.
+     * Get Services with the specified ids.
      *
      * @param ids
      * @return
      */
-    List<RichResource> getByIds(Authentication authentication, String... ids);
-
-    /**
-     * Gets all Resources with extra fields like views and ratings
-     *
-     * @param ff
-     * @return
-     */
-    Paging<RichResource> getRichResources(FacetFilter ff, Authentication auth);
-
-    /**
-     * Gets the specific Resource with extra fields like views and ratings
-     *
-     * @param id
-     * @param catalogueId
-     * @param auth
-     * @return
-     */
-    RichResource getRichResource(String id, String catalogueId, Authentication auth);
-
-    /**
-     * Creates a RichResource for the specific Resource
-     *
-     * @return
-     */
-    RichResource createRichResource(T resourceBundle, Authentication auth);
-
-    /**
-     * Creates RichResources for a list of given Resources
-     *
-     * @return
-     */
-    List<RichResource> createRichResources(List<T> resourceBundleList, Authentication auth);
-
+    List<ServiceBundle> getByIds(Authentication authentication, String... ids);
 
     /**
      * Check if the Resource exists.

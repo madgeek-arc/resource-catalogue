@@ -84,12 +84,6 @@ public class SecureResponseAdvice<T> implements ResponseBodyAdvice<T> {
             modifyTrainingResource(t, auth);
         } else if (t instanceof InteroperabilityRecordBundle) {
             modifyInteroperabilityRecordBundle(t, auth);
-        } else if (t instanceof RichResource) {
-            if (((RichResource) t).getTrainingResource() != null) {
-                modifyRichTrainingResource(t, auth);
-            } else {
-                modifyRichService(t, auth);
-            }
         } else if (t instanceof LoggingInfo) {
             modifyLoggingInfo(t);
         }
@@ -144,23 +138,6 @@ public class SecureResponseAdvice<T> implements ResponseBodyAdvice<T> {
 
         if (!this.securityService.isResourceProviderAdmin(auth, ((InteroperabilityRecordBundle) interoperabilityRecordBundle).getId(), ((InteroperabilityRecordBundle) interoperabilityRecordBundle).getInteroperabilityRecord().getCatalogueId())) {
             ((InteroperabilityRecordBundle) interoperabilityRecordBundle).getMetadata().setTerms(null);
-        }
-    }
-
-    private void modifyRichService(T richResource, Authentication auth) {
-        if (((RichResource) richResource).getService() != null) {
-            if (!this.securityService.isResourceProviderAdmin(auth, ((RichResource) richResource).getService().getId(), ((RichResource) richResource).getService().getCatalogueId())) {
-                ((RichResource) richResource).getService().setMainContact(null);
-                ((RichResource) richResource).getService().setSecurityContactEmail(null);
-                ((RichResource) richResource).getMetadata().setTerms(null);
-            }
-        }
-    }
-
-    private void modifyRichTrainingResource(T richTrainingResource, Authentication auth) {
-        if (!this.securityService.isResourceProviderAdmin(auth, ((RichResource) richTrainingResource).getTrainingResource().getId(), ((RichResource) richTrainingResource).getTrainingResource().getCatalogueId())) {
-            ((RichResource) richTrainingResource).getTrainingResource().setContact(null);
-            ((RichResource) richTrainingResource).getMetadata().setTerms(null);
         }
     }
 

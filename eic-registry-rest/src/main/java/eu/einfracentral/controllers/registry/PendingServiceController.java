@@ -71,11 +71,6 @@ public class PendingServiceController extends ResourceController<ServiceBundle, 
         return new ResponseEntity<>(pendingServiceManager.get(id).getService(), HttpStatus.OK);
     }
 
-    @GetMapping(path = "/rich/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
-    public ResponseEntity<RichResource> getPendingRich(@PathVariable("id") String id, Authentication auth) {
-        return new ResponseEntity<>((RichResource) pendingServiceManager.getPendingRich(id, auth), HttpStatus.OK);
-    }
-
     @Browse
     @GetMapping(path = "/byProvider/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isProviderAdmin(#auth,#id,true)")

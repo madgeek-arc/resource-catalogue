@@ -78,7 +78,7 @@ public interface TrainingResourceService<T> extends ResourceService<T, Authentic
     Map<String, List<T>> getBy(String field, Authentication auth) throws NoSuchFieldException;
 
     /**
-     * Get RichResources with the specified ids.
+     * Get Services with the specified ids.
      *
      * @param ids
      * @return

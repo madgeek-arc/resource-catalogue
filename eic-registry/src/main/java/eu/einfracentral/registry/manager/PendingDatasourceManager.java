@@ -188,10 +188,6 @@
 //        return transformToActive(datasourceBundle, auth);
 //    }
 //
-//    public Object getPendingRich(String id, Authentication auth) {
-//        return serviceBundleService.createRichResource(get(id), auth);
-//    }
-//
 //    public List<DatasourceBundle> getMy(Authentication auth) {
 //        List<DatasourceBundle> re = new ArrayList<>();
 //        return re;
