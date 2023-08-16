@@ -273,7 +273,10 @@ public class FieldValidator {
             huc = (HttpURLConnection) urlForValidation.openConnection();
             assert huc != null;
             huc.setRequestMethod("HEAD");
+            huc.setConnectTimeout(5000);
             statusCode = huc.getResponseCode();
+        } catch (java.net.SocketTimeoutException e) {
+            throw new ValidationException("URI provided is not valid, or takes too long to load. Found in field " + field.getName());
         } catch (IOException e) {
             logger.trace(e.getMessage());
         }

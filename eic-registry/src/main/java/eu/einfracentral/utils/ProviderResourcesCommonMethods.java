@@ -144,13 +144,15 @@ public class ProviderResourcesCommonMethods {
             }
             if (resourceProviders != null && !resourceProviders.isEmpty()) {
                 for (String resourceProvider : resourceProviders) {
-                    try {
-                        //FIXME: get(resourceTypeName, id) won't work as intended if there are 2 or more resources with the same ID
-                        ProviderBundle providerBundle = genericResourceService.get("provider", resourceProvider);
-                        if (!providerBundle.getMetadata().isPublished() && !providerBundle.getProvider().getCatalogueId().equals(catalogueId)) {
-                            throw new ValidationException("Cross Catalogue reference is prohibited. Found in field 'resourceProviders");
-                        }
-                    } catch (ResourceNotFoundException e) {}
+                    if (resourceProvider != null && !resourceProvider.equals("")) {
+                        try {
+                            //FIXME: get(resourceTypeName, id) won't work as intended if there are 2 or more resources with the same ID
+                            ProviderBundle providerBundle = genericResourceService.get("provider", resourceProvider);
+                            if (!providerBundle.getMetadata().isPublished() && !providerBundle.getProvider().getCatalogueId().equals(catalogueId)) {
+                                throw new ValidationException("Cross Catalogue reference is prohibited. Found in field 'resourceProviders");
+                            }
+                        } catch (ResourceNotFoundException e) {}
+                    }
                 }
             }
             if (requiredResources != null && !requiredResources.isEmpty()) {
