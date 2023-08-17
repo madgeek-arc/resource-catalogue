@@ -218,6 +218,7 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
 
         catalogue.setActive(ex.isActive());
         catalogue.setStatus(ex.getStatus());
+        catalogue.setSuspended(ex.isSuspended());
         existing.setPayload(serialize(catalogue));
         existing.setResourceType(resourceType);
         resourceService.updateResource(existing);

@@ -197,6 +197,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         }
         provider.setActive(ex.isActive());
         provider.setStatus(ex.getStatus());
+        provider.setSuspended(ex.isSuspended());
         existing.setPayload(serialize(provider));
         existing.setResourceType(resourceType);
         resourceService.updateResource(existing);

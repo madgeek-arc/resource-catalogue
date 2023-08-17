@@ -295,6 +295,7 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
         // set active/status
         trainingResourceBundle.setActive(existingTrainingResourceBundle.isActive());
         trainingResourceBundle.setStatus(existingTrainingResourceBundle.getStatus());
+        trainingResourceBundle.setSuspended(existingTrainingResourceBundle.isSuspended());
 
         // if Resource's status = "rejected resource", update to "pending resource" & Provider templateStatus to "pending template"
         if (existingTrainingResourceBundle.getStatus().equals(vocabularyService.get("rejected resource").getId())) {
