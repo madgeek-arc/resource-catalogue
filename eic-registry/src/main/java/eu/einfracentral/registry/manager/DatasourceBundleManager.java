@@ -243,6 +243,7 @@ public class DatasourceBundleManager extends AbstractResourceBundleManager<Datas
         // set active/status
         datasourceBundle.setActive(existingDatasource.isActive());
         datasourceBundle.setStatus(existingDatasource.getStatus());
+        datasourceBundle.setSuspended(existingDatasource.isSuspended());
 
         // if Resource's status = "rejected resource", update to "pending resource" & Provider templateStatus to "pending template"
         if (existingDatasource.getStatus().equals(vocabularyService.get("rejected resource").getId())){
