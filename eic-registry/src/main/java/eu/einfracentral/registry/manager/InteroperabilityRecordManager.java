@@ -180,6 +180,7 @@ public class InteroperabilityRecordManager extends ResourceManager<Interoperabil
         // active/status
         interoperabilityRecordBundle.setActive(existingInteroperabilityRecord.isActive());
         interoperabilityRecordBundle.setStatus(existingInteroperabilityRecord.getStatus());
+        interoperabilityRecordBundle.setSuspended(existingInteroperabilityRecord.isSuspended());
 
         // updated && created
         interoperabilityRecordBundle.getInteroperabilityRecord().setCreated(existingInteroperabilityRecord.getInteroperabilityRecord().getCreated());

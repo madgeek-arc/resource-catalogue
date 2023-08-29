@@ -230,6 +230,7 @@ public class ServiceBundleManager extends AbstractResourceBundleManager<ServiceB
         // set active/status
         serviceBundle.setActive(existingService.isActive());
         serviceBundle.setStatus(existingService.getStatus());
+        serviceBundle.setSuspended(existingService.isSuspended());
 
         // if Resource's status = "rejected resource", update to "pending resource" & Provider templateStatus to "pending template"
         if (existingService.getStatus().equals(vocabularyService.get("rejected resource").getId())) {
