@@ -69,22 +69,19 @@ public class DatasourceController {
 
     @ApiOperation(value = "Filter a list of Datasources based on a set of filters or get a list of all Datasources in the Catalogue.")
     @Browse
+    @ApiImplicitParam(name = "suspended", value = "Suspended", defaultValue = "false", dataType = "boolean", paramType = "query")
     @GetMapping(path = "/all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    public ResponseEntity<Paging<Datasource>> getAllDatasources(@ApiIgnore @RequestParam Map<String, Object> allRequestParams,
-                                                                @RequestParam(defaultValue = "all", name = "catalogue_id") String catalogueIds,
+    public ResponseEntity<Paging<Datasource>> getAllDatasources(@ApiIgnore @RequestParam MultiValueMap<String, Object> allRequestParams,
+                                                                @RequestParam(defaultValue = "all", name = "catalogue_id") String catalogueId,
                                                                 @ApiIgnore Authentication auth) {
-        allRequestParams.putIfAbsent("catalogue_id", catalogueIds);
-        if (catalogueIds != null && catalogueIds.equals("all")) {
-            allRequestParams.remove("catalogue_id");
-        }
-        FacetFilter ff = FacetFilterUtils.createFacetFilter(allRequestParams);
+        FacetFilter ff = datasourceService.createFacetFilterForFetchingDatasources(allRequestParams, catalogueId);
         List<Datasource> datasourceList = new LinkedList<>();
-        Paging<DatasourceBundle> datasourceBundlePaging = datasourceService.getAll(ff, auth);
-        for (DatasourceBundle datasourceBundle : datasourceBundlePaging.getResults()) {
+        Paging<DatasourceBundle> paging = genericResourceService.getResults(ff);
+        for (DatasourceBundle datasourceBundle : paging.getResults()) {
             datasourceList.add(datasourceBundle.getDatasource());
         }
-        Paging<Datasource> datasourcePaging = new Paging<>(datasourceBundlePaging.getTotal(), datasourceBundlePaging.getFrom(),
-                datasourceBundlePaging.getTo(), datasourceList, datasourceBundlePaging.getFacets());
+        Paging<Datasource> datasourcePaging = new Paging<>(paging.getTotal(), paging.getFrom(),
+                paging.getTo(), datasourceList, paging.getFacets());
         return new ResponseEntity<>(datasourcePaging, HttpStatus.OK);
     }
 

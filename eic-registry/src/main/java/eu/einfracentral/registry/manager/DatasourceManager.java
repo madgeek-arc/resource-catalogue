@@ -228,7 +228,7 @@ public class DatasourceManager extends ResourceManager<DatasourceBundle> impleme
         allRequestParams.remove("catalogue_id");
         if (catalogueId != null){
             if (!catalogueId.equals("all")){
-                ff.addFilter("datasource", catalogueId);
+                ff.addFilter("catalogue_id", catalogueId);
             }
         }
         ff.addFilter("published", false);
