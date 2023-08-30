@@ -6,7 +6,6 @@ import eu.einfracentral.registry.service.ServiceBundleService;
 import eu.einfracentral.registry.service.PendingResourceService;
 import eu.einfracentral.registry.service.VocabularyService;
 import eu.einfracentral.service.IdCreator;
-import eu.einfracentral.service.SecurityService;
 import eu.einfracentral.utils.ProviderResourcesCommonMethods;
 import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.domain.Paging;
@@ -140,9 +139,6 @@ public class PendingServiceManager extends ResourceManager<ServiceBundle> implem
         LoggingInfo loggingInfo = commonMethods.createLoggingInfo(auth, LoggingInfo.Types.ONBOARD.getKey(),
                 LoggingInfo.ActionType.REGISTERED.getKey());
         loggingInfoList.add(loggingInfo);
-
-        // serviceType
-        serviceBundleManager.createResourceExtras(serviceBundle, "service_type-service");
 
         // set resource status according to Provider's templateStatus
         if (providerManager.get(serviceBundle.getService().getResourceOrganisation()).getTemplateStatus().equals("approved template")){

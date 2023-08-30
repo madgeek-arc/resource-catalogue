@@ -97,7 +97,7 @@ public class PublicServiceController {
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(10000);
         ff.addFilter("published", true);
-        ff.setResourceType("resources");
+        ff.setResourceType("service");
         ff.addOrderBy("name", "asc");
         if (auth == null) {
             throw new UnauthorizedUserException("Please log in.");

@@ -413,7 +413,7 @@ public class ProviderResourcesCommonMethods {
 
     public Bundle<?> getPublicResourceViaPID(String resourceType, String pid) {
         List<String> resourceTypes = Arrays.asList("catalogue", "provider", "service", "datasource",
-                "training_resource", "interoperability_record", "resources");
+                "training_resource", "interoperability_record");
         if (!resourceTypes.contains(resourceType)) {
             throw new ValidationException("The resource type you provided does not exist -> " + resourceType);
         }

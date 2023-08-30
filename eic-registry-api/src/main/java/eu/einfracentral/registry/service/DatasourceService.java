@@ -4,12 +4,22 @@ import eu.einfracentral.domain.Datasource;
 import eu.einfracentral.domain.DatasourceBundle;
 import eu.openminted.registry.core.domain.FacetFilter;
 import org.springframework.security.core.Authentication;
+import org.springframework.util.MultiValueMap;
 
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
 public interface DatasourceService<T, U extends Authentication> extends ResourceService<T, Authentication> {
+
+    /**
+     * Get the Datasource sub-profile of the specific Service of the specific Catalogue
+     *
+     * @param serviceId - The ID of the Service
+     * @param catalogueId - The ID of the Catalogue
+     * @return {@link DatasourceBundle}
+     */
+    DatasourceBundle get(String serviceId, String catalogueId);
 
     /**
      * Get a list of all registered OpenAIRE Datasources.
@@ -39,4 +49,13 @@ public interface DatasourceService<T, U extends Authentication> extends Resource
      * @return {@link DatasourceBundle}
      */
     DatasourceBundle verifyDatasource(String id, String status, Boolean active, Authentication auth);
+
+    /**
+     * Create a FacetFilter for fetching Datasources
+     *
+     * @param allRequestParams - All the @RequestParams given
+     * @param catalogueId - The ID of the Catalogue
+     * @return {@link FacetFilter}
+     */
+    FacetFilter createFacetFilterForFetchingDatasources(MultiValueMap<String, Object> allRequestParams, String catalogueId);
 }

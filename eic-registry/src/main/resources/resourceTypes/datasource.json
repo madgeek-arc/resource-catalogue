@@ -123,7 +123,7 @@
   ],
   "indexMapperClass": "eu.openminted.registry.core.index.DefaultIndexMapper",
   "name": "datasource",
-  "aliasGroup": "resources",
+  "aliasGroup": "resourceTypes",
   "payloadType": "xml",
   "properties": {
     "class": "eu.einfracentral.domain.DatasourceBundle"

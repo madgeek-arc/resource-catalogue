@@ -306,7 +306,6 @@ public class ServiceController {
     public ResponseEntity<Paging<?>> getRandomResources(@ApiIgnore @RequestParam Map<String, Object> allRequestParams,
                                                         @ApiIgnore Authentication auth) {
         FacetFilter ff = FacetFilterUtils.createFacetFilter(allRequestParams);
-        allRequestParams.remove("type");
         ff.setQuantity(allRequestParams.get("quantity") != null ? Integer.parseInt((String) allRequestParams.remove("quantity")) : 10);
         ff.setFilter(allRequestParams);
         ff.addFilter("status", "approved resource");

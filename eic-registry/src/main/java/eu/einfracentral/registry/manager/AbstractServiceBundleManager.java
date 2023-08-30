@@ -1,9 +1,6 @@
 package eu.einfracentral.registry.manager;
 
 import eu.einfracentral.domain.*;
-import eu.einfracentral.dto.Category;
-import eu.einfracentral.dto.ProviderInfo;
-import eu.einfracentral.dto.ScientificDomain;
 import eu.einfracentral.exception.ResourceException;
 import eu.einfracentral.exception.ResourceNotFoundException;
 import eu.einfracentral.exception.ValidationException;
@@ -550,7 +547,7 @@ public abstract class AbstractServiceBundleManager<T extends ServiceBundle> exte
         ((MultiValueMap<String, Object>) ff2.getFilter().get("multi-filter")).remove("auditState");
         ff2.setQuantity(maxQuantity);
         ff2.setFrom(0);
-        ff2.setResourceType("resources");
+        ff2.setResourceType("service");
         Paging<T> retPaging;
         Paging<T> allResults = genericResourceService.getResults(ff2);
         List<T> ret = new ArrayList<>();
@@ -762,28 +759,26 @@ public abstract class AbstractServiceBundleManager<T extends ServiceBundle> exte
     public FacetFilter createFacetFilterForFetchingServices(Map<String, Object> allRequestParams, String catalogueId){
         FacetFilter ff = FacetFilterUtils.createFacetFilter(allRequestParams);
         allRequestParams.remove("catalogue_id");
-        allRequestParams.remove("type");
         if (catalogueId != null){
             if (!catalogueId.equals("all")){
                 ff.addFilter("catalogue_id", catalogueId);
             }
         }
         ff.addFilter("published", false);
-        ff.setResourceType("resources");
+        ff.setResourceType("service");
         return ff;
     }
 
     public FacetFilter createFacetFilterForFetchingServices(MultiValueMap<String, Object> allRequestParams, String catalogueId){
         FacetFilter ff = FacetFilterUtils.createMultiFacetFilter(allRequestParams);
         allRequestParams.remove("catalogue_id");
-        allRequestParams.remove("type");
         if (catalogueId != null){
             if (!catalogueId.equals("all")){
                 ff.addFilter("catalogue_id", catalogueId);
             }
         }
         ff.addFilter("published", false);
-        ff.setResourceType("resources");
+        ff.setResourceType("service");
         return ff;
     }
 
@@ -807,15 +802,5 @@ public abstract class AbstractServiceBundleManager<T extends ServiceBundle> exte
         ff.addFilter("published", false);
         List<ProviderBundle> allProviders = providerService.getAll(ff, securityService.getAdminAccess()).getResults();
         return allProviders.stream().map(Bundle::getId).collect(Collectors.toList());
-    }
-
-    public void createResourceExtras(T serviceBundle, String serviceType){
-        if (serviceBundle.getResourceExtras() == null){
-            ResourceExtras resourceExtras = new ResourceExtras();
-            resourceExtras.setServiceType(serviceType);
-            serviceBundle.setResourceExtras(resourceExtras);
-        } else {
-            serviceBundle.getResourceExtras().setServiceType(serviceType);
-        }
     }
 }

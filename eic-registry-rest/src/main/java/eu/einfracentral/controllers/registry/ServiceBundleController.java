@@ -104,7 +104,6 @@ public class ServiceBundleController {
     @GetMapping(path = "all", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     public ResponseEntity<Paging<?>> getAll(@RequestParam(defaultValue = "all", name = "catalogue_id") String catalogueId,
-                                            @RequestParam(defaultValue = "service", name = "type") String type,
                                             @ApiIgnore @RequestParam Map<String, Object> allRequestParams,
                                             @ApiIgnore Authentication authentication) {
         FacetFilter ff = serviceBundleService.createFacetFilterForFetchingServices(allRequestParams, catalogueId);

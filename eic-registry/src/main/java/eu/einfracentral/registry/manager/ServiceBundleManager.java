@@ -45,6 +45,7 @@ public class ServiceBundleManager extends AbstractServiceBundleManager<ServiceBu
     private final CatalogueService<CatalogueBundle, Authentication> catalogueService;
     private final PublicServiceManager publicServiceManager;
     private final MigrationService migrationService;
+    private final DatasourceService<DatasourceBundle, Authentication> datasourceService;
     private final ProviderResourcesCommonMethods commonMethods;
 
     @Value("${project.catalogue.name}")
@@ -58,6 +59,7 @@ public class ServiceBundleManager extends AbstractServiceBundleManager<ServiceBu
                                 CatalogueService<CatalogueBundle, Authentication> catalogueService,
                                 @Lazy PublicServiceManager publicServiceManager,
                                 @Lazy MigrationService migrationService,
+                                @Lazy DatasourceService datasourceService,
                                 ProviderResourcesCommonMethods commonMethods) {
         super(ServiceBundle.class);
         this.providerService = providerService; // for providers
@@ -68,6 +70,7 @@ public class ServiceBundleManager extends AbstractServiceBundleManager<ServiceBu
         this.catalogueService = catalogueService;
         this.publicServiceManager = publicServiceManager;
         this.migrationService = migrationService;
+        this.datasourceService = datasourceService;
         this.commonMethods = commonMethods;
     }
 
@@ -141,9 +144,6 @@ public class ServiceBundleManager extends AbstractServiceBundleManager<ServiceBu
 
         // LoggingInfo
         serviceBundle.setLoggingInfo(loggingInfoList);
-
-        // serviceType
-        createResourceExtras(serviceBundle, "service_type-service");
 
         logger.info("Adding Service: {}", serviceBundle);
         ServiceBundle ret;
@@ -587,6 +587,11 @@ public class ServiceBundleManager extends AbstractServiceBundleManager<ServiceBu
         commonMethods.suspensionValidation(serviceBundle, catalogueId,
                 serviceBundle.getService().getResourceOrganisation(), suspend, auth);
         commonMethods.suspendResource(serviceBundle, catalogueId, suspend, auth);
+        // if Service had a Datasource sub-profile, suspend it too
+        DatasourceBundle datasourceBundle = datasourceService.get(serviceId, catalogueId);
+        if (datasourceBundle != null) {
+            commonMethods.suspendResource(datasourceBundle, catalogueId, suspend, auth);
+        }
         return super.update(serviceBundle, auth);
     }
 

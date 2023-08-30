@@ -36,7 +36,7 @@ public abstract class AbstractPublicResourceManager<T extends Identifiable> exte
         return new ArrayList<>(transformed);
     }
 
-    protected void updateResourceIdsToPublic(ServiceBundle serviceBundle) {
+    protected void updateServiceIdsToPublic(ServiceBundle serviceBundle) {
         List<String> allCatalogueIds = getAllCatalogueIds();
         // Resource Organisation
         serviceBundle.getService().setResourceOrganisation(
@@ -64,6 +64,14 @@ public abstract class AbstractPublicResourceManager<T extends Identifiable> exte
                         serviceBundle.getService().getRequiredResources(),
                         serviceBundle.getService().getCatalogueId(),
                         allCatalogueIds));
+    }
+
+    protected void updateDatasourceIdsToPublic(DatasourceBundle datasourceBundle) {
+        // serviceId
+        datasourceBundle.getDatasource().setServiceId(
+                String.format("%s.%s",
+                        datasourceBundle.getDatasource().getCatalogueId(),
+                        datasourceBundle.getDatasource().getServiceId()));
     }
 
     protected void updateTrainingResourceIdsToPublic(TrainingResourceBundle trainingResourceBundle) {

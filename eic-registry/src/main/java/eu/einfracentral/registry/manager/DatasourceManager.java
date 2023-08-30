@@ -8,6 +8,7 @@ import eu.einfracentral.exception.ValidationException;
 import eu.einfracentral.registry.service.*;
 import eu.einfracentral.service.RegistrationMailService;
 import eu.einfracentral.service.SecurityService;
+import eu.einfracentral.utils.FacetFilterUtils;
 import eu.einfracentral.utils.ProviderResourcesCommonMethods;
 import eu.einfracentral.utils.ResourceValidationUtils;
 import eu.openminted.registry.core.domain.FacetFilter;
@@ -22,6 +23,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.http.*;
 import org.springframework.security.core.Authentication;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.*;
@@ -57,7 +59,12 @@ public class DatasourceManager extends ResourceManager<DatasourceBundle> impleme
         return "datasource";
     }
 
-    private DatasourceBundle get(String serviceId, String catalogueId) {
+    public  DatasourceBundle get(String datasourceId) {
+        Resource res = where(false, new SearchService.KeyValue("resource_internal_id", datasourceId));
+        return res != null ? deserialize(res) : null;
+    }
+
+    public  DatasourceBundle get(String serviceId, String catalogueId) {
         Resource res = where(false, new SearchService.KeyValue("service_id", serviceId), new SearchService.KeyValue("catalogue_id", catalogueId));
         return res != null ? deserialize(res) : null;
     }
@@ -72,7 +79,7 @@ public class DatasourceManager extends ResourceManager<DatasourceBundle> impleme
         datasourceBundle.setId(UUID.randomUUID().toString());
         logger.trace("User '{}' is attempting to add a new Datasource: {}", auth, datasourceBundle);
 
-        validate(datasourceBundle);
+        this.validate(datasourceBundle);
 
         datasourceBundle.setMetadata(Metadata.createMetadata(User.of(auth).getFullName(), User.of(auth).getEmail()));
         List<LoggingInfo> loggingInfoList = commonMethods.returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(datasourceBundle, auth);
@@ -164,6 +171,13 @@ public class DatasourceManager extends ResourceManager<DatasourceBundle> impleme
         }
         logger.trace("Verifying Datasource with id: '{}' | status -> '{}' | active -> '{}'", id, status, active);
         DatasourceBundle datasourceBundle = get(id);
+
+        // Verify that Service is Approved before proceeding
+        if (!serviceBundleService.get(datasourceBundle.getDatasource().getServiceId(), datasourceBundle.getDatasource().getCatalogueId()).getStatus().equals("approved resource")
+                && status.equals("approved datasource")) {
+            throw new ValidationException("You cannot approve a Datasource when its Service is in Pending or Rejected state");
+        }
+
         datasourceBundle.setStatus(vocabularyService.get(status).getId());
 
         List<LoggingInfo> loggingInfoList = commonMethods.returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(datasourceBundle, auth);
@@ -209,6 +223,18 @@ public class DatasourceManager extends ResourceManager<DatasourceBundle> impleme
         logger.debug("Deleting Datasource: {}", datasourceBundle);
     }
 
+    public FacetFilter createFacetFilterForFetchingDatasources(MultiValueMap<String, Object> allRequestParams, String catalogueId){
+        FacetFilter ff = FacetFilterUtils.createMultiFacetFilter(allRequestParams);
+        allRequestParams.remove("catalogue_id");
+        if (catalogueId != null){
+            if (!catalogueId.equals("all")){
+                ff.addFilter("datasource", catalogueId);
+            }
+        }
+        ff.addFilter("published", false);
+        ff.setResourceType("datasource");
+        return ff;
+    }
 
     // OpenAIRE related methods
     private DatasourceBundle checkOpenAIREIDExistance(DatasourceBundle datasourceBundle){
