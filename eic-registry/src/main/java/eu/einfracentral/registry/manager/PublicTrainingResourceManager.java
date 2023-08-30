@@ -13,7 +13,7 @@ import org.apache.commons.beanutils.BeanUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jms.core.JmsTemplate;
+import eu.einfracentral.utils.JmsService;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.common.exceptions.UnauthorizedUserException;
 import org.springframework.stereotype.Service;
@@ -26,15 +26,15 @@ import java.util.List;
 public class PublicTrainingResourceManager extends AbstractPublicResourceManager<TrainingResourceBundle> implements ResourceCRUDService<TrainingResourceBundle, Authentication> {
 
     private static final Logger logger = LogManager.getLogger(PublicTrainingResourceManager.class);
-    private final JmsTemplate jmsTopicTemplate;
+    private final JmsService jmsService;
     private final SecurityService securityService;
     private ProviderResourcesCommonMethods commonMethods;
 
     @Autowired
-    public PublicTrainingResourceManager(JmsTemplate jmsTopicTemplate, SecurityService securityService,
+    public PublicTrainingResourceManager(JmsService jmsService, SecurityService securityService,
                                          ProviderResourcesCommonMethods commonMethods) {
         super(TrainingResourceBundle.class);
-        this.jmsTopicTemplate = jmsTopicTemplate;
+        this.jmsService = jmsService;
         this.securityService = securityService;
         this.commonMethods = commonMethods;
     }
@@ -82,8 +82,7 @@ public class PublicTrainingResourceManager extends AbstractPublicResourceManager
         TrainingResourceBundle ret;
         logger.info(String.format("Training Resource [%s] is being published with id [%s]", lowerLevelResourceId, trainingResourceBundle.getId()));
         ret = super.add(trainingResourceBundle, null);
-        logger.info("Sending JMS with topic 'training_resource.create'");
-        jmsTopicTemplate.convertAndSend("training_resource.create", trainingResourceBundle);
+        jmsService.convertAndSendTopic("training_resource.create", trainingResourceBundle);
         return ret;
     }
 
@@ -105,8 +104,7 @@ public class PublicTrainingResourceManager extends AbstractPublicResourceManager
         ret.setMetadata(published.getMetadata());
         logger.info(String.format("Updating public Training Resource with id [%s]", ret.getId()));
         ret = super.update(ret, null);
-        logger.info("Sending JMS with topic 'training_resource.update'");
-        jmsTopicTemplate.convertAndSend("training_resource.update", ret);
+        jmsService.convertAndSendTopic("training_resource.update", ret);
         return ret;
     }
 
@@ -116,8 +114,7 @@ public class PublicTrainingResourceManager extends AbstractPublicResourceManager
             TrainingResourceBundle publicTrainingResourceBundle = get(String.format("%s.%s", trainingResourceBundle.getTrainingResource().getCatalogueId(), trainingResourceBundle.getId()));
             logger.info(String.format("Deleting public Training Resource with id [%s]", publicTrainingResourceBundle.getId()));
             super.delete(publicTrainingResourceBundle);
-            logger.info("Sending JMS with topic 'training_resource.delete'");
-            jmsTopicTemplate.convertAndSend("training_resource.delete", publicTrainingResourceBundle);
+            jmsService.convertAndSendTopic("training_resource.delete", publicTrainingResourceBundle);
         } catch (ResourceException | ResourceNotFoundException ignore){
         }
     }
