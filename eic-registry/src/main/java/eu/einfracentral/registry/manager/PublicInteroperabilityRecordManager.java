@@ -5,6 +5,7 @@ import eu.einfracentral.domain.InteroperabilityRecordBundle;
 import eu.einfracentral.exception.ResourceException;
 import eu.einfracentral.exception.ResourceNotFoundException;
 import eu.einfracentral.service.SecurityService;
+import eu.einfracentral.utils.JmsService;
 import eu.einfracentral.utils.ProviderResourcesCommonMethods;
 import eu.openminted.registry.core.domain.Browsing;
 import eu.openminted.registry.core.domain.FacetFilter;
@@ -13,7 +14,6 @@ import org.apache.commons.beanutils.BeanUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jms.core.JmsTemplate;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.common.exceptions.UnauthorizedUserException;
 import org.springframework.stereotype.Service;
@@ -27,15 +27,15 @@ public class PublicInteroperabilityRecordManager extends ResourceManager<Interop
         implements ResourceCRUDService<InteroperabilityRecordBundle, Authentication> {
 
     private static final Logger logger = LogManager.getLogger(PublicInteroperabilityRecordManager.class);
-    private final JmsTemplate jmsTopicTemplate;
+    private final JmsService jmsService;
     private final SecurityService securityService;
     private final ProviderResourcesCommonMethods commonMethods;
 
     @Autowired
-    public PublicInteroperabilityRecordManager(JmsTemplate jmsTopicTemplate, SecurityService securityService,
+    public PublicInteroperabilityRecordManager(JmsService jmsService, SecurityService securityService,
                                                ProviderResourcesCommonMethods commonMethods) {
         super(InteroperabilityRecordBundle.class);
-        this.jmsTopicTemplate = jmsTopicTemplate;
+        this.jmsService = jmsService;
         this.securityService = securityService;
         this.commonMethods = commonMethods;
     }
@@ -85,8 +85,7 @@ public class PublicInteroperabilityRecordManager extends ResourceManager<Interop
         InteroperabilityRecordBundle ret;
         logger.info(String.format("Interoperability Record [%s] is being published with id [%s]", lowerLevelResourceId, interoperabilityRecordBundle.getId()));
         ret = super.add(interoperabilityRecordBundle, null);
-        logger.info("Sending JMS with topic 'interoperability_record.create'");
-        jmsTopicTemplate.convertAndSend("interoperability_record.create", interoperabilityRecordBundle);
+        jmsService.convertAndSendTopic("interoperability_record.create", interoperabilityRecordBundle);
         return ret;
     }
 
@@ -108,8 +107,7 @@ public class PublicInteroperabilityRecordManager extends ResourceManager<Interop
         ret.setMetadata(published.getMetadata());
         logger.info(String.format("Updating public Interoperability Record with id [%s]", ret.getId()));
         ret = super.update(ret, null);
-        logger.info("Sending JMS with topic 'interoperability_record.update'");
-        jmsTopicTemplate.convertAndSend("interoperability_record.update", ret);
+        jmsService.convertAndSendTopic("interoperability_record.update", ret);
         return ret;
     }
 
@@ -120,7 +118,7 @@ public class PublicInteroperabilityRecordManager extends ResourceManager<Interop
             logger.info(String.format("Deleting public Interoperability Record with id [%s]", publicInteroperabilityRecordBundle.getId()));
             super.delete(publicInteroperabilityRecordBundle);
             logger.info("Sending JMS with topic 'interoperability_record.delete'");
-            jmsTopicTemplate.convertAndSend("interoperability_record.delete", publicInteroperabilityRecordBundle);
+            jmsService.convertAndSendTopic("interoperability_record.delete", publicInteroperabilityRecordBundle);
         } catch (ResourceException | ResourceNotFoundException ignore){
         }
     }

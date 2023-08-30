@@ -9,11 +9,11 @@ import eu.einfracentral.utils.ProviderResourcesCommonMethods;
 import eu.openminted.registry.core.domain.Browsing;
 import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.service.ResourceCRUDService;
+import eu.einfracentral.utils.JmsService;
 import org.apache.commons.beanutils.BeanUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jms.core.JmsTemplate;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.common.exceptions.UnauthorizedUserException;
 import org.springframework.stereotype.Service;
@@ -26,15 +26,15 @@ import java.util.List;
 public class PublicProviderManager extends ResourceManager<ProviderBundle> implements ResourceCRUDService<ProviderBundle, Authentication> {
 
     private static final Logger logger = LogManager.getLogger(PublicProviderManager.class);
-    private final JmsTemplate jmsTopicTemplate;
+    private final JmsService jmsService;
     private final SecurityService securityService;
     private final ProviderResourcesCommonMethods commonMethods;
 
     @Autowired
-    public PublicProviderManager(JmsTemplate jmsTopicTemplate, SecurityService securityService,
+    public PublicProviderManager(JmsService jmsService, SecurityService securityService,
                                  ProviderResourcesCommonMethods commonMethods) {
         super(ProviderBundle.class);
-        this.jmsTopicTemplate = jmsTopicTemplate;
+        this.jmsService = jmsService;
         this.securityService = securityService;
         this.commonMethods = commonMethods;
     }
@@ -77,8 +77,7 @@ public class PublicProviderManager extends ResourceManager<ProviderBundle> imple
         ProviderBundle ret;
         logger.info(String.format("Provider [%s] is being published with id [%s]", lowerLevelProviderId, providerBundle.getId()));
         ret = super.add(providerBundle, null);
-        logger.info("Sending JMS with topic 'provider.create'");
-        jmsTopicTemplate.convertAndSend("provider.create", providerBundle);
+        jmsService.convertAndSendTopic("provider.create", providerBundle);
         return ret;
     }
 
@@ -96,8 +95,7 @@ public class PublicProviderManager extends ResourceManager<ProviderBundle> imple
         ret.setMetadata(published.getMetadata());
         logger.info(String.format("Updating public Provider with id [%s]", ret.getId()));
         ret = super.update(ret, null);
-        logger.info("Sending JMS with topic 'provider.update'");
-        jmsTopicTemplate.convertAndSend("provider.update", ret);
+        jmsService.convertAndSendTopic("provider.update", ret);
         return ret;
     }
 
@@ -107,8 +105,7 @@ public class PublicProviderManager extends ResourceManager<ProviderBundle> imple
             ProviderBundle publicProviderBundle = get(String.format("%s.%s",providerBundle.getProvider().getCatalogueId(), providerBundle.getId()));
             logger.info(String.format("Deleting public Provider with id [%s]", publicProviderBundle.getId()));
             super.delete(publicProviderBundle);
-            logger.info("Sending JMS with topic 'provider.delete'");
-            jmsTopicTemplate.convertAndSend("provider.delete", publicProviderBundle);
+            jmsService.convertAndSendTopic("provider.delete", publicProviderBundle);
         } catch (ResourceException | ResourceNotFoundException ignore){
         }
     }

@@ -5,6 +5,7 @@ import eu.einfracentral.domain.ServiceBundle;
 import eu.einfracentral.exception.ResourceException;
 import eu.einfracentral.exception.ResourceNotFoundException;
 import eu.einfracentral.service.SecurityService;
+import eu.einfracentral.utils.JmsService;
 import eu.einfracentral.utils.ProviderResourcesCommonMethods;
 import eu.openminted.registry.core.domain.Browsing;
 import eu.openminted.registry.core.domain.FacetFilter;
@@ -13,7 +14,6 @@ import org.apache.commons.beanutils.BeanUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jms.core.JmsTemplate;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.common.exceptions.UnauthorizedUserException;
 import org.springframework.stereotype.Service;
@@ -26,15 +26,15 @@ import java.util.List;
 public class PublicServiceManager extends AbstractPublicResourceManager<ServiceBundle> implements ResourceCRUDService<ServiceBundle, Authentication> {
 
     private static final Logger logger = LogManager.getLogger(PublicServiceManager.class);
-    private final JmsTemplate jmsTopicTemplate;
+    private final JmsService jmsService;
     private final SecurityService securityService;
     private final ProviderResourcesCommonMethods commonMethods;
 
     @Autowired
-    public PublicServiceManager(JmsTemplate jmsTopicTemplate, SecurityService securityService,
+    public PublicServiceManager(JmsService jmsService, SecurityService securityService,
                                 ProviderResourcesCommonMethods commonMethods) {
         super(ServiceBundle.class);
-        this.jmsTopicTemplate = jmsTopicTemplate;
+        this.jmsService = jmsService;
         this.securityService = securityService;
         this.commonMethods = commonMethods;
     }
@@ -81,8 +81,7 @@ public class PublicServiceManager extends AbstractPublicResourceManager<ServiceB
         ServiceBundle ret;
         logger.info(String.format("Service [%s] is being published with id [%s]", lowerLevelResourceId, serviceBundle.getId()));
         ret = super.add(serviceBundle, null);
-        logger.info("Sending JMS with topic 'service.create'");
-        jmsTopicTemplate.convertAndSend("service.create", serviceBundle);
+        jmsService.convertAndSendTopic("service.create", serviceBundle);
         return ret;
     }
 
@@ -104,8 +103,7 @@ public class PublicServiceManager extends AbstractPublicResourceManager<ServiceB
         ret.setMetadata(published.getMetadata());
         logger.info(String.format("Updating public Service with id [%s]", ret.getId()));
         ret = super.update(ret, null);
-        logger.info("Sending JMS with topic 'service.update'");
-        jmsTopicTemplate.convertAndSend("service.update", ret);
+        jmsService.convertAndSendTopic("service.update", ret);
         return ret;
     }
 
@@ -115,8 +113,7 @@ public class PublicServiceManager extends AbstractPublicResourceManager<ServiceB
             ServiceBundle publicServiceBundle = get(String.format("%s.%s", serviceBundle.getService().getCatalogueId(), serviceBundle.getId()));
             logger.info(String.format("Deleting public Service with id [%s]", publicServiceBundle.getId()));
             super.delete(publicServiceBundle);
-            logger.info("Sending JMS with topic 'service.delete'");
-            jmsTopicTemplate.convertAndSend("service.delete", publicServiceBundle);
+            jmsService.convertAndSendTopic("service.delete", publicServiceBundle);
         } catch (ResourceException | ResourceNotFoundException ignore){
         }
     }
