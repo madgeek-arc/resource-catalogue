@@ -16,7 +16,7 @@ import org.json.simple.parser.ParseException;
 import org.apache.commons.beanutils.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.jms.core.JmsTemplate;
+import eu.einfracentral.utils.JmsService;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
@@ -27,16 +27,16 @@ public class PublicConfigurationTemplateImplementationManager extends ResourceMa
         implements ResourceCRUDService<ConfigurationTemplateInstanceBundle, Authentication> {
 
     private static final Logger logger = LogManager.getLogger(PublicConfigurationTemplateImplementationManager.class);
-    private final JmsTemplate jmsTopicTemplate;
+    private final JmsService jmsService;
     private final SecurityService securityService;
     @Value("${project.catalogue.name}")
     private String catalogueName;
 
 
     @Autowired
-    public PublicConfigurationTemplateImplementationManager(JmsTemplate jmsTopicTemplate, SecurityService securityService) {
+    public PublicConfigurationTemplateImplementationManager(JmsService jmsService, SecurityService securityService) {
         super(ConfigurationTemplateInstanceBundle.class);
-        this.jmsTopicTemplate = jmsTopicTemplate;
+        this.jmsService = jmsService;
         this.securityService = securityService;
     }
 
@@ -71,8 +71,7 @@ public class PublicConfigurationTemplateImplementationManager extends ResourceMa
         ConfigurationTemplateInstanceBundle ret;
         logger.info(String.format("ConfigurationTemplateInstanceBundle [%s] is being published with id [%s]", lowerLevelResourceId, configurationTemplateInstanceBundle.getId()));
         ret = super.add(configurationTemplateInstanceBundle, null);
-        logger.info("Sending JMS with topic 'configuration_template_instance.create'");
-        jmsTopicTemplate.convertAndSend("configuration_template_instance.create", configurationTemplateInstanceBundle);
+        jmsService.convertAndSendTopic("configuration_template_instance.create", configurationTemplateInstanceBundle);
         return ret;
     }
 
@@ -93,8 +92,7 @@ public class PublicConfigurationTemplateImplementationManager extends ResourceMa
         ret.setMetadata(published.getMetadata());
         logger.info(String.format("Updating public ResourceInteroperabilityRecordBundle with id [%s]", ret.getId()));
         ret = super.update(ret, null);
-        logger.info("Sending JMS with topic 'resource_interoperability_record.update'");
-        jmsTopicTemplate.convertAndSend("resource_interoperability_record.update", ret);
+        jmsService.convertAndSendTopic("resource_interoperability_record.update", ret);
         return ret;
     }
 
@@ -105,8 +103,7 @@ public class PublicConfigurationTemplateImplementationManager extends ResourceMa
                     catalogueName, configurationTemplateInstanceBundle.getId()));
             logger.info(String.format("Deleting public ConfigurationTemplateInstanceBundle with id [%s]", publicConfigurationTemplateInstanceBundle.getId()));
             super.delete(publicConfigurationTemplateInstanceBundle);
-            logger.info("Sending JMS with topic 'resource_interoperability_record.delete'");
-            jmsTopicTemplate.convertAndSend("configuration_template_instance.delete", publicConfigurationTemplateInstanceBundle);
+            jmsService.convertAndSendTopic("configuration_template_instance.delete", publicConfigurationTemplateInstanceBundle);
         } catch (ResourceException | ResourceNotFoundException ignore){
         }
     }

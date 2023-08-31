@@ -3,6 +3,7 @@ package eu.einfracentral.registry.manager;
 import eu.einfracentral.domain.*;
 import eu.einfracentral.registry.service.MigrationService;
 import eu.einfracentral.service.SecurityService;
+import eu.einfracentral.utils.JmsService;
 import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.domain.Resource;
 import eu.openminted.registry.core.service.ResourceService;
@@ -10,7 +11,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.jms.core.JmsTemplate;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
@@ -34,7 +34,7 @@ public class MigrationManager implements MigrationService {
     private final PublicResourceInteroperabilityRecordManager publicResourceInteroperabilityRecordManager;
     private final HelpdeskManager helpdeskManager;
     private final MonitoringManager monitoringManager;
-    private final JmsTemplate jmsTopicTemplate;
+    private final JmsService jmsService;
     private final SecurityService securityService;
 
     @Value("${project.catalogue.name}")
@@ -51,7 +51,7 @@ public class MigrationManager implements MigrationService {
                             ResourceInteroperabilityRecordManager resourceInteroperabilityRecordManager,
                             PublicResourceInteroperabilityRecordManager publicResourceInteroperabilityRecordManager,
                             HelpdeskManager helpdeskManager, MonitoringManager monitoringManager,
-                            JmsTemplate jmsTopicTemplate, SecurityService securityService) {
+                            JmsService jmsService, SecurityService securityService) {
         this.serviceBundleManager = serviceBundleManager;
         this.publicServiceManager = publicServiceManager;
         this.datasourceBundleManager = datasourceBundleManager;
@@ -65,7 +65,7 @@ public class MigrationManager implements MigrationService {
         this.publicResourceInteroperabilityRecordManager = publicResourceInteroperabilityRecordManager;
         this.helpdeskManager = helpdeskManager;
         this.monitoringManager = monitoringManager;
-        this.jmsTopicTemplate = jmsTopicTemplate;
+        this.jmsService = jmsService;
         this.securityService = securityService;
     }
 
@@ -92,8 +92,7 @@ public class MigrationManager implements MigrationService {
             publicResource.setPayload(providerService.serialize(publicProviderBundle));
             logger.info("Migrating Public Provider: {} from Catalogue: {} to Catalogue: {}", publicProviderBundle.getId(), catalogueId, newCatalogueId);
             resourceService.updateResource(publicResource);
-            logger.info("Sending JMS with topic 'provider.update'");
-            jmsTopicTemplate.convertAndSend("provider.update", publicProviderBundle);
+            jmsService.convertAndSendTopic("provider.update", publicProviderBundle);
         } catch (RuntimeException e) {
             logger.error("Error migrating Public Provider", e);
         }
@@ -127,8 +126,7 @@ public class MigrationManager implements MigrationService {
             logger.debug("Migrating Service: {} of Catalogue: {} to Catalogue: {}", serviceBundle.getId(), catalogueId, newCatalogueId);
             resourceService.updateResource(resource);
             if (sendJMS){
-                logger.info(String.format("Sending JMS with topic '%s'", jmsTopic));
-                jmsTopicTemplate.convertAndSend(jmsTopic, serviceBundle);
+                jmsService.convertAndSendTopic(jmsTopic, serviceBundle);
             }
         }
     }
@@ -153,8 +151,7 @@ public class MigrationManager implements MigrationService {
             logger.debug("Migrating Datasource: {} of Catalogue: {} to Catalogue: {}", datasourceBundle.getId(), catalogueId, newCatalogueId);
             resourceService.updateResource(resource);
             if (sendJMS){
-                logger.info(String.format("Sending JMS with topic '%s'", jmsTopic));
-                jmsTopicTemplate.convertAndSend(jmsTopic, datasourceBundle);
+                jmsService.convertAndSendTopic(jmsTopic, datasourceBundle);
             }
         }
     }
@@ -179,8 +176,7 @@ public class MigrationManager implements MigrationService {
             logger.debug("Migrating Training Resource: {} of Catalogue: {} to Catalogue: {}", trainingResourceBundle.getId(), catalogueId, newCatalogueId);
             resourceService.updateResource(resource);
             if (sendJMS){
-                logger.info(String.format("Sending JMS with topic '%s'", jmsTopic));
-                jmsTopicTemplate.convertAndSend(jmsTopic, trainingResourceBundle);
+                jmsService.convertAndSendTopic(jmsTopic, trainingResourceBundle);
             }
         }
     }
@@ -204,8 +200,7 @@ public class MigrationManager implements MigrationService {
             logger.debug("Migrating Interoperability Record: {} of Catalogue: {} to Catalogue: {}", interoperabilityRecordBundle.getId(), catalogueId, newCatalogueId);
             resourceService.updateResource(resource);
             if (sendJMS){
-                logger.info(String.format("Sending JMS with topic '%s'", jmsTopic));
-                jmsTopicTemplate.convertAndSend(jmsTopic, interoperabilityRecordBundle);
+                jmsService.convertAndSendTopic(jmsTopic, interoperabilityRecordBundle);
             }
         }
     }
@@ -298,7 +293,7 @@ public class MigrationManager implements MigrationService {
                 Resource resource = helpdeskManager.getResource(helpdeskBundle.getId());
                 resource.setPayload(helpdeskManager.serialize(helpdeskBundle));
                 resourceService.updateResource(resource);
-                jmsTopicTemplate.convertAndSend("helpdesk.update", helpdeskBundle);
+                jmsService.convertAndSendTopic("helpdesk.update", helpdeskBundle);
             }
         }
 
@@ -308,7 +303,7 @@ public class MigrationManager implements MigrationService {
                 Resource resource = monitoringManager.getResource(monitoringBundle.getId());
                 resource.setPayload(monitoringManager.serialize(monitoringBundle));
                 resourceService.updateResource(resource);
-                jmsTopicTemplate.convertAndSend("monitoring.update", monitoringBundle);
+                jmsService.convertAndSendTopic("monitoring.update", monitoringBundle);
             }
         }
     }

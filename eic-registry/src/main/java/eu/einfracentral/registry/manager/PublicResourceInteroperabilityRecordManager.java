@@ -5,6 +5,7 @@ import eu.einfracentral.domain.ResourceInteroperabilityRecordBundle;
 import eu.einfracentral.exception.ResourceException;
 import eu.einfracentral.exception.ResourceNotFoundException;
 import eu.einfracentral.service.SecurityService;
+import eu.einfracentral.utils.JmsService;
 import eu.openminted.registry.core.domain.Browsing;
 import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.service.ResourceCRUDService;
@@ -12,7 +13,6 @@ import org.apache.commons.beanutils.BeanUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jms.core.JmsTemplate;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.common.exceptions.UnauthorizedUserException;
 import org.springframework.stereotype.Service;
@@ -26,13 +26,13 @@ public class PublicResourceInteroperabilityRecordManager extends AbstractPublicR
         implements ResourceCRUDService<ResourceInteroperabilityRecordBundle, Authentication> {
 
     private static final Logger logger = LogManager.getLogger(PublicResourceInteroperabilityRecordManager.class);
-    private final JmsTemplate jmsTopicTemplate;
+    private final JmsService jmsService;
     private final SecurityService securityService;
 
     @Autowired
-    public PublicResourceInteroperabilityRecordManager(JmsTemplate jmsTopicTemplate, SecurityService securityService) {
+    public PublicResourceInteroperabilityRecordManager(JmsService jmsService, SecurityService securityService) {
         super(ResourceInteroperabilityRecordBundle.class);
-        this.jmsTopicTemplate = jmsTopicTemplate;
+        this.jmsService = jmsService;
         this.securityService = securityService;
     }
 
@@ -78,8 +78,7 @@ public class PublicResourceInteroperabilityRecordManager extends AbstractPublicR
         ResourceInteroperabilityRecordBundle ret;
         logger.info(String.format("ResourceInteroperabilityRecordBundle [%s] is being published with id [%s]", lowerLevelResourceId, resourceInteroperabilityRecordBundle.getId()));
         ret = super.add(resourceInteroperabilityRecordBundle, null);
-        logger.info("Sending JMS with topic 'resource_interoperability_record.create'");
-        jmsTopicTemplate.convertAndSend("resource_interoperability_record.create", resourceInteroperabilityRecordBundle);
+        jmsService.convertAndSendTopic("resource_interoperability_record.create", resourceInteroperabilityRecordBundle);
         return ret;
     }
 
@@ -101,8 +100,7 @@ public class PublicResourceInteroperabilityRecordManager extends AbstractPublicR
         ret.setMetadata(published.getMetadata());
         logger.info(String.format("Updating public ResourceInteroperabilityRecordBundle with id [%s]", ret.getId()));
         ret = super.update(ret, null);
-        logger.info("Sending JMS with topic 'resource_interoperability_record.update'");
-        jmsTopicTemplate.convertAndSend("resource_interoperability_record.update", ret);
+        jmsService.convertAndSendTopic("resource_interoperability_record.update", ret);
         return ret;
     }
 
@@ -113,8 +111,7 @@ public class PublicResourceInteroperabilityRecordManager extends AbstractPublicR
                     resourceInteroperabilityRecordBundle.getResourceInteroperabilityRecord().getCatalogueId(), resourceInteroperabilityRecordBundle.getId()));
             logger.info(String.format("Deleting public ResourceInteroperabilityRecordBundle with id [%s]", publicResourceInteroperabilityRecordBundle.getId()));
             super.delete(publicResourceInteroperabilityRecordBundle);
-            logger.info("Sending JMS with topic 'resource_interoperability_record.delete'");
-            jmsTopicTemplate.convertAndSend("resource_interoperability_record.delete", publicResourceInteroperabilityRecordBundle);
+            jmsService.convertAndSendTopic("resource_interoperability_record.delete", publicResourceInteroperabilityRecordBundle);
         } catch (ResourceException | ResourceNotFoundException ignore){
         }
     }
