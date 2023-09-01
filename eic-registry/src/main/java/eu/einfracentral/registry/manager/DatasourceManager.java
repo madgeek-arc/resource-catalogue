@@ -368,7 +368,7 @@ public class DatasourceManager extends ResourceManager<DatasourceBundle> impleme
         return datasource;
     }
 
-    private boolean isDatasourceRegisteredOnOpenAIRE(String eoscId){
+    public boolean isDatasourceRegisteredOnOpenAIRE(String eoscId){
         DatasourceBundle datasourceBundle = get(eoscId);
         boolean found = false;
         String registerBy;

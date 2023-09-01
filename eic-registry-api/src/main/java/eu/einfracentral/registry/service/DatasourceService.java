@@ -40,6 +40,15 @@ public interface DatasourceService<T, U extends Authentication> extends Resource
     Datasource getOpenAIREDatasourceById(String datasourceId) throws IOException;
 
     /**
+     * Returns True/False according to if the specific Datasource
+     * is already registered in the OpenAIRE Catalogue
+     *
+     * @param eoscId - The ID of the Datasource in creation
+     * @return True/False
+     */
+    boolean isDatasourceRegisteredOnOpenAIRE(String eoscId);
+
+    /**
      * Verify (approve/reject) a Datasource.
      *
      * @param id - The ID of the Datasource

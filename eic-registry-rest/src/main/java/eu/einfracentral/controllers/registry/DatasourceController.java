@@ -175,6 +175,11 @@ public class DatasourceController {
         return ResponseEntity.ok(datasourceService.getOpenAIREDatasourceById(datasourceId));
     }
 
+    @GetMapping(path = "isDatasourceRegisteredOnOpenAIRE/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
+    public boolean isDatasourceRegisteredOnOpenAIRE(@PathVariable("id") String id) {
+        return datasourceService.isDatasourceRegisteredOnOpenAIRE(id);
+    }
+
     @Browse
     @GetMapping(path = "/getAllOpenAIREDatasources", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<Paging<Datasource>> getAllOpenAIREDatasources(@ApiIgnore @RequestParam MultiValueMap<String, Object> allRequestParams) throws IOException {
