@@ -36,6 +36,7 @@ public class ProviderManagementAspect {
     private final TrainingResourceService<TrainingResourceBundle> trainingResourceService;
     private final PublicProviderManager publicProviderManager;
     private final PublicServiceManager publicServiceManager;
+    private final PublicDatasourceManager publicDatasourceManager;
     private final PublicTrainingResourceManager publicTrainingResourceManager;
     private final PublicInteroperabilityRecordManager publicInteroperabilityRecordManager;
     private final PublicConfigurationTemplateImplementationManager publicConfigurationTemplateImplementationManager;
@@ -51,6 +52,7 @@ public class ProviderManagementAspect {
                                     TrainingResourceService<TrainingResourceBundle> trainingResourceService,
                                     PublicProviderManager publicProviderManager,
                                     PublicServiceManager publicServiceManager,
+                                    PublicDatasourceManager publicDatasourceManager,
                                     PublicTrainingResourceManager publicTrainingResourceManager,
                                     PublicInteroperabilityRecordManager publicInteroperabilityRecordManager,
                                     PublicResourceInteroperabilityRecordManager publicResourceInteroperabilityRecordManager,
@@ -62,6 +64,7 @@ public class ProviderManagementAspect {
         this.trainingResourceService = trainingResourceService;
         this.publicProviderManager = publicProviderManager;
         this.publicServiceManager = publicServiceManager;
+        this.publicDatasourceManager = publicDatasourceManager;
         this.publicTrainingResourceManager = publicTrainingResourceManager;
         this.publicInteroperabilityRecordManager = publicInteroperabilityRecordManager;
         this.publicResourceInteroperabilityRecordManager = publicResourceInteroperabilityRecordManager;
@@ -339,6 +342,39 @@ public class ProviderManagementAspect {
                 logger.error(e);
             }
         }
+    }
+
+    @Async
+    @AfterReturning(pointcut = "execution(* eu.einfracentral.registry.manager.DatasourceManager.add(..))" +
+            "|| execution(* eu.einfracentral.registry.manager.DatasourceManager.verifyDatasource(..))",
+            returning = "datasourceBundle")
+    public void addDatasourceAsPublic(final DatasourceBundle datasourceBundle) {
+        if (datasourceBundle.getStatus().equals("approved datasource") && datasourceBundle.isActive()) {
+            try {
+                publicDatasourceManager.get(String.format("%s.%s", datasourceBundle.getDatasource().getCatalogueId(), datasourceBundle.getId()));
+            } catch (ResourceException | ResourceNotFoundException e) {
+                publicDatasourceManager.add(datasourceBundle, null);
+            }
+        }
+    }
+
+    @Async
+    @AfterReturning(pointcut = "execution(* eu.einfracentral.registry.manager.DatasourceManager.update(..))" +
+            "|| execution(* eu.einfracentral.registry.manager.DatasourceManager.verifyDatasource(..))",
+            returning = "datasourceBundle")
+    public void updatePublicDatasource(final DatasourceBundle datasourceBundle) {
+        try {
+            publicDatasourceManager.get(String.format("%s.%s", datasourceBundle.getDatasource().getCatalogueId(), datasourceBundle.getId()));
+            publicDatasourceManager.update(datasourceBundle, null);
+        } catch (ResourceException | ResourceNotFoundException ignore) {
+        }
+    }
+
+    @Async
+    @After("execution(* eu.einfracentral.registry.manager.DatasourceManager.delete(..))")
+    public void deletePublicDatasource(JoinPoint joinPoint) {
+        DatasourceBundle datasourceBundle = (DatasourceBundle) joinPoint.getArgs()[0];
+        publicDatasourceManager.delete(datasourceBundle);
     }
 
     @Async

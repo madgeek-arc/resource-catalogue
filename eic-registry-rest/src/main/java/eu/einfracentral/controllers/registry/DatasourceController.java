@@ -98,9 +98,8 @@ public class DatasourceController {
 
     @ApiOperation(value = "Creates a new Datasource.")
     @PostMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth, #datasource.serviceId, #catalogueId)")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth, #datasource.serviceId, #datasource.catalogueId)")
     public ResponseEntity<Datasource> addDatasource(@Valid @RequestBody Datasource datasource,
-                                                    @RequestParam(defaultValue = "${project.catalogue.name}", name = "catalogue_id") String catalogueId,
                                                     @ApiIgnore Authentication auth) {
         DatasourceBundle datasourceBundle = datasourceService.add(new DatasourceBundle(datasource), auth);
         logger.info("User '{}' added the Datasource with id '{}'", auth.getName(), datasource.getId());
@@ -109,13 +108,13 @@ public class DatasourceController {
 
     @ApiOperation(value = "Updates the Datasource with the given id.")
     @PutMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth, #datasource.serviceId, #catalogueId)")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth, #datasource.serviceId, #datasource.catalogueId)")
     public ResponseEntity<Datasource> updateHDatasource(@Valid @RequestBody Datasource datasource,
-                                                        @RequestParam(defaultValue = "${project.catalogue.name}", name = "catalogue_id") String catalogueId,
+                                                        @RequestParam(required = false) String comment,
                                                         @ApiIgnore Authentication auth) throws ResourceNotFoundException {
         DatasourceBundle datasourceBundle = datasourceService.get(datasource.getId());
         datasourceBundle.setDatasource(datasource);
-        datasourceBundle = datasourceService.update(datasourceBundle, auth);
+        datasourceBundle = datasourceService.update(datasourceBundle, comment, auth);
         logger.info("User '{}' updated the Datasource with id '{}'", auth.getName(), datasource.getId());
         return new ResponseEntity<>(datasourceBundle.getDatasource(), HttpStatus.OK);
     }

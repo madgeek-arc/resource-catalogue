@@ -22,6 +22,16 @@ public interface DatasourceService<T, U extends Authentication> extends Resource
     DatasourceBundle get(String serviceId, String catalogueId);
 
     /**
+     * Get the Datasource sub-profile of the specific Service of the specific Catalogue
+     *
+     * @param datasourceBundle - Datasource Bundle to be updated
+     * @param comment - Optional comment of the update
+     * @param auth - Authentication
+     * @return {@link DatasourceBundle}
+     */
+    DatasourceBundle update(DatasourceBundle datasourceBundle, String comment, Authentication auth);
+
+    /**
      * Get a list of all registered OpenAIRE Datasources.
      *
      * @param ff - FacetFilter

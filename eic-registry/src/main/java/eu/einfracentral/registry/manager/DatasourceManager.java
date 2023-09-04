@@ -37,6 +37,8 @@ public class DatasourceManager extends ResourceManager<DatasourceBundle> impleme
     private final RegistrationMailService registrationMailService;
     private final VocabularyService vocabularyService;
     private final ProviderResourcesCommonMethods commonMethods;
+    @Value("${project.catalogue.name}")
+    private String catalogueName;
     @Value("${openaire.dsm.api}")
     private String openaireAPI;
 
@@ -84,21 +86,35 @@ public class DatasourceManager extends ResourceManager<DatasourceBundle> impleme
         datasourceBundle.setMetadata(Metadata.createMetadata(User.of(auth).getFullName(), User.of(auth).getEmail()));
         List<LoggingInfo> loggingInfoList = commonMethods.returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(datasourceBundle, auth);
         datasourceBundle.setLoggingInfo(loggingInfoList);
-        datasourceBundle.setActive(false);
-        datasourceBundle.setStatus(vocabularyService.get("pending datasource").getId());
-        // latestOnboardingInfo
-        datasourceBundle.setLatestOnboardingInfo(loggingInfoList.get(0));
+        differentiateInternalFromExternalCatalogueAddition(datasourceBundle);
 
         super.add(datasourceBundle, null);
         logger.debug("Adding Datasource for Service: {}", datasourceBundle.getDatasource().getServiceId());
 
-        //TODO: jms
-        registrationMailService.sendEmailsForDatasourceExtension(datasourceBundle, "post");
+        if (datasourceBundle.getDatasource().getCatalogueId().equals(catalogueName)) {
+            registrationMailService.sendEmailsForDatasourceExtension(datasourceBundle, "post");
+        }
+        return datasourceBundle;
+    }
+
+    private DatasourceBundle differentiateInternalFromExternalCatalogueAddition(DatasourceBundle datasourceBundle) {
+        if (datasourceBundle.getDatasource().getCatalogueId().equals(catalogueName)) {
+            datasourceBundle.setActive(false);
+            datasourceBundle.setStatus(vocabularyService.get("pending datasource").getId());
+            datasourceBundle.setLatestOnboardingInfo(datasourceBundle.getLoggingInfo().get(0));
+        } else {
+            datasourceBundle.setActive(true);
+            datasourceBundle.setStatus(vocabularyService.get("approved datasource").getId());
+            LoggingInfo loggingInfo = commonMethods.createLoggingInfo(securityService.getAdminAccess(), LoggingInfo.Types.ONBOARD.getKey(),
+                    LoggingInfo.ActionType.APPROVED.getKey());
+            datasourceBundle.getLoggingInfo().add(loggingInfo);
+            datasourceBundle.setLatestOnboardingInfo(datasourceBundle.getLoggingInfo().get(1));
+        }
         return datasourceBundle;
     }
 
     @Override
-    public DatasourceBundle update(DatasourceBundle datasourceBundle, Authentication auth) {
+    public DatasourceBundle update(DatasourceBundle datasourceBundle, String comment, Authentication auth) {
         logger.trace("User '{}' is attempting to update the Datasource with id '{}'", auth, datasourceBundle.getId());
 
         Resource existing = whereID(datasourceBundle.getId(), true);
@@ -112,7 +128,7 @@ public class DatasourceManager extends ResourceManager<DatasourceBundle> impleme
         datasourceBundle.setMetadata(Metadata.updateMetadata(datasourceBundle.getMetadata(), User.of(auth).getFullName(), User.of(auth).getEmail()));
         List<LoggingInfo> loggingInfoList = commonMethods.returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(datasourceBundle, auth);
         LoggingInfo loggingInfo = commonMethods.createLoggingInfo(auth, LoggingInfo.Types.UPDATE.getKey(),
-                LoggingInfo.ActionType.UPDATED.getKey());
+                LoggingInfo.ActionType.UPDATED.getKey(), comment);
         loggingInfoList.add(loggingInfo);
         datasourceBundle.setLoggingInfo(loggingInfoList);
 
@@ -143,7 +159,6 @@ public class DatasourceManager extends ResourceManager<DatasourceBundle> impleme
         resourceService.updateResource(existing);
         logger.debug("Updating Datasource: {}", datasourceBundle);
 
-        //TODO: jms
         registrationMailService.sendEmailsForDatasourceExtension(datasourceBundle, "put");
         return datasourceBundle;
     }
@@ -213,7 +228,6 @@ public class DatasourceManager extends ResourceManager<DatasourceBundle> impleme
         }
 
         logger.info("Verifying Datasource: {}", datasourceBundle);
-        //TODO: emails?
         return super.update(datasourceBundle, auth);
     }
 

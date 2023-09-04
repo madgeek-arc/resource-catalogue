@@ -35,6 +35,7 @@ public class CatalogueController {
     private final CatalogueService<CatalogueBundle, Authentication> catalogueManager;
     private final ProviderService<ProviderBundle, Authentication> providerManager;
     private final ServiceBundleService<ServiceBundle> serviceBundleService;
+    private final DatasourceService<DatasourceBundle, Authentication> datasourceService;
     private final TrainingResourceService<TrainingResourceBundle> trainingResourceService;
     private final InteroperabilityRecordService<InteroperabilityRecordBundle> interoperabilityRecordService;
     private final GenericResourceService genericResourceService;
@@ -45,12 +46,14 @@ public class CatalogueController {
     CatalogueController(CatalogueService<CatalogueBundle, Authentication> catalogueManager,
                         ProviderService<ProviderBundle, Authentication> providerManager,
                         ServiceBundleService<ServiceBundle> serviceBundleService,
+                        DatasourceService<DatasourceBundle, Authentication> datasourceService,
                         TrainingResourceService<TrainingResourceBundle> trainingResourceService,
                         InteroperabilityRecordService<InteroperabilityRecordBundle> interoperabilityRecordService,
                         GenericResourceService genericResourceService) {
         this.catalogueManager = catalogueManager;
         this.providerManager = providerManager;
         this.serviceBundleService = serviceBundleService;
+        this.datasourceService = datasourceService;
         this.trainingResourceService = trainingResourceService;
         this.interoperabilityRecordService = interoperabilityRecordService;
         this.genericResourceService = genericResourceService;
@@ -366,6 +369,49 @@ public class CatalogueController {
         serviceBundleService.delete(serviceBundle);
         logger.info("User '{}' deleted the Service with name '{}' and id '{}'", auth.getName(), serviceBundle.getService().getName(), serviceBundle.getId());
         return new ResponseEntity<>(serviceBundle.getService(), HttpStatus.OK);
+    }
+
+    //SECTION: DATASOURCE
+    @ApiOperation(value = "Returns the Datasource of the specific Catalogue with the given id.")
+    @GetMapping(path = "{catalogueId}/datasource/{serviceId}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    public ResponseEntity<?> getCatalogueDatasource(@PathVariable("catalogueId") String catalogueId, @PathVariable("serviceId") String serviceId) {
+        DatasourceBundle datasourceBundle = datasourceService.get(serviceId, catalogueId);
+        return datasourceBundle != null ? new ResponseEntity<>(datasourceBundle.getDatasource(), HttpStatus.OK) : new ResponseEntity<>(null, HttpStatus.OK);
+    }
+
+    @ApiOperation(value = "Creates a new Datasource for the specific Catalogue.")
+    @PostMapping(path = "{catalogueId}/datasource", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth, #datasource.serviceId, #datasource.catalogueId)")
+    public ResponseEntity<Datasource> addCatalogueDatasource(@RequestBody Datasource datasource, @ApiIgnore Authentication auth) {
+        DatasourceBundle ret = this.datasourceService.add(new DatasourceBundle(datasource), auth);
+        logger.info("User '{}' added the Datasource with id '{}' in the Catalogue '{}'", auth.getName(), datasource.getId(), datasource.getCatalogueId());
+        return new ResponseEntity<>(ret.getDatasource(), HttpStatus.CREATED);
+    }
+
+    @ApiOperation(value = "Updates the Datasource of the specific Catalogue.")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth, #datasource.serviceId, #datasource.catalogueId)")
+    @PutMapping(path = "{catalogueId}/datasource", produces = {MediaType.APPLICATION_JSON_VALUE})
+    public ResponseEntity<Datasource> updateCatalogueDatasource(@RequestBody Datasource datasource,
+                                                                @RequestParam(required = false) String comment,
+                                                                @ApiIgnore Authentication auth) {
+        DatasourceBundle ret = this.datasourceService.update(new DatasourceBundle(datasource), comment, auth);
+        logger.info("User '{}' updated the Datasource with id '{} of the Catalogue '{}'", auth.getName(), datasource.getId(), datasource.getCatalogueId());
+        return new ResponseEntity<>(ret.getDatasource(), HttpStatus.OK);
+    }
+
+    @ApiOperation(value = "Deletes the Datasource of the specific Catalogue with the given id.")
+    @DeleteMapping(path = "{catalogueId}/datasource/{serviceId}", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isCatalogueAdmin(#auth, #catalogueId)")
+    public ResponseEntity<Datasource> deleteCatalogueDatasource(@PathVariable("serviceId") String serviceId,
+                                                                @PathVariable("catalogueId") String catalogueId,
+                                                                @ApiIgnore Authentication auth) throws ResourceNotFoundException {
+        DatasourceBundle datasourceBundle = datasourceService.get(serviceId, catalogueId);
+        if (datasourceBundle == null) {
+            return new ResponseEntity<>(HttpStatus.GONE);
+        }
+        datasourceService.delete(datasourceBundle);
+        logger.info("User '{}' deleted the Datasource with id '{}'", auth.getName(), datasourceBundle.getId());
+        return new ResponseEntity<>(datasourceBundle.getDatasource(), HttpStatus.OK);
     }
 
     //SECTION: TRAINING RESOURCE
