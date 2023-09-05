@@ -91,7 +91,7 @@ public class PublicProviderManager extends ResourceManager<ProviderBundle> imple
         } catch (IllegalAccessException | InvocationTargetException e) {
             e.printStackTrace();
         }
-        ret.setIdentifiers(published.getIdentifiers());
+        ret.setIdentifiers(commonMethods.updateAlternativeIdentifiers(providerBundle, published));
         ret.setId(published.getId());
         ret.setMetadata(published.getMetadata());
         logger.info(String.format("Updating public Provider with id [%s]", ret.getId()));

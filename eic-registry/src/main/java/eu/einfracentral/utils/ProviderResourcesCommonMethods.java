@@ -19,12 +19,11 @@ import org.springframework.stereotype.Component;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 import java.net.*;
 import java.io.*;
+
 import org.json.*;
 
 @Component
@@ -435,5 +434,26 @@ public class ProviderResourcesCommonMethods {
         if (isPublished){
             throw new ValidationException("You cannot directly delete a Public Resource");
         }
+    }
+
+    public Identifiers updateAlternativeIdentifiers(Bundle<?> lowerLevelResource, Bundle<?> publicLevelResource) {
+        List<AlternativeIdentifier> mergedAlternativeIdentifiers = new ArrayList<>();
+        Identifiers identifiers = publicLevelResource.getIdentifiers();
+        if (identifiers.getAlternativeIdentifiers() != null && !identifiers.getAlternativeIdentifiers().isEmpty()) {
+            mergedAlternativeIdentifiers.addAll(identifiers.getAlternativeIdentifiers());
+        }
+        if (lowerLevelResource.getIdentifiers() != null) {
+            if (lowerLevelResource.getIdentifiers().getAlternativeIdentifiers() != null &&
+                    !lowerLevelResource.getIdentifiers().getAlternativeIdentifiers().isEmpty()) {
+                mergedAlternativeIdentifiers.addAll(lowerLevelResource.getIdentifiers().getAlternativeIdentifiers());
+            }
+        }
+
+        // remove duplicates && convert to list
+        Set<AlternativeIdentifier> uniqueIdentifiers = new HashSet<>(mergedAlternativeIdentifiers);
+        List<AlternativeIdentifier> ret = new ArrayList<>(uniqueIdentifiers);
+
+        identifiers.setAlternativeIdentifiers(ret);
+        return identifiers;
     }
 }

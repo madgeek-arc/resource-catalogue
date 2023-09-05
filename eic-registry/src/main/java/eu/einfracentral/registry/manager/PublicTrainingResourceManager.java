@@ -100,7 +100,7 @@ public class PublicTrainingResourceManager extends AbstractPublicResourceManager
         // sets public ids to resource organisation, resource providers and EOSC related services
         updateTrainingResourceIdsToPublic(ret);
 
-        ret.setIdentifiers(published.getIdentifiers());
+        ret.setIdentifiers(commonMethods.updateAlternativeIdentifiers(trainingResourceBundle, published));
         ret.setId(published.getId());
         ret.setMetadata(published.getMetadata());
         logger.info(String.format("Updating public Training Resource with id [%s]", ret.getId()));

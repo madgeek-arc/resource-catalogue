@@ -99,7 +99,7 @@ public class PublicServiceManager extends AbstractPublicResourceManager<ServiceB
         // sets public ids to resource organisation, resource providers and related/required resources
         updateServiceIdsToPublic(ret);
 
-        ret.setIdentifiers(published.getIdentifiers());
+        ret.setIdentifiers(commonMethods.updateAlternativeIdentifiers(serviceBundle, published));
         ret.setId(published.getId());
         ret.setMetadata(published.getMetadata());
         logger.info(String.format("Updating public Service with id [%s]", ret.getId()));

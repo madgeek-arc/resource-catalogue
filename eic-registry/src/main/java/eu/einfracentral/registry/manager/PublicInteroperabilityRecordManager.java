@@ -103,7 +103,7 @@ public class PublicInteroperabilityRecordManager extends ResourceManager<Interop
         // set providerId to Public
         ret.getInteroperabilityRecord().setProviderId(published.getInteroperabilityRecord().getProviderId());
 
-        ret.setIdentifiers(published.getIdentifiers());
+        ret.setIdentifiers(commonMethods.updateAlternativeIdentifiers(interoperabilityRecordBundle, published));
         ret.setId(published.getId());
         ret.setMetadata(published.getMetadata());
         logger.info(String.format("Updating public Interoperability Record with id [%s]", ret.getId()));
