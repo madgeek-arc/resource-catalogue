@@ -1,5 +1,7 @@
 package eu.einfracentral.registry.manager.aspects;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.einfracentral.domain.*;
 import eu.einfracentral.domain.interoperabilityRecord.configurationTemplates.ConfigurationTemplateInstanceBundle;
 import eu.einfracentral.exception.ResourceException;
@@ -47,6 +49,8 @@ public class ProviderManagementAspect {
     @Value("${project.catalogue.name}")
     private String catalogueName;
 
+    private final ObjectMapper objectMapper = new ObjectMapper();
+
     @Autowired
     public ProviderManagementAspect(ProviderService<ProviderBundle, Authentication> providerService,
                                     ResourceBundleService<ServiceBundle> serviceBundleService,
@@ -80,7 +84,7 @@ public class ProviderManagementAspect {
             "|| execution(* eu.einfracentral.registry.manager.ServiceBundleManager.addResource(..))" +
             "|| execution(* eu.einfracentral.registry.manager.ServiceBundleManager.updateResource(..))",
             returning = "serviceBundle")
-    public void updateProviderState(ServiceBundle serviceBundle) {
+    public void updateProviderState(final ServiceBundle serviceBundle) {
         logger.trace("Updating Provider States");
         updateServiceProviderStates(serviceBundle);
     }
@@ -155,7 +159,7 @@ public class ProviderManagementAspect {
             try {
                 publicProviderManager.get(String.format("%s.%s", providerBundle.getProvider().getCatalogueId(), providerBundle.getId()));
             } catch (ResourceException | ResourceNotFoundException e) {
-                publicProviderManager.add(providerBundle, null);
+                publicProviderManager.add(clone(providerBundle), null);
             }
         }
     }
@@ -170,7 +174,7 @@ public class ProviderManagementAspect {
     public void updatePublicProvider(final ProviderBundle providerBundle) {
         try {
             publicProviderManager.get(String.format("%s.%s", providerBundle.getProvider().getCatalogueId(), providerBundle.getId()));
-            publicProviderManager.update(providerBundle, null);
+            publicProviderManager.update(clone(providerBundle), null);
         } catch (ResourceException | ResourceNotFoundException ignore) {
         }
     }
@@ -229,7 +233,7 @@ public class ProviderManagementAspect {
             try {
                 publicServiceManager.get(String.format("%s.%s", serviceBundle.getService().getCatalogueId(), serviceBundle.getId()));
             } catch (ResourceException | ResourceNotFoundException e) {
-                publicServiceManager.add(serviceBundle, null);
+                publicServiceManager.add(clone(serviceBundle), null);
             }
         }
     }
@@ -245,7 +249,7 @@ public class ProviderManagementAspect {
             try {
                 publicDatasourceManager.get(String.format("%s.%s", datasourceBundle.getDatasource().getCatalogueId(), datasourceBundle.getId()));
             } catch (ResourceException | ResourceNotFoundException e) {
-                publicDatasourceManager.add(datasourceBundle, null);
+                publicDatasourceManager.add(clone(datasourceBundle), null);
             }
         }
     }
@@ -261,7 +265,7 @@ public class ProviderManagementAspect {
             try {
                 publicTrainingResourceManager.get(String.format("%s.%s", trainingResourceBundle.getTrainingResource().getCatalogueId(), trainingResourceBundle.getId()));
             } catch (ResourceException | ResourceNotFoundException e) {
-                publicTrainingResourceManager.add(trainingResourceBundle, null);
+                publicTrainingResourceManager.add(clone(trainingResourceBundle), null);
             }
         }
     }
@@ -275,7 +279,7 @@ public class ProviderManagementAspect {
             try{
                 publicInteroperabilityRecordManager.get(String.format("%s.%s", interoperabilityRecordBundle.getInteroperabilityRecord().getCatalogueId(), interoperabilityRecordBundle.getId()));
             } catch (ResourceException | ResourceNotFoundException e){
-                publicInteroperabilityRecordManager.add(interoperabilityRecordBundle, null);
+                publicInteroperabilityRecordManager.add(clone(interoperabilityRecordBundle), null);
             }
         }
     }
@@ -290,7 +294,7 @@ public class ProviderManagementAspect {
     public void updatePublicResource(final ServiceBundle serviceBundle) {
         try {
             publicServiceManager.get(String.format("%s.%s", serviceBundle.getService().getCatalogueId(), serviceBundle.getId()));
-            publicServiceManager.update(serviceBundle, null);
+            publicServiceManager.update(clone(serviceBundle), null);
         } catch (ResourceException | ResourceNotFoundException ignore) {
         }
     }
@@ -305,7 +309,7 @@ public class ProviderManagementAspect {
     public void updatePublicResource(final DatasourceBundle datasourceBundle) {
         try {
             publicDatasourceManager.get(String.format("%s.%s", datasourceBundle.getDatasource().getCatalogueId(), datasourceBundle.getId()));
-            publicDatasourceManager.update(datasourceBundle, null);
+            publicDatasourceManager.update(clone(datasourceBundle), null);
         } catch (ResourceException | ResourceNotFoundException ignore) {
         }
     }
@@ -320,7 +324,7 @@ public class ProviderManagementAspect {
     public void updatePublicResource(final TrainingResourceBundle trainingResourceBundle) {
         try {
             publicTrainingResourceManager.get(String.format("%s.%s", trainingResourceBundle.getTrainingResource().getCatalogueId(), trainingResourceBundle.getId()));
-            publicTrainingResourceManager.update(trainingResourceBundle, null);
+            publicTrainingResourceManager.update(clone(trainingResourceBundle), null);
         } catch (ResourceException | ResourceNotFoundException ignore) {
         }
     }
@@ -335,7 +339,7 @@ public class ProviderManagementAspect {
     public void updatePublicResource(final InteroperabilityRecordBundle interoperabilityRecordBundle) {
         try{
             publicInteroperabilityRecordManager.get(String.format("%s.%s", interoperabilityRecordBundle.getInteroperabilityRecord().getCatalogueId(), interoperabilityRecordBundle.getId()));
-            publicInteroperabilityRecordManager.update(interoperabilityRecordBundle, null);
+            publicInteroperabilityRecordManager.update(clone(interoperabilityRecordBundle), null);
         } catch (ResourceException | ResourceNotFoundException ignore){
         }
     }
@@ -438,7 +442,7 @@ public class ProviderManagementAspect {
                     resourceInteroperabilityRecordBundle.getResourceInteroperabilityRecord().getCatalogueId(),
                     resourceInteroperabilityRecordBundle.getId()));
         } catch (ResourceException | ResourceNotFoundException e) {
-            publicResourceInteroperabilityRecordManager.add(resourceInteroperabilityRecordBundle, null);
+            publicResourceInteroperabilityRecordManager.add(clone(resourceInteroperabilityRecordBundle), null);
         }
     }
 
@@ -449,7 +453,7 @@ public class ProviderManagementAspect {
         try {
             publicResourceInteroperabilityRecordManager.get(String.format("%s.%s", resourceInteroperabilityRecordBundle.getResourceInteroperabilityRecord().getCatalogueId(),
                     resourceInteroperabilityRecordBundle.getId()));
-            publicResourceInteroperabilityRecordManager.update(resourceInteroperabilityRecordBundle, null);
+            publicResourceInteroperabilityRecordManager.update(clone(resourceInteroperabilityRecordBundle), null);
         } catch (ResourceException | ResourceNotFoundException ignore) {
         }
     }
@@ -468,7 +472,7 @@ public class ProviderManagementAspect {
         try{
             publicConfigurationTemplateImplementationManager.get(String.format("%s.%s", catalogueName, configurationTemplateInstanceBundle.getId()));
         } catch (ResourceException | ResourceNotFoundException e){
-            publicConfigurationTemplateImplementationManager.add(configurationTemplateInstanceBundle, null);
+            publicConfigurationTemplateImplementationManager.add(clone(configurationTemplateInstanceBundle), null);
         }
     }
 
@@ -478,7 +482,7 @@ public class ProviderManagementAspect {
     public void updatePublicConfigurationTemplateInstance(final ConfigurationTemplateInstanceBundle configurationTemplateInstanceBundle) {
         try {
             publicConfigurationTemplateImplementationManager.get(String.format("%s.%s", catalogueName, configurationTemplateInstanceBundle.getId()));
-            publicConfigurationTemplateImplementationManager.update(configurationTemplateInstanceBundle, null);
+            publicConfigurationTemplateImplementationManager.update(clone(configurationTemplateInstanceBundle), null);
         } catch (ResourceException | ResourceNotFoundException ignore) {
         }
     }
@@ -488,5 +492,16 @@ public class ProviderManagementAspect {
     public void deletePublicConfigurationTemplateInstance(JoinPoint joinPoint) {
         ConfigurationTemplateInstanceBundle configurationTemplateInstanceBundle = (ConfigurationTemplateInstanceBundle) joinPoint.getArgs()[0];
         publicConfigurationTemplateImplementationManager.delete(configurationTemplateInstanceBundle);
+    }
+
+    private <T> T clone(T object) {
+        T deepCopy = null;
+        try {
+            String json = objectMapper.writeValueAsString(object);
+            deepCopy = (T) objectMapper.readValue(json, object.getClass());
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+        return deepCopy;
     }
 }
