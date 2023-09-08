@@ -78,7 +78,7 @@ public class PendingServiceController extends ResourceController<ServiceBundle, 
                                                                 @PathVariable String id, @ApiIgnore Authentication auth) {
         FacetFilter ff = serviceBundleService.createFacetFilterForFetchingServices(allRequestParams, catalogueName);
         ff.addFilter("resource_organisation", id);
-        ff.setResourceType("resourceTypes");
+        ff.setResourceType("pending_service");
         Paging<?> paging = genericResourceService.getResults(ff);
         return ResponseEntity.ok(paging);
     }
