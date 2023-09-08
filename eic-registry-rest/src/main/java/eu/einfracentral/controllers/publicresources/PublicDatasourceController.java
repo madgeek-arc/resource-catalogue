@@ -5,7 +5,7 @@ import eu.einfracentral.annotations.Browse;
 import eu.einfracentral.domain.Datasource;
 import eu.einfracentral.domain.DatasourceBundle;
 import eu.einfracentral.domain.User;
-import eu.einfracentral.registry.service.ResourceBundleService;
+import eu.einfracentral.registry.service.DatasourceService;
 import eu.einfracentral.registry.service.ResourceService;
 import eu.einfracentral.service.SecurityService;
 import eu.einfracentral.utils.FacetFilterUtils;
@@ -36,11 +36,11 @@ public class PublicDatasourceController {
     private static final Gson gson = new Gson();
 
     private final SecurityService securityService;
-    private final ResourceBundleService<DatasourceBundle> datasourceBundleService;
+    private final DatasourceService<DatasourceBundle, Authentication> datasourceBundleService;
     private final ResourceService<DatasourceBundle, Authentication> publicDatasourceManager;
 
     public PublicDatasourceController(SecurityService securityService,
-                                      ResourceBundleService<DatasourceBundle> datasourceBundleService,
+                                      DatasourceService<DatasourceBundle, Authentication> datasourceBundleService,
                                       @Qualifier("publicDatasourceManager") ResourceService<DatasourceBundle, Authentication> publicDatasourceManager) {
         this.securityService = securityService;
         this.datasourceBundleService = datasourceBundleService;
@@ -52,7 +52,7 @@ public class PublicDatasourceController {
     public ResponseEntity<?> getPublicDatasource(@PathVariable("id") String id,
                                                  @RequestParam(defaultValue = "${project.catalogue.name}", name = "catalogue_id") String catalogueId,
                                                  @ApiIgnore Authentication auth) {
-        DatasourceBundle datasourceBundle = datasourceBundleService.get(id, catalogueId);
+        DatasourceBundle datasourceBundle = datasourceBundleService.get(id);
         if (auth != null && auth.isAuthenticated()) {
             User user = User.of(auth);
             if (securityService.hasRole(auth, "ROLE_ADMIN") || securityService.hasRole(auth, "ROLE_EPOT")
@@ -76,7 +76,7 @@ public class PublicDatasourceController {
     public ResponseEntity<?> getPublicDatasourceBundle(@PathVariable("id") String id,
                                                        @RequestParam(defaultValue = "${project.catalogue.name}", name = "catalogue_id") String catalogueId,
                                                        @ApiIgnore Authentication auth) {
-        DatasourceBundle datasourceBundle = datasourceBundleService.get(id, catalogueId);
+        DatasourceBundle datasourceBundle = datasourceBundleService.get(id);
         if (auth != null && auth.isAuthenticated()) {
             User user = User.of(auth);
             if (securityService.hasRole(auth, "ROLE_ADMIN") || securityService.hasRole(auth, "ROLE_EPOT")

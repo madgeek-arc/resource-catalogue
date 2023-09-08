@@ -3,7 +3,7 @@ package eu.einfracentral.registry.manager;
 import eu.einfracentral.domain.*;
 import eu.einfracentral.exception.ValidationException;
 import eu.einfracentral.registry.service.HelpdeskService;
-import eu.einfracentral.registry.service.ResourceBundleService;
+import eu.einfracentral.registry.service.ServiceBundleService;
 import eu.einfracentral.registry.service.TrainingResourceService;
 import eu.einfracentral.service.RegistrationMailService;
 import eu.einfracentral.service.SecurityService;
@@ -16,7 +16,6 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpStatus;
-import org.springframework.jms.core.JmsTemplate;
 import org.springframework.security.core.Authentication;
 
 import java.util.List;
@@ -26,23 +25,20 @@ import java.util.UUID;
 public class HelpdeskManager extends ResourceManager<HelpdeskBundle> implements HelpdeskService<HelpdeskBundle, Authentication> {
 
     private static final Logger logger = LogManager.getLogger(HelpdeskManager.class);
-    private final ResourceBundleService<ServiceBundle> serviceBundleService;
-    private final ResourceBundleService<DatasourceBundle> datasourceBundleService;
+    private final ServiceBundleService<ServiceBundle> serviceBundleService;
     private final TrainingResourceService<TrainingResourceBundle> trainingResourceService;
     private final SecurityService securityService;
     private final RegistrationMailService registrationMailService;
     private final ProviderResourcesCommonMethods commonMethods;
 
     @Autowired
-    public HelpdeskManager(ResourceBundleService<ServiceBundle> serviceBundleService,
-                           ResourceBundleService<DatasourceBundle> datasourceBundleService,
+    public HelpdeskManager(ServiceBundleService<ServiceBundle> serviceBundleService,
                            TrainingResourceService<TrainingResourceBundle> trainingResourceService,
-                           JmsTemplate jmsTopicTemplate, @Lazy SecurityService securityService,
+                           @Lazy SecurityService securityService,
                            @Lazy RegistrationMailService registrationMailService,
                            ProviderResourcesCommonMethods commonMethods) {
         super(HelpdeskBundle.class);
         this.serviceBundleService = serviceBundleService;
-        this.datasourceBundleService = datasourceBundleService;
         this.trainingResourceService = trainingResourceService;
         this.securityService = securityService;
         this.registrationMailService = registrationMailService;
@@ -68,12 +64,10 @@ public class HelpdeskManager extends ResourceManager<HelpdeskBundle> implements 
         // check if Resource exists and if User belongs to Resource's Provider Admins
         if (resourceType.equals("service")){
             ResourceValidationUtils.checkIfResourceBundleIsActiveAndApprovedAndNotPublic(resourceId, catalogueId, serviceBundleService, resourceType);
-        } else if (resourceType.equals("datasource")){
-            ResourceValidationUtils.checkIfResourceBundleIsActiveAndApprovedAndNotPublic(resourceId, catalogueId, datasourceBundleService, resourceType);
         } else if (resourceType.equals("training_resource")){
             ResourceValidationUtils.checkIfResourceBundleIsActiveAndApprovedAndNotPublic(resourceId, catalogueId, trainingResourceService, resourceType);
         } else{
-            throw new ValidationException("Field resourceType should be either 'service', 'datasource' or 'training_resource'");
+            throw new ValidationException("Field resourceType should be either 'service' or 'training_resource'");
         }
         return super.validate(helpdeskBundle);
     }

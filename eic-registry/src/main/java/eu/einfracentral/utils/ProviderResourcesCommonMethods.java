@@ -19,12 +19,11 @@ import org.springframework.stereotype.Component;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 import java.net.*;
 import java.io.*;
+
 import org.json.*;
 
 @Component
@@ -73,15 +72,6 @@ public class ProviderResourcesCommonMethods {
                     }
                 }
             }
-            if (o instanceof DatasourceBundle){
-                if (((DatasourceBundle) o).getPayload().getCatalogueId() == null || ((DatasourceBundle) o).getPayload().getCatalogueId().equals("")) {
-                    throw new ValidationException("Datasource's 'catalogueId' cannot be null or empty");
-                } else {
-                    if (!((DatasourceBundle) o).getPayload().getCatalogueId().equals(catalogueId)) {
-                        throw new ValidationException("Parameter 'catalogueId' and Datasource's 'catalogueId' don't match");
-                    }
-                }
-            }
             if (o instanceof ServiceBundle){
                 if (((ServiceBundle) o).getPayload().getCatalogueId() == null || ((ServiceBundle) o).getPayload().getCatalogueId().equals("")) {
                     throw new ValidationException("Service's 'catalogueId' cannot be null or empty");
@@ -121,12 +111,6 @@ public class ProviderResourcesCommonMethods {
         List<String> eoscRelatedServices = new ArrayList<>();
         List<String> interoperabilityRecordIds = new ArrayList<>();
         if (o != null) {
-            if (o instanceof DatasourceBundle) {
-                catalogueId = ((DatasourceBundle) o).getDatasource().getCatalogueId();
-                resourceProviders = ((DatasourceBundle) o).getDatasource().getResourceProviders();
-                requiredResources = ((DatasourceBundle) o).getDatasource().getRequiredResources();
-                relatedResources = ((DatasourceBundle) o).getDatasource().getRelatedResources();
-            }
             if (o instanceof ServiceBundle) {
                 catalogueId = ((ServiceBundle) o).getService().getCatalogueId();
                 resourceProviders = ((ServiceBundle) o).getService().getResourceProviders();
@@ -162,20 +146,13 @@ public class ProviderResourcesCommonMethods {
                         if (!serviceBundle.getMetadata().isPublished() && !serviceBundle.getService().getCatalogueId().equals(catalogueId)) {
                             throw new ValidationException("Cross Catalogue reference is prohibited. Found in field 'requiredResources");
                         }
-                    } catch (ResourceNotFoundException e) {
+                    } catch (ResourceNotFoundException j) {
                         try {
-                            DatasourceBundle datasourceBundle = genericResourceService.get("datasource", requiredResource);
-                            if (!datasourceBundle.getMetadata().isPublished() && !datasourceBundle.getDatasource().getCatalogueId().equals(catalogueId)) {
+                            TrainingResourceBundle trainingResourceBundle = genericResourceService.get("training_resource", requiredResource);
+                            if (!trainingResourceBundle.getMetadata().isPublished() && !trainingResourceBundle.getTrainingResource().getCatalogueId().equals(catalogueId)) {
                                 throw new ValidationException("Cross Catalogue reference is prohibited. Found in field 'requiredResources");
                             }
-                        } catch (ResourceNotFoundException j) {
-                            try {
-                                TrainingResourceBundle trainingResourceBundle = genericResourceService.get("training_resource", requiredResource);
-                                if (!trainingResourceBundle.getMetadata().isPublished() && !trainingResourceBundle.getTrainingResource().getCatalogueId().equals(catalogueId)) {
-                                    throw new ValidationException("Cross Catalogue reference is prohibited. Found in field 'requiredResources");
-                                }
-                            } catch (ResourceNotFoundException k) {
-                            }
+                        } catch (ResourceNotFoundException k) {
                         }
                     }
                 }
@@ -187,20 +164,13 @@ public class ProviderResourcesCommonMethods {
                         if (!serviceBundle.getMetadata().isPublished() && !serviceBundle.getService().getCatalogueId().equals(catalogueId)) {
                             throw new ValidationException("Cross Catalogue reference is prohibited. Found in field 'relatedResources");
                         }
-                    } catch (ResourceNotFoundException e) {
+                    } catch (ResourceNotFoundException j) {
                         try {
-                            DatasourceBundle datasourceBundle = genericResourceService.get("datasource", relatedResource);
-                            if (!datasourceBundle.getMetadata().isPublished() && !datasourceBundle.getDatasource().getCatalogueId().equals(catalogueId)) {
+                            TrainingResourceBundle trainingResourceBundle = genericResourceService.get("training_resource", relatedResource);
+                            if (!trainingResourceBundle.getMetadata().isPublished() && !trainingResourceBundle.getTrainingResource().getCatalogueId().equals(catalogueId)) {
                                 throw new ValidationException("Cross Catalogue reference is prohibited. Found in field 'relatedResources");
                             }
-                        } catch (ResourceNotFoundException j) {
-                            try {
-                                TrainingResourceBundle trainingResourceBundle = genericResourceService.get("training_resource", relatedResource);
-                                if (!trainingResourceBundle.getMetadata().isPublished() && !trainingResourceBundle.getTrainingResource().getCatalogueId().equals(catalogueId)) {
-                                    throw new ValidationException("Cross Catalogue reference is prohibited. Found in field 'relatedResources");
-                                }
-                            } catch (ResourceNotFoundException k) {
-                            }
+                        } catch (ResourceNotFoundException k) {
                         }
                     }
                 }
@@ -212,20 +182,13 @@ public class ProviderResourcesCommonMethods {
                         if (!serviceBundle.getMetadata().isPublished() && !serviceBundle.getService().getCatalogueId().equals(catalogueId)) {
                             throw new ValidationException("Cross Catalogue reference is prohibited. Found in field 'eoscRelatedServices");
                         }
-                    } catch (ResourceNotFoundException e) {
+                    } catch (ResourceNotFoundException j) {
                         try {
-                            DatasourceBundle datasourceBundle = genericResourceService.get("datasource", eoscRelatedService);
-                            if (!datasourceBundle.getMetadata().isPublished() && !datasourceBundle.getDatasource().getCatalogueId().equals(catalogueId)) {
+                            TrainingResourceBundle trainingResourceBundle = genericResourceService.get("training_resource", eoscRelatedService);
+                            if (!trainingResourceBundle.getMetadata().isPublished() && !trainingResourceBundle.getTrainingResource().getCatalogueId().equals(catalogueId)) {
                                 throw new ValidationException("Cross Catalogue reference is prohibited. Found in field 'eoscRelatedServices");
                             }
-                        } catch (ResourceNotFoundException j) {
-                            try {
-                                TrainingResourceBundle trainingResourceBundle = genericResourceService.get("training_resource", eoscRelatedService);
-                                if (!trainingResourceBundle.getMetadata().isPublished() && !trainingResourceBundle.getTrainingResource().getCatalogueId().equals(catalogueId)) {
-                                    throw new ValidationException("Cross Catalogue reference is prohibited. Found in field 'eoscRelatedServices");
-                                }
-                            } catch (ResourceNotFoundException k) {
-                            }
+                        } catch (ResourceNotFoundException k) {
                         }
                     }
                 }
@@ -449,7 +412,7 @@ public class ProviderResourcesCommonMethods {
 
     public Bundle<?> getPublicResourceViaPID(String resourceType, String pid) {
         List<String> resourceTypes = Arrays.asList("catalogue", "provider", "service", "datasource",
-                "training_resource", "interoperability_record", "resources");
+                "training_resource", "interoperability_record");
         if (!resourceTypes.contains(resourceType)) {
             throw new ValidationException("The resource type you provided does not exist -> " + resourceType);
         }
@@ -471,5 +434,26 @@ public class ProviderResourcesCommonMethods {
         if (isPublished){
             throw new ValidationException("You cannot directly delete a Public Resource");
         }
+    }
+
+    public Identifiers updateAlternativeIdentifiers(Bundle<?> lowerLevelResource, Bundle<?> publicLevelResource) {
+        List<AlternativeIdentifier> mergedAlternativeIdentifiers = new ArrayList<>();
+        Identifiers identifiers = publicLevelResource.getIdentifiers();
+        if (identifiers.getAlternativeIdentifiers() != null && !identifiers.getAlternativeIdentifiers().isEmpty()) {
+            mergedAlternativeIdentifiers.addAll(identifiers.getAlternativeIdentifiers());
+        }
+        if (lowerLevelResource.getIdentifiers() != null) {
+            if (lowerLevelResource.getIdentifiers().getAlternativeIdentifiers() != null &&
+                    !lowerLevelResource.getIdentifiers().getAlternativeIdentifiers().isEmpty()) {
+                mergedAlternativeIdentifiers.addAll(lowerLevelResource.getIdentifiers().getAlternativeIdentifiers());
+            }
+        }
+
+        // remove duplicates && convert to list
+        Set<AlternativeIdentifier> uniqueIdentifiers = new HashSet<>(mergedAlternativeIdentifiers);
+        List<AlternativeIdentifier> ret = new ArrayList<>(uniqueIdentifiers);
+
+        identifiers.setAlternativeIdentifiers(ret);
+        return identifiers;
     }
 }

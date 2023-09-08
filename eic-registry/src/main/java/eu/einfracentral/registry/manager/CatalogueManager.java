@@ -44,8 +44,7 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
     private final RegistrationMailService registrationMailService;
     private final DataSource dataSource;
     private final ProviderService<ProviderBundle, Authentication> providerService;
-    private final ResourceBundleService<ServiceBundle> serviceBundleService;
-    private final ResourceBundleService<DatasourceBundle> datasourceBundleService;
+    private final ServiceBundleService<ServiceBundle> serviceBundleService;
     private final TrainingResourceService<TrainingResourceBundle> trainingResourceService;
     private final InteroperabilityRecordService<InteroperabilityRecordBundle> interoperabilityRecordService;
     private final ProviderResourcesCommonMethods commonMethods;
@@ -57,8 +56,7 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
     @Autowired
     public CatalogueManager(IdCreator idCreator, DataSource dataSource,
                             @Lazy ProviderService<ProviderBundle, Authentication> providerService,
-                            @Lazy ResourceBundleService<ServiceBundle> serviceBundleService,
-                            @Lazy ResourceBundleService<DatasourceBundle> datasourceBundleService,
+                            @Lazy ServiceBundleService<ServiceBundle> serviceBundleService,
                             @Lazy TrainingResourceService<TrainingResourceBundle> trainingResourceService,
                             @Lazy InteroperabilityRecordService<InteroperabilityRecordBundle> interoperabilityRecordService,
                             @Lazy FieldValidator fieldValidator,
@@ -75,7 +73,6 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
         this.registrationMailService = registrationMailService;
         this.providerService = providerService;
         this.serviceBundleService = serviceBundleService;
-        this.datasourceBundleService = datasourceBundleService;
         this.trainingResourceService = trainingResourceService;
         this.interoperabilityRecordService = interoperabilityRecordService;
         this.commonMethods = commonMethods;
@@ -273,9 +270,6 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
 
         logger.info("Deleting all Catalogue's Services...");
         deleteCatalogueResources(id, serviceBundleService, securityService.getAdminAccess());
-
-        logger.info("Deleting all Catalogue's Datasources...");
-        deleteCatalogueResources(id, datasourceBundleService, securityService.getAdminAccess());
 
         logger.info("Deleting all Catalogue's Training Resources...");
         deleteCatalogueResources(id, trainingResourceService, securityService.getAdminAccess());

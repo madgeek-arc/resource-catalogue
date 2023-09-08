@@ -1,7 +1,5 @@
 package eu.einfracentral.domain;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.einfracentral.annotation.FieldValidation;
 import eu.einfracentral.annotation.VocabularyValidation;
 import io.swagger.annotations.ApiModelProperty;
@@ -11,12 +9,32 @@ import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 import java.net.URL;
-import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 
 @XmlType
 @XmlRootElement(namespace = "http://einfracentral.eu")
-public class Datasource extends Service implements Identifiable {
+public class Datasource implements Identifiable {
+
+    // Basic Information
+    /**
+     * A persistent identifier, a unique reference to the Datasource in the context of the EOSC Portal.
+     */
+    @XmlElement
+    @ApiModelProperty(position = 1, example = "(required on PUT only)")
+    @FieldValidation
+    private String id;
+
+    @XmlElement(required = true)
+    @ApiModelProperty(position = 2, notes = "Service ID", required = true)
+    @FieldValidation(containsId = true, idClass = Service.class)
+    private String serviceId;
+
+    @XmlElement(required = true)
+    @ApiModelProperty(position = 3, notes = "Catalogue ID", required = true)
+    @FieldValidation(containsId = true, idClass = Catalogue.class)
+    private String catalogueId;
+
 
     // Data Source Policies
     /**
@@ -24,7 +42,7 @@ public class Datasource extends Service implements Identifiable {
      * Criteria for submitting content to the repository as well as product preparation guidelines can be stated. Concepts for quality assurance may be provided.
      */
     @XmlElement
-    @ApiModelProperty(position = 1, example = "https://example.com")
+    @ApiModelProperty(position = 4, example = "https://example.com")
     @FieldValidation(nullable = true)
     private URL submissionPolicyURL;
 
@@ -34,7 +52,7 @@ public class Datasource extends Service implements Identifiable {
      * utility of the content
      */
     @XmlElement
-    @ApiModelProperty(position = 2, example = "https://example.com")
+    @ApiModelProperty(position = 5, example = "https://example.com")
     @FieldValidation(nullable = true)
     private URL preservationPolicyURL;
 
@@ -42,7 +60,7 @@ public class Datasource extends Service implements Identifiable {
      * If data versioning is supported: the data source explicitly allows the deposition of different versions of the same object
      */
     @XmlElement
-    @ApiModelProperty(position = 3)
+    @ApiModelProperty(position = 6)
     @FieldValidation(nullable = true)
     private boolean versionControl;
 
@@ -51,7 +69,7 @@ public class Datasource extends Service implements Identifiable {
      */
     @XmlElementWrapper(name = "persistentIdentitySystems")
     @XmlElement(name = "persistentIdentitySystem")
-    @ApiModelProperty(position = 4)
+    @ApiModelProperty(position = 7)
     @FieldValidation(nullable = true)
     private List<PersistentIdentitySystem> persistentIdentitySystems;
 
@@ -61,7 +79,7 @@ public class Datasource extends Service implements Identifiable {
      * The property defines the jurisdiction of the users of the data source, based on the vocabulary for this property
      */
     @XmlElement(required = true)
-    @ApiModelProperty(position = 5, required = true)
+    @ApiModelProperty(position = 8, required = true)
     @FieldValidation(containsId = true, idClass = Vocabulary.class)
     @VocabularyValidation(type = Vocabulary.Type.DS_JURISDICTION)
     private String jurisdiction;
@@ -70,7 +88,7 @@ public class Datasource extends Service implements Identifiable {
      * The specific type of the data source based on the vocabulary defined for this property
      */
     @XmlElement(required = true)
-    @ApiModelProperty(position = 6, required = true)
+    @ApiModelProperty(position = 9, required = true)
     @FieldValidation(containsId = true, idClass = Vocabulary.class)
     @VocabularyValidation(type = Vocabulary.Type.DS_CLASSIFICATION)
     private String datasourceClassification;
@@ -80,7 +98,7 @@ public class Datasource extends Service implements Identifiable {
      */
     @XmlElementWrapper(required = true, name = "researchEntityTypes")
     @XmlElement(name = "researchEntityType")
-    @ApiModelProperty(position = 7, required = true)
+    @ApiModelProperty(position = 10, required = true)
     @FieldValidation(containsId = true, idClass = Vocabulary.class)
     @VocabularyValidation(type = Vocabulary.Type.DS_RESEARCH_ENTITY_TYPE)
     private List<String> researchEntityTypes;
@@ -89,7 +107,7 @@ public class Datasource extends Service implements Identifiable {
      * Boolean value specifying if the data source is dedicated to a given discipline or is instead discipline agnostic
      */
     @XmlElement(required = true)
-    @ApiModelProperty(position = 8, required = true)
+    @ApiModelProperty(position = 11, required = true)
     @FieldValidation()
     private boolean thematic;
 
@@ -101,7 +119,7 @@ public class Datasource extends Service implements Identifiable {
      */
     @XmlElementWrapper(name = "researchProductLicensings")
     @XmlElement(name = "researchProductLicensing")
-    @ApiModelProperty(position = 9)
+    @ApiModelProperty(position = 12)
     @FieldValidation(nullable = true)
     private List<ResearchProductLicensing> researchProductLicensings;
 
@@ -110,7 +128,7 @@ public class Datasource extends Service implements Identifiable {
      */
     @XmlElementWrapper(name = "researchProductAccessPolicies")
     @XmlElement(name = "researchProductAccessPolicy")
-    @ApiModelProperty(position = 10)
+    @ApiModelProperty(position = 13)
     @FieldValidation(nullable = true, containsId = true, idClass = Vocabulary.class)
     @VocabularyValidation(type = Vocabulary.Type.DS_COAR_ACCESS_RIGHTS_1_0)
     private List<String> researchProductAccessPolicies;
@@ -122,7 +140,7 @@ public class Datasource extends Service implements Identifiable {
      * Access and re-use of metadata
      */
     @XmlElement
-    @ApiModelProperty(position = 11)
+    @ApiModelProperty(position = 14)
     @FieldValidation(nullable = true)
     private ResearchProductMetadataLicensing researchProductMetadataLicensing;
 
@@ -131,7 +149,7 @@ public class Datasource extends Service implements Identifiable {
      */
     @XmlElementWrapper(name = "researchProductMetadataAccessPolicies")
     @XmlElement(name = "researchProductMetadataAccessPolicy")
-    @ApiModelProperty(position = 12)
+    @ApiModelProperty(position = 15)
     @FieldValidation(nullable = true, containsId = true, idClass = Vocabulary.class)
     @VocabularyValidation(type = Vocabulary.Type.DS_COAR_ACCESS_RIGHTS_1_0)
     private List<String> researchProductMetadataAccessPolicies;
@@ -139,23 +157,10 @@ public class Datasource extends Service implements Identifiable {
     public Datasource() {
     }
 
-    public Datasource(URL submissionPolicyURL, URL preservationPolicyURL, boolean versionControl, List<PersistentIdentitySystem> persistentIdentitySystems, String jurisdiction, String datasourceClassification, List<String> researchEntityTypes, boolean thematic, List<ResearchProductLicensing> researchProductLicensings, List<String> researchProductAccessPolicies, ResearchProductMetadataLicensing researchProductMetadataLicensing, List<String> researchProductMetadataAccessPolicies) {
-        this.submissionPolicyURL = submissionPolicyURL;
-        this.preservationPolicyURL = preservationPolicyURL;
-        this.versionControl = versionControl;
-        this.persistentIdentitySystems = persistentIdentitySystems;
-        this.jurisdiction = jurisdiction;
-        this.datasourceClassification = datasourceClassification;
-        this.researchEntityTypes = researchEntityTypes;
-        this.thematic = thematic;
-        this.researchProductLicensings = researchProductLicensings;
-        this.researchProductAccessPolicies = researchProductAccessPolicies;
-        this.researchProductMetadataLicensing = researchProductMetadataLicensing;
-        this.researchProductMetadataAccessPolicies = researchProductMetadataAccessPolicies;
-    }
-
-    public Datasource(String id, String abbreviation, String name, String resourceOrganisation, List<String> resourceProviders, URL webpage, String description, String tagline, URL logo, List<MultimediaPair> multimedia, List<UseCasesPair> useCases, List<ServiceProviderDomain> scientificDomains, List<ServiceCategory> categories, List<String> targetUsers, List<String> accessTypes, List<String> accessModes, List<String> tags, List<String> geographicalAvailabilities, List<String> languageAvailabilities, List<String> resourceGeographicLocations, ServiceMainContact mainContact, List<ServicePublicContact> publicContacts, String helpdeskEmail, String securityContactEmail, String trl, String lifeCycleStatus, List<String> certifications, List<String> standards, List<String> openSourceTechnologies, String version, Date lastUpdate, List<String> changeLog, List<String> requiredResources, List<String> relatedResources, List<String> relatedPlatforms, String catalogueId, List<String> fundingBody, List<String> fundingPrograms, List<String> grantProjectNames, URL helpdeskPage, URL userManual, URL termsOfUse, URL privacyPolicy, URL accessPolicy, URL resourceLevel, URL trainingInformation, URL statusMonitoring, URL maintenance, String orderType, URL order, URL paymentModel, URL pricing, URL submissionPolicyURL, URL preservationPolicyURL, boolean versionControl, List<PersistentIdentitySystem> persistentIdentitySystems, String jurisdiction, String datasourceClassification, List<String> researchEntityTypes, boolean thematic, List<ResearchProductLicensing> researchProductLicensings, List<String> researchProductAccessPolicies, ResearchProductMetadataLicensing researchProductMetadataLicensing, List<String> researchProductMetadataAccessPolicies) {
-        super(id, abbreviation, name, resourceOrganisation, resourceProviders, webpage, description, tagline, logo, multimedia, useCases, scientificDomains, categories, targetUsers, accessTypes, accessModes, tags, geographicalAvailabilities, languageAvailabilities, resourceGeographicLocations, mainContact, publicContacts, helpdeskEmail, securityContactEmail, trl, lifeCycleStatus, certifications, standards, openSourceTechnologies, version, lastUpdate, changeLog, requiredResources, relatedResources, relatedPlatforms, catalogueId, fundingBody, fundingPrograms, grantProjectNames, helpdeskPage, userManual, termsOfUse, privacyPolicy, accessPolicy, resourceLevel, trainingInformation, statusMonitoring, maintenance, orderType, order, paymentModel, pricing);
+    public Datasource(String id, String serviceId, String catalogueId, URL submissionPolicyURL, URL preservationPolicyURL, boolean versionControl, List<PersistentIdentitySystem> persistentIdentitySystems, String jurisdiction, String datasourceClassification, List<String> researchEntityTypes, boolean thematic, List<ResearchProductLicensing> researchProductLicensings, List<String> researchProductAccessPolicies, ResearchProductMetadataLicensing researchProductMetadataLicensing, List<String> researchProductMetadataAccessPolicies) {
+        this.id = id;
+        this.serviceId = serviceId;
+        this.catalogueId = catalogueId;
         this.submissionPolicyURL = submissionPolicyURL;
         this.preservationPolicyURL = preservationPolicyURL;
         this.versionControl = versionControl;
@@ -171,12 +176,42 @@ public class Datasource extends Service implements Identifiable {
     }
 
     @Override
-    public String toString() {
-        try {
-            return new ObjectMapper().writeValueAsString(this);
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Datasource that = (Datasource) o;
+        return versionControl == that.versionControl && thematic == that.thematic && Objects.equals(id, that.id) && Objects.equals(serviceId, that.serviceId) && Objects.equals(catalogueId, that.catalogueId) && Objects.equals(submissionPolicyURL, that.submissionPolicyURL) && Objects.equals(preservationPolicyURL, that.preservationPolicyURL) && Objects.equals(persistentIdentitySystems, that.persistentIdentitySystems) && Objects.equals(jurisdiction, that.jurisdiction) && Objects.equals(datasourceClassification, that.datasourceClassification) && Objects.equals(researchEntityTypes, that.researchEntityTypes) && Objects.equals(researchProductLicensings, that.researchProductLicensings) && Objects.equals(researchProductAccessPolicies, that.researchProductAccessPolicies) && Objects.equals(researchProductMetadataLicensing, that.researchProductMetadataLicensing) && Objects.equals(researchProductMetadataAccessPolicies, that.researchProductMetadataAccessPolicies);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, serviceId, catalogueId, submissionPolicyURL, preservationPolicyURL, versionControl, persistentIdentitySystems, jurisdiction, datasourceClassification, researchEntityTypes, thematic, researchProductLicensings, researchProductAccessPolicies, researchProductMetadataLicensing, researchProductMetadataAccessPolicies);
+    }
+
+    @Override
+    public String getId() {
+        return id;
+    }
+
+    @Override
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public String getServiceId() {
+        return serviceId;
+    }
+
+    public void setServiceId(String serviceId) {
+        this.serviceId = serviceId;
+    }
+
+    public String getCatalogueId() {
+        return catalogueId;
+    }
+
+    public void setCatalogueId(String catalogueId) {
+        this.catalogueId = catalogueId;
     }
 
     public URL getSubmissionPolicyURL() {

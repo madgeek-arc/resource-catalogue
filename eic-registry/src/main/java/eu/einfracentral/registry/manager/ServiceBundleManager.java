@@ -33,7 +33,7 @@ import static eu.einfracentral.config.CacheConfig.CACHE_FEATURED;
 import static eu.einfracentral.config.CacheConfig.CACHE_PROVIDERS;
 
 @org.springframework.stereotype.Service
-public class ServiceBundleManager extends AbstractResourceBundleManager<ServiceBundle> implements ResourceBundleService<ServiceBundle> {
+public class ServiceBundleManager extends AbstractServiceBundleManager<ServiceBundle> implements ServiceBundleService<ServiceBundle> {
 
     private static final Logger logger = LogManager.getLogger(ServiceBundleManager.class);
 
@@ -45,6 +45,7 @@ public class ServiceBundleManager extends AbstractResourceBundleManager<ServiceB
     private final CatalogueService<CatalogueBundle, Authentication> catalogueService;
     private final PublicServiceManager publicServiceManager;
     private final MigrationService migrationService;
+    private final DatasourceService<DatasourceBundle, Authentication> datasourceService;
     private final ProviderResourcesCommonMethods commonMethods;
 
     @Value("${project.catalogue.name}")
@@ -58,6 +59,7 @@ public class ServiceBundleManager extends AbstractResourceBundleManager<ServiceB
                                 CatalogueService<CatalogueBundle, Authentication> catalogueService,
                                 @Lazy PublicServiceManager publicServiceManager,
                                 @Lazy MigrationService migrationService,
+                                @Lazy DatasourceService datasourceService,
                                 ProviderResourcesCommonMethods commonMethods) {
         super(ServiceBundle.class);
         this.providerService = providerService; // for providers
@@ -68,6 +70,7 @@ public class ServiceBundleManager extends AbstractResourceBundleManager<ServiceB
         this.catalogueService = catalogueService;
         this.publicServiceManager = publicServiceManager;
         this.migrationService = migrationService;
+        this.datasourceService = datasourceService;
         this.commonMethods = commonMethods;
     }
 
@@ -141,9 +144,6 @@ public class ServiceBundleManager extends AbstractResourceBundleManager<ServiceB
 
         // LoggingInfo
         serviceBundle.setLoggingInfo(loggingInfoList);
-
-        // serviceType
-        createResourceExtras(serviceBundle, "service_type-service");
 
         logger.info("Adding Service: {}", serviceBundle);
         ServiceBundle ret;
@@ -587,20 +587,12 @@ public class ServiceBundleManager extends AbstractResourceBundleManager<ServiceB
         commonMethods.suspensionValidation(serviceBundle, catalogueId,
                 serviceBundle.getService().getResourceOrganisation(), suspend, auth);
         commonMethods.suspendResource(serviceBundle, catalogueId, suspend, auth);
-        return super.update(serviceBundle, auth);
-    }
-
-    public List<ServiceBundle> transformDatasourcesToServices(List<?> resourceBundles) {
-        List<ServiceBundle> serviceBundles = new ArrayList<>();
-        for (Object obj : resourceBundles) {
-            if (obj instanceof DatasourceBundle) {
-                ServiceBundle serviceBundle = new ServiceBundle((DatasourceBundle) obj);
-                serviceBundles.add(serviceBundle);
-            } else {
-                serviceBundles.add((ServiceBundle) obj);
-            }
+        // if Service had a Datasource sub-profile, suspend it too
+        DatasourceBundle datasourceBundle = datasourceService.get(serviceId, catalogueId);
+        if (datasourceBundle != null) {
+            commonMethods.suspendResource(datasourceBundle, catalogueId, suspend, auth);
         }
-        return serviceBundles;
+        return super.update(serviceBundle, auth);
     }
 
 }

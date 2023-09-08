@@ -590,15 +590,6 @@ public class Service implements Identifiable {
         } else return list.size() == 1 && "".equals(list.get(0));
     }
 
-    public static String createId(Service service) {
-        String provider = service.getResourceOrganisation();
-        return String.format("%s.%s", provider, StringUtils
-                .stripAccents(service.getName())
-                .replaceAll("[^a-zA-Z0-9\\s\\-\\_]+", "")
-                .replace(" ", "_")
-                .toLowerCase());
-    }
-
     public enum Field {
         ID("id"),
         ABBREVIATION("abbreviation"),

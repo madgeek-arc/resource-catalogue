@@ -273,6 +273,8 @@
             
       <xs:enumeration value="RESOURCE_STATE"/>
             
+      <xs:enumeration value="DATASOURCE_STATE"/>
+            
       <xs:enumeration value="TEMPLATE_STATE"/>
             
       <xs:enumeration value="INTEROPERABILITY_RECORD_STATE"/>
@@ -314,8 +316,6 @@
       <xs:enumeration value="IR_STATUS"/>
             
       <xs:enumeration value="IR_EOSC_GUIDELINE_TYPE"/>
-            
-      <xs:enumeration value="SERVICE_TYPE"/>
             
       <xs:enumeration value="CT_PROTOCOL"/>
             

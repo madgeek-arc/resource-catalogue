@@ -1,6 +1,5 @@
 package eu.einfracentral.registry.manager;
 
-import eu.einfracentral.domain.ResourceBundle;
 import eu.einfracentral.domain.*;
 import eu.einfracentral.exception.ValidationException;
 import eu.einfracentral.registry.service.*;
@@ -37,6 +36,7 @@ import java.time.Instant;
 import java.time.ZoneId;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static eu.einfracentral.config.CacheConfig.*;
 import static eu.einfracentral.utils.VocabularyValidationUtils.validateMerilScientificDomains;
@@ -46,12 +46,10 @@ import static eu.einfracentral.utils.VocabularyValidationUtils.validateScientifi
 public class ProviderManager extends ResourceManager<ProviderBundle> implements ProviderService<ProviderBundle, Authentication> {
 
     private static final Logger logger = LogManager.getLogger(ProviderManager.class);
-    private final ResourceBundleService<ServiceBundle> resourceBundleService;
-    private final ResourceBundleService<DatasourceBundle> datasourceBundleService;
+    private final ServiceBundleService<ServiceBundle> serviceBundleService;
     private final TrainingResourceService<TrainingResourceBundle> trainingResourceService;
     private final InteroperabilityRecordService<InteroperabilityRecordBundle> interoperabilityRecordService;
     private final PublicServiceManager publicServiceManager;
-    private final PublicDatasourceManager publicDatasourceManager;
     private final PublicProviderManager publicProviderManager;
     private final PublicTrainingResourceManager publicTrainingResourceManager;
     private final PublicInteroperabilityRecordManager publicInteroperabilityRecordManager;
@@ -76,8 +74,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     private String catalogueName;
 
     @Autowired
-    public ProviderManager(@Lazy ResourceBundleService<ServiceBundle> resourceBundleService,
-                           @Lazy ResourceBundleService<DatasourceBundle> datasourceBundleService,
+    public ProviderManager(@Lazy ServiceBundleService<ServiceBundle> serviceBundleService,
                            @Lazy SecurityService securityService, @Lazy FieldValidator fieldValidator,
                            @Lazy RegistrationMailService registrationMailService, IdCreator idCreator,
                            EventService eventService, VersionService versionService,
@@ -86,15 +83,13 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
                            ProviderResourcesCommonMethods commonMethods,
                            CatalogueService<CatalogueBundle, Authentication> catalogueService,
                            @Lazy PublicServiceManager publicServiceManager,
-                           @Lazy PublicDatasourceManager publicDatasourceManager,
                            @Lazy PublicProviderManager publicProviderManager,
                            @Lazy TrainingResourceService<TrainingResourceBundle> trainingResourceService,
                            @Lazy InteroperabilityRecordService<InteroperabilityRecordBundle> interoperabilityRecordService,
                            @Lazy PublicTrainingResourceManager publicTrainingResourceManager,
                            @Lazy PublicInteroperabilityRecordManager publicInteroperabilityRecordManager) {
         super(ProviderBundle.class);
-        this.resourceBundleService = resourceBundleService;
-        this.datasourceBundleService = datasourceBundleService;
+        this.serviceBundleService = serviceBundleService;
         this.securityService = securityService;
         this.fieldValidator = fieldValidator;
         this.idCreator = idCreator;
@@ -107,7 +102,6 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         this.commonMethods = commonMethods;
         this.catalogueService = catalogueService;
         this.publicServiceManager = publicServiceManager;
-        this.publicDatasourceManager = publicDatasourceManager;
         this.publicProviderManager = publicProviderManager;
         this.trainingResourceService = trainingResourceService;
         this.interoperabilityRecordService = interoperabilityRecordService;
@@ -382,26 +376,17 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         }
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         logger.trace("User is attempting to delete the Provider with id '{}'", provider.getId());
-        List<ServiceBundle> services = resourceBundleService.getResourceBundles(provider.getProvider().getCatalogueId(), provider.getId(), authentication).getResults();
+        List<ServiceBundle> services = serviceBundleService.getResourceBundles(provider.getProvider().getCatalogueId(), provider.getId(), authentication).getResults();
         services.forEach(s -> {
             if (!s.getMetadata().isPublished()){
                 try {
-                    resourceBundleService.delete(s);
+                    serviceBundleService.delete(s);
                 } catch (ResourceNotFoundException e) {
                     logger.error(String.format("Error deleting Service with ID [%s]", s.getId()));
                 }
             }
         });
-        List<DatasourceBundle> datasources = datasourceBundleService.getResourceBundles(provider.getProvider().getCatalogueId(), provider.getId(), authentication).getResults();
-        datasources.forEach(s -> {
-            if (!s.getMetadata().isPublished()){
-                try {
-                    datasourceBundleService.delete(s);
-                } catch (ResourceNotFoundException e) {
-                    logger.error(String.format("Error deleting Datasource with ID [%s]", s.getId()));
-                }
-            }
-        });
+        //TODO: DELETE DATASOURCE EXTENSIONS
         List<TrainingResourceBundle> trainingResources = trainingResourceService.getResourceBundles(provider.getProvider().getCatalogueId(), provider.getId(), authentication).getResults();
         trainingResources.forEach(s -> {
             if (!s.getMetadata().isPublished()){
@@ -584,8 +569,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     }
 
     public void activateProviderResources(String providerId, Boolean active, Authentication auth) {
-        List<ServiceBundle> services = resourceBundleService.getResourceBundles(providerId, auth);
-        List<DatasourceBundle> datasources = datasourceBundleService.getResourceBundles(providerId, auth);
+        List<ServiceBundle> services = serviceBundleService.getResourceBundles(providerId, auth);
         List<TrainingResourceBundle> trainingResources = trainingResourceService.getResourceBundles(providerId, auth);
         List<InteroperabilityRecordBundle> interoperabilityRecords = interoperabilityRecordService.getInteroperabilityRecordBundles(catalogueName, providerId, auth).getResults();
         if (active){
@@ -594,7 +578,6 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
             logger.info("Deactivating all Resources of the Provider with id: {}", providerId);
         }
         activateProviderServices(services, active, auth);
-        activateProviderDatasources(datasources, active, auth);
         activateProviderTrainingResources(trainingResources, active, auth);
         activateProviderInteroperabilityRecords(interoperabilityRecords, active, auth);
     }
@@ -611,7 +594,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
             try {
                 logger.debug("Setting Service '{}'-'{}' of the '{}' Catalogue to active: '{}'", service.getId(),
                         service.getService().getName(), service.getService().getCatalogueId(), service.isActive());
-                resourceBundleService.update(service, auth);
+                serviceBundleService.update(service, auth);
                 // TODO: FIX ON ProviderManagementAspect
                 if (service.getStatus().equals("approved resource")) {
                     publicServiceManager.update(service, auth);
@@ -619,30 +602,6 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
             } catch (ResourceNotFoundException e) {
                 logger.error("Could not update Service '{}'-'{}' of the '{}' Catalogue", service.getId(),
                         service.getService().getName(), service.getService().getCatalogueId());
-            }
-        }
-    }
-
-    private void activateProviderDatasources(List<DatasourceBundle> datasources, Boolean active, Authentication auth){
-        for (DatasourceBundle datasource : datasources){
-            List<LoggingInfo> loggingInfoList = commonMethods.createActivationLoggingInfo(datasource, active, auth);
-
-            // update Datasource's fields
-            datasource.setLoggingInfo(loggingInfoList);
-            datasource.setLatestUpdateInfo(loggingInfoList.get(loggingInfoList.size()-1));
-            datasource.setActive(active);
-
-            try {
-                logger.debug("Setting Datasource '{}'-'{}' of the '{}' Catalogue to active: '{}'", datasource.getId(),
-                        datasource.getDatasource().getName(), datasource.getDatasource().getCatalogueId(), datasource.isActive());
-                datasourceBundleService.update(datasource, auth);
-                // TODO: FIX ON ProviderManagementAspect
-                if (datasource.getStatus().equals("approved resource")) {
-                    publicDatasourceManager.update(datasource, auth);
-                }
-            } catch (ResourceNotFoundException e) {
-                logger.error("Could not update Datasource '{}'-'{}' of the '{}' Catalogue", datasource.getId(),
-                        datasource.getDatasource().getName(), datasource.getDatasource().getCatalogueId());
             }
         }
     }
@@ -1170,15 +1129,15 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         }
     }
 
-    public Paging<ResourceBundle<?>> getRejectedResources(FacetFilter ff, String resourceType, Authentication auth){
-        List<ResourceBundle<?>> ret = new ArrayList<>();
+    public Paging<?> getRejectedResources(FacetFilter ff, String resourceType, Authentication auth){
+        List<Bundle<?>> ret = new ArrayList<>();
         if (resourceType.equals("service")){
-            Browsing<ServiceBundle> providerRejectedResources = getResourceBundles(ff, resourceBundleService, auth);
+            Browsing<ServiceBundle> providerRejectedResources = getResourceBundles(ff, serviceBundleService, auth);
             ret.addAll(providerRejectedResources.getResults());
             return new Paging<>(providerRejectedResources.getTotal(), providerRejectedResources.getFrom(),
                     providerRejectedResources.getTo(), ret, providerRejectedResources.getFacets());
-        } else if (resourceType.equals("datasource")){
-            Browsing<DatasourceBundle> providerRejectedResources = getResourceBundles(ff, datasourceBundleService, auth);
+        } else if (resourceType.equals("training_resource")){
+            Browsing<TrainingResourceBundle> providerRejectedResources = getResourceBundles(ff, trainingResourceService, auth);
             ret.addAll(providerRejectedResources.getResults());
             return new Paging<>(providerRejectedResources.getTotal(), providerRejectedResources.getFrom(),
                     providerRejectedResources.getTo(), ret, providerRejectedResources.getFacets());
@@ -1213,19 +1172,13 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         Objects.requireNonNull(cacheManager.getCache(CACHE_PROVIDERS)).clear();
 
         // Suspend Provider's resources
-        List<ServiceBundle> services = resourceBundleService.getResourceBundles(catalogueId, providerId, auth).getResults();
-        List<DatasourceBundle> datasources = datasourceBundleService.getResourceBundles(catalogueId, providerId, auth).getResults();
+        List<ServiceBundle> services = serviceBundleService.getResourceBundles(catalogueId, providerId, auth).getResults();
         List<TrainingResourceBundle> trainingResources = trainingResourceService.getResourceBundles(catalogueId, providerId, auth).getResults();
         List<InteroperabilityRecordBundle> interoperabilityRecords = interoperabilityRecordService.getInteroperabilityRecordBundles(catalogueId, providerId, auth).getResults();
 
         if (services != null && !services.isEmpty()) {
             for (ServiceBundle serviceBundle : services) {
-                resourceBundleService.suspend(serviceBundle.getId(), catalogueId, suspend, auth);
-            }
-        }
-        if (datasources != null && !datasources.isEmpty()) {
-            for (DatasourceBundle datasourceBundle : datasources) {
-                datasourceBundleService.suspend(datasourceBundle.getId(), catalogueId, suspend, auth);
+                serviceBundleService.suspend(serviceBundle.getId(), catalogueId, suspend, auth);
             }
         }
         if (trainingResources != null && !trainingResources.isEmpty()) {

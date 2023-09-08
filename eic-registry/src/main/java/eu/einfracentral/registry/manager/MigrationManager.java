@@ -23,8 +23,6 @@ public class MigrationManager implements MigrationService {
 
     private final ServiceBundleManager serviceBundleManager;
     private final PublicServiceManager publicServiceManager;
-    private final DatasourceBundleManager datasourceBundleManager;
-    private final PublicDatasourceManager publicDatasourceManager;
     private final TrainingResourceManager trainingResourceManager;
     private final InteroperabilityRecordManager interoperabilityRecordManager;
     private final PublicTrainingResourceManager publicTrainingResourceManager;
@@ -44,7 +42,6 @@ public class MigrationManager implements MigrationService {
 
     @Autowired
     public MigrationManager(ServiceBundleManager serviceBundleManager, PublicServiceManager publicServiceManager,
-                            DatasourceBundleManager datasourceBundleManager, PublicDatasourceManager publicDatasourceManager,
                             TrainingResourceManager trainingResourceManager, InteroperabilityRecordManager interoperabilityRecordManager,
                             PublicTrainingResourceManager publicTrainingResourceManager,
                             ProviderManager providerService, ResourceService resourceService,
@@ -54,8 +51,6 @@ public class MigrationManager implements MigrationService {
                             JmsService jmsService, SecurityService securityService) {
         this.serviceBundleManager = serviceBundleManager;
         this.publicServiceManager = publicServiceManager;
-        this.datasourceBundleManager = datasourceBundleManager;
-        this.publicDatasourceManager = publicDatasourceManager;
         this.trainingResourceManager = trainingResourceManager;
         this.interoperabilityRecordManager = interoperabilityRecordManager;
         this.publicTrainingResourceManager = publicTrainingResourceManager;
@@ -99,7 +94,6 @@ public class MigrationManager implements MigrationService {
 
         // Update provider's resources' catalogue
         changeServiceCatalogue(providerId, catalogueId, newCatalogueId, authentication);
-        changeDatasourceCatalogue(providerId, catalogueId, newCatalogueId, authentication);
         changeTrainingResourceCatalogue(providerId, catalogueId, newCatalogueId, authentication);
         changeInteroperabilityRecordCatalogue(providerId, catalogueId, newCatalogueId, authentication);
 
@@ -127,31 +121,6 @@ public class MigrationManager implements MigrationService {
             resourceService.updateResource(resource);
             if (sendJMS){
                 jmsService.convertAndSendTopic(jmsTopic, serviceBundle);
-            }
-        }
-    }
-
-    private void changeDatasourceCatalogue(String providerId, String catalogueId, String newCatalogueId, Authentication authentication) {
-        List<DatasourceBundle> datasourceBundles = datasourceBundleManager.getResourceBundles(catalogueId, providerId, authentication).getResults();
-        // Datasources
-        String jmsTopic = "datasource.update";
-        boolean sendJMS;
-        for (DatasourceBundle datasourceBundle : datasourceBundles) {
-            sendJMS = false;
-            String oldResourceId = datasourceBundle.getId();
-            if (datasourceBundle.getDatasource().getId().startsWith(catalogueId)) {
-                // if Datasource is Public, update its id
-                sendJMS = true;
-                String id = datasourceBundle.getId().replaceFirst(catalogueId, newCatalogueId);
-                datasourceBundle.getDatasource().setId(id);
-            }
-            datasourceBundle.getDatasource().setCatalogueId(newCatalogueId);
-            Resource resource = datasourceBundleManager.getResource(oldResourceId, catalogueId);
-            resource.setPayload(datasourceBundleManager.serialize(datasourceBundle));
-            logger.debug("Migrating Datasource: {} of Catalogue: {} to Catalogue: {}", datasourceBundle.getId(), catalogueId, newCatalogueId);
-            resourceService.updateResource(resource);
-            if (sendJMS){
-                jmsService.convertAndSendTopic(jmsTopic, datasourceBundle);
             }
         }
     }
@@ -210,7 +179,6 @@ public class MigrationManager implements MigrationService {
         ff.setQuantity(maxQuantity);
         ff.addFilter("published", false);
         List<ServiceBundle> allServices = serviceBundleManager.getAllForAdmin(ff, securityService.getAdminAccess()).getResults();
-        List<DatasourceBundle> allDatasources = datasourceBundleManager.getAllForAdmin(ff, securityService.getAdminAccess()).getResults();
         List<TrainingResourceBundle> allTrainingResources = trainingResourceManager.getAllForAdmin(ff, securityService.getAdminAccess()).getResults();
         List<ResourceInteroperabilityRecordBundle> allResourceInteroperabilityRecords = resourceInteroperabilityRecordManager.getAll(ff, securityService.getAdminAccess()).getResults();
         List<HelpdeskBundle> allHelpdeskBundles = helpdeskManager.getAll(ff, securityService.getAdminAccess()).getResults();
@@ -236,29 +204,6 @@ public class MigrationManager implements MigrationService {
                 resourceService.updateResource(resource);
                 // update Public Service
                 publicServiceManager.update(serviceBundle, securityService.getAdminAccess());
-            }
-        }
-
-        for (DatasourceBundle datasourceBundle : allDatasources){
-            boolean entered = false;
-            if (datasourceBundle.getDatasource().getRequiredResources() != null && !datasourceBundle.getDatasource().getRequiredResources().isEmpty()
-                    && datasourceBundle.getDatasource().getRequiredResources().contains(oldResourceId)){
-                datasourceBundle.getDatasource().getRequiredResources().remove(oldResourceId);
-                datasourceBundle.getDatasource().getRequiredResources().add(newResourceId);
-                entered = true;
-            }
-            if (datasourceBundle.getDatasource().getRelatedResources() != null && !datasourceBundle.getDatasource().getRelatedResources().isEmpty()
-                    && datasourceBundle.getDatasource().getRelatedResources().contains(oldResourceId)){
-                datasourceBundle.getDatasource().getRelatedResources().remove(oldResourceId);
-                datasourceBundle.getDatasource().getRelatedResources().add(newResourceId);
-                entered = true;
-            }
-            if (entered){
-                Resource resource = datasourceBundleManager.getResource(datasourceBundle.getId(), datasourceBundle.getDatasource().getCatalogueId());
-                resource.setPayload(datasourceBundleManager.serialize(datasourceBundle));
-                resourceService.updateResource(resource);
-                // update Public Datasource
-                publicDatasourceManager.update(datasourceBundle, securityService.getAdminAccess());
             }
         }
 

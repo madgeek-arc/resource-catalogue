@@ -4,7 +4,7 @@ package eu.einfracentral.controllers.registry;
 import eu.einfracentral.domain.ProviderBundle;
 import eu.einfracentral.domain.ServiceBundle;
 import eu.einfracentral.registry.service.ProviderService;
-import eu.einfracentral.registry.service.ResourceBundleService;
+import eu.einfracentral.registry.service.ServiceBundleService;
 import eu.openminted.registry.core.domain.Facet;
 import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.domain.Paging;
@@ -26,12 +26,12 @@ import java.util.Map;
 @Api(value = "Get General Information")
 public class InfoController {
 
-    private final ResourceBundleService<ServiceBundle> resourceBundleService;
+    private final ServiceBundleService<ServiceBundle> serviceBundleService;
     private final ProviderService<ProviderBundle, Authentication> providerService;
 
     @Autowired
-    InfoController(ResourceBundleService<ServiceBundle> service, ProviderService<ProviderBundle, Authentication> provider) {
-        this.resourceBundleService = service;
+    InfoController(ServiceBundleService<ServiceBundle> service, ProviderService<ProviderBundle, Authentication> provider) {
+        this.serviceBundleService = service;
         this.providerService = provider;
     }
 
@@ -42,7 +42,7 @@ public class InfoController {
         FacetFilter ff = new FacetFilter();
         ff.addFilter("active", true);
         servicesInfo.put("providers", (long) providerService.getAll(ff, authentication).getTotal());
-        Paging<ServiceBundle> serviceBundles = resourceBundleService.getAll(ff, null);
+        Paging<ServiceBundle> serviceBundles = serviceBundleService.getAll(ff, null);
         servicesInfo.put("services", (long) serviceBundles.getTotal());
         for (Facet f : serviceBundles.getFacets()) {
             if (f.getField().equals("resourceType")) {

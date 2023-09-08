@@ -1,9 +1,9 @@
 package eu.einfracentral.recdb.managers;
 
+import eu.einfracentral.domain.Service;
 import eu.einfracentral.domain.ServiceBundle;
-import eu.einfracentral.domain.RichResource;
 import eu.einfracentral.recdb.services.RecommendationService;
-import eu.einfracentral.registry.service.ResourceBundleService;
+import eu.einfracentral.registry.service.ServiceBundleService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.mitre.openid.connect.model.OIDCAuthenticationToken;
@@ -18,24 +18,25 @@ import org.springframework.stereotype.Component;
 import javax.sql.DataSource;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Component
-public class RecommendationManager implements RecommendationService<RichResource, Authentication> {
+public class RecommendationManager implements RecommendationService<Service, Authentication> {
 
     private static final Logger logger = LogManager.getLogger(RecommendationManager.class);
-    private final ResourceBundleService<ServiceBundle> resourceBundleService;
+    private final ServiceBundleService<ServiceBundle> serviceBundleService;
     private final DataSource recdbDataSource;
 
     @Autowired
-    public RecommendationManager(ResourceBundleService<ServiceBundle> resourceBundleService,
+    public RecommendationManager(ServiceBundleService<ServiceBundle> serviceBundleService,
                                  @Qualifier("recdbDataSource") DataSource recdbDataSource) {
-        this.resourceBundleService = resourceBundleService;
+        this.serviceBundleService = serviceBundleService;
         this.recdbDataSource = recdbDataSource;
     }
 
-    public ResponseEntity<List<RichResource>> getRecommendedResources(int limit, Authentication authentication) {
+    public ResponseEntity<List<Service>> getRecommendedResources(int limit, Authentication authentication) {
         JdbcTemplate jdbcTemplate = new JdbcTemplate(recdbDataSource);
-        List<RichResource> services = new ArrayList<>();
+        List<Service> services = new ArrayList<>();
 
         /* Get user id */
         int user_id = -1;
@@ -54,7 +55,7 @@ public class RecommendationManager implements RecommendationService<RichResource
             List<String> serviceIds = jdbcTemplate.queryForList(query, new Object[]{user_id, limit}, java.lang.String.class);
 
             String[] ids = serviceIds.toArray(new String[0]);
-            services = resourceBundleService.getByIds(authentication, ids);
+            services = serviceBundleService.getByIds(authentication, ids).stream().map(ServiceBundle::getService).collect(Collectors.toList());
         } catch (DataAccessException e) {
             logger.warn("Could not find user {} in recommendation database.", ((OIDCAuthenticationToken) authentication).getUserInfo().getEmail());
         } catch (Exception e) {

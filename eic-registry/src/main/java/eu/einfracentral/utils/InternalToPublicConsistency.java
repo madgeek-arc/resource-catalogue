@@ -29,8 +29,7 @@ public class InternalToPublicConsistency {
     private static final Logger logger = LogManager.getLogger(InternalToPublicConsistency.class);
 
     private final ProviderService<ProviderBundle, Authentication> providerService;
-    private final ResourceBundleService<ServiceBundle> serviceBundleService;
-    private final ResourceBundleService<DatasourceBundle> datasourceBundleService;
+    private final ServiceBundleService<ServiceBundle> serviceBundleService;
     private final TrainingResourceService<TrainingResourceBundle> trainingResourceService;
     private final InteroperabilityRecordService<InteroperabilityRecordBundle> interoperabilityRecordService;
     private final ResourceInteroperabilityRecordService<ResourceInteroperabilityRecordBundle> resourceInteroperabilityRecordService;
@@ -38,7 +37,6 @@ public class InternalToPublicConsistency {
 
     private final PublicProviderManager publicProviderManager;
     private final PublicServiceManager publicServiceManager;
-    private final PublicDatasourceManager publicDatasourceManager;
     private final PublicTrainingResourceManager publicTrainingResourceManager;
     private final PublicInteroperabilityRecordManager publicInteroperabilityRecordManager;
     private final PublicResourceInteroperabilityRecordManager publicResourceInteroperabilityRecordManager;
@@ -58,25 +56,22 @@ public class InternalToPublicConsistency {
     private String consistencyCC;
 
     public InternalToPublicConsistency(ProviderService<ProviderBundle, Authentication> providerService,
-                                       ResourceBundleService<ServiceBundle> serviceBundleService,
-                                       ResourceBundleService<DatasourceBundle> datasourceBundleService,
+                                       ServiceBundleService<ServiceBundle> serviceBundleService,
                                        TrainingResourceService<TrainingResourceBundle> trainingResourceService,
                                        InteroperabilityRecordService<InteroperabilityRecordBundle> interoperabilityRecordService,
                                        ResourceInteroperabilityRecordService<ResourceInteroperabilityRecordBundle> resourceInteroperabilityRecordService,
                                        PublicProviderManager publicProviderManager, PublicServiceManager publicServiceManager,
-                                       PublicDatasourceManager publicDatasourceManager, PublicTrainingResourceManager publicTrainingResourceManager,
+                                       PublicTrainingResourceManager publicTrainingResourceManager,
                                        PublicInteroperabilityRecordManager publicInteroperabilityRecordManager,
                                        PublicResourceInteroperabilityRecordManager publicResourceInteroperabilityRecordManager,
                                        SecurityService securityService, Configuration cfg, MailService mailService) {
         this.providerService = providerService;
         this.serviceBundleService = serviceBundleService;
-        this.datasourceBundleService = datasourceBundleService;
         this.trainingResourceService = trainingResourceService;
         this.interoperabilityRecordService = interoperabilityRecordService;
         this.resourceInteroperabilityRecordService = resourceInteroperabilityRecordService;
         this.publicProviderManager = publicProviderManager;
         this.publicServiceManager = publicServiceManager;
-        this.publicDatasourceManager = publicDatasourceManager;
         this.publicTrainingResourceManager = publicTrainingResourceManager;
         this.publicInteroperabilityRecordManager = publicInteroperabilityRecordManager;
         this.publicResourceInteroperabilityRecordManager = publicResourceInteroperabilityRecordManager;
@@ -90,7 +85,6 @@ public class InternalToPublicConsistency {
     protected void logInternalToPublicResourceConsistency() {
         List<ProviderBundle> allInternalApprovedProviders = providerService.getAll(createFacetFilter("approved provider"), securityService.getAdminAccess()).getResults();
         List<ServiceBundle> allInternalApprovedServices = serviceBundleService.getAll(createFacetFilter("approved resource"), securityService.getAdminAccess()).getResults();
-        List<DatasourceBundle> allInternalApprovedDatasources = datasourceBundleService.getAll(createFacetFilter("approved resource"), securityService.getAdminAccess()).getResults();
         List<TrainingResourceBundle> allInternalApprovedTR = trainingResourceService.getAll(createFacetFilter("approved resource"), securityService.getAdminAccess()).getResults();
         List<InteroperabilityRecordBundle> allInternalApprovedIR = interoperabilityRecordService.getAll(createFacetFilter("approved interoperability record"), securityService.getAdminAccess()).getResults();
         List<ResourceInteroperabilityRecordBundle> allInternalApprovedRIR = resourceInteroperabilityRecordService.getAll(createFacetFilter(null), securityService.getAdminAccess()).getResults();
@@ -120,19 +114,6 @@ public class InternalToPublicConsistency {
             } catch (ResourceException | ResourceNotFoundException e) {
                 logs.add(String.format("Service with ID [%s] is missing its Public instance [%s]",
                         serviceId, publicServiceId));
-            }
-        }
-
-        // check consistency for Datasources
-        for (DatasourceBundle datasourceBundle : allInternalApprovedDatasources) {
-            String datasourceId = datasourceBundle.getId();
-            String publicDatasourceId = datasourceBundle.getDatasource().getCatalogueId() + "." + datasourceId;
-            // try and get its Public instance
-            try {
-                publicDatasourceManager.get(publicDatasourceId);
-            } catch (ResourceException | ResourceNotFoundException e) {
-                logs.add(String.format("Datasource with ID [%s] is missing its Public instance [%s]",
-                        datasourceId, publicDatasourceId));
             }
         }
 

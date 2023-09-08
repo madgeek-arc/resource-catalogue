@@ -15,20 +15,12 @@ public interface IdCreator {
     String createProviderId(Provider provider);
 
     /**
-     * Creates id for {@link ResourceBundle}
+     * Creates id for {@link ServiceBundle}
      *
-     * @param resource
+     * @param serviceBundle
      * @return
      */
-    String createServiceId(ResourceBundle<?> resource);
-
-    /**
-     * Creates id for {@link ResourceBundle}
-     *
-     * @param resource
-     * @return
-     */
-    String createDatasourceId(ResourceBundle<?> resource) throws NoSuchAlgorithmException;
+    String createServiceId(ServiceBundle serviceBundle);
 
     /**
      * Creates id for {@link TrainingResourceBundle}

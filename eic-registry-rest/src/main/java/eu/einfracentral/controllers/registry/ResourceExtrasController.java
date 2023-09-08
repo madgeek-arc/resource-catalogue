@@ -1,10 +1,8 @@
 package eu.einfracentral.controllers.registry;
 
-import eu.einfracentral.domain.DatasourceBundle;
 import eu.einfracentral.domain.EOSCIFGuidelines;
-import eu.einfracentral.domain.ResourceBundle;
 import eu.einfracentral.domain.ServiceBundle;
-import eu.einfracentral.registry.service.ResourceBundleService;
+import eu.einfracentral.registry.service.ServiceBundleService;
 import io.swagger.annotations.ApiOperation;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -26,72 +24,39 @@ public class ResourceExtrasController {
 
     private static final Logger logger = LogManager.getLogger(ResourceExtrasController.class);
 
-    private final ResourceBundleService<ServiceBundle> serviceBundleService;
-    private final ResourceBundleService<DatasourceBundle> datasourceBundleService;
+    private final ServiceBundleService<ServiceBundle> serviceBundleService;
 
-    public ResourceExtrasController(ResourceBundleService<ServiceBundle> serviceBundleService,
-                                    ResourceBundleService<DatasourceBundle> datasourceBundleService) {
+    public ResourceExtrasController(ServiceBundleService<ServiceBundle> serviceBundleService) {
         this.serviceBundleService = serviceBundleService;
-        this.datasourceBundleService = datasourceBundleService;
     }
 
-    @ApiOperation(value = "Update a specific Resource's EOSC Interoperability Framework Guidelines given its ID")
+    @ApiOperation(value = "Update a specific Service's EOSC Interoperability Framework Guidelines given its ID")
     @PutMapping(path = "/update/eoscIFGuidelines", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
-    public ResponseEntity<ResourceBundle<?>> updateEOSCIFGuidelines(@RequestParam String resourceId, @RequestParam String catalogueId,
-                                                                    @RequestBody List<EOSCIFGuidelines> eoscIFGuidelines, @RequestParam String type,
-                                                                    @ApiIgnore Authentication auth) {
-        ResourceBundle<?> bundle;
-        switch (type) {
-            case "service":
-                bundle = serviceBundleService.updateEOSCIFGuidelines(resourceId, catalogueId, eoscIFGuidelines, auth);
-                break;
-            case "datasource":
-                bundle = datasourceBundleService.updateEOSCIFGuidelines(resourceId, catalogueId, eoscIFGuidelines, auth);
-                break;
-            default:
-                throw new UnsupportedOperationException(String.format("Type [%s] is not supported.", type));
-        }
-        return new ResponseEntity<>(bundle, HttpStatus.OK);
+    public ResponseEntity<ServiceBundle> updateEOSCIFGuidelines(@RequestParam String serviceId, @RequestParam String catalogueId,
+                                                                @RequestBody List<EOSCIFGuidelines> eoscIFGuidelines,
+                                                                @ApiIgnore Authentication auth) {
+        ServiceBundle serviceBundle = serviceBundleService.updateEOSCIFGuidelines(serviceId, catalogueId, eoscIFGuidelines, auth);
+        return new ResponseEntity<>(serviceBundle, HttpStatus.OK);
     }
 
-    @ApiOperation(value = "Update a specific Resource's Research Categories field")
+    @ApiOperation(value = "Update a specific Service's Research Categories field")
     @PutMapping(path = "/update/researchCategories", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
-    public ResponseEntity<ResourceBundle<?>> updateResearchCategories(@RequestParam String resourceId, @RequestParam String catalogueId,
-                                                                      @RequestBody List<String> researchCategories, @RequestParam String type,
-                                                                      @ApiIgnore Authentication auth) {
-        ResourceBundle<?> bundle;
-        switch (type) {
-            case "service":
-                bundle = serviceBundleService.updateResearchCategories(resourceId, catalogueId, researchCategories, auth);
-                break;
-            case "datasource":
-                bundle = datasourceBundleService.updateResearchCategories(resourceId, catalogueId, researchCategories, auth);
-                break;
-            default:
-                throw new UnsupportedOperationException(String.format("Type [%s] is not supported.", type));
-        }
-        return new ResponseEntity<>(bundle, HttpStatus.OK);
+    public ResponseEntity<ServiceBundle> updateResearchCategories(@RequestParam String serviceId, @RequestParam String catalogueId,
+                                                                  @RequestBody List<String> researchCategories,
+                                                                  @ApiIgnore Authentication auth) {
+        ServiceBundle serviceBundle = serviceBundleService.updateResearchCategories(serviceId, catalogueId, researchCategories, auth);
+        return new ResponseEntity<>(serviceBundle, HttpStatus.OK);
     }
 
-    @ApiOperation(value = "Update Resource's Horizontal Service field")
+    @ApiOperation(value = "Update Service's Horizontal Service field")
     @PutMapping(path = "/update/horizontalService", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
-    public ResponseEntity<ResourceBundle<?>> updateHorizontalService(@RequestParam String resourceId, @RequestParam String catalogueId,
-                                                                     @RequestParam boolean horizontalService, @RequestParam String type,
-                                                                     @ApiIgnore Authentication auth) {
-        ResourceBundle<?> bundle;
-        switch (type) {
-            case "service":
-                bundle = serviceBundleService.updateHorizontalService(resourceId, catalogueId, horizontalService, auth);
-                break;
-            case "datasource":
-                bundle = datasourceBundleService.updateHorizontalService(resourceId, catalogueId, horizontalService, auth);
-                break;
-            default:
-                throw new UnsupportedOperationException(String.format("Type [%s] is not supported.", type));
-        }
-        return new ResponseEntity<>(bundle, HttpStatus.OK);
+    public ResponseEntity<ServiceBundle> updateHorizontalService(@RequestParam String serviceId, @RequestParam String catalogueId,
+                                                                 @RequestParam boolean horizontalService,
+                                                                 @ApiIgnore Authentication auth) {
+        ServiceBundle serviceBundle = serviceBundleService.updateHorizontalService(serviceId, catalogueId, horizontalService, auth);
+        return new ResponseEntity<>(serviceBundle, HttpStatus.OK);
     }
 }

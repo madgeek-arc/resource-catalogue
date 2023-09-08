@@ -1,5 +1,7 @@
 package eu.einfracentral.domain;
 
+import eu.einfracentral.annotation.FieldValidation;
+
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
@@ -7,7 +9,14 @@ import javax.xml.bind.annotation.XmlType;
 //@Document
 @XmlType
 @XmlRootElement(namespace = "http://einfracentral.eu")
-public class ServiceBundle extends ResourceBundle<Service> {
+public class ServiceBundle extends Bundle<Service> {
+
+    @XmlElement
+    private String status;
+
+    @XmlElement
+    @FieldValidation(nullable = true)
+    private ResourceExtras resourceExtras;
 
     public ServiceBundle() {
         // No arg constructor
@@ -23,20 +32,12 @@ public class ServiceBundle extends ResourceBundle<Service> {
         this.setMetadata(metadata);
     }
 
-    public ServiceBundle(DatasourceBundle datasourceBundle) {
-        this.setId(datasourceBundle.getId());
-        this.setService(datasourceBundle.getDatasource());
-        this.setMetadata(datasourceBundle.getMetadata());
-        this.setStatus(datasourceBundle.getStatus());
-        this.setActive(datasourceBundle.isActive());
-        this.setLoggingInfo(datasourceBundle.getLoggingInfo());
-        this.setLatestAuditInfo(datasourceBundle.getLatestAuditInfo());
-        this.setLatestOnboardingInfo(datasourceBundle.getLatestOnboardingInfo());
-        this.setLatestUpdateInfo(datasourceBundle.getLatestUpdateInfo());
-        this.setIdentifiers(datasourceBundle.getIdentifiers());
-        this.setResourceExtras(datasourceBundle.getResourceExtras());
-        this.setSuspended(datasourceBundle.isSuspended());
-        this.setMigrationStatus(datasourceBundle.getMigrationStatus());
+    @Override
+    public String toString() {
+        return "ServiceBundle{" +
+                "status='" + status + '\'' +
+                ", resourceExtras=" + resourceExtras +
+                '}';
     }
 
     @XmlElement(name = "service")
@@ -59,8 +60,19 @@ public class ServiceBundle extends ResourceBundle<Service> {
         super.setId(id);
     }
 
-    @Override
-    public String toString() {
-        return "ServiceBundle{} " + super.toString();
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public ResourceExtras getResourceExtras() {
+        return resourceExtras;
+    }
+
+    public void setResourceExtras(ResourceExtras resourceExtras) {
+        this.resourceExtras = resourceExtras;
     }
 }

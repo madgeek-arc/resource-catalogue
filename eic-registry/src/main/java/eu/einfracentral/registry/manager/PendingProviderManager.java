@@ -203,13 +203,6 @@ public class PendingProviderManager extends ResourceManager<ProviderBundle> impl
         return transformToActive(providerBundle, auth);
     }
 
-
-    @Override
-    public Object getPendingRich(String id, Authentication auth) {
-        throw new UnsupportedOperationException("Not yet Implemented");
-    }
-
-
     public boolean userIsPendingProviderAdmin(@NotNull User user, @NotNull ProviderBundle registeredProvider) {
         if (registeredProvider.getProvider().getUsers() == null) {
             return false;
@@ -275,7 +268,7 @@ public class PendingProviderManager extends ResourceManager<ProviderBundle> impl
     public Resource getPendingResourceViaServiceId(String serviceId){
         return null;
     }
-    public DatasourceBundle getOpenAIREDatasource(Datasource datasource){
-        return null;
-    }
+//    public DatasourceBundle getOpenAIREDatasource(Datasource datasource){
+//        return null;
+//    }
 }

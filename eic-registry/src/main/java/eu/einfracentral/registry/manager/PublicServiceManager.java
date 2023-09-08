@@ -1,7 +1,6 @@
 package eu.einfracentral.registry.manager;
 
 import eu.einfracentral.domain.Identifiers;
-import eu.einfracentral.domain.ResourceExtras;
 import eu.einfracentral.domain.ServiceBundle;
 import eu.einfracentral.exception.ResourceException;
 import eu.einfracentral.exception.ResourceNotFoundException;
@@ -74,12 +73,11 @@ public class PublicServiceManager extends AbstractPublicResourceManager<ServiceB
         serviceBundle.setId(String.format("%s.%s", serviceBundle.getService().getCatalogueId(), serviceBundle.getId()));
 
         // sets public ids to resource organisation, resource providers and related/required resources
-        updateResourceIdsToPublic(serviceBundle);
+        updateServiceIdsToPublic(serviceBundle);
 
         serviceBundle.getMetadata().setPublished(true);
         // create PID and set it as Alternative Identifier
         serviceBundle.getIdentifiers().setAlternativeIdentifiers(commonMethods.createAlternativeIdentifierForPID(serviceBundle));
-        createResourceExtras(serviceBundle);
         ServiceBundle ret;
         logger.info(String.format("Service [%s] is being published with id [%s]", lowerLevelResourceId, serviceBundle.getId()));
         ret = super.add(serviceBundle, null);
@@ -98,12 +96,11 @@ public class PublicServiceManager extends AbstractPublicResourceManager<ServiceB
         }
 
         // sets public ids to resource organisation, resource providers and related/required resources
-        updateResourceIdsToPublic(ret);
+        updateServiceIdsToPublic(ret);
 
-        ret.setIdentifiers(published.getIdentifiers());
+        ret.setIdentifiers(commonMethods.updateAlternativeIdentifiers(serviceBundle, published));
         ret.setId(published.getId());
         ret.setMetadata(published.getMetadata());
-        ret.getResourceExtras().setServiceType("service_type-service");
         logger.info(String.format("Updating public Service with id [%s]", ret.getId()));
         ret = super.update(ret, null);
         jmsService.convertAndSendTopic("service.update", ret);
@@ -118,16 +115,6 @@ public class PublicServiceManager extends AbstractPublicResourceManager<ServiceB
             super.delete(publicServiceBundle);
             jmsService.convertAndSendTopic("service.delete", publicServiceBundle);
         } catch (ResourceException | ResourceNotFoundException ignore){
-        }
-    }
-
-    private void createResourceExtras(ServiceBundle serviceBundle){
-        if (serviceBundle.getResourceExtras() == null){
-            ResourceExtras resourceExtras = new ResourceExtras();
-            resourceExtras.setServiceType("service_type-service");
-            serviceBundle.setResourceExtras(resourceExtras);
-        } else {
-            serviceBundle.getResourceExtras().setServiceType("service_type-service");
         }
     }
 }
