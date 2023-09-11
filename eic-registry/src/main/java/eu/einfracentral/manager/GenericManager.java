@@ -69,68 +69,52 @@ public class GenericManager implements GenericResourceService {
     }
 
     @PostConstruct
-    void initResourceTypesBrowseFields() {
-        this.browseByMap = new HashMap();
-        this.labelsMap = new HashMap();
-        Map<String, Set<String>> aliasGroupBrowse = new HashMap();
-        Map<String, Map<String, String>> aliasGroupLabels = new HashMap();
-        Iterator var3 = this.resourceTypeService.getAllResourceType().iterator();
+    void initResourceTypesBrowseFields() { // TODO: move this to a bean to avoid running multiple times ??
+        browseByMap = new HashMap<>();
+        labelsMap = new HashMap<>();
+        Map<String, Set<String>> aliasGroupBrowse = new HashMap<>();
+        Map<String, Map<String, String>> aliasGroupLabels = new HashMap<>();
+        for (ResourceType rt : resourceTypeService.getAllResourceType()) {
+            Set<String> browseSet = new HashSet<>();
+            Map<String, Set<String>> sets = new HashMap<>();
+            Map<String, String> labels = new HashMap<>();
 
-        while(var3.hasNext()) {
-            ResourceType rt = (ResourceType)var3.next();
-            Set<String> browseSet = new HashSet();
-            Map<String, Set<String>> sets = new HashMap();
-            Map<String, String> labels = new HashMap();
             labels.put("resourceType", "Resource Type");
-            Iterator var8 = rt.getIndexFields().iterator();
-
-            while(var8.hasNext()) {
-                IndexField f = (IndexField)var8.next();
-                sets.putIfAbsent(f.getResourceType().getName(), new HashSet());
+            for (IndexField f : rt.getIndexFields()) {
+                sets.putIfAbsent(f.getResourceType().getName(), new HashSet<>());
                 labels.put(f.getName(), f.getLabel());
                 if (f.getLabel() != null) {
-                    ((Set)sets.get(f.getResourceType().getName())).add(f.getName());
+                    sets.get(f.getResourceType().getName()).add(f.getName());
                 }
             }
-
-            this.labelsMap.put(rt.getName(), labels);
+            labelsMap.put(rt.getName(), labels);
             boolean flag = true;
-            Iterator var13 = sets.entrySet().iterator();
-
-            while(var13.hasNext()) {
-                Map.Entry<String, Set<String>> entry = (Map.Entry)var13.next();
+            for (Map.Entry<String, Set<String>> entry : sets.entrySet()) {
                 if (flag) {
-                    browseSet.addAll((Collection)entry.getValue());
+                    browseSet.addAll(entry.getValue());
                     flag = false;
                 } else {
-                    browseSet.retainAll((Collection)entry.getValue());
+                    browseSet.retainAll(entry.getValue());
                 }
             }
-
             if (rt.getAliasGroup() != null) {
                 if (aliasGroupBrowse.get(rt.getAliasGroup()) == null) {
-                    aliasGroupBrowse.put(rt.getAliasGroup(), browseSet);
-                    aliasGroupLabels.put(rt.getAliasGroup(), labels);
+                    aliasGroupBrowse.put(rt.getAliasGroup(), new HashSet<>(browseSet));
+                    aliasGroupLabels.put(rt.getAliasGroup(), new HashMap<>(labels));
                 } else {
-                    ((Set)aliasGroupBrowse.get(rt.getAliasGroup())).retainAll(browseSet);
-                    ((Map)aliasGroupLabels.get(rt.getAliasGroup())).keySet().retainAll(labels.keySet());
+                    aliasGroupBrowse.get(rt.getAliasGroup()).retainAll(browseSet);
+                    aliasGroupLabels.get(rt.getAliasGroup()).keySet().retainAll(labels.keySet());
                 }
             }
-
-            List<String> browseBy = new ArrayList(browseSet);
-            Collections.sort(browseBy);
-            this.browseByMap.put(rt.getName(), browseBy);
+            List<String> browseBy = new ArrayList<>(browseSet);
+            java.util.Collections.sort(browseBy);
+            browseByMap.put(rt.getName(), browseBy);
             logger.debug("Generating browse fields for [{}]", rt.getName());
         }
-
-        var3 = aliasGroupBrowse.keySet().iterator();
-
-        while(var3.hasNext()) {
-            String alias = (String)var3.next();
-            this.browseByMap.put(alias, (List)((Set)aliasGroupBrowse.get(alias)).stream().sorted().collect(Collectors.toList()));
-            this.labelsMap.put(alias, (Map)aliasGroupLabels.get(alias));
+        for (String alias : aliasGroupBrowse.keySet()) {
+            browseByMap.put(alias, aliasGroupBrowse.get(alias).stream().sorted().collect(Collectors.toList()));
+            labelsMap.put(alias, aliasGroupLabels.get(alias));
         }
-
     }
 
     public <T> T get(String resourceTypeName, String field, String value, boolean throwOnNull) {

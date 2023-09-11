@@ -3278,7 +3278,7 @@ that is the used scheme (e.g., Web Address URL, DOI, ARK, etc.).]]></xs:document
                                 
                 <xs:sequence>
                                     
-                  <xs:element minOccurs="0" name="key" type="xs:string"/>
+                  <xs:element minOccurs="0" name="key" type="xs:anyType"/>
                                     
                   <xs:element minOccurs="0" name="value" type="xs:anyType"/>
                                   
