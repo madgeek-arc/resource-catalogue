@@ -7,11 +7,7 @@ import eu.einfracentral.service.GenericResourceService;
 import eu.einfracentral.utils.FacetLabelService;
 import eu.einfracentral.utils.ReflectUtils;
 import eu.einfracentral.utils.LoggingUtils;
-import eu.openminted.registry.core.domain.Browsing;
-import eu.openminted.registry.core.domain.FacetFilter;
-import eu.openminted.registry.core.domain.Paging;
-import eu.openminted.registry.core.domain.Resource;
-import eu.openminted.registry.core.domain.ResourceType;
+import eu.openminted.registry.core.domain.*;
 import eu.openminted.registry.core.domain.index.IndexField;
 import eu.openminted.registry.core.service.ParserService;
 import eu.openminted.registry.core.service.ResourceService;
@@ -21,17 +17,7 @@ import eu.openminted.registry.core.service.ServiceException;
 import eu.openminted.registry.core.service.ParserService.ParserServiceTypes;
 import java.lang.reflect.InvocationTargetException;
 import java.net.UnknownHostException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 
@@ -304,6 +290,16 @@ public class GenericManager implements GenericResourceService {
 
     public void setBrowseByMap(Map<String, List<String>> browseByMap) {
         this.browseByMap = browseByMap;
+    }
+
+    // facets are pre-sorted by 'count' field
+    public void sortSpecificFacetsAlphabetically(List<Facet> facets, String field) {
+        for (Iterator<Facet> iter = facets.listIterator(); iter.hasNext();) {
+            Facet facet = iter.next();
+            if (facet.getField().equals("catalogue_id") || facet.getField().equals(field)) {
+                facet.getValues().sort(Comparator.comparing(eu.openminted.registry.core.domain.Value::getLabel, String.CASE_INSENSITIVE_ORDER));
+            }
+        }
     }
 }
 

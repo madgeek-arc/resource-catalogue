@@ -129,7 +129,9 @@ public class InteroperabilityRecordController {
                                                                               @RequestParam(defaultValue = "all", name = "catalogue_id") String catalogueId,
                                                                               @RequestParam(defaultValue = "all", name = "provider_id") String providerId) {
         FacetFilter ff = interoperabilityRecordService.createFacetFilterForFetchingInteroperabilityRecords(allRequestParams, catalogueId, providerId);
-        return ResponseEntity.ok(genericResourceService.getResults(ff));
+        Paging<InteroperabilityRecordBundle> paging = genericResourceService.getResults(ff);
+        genericResourceService.sortSpecificFacetsAlphabetically(paging.getFacets(), "provider_id");
+        return ResponseEntity.ok(paging);
     }
 
     @PatchMapping(path = "verify/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})

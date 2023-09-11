@@ -280,6 +280,7 @@ public class ServiceController {
         FacetFilter ff = serviceBundleService.createFacetFilterForFetchingServices(allRequestParams, catalogueId);
         if (auditState == null) {
             Paging<?> paging = genericResourceService.getResults(ff);
+            genericResourceService.sortSpecificFacetsAlphabetically(paging.getFacets(), "resource_organisation");
             return ResponseEntity.ok(paging);
         } else {
             return ResponseEntity.ok(serviceBundleService.getAllForAdminWithAuditStates(ff, auditState, authentication));
