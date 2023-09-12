@@ -51,6 +51,8 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
     private final SecurityService securityService;
     private final RegistrationMailService registrationMailService;
     private final VocabularyService vocabularyService;
+    private final HelpdeskService<HelpdeskBundle, Authentication> helpdeskService;
+    private final MonitoringService<MonitoringBundle, Authentication> monitoringService;
     private final CatalogueService<CatalogueBundle, Authentication> catalogueService;
     private final PublicTrainingResourceManager publicTrainingResourceManager;
     private final MigrationService migrationService;
@@ -58,10 +60,6 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
     private FacetLabelService facetLabelService;
     @Autowired
     private FieldValidator fieldValidator;
-    @Autowired
-    private AnalyticsService analyticsService;
-    @Autowired
-    private EventService eventService;
     @Autowired
     private SearchServiceEIC searchServiceEIC;
     @Autowired
@@ -107,6 +105,8 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
                                    IdCreator idCreator, @Lazy SecurityService securityService,
                                    @Lazy RegistrationMailService registrationMailService,
                                    @Lazy VocabularyService vocabularyService,
+                                   @Lazy HelpdeskService<HelpdeskBundle, Authentication> helpdeskService,
+                                   @Lazy MonitoringService<MonitoringBundle, Authentication> monitoringService,
                                    CatalogueService<CatalogueBundle, Authentication> catalogueService,
                                    PublicTrainingResourceManager publicTrainingResourceManager,
                                    SynchronizerService<TrainingResource> synchronizerService,
@@ -118,6 +118,8 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
         this.securityService = securityService;
         this.registrationMailService = registrationMailService;
         this.vocabularyService = vocabularyService;
+        this.helpdeskService = helpdeskService;
+        this.monitoringService = monitoringService;
         this.catalogueService = catalogueService;
         this.publicTrainingResourceManager = publicTrainingResourceManager;
         this.synchronizerService = synchronizerService;
@@ -1101,6 +1103,15 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
         commonMethods.suspensionValidation(trainingResourceBundle, catalogueId,
                 trainingResourceBundle.getTrainingResource().getResourceOrganisation(), suspend, auth);
         commonMethods.suspendResource(trainingResourceBundle, catalogueId, suspend, auth);
+        // suspend Service's extensions
+        HelpdeskBundle helpdeskBundle = helpdeskService.get(trainingResourceId, catalogueId);
+        if (helpdeskBundle != null) {
+            commonMethods.suspendResource(helpdeskBundle, catalogueId, suspend, auth);
+        }
+        MonitoringBundle monitoringBundle = monitoringService.get(trainingResourceId, catalogueId);
+        if (monitoringBundle != null) {
+            commonMethods.suspendResource(monitoringBundle, catalogueId, suspend, auth);
+        }
         return super.update(trainingResourceBundle, auth);
     }
 

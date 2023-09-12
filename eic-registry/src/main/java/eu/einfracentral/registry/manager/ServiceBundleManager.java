@@ -46,6 +46,8 @@ public class ServiceBundleManager extends AbstractServiceBundleManager<ServiceBu
     private final PublicServiceManager publicServiceManager;
     private final MigrationService migrationService;
     private final DatasourceService<DatasourceBundle, Authentication> datasourceService;
+    private final HelpdeskService<HelpdeskBundle, Authentication> helpdeskService;
+    private final MonitoringService<MonitoringBundle, Authentication> monitoringService;
     private final ProviderResourcesCommonMethods commonMethods;
 
     @Value("${project.catalogue.name}")
@@ -59,7 +61,9 @@ public class ServiceBundleManager extends AbstractServiceBundleManager<ServiceBu
                                 CatalogueService<CatalogueBundle, Authentication> catalogueService,
                                 @Lazy PublicServiceManager publicServiceManager,
                                 @Lazy MigrationService migrationService,
-                                @Lazy DatasourceService datasourceService,
+                                @Lazy DatasourceService<DatasourceBundle, Authentication> datasourceService,
+                                @Lazy HelpdeskService<HelpdeskBundle, Authentication> helpdeskService,
+                                @Lazy MonitoringService<MonitoringBundle, Authentication> monitoringService,
                                 ProviderResourcesCommonMethods commonMethods) {
         super(ServiceBundle.class);
         this.providerService = providerService; // for providers
@@ -71,6 +75,8 @@ public class ServiceBundleManager extends AbstractServiceBundleManager<ServiceBu
         this.publicServiceManager = publicServiceManager;
         this.migrationService = migrationService;
         this.datasourceService = datasourceService;
+        this.helpdeskService = helpdeskService;
+        this.monitoringService = monitoringService;
         this.commonMethods = commonMethods;
     }
 
@@ -590,10 +596,19 @@ public class ServiceBundleManager extends AbstractServiceBundleManager<ServiceBu
         commonMethods.suspensionValidation(serviceBundle, catalogueId,
                 serviceBundle.getService().getResourceOrganisation(), suspend, auth);
         commonMethods.suspendResource(serviceBundle, catalogueId, suspend, auth);
-        // if Service had a Datasource sub-profile, suspend it too
+        // suspend Service's sub-profiles
         DatasourceBundle datasourceBundle = datasourceService.get(serviceId, catalogueId);
         if (datasourceBundle != null) {
             commonMethods.suspendResource(datasourceBundle, catalogueId, suspend, auth);
+        }
+        // suspend Service's extensions
+        HelpdeskBundle helpdeskBundle = helpdeskService.get(serviceId, catalogueId);
+        if (helpdeskBundle != null) {
+            commonMethods.suspendResource(helpdeskBundle, catalogueId, suspend, auth);
+        }
+        MonitoringBundle monitoringBundle = monitoringService.get(serviceId, catalogueId);
+        if (monitoringBundle != null) {
+            commonMethods.suspendResource(monitoringBundle, catalogueId, suspend, auth);
         }
         return super.update(serviceBundle, auth);
     }
