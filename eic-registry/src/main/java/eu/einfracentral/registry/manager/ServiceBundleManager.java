@@ -302,7 +302,10 @@ public class ServiceBundleManager extends AbstractServiceBundleManager<ServiceBu
 
     @Override
     public void delete(ServiceBundle serviceBundle) {
+        String catalogueId = serviceBundle.getService().getCatalogueId();
         commonMethods.blockResourceDeletion(serviceBundle.getStatus(), serviceBundle.getMetadata().isPublished());
+        commonMethods.deleteCatalogueRelatedServiceSubprofiles(serviceBundle.getId(), catalogueId);
+        commonMethods.deleteCatalogueRelatedServiceExtensions(serviceBundle, catalogueId, "Service");
         logger.info("Deleting Service: {}", serviceBundle);
         super.delete(serviceBundle);
     }

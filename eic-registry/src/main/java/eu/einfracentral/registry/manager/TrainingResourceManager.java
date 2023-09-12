@@ -380,7 +380,9 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
 
     @Override
     public void delete(TrainingResourceBundle trainingResourceBundle) {
+        String catalogueId = trainingResourceBundle.getTrainingResource().getCatalogueId();
         commonMethods.blockResourceDeletion(trainingResourceBundle.getStatus(), trainingResourceBundle.getMetadata().isPublished());
+        commonMethods.deleteCatalogueRelatedServiceExtensions(trainingResourceBundle, catalogueId, "TrainingResource");
         logger.info("Deleting Training Resource: {}", trainingResourceBundle);
         super.delete(trainingResourceBundle);
         synchronizerService.syncDelete(trainingResourceBundle.getTrainingResource());

@@ -33,6 +33,9 @@ public class ProviderResourcesCommonMethods {
 
     private final CatalogueService<CatalogueBundle, Authentication> catalogueService;
     private final ProviderService<ProviderBundle, Authentication> providerService;
+    private final DatasourceService<DatasourceBundle, Authentication> datasourceService;
+    private final HelpdeskService<HelpdeskBundle, Authentication> helpdeskService;
+    private final MonitoringService<MonitoringBundle, Authentication> monitoringService;
     private final GenericResourceService genericResourceService;
     private final VocabularyService vocabularyService;
     private final SecurityService securityService;
@@ -50,11 +53,17 @@ public class ProviderResourcesCommonMethods {
 
     public ProviderResourcesCommonMethods(@Lazy CatalogueService<CatalogueBundle, Authentication> catalogueService,
                                           @Lazy ProviderService<ProviderBundle, Authentication> providerService,
+                                          @Lazy DatasourceService<DatasourceBundle, Authentication> datasourceService,
+                                          @Lazy HelpdeskService<HelpdeskBundle, Authentication> helpdeskService,
+                                          @Lazy MonitoringService<MonitoringBundle, Authentication> monitoringService,
                                           @Lazy GenericResourceService genericResourceService,
                                           @Lazy VocabularyService vocabularyService,
                                           @Lazy SecurityService securityService) {
         this.catalogueService = catalogueService;
         this.providerService = providerService;
+        this.datasourceService = datasourceService;
+        this.helpdeskService = helpdeskService;
+        this.monitoringService = monitoringService;
         this.genericResourceService = genericResourceService;
         this.vocabularyService = vocabularyService;
         this.securityService = securityService;
@@ -455,5 +464,44 @@ public class ProviderResourcesCommonMethods {
 
         identifiers.setAlternativeIdentifiers(ret);
         return identifiers;
+    }
+
+    public void deleteCatalogueRelatedServiceSubprofiles(String serviceId, String catalogueId) {
+        DatasourceBundle datasourceBundle = datasourceService.get(serviceId, catalogueId);
+        if (datasourceBundle != null) {
+            try {
+                logger.info("Deleting Datasource of Service with id: {}", serviceId);
+                datasourceService.delete(datasourceBundle);
+            } catch (eu.openminted.registry.core.exception.ResourceNotFoundException e) {
+                logger.error(e);
+            }
+        }
+    }
+
+    public void deleteCatalogueRelatedServiceExtensions(Object resource, String catalogueId, String resourceType) {
+        String resourceId;
+        if (resourceType.equalsIgnoreCase("service")) {
+            resourceId = ((ServiceBundle) resource).getId();
+        } else {
+            resourceId = ((TrainingResourceBundle) resource).getId();
+        }
+        HelpdeskBundle helpdeskBundle = helpdeskService.get(resourceId, catalogueId);
+        if (helpdeskBundle != null) {
+            try {
+                logger.info("Deleting Helpdesk of {} with id: {}", resourceType, resourceId);
+                helpdeskService.delete(helpdeskBundle);
+            } catch (eu.openminted.registry.core.exception.ResourceNotFoundException e) {
+                logger.error(e);
+            }
+        }
+        MonitoringBundle monitoringBundle = monitoringService.get(resourceId, catalogueId);
+        if (monitoringBundle != null) {
+            try {
+                logger.info("Deleting Monitoring of {} with id: {}", resourceType, resourceId);
+                monitoringService.delete(monitoringBundle);
+            } catch (eu.openminted.registry.core.exception.ResourceNotFoundException e) {
+                logger.error(e);
+            }
+        }
     }
 }
