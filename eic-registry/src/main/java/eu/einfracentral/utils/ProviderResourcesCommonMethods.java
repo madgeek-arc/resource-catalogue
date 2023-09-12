@@ -36,6 +36,7 @@ public class ProviderResourcesCommonMethods {
     private final DatasourceService<DatasourceBundle, Authentication> datasourceService;
     private final HelpdeskService<HelpdeskBundle, Authentication> helpdeskService;
     private final MonitoringService<MonitoringBundle, Authentication> monitoringService;
+    private final ResourceInteroperabilityRecordService<ResourceInteroperabilityRecordBundle> resourceInteroperabilityRecordService;
     private final GenericResourceService genericResourceService;
     private final VocabularyService vocabularyService;
     private final SecurityService securityService;
@@ -56,6 +57,8 @@ public class ProviderResourcesCommonMethods {
                                           @Lazy DatasourceService<DatasourceBundle, Authentication> datasourceService,
                                           @Lazy HelpdeskService<HelpdeskBundle, Authentication> helpdeskService,
                                           @Lazy MonitoringService<MonitoringBundle, Authentication> monitoringService,
+                                          @Lazy ResourceInteroperabilityRecordService<ResourceInteroperabilityRecordBundle>
+                                                  resourceInteroperabilityRecordService,
                                           @Lazy GenericResourceService genericResourceService,
                                           @Lazy VocabularyService vocabularyService,
                                           @Lazy SecurityService securityService) {
@@ -64,6 +67,7 @@ public class ProviderResourcesCommonMethods {
         this.datasourceService = datasourceService;
         this.helpdeskService = helpdeskService;
         this.monitoringService = monitoringService;
+        this.resourceInteroperabilityRecordService = resourceInteroperabilityRecordService;
         this.genericResourceService = genericResourceService;
         this.vocabularyService = vocabularyService;
         this.securityService = securityService;
@@ -466,7 +470,7 @@ public class ProviderResourcesCommonMethods {
         return identifiers;
     }
 
-    public void deleteCatalogueRelatedServiceSubprofiles(String serviceId, String catalogueId) {
+    public void deleteResourceRelatedServiceSubprofiles(String serviceId, String catalogueId) {
         DatasourceBundle datasourceBundle = datasourceService.get(serviceId, catalogueId);
         if (datasourceBundle != null) {
             try {
@@ -478,13 +482,8 @@ public class ProviderResourcesCommonMethods {
         }
     }
 
-    public void deleteCatalogueRelatedServiceExtensions(Object resource, String catalogueId, String resourceType) {
-        String resourceId;
-        if (resourceType.equalsIgnoreCase("service")) {
-            resourceId = ((ServiceBundle) resource).getId();
-        } else {
-            resourceId = ((TrainingResourceBundle) resource).getId();
-        }
+    public void deleteResourceRelatedServiceExtensionsAndResourceInteroperabilityRecords(String resourceId, String catalogueId, String resourceType) {
+        // service extensions
         HelpdeskBundle helpdeskBundle = helpdeskService.get(resourceId, catalogueId);
         if (helpdeskBundle != null) {
             try {
@@ -499,6 +498,16 @@ public class ProviderResourcesCommonMethods {
             try {
                 logger.info("Deleting Monitoring of {} with id: {}", resourceType, resourceId);
                 monitoringService.delete(monitoringBundle);
+            } catch (eu.openminted.registry.core.exception.ResourceNotFoundException e) {
+                logger.error(e);
+            }
+        }
+        // resource interoperability records
+        ResourceInteroperabilityRecordBundle resourceInteroperabilityRecordBundle = resourceInteroperabilityRecordService.getWithResourceId(resourceId, catalogueId);
+        if (resourceInteroperabilityRecordBundle != null) {
+            try {
+                logger.info("Deleting ResourceInteroperabilityRecord of {} with id: {}", resourceType, resourceId);
+                resourceInteroperabilityRecordService.delete(resourceInteroperabilityRecordBundle);
             } catch (eu.openminted.registry.core.exception.ResourceNotFoundException e) {
                 logger.error(e);
             }

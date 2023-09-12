@@ -53,6 +53,7 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
     private final VocabularyService vocabularyService;
     private final HelpdeskService<HelpdeskBundle, Authentication> helpdeskService;
     private final MonitoringService<MonitoringBundle, Authentication> monitoringService;
+    private final ResourceInteroperabilityRecordService<ResourceInteroperabilityRecordBundle> resourceInteroperabilityRecordService;
     private final CatalogueService<CatalogueBundle, Authentication> catalogueService;
     private final PublicTrainingResourceManager publicTrainingResourceManager;
     private final MigrationService migrationService;
@@ -107,6 +108,7 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
                                    @Lazy VocabularyService vocabularyService,
                                    @Lazy HelpdeskService<HelpdeskBundle, Authentication> helpdeskService,
                                    @Lazy MonitoringService<MonitoringBundle, Authentication> monitoringService,
+                                   @Lazy ResourceInteroperabilityRecordService<ResourceInteroperabilityRecordBundle> resourceInteroperabilityRecordService,
                                    CatalogueService<CatalogueBundle, Authentication> catalogueService,
                                    PublicTrainingResourceManager publicTrainingResourceManager,
                                    SynchronizerService<TrainingResource> synchronizerService,
@@ -120,6 +122,7 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
         this.vocabularyService = vocabularyService;
         this.helpdeskService = helpdeskService;
         this.monitoringService = monitoringService;
+        this.resourceInteroperabilityRecordService = resourceInteroperabilityRecordService;
         this.catalogueService = catalogueService;
         this.publicTrainingResourceManager = publicTrainingResourceManager;
         this.synchronizerService = synchronizerService;
@@ -384,7 +387,7 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
     public void delete(TrainingResourceBundle trainingResourceBundle) {
         String catalogueId = trainingResourceBundle.getTrainingResource().getCatalogueId();
         commonMethods.blockResourceDeletion(trainingResourceBundle.getStatus(), trainingResourceBundle.getMetadata().isPublished());
-        commonMethods.deleteCatalogueRelatedServiceExtensions(trainingResourceBundle, catalogueId, "TrainingResource");
+        commonMethods.deleteResourceRelatedServiceExtensionsAndResourceInteroperabilityRecords(trainingResourceBundle.getId(), catalogueId, "TrainingResource");
         logger.info("Deleting Training Resource: {}", trainingResourceBundle);
         super.delete(trainingResourceBundle);
         synchronizerService.syncDelete(trainingResourceBundle.getTrainingResource());
@@ -1106,11 +1109,31 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
         // suspend Service's extensions
         HelpdeskBundle helpdeskBundle = helpdeskService.get(trainingResourceId, catalogueId);
         if (helpdeskBundle != null) {
-            commonMethods.suspendResource(helpdeskBundle, catalogueId, suspend, auth);
+            try {
+                commonMethods.suspendResource(helpdeskBundle, catalogueId, suspend, auth);
+                helpdeskService.update(helpdeskBundle, auth);
+            } catch (eu.openminted.registry.core.exception.ResourceNotFoundException e) {
+                throw new RuntimeException(e);
+            }
         }
         MonitoringBundle monitoringBundle = monitoringService.get(trainingResourceId, catalogueId);
         if (monitoringBundle != null) {
-            commonMethods.suspendResource(monitoringBundle, catalogueId, suspend, auth);
+            try {
+                commonMethods.suspendResource(monitoringBundle, catalogueId, suspend, auth);
+                monitoringService.update(monitoringBundle, auth);
+            } catch (eu.openminted.registry.core.exception.ResourceNotFoundException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        // suspend ResourceInteroperabilityRecord
+        ResourceInteroperabilityRecordBundle resourceInteroperabilityRecordBundle = resourceInteroperabilityRecordService.getWithResourceId(trainingResourceId, catalogueId);
+        if (resourceInteroperabilityRecordBundle != null) {
+            try {
+                commonMethods.suspendResource(resourceInteroperabilityRecordBundle, catalogueId, suspend, auth);
+                resourceInteroperabilityRecordService.update(resourceInteroperabilityRecordBundle, auth);
+            } catch (eu.openminted.registry.core.exception.ResourceNotFoundException e) {
+                throw new RuntimeException(e);
+            }
         }
         return super.update(trainingResourceBundle, auth);
     }

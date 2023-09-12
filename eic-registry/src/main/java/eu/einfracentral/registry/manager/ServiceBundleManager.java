@@ -48,6 +48,7 @@ public class ServiceBundleManager extends AbstractServiceBundleManager<ServiceBu
     private final DatasourceService<DatasourceBundle, Authentication> datasourceService;
     private final HelpdeskService<HelpdeskBundle, Authentication> helpdeskService;
     private final MonitoringService<MonitoringBundle, Authentication> monitoringService;
+    private final ResourceInteroperabilityRecordService<ResourceInteroperabilityRecordBundle> resourceInteroperabilityRecordService;
     private final ProviderResourcesCommonMethods commonMethods;
 
     @Value("${project.catalogue.name}")
@@ -64,6 +65,8 @@ public class ServiceBundleManager extends AbstractServiceBundleManager<ServiceBu
                                 @Lazy DatasourceService<DatasourceBundle, Authentication> datasourceService,
                                 @Lazy HelpdeskService<HelpdeskBundle, Authentication> helpdeskService,
                                 @Lazy MonitoringService<MonitoringBundle, Authentication> monitoringService,
+                                @Lazy ResourceInteroperabilityRecordService<ResourceInteroperabilityRecordBundle>
+                                            resourceInteroperabilityRecordService,
                                 ProviderResourcesCommonMethods commonMethods) {
         super(ServiceBundle.class);
         this.providerService = providerService; // for providers
@@ -77,6 +80,7 @@ public class ServiceBundleManager extends AbstractServiceBundleManager<ServiceBu
         this.datasourceService = datasourceService;
         this.helpdeskService = helpdeskService;
         this.monitoringService = monitoringService;
+        this.resourceInteroperabilityRecordService = resourceInteroperabilityRecordService;
         this.commonMethods = commonMethods;
     }
 
@@ -310,8 +314,8 @@ public class ServiceBundleManager extends AbstractServiceBundleManager<ServiceBu
     public void delete(ServiceBundle serviceBundle) {
         String catalogueId = serviceBundle.getService().getCatalogueId();
         commonMethods.blockResourceDeletion(serviceBundle.getStatus(), serviceBundle.getMetadata().isPublished());
-        commonMethods.deleteCatalogueRelatedServiceSubprofiles(serviceBundle.getId(), catalogueId);
-        commonMethods.deleteCatalogueRelatedServiceExtensions(serviceBundle, catalogueId, "Service");
+        commonMethods.deleteResourceRelatedServiceSubprofiles(serviceBundle.getId(), catalogueId);
+        commonMethods.deleteResourceRelatedServiceExtensionsAndResourceInteroperabilityRecords(serviceBundle.getId(), catalogueId, "Service");
         logger.info("Deleting Service: {}", serviceBundle);
         super.delete(serviceBundle);
     }
@@ -599,16 +603,41 @@ public class ServiceBundleManager extends AbstractServiceBundleManager<ServiceBu
         // suspend Service's sub-profiles
         DatasourceBundle datasourceBundle = datasourceService.get(serviceId, catalogueId);
         if (datasourceBundle != null) {
-            commonMethods.suspendResource(datasourceBundle, catalogueId, suspend, auth);
+            try {
+                commonMethods.suspendResource(datasourceBundle, catalogueId, suspend, auth);
+                datasourceService.update(datasourceBundle, auth);
+            } catch (eu.openminted.registry.core.exception.ResourceNotFoundException e) {
+                throw new RuntimeException(e);
+            }
         }
         // suspend Service's extensions
         HelpdeskBundle helpdeskBundle = helpdeskService.get(serviceId, catalogueId);
         if (helpdeskBundle != null) {
-            commonMethods.suspendResource(helpdeskBundle, catalogueId, suspend, auth);
+            try {
+                commonMethods.suspendResource(helpdeskBundle, catalogueId, suspend, auth);
+                helpdeskService.update(helpdeskBundle, auth);
+            } catch (eu.openminted.registry.core.exception.ResourceNotFoundException e) {
+                throw new RuntimeException(e);
+            }
         }
         MonitoringBundle monitoringBundle = monitoringService.get(serviceId, catalogueId);
         if (monitoringBundle != null) {
-            commonMethods.suspendResource(monitoringBundle, catalogueId, suspend, auth);
+            try {
+                commonMethods.suspendResource(monitoringBundle, catalogueId, suspend, auth);
+                monitoringService.update(monitoringBundle, auth);
+            } catch (eu.openminted.registry.core.exception.ResourceNotFoundException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        // suspend ResourceInteroperabilityRecord
+        ResourceInteroperabilityRecordBundle resourceInteroperabilityRecordBundle = resourceInteroperabilityRecordService.getWithResourceId(serviceId, catalogueId);
+        if (resourceInteroperabilityRecordBundle != null) {
+            try {
+                commonMethods.suspendResource(resourceInteroperabilityRecordBundle, catalogueId, suspend, auth);
+                resourceInteroperabilityRecordService.update(resourceInteroperabilityRecordBundle, auth);
+            } catch (eu.openminted.registry.core.exception.ResourceNotFoundException e) {
+                throw new RuntimeException(e);
+            }
         }
         return super.update(serviceBundle, auth);
     }
