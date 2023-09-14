@@ -200,9 +200,7 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
         Resource existing = whereID(catalogue.getId(), true);
         CatalogueBundle ex = deserialize(existing);
         // check if there are actual changes in the Catalogue
-        if (catalogue.getCatalogue().equals(ex.getCatalogue())){
-            throw new ValidationException("There are no changes in the Catalogue", HttpStatus.OK);
-        }
+        commonMethods.checkIfResourceHasBeenModified(catalogue.getCatalogue(), ex.getCatalogue());
 
         validate(catalogue);
         catalogue.setMetadata(Metadata.updateMetadata(catalogue.getMetadata(), User.of(auth).getFullName(), User.of(auth).getEmail()));

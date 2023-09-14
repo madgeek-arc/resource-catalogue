@@ -132,9 +132,7 @@ public class ResourceInteroperabilityRecordManager extends ResourceManager<Resou
         Resource existing = whereID(resourceInteroperabilityRecordBundle.getId(), true);
         ResourceInteroperabilityRecordBundle ex = deserialize(existing);
         // check if there are actual changes in the ResourceInteroperabilityRecord
-        if (resourceInteroperabilityRecordBundle.getResourceInteroperabilityRecord().equals(ex.getResourceInteroperabilityRecord())){
-            throw new ValidationException("There are no changes in the Resource Interoperability Record", HttpStatus.OK);
-        }
+        commonMethods.checkIfResourceHasBeenModified(resourceInteroperabilityRecordBundle.getResourceInteroperabilityRecord(), ex.getResourceInteroperabilityRecord());
 
         // block Public ResourceInteroperabilityRecordBundle updates
         if (resourceInteroperabilityRecordBundle.getMetadata().isPublished()){

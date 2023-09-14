@@ -12,6 +12,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
@@ -511,6 +512,12 @@ public class ProviderResourcesCommonMethods {
             } catch (eu.openminted.registry.core.exception.ResourceNotFoundException e) {
                 logger.error(e);
             }
+        }
+    }
+
+    public void checkIfResourceHasBeenModified(Object a, Object b) {
+        if (a.equals(b)) {
+            throw new ValidationException("There are no changes in the resource", HttpStatus.OK);
         }
     }
 }

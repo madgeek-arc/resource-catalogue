@@ -164,7 +164,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         // check if there are actual changes in the Provider
         if (provider.getTemplateStatus().equals(ex.getTemplateStatus()) && provider.getProvider().equals(ex.getProvider())){
             if (provider.isSuspended() == ex.isSuspended()){
-                throw new ValidationException("There are no changes in the Provider", HttpStatus.OK);
+                throw new ValidationException("There are no changes in the Provider", HttpStatus.NOT_MODIFIED);
             }
         }
 
