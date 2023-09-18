@@ -120,7 +120,9 @@ public class DatasourceManager extends ResourceManager<DatasourceBundle> impleme
         Resource existing = whereID(datasourceBundle.getId(), true);
         DatasourceBundle ex = deserialize(existing);
         // check if there are actual changes in the Datasource
-        commonMethods.checkIfResourceHasBeenModified(datasourceBundle.getDatasource(), ex.getDatasource());
+        if (datasourceBundle.getDatasource().equals(ex.getDatasource())) {
+            return datasourceBundle;
+        }
 
         super.validate(datasourceBundle);
         datasourceBundle.setMetadata(Metadata.updateMetadata(datasourceBundle.getMetadata(), User.of(auth).getFullName(), User.of(auth).getEmail()));

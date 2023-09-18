@@ -260,7 +260,9 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
         }
 
         // check if there are actual changes in the Training Resource
-        commonMethods.checkIfResourceHasBeenModified(trainingResourceBundle.getTrainingResource(), existingTrainingResourceBundle.getTrainingResource());
+        if (trainingResourceBundle.getTrainingResource().equals(existingTrainingResourceBundle.getTrainingResource())) {
+            return trainingResourceBundle;
+        }
 
         if (catalogueId == null || catalogueId.equals("")) {
             trainingResourceBundle.getTrainingResource().setCatalogueId(catalogueName);

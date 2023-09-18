@@ -107,7 +107,9 @@ public class HelpdeskManager extends ResourceManager<HelpdeskBundle> implements 
         Resource existing = whereID(helpdesk.getId(), true);
         HelpdeskBundle ex = deserialize(existing);
         // check if there are actual changes in the Helpdesk
-        commonMethods.checkIfResourceHasBeenModified(helpdesk.getMetadata(), ex.getHelpdesk());
+        if (helpdesk.getHelpdesk().equals(ex.getHelpdesk())) {
+            return helpdesk;
+        }
 
         validate(helpdesk);
         helpdesk.setMetadata(Metadata.updateMetadata(helpdesk.getMetadata(), User.of(auth).getFullName(), User.of(auth).getEmail()));

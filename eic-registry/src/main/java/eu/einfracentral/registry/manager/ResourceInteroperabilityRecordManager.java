@@ -132,7 +132,9 @@ public class ResourceInteroperabilityRecordManager extends ResourceManager<Resou
         Resource existing = whereID(resourceInteroperabilityRecordBundle.getId(), true);
         ResourceInteroperabilityRecordBundle ex = deserialize(existing);
         // check if there are actual changes in the ResourceInteroperabilityRecord
-        commonMethods.checkIfResourceHasBeenModified(resourceInteroperabilityRecordBundle.getResourceInteroperabilityRecord(), ex.getResourceInteroperabilityRecord());
+        if (resourceInteroperabilityRecordBundle.getResourceInteroperabilityRecord().equals(ex.getResourceInteroperabilityRecord())) {
+            return resourceInteroperabilityRecordBundle;
+        }
 
         // block Public ResourceInteroperabilityRecordBundle updates
         if (resourceInteroperabilityRecordBundle.getMetadata().isPublished()){

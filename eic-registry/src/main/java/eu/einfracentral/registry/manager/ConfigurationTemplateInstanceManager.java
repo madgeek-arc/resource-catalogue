@@ -88,7 +88,9 @@ public class ConfigurationTemplateInstanceManager extends ResourceManager<Config
         Resource existing = whereID(configurationTemplateInstanceBundle.getId(), true);
         ConfigurationTemplateInstanceBundle ex = deserialize(existing);
         // check if there are actual changes in the ConfigurationTemplateInstance
-        commonMethods.checkIfResourceHasBeenModified(configurationTemplateInstanceBundle.getConfigurationTemplateInstance(), ex.getConfigurationTemplateInstance());
+        if (configurationTemplateInstanceBundle.getConfigurationTemplateInstance().equals(ex.getConfigurationTemplateInstance())) {
+            return configurationTemplateInstanceBundle;
+        }
 
         // block Public ConfigurationTemplateInstanceBundle updates
         if (configurationTemplateInstanceBundle.getMetadata().isPublished()){

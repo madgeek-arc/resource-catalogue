@@ -184,7 +184,9 @@ public class ServiceBundleManager extends AbstractServiceBundleManager<ServiceBu
         }
 
         // check if there are actual changes in the Service
-        commonMethods.checkIfResourceHasBeenModified(serviceBundle.getService(), existingService.getService());
+        if (serviceBundle.getService().equals(existingService.getService())) {
+            return serviceBundle;
+        }
 
         if (catalogueId == null || catalogueId.equals("")) {
             serviceBundle.getService().setCatalogueId(catalogueName);

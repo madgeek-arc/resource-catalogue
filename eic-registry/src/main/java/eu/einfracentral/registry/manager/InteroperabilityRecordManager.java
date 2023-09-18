@@ -145,7 +145,9 @@ public class InteroperabilityRecordManager extends ResourceManager<Interoperabil
         }
 
         // check if there are actual changes in the InteroperabilityRecord
-        commonMethods.checkIfResourceHasBeenModified(interoperabilityRecordBundle.getInteroperabilityRecord(), existingInteroperabilityRecord.getInteroperabilityRecord());
+        if (interoperabilityRecordBundle.getInteroperabilityRecord().equals(existingInteroperabilityRecord.getInteroperabilityRecord())) {
+            return interoperabilityRecordBundle;
+        }
 
         if (catalogueId == null || catalogueId.equals("")) {
             interoperabilityRecordBundle.getInteroperabilityRecord().setCatalogueId(catalogueName);

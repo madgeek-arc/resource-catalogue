@@ -123,7 +123,9 @@ public class MonitoringManager extends ResourceManager<MonitoringBundle> impleme
         Resource existing = whereID(monitoring.getId(), true);
         MonitoringBundle ex = deserialize(existing);
         // check if there are actual changes in the Monitoring
-        commonMethods.checkIfResourceHasBeenModified(monitoring.getMonitoring(), ex.getMonitoring());
+        if (monitoring.getMonitoring().equals(ex.getMonitoring())) {
+            return monitoring;
+        }
 
         validate(monitoring);
         monitoring.setMetadata(Metadata.updateMetadata(monitoring.getMetadata(), User.of(auth).getFullName(), User.of(auth).getEmail()));
