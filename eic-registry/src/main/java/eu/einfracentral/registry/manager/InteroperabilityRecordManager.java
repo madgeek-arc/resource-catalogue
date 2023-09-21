@@ -174,8 +174,10 @@ public class InteroperabilityRecordManager extends ResourceManager<Interoperabil
         loggingInfoList.sort(Comparator.comparing(LoggingInfo::getDate));
         interoperabilityRecordBundle.setLoggingInfo(loggingInfoList);
 
-        // latestUpdateInfo
+        // latestLoggingInfo
         interoperabilityRecordBundle.setLatestUpdateInfo(loggingInfo);
+        interoperabilityRecordBundle.setLatestOnboardingInfo(commonMethods.setLatestLoggingInfo(loggingInfoList, LoggingInfo.Types.ONBOARD.getKey()));
+        interoperabilityRecordBundle.setLatestAuditInfo(commonMethods.setLatestLoggingInfo(loggingInfoList, LoggingInfo.Types.AUDIT.getKey()));
 
         // active/status
         interoperabilityRecordBundle.setActive(existingInteroperabilityRecord.isActive());

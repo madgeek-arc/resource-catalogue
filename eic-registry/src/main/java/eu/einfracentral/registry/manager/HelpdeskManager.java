@@ -119,8 +119,10 @@ public class HelpdeskManager extends ResourceManager<HelpdeskBundle> implements 
         loggingInfoList.add(loggingInfo);
         helpdesk.setLoggingInfo(loggingInfoList);
 
-        // latestUpdateInfo
+        // latestLoggingInfo
         helpdesk.setLatestUpdateInfo(loggingInfo);
+        helpdesk.setLatestOnboardingInfo(commonMethods.setLatestLoggingInfo(loggingInfoList, LoggingInfo.Types.ONBOARD.getKey()));
+        helpdesk.setLatestAuditInfo(commonMethods.setLatestLoggingInfo(loggingInfoList, LoggingInfo.Types.AUDIT.getKey()));
 
         helpdesk.setActive(ex.isActive());
         existing.setPayload(serialize(helpdesk));

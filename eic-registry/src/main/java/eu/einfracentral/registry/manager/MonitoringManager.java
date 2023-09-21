@@ -135,8 +135,10 @@ public class MonitoringManager extends ResourceManager<MonitoringBundle> impleme
         loggingInfoList.add(loggingInfo);
         monitoring.setLoggingInfo(loggingInfoList);
 
-        // latestUpdateInfo
+        // latestLoggingInfo
         monitoring.setLatestUpdateInfo(loggingInfo);
+        monitoring.setLatestOnboardingInfo(commonMethods.setLatestLoggingInfo(loggingInfoList, LoggingInfo.Types.ONBOARD.getKey()));
+        monitoring.setLatestAuditInfo(commonMethods.setLatestLoggingInfo(loggingInfoList, LoggingInfo.Types.AUDIT.getKey()));
 
         // default monitoredBy value -> EOSC
         monitoring.getMonitoring().setMonitoredBy("monitored_by-eosc");

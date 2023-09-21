@@ -132,8 +132,10 @@ public class DatasourceManager extends ResourceManager<DatasourceBundle> impleme
         loggingInfoList.add(loggingInfo);
         datasourceBundle.setLoggingInfo(loggingInfoList);
 
-        // latestUpdateInfo
+        // latestLoggingInfo
         datasourceBundle.setLatestUpdateInfo(loggingInfo);
+        datasourceBundle.setLatestOnboardingInfo(commonMethods.setLatestLoggingInfo(loggingInfoList, LoggingInfo.Types.ONBOARD.getKey()));
+        datasourceBundle.setLatestAuditInfo(commonMethods.setLatestLoggingInfo(loggingInfoList, LoggingInfo.Types.AUDIT.getKey()));
         datasourceBundle.setActive(ex.isActive());
 
         // if status = "rejected datasource", update to "pending datasource"

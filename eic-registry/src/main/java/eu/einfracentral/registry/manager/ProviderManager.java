@@ -188,8 +188,10 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         loggingInfoList.add(loggingInfo);
         provider.setLoggingInfo(loggingInfoList);
 
-        // latestUpdateInfo
+        // latestLoggingInfo
         provider.setLatestUpdateInfo(loggingInfo);
+        provider.setLatestOnboardingInfo(commonMethods.setLatestLoggingInfo(loggingInfoList, LoggingInfo.Types.ONBOARD.getKey()));
+        provider.setLatestAuditInfo(commonMethods.setLatestLoggingInfo(loggingInfoList, LoggingInfo.Types.AUDIT.getKey()));
 
         // block catalogueId updates from Provider Admins
         if (!securityService.hasRole(auth, "ROLE_ADMIN") && !ex.getProvider().getCatalogueId().equals(provider.getProvider().getCatalogueId())) {

@@ -224,8 +224,10 @@ public class ServiceBundleManager extends AbstractServiceBundleManager<ServiceBu
         loggingInfoList.sort(Comparator.comparing(LoggingInfo::getDate));
         serviceBundle.setLoggingInfo(loggingInfoList);
 
-        // latestUpdateInfo
+        // latestLoggingInfo
         serviceBundle.setLatestUpdateInfo(loggingInfo);
+        serviceBundle.setLatestOnboardingInfo(commonMethods.setLatestLoggingInfo(loggingInfoList, LoggingInfo.Types.ONBOARD.getKey()));
+        serviceBundle.setLatestAuditInfo(commonMethods.setLatestLoggingInfo(loggingInfoList, LoggingInfo.Types.AUDIT.getKey()));
 
         // set active/status
         serviceBundle.setActive(existingService.isActive());

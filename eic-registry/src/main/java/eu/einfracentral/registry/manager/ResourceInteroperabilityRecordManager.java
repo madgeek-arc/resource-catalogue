@@ -149,6 +149,8 @@ public class ResourceInteroperabilityRecordManager extends ResourceManager<Resou
 
         // latestUpdateInfo
         resourceInteroperabilityRecordBundle.setLatestUpdateInfo(loggingInfo);
+        resourceInteroperabilityRecordBundle.setLatestOnboardingInfo(commonMethods.setLatestLoggingInfo(loggingInfoList, LoggingInfo.Types.ONBOARD.getKey()));
+        resourceInteroperabilityRecordBundle.setLatestAuditInfo(commonMethods.setLatestLoggingInfo(loggingInfoList, LoggingInfo.Types.AUDIT.getKey()));
 
         existing.setPayload(serialize(resourceInteroperabilityRecordBundle));
         existing.setResourceType(resourceType);
