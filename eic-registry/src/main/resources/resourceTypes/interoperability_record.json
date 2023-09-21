@@ -87,6 +87,30 @@
     },
     {
       "multivalued": false,
+      "name": "latestAuditActionType",
+      "path": "//*[local-name()='latestAuditInfo']/*[local-name()='actionType']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
+      "name": "latestAuditDate",
+      "path": "//*[local-name()='latestAuditInfo']/*[local-name()='date']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
+      "name": "latestAuditType",
+      "path": "//*[local-name()='latestAuditInfo']/*[local-name()='type']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
+      "name": "latestAuditUserEmail",
+      "path": "//*[local-name()='latestAuditInfo']/*[local-name()='userEmail']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
       "name": "latestUpdateActionType",
       "path": "//*[local-name()='latestUpdateInfo']/*[local-name()='actionType']/text()",
       "type": "java.lang.String"
@@ -161,5 +185,5 @@
   "properties": {
     "class": "eu.einfracentral.domain.InteroperabilityRecord"
   },
-  "schemaUrl": "https://raw.githubusercontent.com/madgeek-arc/resource-catalogue/master/eic-registry-model/src/main/resources/schema1.xsd"
+  "schemaUrl": "https://raw.githubusercontent.com/madgeek-arc/resource-catalogue/jira_tickets/eic-registry-model/src/main/resources/schema1.xsd"
 }

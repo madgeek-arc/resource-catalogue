@@ -466,8 +466,10 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
         loggingInfoList.add(loggingInfo);
         catalogue.setLoggingInfo(loggingInfoList);
 
-        // latestOnboardingInfo
+        // latestLoggingInfo
         catalogue.setLatestUpdateInfo(loggingInfo);
+        catalogue.setLatestOnboardingInfo(commonMethods.setLatestLoggingInfo(loggingInfoList, LoggingInfo.Types.ONBOARD.getKey()));
+        catalogue.setLatestAuditInfo(commonMethods.setLatestLoggingInfo(loggingInfoList, LoggingInfo.Types.AUDIT.getKey()));
 
         return super.update(catalogue, auth);
     }

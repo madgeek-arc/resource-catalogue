@@ -513,4 +513,16 @@ public class ProviderResourcesCommonMethods {
             }
         }
     }
+
+    public LoggingInfo setLatestLoggingInfo(List<LoggingInfo> loggingInfoList, String loggingInfoType) {
+        loggingInfoList.sort(Comparator.comparing(LoggingInfo::getDate).reversed());
+        LoggingInfo latestLoggingInfo = new LoggingInfo();
+        for (LoggingInfo loggingInfo : loggingInfoList) {
+            if (loggingInfo.getType().equals(loggingInfoType)) {
+                latestLoggingInfo = loggingInfo;
+                break;
+            }
+        }
+        return latestLoggingInfo;
+    }
 }

@@ -294,8 +294,10 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
         loggingInfoList.add(loggingInfo);
         trainingResourceBundle.setLoggingInfo(loggingInfoList);
 
-        // latestUpdateInfo
+        // latestLoggingInfo
         trainingResourceBundle.setLatestUpdateInfo(loggingInfo);
+        trainingResourceBundle.setLatestOnboardingInfo(commonMethods.setLatestLoggingInfo(loggingInfoList, LoggingInfo.Types.ONBOARD.getKey()));
+        trainingResourceBundle.setLatestAuditInfo(commonMethods.setLatestLoggingInfo(loggingInfoList, LoggingInfo.Types.AUDIT.getKey()));
 
         // set active/status
         trainingResourceBundle.setActive(existingTrainingResourceBundle.isActive());
