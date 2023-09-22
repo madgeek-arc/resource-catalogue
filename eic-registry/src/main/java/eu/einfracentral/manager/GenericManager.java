@@ -197,20 +197,25 @@ public class GenericManager implements GenericResourceService {
 
     @Override
     public <T> Browsing<T> cqlQuery(FacetFilter filter) {
-        filter.getBrowseBy().addAll(browseByMap.get(filter.getResourceType()));
+        Set<String> browseBy = new HashSet<>(filter.getBrowseBy());
+        browseBy.addAll(browseByMap.get(filter.getResourceType()));
+        filter.setBrowseBy(new ArrayList<>(browseBy));
         return convertToBrowsing(searchService.cqlQuery(filter), filter.getResourceType());
     }
 
     @Override
     public <T> Browsing<T> getResults(FacetFilter filter) {
-        filter.getBrowseBy().addAll(browseByMap.get(filter.getResourceType()));
-        Browsing<T> browsing;
+        Set<String> browseBy = new HashSet<>(filter.getBrowseBy());
+        browseBy.addAll(browseByMap.get(filter.getResourceType()));
+        filter.setBrowseBy(new ArrayList<>(browseBy));
         try {
+            Browsing<T> browsing;
             browsing = convertToBrowsing(searchService.search(filter), filter.getResourceType());
+            browsing.setFacets(facetLabelService.generateLabels(browsing.getFacets()));
+            return browsing;
         } catch (UnknownHostException e) {
             throw new ServiceException(e);
         }
-        return browsing;
     }
 
     @Override
@@ -324,7 +329,11 @@ public class GenericManager implements GenericResourceService {
         for (Iterator<Facet> iter = facets.listIterator(); iter.hasNext();) {
             Facet facet = iter.next();
             if (facet.getField().equals("catalogue_id") || facet.getField().equals(field)) {
-                facet.getValues().sort(Comparator.comparing(eu.openminted.registry.core.domain.Value::getLabel, String.CASE_INSENSITIVE_ORDER));
+                try {
+                    facet.getValues().sort(Comparator.comparing(eu.openminted.registry.core.domain.Value::getLabel, String.CASE_INSENSITIVE_ORDER));
+                } catch (NullPointerException e) {
+                    facet.getValues().sort(Comparator.comparing(eu.openminted.registry.core.domain.Value::getValue, String.CASE_INSENSITIVE_ORDER));
+                }
             }
         }
     }
