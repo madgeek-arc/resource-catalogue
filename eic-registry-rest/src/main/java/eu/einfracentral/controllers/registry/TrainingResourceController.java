@@ -256,7 +256,7 @@ public class TrainingResourceController {
     @ApiImplicitParam(name = "suspended", value = "Suspended", defaultValue = "false", dataType = "boolean", paramType = "query")
     @GetMapping(path = "adminPage/all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
-    public ResponseEntity<Paging<TrainingResourceBundle>> getAllTrainingResourcesForAdminPage(@ApiIgnore @RequestParam MultiValueMap<String, Object> allRequestParams,
+    public ResponseEntity<Paging<?>> getAllTrainingResourcesForAdminPage(@ApiIgnore @RequestParam MultiValueMap<String, Object> allRequestParams,
                                                                                               @RequestParam(required = false) Set<String> auditState,
                                                                                               @RequestParam(defaultValue = "all", name = "catalogue_id") String catalogueId,
                                                                                               @ApiIgnore Authentication authentication) {
@@ -271,7 +271,7 @@ public class TrainingResourceController {
         if (auditState == null) {
             return ResponseEntity.ok(trainingResourceService.getAllForAdmin(ff, authentication));
         } else {
-            return ResponseEntity.ok(trainingResourceService.getAllForAdminWithAuditStates(ff, auditState, authentication));
+            return ResponseEntity.ok(trainingResourceService.getAllForAdminWithAuditStates(ff, auditState));
         }
     }
 

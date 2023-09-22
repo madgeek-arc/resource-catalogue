@@ -123,8 +123,8 @@ public class MonitoringManager extends ResourceManager<MonitoringBundle> impleme
         Resource existing = whereID(monitoring.getId(), true);
         MonitoringBundle ex = deserialize(existing);
         // check if there are actual changes in the Monitoring
-        if (monitoring.getMonitoring().equals(ex.getMonitoring())){
-            throw new ValidationException("There are no changes in the Monitoring", HttpStatus.OK);
+        if (monitoring.getMonitoring().equals(ex.getMonitoring())) {
+            return monitoring;
         }
 
         validate(monitoring);

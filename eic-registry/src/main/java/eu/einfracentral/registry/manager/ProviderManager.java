@@ -36,7 +36,6 @@ import java.time.Instant;
 import java.time.ZoneId;
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static eu.einfracentral.config.CacheConfig.*;
 import static eu.einfracentral.utils.VocabularyValidationUtils.validateMerilScientificDomains;
@@ -165,7 +164,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         // check if there are actual changes in the Provider
         if (provider.getTemplateStatus().equals(ex.getTemplateStatus()) && provider.getProvider().equals(ex.getProvider())){
             if (provider.isSuspended() == ex.isSuspended()){
-                throw new ValidationException("There are no changes in the Provider", HttpStatus.OK);
+                throw new ValidationException("There are no changes in the Provider", HttpStatus.NOT_MODIFIED);
             }
         }
 
@@ -372,13 +371,14 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     @Override
     @CacheEvict(value = CACHE_PROVIDERS, allEntries = true)
     public void delete(ProviderBundle provider) {
+        String catalogueId = provider.getProvider().getCatalogueId();
         // block Public Provider update
         if (provider.getMetadata().isPublished()){
             throw new ValidationException("You cannot directly delete a Public Provider");
         }
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         logger.trace("User is attempting to delete the Provider with id '{}'", provider.getId());
-        List<ServiceBundle> services = serviceBundleService.getResourceBundles(provider.getProvider().getCatalogueId(), provider.getId(), authentication).getResults();
+        List<ServiceBundle> services = serviceBundleService.getResourceBundles(catalogueId, provider.getId(), authentication).getResults();
         services.forEach(s -> {
             if (!s.getMetadata().isPublished()){
                 try {
@@ -388,8 +388,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
                 }
             }
         });
-        //TODO: DELETE DATASOURCE EXTENSIONS
-        List<TrainingResourceBundle> trainingResources = trainingResourceService.getResourceBundles(provider.getProvider().getCatalogueId(), provider.getId(), authentication).getResults();
+        List<TrainingResourceBundle> trainingResources = trainingResourceService.getResourceBundles(catalogueId, provider.getId(), authentication).getResults();
         trainingResources.forEach(s -> {
             if (!s.getMetadata().isPublished()){
                 try {
@@ -399,7 +398,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
                 }
             }
         });
-        List<InteroperabilityRecordBundle> interoperabilityRecords = interoperabilityRecordService.getInteroperabilityRecordBundles(provider.getProvider().getCatalogueId(), provider.getId(), authentication).getResults();
+        List<InteroperabilityRecordBundle> interoperabilityRecords = interoperabilityRecordService.getInteroperabilityRecordBundles(catalogueId, provider.getId(), authentication).getResults();
         interoperabilityRecords.forEach(s -> {
             if (!s.getMetadata().isPublished()){
                 try {

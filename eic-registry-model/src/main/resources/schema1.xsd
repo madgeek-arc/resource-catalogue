@@ -441,6 +441,12 @@ It is also possible to select Not a legal entity.]]></xs:documentation>
               
       </xs:element>
             
+      <xs:element minOccurs="0" name="scope" type="xs:string">
+        <xs:annotation>
+          <xs:documentation><![CDATA[A high-level description of the Catalogue's scope.]]></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+            
       <xs:element minOccurs="0" name="tags">
         <xs:annotation>
           <xs:documentation><![CDATA[Keywords associated to the Catalogue to simplify search by relevant keywords.]]></xs:documentation>
@@ -3278,7 +3284,7 @@ that is the used scheme (e.g., Web Address URL, DOI, ARK, etc.).]]></xs:document
                                 
                 <xs:sequence>
                                     
-                  <xs:element minOccurs="0" name="key" type="xs:string"/>
+                  <xs:element minOccurs="0" name="key" type="xs:anyType"/>
                                     
                   <xs:element minOccurs="0" name="value" type="xs:anyType"/>
                                   

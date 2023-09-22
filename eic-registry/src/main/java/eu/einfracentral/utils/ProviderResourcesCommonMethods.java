@@ -8,6 +8,7 @@ import eu.einfracentral.service.GenericResourceService;
 import eu.einfracentral.service.SecurityService;
 import eu.openminted.registry.core.domain.Browsing;
 import eu.openminted.registry.core.domain.FacetFilter;
+import eu.openminted.registry.core.domain.Paging;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
@@ -25,14 +26,22 @@ import java.net.*;
 import java.io.*;
 
 import org.json.*;
+import org.springframework.util.MultiValueMap;
 
 @Component
 public class ProviderResourcesCommonMethods {
 
     private static final Logger logger = LogManager.getLogger(ProviderResourcesCommonMethods.class);
 
+    @Value("${elastic.index.max_result_window:10000}")
+    protected int maxQuantity;
+
     private final CatalogueService<CatalogueBundle, Authentication> catalogueService;
     private final ProviderService<ProviderBundle, Authentication> providerService;
+    private final DatasourceService<DatasourceBundle, Authentication> datasourceService;
+    private final HelpdeskService<HelpdeskBundle, Authentication> helpdeskService;
+    private final MonitoringService<MonitoringBundle, Authentication> monitoringService;
+    private final ResourceInteroperabilityRecordService<ResourceInteroperabilityRecordBundle> resourceInteroperabilityRecordService;
     private final GenericResourceService genericResourceService;
     private final VocabularyService vocabularyService;
     private final SecurityService securityService;
@@ -50,11 +59,20 @@ public class ProviderResourcesCommonMethods {
 
     public ProviderResourcesCommonMethods(@Lazy CatalogueService<CatalogueBundle, Authentication> catalogueService,
                                           @Lazy ProviderService<ProviderBundle, Authentication> providerService,
+                                          @Lazy DatasourceService<DatasourceBundle, Authentication> datasourceService,
+                                          @Lazy HelpdeskService<HelpdeskBundle, Authentication> helpdeskService,
+                                          @Lazy MonitoringService<MonitoringBundle, Authentication> monitoringService,
+                                          @Lazy ResourceInteroperabilityRecordService<ResourceInteroperabilityRecordBundle>
+                                                  resourceInteroperabilityRecordService,
                                           @Lazy GenericResourceService genericResourceService,
                                           @Lazy VocabularyService vocabularyService,
                                           @Lazy SecurityService securityService) {
         this.catalogueService = catalogueService;
         this.providerService = providerService;
+        this.datasourceService = datasourceService;
+        this.helpdeskService = helpdeskService;
+        this.monitoringService = monitoringService;
+        this.resourceInteroperabilityRecordService = resourceInteroperabilityRecordService;
         this.genericResourceService = genericResourceService;
         this.vocabularyService = vocabularyService;
         this.securityService = securityService;
@@ -457,6 +475,50 @@ public class ProviderResourcesCommonMethods {
         return identifiers;
     }
 
+    public void deleteResourceRelatedServiceSubprofiles(String serviceId, String catalogueId) {
+        DatasourceBundle datasourceBundle = datasourceService.get(serviceId, catalogueId);
+        if (datasourceBundle != null) {
+            try {
+                logger.info("Deleting Datasource of Service with id: {}", serviceId);
+                datasourceService.delete(datasourceBundle);
+            } catch (eu.openminted.registry.core.exception.ResourceNotFoundException e) {
+                logger.error(e);
+            }
+        }
+    }
+
+    public void deleteResourceRelatedServiceExtensionsAndResourceInteroperabilityRecords(String resourceId, String catalogueId, String resourceType) {
+        // service extensions
+        HelpdeskBundle helpdeskBundle = helpdeskService.get(resourceId, catalogueId);
+        if (helpdeskBundle != null) {
+            try {
+                logger.info("Deleting Helpdesk of {} with id: {}", resourceType, resourceId);
+                helpdeskService.delete(helpdeskBundle);
+            } catch (eu.openminted.registry.core.exception.ResourceNotFoundException e) {
+                logger.error(e);
+            }
+        }
+        MonitoringBundle monitoringBundle = monitoringService.get(resourceId, catalogueId);
+        if (monitoringBundle != null) {
+            try {
+                logger.info("Deleting Monitoring of {} with id: {}", resourceType, resourceId);
+                monitoringService.delete(monitoringBundle);
+            } catch (eu.openminted.registry.core.exception.ResourceNotFoundException e) {
+                logger.error(e);
+            }
+        }
+        // resource interoperability records
+        ResourceInteroperabilityRecordBundle resourceInteroperabilityRecordBundle = resourceInteroperabilityRecordService.getWithResourceId(resourceId, catalogueId);
+        if (resourceInteroperabilityRecordBundle != null) {
+            try {
+                logger.info("Deleting ResourceInteroperabilityRecord of {} with id: {}", resourceType, resourceId);
+                resourceInteroperabilityRecordService.delete(resourceInteroperabilityRecordBundle);
+            } catch (eu.openminted.registry.core.exception.ResourceNotFoundException e) {
+                logger.error(e);
+            }
+        }
+    }
+
     public LoggingInfo setLatestLoggingInfo(List<LoggingInfo> loggingInfoList, String loggingInfoType) {
         loggingInfoList.sort(Comparator.comparing(LoggingInfo::getDate).reversed());
         LoggingInfo latestLoggingInfo = new LoggingInfo();
@@ -467,5 +529,111 @@ public class ProviderResourcesCommonMethods {
             }
         }
         return latestLoggingInfo;
+    }
+
+    // TODO: Hard refactor
+    public Paging<Bundle<?>> getAllForAdminWithAuditStates(FacetFilter ff, Set<String> auditState, String resourceType) {
+        List<Bundle<?>> valid = new ArrayList<>();
+        List<Bundle<?>> notAudited = new ArrayList<>();
+        List<Bundle<?>> invalidAndUpdated = new ArrayList<>();
+        List<Bundle<?>> invalidAndNotUpdated = new ArrayList<>();
+
+        int quantity = ff.getQuantity();
+        int from = ff.getFrom();
+        int to = 0;
+
+        FacetFilter ff2 = new FacetFilter();
+        ff2.setFilter(new HashMap<>(ff.getFilter()));
+        // remove auditState from ff2 filter
+        ((MultiValueMap<String, Object>) ff2.getFilter().get("multi-filter")).remove("auditState");
+        ff2.setQuantity(maxQuantity);
+        ff2.setFrom(0);
+        ff2.setResourceType(resourceType);
+        Paging<Bundle<?>> retPaging;
+        Paging<Bundle<?>> allResults = genericResourceService.getResults(ff2);
+        List<Bundle<?>> ret = new ArrayList<>();
+        for (Bundle<?> bundle : allResults.getResults()) {
+            String auditVocStatus;
+            try {
+                auditVocStatus = LoggingInfo.createAuditVocabularyStatuses(bundle.getLoggingInfo());
+            } catch (NullPointerException e) { // bundle has null loggingInfo
+                continue;
+            }
+            switch (auditVocStatus) {
+                case "Valid and updated":
+                case "Valid and not updated":
+                    valid.add(bundle);
+                    break;
+                case "Not Audited":
+                    notAudited.add(bundle);
+                    break;
+                case "Invalid and updated":
+                    invalidAndUpdated.add(bundle);
+                    break;
+                case "Invalid and not updated":
+                    invalidAndNotUpdated.add(bundle);
+                    break;
+                default:
+                    throw new IllegalStateException("Unexpected value: " + auditVocStatus);
+            }
+        }
+        for (String state : auditState) {
+            switch (state) {
+                case "Valid":
+                    ret.addAll(valid);
+                    break;
+                case "Not Audited":
+                    ret.addAll(notAudited);
+                    break;
+                case "Invalid and updated":
+                    ret.addAll(invalidAndUpdated);
+                    break;
+                case "Invalid and not updated":
+                    ret.addAll(invalidAndNotUpdated);
+                    break;
+                default:
+                    throw new ValidationException(String.format("The audit state [%s] you have provided is wrong", state));
+            }
+        }
+        if (!ret.isEmpty()) {
+            List<Bundle<?>> retWithCorrectQuantity = new ArrayList<>();
+            if (from == 0) {
+                if (quantity <= ret.size()) {
+                    for (int i = from; i <= quantity - 1; i++) {
+                        retWithCorrectQuantity.add(ret.get(i));
+                    }
+                } else {
+                    retWithCorrectQuantity.addAll(ret);
+                }
+                to = retWithCorrectQuantity.size();
+            } else {
+                if (quantity + from > ret.size()) {
+                    to = ret.size();
+                } else {
+                    to = quantity + from;
+                }
+                boolean indexOutOfBound = false;
+                if (quantity <= ret.size()) {
+                    for (int i = from; i < quantity + from; i++) {
+                        try {
+                            retWithCorrectQuantity.add(ret.get(i));
+                        } catch (IndexOutOfBoundsException e) {
+                            indexOutOfBound = true;
+                            break;
+                        }
+                    }
+                    if (indexOutOfBound) {
+                        to = ret.size();
+                    }
+                } else {
+                    retWithCorrectQuantity.addAll(ret.subList(from, ret.size()));
+                }
+            }
+            ret = retWithCorrectQuantity;
+        } else {
+            from = 0;
+        }
+        retPaging = new Paging<>(ret.size(), from, to, ret, allResults.getFacets());
+        return retPaging;
     }
 }

@@ -26,10 +26,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.util.MultiValueMap;
 
 import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 
 import static eu.einfracentral.config.CacheConfig.CACHE_FEATURED;
 import static eu.einfracentral.config.CacheConfig.CACHE_PROVIDERS;
@@ -145,8 +142,8 @@ public class InteroperabilityRecordManager extends ResourceManager<Interoperabil
         }
 
         // check if there are actual changes in the InteroperabilityRecord
-        if (interoperabilityRecordBundle.getInteroperabilityRecord().equals(existingInteroperabilityRecord.getInteroperabilityRecord())){
-            throw new ValidationException("There are no changes in the Interoperability Record", HttpStatus.OK);
+        if (interoperabilityRecordBundle.getInteroperabilityRecord().equals(existingInteroperabilityRecord.getInteroperabilityRecord())) {
+            return interoperabilityRecordBundle;
         }
 
         if (catalogueId == null || catalogueId.equals("")) {
@@ -435,6 +432,10 @@ public class InteroperabilityRecordManager extends ResourceManager<Interoperabil
                 filter.addFilter("active", true);
             }
         }
+    }
+
+    public Paging<Bundle<?>> getAllForAdminWithAuditStates(FacetFilter ff, Set<String> auditState) {
+        return commonMethods.getAllForAdminWithAuditStates(ff, auditState, this.resourceType.getName());
     }
 
     @CacheEvict(cacheNames = {CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)

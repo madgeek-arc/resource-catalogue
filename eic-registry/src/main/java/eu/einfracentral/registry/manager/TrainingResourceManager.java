@@ -26,6 +26,7 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.MultiValueMap;
 
 import javax.annotation.PostConstruct;
@@ -51,6 +52,9 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
     private final SecurityService securityService;
     private final RegistrationMailService registrationMailService;
     private final VocabularyService vocabularyService;
+    private final HelpdeskService<HelpdeskBundle, Authentication> helpdeskService;
+    private final MonitoringService<MonitoringBundle, Authentication> monitoringService;
+    private final ResourceInteroperabilityRecordService<ResourceInteroperabilityRecordBundle> resourceInteroperabilityRecordService;
     private final CatalogueService<CatalogueBundle, Authentication> catalogueService;
     private final PublicTrainingResourceManager publicTrainingResourceManager;
     private final MigrationService migrationService;
@@ -58,10 +62,6 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
     private FacetLabelService facetLabelService;
     @Autowired
     private FieldValidator fieldValidator;
-    @Autowired
-    private AnalyticsService analyticsService;
-    @Autowired
-    private EventService eventService;
     @Autowired
     private SearchServiceEIC searchServiceEIC;
     @Autowired
@@ -107,6 +107,9 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
                                    IdCreator idCreator, @Lazy SecurityService securityService,
                                    @Lazy RegistrationMailService registrationMailService,
                                    @Lazy VocabularyService vocabularyService,
+                                   @Lazy HelpdeskService<HelpdeskBundle, Authentication> helpdeskService,
+                                   @Lazy MonitoringService<MonitoringBundle, Authentication> monitoringService,
+                                   @Lazy ResourceInteroperabilityRecordService<ResourceInteroperabilityRecordBundle> resourceInteroperabilityRecordService,
                                    CatalogueService<CatalogueBundle, Authentication> catalogueService,
                                    PublicTrainingResourceManager publicTrainingResourceManager,
                                    SynchronizerService<TrainingResource> synchronizerService,
@@ -118,6 +121,9 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
         this.securityService = securityService;
         this.registrationMailService = registrationMailService;
         this.vocabularyService = vocabularyService;
+        this.helpdeskService = helpdeskService;
+        this.monitoringService = monitoringService;
+        this.resourceInteroperabilityRecordService = resourceInteroperabilityRecordService;
         this.catalogueService = catalogueService;
         this.publicTrainingResourceManager = publicTrainingResourceManager;
         this.synchronizerService = synchronizerService;
@@ -207,7 +213,6 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
     }
 
     @Override
-    @CacheEvict(cacheNames = {CACHE_VISITS, CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)
     public TrainingResourceBundle add(TrainingResourceBundle trainingResourceBundle, Authentication auth) {
         logger.trace("User '{}' is attempting to add a new Training Resource: {}", auth, trainingResourceBundle);
         if (trainingResourceBundle.getTrainingResource().getId() == null) {
@@ -234,15 +239,11 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
     }
 
     @Override
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or " + "@securityService.isResourceProviderAdmin(#auth, #trainingResourceBundle.payload)")
-    @CacheEvict(cacheNames = {CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)
     public TrainingResourceBundle updateResource(TrainingResourceBundle trainingResourceBundle, String comment, Authentication auth) {
         return updateResource(trainingResourceBundle, trainingResourceBundle.getTrainingResource().getCatalogueId(), comment, auth);
     }
 
     @Override
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or " + "@securityService.isResourceProviderAdmin(#auth, #trainingResourceBundle.payload)")
-    @CacheEvict(cacheNames = {CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)
     public TrainingResourceBundle updateResource(TrainingResourceBundle trainingResourceBundle, String catalogueId, String comment, Authentication auth) {
 
         TrainingResourceBundle ret;
@@ -255,8 +256,8 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
         }
 
         // check if there are actual changes in the Training Resource
-        if (trainingResourceBundle.getTrainingResource().equals(existingTrainingResourceBundle.getTrainingResource())){
-            throw new ValidationException("There are no changes in the Training Resource", HttpStatus.OK);
+        if (trainingResourceBundle.getTrainingResource().equals(existingTrainingResourceBundle.getTrainingResource())) {
+            return trainingResourceBundle;
         }
 
         if (catalogueId == null || catalogueId.equals("")) {
@@ -332,7 +333,6 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
     }
 
     @Override
-    @CacheEvict(cacheNames = {CACHE_VISITS, CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)
     public TrainingResourceBundle update(TrainingResourceBundle trainingResourceBundle, Authentication auth) {
         logger.trace("User '{}' is attempting to update the Training Resource: {}", auth, trainingResourceBundle);
 
@@ -382,7 +382,9 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
 
     @Override
     public void delete(TrainingResourceBundle trainingResourceBundle) {
+        String catalogueId = trainingResourceBundle.getTrainingResource().getCatalogueId();
         commonMethods.blockResourceDeletion(trainingResourceBundle.getStatus(), trainingResourceBundle.getMetadata().isPublished());
+        commonMethods.deleteResourceRelatedServiceExtensionsAndResourceInteroperabilityRecords(trainingResourceBundle.getId(), catalogueId, "TrainingResource");
         logger.info("Deleting Training Resource: {}", trainingResourceBundle);
         super.delete(trainingResourceBundle);
         synchronizerService.syncDelete(trainingResourceBundle.getTrainingResource());
@@ -888,118 +890,9 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
         return null;
     }
 
-    @Override
-    public Paging<TrainingResourceBundle> getAllForAdminWithAuditStates(FacetFilter ff, Set<String> auditState, Authentication auth) {
-        List<TrainingResourceBundle> valid = new ArrayList<>();
-        List<TrainingResourceBundle> notAudited = new ArrayList<>();
-        List<TrainingResourceBundle> invalidAndUpdated = new ArrayList<>();
-        List<TrainingResourceBundle> invalidAndNotUpdated = new ArrayList<>();
-
-        int quantity = ff.getQuantity();
-        int from = ff.getFrom();
-
-        FacetFilter ff2 = new FacetFilter();
-        ff2.setFilter(new HashMap<>(ff.getFilter()));
-        // remove auditState from ff2 filter
-        ((MultiValueMap<String, Object>) ff2.getFilter().get("multi-filter")).remove("auditState");
-        ff2.setQuantity(maxQuantity);
-        ff2.setFrom(0);
-        Paging<TrainingResourceBundle> retPaging = getAllForAdmin(ff, auth);
-        List<TrainingResourceBundle> allWithoutAuditFilterList = getAllForAdmin(ff2, auth).getResults();
-        List<TrainingResourceBundle> ret = new ArrayList<>();
-        for (TrainingResourceBundle trainingResourceBundle : allWithoutAuditFilterList) {
-            String auditVocStatus;
-            try {
-                auditVocStatus = LoggingInfo.createAuditVocabularyStatuses(trainingResourceBundle.getLoggingInfo());
-            } catch (NullPointerException e) { // serviceBundle has null loggingInfo
-                continue;
-            }
-            switch (auditVocStatus) {
-                case "Valid and updated":
-                case "Valid and not updated":
-                    valid.add(trainingResourceBundle);
-                    break;
-                case "Not Audited":
-                    notAudited.add(trainingResourceBundle);
-                    break;
-                case "Invalid and updated":
-                    invalidAndUpdated.add(trainingResourceBundle);
-                    break;
-                case "Invalid and not updated":
-                    invalidAndNotUpdated.add(trainingResourceBundle);
-                    break;
-                default:
-                    throw new IllegalStateException("Unexpected value: " + auditVocStatus);
-            }
-        }
-        for (String state : auditState) {
-            switch (state) {
-                case "Valid":
-                    ret.addAll(valid);
-                    break;
-                case "Not Audited":
-                    ret.addAll(notAudited);
-                    break;
-                case "Invalid and updated":
-                    ret.addAll(invalidAndUpdated);
-                    break;
-                case "Invalid and not updated":
-                    ret.addAll(invalidAndNotUpdated);
-                    break;
-                default:
-                    throw new ValidationException(String.format("The audit state [%s] you have provided is wrong", state));
-            }
-        }
-        if (!ret.isEmpty()) {
-            List<TrainingResourceBundle> retWithCorrectQuantity = new ArrayList<>();
-            if (from == 0) {
-                if (quantity <= ret.size()) {
-                    for (int i = from; i <= quantity - 1; i++) {
-                        retWithCorrectQuantity.add(ret.get(i));
-                    }
-                } else {
-                    retWithCorrectQuantity.addAll(ret);
-                }
-                retPaging.setTo(retWithCorrectQuantity.size());
-            } else {
-                boolean indexOutOfBound = false;
-                if (quantity <= ret.size()) {
-                    for (int i = from; i < quantity + from; i++) {
-                        try {
-                            retWithCorrectQuantity.add(ret.get(i));
-                            if (quantity + from > ret.size()) {
-                                retPaging.setTo(ret.size());
-                            } else {
-                                retPaging.setTo(quantity + from);
-                            }
-                        } catch (IndexOutOfBoundsException e) {
-                            indexOutOfBound = true;
-                        }
-                    }
-                    if (indexOutOfBound) {
-                        retPaging.setTo(ret.size());
-                    }
-                } else {
-                    retWithCorrectQuantity.addAll(ret);
-                    if (quantity + from > ret.size()) {
-                        retPaging.setTo(ret.size());
-                    } else {
-                        retPaging.setTo(quantity + from);
-                    }
-                }
-            }
-            retPaging.setFrom(from);
-            retPaging.setResults(retWithCorrectQuantity);
-            retPaging.setTotal(ret.size());
-        } else {
-            retPaging.setResults(ret);
-            retPaging.setTotal(0);
-            retPaging.setFrom(0);
-            retPaging.setTo(0);
-        }
-        return retPaging;
+    public Paging<Bundle<?>> getAllForAdminWithAuditStates(FacetFilter ff, Set<String> auditState) {
+        return commonMethods.getAllForAdminWithAuditStates(ff, auditState, this.resourceType.getName());
     }
-
 
     @Override
     public Map<String, List<TrainingResourceBundle>> getBy(String field, Authentication auth) throws NoSuchFieldException {
@@ -1101,6 +994,35 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
         commonMethods.suspensionValidation(trainingResourceBundle, catalogueId,
                 trainingResourceBundle.getTrainingResource().getResourceOrganisation(), suspend, auth);
         commonMethods.suspendResource(trainingResourceBundle, catalogueId, suspend, auth);
+        // suspend Service's extensions
+        HelpdeskBundle helpdeskBundle = helpdeskService.get(trainingResourceId, catalogueId);
+        if (helpdeskBundle != null) {
+            try {
+                commonMethods.suspendResource(helpdeskBundle, catalogueId, suspend, auth);
+                helpdeskService.update(helpdeskBundle, auth);
+            } catch (eu.openminted.registry.core.exception.ResourceNotFoundException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        MonitoringBundle monitoringBundle = monitoringService.get(trainingResourceId, catalogueId);
+        if (monitoringBundle != null) {
+            try {
+                commonMethods.suspendResource(monitoringBundle, catalogueId, suspend, auth);
+                monitoringService.update(monitoringBundle, auth);
+            } catch (eu.openminted.registry.core.exception.ResourceNotFoundException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        // suspend ResourceInteroperabilityRecord
+        ResourceInteroperabilityRecordBundle resourceInteroperabilityRecordBundle = resourceInteroperabilityRecordService.getWithResourceId(trainingResourceId, catalogueId);
+        if (resourceInteroperabilityRecordBundle != null) {
+            try {
+                commonMethods.suspendResource(resourceInteroperabilityRecordBundle, catalogueId, suspend, auth);
+                resourceInteroperabilityRecordService.update(resourceInteroperabilityRecordBundle, auth);
+            } catch (eu.openminted.registry.core.exception.ResourceNotFoundException e) {
+                throw new RuntimeException(e);
+            }
+        }
         return super.update(trainingResourceBundle, auth);
     }
 

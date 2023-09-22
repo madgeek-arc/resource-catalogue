@@ -107,8 +107,8 @@ public class HelpdeskManager extends ResourceManager<HelpdeskBundle> implements 
         Resource existing = whereID(helpdesk.getId(), true);
         HelpdeskBundle ex = deserialize(existing);
         // check if there are actual changes in the Helpdesk
-        if (helpdesk.getHelpdesk().equals(ex.getHelpdesk())){
-            throw new ValidationException("There are no changes in the Helpdesk", HttpStatus.OK);
+        if (helpdesk.getHelpdesk().equals(ex.getHelpdesk())) {
+            return helpdesk;
         }
 
         validate(helpdesk);

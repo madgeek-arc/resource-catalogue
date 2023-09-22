@@ -13,11 +13,11 @@ import eu.einfracentral.service.SecurityService;
 import eu.einfracentral.utils.ProviderResourcesCommonMethods;
 import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.domain.Resource;
-import net.minidev.json.JSONObject;
-import net.minidev.json.parser.JSONParser;
-import net.minidev.json.parser.ParseException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
@@ -88,8 +88,8 @@ public class ConfigurationTemplateInstanceManager extends ResourceManager<Config
         Resource existing = whereID(configurationTemplateInstanceBundle.getId(), true);
         ConfigurationTemplateInstanceBundle ex = deserialize(existing);
         // check if there are actual changes in the ConfigurationTemplateInstance
-        if (configurationTemplateInstanceBundle.getConfigurationTemplateInstance().equals(ex.getConfigurationTemplateInstance())){
-            throw new ValidationException("There are no changes in the Configuration Template Instance", HttpStatus.OK);
+        if (configurationTemplateInstanceBundle.getConfigurationTemplateInstance().equals(ex.getConfigurationTemplateInstance())) {
+            return configurationTemplateInstanceBundle;
         }
 
         // block Public ConfigurationTemplateInstanceBundle updates
@@ -213,12 +213,14 @@ public class ConfigurationTemplateInstanceManager extends ResourceManager<Config
         ret.setConfigurationTemplateId(configurationTemplateInstance.getConfigurationTemplateId());
         ret.setResourceId(configurationTemplateInstance.getResourceId());
         JSONParser parser = new JSONParser();
-        JSONObject json = null;
         try {
-            json = (JSONObject) parser.parse(configurationTemplateInstance.getPayload());
+            String jsonString = configurationTemplateInstance.getPayload();
+            jsonString = jsonString.replace("'", "\"");
+            JSONObject jsonObject = (JSONObject) parser.parse(jsonString);
+            ret.setPayload(jsonObject);
         } catch (ParseException e) {
+            e.printStackTrace();
         }
-        ret.setPayload(json);
         return ret;
     }
 }

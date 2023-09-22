@@ -210,7 +210,7 @@ public interface ServiceBundleService<T> extends ResourceCRUDService<T, Authenti
      */
     T changeProvider(String resourceId, String newProvider, String comment, Authentication auth);
 
-    Paging<T> getAllForAdminWithAuditStates(FacetFilter ff, Set<String> auditState, Authentication authentication);
+    Paging<Bundle<?>> getAllForAdminWithAuditStates(FacetFilter ff, Set<String> auditState);
 
     ServiceBundle updateEOSCIFGuidelines(String serviceId, String catalogueId, List<EOSCIFGuidelines> eoscIFGuidelines, Authentication auth);
 

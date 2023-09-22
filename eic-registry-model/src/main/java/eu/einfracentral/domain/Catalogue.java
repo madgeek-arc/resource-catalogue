@@ -111,10 +111,18 @@ public class Catalogue implements Identifiable {
     private String description;
 
     /**
+     * A high-level description of the Catalogue's scope.
+     */
+    @XmlElement
+    @ApiModelProperty(position = 12)
+    @FieldValidation(nullable = true)
+    private String scope;
+
+    /**
      * Link to the logo/visual identity of the Catalogue.
      */
     @XmlElement(required = true)
-    @ApiModelProperty(position = 12, example = "https://example.com", required = true)
+    @ApiModelProperty(position = 13, example = "https://example.com", required = true)
     @FieldValidation
     private URL logo;
 
@@ -123,7 +131,7 @@ public class Catalogue implements Identifiable {
      */
     @XmlElementWrapper(name = "multimedia")
     @XmlElement(name = "multimedia")
-    @ApiModelProperty(position = 13)
+    @ApiModelProperty(position = 14)
     @FieldValidation(nullable = true)
     private List<MultimediaPair> multimedia;
 
@@ -134,7 +142,7 @@ public class Catalogue implements Identifiable {
      */
     @XmlElementWrapper(name = "scientificDomains")
     @XmlElement(name = "scientificDomain")
-    @ApiModelProperty(position = 14, notes = "Vocabulary ID")
+    @ApiModelProperty(position = 15, notes = "Vocabulary ID")
     @FieldValidation(nullable = true)
     private List<ServiceProviderDomain> scientificDomains;
 
@@ -143,7 +151,7 @@ public class Catalogue implements Identifiable {
      */
     @XmlElementWrapper(name = "tags")
     @XmlElement(name = "tag")
-    @ApiModelProperty(position = 15)
+    @ApiModelProperty(position = 16)
     @FieldValidation(nullable = true)
     private List<String> tags;
 
@@ -153,7 +161,7 @@ public class Catalogue implements Identifiable {
      * Physical location of the Catalogue.
      */
     @XmlElement(required = true)
-    @ApiModelProperty(position = 16, required = true)
+    @ApiModelProperty(position = 17, required = true)
     @FieldValidation
     private ProviderLocation location;
 
@@ -163,7 +171,7 @@ public class Catalogue implements Identifiable {
      * Catalogue's main contact info.
      */
     @XmlElement(required = true)
-    @ApiModelProperty(position = 17, required = true)
+    @ApiModelProperty(position = 18, required = true)
     @FieldValidation
     private ProviderMainContact mainContact;
 
@@ -172,7 +180,7 @@ public class Catalogue implements Identifiable {
      */
     @XmlElementWrapper(required = true, name = "publicContacts")
     @XmlElement(name = "publicContact")
-    @ApiModelProperty(position = 18, required = true)
+    @ApiModelProperty(position = 19, required = true)
     @FieldValidation
     private List<ProviderPublicContact> publicContacts;
 
@@ -183,7 +191,7 @@ public class Catalogue implements Identifiable {
      */
     @XmlElementWrapper(name = "participatingCountries")
     @XmlElement(name = "participatingCountry")
-    @ApiModelProperty(position = 19, notes = "Vocabulary ID")
+    @ApiModelProperty(position = 20, notes = "Vocabulary ID")
     @FieldValidation(nullable = true, containsId = true, idClass = Vocabulary.class)
     @VocabularyValidation(type = Vocabulary.Type.COUNTRY)
     private List<String> participatingCountries;
@@ -193,7 +201,7 @@ public class Catalogue implements Identifiable {
      */
     @XmlElementWrapper(name = "affiliations")
     @XmlElement(name = "affiliation")
-    @ApiModelProperty(position = 20)
+    @ApiModelProperty(position = 21)
     @FieldValidation(nullable = true)
     private List<String> affiliations;
 
@@ -202,7 +210,7 @@ public class Catalogue implements Identifiable {
      */
     @XmlElementWrapper(name = "networks")
     @XmlElement(name = "network")
-    @ApiModelProperty(position = 21, notes = "Vocabulary ID")
+    @ApiModelProperty(position = 22, notes = "Vocabulary ID")
     @FieldValidation(nullable = true, containsId = true, idClass = Vocabulary.class)
     @VocabularyValidation(type = Vocabulary.Type.PROVIDER_NETWORK)
     private List<String> networks;
@@ -211,7 +219,7 @@ public class Catalogue implements Identifiable {
     // Extra needed fields
     @XmlElementWrapper(name = "users", required = true)
     @XmlElement(name = "user")
-    @ApiModelProperty(position = 22, required = true)
+    @ApiModelProperty(position = 23, required = true)
     @FieldValidation
     private List<User> users;
 
@@ -233,6 +241,7 @@ public class Catalogue implements Identifiable {
                 ", validationProcess=" + validationProcess +
                 ", endOfLife='" + endOfLife + '\'' +
                 ", description='" + description + '\'' +
+                ", scope='" + scope + '\'' +
                 ", logo=" + logo +
                 ", multimedia=" + multimedia +
                 ", scientificDomains=" + scientificDomains +
@@ -335,6 +344,14 @@ public class Catalogue implements Identifiable {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public String getScope() {
+        return scope;
+    }
+
+    public void setScope(String scope) {
+        this.scope = scope;
     }
 
     public URL getLogo() {

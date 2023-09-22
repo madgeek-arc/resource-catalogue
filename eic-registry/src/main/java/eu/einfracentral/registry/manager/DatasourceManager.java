@@ -120,8 +120,8 @@ public class DatasourceManager extends ResourceManager<DatasourceBundle> impleme
         Resource existing = whereID(datasourceBundle.getId(), true);
         DatasourceBundle ex = deserialize(existing);
         // check if there are actual changes in the Datasource
-        if (datasourceBundle.getDatasource().equals(ex.getDatasource())){
-            throw new ValidationException("There are no changes in the Datasource", HttpStatus.OK);
+        if (datasourceBundle.getDatasource().equals(ex.getDatasource())) {
+            return datasourceBundle;
         }
 
         super.validate(datasourceBundle);

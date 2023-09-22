@@ -27,6 +27,7 @@ import org.springframework.security.core.Authentication;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static eu.einfracentral.config.CacheConfig.CACHE_FEATURED;
@@ -46,6 +47,9 @@ public class ServiceBundleManager extends AbstractServiceBundleManager<ServiceBu
     private final PublicServiceManager publicServiceManager;
     private final MigrationService migrationService;
     private final DatasourceService<DatasourceBundle, Authentication> datasourceService;
+    private final HelpdeskService<HelpdeskBundle, Authentication> helpdeskService;
+    private final MonitoringService<MonitoringBundle, Authentication> monitoringService;
+    private final ResourceInteroperabilityRecordService<ResourceInteroperabilityRecordBundle> resourceInteroperabilityRecordService;
     private final ProviderResourcesCommonMethods commonMethods;
 
     @Value("${project.catalogue.name}")
@@ -59,7 +63,11 @@ public class ServiceBundleManager extends AbstractServiceBundleManager<ServiceBu
                                 CatalogueService<CatalogueBundle, Authentication> catalogueService,
                                 @Lazy PublicServiceManager publicServiceManager,
                                 @Lazy MigrationService migrationService,
-                                @Lazy DatasourceService datasourceService,
+                                @Lazy DatasourceService<DatasourceBundle, Authentication> datasourceService,
+                                @Lazy HelpdeskService<HelpdeskBundle, Authentication> helpdeskService,
+                                @Lazy MonitoringService<MonitoringBundle, Authentication> monitoringService,
+                                @Lazy ResourceInteroperabilityRecordService<ResourceInteroperabilityRecordBundle>
+                                            resourceInteroperabilityRecordService,
                                 ProviderResourcesCommonMethods commonMethods) {
         super(ServiceBundle.class);
         this.providerService = providerService; // for providers
@@ -71,6 +79,9 @@ public class ServiceBundleManager extends AbstractServiceBundleManager<ServiceBu
         this.publicServiceManager = publicServiceManager;
         this.migrationService = migrationService;
         this.datasourceService = datasourceService;
+        this.helpdeskService = helpdeskService;
+        this.monitoringService = monitoringService;
+        this.resourceInteroperabilityRecordService = resourceInteroperabilityRecordService;
         this.commonMethods = commonMethods;
     }
 
@@ -174,8 +185,8 @@ public class ServiceBundleManager extends AbstractServiceBundleManager<ServiceBu
         }
 
         // check if there are actual changes in the Service
-        if (serviceBundle.getService().equals(existingService.getService())){
-            throw new ValidationException("There are no changes in the Service", HttpStatus.OK);
+        if (serviceBundle.getService().equals(existingService.getService())) {
+            return serviceBundle;
         }
 
         if (catalogueId == null || catalogueId.equals("")) {
@@ -304,7 +315,10 @@ public class ServiceBundleManager extends AbstractServiceBundleManager<ServiceBu
 
     @Override
     public void delete(ServiceBundle serviceBundle) {
+        String catalogueId = serviceBundle.getService().getCatalogueId();
         commonMethods.blockResourceDeletion(serviceBundle.getStatus(), serviceBundle.getMetadata().isPublished());
+        commonMethods.deleteResourceRelatedServiceSubprofiles(serviceBundle.getId(), catalogueId);
+        commonMethods.deleteResourceRelatedServiceExtensionsAndResourceInteroperabilityRecords(serviceBundle.getId(), catalogueId, "Service");
         logger.info("Deleting Service: {}", serviceBundle);
         super.delete(serviceBundle);
     }
@@ -589,12 +603,50 @@ public class ServiceBundleManager extends AbstractServiceBundleManager<ServiceBu
         commonMethods.suspensionValidation(serviceBundle, catalogueId,
                 serviceBundle.getService().getResourceOrganisation(), suspend, auth);
         commonMethods.suspendResource(serviceBundle, catalogueId, suspend, auth);
-        // if Service had a Datasource sub-profile, suspend it too
+        // suspend Service's sub-profiles
         DatasourceBundle datasourceBundle = datasourceService.get(serviceId, catalogueId);
         if (datasourceBundle != null) {
-            commonMethods.suspendResource(datasourceBundle, catalogueId, suspend, auth);
+            try {
+                commonMethods.suspendResource(datasourceBundle, catalogueId, suspend, auth);
+                datasourceService.update(datasourceBundle, auth);
+            } catch (eu.openminted.registry.core.exception.ResourceNotFoundException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        // suspend Service's extensions
+        HelpdeskBundle helpdeskBundle = helpdeskService.get(serviceId, catalogueId);
+        if (helpdeskBundle != null) {
+            try {
+                commonMethods.suspendResource(helpdeskBundle, catalogueId, suspend, auth);
+                helpdeskService.update(helpdeskBundle, auth);
+            } catch (eu.openminted.registry.core.exception.ResourceNotFoundException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        MonitoringBundle monitoringBundle = monitoringService.get(serviceId, catalogueId);
+        if (monitoringBundle != null) {
+            try {
+                commonMethods.suspendResource(monitoringBundle, catalogueId, suspend, auth);
+                monitoringService.update(monitoringBundle, auth);
+            } catch (eu.openminted.registry.core.exception.ResourceNotFoundException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        // suspend ResourceInteroperabilityRecord
+        ResourceInteroperabilityRecordBundle resourceInteroperabilityRecordBundle = resourceInteroperabilityRecordService.getWithResourceId(serviceId, catalogueId);
+        if (resourceInteroperabilityRecordBundle != null) {
+            try {
+                commonMethods.suspendResource(resourceInteroperabilityRecordBundle, catalogueId, suspend, auth);
+                resourceInteroperabilityRecordService.update(resourceInteroperabilityRecordBundle, auth);
+            } catch (eu.openminted.registry.core.exception.ResourceNotFoundException e) {
+                throw new RuntimeException(e);
+            }
         }
         return super.update(serviceBundle, auth);
+    }
+
+    public Paging<Bundle<?>> getAllForAdminWithAuditStates(FacetFilter ff, Set<String> auditState) {
+        return commonMethods.getAllForAdminWithAuditStates(ff, auditState, this.resourceType.getName());
     }
 
 }
