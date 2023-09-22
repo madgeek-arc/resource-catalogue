@@ -26,10 +26,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.util.MultiValueMap;
 
 import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 
 import static eu.einfracentral.config.CacheConfig.CACHE_FEATURED;
 import static eu.einfracentral.config.CacheConfig.CACHE_PROVIDERS;
@@ -435,6 +432,10 @@ public class InteroperabilityRecordManager extends ResourceManager<Interoperabil
                 filter.addFilter("active", true);
             }
         }
+    }
+
+    public Paging<Bundle<?>> getAllForAdminWithAuditStates(FacetFilter ff, Set<String> auditState) {
+        return commonMethods.getAllForAdminWithAuditStates(ff, auditState, this.resourceType.getName());
     }
 
     @CacheEvict(cacheNames = {CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)

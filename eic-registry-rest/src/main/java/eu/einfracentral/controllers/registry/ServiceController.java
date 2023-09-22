@@ -275,15 +275,14 @@ public class ServiceController {
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     public ResponseEntity<Paging<?>> getAllServicesForAdminPage(@ApiIgnore @RequestParam MultiValueMap<String, Object> allRequestParams,
                                                                 @RequestParam(required = false) Set<String> auditState,
-                                                                @RequestParam(defaultValue = "all", name = "catalogue_id") String catalogueId,
-                                                                @ApiIgnore Authentication authentication) {
+                                                                @RequestParam(defaultValue = "all", name = "catalogue_id") String catalogueId) {
         FacetFilter ff = serviceBundleService.createFacetFilterForFetchingServices(allRequestParams, catalogueId);
         if (auditState == null) {
             Paging<?> paging = genericResourceService.getResults(ff);
             genericResourceService.sortSpecificFacetsAlphabetically(paging.getFacets(), "resource_organisation");
             return ResponseEntity.ok(paging);
         } else {
-            return ResponseEntity.ok(serviceBundleService.getAllForAdminWithAuditStates(ff, auditState, authentication));
+            return ResponseEntity.ok(serviceBundleService.getAllForAdminWithAuditStates(ff, auditState));
         }
     }
 

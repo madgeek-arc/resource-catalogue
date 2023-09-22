@@ -1,12 +1,14 @@
 package eu.einfracentral.registry.service;
 
+import eu.einfracentral.domain.Bundle;
 import eu.einfracentral.domain.InteroperabilityRecordBundle;
 import eu.einfracentral.domain.LoggingInfo;
-import eu.einfracentral.domain.TrainingResourceBundle;
 import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.domain.Paging;
 import org.springframework.security.core.Authentication;
 import org.springframework.util.MultiValueMap;
+
+import java.util.Set;
 
 public interface InteroperabilityRecordService<T> extends ResourceService<T, Authentication> {
 
@@ -34,4 +36,5 @@ public interface InteroperabilityRecordService<T> extends ResourceService<T, Aut
      */
     T auditResource(String resourceId, String catalogueId, String comment, LoggingInfo.ActionType actionType, Authentication auth);
     InteroperabilityRecordBundle suspend(String interoperabilityRecordId, String catalogueId, boolean suspend, Authentication auth);
+    Paging<Bundle<?>> getAllForAdminWithAuditStates(FacetFilter ff, Set<String> auditState);
 }

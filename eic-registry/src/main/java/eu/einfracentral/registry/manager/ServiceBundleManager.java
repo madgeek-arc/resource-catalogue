@@ -27,6 +27,7 @@ import org.springframework.security.core.Authentication;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static eu.einfracentral.config.CacheConfig.CACHE_FEATURED;
@@ -642,6 +643,10 @@ public class ServiceBundleManager extends AbstractServiceBundleManager<ServiceBu
             }
         }
         return super.update(serviceBundle, auth);
+    }
+
+    public Paging<Bundle<?>> getAllForAdminWithAuditStates(FacetFilter ff, Set<String> auditState) {
+        return commonMethods.getAllForAdminWithAuditStates(ff, auditState, this.resourceType.getName());
     }
 
 }

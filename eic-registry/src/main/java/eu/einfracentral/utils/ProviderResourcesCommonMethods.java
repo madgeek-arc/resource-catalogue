@@ -8,6 +8,7 @@ import eu.einfracentral.service.GenericResourceService;
 import eu.einfracentral.service.SecurityService;
 import eu.openminted.registry.core.domain.Browsing;
 import eu.openminted.registry.core.domain.FacetFilter;
+import eu.openminted.registry.core.domain.Paging;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
@@ -25,11 +26,15 @@ import java.net.*;
 import java.io.*;
 
 import org.json.*;
+import org.springframework.util.MultiValueMap;
 
 @Component
 public class ProviderResourcesCommonMethods {
 
     private static final Logger logger = LogManager.getLogger(ProviderResourcesCommonMethods.class);
+
+    @Value("${elastic.index.max_result_window:10000}")
+    protected int maxQuantity;
 
     private final CatalogueService<CatalogueBundle, Authentication> catalogueService;
     private final ProviderService<ProviderBundle, Authentication> providerService;
@@ -524,5 +529,111 @@ public class ProviderResourcesCommonMethods {
             }
         }
         return latestLoggingInfo;
+    }
+
+    // TODO: Hard refactor
+    public Paging<Bundle<?>> getAllForAdminWithAuditStates(FacetFilter ff, Set<String> auditState, String resourceType) {
+        List<Bundle<?>> valid = new ArrayList<>();
+        List<Bundle<?>> notAudited = new ArrayList<>();
+        List<Bundle<?>> invalidAndUpdated = new ArrayList<>();
+        List<Bundle<?>> invalidAndNotUpdated = new ArrayList<>();
+
+        int quantity = ff.getQuantity();
+        int from = ff.getFrom();
+        int to = 0;
+
+        FacetFilter ff2 = new FacetFilter();
+        ff2.setFilter(new HashMap<>(ff.getFilter()));
+        // remove auditState from ff2 filter
+        ((MultiValueMap<String, Object>) ff2.getFilter().get("multi-filter")).remove("auditState");
+        ff2.setQuantity(maxQuantity);
+        ff2.setFrom(0);
+        ff2.setResourceType(resourceType);
+        Paging<Bundle<?>> retPaging;
+        Paging<Bundle<?>> allResults = genericResourceService.getResults(ff2);
+        List<Bundle<?>> ret = new ArrayList<>();
+        for (Bundle<?> bundle : allResults.getResults()) {
+            String auditVocStatus;
+            try {
+                auditVocStatus = LoggingInfo.createAuditVocabularyStatuses(bundle.getLoggingInfo());
+            } catch (NullPointerException e) { // bundle has null loggingInfo
+                continue;
+            }
+            switch (auditVocStatus) {
+                case "Valid and updated":
+                case "Valid and not updated":
+                    valid.add(bundle);
+                    break;
+                case "Not Audited":
+                    notAudited.add(bundle);
+                    break;
+                case "Invalid and updated":
+                    invalidAndUpdated.add(bundle);
+                    break;
+                case "Invalid and not updated":
+                    invalidAndNotUpdated.add(bundle);
+                    break;
+                default:
+                    throw new IllegalStateException("Unexpected value: " + auditVocStatus);
+            }
+        }
+        for (String state : auditState) {
+            switch (state) {
+                case "Valid":
+                    ret.addAll(valid);
+                    break;
+                case "Not Audited":
+                    ret.addAll(notAudited);
+                    break;
+                case "Invalid and updated":
+                    ret.addAll(invalidAndUpdated);
+                    break;
+                case "Invalid and not updated":
+                    ret.addAll(invalidAndNotUpdated);
+                    break;
+                default:
+                    throw new ValidationException(String.format("The audit state [%s] you have provided is wrong", state));
+            }
+        }
+        if (!ret.isEmpty()) {
+            List<Bundle<?>> retWithCorrectQuantity = new ArrayList<>();
+            if (from == 0) {
+                if (quantity <= ret.size()) {
+                    for (int i = from; i <= quantity - 1; i++) {
+                        retWithCorrectQuantity.add(ret.get(i));
+                    }
+                } else {
+                    retWithCorrectQuantity.addAll(ret);
+                }
+                to = retWithCorrectQuantity.size();
+            } else {
+                if (quantity + from > ret.size()) {
+                    to = ret.size();
+                } else {
+                    to = quantity + from;
+                }
+                boolean indexOutOfBound = false;
+                if (quantity <= ret.size()) {
+                    for (int i = from; i < quantity + from; i++) {
+                        try {
+                            retWithCorrectQuantity.add(ret.get(i));
+                        } catch (IndexOutOfBoundsException e) {
+                            indexOutOfBound = true;
+                            break;
+                        }
+                    }
+                    if (indexOutOfBound) {
+                        to = ret.size();
+                    }
+                } else {
+                    retWithCorrectQuantity.addAll(ret.subList(from, ret.size()));
+                }
+            }
+            ret = retWithCorrectQuantity;
+        } else {
+            from = 0;
+        }
+        retPaging = new Paging<>(ret.size(), from, to, ret, allResults.getFacets());
+        return retPaging;
     }
 }

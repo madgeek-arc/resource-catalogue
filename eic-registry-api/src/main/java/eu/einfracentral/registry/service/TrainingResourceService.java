@@ -202,7 +202,7 @@ public interface TrainingResourceService<T> extends ResourceService<T, Authentic
 
     T changeProvider(String resourceId, String newProvider, String comment, Authentication auth);
 
-    Paging<T> getAllForAdminWithAuditStates(FacetFilter ff, Set<String> auditState, Authentication authentication);
+    Paging<Bundle<?>> getAllForAdminWithAuditStates(FacetFilter ff, Set<String> auditState);
 
     TrainingResourceBundle getOrElseReturnNull(String id);
     TrainingResourceBundle getOrElseReturnNull(String id, String catalogueId);
