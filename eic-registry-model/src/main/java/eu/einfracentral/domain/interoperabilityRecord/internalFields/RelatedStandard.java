@@ -7,6 +7,7 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 import java.net.URL;
+import java.util.Objects;
 
 @XmlType
 @XmlRootElement(namespace = "http://einfracentral.eu")
@@ -34,6 +35,19 @@ public class RelatedStandard {
     public RelatedStandard(String relatedStandardIdentifier, URL relatedStandardURI) {
         this.relatedStandardIdentifier = relatedStandardIdentifier;
         this.relatedStandardURI = relatedStandardURI;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        RelatedStandard that = (RelatedStandard) o;
+        return Objects.equals(relatedStandardIdentifier, that.relatedStandardIdentifier) && Objects.equals(relatedStandardURI, that.relatedStandardURI);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(relatedStandardIdentifier, relatedStandardURI);
     }
 
     @Override

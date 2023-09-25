@@ -189,6 +189,27 @@ public class Datasource implements Identifiable {
     }
 
     @Override
+    public String toString() {
+        return "Datasource{" +
+                "id='" + id + '\'' +
+                ", serviceId='" + serviceId + '\'' +
+                ", catalogueId='" + catalogueId + '\'' +
+                ", submissionPolicyURL=" + submissionPolicyURL +
+                ", preservationPolicyURL=" + preservationPolicyURL +
+                ", versionControl=" + versionControl +
+                ", persistentIdentitySystems=" + persistentIdentitySystems +
+                ", jurisdiction='" + jurisdiction + '\'' +
+                ", datasourceClassification='" + datasourceClassification + '\'' +
+                ", researchEntityTypes=" + researchEntityTypes +
+                ", thematic=" + thematic +
+                ", researchProductLicensings=" + researchProductLicensings +
+                ", researchProductAccessPolicies=" + researchProductAccessPolicies +
+                ", researchProductMetadataLicensing=" + researchProductMetadataLicensing +
+                ", researchProductMetadataAccessPolicies=" + researchProductMetadataAccessPolicies +
+                '}';
+    }
+
+    @Override
     public String getId() {
         return id;
     }

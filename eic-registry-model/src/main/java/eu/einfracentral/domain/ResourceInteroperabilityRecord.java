@@ -8,6 +8,7 @@ import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 import java.util.List;
+import java.util.Objects;
 
 @XmlType
 @XmlRootElement(namespace = "http://einfracentral.eu")
@@ -41,6 +42,19 @@ public class ResourceInteroperabilityRecord implements Identifiable {
         this.resourceId = resourceId;
         this.catalogueId = catalogueId;
         this.interoperabilityRecordIds = interoperabilityRecordIds;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ResourceInteroperabilityRecord that = (ResourceInteroperabilityRecord) o;
+        return Objects.equals(id, that.id) && Objects.equals(resourceId, that.resourceId) && Objects.equals(catalogueId, that.catalogueId) && Objects.equals(interoperabilityRecordIds, that.interoperabilityRecordIds);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, resourceId, catalogueId, interoperabilityRecordIds);
     }
 
     @Override

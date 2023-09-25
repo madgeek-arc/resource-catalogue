@@ -7,6 +7,7 @@ import eu.einfracentral.registry.service.ServiceBundleService;
 import eu.einfracentral.registry.service.TrainingResourceService;
 import eu.einfracentral.service.RegistrationMailService;
 import eu.einfracentral.service.SecurityService;
+import eu.einfracentral.utils.ObjectUtils;
 import eu.einfracentral.utils.ProviderResourcesCommonMethods;
 import eu.einfracentral.utils.ResourceValidationUtils;
 import eu.openminted.registry.core.domain.Resource;
@@ -101,44 +102,45 @@ public class HelpdeskManager extends ResourceManager<HelpdeskBundle> implements 
     }
 
     @Override
-    public HelpdeskBundle update(HelpdeskBundle helpdesk, Authentication auth) {
-        logger.trace("User '{}' is attempting to update the Helpdesk with id '{}'", auth, helpdesk.getId());
+    public HelpdeskBundle update(HelpdeskBundle helpdeskBundle, Authentication auth) {
+        logger.trace("User '{}' is attempting to update the Helpdesk with id '{}'", auth, helpdeskBundle.getId());
 
-        Resource existing = whereID(helpdesk.getId(), true);
-        HelpdeskBundle ex = deserialize(existing);
+        HelpdeskBundle ret = ObjectUtils.clone(helpdeskBundle);
+        Resource existingResource = whereID(ret.getId(), true);
+        HelpdeskBundle existingHelpdesk = deserialize(existingResource);
         // check if there are actual changes in the Helpdesk
-        if (helpdesk.getHelpdesk().equals(ex.getHelpdesk())) {
-            return helpdesk;
+        if (ret.getHelpdesk().equals(existingHelpdesk.getHelpdesk())) {
+            return ret;
         }
 
-        validate(helpdesk);
-        helpdesk.setMetadata(Metadata.updateMetadata(helpdesk.getMetadata(), User.of(auth).getFullName(), User.of(auth).getEmail()));
-        List<LoggingInfo> loggingInfoList = commonMethods.returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(helpdesk, auth);
+        validate(ret);
+        ret.setMetadata(Metadata.updateMetadata(ret.getMetadata(), User.of(auth).getFullName(), User.of(auth).getEmail()));
+        List<LoggingInfo> loggingInfoList = commonMethods.returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(ret, auth);
         LoggingInfo loggingInfo = commonMethods.createLoggingInfo(auth, LoggingInfo.Types.UPDATE.getKey(),
                 LoggingInfo.ActionType.UPDATED.getKey());
         loggingInfoList.add(loggingInfo);
-        helpdesk.setLoggingInfo(loggingInfoList);
+        ret.setLoggingInfo(loggingInfoList);
 
         // latestLoggingInfo
-        helpdesk.setLatestUpdateInfo(loggingInfo);
-        helpdesk.setLatestOnboardingInfo(commonMethods.setLatestLoggingInfo(loggingInfoList, LoggingInfo.Types.ONBOARD.getKey()));
-        helpdesk.setLatestAuditInfo(commonMethods.setLatestLoggingInfo(loggingInfoList, LoggingInfo.Types.AUDIT.getKey()));
+        ret.setLatestUpdateInfo(loggingInfo);
+        ret.setLatestOnboardingInfo(commonMethods.setLatestLoggingInfo(loggingInfoList, LoggingInfo.Types.ONBOARD.getKey()));
+        ret.setLatestAuditInfo(commonMethods.setLatestLoggingInfo(loggingInfoList, LoggingInfo.Types.AUDIT.getKey()));
 
-        helpdesk.setActive(ex.isActive());
-        existing.setPayload(serialize(helpdesk));
-        existing.setResourceType(resourceType);
+        ret.setActive(existingHelpdesk.isActive());
+        existingResource.setPayload(serialize(ret));
+        existingResource.setResourceType(resourceType);
 
         // block user from updating serviceId
-        if (!helpdesk.getHelpdesk().getServiceId().equals(ex.getHelpdesk().getServiceId()) && !securityService.hasRole(auth, "ROLE_ADMIN")){
+        if (!ret.getHelpdesk().getServiceId().equals(existingHelpdesk.getHelpdesk().getServiceId()) && !securityService.hasRole(auth, "ROLE_ADMIN")){
             throw new ValidationException("You cannot change the Service Id with which this Helpdesk is related");
         }
 
-        resourceService.updateResource(existing);
-        logger.debug("Updating Helpdesk: {}", helpdesk);
+        resourceService.updateResource(existingResource);
+        logger.debug("Updating Helpdesk: {}", ret);
 
-        registrationMailService.sendEmailsForHelpdeskExtension(helpdesk, "Resource", "put");
+        registrationMailService.sendEmailsForHelpdeskExtension(ret, "Resource", "put");
 
-        return helpdesk;
+        return ret;
     }
 
     @Override

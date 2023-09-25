@@ -7,6 +7,7 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 import java.net.URL;
+import java.util.Objects;
 
 @XmlType
 @XmlRootElement(namespace = "http://einfracentral.eu")
@@ -43,6 +44,19 @@ public class Right {
         this.rightTitle = rightTitle;
         this.rightURI = rightURI;
         this.rightIdentifier = rightIdentifier;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Right right = (Right) o;
+        return Objects.equals(rightTitle, right.rightTitle) && Objects.equals(rightURI, right.rightURI) && Objects.equals(rightIdentifier, right.rightIdentifier);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(rightTitle, rightURI, rightIdentifier);
     }
 
     @Override

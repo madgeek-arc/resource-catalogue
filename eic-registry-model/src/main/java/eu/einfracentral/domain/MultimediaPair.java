@@ -7,6 +7,7 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 import java.net.URL;
+import java.util.Objects;
 
 @XmlType
 @XmlRootElement(namespace = "http://einfracentral.eu")
@@ -34,6 +35,19 @@ public class MultimediaPair {
     public MultimediaPair(URL multimediaURL, String multimediaName) {
         this.multimediaURL = multimediaURL;
         this.multimediaName = multimediaName;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        MultimediaPair that = (MultimediaPair) o;
+        return Objects.equals(multimediaURL, that.multimediaURL) && Objects.equals(multimediaName, that.multimediaName);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(multimediaURL, multimediaName);
     }
 
     @Override

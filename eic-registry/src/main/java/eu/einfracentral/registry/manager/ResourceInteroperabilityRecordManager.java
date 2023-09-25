@@ -8,6 +8,7 @@ import eu.einfracentral.registry.service.ServiceBundleService;
 import eu.einfracentral.registry.service.ResourceInteroperabilityRecordService;
 import eu.einfracentral.registry.service.TrainingResourceService;
 import eu.einfracentral.service.SecurityService;
+import eu.einfracentral.utils.ObjectUtils;
 import eu.einfracentral.utils.ProviderResourcesCommonMethods;
 import eu.einfracentral.utils.ResourceValidationUtils;
 import eu.openminted.registry.core.domain.Paging;
@@ -128,48 +129,49 @@ public class ResourceInteroperabilityRecordManager extends ResourceManager<Resou
     public ResourceInteroperabilityRecordBundle update(ResourceInteroperabilityRecordBundle resourceInteroperabilityRecordBundle, Authentication auth) {
         logger.trace("User '{}' is attempting to update the ResourceInteroperabilityRecord with id '{}'", auth, resourceInteroperabilityRecordBundle.getId());
 
-        commonMethods.checkRelatedResourceIDsConsistency(resourceInteroperabilityRecordBundle);
-        Resource existing = whereID(resourceInteroperabilityRecordBundle.getId(), true);
-        ResourceInteroperabilityRecordBundle ex = deserialize(existing);
+        ResourceInteroperabilityRecordBundle ret = ObjectUtils.clone(resourceInteroperabilityRecordBundle);
+        Resource existingResource = whereID(ret.getId(), true);
+        ResourceInteroperabilityRecordBundle existingInteroperabilityRecord = deserialize(existingResource);
         // check if there are actual changes in the ResourceInteroperabilityRecord
-        if (resourceInteroperabilityRecordBundle.getResourceInteroperabilityRecord().equals(ex.getResourceInteroperabilityRecord())) {
-            return resourceInteroperabilityRecordBundle;
+        if (ret.getResourceInteroperabilityRecord().equals(existingInteroperabilityRecord.getResourceInteroperabilityRecord())) {
+            return ret;
         }
+        commonMethods.checkRelatedResourceIDsConsistency(ret);
 
         // block Public ResourceInteroperabilityRecordBundle updates
-        if (resourceInteroperabilityRecordBundle.getMetadata().isPublished()){
+        if (ret.getMetadata().isPublished()){
             throw new ValidationException("You cannot directly update a Public Resource Interoperability Record");
         }
 
-        validate(resourceInteroperabilityRecordBundle);
-        checkIfEachInteroperabilityRecordIsApproved(resourceInteroperabilityRecordBundle);
+        validate(ret);
+        checkIfEachInteroperabilityRecordIsApproved(ret);
 
-        resourceInteroperabilityRecordBundle.setMetadata(Metadata.updateMetadata(resourceInteroperabilityRecordBundle.getMetadata(), User.of(auth).getFullName(), User.of(auth).getEmail()));
-        List<LoggingInfo> loggingInfoList = commonMethods.returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(ex, auth);
+        ret.setMetadata(Metadata.updateMetadata(ret.getMetadata(), User.of(auth).getFullName(), User.of(auth).getEmail()));
+        List<LoggingInfo> loggingInfoList = commonMethods.returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(existingInteroperabilityRecord, auth);
         LoggingInfo loggingInfo = commonMethods.createLoggingInfo(auth, LoggingInfo.Types.UPDATE.getKey(),
                 LoggingInfo.ActionType.UPDATED.getKey());
         loggingInfoList.add(loggingInfo);
         loggingInfoList.sort(Comparator.comparing(LoggingInfo::getDate));
-        resourceInteroperabilityRecordBundle.setLoggingInfo(loggingInfoList);
+        ret.setLoggingInfo(loggingInfoList);
 
         // latestUpdateInfo
-        resourceInteroperabilityRecordBundle.setLatestUpdateInfo(loggingInfo);
-        resourceInteroperabilityRecordBundle.setLatestOnboardingInfo(commonMethods.setLatestLoggingInfo(loggingInfoList, LoggingInfo.Types.ONBOARD.getKey()));
-        resourceInteroperabilityRecordBundle.setLatestAuditInfo(commonMethods.setLatestLoggingInfo(loggingInfoList, LoggingInfo.Types.AUDIT.getKey()));
+        ret.setLatestUpdateInfo(loggingInfo);
+        ret.setLatestOnboardingInfo(commonMethods.setLatestLoggingInfo(loggingInfoList, LoggingInfo.Types.ONBOARD.getKey()));
+        ret.setLatestAuditInfo(commonMethods.setLatestLoggingInfo(loggingInfoList, LoggingInfo.Types.AUDIT.getKey()));
 
-        existing.setPayload(serialize(resourceInteroperabilityRecordBundle));
-        existing.setResourceType(resourceType);
+        existingResource.setPayload(serialize(ret));
+        existingResource.setResourceType(resourceType);
 
         // block user from updating resourceId
-        if (!resourceInteroperabilityRecordBundle.getResourceInteroperabilityRecord().getResourceId().equals(ex.getResourceInteroperabilityRecord().getResourceId())
+        if (!ret.getResourceInteroperabilityRecord().getResourceId().equals(existingInteroperabilityRecord.getResourceInteroperabilityRecord().getResourceId())
                 && !securityService.hasRole(auth, "ROLE_ADMIN")){
             throw new ValidationException("You cannot change the Resource Id with which this ResourceInteroperabilityRecord is related");
         }
 
-        resourceService.updateResource(existing);
-        logger.debug("Updating ResourceInteroperabilityRecord: {}", resourceInteroperabilityRecordBundle);
+        resourceService.updateResource(existingResource);
+        logger.debug("Updating ResourceInteroperabilityRecord: {}", ret);
 
-        return resourceInteroperabilityRecordBundle;
+        return ret;
     }
 
     public void delete(ResourceInteroperabilityRecordBundle resourceInteroperabilityRecordBundle) {

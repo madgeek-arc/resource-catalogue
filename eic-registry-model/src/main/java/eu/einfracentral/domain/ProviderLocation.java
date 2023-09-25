@@ -68,6 +68,19 @@ public class ProviderLocation {
     }
 
     @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ProviderLocation that = (ProviderLocation) o;
+        return Objects.equals(streetNameAndNumber, that.streetNameAndNumber) && Objects.equals(postalCode, that.postalCode) && Objects.equals(city, that.city) && Objects.equals(region, that.region) && Objects.equals(country, that.country);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(streetNameAndNumber, postalCode, city, region, country);
+    }
+
+    @Override
     public String toString() {
         return "ProviderLocation{" +
                 "streetNameAndNumber='" + streetNameAndNumber + '\'' +
@@ -116,18 +129,5 @@ public class ProviderLocation {
 
     public void setCountry(String country) {
         this.country = country;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        ProviderLocation that = (ProviderLocation) o;
-        return Objects.equals(streetNameAndNumber, that.streetNameAndNumber) && Objects.equals(postalCode, that.postalCode) && Objects.equals(city, that.city) && Objects.equals(region, that.region) && Objects.equals(country, that.country);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(streetNameAndNumber, postalCode, city, region, country);
     }
 }

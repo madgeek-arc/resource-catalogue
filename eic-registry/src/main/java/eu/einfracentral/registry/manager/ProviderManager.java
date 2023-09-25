@@ -1,12 +1,14 @@
 package eu.einfracentral.registry.manager;
 
 import eu.einfracentral.domain.*;
+import eu.einfracentral.domain.interoperabilityRecord.configurationTemplates.ConfigurationTemplateInstanceBundle;
 import eu.einfracentral.exception.ValidationException;
 import eu.einfracentral.registry.service.*;
 import eu.einfracentral.service.IdCreator;
 import eu.einfracentral.service.RegistrationMailService;
 import eu.einfracentral.service.SecurityService;
 import eu.einfracentral.service.SynchronizerService;
+import eu.einfracentral.utils.ObjectUtils;
 import eu.einfracentral.utils.ProviderResourcesCommonMethods;
 import eu.einfracentral.validators.FieldValidator;
 import eu.openminted.registry.core.domain.*;
@@ -156,72 +158,73 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
 
     //    @Override
     @CacheEvict(value = CACHE_PROVIDERS, allEntries = true)
-    public ProviderBundle update(ProviderBundle provider, String catalogueId, String comment, Authentication auth) {
-        logger.trace("User '{}' is attempting to update the Provider with id '{}' of the Catalogue '{}'", auth, provider, provider.getProvider().getCatalogueId());
+    public ProviderBundle update(ProviderBundle providerBundle, String catalogueId, String comment, Authentication auth) {
+        logger.trace("User '{}' is attempting to update the Provider with id '{}' of the Catalogue '{}'", auth, providerBundle, providerBundle.getProvider().getCatalogueId());
 
-        Resource existing = getResource(provider.getId(), provider.getProvider().getCatalogueId());
-        ProviderBundle ex = deserialize(existing);
+        ProviderBundle ret = ObjectUtils.clone(providerBundle);
+        Resource existingResource = getResource(ret.getId(), ret.getProvider().getCatalogueId());
+        ProviderBundle existingProvider = deserialize(existingResource);
         // check if there are actual changes in the Provider
-        if (provider.getTemplateStatus().equals(ex.getTemplateStatus()) && provider.getProvider().equals(ex.getProvider())){
-            if (provider.isSuspended() == ex.isSuspended()){
-                throw new ValidationException("There are no changes in the Provider", HttpStatus.NOT_MODIFIED);
+        if (ret.getTemplateStatus().equals(existingProvider.getTemplateStatus()) && ret.getProvider().equals(existingProvider.getProvider())){
+            if (ret.isSuspended() == existingProvider.isSuspended()){
+                return ret;
             }
         }
 
         if (catalogueId == null || catalogueId.equals("")) {
-            provider.getProvider().setCatalogueId(catalogueName);
+            ret.getProvider().setCatalogueId(catalogueName);
         } else {
-            commonMethods.checkCatalogueIdConsistency(provider, catalogueId);
+            commonMethods.checkCatalogueIdConsistency(ret, catalogueId);
         }
 
         // block Public Provider update
-        if (provider.getMetadata().isPublished()){
+        if (ret.getMetadata().isPublished()){
             throw new ValidationException("You cannot directly update a Public Provider");
         }
 
-        validate(provider);
-        provider.setMetadata(Metadata.updateMetadata(provider.getMetadata(), User.of(auth).getFullName(), User.of(auth).getEmail()));
-        List<LoggingInfo> loggingInfoList = commonMethods.returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(provider, auth);
+        validate(ret);
+        ret.setMetadata(Metadata.updateMetadata(ret.getMetadata(), User.of(auth).getFullName(), User.of(auth).getEmail()));
+        List<LoggingInfo> loggingInfoList = commonMethods.returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(ret, auth);
         LoggingInfo loggingInfo = commonMethods.createLoggingInfo(auth, LoggingInfo.Types.UPDATE.getKey(),
                 LoggingInfo.ActionType.UPDATED.getKey(), comment);
         loggingInfoList.add(loggingInfo);
-        provider.setLoggingInfo(loggingInfoList);
+        ret.setLoggingInfo(loggingInfoList);
 
         // latestLoggingInfo
-        provider.setLatestUpdateInfo(loggingInfo);
-        provider.setLatestOnboardingInfo(commonMethods.setLatestLoggingInfo(loggingInfoList, LoggingInfo.Types.ONBOARD.getKey()));
-        provider.setLatestAuditInfo(commonMethods.setLatestLoggingInfo(loggingInfoList, LoggingInfo.Types.AUDIT.getKey()));
+        ret.setLatestUpdateInfo(loggingInfo);
+        ret.setLatestOnboardingInfo(commonMethods.setLatestLoggingInfo(loggingInfoList, LoggingInfo.Types.ONBOARD.getKey()));
+        ret.setLatestAuditInfo(commonMethods.setLatestLoggingInfo(loggingInfoList, LoggingInfo.Types.AUDIT.getKey()));
 
         // block catalogueId updates from Provider Admins
-        if (!securityService.hasRole(auth, "ROLE_ADMIN") && !ex.getProvider().getCatalogueId().equals(provider.getProvider().getCatalogueId())) {
+        if (!securityService.hasRole(auth, "ROLE_ADMIN") && !existingProvider.getProvider().getCatalogueId().equals(ret.getProvider().getCatalogueId())) {
             throw new ValidationException("You cannot change catalogueId");
         }
-        provider.setActive(ex.isActive());
-        provider.setStatus(ex.getStatus());
-        provider.setSuspended(ex.isSuspended());
-        existing.setPayload(serialize(provider));
-        existing.setResourceType(resourceType);
-        resourceService.updateResource(existing);
-        logger.debug("Updating Provider: {} of Catalogue: {}", provider, provider.getProvider().getCatalogueId());
+        ret.setActive(existingProvider.isActive());
+        ret.setStatus(existingProvider.getStatus());
+        ret.setSuspended(existingProvider.isSuspended());
+        existingResource.setPayload(serialize(ret));
+        existingResource.setResourceType(resourceType);
+        resourceService.updateResource(existingResource);
+        logger.debug("Updating Provider: {} of Catalogue: {}", ret, ret.getProvider().getCatalogueId());
 
         // check if Provider has become a Legal Entity
-        checkAndAddProviderToHLEVocabulary(provider);
+        checkAndAddProviderToHLEVocabulary(ret);
 
         // Send emails to newly added or deleted Admins
-        adminDifferences(provider, ex);
+        adminDifferences(ret, existingProvider);
 
         // send notification emails to Portal Admins
-        if (provider.getLatestAuditInfo() != null && provider.getLatestUpdateInfo() != null) {
-            long latestAudit = Long.parseLong(provider.getLatestAuditInfo().getDate());
-            long latestUpdate = Long.parseLong(provider.getLatestUpdateInfo().getDate());
-            if (latestAudit < latestUpdate && provider.getLatestAuditInfo().getActionType().equals(LoggingInfo.ActionType.INVALID.getKey())) {
-                registrationMailService.notifyPortalAdminsForInvalidProviderUpdate(provider);
+        if (ret.getLatestAuditInfo() != null && ret.getLatestUpdateInfo() != null) {
+            long latestAudit = Long.parseLong(ret.getLatestAuditInfo().getDate());
+            long latestUpdate = Long.parseLong(ret.getLatestUpdateInfo().getDate());
+            if (latestAudit < latestUpdate && ret.getLatestAuditInfo().getActionType().equals(LoggingInfo.ActionType.INVALID.getKey())) {
+                registrationMailService.notifyPortalAdminsForInvalidProviderUpdate(ret);
             }
         }
 
-        synchronizerService.syncUpdate(provider.getProvider());
+        synchronizerService.syncUpdate(ret.getProvider());
 
-        return provider;
+        return ret;
     }
 
     /**

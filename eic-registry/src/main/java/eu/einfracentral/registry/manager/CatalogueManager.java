@@ -7,6 +7,7 @@ import eu.einfracentral.registry.service.*;
 import eu.einfracentral.service.IdCreator;
 import eu.einfracentral.service.RegistrationMailService;
 import eu.einfracentral.service.SecurityService;
+import eu.einfracentral.utils.ObjectUtils;
 import eu.einfracentral.utils.ProviderResourcesCommonMethods;
 import eu.einfracentral.validators.FieldValidator;
 import eu.openminted.registry.core.domain.Browsing;
@@ -194,48 +195,49 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
         return ret;
     }
 
-    public CatalogueBundle update(CatalogueBundle catalogue, String comment, Authentication auth) {
-        logger.trace("User '{}' is attempting to update the Catalogue with id '{}'", auth, catalogue);
+    public CatalogueBundle update(CatalogueBundle catalogueBundle, String comment, Authentication auth) {
+        logger.trace("User '{}' is attempting to update the Catalogue with id '{}'", auth, catalogueBundle);
 
-        Resource existing = whereID(catalogue.getId(), true);
-        CatalogueBundle ex = deserialize(existing);
+        CatalogueBundle ret = ObjectUtils.clone(catalogueBundle);
+        Resource existingResource = whereID(ret.getId(), true);
+        CatalogueBundle existingCatalogue = deserialize(existingResource);
         // check if there are actual changes in the Catalogue
-        if (catalogue.getCatalogue().equals(ex.getCatalogue())) {
-            return catalogue;
+        if (ret.getCatalogue().equals(existingCatalogue.getCatalogue())) {
+            return ret;
         }
 
-        validate(catalogue);
-        catalogue.setMetadata(Metadata.updateMetadata(catalogue.getMetadata(), User.of(auth).getFullName(), User.of(auth).getEmail()));
-        List<LoggingInfo> loggingInfoList = commonMethods.returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(catalogue, auth);
+        validate(ret);
+        ret.setMetadata(Metadata.updateMetadata(ret.getMetadata(), User.of(auth).getFullName(), User.of(auth).getEmail()));
+        List<LoggingInfo> loggingInfoList = commonMethods.returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(ret, auth);
         LoggingInfo loggingInfo = commonMethods.createLoggingInfo(auth, LoggingInfo.Types.UPDATE.getKey(),
                 LoggingInfo.ActionType.UPDATED.getKey(), comment);
         loggingInfoList.add(loggingInfo);
-        catalogue.getCatalogue().setParticipatingCountries(sortCountries(catalogue.getCatalogue().getParticipatingCountries()));
-        catalogue.setLoggingInfo(loggingInfoList);
+        ret.getCatalogue().setParticipatingCountries(sortCountries(ret.getCatalogue().getParticipatingCountries()));
+        ret.setLoggingInfo(loggingInfoList);
 
         // latestUpdateInfo
-        catalogue.setLatestUpdateInfo(loggingInfo);
+        ret.setLatestUpdateInfo(loggingInfo);
 
-        catalogue.setActive(ex.isActive());
-        catalogue.setStatus(ex.getStatus());
-        catalogue.setSuspended(ex.isSuspended());
-        existing.setPayload(serialize(catalogue));
-        existing.setResourceType(resourceType);
-        resourceService.updateResource(existing);
-        logger.debug("Updating Catalogue: {}", catalogue);
+        ret.setActive(existingCatalogue.isActive());
+        ret.setStatus(existingCatalogue.getStatus());
+        ret.setSuspended(existingCatalogue.isSuspended());
+        existingResource.setPayload(serialize(ret));
+        existingResource.setResourceType(resourceType);
+        resourceService.updateResource(existingResource);
+        logger.debug("Updating Catalogue: {}", ret);
 
         // Send emails to newly added or deleted Admins
-        adminDifferences(catalogue, ex);
+        adminDifferences(ret, existingCatalogue);
 
-        if (catalogue.getLatestAuditInfo() != null && catalogue.getLatestUpdateInfo() != null) {
-            Long latestAudit = Long.parseLong(catalogue.getLatestAuditInfo().getDate());
-            Long latestUpdate = Long.parseLong(catalogue.getLatestUpdateInfo().getDate());
-            if (latestAudit < latestUpdate && catalogue.getLatestAuditInfo().getActionType().equals(LoggingInfo.ActionType.INVALID.getKey())) {
-                registrationMailService.notifyPortalAdminsForInvalidCatalogueUpdate(catalogue);
+        if (ret.getLatestAuditInfo() != null && ret.getLatestUpdateInfo() != null) {
+            Long latestAudit = Long.parseLong(ret.getLatestAuditInfo().getDate());
+            Long latestUpdate = Long.parseLong(ret.getLatestUpdateInfo().getDate());
+            if (latestAudit < latestUpdate && ret.getLatestAuditInfo().getActionType().equals(LoggingInfo.ActionType.INVALID.getKey())) {
+                registrationMailService.notifyPortalAdminsForInvalidCatalogueUpdate(ret);
             }
         }
 
-        return catalogue;
+        return ret;
     }
 
     @Override

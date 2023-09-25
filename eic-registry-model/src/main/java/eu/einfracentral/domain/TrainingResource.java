@@ -299,6 +299,37 @@ public class TrainingResource implements Identifiable {
     }
 
     @Override
+    public String toString() {
+        return "TrainingResource{" +
+                "id='" + id + '\'' +
+                ", title='" + title + '\'' +
+                ", resourceOrganisation='" + resourceOrganisation + '\'' +
+                ", resourceProviders=" + resourceProviders +
+                ", authors=" + authors +
+                ", url=" + url +
+                ", urlType='" + urlType + '\'' +
+                ", eoscRelatedServices=" + eoscRelatedServices +
+                ", description='" + description + '\'' +
+                ", keywords=" + keywords +
+                ", license='" + license + '\'' +
+                ", accessRights='" + accessRights + '\'' +
+                ", versionDate=" + versionDate +
+                ", targetGroups=" + targetGroups +
+                ", learningResourceTypes=" + learningResourceTypes +
+                ", learningOutcomes=" + learningOutcomes +
+                ", expertiseLevel='" + expertiseLevel + '\'' +
+                ", contentResourceTypes=" + contentResourceTypes +
+                ", qualifications=" + qualifications +
+                ", duration='" + duration + '\'' +
+                ", languages=" + languages +
+                ", geographicalAvailabilities=" + geographicalAvailabilities +
+                ", scientificDomains=" + scientificDomains +
+                ", contact=" + contact +
+                ", catalogueId='" + catalogueId + '\'' +
+                '}';
+    }
+
+    @Override
     public String getId() {
         return id;
     }

@@ -42,6 +42,19 @@ public class ProviderMerilDomain {
     }
 
     @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ProviderMerilDomain that = (ProviderMerilDomain) o;
+        return Objects.equals(merilScientificDomain, that.merilScientificDomain) && Objects.equals(merilScientificSubdomain, that.merilScientificSubdomain);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(merilScientificDomain, merilScientificSubdomain);
+    }
+
+    @Override
     public String toString() {
         return "ProviderMerilDomain{" +
                 "merilScientificDomain='" + merilScientificDomain + '\'' +
@@ -63,18 +76,5 @@ public class ProviderMerilDomain {
 
     public void setMerilScientificSubdomain(String merilScientificSubdomain) {
         this.merilScientificSubdomain = merilScientificSubdomain;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        ProviderMerilDomain that = (ProviderMerilDomain) o;
-        return Objects.equals(merilScientificDomain, that.merilScientificDomain) && Objects.equals(merilScientificSubdomain, that.merilScientificSubdomain);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(merilScientificDomain, merilScientificSubdomain);
     }
 }

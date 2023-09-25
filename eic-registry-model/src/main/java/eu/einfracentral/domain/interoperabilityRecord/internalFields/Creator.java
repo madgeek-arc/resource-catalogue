@@ -6,6 +6,7 @@ import io.swagger.annotations.ApiModelProperty;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
+import java.util.Objects;
 
 @XmlType
 @XmlRootElement(namespace = "http://einfracentral.eu")
@@ -60,6 +61,19 @@ public class Creator {
         this.familyName = familyName;
         this.nameIdentifier = nameIdentifier;
         this.creatorAffiliationInfo = creatorAffiliationInfo;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Creator creator = (Creator) o;
+        return Objects.equals(creatorNameTypeInfo, creator.creatorNameTypeInfo) && Objects.equals(givenName, creator.givenName) && Objects.equals(familyName, creator.familyName) && Objects.equals(nameIdentifier, creator.nameIdentifier) && Objects.equals(creatorAffiliationInfo, creator.creatorAffiliationInfo);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(creatorNameTypeInfo, givenName, familyName, nameIdentifier, creatorAffiliationInfo);
     }
 
     @Override
