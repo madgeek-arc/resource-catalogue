@@ -22,7 +22,6 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
-import org.springframework.http.*;
 import org.springframework.security.core.Authentication;
 
 import java.util.ArrayList;
@@ -36,6 +35,7 @@ public class MonitoringManager extends ResourceManager<MonitoringBundle> impleme
     private static final Logger logger = LogManager.getLogger(MonitoringManager.class);
     private final ServiceBundleService<ServiceBundle> serviceBundleService;
     private final TrainingResourceService<TrainingResourceBundle> trainingResourceService;
+    private final PublicMonitoringManager publicMonitoringManager;
     private final SecurityService securityService;
     private final RegistrationMailService registrationMailService;
     private final ProviderResourcesCommonMethods commonMethods;
@@ -48,12 +48,14 @@ public class MonitoringManager extends ResourceManager<MonitoringBundle> impleme
 
     public MonitoringManager(ServiceBundleService<ServiceBundle> serviceBundleService,
                              TrainingResourceService<TrainingResourceBundle> trainingResourceService,
+                             PublicMonitoringManager publicMonitoringManager,
                              @Lazy SecurityService securityService,
                              @Lazy RegistrationMailService registrationMailService,
                              ProviderResourcesCommonMethods commonMethods) {
         super(MonitoringBundle.class);
         this.serviceBundleService = serviceBundleService;
         this.trainingResourceService = trainingResourceService;
+        this.publicMonitoringManager = publicMonitoringManager;
         this.securityService = securityService;
         this.registrationMailService = registrationMailService;
         this.commonMethods = commonMethods;
@@ -232,5 +234,10 @@ public class MonitoringManager extends ResourceManager<MonitoringBundle> impleme
             monitoringStatuses.add(monitoringStatus);
         }
         return monitoringStatuses;
+    }
+
+    public MonitoringBundle createPublicResource(MonitoringBundle monitoringBundle, Authentication auth) {
+        publicMonitoringManager.add(monitoringBundle, auth);
+        return monitoringBundle;
     }
 }

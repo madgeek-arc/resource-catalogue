@@ -49,14 +49,13 @@ public class PublicDatasourceController {
 
     @ApiOperation(value = "Returns the Public Datasource with the given id.")
     @GetMapping(path = "public/datasource/{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    public ResponseEntity<?> getPublicDatasource(@PathVariable("id") String id,
-                                                 @RequestParam(defaultValue = "${project.catalogue.name}", name = "catalogue_id") String catalogueId,
-                                                 @ApiIgnore Authentication auth) {
+    public ResponseEntity<?> getPublicDatasource(@PathVariable("id") String id, @ApiIgnore Authentication auth) {
         DatasourceBundle datasourceBundle = datasourceBundleService.get(id);
         if (auth != null && auth.isAuthenticated()) {
             User user = User.of(auth);
             if (securityService.hasRole(auth, "ROLE_ADMIN") || securityService.hasRole(auth, "ROLE_EPOT")
-                    || securityService.userIsResourceProviderAdmin(user, id, datasourceBundle.getPayload().getCatalogueId())) {
+                    || securityService.userIsResourceProviderAdmin(user, datasourceBundle.getDatasource().getServiceId(),
+                    datasourceBundle.getDatasource().getCatalogueId())) {
                 if (datasourceBundle.getMetadata().isPublished()) {
                     return new ResponseEntity<>(datasourceBundle.getDatasource(), HttpStatus.OK);
                 } else {
@@ -72,15 +71,14 @@ public class PublicDatasourceController {
     }
 
     @GetMapping(path = "public/datasource/datasourceBundle/{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth, #id, #catalogueId)")
-    public ResponseEntity<?> getPublicDatasourceBundle(@PathVariable("id") String id,
-                                                       @RequestParam(defaultValue = "${project.catalogue.name}", name = "catalogue_id") String catalogueId,
-                                                       @ApiIgnore Authentication auth) {
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
+    public ResponseEntity<?> getPublicDatasourceBundle(@PathVariable("id") String id, @ApiIgnore Authentication auth) {
         DatasourceBundle datasourceBundle = datasourceBundleService.get(id);
         if (auth != null && auth.isAuthenticated()) {
             User user = User.of(auth);
             if (securityService.hasRole(auth, "ROLE_ADMIN") || securityService.hasRole(auth, "ROLE_EPOT")
-                    || securityService.userIsResourceProviderAdmin(user, id, datasourceBundle.getPayload().getCatalogueId())) {
+                    || securityService.userIsResourceProviderAdmin(user, datasourceBundle.getDatasource().getServiceId(),
+                    datasourceBundle.getDatasource().getCatalogueId())) {
                 if (datasourceBundle.getMetadata().isPublished()) {
                     return new ResponseEntity<>(datasourceBundle, HttpStatus.OK);
                 } else {

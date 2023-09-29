@@ -10,28 +10,58 @@ import java.util.List;
 
 public interface MonitoringService<T, U extends Authentication> extends ResourceService<T, Authentication> {
 
+    /**
+     * Creates a new Monitoring
+     * @param monitoring - MonitoringBundle
+     * @param resourceType - String Resource Type
+     * @param auth - Authentication
+     * @return {@link MonitoringBundle}
+     */
     MonitoringBundle add(MonitoringBundle monitoring, String resourceType, Authentication auth);
-    List<ServiceType> getAvailableServiceTypes();
 
+    /**
+     * Returns all the available Service Types
+     * @return {@link List<ServiceType>}
+     */
+    List<ServiceType> getAvailableServiceTypes();
 
     /**
      * Retrieve {@link MonitoringBundle} for a catalogue specific resource.
-     * @param serviceId
-     * @param catalogueId
+     * @param serviceId - String Service ID
+     * @param catalogueId - String Catalogue ID
      * @return {@link MonitoringBundle}
      */
     MonitoringBundle get(String serviceId, String catalogueId);
 
     /**
-     * Validates ...(TODO write description here)
-     * @param monitoringBundle
-     * @param resourceType
-     * @return
+     * Validates the given Monitoring
+     * @param monitoringBundle - MonitoringBundle
+     * @param resourceType - String Resource Type
+     * @return {@link MonitoringBundle}
      */
     MonitoringBundle validate(MonitoringBundle monitoringBundle, String resourceType);
 
+    /**
+     * Creates a Public version of the specific Monitoring
+     * @param monitoringBundle - MonitoringBundle
+     * @param auth - Authentication
+     * @return {@link MonitoringBundle}
+     */
+    MonitoringBundle createPublicResource(MonitoringBundle monitoringBundle, Authentication auth);
+
 
     // Argo GRNET Monitoring Status methods
+    /**
+     * Returns a list of Monitoring's Availability Object
+     * @param results - JsonArray Results
+     * @return {@link List<MonitoringStatus>}
+     */
     List<MonitoringStatus> createMonitoringAvailabilityObject(JsonArray results);
+
+    /**
+     * Returns a list of Monitoring's Status Objects
+     * @param results - JsonArray Results
+     * @return {@link List<MonitoringStatus>}
+     */
     List<MonitoringStatus> createMonitoringStatusObject(JsonArray results);
 }

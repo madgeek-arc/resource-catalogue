@@ -82,8 +82,15 @@ public class ServiceExtensionsController {
     //SECTION: HELPDESK
     @ApiOperation(value = "Returns the Helpdesk with the given id.")
     @GetMapping(path = "/helpdesk/{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    public ResponseEntity<Helpdesk> getHelpdesk(@PathVariable("id") String id, @ApiIgnore Authentication auth) {
+    public ResponseEntity<Helpdesk> getHelpdesk(@PathVariable("id") String id) {
         Helpdesk helpdesk = helpdeskService.get(id).getHelpdesk();
+        return new ResponseEntity<>(helpdesk, HttpStatus.OK);
+    }
+
+    @GetMapping(path = "/helpdesk/bundle/{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
+    public ResponseEntity<HelpdeskBundle> getHelpdeskBundle(@PathVariable("id") String id) {
+        HelpdeskBundle helpdesk = helpdeskService.get(id);
         return new ResponseEntity<>(helpdesk, HttpStatus.OK);
     }
 
@@ -185,12 +192,29 @@ public class ServiceExtensionsController {
         return new ResponseEntity<>(helpdeskBundle.getHelpdesk(), HttpStatus.OK);
     }
 
+    // Create a Public HelpdeskBundle if something went bad during its creation
+    @ApiIgnore
+    @PostMapping(path = "createPublicHelpdesk", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public ResponseEntity<HelpdeskBundle> createPublicHelpdesk(@RequestBody HelpdeskBundle helpdeskBundle, @ApiIgnore Authentication auth) {
+        logger.info("User '{}-{}' attempts to create a Public Helpdesk from Helpdesk '{}' of the '{}' Catalogue", User.of(auth).getFullName(),
+                User.of(auth).getEmail(), helpdeskBundle.getId(), helpdeskBundle.getCatalogueId());
+        return ResponseEntity.ok(helpdeskService.createPublicResource(helpdeskBundle, auth));
+    }
+
 
     //SECTION: MONITORING
     @ApiOperation(value = "Returns the Monitoring with the given id.")
     @GetMapping(path = "/monitoring/{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    public ResponseEntity<Monitoring> getMonitoring(@PathVariable("id") String id, @ApiIgnore Authentication auth) {
+    public ResponseEntity<Monitoring> getMonitoring(@PathVariable("id") String id) {
         Monitoring monitoring = monitoringService.get(id).getMonitoring();
+        return new ResponseEntity<>(monitoring, HttpStatus.OK);
+    }
+
+    @GetMapping(path = "/monitoring/bundle/{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
+    public ResponseEntity<MonitoringBundle> getMonitoringBundle(@PathVariable("id") String id) {
+        MonitoringBundle monitoring = monitoringService.get(id);
         return new ResponseEntity<>(monitoring, HttpStatus.OK);
     }
 
@@ -374,6 +398,16 @@ public class ServiceExtensionsController {
         } catch (NullPointerException e) {
             return "";
         }
+    }
+
+    // Create a Public MonitoringBundle if something went bad during its creation
+    @ApiIgnore
+    @PostMapping(path = "createPublicMonitoring", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public ResponseEntity<MonitoringBundle> createPublicMonitoring(@RequestBody MonitoringBundle monitoringBundle, @ApiIgnore Authentication auth) {
+        logger.info("User '{}-{}' attempts to create a Public Monitoring from Monitoring '{}' of the '{}' Catalogue", User.of(auth).getFullName(),
+                User.of(auth).getEmail(), monitoringBundle.getId(), monitoringBundle.getCatalogueId());
+        return ResponseEntity.ok(monitoringService.createPublicResource(monitoringBundle, auth));
     }
 
 }

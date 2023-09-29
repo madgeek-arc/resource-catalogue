@@ -16,7 +16,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 
 import java.util.List;
@@ -28,6 +27,7 @@ public class HelpdeskManager extends ResourceManager<HelpdeskBundle> implements 
     private static final Logger logger = LogManager.getLogger(HelpdeskManager.class);
     private final ServiceBundleService<ServiceBundle> serviceBundleService;
     private final TrainingResourceService<TrainingResourceBundle> trainingResourceService;
+    private final PublicHelpdeskManager publicHelpdeskManager;
     private final SecurityService securityService;
     private final RegistrationMailService registrationMailService;
     private final ProviderResourcesCommonMethods commonMethods;
@@ -35,12 +35,14 @@ public class HelpdeskManager extends ResourceManager<HelpdeskBundle> implements 
     @Autowired
     public HelpdeskManager(ServiceBundleService<ServiceBundle> serviceBundleService,
                            TrainingResourceService<TrainingResourceBundle> trainingResourceService,
+                           PublicHelpdeskManager publicHelpdeskManager,
                            @Lazy SecurityService securityService,
                            @Lazy RegistrationMailService registrationMailService,
                            ProviderResourcesCommonMethods commonMethods) {
         super(HelpdeskBundle.class);
         this.serviceBundleService = serviceBundleService;
         this.trainingResourceService = trainingResourceService;
+        this.publicHelpdeskManager = publicHelpdeskManager;
         this.securityService = securityService;
         this.registrationMailService = registrationMailService;
         this.commonMethods = commonMethods;
@@ -147,5 +149,10 @@ public class HelpdeskManager extends ResourceManager<HelpdeskBundle> implements 
     public void delete(HelpdeskBundle helpdesk) {
         super.delete(helpdesk);
         logger.debug("Deleting Helpdesk: {}", helpdesk);
+    }
+
+    public HelpdeskBundle createPublicResource(HelpdeskBundle helpdeskBundle, Authentication auth) {
+        publicHelpdeskManager.add(helpdeskBundle, auth);
+        return helpdeskBundle;
     }
 }
