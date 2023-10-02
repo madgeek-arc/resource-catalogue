@@ -73,6 +73,7 @@ public class PublicInteroperabilityRecordManager extends ResourceManager<Interop
         String lowerLevelResourceId = interoperabilityRecordBundle.getId();
         Identifiers.createOriginalId(interoperabilityRecordBundle);
         interoperabilityRecordBundle.setId(String.format("%s.%s", interoperabilityRecordBundle.getInteroperabilityRecord().getCatalogueId(), interoperabilityRecordBundle.getId()));
+        commonMethods.restrictPrefixRepetitionOnPublicResources(interoperabilityRecordBundle.getId(), interoperabilityRecordBundle.getInteroperabilityRecord().getCatalogueId());
 
         // set providerId to Public
         interoperabilityRecordBundle.getInteroperabilityRecord().setProviderId(String.format("%s.%s",

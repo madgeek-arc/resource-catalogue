@@ -72,6 +72,7 @@ public class PublicHelpdeskManager extends AbstractPublicResourceManager<Helpdes
         String lowerLevelResourceId = helpdeskBundle.getId();
         Identifiers.createOriginalId(helpdeskBundle);
         helpdeskBundle.setId(String.format("%s.%s", helpdeskBundle.getCatalogueId(), helpdeskBundle.getId()));
+        commonMethods.restrictPrefixRepetitionOnPublicResources(helpdeskBundle.getId(), helpdeskBundle.getCatalogueId());
 
         // sets public id to serviceId
         updateHelpdeskIdsToPublic(helpdeskBundle);

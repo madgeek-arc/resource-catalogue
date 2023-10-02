@@ -71,6 +71,7 @@ public class PublicDatasourceManager extends AbstractPublicResourceManager<Datas
         String lowerLevelResourceId = datasourceBundle.getId();
         Identifiers.createOriginalId(datasourceBundle);
         datasourceBundle.setId(String.format("%s.%s", datasourceBundle.getDatasource().getCatalogueId(), datasourceBundle.getId()));
+        commonMethods.restrictPrefixRepetitionOnPublicResources(datasourceBundle.getId(), datasourceBundle.getDatasource().getCatalogueId());
 
         // sets public ids to providerId, serviceId
         updateDatasourceIdsToPublic(datasourceBundle);

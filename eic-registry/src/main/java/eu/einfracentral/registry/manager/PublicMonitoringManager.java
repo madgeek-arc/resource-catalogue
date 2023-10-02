@@ -72,6 +72,7 @@ public class PublicMonitoringManager extends AbstractPublicResourceManager<Monit
         String lowerLevelResourceId = monitoringBundle.getId();
         Identifiers.createOriginalId(monitoringBundle);
         monitoringBundle.setId(String.format("%s.%s", monitoringBundle.getCatalogueId(), monitoringBundle.getId()));
+        commonMethods.restrictPrefixRepetitionOnPublicResources(monitoringBundle.getId(), monitoringBundle.getCatalogueId());
 
         // sets public id to serviceId
         updateMonitoringIdsToPublic(monitoringBundle);

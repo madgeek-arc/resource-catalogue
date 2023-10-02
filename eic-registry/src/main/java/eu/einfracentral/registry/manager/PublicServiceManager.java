@@ -71,6 +71,7 @@ public class PublicServiceManager extends AbstractPublicResourceManager<ServiceB
         String lowerLevelResourceId = serviceBundle.getId();
         Identifiers.createOriginalId(serviceBundle);
         serviceBundle.setId(String.format("%s.%s", serviceBundle.getService().getCatalogueId(), serviceBundle.getId()));
+        commonMethods.restrictPrefixRepetitionOnPublicResources(serviceBundle.getId(), serviceBundle.getService().getCatalogueId());
 
         // sets public ids to resource organisation, resource providers and related/required resources
         updateServiceIdsToPublic(serviceBundle);

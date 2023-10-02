@@ -24,6 +24,8 @@ import java.util.*;
 
 import java.net.*;
 import java.io.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.json.*;
 import org.springframework.util.MultiValueMap;
@@ -633,5 +635,18 @@ public class ProviderResourcesCommonMethods {
         }
         retPaging = new Paging<>(ret.size(), from, to, ret, allResults.getFacets());
         return retPaging;
+    }
+
+    public void restrictPrefixRepetitionOnPublicResources(String id, String cataloguePrefix) {
+        String regex = cataloguePrefix + ".";
+        Pattern pattern = Pattern.compile(regex);
+        Matcher matcher = pattern.matcher(id);
+        int count = 0;
+        while (matcher.find()) {
+            count++;
+        }
+        if (count > 1) {
+            throw new ValidationException("Resource with ID [%s] cannot have a Public registry" + id);
+        }
     }
 }
