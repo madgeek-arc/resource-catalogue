@@ -118,7 +118,6 @@ public class PublicInteroperabilityRecordManager extends ResourceManager<Interop
             InteroperabilityRecordBundle publicInteroperabilityRecordBundle = get(String.format("%s.%s", interoperabilityRecordBundle.getInteroperabilityRecord().getCatalogueId(), interoperabilityRecordBundle.getId()));
             logger.info(String.format("Deleting public Interoperability Record with id [%s]", publicInteroperabilityRecordBundle.getId()));
             super.delete(publicInteroperabilityRecordBundle);
-            logger.info("Sending JMS with topic 'interoperability_record.delete'");
             jmsService.convertAndSendTopic("interoperability_record.delete", publicInteroperabilityRecordBundle);
         } catch (ResourceException | ResourceNotFoundException ignore){
         }

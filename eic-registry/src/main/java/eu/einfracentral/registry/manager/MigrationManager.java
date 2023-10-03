@@ -25,6 +25,7 @@ public class MigrationManager implements MigrationService {
     private final PublicServiceManager publicServiceManager;
     private final TrainingResourceManager trainingResourceManager;
     private final InteroperabilityRecordManager interoperabilityRecordManager;
+    private final DatasourceManager datasourceManager;
     private final PublicTrainingResourceManager publicTrainingResourceManager;
     private final ProviderManager providerService;
     private final ResourceService resourceService;
@@ -42,7 +43,8 @@ public class MigrationManager implements MigrationService {
 
     @Autowired
     public MigrationManager(ServiceBundleManager serviceBundleManager, PublicServiceManager publicServiceManager,
-                            TrainingResourceManager trainingResourceManager, InteroperabilityRecordManager interoperabilityRecordManager,
+                            TrainingResourceManager trainingResourceManager, DatasourceManager datasourceManager,
+                            InteroperabilityRecordManager interoperabilityRecordManager,
                             PublicTrainingResourceManager publicTrainingResourceManager,
                             ProviderManager providerService, ResourceService resourceService,
                             ResourceInteroperabilityRecordManager resourceInteroperabilityRecordManager,
@@ -52,6 +54,7 @@ public class MigrationManager implements MigrationService {
         this.serviceBundleManager = serviceBundleManager;
         this.publicServiceManager = publicServiceManager;
         this.trainingResourceManager = trainingResourceManager;
+        this.datasourceManager = datasourceManager;
         this.interoperabilityRecordManager = interoperabilityRecordManager;
         this.publicTrainingResourceManager = publicTrainingResourceManager;
         this.providerService = providerService;
@@ -180,6 +183,7 @@ public class MigrationManager implements MigrationService {
         ff.addFilter("published", false);
         List<ServiceBundle> allServices = serviceBundleManager.getAllForAdmin(ff, securityService.getAdminAccess()).getResults();
         List<TrainingResourceBundle> allTrainingResources = trainingResourceManager.getAllForAdmin(ff, securityService.getAdminAccess()).getResults();
+        List<DatasourceBundle> allDatasourceBundles = datasourceManager.getAll(ff, securityService.getAdminAccess()).getResults();
         List<ResourceInteroperabilityRecordBundle> allResourceInteroperabilityRecords = resourceInteroperabilityRecordManager.getAll(ff, securityService.getAdminAccess()).getResults();
         List<HelpdeskBundle> allHelpdeskBundles = helpdeskManager.getAll(ff, securityService.getAdminAccess()).getResults();
         List<MonitoringBundle> allMonitoringBundles = monitoringManager.getAll(ff, securityService.getAdminAccess()).getResults();
@@ -218,6 +222,16 @@ public class MigrationManager implements MigrationService {
                 // update Public Training Resource
                 TrainingResourceBundle updatedTrainingResourceBundle = trainingResourceManager.get(newResourceId, catalogueName);
                 publicTrainingResourceManager.update(updatedTrainingResourceBundle, securityService.getAdminAccess());
+            }
+        }
+
+        for (DatasourceBundle datasourceBundle : allDatasourceBundles){
+            if (datasourceBundle.getDatasource().getServiceId().equals(oldResourceId)){
+                datasourceBundle.getDatasource().setServiceId(newResourceId);
+                Resource resource = datasourceManager.getResource(datasourceBundle.getId());
+                resource.setPayload(datasourceManager.serialize(datasourceBundle));
+                resourceService.updateResource(resource);
+                jmsService.convertAndSendTopic("datasource.update", datasourceBundle);
             }
         }
 
