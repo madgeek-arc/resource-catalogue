@@ -160,6 +160,7 @@ public class ConfigurationTemplateInstanceManager extends ResourceManager<Config
         List<ConfigurationTemplateInstance> ret = new ArrayList<>();
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(10000);
+        ff.addFilter("published", false);
         List<ConfigurationTemplateInstanceBundle> configurationTemplateInstanceBundles = configurationTemplateInstanceService.getAll(ff, null).getResults();
         for (ConfigurationTemplateInstanceBundle configurationTemplateInstanceBundle : configurationTemplateInstanceBundles){
             if (configurationTemplateInstanceBundle.getConfigurationTemplateInstance().getConfigurationTemplateId().equals(configurationTemplateId)){
