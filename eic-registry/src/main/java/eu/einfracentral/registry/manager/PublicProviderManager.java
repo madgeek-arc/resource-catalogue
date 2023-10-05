@@ -74,7 +74,7 @@ public class PublicProviderManager extends ResourceManager<ProviderBundle> imple
         commonMethods.restrictPrefixRepetitionOnPublicResources(providerBundle.getId(), providerBundle.getProvider().getCatalogueId());
         providerBundle.getMetadata().setPublished(true);
         // create PID and set it as Alternative Identifier
-        providerBundle.getIdentifiers().setAlternativeIdentifiers(commonMethods.createAlternativeIdentifierForPID(providerBundle));
+        providerBundle.getIdentifiers().setAlternativeIdentifiers(commonMethods.createAlternativeIdentifierForPID(providerBundle, "providers/"));
         ProviderBundle ret;
         logger.info(String.format("Provider [%s] is being published with id [%s]", lowerLevelProviderId, providerBundle.getId()));
         ret = super.add(providerBundle, null);

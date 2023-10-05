@@ -78,7 +78,7 @@ public class PublicDatasourceManager extends AbstractPublicResourceManager<Datas
 
         datasourceBundle.getMetadata().setPublished(true);
         // create PID and set it as Alternative Identifier
-        datasourceBundle.getIdentifiers().setAlternativeIdentifiers(commonMethods.createAlternativeIdentifierForPID(datasourceBundle));
+        datasourceBundle.getIdentifiers().setAlternativeIdentifiers(commonMethods.createAlternativeIdentifierForPID(datasourceBundle, "services/"));
         DatasourceBundle ret;
         logger.info(String.format("Datasource [%s] is being published with id [%s]", lowerLevelResourceId, datasourceBundle.getId()));
         ret = super.add(datasourceBundle, null);

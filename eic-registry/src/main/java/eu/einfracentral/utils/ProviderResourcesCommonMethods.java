@@ -58,6 +58,8 @@ public class ProviderResourcesCommonMethods {
     private String pidPrefix;
     @Value("${pid.api}")
     private String pidApi;
+    @Value("${marketplace.url}")
+    private String marketplaceUrl;
 
     public ProviderResourcesCommonMethods(@Lazy CatalogueService<CatalogueBundle, Authentication> catalogueService,
                                           @Lazy ProviderService<ProviderBundle, Authentication> providerService,
@@ -323,14 +325,14 @@ public class ProviderResourcesCommonMethods {
         return loggingInfoList;
     }
 
-    public List<AlternativeIdentifier> createAlternativeIdentifierForPID(Bundle<?> bundle) {
+    public List<AlternativeIdentifier> createAlternativeIdentifierForPID(Bundle<?> bundle, String resourceTypePath) {
         if (bundle.getMetadata().isPublished()) {
             String pid = ShortHashGenerator(bundle.getId());
             AlternativeIdentifier alternativeIdentifier = new AlternativeIdentifier();
             alternativeIdentifier.setType("PID");
             alternativeIdentifier.setValue(pid);
             if (bundle.getIdentifiers() != null) {
-                postPID(bundle.getId(), pid);
+                postPID(bundle.getId(), pid, resourceTypePath);
                 List<AlternativeIdentifier> alternativeIdentifiers = bundle.getIdentifiers().getAlternativeIdentifiers();
                 if (alternativeIdentifiers != null && !alternativeIdentifiers.isEmpty()) {
                     alternativeIdentifiers.add(alternativeIdentifier);
@@ -369,9 +371,9 @@ public class ProviderResourcesCommonMethods {
         }
     }
 
-    private void postPID(String resourceId, String pid) {
+    private void postPID(String resourceId, String pid, String resourceTypePath) {
         String url = pidApi + pidPrefix + "/" + pid;
-        String payload = createPID(resourceId);
+        String payload = createPID(resourceId, resourceTypePath);
         HttpURLConnection con;
         try {
             con = (HttpURLConnection) new URL(url).openConnection();
@@ -405,13 +407,14 @@ public class ProviderResourcesCommonMethods {
         }
     }
 
-    private String createPID(String resourceId) {
+    private String createPID(String resourceId, String resourceTypePath) {
         JSONObject data = new JSONObject();
         JSONArray values = new JSONArray();
         JSONObject hs_admin = new JSONObject();
         JSONObject hs_admin_data = new JSONObject();
         JSONObject hs_admin_data_value = new JSONObject();
         JSONObject id = new JSONObject();
+        JSONObject markeplaceUrl = new JSONObject();
         hs_admin_data_value.put("index", 301);
         hs_admin_data_value.put("handle", pidPrefix + "/" + pidUsername);
         hs_admin_data_value.put("permissions", "011111110011");
@@ -422,7 +425,11 @@ public class ProviderResourcesCommonMethods {
         hs_admin.put("type", "HS_ADMIN");
         hs_admin.put("data", hs_admin_data);
         values.put(hs_admin);
-        id.put("index", 1);
+        markeplaceUrl.put("index", 1);
+        markeplaceUrl.put("type", "url");
+        markeplaceUrl.put("data", marketplaceUrl + resourceTypePath + resourceId);
+        values.put(markeplaceUrl);
+        id.put("index", 2);
         id.put("type", "id");
         id.put("data", resourceId);
         values.put(id);

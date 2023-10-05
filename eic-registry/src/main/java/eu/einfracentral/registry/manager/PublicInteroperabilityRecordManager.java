@@ -82,7 +82,7 @@ public class PublicInteroperabilityRecordManager extends ResourceManager<Interop
 
         interoperabilityRecordBundle.getMetadata().setPublished(true);
         // create PID and set it as Alternative Identifier
-        interoperabilityRecordBundle.getIdentifiers().setAlternativeIdentifiers(commonMethods.createAlternativeIdentifierForPID(interoperabilityRecordBundle));
+        interoperabilityRecordBundle.getIdentifiers().setAlternativeIdentifiers(commonMethods.createAlternativeIdentifierForPID(interoperabilityRecordBundle, "guidelines/"));
         InteroperabilityRecordBundle ret;
         logger.info(String.format("Interoperability Record [%s] is being published with id [%s]", lowerLevelResourceId, interoperabilityRecordBundle.getId()));
         ret = super.add(interoperabilityRecordBundle, null);

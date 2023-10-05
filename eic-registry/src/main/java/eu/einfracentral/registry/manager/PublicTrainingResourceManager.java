@@ -79,7 +79,7 @@ public class PublicTrainingResourceManager extends AbstractPublicResourceManager
 
         trainingResourceBundle.getMetadata().setPublished(true);
         // create PID and set it as Alternative Identifier
-        trainingResourceBundle.getIdentifiers().setAlternativeIdentifiers(commonMethods.createAlternativeIdentifierForPID(trainingResourceBundle));
+        trainingResourceBundle.getIdentifiers().setAlternativeIdentifiers(commonMethods.createAlternativeIdentifierForPID(trainingResourceBundle, "trainings/"));
         TrainingResourceBundle ret;
         logger.info(String.format("Training Resource [%s] is being published with id [%s]", lowerLevelResourceId, trainingResourceBundle.getId()));
         ret = super.add(trainingResourceBundle, null);
