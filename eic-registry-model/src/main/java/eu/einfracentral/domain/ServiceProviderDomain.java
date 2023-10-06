@@ -42,6 +42,19 @@ public class ServiceProviderDomain {
     }
 
     @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ServiceProviderDomain that = (ServiceProviderDomain) o;
+        return Objects.equals(scientificDomain, that.scientificDomain) && Objects.equals(scientificSubdomain, that.scientificSubdomain);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(scientificDomain, scientificSubdomain);
+    }
+
+    @Override
     public String toString() {
         return "ProviderDomains{" +
                 "scientificDomain='" + scientificDomain + '\'' +
@@ -63,18 +76,5 @@ public class ServiceProviderDomain {
 
     public void setScientificSubdomain(String scientificSubdomain) {
         this.scientificSubdomain = scientificSubdomain;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        ServiceProviderDomain that = (ServiceProviderDomain) o;
-        return Objects.equals(scientificDomain, that.scientificDomain) && Objects.equals(scientificSubdomain, that.scientificSubdomain);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(scientificDomain, scientificSubdomain);
     }
 }

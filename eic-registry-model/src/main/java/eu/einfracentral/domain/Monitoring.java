@@ -9,6 +9,7 @@ import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 import java.util.List;
+import java.util.Objects;
 
 @XmlType
 @XmlRootElement(namespace = "http://einfracentral.eu")
@@ -42,6 +43,19 @@ public class Monitoring implements Identifiable {
         this.serviceId = serviceId;
         this.monitoredBy = monitoredBy;
         this.monitoringGroups = monitoringGroups;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Monitoring that = (Monitoring) o;
+        return Objects.equals(id, that.id) && Objects.equals(serviceId, that.serviceId) && Objects.equals(monitoredBy, that.monitoredBy) && Objects.equals(monitoringGroups, that.monitoringGroups);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, serviceId, monitoredBy, monitoringGroups);
     }
 
     @Override

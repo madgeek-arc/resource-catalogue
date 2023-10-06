@@ -8,6 +8,7 @@ import org.json.simple.JSONObject;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
+import java.util.Objects;
 
 @XmlType
 @XmlRootElement(namespace = "http://einfracentral.eu")
@@ -40,6 +41,29 @@ public class ConfigurationTemplateInstance implements Identifiable {
         this.resourceId = resourceId;
         this.configurationTemplateId = configurationTemplateId;
         this.payload = payload;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ConfigurationTemplateInstance that = (ConfigurationTemplateInstance) o;
+        return Objects.equals(id, that.id) && Objects.equals(resourceId, that.resourceId) && Objects.equals(configurationTemplateId, that.configurationTemplateId) && Objects.equals(payload, that.payload);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, resourceId, configurationTemplateId, payload);
+    }
+
+    @Override
+    public String toString() {
+        return "ConfigurationTemplateInstance{" +
+                "id='" + id + '\'' +
+                ", resourceId='" + resourceId + '\'' +
+                ", configurationTemplateId='" + configurationTemplateId + '\'' +
+                ", payload='" + payload + '\'' +
+                '}';
     }
 
     @Override

@@ -7,6 +7,7 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 import java.net.URL;
+import java.util.Objects;
 
 @XmlType
 @XmlRootElement(namespace = "http://einfracentral.eu")
@@ -34,6 +35,19 @@ public class UseCasesPair {
     public UseCasesPair(URL useCaseURL, String useCaseName) {
         this.useCaseURL = useCaseURL;
         this.useCaseName = useCaseName;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        UseCasesPair that = (UseCasesPair) o;
+        return Objects.equals(useCaseURL, that.useCaseURL) && Objects.equals(useCaseName, that.useCaseName);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(useCaseURL, useCaseName);
     }
 
     @Override

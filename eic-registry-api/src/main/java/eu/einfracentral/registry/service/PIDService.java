@@ -12,4 +12,6 @@ public interface PIDService {
      * @return Bundle<?>
      */
     Bundle<?> get(String resourceType, String pid);
+
+    void updatePID(String pid, String resourceId, String resourceTypePath);
 }

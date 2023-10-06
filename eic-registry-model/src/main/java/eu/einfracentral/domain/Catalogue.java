@@ -10,6 +10,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 import java.net.URL;
 import java.util.List;
+import java.util.Objects;
 
 @XmlType
 @XmlRootElement(namespace = "http://einfracentral.eu")
@@ -225,6 +226,19 @@ public class Catalogue implements Identifiable {
 
     public Catalogue() {
         // no-arg constructor
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Catalogue catalogue = (Catalogue) o;
+        return legalEntity == catalogue.legalEntity && Objects.equals(id, catalogue.id) && Objects.equals(abbreviation, catalogue.abbreviation) && Objects.equals(name, catalogue.name) && Objects.equals(website, catalogue.website) && Objects.equals(legalStatus, catalogue.legalStatus) && Objects.equals(hostingLegalEntity, catalogue.hostingLegalEntity) && Objects.equals(inclusionCriteria, catalogue.inclusionCriteria) && Objects.equals(validationProcess, catalogue.validationProcess) && Objects.equals(endOfLife, catalogue.endOfLife) && Objects.equals(description, catalogue.description) && Objects.equals(scope, catalogue.scope) && Objects.equals(logo, catalogue.logo) && Objects.equals(multimedia, catalogue.multimedia) && Objects.equals(scientificDomains, catalogue.scientificDomains) && Objects.equals(tags, catalogue.tags) && Objects.equals(location, catalogue.location) && Objects.equals(mainContact, catalogue.mainContact) && Objects.equals(publicContacts, catalogue.publicContacts) && Objects.equals(participatingCountries, catalogue.participatingCountries) && Objects.equals(affiliations, catalogue.affiliations) && Objects.equals(networks, catalogue.networks) && Objects.equals(users, catalogue.users);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, abbreviation, name, website, legalEntity, legalStatus, hostingLegalEntity, inclusionCriteria, validationProcess, endOfLife, description, scope, logo, multimedia, scientificDomains, tags, location, mainContact, publicContacts, participatingCountries, affiliations, networks, users);
     }
 
     @Override

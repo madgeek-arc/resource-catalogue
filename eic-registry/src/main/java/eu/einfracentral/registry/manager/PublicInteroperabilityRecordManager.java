@@ -73,6 +73,7 @@ public class PublicInteroperabilityRecordManager extends ResourceManager<Interop
         String lowerLevelResourceId = interoperabilityRecordBundle.getId();
         Identifiers.createOriginalId(interoperabilityRecordBundle);
         interoperabilityRecordBundle.setId(String.format("%s.%s", interoperabilityRecordBundle.getInteroperabilityRecord().getCatalogueId(), interoperabilityRecordBundle.getId()));
+        commonMethods.restrictPrefixRepetitionOnPublicResources(interoperabilityRecordBundle.getId(), interoperabilityRecordBundle.getInteroperabilityRecord().getCatalogueId());
 
         // set providerId to Public
         interoperabilityRecordBundle.getInteroperabilityRecord().setProviderId(String.format("%s.%s",
@@ -81,7 +82,7 @@ public class PublicInteroperabilityRecordManager extends ResourceManager<Interop
 
         interoperabilityRecordBundle.getMetadata().setPublished(true);
         // create PID and set it as Alternative Identifier
-        interoperabilityRecordBundle.getIdentifiers().setAlternativeIdentifiers(commonMethods.createAlternativeIdentifierForPID(interoperabilityRecordBundle));
+        interoperabilityRecordBundle.getIdentifiers().setAlternativeIdentifiers(commonMethods.createAlternativeIdentifierForPID(interoperabilityRecordBundle, "guidelines/"));
         InteroperabilityRecordBundle ret;
         logger.info(String.format("Interoperability Record [%s] is being published with id [%s]", lowerLevelResourceId, interoperabilityRecordBundle.getId()));
         ret = super.add(interoperabilityRecordBundle, null);
@@ -117,7 +118,6 @@ public class PublicInteroperabilityRecordManager extends ResourceManager<Interop
             InteroperabilityRecordBundle publicInteroperabilityRecordBundle = get(String.format("%s.%s", interoperabilityRecordBundle.getInteroperabilityRecord().getCatalogueId(), interoperabilityRecordBundle.getId()));
             logger.info(String.format("Deleting public Interoperability Record with id [%s]", publicInteroperabilityRecordBundle.getId()));
             super.delete(publicInteroperabilityRecordBundle);
-            logger.info("Sending JMS with topic 'interoperability_record.delete'");
             jmsService.convertAndSendTopic("interoperability_record.delete", publicInteroperabilityRecordBundle);
         } catch (ResourceException | ResourceNotFoundException ignore){
         }

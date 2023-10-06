@@ -72,13 +72,14 @@ public class PublicTrainingResourceManager extends AbstractPublicResourceManager
         String lowerLevelResourceId = trainingResourceBundle.getId();
         Identifiers.createOriginalId(trainingResourceBundle);
         trainingResourceBundle.setId(String.format("%s.%s", trainingResourceBundle.getTrainingResource().getCatalogueId(), trainingResourceBundle.getId()));
+        commonMethods.restrictPrefixRepetitionOnPublicResources(trainingResourceBundle.getId(), trainingResourceBundle.getTrainingResource().getCatalogueId());
 
         // sets public ids to resource organisation, resource providers and EOSC related services
         updateTrainingResourceIdsToPublic(trainingResourceBundle);
 
         trainingResourceBundle.getMetadata().setPublished(true);
         // create PID and set it as Alternative Identifier
-        trainingResourceBundle.getIdentifiers().setAlternativeIdentifiers(commonMethods.createAlternativeIdentifierForPID(trainingResourceBundle));
+        trainingResourceBundle.getIdentifiers().setAlternativeIdentifiers(commonMethods.createAlternativeIdentifierForPID(trainingResourceBundle, "trainings/"));
         TrainingResourceBundle ret;
         logger.info(String.format("Training Resource [%s] is being published with id [%s]", lowerLevelResourceId, trainingResourceBundle.getId()));
         ret = super.add(trainingResourceBundle, null);

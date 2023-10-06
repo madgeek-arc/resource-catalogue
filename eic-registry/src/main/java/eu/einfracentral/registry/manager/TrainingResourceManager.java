@@ -9,6 +9,7 @@ import eu.einfracentral.service.*;
 import eu.einfracentral.service.search.SearchServiceEIC;
 import eu.einfracentral.utils.FacetFilterUtils;
 import eu.einfracentral.utils.FacetLabelService;
+import eu.einfracentral.utils.ObjectUtils;
 import eu.einfracentral.utils.ProviderResourcesCommonMethods;
 import eu.einfracentral.validators.FieldValidator;
 import eu.openminted.registry.core.domain.*;
@@ -26,8 +27,6 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.MultiValueMap;
 
 import javax.annotation.PostConstruct;
 import javax.validation.constraints.NotNull;
@@ -246,65 +245,63 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
     @Override
     public TrainingResourceBundle updateResource(TrainingResourceBundle trainingResourceBundle, String catalogueId, String comment, Authentication auth) {
 
-        TrainingResourceBundle ret;
-        TrainingResourceBundle existingTrainingResourceBundle;
-        try { // try to find a TrainingResourceBundle with the same id
-            existingTrainingResourceBundle = get(trainingResourceBundle.getTrainingResource().getId(), trainingResourceBundle.getTrainingResource().getCatalogueId());
+        TrainingResourceBundle ret = ObjectUtils.clone(trainingResourceBundle);
+        TrainingResourceBundle existingTrainingResource;
+        try {
+            existingTrainingResource = get(ret.getTrainingResource().getId(), ret.getTrainingResource().getCatalogueId());
+            if (ret.getTrainingResource().equals(existingTrainingResource.getTrainingResource())) {
+                return ret;
+            }
         } catch (ResourceNotFoundException e) {
             throw new ResourceNotFoundException(String.format("There is no Training Resource with id [%s] on the [%s] Catalogue",
-                    trainingResourceBundle.getTrainingResource().getId(), trainingResourceBundle.getTrainingResource().getCatalogueId()));
-        }
-
-        // check if there are actual changes in the Training Resource
-        if (trainingResourceBundle.getTrainingResource().equals(existingTrainingResourceBundle.getTrainingResource())) {
-            return trainingResourceBundle;
+                    ret.getTrainingResource().getId(), ret.getTrainingResource().getCatalogueId()));
         }
 
         if (catalogueId == null || catalogueId.equals("")) {
-            trainingResourceBundle.getTrainingResource().setCatalogueId(catalogueName);
+            ret.getTrainingResource().setCatalogueId(catalogueName);
         } else {
-            commonMethods.checkCatalogueIdConsistency(trainingResourceBundle, catalogueId);
+            commonMethods.checkCatalogueIdConsistency(ret, catalogueId);
         }
-        commonMethods.checkRelatedResourceIDsConsistency(trainingResourceBundle);
+        commonMethods.checkRelatedResourceIDsConsistency(ret);
 
-        logger.trace("User '{}' is attempting to update the Training Resource with id '{}' of the Catalogue '{}'", auth, trainingResourceBundle.getTrainingResource().getId(), trainingResourceBundle.getTrainingResource().getCatalogueId());
-        validateTrainingResource(trainingResourceBundle);
+        logger.trace("User '{}' is attempting to update the Training Resource with id '{}' of the Catalogue '{}'", auth, ret.getTrainingResource().getId(), ret.getTrainingResource().getCatalogueId());
+        validateTrainingResource(ret);
 
-        ProviderBundle providerBundle = providerService.get(trainingResourceBundle.getTrainingResource().getCatalogueId(),
-                trainingResourceBundle.getTrainingResource().getResourceOrganisation(), auth);
+        ProviderBundle providerBundle = providerService.get(ret.getTrainingResource().getCatalogueId(),
+                ret.getTrainingResource().getResourceOrganisation(), auth);
 
         // block Public Training Resource update
-        if (existingTrainingResourceBundle.getMetadata().isPublished()){
+        if (existingTrainingResource.getMetadata().isPublished()){
             throw new ValidationException("You cannot directly update a Public Training Resource");
         }
 
         User user = User.of(auth);
 
         // update existing TrainingResource Metadata, Identifiers, MigrationStatus
-        trainingResourceBundle.setMetadata(Metadata.updateMetadata(trainingResourceBundle.getMetadata(), user.getFullName()));
-        trainingResourceBundle.setMigrationStatus(trainingResourceBundle.getMigrationStatus());
+        ret.setMetadata(Metadata.updateMetadata(ret.getMetadata(), user.getFullName()));
+        ret.setMigrationStatus(ret.getMigrationStatus());
 
-        List<LoggingInfo> loggingInfoList = commonMethods.returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(existingTrainingResourceBundle, auth);
+        List<LoggingInfo> loggingInfoList = commonMethods.returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(existingTrainingResource, auth);
         LoggingInfo loggingInfo = commonMethods.createLoggingInfo(auth, LoggingInfo.Types.UPDATE.getKey(),
                 LoggingInfo.ActionType.UPDATED.getKey(), comment);
         loggingInfoList.add(loggingInfo);
-        trainingResourceBundle.setLoggingInfo(loggingInfoList);
+        ret.setLoggingInfo(loggingInfoList);
 
         // latestLoggingInfo
-        trainingResourceBundle.setLatestUpdateInfo(loggingInfo);
-        trainingResourceBundle.setLatestOnboardingInfo(commonMethods.setLatestLoggingInfo(loggingInfoList, LoggingInfo.Types.ONBOARD.getKey()));
-        trainingResourceBundle.setLatestAuditInfo(commonMethods.setLatestLoggingInfo(loggingInfoList, LoggingInfo.Types.AUDIT.getKey()));
+        ret.setLatestUpdateInfo(loggingInfo);
+        ret.setLatestOnboardingInfo(commonMethods.setLatestLoggingInfo(loggingInfoList, LoggingInfo.Types.ONBOARD.getKey()));
+        ret.setLatestAuditInfo(commonMethods.setLatestLoggingInfo(loggingInfoList, LoggingInfo.Types.AUDIT.getKey()));
 
         // set active/status
-        trainingResourceBundle.setActive(existingTrainingResourceBundle.isActive());
-        trainingResourceBundle.setStatus(existingTrainingResourceBundle.getStatus());
-        trainingResourceBundle.setSuspended(existingTrainingResourceBundle.isSuspended());
+        ret.setActive(existingTrainingResource.isActive());
+        ret.setStatus(existingTrainingResource.getStatus());
+        ret.setSuspended(existingTrainingResource.isSuspended());
 
         // if Resource's status = "rejected resource", update to "pending resource" & Provider templateStatus to "pending template"
-        if (existingTrainingResourceBundle.getStatus().equals(vocabularyService.get("rejected resource").getId())) {
+        if (existingTrainingResource.getStatus().equals(vocabularyService.get("rejected resource").getId())) {
             if (providerBundle.getTemplateStatus().equals(vocabularyService.get("rejected template").getId())) {
-                trainingResourceBundle.setStatus(vocabularyService.get("pending resource").getId());
-                trainingResourceBundle.setActive(false);
+                ret.setStatus(vocabularyService.get("pending resource").getId());
+                ret.setActive(false);
                 providerBundle.setTemplateStatus(vocabularyService.get("pending template").getId());
                 providerService.update(providerBundle, null, auth);
             }
@@ -312,20 +309,20 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
 
         // block catalogueId updates from Provider Admins
         if (!securityService.hasRole(auth, "ROLE_ADMIN")) {
-            if (!existingTrainingResourceBundle.getTrainingResource().getCatalogueId().equals(trainingResourceBundle.getTrainingResource().getCatalogueId())) {
+            if (!existingTrainingResource.getTrainingResource().getCatalogueId().equals(ret.getTrainingResource().getCatalogueId())) {
                 throw new ValidationException("You cannot change catalogueId");
             }
         }
 
-        ret = update(trainingResourceBundle, auth);
-        logger.info("Updating Training Resource: {}", trainingResourceBundle);
+        ret = update(ret, auth);
+        logger.info("Updating Training Resource: {}", ret);
 
         // send notification emails to Portal Admins
-        if (trainingResourceBundle.getLatestAuditInfo() != null && trainingResourceBundle.getLatestUpdateInfo() != null) {
-            Long latestAudit = Long.parseLong(trainingResourceBundle.getLatestAuditInfo().getDate());
-            Long latestUpdate = Long.parseLong(trainingResourceBundle.getLatestUpdateInfo().getDate());
-            if (latestAudit < latestUpdate && trainingResourceBundle.getLatestAuditInfo().getActionType().equals(LoggingInfo.ActionType.INVALID.getKey())) {
-                registrationMailService.notifyPortalAdminsForInvalidTrainingResourceUpdate(trainingResourceBundle);
+        if (ret.getLatestAuditInfo() != null && ret.getLatestUpdateInfo() != null) {
+            Long latestAudit = Long.parseLong(ret.getLatestAuditInfo().getDate());
+            Long latestUpdate = Long.parseLong(ret.getLatestUpdateInfo().getDate());
+            if (latestAudit < latestUpdate && ret.getLatestAuditInfo().getActionType().equals(LoggingInfo.ActionType.INVALID.getKey())) {
+                registrationMailService.notifyPortalAdminsForInvalidTrainingResourceUpdate(ret);
             }
         }
 

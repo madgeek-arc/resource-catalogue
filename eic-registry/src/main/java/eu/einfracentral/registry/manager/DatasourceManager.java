@@ -9,6 +9,7 @@ import eu.einfracentral.registry.service.*;
 import eu.einfracentral.service.RegistrationMailService;
 import eu.einfracentral.service.SecurityService;
 import eu.einfracentral.utils.FacetFilterUtils;
+import eu.einfracentral.utils.ObjectUtils;
 import eu.einfracentral.utils.ProviderResourcesCommonMethods;
 import eu.einfracentral.utils.ResourceValidationUtils;
 import eu.openminted.registry.core.domain.FacetFilter;
@@ -117,52 +118,53 @@ public class DatasourceManager extends ResourceManager<DatasourceBundle> impleme
     public DatasourceBundle update(DatasourceBundle datasourceBundle, String comment, Authentication auth) {
         logger.trace("User '{}' is attempting to update the Datasource with id '{}'", auth, datasourceBundle.getId());
 
-        Resource existing = whereID(datasourceBundle.getId(), true);
-        DatasourceBundle ex = deserialize(existing);
+        DatasourceBundle ret = ObjectUtils.clone(datasourceBundle);
+        Resource existingResource = whereID(ret.getId(), true);
+        DatasourceBundle existingDatasource = deserialize(existingResource);
         // check if there are actual changes in the Datasource
-        if (datasourceBundle.getDatasource().equals(ex.getDatasource())) {
-            return datasourceBundle;
+        if (ret.getDatasource().equals(existingDatasource.getDatasource())) {
+            return ret;
         }
 
-        super.validate(datasourceBundle);
-        datasourceBundle.setMetadata(Metadata.updateMetadata(datasourceBundle.getMetadata(), User.of(auth).getFullName(), User.of(auth).getEmail()));
-        List<LoggingInfo> loggingInfoList = commonMethods.returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(datasourceBundle, auth);
+        super.validate(ret);
+        ret.setMetadata(Metadata.updateMetadata(ret.getMetadata(), User.of(auth).getFullName(), User.of(auth).getEmail()));
+        List<LoggingInfo> loggingInfoList = commonMethods.returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(ret, auth);
         LoggingInfo loggingInfo = commonMethods.createLoggingInfo(auth, LoggingInfo.Types.UPDATE.getKey(),
                 LoggingInfo.ActionType.UPDATED.getKey(), comment);
         loggingInfoList.add(loggingInfo);
-        datasourceBundle.setLoggingInfo(loggingInfoList);
+        ret.setLoggingInfo(loggingInfoList);
 
         // latestLoggingInfo
-        datasourceBundle.setLatestUpdateInfo(loggingInfo);
-        datasourceBundle.setLatestOnboardingInfo(commonMethods.setLatestLoggingInfo(loggingInfoList, LoggingInfo.Types.ONBOARD.getKey()));
-        datasourceBundle.setLatestAuditInfo(commonMethods.setLatestLoggingInfo(loggingInfoList, LoggingInfo.Types.AUDIT.getKey()));
-        datasourceBundle.setActive(ex.isActive());
+        ret.setLatestUpdateInfo(loggingInfo);
+        ret.setLatestOnboardingInfo(commonMethods.setLatestLoggingInfo(loggingInfoList, LoggingInfo.Types.ONBOARD.getKey()));
+        ret.setLatestAuditInfo(commonMethods.setLatestLoggingInfo(loggingInfoList, LoggingInfo.Types.AUDIT.getKey()));
+        ret.setActive(existingDatasource.isActive());
 
         // if status = "rejected datasource", update to "pending datasource"
-        if (ex.getStatus().equals(vocabularyService.get("rejected datasource").getId())) {
-            datasourceBundle.setStatus(vocabularyService.get("pending datasource").getId());
+        if (existingDatasource.getStatus().equals(vocabularyService.get("rejected datasource").getId())) {
+            ret.setStatus(vocabularyService.get("pending datasource").getId());
         }
 
         // block user from updating serviceId
-        if (!datasourceBundle.getDatasource().getServiceId().equals(ex.getDatasource().getServiceId()) && !securityService.hasRole(auth, "ROLE_ADMIN")){
+        if (!ret.getDatasource().getServiceId().equals(existingDatasource.getDatasource().getServiceId()) && !securityService.hasRole(auth, "ROLE_ADMIN")){
             throw new ValidationException("You cannot change the Service Id with which this Datasource is related");
         }
 
         // block catalogueId updates from Provider Admins
         if (!securityService.hasRole(auth, "ROLE_ADMIN")){
-            if (!ex.getDatasource().getCatalogueId().equals(datasourceBundle.getDatasource().getCatalogueId())){
+            if (!existingDatasource.getDatasource().getCatalogueId().equals(ret.getDatasource().getCatalogueId())){
                 throw new ValidationException("You cannot change catalogueId");
             }
         }
 
-        existing.setPayload(serialize(datasourceBundle));
-        existing.setResourceType(resourceType);
+        existingResource.setPayload(serialize(ret));
+        existingResource.setResourceType(resourceType);
 
-        resourceService.updateResource(existing);
-        logger.debug("Updating Datasource: {}", datasourceBundle);
+        resourceService.updateResource(existingResource);
+        logger.debug("Updating Datasource: {}", ret);
 
-        registrationMailService.sendEmailsForDatasourceExtension(datasourceBundle, "put");
-        return datasourceBundle;
+        registrationMailService.sendEmailsForDatasourceExtension(ret, "put");
+        return ret;
     }
 
     @Override

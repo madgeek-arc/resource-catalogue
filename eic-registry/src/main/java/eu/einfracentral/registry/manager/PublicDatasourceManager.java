@@ -58,7 +58,7 @@ public class PublicDatasourceManager extends AbstractPublicResourceManager<Datas
         List<DatasourceBundle> datasourceBundleList = new ArrayList<>();
         Browsing<DatasourceBundle> datasourceBundleBrowsing = super.getAll(facetFilter, authentication);
         for (DatasourceBundle datasourceBundle : datasourceBundleBrowsing.getResults()) {
-            if (securityService.isResourceProviderAdmin(authentication, datasourceBundle.getId(), datasourceBundle.getPayload().getCatalogueId()) && datasourceBundle.getMetadata().isPublished()) {
+            if (securityService.isResourceProviderAdmin(authentication, datasourceBundle.getDatasource().getServiceId(), datasourceBundle.getDatasource().getCatalogueId()) && datasourceBundle.getMetadata().isPublished()) {
                 datasourceBundleList.add(datasourceBundle);
             }
         }
@@ -71,13 +71,12 @@ public class PublicDatasourceManager extends AbstractPublicResourceManager<Datas
         String lowerLevelResourceId = datasourceBundle.getId();
         Identifiers.createOriginalId(datasourceBundle);
         datasourceBundle.setId(String.format("%s.%s", datasourceBundle.getDatasource().getCatalogueId(), datasourceBundle.getId()));
+        commonMethods.restrictPrefixRepetitionOnPublicResources(datasourceBundle.getId(), datasourceBundle.getDatasource().getCatalogueId());
 
         // sets public ids to providerId, serviceId
         updateDatasourceIdsToPublic(datasourceBundle);
 
         datasourceBundle.getMetadata().setPublished(true);
-        // create PID and set it as Alternative Identifier
-        datasourceBundle.getIdentifiers().setAlternativeIdentifiers(commonMethods.createAlternativeIdentifierForPID(datasourceBundle));
         DatasourceBundle ret;
         logger.info(String.format("Datasource [%s] is being published with id [%s]", lowerLevelResourceId, datasourceBundle.getId()));
         ret = super.add(datasourceBundle, null);

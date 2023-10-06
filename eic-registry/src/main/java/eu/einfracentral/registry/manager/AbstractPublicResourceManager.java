@@ -74,6 +74,22 @@ public abstract class AbstractPublicResourceManager<T extends Identifiable> exte
                         datasourceBundle.getDatasource().getServiceId()));
     }
 
+    protected void updateHelpdeskIdsToPublic(HelpdeskBundle helpdeskBundle) {
+        // serviceId
+        helpdeskBundle.getHelpdesk().setServiceId(
+                String.format("%s.%s",
+                        helpdeskBundle.getCatalogueId(),
+                        helpdeskBundle.getHelpdesk().getServiceId()));
+    }
+
+    protected void updateMonitoringIdsToPublic(MonitoringBundle monitoringBundle) {
+        // serviceId
+        monitoringBundle.getMonitoring().setServiceId(
+                String.format("%s.%s",
+                        monitoringBundle.getCatalogueId(),
+                        monitoringBundle.getMonitoring().getServiceId()));
+    }
+
     protected void updateTrainingResourceIdsToPublic(TrainingResourceBundle trainingResourceBundle) {
         List<String> allCatalogueIds = getAllCatalogueIds();
         // Resource Organisation

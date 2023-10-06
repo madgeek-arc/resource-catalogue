@@ -42,6 +42,19 @@ public class ServiceCategory {
     }
 
     @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ServiceCategory that = (ServiceCategory) o;
+        return Objects.equals(category, that.category) && Objects.equals(subcategory, that.subcategory);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(category, subcategory);
+    }
+
+    @Override
     public String toString() {
         return "ServiceCategories{" +
                 "category='" + category + '\'' +
@@ -63,18 +76,5 @@ public class ServiceCategory {
 
     public void setSubcategory(String subcategory) {
         this.subcategory = subcategory;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        ServiceCategory that = (ServiceCategory) o;
-        return Objects.equals(category, that.category) && Objects.equals(subcategory, that.subcategory);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(category, subcategory);
     }
 }

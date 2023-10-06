@@ -8,6 +8,7 @@ import eu.einfracentral.registry.service.*;
 import eu.einfracentral.service.IdCreator;
 import eu.einfracentral.service.RegistrationMailService;
 import eu.einfracentral.service.SecurityService;
+import eu.einfracentral.utils.ObjectUtils;
 import eu.einfracentral.utils.ProviderResourcesCommonMethods;
 import eu.openminted.registry.core.domain.Browsing;
 import eu.openminted.registry.core.domain.FacetFilter;
@@ -175,35 +176,34 @@ public class ServiceBundleManager extends AbstractServiceBundleManager<ServiceBu
     @CacheEvict(cacheNames = {CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)
     public ServiceBundle updateResource(ServiceBundle serviceBundle, String catalogueId, String comment, Authentication auth) {
 
-        ServiceBundle ret;
+        ServiceBundle ret = ObjectUtils.clone(serviceBundle);
         ServiceBundle existingService;
-        try { // try to find a Service with the same id
-            existingService = get(serviceBundle.getService().getId(), serviceBundle.getService().getCatalogueId());
+        try {
+            existingService = get(ret.getService().getId(), ret.getService().getCatalogueId());
+            if (ret.getService().equals(existingService.getService())) {
+                return ret;
+            }
         } catch (ResourceNotFoundException e) {
             throw new ResourceNotFoundException(String.format("There is no Service with id [%s] on the [%s] Catalogue",
-                    serviceBundle.getService().getId(), serviceBundle.getService().getCatalogueId()));
+                    ret.getService().getId(), ret.getService().getCatalogueId()));
         }
 
-        // check if there are actual changes in the Service
-        if (serviceBundle.getService().equals(existingService.getService())) {
-            return serviceBundle;
-        }
 
         if (catalogueId == null || catalogueId.equals("")) {
-            serviceBundle.getService().setCatalogueId(catalogueName);
+            ret.getService().setCatalogueId(catalogueName);
         } else {
-            commonMethods.checkCatalogueIdConsistency(serviceBundle, catalogueId);
+            commonMethods.checkCatalogueIdConsistency(ret, catalogueId);
         }
-        commonMethods.checkRelatedResourceIDsConsistency(serviceBundle);
+        commonMethods.checkRelatedResourceIDsConsistency(ret);
 
-        logger.trace("User '{}' is attempting to update the Service with id '{}' of the Catalogue '{}'", auth, serviceBundle.getService().getId(), serviceBundle.getService().getCatalogueId());
-        validate(serviceBundle);
+        logger.trace("User '{}' is attempting to update the Service with id '{}' of the Catalogue '{}'", auth, ret.getService().getId(), ret.getService().getCatalogueId());
+        validate(ret);
 
-        ProviderBundle providerBundle = providerService.get(serviceBundle.getService().getCatalogueId(), serviceBundle.getService().getResourceOrganisation(), auth);
+        ProviderBundle providerBundle = providerService.get(ret.getService().getCatalogueId(), ret.getService().getResourceOrganisation(), auth);
 
         // if service version is empty set it null
-        if ("".equals(serviceBundle.getService().getVersion())) {
-            serviceBundle.getService().setVersion(null);
+        if ("".equals(ret.getService().getVersion())) {
+            ret.getService().setVersion(null);
         }
 
         // block Public Service update
@@ -214,17 +214,17 @@ public class ServiceBundleManager extends AbstractServiceBundleManager<ServiceBu
         User user = User.of(auth);
 
         // update existing service Metadata, ResourceExtras, Identifiers, MigrationStatus
-        serviceBundle.setMetadata(Metadata.updateMetadata(existingService.getMetadata(), user.getFullName()));
-        serviceBundle.setResourceExtras(existingService.getResourceExtras());
-//        serviceBundle.setIdentifiers(existingService.getIdentifiers());
-        serviceBundle.setMigrationStatus(existingService.getMigrationStatus());
+        ret.setMetadata(Metadata.updateMetadata(existingService.getMetadata(), user.getFullName()));
+        ret.setResourceExtras(existingService.getResourceExtras());
+//        ret.setIdentifiers(existingService.getIdentifiers());
+        ret.setMigrationStatus(existingService.getMigrationStatus());
 
         List<LoggingInfo> loggingInfoList = commonMethods.returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(existingService, auth);
         LoggingInfo loggingInfo;
 
         // update VS version update
-        if (((serviceBundle.getService().getVersion() == null) && (existingService.getService().getVersion() == null)) ||
-                (serviceBundle.getService().getVersion().equals(existingService.getService().getVersion()))) {
+        if (((ret.getService().getVersion() == null) && (existingService.getService().getVersion() == null)) ||
+                (ret.getService().getVersion().equals(existingService.getService().getVersion()))) {
             loggingInfo = commonMethods.createLoggingInfo(auth, LoggingInfo.Types.UPDATE.getKey(),
                     LoggingInfo.ActionType.UPDATED.getKey(), comment);
         } else {
@@ -233,23 +233,23 @@ public class ServiceBundleManager extends AbstractServiceBundleManager<ServiceBu
         }
         loggingInfoList.add(loggingInfo);
         loggingInfoList.sort(Comparator.comparing(LoggingInfo::getDate));
-        serviceBundle.setLoggingInfo(loggingInfoList);
+        ret.setLoggingInfo(loggingInfoList);
 
         // latestLoggingInfo
-        serviceBundle.setLatestUpdateInfo(loggingInfo);
-        serviceBundle.setLatestOnboardingInfo(commonMethods.setLatestLoggingInfo(loggingInfoList, LoggingInfo.Types.ONBOARD.getKey()));
-        serviceBundle.setLatestAuditInfo(commonMethods.setLatestLoggingInfo(loggingInfoList, LoggingInfo.Types.AUDIT.getKey()));
+        ret.setLatestUpdateInfo(loggingInfo);
+        ret.setLatestOnboardingInfo(commonMethods.setLatestLoggingInfo(loggingInfoList, LoggingInfo.Types.ONBOARD.getKey()));
+        ret.setLatestAuditInfo(commonMethods.setLatestLoggingInfo(loggingInfoList, LoggingInfo.Types.AUDIT.getKey()));
 
         // set active/status
-        serviceBundle.setActive(existingService.isActive());
-        serviceBundle.setStatus(existingService.getStatus());
-        serviceBundle.setSuspended(existingService.isSuspended());
+        ret.setActive(existingService.isActive());
+        ret.setStatus(existingService.getStatus());
+        ret.setSuspended(existingService.isSuspended());
 
         // if Resource's status = "rejected resource", update to "pending resource" & Provider templateStatus to "pending template"
         if (existingService.getStatus().equals(vocabularyService.get("rejected resource").getId())) {
             if (providerBundle.getTemplateStatus().equals(vocabularyService.get("rejected template").getId())) {
-                serviceBundle.setStatus(vocabularyService.get("pending resource").getId());
-                serviceBundle.setActive(false);
+                ret.setStatus(vocabularyService.get("pending resource").getId());
+                ret.setActive(false);
                 providerBundle.setTemplateStatus(vocabularyService.get("pending template").getId());
                 providerService.update(providerBundle, null, auth);
             }
@@ -257,26 +257,26 @@ public class ServiceBundleManager extends AbstractServiceBundleManager<ServiceBu
 
         // if a user updates a service with version to a service with null version then while searching for the service
         // you get a "Service already exists" error.
-        if (existingService.getService().getVersion() != null && serviceBundle.getService().getVersion() == null) {
+        if (existingService.getService().getVersion() != null && ret.getService().getVersion() == null) {
             throw new ServiceException("You cannot update a Service registered with version to a Service with null version");
         }
 
         // block catalogueId updates from Provider Admins
         if (!securityService.hasRole(auth, "ROLE_ADMIN")) {
-            if (!existingService.getService().getCatalogueId().equals(serviceBundle.getService().getCatalogueId())) {
+            if (!existingService.getService().getCatalogueId().equals(ret.getService().getCatalogueId())) {
                 throw new ValidationException("You cannot change catalogueId");
             }
         }
 
-        ret = super.update(serviceBundle, auth);
-        logger.info("Updating Service: {}", serviceBundle);
+        ret = super.update(ret, auth);
+        logger.info("Updating Service: {}", ret);
 
         // send notification emails to Portal Admins
-        if (serviceBundle.getLatestAuditInfo() != null && serviceBundle.getLatestUpdateInfo() != null) {
-            Long latestAudit = Long.parseLong(serviceBundle.getLatestAuditInfo().getDate());
-            Long latestUpdate = Long.parseLong(serviceBundle.getLatestUpdateInfo().getDate());
-            if (latestAudit < latestUpdate && serviceBundle.getLatestAuditInfo().getActionType().equals(LoggingInfo.ActionType.INVALID.getKey())) {
-                registrationMailService.notifyPortalAdminsForInvalidResourceUpdate(serviceBundle);
+        if (ret.getLatestAuditInfo() != null && ret.getLatestUpdateInfo() != null) {
+            Long latestAudit = Long.parseLong(ret.getLatestAuditInfo().getDate());
+            Long latestUpdate = Long.parseLong(ret.getLatestUpdateInfo().getDate());
+            if (latestAudit < latestUpdate && ret.getLatestAuditInfo().getActionType().equals(LoggingInfo.ActionType.INVALID.getKey())) {
+                registrationMailService.notifyPortalAdminsForInvalidResourceUpdate(ret);
             }
         }
 
