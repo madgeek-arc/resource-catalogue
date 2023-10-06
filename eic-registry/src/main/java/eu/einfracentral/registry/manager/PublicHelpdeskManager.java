@@ -79,7 +79,8 @@ public class PublicHelpdeskManager extends AbstractPublicResourceManager<Helpdes
 
         helpdeskBundle.getMetadata().setPublished(true);
         // create PID and set it as Alternative Identifier
-        helpdeskBundle.getIdentifiers().setAlternativeIdentifiers(commonMethods.createAlternativeIdentifierForPID(helpdeskBundle));
+        //TODO: change resourceTypePath when MP create one
+        helpdeskBundle.getIdentifiers().setAlternativeIdentifiers(commonMethods.createAlternativeIdentifierForPID(helpdeskBundle, "/helpdesks"));
         HelpdeskBundle ret;
         logger.info(String.format("Helpdesk [%s] is being published with id [%s]", lowerLevelResourceId, helpdeskBundle.getId()));
         ret = super.add(helpdeskBundle, null);
