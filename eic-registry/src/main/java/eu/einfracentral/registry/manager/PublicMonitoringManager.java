@@ -78,9 +78,6 @@ public class PublicMonitoringManager extends AbstractPublicResourceManager<Monit
         updateMonitoringIdsToPublic(monitoringBundle);
 
         monitoringBundle.getMetadata().setPublished(true);
-        // create PID and set it as Alternative Identifier
-        //TODO: change resourceTypePath when MP create one
-        monitoringBundle.getIdentifiers().setAlternativeIdentifiers(commonMethods.createAlternativeIdentifierForPID(monitoringBundle, "monitorings/"));
         MonitoringBundle ret;
         logger.info(String.format("Monitoring [%s] is being published with id [%s]", lowerLevelResourceId, monitoringBundle.getId()));
         ret = super.add(monitoringBundle, null);
