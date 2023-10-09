@@ -154,10 +154,20 @@ public class Datasource implements Identifiable {
     @VocabularyValidation(type = Vocabulary.Type.DS_COAR_ACCESS_RIGHTS_1_0)
     private List<String> researchProductMetadataAccessPolicies;
 
+
+    // Extras
+    /**
+     * Boolean value specifying if the data source requires the harvesting of Research Products into the Research Catalogue
+     */
+    @XmlElement
+    @ApiModelProperty(position = 16)
+    @FieldValidation(nullable = true)
+    private boolean harvestable;
+
     public Datasource() {
     }
 
-    public Datasource(String id, String serviceId, String catalogueId, URL submissionPolicyURL, URL preservationPolicyURL, boolean versionControl, List<PersistentIdentitySystem> persistentIdentitySystems, String jurisdiction, String datasourceClassification, List<String> researchEntityTypes, boolean thematic, List<ResearchProductLicensing> researchProductLicensings, List<String> researchProductAccessPolicies, ResearchProductMetadataLicensing researchProductMetadataLicensing, List<String> researchProductMetadataAccessPolicies) {
+    public Datasource(String id, String serviceId, String catalogueId, URL submissionPolicyURL, URL preservationPolicyURL, boolean versionControl, List<PersistentIdentitySystem> persistentIdentitySystems, String jurisdiction, String datasourceClassification, List<String> researchEntityTypes, boolean thematic, List<ResearchProductLicensing> researchProductLicensings, List<String> researchProductAccessPolicies, ResearchProductMetadataLicensing researchProductMetadataLicensing, List<String> researchProductMetadataAccessPolicies, boolean harvestable) {
         this.id = id;
         this.serviceId = serviceId;
         this.catalogueId = catalogueId;
@@ -173,6 +183,7 @@ public class Datasource implements Identifiable {
         this.researchProductAccessPolicies = researchProductAccessPolicies;
         this.researchProductMetadataLicensing = researchProductMetadataLicensing;
         this.researchProductMetadataAccessPolicies = researchProductMetadataAccessPolicies;
+        this.harvestable = harvestable;
     }
 
     @Override
@@ -180,12 +191,12 @@ public class Datasource implements Identifiable {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Datasource that = (Datasource) o;
-        return versionControl == that.versionControl && thematic == that.thematic && Objects.equals(id, that.id) && Objects.equals(serviceId, that.serviceId) && Objects.equals(catalogueId, that.catalogueId) && Objects.equals(submissionPolicyURL, that.submissionPolicyURL) && Objects.equals(preservationPolicyURL, that.preservationPolicyURL) && Objects.equals(persistentIdentitySystems, that.persistentIdentitySystems) && Objects.equals(jurisdiction, that.jurisdiction) && Objects.equals(datasourceClassification, that.datasourceClassification) && Objects.equals(researchEntityTypes, that.researchEntityTypes) && Objects.equals(researchProductLicensings, that.researchProductLicensings) && Objects.equals(researchProductAccessPolicies, that.researchProductAccessPolicies) && Objects.equals(researchProductMetadataLicensing, that.researchProductMetadataLicensing) && Objects.equals(researchProductMetadataAccessPolicies, that.researchProductMetadataAccessPolicies);
+        return versionControl == that.versionControl && thematic == that.thematic && harvestable == that.harvestable && Objects.equals(id, that.id) && Objects.equals(serviceId, that.serviceId) && Objects.equals(catalogueId, that.catalogueId) && Objects.equals(submissionPolicyURL, that.submissionPolicyURL) && Objects.equals(preservationPolicyURL, that.preservationPolicyURL) && Objects.equals(persistentIdentitySystems, that.persistentIdentitySystems) && Objects.equals(jurisdiction, that.jurisdiction) && Objects.equals(datasourceClassification, that.datasourceClassification) && Objects.equals(researchEntityTypes, that.researchEntityTypes) && Objects.equals(researchProductLicensings, that.researchProductLicensings) && Objects.equals(researchProductAccessPolicies, that.researchProductAccessPolicies) && Objects.equals(researchProductMetadataLicensing, that.researchProductMetadataLicensing) && Objects.equals(researchProductMetadataAccessPolicies, that.researchProductMetadataAccessPolicies);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, serviceId, catalogueId, submissionPolicyURL, preservationPolicyURL, versionControl, persistentIdentitySystems, jurisdiction, datasourceClassification, researchEntityTypes, thematic, researchProductLicensings, researchProductAccessPolicies, researchProductMetadataLicensing, researchProductMetadataAccessPolicies);
+        return Objects.hash(id, serviceId, catalogueId, submissionPolicyURL, preservationPolicyURL, versionControl, persistentIdentitySystems, jurisdiction, datasourceClassification, researchEntityTypes, thematic, researchProductLicensings, researchProductAccessPolicies, researchProductMetadataLicensing, researchProductMetadataAccessPolicies, harvestable);
     }
 
     @Override
@@ -206,6 +217,7 @@ public class Datasource implements Identifiable {
                 ", researchProductAccessPolicies=" + researchProductAccessPolicies +
                 ", researchProductMetadataLicensing=" + researchProductMetadataLicensing +
                 ", researchProductMetadataAccessPolicies=" + researchProductMetadataAccessPolicies +
+                ", harvestable=" + harvestable +
                 '}';
     }
 
@@ -329,5 +341,13 @@ public class Datasource implements Identifiable {
 
     public void setResearchProductMetadataAccessPolicies(List<String> researchProductMetadataAccessPolicies) {
         this.researchProductMetadataAccessPolicies = researchProductMetadataAccessPolicies;
+    }
+
+    public boolean isHarvestable() {
+        return harvestable;
+    }
+
+    public void setHarvestable(boolean harvestable) {
+        this.harvestable = harvestable;
     }
 }
