@@ -206,6 +206,7 @@ public class ServiceExtensionsController {
     public void createPublicHelpdesks(@ApiIgnore Authentication auth) {
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(1000);
+        ff.addFilter("published", false);
         List<HelpdeskBundle> allHelpdesks = helpdeskService.getAll(ff, auth).getResults();
         for (HelpdeskBundle helpdeskBundle : allHelpdesks) {
             try {
@@ -430,6 +431,7 @@ public class ServiceExtensionsController {
     public void createPublicMonitorings(@ApiIgnore Authentication auth) {
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(1000);
+        ff.addFilter("published", false);
         List<MonitoringBundle> allMonitorings = monitoringService.getAll(ff, auth).getResults();
         for (MonitoringBundle monitoringBundle : allMonitorings) {
             try {
