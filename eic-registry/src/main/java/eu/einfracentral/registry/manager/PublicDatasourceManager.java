@@ -99,7 +99,7 @@ public class PublicDatasourceManager extends AbstractPublicResourceManager<Datas
 
         ret.setIdentifiers(commonMethods.updateAlternativeIdentifiers(datasourceBundle, published));
         ret.setId(published.getId());
-        ret.setMetadata(published.getMetadata());
+        ret.getMetadata().setPublished(true);
         logger.info(String.format("Updating public Datasource with id [%s]", ret.getId()));
         ret = super.update(ret, null);
         jmsService.convertAndSendTopic("datasource.update", ret);

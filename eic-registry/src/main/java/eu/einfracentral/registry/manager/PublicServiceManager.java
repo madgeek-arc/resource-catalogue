@@ -101,7 +101,7 @@ public class PublicServiceManager extends AbstractPublicResourceManager<ServiceB
 
         ret.setIdentifiers(commonMethods.updateAlternativeIdentifiers(serviceBundle, published));
         ret.setId(published.getId());
-        ret.setMetadata(published.getMetadata());
+        ret.getMetadata().setPublished(true);
         logger.info(String.format("Updating public Service with id [%s]", ret.getId()));
         ret = super.update(ret, null);
         jmsService.convertAndSendTopic("service.update", ret);

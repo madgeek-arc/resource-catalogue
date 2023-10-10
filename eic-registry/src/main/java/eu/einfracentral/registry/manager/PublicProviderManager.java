@@ -93,7 +93,7 @@ public class PublicProviderManager extends ResourceManager<ProviderBundle> imple
         }
         ret.setIdentifiers(commonMethods.updateAlternativeIdentifiers(providerBundle, published));
         ret.setId(published.getId());
-        ret.setMetadata(published.getMetadata());
+        ret.getMetadata().setPublished(true);
         logger.info(String.format("Updating public Provider with id [%s]", ret.getId()));
         ret = super.update(ret, null);
         jmsService.convertAndSendTopic("provider.update", ret);

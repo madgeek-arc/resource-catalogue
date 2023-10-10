@@ -145,7 +145,7 @@ public class ProviderManagementAspect {
     public void updatePublicProvider(ProviderBundle providerBundle, ProviderBundle ret) {
         try {
             if (!ret.equals(providerBundle)) {
-                publicProviderManager.update(ObjectUtils.clone(providerBundle), null);
+                publicProviderManager.update(ObjectUtils.clone(ret), null);
             }
         } catch (ResourceException | ResourceNotFoundException ignore) {}
     }
@@ -248,7 +248,7 @@ public class ProviderManagementAspect {
     public void updatePublicResource(ServiceBundle serviceBundle, ServiceBundle ret) {
         try {
             if (!ret.equals(serviceBundle)) {
-                publicServiceManager.update(ObjectUtils.clone(serviceBundle), null);
+                publicServiceManager.update(ObjectUtils.clone(ret), null);
             }
         } catch (ResourceException | ResourceNotFoundException ignore) {}
     }
@@ -271,7 +271,7 @@ public class ProviderManagementAspect {
     public void updatePublicResource(TrainingResourceBundle trainingResourceBundle, TrainingResourceBundle ret) {
         try {
             if (!ret.equals(trainingResourceBundle)) {
-                publicTrainingResourceManager.update(ObjectUtils.clone(trainingResourceBundle), null);
+                publicTrainingResourceManager.update(ObjectUtils.clone(ret), null);
             }
         } catch (ResourceException | ResourceNotFoundException ignore) {}
     }
@@ -294,7 +294,7 @@ public class ProviderManagementAspect {
     public void updatePublicResource(InteroperabilityRecordBundle interoperabilityRecordBundle, InteroperabilityRecordBundle ret) {
         try {
             if (!ret.equals(interoperabilityRecordBundle)) {
-                publicInteroperabilityRecordManager.update(ObjectUtils.clone(interoperabilityRecordBundle), null);
+                publicInteroperabilityRecordManager.update(ObjectUtils.clone(ret), null);
             }
         } catch (ResourceException | ResourceNotFoundException ignore) {}
     }
@@ -395,7 +395,7 @@ public class ProviderManagementAspect {
     public void updatePublicResource(DatasourceBundle datasourceBundle, DatasourceBundle ret) {
         try {
             if (!ret.equals(datasourceBundle)) {
-                publicDatasourceManager.update(ObjectUtils.clone(datasourceBundle), null);
+                publicDatasourceManager.update(ObjectUtils.clone(ret), null);
             }
         } catch (ResourceException | ResourceNotFoundException ignore) {}
     }
@@ -436,7 +436,7 @@ public class ProviderManagementAspect {
     public void updatePublicResourceInteroperabilityRecord(ResourceInteroperabilityRecordBundle resourceInteroperabilityRecordBundle, ResourceInteroperabilityRecordBundle ret) {
         try {
             if (!ret.equals(resourceInteroperabilityRecordBundle)) {
-                publicResourceInteroperabilityRecordManager.update(ObjectUtils.clone(resourceInteroperabilityRecordBundle), null);
+                publicResourceInteroperabilityRecordManager.update(ObjectUtils.clone(ret), null);
             }
         } catch (ResourceException | ResourceNotFoundException ignore) {}
     }
@@ -465,7 +465,7 @@ public class ProviderManagementAspect {
     public void updatePublicConfigurationTemplateInstance(ConfigurationTemplateInstanceBundle configurationTemplateInstanceBundle, ConfigurationTemplateInstanceBundle ret) {
         try {
             if (!ret.equals(configurationTemplateInstanceBundle)) {
-                publicConfigurationTemplateImplementationManager.update(ObjectUtils.clone(configurationTemplateInstanceBundle), null);
+                publicConfigurationTemplateImplementationManager.update(ObjectUtils.clone(ret), null);
             }
         } catch (ResourceException | ResourceNotFoundException ignore) {}
     }

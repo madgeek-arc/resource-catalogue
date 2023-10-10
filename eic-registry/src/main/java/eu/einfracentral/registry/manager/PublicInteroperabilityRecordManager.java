@@ -105,7 +105,7 @@ public class PublicInteroperabilityRecordManager extends ResourceManager<Interop
 
         ret.setIdentifiers(commonMethods.updateAlternativeIdentifiers(interoperabilityRecordBundle, published));
         ret.setId(published.getId());
-        ret.setMetadata(published.getMetadata());
+        ret.getMetadata().setPublished(true);
         logger.info(String.format("Updating public Interoperability Record with id [%s]", ret.getId()));
         ret = super.update(ret, null);
         jmsService.convertAndSendTopic("interoperability_record.update", ret);
