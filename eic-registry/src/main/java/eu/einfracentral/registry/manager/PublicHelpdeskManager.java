@@ -100,7 +100,7 @@ public class PublicHelpdeskManager extends AbstractPublicResourceManager<Helpdes
 
         ret.setIdentifiers(commonMethods.updateAlternativeIdentifiers(helpdeskBundle, published));
         ret.setId(published.getId());
-        ret.setMetadata(published.getMetadata());
+        ret.getMetadata().setPublished(true);
         logger.info(String.format("Updating public Helpdesk with id [%s]", ret.getId()));
         ret = super.update(ret, null);
         jmsService.convertAndSendTopic("helpdesk.update", helpdeskBundle);

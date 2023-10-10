@@ -100,7 +100,7 @@ public class PublicMonitoringManager extends AbstractPublicResourceManager<Monit
 
         ret.setIdentifiers(commonMethods.updateAlternativeIdentifiers(monitoringBundle, published));
         ret.setId(published.getId());
-        ret.setMetadata(published.getMetadata());
+        ret.getMetadata().setPublished(true);
         logger.info(String.format("Updating public Monitoring with id [%s]", ret.getId()));
         ret = super.update(ret, null);
         jmsService.convertAndSendTopic("monitoring.update", monitoringBundle);

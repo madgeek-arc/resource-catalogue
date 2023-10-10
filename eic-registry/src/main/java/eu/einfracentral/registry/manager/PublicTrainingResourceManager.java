@@ -102,7 +102,7 @@ public class PublicTrainingResourceManager extends AbstractPublicResourceManager
 
         ret.setIdentifiers(commonMethods.updateAlternativeIdentifiers(trainingResourceBundle, published));
         ret.setId(published.getId());
-        ret.setMetadata(published.getMetadata());
+        ret.getMetadata().setPublished(true);
         logger.info(String.format("Updating public Training Resource with id [%s]", ret.getId()));
         ret = super.update(ret, null);
         jmsService.convertAndSendTopic("training_resource.update", ret);
