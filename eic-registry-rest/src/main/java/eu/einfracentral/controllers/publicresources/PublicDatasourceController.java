@@ -36,21 +36,21 @@ public class PublicDatasourceController {
     private static final Gson gson = new Gson();
 
     private final SecurityService securityService;
-    private final DatasourceService<DatasourceBundle, Authentication> datasourceBundleService;
+    private final DatasourceService datasourceService;
     private final ResourceService<DatasourceBundle, Authentication> publicDatasourceManager;
 
     public PublicDatasourceController(SecurityService securityService,
-                                      DatasourceService<DatasourceBundle, Authentication> datasourceBundleService,
+                                      DatasourceService datasourceService,
                                       @Qualifier("publicDatasourceManager") ResourceService<DatasourceBundle, Authentication> publicDatasourceManager) {
         this.securityService = securityService;
-        this.datasourceBundleService = datasourceBundleService;
+        this.datasourceService = datasourceService;
         this.publicDatasourceManager = publicDatasourceManager;
     }
 
     @ApiOperation(value = "Returns the Public Datasource with the given id.")
     @GetMapping(path = "public/datasource/{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity<?> getPublicDatasource(@PathVariable("id") String id, @ApiIgnore Authentication auth) {
-        DatasourceBundle datasourceBundle = datasourceBundleService.get(id);
+        DatasourceBundle datasourceBundle = datasourceService.get(id);
         if (auth != null && auth.isAuthenticated()) {
             User user = User.of(auth);
             if (securityService.hasRole(auth, "ROLE_ADMIN") || securityService.hasRole(auth, "ROLE_EPOT")
@@ -73,7 +73,7 @@ public class PublicDatasourceController {
     @GetMapping(path = "public/datasource/datasourceBundle/{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     public ResponseEntity<?> getPublicDatasourceBundle(@PathVariable("id") String id, @ApiIgnore Authentication auth) {
-        DatasourceBundle datasourceBundle = datasourceBundleService.get(id);
+        DatasourceBundle datasourceBundle = datasourceService.get(id);
         if (auth != null && auth.isAuthenticated()) {
             User user = User.of(auth);
             if (securityService.hasRole(auth, "ROLE_ADMIN") || securityService.hasRole(auth, "ROLE_EPOT")
@@ -141,7 +141,7 @@ public class PublicDatasourceController {
             ff.addFilter("active", true);
             ff.addFilter("status", "approved resource");
         }
-        Paging<DatasourceBundle> datasourceBundlePaging = datasourceBundleService.getAll(ff, auth);
+        Paging<DatasourceBundle> datasourceBundlePaging = datasourceService.getAll(ff, auth);
         List<DatasourceBundle> datasourceBundleList = new LinkedList<>(datasourceBundlePaging.getResults());
         Paging<DatasourceBundle> datasourcePaging = new Paging<>(datasourceBundlePaging.getTotal(), datasourceBundlePaging.getFrom(),
                 datasourceBundlePaging.getTo(), datasourceBundleList, datasourceBundlePaging.getFacets());

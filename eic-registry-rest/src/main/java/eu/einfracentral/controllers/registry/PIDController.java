@@ -24,7 +24,7 @@ public class PIDController {
     private final ServiceBundleService<ServiceBundle> serviceService;
     private final TrainingResourceService<TrainingResourceBundle> trainingResourceService;
     private final InteroperabilityRecordService<InteroperabilityRecordBundle> interoperabilityRecordService;
-    private final DatasourceService<DatasourceBundle, Authentication> datasourceService;
+    private final DatasourceService datasourceService;
     private final HelpdeskService<HelpdeskBundle, Authentication> helpdeskService;
     private final MonitoringService<MonitoringBundle, Authentication> monitoringService;
 
@@ -32,7 +32,7 @@ public class PIDController {
                          ServiceBundleService<ServiceBundle> serviceService,
                          TrainingResourceService<TrainingResourceBundle> trainingResourceService,
                          InteroperabilityRecordService<InteroperabilityRecordBundle> interoperabilityRecordService,
-                         DatasourceService<DatasourceBundle, Authentication> datasourceService,
+                         DatasourceService datasourceService,
                          HelpdeskService<HelpdeskBundle, Authentication> helpdeskService,
                          MonitoringService<MonitoringBundle, Authentication> monitoringService) {
         this.pidService = pidService;

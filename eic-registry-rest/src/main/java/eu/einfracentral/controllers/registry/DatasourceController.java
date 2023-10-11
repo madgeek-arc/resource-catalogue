@@ -1,8 +1,11 @@
 package eu.einfracentral.controllers.registry;
 
 import eu.einfracentral.annotations.Browse;
-import eu.einfracentral.domain.*;
+import eu.einfracentral.domain.Datasource;
+import eu.einfracentral.domain.DatasourceBundle;
+import eu.einfracentral.dto.OpenAIREMetrics;
 import eu.einfracentral.registry.service.DatasourceService;
+import eu.einfracentral.registry.service.OpenAIREDatasourceService;
 import eu.einfracentral.service.GenericResourceService;
 import eu.einfracentral.utils.FacetFilterUtils;
 import eu.openminted.registry.core.domain.FacetFilter;
@@ -35,13 +38,16 @@ import java.util.Map;
 public class DatasourceController {
 
     private static final Logger logger = LogManager.getLogger(DatasourceController.class);
-    private final DatasourceService<DatasourceBundle, Authentication> datasourceService;
+    private final DatasourceService datasourceService;
     private final GenericResourceService genericResourceService;
+    private final OpenAIREDatasourceService openAIREDatasourceService;
 
-    public DatasourceController(DatasourceService<DatasourceBundle, Authentication> datasourceService,
-                                @Lazy GenericResourceService genericResourceService) {
+    public DatasourceController(DatasourceService datasourceService,
+                                @Lazy GenericResourceService genericResourceService,
+                                OpenAIREDatasourceService openAIREDatasourceService) {
         this.datasourceService = datasourceService;
         this.genericResourceService = genericResourceService;
+        this.openAIREDatasourceService = openAIREDatasourceService;
     }
 
     @ApiOperation(value = "Returns the Datasource with the given id.")
@@ -172,7 +178,7 @@ public class DatasourceController {
     // OpenAIRE related methods
     @GetMapping(path = "/getOpenAIREDatasourceById", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<Datasource> getOpenAIREDatasourceById(@RequestParam String datasourceId) throws IOException {
-        return ResponseEntity.ok(datasourceService.getOpenAIREDatasourceById(datasourceId));
+        return ResponseEntity.ok(openAIREDatasourceService.get(datasourceId));
     }
 
     @GetMapping(path = "isDatasourceRegisteredOnOpenAIRE/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
@@ -184,7 +190,7 @@ public class DatasourceController {
     @GetMapping(path = "/getAllOpenAIREDatasources", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<Paging<Datasource>> getAllOpenAIREDatasources(@ApiIgnore @RequestParam MultiValueMap<String, Object> allRequestParams) throws IOException {
         FacetFilter ff = FacetFilterUtils.createMultiFacetFilter(allRequestParams);
-        Map<Integer, List<Datasource>> datasourceMap = datasourceService.getAllOpenAIREDatasources(ff);
+        Map<Integer, List<Datasource>> datasourceMap = openAIREDatasourceService.getAll(ff);
         Paging<Datasource> datasourcePaging = new Paging<>();
         datasourcePaging.setTotal(datasourceMap.keySet().iterator().next());
         datasourcePaging.setFrom(ff.getFrom());
@@ -192,5 +198,10 @@ public class DatasourceController {
         datasourcePaging.setResults(datasourceMap.get(datasourcePaging.getTotal()));
         return ResponseEntity.ok(new Paging<>(datasourcePaging.getTotal(), datasourcePaging.getFrom(),
                 datasourcePaging.getTo(), datasourcePaging.getResults(), datasourcePaging.getFacets()));
+    }
+
+    @GetMapping(path = "isMetricsValid", produces = {MediaType.APPLICATION_JSON_VALUE})
+    public OpenAIREMetrics getOpenaireMetrics(String eoscDatasourceId) {
+        return openAIREDatasourceService.getMetrics(eoscDatasourceId);
     }
 }

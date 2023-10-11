@@ -35,7 +35,7 @@ public class CatalogueController {
     private final CatalogueService<CatalogueBundle, Authentication> catalogueManager;
     private final ProviderService<ProviderBundle, Authentication> providerManager;
     private final ServiceBundleService<ServiceBundle> serviceBundleService;
-    private final DatasourceService<DatasourceBundle, Authentication> datasourceService;
+    private final DatasourceService datasourceService;
     private final TrainingResourceService<TrainingResourceBundle> trainingResourceService;
     private final InteroperabilityRecordService<InteroperabilityRecordBundle> interoperabilityRecordService;
     private final GenericResourceService genericResourceService;
@@ -46,7 +46,7 @@ public class CatalogueController {
     CatalogueController(CatalogueService<CatalogueBundle, Authentication> catalogueManager,
                         ProviderService<ProviderBundle, Authentication> providerManager,
                         ServiceBundleService<ServiceBundle> serviceBundleService,
-                        DatasourceService<DatasourceBundle, Authentication> datasourceService,
+                        DatasourceService datasourceService,
                         TrainingResourceService<TrainingResourceBundle> trainingResourceService,
                         InteroperabilityRecordService<InteroperabilityRecordBundle> interoperabilityRecordService,
                         GenericResourceService genericResourceService) {

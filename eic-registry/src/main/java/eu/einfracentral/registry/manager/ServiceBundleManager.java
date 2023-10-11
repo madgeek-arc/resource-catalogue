@@ -47,7 +47,7 @@ public class ServiceBundleManager extends AbstractServiceBundleManager<ServiceBu
     private final CatalogueService<CatalogueBundle, Authentication> catalogueService;
     private final PublicServiceManager publicServiceManager;
     private final MigrationService migrationService;
-    private final DatasourceService<DatasourceBundle, Authentication> datasourceService;
+    private final DatasourceService datasourceService;
     private final HelpdeskService<HelpdeskBundle, Authentication> helpdeskService;
     private final MonitoringService<MonitoringBundle, Authentication> monitoringService;
     private final ResourceInteroperabilityRecordService<ResourceInteroperabilityRecordBundle> resourceInteroperabilityRecordService;
@@ -64,7 +64,7 @@ public class ServiceBundleManager extends AbstractServiceBundleManager<ServiceBu
                                 CatalogueService<CatalogueBundle, Authentication> catalogueService,
                                 @Lazy PublicServiceManager publicServiceManager,
                                 @Lazy MigrationService migrationService,
-                                @Lazy DatasourceService<DatasourceBundle, Authentication> datasourceService,
+                                @Lazy DatasourceService datasourceService,
                                 @Lazy HelpdeskService<HelpdeskBundle, Authentication> helpdeskService,
                                 @Lazy MonitoringService<MonitoringBundle, Authentication> monitoringService,
                                 @Lazy ResourceInteroperabilityRecordService<ResourceInteroperabilityRecordBundle>
