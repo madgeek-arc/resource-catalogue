@@ -29,7 +29,7 @@ public interface OpenAIREDatasourceService {
     Map<Integer, List<Datasource>> getAll(FacetFilter ff) throws IOException;
 
     /**
-     * Returns various metrics of an OpenAIRE Datasource
+     * Returns various metrics of an OpenAIRE Datasource, given the EOSC Datasource ID
      *
      * @param id - The ID of the Datasource
      * @return {@link Boolean}

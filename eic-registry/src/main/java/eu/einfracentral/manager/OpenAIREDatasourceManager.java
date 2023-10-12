@@ -198,7 +198,7 @@ public class OpenAIREDatasourceManager implements OpenAIREDatasourceService {
         return null;
     }
 
-    public String getOpenAIREDatasourceIdByEOSCDatasourceId(String eoscDatasourceId) {
+    public String getOpenAIREDatasourceIdByEOSCDatasourceId(String id) {
         // API call from Italians
         return null;
     }

@@ -201,7 +201,7 @@ public class DatasourceController {
     }
 
     @GetMapping(path = "isMetricsValid", produces = {MediaType.APPLICATION_JSON_VALUE})
-    public OpenAIREMetrics getOpenaireMetrics(String eoscDatasourceId) {
-        return openAIREDatasourceService.getMetrics(eoscDatasourceId);
+    public OpenAIREMetrics getOpenaireMetrics(String id) {
+        return openAIREDatasourceService.getMetrics(id);
     }
 }
