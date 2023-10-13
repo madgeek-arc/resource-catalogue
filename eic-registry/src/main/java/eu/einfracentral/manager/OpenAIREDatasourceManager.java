@@ -2,6 +2,7 @@ package eu.einfracentral.manager;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
+import com.google.gson.JsonNull;
 import eu.einfracentral.domain.Datasource;
 import eu.einfracentral.dto.OpenAIREMetrics;
 import eu.einfracentral.exception.ResourceNotFoundException;
@@ -177,7 +178,7 @@ public class OpenAIREDatasourceManager implements OpenAIREDatasourceService {
                     Gson gson = new Gson();
                     JsonElement jsonObj = gson.fromJson(String.valueOf(map), JsonElement.class);
                     try {
-                        registerBy = jsonObj.getAsJsonObject().get("registeredby").getAsString();
+                        registerBy = jsonObj.getAsJsonObject().get("registeredby") != JsonNull.INSTANCE ? jsonObj.getAsJsonObject().get("registeredby").getAsString() : null;
                     } catch (UnsupportedOperationException e) {
                         logger.error(e);
                     }
