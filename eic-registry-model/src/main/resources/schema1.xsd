@@ -859,7 +859,7 @@ Criteria for submitting content to the repository as well as product preparation
                     
           <xs:sequence>
                         
-            <xs:element maxOccurs="unbounded" minOccurs="0" name="persistentIdentityEntityType" type="xs:string"/>
+            <xs:element maxOccurs="unbounded" minOccurs="0" name="persistentIdentityEntityTypeScheme" type="xs:string"/>
                       
           </xs:sequence>
                   
