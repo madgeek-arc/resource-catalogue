@@ -167,6 +167,22 @@ public class DatasourceManager extends ResourceManager<DatasourceBundle> impleme
         return ret;
     }
 
+    public void updateBundle(DatasourceBundle datasourceBundle, Authentication auth) {
+        logger.trace("User '{}' is attempting to update the Datasource: {}", auth, datasourceBundle);
+
+        Resource existing = getResource(datasourceBundle.getId());
+        if (existing == null) {
+            throw new ResourceNotFoundException(
+                    String.format("Could not update Datasource with id '%s' because it does not exist",
+                            datasourceBundle.getId()));
+        }
+
+        existing.setPayload(serialize(datasourceBundle));
+        existing.setResourceType(resourceType);
+
+        resourceService.updateResource(existing);
+    }
+
     @Override
     public DatasourceBundle validate(DatasourceBundle datasourceBundle) {
         String serviceId = datasourceBundle.getDatasource().getServiceId();
@@ -255,14 +271,13 @@ public class DatasourceManager extends ResourceManager<DatasourceBundle> impleme
     }
 
     // OpenAIRE related methods
-    private DatasourceBundle checkOpenAIREIDExistance(DatasourceBundle datasourceBundle){
+    private void checkOpenAIREIDExistance(DatasourceBundle datasourceBundle){
         Datasource datasource = getOpenAIREDatasourceById(datasourceBundle.getId());
         if (datasource != null){
             createOpenAIREAlternativeIdentifiers(datasourceBundle);
         } else{
             throw new ValidationException(String.format("The ID [%s] you provided does not belong to an OpenAIRE Datasource", datasourceBundle.getId()));
         }
-        return datasourceBundle;
     }
 
     public Datasource getOpenAIREDatasourceById(String openaireDatasourceID) {
@@ -343,7 +358,7 @@ public class DatasourceManager extends ResourceManager<DatasourceBundle> impleme
         return restTemplate.exchange(url, HttpMethod.POST, entity, String.class).getBody();
     }
 
-    private DatasourceBundle createOpenAIREAlternativeIdentifiers(DatasourceBundle datasourceBundle) {
+    private void createOpenAIREAlternativeIdentifiers(DatasourceBundle datasourceBundle) {
         Identifiers datasourceIdentifiers = new Identifiers();
         List<AlternativeIdentifier> datasourceAlternativeIdentifiers = new ArrayList<>();
         AlternativeIdentifier alternativeIdentifier = new AlternativeIdentifier();
@@ -352,7 +367,6 @@ public class DatasourceManager extends ResourceManager<DatasourceBundle> impleme
         datasourceAlternativeIdentifiers.add(alternativeIdentifier);
         datasourceIdentifiers.setAlternativeIdentifiers(datasourceAlternativeIdentifiers);
         datasourceBundle.setIdentifiers(datasourceIdentifiers);
-        return datasourceBundle;
     }
 
     public Map<Integer, List<Datasource>> getAllOpenAIREDatasources(FacetFilter ff) {

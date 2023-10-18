@@ -1,7 +1,6 @@
 package eu.einfracentral.registry.manager;
 
 import eu.einfracentral.domain.*;
-import eu.einfracentral.domain.interoperabilityRecord.configurationTemplates.ConfigurationTemplateInstanceBundle;
 import eu.einfracentral.exception.ValidationException;
 import eu.einfracentral.registry.service.*;
 import eu.einfracentral.service.IdCreator;
@@ -25,7 +24,6 @@ import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.annotation.Lazy;
-import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.security.core.Authentication;
@@ -607,6 +605,9 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
                 logger.error("Could not update Service '{}'-'{}' of the '{}' Catalogue", service.getId(),
                         service.getService().getName(), service.getService().getCatalogueId());
             }
+
+            // Activate/Deactivate Service's Extensions && Subprofiles
+            serviceBundleService.publishServiceRelatedResources(service.getId(), service.getService().getCatalogueId(), active, auth);
         }
     }
 

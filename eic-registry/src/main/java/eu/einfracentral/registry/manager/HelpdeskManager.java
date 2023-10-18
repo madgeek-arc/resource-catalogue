@@ -1,6 +1,7 @@
 package eu.einfracentral.registry.manager;
 
 import eu.einfracentral.domain.*;
+import eu.einfracentral.exception.ResourceNotFoundException;
 import eu.einfracentral.exception.ValidationException;
 import eu.einfracentral.registry.service.HelpdeskService;
 import eu.einfracentral.registry.service.ServiceBundleService;
@@ -143,6 +144,22 @@ public class HelpdeskManager extends ResourceManager<HelpdeskBundle> implements 
         registrationMailService.sendEmailsForHelpdeskExtension(ret, "Resource", "put");
 
         return ret;
+    }
+
+    public void updateBundle(HelpdeskBundle helpdeskBundle, Authentication auth) {
+        logger.trace("User '{}' is attempting to update the Helpdesk: {}", auth, helpdeskBundle);
+
+        Resource existing = getResource(helpdeskBundle.getId());
+        if (existing == null) {
+            throw new ResourceNotFoundException(
+                    String.format("Could not update Helpdesk with id '%s' because it does not exist",
+                            helpdeskBundle.getId()));
+        }
+
+        existing.setPayload(serialize(helpdeskBundle));
+        existing.setResourceType(resourceType);
+
+        resourceService.updateResource(existing);
     }
 
     @Override
