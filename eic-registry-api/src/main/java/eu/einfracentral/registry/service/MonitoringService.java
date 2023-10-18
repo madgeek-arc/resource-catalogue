@@ -42,6 +42,13 @@ public interface MonitoringService<T, U extends Authentication> extends Resource
     MonitoringBundle validate(MonitoringBundle monitoringBundle, String resourceType);
 
     /**
+     *
+     * @param monitoringBundle - MonitoringBundle
+     * @param auth - Authentication
+     */
+    void updateBundle(MonitoringBundle monitoringBundle, Authentication auth);
+
+    /**
      * Creates a Public version of the specific Monitoring
      * @param monitoringBundle - MonitoringBundle
      * @param auth - Authentication

@@ -4,6 +4,7 @@ import com.google.gson.JsonArray;
 import eu.einfracentral.domain.*;
 import eu.einfracentral.dto.MonitoringStatus;
 import eu.einfracentral.dto.ServiceType;
+import eu.einfracentral.exception.ResourceNotFoundException;
 import eu.einfracentral.exception.ValidationException;
 import eu.einfracentral.registry.service.ServiceBundleService;
 import eu.einfracentral.registry.service.MonitoringService;
@@ -162,6 +163,22 @@ public class MonitoringManager extends ResourceManager<MonitoringBundle> impleme
         registrationMailService.sendEmailsForMonitoringExtension(ret, "Resource", "put");
 
         return ret;
+    }
+
+    public void updateBundle(MonitoringBundle monitoringBundle, Authentication auth) {
+        logger.trace("User '{}' is attempting to update the Monitoring: {}", auth, monitoringBundle);
+
+        Resource existing = getResource(monitoringBundle.getId());
+        if (existing == null) {
+            throw new ResourceNotFoundException(
+                    String.format("Could not update Monitoring with id '%s' because it does not exist",
+                            monitoringBundle.getId()));
+        }
+
+        existing.setPayload(serialize(monitoringBundle));
+        existing.setResourceType(resourceType);
+
+        resourceService.updateResource(existing);
     }
 
     @Override

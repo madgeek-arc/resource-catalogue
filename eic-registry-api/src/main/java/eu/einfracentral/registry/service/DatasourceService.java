@@ -38,6 +38,13 @@ public interface DatasourceService extends ResourceService<DatasourceBundle, Aut
     DatasourceBundle verifyDatasource(String id, String status, Boolean active, Authentication auth);
 
     /**
+     *
+     * @param datasourceBundle - DatasourceBundle
+     * @param auth - Authentication
+     */
+    void updateBundle(DatasourceBundle datasourceBundle, Authentication auth);
+
+    /**
      * Create a FacetFilter for fetching Datasources
      *
      * @param allRequestParams - All the @RequestParams given

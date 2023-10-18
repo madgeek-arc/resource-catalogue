@@ -50,6 +50,9 @@ public class ServiceBundleManager extends AbstractServiceBundleManager<ServiceBu
     private final DatasourceService datasourceService;
     private final HelpdeskService<HelpdeskBundle, Authentication> helpdeskService;
     private final MonitoringService<MonitoringBundle, Authentication> monitoringService;
+    private final PublicHelpdeskManager publicHelpdeskManager;
+    private final PublicMonitoringManager publicMonitoringManager;
+    private final PublicDatasourceManager publicDatasourceManager;
     private final ResourceInteroperabilityRecordService<ResourceInteroperabilityRecordBundle> resourceInteroperabilityRecordService;
     private final ProviderResourcesCommonMethods commonMethods;
 
@@ -67,6 +70,9 @@ public class ServiceBundleManager extends AbstractServiceBundleManager<ServiceBu
                                 @Lazy DatasourceService datasourceService,
                                 @Lazy HelpdeskService<HelpdeskBundle, Authentication> helpdeskService,
                                 @Lazy MonitoringService<MonitoringBundle, Authentication> monitoringService,
+                                @Lazy PublicHelpdeskManager publicHelpdeskManager,
+                                @Lazy PublicMonitoringManager publicMonitoringManager,
+                                @Lazy PublicDatasourceManager publicDatasourceManager,
                                 @Lazy ResourceInteroperabilityRecordService<ResourceInteroperabilityRecordBundle>
                                             resourceInteroperabilityRecordService,
                                 ProviderResourcesCommonMethods commonMethods) {
@@ -82,6 +88,9 @@ public class ServiceBundleManager extends AbstractServiceBundleManager<ServiceBu
         this.datasourceService = datasourceService;
         this.helpdeskService = helpdeskService;
         this.monitoringService = monitoringService;
+        this.publicHelpdeskManager = publicHelpdeskManager;
+        this.publicMonitoringManager = publicMonitoringManager;
+        this.publicDatasourceManager = publicDatasourceManager;
         this.resourceInteroperabilityRecordService = resourceInteroperabilityRecordService;
         this.commonMethods = commonMethods;
     }
@@ -420,8 +429,78 @@ public class ServiceBundleManager extends AbstractServiceBundleManager<ServiceBu
         // latestOnboardingInfo
         service.setLatestUpdateInfo(loggingInfoList.get(0)); //TODO: check this
 
+        // active Service's related resources (ServiceExtensions && Subprofilers)
+        publishServiceRelatedResources(service.getId(), service.getService().getCatalogueId(), active, auth);
+
         this.update(service, auth);
         return service;
+    }
+
+    public void publishServiceRelatedResources(String serviceId, String catalogueId, Boolean active, Authentication auth) {
+        HelpdeskBundle helpdeskBundle = helpdeskService.get(serviceId, catalogueId);
+        MonitoringBundle monitoringBundle = monitoringService.get(serviceId, catalogueId);
+        DatasourceBundle datasourceBundle = datasourceService.get(serviceId, catalogueId);
+        if (active){
+            logger.info("Activating all related resources of the Service with id: {}", serviceId);
+        } else{
+            logger.info("Deactivating all related resources of the Service with id: {}", serviceId);
+        }
+        if (helpdeskBundle != null) {
+            publishServiceExtensionsAndSubprofiles(helpdeskBundle, active, auth);
+        }
+        if (monitoringBundle != null) {
+            publishServiceExtensionsAndSubprofiles(monitoringBundle, active, auth);
+        }
+        if (datasourceBundle != null) {
+            publishServiceExtensionsAndSubprofiles(datasourceBundle, active, auth);
+        }
+    }
+
+    private void publishServiceExtensionsAndSubprofiles(Bundle<?> bundle, boolean active, Authentication auth) {
+        List<LoggingInfo> loggingInfoList = commonMethods.createActivationLoggingInfo(bundle, active, auth);
+
+        // update Bundle's fields
+        bundle.setLoggingInfo(loggingInfoList);
+        bundle.setLatestUpdateInfo(loggingInfoList.get(loggingInfoList.size()-1));
+        bundle.setActive(active);
+
+        if (bundle instanceof HelpdeskBundle) {
+            try {
+                logger.debug("Setting Helpdesk '{}' of the Service '{}' of the '{}' Catalogue to active: '{}'",
+                        bundle.getId(), ((HelpdeskBundle) bundle).getHelpdesk().getServiceId(),
+                        ((HelpdeskBundle) bundle).getCatalogueId(), bundle.isActive());
+                helpdeskService.updateBundle((HelpdeskBundle) bundle, auth);
+                publicHelpdeskManager.update((HelpdeskBundle) bundle, auth);
+            } catch (eu.einfracentral.exception.ResourceNotFoundException e) {
+                logger.error("Could not update Helpdesk '{}' of the Service '{}' of the '{}' Catalogue",
+                        bundle.getId(), ((HelpdeskBundle) bundle).getHelpdesk().getServiceId(),
+                        ((HelpdeskBundle) bundle).getCatalogueId());
+            }
+        } else if (bundle instanceof MonitoringBundle) {
+            try {
+                logger.debug("Setting Monitoring '{}' of the Service '{}' of the '{}' Catalogue to active: '{}'",
+                        bundle.getId(), ((MonitoringBundle) bundle).getMonitoring().getServiceId(),
+                        ((MonitoringBundle) bundle).getCatalogueId(), bundle.isActive());
+                monitoringService.updateBundle((MonitoringBundle) bundle, auth);
+                publicMonitoringManager.update((MonitoringBundle) bundle, auth);
+            } catch (eu.einfracentral.exception.ResourceNotFoundException e) {
+                logger.error("Could not update Monitoring '{}' of the Service '{}' of the '{}' Catalogue",
+                        bundle.getId(), ((MonitoringBundle) bundle).getMonitoring().getServiceId(),
+                        ((MonitoringBundle) bundle).getCatalogueId());
+            }
+        } else {
+            try {
+                logger.debug("Setting Datasource '{}' of the Service '{}' of the '{}' Catalogue to active: '{}'",
+                        bundle.getId(), ((DatasourceBundle) bundle).getDatasource().getServiceId(),
+                        ((DatasourceBundle) bundle).getDatasource().getCatalogueId(), bundle.isActive());
+                datasourceService.updateBundle((DatasourceBundle) bundle, auth);
+                publicDatasourceManager.update((DatasourceBundle) bundle, auth);
+            } catch (eu.einfracentral.exception.ResourceNotFoundException e) {
+                logger.error("Could not update Datasource '{}' of the Service '{}' of the '{}' Catalogue",
+                        bundle.getId(), ((DatasourceBundle) bundle).getDatasource().getServiceId(),
+                        ((DatasourceBundle) bundle).getDatasource().getCatalogueId());
+            }
+        }
     }
 
     public ServiceBundle auditResource(String serviceId, String catalogueId, String comment, LoggingInfo.ActionType actionType, Authentication auth) {

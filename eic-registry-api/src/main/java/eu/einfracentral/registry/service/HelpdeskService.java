@@ -30,4 +30,10 @@ public interface HelpdeskService<T, U extends Authentication> extends ResourceSe
      * @return {@link HelpdeskBundle}
      */
     HelpdeskBundle createPublicResource(HelpdeskBundle helpdeskBundle, Authentication auth);
+
+    /**
+     * @param helpdeskBundle - HelpdeskBundle
+     * @param auth           - Authentication
+     */
+    void updateBundle(HelpdeskBundle helpdeskBundle, Authentication auth);
 }
