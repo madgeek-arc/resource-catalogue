@@ -16,24 +16,6 @@ public class SimpleIdCreator implements IdCreator {
     }
 
     @Override
-    public String createProviderId(Provider provider) {
-        String providerId;
-        if (provider.getAbbreviation() != null && !"".equals(provider.getAbbreviation()) && !"null".equals(provider.getAbbreviation())) {
-            providerId = provider.getAbbreviation();
-        } else {
-            throw new ValidationException("Provider must have an abbreviation.");
-        }
-        return StringUtils
-                .stripAccents(providerId)
-                .replaceAll("[\\n\\t\\s]+", " ")
-                .replaceAll("\\s+$", "")
-                .replaceAll("[^a-zA-Z0-9\\s\\-\\_]+", "")
-                .replace(" ", "_")
-                .toLowerCase();
-
-    }
-
-    @Override
     public String createCatalogueId(Catalogue catalogue) {
         String catalogueId;
         if (catalogue.getId() == null || "".equals(catalogue.getId())) {
@@ -45,14 +27,18 @@ public class SimpleIdCreator implements IdCreator {
         } else {
             catalogueId = catalogue.getId();
         }
-        return StringUtils
-                .stripAccents(catalogueId)
-                .replaceAll("[\\n\\t\\s]+", " ")
-                .replaceAll("\\s+$", "")
-                .replaceAll("[^a-zA-Z0-9\\s\\-\\_]+", "")
-                .replace(" ", "_")
-                .toLowerCase();
+        return sanitizeString(catalogueId);
+    }
 
+    @Override
+    public String createProviderId(Provider provider) {
+        String providerId;
+        if (provider.getAbbreviation() != null && !"".equals(provider.getAbbreviation()) && !"null".equals(provider.getAbbreviation())) {
+            providerId = provider.getAbbreviation();
+        } else {
+            throw new ValidationException("Provider must have an abbreviation.");
+        }
+        return sanitizeString(providerId);
     }
 
     @Override
@@ -67,13 +53,7 @@ public class SimpleIdCreator implements IdCreator {
             throw new ValidationException("Resource must have an abbreviation.");
         }
         String provider = serviceBundle.getService().getResourceOrganisation();
-        return String.format("%s.%s", provider, StringUtils
-                .stripAccents(serviceId)
-                .replaceAll("[\n\t\\s]+", " ")
-                .replaceAll("\\s+$", "")
-                .replaceAll("[^a-zA-Z0-9\\s\\-\\_]+", "")
-                .replace(" ", "_")
-                .toLowerCase());
+        return String.format("%s.%s", provider, sanitizeString(serviceId));
     }
 
     public String createTrainingResourceId(TrainingResourceBundle trainingResourceBundle) throws NoSuchAlgorithmException {
@@ -102,14 +82,13 @@ public class SimpleIdCreator implements IdCreator {
     }
 
     @Override
-    public String reformatId(String toBeReformatted) {
+    public String sanitizeString(String input) {
         return StringUtils
-                .stripAccents(toBeReformatted)
+                .stripAccents(input)
                 .replaceAll("[\\n\\t\\s]+", " ")
                 .replaceAll("\\s+$", "")
-                .replaceAll("[^a-zA-Z0-9\\s\\-\\_]+", "")
-                .replace(" ", "_")
+                .replaceAll("[^a-zA-Z0-9\\s\\-_/]+", "")
+                .replaceAll("[/\\s]+", "_")
                 .toLowerCase();
-
     }
 }
