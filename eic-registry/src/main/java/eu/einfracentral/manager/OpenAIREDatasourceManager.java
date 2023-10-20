@@ -201,7 +201,7 @@ public class OpenAIREDatasourceManager implements OpenAIREDatasourceService {
 
     public String getOpenAIREDatasourceIdByEOSCDatasourceId(String id) {
         // API call from Italians
-        return null;
+        return "opendoar____::1106";
     }
 
     private boolean isMetricsValid(String id) {
