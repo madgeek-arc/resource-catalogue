@@ -51,5 +51,5 @@ public interface IdCreator {
      * @param providerName
      * @return
      */
-    String reformatId(String providerName);
+    String sanitizeString(String providerName);
 }
