@@ -109,6 +109,8 @@
             
       <xs:enumeration value="WEBPAGE"/>
             
+      <xs:enumeration value="ALTERNATIVE_IDENTIFIERS"/>
+            
       <xs:enumeration value="DESCRIPTION"/>
             
       <xs:enumeration value="TAGLINE"/>
@@ -130,6 +132,12 @@
       <xs:enumeration value="ACCESS_MODES"/>
             
       <xs:enumeration value="TAGS"/>
+            
+      <xs:enumeration value="HORIZONTAL_SERVICE"/>
+            
+      <xs:enumeration value="SERVICE_CATEGORIES"/>
+            
+      <xs:enumeration value="MARKETPLACE_LOCATIONS"/>
             
       <xs:enumeration value="GEOGRAPHICAL_AVAILABILITIES"/>
             
@@ -266,6 +274,10 @@
       <xs:enumeration value="LIFE_CYCLE_STATUS"/>
             
       <xs:enumeration value="RELATED_PLATFORM"/>
+            
+      <xs:enumeration value="SERVICE_CATEGORY"/>
+            
+      <xs:enumeration value="MARKETPLACE_LOCATION"/>
             
       <xs:enumeration value="CATALOGUE_STATE"/>
             
