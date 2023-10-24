@@ -80,7 +80,7 @@ public class DatasourceManager extends ResourceManager<DatasourceBundle> impleme
         if (datasourceBundle.getId() != null && !datasourceBundle.getId().equals("")) {
             checkOpenAIREIDExistance(datasourceBundle);
         }
-        datasourceBundle.setId(UUID.randomUUID().toString());
+        datasourceBundle.setId(datasourceBundle.getDatasource().getServiceId());
         logger.trace("User '{}' is attempting to add a new Datasource: {}", auth, datasourceBundle);
 
         this.validate(datasourceBundle);
