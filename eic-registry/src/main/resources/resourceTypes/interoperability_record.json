@@ -185,5 +185,5 @@
   "properties": {
     "class": "eu.einfracentral.domain.InteroperabilityRecord"
   },
-  "schemaUrl": "https://raw.githubusercontent.com/madgeek-arc/resource-catalogue/jira_tickets/eic-registry-model/src/main/resources/schema1.xsd"
+  "schemaUrl": "https://raw.githubusercontent.com/madgeek-arc/resource-catalogue/m30_release/eic-registry-model/src/main/resources/schema1.xsd"
 }
