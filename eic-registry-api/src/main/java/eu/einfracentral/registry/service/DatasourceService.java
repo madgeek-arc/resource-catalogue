@@ -1,16 +1,11 @@
 package eu.einfracentral.registry.service;
 
-import eu.einfracentral.domain.Datasource;
 import eu.einfracentral.domain.DatasourceBundle;
 import eu.openminted.registry.core.domain.FacetFilter;
 import org.springframework.security.core.Authentication;
 import org.springframework.util.MultiValueMap;
 
-import java.io.IOException;
-import java.util.List;
-import java.util.Map;
-
-public interface DatasourceService<T, U extends Authentication> extends ResourceService<T, Authentication> {
+public interface DatasourceService extends ResourceService<DatasourceBundle, Authentication> {
 
     /**
      * Get the Datasource sub-profile of the specific Service of the specific Catalogue
@@ -30,33 +25,6 @@ public interface DatasourceService<T, U extends Authentication> extends Resource
      * @return {@link DatasourceBundle}
      */
     DatasourceBundle update(DatasourceBundle datasourceBundle, String comment, Authentication auth);
-
-    /**
-     * Get a list of all registered OpenAIRE Datasources.
-     *
-     * @param ff - FacetFilter
-     * @return {@link Map<>}
-     * @throws IOException  If an input or output exception occurred
-     */
-    Map<Integer, List<Datasource>> getAllOpenAIREDatasources(FacetFilter ff) throws IOException;
-
-    /**
-     * Get a specific OpenAIRE Datasource given its ID.
-     *
-     * @param datasourceId - The ID of the Datasource
-     * @throws IOException  If an input or output exception occurred
-     * @return {@link Datasource}
-     */
-    Datasource getOpenAIREDatasourceById(String datasourceId) throws IOException;
-
-    /**
-     * Returns True/False according to if the specific Datasource
-     * is already registered in the OpenAIRE Catalogue
-     *
-     * @param eoscId - The ID of the Datasource in creation
-     * @return True/False
-     */
-    boolean isDatasourceRegisteredOnOpenAIRE(String eoscId);
 
     /**
      * Verify (approve/reject) a Datasource.
@@ -84,4 +52,13 @@ public interface DatasourceService<T, U extends Authentication> extends Resource
      * @return {@link FacetFilter}
      */
     FacetFilter createFacetFilterForFetchingDatasources(MultiValueMap<String, Object> allRequestParams, String catalogueId);
+
+    /**
+     * Returns True/False according to if the specific Datasource
+     * is already registered in the OpenAIRE Catalogue
+     *
+     * @param id - The ID of the Datasource in creation
+     * @return True/False
+     */
+    boolean isDatasourceRegisteredOnOpenAIRE(String id);
 }

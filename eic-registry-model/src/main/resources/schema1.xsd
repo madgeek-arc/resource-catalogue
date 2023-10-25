@@ -696,6 +696,12 @@ It is also possible to select Not a legal entity.]]></xs:documentation>
         </xs:annotation>
       </xs:element>
             
+      <xs:element minOccurs="0" name="harvestable" type="xs:boolean">
+        <xs:annotation>
+          <xs:documentation><![CDATA[Boolean value specifying if the data source requires the harvesting of Research Products into the Research Catalogue]]></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+            
       <xs:element minOccurs="0" name="id" type="xs:string">
         <xs:annotation>
           <xs:documentation><![CDATA[A persistent identifier, a unique reference to the Datasource in the context of the EOSC Portal.]]></xs:documentation>
@@ -824,7 +830,7 @@ Criteria for submitting content to the repository as well as product preparation
         </xs:annotation>
       </xs:element>
             
-      <xs:element name="versionControl" type="xs:boolean">
+      <xs:element minOccurs="0" name="versionControl" type="xs:boolean">
         <xs:annotation>
           <xs:documentation><![CDATA[If data versioning is supported: the data source explicitly allows the deposition of different versions of the same object]]></xs:documentation>
         </xs:annotation>
@@ -1349,7 +1355,7 @@ a Provider's design towards interoperability based on the guideline.]]></xs:docu
         
     <xs:sequence>
             
-      <xs:element minOccurs="0" name="creatorName" type="xs:string">
+      <xs:element name="creatorName" type="xs:string">
         <xs:annotation>
           <xs:documentation><![CDATA[The full name of the creator.]]></xs:documentation>
         </xs:annotation>
@@ -2102,6 +2108,23 @@ For embedded providers (2) - legal status of the hosting legal entity. It is als
               
       </xs:element>
             
+      <xs:element minOccurs="0" name="alternativeIdentifiers">
+        <xs:annotation>
+          <xs:documentation><![CDATA[Other types of Identifiers for the specific Service (eg. PID)]]></xs:documentation>
+        </xs:annotation>
+                
+        <xs:complexType>
+                    
+          <xs:sequence>
+                        
+            <xs:element maxOccurs="unbounded" minOccurs="0" ref="tns:alternativeIdentifier"/>
+                      
+          </xs:sequence>
+                  
+        </xs:complexType>
+              
+      </xs:element>
+            
       <xs:element minOccurs="0" name="catalogueId" type="xs:string">
         <xs:annotation>
           <xs:documentation><![CDATA[The Catalogue this Resource is originally registered at.]]></xs:documentation>
@@ -2248,6 +2271,13 @@ c) list of customers, communities, users, etc. using the Resource.]]></xs:docume
         </xs:annotation>
       </xs:element>
             
+      <xs:element minOccurs="0" name="horizontalService" type="xs:boolean">
+        <xs:annotation>
+          <xs:documentation><![CDATA[Does Service consist a generic service or resource bringing significant value to two or more research
+infrastructures.]]></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+            
       <xs:element minOccurs="0" name="id" type="xs:string">
         <xs:annotation>
           <xs:documentation><![CDATA[A persistent identifier, a unique reference to the Resource in the context of the EOSC Portal.]]></xs:documentation>
@@ -2299,6 +2329,23 @@ c) list of customers, communities, users, etc. using the Resource.]]></xs:docume
         <xs:annotation>
           <xs:documentation><![CDATA[Webpage with information about planned maintenance windows for this Resource.]]></xs:documentation>
         </xs:annotation>
+      </xs:element>
+            
+      <xs:element name="marketplaceLocations">
+        <xs:annotation>
+          <xs:documentation><![CDATA[Placement of the Service in the different sections of the EOSC Marketplace.]]></xs:documentation>
+        </xs:annotation>
+                
+        <xs:complexType>
+                    
+          <xs:sequence>
+                        
+            <xs:element maxOccurs="unbounded" minOccurs="0" name="marketplaceLocation" type="xs:string"/>
+                      
+          </xs:sequence>
+                  
+        </xs:complexType>
+              
       </xs:element>
             
       <xs:element minOccurs="0" name="multimedia">
@@ -2506,6 +2553,23 @@ c) list of customers, communities, users, etc. using the Resource.]]></xs:docume
         <xs:annotation>
           <xs:documentation><![CDATA[The email to contact the Provider for critical security issues about this Resource.]]></xs:documentation>
         </xs:annotation>
+      </xs:element>
+            
+      <xs:element name="serviceCategories">
+        <xs:annotation>
+          <xs:documentation><![CDATA[A named group of Resources that offer access to the same type of Resources.]]></xs:documentation>
+        </xs:annotation>
+                
+        <xs:complexType>
+                    
+          <xs:sequence>
+                        
+            <xs:element maxOccurs="unbounded" minOccurs="0" name="serviceCategory" type="xs:string"/>
+                      
+          </xs:sequence>
+                  
+        </xs:complexType>
+              
       </xs:element>
             
       <xs:element minOccurs="0" name="standards">

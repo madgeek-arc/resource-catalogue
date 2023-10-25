@@ -20,7 +20,6 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
-import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.security.core.Authentication;
@@ -302,18 +301,7 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
                 .collect(Collectors.toList());
     }
 
-    @Override
-    public List<CatalogueBundle> getInactive() {
-        FacetFilter ff = new FacetFilter();
-        ff.addFilter("active", false);
-        ff.setFrom(0);
-        ff.setQuantity(maxQuantity);
-        ff.addOrderBy("name", "asc");
-        return getAll(ff, null).getResults();
-    }
-
-    @Override
-    public <T, I extends ResourceCRUDService<T, Authentication>> void deleteCatalogueResources(String id, I service, Authentication auth) {
+    private <T, I extends ResourceCRUDService<T, Authentication>> void deleteCatalogueResources(String id, I service, Authentication auth) {
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(maxQuantity);
         ff.addFilter("catalogue_id", id);
@@ -357,12 +345,12 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
         }
     }
 
-    public List<String> sortCountries(List<String> countries) {
+    private List<String> sortCountries(List<String> countries) {
         Collections.sort(countries);
         return countries;
     }
 
-    public void adminDifferences(CatalogueBundle updatedCatalogue, CatalogueBundle existingCatalogue) {
+    private void adminDifferences(CatalogueBundle updatedCatalogue, CatalogueBundle existingCatalogue) {
         List<String> existingAdmins = new ArrayList<>();
         List<String> newAdmins = new ArrayList<>();
         for (User user : existingCatalogue.getCatalogue().getUsers()) {
@@ -542,27 +530,27 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
         return namedParameterJdbcTemplate.queryForList(query, in);
     }
 
-    public Paging<CatalogueBundle> createCorrectQuantityFacets(List<CatalogueBundle> catalogueBundle, Paging<CatalogueBundle> catalogueBundlePaging,
+    public Paging<CatalogueBundle> createCorrectQuantityFacets(List<CatalogueBundle> catalogueBundles, Paging<CatalogueBundle> catalogueBundlePaging,
                                                                int quantity, int from){
-        if (!catalogueBundle.isEmpty()) {
+        if (!catalogueBundles.isEmpty()) {
             List<CatalogueBundle> retWithCorrectQuantity = new ArrayList<>();
             if (from == 0){
-                if (quantity <= catalogueBundle.size()){
+                if (quantity <= catalogueBundles.size()){
                     for (int i=from; i<=quantity-1; i++){
-                        retWithCorrectQuantity.add(catalogueBundle.get(i));
+                        retWithCorrectQuantity.add(catalogueBundles.get(i));
                     }
                 } else{
-                    retWithCorrectQuantity.addAll(catalogueBundle);
+                    retWithCorrectQuantity.addAll(catalogueBundles);
                 }
                 catalogueBundlePaging.setTo(retWithCorrectQuantity.size());
             } else{
                 boolean indexOutOfBound = false;
-                if (quantity <= catalogueBundle.size()){
+                if (quantity <= catalogueBundles.size()){
                     for (int i=from; i<quantity+from; i++) {
                         try{
-                            retWithCorrectQuantity.add(catalogueBundle.get(i));
-                            if (quantity+from > catalogueBundle.size()){
-                                catalogueBundlePaging.setTo(catalogueBundle.size());
+                            retWithCorrectQuantity.add(catalogueBundles.get(i));
+                            if (quantity+from > catalogueBundles.size()){
+                                catalogueBundlePaging.setTo(catalogueBundles.size());
                             } else{
                                 catalogueBundlePaging.setTo(quantity+from);
                             }
@@ -571,12 +559,12 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
                         }
                     }
                     if (indexOutOfBound){
-                        catalogueBundlePaging.setTo(catalogueBundle.size());
+                        catalogueBundlePaging.setTo(catalogueBundles.size());
                     }
                 } else{
-                    retWithCorrectQuantity.addAll(catalogueBundle);
-                    if (quantity+from > catalogueBundle.size()){
-                        catalogueBundlePaging.setTo(catalogueBundle.size());
+                    retWithCorrectQuantity.addAll(catalogueBundles);
+                    if (quantity+from > catalogueBundles.size()){
+                        catalogueBundlePaging.setTo(catalogueBundles.size());
                     } else{
                         catalogueBundlePaging.setTo(quantity+from);
                     }
@@ -584,23 +572,14 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
             }
             catalogueBundlePaging.setFrom(from);
             catalogueBundlePaging.setResults(retWithCorrectQuantity);
-            catalogueBundlePaging.setTotal(catalogueBundle.size());
+            catalogueBundlePaging.setTotal(catalogueBundles.size());
         } else{
-            catalogueBundlePaging.setResults(catalogueBundle);
+            catalogueBundlePaging.setResults(catalogueBundles);
             catalogueBundlePaging.setTotal(0);
             catalogueBundlePaging.setFrom(0);
             catalogueBundlePaging.setTo(0);
         }
         return catalogueBundlePaging;
-    }
-
-    @Override
-    public Paging<ProviderBundle> getAllCatalogueProviders(String catalogueId, Authentication auth) {
-        FacetFilter ff = new FacetFilter();
-        ff.addFilter("catalogue_id", catalogueId);
-        ff.setQuantity(maxQuantity);
-        ff.addOrderBy("name", "asc");
-        return providerService.getAll(ff, auth);
     }
 
     public CatalogueBundle suspend(String catalogueId, boolean suspend, Authentication auth) {

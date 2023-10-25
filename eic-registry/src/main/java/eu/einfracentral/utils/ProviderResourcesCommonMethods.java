@@ -40,7 +40,7 @@ public class ProviderResourcesCommonMethods {
 
     private final CatalogueService<CatalogueBundle, Authentication> catalogueService;
     private final ProviderService<ProviderBundle, Authentication> providerService;
-    private final DatasourceService<DatasourceBundle, Authentication> datasourceService;
+    private final DatasourceService datasourceService;
     private final HelpdeskService<HelpdeskBundle, Authentication> helpdeskService;
     private final MonitoringService<MonitoringBundle, Authentication> monitoringService;
     private final ResourceInteroperabilityRecordService<ResourceInteroperabilityRecordBundle> resourceInteroperabilityRecordService;
@@ -63,7 +63,7 @@ public class ProviderResourcesCommonMethods {
 
     public ProviderResourcesCommonMethods(@Lazy CatalogueService<CatalogueBundle, Authentication> catalogueService,
                                           @Lazy ProviderService<ProviderBundle, Authentication> providerService,
-                                          @Lazy DatasourceService<DatasourceBundle, Authentication> datasourceService,
+                                          @Lazy DatasourceService datasourceService,
                                           @Lazy HelpdeskService<HelpdeskBundle, Authentication> helpdeskService,
                                           @Lazy MonitoringService<MonitoringBundle, Authentication> monitoringService,
                                           @Lazy ResourceInteroperabilityRecordService<ResourceInteroperabilityRecordBundle>

@@ -75,6 +75,8 @@ public class Vocabulary implements Identifiable {
         FUNDING_PROGRAM("Funding program"),
         LIFE_CYCLE_STATUS("Life cycle status"),
         RELATED_PLATFORM("Related platform"),
+        SERVICE_CATEGORY("Service category"),
+        MARKETPLACE_LOCATION("Marketplace location"),
         // States
         CATALOGUE_STATE("Catalogue state"),
         PROVIDER_STATE("Provider state"),

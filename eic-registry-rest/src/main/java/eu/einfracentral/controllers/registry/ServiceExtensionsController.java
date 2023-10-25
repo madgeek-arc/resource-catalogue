@@ -8,7 +8,6 @@ import eu.einfracentral.domain.*;
 import eu.einfracentral.dto.MonitoringStatus;
 import eu.einfracentral.dto.ServiceType;
 import eu.einfracentral.exception.ResourceException;
-import eu.einfracentral.registry.service.DatasourceService;
 import eu.einfracentral.registry.service.HelpdeskService;
 import eu.einfracentral.registry.service.MonitoringService;
 import eu.einfracentral.registry.service.ServiceBundleService;
@@ -47,7 +46,6 @@ public class ServiceExtensionsController {
     private static final Logger logger = LogManager.getLogger(ServiceExtensionsController.class);
     private final HelpdeskService<HelpdeskBundle, Authentication> helpdeskService;
     private final MonitoringService<MonitoringBundle, Authentication> monitoringService;
-    private final DatasourceService<DatasourceBundle, Authentication> datasourceService;
     private final ServiceBundleService<ServiceBundle> serviceBundleService;
     @Value("${argo.grnet.monitoring.availability}")
     private String monitoringAvailability;
@@ -69,11 +67,9 @@ public class ServiceExtensionsController {
     @Autowired
     ServiceExtensionsController(HelpdeskService<HelpdeskBundle, Authentication> helpdeskService,
                                 MonitoringService<MonitoringBundle, Authentication> monitoringService,
-                                DatasourceService<DatasourceBundle, Authentication> datasourceService,
                                 ServiceBundleService<ServiceBundle> serviceBundleService) {
         this.helpdeskService = helpdeskService;
         this.monitoringService = monitoringService;
-        this.datasourceService = datasourceService;
         this.serviceBundleService = serviceBundleService;
     }
 
