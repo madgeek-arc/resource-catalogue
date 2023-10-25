@@ -24,7 +24,7 @@ public class PersistentIdentitySystem {
      * Specify the list of persistent identifier schemes used to refer to EntityTypes.
      */
     @XmlElementWrapper(required = true, name = "persistentIdentityEntityTypeSchemes")
-    @XmlElement(name = "persistentIdentityEntityTypeScheme")
+    @XmlElement(name = "persistentIdentityEntityType")
     @ApiModelProperty(position = 2, required = true)
     @FieldValidation()
     @VocabularyValidation(type = Vocabulary.Type.DS_PERSISTENT_IDENTITY_SCHEME)
