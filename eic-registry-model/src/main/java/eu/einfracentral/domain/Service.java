@@ -195,7 +195,7 @@ public class Service implements Identifiable {
      */
     @XmlElement()
     @ApiModelProperty(position = 19)
-    @FieldValidation
+    @FieldValidation(nullable = true)
     private Boolean horizontalService;
 
     /**
