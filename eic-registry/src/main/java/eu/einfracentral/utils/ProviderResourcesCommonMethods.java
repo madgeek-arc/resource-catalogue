@@ -329,7 +329,7 @@ public class ProviderResourcesCommonMethods {
         if (bundle.getMetadata().isPublished()) {
             String pid = ShortHashGenerator(bundle.getId());
             AlternativeIdentifier alternativeIdentifier = new AlternativeIdentifier();
-            alternativeIdentifier.setType("PID");
+            alternativeIdentifier.setType("EOSC PID");
             alternativeIdentifier.setValue(pid);
             if (bundle.getIdentifiers() != null) {
                 postPID(bundle.getId(), pid, resourceTypePath);

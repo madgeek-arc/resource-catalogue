@@ -132,6 +132,9 @@ public class ServiceBundleManager extends AbstractServiceBundleManager<ServiceBu
             throw new ValidationException(String.format("The Provider with id %s has already registered a Resource Template.", providerBundle.getId()));
         }
 
+        // prohibit EOSC related Alternative Identifier Types
+        prohibitEOSCRelatedPIDs(serviceBundle);
+
         serviceBundle.setId(idCreator.createServiceId(serviceBundle));
         validate(serviceBundle);
 
@@ -219,6 +222,9 @@ public class ServiceBundleManager extends AbstractServiceBundleManager<ServiceBu
         if (existingService.getMetadata().isPublished()){
             throw new ValidationException("You cannot directly update a Public Service");
         }
+
+        // prohibit EOSC related Alternative Identifier Types
+        prohibitEOSCRelatedPIDs(serviceBundle);
 
         User user = User.of(auth);
 
@@ -726,6 +732,18 @@ public class ServiceBundleManager extends AbstractServiceBundleManager<ServiceBu
 
     public Paging<Bundle<?>> getAllForAdminWithAuditStates(FacetFilter ff, Set<String> auditState) {
         return commonMethods.getAllForAdminWithAuditStates(ff, auditState, this.resourceType.getName());
+    }
+
+    private void prohibitEOSCRelatedPIDs(ServiceBundle serviceBundle) {
+        // prohibit EOSC related Alternative Identifier Types
+        if (serviceBundle.getService().getAlternativeIdentifiers() != null &&
+                !serviceBundle.getService().getAlternativeIdentifiers().isEmpty()) {
+            for (AlternativeIdentifier alternativeIdentifier : serviceBundle.getService().getAlternativeIdentifiers()) {
+                if (alternativeIdentifier.getType().toLowerCase().contains("eosc")) {
+                    throw new ValidationException("You cannot create an EOSC related PID. Found in Service -> Alternative Identifiers");
+                }
+            }
+        }
     }
 
 }

@@ -64,7 +64,8 @@ public class PIDController {
         for (ProviderBundle providerBundle : allPublishedProviders) {
             List<AlternativeIdentifier> alternativeIdentifiers = providerBundle.getIdentifiers().getAlternativeIdentifiers();
             for (AlternativeIdentifier alternativeIdentifier : alternativeIdentifiers) {
-                if (alternativeIdentifier.getType().equalsIgnoreCase("PID")) {
+                if (alternativeIdentifier.getType().equalsIgnoreCase("PID") ||
+                        alternativeIdentifier.getType().equalsIgnoreCase("EOSC PID")) {
                     pidService.updatePID(alternativeIdentifier.getValue(), providerBundle.getId(), "providers/");
                     break;
                 }
@@ -74,7 +75,8 @@ public class PIDController {
         for (ServiceBundle serviceBundle : allPublishedServices) {
             List<AlternativeIdentifier> alternativeIdentifiers = serviceBundle.getIdentifiers().getAlternativeIdentifiers();
             for (AlternativeIdentifier alternativeIdentifier : alternativeIdentifiers) {
-                if (alternativeIdentifier.getType().equalsIgnoreCase("PID")) {
+                if (alternativeIdentifier.getType().equalsIgnoreCase("PID") ||
+                        alternativeIdentifier.getType().equalsIgnoreCase("EOSC PID")) {
                     pidService.updatePID(alternativeIdentifier.getValue(), serviceBundle.getId(), "services/");
                     break;
                 }
@@ -84,7 +86,8 @@ public class PIDController {
         for (DatasourceBundle datasourceBundle : allPublishedDatasources) {
             List<AlternativeIdentifier> alternativeIdentifiers = datasourceBundle.getIdentifiers().getAlternativeIdentifiers();
             for (AlternativeIdentifier alternativeIdentifier : alternativeIdentifiers) {
-                if (alternativeIdentifier.getType().equalsIgnoreCase("PID")) {
+                if (alternativeIdentifier.getType().equalsIgnoreCase("PID") ||
+                        alternativeIdentifier.getType().equalsIgnoreCase("EOSC PID")) {
                     pidService.updatePID(alternativeIdentifier.getValue(), datasourceBundle.getId(), "services/");
                     break;
                 }
@@ -94,7 +97,8 @@ public class PIDController {
         for (TrainingResourceBundle trainingResourceBundle : allPublishedTrainingResources) {
             List<AlternativeIdentifier> alternativeIdentifiers = trainingResourceBundle.getIdentifiers().getAlternativeIdentifiers();
             for (AlternativeIdentifier alternativeIdentifier : alternativeIdentifiers) {
-                if (alternativeIdentifier.getType().equalsIgnoreCase("PID")) {
+                if (alternativeIdentifier.getType().equalsIgnoreCase("PID") ||
+                        alternativeIdentifier.getType().equalsIgnoreCase("EOSC PID")) {
                     pidService.updatePID(alternativeIdentifier.getValue(), trainingResourceBundle.getId(), "trainings/");
                     break;
                 }
@@ -104,7 +108,8 @@ public class PIDController {
         for (InteroperabilityRecordBundle interoperabilityRecordBundle : allInteroperabilityRecords) {
             List<AlternativeIdentifier> alternativeIdentifiers = interoperabilityRecordBundle.getIdentifiers().getAlternativeIdentifiers();
             for (AlternativeIdentifier alternativeIdentifier : alternativeIdentifiers) {
-                if (alternativeIdentifier.getType().equalsIgnoreCase("PID")) {
+                if (alternativeIdentifier.getType().equalsIgnoreCase("PID") ||
+                        alternativeIdentifier.getType().equalsIgnoreCase("EOSC PID")) {
                     pidService.updatePID(alternativeIdentifier.getValue(), interoperabilityRecordBundle.getId(), "guidelines/");
                     break;
                 }
