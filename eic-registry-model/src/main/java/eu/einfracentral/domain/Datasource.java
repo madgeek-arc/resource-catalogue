@@ -164,10 +164,18 @@ public class Datasource implements Identifiable {
     @FieldValidation(nullable = true)
     private Boolean harvestable;
 
+    /**
+     * Original OpenAIRE ID, if Datasource already exists in the OpenAIRE Catalogue
+     */
+    @XmlElement
+    @ApiModelProperty(position = 17)
+    @FieldValidation(nullable = true)
+    private String originalOpenAIREId;
+
     public Datasource() {
     }
 
-    public Datasource(String id, String serviceId, String catalogueId, URL submissionPolicyURL, URL preservationPolicyURL, Boolean versionControl, List<PersistentIdentitySystem> persistentIdentitySystems, String jurisdiction, String datasourceClassification, List<String> researchEntityTypes, Boolean thematic, List<ResearchProductLicensing> researchProductLicensings, List<String> researchProductAccessPolicies, ResearchProductMetadataLicensing researchProductMetadataLicensing, List<String> researchProductMetadataAccessPolicies, Boolean harvestable) {
+    public Datasource(String id, String serviceId, String catalogueId, URL submissionPolicyURL, URL preservationPolicyURL, Boolean versionControl, List<PersistentIdentitySystem> persistentIdentitySystems, String jurisdiction, String datasourceClassification, List<String> researchEntityTypes, Boolean thematic, List<ResearchProductLicensing> researchProductLicensings, List<String> researchProductAccessPolicies, ResearchProductMetadataLicensing researchProductMetadataLicensing, List<String> researchProductMetadataAccessPolicies, Boolean harvestable, String originalOpenAIREId) {
         this.id = id;
         this.serviceId = serviceId;
         this.catalogueId = catalogueId;
@@ -184,6 +192,7 @@ public class Datasource implements Identifiable {
         this.researchProductMetadataLicensing = researchProductMetadataLicensing;
         this.researchProductMetadataAccessPolicies = researchProductMetadataAccessPolicies;
         this.harvestable = harvestable;
+        this.originalOpenAIREId = originalOpenAIREId;
     }
 
     @Override
@@ -191,12 +200,12 @@ public class Datasource implements Identifiable {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Datasource that = (Datasource) o;
-        return versionControl == that.versionControl && thematic == that.thematic && harvestable == that.harvestable && Objects.equals(id, that.id) && Objects.equals(serviceId, that.serviceId) && Objects.equals(catalogueId, that.catalogueId) && Objects.equals(submissionPolicyURL, that.submissionPolicyURL) && Objects.equals(preservationPolicyURL, that.preservationPolicyURL) && Objects.equals(persistentIdentitySystems, that.persistentIdentitySystems) && Objects.equals(jurisdiction, that.jurisdiction) && Objects.equals(datasourceClassification, that.datasourceClassification) && Objects.equals(researchEntityTypes, that.researchEntityTypes) && Objects.equals(researchProductLicensings, that.researchProductLicensings) && Objects.equals(researchProductAccessPolicies, that.researchProductAccessPolicies) && Objects.equals(researchProductMetadataLicensing, that.researchProductMetadataLicensing) && Objects.equals(researchProductMetadataAccessPolicies, that.researchProductMetadataAccessPolicies);
+        return Objects.equals(id, that.id) && Objects.equals(serviceId, that.serviceId) && Objects.equals(catalogueId, that.catalogueId) && Objects.equals(submissionPolicyURL, that.submissionPolicyURL) && Objects.equals(preservationPolicyURL, that.preservationPolicyURL) && Objects.equals(versionControl, that.versionControl) && Objects.equals(persistentIdentitySystems, that.persistentIdentitySystems) && Objects.equals(jurisdiction, that.jurisdiction) && Objects.equals(datasourceClassification, that.datasourceClassification) && Objects.equals(researchEntityTypes, that.researchEntityTypes) && Objects.equals(thematic, that.thematic) && Objects.equals(researchProductLicensings, that.researchProductLicensings) && Objects.equals(researchProductAccessPolicies, that.researchProductAccessPolicies) && Objects.equals(researchProductMetadataLicensing, that.researchProductMetadataLicensing) && Objects.equals(researchProductMetadataAccessPolicies, that.researchProductMetadataAccessPolicies) && Objects.equals(harvestable, that.harvestable) && Objects.equals(originalOpenAIREId, that.originalOpenAIREId);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, serviceId, catalogueId, submissionPolicyURL, preservationPolicyURL, versionControl, persistentIdentitySystems, jurisdiction, datasourceClassification, researchEntityTypes, thematic, researchProductLicensings, researchProductAccessPolicies, researchProductMetadataLicensing, researchProductMetadataAccessPolicies, harvestable);
+        return Objects.hash(id, serviceId, catalogueId, submissionPolicyURL, preservationPolicyURL, versionControl, persistentIdentitySystems, jurisdiction, datasourceClassification, researchEntityTypes, thematic, researchProductLicensings, researchProductAccessPolicies, researchProductMetadataLicensing, researchProductMetadataAccessPolicies, harvestable, originalOpenAIREId);
     }
 
     @Override
@@ -218,6 +227,7 @@ public class Datasource implements Identifiable {
                 ", researchProductMetadataLicensing=" + researchProductMetadataLicensing +
                 ", researchProductMetadataAccessPolicies=" + researchProductMetadataAccessPolicies +
                 ", harvestable=" + harvestable +
+                ", originalOpenAIREId='" + originalOpenAIREId + '\'' +
                 '}';
     }
 
@@ -263,7 +273,7 @@ public class Datasource implements Identifiable {
         this.preservationPolicyURL = preservationPolicyURL;
     }
 
-    public Boolean isVersionControl() {
+    public Boolean getVersionControl() {
         return versionControl;
     }
 
@@ -303,7 +313,7 @@ public class Datasource implements Identifiable {
         this.researchEntityTypes = researchEntityTypes;
     }
 
-    public Boolean isThematic() {
+    public Boolean getThematic() {
         return thematic;
     }
 
@@ -343,11 +353,19 @@ public class Datasource implements Identifiable {
         this.researchProductMetadataAccessPolicies = researchProductMetadataAccessPolicies;
     }
 
-    public Boolean isHarvestable() {
+    public Boolean getHarvestable() {
         return harvestable;
     }
 
     public void setHarvestable(Boolean harvestable) {
         this.harvestable = harvestable;
+    }
+
+    public String getOriginalOpenAIREId() {
+        return originalOpenAIREId;
+    }
+
+    public void setOriginalOpenAIREId(String originalOpenAIREId) {
+        this.originalOpenAIREId = originalOpenAIREId;
     }
 }

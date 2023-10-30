@@ -236,26 +236,6 @@ public interface ServiceBundleService<T> extends ResourceCRUDService<T, Authenti
      */
     ServiceBundle updateEOSCIFGuidelines(String serviceId, String catalogueId, List<EOSCIFGuidelines> eoscIFGuidelines, Authentication auth);
 
-    /**
-     *
-     * @param serviceId - The ID of the Service
-     * @param catalogueId - The ID of the Catalogue
-     * @param researchCategories - Research Categories
-     * @param auth - Authentication
-     * @return {@link ServiceBundle}
-     */
-    ServiceBundle updateResearchCategories(String serviceId, String catalogueId, List<String> researchCategories, Authentication auth);
-
-    /**
-     *
-     * @param serviceId - The ID of the Service
-     * @param catalogueId - The ID of the Catalogue
-     * @param horizontalService - Does the Service consists a Horizontal Service
-     * @param auth - Authentication
-     * @return {@link ServiceBundle}
-     */
-    ServiceBundle updateHorizontalService(String serviceId, String catalogueId, boolean horizontalService, Authentication auth);
-
     ServiceBundle getOrElseReturnNull(String id);
 
     ServiceBundle getOrElseReturnNull(String id, String catalogueId);

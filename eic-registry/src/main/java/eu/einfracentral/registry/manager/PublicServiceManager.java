@@ -78,7 +78,7 @@ public class PublicServiceManager extends AbstractPublicResourceManager<ServiceB
 
         serviceBundle.getMetadata().setPublished(true);
         // create PID and set it as Alternative Identifier
-        serviceBundle.getIdentifiers().setAlternativeIdentifiers(commonMethods.createAlternativeIdentifierForPID(serviceBundle, "services/"));
+        commonMethods.determineResourceTypeAndCreateAlternativeIdentifierForPID(serviceBundle, "services/");
         ServiceBundle ret;
         logger.info(String.format("Service [%s] is being published with id [%s]", lowerLevelResourceId, serviceBundle.getId()));
         ret = super.add(serviceBundle, null);
@@ -99,7 +99,10 @@ public class PublicServiceManager extends AbstractPublicResourceManager<ServiceB
         // sets public ids to resource organisation, resource providers and related/required resources
         updateServiceIdsToPublic(ret);
 
-        ret.setIdentifiers(commonMethods.updateAlternativeIdentifiers(serviceBundle, published));
+        ret.getService().setAlternativeIdentifiers(commonMethods.updateAlternativeIdentifiers(
+                serviceBundle.getService().getAlternativeIdentifiers(),
+                published.getService().getAlternativeIdentifiers()));
+        ret.setIdentifiers(published.getIdentifiers());
         ret.setId(published.getId());
         ret.getMetadata().setPublished(true);
         logger.info(String.format("Updating public Service with id [%s]", ret.getId()));

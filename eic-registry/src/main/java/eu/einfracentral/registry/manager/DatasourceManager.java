@@ -24,10 +24,8 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.security.core.Authentication;
 import org.springframework.util.MultiValueMap;
 
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.UUID;
 
 @org.springframework.stereotype.Service
 public class DatasourceManager extends ResourceManager<DatasourceBundle> implements DatasourceService {
@@ -75,6 +73,11 @@ public class DatasourceManager extends ResourceManager<DatasourceBundle> impleme
 
     @Override
     public DatasourceBundle add(DatasourceBundle datasourceBundle, Authentication auth) {
+        // prohibit 'originalOpenAIREId' manipulation
+        if (datasourceBundle.getDatasource().getOriginalOpenAIREId() != null &&
+                !datasourceBundle.getDatasource().getOriginalOpenAIREId().equals("")) {
+            throw new ValidationException("You cannot edit field 'originalOpenAIREId");
+        }
 
         // if Datasource has ID -> check if it exists in OpenAIRE Datasources list
         if (datasourceBundle.getId() != null && !datasourceBundle.getId().equals("")) {
@@ -125,6 +128,11 @@ public class DatasourceManager extends ResourceManager<DatasourceBundle> impleme
         // check if there are actual changes in the Datasource
         if (ret.getDatasource().equals(existingDatasource.getDatasource())) {
             return ret;
+        }
+
+        // prohibit 'originalOpenAIREId' manipulation
+        if (!ret.getDatasource().getOriginalOpenAIREId().equals(existingDatasource.getDatasource().getOriginalOpenAIREId())) {
+            throw new ValidationException("You cannot edit field 'originalOpenAIREId");
         }
 
         super.validate(ret);
@@ -275,21 +283,10 @@ public class DatasourceManager extends ResourceManager<DatasourceBundle> impleme
     private void checkOpenAIREIDExistance(DatasourceBundle datasourceBundle) {
         Datasource datasource = openAIREDatasourceManager.get(datasourceBundle.getId());
         if (datasource != null) {
-            createOpenAIREAlternativeIdentifiers(datasourceBundle);
+            datasourceBundle.getDatasource().setOriginalOpenAIREId(datasourceBundle.getId());
         } else {
             throw new ValidationException(String.format("The ID [%s] you provided does not belong to an OpenAIRE Datasource", datasourceBundle.getId()));
         }
-    }
-
-    private void createOpenAIREAlternativeIdentifiers(DatasourceBundle datasourceBundle) {
-        Identifiers datasourceIdentifiers = new Identifiers();
-        List<AlternativeIdentifier> datasourceAlternativeIdentifiers = new ArrayList<>();
-        AlternativeIdentifier alternativeIdentifier = new AlternativeIdentifier();
-        alternativeIdentifier.setType("openaire");
-        alternativeIdentifier.setValue(datasourceBundle.getId());
-        datasourceAlternativeIdentifiers.add(alternativeIdentifier);
-        datasourceIdentifiers.setAlternativeIdentifiers(datasourceAlternativeIdentifiers);
-        datasourceBundle.setIdentifiers(datasourceIdentifiers);
     }
 
     public boolean isDatasourceRegisteredOnOpenAIRE(String id) {
@@ -297,18 +294,11 @@ public class DatasourceManager extends ResourceManager<DatasourceBundle> impleme
         boolean found = false;
         String registerBy;
         if (datasourceBundle != null) {
-            Identifiers identifiers = datasourceBundle.getIdentifiers();
-            if (identifiers != null) {
-                List<AlternativeIdentifier> alternativeIdentifiers = identifiers.getAlternativeIdentifiers();
-                if (alternativeIdentifiers != null && !alternativeIdentifiers.isEmpty()) {
-                    for (AlternativeIdentifier alternativeIdentifier : alternativeIdentifiers) {
-                        if (alternativeIdentifier.getType().equals("openaire")) {
-                            registerBy = openAIREDatasourceManager.getRegisterBy(alternativeIdentifier.getValue());
-                            if (registerBy != null && !registerBy.equals("")) {
-                                found = true;
-                            }
-                        }
-                    }
+            String originalOpenAIREId = datasourceBundle.getDatasource().getOriginalOpenAIREId();
+            if (originalOpenAIREId != null && !originalOpenAIREId.equals("")) {
+                registerBy = openAIREDatasourceManager.getRegisterBy(originalOpenAIREId);
+                if (registerBy != null && !registerBy.equals("")) {
+                    found = true;
                 }
             }
         } else {

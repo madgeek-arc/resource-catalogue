@@ -97,7 +97,7 @@ public class PublicDatasourceManager extends AbstractPublicResourceManager<Datas
         // sets public ids to providerId, serviceId
         updateDatasourceIdsToPublic(datasourceBundle);
 
-        ret.setIdentifiers(commonMethods.updateAlternativeIdentifiers(datasourceBundle, published));
+        ret.setIdentifiers(published.getIdentifiers());
         ret.setId(published.getId());
         ret.getMetadata().setPublished(true);
         logger.info(String.format("Updating public Datasource with id [%s]", ret.getId()));

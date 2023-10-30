@@ -39,24 +39,4 @@ public class ResourceExtrasController {
         ServiceBundle serviceBundle = serviceBundleService.updateEOSCIFGuidelines(serviceId, catalogueId, eoscIFGuidelines, auth);
         return new ResponseEntity<>(serviceBundle, HttpStatus.OK);
     }
-
-    @ApiOperation(value = "Update a specific Service's Research Categories field")
-    @PutMapping(path = "/update/researchCategories", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
-    public ResponseEntity<ServiceBundle> updateResearchCategories(@RequestParam String serviceId, @RequestParam String catalogueId,
-                                                                  @RequestBody List<String> researchCategories,
-                                                                  @ApiIgnore Authentication auth) {
-        ServiceBundle serviceBundle = serviceBundleService.updateResearchCategories(serviceId, catalogueId, researchCategories, auth);
-        return new ResponseEntity<>(serviceBundle, HttpStatus.OK);
-    }
-
-    @ApiOperation(value = "Update Service's Horizontal Service field")
-    @PutMapping(path = "/update/horizontalService", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
-    public ResponseEntity<ServiceBundle> updateHorizontalService(@RequestParam String serviceId, @RequestParam String catalogueId,
-                                                                 @RequestParam boolean horizontalService,
-                                                                 @ApiIgnore Authentication auth) {
-        ServiceBundle serviceBundle = serviceBundleService.updateHorizontalService(serviceId, catalogueId, horizontalService, auth);
-        return new ResponseEntity<>(serviceBundle, HttpStatus.OK);
-    }
 }

@@ -74,7 +74,7 @@ public class PublicProviderManager extends ResourceManager<ProviderBundle> imple
         commonMethods.restrictPrefixRepetitionOnPublicResources(providerBundle.getId(), providerBundle.getProvider().getCatalogueId());
         providerBundle.getMetadata().setPublished(true);
         // create PID and set it as Alternative Identifier
-        providerBundle.getIdentifiers().setAlternativeIdentifiers(commonMethods.createAlternativeIdentifierForPID(providerBundle, "providers/"));
+        commonMethods.determineResourceTypeAndCreateAlternativeIdentifierForPID(providerBundle, "providers/");
         ProviderBundle ret;
         logger.info(String.format("Provider [%s] is being published with id [%s]", lowerLevelProviderId, providerBundle.getId()));
         ret = super.add(providerBundle, null);
@@ -91,7 +91,11 @@ public class PublicProviderManager extends ResourceManager<ProviderBundle> imple
         } catch (IllegalAccessException | InvocationTargetException e) {
             e.printStackTrace();
         }
-        ret.setIdentifiers(commonMethods.updateAlternativeIdentifiers(providerBundle, published));
+
+        ret.getProvider().setAlternativeIdentifiers(commonMethods.updateAlternativeIdentifiers(
+                providerBundle.getProvider().getAlternativeIdentifiers(),
+                published.getProvider().getAlternativeIdentifiers()));
+        ret.setIdentifiers(published.getIdentifiers());
         ret.setId(published.getId());
         ret.getMetadata().setPublished(true);
         logger.info(String.format("Updating public Provider with id [%s]", ret.getId()));
