@@ -702,4 +702,15 @@ public class ProviderResourcesCommonMethods {
             throw new ValidationException("Resource with ID [%s] cannot have a Public registry" + id);
         }
     }
+
+    public void prohibitEOSCRelatedPIDs(List<AlternativeIdentifier> alternativeIdentifiers) {
+        // prohibit EOSC related Alternative Identifier Types
+        if (alternativeIdentifiers != null && !alternativeIdentifiers.isEmpty()) {
+            for (AlternativeIdentifier alternativeIdentifier : alternativeIdentifiers) {
+                if (alternativeIdentifier.getType().toLowerCase().contains("eosc")) {
+                    throw new ValidationException("You cannot create an EOSC related PID. Found in field 'alternativeIdentifiers'");
+                }
+            }
+        }
+    }
 }

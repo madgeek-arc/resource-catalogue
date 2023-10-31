@@ -133,7 +133,7 @@ public class ServiceBundleManager extends AbstractServiceBundleManager<ServiceBu
         }
 
         // prohibit EOSC related Alternative Identifier Types
-        prohibitEOSCRelatedPIDs(serviceBundle);
+        commonMethods.prohibitEOSCRelatedPIDs(serviceBundle.getService().getAlternativeIdentifiers());
 
         serviceBundle.setId(idCreator.createServiceId(serviceBundle));
         validate(serviceBundle);
@@ -224,7 +224,7 @@ public class ServiceBundleManager extends AbstractServiceBundleManager<ServiceBu
         }
 
         // prohibit EOSC related Alternative Identifier Types
-        prohibitEOSCRelatedPIDs(serviceBundle);
+        commonMethods.prohibitEOSCRelatedPIDs(ret.getService().getAlternativeIdentifiers());
 
         User user = User.of(auth);
 
@@ -732,18 +732,6 @@ public class ServiceBundleManager extends AbstractServiceBundleManager<ServiceBu
 
     public Paging<Bundle<?>> getAllForAdminWithAuditStates(FacetFilter ff, Set<String> auditState) {
         return commonMethods.getAllForAdminWithAuditStates(ff, auditState, this.resourceType.getName());
-    }
-
-    private void prohibitEOSCRelatedPIDs(ServiceBundle serviceBundle) {
-        // prohibit EOSC related Alternative Identifier Types
-        if (serviceBundle.getService().getAlternativeIdentifiers() != null &&
-                !serviceBundle.getService().getAlternativeIdentifiers().isEmpty()) {
-            for (AlternativeIdentifier alternativeIdentifier : serviceBundle.getService().getAlternativeIdentifiers()) {
-                if (alternativeIdentifier.getType().toLowerCase().contains("eosc")) {
-                    throw new ValidationException("You cannot create an EOSC related PID. Found in Service -> Alternative Identifiers");
-                }
-            }
-        }
     }
 
 }
