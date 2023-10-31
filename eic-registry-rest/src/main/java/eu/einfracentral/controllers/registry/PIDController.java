@@ -55,68 +55,56 @@ public class PIDController {
         return new ResponseEntity<>(null, HttpStatus.OK);
     }
 
-    //TODO: THIS NEEDS TO BE USED BEFORE ALTERNATIVE IDENTIFIERS MIGRATION, THEN DELETE
-//    @ApiIgnore
-//    @PutMapping(path = "updateAllHandles", produces = {MediaType.APPLICATION_JSON_VALUE})
-//    @PreAuthorize("hasRole('ROLE_ADMIN')")
-//    public void updateAllHandles(@ApiIgnore Authentication auth) {
-//        FacetFilter ff = createFacetFilter();
-//        List<ProviderBundle> allPublishedProviders = providerService.getAll(ff, auth).getResults();
-//        for (ProviderBundle providerBundle : allPublishedProviders) {
-//            List<AlternativeIdentifier> alternativeIdentifiers = providerBundle.getIdentifiers().getAlternativeIdentifiers();
-//            for (AlternativeIdentifier alternativeIdentifier : alternativeIdentifiers) {
-//                if (alternativeIdentifier.getType().equalsIgnoreCase("PID") ||
-//                        alternativeIdentifier.getType().equalsIgnoreCase("EOSC PID")) {
-//                    pidService.updatePID(alternativeIdentifier.getValue(), providerBundle.getId(), "providers/");
-//                    break;
-//                }
-//            }
-//        }
-//        List<ServiceBundle> allPublishedServices = serviceService.getAll(ff, auth).getResults();
-//        for (ServiceBundle serviceBundle : allPublishedServices) {
-//            List<AlternativeIdentifier> alternativeIdentifiers = serviceBundle.getIdentifiers().getAlternativeIdentifiers();
-//            for (AlternativeIdentifier alternativeIdentifier : alternativeIdentifiers) {
-//                if (alternativeIdentifier.getType().equalsIgnoreCase("PID") ||
-//                        alternativeIdentifier.getType().equalsIgnoreCase("EOSC PID")) {
-//                    pidService.updatePID(alternativeIdentifier.getValue(), serviceBundle.getId(), "services/");
-//                    break;
-//                }
-//            }
-//        }
-//        List<DatasourceBundle> allPublishedDatasources = datasourceService.getAll(ff, auth).getResults();
-//        for (DatasourceBundle datasourceBundle : allPublishedDatasources) {
-//            List<AlternativeIdentifier> alternativeIdentifiers = datasourceBundle.getIdentifiers().getAlternativeIdentifiers();
-//            for (AlternativeIdentifier alternativeIdentifier : alternativeIdentifiers) {
-//                if (alternativeIdentifier.getType().equalsIgnoreCase("PID") ||
-//                        alternativeIdentifier.getType().equalsIgnoreCase("EOSC PID")) {
-//                    pidService.updatePID(alternativeIdentifier.getValue(), datasourceBundle.getId(), "services/");
-//                    break;
-//                }
-//            }
-//        }
-//        List<TrainingResourceBundle> allPublishedTrainingResources = trainingResourceService.getAll(ff, auth).getResults();
-//        for (TrainingResourceBundle trainingResourceBundle : allPublishedTrainingResources) {
-//            List<AlternativeIdentifier> alternativeIdentifiers = trainingResourceBundle.getIdentifiers().getAlternativeIdentifiers();
-//            for (AlternativeIdentifier alternativeIdentifier : alternativeIdentifiers) {
-//                if (alternativeIdentifier.getType().equalsIgnoreCase("PID") ||
-//                        alternativeIdentifier.getType().equalsIgnoreCase("EOSC PID")) {
-//                    pidService.updatePID(alternativeIdentifier.getValue(), trainingResourceBundle.getId(), "trainings/");
-//                    break;
-//                }
-//            }
-//        }
-//        List<InteroperabilityRecordBundle> allInteroperabilityRecords = interoperabilityRecordService.getAll(ff, auth).getResults();
-//        for (InteroperabilityRecordBundle interoperabilityRecordBundle : allInteroperabilityRecords) {
-//            List<AlternativeIdentifier> alternativeIdentifiers = interoperabilityRecordBundle.getIdentifiers().getAlternativeIdentifiers();
-//            for (AlternativeIdentifier alternativeIdentifier : alternativeIdentifiers) {
-//                if (alternativeIdentifier.getType().equalsIgnoreCase("PID") ||
-//                        alternativeIdentifier.getType().equalsIgnoreCase("EOSC PID")) {
-//                    pidService.updatePID(alternativeIdentifier.getValue(), interoperabilityRecordBundle.getId(), "guidelines/");
-//                    break;
-//                }
-//            }
-//        }
-//    }
+    @ApiIgnore
+    @PutMapping(path = "updateAllHandles", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public void updateAllHandles(@ApiIgnore Authentication auth) {
+        FacetFilter ff = createFacetFilter();
+        List<ProviderBundle> allPublishedProviders = providerService.getAll(ff, auth).getResults();
+        for (ProviderBundle providerBundle : allPublishedProviders) {
+            List<AlternativeIdentifier> alternativeIdentifiers = providerBundle.getProvider().getAlternativeIdentifiers();
+            for (AlternativeIdentifier alternativeIdentifier : alternativeIdentifiers) {
+                if (alternativeIdentifier.getType().equalsIgnoreCase("PID") ||
+                        alternativeIdentifier.getType().equalsIgnoreCase("EOSC PID")) {
+                    pidService.updatePID(alternativeIdentifier.getValue(), providerBundle.getId(), "providers/");
+                    break;
+                }
+            }
+        }
+        List<ServiceBundle> allPublishedServices = serviceService.getAll(ff, auth).getResults();
+        for (ServiceBundle serviceBundle : allPublishedServices) {
+            List<AlternativeIdentifier> alternativeIdentifiers = serviceBundle.getService().getAlternativeIdentifiers();
+            for (AlternativeIdentifier alternativeIdentifier : alternativeIdentifiers) {
+                if (alternativeIdentifier.getType().equalsIgnoreCase("PID") ||
+                        alternativeIdentifier.getType().equalsIgnoreCase("EOSC PID")) {
+                    pidService.updatePID(alternativeIdentifier.getValue(), serviceBundle.getId(), "services/");
+                    break;
+                }
+            }
+        }
+        List<TrainingResourceBundle> allPublishedTrainingResources = trainingResourceService.getAll(ff, auth).getResults();
+        for (TrainingResourceBundle trainingResourceBundle : allPublishedTrainingResources) {
+            List<AlternativeIdentifier> alternativeIdentifiers = trainingResourceBundle.getTrainingResource().getAlternativeIdentifiers();
+            for (AlternativeIdentifier alternativeIdentifier : alternativeIdentifiers) {
+                if (alternativeIdentifier.getType().equalsIgnoreCase("PID") ||
+                        alternativeIdentifier.getType().equalsIgnoreCase("EOSC PID")) {
+                    pidService.updatePID(alternativeIdentifier.getValue(), trainingResourceBundle.getId(), "trainings/");
+                    break;
+                }
+            }
+        }
+        List<InteroperabilityRecordBundle> allInteroperabilityRecords = interoperabilityRecordService.getAll(ff, auth).getResults();
+        for (InteroperabilityRecordBundle interoperabilityRecordBundle : allInteroperabilityRecords) {
+            List<AlternativeIdentifier> alternativeIdentifiers = interoperabilityRecordBundle.getInteroperabilityRecord().getAlternativeIdentifiers();
+            for (AlternativeIdentifier alternativeIdentifier : alternativeIdentifiers) {
+                if (alternativeIdentifier.getType().equalsIgnoreCase("PID") ||
+                        alternativeIdentifier.getType().equalsIgnoreCase("EOSC PID")) {
+                    pidService.updatePID(alternativeIdentifier.getValue(), interoperabilityRecordBundle.getId(), "guidelines/");
+                    break;
+                }
+            }
+        }
+    }
 
     private FacetFilter createFacetFilter() {
         FacetFilter ff = new FacetFilter();
