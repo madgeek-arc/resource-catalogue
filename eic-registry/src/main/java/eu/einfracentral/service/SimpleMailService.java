@@ -79,7 +79,7 @@ public class SimpleMailService implements MailService {
             try {
                 transport = session.getTransport();
                 InternetAddress sender = new InternetAddress(from);
-                MimeMessage message = new MimeMessage(session);
+                Message message = new MimeMessage(session);
                 message.setFrom(sender);
                 if (to != null) {
                     message.setRecipients(Message.RecipientType.TO, createAddresses(to));
@@ -89,12 +89,7 @@ public class SimpleMailService implements MailService {
                 }
                 message.setRecipient(Message.RecipientType.BCC, sender);
                 message.setSubject(subject);
-
-                // use mime message helper to create html message
-                MimeMessageHelper msgHelper = new MimeMessageHelper(message, false, "utf-8");
-                msgHelper.setText(text, true);
-                // apply changes to mime message before sending
-                message.saveChanges();
+                message.setContent(text, "text/html");
 
                 transport.connect();
                 Transport.send(message);
