@@ -79,7 +79,7 @@ public class SimpleMailService implements MailService {
             try {
                 transport = session.getTransport();
                 InternetAddress sender = new InternetAddress(from);
-                Message message = new MimeMessage(session);
+                MimeMessage message = new MimeMessage(session);
                 message.setFrom(sender);
                 if (to != null) {
                     message.setRecipients(Message.RecipientType.TO, createAddresses(to));
@@ -91,7 +91,7 @@ public class SimpleMailService implements MailService {
                 message.setSubject(subject);
 
                 message.setHeader("Content-Type", "text/html");
-                message.setContent(text, "text/html");
+                message.setText(text, null, "html");
 
                 transport.connect();
                 Transport.send(message);
