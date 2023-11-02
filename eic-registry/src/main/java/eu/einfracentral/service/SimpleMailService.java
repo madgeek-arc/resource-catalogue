@@ -10,9 +10,7 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import javax.mail.*;
-import javax.mail.internet.AddressException;
-import javax.mail.internet.InternetAddress;
-import javax.mail.internet.MimeMessage;
+import javax.mail.internet.*;
 import javax.validation.constraints.NotNull;
 import java.util.*;
 import java.util.regex.Matcher;
@@ -90,7 +88,7 @@ public class SimpleMailService implements MailService {
                 }
                 message.setRecipient(Message.RecipientType.BCC, sender);
                 message.setSubject(subject);
-                message.setContent(text, "text/html");
+                message.setContent(text, "text/html; charset=utf-8");
                 transport.connect();
                 Transport.send(message);
             } catch (MessagingException e) {
