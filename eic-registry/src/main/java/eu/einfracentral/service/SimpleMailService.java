@@ -5,6 +5,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
+import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
@@ -78,7 +79,7 @@ public class SimpleMailService implements MailService {
             try {
                 transport = session.getTransport();
                 InternetAddress sender = new InternetAddress(from);
-                Message message = new MimeMessage(session);
+                MimeMessage message = new MimeMessage(session);
                 message.setFrom(sender);
                 if (to != null) {
                     message.setRecipients(Message.RecipientType.TO, createAddresses(to));
@@ -88,7 +89,13 @@ public class SimpleMailService implements MailService {
                 }
                 message.setRecipient(Message.RecipientType.BCC, sender);
                 message.setSubject(subject);
-                message.setContent(text, "text/html; charset=utf-8");
+
+                // use mime message helper to create html message
+                MimeMessageHelper msgHelper = new MimeMessageHelper(message, false, "utf-8");
+                msgHelper.setText(text, true);
+                // apply changes to mime message before sending
+                message.saveChanges();
+
                 transport.connect();
                 Transport.send(message);
             } catch (MessagingException e) {
