@@ -90,8 +90,8 @@ public class SimpleMailService implements MailService {
                 message.setRecipient(Message.RecipientType.BCC, sender);
                 message.setSubject(subject);
 
-                message.setHeader("Content-Type", "text/html");
-                message.setText(text, null, "html");
+                message.setText(text, "utf-8", "html");
+                message.saveChanges();
 
                 transport.connect();
                 Transport.send(message);
