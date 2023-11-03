@@ -30,13 +30,6 @@
     },
     {
       "multivalued": false,
-      "name": "original_openaire_id",
-      "label": "Original OpenAIRE ID",
-      "path": "//*[local-name()='originalOpenAIREId']/text()",
-      "type": "java.lang.String"
-    },
-    {
-      "multivalued": false,
       "name": "registeredBy",
       "path": "//*[local-name()='metadata']/*[local-name()='registeredBy']/text()",
       "type": "java.lang.String"
@@ -132,6 +125,13 @@
       "path": "//*[local-name()='suspended']/text()",
       "defaultValue": false,
       "type": "java.lang.Boolean"
+    },
+    {
+      "multivalued": false,
+      "name": "original_openaire_id",
+      "label": "Original OpenAIRE ID",
+      "path": "//*[local-name()='datasourceBundle']/*[local-name()='originalOpenAIREId']/text()",
+      "type": "java.lang.String"
     },
     {
       "multivalued": false,
