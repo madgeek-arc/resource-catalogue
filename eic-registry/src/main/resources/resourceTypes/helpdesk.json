@@ -165,6 +165,12 @@
     },
     {
       "multivalued": false,
+      "name": "published",
+      "path": "//*[local-name()='metadata']/*[local-name()='published']/text()",
+      "type": "java.lang.Boolean"
+    },
+    {
+      "multivalued": false,
       "name": "active",
       "path": "//*[local-name()='active']/text()",
       "defaultValue": false,
