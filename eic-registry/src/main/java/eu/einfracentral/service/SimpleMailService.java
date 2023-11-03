@@ -5,17 +5,15 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
-import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import javax.mail.*;
-import javax.mail.internet.*;
-import javax.validation.constraints.NotNull;
+import javax.mail.internet.AddressException;
+import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeMessage;
 import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 @Component
@@ -74,35 +72,7 @@ public class SimpleMailService implements MailService {
     @Async
     @Override
     public void sendMail(List<String> to, List<String> cc, String subject, String text) throws MessagingException {
-        if (enableEmails) {
-            Transport transport = null;
-            try {
-                transport = session.getTransport();
-                InternetAddress sender = new InternetAddress(from);
-                MimeMessage message = new MimeMessage(session);
-                message.setFrom(sender);
-                if (to != null) {
-                    message.setRecipients(Message.RecipientType.TO, createAddresses(to));
-                }
-                if (cc != null) {
-                    message.setRecipients(Message.RecipientType.CC, createAddresses(cc));
-                }
-                message.setRecipient(Message.RecipientType.BCC, sender);
-                message.setSubject(subject);
-
-                message.setText(text, "utf-8", "html");
-                message.saveChanges();
-
-                transport.connect();
-                Transport.send(message);
-            } catch (MessagingException e) {
-                logger.error("ERROR", e);
-            } finally {
-                if (transport != null) {
-                    transport.close();
-                }
-            }
-        }
+        sendMail(to, cc, Collections.singletonList(from), subject, text);
     }
 
     @Override
@@ -144,7 +114,7 @@ public class SimpleMailService implements MailService {
     void sendMessage(Message message, List<String> to, List<String> cc, List<String> bcc) throws MessagingException {
         boolean sent = false;
         int attempts = 0;
-        while(!sent && attempts < 20) {
+        while (!sent && attempts < 20) {
             try {
                 attempts++;
                 Transport.send(message);
