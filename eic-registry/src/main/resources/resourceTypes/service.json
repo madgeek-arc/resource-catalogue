@@ -169,6 +169,13 @@
     },
     {
       "multivalued": true,
+      "name": "service_categories",
+      "label": "Service Category",
+      "path": "//*[local-name()='service']//*[local-name()='serviceCategory']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": true,
       "name": "marketplace_locations",
       "label": "Marketplace Location",
       "path": "//*[local-name()='service']//*[local-name()='marketplaceLocation']/text()",
