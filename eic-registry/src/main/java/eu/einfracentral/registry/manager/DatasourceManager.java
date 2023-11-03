@@ -74,8 +74,8 @@ public class DatasourceManager extends ResourceManager<DatasourceBundle> impleme
     @Override
     public DatasourceBundle add(DatasourceBundle datasourceBundle, Authentication auth) {
         // prohibit 'originalOpenAIREId' manipulation
-        if (datasourceBundle.getDatasource().getOriginalOpenAIREId() != null &&
-                !datasourceBundle.getDatasource().getOriginalOpenAIREId().equals("")) {
+        if (datasourceBundle.getOriginalOpenAIREId() != null &&
+                !datasourceBundle.getOriginalOpenAIREId().equals("")) {
             throw new ValidationException("You cannot edit field 'originalOpenAIREId");
         }
 
@@ -131,7 +131,7 @@ public class DatasourceManager extends ResourceManager<DatasourceBundle> impleme
         }
 
         // prohibit 'originalOpenAIREId' manipulation
-        if (!ret.getDatasource().getOriginalOpenAIREId().equals(existingDatasource.getDatasource().getOriginalOpenAIREId())) {
+        if (!ret.getOriginalOpenAIREId().equals(existingDatasource.getOriginalOpenAIREId())) {
             throw new ValidationException("You cannot edit field 'originalOpenAIREId");
         }
 
@@ -283,7 +283,7 @@ public class DatasourceManager extends ResourceManager<DatasourceBundle> impleme
     private void checkOpenAIREIDExistance(DatasourceBundle datasourceBundle) {
         Datasource datasource = openAIREDatasourceManager.get(datasourceBundle.getId());
         if (datasource != null) {
-            datasourceBundle.getDatasource().setOriginalOpenAIREId(datasourceBundle.getId());
+            datasourceBundle.setOriginalOpenAIREId(datasourceBundle.getId());
         } else {
             throw new ValidationException(String.format("The ID [%s] you provided does not belong to an OpenAIRE Datasource", datasourceBundle.getId()));
         }
@@ -294,7 +294,7 @@ public class DatasourceManager extends ResourceManager<DatasourceBundle> impleme
         boolean found = false;
         String registerBy;
         if (datasourceBundle != null) {
-            String originalOpenAIREId = datasourceBundle.getDatasource().getOriginalOpenAIREId();
+            String originalOpenAIREId = datasourceBundle.getOriginalOpenAIREId();
             if (originalOpenAIREId != null && !originalOpenAIREId.equals("")) {
                 registerBy = openAIREDatasourceManager.getRegisterBy(originalOpenAIREId);
                 if (registerBy != null && !registerBy.equals("")) {

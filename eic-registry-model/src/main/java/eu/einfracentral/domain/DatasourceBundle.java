@@ -11,6 +11,12 @@ public class DatasourceBundle extends Bundle<Datasource> {
     @XmlElement
     private String status;
 
+    /**
+     * Original OpenAIRE ID, if Datasource already exists in the OpenAIRE Catalogue
+     */
+    @XmlElement
+    private String originalOpenAIREId;
+
     public DatasourceBundle() {
         // No arg constructor
     }
@@ -31,10 +37,18 @@ public class DatasourceBundle extends Bundle<Datasource> {
         this.setMetadata(null);
     }
 
+    public DatasourceBundle(Datasource datasource, String status, String originalOpenAIREId) {
+        this.setDatasource(datasource);
+        this.status = status;
+        this.originalOpenAIREId = originalOpenAIREId;
+        this.setMetadata(null);
+    }
+
     @Override
     public String toString() {
         return "DatasourceBundle{" +
                 "status='" + status + '\'' +
+                ", originalOpenAIREId='" + originalOpenAIREId + '\'' +
                 '}';
     }
 
@@ -65,4 +79,11 @@ public class DatasourceBundle extends Bundle<Datasource> {
         this.status = status;
     }
 
+    public String getOriginalOpenAIREId() {
+        return originalOpenAIREId;
+    }
+
+    public void setOriginalOpenAIREId(String originalOpenAIREId) {
+        this.originalOpenAIREId = originalOpenAIREId;
+    }
 }

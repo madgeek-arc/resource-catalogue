@@ -700,12 +700,6 @@ It is also possible to select Not a legal entity.]]></xs:documentation>
         </xs:annotation>
       </xs:element>
             
-      <xs:element minOccurs="0" name="originalOpenAIREId" type="xs:string">
-        <xs:annotation>
-          <xs:documentation><![CDATA[Original OpenAIRE ID, if Datasource already exists in the OpenAIRE Catalogue]]></xs:documentation>
-        </xs:annotation>
-      </xs:element>
-            
       <xs:element minOccurs="0" name="persistentIdentitySystems">
         <xs:annotation>
           <xs:documentation><![CDATA[The persistent identifier systems that are used by the Data Source to identify the EntityType it supports]]></xs:documentation>
@@ -912,6 +906,12 @@ Criteria for submitting content to the repository as well as product preparation
         <xs:sequence>
                     
           <xs:element minOccurs="0" ref="tns:datasource"/>
+                    
+          <xs:element minOccurs="0" name="originalOpenAIREId" type="xs:string">
+            <xs:annotation>
+              <xs:documentation><![CDATA[Original OpenAIRE ID, if Datasource already exists in the OpenAIRE Catalogue]]></xs:documentation>
+            </xs:annotation>
+          </xs:element>
                     
           <xs:element minOccurs="0" name="status" type="xs:string"/>
                   
