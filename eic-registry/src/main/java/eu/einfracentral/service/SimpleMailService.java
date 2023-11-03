@@ -109,7 +109,7 @@ public class SimpleMailService implements MailService {
     public void sendMail(List<String> to, List<String> cc, List<String> bcc, String subject, String text) throws MessagingException {
         if (enableEmails) {
             Transport transport = null;
-            Message message;
+            MimeMessage message;
             try {
                 transport = session.getTransport();
                 InternetAddress sender = new InternetAddress(from);
@@ -125,7 +125,10 @@ public class SimpleMailService implements MailService {
                     message.setRecipients(Message.RecipientType.BCC, createAddresses(bcc));
                 }
                 message.setSubject(subject);
-                message.setText(text);
+
+                message.setText(text, "utf-8", "html");
+                message.saveChanges();
+
                 transport.connect();
                 sendMessage(message, to, cc, bcc);
             } catch (MessagingException e) {
