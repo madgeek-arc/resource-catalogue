@@ -65,20 +65,6 @@
       "type": "java.lang.String"
     },
     {
-      "multivalued": true,
-      "name": "alternative_identifiers_types",
-      "label": "Alternative Identifier Type",
-      "path": "//*[local-name()='identifiers']/*[local-name()='alternativeIdentifiers']/*[local-name()='alternativeIdentifier']/*[local-name()='type']/text()",
-      "type": "java.lang.String"
-    },
-    {
-      "multivalued": true,
-      "name": "alternative_identifiers_values",
-      "label": "Alternative Identifier Value",
-      "path": "//*[local-name()='identifiers']/*[local-name()='alternativeIdentifiers']/*[local-name()='alternativeIdentifier']/*[local-name()='value']/text()",
-      "type": "java.lang.String"
-    },
-    {
       "multivalued": false,
       "name": "latestUpdateActionType",
       "path": "//*[local-name()='latestUpdateInfo']/*[local-name()='actionType']/text()",
@@ -139,6 +125,13 @@
       "path": "//*[local-name()='suspended']/text()",
       "defaultValue": false,
       "type": "java.lang.Boolean"
+    },
+    {
+      "multivalued": false,
+      "name": "original_openaire_id",
+      "label": "Original OpenAIRE ID",
+      "path": "//*[local-name()='datasourceBundle']/*[local-name()='originalOpenAIREId']/text()",
+      "type": "java.lang.String"
     },
     {
       "multivalued": false,

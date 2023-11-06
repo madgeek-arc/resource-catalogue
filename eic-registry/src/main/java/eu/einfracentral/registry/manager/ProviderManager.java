@@ -132,6 +132,9 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
 
         provider = onboard(provider, catalogueId, auth);
 
+        // prohibit EOSC related Alternative Identifier Types
+        commonMethods.prohibitEOSCRelatedPIDs(provider.getProvider().getAlternativeIdentifiers());
+
         provider.setId(idCreator.createProviderId(provider.getProvider()));
         addAuthenticatedUser(provider.getProvider(), auth);
         validate(provider);
@@ -174,6 +177,9 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         } else {
             commonMethods.checkCatalogueIdConsistency(ret, catalogueId);
         }
+
+        // prohibit EOSC related Alternative Identifier Types
+        commonMethods.prohibitEOSCRelatedPIDs(ret.getProvider().getAlternativeIdentifiers());
 
         // block Public Provider update
         if (ret.getMetadata().isPublished()){

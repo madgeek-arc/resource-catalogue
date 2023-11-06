@@ -553,45 +553,6 @@ public abstract class AbstractServiceBundleManager<T extends ServiceBundle> exte
         return bundle;
     }
 
-    public ServiceBundle updateResearchCategories(String resourceId, String catalogueId, List<String> researchCategories, Authentication auth) {
-        T bundle = get(resourceId, catalogueId);
-        blockUpdateIfResourceIsPublished(bundle);
-        ResourceExtras resourceExtras = bundle.getResourceExtras();
-        if (resourceExtras == null) {
-            ResourceExtras newResourceExtras = new ResourceExtras();
-            List<String> newResearchCategories = new ArrayList<>(researchCategories);
-            newResourceExtras.setResearchCategories(newResearchCategories);
-            bundle.setResourceExtras(newResourceExtras);
-        } else {
-            bundle.getResourceExtras().setResearchCategories(researchCategories);
-        }
-        createLoggingInfoEntriesForResourceExtraUpdates(bundle, auth);
-        validate(bundle);
-        update(bundle, auth);
-        logger.info("User '{}'-'{}' updated field researchCategories of the Resource '{}' with value '{}'",
-                User.of(auth).getFullName(), User.of(auth).getEmail(), resourceId, researchCategories);
-        return bundle;
-    }
-
-    public ServiceBundle updateHorizontalService(String resourceId, String catalogueId, boolean horizontalService, Authentication auth) {
-        T bundle = get(resourceId, catalogueId);
-        blockUpdateIfResourceIsPublished(bundle);
-        ResourceExtras resourceExtras = bundle.getResourceExtras();
-        if (resourceExtras == null) {
-            ResourceExtras newResourceExtras = new ResourceExtras();
-            newResourceExtras.setHorizontalService(horizontalService);
-            bundle.setResourceExtras(newResourceExtras);
-        } else {
-            resourceExtras.setHorizontalService(horizontalService);
-        }
-        createLoggingInfoEntriesForResourceExtraUpdates(bundle, auth);
-        validate(bundle);
-        update(bundle, auth);
-        logger.info("User '{}'-'{}' updated the field horizontalService of the Resource '{}' with value '{}'",
-                User.of(auth).getFullName(), User.of(auth).getEmail(), resourceId, horizontalService);
-        return bundle;
-    }
-
     private void blockUpdateIfResourceIsPublished(ServiceBundle serviceBundle) { //FIXME: DOES NOT WORK AS INTENDED
         if (serviceBundle.getMetadata().isPublished()) {
             throw new AccessDeniedException("You cannot directly update a Public Resource.");

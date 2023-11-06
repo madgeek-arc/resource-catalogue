@@ -325,26 +325,79 @@ public class ProviderResourcesCommonMethods {
         return loggingInfoList;
     }
 
-    public List<AlternativeIdentifier> createAlternativeIdentifierForPID(Bundle<?> bundle, String resourceTypePath) {
-        if (bundle.getMetadata().isPublished()) {
-            String pid = ShortHashGenerator(bundle.getId());
-            AlternativeIdentifier alternativeIdentifier = new AlternativeIdentifier();
-            alternativeIdentifier.setType("PID");
-            alternativeIdentifier.setValue(pid);
-            if (bundle.getIdentifiers() != null) {
-                postPID(bundle.getId(), pid, resourceTypePath);
-                List<AlternativeIdentifier> alternativeIdentifiers = bundle.getIdentifiers().getAlternativeIdentifiers();
-                if (alternativeIdentifiers != null && !alternativeIdentifiers.isEmpty()) {
-                    alternativeIdentifiers.add(alternativeIdentifier);
-                    return alternativeIdentifiers;
-                } else {
-                    List<AlternativeIdentifier> newAlternativeIdentifiers = new ArrayList<>();
-                    newAlternativeIdentifiers.add(alternativeIdentifier);
-                    return newAlternativeIdentifiers;
+    public void determineResourceTypeAndCreateAlternativeIdentifierForPID(Bundle<?> bundle, String resourceTypePath) {
+        AlternativeIdentifier alternativeIdentifier;
+        List<AlternativeIdentifier> alternativeIdentifiers = new ArrayList<>();
+        List<AlternativeIdentifier> existingAlternativeIdentifiers;
+        switch (resourceTypePath) {
+            case "providers/":
+                ProviderBundle providerBundle = (ProviderBundle) bundle;
+                existingAlternativeIdentifiers = providerBundle.getProvider().getAlternativeIdentifiers();
+                alternativeIdentifier = createAlternativeIdentifierForPID(providerBundle, resourceTypePath);
+                if (alternativeIdentifier != null) {
+                    if (existingAlternativeIdentifiers != null && !existingAlternativeIdentifiers.isEmpty()) {
+                        existingAlternativeIdentifiers.add(alternativeIdentifier);
+                    } else {
+                        alternativeIdentifiers.add(alternativeIdentifier);
+                        providerBundle.getProvider().setAlternativeIdentifiers(alternativeIdentifiers);
+                    }
                 }
-            } else {
-                throw new ValidationException("Public Resource with ID {} has null Identifiers (originalId)" + bundle.getId());
-            }
+                break;
+            case "services/":
+                ServiceBundle serviceBundle = (ServiceBundle) bundle;
+                existingAlternativeIdentifiers = serviceBundle.getService().getAlternativeIdentifiers();
+                alternativeIdentifier = createAlternativeIdentifierForPID(serviceBundle, resourceTypePath);
+                if (alternativeIdentifier != null) {
+                    if (existingAlternativeIdentifiers != null && !existingAlternativeIdentifiers.isEmpty()) {
+                        existingAlternativeIdentifiers.add(alternativeIdentifier);
+                    } else {
+                        alternativeIdentifiers.add(alternativeIdentifier);
+                        serviceBundle.getService().setAlternativeIdentifiers(alternativeIdentifiers);
+                    }
+                }
+                break;
+            case "trainings/":
+                TrainingResourceBundle trainingResourceBundle = (TrainingResourceBundle) bundle;
+                existingAlternativeIdentifiers = trainingResourceBundle.getTrainingResource().getAlternativeIdentifiers();
+                alternativeIdentifier = createAlternativeIdentifierForPID(trainingResourceBundle, resourceTypePath);
+                if (alternativeIdentifier != null) {
+                    if (existingAlternativeIdentifiers != null && !existingAlternativeIdentifiers.isEmpty()) {
+                        existingAlternativeIdentifiers.add(alternativeIdentifier);
+                    } else {
+                        alternativeIdentifiers.add(alternativeIdentifier);
+                        trainingResourceBundle.getTrainingResource().setAlternativeIdentifiers(alternativeIdentifiers);
+                    }
+                }
+                break;
+            case "guidelines/":
+                InteroperabilityRecordBundle interoperabilityRecordBundle = (InteroperabilityRecordBundle) bundle;
+                existingAlternativeIdentifiers = interoperabilityRecordBundle.getInteroperabilityRecord().getAlternativeIdentifiers();
+                alternativeIdentifier = createAlternativeIdentifierForPID(interoperabilityRecordBundle, resourceTypePath);
+                if (alternativeIdentifier != null) {
+                    if (existingAlternativeIdentifiers != null && !existingAlternativeIdentifiers.isEmpty()) {
+                        existingAlternativeIdentifiers.add(alternativeIdentifier);
+                    } else {
+                        alternativeIdentifiers.add(alternativeIdentifier);
+                        interoperabilityRecordBundle.getInteroperabilityRecord().setAlternativeIdentifiers(alternativeIdentifiers);
+                    }
+                }
+                break;
+            default:
+                break;
+        }
+    }
+
+    private AlternativeIdentifier createAlternativeIdentifierForPID(Bundle<?> bundle, String resourceTypePath) {
+        if (bundle.getMetadata().isPublished()) {
+            // create PID
+            String pid = ShortHashGenerator(bundle.getId());
+            // create AlternativeIdentifier
+            AlternativeIdentifier alternativeIdentifier = new AlternativeIdentifier();
+            alternativeIdentifier.setType("EOSC PID");
+            alternativeIdentifier.setValue(pid);
+            // post PID
+            postPID(bundle.getId(), pid, resourceTypePath);
+            return alternativeIdentifier;
         } else {
             return null;
         }
@@ -463,25 +516,18 @@ public class ProviderResourcesCommonMethods {
         }
     }
 
-    public Identifiers updateAlternativeIdentifiers(Bundle<?> lowerLevelResource, Bundle<?> publicLevelResource) {
+    public List<AlternativeIdentifier> updateAlternativeIdentifiers(List<AlternativeIdentifier> lowerLevelAI, List<AlternativeIdentifier> publicLevelAI) {
         List<AlternativeIdentifier> mergedAlternativeIdentifiers = new ArrayList<>();
-        Identifiers identifiers = publicLevelResource.getIdentifiers();
-        if (identifiers.getAlternativeIdentifiers() != null && !identifiers.getAlternativeIdentifiers().isEmpty()) {
-            mergedAlternativeIdentifiers.addAll(identifiers.getAlternativeIdentifiers());
+        if (lowerLevelAI != null && !lowerLevelAI.isEmpty()) {
+            mergedAlternativeIdentifiers.addAll(lowerLevelAI);
         }
-        if (lowerLevelResource.getIdentifiers() != null) {
-            if (lowerLevelResource.getIdentifiers().getAlternativeIdentifiers() != null &&
-                    !lowerLevelResource.getIdentifiers().getAlternativeIdentifiers().isEmpty()) {
-                mergedAlternativeIdentifiers.addAll(lowerLevelResource.getIdentifiers().getAlternativeIdentifiers());
-            }
+        if (publicLevelAI != null && !publicLevelAI.isEmpty()) {
+            mergedAlternativeIdentifiers.addAll(publicLevelAI);
         }
-
         // remove duplicates && convert to list
         Set<AlternativeIdentifier> uniqueIdentifiers = new HashSet<>(mergedAlternativeIdentifiers);
         List<AlternativeIdentifier> ret = new ArrayList<>(uniqueIdentifiers);
-
-        identifiers.setAlternativeIdentifiers(ret);
-        return identifiers;
+        return ret;
     }
 
     public void deleteResourceRelatedServiceSubprofiles(String serviceId, String catalogueId) {
@@ -654,6 +700,17 @@ public class ProviderResourcesCommonMethods {
         }
         if (count > 1) {
             throw new ValidationException("Resource with ID [%s] cannot have a Public registry" + id);
+        }
+    }
+
+    public void prohibitEOSCRelatedPIDs(List<AlternativeIdentifier> alternativeIdentifiers) {
+        // prohibit EOSC related Alternative Identifier Types
+        if (alternativeIdentifiers != null && !alternativeIdentifiers.isEmpty()) {
+            for (AlternativeIdentifier alternativeIdentifier : alternativeIdentifiers) {
+                if (alternativeIdentifier.getType().toLowerCase().contains("eosc")) {
+                    throw new ValidationException("You cannot create an EOSC related PID. Found in field 'alternativeIdentifiers'");
+                }
+            }
         }
     }
 }

@@ -24,10 +24,8 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.security.core.Authentication;
 import org.springframework.util.MultiValueMap;
 
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.UUID;
 
 @org.springframework.stereotype.Service
 public class DatasourceManager extends ResourceManager<DatasourceBundle> implements DatasourceService {
@@ -275,21 +273,10 @@ public class DatasourceManager extends ResourceManager<DatasourceBundle> impleme
     private void checkOpenAIREIDExistance(DatasourceBundle datasourceBundle) {
         Datasource datasource = openAIREDatasourceManager.get(datasourceBundle.getId());
         if (datasource != null) {
-            createOpenAIREAlternativeIdentifiers(datasourceBundle);
+            datasourceBundle.setOriginalOpenAIREId(datasourceBundle.getId());
         } else {
             throw new ValidationException(String.format("The ID [%s] you provided does not belong to an OpenAIRE Datasource", datasourceBundle.getId()));
         }
-    }
-
-    private void createOpenAIREAlternativeIdentifiers(DatasourceBundle datasourceBundle) {
-        Identifiers datasourceIdentifiers = new Identifiers();
-        List<AlternativeIdentifier> datasourceAlternativeIdentifiers = new ArrayList<>();
-        AlternativeIdentifier alternativeIdentifier = new AlternativeIdentifier();
-        alternativeIdentifier.setType("openaire");
-        alternativeIdentifier.setValue(datasourceBundle.getId());
-        datasourceAlternativeIdentifiers.add(alternativeIdentifier);
-        datasourceIdentifiers.setAlternativeIdentifiers(datasourceAlternativeIdentifiers);
-        datasourceBundle.setIdentifiers(datasourceIdentifiers);
     }
 
     public boolean isDatasourceRegisteredOnOpenAIRE(String id) {
@@ -297,18 +284,11 @@ public class DatasourceManager extends ResourceManager<DatasourceBundle> impleme
         boolean found = false;
         String registerBy;
         if (datasourceBundle != null) {
-            Identifiers identifiers = datasourceBundle.getIdentifiers();
-            if (identifiers != null) {
-                List<AlternativeIdentifier> alternativeIdentifiers = identifiers.getAlternativeIdentifiers();
-                if (alternativeIdentifiers != null && !alternativeIdentifiers.isEmpty()) {
-                    for (AlternativeIdentifier alternativeIdentifier : alternativeIdentifiers) {
-                        if (alternativeIdentifier.getType().equals("openaire")) {
-                            registerBy = openAIREDatasourceManager.getRegisterBy(alternativeIdentifier.getValue());
-                            if (registerBy != null && !registerBy.equals("")) {
-                                found = true;
-                            }
-                        }
-                    }
+            String originalOpenAIREId = datasourceBundle.getOriginalOpenAIREId();
+            if (originalOpenAIREId != null && !originalOpenAIREId.equals("")) {
+                registerBy = openAIREDatasourceManager.getRegisterBy(originalOpenAIREId);
+                if (registerBy != null && !registerBy.equals("")) {
+                    found = true;
                 }
             }
         } else {

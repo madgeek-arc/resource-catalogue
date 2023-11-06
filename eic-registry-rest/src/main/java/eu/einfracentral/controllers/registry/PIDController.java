@@ -62,9 +62,10 @@ public class PIDController {
         FacetFilter ff = createFacetFilter();
         List<ProviderBundle> allPublishedProviders = providerService.getAll(ff, auth).getResults();
         for (ProviderBundle providerBundle : allPublishedProviders) {
-            List<AlternativeIdentifier> alternativeIdentifiers = providerBundle.getIdentifiers().getAlternativeIdentifiers();
+            List<AlternativeIdentifier> alternativeIdentifiers = providerBundle.getProvider().getAlternativeIdentifiers();
             for (AlternativeIdentifier alternativeIdentifier : alternativeIdentifiers) {
-                if (alternativeIdentifier.getType().equalsIgnoreCase("PID")) {
+                if (alternativeIdentifier.getType().equalsIgnoreCase("PID") ||
+                        alternativeIdentifier.getType().equalsIgnoreCase("EOSC PID")) {
                     pidService.updatePID(alternativeIdentifier.getValue(), providerBundle.getId(), "providers/");
                     break;
                 }
@@ -72,29 +73,21 @@ public class PIDController {
         }
         List<ServiceBundle> allPublishedServices = serviceService.getAll(ff, auth).getResults();
         for (ServiceBundle serviceBundle : allPublishedServices) {
-            List<AlternativeIdentifier> alternativeIdentifiers = serviceBundle.getIdentifiers().getAlternativeIdentifiers();
+            List<AlternativeIdentifier> alternativeIdentifiers = serviceBundle.getService().getAlternativeIdentifiers();
             for (AlternativeIdentifier alternativeIdentifier : alternativeIdentifiers) {
-                if (alternativeIdentifier.getType().equalsIgnoreCase("PID")) {
+                if (alternativeIdentifier.getType().equalsIgnoreCase("PID") ||
+                        alternativeIdentifier.getType().equalsIgnoreCase("EOSC PID")) {
                     pidService.updatePID(alternativeIdentifier.getValue(), serviceBundle.getId(), "services/");
-                    break;
-                }
-            }
-        }
-        List<DatasourceBundle> allPublishedDatasources = datasourceService.getAll(ff, auth).getResults();
-        for (DatasourceBundle datasourceBundle : allPublishedDatasources) {
-            List<AlternativeIdentifier> alternativeIdentifiers = datasourceBundle.getIdentifiers().getAlternativeIdentifiers();
-            for (AlternativeIdentifier alternativeIdentifier : alternativeIdentifiers) {
-                if (alternativeIdentifier.getType().equalsIgnoreCase("PID")) {
-                    pidService.updatePID(alternativeIdentifier.getValue(), datasourceBundle.getId(), "services/");
                     break;
                 }
             }
         }
         List<TrainingResourceBundle> allPublishedTrainingResources = trainingResourceService.getAll(ff, auth).getResults();
         for (TrainingResourceBundle trainingResourceBundle : allPublishedTrainingResources) {
-            List<AlternativeIdentifier> alternativeIdentifiers = trainingResourceBundle.getIdentifiers().getAlternativeIdentifiers();
+            List<AlternativeIdentifier> alternativeIdentifiers = trainingResourceBundle.getTrainingResource().getAlternativeIdentifiers();
             for (AlternativeIdentifier alternativeIdentifier : alternativeIdentifiers) {
-                if (alternativeIdentifier.getType().equalsIgnoreCase("PID")) {
+                if (alternativeIdentifier.getType().equalsIgnoreCase("PID") ||
+                        alternativeIdentifier.getType().equalsIgnoreCase("EOSC PID")) {
                     pidService.updatePID(alternativeIdentifier.getValue(), trainingResourceBundle.getId(), "trainings/");
                     break;
                 }
@@ -102,16 +95,15 @@ public class PIDController {
         }
         List<InteroperabilityRecordBundle> allInteroperabilityRecords = interoperabilityRecordService.getAll(ff, auth).getResults();
         for (InteroperabilityRecordBundle interoperabilityRecordBundle : allInteroperabilityRecords) {
-            List<AlternativeIdentifier> alternativeIdentifiers = interoperabilityRecordBundle.getIdentifiers().getAlternativeIdentifiers();
+            List<AlternativeIdentifier> alternativeIdentifiers = interoperabilityRecordBundle.getInteroperabilityRecord().getAlternativeIdentifiers();
             for (AlternativeIdentifier alternativeIdentifier : alternativeIdentifiers) {
-                if (alternativeIdentifier.getType().equalsIgnoreCase("PID")) {
+                if (alternativeIdentifier.getType().equalsIgnoreCase("PID") ||
+                        alternativeIdentifier.getType().equalsIgnoreCase("EOSC PID")) {
                     pidService.updatePID(alternativeIdentifier.getValue(), interoperabilityRecordBundle.getId(), "guidelines/");
                     break;
                 }
             }
         }
-//        List<HelpdeskBundle> allPublishedHelpdesks = helpdeskService.getAll(ff, auth).getResults();
-//        List<MonitoringBundle> allPublishedMonitorings = monitoringService.getAll(ff, auth).getResults();
     }
 
     private FacetFilter createFacetFilter() {

@@ -22,9 +22,8 @@ public class PublicResourceManagementAspect<T extends Bundle<?>> {
     }
 
     @Async
-    @AfterReturning(pointcut = "(execution(* eu.einfracentral.registry.manager.AbstractServiceBundleManager.updateEOSCIFGuidelines(String, String, java.util.List<eu.einfracentral.domain.EOSCIFGuidelines>, org.springframework.security.core.Authentication)) " +
-            "|| execution(* eu.einfracentral.registry.manager.AbstractServiceBundleManager.updateResearchCategories(String, String, java.util.List<String>, org.springframework.security.core.Authentication)) " +
-            "|| execution(* eu.einfracentral.registry.manager.AbstractServiceBundleManager.updateHorizontalService(String, String, boolean, org.springframework.security.core.Authentication)))",
+    @AfterReturning(pointcut = "(execution(* eu.einfracentral.registry.manager.AbstractServiceBundleManager.updateEOSCIFGuidelines" +
+            "(String, String, java.util.List<eu.einfracentral.domain.EOSCIFGuidelines>, org.springframework.security.core.Authentication)))",
             returning = "serviceBundle")
     public void updatePublicResourceAfterResourceExtrasUpdate(ServiceBundle serviceBundle) {
         publicServiceManager.update(serviceBundle, null);

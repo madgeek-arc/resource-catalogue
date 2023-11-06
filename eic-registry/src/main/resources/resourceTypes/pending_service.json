@@ -44,6 +44,13 @@
     },
     {
       "multivalued": true,
+      "name": "alternative_identifiers_values",
+      "label": "Alternative Identifier Value",
+      "path": "//*[local-name()='alternativeIdentifiers']/*[local-name()='alternativeIdentifier']/*[local-name()='value']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": true,
       "name": "subcategories",
       "label": "Subcategory",
       "path": "//*[local-name()='category']/*[local-name()='subcategory']/text()",
@@ -170,6 +177,19 @@
     },
     {
       "multivalued": false,
+      "name": "horizontalService",
+      "path": "//*[local-name()='service']/*[local-name()='horizontalService']/text()",
+      "type": "java.lang.Boolean"
+    },
+    {
+      "multivalued": true,
+      "name": "marketplace_locations",
+      "label": "Marketplace Location",
+      "path": "//*[local-name()='service']//*[local-name()='marketplaceLocation']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
       "name": "order_type",
       "label": "Order Type",
       "path": "//*[local-name()='service']/*[local-name()='orderType']/text()",
@@ -209,20 +229,6 @@
       "multivalued": false,
       "name": "originalId",
       "path": "//*[local-name()='identifiers']/*[local-name()='originalId']/text()",
-      "type": "java.lang.String"
-    },
-    {
-      "multivalued": true,
-      "name": "alternative_identifiers_types",
-      "label": "Alternative Identifier Type",
-      "path": "//*[local-name()='identifiers']/*[local-name()='alternativeIdentifiers']/*[local-name()='alternativeIdentifier']/*[local-name()='type']/text()",
-      "type": "java.lang.String"
-    },
-    {
-      "multivalued": true,
-      "name": "alternative_identifiers_values",
-      "label": "Alternative Identifier Value",
-      "path": "//*[local-name()='identifiers']/*[local-name()='alternativeIdentifiers']/*[local-name()='alternativeIdentifier']/*[local-name()='value']/text()",
       "type": "java.lang.String"
     },
     {

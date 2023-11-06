@@ -191,7 +191,7 @@ public class Datasource implements Identifiable {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Datasource that = (Datasource) o;
-        return versionControl == that.versionControl && thematic == that.thematic && harvestable == that.harvestable && Objects.equals(id, that.id) && Objects.equals(serviceId, that.serviceId) && Objects.equals(catalogueId, that.catalogueId) && Objects.equals(submissionPolicyURL, that.submissionPolicyURL) && Objects.equals(preservationPolicyURL, that.preservationPolicyURL) && Objects.equals(persistentIdentitySystems, that.persistentIdentitySystems) && Objects.equals(jurisdiction, that.jurisdiction) && Objects.equals(datasourceClassification, that.datasourceClassification) && Objects.equals(researchEntityTypes, that.researchEntityTypes) && Objects.equals(researchProductLicensings, that.researchProductLicensings) && Objects.equals(researchProductAccessPolicies, that.researchProductAccessPolicies) && Objects.equals(researchProductMetadataLicensing, that.researchProductMetadataLicensing) && Objects.equals(researchProductMetadataAccessPolicies, that.researchProductMetadataAccessPolicies);
+        return Objects.equals(id, that.id) && Objects.equals(serviceId, that.serviceId) && Objects.equals(catalogueId, that.catalogueId) && Objects.equals(submissionPolicyURL, that.submissionPolicyURL) && Objects.equals(preservationPolicyURL, that.preservationPolicyURL) && Objects.equals(versionControl, that.versionControl) && Objects.equals(persistentIdentitySystems, that.persistentIdentitySystems) && Objects.equals(jurisdiction, that.jurisdiction) && Objects.equals(datasourceClassification, that.datasourceClassification) && Objects.equals(researchEntityTypes, that.researchEntityTypes) && Objects.equals(thematic, that.thematic) && Objects.equals(researchProductLicensings, that.researchProductLicensings) && Objects.equals(researchProductAccessPolicies, that.researchProductAccessPolicies) && Objects.equals(researchProductMetadataLicensing, that.researchProductMetadataLicensing) && Objects.equals(researchProductMetadataAccessPolicies, that.researchProductMetadataAccessPolicies) && Objects.equals(harvestable, that.harvestable);
     }
 
     @Override
@@ -263,7 +263,7 @@ public class Datasource implements Identifiable {
         this.preservationPolicyURL = preservationPolicyURL;
     }
 
-    public Boolean isVersionControl() {
+    public Boolean getVersionControl() {
         return versionControl;
     }
 
@@ -303,7 +303,7 @@ public class Datasource implements Identifiable {
         this.researchEntityTypes = researchEntityTypes;
     }
 
-    public Boolean isThematic() {
+    public Boolean getThematic() {
         return thematic;
     }
 
@@ -343,7 +343,7 @@ public class Datasource implements Identifiable {
         this.researchProductMetadataAccessPolicies = researchProductMetadataAccessPolicies;
     }
 
-    public Boolean isHarvestable() {
+    public Boolean getHarvestable() {
         return harvestable;
     }
 

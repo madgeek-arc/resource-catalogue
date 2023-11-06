@@ -89,13 +89,22 @@ public class TrainingResource implements Identifiable {
     @FieldValidation(nullable = true, containsId = true, containsResourceId = true)
     private List<String> eoscRelatedServices;
 
+    /**
+     * Other types of Identifiers for the specific Service (eg. PID)
+     */
+    @XmlElementWrapper(name = "alternativeIdentifiers")
+    @XmlElement(name = "alternativeIdentifier")
+    @ApiModelProperty(position = 9)
+    @FieldValidation(nullable = true)
+    private List<AlternativeIdentifier> alternativeIdentifiers;
+
 
     // Detailed & Access Information
     /**
      * A brief synopsis about or description of the learning resource.
      */
     @XmlElement
-    @ApiModelProperty(position = 9)
+    @ApiModelProperty(position = 10)
     @FieldValidation(nullable = true)
     private String description;
 
@@ -104,7 +113,7 @@ public class TrainingResource implements Identifiable {
      */
     @XmlElementWrapper(name = "keywords")
     @XmlElement(name = "keyword")
-    @ApiModelProperty(position = 10)
+    @ApiModelProperty(position = 11)
     @FieldValidation(nullable = true)
     private List<String> keywords;
 
@@ -112,7 +121,7 @@ public class TrainingResource implements Identifiable {
      * A license document that applies to this content, typically indicated by URL.
      */
     @XmlElement(required = true)
-    @ApiModelProperty(position = 11, required = true)
+    @ApiModelProperty(position = 12, required = true)
     @FieldValidation
     private String license;
 
@@ -120,7 +129,7 @@ public class TrainingResource implements Identifiable {
      * The access status of a resource (open, restricted, paid).
      */
     @XmlElement(required = true)
-    @ApiModelProperty(position = 12, notes = "Vocabulary ID", required = true)
+    @ApiModelProperty(position = 13, notes = "Vocabulary ID", required = true)
     @FieldValidation(containsId = true, idClass = Vocabulary.class)
     @VocabularyValidation(type = Vocabulary.Type.TR_ACCESS_RIGHT)
     private String accessRights;
@@ -129,7 +138,7 @@ public class TrainingResource implements Identifiable {
      * The version date for the most recently published or broadcast resource.
      */
     @XmlElement(required = true)
-    @ApiModelProperty(position = 13, example = "2020-01-01", required = true)
+    @ApiModelProperty(position = 14, example = "2020-01-01", required = true)
     @FieldValidation
     private Date versionDate;
 
@@ -140,7 +149,7 @@ public class TrainingResource implements Identifiable {
      */
     @XmlElementWrapper(name = "targetGroups", required = true)
     @XmlElement(name = "targetGroup")
-    @ApiModelProperty(position = 14, notes = "Vocabulary ID", required = true)
+    @ApiModelProperty(position = 15, notes = "Vocabulary ID", required = true)
     @FieldValidation(containsId = true, idClass = Vocabulary.class)
     @VocabularyValidation(type = Vocabulary.Type.TARGET_USER)
     private List<String> targetGroups;
@@ -150,7 +159,7 @@ public class TrainingResource implements Identifiable {
      */
     @XmlElementWrapper(name = "learningResourceTypes")
     @XmlElement(name = "learningResourceType")
-    @ApiModelProperty(position = 15, notes = "Vocabulary ID")
+    @ApiModelProperty(position = 16, notes = "Vocabulary ID")
     @FieldValidation(nullable = true, containsId = true, idClass = Vocabulary.class)
     @VocabularyValidation(type = Vocabulary.Type.TR_DCMI_TYPE)
     private List<String> learningResourceTypes;
@@ -160,7 +169,7 @@ public class TrainingResource implements Identifiable {
      */
     @XmlElementWrapper(name = "learningOutcomes", required = true)
     @XmlElement(name = "learningOutcome")
-    @ApiModelProperty(position = 16, required = true)
+    @ApiModelProperty(position = 17, required = true)
     @FieldValidation
     private List<String> learningOutcomes;
 
@@ -168,7 +177,7 @@ public class TrainingResource implements Identifiable {
      * Target skill level in the topic being taught.
      */
     @XmlElement(required = true)
-    @ApiModelProperty(position = 17, notes = "Vocabulary ID", required = true)
+    @ApiModelProperty(position = 18, notes = "Vocabulary ID", required = true)
     @FieldValidation(containsId = true, idClass = Vocabulary.class)
     @VocabularyValidation(type = Vocabulary.Type.TR_EXPERTISE_LEVEL)
     private String expertiseLevel;
@@ -178,7 +187,7 @@ public class TrainingResource implements Identifiable {
      */
     @XmlElementWrapper(name = "contentResourceTypes")
     @XmlElement(name = "contentResourceType")
-    @ApiModelProperty(position = 18, notes = "Vocabulary ID")
+    @ApiModelProperty(position = 19, notes = "Vocabulary ID")
     @FieldValidation(nullable = true, containsId = true, idClass = Vocabulary.class)
     @VocabularyValidation(type = Vocabulary.Type.TR_CONTENT_RESOURCE_TYPE)
     private List<String> contentResourceTypes;
@@ -188,7 +197,7 @@ public class TrainingResource implements Identifiable {
      */
     @XmlElementWrapper(name = "qualifications")
     @XmlElement(name = "qualification")
-    @ApiModelProperty(position = 19, notes = "Vocabulary ID")
+    @ApiModelProperty(position = 20, notes = "Vocabulary ID")
     @FieldValidation(nullable = true, containsId = true, idClass = Vocabulary.class)
     @VocabularyValidation(type = Vocabulary.Type.TR_QUALIFICATION)
     private List<String> qualifications;
@@ -197,7 +206,7 @@ public class TrainingResource implements Identifiable {
      * Approximate or typical time it takes to work with or through the learning resource for the typical intended target audience.
      */
     @XmlElement
-    @ApiModelProperty(position = 20)
+    @ApiModelProperty(position = 21)
     @FieldValidation(nullable = true)
     private String duration;
 
@@ -208,7 +217,7 @@ public class TrainingResource implements Identifiable {
      */
     @XmlElementWrapper(name = "languages", required = true)
     @XmlElement(name = "language")
-    @ApiModelProperty(position = 21, notes = "Vocabulary ID", required = true)
+    @ApiModelProperty(position = 22, notes = "Vocabulary ID", required = true)
     @FieldValidation(containsId = true, idClass = Vocabulary.class)
     @VocabularyValidation(type = Vocabulary.Type.LANGUAGE)
     private List<String> languages;
@@ -218,7 +227,7 @@ public class TrainingResource implements Identifiable {
      */
     @XmlElementWrapper(name = "geographicalAvailabilities", required = true)
     @XmlElement(name = "geographicalAvailability")
-    @ApiModelProperty(position = 22, notes = "Vocabulary ID", required = true)
+    @ApiModelProperty(position = 23, notes = "Vocabulary ID", required = true)
     @FieldValidation(containsId = true, idClass = Vocabulary.class)
     @GeoLocationVocValidation(region = Vocabulary.Type.REGION, country = Vocabulary.Type.COUNTRY)
     private List<String> geographicalAvailabilities;
@@ -230,7 +239,7 @@ public class TrainingResource implements Identifiable {
      */
     @XmlElementWrapper(name = "scientificDomains", required = true)
     @XmlElement(name = "scientificDomain")
-    @ApiModelProperty(position = 23, notes = "Vocabulary ID", required = true)
+    @ApiModelProperty(position = 24, notes = "Vocabulary ID", required = true)
     @FieldValidation
     private List<ServiceProviderDomain> scientificDomains;
 
@@ -240,7 +249,7 @@ public class TrainingResource implements Identifiable {
      * Training Resource's Main Contact Owner info.
      */
     @XmlElement(required = true)
-    @ApiModelProperty(position = 24, required = true)
+    @ApiModelProperty(position = 25, required = true)
     @FieldValidation
     private ServiceMainContact contact;
 
@@ -250,14 +259,14 @@ public class TrainingResource implements Identifiable {
      * The Catalogue this Training Resource is originally registered at.
      */
     @XmlElement
-    @ApiModelProperty(position = 25)
+    @ApiModelProperty(position = 26)
     @FieldValidation(nullable = true, containsId = true, idClass = Catalogue.class)
     private String catalogueId;
 
     public TrainingResource() {
     }
 
-    public TrainingResource(String id, String title, String resourceOrganisation, List<String> resourceProviders, List<String> authors, URL url, String urlType, List<String> eoscRelatedServices, String description, List<String> keywords, String license, String accessRights, Date versionDate, List<String> targetGroups, List<String> learningResourceTypes, List<String> learningOutcomes, String expertiseLevel, List<String> contentResourceTypes, List<String> qualifications, String duration, List<String> languages, List<String> geographicalAvailabilities, List<ServiceProviderDomain> scientificDomains, ServiceMainContact contact, String catalogueId) {
+    public TrainingResource(String id, String title, String resourceOrganisation, List<String> resourceProviders, List<String> authors, URL url, String urlType, List<String> eoscRelatedServices, List<AlternativeIdentifier> alternativeIdentifiers, String description, List<String> keywords, String license, String accessRights, Date versionDate, List<String> targetGroups, List<String> learningResourceTypes, List<String> learningOutcomes, String expertiseLevel, List<String> contentResourceTypes, List<String> qualifications, String duration, List<String> languages, List<String> geographicalAvailabilities, List<ServiceProviderDomain> scientificDomains, ServiceMainContact contact, String catalogueId) {
         this.id = id;
         this.title = title;
         this.resourceOrganisation = resourceOrganisation;
@@ -266,6 +275,7 @@ public class TrainingResource implements Identifiable {
         this.url = url;
         this.urlType = urlType;
         this.eoscRelatedServices = eoscRelatedServices;
+        this.alternativeIdentifiers = alternativeIdentifiers;
         this.description = description;
         this.keywords = keywords;
         this.license = license;
@@ -290,12 +300,12 @@ public class TrainingResource implements Identifiable {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         TrainingResource that = (TrainingResource) o;
-        return Objects.equals(id, that.id) && Objects.equals(title, that.title) && Objects.equals(resourceOrganisation, that.resourceOrganisation) && Objects.equals(resourceProviders, that.resourceProviders) && Objects.equals(authors, that.authors) && Objects.equals(url, that.url) && Objects.equals(urlType, that.urlType) && Objects.equals(eoscRelatedServices, that.eoscRelatedServices) && Objects.equals(description, that.description) && Objects.equals(keywords, that.keywords) && Objects.equals(license, that.license) && Objects.equals(accessRights, that.accessRights) && Objects.equals(versionDate, that.versionDate) && Objects.equals(targetGroups, that.targetGroups) && Objects.equals(learningResourceTypes, that.learningResourceTypes) && Objects.equals(learningOutcomes, that.learningOutcomes) && Objects.equals(expertiseLevel, that.expertiseLevel) && Objects.equals(contentResourceTypes, that.contentResourceTypes) && Objects.equals(qualifications, that.qualifications) && Objects.equals(duration, that.duration) && Objects.equals(languages, that.languages) && Objects.equals(geographicalAvailabilities, that.geographicalAvailabilities) && Objects.equals(scientificDomains, that.scientificDomains) && Objects.equals(contact, that.contact) && Objects.equals(catalogueId, that.catalogueId);
+        return Objects.equals(id, that.id) && Objects.equals(title, that.title) && Objects.equals(resourceOrganisation, that.resourceOrganisation) && Objects.equals(resourceProviders, that.resourceProviders) && Objects.equals(authors, that.authors) && Objects.equals(url, that.url) && Objects.equals(urlType, that.urlType) && Objects.equals(eoscRelatedServices, that.eoscRelatedServices) && Objects.equals(alternativeIdentifiers, that.alternativeIdentifiers) && Objects.equals(description, that.description) && Objects.equals(keywords, that.keywords) && Objects.equals(license, that.license) && Objects.equals(accessRights, that.accessRights) && Objects.equals(versionDate, that.versionDate) && Objects.equals(targetGroups, that.targetGroups) && Objects.equals(learningResourceTypes, that.learningResourceTypes) && Objects.equals(learningOutcomes, that.learningOutcomes) && Objects.equals(expertiseLevel, that.expertiseLevel) && Objects.equals(contentResourceTypes, that.contentResourceTypes) && Objects.equals(qualifications, that.qualifications) && Objects.equals(duration, that.duration) && Objects.equals(languages, that.languages) && Objects.equals(geographicalAvailabilities, that.geographicalAvailabilities) && Objects.equals(scientificDomains, that.scientificDomains) && Objects.equals(contact, that.contact) && Objects.equals(catalogueId, that.catalogueId);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, title, resourceOrganisation, resourceProviders, authors, url, urlType, eoscRelatedServices, description, keywords, license, accessRights, versionDate, targetGroups, learningResourceTypes, learningOutcomes, expertiseLevel, contentResourceTypes, qualifications, duration, languages, geographicalAvailabilities, scientificDomains, contact, catalogueId);
+        return Objects.hash(id, title, resourceOrganisation, resourceProviders, authors, url, urlType, eoscRelatedServices, alternativeIdentifiers, description, keywords, license, accessRights, versionDate, targetGroups, learningResourceTypes, learningOutcomes, expertiseLevel, contentResourceTypes, qualifications, duration, languages, geographicalAvailabilities, scientificDomains, contact, catalogueId);
     }
 
     @Override
@@ -309,6 +319,7 @@ public class TrainingResource implements Identifiable {
                 ", url=" + url +
                 ", urlType='" + urlType + '\'' +
                 ", eoscRelatedServices=" + eoscRelatedServices +
+                ", alternativeIdentifiers=" + alternativeIdentifiers +
                 ", description='" + description + '\'' +
                 ", keywords=" + keywords +
                 ", license='" + license + '\'' +
@@ -393,6 +404,14 @@ public class TrainingResource implements Identifiable {
 
     public void setEoscRelatedServices(List<String> eoscRelatedServices) {
         this.eoscRelatedServices = eoscRelatedServices;
+    }
+
+    public List<AlternativeIdentifier> getAlternativeIdentifiers() {
+        return alternativeIdentifiers;
+    }
+
+    public void setAlternativeIdentifiers(List<AlternativeIdentifier> alternativeIdentifiers) {
+        this.alternativeIdentifiers = alternativeIdentifiers;
     }
 
     public String getDescription() {

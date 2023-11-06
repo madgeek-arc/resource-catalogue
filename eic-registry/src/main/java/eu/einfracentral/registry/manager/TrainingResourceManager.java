@@ -153,6 +153,9 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
         }
         commonMethods.checkRelatedResourceIDsConsistency(trainingResourceBundle);
 
+        // prohibit EOSC related Alternative Identifier Types
+        commonMethods.prohibitEOSCRelatedPIDs(trainingResourceBundle.getTrainingResource().getAlternativeIdentifiers());
+
         ProviderBundle providerBundle = providerService.get(trainingResourceBundle.getTrainingResource().getCatalogueId(), trainingResourceBundle.getTrainingResource().getResourceOrganisation(), auth);
         if (providerBundle == null) {
             throw new ValidationException(String.format("Provider with id '%s' and catalogueId '%s' does not exist", trainingResourceBundle.getTrainingResource().getResourceOrganisation(), trainingResourceBundle.getTrainingResource().getCatalogueId()));
@@ -263,6 +266,9 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
             commonMethods.checkCatalogueIdConsistency(ret, catalogueId);
         }
         commonMethods.checkRelatedResourceIDsConsistency(ret);
+
+        // prohibit EOSC related Alternative Identifier Types
+        commonMethods.prohibitEOSCRelatedPIDs(ret.getTrainingResource().getAlternativeIdentifiers());
 
         logger.trace("User '{}' is attempting to update the Training Resource with id '{}' of the Catalogue '{}'", auth, ret.getTrainingResource().getId(), ret.getTrainingResource().getCatalogueId());
         validateTrainingResource(ret);

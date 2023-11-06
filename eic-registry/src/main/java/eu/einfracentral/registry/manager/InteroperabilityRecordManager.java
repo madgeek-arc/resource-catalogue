@@ -87,6 +87,9 @@ public class InteroperabilityRecordManager extends ResourceManager<Interoperabil
             commonMethods.checkCatalogueIdConsistency(interoperabilityRecordBundle, catalogueId);
         }
 
+        // prohibit EOSC related Alternative Identifier Types
+        commonMethods.prohibitEOSCRelatedPIDs(interoperabilityRecordBundle.getInteroperabilityRecord().getAlternativeIdentifiers());
+
         ProviderBundle providerBundle = providerService.get(interoperabilityRecordBundle.getInteroperabilityRecord().getCatalogueId(), interoperabilityRecordBundle.getInteroperabilityRecord().getProviderId(), auth);
         // check if Provider is approved
         if (!providerBundle.getStatus().equals("approved provider")) {
@@ -151,6 +154,9 @@ public class InteroperabilityRecordManager extends ResourceManager<Interoperabil
         } else {
             commonMethods.checkCatalogueIdConsistency(ret, catalogueId);
         }
+
+        // prohibit EOSC related Alternative Identifier Types
+        commonMethods.prohibitEOSCRelatedPIDs(ret.getInteroperabilityRecord().getAlternativeIdentifiers());
 
         validate(ret);
 

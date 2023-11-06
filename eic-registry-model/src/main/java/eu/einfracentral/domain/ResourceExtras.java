@@ -1,7 +1,6 @@
 package eu.einfracentral.domain;
 
 import eu.einfracentral.annotation.FieldValidation;
-import eu.einfracentral.annotation.VocabularyValidation;
 import io.swagger.annotations.ApiModelProperty;
 
 import javax.xml.bind.annotation.XmlElement;
@@ -20,32 +19,17 @@ public class ResourceExtras {
     @FieldValidation(nullable = true)
     private List<EOSCIFGuidelines> eoscIFGuidelines;
 
-    @XmlElement()
-    @ApiModelProperty(position = 2)
-    private boolean horizontalService;
-
-    @XmlElementWrapper(name = "researchCategories")
-    @XmlElement(name = "researchCategory")
-    @ApiModelProperty(position = 3)
-    @FieldValidation(nullable = true, containsId = true, idClass = Vocabulary.class)
-    @VocabularyValidation(type = Vocabulary.Type.RESEARCH_CATEGORY)
-    private List<String> researchCategories;
-
     public ResourceExtras() {
     }
 
-    public ResourceExtras(List<EOSCIFGuidelines> eoscIFGuidelines, boolean horizontalService, List<String> researchCategories) {
+    public ResourceExtras(List<EOSCIFGuidelines> eoscIFGuidelines) {
         this.eoscIFGuidelines = eoscIFGuidelines;
-        this.horizontalService = horizontalService;
-        this.researchCategories = researchCategories;
     }
 
     @Override
     public String toString() {
         return "ResourceExtras{" +
                 "eoscIFGuidelines=" + eoscIFGuidelines +
-                ", horizontalService=" + horizontalService +
-                ", researchCategories=" + researchCategories +
                 '}';
     }
 
@@ -55,21 +39,5 @@ public class ResourceExtras {
 
     public void setEoscIFGuidelines(List<EOSCIFGuidelines> eoscIFGuidelines) {
         this.eoscIFGuidelines = eoscIFGuidelines;
-    }
-
-    public boolean isHorizontalService() {
-        return horizontalService;
-    }
-
-    public void setHorizontalService(boolean horizontalService) {
-        this.horizontalService = horizontalService;
-    }
-
-    public List<String> getResearchCategories() {
-        return researchCategories;
-    }
-
-    public void setResearchCategories(List<String> researchCategories) {
-        this.researchCategories = researchCategories;
     }
 }

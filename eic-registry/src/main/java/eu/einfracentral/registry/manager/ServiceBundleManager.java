@@ -132,6 +132,9 @@ public class ServiceBundleManager extends AbstractServiceBundleManager<ServiceBu
             throw new ValidationException(String.format("The Provider with id %s has already registered a Resource Template.", providerBundle.getId()));
         }
 
+        // prohibit EOSC related Alternative Identifier Types
+        commonMethods.prohibitEOSCRelatedPIDs(serviceBundle.getService().getAlternativeIdentifiers());
+
         serviceBundle.setId(idCreator.createServiceId(serviceBundle));
         validate(serviceBundle);
 
@@ -219,6 +222,9 @@ public class ServiceBundleManager extends AbstractServiceBundleManager<ServiceBu
         if (existingService.getMetadata().isPublished()){
             throw new ValidationException("You cannot directly update a Public Service");
         }
+
+        // prohibit EOSC related Alternative Identifier Types
+        commonMethods.prohibitEOSCRelatedPIDs(ret.getService().getAlternativeIdentifiers());
 
         User user = User.of(auth);
 
