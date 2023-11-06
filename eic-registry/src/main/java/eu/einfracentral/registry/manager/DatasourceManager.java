@@ -73,11 +73,6 @@ public class DatasourceManager extends ResourceManager<DatasourceBundle> impleme
 
     @Override
     public DatasourceBundle add(DatasourceBundle datasourceBundle, Authentication auth) {
-        // prohibit 'originalOpenAIREId' manipulation
-        if (datasourceBundle.getOriginalOpenAIREId() != null &&
-                !datasourceBundle.getOriginalOpenAIREId().equals("")) {
-            throw new ValidationException("You cannot edit field 'originalOpenAIREId");
-        }
 
         // if Datasource has ID -> check if it exists in OpenAIRE Datasources list
         if (datasourceBundle.getId() != null && !datasourceBundle.getId().equals("")) {
@@ -128,11 +123,6 @@ public class DatasourceManager extends ResourceManager<DatasourceBundle> impleme
         // check if there are actual changes in the Datasource
         if (ret.getDatasource().equals(existingDatasource.getDatasource())) {
             return ret;
-        }
-
-        // prohibit 'originalOpenAIREId' manipulation
-        if (!ret.getOriginalOpenAIREId().equals(existingDatasource.getOriginalOpenAIREId())) {
-            throw new ValidationException("You cannot edit field 'originalOpenAIREId");
         }
 
         super.validate(ret);
