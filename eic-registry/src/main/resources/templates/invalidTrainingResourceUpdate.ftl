@@ -1,7 +1,12 @@
-Dear ${project} Portal Onboarding Team,
-
-The Resource [${trainingResourceBundle.payload.title}] previously marked as [invalid] during an auditing process has been updated with comment:
-"${trainingResourceBundle.latestUpdateInfo.comment}"
-
-Best Regards,
-the ${project} Team
+<p>Dear ${project} Portal Onboarding Team,</p>
+<p>
+    The Resource [${trainingResourceBundle.payload.title}] previously marked as [invalid] during an auditing process has
+    been updated with comment:
+    <br>
+    "${trainingResourceBundle.latestUpdateInfo.comment}"
+</p>
+<p>
+    Best Regards,
+    <br>
+    the ${project} Team
+</p>

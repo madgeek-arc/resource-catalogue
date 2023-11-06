@@ -1,7 +1,13 @@
-Dear ${project} Portal Admins,
-
-The Resource [${resourceBundle.payload.name}] has been moved from the Provider [${oldProvider.provider.id}]-[${oldProvider.provider.name}] to the Provider [${newProvider.provider.id}]-[${newProvider.provider.name}].
-This change has been made by ${adminRole} [${adminFullName}]-[${adminEmail}], with comment: "${comment}".
-
-Best Regards,
-the ${project} Team
+<p>Dear ${project} Portal Admins,</p>
+<p>
+    The Resource [${resourceBundle.payload.name}] has been moved from the Provider
+    [${oldProvider.provider.id}]-[${oldProvider.provider.name}] to the Provider
+    [${newProvider.provider.id}]-[${newProvider.provider.name}].
+    <br>
+    This change has been made by ${adminRole} [${adminFullName}]-[${adminEmail}], with comment: "${comment}".
+</p>
+<p>
+    Best Regards,
+    <br>
+    the ${project} Team
+</p>

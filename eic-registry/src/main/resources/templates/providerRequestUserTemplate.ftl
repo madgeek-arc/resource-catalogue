@@ -1,13 +1,22 @@
-Dear ${message.senderName},
-
-Your message considering the services:
-<#list services as service>
+<p>Dear ${message.senderName},</p>
+<p>
+    Your message considering the services:
+    <br>
+    <#list services as service>
+    <br>
     > ${service} <
-</#list>has been sent successfully.
-
-You can see your message below:
-Subject: ${message.subject}
-Message: ${message.message}
-
-Best Regards,
-the ${project} Team
+    <br>
+    </#list>has been sent successfully.
+</p>
+<p>
+    You can see your message below:
+    <br>
+    Subject: ${message.subject}
+    <br>
+    Message: ${message.message}
+</p>
+<p>
+    Best Regards,
+    <br>
+    the ${project} Team
+</p>
