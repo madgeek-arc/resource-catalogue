@@ -67,6 +67,16 @@ public class PublicMonitoringManager extends AbstractPublicResourceManager<Monit
                 monitoringBundleBrowsing.getTo(), monitoringBundleList, monitoringBundleBrowsing.getFacets());
     }
 
+    public MonitoringBundle getOrElseReturnNull(String id) {
+        MonitoringBundle monitoringBundle;
+        try {
+            monitoringBundle = get(id);
+        } catch (ResourceException | ResourceNotFoundException e) {
+            return null;
+        }
+        return monitoringBundle;
+    }
+
     @Override
     public MonitoringBundle add(MonitoringBundle monitoringBundle, Authentication authentication) {
         String lowerLevelResourceId = monitoringBundle.getId();

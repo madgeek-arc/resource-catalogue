@@ -435,7 +435,7 @@ public class ServiceBundleManager extends AbstractServiceBundleManager<ServiceBu
         // latestOnboardingInfo
         service.setLatestUpdateInfo(loggingInfoList.get(0)); //TODO: check this
 
-        // active Service's related resources (ServiceExtensions && Subprofilers)
+        // active Service's related resources (ServiceExtensions && Subprofiles)
         publishServiceRelatedResources(service.getId(), service.getService().getCatalogueId(), active, auth);
 
         this.update(service, auth);
@@ -476,7 +476,12 @@ public class ServiceBundleManager extends AbstractServiceBundleManager<ServiceBu
                         bundle.getId(), ((HelpdeskBundle) bundle).getHelpdesk().getServiceId(),
                         ((HelpdeskBundle) bundle).getCatalogueId(), bundle.isActive());
                 helpdeskService.updateBundle((HelpdeskBundle) bundle, auth);
-                publicHelpdeskManager.update((HelpdeskBundle) bundle, auth);
+                HelpdeskBundle publicHelpdeskBundle =
+                        publicHelpdeskManager.getOrElseReturnNull(((HelpdeskBundle) bundle).getCatalogueId() +
+                                "." + bundle.getId());
+                if (publicHelpdeskBundle != null) {
+                    publicHelpdeskManager.update(publicHelpdeskBundle, auth);
+                }
             } catch (eu.einfracentral.exception.ResourceNotFoundException e) {
                 logger.error("Could not update Helpdesk '{}' of the Service '{}' of the '{}' Catalogue",
                         bundle.getId(), ((HelpdeskBundle) bundle).getHelpdesk().getServiceId(),
@@ -488,7 +493,12 @@ public class ServiceBundleManager extends AbstractServiceBundleManager<ServiceBu
                         bundle.getId(), ((MonitoringBundle) bundle).getMonitoring().getServiceId(),
                         ((MonitoringBundle) bundle).getCatalogueId(), bundle.isActive());
                 monitoringService.updateBundle((MonitoringBundle) bundle, auth);
-                publicMonitoringManager.update((MonitoringBundle) bundle, auth);
+                MonitoringBundle publicMonitoringBundle =
+                        publicMonitoringManager.getOrElseReturnNull(((MonitoringBundle) bundle).getCatalogueId() +
+                                "." + bundle.getId());
+                if (publicMonitoringBundle != null) {
+                    publicMonitoringManager.update(publicMonitoringBundle, auth);
+                }
             } catch (eu.einfracentral.exception.ResourceNotFoundException e) {
                 logger.error("Could not update Monitoring '{}' of the Service '{}' of the '{}' Catalogue",
                         bundle.getId(), ((MonitoringBundle) bundle).getMonitoring().getServiceId(),
@@ -500,7 +510,12 @@ public class ServiceBundleManager extends AbstractServiceBundleManager<ServiceBu
                         bundle.getId(), ((DatasourceBundle) bundle).getDatasource().getServiceId(),
                         ((DatasourceBundle) bundle).getDatasource().getCatalogueId(), bundle.isActive());
                 datasourceService.updateBundle((DatasourceBundle) bundle, auth);
-                publicDatasourceManager.update((DatasourceBundle) bundle, auth);
+                DatasourceBundle publicDatasourceBundle =
+                        publicDatasourceManager.getOrElseReturnNull(((DatasourceBundle) bundle).getDatasource().getCatalogueId()
+                                + "." + bundle.getId());
+                if (publicDatasourceBundle != null) {
+                    publicDatasourceManager.update(publicDatasourceBundle, auth);
+                }
             } catch (eu.einfracentral.exception.ResourceNotFoundException e) {
                 logger.error("Could not update Datasource '{}' of the Service '{}' of the '{}' Catalogue",
                         bundle.getId(), ((DatasourceBundle) bundle).getDatasource().getServiceId(),

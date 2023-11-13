@@ -67,6 +67,16 @@ public class PublicHelpdeskManager extends AbstractPublicResourceManager<Helpdes
                 helpdeskBundleBrowsing.getTo(), helpdeskBundleList, helpdeskBundleBrowsing.getFacets());
     }
 
+    public HelpdeskBundle getOrElseReturnNull(String id) {
+        HelpdeskBundle helpdeskBundle;
+        try {
+            helpdeskBundle = get(id);
+        } catch (ResourceException | ResourceNotFoundException e) {
+            return null;
+        }
+        return helpdeskBundle;
+    }
+
     @Override
     public HelpdeskBundle add(HelpdeskBundle helpdeskBundle, Authentication authentication) {
         String lowerLevelResourceId = helpdeskBundle.getId();

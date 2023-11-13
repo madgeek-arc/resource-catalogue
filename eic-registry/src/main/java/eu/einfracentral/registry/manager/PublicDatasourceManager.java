@@ -66,6 +66,16 @@ public class PublicDatasourceManager extends AbstractPublicResourceManager<Datas
                 datasourceBundleBrowsing.getTo(), datasourceBundleList, datasourceBundleBrowsing.getFacets());
     }
 
+    public DatasourceBundle getOrElseReturnNull(String id) {
+        DatasourceBundle datasourceBundle;
+        try {
+            datasourceBundle = get(id);
+        } catch (ResourceException | ResourceNotFoundException e) {
+            return null;
+        }
+        return datasourceBundle;
+    }
+
     @Override
     public DatasourceBundle add(DatasourceBundle datasourceBundle, Authentication authentication) {
         String lowerLevelResourceId = datasourceBundle.getId();

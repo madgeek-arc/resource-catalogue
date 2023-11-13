@@ -592,6 +592,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
 
     private void activateProviderServices(List<ServiceBundle> services, Boolean active, Authentication auth){
         for (ServiceBundle service : services){
+            ServiceBundle lowerLevelService = ObjectUtils.clone(service);
             List<LoggingInfo> loggingInfoList = commonMethods.createActivationLoggingInfo(service, active, auth);
 
             // update Service's fields
@@ -613,12 +614,14 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
             }
 
             // Activate/Deactivate Service's Extensions && Subprofiles
-            serviceBundleService.publishServiceRelatedResources(service.getId(), service.getService().getCatalogueId(), active, auth);
+            serviceBundleService.publishServiceRelatedResources(lowerLevelService.getId(),
+                    lowerLevelService.getService().getCatalogueId(), active, auth);
         }
     }
 
     private void activateProviderTrainingResources(List<TrainingResourceBundle> trainingResources, Boolean active, Authentication auth){
         for (TrainingResourceBundle trainingResourceBundle : trainingResources){
+            TrainingResourceBundle lowerLevelTrainingResource = ObjectUtils.clone(trainingResourceBundle);
             List<LoggingInfo> loggingInfoList = commonMethods.createActivationLoggingInfo(trainingResourceBundle, active, auth);
 
             // update Service's fields
@@ -639,6 +642,11 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
                 logger.error("Could not update Training Resource '{}'-'{}' of the '{}' Catalogue", trainingResourceBundle.getId(),
                         trainingResourceBundle.getTrainingResource().getTitle(), trainingResourceBundle.getTrainingResource().getCatalogueId());
             }
+
+            //TODO
+            // Activate/Deactivate Training Resource's Extensions
+//            trainingResourceService.publishTrainingResourceRelatedResources(lowerLevelTrainingResource.getId(),
+//                    lowerLevelTrainingResource.getTrainingResource().getCatalogueId(), active, auth);
         }
     }
 
