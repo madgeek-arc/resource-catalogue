@@ -508,8 +508,11 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         loggingInfoList.add(loggingInfo);
         provider.setLoggingInfo(loggingInfoList);
 
-        // latestOnboardingInfo
+        // latestLoggingInfo
         provider.setLatestUpdateInfo(loggingInfo);
+        provider.setLatestOnboardingInfo(commonMethods.setLatestLoggingInfo(loggingInfoList, LoggingInfo.Types.ONBOARD.getKey()));
+        provider.setLatestAuditInfo(commonMethods.setLatestLoggingInfo(loggingInfoList, LoggingInfo.Types.AUDIT.getKey()));
+
         return super.update(provider, auth);
     }
 
@@ -592,85 +595,84 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
 
     private void activateProviderServices(List<ServiceBundle> services, Boolean active, Authentication auth){
         for (ServiceBundle service : services){
-            ServiceBundle lowerLevelService = ObjectUtils.clone(service);
-            List<LoggingInfo> loggingInfoList = commonMethods.createActivationLoggingInfo(service, active, auth);
+            if (service.getStatus().equals("approved resource")) {
+                ServiceBundle lowerLevelService = ObjectUtils.clone(service);
+                List<LoggingInfo> loggingInfoList = commonMethods.createActivationLoggingInfo(service, active, auth);
 
-            // update Service's fields
-            service.setLoggingInfo(loggingInfoList);
-            service.setLatestUpdateInfo(loggingInfoList.get(loggingInfoList.size()-1));
-            service.setActive(active);
+                // update Service's fields
+                service.setLoggingInfo(loggingInfoList);
+                service.setLatestUpdateInfo(loggingInfoList.get(loggingInfoList.size()-1));
+                service.setActive(active);
 
-            try {
-                logger.debug("Setting Service '{}'-'{}' of the '{}' Catalogue to active: '{}'", service.getId(),
-                        service.getService().getName(), service.getService().getCatalogueId(), service.isActive());
-                serviceBundleService.update(service, auth);
-                // TODO: FIX ON ProviderManagementAspect
-                if (service.getStatus().equals("approved resource")) {
+                try {
+                    logger.debug("Setting Service '{}'-'{}' of the '{}' Catalogue to active: '{}'", service.getId(),
+                            service.getService().getName(), service.getService().getCatalogueId(), service.isActive());
+                    serviceBundleService.update(service, auth);
+                    // TODO: FIX ON ProviderManagementAspect
                     publicServiceManager.update(service, auth);
+                } catch (ResourceNotFoundException e) {
+                    logger.error("Could not update Service '{}'-'{}' of the '{}' Catalogue", service.getId(),
+                            service.getService().getName(), service.getService().getCatalogueId());
                 }
-            } catch (ResourceNotFoundException e) {
-                logger.error("Could not update Service '{}'-'{}' of the '{}' Catalogue", service.getId(),
-                        service.getService().getName(), service.getService().getCatalogueId());
-            }
 
-            // Activate/Deactivate Service's Extensions && Subprofiles
-            serviceBundleService.publishServiceRelatedResources(lowerLevelService.getId(),
-                    lowerLevelService.getService().getCatalogueId(), active, auth);
+                // Activate/Deactivate Service's Extensions && Subprofiles
+                serviceBundleService.publishServiceRelatedResources(lowerLevelService.getId(),
+                        lowerLevelService.getService().getCatalogueId(), active, auth);
+            }
         }
     }
 
     private void activateProviderTrainingResources(List<TrainingResourceBundle> trainingResources, Boolean active, Authentication auth){
         for (TrainingResourceBundle trainingResourceBundle : trainingResources){
-            TrainingResourceBundle lowerLevelTrainingResource = ObjectUtils.clone(trainingResourceBundle);
-            List<LoggingInfo> loggingInfoList = commonMethods.createActivationLoggingInfo(trainingResourceBundle, active, auth);
+            if (trainingResourceBundle.getStatus().equals("approved resource")) {
+                TrainingResourceBundle lowerLevelTrainingResource = ObjectUtils.clone(trainingResourceBundle);
+                List<LoggingInfo> loggingInfoList = commonMethods.createActivationLoggingInfo(trainingResourceBundle, active, auth);
 
-            // update Service's fields
-            trainingResourceBundle.setLoggingInfo(loggingInfoList);
-            trainingResourceBundle.setLatestUpdateInfo(loggingInfoList.get(loggingInfoList.size()-1));
-            trainingResourceBundle.setActive(active);
+                // update Service's fields
+                trainingResourceBundle.setLoggingInfo(loggingInfoList);
+                trainingResourceBundle.setLatestUpdateInfo(loggingInfoList.get(loggingInfoList.size()-1));
+                trainingResourceBundle.setActive(active);
 
-            try {
-                logger.debug("Setting Training Resource '{}'-'{}' of the '{}' Catalogue to active: '{}'", trainingResourceBundle.getId(),
-                        trainingResourceBundle.getTrainingResource().getTitle(), trainingResourceBundle.getTrainingResource().getCatalogueId(),
-                        trainingResourceBundle.isActive());
-                trainingResourceService.update(trainingResourceBundle, auth);
-                // TODO: FIX ON ProviderManagementAspect
-                if (trainingResourceBundle.getStatus().equals("approved resource")) {
+                try {
+                    logger.debug("Setting Training Resource '{}'-'{}' of the '{}' Catalogue to active: '{}'", trainingResourceBundle.getId(),
+                            trainingResourceBundle.getTrainingResource().getTitle(), trainingResourceBundle.getTrainingResource().getCatalogueId(),
+                            trainingResourceBundle.isActive());
+                    trainingResourceService.update(trainingResourceBundle, auth);
+                    // TODO: FIX ON ProviderManagementAspect
                     publicTrainingResourceManager.update(trainingResourceBundle, auth);
+                } catch (ResourceNotFoundException e) {
+                    logger.error("Could not update Training Resource '{}'-'{}' of the '{}' Catalogue", trainingResourceBundle.getId(),
+                            trainingResourceBundle.getTrainingResource().getTitle(), trainingResourceBundle.getTrainingResource().getCatalogueId());
                 }
-            } catch (ResourceNotFoundException e) {
-                logger.error("Could not update Training Resource '{}'-'{}' of the '{}' Catalogue", trainingResourceBundle.getId(),
-                        trainingResourceBundle.getTrainingResource().getTitle(), trainingResourceBundle.getTrainingResource().getCatalogueId());
-            }
 
-            //TODO
-            // Activate/Deactivate Training Resource's Extensions
-//            trainingResourceService.publishTrainingResourceRelatedResources(lowerLevelTrainingResource.getId(),
-//                    lowerLevelTrainingResource.getTrainingResource().getCatalogueId(), active, auth);
+                // Activate/Deactivate Training Resource's Extensions
+                trainingResourceService.publishTrainingResourceRelatedResources(lowerLevelTrainingResource.getId(),
+                        lowerLevelTrainingResource.getTrainingResource().getCatalogueId(), active, auth);
+            }
         }
     }
 
     private void activateProviderInteroperabilityRecords(List<InteroperabilityRecordBundle> interoperabilityRecords, Boolean active, Authentication auth){
-        for (InteroperabilityRecordBundle interoperabilityRecordBundle : interoperabilityRecords){
-            List<LoggingInfo> loggingInfoList = commonMethods.createActivationLoggingInfo(interoperabilityRecordBundle, active, auth);
+        for (InteroperabilityRecordBundle interoperabilityRecordBundle : interoperabilityRecords) {
+            if (interoperabilityRecordBundle.getStatus().equals("approved interoperability record")) {
+                List<LoggingInfo> loggingInfoList = commonMethods.createActivationLoggingInfo(interoperabilityRecordBundle, active, auth);
 
-            // update Service's fields
-            interoperabilityRecordBundle.setLoggingInfo(loggingInfoList);
-            interoperabilityRecordBundle.setLatestUpdateInfo(loggingInfoList.get(loggingInfoList.size()-1));
-            interoperabilityRecordBundle.setActive(active);
+                // update Service's fields
+                interoperabilityRecordBundle.setLoggingInfo(loggingInfoList);
+                interoperabilityRecordBundle.setLatestUpdateInfo(loggingInfoList.get(loggingInfoList.size()-1));
+                interoperabilityRecordBundle.setActive(active);
 
-            try {
-                logger.debug("Setting Interoperability Record '{}'-'{}' of the '{}' Catalogue to active: '{}'", interoperabilityRecordBundle.getId(),
-                        interoperabilityRecordBundle.getInteroperabilityRecord().getTitle(), interoperabilityRecordBundle.getInteroperabilityRecord().getCatalogueId(),
-                        interoperabilityRecordBundle.isActive());
-                interoperabilityRecordService.update(interoperabilityRecordBundle, auth);
-                // TODO: FIX ON ProviderManagementAspect
-                if (interoperabilityRecordBundle.getStatus().equals("approved interoperability record")) {
+                try {
+                    logger.debug("Setting Interoperability Record '{}'-'{}' of the '{}' Catalogue to active: '{}'", interoperabilityRecordBundle.getId(),
+                            interoperabilityRecordBundle.getInteroperabilityRecord().getTitle(), interoperabilityRecordBundle.getInteroperabilityRecord().getCatalogueId(),
+                            interoperabilityRecordBundle.isActive());
+                    interoperabilityRecordService.update(interoperabilityRecordBundle, auth);
+                    // TODO: FIX ON ProviderManagementAspect
                     publicInteroperabilityRecordManager.update(interoperabilityRecordBundle, auth);
+                } catch (ResourceNotFoundException e) {
+                    logger.error("Could not update Interoperability Record '{}'-'{}' of the '{}' Catalogue", interoperabilityRecordBundle.getId(),
+                            interoperabilityRecordBundle.getInteroperabilityRecord().getTitle(), interoperabilityRecordBundle.getInteroperabilityRecord().getCatalogueId());
                 }
-            } catch (ResourceNotFoundException e) {
-                logger.error("Could not update Interoperability Record '{}'-'{}' of the '{}' Catalogue", interoperabilityRecordBundle.getId(),
-                        interoperabilityRecordBundle.getInteroperabilityRecord().getTitle(), interoperabilityRecordBundle.getInteroperabilityRecord().getCatalogueId());
             }
         }
     }

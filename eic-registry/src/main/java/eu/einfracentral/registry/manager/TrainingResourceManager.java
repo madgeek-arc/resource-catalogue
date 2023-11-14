@@ -56,6 +56,8 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
     private final ResourceInteroperabilityRecordService<ResourceInteroperabilityRecordBundle> resourceInteroperabilityRecordService;
     private final CatalogueService<CatalogueBundle, Authentication> catalogueService;
     private final PublicTrainingResourceManager publicTrainingResourceManager;
+    private final PublicHelpdeskManager publicHelpdeskManager;
+    private final PublicMonitoringManager publicMonitoringManager;
     private final MigrationService migrationService;
     @Autowired
     private FacetLabelService facetLabelService;
@@ -111,6 +113,8 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
                                    @Lazy ResourceInteroperabilityRecordService<ResourceInteroperabilityRecordBundle> resourceInteroperabilityRecordService,
                                    CatalogueService<CatalogueBundle, Authentication> catalogueService,
                                    PublicTrainingResourceManager publicTrainingResourceManager,
+                                   PublicHelpdeskManager publicHelpdeskManager,
+                                   PublicMonitoringManager publicMonitoringManager,
                                    SynchronizerService<TrainingResource> synchronizerService,
                                    ProviderResourcesCommonMethods commonMethods,
                                    @Lazy MigrationService migrationService){
@@ -125,6 +129,8 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
         this.resourceInteroperabilityRecordService = resourceInteroperabilityRecordService;
         this.catalogueService = catalogueService;
         this.publicTrainingResourceManager = publicTrainingResourceManager;
+        this.publicHelpdeskManager = publicHelpdeskManager;
+        this.publicMonitoringManager = publicMonitoringManager;
         this.synchronizerService = synchronizerService;
         this.commonMethods = commonMethods;
         this.migrationService = migrationService;
@@ -502,16 +508,82 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
         }
         trainingResourceBundle.setActive(active);
 
-        User user = User.of(auth);
         List<LoggingInfo> loggingInfoList = commonMethods.createActivationLoggingInfo(trainingResourceBundle, active, auth);
         loggingInfoList.sort(Comparator.comparing(LoggingInfo::getDate));
         trainingResourceBundle.setLoggingInfo(loggingInfoList);
 
-        // latestOnboardingInfo
-        trainingResourceBundle.setLatestUpdateInfo(loggingInfoList.get(0)); //TODO: check this
+        // latestLoggingInfo
+        trainingResourceBundle.setLatestUpdateInfo(commonMethods.setLatestLoggingInfo(loggingInfoList, LoggingInfo.Types.UPDATE.getKey()));
+        trainingResourceBundle.setLatestOnboardingInfo(commonMethods.setLatestLoggingInfo(loggingInfoList, LoggingInfo.Types.ONBOARD.getKey()));
+        trainingResourceBundle.setLatestAuditInfo(commonMethods.setLatestLoggingInfo(loggingInfoList, LoggingInfo.Types.AUDIT.getKey()));
+
+        // active Service's related resources (ServiceExtensions && Subprofiles)
+        publishTrainingResourceRelatedResources(trainingResourceBundle.getId(),
+                trainingResourceBundle.getTrainingResource().getCatalogueId(), active, auth);
 
         update(trainingResourceBundle, auth);
         return trainingResourceBundle;
+    }
+
+    public void publishTrainingResourceRelatedResources(String id, String catalogueId, Boolean active, Authentication auth) {
+        HelpdeskBundle helpdeskBundle = helpdeskService.get(id, catalogueId);
+        MonitoringBundle monitoringBundle = monitoringService.get(id, catalogueId);
+        if (active){
+            logger.info("Activating all related resources of the Training Resource with id: {}", id);
+        } else{
+            logger.info("Deactivating all related resources of the Training Resource with id: {}", id);
+        }
+        if (helpdeskBundle != null) {
+            publishServiceExtensions(helpdeskBundle, active, auth);
+        }
+        if (monitoringBundle != null) {
+            publishServiceExtensions(monitoringBundle, active, auth);
+        }
+    }
+
+    private void publishServiceExtensions(Bundle<?> bundle, boolean active, Authentication auth) {
+        List<LoggingInfo> loggingInfoList = commonMethods.createActivationLoggingInfo(bundle, active, auth);
+
+        // update Bundle's fields
+        bundle.setLoggingInfo(loggingInfoList);
+        bundle.setLatestUpdateInfo(loggingInfoList.get(loggingInfoList.size()-1));
+        bundle.setActive(active);
+
+        if (bundle instanceof HelpdeskBundle) {
+            try {
+                logger.debug("Setting Helpdesk '{}' of the Training Resource '{}' of the '{}' Catalogue to active: '{}'",
+                        bundle.getId(), ((HelpdeskBundle) bundle).getHelpdesk().getServiceId(),
+                        ((HelpdeskBundle) bundle).getCatalogueId(), bundle.isActive());
+                helpdeskService.updateBundle((HelpdeskBundle) bundle, auth);
+                HelpdeskBundle publicHelpdeskBundle =
+                        publicHelpdeskManager.getOrElseReturnNull(((HelpdeskBundle) bundle).getCatalogueId() +
+                                "." + bundle.getId());
+                if (publicHelpdeskBundle != null) {
+                    publicHelpdeskManager.update((HelpdeskBundle) bundle, auth);
+                }
+            } catch (eu.einfracentral.exception.ResourceNotFoundException e) {
+                logger.error("Could not update Helpdesk '{}' of the Training Resource '{}' of the '{}' Catalogue",
+                        bundle.getId(), ((HelpdeskBundle) bundle).getHelpdesk().getServiceId(),
+                        ((HelpdeskBundle) bundle).getCatalogueId());
+            }
+        } else {
+            try {
+                logger.debug("Setting Monitoring '{}' of the Training Resource '{}' of the '{}' Catalogue to active: '{}'",
+                        bundle.getId(), ((MonitoringBundle) bundle).getMonitoring().getServiceId(),
+                        ((MonitoringBundle) bundle).getCatalogueId(), bundle.isActive());
+                monitoringService.updateBundle((MonitoringBundle) bundle, auth);
+                MonitoringBundle publicMonitoringBundle =
+                        publicMonitoringManager.getOrElseReturnNull(((MonitoringBundle) bundle).getCatalogueId() +
+                                "." + bundle.getId());
+                if (publicMonitoringBundle != null) {
+                    publicMonitoringManager.update((MonitoringBundle) bundle, auth);
+                }
+            } catch (eu.einfracentral.exception.ResourceNotFoundException e) {
+                logger.error("Could not update Monitoring '{}' of the Training Resource '{}' of the '{}' Catalogue",
+                        bundle.getId(), ((MonitoringBundle) bundle).getMonitoring().getServiceId(),
+                        ((MonitoringBundle) bundle).getCatalogueId());
+            }
+        }
     }
 
     public TrainingResourceBundle auditResource(String trainingResourceId, String catalogueId, String comment, LoggingInfo.ActionType actionType, Authentication auth) {
