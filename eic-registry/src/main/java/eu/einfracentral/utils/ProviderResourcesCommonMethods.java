@@ -522,12 +522,16 @@ public class ProviderResourcesCommonMethods {
             mergedAlternativeIdentifiers.addAll(lowerLevelAI);
         }
         if (publicLevelAI != null && !publicLevelAI.isEmpty()) {
-            mergedAlternativeIdentifiers.addAll(publicLevelAI);
+            for (AlternativeIdentifier alternativeIdentifier : publicLevelAI) {
+                if (alternativeIdentifier.getType().equals("EOSC PID")) {
+                    mergedAlternativeIdentifiers.add(alternativeIdentifier);
+                    break;
+                }
+            }
         }
         // remove duplicates && convert to list
         Set<AlternativeIdentifier> uniqueIdentifiers = new HashSet<>(mergedAlternativeIdentifiers);
-        List<AlternativeIdentifier> ret = new ArrayList<>(uniqueIdentifiers);
-        return ret;
+        return new ArrayList<>(uniqueIdentifiers);
     }
 
     public void deleteResourceRelatedServiceSubprofiles(String serviceId, String catalogueId) {
