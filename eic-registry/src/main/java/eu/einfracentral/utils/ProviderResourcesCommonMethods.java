@@ -480,7 +480,11 @@ public class ProviderResourcesCommonMethods {
         values.put(hs_admin);
         markeplaceUrl.put("index", 1);
         markeplaceUrl.put("type", "url");
-        markeplaceUrl.put("data", marketplaceUrl + resourceTypePath + resourceId);
+        String url = marketplaceUrl;
+        if (resourceTypePath.equals("trainings/") || resourceTypePath.equals("guidelines/")) {
+            url = url.replace("marketplace", "search.marketplace");
+        }
+        markeplaceUrl.put("data", url + resourceTypePath + resourceId);
         values.put(markeplaceUrl);
         id.put("index", 2);
         id.put("type", "id");

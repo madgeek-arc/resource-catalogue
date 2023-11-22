@@ -24,25 +24,16 @@ public class PIDController {
     private final ServiceBundleService<ServiceBundle> serviceService;
     private final TrainingResourceService<TrainingResourceBundle> trainingResourceService;
     private final InteroperabilityRecordService<InteroperabilityRecordBundle> interoperabilityRecordService;
-    private final DatasourceService datasourceService;
-    private final HelpdeskService<HelpdeskBundle, Authentication> helpdeskService;
-    private final MonitoringService<MonitoringBundle, Authentication> monitoringService;
 
     public PIDController(PIDService pidService, ProviderService<ProviderBundle, Authentication> providerService,
                          ServiceBundleService<ServiceBundle> serviceService,
                          TrainingResourceService<TrainingResourceBundle> trainingResourceService,
-                         InteroperabilityRecordService<InteroperabilityRecordBundle> interoperabilityRecordService,
-                         DatasourceService datasourceService,
-                         HelpdeskService<HelpdeskBundle, Authentication> helpdeskService,
-                         MonitoringService<MonitoringBundle, Authentication> monitoringService) {
+                         InteroperabilityRecordService<InteroperabilityRecordBundle> interoperabilityRecordService) {
         this.pidService = pidService;
         this.providerService = providerService;
         this.serviceService = serviceService;
         this.trainingResourceService = trainingResourceService;
         this.interoperabilityRecordService = interoperabilityRecordService;
-        this.datasourceService = datasourceService;
-        this.helpdeskService = helpdeskService;
-        this.monitoringService = monitoringService;
     }
 
     @ApiOperation(value = "Returns the Resource with the given PID.")
