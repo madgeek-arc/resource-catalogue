@@ -13,10 +13,7 @@ import javax.mail.*;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
-import javax.validation.constraints.NotNull;
 import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 @Component
@@ -75,39 +72,14 @@ public class SimpleMailService implements MailService {
     @Async
     @Override
     public void sendMail(List<String> to, List<String> cc, String subject, String text) throws MessagingException {
-        if (enableEmails) {
-            Transport transport = null;
-            try {
-                transport = session.getTransport();
-                InternetAddress sender = new InternetAddress(from);
-                Message message = new MimeMessage(session);
-                message.setFrom(sender);
-                if (to != null) {
-                    message.setRecipients(Message.RecipientType.TO, createAddresses(to));
-                }
-                if (cc != null) {
-                    message.setRecipients(Message.RecipientType.CC, createAddresses(cc));
-                }
-                message.setRecipient(Message.RecipientType.BCC, sender);
-                message.setSubject(subject);
-                message.setText(text);
-                transport.connect();
-                Transport.send(message);
-            } catch (MessagingException e) {
-                logger.error("ERROR", e);
-            } finally {
-                if (transport != null) {
-                    transport.close();
-                }
-            }
-        }
+        sendMail(to, cc, Collections.singletonList(from), subject, text);
     }
 
     @Override
     public void sendMail(List<String> to, List<String> cc, List<String> bcc, String subject, String text) throws MessagingException {
         if (enableEmails) {
             Transport transport = null;
-            Message message;
+            MimeMessage message;
             try {
                 transport = session.getTransport();
                 InternetAddress sender = new InternetAddress(from);
@@ -123,7 +95,10 @@ public class SimpleMailService implements MailService {
                     message.setRecipients(Message.RecipientType.BCC, createAddresses(bcc));
                 }
                 message.setSubject(subject);
-                message.setText(text);
+
+                message.setText(text, "utf-8", "html");
+                message.saveChanges();
+
                 transport.connect();
                 sendMessage(message, to, cc, bcc);
             } catch (MessagingException e) {
@@ -139,7 +114,7 @@ public class SimpleMailService implements MailService {
     void sendMessage(Message message, List<String> to, List<String> cc, List<String> bcc) throws MessagingException {
         boolean sent = false;
         int attempts = 0;
-        while(!sent && attempts < 20) {
+        while (!sent && attempts < 20) {
             try {
                 attempts++;
                 Transport.send(message);
