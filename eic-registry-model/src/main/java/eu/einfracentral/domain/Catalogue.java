@@ -114,9 +114,9 @@ public class Catalogue implements Identifiable {
     /**
      * A high-level description of the Catalogue's scope.
      */
-    @XmlElement
-    @ApiModelProperty(position = 12)
-    @FieldValidation(nullable = true)
+    @XmlElement(required = true)
+    @ApiModelProperty(position = 12, required = true)
+    @FieldValidation
     private String scope;
 
     /**

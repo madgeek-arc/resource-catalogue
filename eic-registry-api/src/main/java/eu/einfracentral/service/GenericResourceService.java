@@ -33,5 +33,5 @@ public interface GenericResourceService {
 
     Resource searchResource(String resourceTypeName, SearchService.KeyValue... keyValues);
 
-    void sortSpecificFacetsAlphabetically(List<Facet> facets, String field);
+    void sortFacets(List<Facet> facets, String field);
 }

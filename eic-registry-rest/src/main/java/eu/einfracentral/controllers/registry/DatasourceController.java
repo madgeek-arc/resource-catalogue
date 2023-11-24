@@ -99,7 +99,7 @@ public class DatasourceController {
                                                                    @RequestParam(defaultValue = "all", name = "catalogue_id") String catalogueId) {
         FacetFilter ff = datasourceService.createFacetFilterForFetchingDatasources(allRequestParams, catalogueId);
         Paging<?> paging = genericResourceService.getResults(ff);
-        genericResourceService.sortSpecificFacetsAlphabetically(paging.getFacets(), "service_id");
+        genericResourceService.sortFacets(paging.getFacets(), "service_id");
         return ResponseEntity.ok(paging);
     }
 

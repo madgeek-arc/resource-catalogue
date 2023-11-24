@@ -133,7 +133,7 @@ public class InteroperabilityRecordController {
         FacetFilter ff = interoperabilityRecordService.createFacetFilterForFetchingInteroperabilityRecords(allRequestParams, catalogueId, providerId);
         if (auditState == null) {
             Paging<InteroperabilityRecordBundle> paging = genericResourceService.getResults(ff);
-            genericResourceService.sortSpecificFacetsAlphabetically(paging.getFacets(), "provider_id");
+            genericResourceService.sortFacets(paging.getFacets(), "provider_id");
             return ResponseEntity.ok(paging);
         } else {
             return ResponseEntity.ok(interoperabilityRecordService.getAllForAdminWithAuditStates(ff, auditState));

@@ -427,7 +427,7 @@ It is also possible to select Not a legal entity.]]></xs:documentation>
               
       </xs:element>
             
-      <xs:element minOccurs="0" name="scope" type="xs:string">
+      <xs:element name="scope" type="xs:string">
         <xs:annotation>
           <xs:documentation><![CDATA[A high-level description of the Catalogue's scope.]]></xs:documentation>
         </xs:annotation>
@@ -2341,7 +2341,7 @@ infrastructures.]]></xs:documentation>
         </xs:annotation>
       </xs:element>
             
-      <xs:element name="marketplaceLocations">
+      <xs:element minOccurs="0" name="marketplaceLocations">
         <xs:annotation>
           <xs:documentation><![CDATA[Placement of the Service in the different sections of the EOSC Marketplace.]]></xs:documentation>
         </xs:annotation>
@@ -2565,7 +2565,7 @@ infrastructures.]]></xs:documentation>
         </xs:annotation>
       </xs:element>
             
-      <xs:element name="serviceCategories">
+      <xs:element minOccurs="0" name="serviceCategories">
         <xs:annotation>
           <xs:documentation><![CDATA[A named group of Resources that offer access to the same type of Resources.]]></xs:documentation>
         </xs:annotation>

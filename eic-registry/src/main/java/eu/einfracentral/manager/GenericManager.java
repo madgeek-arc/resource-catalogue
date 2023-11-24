@@ -325,7 +325,7 @@ public class GenericManager implements GenericResourceService {
     }
 
     // facets are pre-sorted by 'count' field
-    public void sortSpecificFacetsAlphabetically(List<Facet> facets, String field) {
+    public void sortFacets(List<Facet> facets, String field) {
         for (Iterator<Facet> iter = facets.listIterator(); iter.hasNext();) {
             Facet facet = iter.next();
             if (facet.getField().equals("catalogue_id") || facet.getField().equals(field)) {

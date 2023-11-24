@@ -201,20 +201,20 @@ public class Service implements Identifiable {
     /**
      * A named group of Resources that offer access to the same type of Resources.
      */
-    @XmlElementWrapper(name = "serviceCategories", required = true)
+    @XmlElementWrapper(name = "serviceCategories")
     @XmlElement(name = "serviceCategory")
-    @ApiModelProperty(position = 20, notes = "Vocabulary ID", required = true)
-    @FieldValidation(containsId = true, idClass = Vocabulary.class)
+    @ApiModelProperty(position = 20, notes = "Vocabulary ID")
+    @FieldValidation(nullable = true, containsId = true, idClass = Vocabulary.class)
     @VocabularyValidation(type = Vocabulary.Type.SERVICE_CATEGORY)
     private List<String> serviceCategories;
 
     /**
      * Placement of the Service in the different sections of the EOSC Marketplace.
      */
-    @XmlElementWrapper(name = "marketplaceLocations", required = true)
+    @XmlElementWrapper(name = "marketplaceLocations")
     @XmlElement(name = "marketplaceLocation")
-    @ApiModelProperty(position = 21, notes = "Vocabulary ID", required = true)
-    @FieldValidation(containsId = true, idClass = Vocabulary.class)
+    @ApiModelProperty(position = 21, notes = "Vocabulary ID")
+    @FieldValidation(nullable = true, containsId = true, idClass = Vocabulary.class)
     @VocabularyValidation(type = Vocabulary.Type.MARKETPLACE_LOCATION)
     private List<String> marketplaceLocations;
 
