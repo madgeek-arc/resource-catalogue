@@ -75,10 +75,13 @@ public class Vocabulary implements Identifiable {
         FUNDING_PROGRAM("Funding program"),
         LIFE_CYCLE_STATUS("Life cycle status"),
         RELATED_PLATFORM("Related platform"),
+        SERVICE_CATEGORY("Service category"),
+        MARKETPLACE_LOCATION("Marketplace location"),
         // States
         CATALOGUE_STATE("Catalogue state"),
         PROVIDER_STATE("Provider state"),
         RESOURCE_STATE("Resource state"),
+        DATASOURCE_STATE("Datasource state"),
         TEMPLATE_STATE("Template state"),
         INTEROPERABILITY_RECORD_STATE("Interoperability Record state"),
         // Datasource
@@ -105,8 +108,6 @@ public class Vocabulary implements Identifiable {
         IR_RESOURCE_TYPE_GENERAL("Interoperability Record resource type general"),
         IR_STATUS("Interoperability Record status"),
         IR_EOSC_GUIDELINE_TYPE("Interoperability Record eosc guideline type"),
-        // serviceType
-        SERVICE_TYPE("Service type"),
         // Configuration Template
         CT_PROTOCOL("Configuration Template protocol"),
         CT_COMPATIBILITY("Configuration Template compatibility");

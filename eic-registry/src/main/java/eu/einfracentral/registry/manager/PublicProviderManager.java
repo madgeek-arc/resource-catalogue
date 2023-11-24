@@ -71,9 +71,10 @@ public class PublicProviderManager extends ResourceManager<ProviderBundle> imple
         String lowerLevelProviderId = providerBundle.getId();
         Identifiers.createOriginalId(providerBundle);
         providerBundle.setId(String.format("%s.%s", providerBundle.getProvider().getCatalogueId(), providerBundle.getId()));
+        commonMethods.restrictPrefixRepetitionOnPublicResources(providerBundle.getId(), providerBundle.getProvider().getCatalogueId());
         providerBundle.getMetadata().setPublished(true);
         // create PID and set it as Alternative Identifier
-        providerBundle.getIdentifiers().setAlternativeIdentifiers(commonMethods.createAlternativeIdentifierForPID(providerBundle));
+        commonMethods.createPIDAndCorrespondingAlternativeIdentifier(providerBundle, "providers/");
         ProviderBundle ret;
         logger.info(String.format("Provider [%s] is being published with id [%s]", lowerLevelProviderId, providerBundle.getId()));
         ret = super.add(providerBundle, null);
@@ -90,9 +91,13 @@ public class PublicProviderManager extends ResourceManager<ProviderBundle> imple
         } catch (IllegalAccessException | InvocationTargetException e) {
             e.printStackTrace();
         }
+
+        ret.getProvider().setAlternativeIdentifiers(commonMethods.updateAlternativeIdentifiers(
+                providerBundle.getProvider().getAlternativeIdentifiers(),
+                published.getProvider().getAlternativeIdentifiers()));
         ret.setIdentifiers(published.getIdentifiers());
         ret.setId(published.getId());
-        ret.setMetadata(published.getMetadata());
+        ret.getMetadata().setPublished(true);
         logger.info(String.format("Updating public Provider with id [%s]", ret.getId()));
         ret = super.update(ret, null);
         jmsService.convertAndSendTopic("provider.update", ret);

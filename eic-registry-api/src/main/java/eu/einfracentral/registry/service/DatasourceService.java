@@ -1,22 +1,64 @@
 package eu.einfracentral.registry.service;
 
-import eu.einfracentral.domain.Datasource;
+import eu.einfracentral.domain.DatasourceBundle;
 import eu.openminted.registry.core.domain.FacetFilter;
-import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.util.MultiValueMap;
 
-import java.io.IOException;
-import java.util.List;
-import java.util.Map;
+public interface DatasourceService extends ResourceService<DatasourceBundle, Authentication> {
 
-public interface DatasourceService<T> extends ResourceBundleService<T>  {
+    /**
+     * Get the Datasource sub-profile of the specific Service of the specific Catalogue
+     *
+     * @param serviceId - The ID of the Service
+     * @param catalogueId - The ID of the Catalogue
+     * @return {@link DatasourceBundle}
+     */
+    DatasourceBundle get(String serviceId, String catalogueId);
 
-    Map<Integer, List<Datasource>> getAllOpenAIREDatasources(FacetFilter ff) throws IOException;
+    /**
+     * Get the Datasource sub-profile of the specific Service of the specific Catalogue
+     *
+     * @param datasourceBundle - Datasource Bundle to be updated
+     * @param comment - Optional comment of the update
+     * @param auth - Authentication
+     * @return {@link DatasourceBundle}
+     */
+    DatasourceBundle update(DatasourceBundle datasourceBundle, String comment, Authentication auth);
 
-    String[] getOpenAIREDatasourcesAsJSON(FacetFilter ff) throws IOException;
+    /**
+     * Verify (approve/reject) a Datasource.
+     *
+     * @param id - The ID of the Datasource
+     * @param status - New status
+     * @param active - New active
+     * @param auth - Authentication
+     * @return {@link DatasourceBundle}
+     */
+    DatasourceBundle verifyDatasource(String id, String status, Boolean active, Authentication auth);
 
-    Datasource getOpenAIREDatasourceById(String datasourceId) throws IOException;
+    /**
+     *
+     * @param datasourceBundle - DatasourceBundle
+     * @param auth - Authentication
+     */
+    void updateBundle(DatasourceBundle datasourceBundle, Authentication auth);
 
-    String createHttpRequest(String url, String data);
+    /**
+     * Create a FacetFilter for fetching Datasources
+     *
+     * @param allRequestParams - All the @RequestParams given
+     * @param catalogueId - The ID of the Catalogue
+     * @return {@link FacetFilter}
+     */
+    FacetFilter createFacetFilterForFetchingDatasources(MultiValueMap<String, Object> allRequestParams, String catalogueId);
 
-    boolean isDatasourceRegisteredOnOpenAIRE(String eoscId);
+    /**
+     * Returns True/False according to if the specific Datasource
+     * is already registered in the OpenAIRE Catalogue
+     *
+     * @param id - The ID of the Datasource in creation
+     * @return True/False
+     */
+    boolean isDatasourceRegisteredOnOpenAIRE(String id);
 }

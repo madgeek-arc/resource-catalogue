@@ -82,13 +82,22 @@ public class Provider implements Identifiable {
     @VocabularyValidation(type = Vocabulary.Type.PROVIDER_HOSTING_LEGAL_ENTITY)
     private String hostingLegalEntity;
 
+    /**
+     * Other types of Identifiers for the specific Service (eg. PID)
+     */
+    @XmlElementWrapper(name = "alternativeIdentifiers")
+    @XmlElement(name = "alternativeIdentifier")
+    @ApiModelProperty(position = 8)
+    @FieldValidation(nullable = true)
+    private List<AlternativeIdentifier> alternativeIdentifiers;
+
 
     // Marketing Information
     /**
      * A high-level description of the Provider in fairly non-technical terms, with the vision, mission, objectives, background, experience.
      */
     @XmlElement(required = true)
-    @ApiModelProperty(position = 8, required = true)
+    @ApiModelProperty(position = 9, required = true)
     @FieldValidation
     private String description;
 
@@ -96,7 +105,7 @@ public class Provider implements Identifiable {
      * Link to the logo/visual identity of the Provider.
      */
     @XmlElement(required = true)
-    @ApiModelProperty(position = 9, example = "https://example.com", required = true)
+    @ApiModelProperty(position = 10, example = "https://example.com", required = true)
     @FieldValidation
     private URL logo;
 
@@ -105,7 +114,7 @@ public class Provider implements Identifiable {
      */
     @XmlElementWrapper(name = "multimedia")
     @XmlElement(name = "multimedia")
-    @ApiModelProperty(position = 10)
+    @ApiModelProperty(position = 11)
     @FieldValidation(nullable = true)
     private List<MultimediaPair> multimedia;
 
@@ -116,7 +125,7 @@ public class Provider implements Identifiable {
      */
     @XmlElementWrapper(name = "scientificDomains")
     @XmlElement(name = "scientificDomain")
-    @ApiModelProperty(position = 11, notes = "Vocabulary ID")
+    @ApiModelProperty(position = 12, notes = "Vocabulary ID")
     @FieldValidation(nullable = true)
     private List<ServiceProviderDomain> scientificDomains;
 
@@ -125,7 +134,7 @@ public class Provider implements Identifiable {
      */
     @XmlElementWrapper(name = "tags")
     @XmlElement(name = "tag")
-    @ApiModelProperty(position = 12)
+    @ApiModelProperty(position = 13)
     @FieldValidation(nullable = true)
     private List<String> tags;
 
@@ -134,7 +143,7 @@ public class Provider implements Identifiable {
      */
     @XmlElementWrapper(name = "structureTypes")
     @XmlElement(name = "structureType")
-    @ApiModelProperty(position = 13, notes = "Vocabulary ID")
+    @ApiModelProperty(position = 14, notes = "Vocabulary ID")
     @FieldValidation(nullable = true, containsId = true, idClass = Vocabulary.class)
     @VocabularyValidation(type = Vocabulary.Type.PROVIDER_STRUCTURE_TYPE)
     private List<String> structureTypes;
@@ -145,7 +154,7 @@ public class Provider implements Identifiable {
      * Physical location of the Provider or its coordinating centre in the case of distributed, virtual, and mobile Providers.
      */
     @XmlElement(required = true)
-    @ApiModelProperty(position = 14, required = true)
+    @ApiModelProperty(position = 15, required = true)
     @FieldValidation
     private ProviderLocation location;
 
@@ -155,7 +164,7 @@ public class Provider implements Identifiable {
      * Provider's main contact info.
      */
     @XmlElement(required = true)
-    @ApiModelProperty(position = 15, required = true)
+    @ApiModelProperty(position = 16, required = true)
     @FieldValidation
     private ProviderMainContact mainContact;
 
@@ -164,7 +173,7 @@ public class Provider implements Identifiable {
      */
     @XmlElementWrapper(required = true, name = "publicContacts")
     @XmlElement(name = "publicContact")
-    @ApiModelProperty(position = 16, required = true)
+    @ApiModelProperty(position = 17, required = true)
     @FieldValidation
     private List<ProviderPublicContact> publicContacts;
 
@@ -174,7 +183,7 @@ public class Provider implements Identifiable {
      * Current status of the Provider life-cycle.
      */
     @XmlElement
-    @ApiModelProperty(position = 17, notes = "Vocabulary ID")
+    @ApiModelProperty(position = 18, notes = "Vocabulary ID")
     @FieldValidation(nullable = true, containsId = true, idClass = Vocabulary.class)
     @VocabularyValidation(type = Vocabulary.Type.PROVIDER_LIFE_CYCLE_STATUS)
     private String lifeCycleStatus;
@@ -184,7 +193,7 @@ public class Provider implements Identifiable {
      */
     @XmlElementWrapper(name = "certifications")
     @XmlElement(name = "certification")
-    @ApiModelProperty(position = 18)
+    @ApiModelProperty(position = 19)
     @FieldValidation(nullable = true)
     private List<String> certifications;
 
@@ -195,7 +204,7 @@ public class Provider implements Identifiable {
      */
     @XmlElementWrapper(name = "participatingCountries")
     @XmlElement(name = "participatingCountry")
-    @ApiModelProperty(position = 19, notes = "Vocabulary ID")
+    @ApiModelProperty(position = 20, notes = "Vocabulary ID")
     @FieldValidation(nullable = true, containsId = true, idClass = Vocabulary.class)
     @VocabularyValidation(type = Vocabulary.Type.COUNTRY)
     private List<String> participatingCountries;
@@ -205,7 +214,7 @@ public class Provider implements Identifiable {
      */
     @XmlElementWrapper(name = "affiliations")
     @XmlElement(name = "affiliation")
-    @ApiModelProperty(position = 20)
+    @ApiModelProperty(position = 21)
     @FieldValidation(nullable = true)
     private List<String> affiliations;
 
@@ -214,7 +223,7 @@ public class Provider implements Identifiable {
      */
     @XmlElementWrapper(name = "networks")
     @XmlElement(name = "network")
-    @ApiModelProperty(position = 21, notes = "Vocabulary ID")
+    @ApiModelProperty(position = 22, notes = "Vocabulary ID")
     @FieldValidation(nullable = true, containsId = true, idClass = Vocabulary.class)
     @VocabularyValidation(type = Vocabulary.Type.PROVIDER_NETWORK)
     private List<String> networks;
@@ -223,7 +232,7 @@ public class Provider implements Identifiable {
      * The Catalogue this Provider is originally registered at.
      */
     @XmlElement
-    @ApiModelProperty(position = 22)
+    @ApiModelProperty(position = 23)
     @FieldValidation(nullable = true, containsId = true, idClass = Catalogue.class)
     private String catalogueId;
 
@@ -234,7 +243,7 @@ public class Provider implements Identifiable {
      */
     @XmlElementWrapper(name = "esfriDomains")
     @XmlElement(name = "esfriDomain")
-    @ApiModelProperty(position = 23, notes = "Vocabulary ID")
+    @ApiModelProperty(position = 24, notes = "Vocabulary ID")
     @FieldValidation(nullable = true, containsId = true, idClass = Vocabulary.class)
     @VocabularyValidation(type = Vocabulary.Type.PROVIDER_ESFRI_DOMAIN)
     private List<String> esfriDomains;
@@ -244,7 +253,7 @@ public class Provider implements Identifiable {
      * a) is a node of an ESFRI project, b) is an ESFRI project, c) is an ESFRI landmark, d) is not an ESFRI project or landmark.
      */
     @XmlElement
-    @ApiModelProperty(position = 24, notes = "Vocabulary ID")
+    @ApiModelProperty(position = 25, notes = "Vocabulary ID")
     @FieldValidation(nullable = true, containsId = true, idClass = Vocabulary.class)
     @VocabularyValidation(type = Vocabulary.Type.PROVIDER_ESFRI_TYPE)
     private String esfriType;
@@ -254,7 +263,7 @@ public class Provider implements Identifiable {
      */
     @XmlElementWrapper(name = "merilScientificDomains")
     @XmlElement(name = "merilScientificDomain")
-    @ApiModelProperty(position = 25, notes = "Vocabulary ID")
+    @ApiModelProperty(position = 26, notes = "Vocabulary ID")
     @FieldValidation(nullable = true)
     private List<ProviderMerilDomain> merilScientificDomains;
 
@@ -263,7 +272,7 @@ public class Provider implements Identifiable {
      */
     @XmlElementWrapper(name = "areasOfActivity")
     @XmlElement(name = "areaOfActivity")
-    @ApiModelProperty(position = 26, notes = "Vocabulary ID")
+    @ApiModelProperty(position = 27, notes = "Vocabulary ID")
     @FieldValidation(nullable = true, containsId = true, idClass = Vocabulary.class)
     @VocabularyValidation(type = Vocabulary.Type.PROVIDER_AREA_OF_ACTIVITY)
     private List<String> areasOfActivity;
@@ -273,7 +282,7 @@ public class Provider implements Identifiable {
      */
     @XmlElementWrapper(name = "societalGrandChallenges")
     @XmlElement(name = "societalGrandChallenge")
-    @ApiModelProperty(position = 27, notes = "Vocabulary ID")
+    @ApiModelProperty(position = 28, notes = "Vocabulary ID")
     @FieldValidation(nullable = true, containsId = true, idClass = Vocabulary.class)
     @VocabularyValidation(type = Vocabulary.Type.PROVIDER_SOCIETAL_GRAND_CHALLENGE)
     private List<String> societalGrandChallenges;
@@ -283,7 +292,7 @@ public class Provider implements Identifiable {
      */
     @XmlElementWrapper(name = "nationalRoadmaps")
     @XmlElement(name = "nationalRoadmap")
-    @ApiModelProperty(position = 28)
+    @ApiModelProperty(position = 29)
     @FieldValidation(nullable = true)
     private List<String> nationalRoadmaps;
 
@@ -291,12 +300,25 @@ public class Provider implements Identifiable {
     // Extra needed fields
     @XmlElementWrapper(name = "users", required = true)
     @XmlElement(name = "user")
-    @ApiModelProperty(position = 29, required = true)
+    @ApiModelProperty(position = 30, required = true)
     @FieldValidation
     private List<User> users;
 
 
     public Provider() {
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Provider provider = (Provider) o;
+        return legalEntity == provider.legalEntity && Objects.equals(id, provider.id) && Objects.equals(abbreviation, provider.abbreviation) && Objects.equals(name, provider.name) && Objects.equals(website, provider.website) && Objects.equals(legalStatus, provider.legalStatus) && Objects.equals(hostingLegalEntity, provider.hostingLegalEntity) && Objects.equals(alternativeIdentifiers, provider.alternativeIdentifiers) && Objects.equals(description, provider.description) && Objects.equals(logo, provider.logo) && Objects.equals(multimedia, provider.multimedia) && Objects.equals(scientificDomains, provider.scientificDomains) && Objects.equals(tags, provider.tags) && Objects.equals(structureTypes, provider.structureTypes) && Objects.equals(location, provider.location) && Objects.equals(mainContact, provider.mainContact) && Objects.equals(publicContacts, provider.publicContacts) && Objects.equals(lifeCycleStatus, provider.lifeCycleStatus) && Objects.equals(certifications, provider.certifications) && Objects.equals(participatingCountries, provider.participatingCountries) && Objects.equals(affiliations, provider.affiliations) && Objects.equals(networks, provider.networks) && Objects.equals(catalogueId, provider.catalogueId) && Objects.equals(esfriDomains, provider.esfriDomains) && Objects.equals(esfriType, provider.esfriType) && Objects.equals(merilScientificDomains, provider.merilScientificDomains) && Objects.equals(areasOfActivity, provider.areasOfActivity) && Objects.equals(societalGrandChallenges, provider.societalGrandChallenges) && Objects.equals(nationalRoadmaps, provider.nationalRoadmaps) && Objects.equals(users, provider.users);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, abbreviation, name, website, legalEntity, legalStatus, hostingLegalEntity, alternativeIdentifiers, description, logo, multimedia, scientificDomains, tags, structureTypes, location, mainContact, publicContacts, lifeCycleStatus, certifications, participatingCountries, affiliations, networks, catalogueId, esfriDomains, esfriType, merilScientificDomains, areasOfActivity, societalGrandChallenges, nationalRoadmaps, users);
     }
 
     @Override
@@ -364,6 +386,14 @@ public class Provider implements Identifiable {
 
     public void setHostingLegalEntity(String hostingLegalEntity) {
         this.hostingLegalEntity = hostingLegalEntity;
+    }
+
+    public List<AlternativeIdentifier> getAlternativeIdentifiers() {
+        return alternativeIdentifiers;
+    }
+
+    public void setAlternativeIdentifiers(List<AlternativeIdentifier> alternativeIdentifiers) {
+        this.alternativeIdentifiers = alternativeIdentifiers;
     }
 
     public String getDescription() {
@@ -540,18 +570,5 @@ public class Provider implements Identifiable {
 
     public void setUsers(List<User> users) {
         this.users = users;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Provider provider = (Provider) o;
-        return legalEntity == provider.legalEntity && Objects.equals(id, provider.id) && Objects.equals(name, provider.name) && Objects.equals(abbreviation, provider.abbreviation) && Objects.equals(website, provider.website) && Objects.equals(legalStatus, provider.legalStatus) && Objects.equals(description, provider.description) && Objects.equals(logo, provider.logo) && Objects.equals(multimedia, provider.multimedia) && Objects.equals(scientificDomains, provider.scientificDomains) && Objects.equals(tags, provider.tags) && Objects.equals(location, provider.location) && Objects.equals(mainContact, provider.mainContact) && Objects.equals(publicContacts, provider.publicContacts) && Objects.equals(lifeCycleStatus, provider.lifeCycleStatus) && Objects.equals(certifications, provider.certifications) && Objects.equals(hostingLegalEntity, provider.hostingLegalEntity) && Objects.equals(participatingCountries, provider.participatingCountries) && Objects.equals(affiliations, provider.affiliations) && Objects.equals(networks, provider.networks) && Objects.equals(structureTypes, provider.structureTypes) && Objects.equals(esfriDomains, provider.esfriDomains) && Objects.equals(esfriType, provider.esfriType) && Objects.equals(merilScientificDomains, provider.merilScientificDomains) && Objects.equals(areasOfActivity, provider.areasOfActivity) && Objects.equals(societalGrandChallenges, provider.societalGrandChallenges) && Objects.equals(nationalRoadmaps, provider.nationalRoadmaps) && Objects.equals(users, provider.users);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(id, name, abbreviation, website, legalEntity, legalStatus, description, logo, multimedia, scientificDomains, tags, location, mainContact, publicContacts, lifeCycleStatus, certifications, hostingLegalEntity, participatingCountries, affiliations, networks, structureTypes, esfriDomains, esfriType, merilScientificDomains, areasOfActivity, societalGrandChallenges, nationalRoadmaps, users);
     }
 }

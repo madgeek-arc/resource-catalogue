@@ -1,5 +1,5 @@
 ### Build using Maven ###
-FROM maven:3.6.0-jdk-8-alpine AS maven
+FROM maven:3.6 AS maven
 ARG profile
 
 COPY pom.xml /tmp/
@@ -15,7 +15,7 @@ RUN if [[ -z "$profile" ]] ; then mvn package -U ; else mvn package -U -P $profi
 
 
 ### Deploy to Tomcat ###
-FROM tomcat:8.5-jre8-alpine
+FROM tomcat:8.5-jre11-openjdk
 MAINTAINER "***REMOVED***"
 RUN ["rm", "-fr", "/usr/local/tomcat/webapps/ROOT"]
 

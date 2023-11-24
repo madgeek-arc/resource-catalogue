@@ -10,14 +10,15 @@ import eu.einfracentral.registry.service.ConfigurationTemplateInstanceService;
 import eu.einfracentral.registry.service.ConfigurationTemplateService;
 import eu.einfracentral.registry.service.ResourceInteroperabilityRecordService;
 import eu.einfracentral.service.SecurityService;
+import eu.einfracentral.utils.ObjectUtils;
 import eu.einfracentral.utils.ProviderResourcesCommonMethods;
 import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.domain.Resource;
-import net.minidev.json.JSONObject;
-import net.minidev.json.parser.JSONParser;
-import net.minidev.json.parser.ParseException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
@@ -85,50 +86,51 @@ public class ConfigurationTemplateInstanceManager extends ResourceManager<Config
     public ConfigurationTemplateInstanceBundle update(ConfigurationTemplateInstanceBundle configurationTemplateInstanceBundle, Authentication auth) {
         logger.trace("User '{}' is attempting to update the ConfigurationTemplateInstance with id '{}'", auth, configurationTemplateInstanceBundle.getId());
 
-        Resource existing = whereID(configurationTemplateInstanceBundle.getId(), true);
-        ConfigurationTemplateInstanceBundle ex = deserialize(existing);
+        ConfigurationTemplateInstanceBundle ret = ObjectUtils.clone(configurationTemplateInstanceBundle);
+        Resource existingResource = whereID(ret.getId(), true);
+        ConfigurationTemplateInstanceBundle existingCTI = deserialize(existingResource);
         // check if there are actual changes in the ConfigurationTemplateInstance
-        if (configurationTemplateInstanceBundle.getConfigurationTemplateInstance().equals(ex.getConfigurationTemplateInstance())){
-            throw new ValidationException("There are no changes in the Configuration Template Instance", HttpStatus.OK);
+        if (ret.getConfigurationTemplateInstance().equals(existingCTI.getConfigurationTemplateInstance())) {
+            return ret;
         }
 
         // block Public ConfigurationTemplateInstanceBundle updates
-        if (configurationTemplateInstanceBundle.getMetadata().isPublished()){
+        if (ret.getMetadata().isPublished()){
             throw new ValidationException("You cannot directly update a Public Configuration Template Instance");
         }
 
-        validate(configurationTemplateInstanceBundle);
+        validate(ret);
 
-        configurationTemplateInstanceBundle.setMetadata(Metadata.updateMetadata(configurationTemplateInstanceBundle.getMetadata(), User.of(auth).getFullName(), User.of(auth).getEmail()));
-        List<LoggingInfo> loggingInfoList = commonMethods.returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(ex, auth);
+        ret.setMetadata(Metadata.updateMetadata(ret.getMetadata(), User.of(auth).getFullName(), User.of(auth).getEmail()));
+        List<LoggingInfo> loggingInfoList = commonMethods.returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(existingCTI, auth);
         LoggingInfo loggingInfo = commonMethods.createLoggingInfo(auth, LoggingInfo.Types.UPDATE.getKey(),
                 LoggingInfo.ActionType.UPDATED.getKey());
         loggingInfoList.add(loggingInfo);
         loggingInfoList.sort(Comparator.comparing(LoggingInfo::getDate));
-        configurationTemplateInstanceBundle.setLoggingInfo(loggingInfoList);
+        ret.setLoggingInfo(loggingInfoList);
 
         // latestUpdateInfo
-        configurationTemplateInstanceBundle.setLatestUpdateInfo(loggingInfo);
+        ret.setLatestUpdateInfo(loggingInfo);
 
-        existing.setPayload(serialize(configurationTemplateInstanceBundle));
-        existing.setResourceType(resourceType);
+        existingResource.setPayload(serialize(ret));
+        existingResource.setResourceType(resourceType);
 
         // block user from updating resourceId
-        if (!configurationTemplateInstanceBundle.getConfigurationTemplateInstance().getResourceId().equals(ex.getConfigurationTemplateInstance().getResourceId())
+        if (!ret.getConfigurationTemplateInstance().getResourceId().equals(existingCTI.getConfigurationTemplateInstance().getResourceId())
                 && !securityService.hasRole(auth, "ROLE_ADMIN")){
             throw new ValidationException("You cannot change the Resource Id with which this ConfigurationTemplateInstance is related");
         }
 
         // block user from updating configurationTemplateId
-        if (!configurationTemplateInstanceBundle.getConfigurationTemplateInstance().getConfigurationTemplateId().equals(ex.getConfigurationTemplateInstance().getConfigurationTemplateId())
+        if (!ret.getConfigurationTemplateInstance().getConfigurationTemplateId().equals(existingCTI.getConfigurationTemplateInstance().getConfigurationTemplateId())
                 && !securityService.hasRole(auth, "ROLE_ADMIN")){
             throw new ValidationException("You cannot change the Configuration Template Id with which this ConfigurationTemplateInstance is related");
         }
 
-        resourceService.updateResource(existing);
-        logger.debug("Updating ResourceInteroperabilityRecord: {}", configurationTemplateInstanceBundle);
+        resourceService.updateResource(existingResource);
+        logger.debug("Updating ResourceInteroperabilityRecord: {}", ret);
 
-        return configurationTemplateInstanceBundle;
+        return ret;
     }
 
     public void delete(ConfigurationTemplateInstanceBundle configurationTemplateInstanceBundle) {
@@ -160,6 +162,7 @@ public class ConfigurationTemplateInstanceManager extends ResourceManager<Config
         List<ConfigurationTemplateInstance> ret = new ArrayList<>();
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(10000);
+        ff.addFilter("published", false);
         List<ConfigurationTemplateInstanceBundle> configurationTemplateInstanceBundles = configurationTemplateInstanceService.getAll(ff, null).getResults();
         for (ConfigurationTemplateInstanceBundle configurationTemplateInstanceBundle : configurationTemplateInstanceBundles){
             if (configurationTemplateInstanceBundle.getConfigurationTemplateInstance().getConfigurationTemplateId().equals(configurationTemplateId)){
@@ -213,12 +216,14 @@ public class ConfigurationTemplateInstanceManager extends ResourceManager<Config
         ret.setConfigurationTemplateId(configurationTemplateInstance.getConfigurationTemplateId());
         ret.setResourceId(configurationTemplateInstance.getResourceId());
         JSONParser parser = new JSONParser();
-        JSONObject json = null;
         try {
-            json = (JSONObject) parser.parse(configurationTemplateInstance.getPayload());
+            String jsonString = configurationTemplateInstance.getPayload();
+            jsonString = jsonString.replace("'", "\"");
+            JSONObject jsonObject = (JSONObject) parser.parse(jsonString);
+            ret.setPayload(jsonObject);
         } catch (ParseException e) {
+            logger.error(e.getMessage(), e);
         }
-        ret.setPayload(json);
         return ret;
     }
 }

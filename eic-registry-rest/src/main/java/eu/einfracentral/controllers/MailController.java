@@ -5,7 +5,7 @@ import eu.einfracentral.domain.*;
 import eu.einfracentral.registry.service.MailService;
 import eu.einfracentral.registry.service.PendingResourceService;
 import eu.einfracentral.registry.service.ProviderService;
-import eu.einfracentral.registry.service.ResourceBundleService;
+import eu.einfracentral.registry.service.ServiceBundleService;
 import eu.einfracentral.service.SecurityService;
 import eu.openminted.registry.core.domain.FacetFilter;
 import org.apache.log4j.LogManager;
@@ -38,10 +38,7 @@ public class MailController {
     PendingResourceService<ProviderBundle> pendingProviderService;
 
     @Autowired
-    ResourceBundleService<ServiceBundle> serviceBundleService;
-
-    @Autowired
-    ResourceBundleService<DatasourceBundle> datasourceBundleService;
+    ServiceBundleService<ServiceBundle> serviceBundleService;
 
     @Autowired
     SecurityService securityService;
@@ -86,16 +83,9 @@ public class MailController {
 
         ff = new FacetFilter();
         ff.setQuantity(10000);
-        for (ResourceBundle<?> bundle : datasourceBundleService.getAll(ff, securityService.getAdminAccess()).getResults()) {
-            emails.add(bundle.getPayload().getMainContact().getEmail());
-            emails.addAll(bundle.getPayload().getPublicContacts().stream().map(ServicePublicContact::getEmail).collect(Collectors.toSet()));
-        }
-
-        ff = new FacetFilter();
-        ff.setQuantity(10000);
-        for (ResourceBundle<?> bundle : serviceBundleService.getAll(ff, securityService.getAdminAccess()).getResults()) {
-            emails.add(bundle.getPayload().getMainContact().getEmail());
-            emails.addAll(bundle.getPayload().getPublicContacts().stream().map(ServicePublicContact::getEmail).collect(Collectors.toSet()));
+        for (ServiceBundle bundle : serviceBundleService.getAll(ff, securityService.getAdminAccess()).getResults()) {
+            emails.add(bundle.getService().getMainContact().getEmail());
+            emails.addAll(bundle.getService().getPublicContacts().stream().map(ServicePublicContact::getEmail).collect(Collectors.toSet()));
         }
 
         return emails.stream().sorted().collect(Collectors.toList());

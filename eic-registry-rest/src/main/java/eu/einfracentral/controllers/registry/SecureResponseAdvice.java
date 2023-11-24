@@ -74,10 +74,6 @@ public class SecureResponseAdvice<T> implements ResponseBodyAdvice<T> {
             modifyProviderBundle(t, auth);
         } else if (t instanceof Provider) {
             modifyProvider(t, auth);
-        } else if (t instanceof DatasourceBundle) {
-            modifyDatasourceBundle(t, auth);
-        } else if (t instanceof Datasource) {
-            modifyDatasource(t, auth);
         } else if (t instanceof ServiceBundle) {
             modifyServiceBundle(t, auth);
         } else if (t instanceof Service) {
@@ -88,12 +84,6 @@ public class SecureResponseAdvice<T> implements ResponseBodyAdvice<T> {
             modifyTrainingResource(t, auth);
         } else if (t instanceof InteroperabilityRecordBundle) {
             modifyInteroperabilityRecordBundle(t, auth);
-        } else if (t instanceof RichResource) {
-            if (((RichResource) t).getTrainingResource() != null) {
-                modifyRichTrainingResource(t, auth);
-            } else {
-                modifyRichService(t, auth);
-            }
         } else if (t instanceof LoggingInfo) {
             modifyLoggingInfo(t);
         }
@@ -113,31 +103,10 @@ public class SecureResponseAdvice<T> implements ResponseBodyAdvice<T> {
         modifyLoggingInfo((T) ((ServiceBundle) serviceBundle).getLatestUpdateInfo());
         modifyLoggingInfo((T) ((ServiceBundle) serviceBundle).getLatestOnboardingInfo());
 
-        if (!this.securityService.isResourceProviderAdmin(auth, ((ServiceBundle) serviceBundle).getId(), ((ResourceBundle<?>) serviceBundle).getPayload().getCatalogueId())) {
+        if (!this.securityService.isResourceProviderAdmin(auth, ((ServiceBundle) serviceBundle).getId(), ((ServiceBundle) serviceBundle).getService().getCatalogueId())) {
             ((ServiceBundle) serviceBundle).getService().setMainContact(null);
             ((ServiceBundle) serviceBundle).getService().setSecurityContactEmail(null);
             ((ServiceBundle) serviceBundle).getMetadata().setTerms(null);
-        }
-    }
-
-    private void modifyDatasource(T datasource, Authentication auth) {
-        if (!this.securityService.isResourceProviderAdmin(auth, ((Datasource) datasource).getId(), ((Datasource) datasource).getCatalogueId())) {
-            ((Datasource) datasource).setMainContact(null);
-            ((Datasource) datasource).setSecurityContactEmail(null);
-        }
-    }
-
-    @SuppressWarnings("unchecked")
-    private void modifyDatasourceBundle(T datasourceBundle, Authentication auth) {
-        modifyLoggingInfoList((T) ((DatasourceBundle) datasourceBundle).getLoggingInfo());
-        modifyLoggingInfo((T) ((DatasourceBundle) datasourceBundle).getLatestAuditInfo());
-        modifyLoggingInfo((T) ((DatasourceBundle) datasourceBundle).getLatestUpdateInfo());
-        modifyLoggingInfo((T) ((DatasourceBundle) datasourceBundle).getLatestOnboardingInfo());
-
-        if (!this.securityService.isResourceProviderAdmin(auth, ((DatasourceBundle) datasourceBundle).getId(), ((ResourceBundle<?>) datasourceBundle).getPayload().getCatalogueId())) {
-            ((DatasourceBundle) datasourceBundle).getDatasource().setMainContact(null);
-            ((DatasourceBundle) datasourceBundle).getDatasource().setSecurityContactEmail(null);
-            ((DatasourceBundle) datasourceBundle).getMetadata().setTerms(null);
         }
     }
 
@@ -169,29 +138,6 @@ public class SecureResponseAdvice<T> implements ResponseBodyAdvice<T> {
 
         if (!this.securityService.isResourceProviderAdmin(auth, ((InteroperabilityRecordBundle) interoperabilityRecordBundle).getId(), ((InteroperabilityRecordBundle) interoperabilityRecordBundle).getInteroperabilityRecord().getCatalogueId())) {
             ((InteroperabilityRecordBundle) interoperabilityRecordBundle).getMetadata().setTerms(null);
-        }
-    }
-
-    private void modifyRichService(T richResource, Authentication auth) {
-        if (((RichResource) richResource).getService() != null) {
-            if (!this.securityService.isResourceProviderAdmin(auth, ((RichResource) richResource).getService().getId(), ((RichResource) richResource).getService().getCatalogueId())) {
-                ((RichResource) richResource).getService().setMainContact(null);
-                ((RichResource) richResource).getService().setSecurityContactEmail(null);
-                ((RichResource) richResource).getMetadata().setTerms(null);
-            }
-        } else if (((RichResource) richResource).getDatasource() != null) {
-            if (!this.securityService.isResourceProviderAdmin(auth, ((RichResource) richResource).getDatasource().getId(), ((RichResource) richResource).getDatasource().getCatalogueId())) {
-                ((RichResource) richResource).getDatasource().setMainContact(null);
-                ((RichResource) richResource).getDatasource().setSecurityContactEmail(null);
-                ((RichResource) richResource).getMetadata().setTerms(null);
-            }
-        }
-    }
-
-    private void modifyRichTrainingResource(T richTrainingResource, Authentication auth) {
-        if (!this.securityService.isResourceProviderAdmin(auth, ((RichResource) richTrainingResource).getTrainingResource().getId(), ((RichResource) richTrainingResource).getTrainingResource().getCatalogueId())) {
-            ((RichResource) richTrainingResource).getTrainingResource().setContact(null);
-            ((RichResource) richTrainingResource).getMetadata().setTerms(null);
         }
     }
 

@@ -16,100 +16,9 @@
     },
     {
       "multivalued": false,
-      "name": "name",
-      "label": "Datasource Name",
-      "path": "//*[local-name()='datasource']/*[local-name()='name']/text()",
-      "type": "java.lang.String"
-    },
-    {
-      "multivalued": false,
-      "name": "abbreviation",
-      "label": "Abbreviation",
-      "path": "//*[local-name()='abbreviation']/text()",
-      "type": "java.lang.String"
-    },
-    {
-      "multivalued": false,
-      "name": "resource_organisation",
-      "label": "Resource Organisation",
-      "path": "//*[local-name()='datasource']/*[local-name()='resourceOrganisation']/text()",
-      "type": "java.lang.String"
-    },
-    {
-      "multivalued": true,
-      "name": "resource_providers",
-      "label": "Resource Provider",
-      "path": "//*[local-name()='datasource']//*[local-name()='resourceProvider']/text()",
-      "type": "java.lang.String"
-    },
-    {
-      "multivalued": true,
-      "name": "subcategories",
-      "label": "Subcategory",
-      "path": "//*[local-name()='category']/*[local-name()='subcategory']/text()",
-      "type": "java.lang.String"
-    },
-    {
-      "multivalued": true,
-      "name": "scientific_subdomains",
-      "label": "Scientific Subdomain",
-      "path": "//*[local-name()='scientificDomain']/*[local-name()='scientificSubdomain']/text()",
-      "type": "java.lang.String"
-    },
-    {
-      "multivalued": true,
-      "name": "target_users",
-      "label": "Target User",
-      "path": "//*[local-name()='datasource']//*[local-name()='targetUser']/text()",
-      "type": "java.lang.String"
-    },
-    {
-      "multivalued": true,
-      "name": "access_types",
-      "label": "Access Type",
-      "path": "//*[local-name()='datasource']//*[local-name()='accessType']/text()",
-      "type": "java.lang.String"
-    },
-    {
-      "multivalued": true,
-      "name": "access_modes",
-      "label": "Access Mode",
-      "path": "//*[local-name()='datasource']//*[local-name()='accessMode']/text()",
-      "type": "java.lang.String"
-    },
-    {
-      "multivalued": true,
-      "name": "language_availabilities",
-      "label": "Language Availability",
-      "path": "//*[local-name()='datasource']//*[local-name()='languageAvailability']/text()",
-      "type": "java.lang.String"
-    },
-    {
-      "multivalued": true,
-      "name": "geographical_availabilities",
-      "label": "Geographical Availability",
-      "path": "//*[local-name()='datasource']//*[local-name()='geographicalAvailability']/text()",
-      "type": "java.lang.String"
-    },
-    {
-      "multivalued": true,
-      "name": "resource_geographic_locations",
-      "label": "Resource Geographic Location",
-      "path": "//*[local-name()='datasource']//*[local-name()='resourceGeographicLocation']/text()",
-      "type": "java.lang.String"
-    },
-    {
-      "multivalued": false,
-      "name": "trl",
-      "label": "TRL",
-      "path": "//*[local-name()='datasource']/*[local-name()='trl']/text()",
-      "type": "java.lang.String"
-    },
-    {
-      "multivalued": false,
-      "name": "life_cycle_status",
-      "label": "Life Cycle Status",
-      "path": "//*[local-name()='datasource']//*[local-name()='lifeCycleStatus']/text()",
+      "name": "service_id",
+      "label": "Service ID",
+      "path": "//*[local-name()='serviceId']/text()",
       "type": "java.lang.String"
     },
     {
@@ -117,55 +26,6 @@
       "name": "catalogue_id",
       "label": "Catalogue ID",
       "path": "//*[local-name()='catalogueId']/text()",
-      "type": "java.lang.String"
-    },
-    {
-      "multivalued": true,
-      "name": "funding_body",
-      "label": "Funding Body",
-      "path": "//*[local-name()='datasource']//*[local-name()='fundingBody']/text()",
-      "type": "java.lang.String"
-    },
-    {
-      "multivalued": true,
-      "name": "funding_programs",
-      "label": "Funding Program",
-      "path": "//*[local-name()='datasource']//*[local-name()='fundingProgram']/text()",
-      "type": "java.lang.String"
-    },
-    {
-      "multivalued": false,
-      "name": "description",
-      "label": "Description",
-      "path": "//*[local-name()='datasource']/*[local-name()='description']/text()",
-      "type": "java.lang.String"
-    },
-    {
-      "multivalued": false,
-      "name": "tagline",
-      "label": "Tagline",
-      "path": "//*[local-name()='datasource']/*[local-name()='tagline']/text()",
-      "type": "java.lang.String"
-    },
-    {
-      "multivalued": true,
-      "name": "open_source_technologies",
-      "label": "Open Source Technology",
-      "path": "//*[local-name()='datasource']//*[local-name()='openSourceTechnology']/text()",
-      "type": "java.lang.String"
-    },
-    {
-      "multivalued": true,
-      "name": "tags",
-      "label": "Tag",
-      "path": "//*[local-name()='datasource']//*[local-name()='tag']/text()",
-      "type": "java.lang.String"
-    },
-    {
-      "multivalued": false,
-      "name": "order_type",
-      "label": "Order Type",
-      "path": "//*[local-name()='datasource']/*[local-name()='orderType']/text()",
       "type": "java.lang.String"
     },
     {
@@ -200,52 +60,8 @@
     },
     {
       "multivalued": false,
-      "name": "horizontalService",
-      "path": "//*[local-name()='resourceExtras']/*[local-name()='horizontalService']/text()",
-      "type": "java.lang.Boolean"
-    },
-    {
-      "multivalued": false,
       "name": "originalId",
       "path": "//*[local-name()='identifiers']/*[local-name()='originalId']/text()",
-      "type": "java.lang.String"
-    },
-    {
-      "multivalued": true,
-      "name": "alternative_identifiers_types",
-      "label": "Alternative Identifier Type",
-      "path": "//*[local-name()='identifiers']/*[local-name()='alternativeIdentifiers']/*[local-name()='alternativeIdentifier']/*[local-name()='type']/text()",
-      "type": "java.lang.String"
-    },
-    {
-      "multivalued": true,
-      "name": "alternative_identifiers_values",
-      "label": "Alternative Identifier Value",
-      "path": "//*[local-name()='identifiers']/*[local-name()='alternativeIdentifiers']/*[local-name()='alternativeIdentifier']/*[local-name()='value']/text()",
-      "type": "java.lang.String"
-    },
-    {
-      "multivalued": false,
-      "name": "latestAuditActionType",
-      "path": "//*[local-name()='latestAuditInfo']/*[local-name()='actionType']/text()",
-      "type": "java.lang.String"
-    },
-    {
-      "multivalued": false,
-      "name": "latestAuditDate",
-      "path": "//*[local-name()='latestAuditInfo']/*[local-name()='date']/text()",
-      "type": "java.lang.String"
-    },
-    {
-      "multivalued": false,
-      "name": "latestAuditType",
-      "path": "//*[local-name()='latestAuditInfo']/*[local-name()='type']/text()",
-      "type": "java.lang.String"
-    },
-    {
-      "multivalued": false,
-      "name": "latestAuditUserEmail",
-      "path": "//*[local-name()='latestAuditInfo']/*[local-name()='userEmail']/text()",
       "type": "java.lang.String"
     },
     {
@@ -299,8 +115,8 @@
     {
       "multivalued": false,
       "name": "active",
+      "path": "//*[local-name()='active']/text()",
       "defaultValue": false,
-      "path": "//*[local-name()='datasourceBundle']/*[local-name()='active']/text()",
       "type": "java.lang.Boolean"
     },
     {
@@ -312,23 +128,24 @@
     },
     {
       "multivalued": false,
-      "name": "status",
-      "path": "//*[local-name()='datasourceBundle']/*[local-name()='status']/text()",
+      "name": "original_openaire_id",
+      "label": "Original OpenAIRE ID",
+      "path": "//*[local-name()='datasourceBundle']/*[local-name()='originalOpenAIREId']/text()",
       "type": "java.lang.String"
     },
     {
       "multivalued": false,
-      "name": "serviceType",
-      "path": "//*[local-name()='resourceExtras']/*[local-name()='serviceType']/text()",
+      "name": "status",
+      "path": "//*[local-name()='datasourceBundle']/*[local-name()='status']/text()",
       "type": "java.lang.String"
     }
   ],
   "indexMapperClass": "eu.openminted.registry.core.index.DefaultIndexMapper",
   "name": "datasource",
-  "aliasGroup": "resources",
+  "aliasGroup": "resourceTypes",
   "payloadType": "xml",
   "properties": {
     "class": "eu.einfracentral.domain.DatasourceBundle"
   },
-  "schemaUrl": "https://raw.githubusercontent.com/madgeek-arc/resource-catalogue/master/eic-registry-model/src/main/resources/schema1.xsd"
+  "schemaUrl": "https://raw.githubusercontent.com/madgeek-arc/resource-catalogue/develop/eic-registry-model/src/main/resources/schema1.xsd"
 }

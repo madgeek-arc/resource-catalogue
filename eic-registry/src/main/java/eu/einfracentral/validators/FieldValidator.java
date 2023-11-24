@@ -31,8 +31,7 @@ public class FieldValidator {
 
     private final VocabularyService vocabularyService;
     private final ProviderManager providerService;
-    private final ResourceBundleService<ServiceBundle> serviceBundleService;
-    private final ResourceBundleService<DatasourceBundle> datasourceBundleService;
+    private final ServiceBundleService<ServiceBundle> serviceBundleService;
     private final TrainingResourceService<TrainingResourceBundle> trainingResourceService;
     private final CatalogueService<CatalogueBundle, Authentication> catalogueService;
     private final InteroperabilityRecordService<InteroperabilityRecordBundle> interoperabilityRecordService;
@@ -45,15 +44,13 @@ public class FieldValidator {
     @Autowired
     public FieldValidator(VocabularyService vocabularyService,
                           ProviderManager providerService,
-                          @Lazy ResourceBundleService<ServiceBundle> serviceBundleService,
-                          @Lazy ResourceBundleService<DatasourceBundle> datasourceBundleService,
+                          @Lazy ServiceBundleService<ServiceBundle> serviceBundleService,
                           @Lazy TrainingResourceService<TrainingResourceBundle> trainingResourceService,
                           @Lazy CatalogueService<CatalogueBundle, Authentication> catalogueService,
                           @Lazy InteroperabilityRecordService<InteroperabilityRecordBundle> interoperabilityRecordService) {
         this.vocabularyService = vocabularyService;
         this.providerService = providerService;
         this.serviceBundleService = serviceBundleService;
-        this.datasourceBundleService = datasourceBundleService;
         this.catalogueService = catalogueService;
         this.interoperabilityRecordService = interoperabilityRecordService;
         this.trainingResourceService = trainingResourceService;
@@ -66,8 +63,7 @@ public class FieldValidator {
     public void validate(Object o) throws IllegalAccessException {
         validationLocation = new ArrayDeque<>();
         validateFields(o);
-        if (o.getClass().getSuperclass() != null && (o.getClass().getSuperclass().getCanonicalName().contains("eu.einfracentral.domain.Bundle")
-                || o.getClass().getSuperclass().getCanonicalName().contains("eu.einfracentral.domain.ResourceBundle"))) {
+        if (o.getClass().getSuperclass() != null && (o.getClass().getSuperclass().getCanonicalName().contains("eu.einfracentral.domain.Bundle"))) {
             try {
                 Field payload = Bundle.class.getDeclaredField("payload");
                 payload.setAccessible(true);
@@ -87,9 +83,6 @@ public class FieldValidator {
         // get declared fields of class
         List<Field> declaredFields = new ArrayList<>(Arrays.asList(o.getClass().getDeclaredFields()));
         if (o instanceof ServiceBundle){
-            declaredFields.addAll(Arrays.asList(o.getClass().getSuperclass().getDeclaredFields()));
-        }
-        if (o instanceof DatasourceBundle){
             declaredFields.addAll(Arrays.asList(o.getClass().getSuperclass().getDeclaredFields()));
         }
         if (o instanceof TrainingResourceBundle){
@@ -301,13 +294,12 @@ public class FieldValidator {
             } else if (String.class.equals(o.getClass())) {
                 try {
                     if (annotation.containsResourceId()) {
-                        DatasourceBundle datasourceBundle = (DatasourceBundle) datasourceBundleService.getOrElseReturnNull(o.toString());
-                        ServiceBundle serviceBundle = (ServiceBundle) serviceBundleService.getOrElseReturnNull(o.toString());
+                        ServiceBundle serviceBundle = serviceBundleService.getOrElseReturnNull(o.toString());
                         TrainingResourceBundle trainingResourceBundle = trainingResourceService.getOrElseReturnNull(o.toString());
-                        if (datasourceBundle == null && serviceBundle == null && trainingResourceBundle == null){
+                        if (serviceBundle == null && trainingResourceBundle == null){
                             throw new ValidationException(
-                                    String.format("Field '%s' should ONLY contain the ID of an existing Service, " +
-                                                    "Datasource or Training Resource", field.getName()));
+                                    String.format("Field '%s' should ONLY contain the ID of an existing Service " +
+                                            "or Training Resource", field.getName()));
                         }
                     } else if (Vocabulary.class.equals(annotation.idClass())) {
                         Vocabulary voc = vocabularyService.get(o.toString());
@@ -333,12 +325,6 @@ public class FieldValidator {
                             && providerService.get(o.toString()) == null) { //FIXME catalogueID
                         throw new ValidationException(
                                 String.format("Field '%s' should contain the ID of an existing Provider",
-                                        field.getName()));
-                    } else if ((eu.einfracentral.domain.Datasource.class.equals(annotation.idClass())
-                            || DatasourceBundle.class.equals(annotation.idClass()))
-                            && datasourceBundleService.get(o.toString()) == null) {
-                        throw new ValidationException(
-                                String.format("Field '%s' should contain the ID of an existing Datasource",
                                         field.getName()));
                     } else if ((eu.einfracentral.domain.Service.class.equals(annotation.idClass())
                             || ServiceBundle.class.equals(annotation.idClass()))

@@ -78,7 +78,7 @@ public interface TrainingResourceService<T> extends ResourceService<T, Authentic
     Map<String, List<T>> getBy(String field, Authentication auth) throws NoSuchFieldException;
 
     /**
-     * Get RichResources with the specified ids.
+     * Get Services with the specified ids.
      *
      * @param ids
      * @return
@@ -202,11 +202,12 @@ public interface TrainingResourceService<T> extends ResourceService<T, Authentic
 
     T changeProvider(String resourceId, String newProvider, String comment, Authentication auth);
 
-    Paging<T> getAllForAdminWithAuditStates(FacetFilter ff, Set<String> auditState, Authentication authentication);
+    Paging<Bundle<?>> getAllForAdminWithAuditStates(FacetFilter ff, Set<String> auditState);
 
     TrainingResourceBundle getOrElseReturnNull(String id);
     TrainingResourceBundle getOrElseReturnNull(String id, String catalogueId);
 
     T createPublicResource(T resource, Authentication auth);
     TrainingResourceBundle suspend(String trainingResourceId, String catalogueId, boolean suspend, Authentication auth);
+    void publishTrainingResourceRelatedResources(String serviceId, String catalogueId, Boolean active, Authentication auth);
 }

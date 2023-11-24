@@ -2,7 +2,6 @@ package eu.einfracentral.registry.manager;
 
 import eu.einfracentral.domain.DatasourceBundle;
 import eu.einfracentral.domain.Identifiers;
-import eu.einfracentral.domain.ResourceExtras;
 import eu.einfracentral.exception.ResourceException;
 import eu.einfracentral.exception.ResourceNotFoundException;
 import eu.einfracentral.service.SecurityService;
@@ -59,7 +58,7 @@ public class PublicDatasourceManager extends AbstractPublicResourceManager<Datas
         List<DatasourceBundle> datasourceBundleList = new ArrayList<>();
         Browsing<DatasourceBundle> datasourceBundleBrowsing = super.getAll(facetFilter, authentication);
         for (DatasourceBundle datasourceBundle : datasourceBundleBrowsing.getResults()) {
-            if (securityService.isResourceProviderAdmin(authentication, datasourceBundle.getId(), datasourceBundle.getPayload().getCatalogueId()) && datasourceBundle.getMetadata().isPublished()) {
+            if (securityService.isResourceProviderAdmin(authentication, datasourceBundle.getDatasource().getServiceId(), datasourceBundle.getDatasource().getCatalogueId()) && datasourceBundle.getMetadata().isPublished()) {
                 datasourceBundleList.add(datasourceBundle);
             }
         }
@@ -67,19 +66,27 @@ public class PublicDatasourceManager extends AbstractPublicResourceManager<Datas
                 datasourceBundleBrowsing.getTo(), datasourceBundleList, datasourceBundleBrowsing.getFacets());
     }
 
+    public DatasourceBundle getOrElseReturnNull(String id) {
+        DatasourceBundle datasourceBundle;
+        try {
+            datasourceBundle = get(id);
+        } catch (ResourceException | ResourceNotFoundException e) {
+            return null;
+        }
+        return datasourceBundle;
+    }
+
     @Override
     public DatasourceBundle add(DatasourceBundle datasourceBundle, Authentication authentication) {
         String lowerLevelResourceId = datasourceBundle.getId();
         Identifiers.createOriginalId(datasourceBundle);
         datasourceBundle.setId(String.format("%s.%s", datasourceBundle.getDatasource().getCatalogueId(), datasourceBundle.getId()));
+        commonMethods.restrictPrefixRepetitionOnPublicResources(datasourceBundle.getId(), datasourceBundle.getDatasource().getCatalogueId());
 
-        // sets public ids to resource organisation, resource providers and related/required resources
-        updateResourceIdsToPublic(datasourceBundle);
+        // sets public ids to providerId, serviceId
+        updateDatasourceIdsToPublic(datasourceBundle);
 
         datasourceBundle.getMetadata().setPublished(true);
-        // create PID and set it as Alternative Identifier
-        datasourceBundle.getIdentifiers().setAlternativeIdentifiers(commonMethods.createAlternativeIdentifierForPID(datasourceBundle));
-        createResourceExtras(datasourceBundle);
         DatasourceBundle ret;
         logger.info(String.format("Datasource [%s] is being published with id [%s]", lowerLevelResourceId, datasourceBundle.getId()));
         ret = super.add(datasourceBundle, null);
@@ -97,13 +104,12 @@ public class PublicDatasourceManager extends AbstractPublicResourceManager<Datas
             e.printStackTrace();
         }
 
-        // sets public ids to resource organisation, resource providers and related/required resources
-        updateResourceIdsToPublic(ret);
+        // sets public ids to providerId, serviceId
+        updateDatasourceIdsToPublic(datasourceBundle);
 
         ret.setIdentifiers(published.getIdentifiers());
         ret.setId(published.getId());
-        ret.setMetadata(published.getMetadata());
-        ret.getResourceExtras().setServiceType("service_type-datasource");
+        ret.getMetadata().setPublished(true);
         logger.info(String.format("Updating public Datasource with id [%s]", ret.getId()));
         ret = super.update(ret, null);
         jmsService.convertAndSendTopic("datasource.update", ret);
@@ -118,16 +124,6 @@ public class PublicDatasourceManager extends AbstractPublicResourceManager<Datas
             super.delete(publicDatasourceBundle);
             jmsService.convertAndSendTopic("datasource.delete", publicDatasourceBundle);
         } catch (ResourceException | ResourceNotFoundException ignore){
-        }
-    }
-
-    private void createResourceExtras(DatasourceBundle datasourceBundle){
-        if (datasourceBundle.getResourceExtras() == null){
-            ResourceExtras resourceExtras = new ResourceExtras();
-            resourceExtras.setServiceType("service_type-datasource");
-            datasourceBundle.setResourceExtras(resourceExtras);
-        } else {
-            datasourceBundle.getResourceExtras().setServiceType("service_type-datasource");
         }
     }
 }

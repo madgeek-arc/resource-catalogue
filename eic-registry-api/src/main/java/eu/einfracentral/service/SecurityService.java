@@ -1,7 +1,7 @@
 package eu.einfracentral.service;
 
 import eu.einfracentral.domain.ProviderBundle;
-import eu.einfracentral.domain.ResourceBundle;
+import eu.einfracentral.domain.ServiceBundle;
 import eu.einfracentral.domain.User;
 import org.springframework.security.core.Authentication;
 
@@ -27,7 +27,7 @@ public interface SecurityService {
     boolean isResourceProviderAdmin(Authentication auth, String resourceId);
     boolean isResourceProviderAdmin(Authentication auth, String resourceId, String catalogueId);
 
-    boolean isResourceProviderAdmin(Authentication auth, ResourceBundle<?> resourceBundle, boolean noThrow);
+    boolean isResourceProviderAdmin(Authentication auth, ServiceBundle serviceBundle, boolean noThrow);
     <T extends eu.einfracentral.domain.Service> boolean isResourceProviderAdmin(Authentication auth, T service);
 
     boolean userIsProviderAdmin(@NotNull User user, @NotNull String providerId, @NotNull String catalogueId);
@@ -40,14 +40,12 @@ public interface SecurityService {
     boolean userIsResourceProviderAdmin(User user, String resourceId, String catalogueId);
 
     boolean providerCanAddResources(Authentication auth, String resourceId, String catalogueId);
-    boolean providerCanAddResources(Authentication auth, ResourceBundle<?> resourceBundle);
+    boolean providerCanAddResources(Authentication auth, ServiceBundle serviceBundle);
     <T extends eu.einfracentral.domain.Service> boolean providerCanAddResources(Authentication auth, T service);
 
     boolean providerIsActiveAndUserIsAdmin(Authentication auth, String resourceId);
     boolean providerIsActiveAndUserIsAdmin(Authentication auth, String resourceId, String catalogueId);
 
     boolean resourceIsActive(String resourceId, String catalogueId);
-    boolean datasourceIsActive(String resourceId, String catalogueId);
-    boolean resourceOrDatasourceIsActive(String resourceId, String catalogueId);
     boolean trainingResourceIsActive(String resourceId, String catalogueId);
 }

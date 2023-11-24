@@ -1,4 +1,4 @@
-FROM tomcat:8.5-jre8-alpine
+FROM tomcat:8.5-jre11-openjdk
 MAINTAINER "***REMOVED***"
 RUN ["rm", "-fr", "/usr/local/tomcat/webapps/ROOT"]
 COPY ./target/eic-registry.war /usr/local/tomcat/webapps/eic-registry.war

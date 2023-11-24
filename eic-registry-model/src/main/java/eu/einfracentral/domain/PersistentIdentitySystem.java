@@ -7,6 +7,7 @@ import io.swagger.annotations.ApiModelProperty;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
 import java.util.List;
+import java.util.Objects;
 
 public class PersistentIdentitySystem {
 
@@ -35,6 +36,19 @@ public class PersistentIdentitySystem {
     public PersistentIdentitySystem(String persistentIdentityEntityType, List<String> persistentIdentityEntityTypeSchemes) {
         this.persistentIdentityEntityType = persistentIdentityEntityType;
         this.persistentIdentityEntityTypeSchemes = persistentIdentityEntityTypeSchemes;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        PersistentIdentitySystem that = (PersistentIdentitySystem) o;
+        return Objects.equals(persistentIdentityEntityType, that.persistentIdentityEntityType) && Objects.equals(persistentIdentityEntityTypeSchemes, that.persistentIdentityEntityTypeSchemes);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(persistentIdentityEntityType, persistentIdentityEntityTypeSchemes);
     }
 
     @Override

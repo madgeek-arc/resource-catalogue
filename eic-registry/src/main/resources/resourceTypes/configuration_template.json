@@ -72,20 +72,6 @@
       "type": "java.lang.String"
     },
     {
-      "multivalued": true,
-      "name": "alternative_identifiers_types",
-      "label": "Alternative Identifier Type",
-      "path": "//*[local-name()='identifiers']/*[local-name()='alternativeIdentifiers']/*[local-name()='alternativeIdentifier']/*[local-name()='type']/text()",
-      "type": "java.lang.String"
-    },
-    {
-      "multivalued": true,
-      "name": "alternative_identifiers_values",
-      "label": "Alternative Identifier Value",
-      "path": "//*[local-name()='identifiers']/*[local-name()='alternativeIdentifiers']/*[local-name()='alternativeIdentifier']/*[local-name()='value']/text()",
-      "type": "java.lang.String"
-    },
-    {
       "multivalued": false,
       "name": "latestUpdateActionType",
       "path": "//*[local-name()='latestUpdateInfo']/*[local-name()='actionType']/text()",
@@ -124,5 +110,5 @@
   "properties": {
     "class": "eu.einfracentral.domain.ConfigurationTemplate"
   },
-  "schemaUrl": "https://raw.githubusercontent.com/madgeek-arc/resource-catalogue/master/eic-registry-model/src/main/resources/schema1.xsd"
+  "schemaUrl": "https://raw.githubusercontent.com/madgeek-arc/resource-catalogue/develop/eic-registry-model/src/main/resources/schema1.xsd"
 }

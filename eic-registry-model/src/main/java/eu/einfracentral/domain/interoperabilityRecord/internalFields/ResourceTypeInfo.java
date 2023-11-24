@@ -8,6 +8,7 @@ import io.swagger.annotations.ApiModelProperty;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
+import java.util.Objects;
 
 @XmlType
 @XmlRootElement(namespace = "http://einfracentral.eu")
@@ -36,6 +37,19 @@ public class ResourceTypeInfo {
     public ResourceTypeInfo(String resourceType, String resourceTypeGeneral) {
         this.resourceType = resourceType;
         this.resourceTypeGeneral = resourceTypeGeneral;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ResourceTypeInfo that = (ResourceTypeInfo) o;
+        return Objects.equals(resourceType, that.resourceType) && Objects.equals(resourceTypeGeneral, that.resourceTypeGeneral);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(resourceType, resourceTypeGeneral);
     }
 
     @Override

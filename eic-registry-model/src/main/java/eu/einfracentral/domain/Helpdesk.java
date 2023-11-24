@@ -9,6 +9,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 @XmlType
 @XmlRootElement(namespace = "http://einfracentral.eu")
@@ -110,6 +111,19 @@ public class Helpdesk implements Identifiable {
                     .orElseThrow(() -> new IllegalArgumentException(String.format("Unknown value [%s] found in field 'helpdeskType'. " +
                             "Available values: ['full integration', 'ticket redirection' and 'direct usage']", s)));
         }
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Helpdesk helpdesk = (Helpdesk) o;
+        return Objects.equals(id, helpdesk.id) && Objects.equals(serviceId, helpdesk.serviceId) && Objects.equals(services, helpdesk.services) && Objects.equals(helpdeskType, helpdesk.helpdeskType) && Objects.equals(supportGroups, helpdesk.supportGroups) && Objects.equals(organisation, helpdesk.organisation) && Objects.equals(emails, helpdesk.emails) && Objects.equals(agents, helpdesk.agents) && Objects.equals(signatures, helpdesk.signatures) && Objects.equals(ticketPreservation, helpdesk.ticketPreservation) && Objects.equals(webform, helpdesk.webform);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, serviceId, services, helpdeskType, supportGroups, organisation, emails, agents, signatures, ticketPreservation, webform);
     }
 
     @Override

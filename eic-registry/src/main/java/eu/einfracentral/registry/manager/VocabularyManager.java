@@ -36,20 +36,21 @@ import static eu.einfracentral.config.CacheConfig.*;
 public class VocabularyManager extends ResourceManager<Vocabulary> implements VocabularyService {
     private static final Logger logger = LogManager.getLogger(VocabularyManager.class);
 
-    private Map<String, Region> regions = new HashMap<>();
+    private final Map<String, Region> regions = new HashMap<>();
 
-    private ProviderManager providerManager;
+    private final ProviderManager providerManager;
 
-    private SecurityService securityService;
+    private final SecurityService securityService;
 
-    private IdCreator idCreator;
+    private final IdCreator idCreator;
 
-    public VocabularyManager(@Lazy ProviderManager providerManager, @Lazy IdCreator idCreator) {
+    public VocabularyManager(@Lazy ProviderManager providerManager, @Lazy IdCreator idCreator, @Lazy SecurityService securityService) {
         super(Vocabulary.class);
         regions.put("EU", new Region("https://restcountries.com/v3.1/region/europe?fields=cca2"));
         regions.put("WW", new Region("https://restcountries.com/v3.1/all?fields=cca2"));
         this.providerManager = providerManager;
         this.idCreator = idCreator;
+        this.securityService = securityService;
     }
 
     @Override
@@ -335,7 +336,7 @@ public class VocabularyManager extends ResourceManager<Vocabulary> implements Vo
     private void updateHLEVocabularyList(List<String> providerNames){
         for (String newHLE : providerNames){
             Vocabulary newHostingLegalEntity = new Vocabulary();
-            newHostingLegalEntity.setId(idCreator.reformatId(newHLE));
+            newHostingLegalEntity.setId(idCreator.sanitizeString(newHLE));
             newHostingLegalEntity.setName(newHLE);
             newHostingLegalEntity.setType(Vocabulary.Type.PROVIDER_HOSTING_LEGAL_ENTITY.getKey());
             //TODO: Also add catalogueId as extras if this method gets activated

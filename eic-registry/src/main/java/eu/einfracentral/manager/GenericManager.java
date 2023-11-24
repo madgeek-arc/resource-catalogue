@@ -7,31 +7,16 @@ import eu.einfracentral.service.GenericResourceService;
 import eu.einfracentral.utils.FacetLabelService;
 import eu.einfracentral.utils.ReflectUtils;
 import eu.einfracentral.utils.LoggingUtils;
-import eu.openminted.registry.core.domain.Browsing;
-import eu.openminted.registry.core.domain.FacetFilter;
-import eu.openminted.registry.core.domain.Paging;
-import eu.openminted.registry.core.domain.Resource;
-import eu.openminted.registry.core.domain.ResourceType;
+import eu.openminted.registry.core.domain.*;
 import eu.openminted.registry.core.domain.index.IndexField;
 import eu.openminted.registry.core.service.ParserService;
 import eu.openminted.registry.core.service.ResourceService;
 import eu.openminted.registry.core.service.ResourceTypeService;
 import eu.openminted.registry.core.service.SearchService;
 import eu.openminted.registry.core.service.ServiceException;
-import eu.openminted.registry.core.service.ParserService.ParserServiceTypes;
 import java.lang.reflect.InvocationTargetException;
 import java.net.UnknownHostException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 
@@ -43,6 +28,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
+import javax.validation.constraints.NotNull;
 
 @Component
 public class GenericManager implements GenericResourceService {
@@ -69,257 +55,286 @@ public class GenericManager implements GenericResourceService {
     }
 
     @PostConstruct
-    void initResourceTypesBrowseFields() {
-        this.browseByMap = new HashMap();
-        this.labelsMap = new HashMap();
-        Map<String, Set<String>> aliasGroupBrowse = new HashMap();
-        Map<String, Map<String, String>> aliasGroupLabels = new HashMap();
-        Iterator var3 = this.resourceTypeService.getAllResourceType().iterator();
+    void initResourceTypesBrowseFields() { // TODO: move this to a bean to avoid running multiple times ??
+        browseByMap = new TreeMap<>();
+        labelsMap = new TreeMap<>();
+        Map<String, Set<String>> aliasGroupBrowse = new TreeMap<>();
+        Map<String, Map<String, String>> aliasGroupLabels = new TreeMap<>();
+        for (ResourceType rt : resourceTypeService.getAllResourceType()) {
+            Set<String> browseSet = new TreeSet<>();
+            Map<String, Set<String>> sets = new TreeMap<>();
+            Map<String, String> labels = new TreeMap<>();
 
-        while(var3.hasNext()) {
-            ResourceType rt = (ResourceType)var3.next();
-            Set<String> browseSet = new HashSet();
-            Map<String, Set<String>> sets = new HashMap();
-            Map<String, String> labels = new HashMap();
             labels.put("resourceType", "Resource Type");
-            Iterator var8 = rt.getIndexFields().iterator();
-
-            while(var8.hasNext()) {
-                IndexField f = (IndexField)var8.next();
-                sets.putIfAbsent(f.getResourceType().getName(), new HashSet());
+            for (IndexField f : rt.getIndexFields()) {
+                sets.putIfAbsent(f.getResourceType().getName(), new HashSet<>());
                 labels.put(f.getName(), f.getLabel());
                 if (f.getLabel() != null) {
-                    ((Set)sets.get(f.getResourceType().getName())).add(f.getName());
+                    sets.get(f.getResourceType().getName()).add(f.getName());
                 }
             }
 
-            this.labelsMap.put(rt.getName(), labels);
             boolean flag = true;
-            Iterator var13 = sets.entrySet().iterator();
-
-            while(var13.hasNext()) {
-                Map.Entry<String, Set<String>> entry = (Map.Entry)var13.next();
+            for (Map.Entry<String, Set<String>> entry : sets.entrySet()) {
                 if (flag) {
-                    browseSet.addAll((Collection)entry.getValue());
+                    browseSet.addAll(entry.getValue());
                     flag = false;
                 } else {
-                    browseSet.retainAll((Collection)entry.getValue());
+                    browseSet.retainAll(entry.getValue());
                 }
             }
-
             if (rt.getAliasGroup() != null) {
                 if (aliasGroupBrowse.get(rt.getAliasGroup()) == null) {
-                    aliasGroupBrowse.put(rt.getAliasGroup(), browseSet);
-                    aliasGroupLabels.put(rt.getAliasGroup(), labels);
+                    aliasGroupBrowse.put(rt.getAliasGroup(), new TreeSet<>(browseSet));
+                    aliasGroupLabels.put(rt.getAliasGroup(), new TreeMap<>(labels));
                 } else {
-                    ((Set)aliasGroupBrowse.get(rt.getAliasGroup())).retainAll(browseSet);
-                    ((Map)aliasGroupLabels.get(rt.getAliasGroup())).keySet().retainAll(labels.keySet());
+                    aliasGroupBrowse.get(rt.getAliasGroup()).retainAll(browseSet);
+                    aliasGroupLabels.get(rt.getAliasGroup()).keySet().retainAll(labels.keySet());
+                }
+            }
+            if (rt.getAliases() != null) {
+                for (String alias : rt.getAliases()) {
+                    if (aliasGroupBrowse.get(alias) == null) {
+                        aliasGroupBrowse.put(alias, new TreeSet<>(browseSet));
+                        aliasGroupLabels.put(alias, new TreeMap<>(labels));
+                    } else {
+                        aliasGroupBrowse.get(alias).retainAll(browseSet);
+                        aliasGroupLabels.get(alias).keySet().retainAll(labels.keySet());
+                    }
                 }
             }
 
-            List<String> browseBy = new ArrayList(browseSet);
-            Collections.sort(browseBy);
-            this.browseByMap.put(rt.getName(), browseBy);
+            labelsMap.put(rt.getName(), labels);
+            browseByMap.put(rt.getName(), new ArrayList<>(browseSet));
             logger.debug("Generating browse fields for [{}]", rt.getName());
         }
-
-        var3 = aliasGroupBrowse.keySet().iterator();
-
-        while(var3.hasNext()) {
-            String alias = (String)var3.next();
-            this.browseByMap.put(alias, (List)((Set)aliasGroupBrowse.get(alias)).stream().sorted().collect(Collectors.toList()));
-            this.labelsMap.put(alias, (Map)aliasGroupLabels.get(alias));
+        for (String alias : aliasGroupBrowse.keySet()) {
+            browseByMap.put(alias, aliasGroupBrowse.get(alias).stream().sorted().collect(Collectors.toList()));
+            labelsMap.put(alias, aliasGroupLabels.get(alias));
         }
-
     }
 
+    @Override
     public <T> T get(String resourceTypeName, String field, String value, boolean throwOnNull) {
+        Resource res;
+        T ret;
         try {
-            Resource res = this.searchService.searchId(resourceTypeName, new SearchService.KeyValue[]{new SearchService.KeyValue(field, value)});
+            res = searchService.searchId(resourceTypeName, new SearchService.KeyValue(field, value));
             if (throwOnNull && res == null) {
                 throw new ResourceException(String.format("%s '%s' does not exist!", resourceTypeName, value), HttpStatus.NOT_FOUND);
-            } else {
-                T ret = (T) this.parserPool.deserialize(res, this.getClassFromResourceType(resourceTypeName));
-                return ret;
             }
-        } catch (UnknownHostException var8) {
-            logger.error(var8.getMessage(), var8);
-            throw new ServiceException(var8);
+            ret = (T) parserPool.deserialize(res, getClassFromResourceType(resourceTypeName));
+        } catch (UnknownHostException e) {
+            logger.error(e.getMessage(), e);
+            throw new ServiceException(e);
         }
+        return ret;
     }
 
+    @Override
     public <T> T add(String resourceTypeName, T resource) {
-        Class<?> clazz = this.getClassFromResourceType(resourceTypeName);
+        Class<?> clazz = getClassFromResourceType(resourceTypeName);
         if (!clazz.isInstance(resource)) {
-            resource = (T) this.objectMapper.convertValue(resource, clazz);
+            resource = (T) objectMapper.convertValue(resource, clazz);
         }
 
-        ResourceType resourceType = this.resourceTypeService.getResourceType(resourceTypeName);
+        ResourceType resourceType = resourceTypeService.getResourceType(resourceTypeName);
         Resource res = new Resource();
         res.setResourceTypeName(resourceTypeName);
         res.setResourceType(resourceType);
-        String id = null;
 
+        String id = null;
         try {
             id = ReflectUtils.getId(clazz, resource);
-        } catch (Exception var8) {
-            logger.warn("Could not find field 'id'.", var8);
+        } catch (Exception e) {
+            logger.warn("Could not find field 'id'.", e);
         }
-
-        if (id == null || id.replaceAll("\\s", "").isEmpty()) {
+        if (id == null || id.isBlank()) {
             id = UUID.randomUUID().toString();
             ReflectUtils.setId(clazz, resource, id);
         }
-
-        String payload = this.parserPool.serialize(resource, ParserServiceTypes.fromString(resourceType.getPayloadType()));
+        String payload = parserPool.serialize(resource, ParserService.ParserServiceTypes.fromString(resourceType.getPayloadType()));
         res.setPayload(payload);
         logger.info(LoggingUtils.addResource(resourceTypeName, id, resource));
-        this.resourceService.addResource(res);
+        resourceService.addResource(res);
+
         return resource;
     }
 
+    @Override
     public <T> T update(String resourceTypeName, String id, T resource) throws NoSuchFieldException, InvocationTargetException, NoSuchMethodException {
-        Class<?> clazz = this.getClassFromResourceType(resourceTypeName);
-        resource = (T) this.objectMapper.convertValue(resource, clazz);
+        Class<?> clazz = getClassFromResourceType(resourceTypeName);
+        resource = (T) objectMapper.convertValue(resource, clazz);
+
         String existingId = ReflectUtils.getId(clazz, resource);
         if (!id.equals(existingId)) {
             throw new ResourceException("Resource body id different than path id", HttpStatus.CONFLICT);
-        } else {
-            ResourceType resourceType = this.resourceTypeService.getResourceType(resourceTypeName);
-            Resource res = this.searchResource(resourceTypeName, id, true);
-            String payload = this.parserPool.serialize(resource, ParserServiceTypes.fromString(resourceType.getPayloadType()));
-            res.setPayload(payload);
-            logger.info(LoggingUtils.updateResource(resourceTypeName, id, resource));
-            this.resourceService.updateResource(res);
-            return resource;
         }
+
+        ResourceType resourceType = resourceTypeService.getResourceType(resourceTypeName);
+        Resource res = searchResource(resourceTypeName, id, true);
+        String payload = parserPool.serialize(resource, ParserService.ParserServiceTypes.fromString(resourceType.getPayloadType()));
+        res.setPayload(payload);
+        logger.info(LoggingUtils.updateResource(resourceTypeName, id, resource));
+        resourceService.updateResource(res);
+
+        return resource;
     }
 
+    @Override
     public <T> T delete(String resourceTypeName, String id) {
-        Resource res = this.searchResource(resourceTypeName, id, true);
+        Resource res = searchResource(resourceTypeName, id, true);
         logger.info(LoggingUtils.deleteResource(resourceTypeName, id, res));
-        this.resourceService.deleteResource(res.getId());
-        return (T) this.parserPool.deserialize(res, this.getClassFromResourceType(resourceTypeName));
+        resourceService.deleteResource(res.getId());
+        return (T) parserPool.deserialize(res, getClassFromResourceType(resourceTypeName));
     }
 
+    @Override
     public <T> T get(String resourceTypeName, String id) {
-        Resource res = this.searchResource(resourceTypeName, id, true);
-        return (T) this.parserPool.deserialize(res, this.getClassFromResourceType(res.getResourceTypeName()));
+        Resource res = searchResource(resourceTypeName, id, true);
+        return (T) parserPool.deserialize(res, getClassFromResourceType(res.getResourceTypeName()));
     }
 
+    @Override
     public <T> Browsing<T> cqlQuery(FacetFilter filter) {
-        filter.setBrowseBy((List)this.browseByMap.get(filter.getResourceType()));
-        return this.convertToBrowsing(this.searchService.cqlQuery(filter), filter.getResourceType());
+        Set<String> browseBy = new HashSet<>(filter.getBrowseBy());
+        browseBy.addAll(browseByMap.get(filter.getResourceType()));
+        filter.setBrowseBy(new ArrayList<>(browseBy));
+        return convertToBrowsing(searchService.cqlQuery(filter), filter.getResourceType());
     }
 
+    @Override
     public <T> Browsing<T> getResults(FacetFilter filter) {
-        filter.setBrowseBy((List)this.browseByMap.get(filter.getResourceType()));
-
+        Set<String> browseBy = new HashSet<>(filter.getBrowseBy());
+        browseBy.addAll(browseByMap.get(filter.getResourceType()));
+        filter.setBrowseBy(new ArrayList<>(browseBy));
         try {
-            Browsing<T> browsing = this.convertToBrowsing(this.searchService.search(filter), filter.getResourceType());
+            Browsing<T> browsing;
+            browsing = convertToBrowsing(searchService.search(filter), filter.getResourceType());
             browsing.setFacets(facetLabelService.generateLabels(browsing.getFacets()));
             return browsing;
-        } catch (UnknownHostException var4) {
-            throw new ServiceException(var4);
+        } catch (UnknownHostException e) {
+            throw new ServiceException(e);
         }
     }
 
-    public <T> Browsing<T> convertToBrowsing(Paging<Resource> paging, String resourceTypeName) {
-        Class<?> clazz = this.getClassFromResourceType(resourceTypeName);
-        List results;
-        if (clazz != null) {
-            results = (List)paging.getResults().parallelStream().map((res) -> {
-                return this.parserPool.deserialize(res, clazz);
-            }).collect(Collectors.toList());
-        } else {
-            results = (List)paging.getResults().stream().map((resource) -> {
-                return this.parserPool.deserialize(resource, this.getClassFromResourceType(resource.getResourceTypeName()));
-            }).collect(Collectors.toList());
+    @Override
+    public <T> Browsing<T> convertToBrowsing(@NotNull Paging<Resource> paging, String resourceTypeName) {
+        Class<?> clazz = getClassFromResourceType(resourceTypeName);
+        List<T> results;
+        if (clazz != null) { // all resources are from the same resourceType
+            results = (List<T>) paging.getResults()
+                    .parallelStream()
+                    .map(res -> (T) parserPool.deserialize(res, clazz))
+                    .collect(Collectors.toList());
+        } else { // mixed resources
+            results = (List<T>) paging.getResults()
+                    .stream()
+                    .map(resource -> {
+                        T item = null;
+                        try {
+                            item = (T) parserPool.deserialize(resource, getClassFromResourceType(resource.getResourceTypeName()));
+                        } catch (Exception e) {
+                            logger.warn("Problem encountered: ", e);
+                        }
+                        return item;
+                    })
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.toList());
         }
-
-        return new Browsing(paging, results, (Map)this.labelsMap.get(resourceTypeName));
+        return new Browsing<>(paging, results, labelsMap.get(resourceTypeName));
     }
 
+    @Override
     public <T> Map<String, List<T>> getResultsGrouped(FacetFilter filter, String category) {
-        Map<String, List<T>> result = new HashMap();
-        Class<?> clazz = this.getClassFromResourceType(filter.getResourceType());
+        Map<String, List<T>> result = new HashMap<>();
+        Class<?> clazz = getClassFromResourceType(filter.getResourceType());
 
+        Map<String, List<Resource>> resources;
         try {
-            Map<String, List<Resource>> resources = this.searchService.searchByCategory(filter, category);
-            Iterator var6 = resources.entrySet().iterator();
-
-            while(var6.hasNext()) {
-                Map.Entry<String, List<Resource>> bucket = (Map.Entry)var6.next();
-                List<T> bucketResults = new ArrayList();
-                Iterator var9 = ((List)bucket.getValue()).iterator();
-
-                while(var9.hasNext()) {
-                    Resource res = (Resource)var9.next();
-                    bucketResults.add((T) this.parserPool.deserialize(res, clazz));
+            resources = searchService.searchByCategory(filter, category);
+            for (Map.Entry<String, List<Resource>> bucket : resources.entrySet()) {
+                List<T> bucketResults = new ArrayList<>();
+                for (Resource res : bucket.getValue()) {
+                    if (clazz != null) {
+                        bucketResults.add((T) parserPool.deserialize(res, clazz));
+                    } else {
+                        bucketResults.add((T) parserPool.deserialize(res, getClassFromResourceType(res.getResourceTypeName())));
+                    }
                 }
-
-                result.put((String)bucket.getKey(), bucketResults);
+                result.put(bucket.getKey(), bucketResults);
             }
-
             return result;
-        } catch (Exception var11) {
-            logger.error(var11.getMessage(), var11);
-            throw new ServiceException(var11);
+        } catch (Exception e) {
+            logger.error(e.getMessage(), e);
+            throw new ServiceException(e);
         }
     }
 
+    @Override
     public Class<?> getClassFromResourceType(String resourceTypeName) {
         Class<?> tClass = null;
-
         try {
-            ResourceType resourceType = this.resourceTypeService.getResourceType(resourceTypeName);
-            if (resourceType == null) {
+            ResourceType resourceType = resourceTypeService.getResourceType(resourceTypeName);
+            if (resourceType == null) { // search was performed using alias
                 return null;
             }
-
             tClass = Class.forName(resourceType.getProperty("class"));
-        } catch (ClassNotFoundException var4) {
-            logger.error(var4.getMessage(), var4);
-        } catch (NullPointerException var5) {
-            logger.error("Class property is not defined", var5);
+        } catch (ClassNotFoundException e) {
+            logger.warn(e.getMessage(), e);
+            tClass = Map.class;
+        } catch (NullPointerException e) {
+            logger.error("Class property is not defined", e);
             throw new ServiceException(String.format("ResourceType [%s] does not have properties field", resourceTypeName));
         }
-
         return tClass;
     }
 
+    @Override
     public Resource searchResource(String resourceTypeName, String id, boolean throwOnNull) {
         Resource res = null;
-
         try {
-            res = this.searchService.searchId(resourceTypeName, new SearchService.KeyValue[]{new SearchService.KeyValue("resource_internal_id", id)});
-        } catch (UnknownHostException var6) {
-            logger.error(var6.getMessage(), var6);
+            res = searchService.searchId(resourceTypeName, new SearchService.KeyValue("resource_internal_id", id));
+        } catch (UnknownHostException e) {
+            logger.error(e.getMessage(), e);
         }
-
-        return throwOnNull ? (Resource)Optional.ofNullable(res).orElseThrow(() -> {
-            return new ResourceNotFoundException(id, resourceTypeName);
-        }) : res;
+        if (throwOnNull) {
+            return Optional.ofNullable(res)
+                    .orElseThrow(() -> new ResourceNotFoundException(id, resourceTypeName));
+        }
+        return res;
     }
 
+    @Override
     public Resource searchResource(String resourceTypeName, SearchService.KeyValue... keyValues) {
         Resource res = null;
-
         try {
-            res = this.searchService.searchId(resourceTypeName, keyValues);
-        } catch (UnknownHostException var5) {
-            logger.error(var5.getMessage(), var5);
+            res = searchService.searchId(resourceTypeName, keyValues);
+        } catch (UnknownHostException e) {
+            logger.error(e.getMessage(), e);
         }
-
         return res;
     }
 
     public Map<String, List<String>> getBrowseByMap() {
-        return this.browseByMap;
+        return browseByMap;
     }
 
     public void setBrowseByMap(Map<String, List<String>> browseByMap) {
         this.browseByMap = browseByMap;
     }
-}
 
+    // facets are pre-sorted by 'count' field
+    public void sortFacets(List<Facet> facets, String field) {
+        for (Iterator<Facet> iter = facets.listIterator(); iter.hasNext();) {
+            Facet facet = iter.next();
+            if (facet.getField().equals("catalogue_id") || facet.getField().equals(field)) {
+                try {
+                    facet.getValues().sort(Comparator.comparing(eu.openminted.registry.core.domain.Value::getLabel, String.CASE_INSENSITIVE_ORDER));
+                } catch (NullPointerException e) {
+                    facet.getValues().sort(Comparator.comparing(eu.openminted.registry.core.domain.Value::getValue, String.CASE_INSENSITIVE_ORDER));
+                }
+            }
+        }
+    }
+}

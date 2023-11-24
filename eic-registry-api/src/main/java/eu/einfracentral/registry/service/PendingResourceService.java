@@ -1,8 +1,6 @@
 package eu.einfracentral.registry.service;
 
 import eu.einfracentral.domain.Bundle;
-import eu.einfracentral.domain.Datasource;
-import eu.einfracentral.domain.DatasourceBundle;
 import eu.einfracentral.exception.ResourceException;
 import eu.openminted.registry.core.domain.Browsing;
 import eu.openminted.registry.core.domain.FacetFilter;
@@ -47,15 +45,6 @@ public interface PendingResourceService<T extends Bundle> extends ResourceServic
      * @param auth
      */
     T transformToActive(String id, Authentication auth);
-
-    /**
-     * Create a Rich Object from a Pending Resource
-     *
-     * @param id
-     * @param auth
-     * @return
-     */
-    Object getPendingRich(String id, Authentication auth);
 
     /**
      * Get the id using the originalId of the resource.
@@ -112,6 +101,6 @@ public interface PendingResourceService<T extends Bundle> extends ResourceServic
      * @return Resource
      */
     Resource getPendingResourceViaProviderId(String providerId);
-    DatasourceBundle getOpenAIREDatasource(Datasource datasource);
+//    DatasourceBundle getOpenAIREDatasource(Datasource datasource);
 
 }

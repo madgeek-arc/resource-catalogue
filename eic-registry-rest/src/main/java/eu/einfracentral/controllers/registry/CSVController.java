@@ -4,7 +4,7 @@ import com.google.gson.Gson;
 import eu.einfracentral.domain.ProviderBundle;
 import eu.einfracentral.domain.ServiceBundle;
 import eu.einfracentral.registry.service.ProviderService;
-import eu.einfracentral.registry.service.ResourceBundleService;
+import eu.einfracentral.registry.service.ServiceBundleService;
 import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.domain.Paging;
 import org.apache.logging.log4j.LogManager;
@@ -30,15 +30,15 @@ import java.util.List;
 public class CSVController {
 
     private static Logger logger = LogManager.getLogger(CSVController.class);
-    private final ResourceBundleService<ServiceBundle> resourceBundleService;
+    private final ServiceBundleService<ServiceBundle> serviceBundleService;
     private final ProviderService<ProviderBundle, Authentication> providerService;
 
     @Value("${elastic.index.max_result_window:10000}")
     private int maxQuantity;
 
     @Autowired
-    CSVController(ResourceBundleService<ServiceBundle> service, ProviderService<ProviderBundle, Authentication> provider) {
-        this.resourceBundleService = service;
+    CSVController(ServiceBundleService<ServiceBundle> service, ProviderService<ProviderBundle, Authentication> provider) {
+        this.serviceBundleService = service;
         this.providerService = provider;
     }
 
@@ -48,7 +48,7 @@ public class CSVController {
     public ResponseEntity<String> servicesToCSV(@ApiIgnore Authentication auth, HttpServletResponse response) {
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(maxQuantity);
-        Paging<ServiceBundle> serviceBundles = resourceBundleService.getAll(ff, auth);
+        Paging<ServiceBundle> serviceBundles = serviceBundleService.getAll(ff, auth);
         String csvData = listServicesToCSV(serviceBundles.getResults());
         response.setHeader("Content-disposition", "attachment; filename=" + "services.csv");
         return ResponseEntity.ok(csvData);
