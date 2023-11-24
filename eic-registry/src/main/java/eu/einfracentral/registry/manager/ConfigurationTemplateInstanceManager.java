@@ -222,7 +222,7 @@ public class ConfigurationTemplateInstanceManager extends ResourceManager<Config
             JSONObject jsonObject = (JSONObject) parser.parse(jsonString);
             ret.setPayload(jsonObject);
         } catch (ParseException e) {
-            e.printStackTrace();
+            logger.error(e.getMessage(), e);
         }
         return ret;
     }
