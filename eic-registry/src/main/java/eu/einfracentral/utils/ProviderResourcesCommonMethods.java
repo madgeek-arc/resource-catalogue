@@ -325,7 +325,7 @@ public class ProviderResourcesCommonMethods {
         return loggingInfoList;
     }
 
-    public void determineResourceTypeAndCreateAlternativeIdentifierForPID(Bundle<?> bundle, String resourceTypePath) {
+    public void createPIDAndCorrespondingAlternativeIdentifier(Bundle<?> bundle, String resourceTypePath) {
         AlternativeIdentifier alternativeIdentifier;
         List<AlternativeIdentifier> alternativeIdentifiers = new ArrayList<>();
         List<AlternativeIdentifier> existingAlternativeIdentifiers;
