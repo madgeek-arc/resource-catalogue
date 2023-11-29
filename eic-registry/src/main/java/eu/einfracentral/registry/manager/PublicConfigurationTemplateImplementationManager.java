@@ -89,7 +89,7 @@ public class PublicConfigurationTemplateImplementationManager extends ResourceMa
         ret.setIdentifiers(published.getIdentifiers());
         ret.getConfigurationTemplateInstance().setPayload(published.getConfigurationTemplateInstance().getPayload()); //TODO: refactor when users will be able to update CTIs
         ret.setId(published.getId());
-        ret.setMetadata(published.getMetadata());
+        ret.getMetadata().setPublished(true);
         logger.info(String.format("Updating public ResourceInteroperabilityRecordBundle with id [%s]", ret.getId()));
         ret = super.update(ret, null);
         jmsService.convertAndSendTopic("resource_interoperability_record.update", ret);

@@ -5,6 +5,7 @@ import io.swagger.annotations.ApiModelProperty;
 
 import javax.xml.bind.annotation.XmlElement;
 import java.net.URL;
+import java.util.Objects;
 
 public class ResearchProductLicensing {
 
@@ -30,6 +31,19 @@ public class ResearchProductLicensing {
     public ResearchProductLicensing(String researchProductLicenseName, URL researchProductLicenseURL) {
         this.researchProductLicenseName = researchProductLicenseName;
         this.researchProductLicenseURL = researchProductLicenseURL;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ResearchProductLicensing that = (ResearchProductLicensing) o;
+        return Objects.equals(researchProductLicenseName, that.researchProductLicenseName) && Objects.equals(researchProductLicenseURL, that.researchProductLicenseURL);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(researchProductLicenseName, researchProductLicenseURL);
     }
 
     @Override

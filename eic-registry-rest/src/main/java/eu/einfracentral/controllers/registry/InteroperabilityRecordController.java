@@ -28,6 +28,7 @@ import springfox.documentation.annotations.ApiIgnore;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @RestController
@@ -125,11 +126,18 @@ public class InteroperabilityRecordController {
     @ApiImplicitParam(name = "suspended", value = "Suspended", defaultValue = "false", dataType = "boolean", paramType = "query")
     @GetMapping(path = "bundle/all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
-    public ResponseEntity<Paging<InteroperabilityRecordBundle>> getAllBundles(@ApiIgnore @RequestParam MultiValueMap<String, Object> allRequestParams,
+    public ResponseEntity<Paging<?>> getAllBundles(@ApiIgnore @RequestParam MultiValueMap<String, Object> allRequestParams,
+                                                                              @RequestParam(required = false) Set<String> auditState,
                                                                               @RequestParam(defaultValue = "all", name = "catalogue_id") String catalogueId,
                                                                               @RequestParam(defaultValue = "all", name = "provider_id") String providerId) {
         FacetFilter ff = interoperabilityRecordService.createFacetFilterForFetchingInteroperabilityRecords(allRequestParams, catalogueId, providerId);
-        return ResponseEntity.ok(genericResourceService.getResults(ff));
+        if (auditState == null) {
+            Paging<InteroperabilityRecordBundle> paging = genericResourceService.getResults(ff);
+            genericResourceService.sortFacets(paging.getFacets(), "provider_id");
+            return ResponseEntity.ok(paging);
+        } else {
+            return ResponseEntity.ok(interoperabilityRecordService.getAllForAdminWithAuditStates(ff, auditState));
+        }
     }
 
     @PatchMapping(path = "verify/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})

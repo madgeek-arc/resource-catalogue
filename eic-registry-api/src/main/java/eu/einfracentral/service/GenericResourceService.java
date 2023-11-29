@@ -1,9 +1,6 @@
 package eu.einfracentral.service;
 
-import eu.openminted.registry.core.domain.Browsing;
-import eu.openminted.registry.core.domain.FacetFilter;
-import eu.openminted.registry.core.domain.Paging;
-import eu.openminted.registry.core.domain.Resource;
+import eu.openminted.registry.core.domain.*;
 import eu.openminted.registry.core.service.SearchService;
 
 import javax.validation.constraints.NotNull;
@@ -35,4 +32,6 @@ public interface GenericResourceService {
     Resource searchResource(String resourceTypeName, String id, boolean throwOnNull);
 
     Resource searchResource(String resourceTypeName, SearchService.KeyValue... keyValues);
+
+    void sortFacets(List<Facet> facets, String field);
 }

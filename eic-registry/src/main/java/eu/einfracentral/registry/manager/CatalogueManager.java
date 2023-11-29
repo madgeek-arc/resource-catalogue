@@ -7,6 +7,7 @@ import eu.einfracentral.registry.service.*;
 import eu.einfracentral.service.IdCreator;
 import eu.einfracentral.service.RegistrationMailService;
 import eu.einfracentral.service.SecurityService;
+import eu.einfracentral.utils.ObjectUtils;
 import eu.einfracentral.utils.ProviderResourcesCommonMethods;
 import eu.einfracentral.validators.FieldValidator;
 import eu.openminted.registry.core.domain.Browsing;
@@ -19,7 +20,6 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
-import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.security.core.Authentication;
@@ -44,8 +44,7 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
     private final RegistrationMailService registrationMailService;
     private final DataSource dataSource;
     private final ProviderService<ProviderBundle, Authentication> providerService;
-    private final ResourceBundleService<ServiceBundle> serviceBundleService;
-    private final ResourceBundleService<DatasourceBundle> datasourceBundleService;
+    private final ServiceBundleService<ServiceBundle> serviceBundleService;
     private final TrainingResourceService<TrainingResourceBundle> trainingResourceService;
     private final InteroperabilityRecordService<InteroperabilityRecordBundle> interoperabilityRecordService;
     private final ProviderResourcesCommonMethods commonMethods;
@@ -57,8 +56,7 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
     @Autowired
     public CatalogueManager(IdCreator idCreator, DataSource dataSource,
                             @Lazy ProviderService<ProviderBundle, Authentication> providerService,
-                            @Lazy ResourceBundleService<ServiceBundle> serviceBundleService,
-                            @Lazy ResourceBundleService<DatasourceBundle> datasourceBundleService,
+                            @Lazy ServiceBundleService<ServiceBundle> serviceBundleService,
                             @Lazy TrainingResourceService<TrainingResourceBundle> trainingResourceService,
                             @Lazy InteroperabilityRecordService<InteroperabilityRecordBundle> interoperabilityRecordService,
                             @Lazy FieldValidator fieldValidator,
@@ -75,7 +73,6 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
         this.registrationMailService = registrationMailService;
         this.providerService = providerService;
         this.serviceBundleService = serviceBundleService;
-        this.datasourceBundleService = datasourceBundleService;
         this.trainingResourceService = trainingResourceService;
         this.interoperabilityRecordService = interoperabilityRecordService;
         this.commonMethods = commonMethods;
@@ -197,48 +194,49 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
         return ret;
     }
 
-    public CatalogueBundle update(CatalogueBundle catalogue, String comment, Authentication auth) {
-        logger.trace("User '{}' is attempting to update the Catalogue with id '{}'", auth, catalogue);
+    public CatalogueBundle update(CatalogueBundle catalogueBundle, String comment, Authentication auth) {
+        logger.trace("User '{}' is attempting to update the Catalogue with id '{}'", auth, catalogueBundle);
 
-        Resource existing = whereID(catalogue.getId(), true);
-        CatalogueBundle ex = deserialize(existing);
+        CatalogueBundle ret = ObjectUtils.clone(catalogueBundle);
+        Resource existingResource = whereID(ret.getId(), true);
+        CatalogueBundle existingCatalogue = deserialize(existingResource);
         // check if there are actual changes in the Catalogue
-        if (catalogue.getCatalogue().equals(ex.getCatalogue())){
-            throw new ValidationException("There are no changes in the Catalogue", HttpStatus.OK);
+        if (ret.getCatalogue().equals(existingCatalogue.getCatalogue())) {
+            return ret;
         }
 
-        validate(catalogue);
-        catalogue.setMetadata(Metadata.updateMetadata(catalogue.getMetadata(), User.of(auth).getFullName(), User.of(auth).getEmail()));
-        List<LoggingInfo> loggingInfoList = commonMethods.returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(catalogue, auth);
+        validate(ret);
+        ret.setMetadata(Metadata.updateMetadata(ret.getMetadata(), User.of(auth).getFullName(), User.of(auth).getEmail()));
+        List<LoggingInfo> loggingInfoList = commonMethods.returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(ret, auth);
         LoggingInfo loggingInfo = commonMethods.createLoggingInfo(auth, LoggingInfo.Types.UPDATE.getKey(),
                 LoggingInfo.ActionType.UPDATED.getKey(), comment);
         loggingInfoList.add(loggingInfo);
-        catalogue.getCatalogue().setParticipatingCountries(sortCountries(catalogue.getCatalogue().getParticipatingCountries()));
-        catalogue.setLoggingInfo(loggingInfoList);
+        ret.getCatalogue().setParticipatingCountries(sortCountries(ret.getCatalogue().getParticipatingCountries()));
+        ret.setLoggingInfo(loggingInfoList);
 
         // latestUpdateInfo
-        catalogue.setLatestUpdateInfo(loggingInfo);
+        ret.setLatestUpdateInfo(loggingInfo);
 
-        catalogue.setActive(ex.isActive());
-        catalogue.setStatus(ex.getStatus());
-        catalogue.setSuspended(ex.isSuspended());
-        existing.setPayload(serialize(catalogue));
-        existing.setResourceType(resourceType);
-        resourceService.updateResource(existing);
-        logger.debug("Updating Catalogue: {}", catalogue);
+        ret.setActive(existingCatalogue.isActive());
+        ret.setStatus(existingCatalogue.getStatus());
+        ret.setSuspended(existingCatalogue.isSuspended());
+        existingResource.setPayload(serialize(ret));
+        existingResource.setResourceType(resourceType);
+        resourceService.updateResource(existingResource);
+        logger.debug("Updating Catalogue: {}", ret);
 
         // Send emails to newly added or deleted Admins
-        adminDifferences(catalogue, ex);
+        adminDifferences(ret, existingCatalogue);
 
-        if (catalogue.getLatestAuditInfo() != null && catalogue.getLatestUpdateInfo() != null) {
-            Long latestAudit = Long.parseLong(catalogue.getLatestAuditInfo().getDate());
-            Long latestUpdate = Long.parseLong(catalogue.getLatestUpdateInfo().getDate());
-            if (latestAudit < latestUpdate && catalogue.getLatestAuditInfo().getActionType().equals(LoggingInfo.ActionType.INVALID.getKey())) {
-                registrationMailService.notifyPortalAdminsForInvalidCatalogueUpdate(catalogue);
+        if (ret.getLatestAuditInfo() != null && ret.getLatestUpdateInfo() != null) {
+            Long latestAudit = Long.parseLong(ret.getLatestAuditInfo().getDate());
+            Long latestUpdate = Long.parseLong(ret.getLatestUpdateInfo().getDate());
+            if (latestAudit < latestUpdate && ret.getLatestAuditInfo().getActionType().equals(LoggingInfo.ActionType.INVALID.getKey())) {
+                registrationMailService.notifyPortalAdminsForInvalidCatalogueUpdate(ret);
             }
         }
 
-        return catalogue;
+        return ret;
     }
 
     @Override
@@ -274,9 +272,6 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
         logger.info("Deleting all Catalogue's Services...");
         deleteCatalogueResources(id, serviceBundleService, securityService.getAdminAccess());
 
-        logger.info("Deleting all Catalogue's Datasources...");
-        deleteCatalogueResources(id, datasourceBundleService, securityService.getAdminAccess());
-
         logger.info("Deleting all Catalogue's Training Resources...");
         deleteCatalogueResources(id, trainingResourceService, securityService.getAdminAccess());
 
@@ -306,18 +301,7 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
                 .collect(Collectors.toList());
     }
 
-    @Override
-    public List<CatalogueBundle> getInactive() {
-        FacetFilter ff = new FacetFilter();
-        ff.addFilter("active", false);
-        ff.setFrom(0);
-        ff.setQuantity(maxQuantity);
-        ff.addOrderBy("name", "asc");
-        return getAll(ff, null).getResults();
-    }
-
-    @Override
-    public <T, I extends ResourceCRUDService<T, Authentication>> void deleteCatalogueResources(String id, I service, Authentication auth) {
+    private <T, I extends ResourceCRUDService<T, Authentication>> void deleteCatalogueResources(String id, I service, Authentication auth) {
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(maxQuantity);
         ff.addFilter("catalogue_id", id);
@@ -361,12 +345,12 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
         }
     }
 
-    public List<String> sortCountries(List<String> countries) {
+    private List<String> sortCountries(List<String> countries) {
         Collections.sort(countries);
         return countries;
     }
 
-    public void adminDifferences(CatalogueBundle updatedCatalogue, CatalogueBundle existingCatalogue) {
+    private void adminDifferences(CatalogueBundle updatedCatalogue, CatalogueBundle existingCatalogue) {
         List<String> existingAdmins = new ArrayList<>();
         List<String> newAdmins = new ArrayList<>();
         for (User user : existingCatalogue.getCatalogue().getUsers()) {
@@ -472,8 +456,10 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
         loggingInfoList.add(loggingInfo);
         catalogue.setLoggingInfo(loggingInfoList);
 
-        // latestOnboardingInfo
+        // latestLoggingInfo
         catalogue.setLatestUpdateInfo(loggingInfo);
+        catalogue.setLatestOnboardingInfo(commonMethods.setLatestLoggingInfo(loggingInfoList, LoggingInfo.Types.ONBOARD.getKey()));
+        catalogue.setLatestAuditInfo(commonMethods.setLatestLoggingInfo(loggingInfoList, LoggingInfo.Types.AUDIT.getKey()));
 
         return super.update(catalogue, auth);
     }
@@ -544,27 +530,27 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
         return namedParameterJdbcTemplate.queryForList(query, in);
     }
 
-    public Paging<CatalogueBundle> createCorrectQuantityFacets(List<CatalogueBundle> catalogueBundle, Paging<CatalogueBundle> catalogueBundlePaging,
+    public Paging<CatalogueBundle> createCorrectQuantityFacets(List<CatalogueBundle> catalogueBundles, Paging<CatalogueBundle> catalogueBundlePaging,
                                                                int quantity, int from){
-        if (!catalogueBundle.isEmpty()) {
+        if (!catalogueBundles.isEmpty()) {
             List<CatalogueBundle> retWithCorrectQuantity = new ArrayList<>();
             if (from == 0){
-                if (quantity <= catalogueBundle.size()){
+                if (quantity <= catalogueBundles.size()){
                     for (int i=from; i<=quantity-1; i++){
-                        retWithCorrectQuantity.add(catalogueBundle.get(i));
+                        retWithCorrectQuantity.add(catalogueBundles.get(i));
                     }
                 } else{
-                    retWithCorrectQuantity.addAll(catalogueBundle);
+                    retWithCorrectQuantity.addAll(catalogueBundles);
                 }
                 catalogueBundlePaging.setTo(retWithCorrectQuantity.size());
             } else{
                 boolean indexOutOfBound = false;
-                if (quantity <= catalogueBundle.size()){
+                if (quantity <= catalogueBundles.size()){
                     for (int i=from; i<quantity+from; i++) {
                         try{
-                            retWithCorrectQuantity.add(catalogueBundle.get(i));
-                            if (quantity+from > catalogueBundle.size()){
-                                catalogueBundlePaging.setTo(catalogueBundle.size());
+                            retWithCorrectQuantity.add(catalogueBundles.get(i));
+                            if (quantity+from > catalogueBundles.size()){
+                                catalogueBundlePaging.setTo(catalogueBundles.size());
                             } else{
                                 catalogueBundlePaging.setTo(quantity+from);
                             }
@@ -573,12 +559,12 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
                         }
                     }
                     if (indexOutOfBound){
-                        catalogueBundlePaging.setTo(catalogueBundle.size());
+                        catalogueBundlePaging.setTo(catalogueBundles.size());
                     }
                 } else{
-                    retWithCorrectQuantity.addAll(catalogueBundle);
-                    if (quantity+from > catalogueBundle.size()){
-                        catalogueBundlePaging.setTo(catalogueBundle.size());
+                    retWithCorrectQuantity.addAll(catalogueBundles);
+                    if (quantity+from > catalogueBundles.size()){
+                        catalogueBundlePaging.setTo(catalogueBundles.size());
                     } else{
                         catalogueBundlePaging.setTo(quantity+from);
                     }
@@ -586,23 +572,14 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
             }
             catalogueBundlePaging.setFrom(from);
             catalogueBundlePaging.setResults(retWithCorrectQuantity);
-            catalogueBundlePaging.setTotal(catalogueBundle.size());
+            catalogueBundlePaging.setTotal(catalogueBundles.size());
         } else{
-            catalogueBundlePaging.setResults(catalogueBundle);
+            catalogueBundlePaging.setResults(catalogueBundles);
             catalogueBundlePaging.setTotal(0);
             catalogueBundlePaging.setFrom(0);
             catalogueBundlePaging.setTo(0);
         }
         return catalogueBundlePaging;
-    }
-
-    @Override
-    public Paging<ProviderBundle> getAllCatalogueProviders(String catalogueId, Authentication auth) {
-        FacetFilter ff = new FacetFilter();
-        ff.addFilter("catalogue_id", catalogueId);
-        ff.setQuantity(maxQuantity);
-        ff.addOrderBy("name", "asc");
-        return providerService.getAll(ff, auth);
     }
 
     public CatalogueBundle suspend(String catalogueId, boolean suspend, Authentication auth) {

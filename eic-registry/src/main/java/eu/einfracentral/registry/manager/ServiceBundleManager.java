@@ -8,6 +8,7 @@ import eu.einfracentral.registry.service.*;
 import eu.einfracentral.service.IdCreator;
 import eu.einfracentral.service.RegistrationMailService;
 import eu.einfracentral.service.SecurityService;
+import eu.einfracentral.utils.ObjectUtils;
 import eu.einfracentral.utils.ProviderResourcesCommonMethods;
 import eu.openminted.registry.core.domain.Browsing;
 import eu.openminted.registry.core.domain.FacetFilter;
@@ -27,13 +28,14 @@ import org.springframework.security.core.Authentication;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static eu.einfracentral.config.CacheConfig.CACHE_FEATURED;
 import static eu.einfracentral.config.CacheConfig.CACHE_PROVIDERS;
 
 @org.springframework.stereotype.Service
-public class ServiceBundleManager extends AbstractResourceBundleManager<ServiceBundle> implements ResourceBundleService<ServiceBundle> {
+public class ServiceBundleManager extends AbstractServiceBundleManager<ServiceBundle> implements ServiceBundleService<ServiceBundle> {
 
     private static final Logger logger = LogManager.getLogger(ServiceBundleManager.class);
 
@@ -45,6 +47,13 @@ public class ServiceBundleManager extends AbstractResourceBundleManager<ServiceB
     private final CatalogueService<CatalogueBundle, Authentication> catalogueService;
     private final PublicServiceManager publicServiceManager;
     private final MigrationService migrationService;
+    private final DatasourceService datasourceService;
+    private final HelpdeskService<HelpdeskBundle, Authentication> helpdeskService;
+    private final MonitoringService<MonitoringBundle, Authentication> monitoringService;
+    private final PublicHelpdeskManager publicHelpdeskManager;
+    private final PublicMonitoringManager publicMonitoringManager;
+    private final PublicDatasourceManager publicDatasourceManager;
+    private final ResourceInteroperabilityRecordService<ResourceInteroperabilityRecordBundle> resourceInteroperabilityRecordService;
     private final ProviderResourcesCommonMethods commonMethods;
 
     @Value("${project.catalogue.name}")
@@ -58,6 +67,14 @@ public class ServiceBundleManager extends AbstractResourceBundleManager<ServiceB
                                 CatalogueService<CatalogueBundle, Authentication> catalogueService,
                                 @Lazy PublicServiceManager publicServiceManager,
                                 @Lazy MigrationService migrationService,
+                                @Lazy DatasourceService datasourceService,
+                                @Lazy HelpdeskService<HelpdeskBundle, Authentication> helpdeskService,
+                                @Lazy MonitoringService<MonitoringBundle, Authentication> monitoringService,
+                                @Lazy PublicHelpdeskManager publicHelpdeskManager,
+                                @Lazy PublicMonitoringManager publicMonitoringManager,
+                                @Lazy PublicDatasourceManager publicDatasourceManager,
+                                @Lazy ResourceInteroperabilityRecordService<ResourceInteroperabilityRecordBundle>
+                                            resourceInteroperabilityRecordService,
                                 ProviderResourcesCommonMethods commonMethods) {
         super(ServiceBundle.class);
         this.providerService = providerService; // for providers
@@ -68,6 +85,13 @@ public class ServiceBundleManager extends AbstractResourceBundleManager<ServiceB
         this.catalogueService = catalogueService;
         this.publicServiceManager = publicServiceManager;
         this.migrationService = migrationService;
+        this.datasourceService = datasourceService;
+        this.helpdeskService = helpdeskService;
+        this.monitoringService = monitoringService;
+        this.publicHelpdeskManager = publicHelpdeskManager;
+        this.publicMonitoringManager = publicMonitoringManager;
+        this.publicDatasourceManager = publicDatasourceManager;
+        this.resourceInteroperabilityRecordService = resourceInteroperabilityRecordService;
         this.commonMethods = commonMethods;
     }
 
@@ -108,6 +132,9 @@ public class ServiceBundleManager extends AbstractResourceBundleManager<ServiceB
             throw new ValidationException(String.format("The Provider with id %s has already registered a Resource Template.", providerBundle.getId()));
         }
 
+        // prohibit EOSC related Alternative Identifier Types
+        commonMethods.prohibitEOSCRelatedPIDs(serviceBundle.getService().getAlternativeIdentifiers());
+
         serviceBundle.setId(idCreator.createServiceId(serviceBundle));
         validate(serviceBundle);
 
@@ -142,9 +169,6 @@ public class ServiceBundleManager extends AbstractResourceBundleManager<ServiceB
         // LoggingInfo
         serviceBundle.setLoggingInfo(loggingInfoList);
 
-        // serviceType
-        createResourceExtras(serviceBundle, "service_type-service");
-
         logger.info("Adding Service: {}", serviceBundle);
         ServiceBundle ret;
         ret = super.add(serviceBundle, auth);
@@ -164,35 +188,34 @@ public class ServiceBundleManager extends AbstractResourceBundleManager<ServiceB
     @CacheEvict(cacheNames = {CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)
     public ServiceBundle updateResource(ServiceBundle serviceBundle, String catalogueId, String comment, Authentication auth) {
 
-        ServiceBundle ret;
+        ServiceBundle ret = ObjectUtils.clone(serviceBundle);
         ServiceBundle existingService;
-        try { // try to find a Service with the same id
-            existingService = get(serviceBundle.getService().getId(), serviceBundle.getService().getCatalogueId());
+        try {
+            existingService = get(ret.getService().getId(), ret.getService().getCatalogueId());
+            if (ret.getService().equals(existingService.getService())) {
+                return ret;
+            }
         } catch (ResourceNotFoundException e) {
             throw new ResourceNotFoundException(String.format("There is no Service with id [%s] on the [%s] Catalogue",
-                    serviceBundle.getService().getId(), serviceBundle.getService().getCatalogueId()));
+                    ret.getService().getId(), ret.getService().getCatalogueId()));
         }
 
-        // check if there are actual changes in the Service
-        if (serviceBundle.getService().equals(existingService.getService())){
-            throw new ValidationException("There are no changes in the Service", HttpStatus.OK);
-        }
 
         if (catalogueId == null || catalogueId.equals("")) {
-            serviceBundle.getService().setCatalogueId(catalogueName);
+            ret.getService().setCatalogueId(catalogueName);
         } else {
-            commonMethods.checkCatalogueIdConsistency(serviceBundle, catalogueId);
+            commonMethods.checkCatalogueIdConsistency(ret, catalogueId);
         }
-        commonMethods.checkRelatedResourceIDsConsistency(serviceBundle);
+        commonMethods.checkRelatedResourceIDsConsistency(ret);
 
-        logger.trace("User '{}' is attempting to update the Service with id '{}' of the Catalogue '{}'", auth, serviceBundle.getService().getId(), serviceBundle.getService().getCatalogueId());
-        validate(serviceBundle);
+        logger.trace("User '{}' is attempting to update the Service with id '{}' of the Catalogue '{}'", auth, ret.getService().getId(), ret.getService().getCatalogueId());
+        validate(ret);
 
-        ProviderBundle providerBundle = providerService.get(serviceBundle.getService().getCatalogueId(), serviceBundle.getService().getResourceOrganisation(), auth);
+        ProviderBundle providerBundle = providerService.get(ret.getService().getCatalogueId(), ret.getService().getResourceOrganisation(), auth);
 
         // if service version is empty set it null
-        if ("".equals(serviceBundle.getService().getVersion())) {
-            serviceBundle.getService().setVersion(null);
+        if ("".equals(ret.getService().getVersion())) {
+            ret.getService().setVersion(null);
         }
 
         // block Public Service update
@@ -200,20 +223,23 @@ public class ServiceBundleManager extends AbstractResourceBundleManager<ServiceB
             throw new ValidationException("You cannot directly update a Public Service");
         }
 
+        // prohibit EOSC related Alternative Identifier Types
+        commonMethods.prohibitEOSCRelatedPIDs(ret.getService().getAlternativeIdentifiers());
+
         User user = User.of(auth);
 
         // update existing service Metadata, ResourceExtras, Identifiers, MigrationStatus
-        serviceBundle.setMetadata(Metadata.updateMetadata(existingService.getMetadata(), user.getFullName()));
-        serviceBundle.setResourceExtras(existingService.getResourceExtras());
-//        serviceBundle.setIdentifiers(existingService.getIdentifiers());
-        serviceBundle.setMigrationStatus(existingService.getMigrationStatus());
+        ret.setMetadata(Metadata.updateMetadata(existingService.getMetadata(), user.getFullName()));
+        ret.setResourceExtras(existingService.getResourceExtras());
+//        ret.setIdentifiers(existingService.getIdentifiers());
+        ret.setMigrationStatus(existingService.getMigrationStatus());
 
         List<LoggingInfo> loggingInfoList = commonMethods.returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(existingService, auth);
         LoggingInfo loggingInfo;
 
         // update VS version update
-        if (((serviceBundle.getService().getVersion() == null) && (existingService.getService().getVersion() == null)) ||
-                (serviceBundle.getService().getVersion().equals(existingService.getService().getVersion()))) {
+        if (((ret.getService().getVersion() == null) && (existingService.getService().getVersion() == null)) ||
+                (ret.getService().getVersion().equals(existingService.getService().getVersion()))) {
             loggingInfo = commonMethods.createLoggingInfo(auth, LoggingInfo.Types.UPDATE.getKey(),
                     LoggingInfo.ActionType.UPDATED.getKey(), comment);
         } else {
@@ -222,21 +248,23 @@ public class ServiceBundleManager extends AbstractResourceBundleManager<ServiceB
         }
         loggingInfoList.add(loggingInfo);
         loggingInfoList.sort(Comparator.comparing(LoggingInfo::getDate));
-        serviceBundle.setLoggingInfo(loggingInfoList);
+        ret.setLoggingInfo(loggingInfoList);
 
-        // latestUpdateInfo
-        serviceBundle.setLatestUpdateInfo(loggingInfo);
+        // latestLoggingInfo
+        ret.setLatestUpdateInfo(loggingInfo);
+        ret.setLatestOnboardingInfo(commonMethods.setLatestLoggingInfo(loggingInfoList, LoggingInfo.Types.ONBOARD.getKey()));
+        ret.setLatestAuditInfo(commonMethods.setLatestLoggingInfo(loggingInfoList, LoggingInfo.Types.AUDIT.getKey()));
 
         // set active/status
-        serviceBundle.setActive(existingService.isActive());
-        serviceBundle.setStatus(existingService.getStatus());
-        serviceBundle.setSuspended(existingService.isSuspended());
+        ret.setActive(existingService.isActive());
+        ret.setStatus(existingService.getStatus());
+        ret.setSuspended(existingService.isSuspended());
 
         // if Resource's status = "rejected resource", update to "pending resource" & Provider templateStatus to "pending template"
         if (existingService.getStatus().equals(vocabularyService.get("rejected resource").getId())) {
             if (providerBundle.getTemplateStatus().equals(vocabularyService.get("rejected template").getId())) {
-                serviceBundle.setStatus(vocabularyService.get("pending resource").getId());
-                serviceBundle.setActive(false);
+                ret.setStatus(vocabularyService.get("pending resource").getId());
+                ret.setActive(false);
                 providerBundle.setTemplateStatus(vocabularyService.get("pending template").getId());
                 providerService.update(providerBundle, null, auth);
             }
@@ -244,26 +272,26 @@ public class ServiceBundleManager extends AbstractResourceBundleManager<ServiceB
 
         // if a user updates a service with version to a service with null version then while searching for the service
         // you get a "Service already exists" error.
-        if (existingService.getService().getVersion() != null && serviceBundle.getService().getVersion() == null) {
+        if (existingService.getService().getVersion() != null && ret.getService().getVersion() == null) {
             throw new ServiceException("You cannot update a Service registered with version to a Service with null version");
         }
 
         // block catalogueId updates from Provider Admins
         if (!securityService.hasRole(auth, "ROLE_ADMIN")) {
-            if (!existingService.getService().getCatalogueId().equals(serviceBundle.getService().getCatalogueId())) {
+            if (!existingService.getService().getCatalogueId().equals(ret.getService().getCatalogueId())) {
                 throw new ValidationException("You cannot change catalogueId");
             }
         }
 
-        ret = super.update(serviceBundle, auth);
-        logger.info("Updating Service: {}", serviceBundle);
+        ret = super.update(ret, auth);
+        logger.info("Updating Service: {}", ret);
 
         // send notification emails to Portal Admins
-        if (serviceBundle.getLatestAuditInfo() != null && serviceBundle.getLatestUpdateInfo() != null) {
-            Long latestAudit = Long.parseLong(serviceBundle.getLatestAuditInfo().getDate());
-            Long latestUpdate = Long.parseLong(serviceBundle.getLatestUpdateInfo().getDate());
-            if (latestAudit < latestUpdate && serviceBundle.getLatestAuditInfo().getActionType().equals(LoggingInfo.ActionType.INVALID.getKey())) {
-                registrationMailService.notifyPortalAdminsForInvalidResourceUpdate(serviceBundle);
+        if (ret.getLatestAuditInfo() != null && ret.getLatestUpdateInfo() != null) {
+            Long latestAudit = Long.parseLong(ret.getLatestAuditInfo().getDate());
+            Long latestUpdate = Long.parseLong(ret.getLatestUpdateInfo().getDate());
+            if (latestAudit < latestUpdate && ret.getLatestAuditInfo().getActionType().equals(LoggingInfo.ActionType.INVALID.getKey())) {
+                registrationMailService.notifyPortalAdminsForInvalidResourceUpdate(ret);
             }
         }
 
@@ -302,7 +330,10 @@ public class ServiceBundleManager extends AbstractResourceBundleManager<ServiceB
 
     @Override
     public void delete(ServiceBundle serviceBundle) {
+        String catalogueId = serviceBundle.getService().getCatalogueId();
         commonMethods.blockResourceDeletion(serviceBundle.getStatus(), serviceBundle.getMetadata().isPublished());
+        commonMethods.deleteResourceRelatedServiceSubprofiles(serviceBundle.getId(), catalogueId);
+        commonMethods.deleteResourceRelatedServiceExtensionsAndResourceInteroperabilityRecords(serviceBundle.getId(), catalogueId, "Service");
         logger.info("Deleting Service: {}", serviceBundle);
         super.delete(serviceBundle);
     }
@@ -401,11 +432,98 @@ public class ServiceBundleManager extends AbstractResourceBundleManager<ServiceB
         loggingInfoList.sort(Comparator.comparing(LoggingInfo::getDate));
         service.setLoggingInfo(loggingInfoList);
 
-        // latestOnboardingInfo
-        service.setLatestUpdateInfo(loggingInfoList.get(0)); //TODO: check this
+        // latestLoggingInfo
+        service.setLatestUpdateInfo(commonMethods.setLatestLoggingInfo(loggingInfoList, LoggingInfo.Types.UPDATE.getKey()));
+        service.setLatestOnboardingInfo(commonMethods.setLatestLoggingInfo(loggingInfoList, LoggingInfo.Types.ONBOARD.getKey()));
+        service.setLatestAuditInfo(commonMethods.setLatestLoggingInfo(loggingInfoList, LoggingInfo.Types.AUDIT.getKey()));
+
+        // active Service's related resources (ServiceExtensions && Subprofiles)
+        publishServiceRelatedResources(service.getId(), service.getService().getCatalogueId(), active, auth);
 
         this.update(service, auth);
         return service;
+    }
+
+    public void publishServiceRelatedResources(String serviceId, String catalogueId, Boolean active, Authentication auth) {
+        HelpdeskBundle helpdeskBundle = helpdeskService.get(serviceId, catalogueId);
+        MonitoringBundle monitoringBundle = monitoringService.get(serviceId, catalogueId);
+        DatasourceBundle datasourceBundle = datasourceService.get(serviceId, catalogueId);
+        if (active){
+            logger.info("Activating all related resources of the Service with id: {}", serviceId);
+        } else{
+            logger.info("Deactivating all related resources of the Service with id: {}", serviceId);
+        }
+        if (helpdeskBundle != null) {
+            publishServiceExtensionsAndSubprofiles(helpdeskBundle, active, auth);
+        }
+        if (monitoringBundle != null) {
+            publishServiceExtensionsAndSubprofiles(monitoringBundle, active, auth);
+        }
+        if (datasourceBundle != null && datasourceBundle.getStatus().equals("approved datasource")) {
+            publishServiceExtensionsAndSubprofiles(datasourceBundle, active, auth);
+        }
+    }
+
+    private void publishServiceExtensionsAndSubprofiles(Bundle<?> bundle, boolean active, Authentication auth) {
+        List<LoggingInfo> loggingInfoList = commonMethods.createActivationLoggingInfo(bundle, active, auth);
+
+        // update Bundle's fields
+        bundle.setLoggingInfo(loggingInfoList);
+        bundle.setLatestUpdateInfo(loggingInfoList.get(loggingInfoList.size()-1));
+        bundle.setActive(active);
+
+        if (bundle instanceof HelpdeskBundle) {
+            try {
+                logger.debug("Setting Helpdesk '{}' of the Service '{}' of the '{}' Catalogue to active: '{}'",
+                        bundle.getId(), ((HelpdeskBundle) bundle).getHelpdesk().getServiceId(),
+                        ((HelpdeskBundle) bundle).getCatalogueId(), bundle.isActive());
+                helpdeskService.updateBundle((HelpdeskBundle) bundle, auth);
+                HelpdeskBundle publicHelpdeskBundle =
+                        publicHelpdeskManager.getOrElseReturnNull(((HelpdeskBundle) bundle).getCatalogueId() +
+                                "." + bundle.getId());
+                if (publicHelpdeskBundle != null) {
+                    publicHelpdeskManager.update((HelpdeskBundle) bundle, auth);
+                }
+            } catch (eu.einfracentral.exception.ResourceNotFoundException e) {
+                logger.error("Could not update Helpdesk '{}' of the Service '{}' of the '{}' Catalogue",
+                        bundle.getId(), ((HelpdeskBundle) bundle).getHelpdesk().getServiceId(),
+                        ((HelpdeskBundle) bundle).getCatalogueId());
+            }
+        } else if (bundle instanceof MonitoringBundle) {
+            try {
+                logger.debug("Setting Monitoring '{}' of the Service '{}' of the '{}' Catalogue to active: '{}'",
+                        bundle.getId(), ((MonitoringBundle) bundle).getMonitoring().getServiceId(),
+                        ((MonitoringBundle) bundle).getCatalogueId(), bundle.isActive());
+                monitoringService.updateBundle((MonitoringBundle) bundle, auth);
+                MonitoringBundle publicMonitoringBundle =
+                        publicMonitoringManager.getOrElseReturnNull(((MonitoringBundle) bundle).getCatalogueId() +
+                                "." + bundle.getId());
+                if (publicMonitoringBundle != null) {
+                    publicMonitoringManager.update((MonitoringBundle) bundle, auth);
+                }
+            } catch (eu.einfracentral.exception.ResourceNotFoundException e) {
+                logger.error("Could not update Monitoring '{}' of the Service '{}' of the '{}' Catalogue",
+                        bundle.getId(), ((MonitoringBundle) bundle).getMonitoring().getServiceId(),
+                        ((MonitoringBundle) bundle).getCatalogueId());
+            }
+        } else {
+            try {
+                logger.debug("Setting Datasource '{}' of the Service '{}' of the '{}' Catalogue to active: '{}'",
+                        bundle.getId(), ((DatasourceBundle) bundle).getDatasource().getServiceId(),
+                        ((DatasourceBundle) bundle).getDatasource().getCatalogueId(), bundle.isActive());
+                datasourceService.updateBundle((DatasourceBundle) bundle, auth);
+                DatasourceBundle publicDatasourceBundle =
+                        publicDatasourceManager.getOrElseReturnNull(((DatasourceBundle) bundle).getDatasource().getCatalogueId()
+                                + "." + bundle.getId());
+                if (publicDatasourceBundle != null) {
+                    publicDatasourceManager.update((DatasourceBundle) bundle, auth);
+                }
+            } catch (eu.einfracentral.exception.ResourceNotFoundException e) {
+                logger.error("Could not update Datasource '{}' of the Service '{}' of the '{}' Catalogue",
+                        bundle.getId(), ((DatasourceBundle) bundle).getDatasource().getServiceId(),
+                        ((DatasourceBundle) bundle).getDatasource().getCatalogueId());
+            }
+        }
     }
 
     public ServiceBundle auditResource(String serviceId, String catalogueId, String comment, LoggingInfo.ActionType actionType, Authentication auth) {
@@ -587,20 +705,50 @@ public class ServiceBundleManager extends AbstractResourceBundleManager<ServiceB
         commonMethods.suspensionValidation(serviceBundle, catalogueId,
                 serviceBundle.getService().getResourceOrganisation(), suspend, auth);
         commonMethods.suspendResource(serviceBundle, catalogueId, suspend, auth);
+        // suspend Service's sub-profiles
+        DatasourceBundle datasourceBundle = datasourceService.get(serviceId, catalogueId);
+        if (datasourceBundle != null) {
+            try {
+                commonMethods.suspendResource(datasourceBundle, catalogueId, suspend, auth);
+                datasourceService.update(datasourceBundle, auth);
+            } catch (eu.openminted.registry.core.exception.ResourceNotFoundException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        // suspend Service's extensions
+        HelpdeskBundle helpdeskBundle = helpdeskService.get(serviceId, catalogueId);
+        if (helpdeskBundle != null) {
+            try {
+                commonMethods.suspendResource(helpdeskBundle, catalogueId, suspend, auth);
+                helpdeskService.update(helpdeskBundle, auth);
+            } catch (eu.openminted.registry.core.exception.ResourceNotFoundException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        MonitoringBundle monitoringBundle = monitoringService.get(serviceId, catalogueId);
+        if (monitoringBundle != null) {
+            try {
+                commonMethods.suspendResource(monitoringBundle, catalogueId, suspend, auth);
+                monitoringService.update(monitoringBundle, auth);
+            } catch (eu.openminted.registry.core.exception.ResourceNotFoundException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        // suspend ResourceInteroperabilityRecord
+        ResourceInteroperabilityRecordBundle resourceInteroperabilityRecordBundle = resourceInteroperabilityRecordService.getWithResourceId(serviceId, catalogueId);
+        if (resourceInteroperabilityRecordBundle != null) {
+            try {
+                commonMethods.suspendResource(resourceInteroperabilityRecordBundle, catalogueId, suspend, auth);
+                resourceInteroperabilityRecordService.update(resourceInteroperabilityRecordBundle, auth);
+            } catch (eu.openminted.registry.core.exception.ResourceNotFoundException e) {
+                throw new RuntimeException(e);
+            }
+        }
         return super.update(serviceBundle, auth);
     }
 
-    public List<ServiceBundle> transformDatasourcesToServices(List<?> resourceBundles) {
-        List<ServiceBundle> serviceBundles = new ArrayList<>();
-        for (Object obj : resourceBundles) {
-            if (obj instanceof DatasourceBundle) {
-                ServiceBundle serviceBundle = new ServiceBundle((DatasourceBundle) obj);
-                serviceBundles.add(serviceBundle);
-            } else {
-                serviceBundles.add((ServiceBundle) obj);
-            }
-        }
-        return serviceBundles;
+    public Paging<Bundle<?>> getAllForAdminWithAuditStates(FacetFilter ff, Set<String> auditState) {
+        return commonMethods.getAllForAdminWithAuditStates(ff, auditState, this.resourceType.getName());
     }
 
 }

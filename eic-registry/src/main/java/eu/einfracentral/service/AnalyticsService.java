@@ -5,7 +5,10 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.Cache;
+import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.annotation.PropertySource;
@@ -47,6 +50,9 @@ public class AnalyticsService implements Analytics {
     @Value("${matomoAuthorizationHeader:}")
     private String authorizationHeader;
 
+    @Autowired
+    private CacheManager cacheManager;
+
     @PostConstruct
     void postConstruct() {
         restTemplate = new RestTemplate();
@@ -62,9 +68,10 @@ public class AnalyticsService implements Analytics {
      * @return
      */
     @Scheduled(fixedDelay = (5 * 60 * 1000))
-    @CachePut(value = CACHE_VISITS)
-    public Map<String, Integer> updateVisitsScheduler() {
-        return getServiceVisits();
+    public void updateVisitsScheduler() {
+        Map<String, Integer> visits = getServiceVisits();
+        Cache cache = cacheManager.getCache(CACHE_VISITS);
+        Objects.requireNonNull(cache).put(CACHE_VISITS, visits);
     }
 
     @Cacheable(value = CACHE_VISITS)

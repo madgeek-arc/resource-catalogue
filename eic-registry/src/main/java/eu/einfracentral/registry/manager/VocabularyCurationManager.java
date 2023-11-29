@@ -34,8 +34,7 @@ public class VocabularyCurationManager extends ResourceManager<VocabularyCuratio
     private static final Logger logger = LogManager.getLogger(VocabularyCurationManager.class);
     private final RegistrationMailService registrationMailService;
     private final ProviderService<ProviderBundle, Authentication> providerService;
-    private final ResourceBundleService<ServiceBundle> serviceBundleService;
-    private final ResourceBundleService<DatasourceBundle> datasourceBundleService;
+    private final ServiceBundleService<ServiceBundle> serviceBundleService;
     private final TrainingResourceService<TrainingResourceBundle> trainingResourceService;
     private List<String> browseBy;
     private Map<String, String> labels;
@@ -46,7 +45,7 @@ public class VocabularyCurationManager extends ResourceManager<VocabularyCuratio
     @Autowired
     private FacetLabelService facetLabelService;
 
-    private final AbstractResourceBundleManager<ServiceBundle> abstractServiceBundleManager;
+    private final AbstractServiceBundleManager<ServiceBundle> abstractServiceBundleManager;
 
     @Autowired
     private SearchServiceEIC searchServiceEIC;
@@ -58,14 +57,13 @@ public class VocabularyCurationManager extends ResourceManager<VocabularyCuratio
 
     @Autowired
     public VocabularyCurationManager(@Lazy RegistrationMailService registrationMailService, ProviderService providerService,
-                                     ResourceBundleService<ServiceBundle> serviceBundleService, ResourceBundleService<DatasourceBundle> datasourceBundleService,
+                                     ServiceBundleService<ServiceBundle> serviceBundleService,
                                      TrainingResourceService<TrainingResourceBundle> trainingResourceService,
-                                     AbstractResourceBundleManager<ServiceBundle> abstractServiceBundleManager) {
+                                     AbstractServiceBundleManager<ServiceBundle> abstractServiceBundleManager) {
         super(VocabularyCuration.class);
         this.registrationMailService = registrationMailService;
         this.providerService = providerService;
         this.serviceBundleService = serviceBundleService;
-        this.datasourceBundleService = datasourceBundleService;
         this.trainingResourceService = trainingResourceService;
         this.abstractServiceBundleManager = abstractServiceBundleManager;
     }
@@ -244,12 +242,6 @@ public class VocabularyCurationManager extends ResourceManager<VocabularyCuratio
                 ServiceBundle serviceBundle = serviceBundleService.get(vocabularyCuration.getVocabularyEntryRequests().get(0).getResourceId(), catalogueName);
                 if (!serviceBundle.getService().getResourceOrganisation().equals(providerBundle.getId())){
                     throw new ValidationException(String.format("Provider with id [%s] does not have a Service with id [%s] registered.", providerBundle.getId(), serviceBundle.getId()));
-                }
-                break;
-            case "datasource":
-                DatasourceBundle datasourceBundle = datasourceBundleService.get(vocabularyCuration.getVocabularyEntryRequests().get(0).getResourceId(), catalogueName);
-                if (!datasourceBundle.getDatasource().getResourceOrganisation().equals(providerBundle.getId())){
-                    throw new ValidationException(String.format("Provider with id [%s] does not have a Datasource with id [%s] registered.", providerBundle.getId(), datasourceBundle.getId()));
                 }
                 break;
             case "training_resource":

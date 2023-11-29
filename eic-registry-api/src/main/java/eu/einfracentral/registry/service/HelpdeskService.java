@@ -9,17 +9,31 @@ public interface HelpdeskService<T, U extends Authentication> extends ResourceSe
 
     /**
      * Retrieve {@link HelpdeskBundle} for a catalogue specific resource.
-     * @param serviceId
-     * @param catalogueId
+     * @param serviceId - String Service ID
+     * @param catalogueId - String Catalogue ID
      * @return {@link HelpdeskBundle}
      */
     HelpdeskBundle get(String serviceId, String catalogueId);
 
     /**
-     * Validates ...(TODO write description here)
-     * @param helpdeskBundle
-     * @param resourceType
-     * @return
+     * Validates the given Helpdesk
+     * @param helpdeskBundle - HelpdeskBundle
+     * @param resourceType - String Resource Type
+     * @return {@link HelpdeskBundle}
      */
     HelpdeskBundle validate(HelpdeskBundle helpdeskBundle, String resourceType);
+
+    /**
+     * Creates a Public version of the specific Helpdesk
+     * @param helpdeskBundle - HelpdeskBundle
+     * @param auth - Authentication
+     * @return {@link HelpdeskBundle}
+     */
+    HelpdeskBundle createPublicResource(HelpdeskBundle helpdeskBundle, Authentication auth);
+
+    /**
+     * @param helpdeskBundle - HelpdeskBundle
+     * @param auth           - Authentication
+     */
+    void updateBundle(HelpdeskBundle helpdeskBundle, Authentication auth);
 }

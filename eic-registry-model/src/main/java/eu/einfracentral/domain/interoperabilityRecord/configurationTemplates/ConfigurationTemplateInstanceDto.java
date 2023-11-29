@@ -1,7 +1,7 @@
 package eu.einfracentral.domain.interoperabilityRecord.configurationTemplates;
 
-import net.minidev.json.JSONObject;
 
+import org.json.simple.JSONObject;
 
 public class ConfigurationTemplateInstanceDto {
 

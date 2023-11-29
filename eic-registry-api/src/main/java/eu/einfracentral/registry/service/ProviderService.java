@@ -213,7 +213,7 @@ public interface ProviderService<T, U extends Authentication> extends ResourceSe
      */
     Resource getResource(String id, String catalogueId);
 
-    Paging<ResourceBundle<?>> getRejectedResources(final FacetFilter ff, String resourceType, Authentication auth);
+    Paging<?> getRejectedResources(final FacetFilter ff, String resourceType, Authentication auth);
 
     ProviderBundle createPublicProvider(ProviderBundle providerBundle, Authentication auth);
 

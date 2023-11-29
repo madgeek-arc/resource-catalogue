@@ -109,6 +109,8 @@
             
       <xs:enumeration value="WEBPAGE"/>
             
+      <xs:enumeration value="ALTERNATIVE_IDENTIFIERS"/>
+            
       <xs:enumeration value="DESCRIPTION"/>
             
       <xs:enumeration value="TAGLINE"/>
@@ -130,6 +132,12 @@
       <xs:enumeration value="ACCESS_MODES"/>
             
       <xs:enumeration value="TAGS"/>
+            
+      <xs:enumeration value="HORIZONTAL_SERVICE"/>
+            
+      <xs:enumeration value="SERVICE_CATEGORIES"/>
+            
+      <xs:enumeration value="MARKETPLACE_LOCATIONS"/>
             
       <xs:enumeration value="GEOGRAPHICAL_AVAILABILITIES"/>
             
@@ -267,11 +275,17 @@
             
       <xs:enumeration value="RELATED_PLATFORM"/>
             
+      <xs:enumeration value="SERVICE_CATEGORY"/>
+            
+      <xs:enumeration value="MARKETPLACE_LOCATION"/>
+            
       <xs:enumeration value="CATALOGUE_STATE"/>
             
       <xs:enumeration value="PROVIDER_STATE"/>
             
       <xs:enumeration value="RESOURCE_STATE"/>
+            
+      <xs:enumeration value="DATASOURCE_STATE"/>
             
       <xs:enumeration value="TEMPLATE_STATE"/>
             
@@ -314,8 +328,6 @@
       <xs:enumeration value="IR_STATUS"/>
             
       <xs:enumeration value="IR_EOSC_GUIDELINE_TYPE"/>
-            
-      <xs:enumeration value="SERVICE_TYPE"/>
             
       <xs:enumeration value="CT_PROTOCOL"/>
             

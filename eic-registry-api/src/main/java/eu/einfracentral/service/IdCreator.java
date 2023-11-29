@@ -9,55 +9,48 @@ public interface IdCreator {
     /**
      * Creates id for {@link Provider}
      *
-     * @param provider
-     * @return
+     * @param provider Provider
+     * @return {@link String}
      */
     String createProviderId(Provider provider);
 
     /**
-     * Creates id for {@link ResourceBundle}
+     * Creates id for {@link ServiceBundle}
      *
-     * @param resource
-     * @return
+     * @param serviceBundle Service
+     * @return {@link String}
      */
-    String createServiceId(ResourceBundle<?> resource);
-
-    /**
-     * Creates id for {@link ResourceBundle}
-     *
-     * @param resource
-     * @return
-     */
-    String createDatasourceId(ResourceBundle<?> resource) throws NoSuchAlgorithmException;
+    String createServiceId(ServiceBundle serviceBundle);
 
     /**
      * Creates id for {@link TrainingResourceBundle}
      *
-     * @param trainingResourceBundle
-     * @return
+     * @param trainingResourceBundle TrainingResource
+     * @return {@link String}
      */
     String createTrainingResourceId(TrainingResourceBundle trainingResourceBundle) throws NoSuchAlgorithmException;
 
     /**
      * Creates id for {@link Catalogue}
      *
-     * @param catalogue
-     * @return
+     * @param catalogue Catalogue
+     * @return {@link String}
      */
     String createCatalogueId(Catalogue catalogue);
 
     /**
      * Creates id for {@link InteroperabilityRecord}
      *
-     * @param interoperabilityRecord
-     * @return
+     * @param interoperabilityRecord InteroperabilityRecord
+     * @return {@link String}
      */
     String createInteroperabilityRecordId(InteroperabilityRecord interoperabilityRecord) throws NoSuchAlgorithmException;
 
     /**
-     * *
-     * @param providerName
-     * @return
+     * Strip accents, replace special characters and transform a string to lowercase
+     *
+     * @param string String
+     * @return {@link String}
      */
-    String reformatId(String providerName);
+    String sanitizeString(String string);
 }

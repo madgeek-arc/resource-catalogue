@@ -8,6 +8,7 @@ import io.swagger.annotations.ApiModelProperty;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
+import java.util.Objects;
 
 @XmlType
 @XmlRootElement(namespace = "http://einfracentral.eu")
@@ -38,6 +39,19 @@ public class IdentifierInfo {
     public IdentifierInfo(String identifier, String identifierType) {
         this.identifier = identifier;
         this.identifierType = identifierType;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        IdentifierInfo that = (IdentifierInfo) o;
+        return Objects.equals(identifier, that.identifier) && Objects.equals(identifierType, that.identifierType);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(identifier, identifierType);
     }
 
     @Override

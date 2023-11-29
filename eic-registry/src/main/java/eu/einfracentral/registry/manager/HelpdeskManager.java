@@ -1,12 +1,14 @@
 package eu.einfracentral.registry.manager;
 
 import eu.einfracentral.domain.*;
+import eu.einfracentral.exception.ResourceNotFoundException;
 import eu.einfracentral.exception.ValidationException;
 import eu.einfracentral.registry.service.HelpdeskService;
-import eu.einfracentral.registry.service.ResourceBundleService;
+import eu.einfracentral.registry.service.ServiceBundleService;
 import eu.einfracentral.registry.service.TrainingResourceService;
 import eu.einfracentral.service.RegistrationMailService;
 import eu.einfracentral.service.SecurityService;
+import eu.einfracentral.utils.ObjectUtils;
 import eu.einfracentral.utils.ProviderResourcesCommonMethods;
 import eu.einfracentral.utils.ResourceValidationUtils;
 import eu.openminted.registry.core.domain.Resource;
@@ -15,8 +17,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
-import org.springframework.http.HttpStatus;
-import org.springframework.jms.core.JmsTemplate;
 import org.springframework.security.core.Authentication;
 
 import java.util.List;
@@ -26,24 +26,24 @@ import java.util.UUID;
 public class HelpdeskManager extends ResourceManager<HelpdeskBundle> implements HelpdeskService<HelpdeskBundle, Authentication> {
 
     private static final Logger logger = LogManager.getLogger(HelpdeskManager.class);
-    private final ResourceBundleService<ServiceBundle> serviceBundleService;
-    private final ResourceBundleService<DatasourceBundle> datasourceBundleService;
+    private final ServiceBundleService<ServiceBundle> serviceBundleService;
     private final TrainingResourceService<TrainingResourceBundle> trainingResourceService;
+    private final PublicHelpdeskManager publicHelpdeskManager;
     private final SecurityService securityService;
     private final RegistrationMailService registrationMailService;
     private final ProviderResourcesCommonMethods commonMethods;
 
     @Autowired
-    public HelpdeskManager(ResourceBundleService<ServiceBundle> serviceBundleService,
-                           ResourceBundleService<DatasourceBundle> datasourceBundleService,
+    public HelpdeskManager(ServiceBundleService<ServiceBundle> serviceBundleService,
                            TrainingResourceService<TrainingResourceBundle> trainingResourceService,
-                           JmsTemplate jmsTopicTemplate, @Lazy SecurityService securityService,
+                           PublicHelpdeskManager publicHelpdeskManager,
+                           @Lazy SecurityService securityService,
                            @Lazy RegistrationMailService registrationMailService,
                            ProviderResourcesCommonMethods commonMethods) {
         super(HelpdeskBundle.class);
         this.serviceBundleService = serviceBundleService;
-        this.datasourceBundleService = datasourceBundleService;
         this.trainingResourceService = trainingResourceService;
+        this.publicHelpdeskManager = publicHelpdeskManager;
         this.securityService = securityService;
         this.registrationMailService = registrationMailService;
         this.commonMethods = commonMethods;
@@ -68,12 +68,10 @@ public class HelpdeskManager extends ResourceManager<HelpdeskBundle> implements 
         // check if Resource exists and if User belongs to Resource's Provider Admins
         if (resourceType.equals("service")){
             ResourceValidationUtils.checkIfResourceBundleIsActiveAndApprovedAndNotPublic(resourceId, catalogueId, serviceBundleService, resourceType);
-        } else if (resourceType.equals("datasource")){
-            ResourceValidationUtils.checkIfResourceBundleIsActiveAndApprovedAndNotPublic(resourceId, catalogueId, datasourceBundleService, resourceType);
         } else if (resourceType.equals("training_resource")){
             ResourceValidationUtils.checkIfResourceBundleIsActiveAndApprovedAndNotPublic(resourceId, catalogueId, trainingResourceService, resourceType);
         } else{
-            throw new ValidationException("Field resourceType should be either 'service', 'datasource' or 'training_resource'");
+            throw new ValidationException("Field resourceType should be either 'service' or 'training_resource'");
         }
         return super.validate(helpdeskBundle);
     }
@@ -107,47 +105,71 @@ public class HelpdeskManager extends ResourceManager<HelpdeskBundle> implements 
     }
 
     @Override
-    public HelpdeskBundle update(HelpdeskBundle helpdesk, Authentication auth) {
-        logger.trace("User '{}' is attempting to update the Helpdesk with id '{}'", auth, helpdesk.getId());
+    public HelpdeskBundle update(HelpdeskBundle helpdeskBundle, Authentication auth) {
+        logger.trace("User '{}' is attempting to update the Helpdesk with id '{}'", auth, helpdeskBundle.getId());
 
-        Resource existing = whereID(helpdesk.getId(), true);
-        HelpdeskBundle ex = deserialize(existing);
+        HelpdeskBundle ret = ObjectUtils.clone(helpdeskBundle);
+        Resource existingResource = whereID(ret.getId(), true);
+        HelpdeskBundle existingHelpdesk = deserialize(existingResource);
         // check if there are actual changes in the Helpdesk
-        if (helpdesk.getHelpdesk().equals(ex.getHelpdesk())){
-            throw new ValidationException("There are no changes in the Helpdesk", HttpStatus.OK);
+        if (ret.getHelpdesk().equals(existingHelpdesk.getHelpdesk())) {
+            return ret;
         }
 
-        validate(helpdesk);
-        helpdesk.setMetadata(Metadata.updateMetadata(helpdesk.getMetadata(), User.of(auth).getFullName(), User.of(auth).getEmail()));
-        List<LoggingInfo> loggingInfoList = commonMethods.returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(helpdesk, auth);
+        validate(ret);
+        ret.setMetadata(Metadata.updateMetadata(ret.getMetadata(), User.of(auth).getFullName(), User.of(auth).getEmail()));
+        List<LoggingInfo> loggingInfoList = commonMethods.returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(ret, auth);
         LoggingInfo loggingInfo = commonMethods.createLoggingInfo(auth, LoggingInfo.Types.UPDATE.getKey(),
                 LoggingInfo.ActionType.UPDATED.getKey());
         loggingInfoList.add(loggingInfo);
-        helpdesk.setLoggingInfo(loggingInfoList);
+        ret.setLoggingInfo(loggingInfoList);
 
-        // latestUpdateInfo
-        helpdesk.setLatestUpdateInfo(loggingInfo);
+        // latestLoggingInfo
+        ret.setLatestUpdateInfo(loggingInfo);
+        ret.setLatestOnboardingInfo(commonMethods.setLatestLoggingInfo(loggingInfoList, LoggingInfo.Types.ONBOARD.getKey()));
+        ret.setLatestAuditInfo(commonMethods.setLatestLoggingInfo(loggingInfoList, LoggingInfo.Types.AUDIT.getKey()));
 
-        helpdesk.setActive(ex.isActive());
-        existing.setPayload(serialize(helpdesk));
-        existing.setResourceType(resourceType);
+        ret.setActive(existingHelpdesk.isActive());
+        existingResource.setPayload(serialize(ret));
+        existingResource.setResourceType(resourceType);
 
         // block user from updating serviceId
-        if (!helpdesk.getHelpdesk().getServiceId().equals(ex.getHelpdesk().getServiceId()) && !securityService.hasRole(auth, "ROLE_ADMIN")){
+        if (!ret.getHelpdesk().getServiceId().equals(existingHelpdesk.getHelpdesk().getServiceId()) && !securityService.hasRole(auth, "ROLE_ADMIN")){
             throw new ValidationException("You cannot change the Service Id with which this Helpdesk is related");
         }
 
+        resourceService.updateResource(existingResource);
+        logger.debug("Updating Helpdesk: {}", ret);
+
+        registrationMailService.sendEmailsForHelpdeskExtension(ret, "Resource", "put");
+
+        return ret;
+    }
+
+    public void updateBundle(HelpdeskBundle helpdeskBundle, Authentication auth) {
+        logger.trace("User '{}' is attempting to update the Helpdesk: {}", auth, helpdeskBundle);
+
+        Resource existing = getResource(helpdeskBundle.getId());
+        if (existing == null) {
+            throw new ResourceNotFoundException(
+                    String.format("Could not update Helpdesk with id '%s' because it does not exist",
+                            helpdeskBundle.getId()));
+        }
+
+        existing.setPayload(serialize(helpdeskBundle));
+        existing.setResourceType(resourceType);
+
         resourceService.updateResource(existing);
-        logger.debug("Updating Helpdesk: {}", helpdesk);
-
-        registrationMailService.sendEmailsForHelpdeskExtension(helpdesk, "Resource", "put");
-
-        return helpdesk;
     }
 
     @Override
     public void delete(HelpdeskBundle helpdesk) {
         super.delete(helpdesk);
         logger.debug("Deleting Helpdesk: {}", helpdesk);
+    }
+
+    public HelpdeskBundle createPublicResource(HelpdeskBundle helpdeskBundle, Authentication auth) {
+        publicHelpdeskManager.add(helpdeskBundle, auth);
+        return helpdeskBundle;
     }
 }

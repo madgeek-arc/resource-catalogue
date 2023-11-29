@@ -6,7 +6,7 @@ import eu.einfracentral.exception.ResourceException;
 import eu.einfracentral.exception.ValidationException;
 import eu.einfracentral.registry.service.PendingResourceService;
 import eu.einfracentral.registry.service.ProviderService;
-import eu.einfracentral.registry.service.ResourceBundleService;
+import eu.einfracentral.registry.service.ServiceBundleService;
 import eu.einfracentral.service.GenericResourceService;
 import eu.einfracentral.service.IdCreator;
 import eu.openminted.registry.core.domain.FacetFilter;
@@ -29,15 +29,13 @@ import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
 @RestController
-@RequestMapping({"pendingResource", "pendingService"})
-@Api(description = "Operations for Pending Resources/Services", tags = {"pending-resource-controller"})
+@RequestMapping({ "pendingService"})
+@Api(description = "Operations for Pending Services", tags = {"pending-resource-controller"})
 public class PendingServiceController extends ResourceController<ServiceBundle, Authentication> {
 
     private static final Logger logger = LogManager.getLogger(PendingServiceController.class);
     private final PendingResourceService<ServiceBundle> pendingServiceManager;
-    private final PendingResourceService<DatasourceBundle> pendingDatasourceManager;
-    private final ResourceBundleService<ServiceBundle> serviceBundleService;
-    private final ResourceBundleService<ServiceBundle> resourceBundleService;
+    private final ServiceBundleService<ServiceBundle> serviceBundleService;
     private final ProviderService<ProviderBundle, Authentication> providerService;
     private GenericResourceService genericResourceService;
     private final IdCreator idCreator;
@@ -47,17 +45,13 @@ public class PendingServiceController extends ResourceController<ServiceBundle, 
 
     @Autowired
     PendingServiceController(PendingResourceService<ServiceBundle> pendingServiceManager,
-                             PendingResourceService<DatasourceBundle> pendingDatasourceManager,
-                             ResourceBundleService<ServiceBundle> serviceBundleService,
-                             ResourceBundleService<ServiceBundle> resourceBundleService,
+                             ServiceBundleService<ServiceBundle> serviceBundleService,
                              ProviderService<ProviderBundle, Authentication> providerService,
                              GenericResourceService genericResourceService,
                              IdCreator idCreator) {
         super(pendingServiceManager);
         this.pendingServiceManager = pendingServiceManager;
-        this.pendingDatasourceManager = pendingDatasourceManager;
         this.serviceBundleService = serviceBundleService;
-        this.resourceBundleService = resourceBundleService;
         this.providerService = providerService;
         this.genericResourceService = genericResourceService;
         this.idCreator = idCreator;
@@ -72,29 +66,19 @@ public class PendingServiceController extends ResourceController<ServiceBundle, 
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
-    @GetMapping(path = "/resource/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @GetMapping(path = "/service/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<?> getService(@PathVariable String id) {
-        try {
-            return new ResponseEntity<>(pendingServiceManager.get(id).getService(), HttpStatus.OK);
-        } catch (ResourceException | eu.einfracentral.exception.ResourceNotFoundException e) {
-            return new ResponseEntity<>(pendingDatasourceManager.get(id).getDatasource(), HttpStatus.OK);
-        }
-    }
-
-    @GetMapping(path = "/rich/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
-    public ResponseEntity<RichResource> getPendingRich(@PathVariable("id") String id, Authentication auth) {
-        return new ResponseEntity<>((RichResource) pendingServiceManager.getPendingRich(id, auth), HttpStatus.OK);
+        return new ResponseEntity<>(pendingServiceManager.get(id).getService(), HttpStatus.OK);
     }
 
     @Browse
     @GetMapping(path = "/byProvider/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isProviderAdmin(#auth,#id,true)")
     public ResponseEntity<Paging<?>> getProviderPendingServices(@ApiIgnore @RequestParam MultiValueMap<String, Object> allRequestParams,
-                                                                @RequestParam(defaultValue = "pending_service", name = "type") String type,
                                                                 @PathVariable String id, @ApiIgnore Authentication auth) {
-        FacetFilter ff = resourceBundleService.createFacetFilterForFetchingServicesAndDatasources(allRequestParams, catalogueName, type);
+        FacetFilter ff = serviceBundleService.createFacetFilterForFetchingServices(allRequestParams, catalogueName);
         ff.addFilter("resource_organisation", id);
-        ff.setResourceType("resourceTypes");
+        ff.setResourceType("pending_service");
         Paging<?> paging = genericResourceService.getResults(ff);
         return ResponseEntity.ok(paging);
     }
@@ -164,7 +148,7 @@ public class PendingServiceController extends ResourceController<ServiceBundle, 
 
         try { // check if service already exists
             if (service.getId() == null || "".equals(service.getId())) { // if service id is not given, create it
-                service.setId(idCreator.createServiceId(new ResourceBundle<>(service)));
+                service.setId(idCreator.createServiceId(new ServiceBundle(service)));
             }
             serviceBundle = this.pendingServiceManager.get(service.getId());
         } catch (ResourceException | eu.einfracentral.exception.ResourceNotFoundException e) {

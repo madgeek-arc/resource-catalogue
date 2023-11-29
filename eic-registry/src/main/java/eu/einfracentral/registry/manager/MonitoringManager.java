@@ -4,13 +4,15 @@ import com.google.gson.JsonArray;
 import eu.einfracentral.domain.*;
 import eu.einfracentral.dto.MonitoringStatus;
 import eu.einfracentral.dto.ServiceType;
+import eu.einfracentral.exception.ResourceNotFoundException;
 import eu.einfracentral.exception.ValidationException;
-import eu.einfracentral.registry.service.ResourceBundleService;
+import eu.einfracentral.registry.service.ServiceBundleService;
 import eu.einfracentral.registry.service.MonitoringService;
 import eu.einfracentral.registry.service.TrainingResourceService;
 import eu.einfracentral.service.RegistrationMailService;
 import eu.einfracentral.service.SecurityService;
 import eu.einfracentral.utils.CreateArgoGrnetHttpRequest;
+import eu.einfracentral.utils.ObjectUtils;
 import eu.einfracentral.utils.ProviderResourcesCommonMethods;
 import eu.einfracentral.utils.ResourceValidationUtils;
 import eu.openminted.registry.core.domain.Resource;
@@ -21,8 +23,6 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
-import org.springframework.http.*;
-import org.springframework.jms.core.JmsTemplate;
 import org.springframework.security.core.Authentication;
 
 import java.util.ArrayList;
@@ -34,9 +34,9 @@ import java.util.UUID;
 public class MonitoringManager extends ResourceManager<MonitoringBundle> implements MonitoringService<MonitoringBundle, Authentication> {
 
     private static final Logger logger = LogManager.getLogger(MonitoringManager.class);
-    private final ResourceBundleService<ServiceBundle> serviceBundleService;
-    private final ResourceBundleService<DatasourceBundle> datasourceBundleService;
+    private final ServiceBundleService<ServiceBundle> serviceBundleService;
     private final TrainingResourceService<TrainingResourceBundle> trainingResourceService;
+    private final PublicMonitoringManager publicMonitoringManager;
     private final SecurityService securityService;
     private final RegistrationMailService registrationMailService;
     private final ProviderResourcesCommonMethods commonMethods;
@@ -47,16 +47,16 @@ public class MonitoringManager extends ResourceManager<MonitoringBundle> impleme
     private String monitoringServiceTypes;
 
 
-    public MonitoringManager(ResourceBundleService<ServiceBundle> serviceBundleService,
-                             ResourceBundleService<DatasourceBundle> datasourceBundleService,
+    public MonitoringManager(ServiceBundleService<ServiceBundle> serviceBundleService,
                              TrainingResourceService<TrainingResourceBundle> trainingResourceService,
+                             PublicMonitoringManager publicMonitoringManager,
                              @Lazy SecurityService securityService,
                              @Lazy RegistrationMailService registrationMailService,
                              ProviderResourcesCommonMethods commonMethods) {
         super(MonitoringBundle.class);
         this.serviceBundleService = serviceBundleService;
-        this.datasourceBundleService = datasourceBundleService;
         this.trainingResourceService = trainingResourceService;
+        this.publicMonitoringManager = publicMonitoringManager;
         this.securityService = securityService;
         this.registrationMailService = registrationMailService;
         this.commonMethods = commonMethods;
@@ -81,8 +81,6 @@ public class MonitoringManager extends ResourceManager<MonitoringBundle> impleme
         // check if Resource exists and if User belongs to Resource's Provider Admins
         if (resourceType.equals("service")){
             ResourceValidationUtils.checkIfResourceBundleIsActiveAndApprovedAndNotPublic(resourceId, catalogueId, serviceBundleService, resourceType);
-        } else if (resourceType.equals("datasource")){
-            ResourceValidationUtils.checkIfResourceBundleIsActiveAndApprovedAndNotPublic(resourceId, catalogueId, datasourceBundleService, resourceType);
         } else if (resourceType.equals("training_resource")){
             ResourceValidationUtils.checkIfResourceBundleIsActiveAndApprovedAndNotPublic(resourceId, catalogueId, trainingResourceService, resourceType);
         } else{
@@ -123,45 +121,64 @@ public class MonitoringManager extends ResourceManager<MonitoringBundle> impleme
     }
 
     @Override
-    public MonitoringBundle update(MonitoringBundle monitoring, Authentication auth) {
-        logger.trace("User '{}' is attempting to update the Monitoring with id '{}'", auth, monitoring.getId());
+    public MonitoringBundle update(MonitoringBundle monitoringBundle, Authentication auth) {
+        logger.trace("User '{}' is attempting to update the Monitoring with id '{}'", auth, monitoringBundle.getId());
 
-        Resource existing = whereID(monitoring.getId(), true);
-        MonitoringBundle ex = deserialize(existing);
+        MonitoringBundle ret = ObjectUtils.clone(monitoringBundle);
+        Resource existingResource = whereID(ret.getId(), true);
+        MonitoringBundle existingMonitoring = deserialize(existingResource);
         // check if there are actual changes in the Monitoring
-        if (monitoring.getMonitoring().equals(ex.getMonitoring())){
-            throw new ValidationException("There are no changes in the Monitoring", HttpStatus.OK);
+        if (ret.getMonitoring().equals(existingMonitoring.getMonitoring())) {
+            return ret;
         }
 
-        validate(monitoring);
-        monitoring.setMetadata(Metadata.updateMetadata(monitoring.getMetadata(), User.of(auth).getFullName(), User.of(auth).getEmail()));
-        List<LoggingInfo> loggingInfoList = commonMethods.returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(monitoring, auth);
+        validate(ret);
+        ret.setMetadata(Metadata.updateMetadata(ret.getMetadata(), User.of(auth).getFullName(), User.of(auth).getEmail()));
+        List<LoggingInfo> loggingInfoList = commonMethods.returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(ret, auth);
         LoggingInfo loggingInfo = commonMethods.createLoggingInfo(auth, LoggingInfo.Types.UPDATE.getKey(),
                 LoggingInfo.ActionType.UPDATED.getKey());
         loggingInfoList.add(loggingInfo);
-        monitoring.setLoggingInfo(loggingInfoList);
+        ret.setLoggingInfo(loggingInfoList);
 
-        // latestUpdateInfo
-        monitoring.setLatestUpdateInfo(loggingInfo);
+        // latestLoggingInfo
+        ret.setLatestUpdateInfo(loggingInfo);
+        ret.setLatestOnboardingInfo(commonMethods.setLatestLoggingInfo(loggingInfoList, LoggingInfo.Types.ONBOARD.getKey()));
+        ret.setLatestAuditInfo(commonMethods.setLatestLoggingInfo(loggingInfoList, LoggingInfo.Types.AUDIT.getKey()));
 
         // default monitoredBy value -> EOSC
-        monitoring.getMonitoring().setMonitoredBy("monitored_by-eosc");
+        ret.getMonitoring().setMonitoredBy("monitored_by-eosc");
 
-        monitoring.setActive(ex.isActive());
-        existing.setPayload(serialize(monitoring));
-        existing.setResourceType(resourceType);
+        ret.setActive(existingMonitoring.isActive());
+        existingResource.setPayload(serialize(ret));
+        existingResource.setResourceType(resourceType);
 
         // block user from updating serviceId
-        if (!monitoring.getMonitoring().getServiceId().equals(ex.getMonitoring().getServiceId()) && !securityService.hasRole(auth, "ROLE_ADMIN")){
+        if (!ret.getMonitoring().getServiceId().equals(existingMonitoring.getMonitoring().getServiceId()) && !securityService.hasRole(auth, "ROLE_ADMIN")){
             throw new ValidationException("You cannot change the Service Id with which this Monitoring is related");
         }
 
+        resourceService.updateResource(existingResource);
+        logger.debug("Updating Monitoring: {}", ret);
+
+        registrationMailService.sendEmailsForMonitoringExtension(ret, "Resource", "put");
+
+        return ret;
+    }
+
+    public void updateBundle(MonitoringBundle monitoringBundle, Authentication auth) {
+        logger.trace("User '{}' is attempting to update the Monitoring: {}", auth, monitoringBundle);
+
+        Resource existing = getResource(monitoringBundle.getId());
+        if (existing == null) {
+            throw new ResourceNotFoundException(
+                    String.format("Could not update Monitoring with id '%s' because it does not exist",
+                            monitoringBundle.getId()));
+        }
+
+        existing.setPayload(serialize(monitoringBundle));
+        existing.setResourceType(resourceType);
+
         resourceService.updateResource(existing);
-        logger.debug("Updating Monitoring: {}", monitoring);
-
-        registrationMailService.sendEmailsForMonitoringExtension(monitoring, "Resource", "put");
-
-        return monitoring;
     }
 
     @Override
@@ -234,5 +251,10 @@ public class MonitoringManager extends ResourceManager<MonitoringBundle> impleme
             monitoringStatuses.add(monitoringStatus);
         }
         return monitoringStatuses;
+    }
+
+    public MonitoringBundle createPublicResource(MonitoringBundle monitoringBundle, Authentication auth) {
+        publicMonitoringManager.add(monitoringBundle, auth);
+        return monitoringBundle;
     }
 }

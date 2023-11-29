@@ -1,17 +1,21 @@
 package eu.einfracentral.utils;
 
 import org.apache.log4j.Logger;
-import org.piwik.java.tracking.PiwikRequest;
-import org.piwik.java.tracking.PiwikTracker;
+import org.matomo.java.tracking.MatomoRequest;
+import org.matomo.java.tracking.MatomoTracker;
+import org.matomo.java.tracking.TrackerConfiguration;
+import org.matomo.java.tracking.servlet.JavaxHttpServletWrapper;
+import org.matomo.java.tracking.servlet.ServletMatomoRequest;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.AsyncHandlerInterceptor;
 
+import java.net.URI;
+
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.net.URL;
 
 @Component
 public class MatomoInterceptor implements AsyncHandlerInterceptor {
@@ -24,12 +28,12 @@ public class MatomoInterceptor implements AsyncHandlerInterceptor {
     @Value("${apitracking.matomo.host:#{null}}")
     private String matomoUrl;
 
-    private PiwikTracker piwikTracker = null;
+    private MatomoTracker matomoTracker = null;
 
     @PostConstruct
     public void init() {
         if (matomoUrl != null && !"".equals(matomoUrl)) {
-            this.piwikTracker = new PiwikTracker(matomoUrl);
+            this.matomoTracker = new MatomoTracker(TrackerConfiguration.builder().apiEndpoint(URI.create(matomoUrl)).build());
             if (siteId == null) {
                 logger.warn("'apitracking.matomo.site' is undefined. Using default value 1");
                 siteId = 1;
@@ -40,18 +44,22 @@ public class MatomoInterceptor implements AsyncHandlerInterceptor {
     @Override
     public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) throws Exception {
 
-        if (piwikTracker != null) {
+        if (matomoTracker != null) {
 
             if (request.getHeader("Referer") == null) {
                 logger.debug("Referer is null. That probably means that the call did not come from the portal. Logging!");
 
-                PiwikRequest piwikRequest = new PiwikRequest(siteId, new URL(request.getRequestURL().toString()));
+                MatomoRequest matomoRequest = ServletMatomoRequest.fromServletRequest(
+                        JavaxHttpServletWrapper.fromHttpServletRequest(request))
+                        .siteId(siteId)
+                        .actionUrl(request.getRequestURL().toString())
+                        .build();
 
-                piwikRequest.setActionName(request.getRequestURI());
-                piwikRequest.setUserId(SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString());
-                piwikRequest.setReferrerUrl(null);
+                matomoRequest.setActionName(request.getRequestURI());
+                matomoRequest.setUserId(SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString());
+                matomoRequest.setReferrerUrl(null);
 
-                piwikTracker.sendRequestAsync(piwikRequest);
+                matomoTracker.sendRequestAsync(matomoRequest);
             } else {
                 logger.debug("Referer is not null. Ignoring!");
             }

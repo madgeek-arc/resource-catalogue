@@ -97,7 +97,7 @@ public class PublicResourceInteroperabilityRecordManager extends AbstractPublicR
 
         ret.setIdentifiers(published.getIdentifiers());
         ret.setId(published.getId());
-        ret.setMetadata(published.getMetadata());
+        ret.getMetadata().setPublished(true);
         logger.info(String.format("Updating public ResourceInteroperabilityRecordBundle with id [%s]", ret.getId()));
         ret = super.update(ret, null);
         jmsService.convertAndSendTopic("resource_interoperability_record.update", ret);

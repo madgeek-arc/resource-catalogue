@@ -36,6 +36,13 @@
       "type": "java.lang.String"
     },
     {
+      "multivalued": true,
+      "name": "alternative_identifiers_values",
+      "label": "Alternative Identifier Value",
+      "path": "//*[local-name()='alternativeIdentifiers']/*[local-name()='alternativeIdentifier']/*[local-name()='value']/text()",
+      "type": "java.lang.String"
+    },
+    {
       "multivalued": false,
       "name": "registeredBy",
       "path": "//*[local-name()='metadata']/*[local-name()='registeredBy']/text()",
@@ -72,17 +79,27 @@
       "type": "java.lang.String"
     },
     {
-      "multivalued": true,
-      "name": "alternative_identifiers_types",
-      "label": "Alternative Identifier Type",
-      "path": "//*[local-name()='identifiers']/*[local-name()='alternativeIdentifiers']/*[local-name()='alternativeIdentifier']/*[local-name()='type']/text()",
+      "multivalued": false,
+      "name": "latestAuditActionType",
+      "path": "//*[local-name()='latestAuditInfo']/*[local-name()='actionType']/text()",
       "type": "java.lang.String"
     },
     {
-      "multivalued": true,
-      "name": "alternative_identifiers_values",
-      "label": "Alternative Identifier Value",
-      "path": "//*[local-name()='identifiers']/*[local-name()='alternativeIdentifiers']/*[local-name()='alternativeIdentifier']/*[local-name()='value']/text()",
+      "multivalued": false,
+      "name": "latestAuditDate",
+      "path": "//*[local-name()='latestAuditInfo']/*[local-name()='date']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
+      "name": "latestAuditType",
+      "path": "//*[local-name()='latestAuditInfo']/*[local-name()='type']/text()",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
+      "name": "latestAuditUserEmail",
+      "path": "//*[local-name()='latestAuditInfo']/*[local-name()='userEmail']/text()",
       "type": "java.lang.String"
     },
     {
@@ -161,5 +178,5 @@
   "properties": {
     "class": "eu.einfracentral.domain.InteroperabilityRecord"
   },
-  "schemaUrl": "https://raw.githubusercontent.com/madgeek-arc/resource-catalogue/master/eic-registry-model/src/main/resources/schema1.xsd"
+  "schemaUrl": "https://raw.githubusercontent.com/madgeek-arc/resource-catalogue/develop/eic-registry-model/src/main/resources/schema1.xsd"
 }

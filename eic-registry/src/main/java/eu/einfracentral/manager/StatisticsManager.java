@@ -69,9 +69,6 @@ public class StatisticsManager implements StatisticsService {
     private final VocabularyService vocabularyService;
     private final DataSource dataSource;
 
-    @org.springframework.beans.factory.annotation.Value("${platform.root:}")
-    String url;
-
     @org.springframework.beans.factory.annotation.Value("${elastic.index.max_result_window:10000}")
     private int maxQuantity;
 

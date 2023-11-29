@@ -1,10 +1,9 @@
 package eu.einfracentral.controllers.registry;
 
 import eu.einfracentral.annotations.Browse;
-import eu.einfracentral.domain.DatasourceBundle;
 import eu.einfracentral.domain.Metadata;
 import eu.einfracentral.domain.ServiceBundle;
-import eu.einfracentral.registry.service.ResourceBundleService;
+import eu.einfracentral.registry.service.ServiceBundleService;
 import eu.einfracentral.service.GenericResourceService;
 import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.domain.Paging;
@@ -25,21 +24,18 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping({"infraService", "serviceBundle"})
-@Api(value = "Get Information about a Service")
+@RequestMapping({"serviceBundle"})
+@Api(value = "Get Information about a Service Bundle")
 public class ServiceBundleController {
 
     private static final Logger logger = LogManager.getLogger(ServiceBundleController.class.getName());
-    private final ResourceBundleService<ServiceBundle> serviceBundleService;
-    private final ResourceBundleService<DatasourceBundle> datasourceBundleService;
+    private final ServiceBundleService<ServiceBundle> serviceBundleService;
     private final GenericResourceService genericResourceService;
 
     @Autowired
-    ServiceBundleController(ResourceBundleService<ServiceBundle> serviceBundleService,
-                            ResourceBundleService<DatasourceBundle> datasourceBundleService,
+    ServiceBundleController(ServiceBundleService<ServiceBundle> serviceBundleService,
                             GenericResourceService genericResourceService) {
         this.serviceBundleService = serviceBundleService;
-        this.datasourceBundleService = datasourceBundleService;
         this.genericResourceService = genericResourceService;
     }
 
@@ -77,11 +73,7 @@ public class ServiceBundleController {
     public ResponseEntity<?> get(@PathVariable("id") String id,
                                  @RequestParam(defaultValue = "${project.catalogue.name}", name = "catalogue_id") String catalogueId,
                                  @ApiIgnore Authentication auth) {
-        try {
-            return new ResponseEntity<>(serviceBundleService.get(id, catalogueId), HttpStatus.OK);
-        } catch (eu.einfracentral.exception.ResourceNotFoundException e) {
-            return new ResponseEntity<>(datasourceBundleService.get(id, catalogueId), HttpStatus.OK);
-        }
+        return new ResponseEntity<>(serviceBundleService.get(id, catalogueId), HttpStatus.OK);
     }
 
     @PostMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
@@ -112,10 +104,9 @@ public class ServiceBundleController {
     @GetMapping(path = "all", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     public ResponseEntity<Paging<?>> getAll(@RequestParam(defaultValue = "all", name = "catalogue_id") String catalogueId,
-                                            @RequestParam(defaultValue = "service", name = "type") String type,
                                             @ApiIgnore @RequestParam Map<String, Object> allRequestParams,
                                             @ApiIgnore Authentication authentication) {
-        FacetFilter ff = serviceBundleService.createFacetFilterForFetchingServicesAndDatasources(allRequestParams, catalogueId, type);
+        FacetFilter ff = serviceBundleService.createFacetFilterForFetchingServices(allRequestParams, catalogueId);
         serviceBundleService.updateFacetFilterConsideringTheAuthorization(ff, authentication);
         Paging<?> paging = genericResourceService.getResults(ff);
         return ResponseEntity.ok(paging);

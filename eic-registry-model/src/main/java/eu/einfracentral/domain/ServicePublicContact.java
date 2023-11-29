@@ -79,6 +79,19 @@ public class ServicePublicContact {
     }
 
     @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ServicePublicContact that = (ServicePublicContact) o;
+        return Objects.equals(firstName, that.firstName) && Objects.equals(lastName, that.lastName) && Objects.equals(email, that.email) && Objects.equals(phone, that.phone) && Objects.equals(position, that.position) && Objects.equals(organisation, that.organisation);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(firstName, lastName, email, phone, position, organisation);
+    }
+
+    @Override
     public String toString() {
         return "ServiceMainContact{" +
                 "firstName='" + firstName + '\'' +
@@ -136,18 +149,5 @@ public class ServicePublicContact {
 
     public void setOrganisation(String organisation) {
         this.organisation = organisation;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        ServicePublicContact that = (ServicePublicContact) o;
-        return Objects.equals(firstName, that.firstName) && Objects.equals(lastName, that.lastName) && Objects.equals(email, that.email) && Objects.equals(phone, that.phone) && Objects.equals(position, that.position) && Objects.equals(organisation, that.organisation);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(firstName, lastName, email, phone, position, organisation);
     }
 }
