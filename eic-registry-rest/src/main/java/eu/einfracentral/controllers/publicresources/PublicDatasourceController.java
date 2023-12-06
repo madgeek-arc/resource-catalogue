@@ -64,7 +64,7 @@ public class PublicDatasourceController {
             }
         }
         if (datasourceBundle.getMetadata().isPublished() && datasourceBundle.isActive()
-                && datasourceBundle.getStatus().equals("approved resource")) {
+                && datasourceBundle.getStatus().equals("approved datasource")) {
             return new ResponseEntity<>(datasourceBundle.getDatasource(), HttpStatus.OK);
         }
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(gson.toJson("You cannot view the specific Datasource."));
@@ -87,7 +87,7 @@ public class PublicDatasourceController {
             }
         }
         if (datasourceBundle.getMetadata().isPublished() && datasourceBundle.isActive()
-                && datasourceBundle.getStatus().equals("approved resource")) {
+                && datasourceBundle.getStatus().equals("approved datasource")) {
             return new ResponseEntity<>(datasourceBundle, HttpStatus.OK);
         }
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(gson.toJson("You cannot view the specific Datasource."));
@@ -110,7 +110,7 @@ public class PublicDatasourceController {
             logger.info("Getting all published Datasources for Admin/Epot");
         } else {
             ff.addFilter("active", true);
-            ff.addFilter("status", "approved resource");
+            ff.addFilter("status", "approved datasource");
         }
         List<Datasource> datasourceList = new LinkedList<>();
         Paging<DatasourceBundle> datasourceBundlePaging = publicDatasourceManager.getAll(ff, auth);
@@ -139,7 +139,7 @@ public class PublicDatasourceController {
             logger.info("Getting all published Datasources for Admin/Epot");
         } else {
             ff.addFilter("active", true);
-            ff.addFilter("status", "approved resource");
+            ff.addFilter("status", "approved datasource");
         }
         Paging<DatasourceBundle> datasourceBundlePaging = datasourceService.getAll(ff, auth);
         List<DatasourceBundle> datasourceBundleList = new LinkedList<>(datasourceBundlePaging.getResults());
