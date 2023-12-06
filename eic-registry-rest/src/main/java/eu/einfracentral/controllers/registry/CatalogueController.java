@@ -252,7 +252,7 @@ public class CatalogueController {
     @GetMapping(path = "{catalogueId}/provider/all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity<Paging<Provider>> getAllCatalogueProviders(@ApiIgnore @RequestParam Map<String, Object> allRequestParams, @PathVariable("catalogueId") String catalogueId, @ApiIgnore Authentication auth) {
         FacetFilter ff = FacetFilterUtils.createFacetFilter(allRequestParams);
-        ff.addFilter("published", "false");
+        ff.addFilter("published", false);
         if (!catalogueId.equals("all")) {
             ff.addFilter("catalogue_id", catalogueId);
         }

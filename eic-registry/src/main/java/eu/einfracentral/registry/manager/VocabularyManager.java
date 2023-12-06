@@ -313,7 +313,7 @@ public class VocabularyManager extends ResourceManager<Vocabulary> implements Vo
         ff.setQuantity(maxQuantity);
         ff.addFilter("active", true);
         ff.addFilter("status", "approved provider");
-        ff.addFilter("published", "false");
+        ff.addFilter("published", false);
         List<ProviderBundle> allActiveAndApprovedProviders = providerManager.getAll(ff, securityService.getAdminAccess()).getResults();
         List<String> providerNames = new ArrayList<>();
         for (ProviderBundle providerBundle : allActiveAndApprovedProviders) {
