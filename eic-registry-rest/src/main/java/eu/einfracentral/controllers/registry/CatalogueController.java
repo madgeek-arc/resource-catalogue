@@ -230,6 +230,19 @@ public class CatalogueController {
         return catalogueManager.suspend(catalogueId, suspend, auth);
     }
 
+    @PatchMapping(path = "auditCatalogue/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
+    public ResponseEntity<CatalogueBundle> auditCatalogue(@PathVariable("id") String id,
+                                                          @RequestParam(required = false) String comment,
+                                                          @RequestParam LoggingInfo.ActionType actionType,
+                                                          @ApiIgnore Authentication auth) {
+        CatalogueBundle catalogue = catalogueManager.auditCatalogue(id, comment, actionType, auth);
+        logger.info("User '{}-{}' audited Catalogue '{}'-'{}' with [actionType: {}]",
+                User.of(auth).getFullName(), User.of(auth).getEmail(),
+                catalogue.getCatalogue().getId(), catalogue.getCatalogue().getName(), actionType);
+        return new ResponseEntity<>(catalogue, HttpStatus.OK);
+    }
+
     //SECTION: PROVIDER
     @ApiOperation(value = "Returns the Provider of the specific Catalogue with the given id.")
     @GetMapping(path = "{catalogueId}/provider/{providerId}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})

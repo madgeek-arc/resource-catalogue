@@ -181,10 +181,6 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
         // latestOnboardingInfo
         catalogue.setLatestOnboardingInfo(loggingInfoList.get(0));
 
-        if (catalogue.getCatalogue().getParticipatingCountries() != null && !catalogue.getCatalogue().getParticipatingCountries().isEmpty()){
-            catalogue.getCatalogue().setParticipatingCountries(sortCountries(catalogue.getCatalogue().getParticipatingCountries()));
-        }
-
         CatalogueBundle ret;
         ret = super.add(catalogue, null);
         logger.debug("Adding Catalogue: {}", catalogue);
@@ -211,7 +207,6 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
         LoggingInfo loggingInfo = commonMethods.createLoggingInfo(auth, LoggingInfo.Types.UPDATE.getKey(),
                 LoggingInfo.ActionType.UPDATED.getKey(), comment);
         loggingInfoList.add(loggingInfo);
-        ret.getCatalogue().setParticipatingCountries(sortCountries(ret.getCatalogue().getParticipatingCountries()));
         ret.setLoggingInfo(loggingInfoList);
 
         // latestUpdateInfo
@@ -343,11 +338,6 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
                 provider.setUsers(users);
             }
         }
-    }
-
-    private List<String> sortCountries(List<String> countries) {
-        Collections.sort(countries);
-        return countries;
     }
 
     private void adminDifferences(CatalogueBundle updatedCatalogue, CatalogueBundle existingCatalogue) {
@@ -599,6 +589,13 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
         }
 
         return catalogueBundle;
+    }
+
+    public CatalogueBundle auditCatalogue(String catalogueId, String comment, LoggingInfo.ActionType actionType, Authentication auth) {
+        CatalogueBundle catalogue = get(catalogueId);
+        commonMethods.auditResource(catalogue, comment, actionType, auth);
+        logger.info(String.format("Auditing Catalogue [%s]", catalogueId));
+        return super.update(catalogue, auth);
     }
 
     private FacetFilter createFacetFilter(String catalogueId){

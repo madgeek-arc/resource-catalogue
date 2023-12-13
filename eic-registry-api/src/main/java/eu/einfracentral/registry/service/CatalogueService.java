@@ -1,6 +1,8 @@
 package eu.einfracentral.registry.service;
 
 import eu.einfracentral.domain.CatalogueBundle;
+import eu.einfracentral.domain.LoggingInfo;
+import eu.einfracentral.domain.ProviderBundle;
 import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.domain.Paging;
 import org.springframework.security.core.Authentication;
@@ -122,4 +124,14 @@ public interface CatalogueService<T, U extends Authentication> extends ResourceS
      * @return {@link CatalogueBundle}
      */
     CatalogueBundle suspend(String catalogueId, boolean suspend, Authentication auth);
+
+    /**
+     * Audit the Catalogue
+     *
+     * @param id  The ID of the Catalogue
+     * @param actionType Validate or Invalidate action
+     * @param auth Authentication
+     * @return {@link CatalogueBundle}
+     */
+    CatalogueBundle auditCatalogue(String id, String comment, LoggingInfo.ActionType actionType, Authentication auth);
 }
