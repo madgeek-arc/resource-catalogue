@@ -21,6 +21,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
@@ -160,39 +161,11 @@ public class CatalogueController {
     @ApiImplicitParam(name = "suspended", value = "Suspended", defaultValue = "false", dataType = "boolean", paramType = "query")
     @GetMapping(path = "bundle/all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
-    public ResponseEntity<Paging<CatalogueBundle>> getAllCatalogueBundles(@ApiIgnore @RequestParam Map<String, Object> allRequestParams, @ApiIgnore Authentication auth,
-                                                                          @RequestParam(required = false) Set<String> status) {
-        FacetFilter ff = new FacetFilter();
-        if (allRequestParams.get("suspended") != null) {
-            ff.addFilter("suspended", allRequestParams.get("suspended"));
-        }
-        ff.setKeyword(allRequestParams.get("query") != null ? (String) allRequestParams.remove("query") : "");
-        ff.setFrom(allRequestParams.get("from") != null ? Integer.parseInt((String) allRequestParams.remove("from")) : 0);
-        ff.setQuantity(allRequestParams.get("quantity") != null ? Integer.parseInt((String) allRequestParams.remove("quantity")) : 10);
-        Map<String, Object> sort = new HashMap<>();
-        Map<String, Object> order = new HashMap<>();
-        String orderDirection = allRequestParams.get("order") != null ? (String) allRequestParams.remove("order") : "asc";
-        String orderField = allRequestParams.get("orderField") != null ? (String) allRequestParams.remove("orderField") : null;
-        if (orderField != null) {
-            order.put("order", orderDirection);
-            sort.put(orderField, order);
-            ff.setOrderBy(sort);
-        }
-        if (status != null) {
-            ff.addFilter("status", status);
-        }
-        int quantity = ff.getQuantity();
-        int from = ff.getFrom();
-        Paging<CatalogueBundle> retPaging = catalogueManager.getAll(ff, auth);
-        // FIXME: is the following needed?? remove
-        List<Map<String, Object>> records = catalogueManager.createQueryForCatalogueFilters(ff, orderDirection, orderField);
-        List<CatalogueBundle> ret = new ArrayList<>();
-        for (Map<String, Object> record : records) {
-            for (Map.Entry<String, Object> entry : record.entrySet()) {
-                ret.add(catalogueManager.get((String) entry.getValue()));
-            }
-        }
-        return ResponseEntity.ok(catalogueManager.createCorrectQuantityFacets(ret, retPaging, quantity, from));
+    public ResponseEntity<Paging<CatalogueBundle>> getAllCatalogueBundles(@ApiIgnore @RequestParam MultiValueMap<String, Object> allRequestParams) {
+        FacetFilter ff = FacetFilterUtils.createMultiFacetFilter(allRequestParams);
+        ff.setResourceType("catalogue");
+        Paging<CatalogueBundle> paging = genericResourceService.getResults(ff);
+        return ResponseEntity.ok(paging);
     }
 
     @GetMapping(path = "hasAdminAcceptedTerms", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})

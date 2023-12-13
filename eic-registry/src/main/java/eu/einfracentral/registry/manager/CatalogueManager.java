@@ -177,6 +177,7 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
         catalogue.setLoggingInfo(loggingInfoList);
         catalogue.setActive(false);
         catalogue.setStatus(vocabularyService.get("pending catalogue").getId());
+        catalogue.setAuditState(CatalogueBundle.AuditState.NOT_AUDITED.getKey());
 
         // latestOnboardingInfo
         catalogue.setLatestOnboardingInfo(loggingInfoList.get(0));
@@ -215,6 +216,7 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
         ret.setActive(existingCatalogue.isActive());
         ret.setStatus(existingCatalogue.getStatus());
         ret.setSuspended(existingCatalogue.isSuspended());
+        ret.setAuditState(determineAuditState(existingCatalogue.getLoggingInfo()));
         existingResource.setPayload(serialize(ret));
         existingResource.setResourceType(resourceType);
         resourceService.updateResource(existingResource);
@@ -594,9 +596,55 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
     public CatalogueBundle auditCatalogue(String catalogueId, String comment, LoggingInfo.ActionType actionType, Authentication auth) {
         CatalogueBundle catalogue = get(catalogueId);
         commonMethods.auditResource(catalogue, comment, actionType, auth);
+        // TODO: if it works as expected, move below if statements to commonMethods.auditResource() - generalize
+        if (actionType.getKey().equals(LoggingInfo.ActionType.VALID.getKey())) {
+            catalogue.setAuditState(CatalogueBundle.AuditState.VALID.getKey());
+        }
+        if (actionType.getKey().equals(LoggingInfo.ActionType.INVALID.getKey())) {
+            catalogue.setAuditState(CatalogueBundle.AuditState.INVALID_AND_NOT_UPDATED.getKey());
+        }
         logger.info(String.format("Auditing Catalogue [%s]", catalogueId));
         return super.update(catalogue, auth);
     }
+
+    private String determineAuditState(List<LoggingInfo> loggingInfoList) {
+        List<LoggingInfo> sorted = new ArrayList<>(loggingInfoList);
+        sorted.sort(Comparator.comparing(LoggingInfo::getDate).reversed());
+
+        boolean hasBeenAudited = false;
+        boolean hasBeenUpdatedAfterAudit = false;
+        String auditActionType = "";
+
+        for (LoggingInfo loggingInfo : sorted) {
+            if (loggingInfo.getType().equals(LoggingInfo.Types.AUDIT.getKey())) {
+                hasBeenAudited = true;
+                auditActionType = loggingInfo.getActionType();
+                break;
+            }
+        }
+
+        if (hasBeenAudited) {
+            for (LoggingInfo info : sorted.subList(0, sorted.indexOf(new LoggingInfo()))) {
+                if (info.getType().equals(LoggingInfo.Types.UPDATE.getKey())) {
+                    hasBeenUpdatedAfterAudit = true;
+                    break;
+                }
+            }
+        }
+
+        if (!hasBeenAudited) {
+            return CatalogueBundle.AuditState.NOT_AUDITED.getKey();
+        } else if (!hasBeenUpdatedAfterAudit) {
+            return (auditActionType.equals(LoggingInfo.ActionType.INVALID.getKey())) ?
+                    CatalogueBundle.AuditState.INVALID_AND_NOT_UPDATED.getKey() :
+                    CatalogueBundle.AuditState.VALID.getKey();
+        } else {
+            return (auditActionType.equals(LoggingInfo.ActionType.INVALID.getKey())) ?
+                    CatalogueBundle.AuditState.INVALID_AND_UPDATED.getKey() :
+                    CatalogueBundle.AuditState.VALID.getKey();
+        }
+    }
+
 
     private FacetFilter createFacetFilter(String catalogueId){
         FacetFilter ff = new FacetFilter();
