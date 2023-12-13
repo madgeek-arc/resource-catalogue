@@ -216,7 +216,7 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
         ret.setActive(existingCatalogue.isActive());
         ret.setStatus(existingCatalogue.getStatus());
         ret.setSuspended(existingCatalogue.isSuspended());
-        ret.setAuditState(determineAuditState(existingCatalogue.getLoggingInfo()));
+        ret.setAuditState(determineAuditState(ret.getLoggingInfo()));
         existingResource.setPayload(serialize(ret));
         existingResource.setResourceType(resourceType);
         resourceService.updateResource(existingResource);
@@ -610,39 +610,42 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
     private String determineAuditState(List<LoggingInfo> loggingInfoList) {
         List<LoggingInfo> sorted = new ArrayList<>(loggingInfoList);
         sorted.sort(Comparator.comparing(LoggingInfo::getDate).reversed());
-
         boolean hasBeenAudited = false;
         boolean hasBeenUpdatedAfterAudit = false;
         String auditActionType = "";
-
-        for (LoggingInfo loggingInfo : sorted) {
-            if (loggingInfo.getType().equals(LoggingInfo.Types.AUDIT.getKey())) {
+        int auditIndex = -1;
+        for (LoggingInfo loggingInfo : sorted){
+            auditIndex++;
+            if (loggingInfo.getType().equals(LoggingInfo.Types.AUDIT.getKey())){
                 hasBeenAudited = true;
                 auditActionType = loggingInfo.getActionType();
                 break;
             }
         }
-
-        if (hasBeenAudited) {
-            for (LoggingInfo info : sorted.subList(0, sorted.indexOf(new LoggingInfo()))) {
-                if (info.getType().equals(LoggingInfo.Types.UPDATE.getKey())) {
+        // update after audit
+        if (hasBeenAudited){
+            for (int i=0; i<auditIndex; i++){
+                if (sorted.get(i).getType().equals(LoggingInfo.Types.UPDATE.getKey())){
                     hasBeenUpdatedAfterAudit = true;
                     break;
                 }
             }
         }
 
+        String auditState;
         if (!hasBeenAudited) {
-            return CatalogueBundle.AuditState.NOT_AUDITED.getKey();
+            auditState = CatalogueBundle.AuditState.NOT_AUDITED.getKey();
         } else if (!hasBeenUpdatedAfterAudit) {
-            return (auditActionType.equals(LoggingInfo.ActionType.INVALID.getKey())) ?
+            auditState = auditActionType.equals(LoggingInfo.ActionType.INVALID.getKey()) ?
                     CatalogueBundle.AuditState.INVALID_AND_NOT_UPDATED.getKey() :
                     CatalogueBundle.AuditState.VALID.getKey();
         } else {
-            return (auditActionType.equals(LoggingInfo.ActionType.INVALID.getKey())) ?
+            auditState = auditActionType.equals(LoggingInfo.ActionType.INVALID.getKey()) ?
                     CatalogueBundle.AuditState.INVALID_AND_UPDATED.getKey() :
                     CatalogueBundle.AuditState.VALID.getKey();
         }
+
+        return auditState;
     }
 
 
