@@ -336,31 +336,32 @@ public class ServiceControllerDeprecated {
 
     // front-end use (Service/Datasource/TR forms)
     @GetMapping(path = {"resourceIdToNameMap"}, produces = {MediaType.APPLICATION_JSON_VALUE})
-    public ResponseEntity<List<eu.einfracentral.dto.Value>> resourceIdToNameMap(String catalogueId) {
+    public ResponseEntity<List<eu.einfracentral.dto.Value>> resourceIdToNameMap(@RequestParam String catalogueId) {
         List<eu.einfracentral.dto.Value> allResources = new ArrayList<>();
         // fetch catalogueId related non-public Resources
-        List<eu.einfracentral.dto.Value> catalogueRelatedServices = serviceBundleService
-                .getAll(createFacetFilter(catalogueId, false), securityService.getAdminAccess()).getResults()
-                .stream().map(ServiceBundle::getService)
-                .map(c -> new eu.einfracentral.dto.Value(c.getId(), c.getResourceOrganisation() + " - " + c.getName()))
+
+        List<eu.einfracentral.dto.Value> catalogueRelatedServices = genericResourceService
+                .getResultsWithoutFacets(createFacetFilter(catalogueId, false, "service")).getResults()
+                .stream().map(serviceBundle -> (ServiceBundle) serviceBundle)
+                .map(c -> new eu.einfracentral.dto.Value(c.getId(), c.getService().getResourceOrganisation() + " - " + c.getService().getName()))
                 .collect(Collectors.toList());
-        List<eu.einfracentral.dto.Value> catalogueRelatedTrainingResources = trainingResourceService
-                .getAll(createFacetFilter(catalogueId, false), securityService.getAdminAccess()).getResults()
-                .stream().map(TrainingResourceBundle::getTrainingResource)
-                .map(c -> new eu.einfracentral.dto.Value(c.getId(), c.getResourceOrganisation() + " - " + c.getTitle()))
+        List<eu.einfracentral.dto.Value> catalogueRelatedTrainingResources = genericResourceService
+                .getResultsWithoutFacets(createFacetFilter(catalogueId, false, "training_resource")).getResults()
+                .stream().map(trainingResourceBundle -> (TrainingResourceBundle) trainingResourceBundle)
+                .map(c -> new eu.einfracentral.dto.Value(c.getId(), c.getTrainingResource().getResourceOrganisation() + " - " + c.getTrainingResource().getTitle()))
                 .collect(Collectors.toList());
         // fetch non-catalogueId related public Resources
-        List<eu.einfracentral.dto.Value> publicServices = serviceBundleService
-                .getAll(createFacetFilter(catalogueId, true), securityService.getAdminAccess()).getResults()
-                .stream().map(ServiceBundle::getService)
-                .filter(c -> !c.getCatalogueId().equals(catalogueId))
-                .map(c -> new eu.einfracentral.dto.Value(c.getId(), c.getResourceOrganisation() + " - " + c.getName()))
+        List<eu.einfracentral.dto.Value> publicServices = genericResourceService
+                .getResultsWithoutFacets(createFacetFilter(catalogueId, true, "service")).getResults()
+                .stream().map(serviceBundle -> (ServiceBundle) serviceBundle)
+                .filter(c -> !c.getService().getCatalogueId().equals(catalogueId))
+                .map(c -> new eu.einfracentral.dto.Value(c.getId(), c.getService().getResourceOrganisation() + " - " + c.getService().getName()))
                 .collect(Collectors.toList());
-        List<eu.einfracentral.dto.Value> publicTrainingResources = trainingResourceService
-                .getAll(createFacetFilter(catalogueId, true), securityService.getAdminAccess()).getResults()
-                .stream().map(TrainingResourceBundle::getTrainingResource)
-                .filter(c -> !c.getCatalogueId().equals(catalogueId))
-                .map(c -> new eu.einfracentral.dto.Value(c.getId(), c.getResourceOrganisation() + " - " + c.getTitle()))
+        List<eu.einfracentral.dto.Value> publicTrainingResources = genericResourceService
+                .getResultsWithoutFacets(createFacetFilter(catalogueId, true, "training_resource")).getResults()
+                .stream().map(trainingResourceBundle -> (TrainingResourceBundle) trainingResourceBundle)
+                .filter(c -> !c.getTrainingResource().getCatalogueId().equals(catalogueId))
+                .map(c -> new eu.einfracentral.dto.Value(c.getId(), c.getTrainingResource().getResourceOrganisation() + " - " + c.getTrainingResource().getTitle()))
                 .collect(Collectors.toList());
 
         allResources.addAll(catalogueRelatedServices);
@@ -372,7 +373,7 @@ public class ServiceControllerDeprecated {
     }
 
     //FIXME: FacetFilters reset after each search.
-    private FacetFilter createFacetFilter(String catalogueId, boolean isPublic) {
+    private FacetFilter createFacetFilter(String catalogueId, boolean isPublic, String resourceType) {
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(10000);
         ff.addFilter("status", "approved resource");
@@ -383,6 +384,7 @@ public class ServiceControllerDeprecated {
             ff.addFilter("catalogue_id", catalogueId);
             ff.addFilter("published", false);
         }
+        ff.setResourceType(resourceType);
         return ff;
     }
 

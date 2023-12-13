@@ -218,6 +218,14 @@ public class GenericManager implements GenericResourceService {
         }
     }
 
+    public <T> Browsing<T>  getResultsWithoutFacets(FacetFilter filter) {
+        try {
+            return convertToBrowsing(searchService.search(filter), filter.getResourceType());
+        } catch (UnknownHostException e) {
+            throw new ServiceException(e);
+        }
+    }
+
     @Override
     public <T> Browsing<T> convertToBrowsing(@NotNull Paging<Resource> paging, String resourceTypeName) {
         Class<?> clazz = getClassFromResourceType(resourceTypeName);
