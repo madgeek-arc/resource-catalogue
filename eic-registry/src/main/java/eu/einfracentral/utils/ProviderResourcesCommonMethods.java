@@ -721,4 +721,45 @@ public class ProviderResourcesCommonMethods {
             }
         }
     }
+
+    public String determineAuditState(List<LoggingInfo> loggingInfoList) {
+        List<LoggingInfo> sorted = new ArrayList<>(loggingInfoList);
+        sorted.sort(Comparator.comparing(LoggingInfo::getDate).reversed());
+        boolean hasBeenAudited = false;
+        boolean hasBeenUpdatedAfterAudit = false;
+        String auditActionType = "";
+        int auditIndex = -1;
+        for (LoggingInfo loggingInfo : sorted){
+            auditIndex++;
+            if (loggingInfo.getType().equals(LoggingInfo.Types.AUDIT.getKey())){
+                hasBeenAudited = true;
+                auditActionType = loggingInfo.getActionType();
+                break;
+            }
+        }
+        // update after audit
+        if (hasBeenAudited){
+            for (int i=0; i<auditIndex; i++){
+                if (sorted.get(i).getType().equals(LoggingInfo.Types.UPDATE.getKey())){
+                    hasBeenUpdatedAfterAudit = true;
+                    break;
+                }
+            }
+        }
+
+        String auditState;
+        if (!hasBeenAudited) {
+            auditState = CatalogueBundle.AuditState.NOT_AUDITED.getKey();
+        } else if (!hasBeenUpdatedAfterAudit) {
+            auditState = auditActionType.equals(LoggingInfo.ActionType.INVALID.getKey()) ?
+                    CatalogueBundle.AuditState.INVALID_AND_NOT_UPDATED.getKey() :
+                    CatalogueBundle.AuditState.VALID.getKey();
+        } else {
+            auditState = auditActionType.equals(LoggingInfo.ActionType.INVALID.getKey()) ?
+                    CatalogueBundle.AuditState.INVALID_AND_UPDATED.getKey() :
+                    CatalogueBundle.AuditState.VALID.getKey();
+        }
+
+        return auditState;
+    }
 }
