@@ -210,9 +210,6 @@ public class CatalogueController {
                                                           @RequestParam LoggingInfo.ActionType actionType,
                                                           @ApiIgnore Authentication auth) {
         CatalogueBundle catalogue = catalogueManager.auditCatalogue(id, comment, actionType, auth);
-        logger.info("User '{}-{}' audited Catalogue '{}'-'{}' with [actionType: {}]",
-                User.of(auth).getFullName(), User.of(auth).getEmail(),
-                catalogue.getCatalogue().getId(), catalogue.getCatalogue().getName(), actionType);
         return new ResponseEntity<>(catalogue, HttpStatus.OK);
     }
 

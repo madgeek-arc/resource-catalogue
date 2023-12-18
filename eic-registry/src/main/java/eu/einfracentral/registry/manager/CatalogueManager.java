@@ -603,7 +603,9 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
         if (actionType.getKey().equals(LoggingInfo.ActionType.INVALID.getKey())) {
             catalogue.setAuditState(CatalogueBundle.AuditState.INVALID_AND_NOT_UPDATED.getKey());
         }
-        logger.info(String.format("Auditing Catalogue [%s]", catalogueId));
+        logger.info("User '{}-{}' audited Catalogue '{}'-'{}' with [actionType: {}]",
+                User.of(auth).getFullName(), User.of(auth).getEmail(),
+                catalogue.getCatalogue().getId(), catalogue.getCatalogue().getName(), actionType);
         return super.update(catalogue, auth);
     }
 
