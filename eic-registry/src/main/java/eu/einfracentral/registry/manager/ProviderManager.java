@@ -826,7 +826,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         FacetFilter facetFilter = new FacetFilter();
         facetFilter.setQuantity(maxQuantity);
         facetFilter.addFilter("status", "approved provider");
-        facetFilter.addFilter("published", "false");
+        facetFilter.addFilter("published", false);
         Browsing<ProviderBundle> providerBrowsing = getAll(facetFilter, auth);
         List<ProviderBundle> providersToBeAudited = new ArrayList<>();
         long todayEpochTime = System.currentTimeMillis();
@@ -1214,5 +1214,23 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         }
 
         return providerBundle;
+    }
+
+    public List<?> getAllProvidersUnderASpecificHLE(String hle, Authentication auth) {
+        FacetFilter ff = new FacetFilter();
+        ff.setQuantity(10000);
+        ff.addFilter("hosting_legal_entity", hle);
+        ff.addFilter("published", false);
+        List<ProviderBundle> providers = getAll(ff, auth).getResults();
+        List<Object> providerResources = new ArrayList<>(providers);
+        for (ProviderBundle providerBundle : providers) {
+            providerResources.addAll(serviceBundleService.getResourceBundles(providerBundle.getProvider().getCatalogueId(),
+                    providerBundle.getId(), auth).getResults());
+            providerResources.addAll(trainingResourceService.getResourceBundles(providerBundle.getProvider().
+                            getCatalogueId(), providerBundle.getId(), auth).getResults());
+            providerResources.addAll(interoperabilityRecordService.getResourceBundles(providerBundle.getProvider().
+                    getCatalogueId(), providerBundle.getId(), auth).getResults());
+        }
+        return providerResources;
     }
 }

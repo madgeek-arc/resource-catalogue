@@ -2,6 +2,7 @@ package eu.einfracentral.registry.service;
 
 import eu.einfracentral.domain.DatasourceBundle;
 import eu.openminted.registry.core.domain.FacetFilter;
+import eu.openminted.registry.core.domain.Paging;
 import org.springframework.security.core.Authentication;
 import org.springframework.util.MultiValueMap;
 
@@ -61,4 +62,5 @@ public interface DatasourceService extends ResourceService<DatasourceBundle, Aut
      * @return True/False
      */
     boolean isDatasourceRegisteredOnOpenAIRE(String id);
+    Paging<DatasourceBundle> getResourceBundles(String catalogueId, String serviceId, Authentication auth);
 }

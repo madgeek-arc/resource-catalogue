@@ -289,7 +289,7 @@ public class ProviderController {
                                                           @RequestParam String resourceType, @ApiIgnore Authentication auth) {
         allRequestParams.add("resource_organisation", providerId);
         allRequestParams.add("status", "rejected resource");
-        allRequestParams.add("published", "false");
+        allRequestParams.add("published", false);
         FacetFilter ff = FacetFilterUtils.createMultiFacetFilter(allRequestParams);
         return ResponseEntity.ok(providerService.getRejectedResources(ff, resourceType, auth));
     }
@@ -487,5 +487,13 @@ public class ProviderController {
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     public ProviderBundle suspendProvider(@RequestParam String providerId, @RequestParam String catalogueId, @RequestParam boolean suspend, @ApiIgnore Authentication auth) {
         return providerService.suspend(providerId, catalogueId, suspend, auth);
+    }
+
+    @Browse
+    @ApiOperation(value = "Given a HLE, get all Providers associated with it")
+    @GetMapping(path = "getAllProvidersUnderASpecificHLE", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
+    public List<?> getAllProvidersUnderASpecificHLE(@RequestParam String hle, @ApiIgnore Authentication auth) {
+        return providerService.getAllProvidersUnderASpecificHLE(hle, auth);
     }
 }

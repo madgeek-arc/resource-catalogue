@@ -14,6 +14,7 @@ import eu.einfracentral.utils.ObjectUtils;
 import eu.einfracentral.utils.ProviderResourcesCommonMethods;
 import eu.einfracentral.utils.ResourceValidationUtils;
 import eu.openminted.registry.core.domain.FacetFilter;
+import eu.openminted.registry.core.domain.Paging;
 import eu.openminted.registry.core.domain.Resource;
 import eu.openminted.registry.core.service.SearchService;
 import org.apache.logging.log4j.LogManager;
@@ -254,6 +255,15 @@ public class DatasourceManager extends ResourceManager<DatasourceBundle> impleme
     public void delete(DatasourceBundle datasourceBundle) {
         super.delete(datasourceBundle);
         logger.debug("Deleting Datasource: {}", datasourceBundle);
+    }
+
+    @Override
+    public Paging<DatasourceBundle> getResourceBundles(String catalogueId, String serviceId, Authentication auth) {
+        FacetFilter ff = new FacetFilter();
+        ff.addFilter("service_id", serviceId);
+        ff.addFilter("catalogue_id", catalogueId);
+        ff.setQuantity(maxQuantity);
+        return this.getAll(ff, auth);
     }
 
     public FacetFilter createFacetFilterForFetchingDatasources(MultiValueMap<String, Object> allRequestParams, String catalogueId) {

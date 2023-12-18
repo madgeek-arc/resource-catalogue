@@ -218,4 +218,6 @@ public interface ProviderService<T, U extends Authentication> extends ResourceSe
     ProviderBundle createPublicProvider(ProviderBundle providerBundle, Authentication auth);
 
     ProviderBundle suspend(String providerId, String catalogueId, boolean suspend, Authentication auth);
+
+    List<?> getAllProvidersUnderASpecificHLE(String hle, Authentication auth);
 }
