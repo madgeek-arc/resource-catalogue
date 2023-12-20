@@ -2,6 +2,7 @@ package eu.einfracentral.controllers.registry;
 
 import eu.einfracentral.annotations.Browse;
 import eu.einfracentral.domain.*;
+import eu.einfracentral.dto.MapValues;
 import eu.einfracentral.exception.ResourceException;
 import eu.einfracentral.exception.ValidationException;
 import eu.einfracentral.registry.service.MigrationService;
@@ -491,9 +492,14 @@ public class ProviderController {
 
     @Browse
     @ApiOperation(value = "Given a HLE, get all Providers associated with it")
-    @GetMapping(path = "getAllProvidersUnderASpecificHLE", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @GetMapping(path = "getAllResourcesUnderASpecificHLE", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
-    public List<?> getAllProvidersUnderASpecificHLE(@RequestParam String hle, @ApiIgnore Authentication auth) {
-        return providerService.getAllProvidersUnderASpecificHLE(hle, auth);
+    public List<MapValues> getAllProvidersUnderASpecificHLE(@RequestParam String providerName, @ApiIgnore Authentication auth) {
+        String hle = providerService.determineHostingLegalEntity(providerName);
+        if (hle != null) {
+            return providerService.getAllResourcesUnderASpecificHLE(hle, auth);
+        } else {
+            return null;
+        }
     }
 }

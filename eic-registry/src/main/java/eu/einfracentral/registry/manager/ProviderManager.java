@@ -1,6 +1,7 @@
 package eu.einfracentral.registry.manager;
 
 import eu.einfracentral.domain.*;
+import eu.einfracentral.dto.MapValues;
 import eu.einfracentral.exception.ValidationException;
 import eu.einfracentral.registry.service.*;
 import eu.einfracentral.service.IdCreator;
@@ -1216,21 +1217,75 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         return providerBundle;
     }
 
-    public List<?> getAllProvidersUnderASpecificHLE(String hle, Authentication auth) {
+    public String determineHostingLegalEntity(String providerName) {
+        List<Vocabulary> hostingLegalEntityList = vocabularyService.getByType(Vocabulary.Type.PROVIDER_HOSTING_LEGAL_ENTITY);
+        for (Vocabulary hle : hostingLegalEntityList) {
+            if (hle.getName().equalsIgnoreCase(providerName)) {
+                return hle.getId();
+            }
+        }
+        return null;
+    }
+
+    public List<MapValues> getAllResourcesUnderASpecificHLE(String hle, Authentication auth) {
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(10000);
         ff.addFilter("hosting_legal_entity", hle);
         ff.addFilter("published", false);
+        List<MapValues> mapValuesList = new ArrayList<>();
         List<ProviderBundle> providers = getAll(ff, auth).getResults();
-        List<Object> providerResources = new ArrayList<>(providers);
+        List<ServiceBundle> services = new ArrayList<>();
+        List<TrainingResourceBundle> trainingResources = new ArrayList<>();
+        List<InteroperabilityRecordBundle> interoperabilityRecords = new ArrayList<>();
+        createMapValuesForHLE(providers, "provider", mapValuesList);
         for (ProviderBundle providerBundle : providers) {
-            providerResources.addAll(serviceBundleService.getResourceBundles(providerBundle.getProvider().getCatalogueId(),
+            services.addAll(serviceBundleService.getResourceBundles(providerBundle.getProvider().getCatalogueId(),
                     providerBundle.getId(), auth).getResults());
-            providerResources.addAll(trainingResourceService.getResourceBundles(providerBundle.getProvider().
-                            getCatalogueId(), providerBundle.getId(), auth).getResults());
-            providerResources.addAll(interoperabilityRecordService.getResourceBundles(providerBundle.getProvider().
+            trainingResources.addAll(trainingResourceService.getResourceBundles(providerBundle.getProvider().
+                    getCatalogueId(), providerBundle.getId(), auth).getResults());
+            interoperabilityRecords.addAll(interoperabilityRecordService.getResourceBundles(providerBundle.getProvider().
                     getCatalogueId(), providerBundle.getId(), auth).getResults());
         }
-        return providerResources;
+        createMapValuesForHLE(services, "service", mapValuesList);
+        createMapValuesForHLE(trainingResources, "training_resource", mapValuesList);
+        createMapValuesForHLE(interoperabilityRecords, "interoperability_record", mapValuesList);
+        return mapValuesList;
+    }
+
+    private List<MapValues> createMapValuesForHLE(List<?> resources, String resourceType, List<MapValues> mapValuesList) {
+        MapValues mapValues = new MapValues();
+        mapValues.setKey(resourceType);
+        List<eu.einfracentral.dto.Value> valueList = new ArrayList<>();
+        for (Object obj : resources) {
+            eu.einfracentral.dto.Value value = new eu.einfracentral.dto.Value();
+            switch (resourceType) {
+                case "provider":
+                    ProviderBundle providerBundle = (ProviderBundle) obj;
+                    value.setId(providerBundle.getId());
+                    value.setName(providerBundle.getProvider().getName());
+                    break;
+                case "service":
+                    ServiceBundle serviceBundle = (ServiceBundle) obj;
+                    value.setId(serviceBundle.getId());
+                    value.setName(serviceBundle.getService().getName());
+                    break;
+                case "training_resource":
+                    TrainingResourceBundle trainingResourceBundle = (TrainingResourceBundle) obj;
+                    value.setId(trainingResourceBundle.getId());
+                    value.setName(trainingResourceBundle.getTrainingResource().getTitle());
+                    break;
+                case "interoperability_record":
+                    InteroperabilityRecordBundle interoperabilityRecordBundle = (InteroperabilityRecordBundle) obj;
+                    value.setId(interoperabilityRecordBundle.getId());
+                    value.setName(interoperabilityRecordBundle.getInteroperabilityRecord().getTitle());
+                    break;
+                default:
+                    break;
+            }
+            valueList.add(value);
+        }
+        mapValues.setValues(valueList);
+        mapValuesList.add(mapValues);
+        return mapValuesList;
     }
 }

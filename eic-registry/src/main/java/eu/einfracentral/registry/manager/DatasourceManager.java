@@ -92,26 +92,23 @@ public class DatasourceManager extends ResourceManager<DatasourceBundle> impleme
         super.add(datasourceBundle, null);
         logger.debug("Adding Datasource for Service: {}", datasourceBundle.getDatasource().getServiceId());
 
-        if (datasourceBundle.getDatasource().getCatalogueId().equals(catalogueName)) {
-            registrationMailService.sendEmailsForDatasourceExtension(datasourceBundle, "post");
-        }
         return datasourceBundle;
     }
 
-    private DatasourceBundle differentiateInternalFromExternalCatalogueAddition(DatasourceBundle datasourceBundle) {
+    private void differentiateInternalFromExternalCatalogueAddition(DatasourceBundle datasourceBundle) {
         if (datasourceBundle.getDatasource().getCatalogueId().equals(catalogueName)) {
             datasourceBundle.setActive(false);
             datasourceBundle.setStatus(vocabularyService.get("pending datasource").getId());
             datasourceBundle.setLatestOnboardingInfo(datasourceBundle.getLoggingInfo().get(0));
+            registrationMailService.sendEmailsForDatasourceExtension(datasourceBundle, "post");
         } else {
             datasourceBundle.setActive(true);
             datasourceBundle.setStatus(vocabularyService.get("approved datasource").getId());
-            LoggingInfo loggingInfo = commonMethods.createLoggingInfo(securityService.getAdminAccess(), LoggingInfo.Types.ONBOARD.getKey(),
-                    LoggingInfo.ActionType.APPROVED.getKey());
+            LoggingInfo loggingInfo = commonMethods.createLoggingInfo(securityService.getAdminAccess(),
+                    LoggingInfo.Types.ONBOARD.getKey(), LoggingInfo.ActionType.APPROVED.getKey());
             datasourceBundle.getLoggingInfo().add(loggingInfo);
             datasourceBundle.setLatestOnboardingInfo(datasourceBundle.getLoggingInfo().get(1));
         }
-        return datasourceBundle;
     }
 
     @Override
