@@ -91,9 +91,9 @@ public class DatasourceManager extends ResourceManager<DatasourceBundle> impleme
         super.add(datasourceBundle, null);
         logger.debug("Adding Datasource for Service: {}", datasourceBundle.getDatasource().getServiceId());
 
-        if (datasourceBundle.getDatasource().getCatalogueId().equals(catalogueName)) {
-            registrationMailService.sendEmailsForDatasourceExtension(datasourceBundle, "post");
-        }
+//        if (datasourceBundle.getDatasource().getCatalogueId().equals(catalogueName)) {
+//            registrationMailService.sendEmailsForDatasourceExtension(datasourceBundle, "post");
+//        }
         return datasourceBundle;
     }
 
