@@ -2,15 +2,15 @@ package eu.einfracentral.dto;
 
 import java.util.List;
 
-public class MapValues {
+public class MapValues<T extends Value> {
 
     private String key;
-    private List<Value> values;
+    private List<T> values;
 
     public MapValues() {
     }
 
-    public MapValues(String key, List<Value> values) {
+    public MapValues(String key, List<T> values) {
         this.key = key;
         this.values = values;
     }
@@ -23,11 +23,11 @@ public class MapValues {
         this.key = key;
     }
 
-    public List<Value> getValues() {
+    public List<T> getValues() {
         return values;
     }
 
-    public void setValues(List<Value> values) {
+    public void setValues(List<T> values) {
         this.values = values;
     }
 }

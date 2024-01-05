@@ -2,6 +2,7 @@ package eu.einfracentral.controllers.registry;
 
 import eu.einfracentral.annotations.Browse;
 import eu.einfracentral.domain.*;
+import eu.einfracentral.dto.ExtendedValue;
 import eu.einfracentral.dto.MapValues;
 import eu.einfracentral.exception.ResourceException;
 import eu.einfracentral.exception.ValidationException;
@@ -494,7 +495,7 @@ public class ProviderController {
     @ApiOperation(value = "Given a HLE, get all Providers associated with it")
     @GetMapping(path = "getAllResourcesUnderASpecificHLE", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
-    public List<MapValues> getAllProvidersUnderASpecificHLE(@RequestParam String providerName, @ApiIgnore Authentication auth) {
+    public List<MapValues<ExtendedValue>> getAllProvidersUnderASpecificHLE(@RequestParam String providerName, @ApiIgnore Authentication auth) {
         String hle = providerService.determineHostingLegalEntity(providerName);
         if (hle != null) {
             return providerService.getAllResourcesUnderASpecificHLE(hle, auth);

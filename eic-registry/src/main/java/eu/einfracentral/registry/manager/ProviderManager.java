@@ -1,6 +1,7 @@
 package eu.einfracentral.registry.manager;
 
 import eu.einfracentral.domain.*;
+import eu.einfracentral.dto.ExtendedValue;
 import eu.einfracentral.dto.MapValues;
 import eu.einfracentral.exception.ValidationException;
 import eu.einfracentral.registry.service.*;
@@ -1227,12 +1228,12 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         return null;
     }
 
-    public List<MapValues> getAllResourcesUnderASpecificHLE(String hle, Authentication auth) {
+    public List<MapValues<ExtendedValue>> getAllResourcesUnderASpecificHLE(String hle, Authentication auth) {
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(10000);
         ff.addFilter("hosting_legal_entity", hle);
         ff.addFilter("published", false);
-        List<MapValues> mapValuesList = new ArrayList<>();
+        List<MapValues<ExtendedValue>> mapValuesList = new ArrayList<>();
         List<ProviderBundle> providers = getAll(ff, auth).getResults();
         List<ServiceBundle> services = new ArrayList<>();
         List<TrainingResourceBundle> trainingResources = new ArrayList<>();
@@ -1252,32 +1253,37 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         return mapValuesList;
     }
 
-    private List<MapValues> createMapValuesForHLE(List<?> resources, String resourceType, List<MapValues> mapValuesList) {
-        MapValues mapValues = new MapValues();
+    private void createMapValuesForHLE(List<?> resources, String resourceType,
+                                       List<MapValues<ExtendedValue>> mapValuesList) {
+        MapValues<ExtendedValue> mapValues = new MapValues<>();
         mapValues.setKey(resourceType);
-        List<eu.einfracentral.dto.Value> valueList = new ArrayList<>();
+        List<eu.einfracentral.dto.ExtendedValue> valueList = new ArrayList<>();
         for (Object obj : resources) {
-            eu.einfracentral.dto.Value value = new eu.einfracentral.dto.Value();
+            eu.einfracentral.dto.ExtendedValue value = new eu.einfracentral.dto.ExtendedValue();
             switch (resourceType) {
                 case "provider":
                     ProviderBundle providerBundle = (ProviderBundle) obj;
                     value.setId(providerBundle.getId());
                     value.setName(providerBundle.getProvider().getName());
+                    value.setCatalogue(providerBundle.getProvider().getCatalogueId());
                     break;
                 case "service":
                     ServiceBundle serviceBundle = (ServiceBundle) obj;
                     value.setId(serviceBundle.getId());
                     value.setName(serviceBundle.getService().getName());
+                    value.setCatalogue(serviceBundle.getService().getCatalogueId());
                     break;
                 case "training_resource":
                     TrainingResourceBundle trainingResourceBundle = (TrainingResourceBundle) obj;
                     value.setId(trainingResourceBundle.getId());
                     value.setName(trainingResourceBundle.getTrainingResource().getTitle());
+                    value.setCatalogue(trainingResourceBundle.getTrainingResource().getCatalogueId());
                     break;
                 case "interoperability_record":
                     InteroperabilityRecordBundle interoperabilityRecordBundle = (InteroperabilityRecordBundle) obj;
                     value.setId(interoperabilityRecordBundle.getId());
                     value.setName(interoperabilityRecordBundle.getInteroperabilityRecord().getTitle());
+                    value.setCatalogue(interoperabilityRecordBundle.getInteroperabilityRecord().getCatalogueId());
                     break;
                 default:
                     break;
@@ -1286,6 +1292,5 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         }
         mapValues.setValues(valueList);
         mapValuesList.add(mapValues);
-        return mapValuesList;
     }
 }
