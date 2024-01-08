@@ -2,13 +2,9 @@ package eu.einfracentral.registry.service;
 
 import eu.einfracentral.domain.CatalogueBundle;
 import eu.einfracentral.domain.LoggingInfo;
-import eu.einfracentral.domain.ProviderBundle;
-import eu.openminted.registry.core.domain.FacetFilter;
-import eu.openminted.registry.core.domain.Paging;
 import org.springframework.security.core.Authentication;
 
 import java.util.List;
-import java.util.Map;
 
 public interface CatalogueService<T, U extends Authentication> extends ResourceService<T, Authentication> {
 
@@ -93,27 +89,6 @@ public interface CatalogueService<T, U extends Authentication> extends ResourceS
      * @param authentication Authentication
      */
     void adminAcceptedTerms(String catalogueId, U authentication);
-
-    /**
-     * Create query for fetching Catalogues from DB
-     *
-     * @param ff FacetFilter
-     * @param orderDirection Ascending/Descending
-     * @param orderField The field in which the order takes place
-     * @return {@link List}&lt;{@link Map}&lt;{@link String},{@link Object}&gt;
-     */
-    List<Map<String, Object>> createQueryForCatalogueFilters(FacetFilter ff, String orderDirection, String orderField);
-
-    /**
-     * Create correct quantity facets for fetching Catalogues
-     *
-     * @param catalogueBundle List of Catalogue Bundles
-     * @param catalogueBundlePaging Paging of Catalogue Bundles
-     * @param quantity - FacetFilter's quantity field
-     * @param from FacetFilter's from field
-     * @return {@link Paging}&lt;{@link CatalogueBundle}&gt;
-     */
-    Paging<CatalogueBundle> createCorrectQuantityFacets(List<CatalogueBundle> catalogueBundle, Paging<CatalogueBundle> catalogueBundlePaging, int quantity, int from);
 
     /**
      * Suspend the Catalogue
