@@ -510,7 +510,7 @@ public abstract class AbstractServiceBundleManager<T extends ServiceBundle> exte
         FacetFilter facetFilter = new FacetFilter();
         facetFilter.setQuantity(maxQuantity);
         facetFilter.addFilter("status", "approved resource");
-        facetFilter.addFilter("published", "false");
+        facetFilter.addFilter("published", false);
         Browsing<T> serviceBrowsing = getAll(facetFilter, auth);
         List<T> servicesToBeAudited = new ArrayList<>();
         long todayEpochTime = System.currentTimeMillis();

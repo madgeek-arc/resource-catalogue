@@ -2,6 +2,8 @@ package eu.einfracentral.controllers.registry;
 
 import eu.einfracentral.annotations.Browse;
 import eu.einfracentral.domain.*;
+import eu.einfracentral.dto.ExtendedValue;
+import eu.einfracentral.dto.MapValues;
 import eu.einfracentral.exception.ResourceException;
 import eu.einfracentral.exception.ValidationException;
 import eu.einfracentral.registry.service.MigrationService;
@@ -289,7 +291,7 @@ public class ProviderController {
                                                           @RequestParam String resourceType, @ApiIgnore Authentication auth) {
         allRequestParams.add("resource_organisation", providerId);
         allRequestParams.add("status", "rejected resource");
-        allRequestParams.add("published", "false");
+        allRequestParams.add("published", false);
         FacetFilter ff = FacetFilterUtils.createMultiFacetFilter(allRequestParams);
         return ResponseEntity.ok(providerService.getRejectedResources(ff, resourceType, auth));
     }
@@ -487,5 +489,18 @@ public class ProviderController {
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     public ProviderBundle suspendProvider(@RequestParam String providerId, @RequestParam String catalogueId, @RequestParam boolean suspend, @ApiIgnore Authentication auth) {
         return providerService.suspend(providerId, catalogueId, suspend, auth);
+    }
+
+    @Browse
+    @ApiOperation(value = "Given a HLE, get all Providers associated with it")
+    @GetMapping(path = "getAllResourcesUnderASpecificHLE", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
+    public List<MapValues<ExtendedValue>> getAllProvidersUnderASpecificHLE(@RequestParam String providerName, @ApiIgnore Authentication auth) {
+        String hle = providerService.determineHostingLegalEntity(providerName);
+        if (hle != null) {
+            return providerService.getAllResourcesUnderASpecificHLE(hle, auth);
+        } else {
+            return null;
+        }
     }
 }

@@ -37,4 +37,5 @@ public interface InteroperabilityRecordService<T> extends ResourceService<T, Aut
     T auditResource(String resourceId, String catalogueId, String comment, LoggingInfo.ActionType actionType, Authentication auth);
     InteroperabilityRecordBundle suspend(String interoperabilityRecordId, String catalogueId, boolean suspend, Authentication auth);
     Paging<Bundle<?>> getAllForAdminWithAuditStates(FacetFilter ff, Set<String> auditState);
+    Paging<InteroperabilityRecordBundle> getResourceBundles(String catalogueId, String providerId, Authentication auth);
 }

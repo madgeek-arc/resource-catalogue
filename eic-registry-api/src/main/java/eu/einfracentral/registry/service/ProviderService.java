@@ -1,6 +1,8 @@
 package eu.einfracentral.registry.service;
 
 import eu.einfracentral.domain.*;
+import eu.einfracentral.dto.ExtendedValue;
+import eu.einfracentral.dto.MapValues;
 import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.domain.Paging;
 import eu.openminted.registry.core.domain.Resource;
@@ -218,4 +220,7 @@ public interface ProviderService<T, U extends Authentication> extends ResourceSe
     ProviderBundle createPublicProvider(ProviderBundle providerBundle, Authentication auth);
 
     ProviderBundle suspend(String providerId, String catalogueId, boolean suspend, Authentication auth);
+
+    String determineHostingLegalEntity(String providerName);
+    List<MapValues<ExtendedValue>> getAllResourcesUnderASpecificHLE(String hle, Authentication auth);
 }

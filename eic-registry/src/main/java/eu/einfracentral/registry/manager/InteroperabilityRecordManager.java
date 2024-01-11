@@ -405,6 +405,17 @@ public class InteroperabilityRecordManager extends ResourceManager<Interoperabil
         return super.update(interoperabilityRecordBundle, auth);
     }
 
+    @Override
+    public Paging<InteroperabilityRecordBundle> getResourceBundles(String catalogueId, String providerId,
+                                                                   Authentication auth) {
+        FacetFilter ff = new FacetFilter();
+        ff.addFilter("resource_organisation", providerId);
+        ff.addFilter("catalogue_id", catalogueId);
+        ff.setQuantity(maxQuantity);
+        ff.addOrderBy("title", "asc");
+        return this.getAll(ff, auth);
+    }
+
     public InteroperabilityRecordBundle createPublicInteroperabilityRecord(InteroperabilityRecordBundle interoperabilityRecordBundle, Authentication auth){
         publicInteroperabilityRecordManager.add(interoperabilityRecordBundle, auth);
         return interoperabilityRecordBundle;

@@ -5,7 +5,10 @@ import eu.einfracentral.exception.ResourceException;
 import eu.einfracentral.exception.ResourceNotFoundException;
 import eu.einfracentral.exception.ValidationException;
 import eu.einfracentral.registry.service.*;
-import eu.einfracentral.service.*;
+import eu.einfracentral.service.IdCreator;
+import eu.einfracentral.service.RegistrationMailService;
+import eu.einfracentral.service.SecurityService;
+import eu.einfracentral.service.SynchronizerService;
 import eu.einfracentral.service.search.SearchServiceEIC;
 import eu.einfracentral.utils.FacetFilterUtils;
 import eu.einfracentral.utils.FacetLabelService;
@@ -37,7 +40,8 @@ import java.time.ZoneId;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static eu.einfracentral.config.CacheConfig.*;
+import static eu.einfracentral.config.CacheConfig.CACHE_FEATURED;
+import static eu.einfracentral.config.CacheConfig.CACHE_PROVIDERS;
 import static eu.einfracentral.utils.VocabularyValidationUtils.validateScientificDomains;
 import static java.util.stream.Collectors.toList;
 
@@ -932,7 +936,7 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
         FacetFilter facetFilter = new FacetFilter();
         facetFilter.setQuantity(maxQuantity);
         facetFilter.addFilter("status", "approved resource");
-        facetFilter.addFilter("published", "false");
+        facetFilter.addFilter("published", false);
         Browsing<TrainingResourceBundle> trainingResourceBrowsing = getAll(facetFilter, auth);
         List<TrainingResourceBundle> trainingResourcesToBeAudited = new ArrayList<>();
         long todayEpochTime = System.currentTimeMillis();

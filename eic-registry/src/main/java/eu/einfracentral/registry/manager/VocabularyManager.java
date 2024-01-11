@@ -121,15 +121,6 @@ public class VocabularyManager extends ResourceManager<Vocabulary> implements Vo
     }
 
     @Override
-    @Cacheable(value = CACHE_VOCABULARY_MAP)
-    public Map<String, Vocabulary> getVocabulariesMap(FacetFilter ff) {
-        return getAll(ff, null)
-                .getResults()
-                .stream()
-                .collect(Collectors.toMap(Vocabulary::getId, v -> v));
-    }
-
-    @Override
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @CacheEvict(value = {CACHE_VOCABULARIES, CACHE_VOCABULARY_MAP, CACHE_VOCABULARY_TREE}, allEntries = true)
     public void addAll(List<Vocabulary> vocabularies, Authentication auth) {

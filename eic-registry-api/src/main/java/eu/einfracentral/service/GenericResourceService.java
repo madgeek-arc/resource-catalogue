@@ -15,6 +15,8 @@ public interface GenericResourceService {
 
     <T> Browsing<T> getResults(FacetFilter filter);
 
+    <T> Browsing<T>  getResultsWithoutFacets(FacetFilter filter);
+
     <T> Browsing<T> convertToBrowsing(@NotNull Paging<Resource> paging, String resourceTypeName);
 
     <T> Map<String, List<T>> getResultsGrouped(FacetFilter filter, String category);

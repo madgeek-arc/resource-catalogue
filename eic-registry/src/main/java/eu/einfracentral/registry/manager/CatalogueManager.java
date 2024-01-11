@@ -12,7 +12,6 @@ import eu.einfracentral.utils.ProviderResourcesCommonMethods;
 import eu.einfracentral.validators.FieldValidator;
 import eu.openminted.registry.core.domain.Browsing;
 import eu.openminted.registry.core.domain.FacetFilter;
-import eu.openminted.registry.core.domain.Paging;
 import eu.openminted.registry.core.domain.Resource;
 import eu.openminted.registry.core.service.ResourceCRUDService;
 import org.apache.logging.log4j.LogManager;
@@ -20,8 +19,6 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
-import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
-import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.common.exceptions.UnauthorizedUserException;
 import org.springframework.stereotype.Service;
@@ -177,13 +174,10 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
         catalogue.setLoggingInfo(loggingInfoList);
         catalogue.setActive(false);
         catalogue.setStatus(vocabularyService.get("pending catalogue").getId());
+        catalogue.setAuditState(CatalogueBundle.AuditState.NOT_AUDITED.getKey());
 
         // latestOnboardingInfo
         catalogue.setLatestOnboardingInfo(loggingInfoList.get(0));
-
-        if (catalogue.getCatalogue().getParticipatingCountries() != null && !catalogue.getCatalogue().getParticipatingCountries().isEmpty()){
-            catalogue.getCatalogue().setParticipatingCountries(sortCountries(catalogue.getCatalogue().getParticipatingCountries()));
-        }
 
         CatalogueBundle ret;
         ret = super.add(catalogue, null);
@@ -211,7 +205,6 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
         LoggingInfo loggingInfo = commonMethods.createLoggingInfo(auth, LoggingInfo.Types.UPDATE.getKey(),
                 LoggingInfo.ActionType.UPDATED.getKey(), comment);
         loggingInfoList.add(loggingInfo);
-        ret.getCatalogue().setParticipatingCountries(sortCountries(ret.getCatalogue().getParticipatingCountries()));
         ret.setLoggingInfo(loggingInfoList);
 
         // latestUpdateInfo
@@ -220,6 +213,7 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
         ret.setActive(existingCatalogue.isActive());
         ret.setStatus(existingCatalogue.getStatus());
         ret.setSuspended(existingCatalogue.isSuspended());
+        ret.setAuditState(commonMethods.determineAuditState(ret.getLoggingInfo()));
         existingResource.setPayload(serialize(ret));
         existingResource.setResourceType(resourceType);
         resourceService.updateResource(existingResource);
@@ -345,11 +339,6 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
         }
     }
 
-    private List<String> sortCountries(List<String> countries) {
-        Collections.sort(countries);
-        return countries;
-    }
-
     private void adminDifferences(CatalogueBundle updatedCatalogue, CatalogueBundle existingCatalogue) {
         List<String> existingAdmins = new ArrayList<>();
         List<String> newAdmins = new ArrayList<>();
@@ -464,124 +453,6 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
         return super.update(catalogue, auth);
     }
 
-    public List<Map<String, Object>> createQueryForCatalogueFilters (FacetFilter ff, String orderDirection, String orderField){
-        String keyword = ff.getKeyword();
-        NamedParameterJdbcTemplate namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(dataSource);
-        MapSqlParameterSource in = new MapSqlParameterSource();
-
-        String query;
-        if (ff.getFilter().entrySet().isEmpty()){
-            query = "SELECT catalogue_id FROM catalogue_view";
-        } else{
-            query = "SELECT catalogue_id FROM catalogue_view WHERE";
-        }
-
-        boolean firstTime = true;
-        for (Map.Entry<String, Object> entry : ff.getFilter().entrySet()) {
-            in.addValue(entry.getKey(), entry.getValue());
-            if (entry.getKey().equals("status")) {
-                if (firstTime) {
-                    query += String.format(" (status=%s)", entry.getValue().toString());
-                    firstTime = false;
-                } else {
-                    query += String.format(" AND (status=%s)", entry.getValue().toString());
-                }
-                if (query.contains(",")){
-                    query = query.replaceAll(", ", "' OR status='");
-                }
-            }
-            if (entry.getKey().equals("suspended")) {
-                if (firstTime) {
-                    query += String.format(" (suspended=%s)", entry.getValue().toString());
-                    firstTime = false;
-                } else {
-                    query += String.format(" AND (suspended=%s)", entry.getValue().toString());
-                }
-                if (query.contains(",")){
-                    query = query.replaceAll(", ", "' OR suspended='");
-                }
-            }
-        }
-
-        // keyword on search bar
-        if (keyword != null && !keyword.equals("")){
-            // replace apostrophes to avoid bad sql grammar
-            if (keyword.contains("'")){
-                keyword = keyword.replaceAll("'", "''");
-            }
-            if (firstTime){
-                query += String.format(" WHERE upper(CONCAT(%s))", columnsOfInterest) + " like '%" + String.format("%s", keyword.toUpperCase()) + "%'";
-            } else{
-                query += String.format(" AND upper(CONCAT(%s))", columnsOfInterest) + " like '%" + String.format("%s", keyword.toUpperCase()) + "%'";
-            }
-        }
-
-        // order/orderField
-        if (orderField !=null && !orderField.equals("")){
-            query += String.format(" ORDER BY %s", orderField);
-        } else{
-            query += " ORDER BY name";
-        }
-        if (orderDirection !=null && !orderDirection.equals("")){
-            query += String.format(" %s", orderDirection);
-        }
-
-        query = query.replaceAll("\\[", "'").replaceAll("\\]","'");
-        return namedParameterJdbcTemplate.queryForList(query, in);
-    }
-
-    public Paging<CatalogueBundle> createCorrectQuantityFacets(List<CatalogueBundle> catalogueBundles, Paging<CatalogueBundle> catalogueBundlePaging,
-                                                               int quantity, int from){
-        if (!catalogueBundles.isEmpty()) {
-            List<CatalogueBundle> retWithCorrectQuantity = new ArrayList<>();
-            if (from == 0){
-                if (quantity <= catalogueBundles.size()){
-                    for (int i=from; i<=quantity-1; i++){
-                        retWithCorrectQuantity.add(catalogueBundles.get(i));
-                    }
-                } else{
-                    retWithCorrectQuantity.addAll(catalogueBundles);
-                }
-                catalogueBundlePaging.setTo(retWithCorrectQuantity.size());
-            } else{
-                boolean indexOutOfBound = false;
-                if (quantity <= catalogueBundles.size()){
-                    for (int i=from; i<quantity+from; i++) {
-                        try{
-                            retWithCorrectQuantity.add(catalogueBundles.get(i));
-                            if (quantity+from > catalogueBundles.size()){
-                                catalogueBundlePaging.setTo(catalogueBundles.size());
-                            } else{
-                                catalogueBundlePaging.setTo(quantity+from);
-                            }
-                        } catch (IndexOutOfBoundsException e){
-                            indexOutOfBound = true;
-                        }
-                    }
-                    if (indexOutOfBound){
-                        catalogueBundlePaging.setTo(catalogueBundles.size());
-                    }
-                } else{
-                    retWithCorrectQuantity.addAll(catalogueBundles);
-                    if (quantity+from > catalogueBundles.size()){
-                        catalogueBundlePaging.setTo(catalogueBundles.size());
-                    } else{
-                        catalogueBundlePaging.setTo(quantity+from);
-                    }
-                }
-            }
-            catalogueBundlePaging.setFrom(from);
-            catalogueBundlePaging.setResults(retWithCorrectQuantity);
-            catalogueBundlePaging.setTotal(catalogueBundles.size());
-        } else{
-            catalogueBundlePaging.setResults(catalogueBundles);
-            catalogueBundlePaging.setTotal(0);
-            catalogueBundlePaging.setFrom(0);
-            catalogueBundlePaging.setTo(0);
-        }
-        return catalogueBundlePaging;
-    }
-
     public CatalogueBundle suspend(String catalogueId, boolean suspend, Authentication auth) {
         CatalogueBundle catalogueBundle = get(catalogueId, auth);
 
@@ -599,6 +470,22 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
         }
 
         return catalogueBundle;
+    }
+
+    public CatalogueBundle auditCatalogue(String catalogueId, String comment, LoggingInfo.ActionType actionType, Authentication auth) {
+        CatalogueBundle catalogue = get(catalogueId);
+        commonMethods.auditResource(catalogue, comment, actionType, auth);
+        // TODO: if it works as expected, move below if statements to commonMethods.auditResource() - generalize
+        if (actionType.getKey().equals(LoggingInfo.ActionType.VALID.getKey())) {
+            catalogue.setAuditState(CatalogueBundle.AuditState.VALID.getKey());
+        }
+        if (actionType.getKey().equals(LoggingInfo.ActionType.INVALID.getKey())) {
+            catalogue.setAuditState(CatalogueBundle.AuditState.INVALID_AND_NOT_UPDATED.getKey());
+        }
+        logger.info("User '{}-{}' audited Catalogue '{}'-'{}' with [actionType: {}]",
+                User.of(auth).getFullName(), User.of(auth).getEmail(),
+                catalogue.getCatalogue().getId(), catalogue.getCatalogue().getName(), actionType);
+        return super.update(catalogue, auth);
     }
 
     private FacetFilter createFacetFilter(String catalogueId){

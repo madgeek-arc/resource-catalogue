@@ -1,12 +1,10 @@
 package eu.einfracentral.registry.service;
 
 import eu.einfracentral.domain.CatalogueBundle;
-import eu.openminted.registry.core.domain.FacetFilter;
-import eu.openminted.registry.core.domain.Paging;
+import eu.einfracentral.domain.LoggingInfo;
 import org.springframework.security.core.Authentication;
 
 import java.util.List;
-import java.util.Map;
 
 public interface CatalogueService<T, U extends Authentication> extends ResourceService<T, Authentication> {
 
@@ -93,27 +91,6 @@ public interface CatalogueService<T, U extends Authentication> extends ResourceS
     void adminAcceptedTerms(String catalogueId, U authentication);
 
     /**
-     * Create query for fetching Catalogues from DB
-     *
-     * @param ff FacetFilter
-     * @param orderDirection Ascending/Descending
-     * @param orderField The field in which the order takes place
-     * @return {@link List}&lt;{@link Map}&lt;{@link String},{@link Object}&gt;
-     */
-    List<Map<String, Object>> createQueryForCatalogueFilters(FacetFilter ff, String orderDirection, String orderField);
-
-    /**
-     * Create correct quantity facets for fetching Catalogues
-     *
-     * @param catalogueBundle List of Catalogue Bundles
-     * @param catalogueBundlePaging Paging of Catalogue Bundles
-     * @param quantity - FacetFilter's quantity field
-     * @param from FacetFilter's from field
-     * @return {@link Paging}&lt;{@link CatalogueBundle}&gt;
-     */
-    Paging<CatalogueBundle> createCorrectQuantityFacets(List<CatalogueBundle> catalogueBundle, Paging<CatalogueBundle> catalogueBundlePaging, int quantity, int from);
-
-    /**
      * Suspend the Catalogue
      *
      * @param catalogueId The ID of the Catalogue
@@ -122,4 +99,14 @@ public interface CatalogueService<T, U extends Authentication> extends ResourceS
      * @return {@link CatalogueBundle}
      */
     CatalogueBundle suspend(String catalogueId, boolean suspend, Authentication auth);
+
+    /**
+     * Audit the Catalogue
+     *
+     * @param id  The ID of the Catalogue
+     * @param actionType Validate or Invalidate action
+     * @param auth Authentication
+     * @return {@link CatalogueBundle}
+     */
+    CatalogueBundle auditCatalogue(String id, String comment, LoggingInfo.ActionType actionType, Authentication auth);
 }
