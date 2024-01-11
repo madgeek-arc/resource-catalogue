@@ -123,9 +123,9 @@ public class SimpleMailService implements MailService {
                 if (e.getInvalidAddresses().length > 0) {
                     logger.warn("Send mail failed. Attempting to remove invalid address");
                     // Create new lists to make them modifiable
-                    List<String> toList = new ArrayList<>(to);
-                    List<String> ccList = new ArrayList<>(cc);
-                    List<String> bccList = new ArrayList<>(bcc);
+                    List<String> toList = new ArrayList<>(to != null ? to : Collections.emptyList());
+                    List<String> ccList = new ArrayList<>(cc != null ? cc : Collections.emptyList());
+                    List<String> bccList = new ArrayList<>(bcc != null ? bcc : Collections.emptyList());
 
                     for (int i = 0; i < e.getInvalidAddresses().length; i++) {
                         Address invalidAddress = e.getInvalidAddresses()[i];
