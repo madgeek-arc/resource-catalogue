@@ -1,6 +1,6 @@
 package eu.einfracentral.validators;
 
-import eu.einfracentral.service.ElasticValidatorService;
+import eu.einfracentral.service.ElasticDBValidatorService;
 import eu.openminted.registry.core.domain.Resource;
 import eu.openminted.registry.core.domain.ResourceType;
 import eu.openminted.registry.core.domain.index.IndexField;
@@ -23,7 +23,6 @@ import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.json.JSONObject;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import javax.sql.DataSource;
@@ -32,17 +31,17 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
-public class ElasticValidator implements ElasticValidatorService {
+public class ElasticDBValidator implements ElasticDBValidatorService {
 
-    private static final Logger logger = LogManager.getLogger(ElasticValidator.class);
+    private static final Logger logger = LogManager.getLogger(ElasticDBValidator.class);
 
     private final RestHighLevelClient client;
     private final ResourceTypeService resourceTypeService;
     private final ResourceService resourceService;
     private final DataSource dataSource;
 
-    public ElasticValidator(RestHighLevelClient client, ResourceTypeService resourceTypeService,
-                            ResourceService resourceService, DataSource dataSource) {
+    public ElasticDBValidator(RestHighLevelClient client, ResourceTypeService resourceTypeService,
+                              ResourceService resourceService, DataSource dataSource) {
         this.client = client;
         this.resourceTypeService = resourceTypeService;
         this.resourceService = resourceService;
@@ -52,82 +51,58 @@ public class ElasticValidator implements ElasticValidatorService {
 //    @Scheduled(cron = "0 0 0 * * *") // At midnight every day
 //    @Scheduled(fixedDelay = 5 * 60 * 1000)
     private void scheduledValidation() {
-        List<String> resourceTypeNames = new ArrayList<>();
-        List<ResourceType> resourceTypes = resourceTypeService.getAllResourceType(0, 100);
-        for (ResourceType resourceType : resourceTypes) {
-            resourceTypeNames.add(resourceType.getName());
-        }
-        //TODO: events are over 10k, elastic supports only 10k
+        List<String> resourceTypeNames = resourceTypeService.getAllResourceType(0, 100)
+                .stream().map(ResourceType::getName).collect(Collectors.toList());
+        //TODO: use elastic scroll if we need to check events too (>10k)
         resourceTypeNames.remove("event");
         for (String resourceTypeName : resourceTypeNames) {
-            validate(resourceTypeName);
+            validate(resourceTypeName, true);
+            validate(resourceTypeName, false);
         }
     }
 
-    public void validate(String resourceType) {
-        // retrieve from elastic
-        List<String> elasticResources = getResourceIdsFromElastic(resourceType);
-
+    public void validate(String resourceType, boolean validateDBtoElastic) {
         // retrieve from DB
+        List<String> databaseResources = fetchResourceIdsFromDB(resourceType);
+        // retrieve from Elastic
+        List<String> elasticResources = fetchResourceIdsFromElastic(resourceType);
+
+        validateDBAndElasticEntries(databaseResources, elasticResources, resourceType, validateDBtoElastic);
+    }
+
+    private List<String> fetchResourceIdsFromDB(String resourceType) {
         List<String> databaseResources = new ArrayList<>();
         NamedParameterJdbcTemplate namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(dataSource);
         MapSqlParameterSource in = new MapSqlParameterSource();
+
         String query = "SELECT id FROM " +resourceType+ "_view";
+
         List<Map<String, Object>> records = namedParameterJdbcTemplate.queryForList(query, in);
         if (records != null && !records.isEmpty()) {
             for (Map<String, Object> record : records) {
                 databaseResources.add((String) record.get("id"));
             }
         }
-
-        List<String> missingElasticIds = new ArrayList<>(databaseResources);
-        missingElasticIds.removeAll(elasticResources);
-
-        // add missing indexes
-        if (!missingElasticIds.isEmpty()) {
-            logger.info("Adding {} missing indexes for {}", missingElasticIds.size(), resourceType);
-            for (String missingElasticId : missingElasticIds) {
-                Resource resource = resourceService.getResource(missingElasticId);
-                String payload = createDocumentForInsert(resource);
-
-                IndexRequest indexRequest = new IndexRequest(resource.getResourceType().getName());
-                indexRequest.id(resource.getId());
-                indexRequest.source(payload, XContentType.JSON);
-                indexRequest.setRefreshPolicy(WriteRequest.RefreshPolicy.IMMEDIATE);
-
-                try {
-                    client.index(indexRequest, RequestOptions.DEFAULT);
-                } catch (IOException e) {
-                    throw new ServiceException(e);
-                }
-            }
-        } else {
-            logger.info("Elastic is consistent with Database for {}", resourceType);
-        }
+        return databaseResources;
     }
 
-    private List<String> getResourceIdsFromElastic(String resourceType) {
+    private List<String> fetchResourceIdsFromElastic(String resourceType) {
         List<String> resourceIds = new ArrayList<>();
         SearchRequest searchRequest = new SearchRequest();
-
         SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
         searchSourceBuilder
                 .from(0)
                 .size(10000)
                 .docValueField("*_id")
                 .fetchSource(false)
-                .explain(true);
-
-        searchSourceBuilder.query(QueryBuilders.boolQuery().
-                must(QueryBuilders.matchQuery("_index", resourceType)));
+                .explain(true)
+                .query(QueryBuilders.boolQuery().must(QueryBuilders.matchQuery("_index", resourceType)));
         searchRequest.source(searchSourceBuilder);
 
-        SearchResponse response = null;
+        SearchResponse response;
         try {
             response = client.search(searchRequest, RequestOptions.DEFAULT);
-
             List<SearchHit> hits = Arrays.stream(response.getHits().getHits()).collect(Collectors.toList());
-
             for (SearchHit hit : hits) {
                 resourceIds.add(hit.getFields().get("_id").getValue());
             }
@@ -135,6 +110,47 @@ public class ElasticValidator implements ElasticValidatorService {
             logger.error("Error retrieving _id value from Elastic.", e);
         }
         return resourceIds;
+    }
+
+    private void validateDBAndElasticEntries(List<String> databaseResources, List<String> elasticResources,
+                                             String resourceType, boolean validateDBtoElastic) {
+        if (validateDBtoElastic) {
+            List<String> missingElasticIds = new ArrayList<>(databaseResources);
+            missingElasticIds.removeAll(elasticResources);
+            if (!missingElasticIds.isEmpty()) {
+                indexMissingElasticIds(missingElasticIds, resourceType);
+            } else {
+                logger.info("Elastic is consistent with Database on {}", resourceType);
+            }
+        } else {
+            List<String> missingDBIds = new ArrayList<>(elasticResources);
+            missingDBIds.removeAll(databaseResources);
+            if (!missingDBIds.isEmpty()) {
+                //TODO: Add missing resources to DB
+                logger.info("Database is missing the following resources {} on {}", missingDBIds, resourceType);
+            } else {
+                logger.info("Database is consistent with Elastic on {}", resourceType);
+            }
+        }
+    }
+
+    private void indexMissingElasticIds(List<String>  missingElasticIds, String resourceType) {
+        logger.info("Adding {} missing indexes for {}", missingElasticIds.size(), resourceType);
+        for (String missingElasticId : missingElasticIds) {
+            Resource resource = resourceService.getResource(missingElasticId);
+            String payload = createDocumentForInsert(resource);
+
+            IndexRequest indexRequest = new IndexRequest(resource.getResourceType().getName());
+            indexRequest.id(resource.getId());
+            indexRequest.source(payload, XContentType.JSON);
+            indexRequest.setRefreshPolicy(WriteRequest.RefreshPolicy.IMMEDIATE);
+
+            try {
+                client.index(indexRequest, RequestOptions.DEFAULT);
+            } catch (IOException e) {
+                throw new ServiceException(e);
+            }
+        }
     }
 
     private String createDocumentForInsert(Resource resource) {
