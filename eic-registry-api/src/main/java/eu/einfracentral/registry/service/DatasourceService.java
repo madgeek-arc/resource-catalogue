@@ -53,7 +53,8 @@ public interface DatasourceService extends ResourceService<DatasourceBundle, Aut
      * @param catalogueId      The ID of the Catalogue
      * @return {@link FacetFilter}
      */
-    FacetFilter createFacetFilterForFetchingDatasources(MultiValueMap<String, Object> allRequestParams, String catalogueId);
+    FacetFilter createFacetFilterForFetchingDatasources(MultiValueMap<String, Object> allRequestParams,
+                                                        String catalogueId);
 
     /**
      * Returns True/False according to if the specific Datasource

@@ -631,10 +631,6 @@ public class RegistrationMailService {
             return String.format("[%s]", this.projectName);
         }
 
-        String serviceOrResource = "Resource";
-        if (projectName.equalsIgnoreCase("CatRIS")) {
-            serviceOrResource = "Service";
-        }
         String subject;
         String providerName = providerBundle.getProvider().getName();
 
@@ -663,27 +659,27 @@ public class RegistrationMailService {
                 case "pending template":
                     assert serviceTemplate != null;
                     subject = String.format("[%s Portal] Your application for registering [%s] " +
-                                    "as a new %s to the %s Portal has been received and is under review",
-                            this.projectName, name, serviceOrResource, this.projectName);
+                                    "as a new Resource to the %s Portal has been received and is under review",
+                            this.projectName, name, this.projectName);
                     break;
                 case "approved template":
                     if (providerBundle.isActive()) {
                         assert serviceTemplate != null;
                         subject = String.format("[%s Portal] Your application for registering [%s] " +
-                                        "as a new %s to the %s Portal has been approved",
-                                this.projectName, name, serviceOrResource, this.projectName);
+                                        "as a new Resource to the %s Portal has been approved",
+                                this.projectName, name, this.projectName);
                         break;
                     } else {
                         assert serviceTemplate != null;
-                        subject = String.format("[%s Portal] Your %s Provider [%s] has been set to inactive",
-                                projectName, serviceOrResource, providerName);
+                        subject = String.format("[%s Portal] Your Resource Provider [%s] has been set to inactive",
+                                projectName, providerName);
                         break;
                     }
                 case "rejected template":
                     assert serviceTemplate != null;
                     subject = String.format("[%s Portal] Your application for registering [%s] " +
-                                    "as a new %s to the %s Portal has been rejected",
-                            this.projectName, name, serviceOrResource, this.projectName);
+                                    "as a new Resource to the %s Portal has been rejected",
+                            this.projectName, name, this.projectName);
                     break;
                 default:
                     subject = String.format("[%s Portal] Provider Registration", this.projectName);
@@ -731,10 +727,6 @@ public class RegistrationMailService {
             return String.format("[%s]", this.projectName);
         }
 
-        String serviceOrResource = "Resource";
-        if (projectName.equalsIgnoreCase("CatRIS")) {
-            serviceOrResource = "Service";
-        }
         String subject;
         String providerName = providerBundle.getProvider().getName();
         String providerId = providerBundle.getProvider().getId();
@@ -764,27 +756,27 @@ public class RegistrationMailService {
                 case "pending template":
                     assert serviceTemplate != null;
                     subject = String.format("[%s Portal] A new application for registering [%s] " +
-                                    "as a new %s to the %s Portal has been received and should be reviewed",
-                            this.projectName, resourceId, serviceOrResource, this.projectName);
+                                    "as a new Resource to the %s Portal has been received and should be reviewed",
+                            this.projectName, resourceId, this.projectName);
                     break;
                 case "approved template":
                     if (providerBundle.isActive()) {
                         assert serviceTemplate != null;
                         subject = String.format("[%s Portal] The application of [%s] - ([%s]) " +
-                                        "for registering as a new %s has been approved",
-                                this.projectName, name, resourceId, serviceOrResource);
+                                        "for registering as a new Resource has been approved",
+                                this.projectName, name, resourceId);
                         break;
                     } else {
                         assert serviceTemplate != null;
-                        subject = String.format("[%s Portal] The %s Provider [%s] has been set to inactive",
-                                this.projectName, serviceOrResource, providerName);
+                        subject = String.format("[%s Portal] The Resource Provider [%s] has been set to inactive",
+                                this.projectName, providerName);
                         break;
                     }
                 case "rejected template":
                     assert serviceTemplate != null;
                     subject = String.format("[%s Portal] The application of [%s] - ([%s]) " +
-                                    "for registering as a %s %s has been rejected",
-                            this.projectName, name, resourceId, this.projectName, serviceOrResource);
+                                    "for registering as a %s Resource has been rejected",
+                            this.projectName, name, resourceId, this.projectName);
                     break;
                 default:
                     subject = String.format("[%s Portal] Provider Registration", this.projectName);

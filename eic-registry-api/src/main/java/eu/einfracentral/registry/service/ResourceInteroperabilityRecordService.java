@@ -5,13 +5,47 @@ import org.springframework.security.core.Authentication;
 
 public interface ResourceInteroperabilityRecordService<T> extends ResourceService<T, Authentication> {
 
-    ResourceInteroperabilityRecordBundle add(ResourceInteroperabilityRecordBundle resourceInteroperabilityRecord, String resourceType, Authentication auth);
+    /**
+     *
+     * @param resourceInteroperabilityRecord
+     * @param resourceType
+     * @param auth
+     * @return
+     */
+    ResourceInteroperabilityRecordBundle add(ResourceInteroperabilityRecordBundle resourceInteroperabilityRecord,
+                                             String resourceType, Authentication auth);
 
+    /**
+     *
+     * @param resourceId
+     * @param catalogueId
+     * @return
+     */
     ResourceInteroperabilityRecordBundle get(String resourceId, String catalogueId);
 
-    ResourceInteroperabilityRecordBundle validate(ResourceInteroperabilityRecordBundle resourceInteroperabilityRecordBundle, String resourceType);
+    /**
+     *
+     * @param resourceInteroperabilityRecordBundle
+     * @param resourceType
+     * @return
+     */
+    ResourceInteroperabilityRecordBundle validate(
+            ResourceInteroperabilityRecordBundle resourceInteroperabilityRecordBundle, String resourceType);
 
-    ResourceInteroperabilityRecordBundle createPublicResourceInteroperabilityRecord(ResourceInteroperabilityRecordBundle resourceInteroperabilityRecordBundle, Authentication auth);
+    /**
+     *
+     * @param resourceInteroperabilityRecordBundle
+     * @param auth
+     * @return
+     */
+    ResourceInteroperabilityRecordBundle createPublicResourceInteroperabilityRecord(
+            ResourceInteroperabilityRecordBundle resourceInteroperabilityRecordBundle, Authentication auth);
 
+    /**
+     *
+     * @param resourceId
+     * @param catalogueId
+     * @return
+     */
     ResourceInteroperabilityRecordBundle getWithResourceId(String resourceId, String catalogueId);
 }

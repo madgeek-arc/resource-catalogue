@@ -55,8 +55,16 @@ public interface TrainingResourceService<T> extends ResourceService<T, Authentic
      * @return
      * @throws ResourceNotFoundException
      */
-    T updateResource(T resource, String catalogueId, String comment, Authentication auth) throws ResourceNotFoundException;
+    T updateResource(T resource, String catalogueId, String comment, Authentication auth)
+            throws ResourceNotFoundException;
 
+    /**
+     *
+     * @param catalogueId
+     * @param resourceId
+     * @param auth
+     * @return
+     */
     T getCatalogueResource(String catalogueId, String resourceId, Authentication auth);
 
     /**
@@ -145,7 +153,8 @@ public interface TrainingResourceService<T> extends ResourceService<T, Authentic
      * @param auth
      * @return
      */
-    T auditResource(String resourceId, String catalogueId, String comment, LoggingInfo.ActionType actionType, Authentication auth);
+    T auditResource(String resourceId, String catalogueId, String comment, LoggingInfo.ActionType actionType,
+                    Authentication auth);
 
     /**
      * @param ff
@@ -170,10 +179,27 @@ public interface TrainingResourceService<T> extends ResourceService<T, Authentic
      */
     Paging<T> getResourceBundles(String catalogueId, String providerId, Authentication auth);
 
+    /**
+     *
+     * @param providerId
+     * @param auth
+     * @return
+     */
     List<? extends TrainingResource> getResources(String providerId, Authentication auth);
 
+    /**
+     *
+     * @param providerId
+     * @param auth
+     * @return
+     */
     TrainingResourceBundle getResourceTemplate(String providerId, Authentication auth);
 
+    /**
+     *
+     * @param providerId
+     * @return
+     */
     List<T> getInactiveResources(String providerId);
 
     /**
@@ -200,17 +226,64 @@ public interface TrainingResourceService<T> extends ResourceService<T, Authentic
      */
     T verifyResource(String id, String status, Boolean active, Authentication auth);
 
+    /**
+     *
+     * @param resourceId
+     * @param newProvider
+     * @param comment
+     * @param auth
+     * @return
+     */
     T changeProvider(String resourceId, String newProvider, String comment, Authentication auth);
 
+    /**
+     *
+     * @param ff
+     * @param auditState
+     * @return
+     */
     Paging<Bundle<?>> getAllForAdminWithAuditStates(FacetFilter ff, Set<String> auditState);
 
+    /**
+     *
+     * @param id
+     * @return
+     */
     TrainingResourceBundle getOrElseReturnNull(String id);
 
+    /**
+     *
+     * @param id
+     * @param catalogueId
+     * @return
+     */
     TrainingResourceBundle getOrElseReturnNull(String id, String catalogueId);
 
+    /**
+     *
+     * @param resource
+     * @param auth
+     * @return
+     */
     T createPublicResource(T resource, Authentication auth);
 
+    /**
+     *
+     * @param trainingResourceId
+     * @param catalogueId
+     * @param suspend
+     * @param auth
+     * @return
+     */
     TrainingResourceBundle suspend(String trainingResourceId, String catalogueId, boolean suspend, Authentication auth);
 
-    void publishTrainingResourceRelatedResources(String serviceId, String catalogueId, Boolean active, Authentication auth);
+    /**
+     *
+     * @param serviceId
+     * @param catalogueId
+     * @param active
+     * @param auth
+     */
+    void publishTrainingResourceRelatedResources(String serviceId, String catalogueId, Boolean active,
+                                                 Authentication auth);
 }

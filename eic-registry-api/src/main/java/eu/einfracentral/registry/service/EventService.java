@@ -28,7 +28,8 @@ public interface EventService extends ResourceService<Event, Authentication> {
      * @param value
      * @return
      */
-    Event setRating(String serviceId, Float value, Authentication authentication) throws ResourceNotFoundException, NumberParseException;
+    Event setRating(String serviceId, Float value, Authentication authentication) throws ResourceNotFoundException,
+            NumberParseException;
 
     /**
      * Get all events of a specific type.
@@ -75,6 +76,10 @@ public interface EventService extends ResourceService<Event, Authentication> {
      */
     Map<String, List<Float>> getAllServiceEventValues(String eventType, Authentication authentication);
 
+    /**
+     *
+     * @param events
+     */
     void deleteEvents(List<Event> events);
 
     /**

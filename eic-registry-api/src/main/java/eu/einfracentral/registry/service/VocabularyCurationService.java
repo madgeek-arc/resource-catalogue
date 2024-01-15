@@ -5,7 +5,8 @@ import eu.openminted.registry.core.domain.Browsing;
 import eu.openminted.registry.core.domain.FacetFilter;
 import org.springframework.security.core.Authentication;
 
-public interface VocabularyCurationService<T, U extends Authentication> extends ResourceService<VocabularyCuration, Authentication> {
+public interface VocabularyCurationService<T, U extends Authentication> extends ResourceService<VocabularyCuration,
+        Authentication> {
 
     /**
      * Add a new VocabularyCuration from UI

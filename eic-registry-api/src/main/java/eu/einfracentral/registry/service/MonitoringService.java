@@ -13,9 +13,9 @@ public interface MonitoringService<T, U extends Authentication> extends Resource
     /**
      * Creates a new Monitoring
      *
-     * @param monitoring   - MonitoringBundle
-     * @param resourceType - String Resource Type
-     * @param auth         - Authentication
+     * @param monitoring   MonitoringBundle
+     * @param resourceType String Resource Type
+     * @param auth         Authentication
      * @return {@link MonitoringBundle}
      */
     MonitoringBundle add(MonitoringBundle monitoring, String resourceType, Authentication auth);
@@ -30,8 +30,8 @@ public interface MonitoringService<T, U extends Authentication> extends Resource
     /**
      * Retrieve {@link MonitoringBundle} for a catalogue specific resource.
      *
-     * @param serviceId   - String Service ID
-     * @param catalogueId - String Catalogue ID
+     * @param serviceId   String Service ID
+     * @param catalogueId String Catalogue ID
      * @return {@link MonitoringBundle}
      */
     MonitoringBundle get(String serviceId, String catalogueId);
@@ -39,23 +39,23 @@ public interface MonitoringService<T, U extends Authentication> extends Resource
     /**
      * Validates the given Monitoring
      *
-     * @param monitoringBundle - MonitoringBundle
-     * @param resourceType     - String Resource Type
+     * @param monitoringBundle MonitoringBundle
+     * @param resourceType     String Resource Type
      * @return {@link MonitoringBundle}
      */
     MonitoringBundle validate(MonitoringBundle monitoringBundle, String resourceType);
 
     /**
-     * @param monitoringBundle - MonitoringBundle
-     * @param auth             - Authentication
+     * @param monitoringBundle MonitoringBundle
+     * @param auth             Authentication
      */
     void updateBundle(MonitoringBundle monitoringBundle, Authentication auth);
 
     /**
      * Creates a Public version of the specific Monitoring
      *
-     * @param monitoringBundle - MonitoringBundle
-     * @param auth             - Authentication
+     * @param monitoringBundle MonitoringBundle
+     * @param auth             Authentication
      * @return {@link MonitoringBundle}
      */
     MonitoringBundle createPublicResource(MonitoringBundle monitoringBundle, Authentication auth);
@@ -66,7 +66,7 @@ public interface MonitoringService<T, U extends Authentication> extends Resource
     /**
      * Returns a list of Monitoring's Availability Object
      *
-     * @param results - JsonArray Results
+     * @param results JsonArray Results
      * @return {@link List<MonitoringStatus>}
      */
     List<MonitoringStatus> createMonitoringAvailabilityObject(JsonArray results);
@@ -74,7 +74,7 @@ public interface MonitoringService<T, U extends Authentication> extends Resource
     /**
      * Returns a list of Monitoring's Status Objects
      *
-     * @param results - JsonArray Results
+     * @param results JsonArray Results
      * @return {@link List<MonitoringStatus>}
      */
     List<MonitoringStatus> createMonitoringStatusObject(JsonArray results);

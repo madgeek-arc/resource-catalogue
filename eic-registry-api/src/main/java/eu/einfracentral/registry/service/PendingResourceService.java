@@ -80,10 +80,23 @@ public interface PendingResourceService<T extends Bundle> extends ResourceServic
                 .collect(Collectors.toMap(Bundle::getId, r -> r.getIdentifiers().getOriginalId()));
     }
 
+    /**
+     * @param authentication
+     * @return
+     */
     List<T> getMy(Authentication authentication);
 
+    /**
+     * @param providerId
+     * @param authentication
+     * @return
+     */
     boolean hasAdminAcceptedTerms(String providerId, Authentication authentication);
 
+    /**
+     * @param providerId
+     * @param authentication
+     */
     void adminAcceptedTerms(String providerId, Authentication authentication);
 
     /**
