@@ -66,11 +66,11 @@ public class HelpdeskManager extends ResourceManager<HelpdeskBundle> implements 
         }
 
         // check if Resource exists and if User belongs to Resource's Provider Admins
-        if (resourceType.equals("service")){
+        if (resourceType.equals("service")) {
             ResourceValidationUtils.checkIfResourceBundleIsActiveAndApprovedAndNotPublic(resourceId, catalogueId, serviceBundleService, resourceType);
-        } else if (resourceType.equals("training_resource")){
+        } else if (resourceType.equals("training_resource")) {
             ResourceValidationUtils.checkIfResourceBundleIsActiveAndApprovedAndNotPublic(resourceId, catalogueId, trainingResourceService, resourceType);
-        } else{
+        } else {
             throw new ValidationException("Field resourceType should be either 'service' or 'training_resource'");
         }
         return super.validate(helpdeskBundle);
@@ -134,7 +134,7 @@ public class HelpdeskManager extends ResourceManager<HelpdeskBundle> implements 
         existingResource.setResourceType(resourceType);
 
         // block user from updating serviceId
-        if (!ret.getHelpdesk().getServiceId().equals(existingHelpdesk.getHelpdesk().getServiceId()) && !securityService.hasRole(auth, "ROLE_ADMIN")){
+        if (!ret.getHelpdesk().getServiceId().equals(existingHelpdesk.getHelpdesk().getServiceId()) && !securityService.hasRole(auth, "ROLE_ADMIN")) {
             throw new ValidationException("You cannot change the Service Id with which this Helpdesk is related");
         }
 

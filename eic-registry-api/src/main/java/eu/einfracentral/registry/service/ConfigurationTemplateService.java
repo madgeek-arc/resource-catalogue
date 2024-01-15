@@ -9,7 +9,7 @@ public interface ConfigurationTemplateService<T> extends ResourceService<T, Auth
      * Add a new Configuration Template.
      *
      * @param configurationTemplateBundle ConfigurationTemplateBundle
-     * @param auth Authentication
+     * @param auth                        Authentication
      * @return {@link ConfigurationTemplateBundle}
      */
     ConfigurationTemplateBundle addConfigurationTemplate(ConfigurationTemplateBundle configurationTemplateBundle,

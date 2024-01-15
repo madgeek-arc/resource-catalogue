@@ -11,7 +11,7 @@ public interface CatalogueService<T, U extends Authentication> extends ResourceS
     /**
      * Return a Catalogue given its ID
      *
-     * @param id The ID of the Catalogue
+     * @param id   The ID of the Catalogue
      * @param auth Authentication
      * @return {@link T}
      */
@@ -27,7 +27,7 @@ public interface CatalogueService<T, U extends Authentication> extends ResourceS
     /**
      * Add a new Catalogue
      *
-     * @param catalogue Catalogue to be added
+     * @param catalogue      Catalogue to be added
      * @param authentication Authentication
      * @return {@link T}
      */
@@ -38,8 +38,8 @@ public interface CatalogueService<T, U extends Authentication> extends ResourceS
      * Update an existing Catalogue
      *
      * @param catalogue Catalogue to be updated
-     * @param comment Optional comment
-     * @param auth Authentication
+     * @param comment   Optional comment
+     * @param auth      Authentication
      * @return {@link CatalogueBundle}
      */
     CatalogueBundle update(CatalogueBundle catalogue, String comment, Authentication auth);
@@ -55,10 +55,10 @@ public interface CatalogueService<T, U extends Authentication> extends ResourceS
     /**
      * Verify (approve/reject) a Catalogue during its Onboarding process
      *
-     * @param id The ID of the Catalogue
+     * @param id     The ID of the Catalogue
      * @param status The Onboarding Status of the Catalogue
      * @param active boolean value marking a Catalogue as Active or Inactive
-     * @param auth Authentication
+     * @param auth   Authentication
      * @return {@link T}
      */
     T verifyCatalogue(String id, String status, Boolean active, U auth);
@@ -67,8 +67,8 @@ public interface CatalogueService<T, U extends Authentication> extends ResourceS
      * Activate/Deactivate a Catalogue
      *
      * @param catalogueId The ID of the Catalogue
-     * @param active boolean value marking a Catalogue as Active or Inactive
-     * @param auth Authentication
+     * @param active      boolean value marking a Catalogue as Active or Inactive
+     * @param auth        Authentication
      * @return {@link CatalogueBundle}
      */
     CatalogueBundle publish(String catalogueId, Boolean active, Authentication auth);
@@ -76,7 +76,7 @@ public interface CatalogueService<T, U extends Authentication> extends ResourceS
     /**
      * Has an Authenticated User accepted the EOSC Portal Terms & Conditions
      *
-     * @param catalogueId The ID of the Catalogue
+     * @param catalogueId    The ID of the Catalogue
      * @param authentication Authentication
      * @return <code>True</code> if Authenticated User has accepted Terms; <code>False</code> otherwise.
      */
@@ -85,7 +85,7 @@ public interface CatalogueService<T, U extends Authentication> extends ResourceS
     /**
      * Update a Catalogue's list of Users that has accepted the Terms & Conditions
      *
-     * @param catalogueId The ID of the Catalogue
+     * @param catalogueId    The ID of the Catalogue
      * @param authentication Authentication
      */
     void adminAcceptedTerms(String catalogueId, U authentication);
@@ -94,8 +94,8 @@ public interface CatalogueService<T, U extends Authentication> extends ResourceS
      * Suspend the Catalogue
      *
      * @param catalogueId The ID of the Catalogue
-     * @param suspend boolean value marking a Catalogue as Suspended or Unsuspended
-     * @param auth Authentication
+     * @param suspend     boolean value marking a Catalogue as Suspended or Unsuspended
+     * @param auth        Authentication
      * @return {@link CatalogueBundle}
      */
     CatalogueBundle suspend(String catalogueId, boolean suspend, Authentication auth);
@@ -103,9 +103,9 @@ public interface CatalogueService<T, U extends Authentication> extends ResourceS
     /**
      * Audit the Catalogue
      *
-     * @param id  The ID of the Catalogue
+     * @param id         The ID of the Catalogue
      * @param actionType Validate or Invalidate action
-     * @param auth Authentication
+     * @param auth       Authentication
      * @return {@link CatalogueBundle}
      */
     CatalogueBundle auditCatalogue(String id, String comment, LoggingInfo.ActionType actionType, Authentication auth);

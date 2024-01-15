@@ -18,7 +18,7 @@ public interface ProviderService<T, U extends Authentication> extends ResourceSe
     /**
      * Add a new Provider on the Project's Catalogue.
      *
-     * @param provider - Provider
+     * @param provider       - Provider
      * @param authentication - Authentication
      * @return {@link T}
      */
@@ -28,8 +28,8 @@ public interface ProviderService<T, U extends Authentication> extends ResourceSe
     /**
      * Add a new Provider on a specific Catalogue.
      *
-     * @param provider - Provider
-     * @param catalogueId - The ID of the Catalogue
+     * @param provider       - Provider
+     * @param catalogueId    - The ID of the Catalogue
      * @param authentication - Authentication
      */
     T add(T provider, String catalogueId, Authentication authentication);
@@ -46,7 +46,7 @@ public interface ProviderService<T, U extends Authentication> extends ResourceSe
     /**
      * Get a Provider of the Project's Catalogue providing the Provider's ID.
      *
-     * @param id - Provider's ID
+     * @param id   - Provider's ID
      * @param auth - Authentication
      */
     T get(String id, U auth);
@@ -55,15 +55,15 @@ public interface ProviderService<T, U extends Authentication> extends ResourceSe
      * Get a Provider of a specific Catalogue providing the Provider's ID and the Catalogue's ID.
      *
      * @param catalogueId - Catalogue's ID
-     * @param providerId - Provider's ID
-     * @param auth - Authentication
+     * @param providerId  - Provider's ID
+     * @param auth        - Authentication
      */
     T get(String catalogueId, String providerId, U auth);
 
     /**
      * Get a list of Providers in which the given User's email is Admin
      *
-     * @param email - User's email
+     * @param email          - User's email
      * @param authentication - Authentication
      */
     List<T> getServiceProviders(String email, U authentication);
@@ -71,7 +71,7 @@ public interface ProviderService<T, U extends Authentication> extends ResourceSe
     /**
      * Return true if the specific User has accepted the Provider's registration terms
      *
-     * @param providerId - Provider's ID
+     * @param providerId     - Provider's ID
      * @param authentication - Authentication
      */
     boolean hasAdminAcceptedTerms(String providerId, U authentication);
@@ -79,16 +79,16 @@ public interface ProviderService<T, U extends Authentication> extends ResourceSe
     /**
      * Update the Provider's list of Users that have accepted the Provider's registration terms
      *
-     * @param providerId - Provider's ID
+     * @param providerId     - Provider's ID
      * @param authentication - Authentication
      */
     void adminAcceptedTerms(String providerId, U authentication);
 
     /**
      * Validates a specific URL regarding the ability to open a connection
-     * @deprecated Validates a specific URL regarding the response's status code
      *
      * @param urlForValidation - URL to be validated
+     * @deprecated Validates a specific URL regarding the response's status code
      */
     boolean validateUrl(URL urlForValidation) throws Throwable;
 
@@ -96,7 +96,7 @@ public interface ProviderService<T, U extends Authentication> extends ResourceSe
      * After a Provider's update, calculate if the list of Admins has changed
      * and send emails to Users that have been added or deleted from the list
      *
-     * @param updatedProvider - Provider after the update
+     * @param updatedProvider  - Provider after the update
      * @param existingProvider - Provider before the update
      */
     void adminDifferences(ProviderBundle updatedProvider, ProviderBundle existingProvider);
@@ -105,7 +105,7 @@ public interface ProviderService<T, U extends Authentication> extends ResourceSe
      * Send email to Portal Admins requesting a Provider's deletion
      *
      * @param providerId - Provider's ID
-     * @param auth - Authentication
+     * @param auth       - Authentication
      */
     void requestProviderDeletion(String providerId, Authentication auth);
 
@@ -117,10 +117,10 @@ public interface ProviderService<T, U extends Authentication> extends ResourceSe
     /**
      * Verify (Accept/Reject during the onboarding process) a specific Provider
      *
-     * @param id - Provider's ID
+     * @param id     - Provider's ID
      * @param status - Provider's new status
      * @param active - Provider's new active field
-     * @param auth - Authentication
+     * @param auth   - Authentication
      */
     T verifyProvider(String id, String status, Boolean active, U auth);
 
@@ -222,5 +222,6 @@ public interface ProviderService<T, U extends Authentication> extends ResourceSe
     ProviderBundle suspend(String providerId, String catalogueId, boolean suspend, Authentication auth);
 
     String determineHostingLegalEntity(String providerName);
+
     List<MapValues<ExtendedValue>> getAllResourcesUnderASpecificHLE(String hle, Authentication auth);
 }

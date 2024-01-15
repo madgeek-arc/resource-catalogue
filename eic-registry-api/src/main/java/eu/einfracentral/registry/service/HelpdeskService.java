@@ -3,14 +3,14 @@ package eu.einfracentral.registry.service;
 import eu.einfracentral.domain.HelpdeskBundle;
 import org.springframework.security.core.Authentication;
 
-public interface HelpdeskService<T, U extends Authentication> extends ResourceService<T, Authentication>  {
+public interface HelpdeskService<T, U extends Authentication> extends ResourceService<T, Authentication> {
 
     HelpdeskBundle add(HelpdeskBundle helpdesk, String resourceType, Authentication auth);
 
     /**
      * Retrieve {@link HelpdeskBundle} for a catalogue specific resource.
      *
-     * @param serviceId String Service ID
+     * @param serviceId   String Service ID
      * @param catalogueId String Catalogue ID
      * @return {@link HelpdeskBundle}
      */
@@ -20,7 +20,7 @@ public interface HelpdeskService<T, U extends Authentication> extends ResourceSe
      * Validates the given Helpdesk
      *
      * @param helpdeskBundle HelpdeskBundle
-     * @param resourceType String Resource Type
+     * @param resourceType   String Resource Type
      * @return {@link HelpdeskBundle}
      */
     HelpdeskBundle validate(HelpdeskBundle helpdeskBundle, String resourceType);
@@ -29,7 +29,7 @@ public interface HelpdeskService<T, U extends Authentication> extends ResourceSe
      * Creates a Public version of the specific Helpdesk
      *
      * @param helpdeskBundle HelpdeskBundle
-     * @param auth Authentication
+     * @param auth           Authentication
      * @return {@link HelpdeskBundle}
      */
     HelpdeskBundle createPublicResource(HelpdeskBundle helpdeskBundle, Authentication auth);
@@ -38,7 +38,7 @@ public interface HelpdeskService<T, U extends Authentication> extends ResourceSe
      * Updates a Helpdesk Bundle
      *
      * @param helpdeskBundle HelpdeskBundle
-     * @param auth Authentication
+     * @param auth           Authentication
      */
     void updateBundle(HelpdeskBundle helpdeskBundle, Authentication auth);
 }

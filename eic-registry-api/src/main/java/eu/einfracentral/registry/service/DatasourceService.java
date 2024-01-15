@@ -13,7 +13,7 @@ public interface DatasourceService extends ResourceService<DatasourceBundle, Aut
     /**
      * Get the Datasource sub-profile of the specific Service of the specific Catalogue
      *
-     * @param serviceId The ID of the Service
+     * @param serviceId   The ID of the Service
      * @param catalogueId The ID of the Catalogue
      * @return {@link DatasourceBundle}
      */
@@ -23,8 +23,8 @@ public interface DatasourceService extends ResourceService<DatasourceBundle, Aut
      * Get the Datasource sub-profile of the specific Service of the specific Catalogue
      *
      * @param datasourceBundle Datasource Bundle to be updated
-     * @param comment Optional comment of the update
-     * @param auth Authentication
+     * @param comment          Optional comment of the update
+     * @param auth             Authentication
      * @return {@link DatasourceBundle}
      */
     DatasourceBundle update(DatasourceBundle datasourceBundle, String comment, Authentication auth);
@@ -32,18 +32,17 @@ public interface DatasourceService extends ResourceService<DatasourceBundle, Aut
     /**
      * Verify (approve/reject) a Datasource.
      *
-     * @param id The ID of the Datasource
+     * @param id     The ID of the Datasource
      * @param status New status
      * @param active New active
-     * @param auth Authentication
+     * @param auth   Authentication
      * @return {@link DatasourceBundle}
      */
     DatasourceBundle verifyDatasource(String id, String status, Boolean active, Authentication auth);
 
     /**
-     *
      * @param datasourceBundle DatasourceBundle
-     * @param auth Authentication
+     * @param auth             Authentication
      */
     void updateBundle(DatasourceBundle datasourceBundle, Authentication auth);
 
@@ -51,7 +50,7 @@ public interface DatasourceService extends ResourceService<DatasourceBundle, Aut
      * Create a FacetFilter for fetching Datasources
      *
      * @param allRequestParams All the @RequestParams given
-     * @param catalogueId The ID of the Catalogue
+     * @param catalogueId      The ID of the Catalogue
      * @return {@link FacetFilter}
      */
     FacetFilter createFacetFilterForFetchingDatasources(MultiValueMap<String, Object> allRequestParams, String catalogueId);
@@ -69,8 +68,8 @@ public interface DatasourceService extends ResourceService<DatasourceBundle, Aut
      * Get a Paging of DatasourceBundles of a specific Service of a specific Catalogue
      *
      * @param catalogueId The ID of the Catalogue
-     * @param serviceId The ID of the Service
-     * @param auth Authentication
+     * @param serviceId   The ID of the Service
+     * @param auth        Authentication
      * @return {@link Paging}&lt;{@link DatasourceBundle}&gt;
      */
     Paging<DatasourceBundle> getResourceBundles(String catalogueId, String serviceId, Authentication auth);

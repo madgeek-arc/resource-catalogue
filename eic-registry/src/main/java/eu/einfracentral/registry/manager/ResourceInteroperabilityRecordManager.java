@@ -62,15 +62,15 @@ public class ResourceInteroperabilityRecordManager extends ResourceManager<Resou
         ResourceInteroperabilityRecordBundle existing = getWithResourceId(resourceId, catalogueId);
         if (existing != null) {
             throw new ValidationException(String.format("Resource [%s] of the Catalogue [%s] has already a Resource " +
-                                "Interoperability Record registered, with id: [%s]", resourceId, catalogueId, existing.getId()));
+                    "Interoperability Record registered, with id: [%s]", resourceId, catalogueId, existing.getId()));
         }
 
         // check if Resource exists and if User belongs to Resource's Provider Admins
-        if (resourceType.equals("service")){
+        if (resourceType.equals("service")) {
             ResourceValidationUtils.checkIfResourceBundleIsActiveAndApprovedAndNotPublic(resourceId, catalogueId, serviceBundleService, resourceType);
-        } else if (resourceType.equals("training_resource")){
+        } else if (resourceType.equals("training_resource")) {
             ResourceValidationUtils.checkIfResourceBundleIsActiveAndApprovedAndNotPublic(resourceId, catalogueId, trainingResourceService, resourceType);
-        } else{
+        } else {
             throw new ValidationException("Field 'resourceType' should be either 'service', 'datasource' or 'training_resource'");
         }
 
@@ -139,7 +139,7 @@ public class ResourceInteroperabilityRecordManager extends ResourceManager<Resou
         commonMethods.checkRelatedResourceIDsConsistency(ret);
 
         // block Public ResourceInteroperabilityRecordBundle updates
-        if (ret.getMetadata().isPublished()){
+        if (ret.getMetadata().isPublished()) {
             throw new ValidationException("You cannot directly update a Public Resource Interoperability Record");
         }
 
@@ -164,7 +164,7 @@ public class ResourceInteroperabilityRecordManager extends ResourceManager<Resou
 
         // block user from updating resourceId
         if (!ret.getResourceInteroperabilityRecord().getResourceId().equals(existingInteroperabilityRecord.getResourceInteroperabilityRecord().getResourceId())
-                && !securityService.hasRole(auth, "ROLE_ADMIN")){
+                && !securityService.hasRole(auth, "ROLE_ADMIN")) {
             throw new ValidationException("You cannot change the Resource Id with which this ResourceInteroperabilityRecord is related");
         }
 
@@ -176,7 +176,7 @@ public class ResourceInteroperabilityRecordManager extends ResourceManager<Resou
 
     public void delete(ResourceInteroperabilityRecordBundle resourceInteroperabilityRecordBundle) {
         // block Public ResourceInteroperabilityRecordBundle deletions
-        if (resourceInteroperabilityRecordBundle.getMetadata().isPublished()){
+        if (resourceInteroperabilityRecordBundle.getMetadata().isPublished()) {
             throw new ValidationException("You cannot directly delete a Public Resource Interoperability Record");
         }
         logger.trace("User is attempting to delete the ResourceInteroperabilityRecord with id '{}'",
@@ -186,16 +186,16 @@ public class ResourceInteroperabilityRecordManager extends ResourceManager<Resou
 
     }
 
-    private ResourceInteroperabilityRecordBundle checkIfEachInteroperabilityRecordIsApproved(ResourceInteroperabilityRecordBundle resourceInteroperabilityRecordBundle){
+    private ResourceInteroperabilityRecordBundle checkIfEachInteroperabilityRecordIsApproved(ResourceInteroperabilityRecordBundle resourceInteroperabilityRecordBundle) {
         for (String interoperabilityRecord : resourceInteroperabilityRecordBundle.getResourceInteroperabilityRecord().getInteroperabilityRecordIds()) {
-            if (!interoperabilityRecordService.get(interoperabilityRecord).getStatus().equals("approved interoperability record")){
+            if (!interoperabilityRecordService.get(interoperabilityRecord).getStatus().equals("approved interoperability record")) {
                 throw new ValidationException("One ore more of the Interoperability Records you have provided is not yet approved.");
             }
         }
         return resourceInteroperabilityRecordBundle;
     }
 
-    public ResourceInteroperabilityRecordBundle createPublicResourceInteroperabilityRecord(ResourceInteroperabilityRecordBundle resourceInteroperabilityRecordBundle, Authentication auth){
+    public ResourceInteroperabilityRecordBundle createPublicResourceInteroperabilityRecord(ResourceInteroperabilityRecordBundle resourceInteroperabilityRecordBundle, Authentication auth) {
         publicResourceInteroperabilityRecordManager.add(resourceInteroperabilityRecordBundle, auth);
         return resourceInteroperabilityRecordBundle;
     }

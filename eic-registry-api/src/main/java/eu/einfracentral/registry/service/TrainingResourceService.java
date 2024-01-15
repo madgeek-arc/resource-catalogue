@@ -62,7 +62,7 @@ public interface TrainingResourceService<T> extends ResourceService<T, Authentic
     /**
      * Returns the Resource with the specified id.
      *
-     * @param id of the Resource.
+     * @param id          of the Resource.
      * @param catalogueId
      * @return resource.
      */
@@ -205,9 +205,12 @@ public interface TrainingResourceService<T> extends ResourceService<T, Authentic
     Paging<Bundle<?>> getAllForAdminWithAuditStates(FacetFilter ff, Set<String> auditState);
 
     TrainingResourceBundle getOrElseReturnNull(String id);
+
     TrainingResourceBundle getOrElseReturnNull(String id, String catalogueId);
 
     T createPublicResource(T resource, Authentication auth);
+
     TrainingResourceBundle suspend(String trainingResourceId, String catalogueId, boolean suspend, Authentication auth);
+
     void publishTrainingResourceRelatedResources(String serviceId, String catalogueId, Boolean active, Authentication auth);
 }

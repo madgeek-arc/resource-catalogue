@@ -25,7 +25,7 @@ public class Identifiers {
                 '}';
     }
 
-    public static void createOriginalId(Bundle<?> bundle){
+    public static void createOriginalId(Bundle<?> bundle) {
         if (bundle.getIdentifiers() != null) {
             bundle.getIdentifiers().setOriginalId(bundle.getId());
         } else {

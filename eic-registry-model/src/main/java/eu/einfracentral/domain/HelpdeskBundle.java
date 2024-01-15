@@ -8,7 +8,7 @@ import javax.xml.bind.annotation.XmlType;
 
 @XmlType
 @XmlRootElement(namespace = "http://einfracentral.eu")
-public class HelpdeskBundle extends Bundle<Helpdesk>{
+public class HelpdeskBundle extends Bundle<Helpdesk> {
 
     @XmlElement
     @FieldValidation(nullable = true, containsId = true, idClass = Catalogue.class)

@@ -66,7 +66,7 @@ public class SimpleIdCreator implements IdCreator {
         while (hashtext.length() < 32) {
             hashtext = "0" + hashtext;
         }
-        return resourceOrganisation+"."+hashtext;
+        return resourceOrganisation + "." + hashtext;
     }
 
     public String createInteroperabilityRecordId(InteroperabilityRecord interoperabilityRecord) throws NoSuchAlgorithmException {

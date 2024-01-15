@@ -291,7 +291,7 @@ public class VocabularyManager extends ResourceManager<Vocabulary> implements Vo
         }
     }
 
-//    @Scheduled(initialDelay = 0, fixedRate = 120000)
+    //    @Scheduled(initialDelay = 0, fixedRate = 120000)
     @Scheduled(cron = "0 0 12 ? * 2/7") // At 12:00:00pm, every 7 days starting on Monday, every month
     public void updateHostingLegalEntityVocabularyList() {
         logger.info("Checking for possible new Hosting Legal Entity entries..");
@@ -308,7 +308,7 @@ public class VocabularyManager extends ResourceManager<Vocabulary> implements Vo
         List<ProviderBundle> allActiveAndApprovedProviders = providerManager.getAll(ff, securityService.getAdminAccess()).getResults();
         List<String> providerNames = new ArrayList<>();
         for (ProviderBundle providerBundle : allActiveAndApprovedProviders) {
-            if (providerBundle.getProvider().isLegalEntity()){
+            if (providerBundle.getProvider().isLegalEntity()) {
                 providerNames.add(providerBundle.getProvider().getName());
             }
         }
@@ -324,8 +324,8 @@ public class VocabularyManager extends ResourceManager<Vocabulary> implements Vo
         updateHLEVocabularyList(providerNames);
     }
 
-    private void updateHLEVocabularyList(List<String> providerNames){
-        for (String newHLE : providerNames){
+    private void updateHLEVocabularyList(List<String> providerNames) {
+        for (String newHLE : providerNames) {
             Vocabulary newHostingLegalEntity = new Vocabulary();
             newHostingLegalEntity.setId(idCreator.sanitizeString(newHLE));
             newHostingLegalEntity.setName(newHLE);

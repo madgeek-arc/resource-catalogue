@@ -127,9 +127,9 @@ public class InteroperabilityRecordController {
     @GetMapping(path = "bundle/all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     public ResponseEntity<Paging<?>> getAllBundles(@ApiIgnore @RequestParam MultiValueMap<String, Object> allRequestParams,
-                                                                              @RequestParam(required = false) Set<String> auditState,
-                                                                              @RequestParam(defaultValue = "all", name = "catalogue_id") String catalogueId,
-                                                                              @RequestParam(defaultValue = "all", name = "provider_id") String providerId) {
+                                                   @RequestParam(required = false) Set<String> auditState,
+                                                   @RequestParam(defaultValue = "all", name = "catalogue_id") String catalogueId,
+                                                   @RequestParam(defaultValue = "all", name = "provider_id") String providerId) {
         FacetFilter ff = interoperabilityRecordService.createFacetFilterForFetchingInteroperabilityRecords(allRequestParams, catalogueId, providerId);
         if (auditState == null) {
             Paging<InteroperabilityRecordBundle> paging = genericResourceService.getResults(ff);
@@ -176,8 +176,8 @@ public class InteroperabilityRecordController {
     @PatchMapping(path = "auditResource/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     public ResponseEntity<InteroperabilityRecordBundle> auditResource(@PathVariable("id") String id, @RequestParam("catalogueId") String catalogueId,
-                                                                @RequestParam(required = false) String comment,
-                                                                @RequestParam LoggingInfo.ActionType actionType, @ApiIgnore Authentication auth) {
+                                                                      @RequestParam(required = false) String comment,
+                                                                      @RequestParam LoggingInfo.ActionType actionType, @ApiIgnore Authentication auth) {
         InteroperabilityRecordBundle interoperabilityRecordBundle = interoperabilityRecordService.auditResource(id, catalogueId, comment, actionType, auth);
         logger.info("User '{}-{}' audited Interoperability Record with name '{}' of the '{}' Catalogue - [actionType: {}]", User.of(auth).getFullName(), User.of(auth).getEmail(),
                 interoperabilityRecordBundle.getInteroperabilityRecord().getTitle(), interoperabilityRecordBundle.getInteroperabilityRecord().getCatalogueId(), actionType);

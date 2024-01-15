@@ -70,7 +70,7 @@ public class PendingServiceManager extends ResourceManager<ServiceBundle> implem
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(maxQuantity);
         List<ServiceBundle> resourceList = serviceBundleService.getAll(ff, auth).getResults();
-        for (ServiceBundle existingResource : resourceList){
+        for (ServiceBundle existingResource : resourceList) {
             if (service.getService().getId().equals(existingResource.getService().getId()) && existingResource.getService().getCatalogueId().equals(catalogueName)) {
                 throw new ValidationException(String.format("Service with the specific id already exists on the [%s] Catalogue. Please refactor your 'abbreviation' field.", catalogueName));
             }
@@ -135,24 +135,24 @@ public class PendingServiceManager extends ResourceManager<ServiceBundle> implem
         serviceBundleService.validate(serviceBundle);
 
         // update loggingInfo
-        List<LoggingInfo> loggingInfoList  = commonMethods.returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(serviceBundle, auth);
+        List<LoggingInfo> loggingInfoList = commonMethods.returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(serviceBundle, auth);
         LoggingInfo loggingInfo = commonMethods.createLoggingInfo(auth, LoggingInfo.Types.ONBOARD.getKey(),
                 LoggingInfo.ActionType.REGISTERED.getKey());
         loggingInfoList.add(loggingInfo);
 
         // set resource status according to Provider's templateStatus
-        if (providerManager.get(serviceBundle.getService().getResourceOrganisation()).getTemplateStatus().equals("approved template")){
+        if (providerManager.get(serviceBundle.getService().getResourceOrganisation()).getTemplateStatus().equals("approved template")) {
             serviceBundle.setStatus(vocabularyService.get("approved resource").getId());
             LoggingInfo loggingInfoApproved = commonMethods.createLoggingInfo(auth, LoggingInfo.Types.ONBOARD.getKey(),
                     LoggingInfo.ActionType.APPROVED.getKey());
             loggingInfoList.add(loggingInfoApproved);
             serviceBundle.setActive(true);
-        } else{
+        } else {
             serviceBundle.setStatus(vocabularyService.get("pending resource").getId());
         }
         serviceBundle.setLoggingInfo(loggingInfoList);
         // latestOnboardingInfo
-        serviceBundle.setLatestOnboardingInfo(loggingInfoList.get(loggingInfoList.size()-1));
+        serviceBundle.setLatestOnboardingInfo(loggingInfoList.get(loggingInfoList.size() - 1));
 
         serviceBundle.setMetadata(Metadata.updateMetadata(serviceBundle.getMetadata(), User.of(auth).getFullName(), User.of(auth).getEmail()));
 
@@ -182,11 +182,11 @@ public class PendingServiceManager extends ResourceManager<ServiceBundle> implem
         return re;
     }
 
-    public boolean hasAdminAcceptedTerms(String providerId, Authentication auth){
+    public boolean hasAdminAcceptedTerms(String providerId, Authentication auth) {
         return true;
     }
 
-    public void adminAcceptedTerms(String providerId, Authentication auth){
+    public void adminAcceptedTerms(String providerId, Authentication auth) {
         // We need this method on PendingProviderManager. Both PendingManagers share the same Service - PendingResourceService
     }
 

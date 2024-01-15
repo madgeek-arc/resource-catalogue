@@ -109,21 +109,21 @@ public class SessionSecurityConfig extends WebSecurityConfigurerAdapter {
 //                .addHeaderWriter(new XFrameOptionsHeaderWriter(XFrameOptionsHeaderWriter.XFrameOptionsMode.SAMEORIGIN))
                 .httpStrictTransportSecurity().disable()
                 .and()
-                    .addFilterBefore(openIdConnectAuthenticationFilter(),
+                .addFilterBefore(openIdConnectAuthenticationFilter(),
                         AbstractPreAuthenticatedProcessingFilter.class)
-                    .authorizeRequests()
-                    .regexMatchers("/resourcesync/.*").permitAll()
-                    .regexMatchers("/restore/", "/resources.*", "/resourceType.*", "/search.*")
-                    .hasAnyRole("ADMIN")
+                .authorizeRequests()
+                .regexMatchers("/resourcesync/.*").permitAll()
+                .regexMatchers("/restore/", "/resources.*", "/resourceType.*", "/search.*")
+                .hasAnyRole("ADMIN")
                 .and().logout()
-                    .deleteCookies("SESSION")
-                    .invalidateHttpSession(true)
-                    .logoutUrl("/openid_logout")
-                    .logoutSuccessUrl(oidcLogoutURL +
+                .deleteCookies("SESSION")
+                .invalidateHttpSession(true)
+                .logoutUrl("/openid_logout")
+                .logoutSuccessUrl(oidcLogoutURL +
                         "?post_logout_redirect_uri=" + webappFrontUrl +
                         "&client_id=" + oidcClientId) // Keycloak
 //                    .logoutSuccessUrl(oidcLogoutURL + "?redirect=" + webappFrontUrl) // MITREid
-                    .deleteCookies("info")
+                .deleteCookies("info")
                 .and().exceptionHandling()
                 .and().csrf().disable()
         ;

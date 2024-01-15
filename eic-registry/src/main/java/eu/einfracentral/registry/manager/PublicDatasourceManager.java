@@ -118,12 +118,12 @@ public class PublicDatasourceManager extends AbstractPublicResourceManager<Datas
 
     @Override
     public void delete(DatasourceBundle datasourceBundle) {
-        try{
+        try {
             DatasourceBundle publicDatasourceBundle = get(String.format("%s.%s", datasourceBundle.getDatasource().getCatalogueId(), datasourceBundle.getId()));
             logger.info(String.format("Deleting public Datasource with id [%s]", publicDatasourceBundle.getId()));
             super.delete(publicDatasourceBundle);
             jmsService.convertAndSendTopic("datasource.delete", publicDatasourceBundle);
-        } catch (ResourceException | ResourceNotFoundException ignore){
+        } catch (ResourceException | ResourceNotFoundException ignore) {
         }
     }
 }

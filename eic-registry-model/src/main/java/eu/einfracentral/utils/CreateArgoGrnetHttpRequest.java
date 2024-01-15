@@ -16,10 +16,11 @@ public class CreateArgoGrnetHttpRequest {
         try {
             ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, entity, String.class);
             return response.getStatusCode().is2xxSuccessful() ? response.getBody() : null;
-        } catch(HttpClientErrorException e) {
+        } catch (HttpClientErrorException e) {
             return null;
         }
     }
 
-    private CreateArgoGrnetHttpRequest() {}
+    private CreateArgoGrnetHttpRequest() {
+    }
 }

@@ -29,7 +29,7 @@ import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
 @RestController
-@RequestMapping({ "pendingService"})
+@RequestMapping({"pendingService"})
 @Api(description = "Operations for Pending Services", tags = {"pending-resource-controller"})
 public class PendingServiceController extends ResourceController<ServiceBundle, Authentication> {
 

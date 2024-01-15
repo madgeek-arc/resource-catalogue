@@ -168,8 +168,8 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         Resource existingResource = getResource(ret.getId(), ret.getProvider().getCatalogueId());
         ProviderBundle existingProvider = deserialize(existingResource);
         // check if there are actual changes in the Provider
-        if (ret.getTemplateStatus().equals(existingProvider.getTemplateStatus()) && ret.getProvider().equals(existingProvider.getProvider())){
-            if (ret.isSuspended() == existingProvider.isSuspended()){
+        if (ret.getTemplateStatus().equals(existingProvider.getTemplateStatus()) && ret.getProvider().equals(existingProvider.getProvider())) {
+            if (ret.isSuspended() == existingProvider.isSuspended()) {
                 return ret;
             }
         }
@@ -184,7 +184,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         commonMethods.prohibitEOSCRelatedPIDs(ret.getProvider().getAlternativeIdentifiers());
 
         // block Public Provider update
-        if (ret.getMetadata().isPublished()){
+        if (ret.getMetadata().isPublished()) {
             throw new ValidationException("You cannot directly update a Public Provider");
         }
 
@@ -259,7 +259,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
             throw new eu.einfracentral.exception.ResourceNotFoundException(
                     String.format("Could not find catalogue with id: %s", catalogueId));
         }
-        if (!providerBundle.getProvider().getCatalogueId().equals(catalogueId)){
+        if (!providerBundle.getProvider().getCatalogueId().equals(catalogueId)) {
             throw new ValidationException(String.format("Provider with id [%s] does not belong to the catalogue with id [%s]", providerId, catalogueId));
         }
         if (auth != null && auth.isAuthenticated()) {
@@ -271,7 +271,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
             }
         }
         // else return the Provider ONLY if he is active
-        if (providerBundle.getStatus().equals(vocabularyService.get("approved provider").getId())){
+        if (providerBundle.getStatus().equals(vocabularyService.get("approved provider").getId())) {
             return providerBundle;
         }
         throw new ValidationException("You cannot view the specific Provider");
@@ -290,7 +290,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
             }
         }
         // else return the Provider ONLY if he is active
-        if (providerBundle.getStatus().equals(vocabularyService.get("approved provider").getId())){
+        if (providerBundle.getStatus().equals(vocabularyService.get("approved provider").getId())) {
             return providerBundle;
         }
         throw new ValidationException("You cannot view the specific Provider");
@@ -343,7 +343,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     }
 
     @Override
-    @Cacheable(value = CACHE_PROVIDERS, key="#ff.hashCode()+(#auth!=null?#auth.hashCode():0)")
+    @Cacheable(value = CACHE_PROVIDERS, key = "#ff.hashCode()+(#auth!=null?#auth.hashCode():0)")
     public Browsing<ProviderBundle> getAll(FacetFilter ff, Authentication auth) {
         List<ProviderBundle> retList = new ArrayList<>();
 
@@ -356,7 +356,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
             // if user is PROVIDER ADMIN return all his Providers (rejected, pending) with their sensitive data (Users, MainContact) too
             User user = User.of(auth);
             Browsing<ProviderBundle> providers = super.getAll(ff, auth);
-            for (ProviderBundle providerBundle : providers.getResults()){
+            for (ProviderBundle providerBundle : providers.getResults()) {
                 if (providerBundle.getStatus().equals(vocabularyService.get("approved provider").getId()) ||
                         securityService.userIsProviderAdmin(user, providerBundle)) {
                     retList.add(providerBundle);
@@ -382,14 +382,14 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     public void delete(ProviderBundle provider) {
         String catalogueId = provider.getProvider().getCatalogueId();
         // block Public Provider update
-        if (provider.getMetadata().isPublished()){
+        if (provider.getMetadata().isPublished()) {
             throw new ValidationException("You cannot directly delete a Public Provider");
         }
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         logger.trace("User is attempting to delete the Provider with id '{}'", provider.getId());
         List<ServiceBundle> services = serviceBundleService.getResourceBundles(catalogueId, provider.getId(), authentication).getResults();
         services.forEach(s -> {
-            if (!s.getMetadata().isPublished()){
+            if (!s.getMetadata().isPublished()) {
                 try {
                     serviceBundleService.delete(s);
                 } catch (ResourceNotFoundException e) {
@@ -399,7 +399,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         });
         List<TrainingResourceBundle> trainingResources = trainingResourceService.getResourceBundles(catalogueId, provider.getId(), authentication).getResults();
         trainingResources.forEach(s -> {
-            if (!s.getMetadata().isPublished()){
+            if (!s.getMetadata().isPublished()) {
                 try {
                     trainingResourceService.delete(s);
                 } catch (ResourceNotFoundException e) {
@@ -409,7 +409,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         });
         List<InteroperabilityRecordBundle> interoperabilityRecords = interoperabilityRecordService.getInteroperabilityRecordBundles(catalogueId, provider.getId(), authentication).getResults();
         interoperabilityRecords.forEach(s -> {
-            if (!s.getMetadata().isPublished()){
+            if (!s.getMetadata().isPublished()) {
                 try {
                     interoperabilityRecordService.delete(s);
                 } catch (ResourceNotFoundException e) {
@@ -431,7 +431,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
 
     private void deleteBundle(ProviderBundle providerBundle) {
         // block Public Provider update
-        if (providerBundle.getMetadata().isPublished()){
+        if (providerBundle.getMetadata().isPublished()) {
             throw new ValidationException("You cannot directly delete a Public Provider");
         }
         logger.info("Deleting Provider: {}", providerBundle);
@@ -487,7 +487,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     public ProviderBundle publish(String providerId, Boolean active, Authentication auth) {
         ProviderBundle provider = getWithCatalogue(providerId, catalogueName);
         if ((provider.getStatus().equals(vocabularyService.get("pending provider").getId()) ||
-                provider.getStatus().equals(vocabularyService.get("rejected provider").getId())) && !provider.isActive()){
+                provider.getStatus().equals(vocabularyService.get("rejected provider").getId())) && !provider.isActive()) {
             throw new ValidationException(String.format("You cannot activate this Provider, because it's Inactive with status = [%s]", provider.getStatus()));
         }
         List<LoggingInfo> loggingInfoList = commonMethods.returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(provider, auth);
@@ -585,9 +585,9 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         List<ServiceBundle> services = serviceBundleService.getResourceBundles(providerId, auth);
         List<TrainingResourceBundle> trainingResources = trainingResourceService.getResourceBundles(providerId, auth);
         List<InteroperabilityRecordBundle> interoperabilityRecords = interoperabilityRecordService.getInteroperabilityRecordBundles(catalogueName, providerId, auth).getResults();
-        if (active){
+        if (active) {
             logger.info("Activating all Resources of the Provider with id: {}", providerId);
-        } else{
+        } else {
             logger.info("Deactivating all Resources of the Provider with id: {}", providerId);
         }
         activateProviderServices(services, active, auth);
@@ -595,15 +595,15 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         activateProviderInteroperabilityRecords(interoperabilityRecords, active, auth);
     }
 
-    private void activateProviderServices(List<ServiceBundle> services, Boolean active, Authentication auth){
-        for (ServiceBundle service : services){
+    private void activateProviderServices(List<ServiceBundle> services, Boolean active, Authentication auth) {
+        for (ServiceBundle service : services) {
             if (service.getStatus().equals("approved resource")) {
                 ServiceBundle lowerLevelService = ObjectUtils.clone(service);
                 List<LoggingInfo> loggingInfoList = commonMethods.createActivationLoggingInfo(service, active, auth);
 
                 // update Service's fields
                 service.setLoggingInfo(loggingInfoList);
-                service.setLatestUpdateInfo(loggingInfoList.get(loggingInfoList.size()-1));
+                service.setLatestUpdateInfo(loggingInfoList.get(loggingInfoList.size() - 1));
                 service.setActive(active);
 
                 try {
@@ -624,15 +624,15 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         }
     }
 
-    private void activateProviderTrainingResources(List<TrainingResourceBundle> trainingResources, Boolean active, Authentication auth){
-        for (TrainingResourceBundle trainingResourceBundle : trainingResources){
+    private void activateProviderTrainingResources(List<TrainingResourceBundle> trainingResources, Boolean active, Authentication auth) {
+        for (TrainingResourceBundle trainingResourceBundle : trainingResources) {
             if (trainingResourceBundle.getStatus().equals("approved resource")) {
                 TrainingResourceBundle lowerLevelTrainingResource = ObjectUtils.clone(trainingResourceBundle);
                 List<LoggingInfo> loggingInfoList = commonMethods.createActivationLoggingInfo(trainingResourceBundle, active, auth);
 
                 // update Service's fields
                 trainingResourceBundle.setLoggingInfo(loggingInfoList);
-                trainingResourceBundle.setLatestUpdateInfo(loggingInfoList.get(loggingInfoList.size()-1));
+                trainingResourceBundle.setLatestUpdateInfo(loggingInfoList.get(loggingInfoList.size() - 1));
                 trainingResourceBundle.setActive(active);
 
                 try {
@@ -654,14 +654,14 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         }
     }
 
-    private void activateProviderInteroperabilityRecords(List<InteroperabilityRecordBundle> interoperabilityRecords, Boolean active, Authentication auth){
+    private void activateProviderInteroperabilityRecords(List<InteroperabilityRecordBundle> interoperabilityRecords, Boolean active, Authentication auth) {
         for (InteroperabilityRecordBundle interoperabilityRecordBundle : interoperabilityRecords) {
             if (interoperabilityRecordBundle.getStatus().equals("approved interoperability record")) {
                 List<LoggingInfo> loggingInfoList = commonMethods.createActivationLoggingInfo(interoperabilityRecordBundle, active, auth);
 
                 // update Service's fields
                 interoperabilityRecordBundle.setLoggingInfo(loggingInfoList);
-                interoperabilityRecordBundle.setLatestUpdateInfo(loggingInfoList.get(loggingInfoList.size()-1));
+                interoperabilityRecordBundle.setLatestUpdateInfo(loggingInfoList.get(loggingInfoList.size() - 1));
                 interoperabilityRecordBundle.setActive(active);
 
                 try {
@@ -850,7 +850,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     //    @Override
     public Paging<LoggingInfo> getLoggingInfoHistory(String id, String catalogueId) {
         ProviderBundle providerBundle = getWithCatalogue(id, catalogueId);
-        if (providerBundle.getLoggingInfo() != null){
+        if (providerBundle.getLoggingInfo() != null) {
             List<LoggingInfo> loggingInfoList = providerBundle.getLoggingInfo();
             loggingInfoList.sort(Comparator.comparing(LoggingInfo::getDate).reversed());
             return new Browsing<>(loggingInfoList.size(), 0, loggingInfoList.size(), loggingInfoList, null);
@@ -866,20 +866,20 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
 
         Paging<ProviderBundle> retPaging = getAll(ff, auth);
         List<ProviderBundle> allWithoutAuditFilterList = new ArrayList<>();
-        if (providers.isEmpty()){
+        if (providers.isEmpty()) {
             allWithoutAuditFilterList = getAll(ff, auth).getResults();
-        } else{
+        } else {
             allWithoutAuditFilterList.addAll(providers);
         }
         List<ProviderBundle> ret = new ArrayList<>();
-        for (ProviderBundle providerBundle : allWithoutAuditFilterList){
+        for (ProviderBundle providerBundle : allWithoutAuditFilterList) {
             String auditVocStatus;
-            try{
+            try {
                 auditVocStatus = LoggingInfo.createAuditVocabularyStatuses(providerBundle.getLoggingInfo());
-            } catch (NullPointerException e){ // providerBundle has null loggingInfo
+            } catch (NullPointerException e) { // providerBundle has null loggingInfo
                 continue;
             }
-            switch (auditVocStatus){
+            switch (auditVocStatus) {
                 case "Valid and updated":
                 case "Valid and not updated":
                     valid.add(providerBundle);
@@ -897,12 +897,12 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
                     throw new IllegalStateException("Unexpected value: " + auditVocStatus);
             }
         }
-        for (String state : auditState){
-            if (state.equals("Valid")){
+        for (String state : auditState) {
+            if (state.equals("Valid")) {
                 ret.addAll(valid);
-            } else if (state.equals("Not Audited")){
+            } else if (state.equals("Not Audited")) {
                 ret.addAll(notAudited);
-            } else if (state.equals("Invalid and updated")){
+            } else if (state.equals("Invalid and updated")) {
                 ret.addAll(invalidAndUpdated);
             } else if (state.equals("Invalid and not updated")) {
                 ret.addAll(invalidAndNotUpdated);
@@ -914,50 +914,50 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     }
 
     public Paging<ProviderBundle> createCorrectQuantityFacets(List<ProviderBundle> providerBundle, Paging<ProviderBundle> providerBundlePaging,
-                                                              int quantity, int from){
+                                                              int quantity, int from) {
         if (!providerBundle.isEmpty()) {
             List<ProviderBundle> retWithCorrectQuantity = new ArrayList<>();
-            if (from == 0){
-                if (quantity <= providerBundle.size()){
-                    for (int i=from; i<=quantity-1; i++){
+            if (from == 0) {
+                if (quantity <= providerBundle.size()) {
+                    for (int i = from; i <= quantity - 1; i++) {
                         retWithCorrectQuantity.add(providerBundle.get(i));
                     }
-                } else{
+                } else {
                     retWithCorrectQuantity.addAll(providerBundle);
                 }
                 providerBundlePaging.setTo(retWithCorrectQuantity.size());
-            } else{
+            } else {
                 boolean indexOutOfBound = false;
-                if (quantity <= providerBundle.size()){
-                    for (int i=from; i<quantity+from; i++){
-                        try{
+                if (quantity <= providerBundle.size()) {
+                    for (int i = from; i < quantity + from; i++) {
+                        try {
                             retWithCorrectQuantity.add(providerBundle.get(i));
-                            if (quantity+from > providerBundle.size()){
+                            if (quantity + from > providerBundle.size()) {
                                 providerBundlePaging.setTo(providerBundle.size());
-                            } else{
-                                providerBundlePaging.setTo(quantity+from);
+                            } else {
+                                providerBundlePaging.setTo(quantity + from);
                             }
-                        } catch (IndexOutOfBoundsException e){
+                        } catch (IndexOutOfBoundsException e) {
                             indexOutOfBound = true;
                             continue;
                         }
                     }
-                    if (indexOutOfBound){
+                    if (indexOutOfBound) {
                         providerBundlePaging.setTo(providerBundle.size());
                     }
-                } else{
+                } else {
                     retWithCorrectQuantity.addAll(providerBundle);
-                    if (quantity+from > providerBundle.size()){
+                    if (quantity + from > providerBundle.size()) {
                         providerBundlePaging.setTo(providerBundle.size());
-                    } else{
-                        providerBundlePaging.setTo(quantity+from);
+                    } else {
+                        providerBundlePaging.setTo(quantity + from);
                     }
                 }
             }
             providerBundlePaging.setFrom(from);
             providerBundlePaging.setResults(retWithCorrectQuantity);
             providerBundlePaging.setTotal(providerBundle.size());
-        } else{
+        } else {
             providerBundlePaging.setResults(providerBundle);
             providerBundlePaging.setTotal(0);
             providerBundlePaging.setFrom(0);
@@ -967,15 +967,15 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     }
 
     // TODO: refactor / delete?...
-    public List<Map<String, Object>> createQueryForProviderFilters (FacetFilter ff, String orderDirection, String orderField){
+    public List<Map<String, Object>> createQueryForProviderFilters(FacetFilter ff, String orderDirection, String orderField) {
         String keyword = ff.getKeyword();
         NamedParameterJdbcTemplate namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(dataSource);
         MapSqlParameterSource in = new MapSqlParameterSource();
 
         String query; // TODO: Replace with StringBuilder
-        if (ff.getFilter().entrySet().isEmpty()){
-            query = "SELECT provider_id,catalogue_id FROM provider_view WHERE catalogue_id = '"+catalogueName+"'";
-        } else{
+        if (ff.getFilter().entrySet().isEmpty()) {
+            query = "SELECT provider_id,catalogue_id FROM provider_view WHERE catalogue_id = '" + catalogueName + "'";
+        } else {
             query = "SELECT provider_id,catalogue_id FROM provider_view WHERE";
         }
 
@@ -990,7 +990,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
                 } else {
                     query += String.format(" AND (suspended=%s)", entry.getValue().toString());
                 }
-                if (query.contains(",")){
+                if (query.contains(",")) {
                     query = query.replaceAll(", ", "' OR suspended='");
                 }
             }
@@ -1002,7 +1002,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
                 } else {
                     query += String.format(" AND (active=%s)", entry.getValue().toString());
                 }
-                if (query.contains(",")){
+                if (query.contains(",")) {
                     query = query.replaceAll(", ", "' OR active='");
                 }
             }
@@ -1014,7 +1014,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
                 } else {
                     query += String.format(" AND (published=%s)", entry.getValue().toString());
                 }
-                if (query.contains(",")){
+                if (query.contains(",")) {
                     query = query.replaceAll(", ", "' OR published='");
                 }
             }
@@ -1026,7 +1026,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
                 } else {
                     query += String.format(" AND (status=%s)", entry.getValue().toString());
                 }
-                if (query.contains(",")){
+                if (query.contains(",")) {
                     query = query.replaceAll(", ", "' OR status='");
                 }
             }
@@ -1038,55 +1038,55 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
                 } else {
                     query += String.format(" AND (templateStatus=%s)", entry.getValue().toString());
                 }
-                if (query.contains(",")){
+                if (query.contains(",")) {
                     query = query.replaceAll(", ", "' OR templateStatus='");
                 }
             }
             // catalogue_id
             if (entry.getKey().equals("catalogue_id")) {
                 if (firstTime) {
-                    if (((LinkedHashSet) entry.getValue()).contains("all")){
+                    if (((LinkedHashSet) entry.getValue()).contains("all")) {
                         query += String.format(" (catalogue_id LIKE '%%%%')");
                         firstTime = false;
                         continue;
-                    } else{
+                    } else {
                         query += String.format(" (catalogue_id=%s)", entry.getValue().toString());
                         firstTime = false;
                     }
                 } else {
-                    if (((LinkedHashSet) entry.getValue()).contains("all")){
+                    if (((LinkedHashSet) entry.getValue()).contains("all")) {
                         query += String.format(" AND (catalogue_id LIKE '%%%%')");
                         continue;
-                    } else{
+                    } else {
                         query += String.format(" AND (catalogue_id=%s)", entry.getValue().toString());
                     }
                 }
-                if (query.contains(",")){
+                if (query.contains(",")) {
                     query = query.replaceAll(", ", "' OR catalogue_id='");
                 }
             }
         }
 
         // keyword on search bar
-        if (keyword != null && !keyword.equals("")){
+        if (keyword != null && !keyword.equals("")) {
             // replace apostrophes to avoid bad sql grammar
-            if (keyword.contains("'")){
+            if (keyword.contains("'")) {
                 keyword = keyword.replaceAll("'", "''");
             }
             query += String.format(" AND upper(CONCAT(%s))", columnsOfInterest) + " like '%" + String.format("%s", keyword.toUpperCase()) + "%'";
         }
 
         // order/orderField
-        if (orderField != null && !orderField.equals("")){
+        if (orderField != null && !orderField.equals("")) {
             query += String.format(" ORDER BY %s", orderField);
-        } else{
+        } else {
             query += " ORDER BY name";
         }
-        if (orderDirection !=null && !orderDirection.equals("")){
+        if (orderDirection != null && !orderDirection.equals("")) {
             query += String.format(" %s", orderDirection);
         }
 
-        query = query.replaceAll("\\[", "'").replaceAll("\\]","'");
+        query = query.replaceAll("\\[", "'").replaceAll("\\]", "'");
         logger.debug(query);
 
         return namedParameterJdbcTemplate.queryForList(query, in);
@@ -1120,31 +1120,33 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         }
 
         // latestOnboardingInfo
-        provider.setLatestOnboardingInfo(loggingInfoList.get(loggingInfoList.size()-1));
+        provider.setLatestOnboardingInfo(loggingInfoList.get(loggingInfoList.size() - 1));
 
         return provider;
     }
 
-    private void addApprovedProviderToHLEVocabulary(ProviderBundle providerBundle){
+    private void addApprovedProviderToHLEVocabulary(ProviderBundle providerBundle) {
         Vocabulary newHostingLegalEntity = new Vocabulary();
-        newHostingLegalEntity.setId("provider_hosting_legal_entity-"+providerBundle.getProvider().getId());
+        newHostingLegalEntity.setId("provider_hosting_legal_entity-" + providerBundle.getProvider().getId());
         newHostingLegalEntity.setName(providerBundle.getProvider().getName());
         newHostingLegalEntity.setType(Vocabulary.Type.PROVIDER_HOSTING_LEGAL_ENTITY.getKey());
-        newHostingLegalEntity.setExtras(new HashMap<String, String>() {{put("catalogueId", providerBundle.getProvider().getCatalogueId());}});
+        newHostingLegalEntity.setExtras(new HashMap<String, String>() {{
+            put("catalogueId", providerBundle.getProvider().getCatalogueId());
+        }});
         logger.info(String.format("Creating a new Hosting Legal Entity Vocabulary with id: [%s] and name: [%s]",
                 newHostingLegalEntity.getId(), newHostingLegalEntity.getName()));
         vocabularyService.add(newHostingLegalEntity, null);
     }
 
-    private void checkAndAddProviderToHLEVocabulary(ProviderBundle providerBundle){
+    private void checkAndAddProviderToHLEVocabulary(ProviderBundle providerBundle) {
         List<Vocabulary> allHLE = vocabularyService.getByType(Vocabulary.Type.PROVIDER_HOSTING_LEGAL_ENTITY);
         List<String> allHLEIDs = new ArrayList<>();
         List<String> allHLENames = new ArrayList<>();
-        for (Vocabulary voc : allHLE){
+        for (Vocabulary voc : allHLE) {
             allHLEIDs.add(voc.getId());
             allHLENames.add(voc.getName());
         }
-        if (providerBundle.getStatus().equals("approved provider") && providerBundle.getProvider().isLegalEntity()){
+        if (providerBundle.getStatus().equals("approved provider") && providerBundle.getProvider().isLegalEntity()) {
             if (!allHLEIDs.contains("provider_hosting_legal_entity-" + providerBundle.getProvider().getId()) &&
                     !allHLENames.contains(providerBundle.getProvider().getName())) {
                 addApprovedProviderToHLEVocabulary(providerBundle);
@@ -1152,14 +1154,14 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         }
     }
 
-    public Paging<?> getRejectedResources(FacetFilter ff, String resourceType, Authentication auth){
+    public Paging<?> getRejectedResources(FacetFilter ff, String resourceType, Authentication auth) {
         List<Bundle<?>> ret = new ArrayList<>();
-        if (resourceType.equals("service")){
+        if (resourceType.equals("service")) {
             Browsing<ServiceBundle> providerRejectedResources = getResourceBundles(ff, serviceBundleService, auth);
             ret.addAll(providerRejectedResources.getResults());
             return new Paging<>(providerRejectedResources.getTotal(), providerRejectedResources.getFrom(),
                     providerRejectedResources.getTo(), ret, providerRejectedResources.getFacets());
-        } else if (resourceType.equals("training_resource")){
+        } else if (resourceType.equals("training_resource")) {
             Browsing<TrainingResourceBundle> providerRejectedResources = getResourceBundles(ff, trainingResourceService, auth);
             ret.addAll(providerRejectedResources.getResults());
             return new Paging<>(providerRejectedResources.getTotal(), providerRejectedResources.getFrom(),
@@ -1179,7 +1181,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         return service.getAll(filter, auth);
     }
 
-    public ProviderBundle createPublicProvider(ProviderBundle providerBundle, Authentication auth){
+    public ProviderBundle createPublicProvider(ProviderBundle providerBundle, Authentication auth) {
         publicProviderManager.add(providerBundle, auth);
         return providerBundle;
     }

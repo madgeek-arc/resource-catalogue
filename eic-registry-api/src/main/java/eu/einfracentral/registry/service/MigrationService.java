@@ -6,5 +6,6 @@ import org.springframework.security.core.Authentication;
 public interface MigrationService {
 
     ProviderBundle changeProviderCatalogue(String providerId, String catalogueId, String newCatalogueId, Authentication authentication);
+
     void updateRelatedToTheIdFieldsOfOtherResourcesOfThePortal(String oldResourceId, String newResourceId);
 }

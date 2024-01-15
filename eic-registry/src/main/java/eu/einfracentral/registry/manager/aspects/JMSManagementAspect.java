@@ -38,7 +38,7 @@ public class JMSManagementAspect {
             "|| (execution(* eu.einfracentral.registry.manager.CatalogueManager.verifyCatalogue(..)))",
             returning = "catalogueBundle")
     public void sendJMSForCatalogueCreation(CatalogueBundle catalogueBundle) {
-        if (catalogueBundle.getStatus().equals("approved catalogue") && catalogueBundle.isActive()){
+        if (catalogueBundle.getStatus().equals("approved catalogue") && catalogueBundle.isActive()) {
             jmsService.convertAndSendTopic("catalogue.create", catalogueBundle);
         }
     }
@@ -50,7 +50,7 @@ public class JMSManagementAspect {
             "|| (execution(* eu.einfracentral.registry.manager.CatalogueManager.verifyCatalogue(..)))",
             returning = "catalogueBundle")
     public void sendJMSForCatalogueUpdate(CatalogueBundle catalogueBundle) {
-        if (catalogueBundle.getStatus().equals("approved catalogue")){
+        if (catalogueBundle.getStatus().equals("approved catalogue")) {
             jmsService.convertAndSendTopic("catalogue.update", catalogueBundle);
         }
     }
@@ -80,7 +80,8 @@ public class JMSManagementAspect {
             if (!ret.equals(helpdeskBundle)) {
                 publicHelpdeskManager.update(ObjectUtils.clone(helpdeskBundle), null);
             }
-        } catch (ResourceException | ResourceNotFoundException ignore) {}
+        } catch (ResourceException | ResourceNotFoundException ignore) {
+        }
     }
 
     @Async
@@ -109,7 +110,8 @@ public class JMSManagementAspect {
             if (!ret.equals(monitoringBundle)) {
                 publicMonitoringManager.update(ObjectUtils.clone(monitoringBundle), null);
             }
-        } catch (ResourceException | ResourceNotFoundException ignore) {}
+        } catch (ResourceException | ResourceNotFoundException ignore) {
+        }
     }
 
     @Async

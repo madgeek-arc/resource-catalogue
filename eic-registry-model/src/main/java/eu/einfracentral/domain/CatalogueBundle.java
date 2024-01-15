@@ -8,7 +8,7 @@ import java.util.Objects;
 
 @XmlType
 @XmlRootElement(namespace = "http://einfracentral.eu")
-public class CatalogueBundle extends Bundle<Catalogue>{
+public class CatalogueBundle extends Bundle<Catalogue> {
 
     @XmlElement
 //    @VocabularyValidation(type = Vocabulary.Type.CATALOGUE_STATE)

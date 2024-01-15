@@ -280,8 +280,8 @@ public class StatisticsManager implements StatisticsService {
                             j[0]++;
                             Terms subTerm = bucket.getAggregations().get("value");
                             if (subTerm.getBuckets() != null) {
-                                for (int i=0; i<subTerm.getBuckets().size(); i++){
-                                    Double key = (Double)subTerm.getBuckets().get(i).getKey();
+                                for (int i = 0; i < subTerm.getBuckets().size(); i++) {
+                                    Double key = (Double) subTerm.getBuckets().get(i).getKey();
                                     Integer keyToInt = key.intValue();
                                     int totalVistisOnBucket = keyToInt * Integer.parseInt(String.valueOf(subTerm.getBuckets().get(i).getDocCount()));
                                     totalDocCounts[j[0]] += totalVistisOnBucket;
@@ -304,13 +304,13 @@ public class StatisticsManager implements StatisticsService {
     @Override
     public Map<String, Integer> providerVisits(String id, Interval by) {
         Map<String, Integer> results = new HashMap<>();
-        for (Service service : serviceBundleManager.getResources(id)){
-            Set<Map.Entry<String, Integer>> entrySet = visits(service.getId(),by).entrySet();
-            for (Map.Entry<String, Integer> entry : entrySet){
-                if (!results.containsKey(entry.getKey())){
+        for (Service service : serviceBundleManager.getResources(id)) {
+            Set<Map.Entry<String, Integer>> entrySet = visits(service.getId(), by).entrySet();
+            for (Map.Entry<String, Integer> entry : entrySet) {
+                if (!results.containsKey(entry.getKey())) {
                     results.put(entry.getKey(), entry.getValue());
                 } else {
-                    results.put(entry.getKey(), results.get(entry.getKey())+entry.getValue());
+                    results.put(entry.getKey(), results.get(entry.getKey()) + entry.getValue());
                 }
             }
         }

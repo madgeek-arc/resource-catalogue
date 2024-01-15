@@ -1,8 +1,10 @@
 package eu.einfracentral.domain;
+
 import eu.einfracentral.annotation.EmailValidation;
 import eu.einfracentral.annotation.FieldValidation;
 import eu.einfracentral.annotation.PhoneValidation;
 import io.swagger.annotations.ApiModelProperty;
+
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;

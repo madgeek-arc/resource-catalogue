@@ -24,7 +24,6 @@ ResourceService<T, U extends Authentication> extends ResourceCRUDService<T, U> {
     List<T> getSome(String... ids);
 
     /**
-     *
      * @param keyValues
      * @return
      */

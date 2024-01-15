@@ -36,7 +36,8 @@ public class Monitoring implements Identifiable {
     @FieldValidation
     private List<MonitoringGroup> monitoringGroups;
 
-    public Monitoring() {}
+    public Monitoring() {
+    }
 
     public Monitoring(String id, String serviceId, String monitoredBy, List<MonitoringGroup> monitoringGroups) {
         this.id = id;

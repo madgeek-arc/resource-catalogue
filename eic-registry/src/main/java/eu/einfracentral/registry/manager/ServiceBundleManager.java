@@ -74,7 +74,7 @@ public class ServiceBundleManager extends AbstractServiceBundleManager<ServiceBu
                                 @Lazy PublicMonitoringManager publicMonitoringManager,
                                 @Lazy PublicDatasourceManager publicDatasourceManager,
                                 @Lazy ResourceInteroperabilityRecordService<ResourceInteroperabilityRecordBundle>
-                                            resourceInteroperabilityRecordService,
+                                        resourceInteroperabilityRecordService,
                                 ProviderResourcesCommonMethods commonMethods) {
         super(ServiceBundle.class);
         this.providerService = providerService; // for providers
@@ -219,7 +219,7 @@ public class ServiceBundleManager extends AbstractServiceBundleManager<ServiceBu
         }
 
         // block Public Service update
-        if (existingService.getMetadata().isPublished()){
+        if (existingService.getMetadata().isPublished()) {
             throw new ValidationException("You cannot directly update a Public Service");
         }
 
@@ -448,9 +448,9 @@ public class ServiceBundleManager extends AbstractServiceBundleManager<ServiceBu
         HelpdeskBundle helpdeskBundle = helpdeskService.get(serviceId, catalogueId);
         MonitoringBundle monitoringBundle = monitoringService.get(serviceId, catalogueId);
         DatasourceBundle datasourceBundle = datasourceService.get(serviceId, catalogueId);
-        if (active){
+        if (active) {
             logger.info("Activating all related resources of the Service with id: {}", serviceId);
-        } else{
+        } else {
             logger.info("Deactivating all related resources of the Service with id: {}", serviceId);
         }
         if (helpdeskBundle != null) {
@@ -469,7 +469,7 @@ public class ServiceBundleManager extends AbstractServiceBundleManager<ServiceBu
 
         // update Bundle's fields
         bundle.setLoggingInfo(loggingInfoList);
-        bundle.setLatestUpdateInfo(loggingInfoList.get(loggingInfoList.size()-1));
+        bundle.setLatestUpdateInfo(loggingInfoList.get(loggingInfoList.size() - 1));
         bundle.setActive(active);
 
         if (bundle instanceof HelpdeskBundle) {
@@ -633,7 +633,7 @@ public class ServiceBundleManager extends AbstractServiceBundleManager<ServiceBu
         ProviderBundle oldProvider = providerService.get(catalogueName, serviceBundle.getService().getResourceOrganisation(), auth);
 
         // check that the 2 Providers co-exist under the same Catalogue
-        if (!oldProvider.getProvider().getCatalogueId().equals(newProvider.getProvider().getCatalogueId())){
+        if (!oldProvider.getProvider().getCatalogueId().equals(newProvider.getProvider().getCatalogueId())) {
             throw new ValidationException("You cannot move a Service to a Provider of another Catalogue");
         }
 
@@ -667,7 +667,7 @@ public class ServiceBundleManager extends AbstractServiceBundleManager<ServiceBu
 
         // update ResourceProviders
         List<String> resourceProviders = serviceBundle.getService().getResourceProviders();
-        if (resourceProviders.contains(oldProvider.getId())){
+        if (resourceProviders.contains(oldProvider.getId())) {
             resourceProviders.remove(oldProvider.getId());
             resourceProviders.add(newProviderId);
         }
@@ -694,7 +694,7 @@ public class ServiceBundleManager extends AbstractServiceBundleManager<ServiceBu
         return serviceBundle;
     }
 
-    public ServiceBundle createPublicResource(ServiceBundle serviceBundle, Authentication auth){
+    public ServiceBundle createPublicResource(ServiceBundle serviceBundle, Authentication auth) {
         publicServiceManager.add(serviceBundle, auth);
         return serviceBundle;
     }

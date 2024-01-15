@@ -50,7 +50,7 @@ public class MatomoInterceptor implements AsyncHandlerInterceptor {
                 logger.debug("Referer is null. That probably means that the call did not come from the portal. Logging!");
 
                 MatomoRequest matomoRequest = ServletMatomoRequest.fromServletRequest(
-                        JavaxHttpServletWrapper.fromHttpServletRequest(request))
+                                JavaxHttpServletWrapper.fromHttpServletRequest(request))
                         .siteId(siteId)
                         .actionUrl(request.getRequestURL().toString())
                         .build();

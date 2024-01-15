@@ -22,7 +22,7 @@ public interface ServiceBundleService<T> extends ResourceCRUDService<T, Authenti
      * Method to add a new resource.
      *
      * @param resource - Resource to be added
-     * @param auth - Authentication
+     * @param auth     - Authentication
      * @return {@link T}
      */
     T addResource(T resource, Authentication auth);
@@ -30,9 +30,9 @@ public interface ServiceBundleService<T> extends ResourceCRUDService<T, Authenti
     /**
      * Method to add a new resource from external catalogue.
      *
-     * @param resource - Resource to be added
+     * @param resource    - Resource to be added
      * @param catalogueId - The ID of the Catalogue
-     * @param auth - Authentication
+     * @param auth        - Authentication
      * @return {@link T}
      */
     T addResource(T resource, String catalogueId, Authentication auth);
@@ -41,8 +41,8 @@ public interface ServiceBundleService<T> extends ResourceCRUDService<T, Authenti
      * Method to update a resource.
      *
      * @param resource - Resource to be added
-     * @param comment - Related comment
-     * @param auth - Authentication
+     * @param comment  - Related comment
+     * @param auth     - Authentication
      * @return {@link T}
      * @throws ResourceNotFoundException
      */
@@ -51,20 +51,19 @@ public interface ServiceBundleService<T> extends ResourceCRUDService<T, Authenti
     /**
      * Method to update a resource.
      *
-     * @param resource - Resource to be added
+     * @param resource    - Resource to be added
      * @param catalogueId - The ID of the Catalogue
-     * @param comment - Related comment
-     * @param auth - Authentication
+     * @param comment     - Related comment
+     * @param auth        - Authentication
      * @return {@link T}
      * @throws ResourceNotFoundException
      */
     T updateResource(T resource, String catalogueId, String comment, Authentication auth) throws ResourceNotFoundException;
 
     /**
-     *
      * @param catalogueId - The ID of the Catalogue
-     * @param resourceId - The ID of the Resource
-     * @param auth - Authentication
+     * @param resourceId  - The ID of the Resource
+     * @param auth        - Authentication
      * @return {@link T}
      */
     T getCatalogueResource(String catalogueId, String resourceId, Authentication auth);
@@ -72,7 +71,7 @@ public interface ServiceBundleService<T> extends ResourceCRUDService<T, Authenti
     /**
      * Returns the Resource with the specified id.
      *
-     * @param id - The ID of the Resource.
+     * @param id          - The ID of the Resource.
      * @param catalogueId - The ID of the Catalogue
      * @return {@link T}
      */
@@ -82,16 +81,15 @@ public interface ServiceBundleService<T> extends ResourceCRUDService<T, Authenti
      * Get ResourceBundles by a specific field.
      *
      * @param field - Specific field to fetch the Bundles
-     * @param auth - Authentication
+     * @param auth  - Authentication
      * @return {@link Map}
      * @throws NoSuchFieldException
      */
     Map<String, List<T>> getBy(String field, Authentication auth) throws NoSuchFieldException;
 
     /**
-     *
      * @param authentication - Authentication
-     * @param ids - List of Service IDs
+     * @param ids            - List of Service IDs
      * @return {@link List<ServiceBundle>}
      */
     List<ServiceBundle> getByIds(Authentication authentication, String... ids);
@@ -107,7 +105,7 @@ public interface ServiceBundleService<T> extends ResourceCRUDService<T, Authenti
     /**
      * Get resource.
      *
-     * @param id - The ID of the Service
+     * @param id          - The ID of the Service
      * @param catalogueId - The ID of the Catalogue
      * @return {@link Resource}
      */
@@ -125,8 +123,8 @@ public interface ServiceBundleService<T> extends ResourceCRUDService<T, Authenti
      * Sets a Resource as active/inactive.
      *
      * @param resourceId - The ID of the Service
-     * @param active - Service active field
-     * @param auth - Authentication
+     * @param active     - Service active field
+     * @param auth       - Authentication
      * @return {@link T}
      */
     T publish(String resourceId, Boolean active, Authentication auth);
@@ -219,19 +217,17 @@ public interface ServiceBundleService<T> extends ResourceCRUDService<T, Authenti
     T changeProvider(String resourceId, String newProvider, String comment, Authentication auth);
 
     /**
-     *
-     * @param ff - FacetFilter
+     * @param ff         - FacetFilter
      * @param auditState - The Audit State
      * @return {@link Paging}
      */
     Paging<Bundle<?>> getAllForAdminWithAuditStates(FacetFilter ff, Set<String> auditState);
 
     /**
-     *
-     * @param serviceId - The ID of the Service
-     * @param catalogueId - The ID of the Catalogue
+     * @param serviceId        - The ID of the Service
+     * @param catalogueId      - The ID of the Catalogue
      * @param eoscIFGuidelines - EOSC Interoperability Framework Guidelines
-     * @param auth - Authentication
+     * @param auth             - Authentication
      * @return {@link ServiceBundle}
      */
     ServiceBundle updateEOSCIFGuidelines(String serviceId, String catalogueId, List<EOSCIFGuidelines> eoscIFGuidelines, Authentication auth);
@@ -241,9 +237,14 @@ public interface ServiceBundleService<T> extends ResourceCRUDService<T, Authenti
     ServiceBundle getOrElseReturnNull(String id, String catalogueId);
 
     T createPublicResource(T resource, Authentication auth);
+
     FacetFilter createFacetFilterForFetchingServices(Map<String, Object> allRequestParams, String catalogueId);
+
     FacetFilter createFacetFilterForFetchingServices(MultiValueMap<String, Object> allRequestParams, String catalogueId);
+
     void updateFacetFilterConsideringTheAuthorization(FacetFilter filter, Authentication auth);
+
     ServiceBundle suspend(String resourceId, String catalogueId, boolean suspend, Authentication auth);
+
     void publishServiceRelatedResources(String serviceId, String catalogueId, Boolean active, Authentication auth);
 }

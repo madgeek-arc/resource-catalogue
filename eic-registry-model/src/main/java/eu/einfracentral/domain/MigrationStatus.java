@@ -8,7 +8,7 @@ import java.util.List;
 
 @XmlType
 @XmlRootElement(namespace = "http://einfracentral.eu")
-public class MigrationStatus{
+public class MigrationStatus {
 
     @XmlElementWrapper(name = "comments")
     @XmlElement(name = "comment")

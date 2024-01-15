@@ -95,7 +95,7 @@ public class ConfigurationTemplateInstanceManager extends ResourceManager<Config
         }
 
         // block Public ConfigurationTemplateInstanceBundle updates
-        if (ret.getMetadata().isPublished()){
+        if (ret.getMetadata().isPublished()) {
             throw new ValidationException("You cannot directly update a Public Configuration Template Instance");
         }
 
@@ -117,13 +117,13 @@ public class ConfigurationTemplateInstanceManager extends ResourceManager<Config
 
         // block user from updating resourceId
         if (!ret.getConfigurationTemplateInstance().getResourceId().equals(existingCTI.getConfigurationTemplateInstance().getResourceId())
-                && !securityService.hasRole(auth, "ROLE_ADMIN")){
+                && !securityService.hasRole(auth, "ROLE_ADMIN")) {
             throw new ValidationException("You cannot change the Resource Id with which this ConfigurationTemplateInstance is related");
         }
 
         // block user from updating configurationTemplateId
         if (!ret.getConfigurationTemplateInstance().getConfigurationTemplateId().equals(existingCTI.getConfigurationTemplateInstance().getConfigurationTemplateId())
-                && !securityService.hasRole(auth, "ROLE_ADMIN")){
+                && !securityService.hasRole(auth, "ROLE_ADMIN")) {
             throw new ValidationException("You cannot change the Configuration Template Id with which this ConfigurationTemplateInstance is related");
         }
 
@@ -135,7 +135,7 @@ public class ConfigurationTemplateInstanceManager extends ResourceManager<Config
 
     public void delete(ConfigurationTemplateInstanceBundle configurationTemplateInstanceBundle) {
         // block Public ConfigurationTemplateInstanceBundle deletions
-        if (configurationTemplateInstanceBundle.getMetadata().isPublished()){
+        if (configurationTemplateInstanceBundle.getMetadata().isPublished()) {
             throw new ValidationException("You cannot directly delete a Public Configuration Template Instance");
         }
         logger.trace("User is attempting to delete the ConfigurationTemplateInstance with id '{}'",
@@ -145,65 +145,65 @@ public class ConfigurationTemplateInstanceManager extends ResourceManager<Config
 
     }
 
-    public List<ConfigurationTemplateInstance> getConfigurationTemplateInstancesByResourceId(String resourceId){
+    public List<ConfigurationTemplateInstance> getConfigurationTemplateInstancesByResourceId(String resourceId) {
         List<ConfigurationTemplateInstance> ret = new ArrayList<>();
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(10000);
         List<ConfigurationTemplateInstanceBundle> configurationTemplateInstanceBundles = configurationTemplateInstanceService.getAll(ff, null).getResults();
-        for (ConfigurationTemplateInstanceBundle configurationTemplateInstanceBundle : configurationTemplateInstanceBundles){
-            if (configurationTemplateInstanceBundle.getConfigurationTemplateInstance().getResourceId().equals(resourceId)){
+        for (ConfigurationTemplateInstanceBundle configurationTemplateInstanceBundle : configurationTemplateInstanceBundles) {
+            if (configurationTemplateInstanceBundle.getConfigurationTemplateInstance().getResourceId().equals(resourceId)) {
                 ret.add(configurationTemplateInstanceBundle.getConfigurationTemplateInstance());
             }
         }
         return ret;
     }
 
-    public List<ConfigurationTemplateInstance> getConfigurationTemplateInstancesByConfigurationTemplateId(String configurationTemplateId){
+    public List<ConfigurationTemplateInstance> getConfigurationTemplateInstancesByConfigurationTemplateId(String configurationTemplateId) {
         List<ConfigurationTemplateInstance> ret = new ArrayList<>();
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(10000);
         ff.addFilter("published", false);
         List<ConfigurationTemplateInstanceBundle> configurationTemplateInstanceBundles = configurationTemplateInstanceService.getAll(ff, null).getResults();
-        for (ConfigurationTemplateInstanceBundle configurationTemplateInstanceBundle : configurationTemplateInstanceBundles){
-            if (configurationTemplateInstanceBundle.getConfigurationTemplateInstance().getConfigurationTemplateId().equals(configurationTemplateId)){
+        for (ConfigurationTemplateInstanceBundle configurationTemplateInstanceBundle : configurationTemplateInstanceBundles) {
+            if (configurationTemplateInstanceBundle.getConfigurationTemplateInstance().getConfigurationTemplateId().equals(configurationTemplateId)) {
                 ret.add(configurationTemplateInstanceBundle.getConfigurationTemplateInstance());
             }
         }
         return ret;
     }
 
-    private void checkResourceIdAndConfigurationTemplateIdConsistency(ConfigurationTemplateInstanceBundle configurationTemplateInstanceBundle, Authentication auth){
+    private void checkResourceIdAndConfigurationTemplateIdConsistency(ConfigurationTemplateInstanceBundle configurationTemplateInstanceBundle, Authentication auth) {
         String resourceId = configurationTemplateInstanceBundle.getConfigurationTemplateInstance().getResourceId();
         String configurationTemplateId = configurationTemplateInstanceBundle.getConfigurationTemplateInstance().getConfigurationTemplateId();
         // check if the configuration template ID is related to the resource ID
         boolean found = false;
         List<ResourceInteroperabilityRecordBundle> resourceInteroperabilityRecordBundleList = resourceInteroperabilityRecordService.getAll(createFacetFilter(), auth).getResults();
-        for (ResourceInteroperabilityRecordBundle resourceInteroperabilityRecordBundle : resourceInteroperabilityRecordBundleList){
-            if (resourceInteroperabilityRecordBundle.getResourceInteroperabilityRecord().getResourceId().equals(resourceId)){
+        for (ResourceInteroperabilityRecordBundle resourceInteroperabilityRecordBundle : resourceInteroperabilityRecordBundleList) {
+            if (resourceInteroperabilityRecordBundle.getResourceInteroperabilityRecord().getResourceId().equals(resourceId)) {
                 ConfigurationTemplateBundle configurationTemplateBundle = configurationTemplateService.get(configurationTemplateId);
-                if (resourceInteroperabilityRecordBundle.getResourceInteroperabilityRecord().getInteroperabilityRecordIds().contains(configurationTemplateBundle.getConfigurationTemplate().getInteroperabilityRecordId())){
+                if (resourceInteroperabilityRecordBundle.getResourceInteroperabilityRecord().getInteroperabilityRecordIds().contains(configurationTemplateBundle.getConfigurationTemplate().getInteroperabilityRecordId())) {
                     found = true;
                     break;
                 }
             }
         }
-        if (!found){
+        if (!found) {
             throw new ValidationException("Fields resourceId and configurationTemplateId are not related.");
         }
 
         // check if a Configuration Template Implementation with the same resourceId, configurationTemplateId and payload already exists
         List<ConfigurationTemplateInstanceBundle> configurationTemplateInstanceBundleList = configurationTemplateInstanceService.getAll(createFacetFilter(), auth).getResults();
-        for (ConfigurationTemplateInstanceBundle ctiBundle : configurationTemplateInstanceBundleList){
+        for (ConfigurationTemplateInstanceBundle ctiBundle : configurationTemplateInstanceBundleList) {
             if (ctiBundle.getConfigurationTemplateInstance().getResourceId().equals(resourceId) &&
-                ctiBundle.getConfigurationTemplateInstance().getConfigurationTemplateId().equals(configurationTemplateId) &&
-                ctiBundle.getConfigurationTemplateInstance().getPayload().equals(configurationTemplateInstanceBundle.getConfigurationTemplateInstance().getPayload())){
+                    ctiBundle.getConfigurationTemplateInstance().getConfigurationTemplateId().equals(configurationTemplateId) &&
+                    ctiBundle.getConfigurationTemplateInstance().getPayload().equals(configurationTemplateInstanceBundle.getConfigurationTemplateInstance().getPayload())) {
                 throw new ValidationException(String.format("There is already a Configuration Template Instance registered for Resource [%s] under [%s] Configuration Template with the same payload",
                         resourceId, configurationTemplateId));
             }
         }
     }
 
-    private FacetFilter createFacetFilter(){
+    private FacetFilter createFacetFilter() {
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(10000);
         ff.addFilter("published", false);

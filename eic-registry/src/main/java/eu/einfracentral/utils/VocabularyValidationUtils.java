@@ -57,5 +57,6 @@ public class VocabularyValidationUtils {
         }
     }
 
-    private VocabularyValidationUtils() {}
+    private VocabularyValidationUtils() {
+    }
 }

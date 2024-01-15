@@ -610,11 +610,11 @@ public abstract class AbstractServiceBundleManager<T extends ServiceBundle> exte
         bundle.setLoggingInfo(loggingInfoList);
     }
 
-    public FacetFilter createFacetFilterForFetchingServices(Map<String, Object> allRequestParams, String catalogueId){
+    public FacetFilter createFacetFilterForFetchingServices(Map<String, Object> allRequestParams, String catalogueId) {
         FacetFilter ff = FacetFilterUtils.createFacetFilter(allRequestParams);
         allRequestParams.remove("catalogue_id");
-        if (catalogueId != null){
-            if (!catalogueId.equals("all")){
+        if (catalogueId != null) {
+            if (!catalogueId.equals("all")) {
                 ff.addFilter("catalogue_id", catalogueId);
             }
         }
@@ -623,11 +623,11 @@ public abstract class AbstractServiceBundleManager<T extends ServiceBundle> exte
         return ff;
     }
 
-    public FacetFilter createFacetFilterForFetchingServices(MultiValueMap<String, Object> allRequestParams, String catalogueId){
+    public FacetFilter createFacetFilterForFetchingServices(MultiValueMap<String, Object> allRequestParams, String catalogueId) {
         FacetFilter ff = FacetFilterUtils.createMultiFacetFilter(allRequestParams);
         allRequestParams.remove("catalogue_id");
-        if (catalogueId != null){
-            if (!catalogueId.equals("all")){
+        if (catalogueId != null) {
+            if (!catalogueId.equals("all")) {
                 ff.addFilter("catalogue_id", catalogueId);
             }
         }
@@ -636,7 +636,7 @@ public abstract class AbstractServiceBundleManager<T extends ServiceBundle> exte
         return ff;
     }
 
-    public void updateFacetFilterConsideringTheAuthorization(FacetFilter filter, Authentication auth){
+    public void updateFacetFilterConsideringTheAuthorization(FacetFilter filter, Authentication auth) {
         // if user is Unauthorized, return active/latest ONLY
         if (auth == null) {
             filter.addFilter("active", true);
@@ -650,7 +650,7 @@ public abstract class AbstractServiceBundleManager<T extends ServiceBundle> exte
         }
     }
 
-    private List<String> getAllProviderIds(){
+    private List<String> getAllProviderIds() {
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(10000);
         ff.addFilter("published", false);

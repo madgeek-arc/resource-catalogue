@@ -16,8 +16,11 @@ public interface SecurityService {
     boolean hasRole(Authentication auth, String role);
 
     boolean isProviderAdmin(Authentication auth, @NotNull String providerId);
+
     boolean isProviderAdmin(Authentication auth, @NotNull String providerId, @NotNull String catalogueId);
+
     boolean isProviderAdmin(Authentication auth, @NotNull String providerId, boolean noThrow);
+
     boolean isProviderAdmin(Authentication auth, @NotNull String providerId, @NotNull String catalogueId, boolean noThrow);
 
     boolean isCatalogueAdmin(Authentication auth, @NotNull String catalogueId);
@@ -25,9 +28,11 @@ public interface SecurityService {
     boolean isCatalogueAdmin(Authentication auth, @NotNull String catalogueId, boolean noThrow);
 
     boolean isResourceProviderAdmin(Authentication auth, String resourceId);
+
     boolean isResourceProviderAdmin(Authentication auth, String resourceId, String catalogueId);
 
     boolean isResourceProviderAdmin(Authentication auth, ServiceBundle serviceBundle, boolean noThrow);
+
     <T extends eu.einfracentral.domain.Service> boolean isResourceProviderAdmin(Authentication auth, T service);
 
     boolean userIsProviderAdmin(@NotNull User user, @NotNull String providerId, @NotNull String catalogueId);
@@ -40,12 +45,16 @@ public interface SecurityService {
     boolean userIsResourceProviderAdmin(User user, String resourceId, String catalogueId);
 
     boolean providerCanAddResources(Authentication auth, String resourceId, String catalogueId);
+
     boolean providerCanAddResources(Authentication auth, ServiceBundle serviceBundle);
+
     <T extends eu.einfracentral.domain.Service> boolean providerCanAddResources(Authentication auth, T service);
 
     boolean providerIsActiveAndUserIsAdmin(Authentication auth, String resourceId);
+
     boolean providerIsActiveAndUserIsAdmin(Authentication auth, String resourceId, String catalogueId);
 
     boolean resourceIsActive(String resourceId, String catalogueId);
+
     boolean trainingResourceIsActive(String resourceId, String catalogueId);
 }

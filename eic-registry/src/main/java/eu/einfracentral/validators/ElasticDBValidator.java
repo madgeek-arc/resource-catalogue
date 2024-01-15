@@ -48,7 +48,7 @@ public class ElasticDBValidator implements ElasticDBValidatorService {
         this.dataSource = dataSource;
     }
 
-//    @Scheduled(cron = "0 0 0 * * *") // At midnight every day
+    //    @Scheduled(cron = "0 0 0 * * *") // At midnight every day
 //    @Scheduled(fixedDelay = 5 * 60 * 1000)
     private void scheduledValidation() {
         List<String> resourceTypeNames = resourceTypeService.getAllResourceType(0, 100)
@@ -75,7 +75,7 @@ public class ElasticDBValidator implements ElasticDBValidatorService {
         NamedParameterJdbcTemplate namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(dataSource);
         MapSqlParameterSource in = new MapSqlParameterSource();
 
-        String query = "SELECT id FROM " +resourceType+ "_view";
+        String query = "SELECT id FROM " + resourceType + "_view";
 
         List<Map<String, Object>> records = namedParameterJdbcTemplate.queryForList(query, in);
         if (records != null && !records.isEmpty()) {
@@ -134,7 +134,7 @@ public class ElasticDBValidator implements ElasticDBValidatorService {
         }
     }
 
-    private void indexMissingElasticIds(List<String>  missingElasticIds, String resourceType) {
+    private void indexMissingElasticIds(List<String> missingElasticIds, String resourceType) {
         logger.info("Adding {} missing indexes for {}", missingElasticIds.size(), resourceType);
         for (String missingElasticId : missingElasticIds) {
             Resource resource = resourceService.getResource(missingElasticId);
@@ -160,39 +160,39 @@ public class ElasticDBValidator implements ElasticDBValidatorService {
         jsonObjectField.put("payload", resource.getPayload());
         jsonObjectField.put("payloadFormat", resource.getPayloadFormat());
         jsonObjectField.put("version", resource.getVersion());
-        jsonObjectField.put("searchableArea", strip(resource.getPayload(),resource.getPayloadFormat()));
+        jsonObjectField.put("searchableArea", strip(resource.getPayload(), resource.getPayloadFormat()));
         jsonObjectField.put("modification_date", resource.getModificationDate().getTime());
         //The creation date exists and should not be updated
-        if(resource.getCreationDate() != null) {
+        if (resource.getCreationDate() != null) {
             jsonObjectField.put("creation_date", resource.getCreationDate().getTime());
         }
         Map<String, IndexField> indexMap = resourceTypeService.getResourceTypeIndexFields(
                         resource.getResourceType().getName()).
-                stream().collect(Collectors.toMap(IndexField::getName, p->p)
+                stream().collect(Collectors.toMap(IndexField::getName, p -> p)
                 );
         if (resource.getIndexedFields() != null) {
             for (IndexedField<?> field : resource.getIndexedFields()) {
-                if(!indexMap.get(field.getName()).isMultivalued()) {
+                if (!indexMap.get(field.getName()).isMultivalued()) {
                     for (Object value : field.getValues()) {
                         String fieldType = indexMap.get(field.getName()).getType();
-                        if(fieldType.equals("java.lang.String")){
+                        if (fieldType.equals("java.lang.String")) {
                             jsonObjectField.put(field.getName(), value);
-                        }else if(fieldType.equals("java.lang.Integer")){
-                            jsonObjectField.put(field.getName(),value);
-                        }else if(fieldType.equals("java.lang.Long")){
-                            jsonObjectField.put(field.getName(),value);
-                        }else if(fieldType.equals("java.lang.Float")){
-                            jsonObjectField.put(field.getName(),value);
-                        }else if(fieldType.equals("java.util.Date")){
+                        } else if (fieldType.equals("java.lang.Integer")) {
+                            jsonObjectField.put(field.getName(), value);
+                        } else if (fieldType.equals("java.lang.Long")) {
+                            jsonObjectField.put(field.getName(), value);
+                        } else if (fieldType.equals("java.lang.Float")) {
+                            jsonObjectField.put(field.getName(), value);
+                        } else if (fieldType.equals("java.util.Date")) {
                             Date date = (Date) value;
                             jsonObjectField.put(field.getName(), date.getTime());
-                        }else if (fieldType.equals("java.lang.Boolean")){
-                            jsonObjectField.put(field.getName(),value);
+                        } else if (fieldType.equals("java.lang.Boolean")) {
+                            jsonObjectField.put(field.getName(), value);
                         }
                     }
                 } else {
                     List<Object> values = new ArrayList<>(field.getValues());
-                    jsonObjectField.put(field.getName(),values);
+                    jsonObjectField.put(field.getName(), values);
 
                 }
             }
@@ -201,7 +201,7 @@ public class ElasticDBValidator implements ElasticDBValidatorService {
     }
 
     private static String strip(String input, String format) {
-        if ( "xml".equals(format)) {
+        if ("xml".equals(format)) {
             return input.replaceAll("<[^>]+>", " ").replaceAll("\\s+", " ");
         } else if ("json".equals(format)) {
             return input;

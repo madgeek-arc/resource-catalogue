@@ -119,12 +119,12 @@ public class PublicMonitoringManager extends AbstractPublicResourceManager<Monit
 
     @Override
     public void delete(MonitoringBundle monitoringBundle) {
-        try{
+        try {
             MonitoringBundle publicMonitoringBundle = get(String.format("%s.%s", monitoringBundle.getCatalogueId(), monitoringBundle.getId()));
             logger.info(String.format("Deleting public Monitoring with id [%s]", publicMonitoringBundle.getId()));
             super.delete(publicMonitoringBundle);
             jmsService.convertAndSendTopic("monitoring.delete", publicMonitoringBundle);
-        } catch (ResourceException | ResourceNotFoundException ignore){
+        } catch (ResourceException | ResourceNotFoundException ignore) {
         }
     }
 }

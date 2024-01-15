@@ -58,10 +58,10 @@ public class ServiceControllerDeprecated {
 
     @Autowired
     ServiceControllerDeprecated(ServiceBundleService<ServiceBundle> service,
-                      ProviderService<ProviderBundle, Authentication> provider,
-                      TrainingResourceService<TrainingResourceBundle> trainingResourceService,
-                      DataSource commonDataSource, GenericResourceService genericResourceService,
-                      SecurityService securityService) {
+                                ProviderService<ProviderBundle, Authentication> provider,
+                                TrainingResourceService<TrainingResourceBundle> trainingResourceService,
+                                DataSource commonDataSource, GenericResourceService genericResourceService,
+                                SecurityService securityService) {
         this.serviceBundleService = service;
         this.providerService = provider;
         this.trainingResourceService = trainingResourceService;

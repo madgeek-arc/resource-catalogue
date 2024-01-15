@@ -106,12 +106,12 @@ public class PublicProviderManager extends ResourceManager<ProviderBundle> imple
 
     @Override
     public void delete(ProviderBundle providerBundle) {
-        try{
-            ProviderBundle publicProviderBundle = get(String.format("%s.%s",providerBundle.getProvider().getCatalogueId(), providerBundle.getId()));
+        try {
+            ProviderBundle publicProviderBundle = get(String.format("%s.%s", providerBundle.getProvider().getCatalogueId(), providerBundle.getId()));
             logger.info(String.format("Deleting public Provider with id [%s]", publicProviderBundle.getId()));
             super.delete(publicProviderBundle);
             jmsService.convertAndSendTopic("provider.delete", publicProviderBundle);
-        } catch (ResourceException | ResourceNotFoundException ignore){
+        } catch (ResourceException | ResourceNotFoundException ignore) {
         }
     }
 }
