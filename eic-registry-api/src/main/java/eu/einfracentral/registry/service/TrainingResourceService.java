@@ -1,6 +1,9 @@
 package eu.einfracentral.registry.service;
 
-import eu.einfracentral.domain.*;
+import eu.einfracentral.domain.Bundle;
+import eu.einfracentral.domain.LoggingInfo;
+import eu.einfracentral.domain.TrainingResource;
+import eu.einfracentral.domain.TrainingResourceBundle;
 import eu.openminted.registry.core.domain.Browsing;
 import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.domain.Paging;
@@ -16,274 +19,302 @@ import java.util.Set;
 public interface TrainingResourceService<T> extends ResourceService<T, Authentication> {
 
     /**
-     * Method to add a new resource.
+     * Add a new TrainingResource on the EOSC Catalogue
      *
-     * @param resource
-     * @param auth
-     * @return
+     * @param resource Training Resource
+     * @param auth     Authentication
+     * @return {@link T}
      */
     T addResource(T resource, Authentication auth);
 
     /**
-     * Method to add a new resource from external catalogue.
+     * Add a new TrainingResource on an external Catalogue, providing the Catalogue's ID
      *
-     * @param resource
-     * @param catalogueId
-     * @param auth
-     * @return
+     * @param resource    Training Resource
+     * @param catalogueId Catalogue ID
+     * @param auth        Authentication
+     * @return {@link T}
      */
     T addResource(T resource, String catalogueId, Authentication auth);
 
     /**
-     * Method to update a resource.
+     * Update a Training Resource of the EOSC Catalogue.
      *
-     * @param resource
-     * @param comment
-     * @param auth
-     * @return
-     * @throws ResourceNotFoundException
+     * @param resource Training Resource
+     * @param comment  Comment
+     * @param auth     Authentication
+     * @return {@link T}
+     * @throws ResourceNotFoundException The Resource was not found
      */
     T updateResource(T resource, String comment, Authentication auth) throws ResourceNotFoundException;
 
     /**
-     * Method to update a resource.
+     * Update a Training Resource of an external Catalogue, providing its Catalogue ID
      *
-     * @param resource
-     * @param catalogueId
-     * @param comment
-     * @param auth
-     * @return
-     * @throws ResourceNotFoundException
+     * @param resource    Training Resource
+     * @param catalogueId Catalogue ID
+     * @param comment     Comment
+     * @param auth        Authentication
+     * @return {@link T}
+     * @throws ResourceNotFoundException The Resource was not found
      */
     T updateResource(T resource, String catalogueId, String comment, Authentication auth)
             throws ResourceNotFoundException;
 
     /**
+     * Get a Training Resource of a specific Catalogue
      *
-     * @param catalogueId
-     * @param resourceId
-     * @param auth
-     * @return
+     * @param catalogueId Catalogue ID
+     * @param resourceId  Training Resource ID
+     * @param auth        Authentication
+     * @return {@link T}
      */
     T getCatalogueResource(String catalogueId, String resourceId, Authentication auth);
 
     /**
-     * Returns the Resource with the specified id.
+     * Returns the Training Resource with the specified ID
      *
-     * @param id          of the Resource.
-     * @param catalogueId
-     * @return resource.
+     * @param id          Training Resource ID
+     * @param catalogueId Catalogue ID
+     * @return {@link T}
      */
     T get(String id, String catalogueId);
 
     /**
-     * Get ResourceBundles by a specific field.
+     * Get TrainingResource Bundles by a specific field.
      *
-     * @param field
-     * @param auth
-     * @return
+     * @param field Field of Training Resource
+     * @param auth  Authentication
+     * @return {@link Map}&lt;{@link String},{@link List}&lt;{@link T}&gt;&gt;
+     * @throws NoSuchFieldException The field does not exist
      */
     Map<String, List<T>> getBy(String field, Authentication auth) throws NoSuchFieldException;
 
     /**
-     * Get Services with the specified ids.
+     * Get TrainingResources with the specified ids.
      *
-     * @param ids
-     * @return
+     * @param authentication Authentication
+     * @param ids            Training Resource IDs
+     * @return {@link List}&lt;{@link TrainingResource}&gt;
      */
     List<TrainingResource> getByIds(Authentication authentication, String... ids);
 
 
     /**
-     * Check if the Resource exists.
+     * Check if the TrainingResource exists.
      *
-     * @param ids
-     * @return
+     * @param ids Training Resource IDs
+     * @return True/False
      */
     boolean exists(SearchService.KeyValue... ids);
 
     /**
-     * Validates the given trainingResourceBundle.
+     * Validates the given TrainingResource Bundle.
      *
-     * @param trainingResourceBundle
-     * @return
+     * @param trainingResourceBundle TrainingResource Bundle
+     * @return True/False
      */
     boolean validateTrainingResource(TrainingResourceBundle trainingResourceBundle);
 
     /**
-     * Get resource.
+     * Get Training Resource.
      *
-     * @param id
-     * @param catalogueId
-     * @return Resource
+     * @param id          TrainingResource ID
+     * @param catalogueId Catalogue ID
+     * @return {@link Resource}
      */
     Resource getResource(String id, String catalogueId);
 
     /**
-     * Sets a Resource as active/inactive.
+     * Sets a TrainingResource as active/inactive.
      *
-     * @param resourceId
-     * @param active
-     * @param auth
-     * @return
+     * @param resourceId TrainingResource ID
+     * @param active     True/False
+     * @param auth       Authentication
+     * @return {@link T}
      */
     T publish(String resourceId, Boolean active, Authentication auth);
 
     /**
      * Return children vocabularies from parent vocabularies
      *
-     * @param type
-     * @param parent
+     * @param type   Vocabulary's type
+     * @param parent Vocabulary's parent
      * @param rec
-     * @return
+     * @return {@link List}&lt;{@link String}&gt;
      */
     List<String> getChildrenFromParent(String type, String parent, List<Map<String, Object>> rec);
 
     /**
-     * Gets all Resources for Admins Page
+     * Gets a Browsing of all TrainingResources for admins
      *
-     * @param filter
-     * @param auth
+     * @param filter FacetFilter
+     * @param auth   Authentication
+     * @return {@link Browsing}&lt;{@link T}&gt;
      */
     Browsing<T> getAllForAdmin(FacetFilter filter, Authentication auth);
 
     /**
-     * @param resourceId
-     * @param actionType
-     * @param auth
-     * @return
+     * Audit a Training Resource
+     *
+     * @param resourceId  TrainingResource ID
+     * @param catalogueId Catalogue ID
+     * @param comment     Comment
+     * @param actionType  Audit's action type
+     * @param auth        Authentication
+     * @return {@link T}
      */
     T auditResource(String resourceId, String catalogueId, String comment, LoggingInfo.ActionType actionType,
                     Authentication auth);
 
     /**
-     * @param ff
-     * @param auth
-     * @param auditingInterval
-     * @return
+     * Get a paging of random Training Resources
+     *
+     * @param ff               FacetFilter
+     * @param auditingInterval Auditing Interval (in months)
+     * @param auth             Authentication
+     * @return {@link Paging}&lt;{@link T}&gt;
      */
     Paging<T> getRandomResources(FacetFilter ff, String auditingInterval, Authentication auth);
 
     /**
-     * @param providerId
-     * @param auth
-     * @return
+     * Get a list of TrainingResource Bundles of a specific Provider of the EOSC Catalogue
+     *
+     * @param providerId Provider ID
+     * @param auth       Authentication
+     * @return {@link List}&lt;{@link T}&gt;
      */
     List<T> getResourceBundles(String providerId, Authentication auth);
 
     /**
-     * @param providerId
-     * @param catalogueId
-     * @param auth
-     * @return
+     * Get a paging of TrainingResource Bundles of a specific Provider of an external Catalogue
+     *
+     * @param catalogueId Catalogue ID
+     * @param providerId  Provider ID
+     * @param auth        Authentication
+     * @return {@link Paging}&lt;{@link T}&gt;
      */
     Paging<T> getResourceBundles(String catalogueId, String providerId, Authentication auth);
 
     /**
+     * Get a list of TrainingResources of a specific Provider of the EOSC Catalogue
      *
-     * @param providerId
-     * @param auth
-     * @return
+     * @param providerId Provider ID
+     * @param auth       Authentication
+     * @return {@link List}&lt;{@link TrainingResource}&gt;
      */
     List<? extends TrainingResource> getResources(String providerId, Authentication auth);
 
     /**
+     * Get an EOSC Provider's TrainingResource Template, if exists, else return null
      *
-     * @param providerId
-     * @param auth
-     * @return
+     * @param providerId Provider ID
+     * @param auth       Authentication
+     * @return {@link TrainingResourceBundle}
      */
     TrainingResourceBundle getResourceTemplate(String providerId, Authentication auth);
 
     /**
+     * Get all inactive TrainingResources of a specific Provider, providing its ID
      *
-     * @param providerId
-     * @return
+     * @param providerId Provider ID
+     * @return {@link List}&lt;{@link T}&gt;
      */
     List<T> getInactiveResources(String providerId);
 
     /**
-     * @param resourceId
-     * @param auth
+     * Send email notifications to all Providers with outdated TrainingResources
+     *
+     * @param resourceId Training Resource ID
+     * @param auth       Authentication
      */
     void sendEmailNotificationsToProvidersWithOutdatedResources(String resourceId, Authentication auth);
 
     /**
-     * Get the History of the Resource with the specified id.
+     * Get the history of the specific TrainingResource of the specific Catalogue ID
      *
-     * @param id
-     * @param catalogueId
-     * @return
+     * @param id          TrainingResource ID
+     * @param catalogueId Catalogue ID
+     * @return {@link Paging}&lt;{@link LoggingInfo}&gt;
      */
     Paging<LoggingInfo> getLoggingInfoHistory(String id, String catalogueId);
 
     /**
-     * @param id
-     * @param status
-     * @param active
-     * @param auth
-     * @return
+     * Verify the TrainingResource providing its ID
+     *
+     * @param id     TrainingResource ID
+     * @param status TrainingResource's status (approved/rejected)
+     * @param active True/False
+     * @param auth   Authentication
+     * @return {@link T}
      */
     T verifyResource(String id, String status, Boolean active, Authentication auth);
 
     /**
+     * Change the Provider of the specific TrainingResource
      *
-     * @param resourceId
-     * @param newProvider
-     * @param comment
-     * @param auth
-     * @return
+     * @param resourceId  TrainingResource ID
+     * @param newProvider New Provider ID
+     * @param comment     Comment
+     * @param auth        Authentication
+     * @return {@link T}
      */
     T changeProvider(String resourceId, String newProvider, String comment, Authentication auth);
 
     /**
+     * Get a paging with all TrainingResource Bundles belonging to a specific audit state
      *
-     * @param ff
-     * @param auditState
-     * @return
+     * @param ff         FacetFilter
+     * @param auditState Audit State
+     * @return {@link Paging}&lt;{@link Bundle}&lt;?&gt;&gt;
      */
     Paging<Bundle<?>> getAllForAdminWithAuditStates(FacetFilter ff, Set<String> auditState);
 
     /**
+     * Get a specific TrainingResource of the EOSC Catalogue, given its ID, or return null
      *
-     * @param id
-     * @return
+     * @param id TrainingResource ID
+     * @return {@link TrainingResourceBundle}
      */
     TrainingResourceBundle getOrElseReturnNull(String id);
 
     /**
+     * Get a specific TrainingResource of an external Catalogue, given its ID, or return null
      *
-     * @param id
-     * @param catalogueId
-     * @return
+     * @param id          Training Resource ID
+     * @param catalogueId Catalogue ID
+     * @return {@link TrainingResourceBundle}
      */
     TrainingResourceBundle getOrElseReturnNull(String id, String catalogueId);
 
     /**
+     * Create a Public TrainingResource
      *
-     * @param resource
-     * @param auth
-     * @return
+     * @param resource TrainingResource
+     * @param auth     Authentication
+     * @return {@link T}
      */
     T createPublicResource(T resource, Authentication auth);
 
     /**
+     * Suspend the TrainingResource given its ID
      *
-     * @param trainingResourceId
-     * @param catalogueId
-     * @param suspend
-     * @param auth
-     * @return
+     * @param trainingResourceId TrainingResource ID
+     * @param catalogueId        Catalogue ID
+     * @param suspend            True/False
+     * @param auth               Authentication
+     * @return {@link TrainingResourceBundle}
      */
     TrainingResourceBundle suspend(String trainingResourceId, String catalogueId, boolean suspend, Authentication auth);
 
     /**
+     * Publish TrainingResource's related resources
      *
-     * @param serviceId
-     * @param catalogueId
-     * @param active
-     * @param auth
+     * @param id          TrainingResource ID
+     * @param catalogueId Catalogue ID
+     * @param active      True/False
+     * @param auth        Authentication
      */
-    void publishTrainingResourceRelatedResources(String serviceId, String catalogueId, Boolean active,
+    void publishTrainingResourceRelatedResources(String id, String catalogueId, Boolean active,
                                                  Authentication auth);
 }

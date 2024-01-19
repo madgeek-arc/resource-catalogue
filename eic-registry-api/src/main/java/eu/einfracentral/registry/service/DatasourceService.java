@@ -6,8 +6,6 @@ import eu.openminted.registry.core.domain.Paging;
 import org.springframework.security.core.Authentication;
 import org.springframework.util.MultiValueMap;
 
-import java.util.List;
-
 public interface DatasourceService extends ResourceService<DatasourceBundle, Authentication> {
 
     /**
@@ -20,7 +18,7 @@ public interface DatasourceService extends ResourceService<DatasourceBundle, Aut
     DatasourceBundle get(String serviceId, String catalogueId);
 
     /**
-     * Get the Datasource sub-profile of the specific Service of the specific Catalogue
+     * Update the specific Datasource
      *
      * @param datasourceBundle Datasource Bundle to be updated
      * @param comment          Optional comment of the update
@@ -41,6 +39,8 @@ public interface DatasourceService extends ResourceService<DatasourceBundle, Aut
     DatasourceBundle verifyDatasource(String id, String status, Boolean active, Authentication auth);
 
     /**
+     * Update the specific DatasourceBundle
+     *
      * @param datasourceBundle DatasourceBundle
      * @param auth             Authentication
      */
