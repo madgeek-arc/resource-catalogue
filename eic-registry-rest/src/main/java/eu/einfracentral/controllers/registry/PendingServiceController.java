@@ -156,10 +156,10 @@ public class PendingServiceController extends ResourceController<ServiceBundle, 
         }
 
         // check Provider's template status -> block transform if it's on 'pending' state
-        String resourceOrgranisation = service.getResourceOrganisation();
-        ProviderBundle providerBundle = providerService.get(resourceOrgranisation);
+        String resourceOrganisation = service.getResourceOrganisation();
+        ProviderBundle providerBundle = providerService.get(resourceOrganisation);
         if (providerBundle.getTemplateStatus().equals("pending template")) {
-            throw new ValidationException(String.format("There is already a Resource waiting to be approved for the Provider [%s]", resourceOrgranisation));
+            throw new ValidationException(String.format("There is already a Resource waiting to be approved for the Provider [%s]", resourceOrganisation));
         }
 
         if (serviceBundle == null) { // if existing Pending Service is null, create a new Active Service

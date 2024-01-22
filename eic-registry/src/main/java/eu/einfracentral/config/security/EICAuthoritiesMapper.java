@@ -16,7 +16,6 @@ import org.mitre.openid.connect.model.UserInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -37,7 +36,7 @@ public class EICAuthoritiesMapper implements OIDCAuthoritiesMapper, AuthoritiesM
     private static final Logger logger = LogManager.getLogger(EICAuthoritiesMapper.class);
     private Set<String> providerUsers = new HashSet<>();
     private Set<String> catalogueUsers = new HashSet<>();
-    private final Map<String, Set<SimpleGrantedAuthority>> adminsAndEpots = new HashMap<>();
+    private final Map<String, Set<SimpleGrantedAuthority>> adminsAndEpot = new HashMap<>();
     private final String admins;
     private final String epotAdmins;
     private final int maxQuantity;
@@ -72,14 +71,14 @@ public class EICAuthoritiesMapper implements OIDCAuthoritiesMapper, AuthoritiesM
 
     @PostConstruct
     void createAdminsOnStartup() {
-        mergeRoles(adminsAndEpots, Arrays.stream(epotAdmins.replace(" ", "").split(","))
+        mergeRoles(adminsAndEpot, Arrays.stream(epotAdmins.replace(" ", "").split(","))
                 .map(String::toLowerCase)
                 .collect(Collectors.toMap(
                         Function.identity(),
                         a -> new SimpleGrantedAuthority("ROLE_EPOT"))
                 ));
 
-        mergeRoles(adminsAndEpots, Arrays.stream(admins.replace(" ", "").split(","))
+        mergeRoles(adminsAndEpot, Arrays.stream(admins.replace(" ", "").split(","))
                 .map(String::toLowerCase)
                 .collect(Collectors.toMap(
                         Function.identity(),
@@ -104,10 +103,10 @@ public class EICAuthoritiesMapper implements OIDCAuthoritiesMapper, AuthoritiesM
 
     @Override
     public boolean isAdmin(String email) {
-        if (!adminsAndEpots.containsKey(email)) {
+        if (!adminsAndEpot.containsKey(email)) {
             return false;
         } else {
-            return adminsAndEpots.get(email)
+            return adminsAndEpot.get(email)
                     .stream()
                     .anyMatch(simpleGrantedAuthority -> simpleGrantedAuthority.getAuthority().equals("ROLE_ADMIN"));
         }
@@ -115,10 +114,10 @@ public class EICAuthoritiesMapper implements OIDCAuthoritiesMapper, AuthoritiesM
 
     @Override
     public boolean isEPOT(String email) {
-        if (!adminsAndEpots.containsKey(email)) {
+        if (!adminsAndEpot.containsKey(email)) {
             return false;
         } else {
-            return adminsAndEpots.get(email).stream()
+            return adminsAndEpot.get(email).stream()
                     .anyMatch(simpleGrantedAuthority -> simpleGrantedAuthority.getAuthority().equals("ROLE_EPOT"));
         }
     }
@@ -180,8 +179,8 @@ public class EICAuthoritiesMapper implements OIDCAuthoritiesMapper, AuthoritiesM
         } finally {
             lock.unlock();
         }
-        if (adminsAndEpots.containsKey(email.toLowerCase())) {
-            authorities.addAll(adminsAndEpots.get(email.toLowerCase()));
+        if (adminsAndEpot.containsKey(email.toLowerCase())) {
+            authorities.addAll(adminsAndEpot.get(email.toLowerCase()));
         }
         logger.debug("Get Authorities took {} ms", (System.nanoTime() - time) / 1000000);
         return authorities;

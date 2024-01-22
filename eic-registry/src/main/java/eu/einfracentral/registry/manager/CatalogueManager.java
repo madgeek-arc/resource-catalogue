@@ -45,7 +45,7 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
     private final TrainingResourceService<TrainingResourceBundle> trainingResourceService;
     private final InteroperabilityRecordService<InteroperabilityRecordBundle> interoperabilityRecordService;
     private final ProviderResourcesCommonMethods commonMethods;
-    private final String columnsOfInterest = "catalogue_id, name"; // variable with DB tables a keyword is been searched on
+    private final String columnsOfInterest = "catalogue_id, name"; // variable with DB tables a keyword is searched on
 
     @Value("${project.catalogue.name}")
     private String catalogueName;

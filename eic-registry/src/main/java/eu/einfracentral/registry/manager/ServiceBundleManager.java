@@ -314,7 +314,7 @@ public class ServiceBundleManager extends AbstractServiceBundleManager<ServiceBu
         }
         if (auth != null && auth.isAuthenticated()) {
             User user = User.of(auth);
-            //TODO: userIsCatalogueAdmin -> transcationRollback error
+            //TODO: userIsCatalogueAdmin -> transactionRollback error
             // if user is ADMIN/EPOT or Catalogue/Provider Admin on the specific Provider, return everything
             if (securityService.hasRole(auth, "ROLE_ADMIN") || securityService.hasRole(auth, "ROLE_EPOT") ||
                     securityService.userIsResourceProviderAdmin(user, serviceId, catalogueId)) {

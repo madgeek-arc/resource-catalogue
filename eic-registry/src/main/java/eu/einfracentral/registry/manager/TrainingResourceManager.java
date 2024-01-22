@@ -706,7 +706,7 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
         try {
             resource = get(id, catalogueName);
         } catch (ResourceNotFoundException e) {
-            resource = checkIdExistanceInOtherCatalogues(id);
+            resource = checkIdExistenceInOtherCatalogues(id);
             if (resource == null) {
                 throw e;
             }
@@ -714,7 +714,7 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
         return resource;
     }
 
-    private TrainingResourceBundle checkIdExistanceInOtherCatalogues(String id) {
+    private TrainingResourceBundle checkIdExistenceInOtherCatalogues(String id) {
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(maxQuantity);
         ff.addFilter("resource_internal_id", id);

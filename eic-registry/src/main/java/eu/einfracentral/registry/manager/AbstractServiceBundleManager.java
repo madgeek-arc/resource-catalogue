@@ -124,7 +124,7 @@ public abstract class AbstractServiceBundleManager<T extends ServiceBundle> exte
     }
 
     // TODO: REMOVE ME
-    private T checkIdExistanceInOtherCatalogues(String id) {
+    private T checkIdExistenceInOtherCatalogues(String id) {
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(maxQuantity);
         ff.addFilter("resource_internal_id", id);
@@ -142,7 +142,7 @@ public abstract class AbstractServiceBundleManager<T extends ServiceBundle> exte
         try {
             resource = get(id, catalogueName);
         } catch (ResourceNotFoundException e) {
-            resource = checkIdExistanceInOtherCatalogues(id);
+            resource = checkIdExistenceInOtherCatalogues(id);
             if (resource == null) {
                 throw e;
             }

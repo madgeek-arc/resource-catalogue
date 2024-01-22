@@ -469,7 +469,7 @@ public class ProviderResourcesCommonMethods {
         JSONObject hs_admin_data = new JSONObject();
         JSONObject hs_admin_data_value = new JSONObject();
         JSONObject id = new JSONObject();
-        JSONObject markeplaceUrl = new JSONObject();
+        JSONObject marketplaceUrl = new JSONObject();
         hs_admin_data_value.put("index", 301);
         hs_admin_data_value.put("handle", pidPrefix + "/" + pidUsername);
         hs_admin_data_value.put("permissions", "011111110011");
@@ -480,14 +480,14 @@ public class ProviderResourcesCommonMethods {
         hs_admin.put("type", "HS_ADMIN");
         hs_admin.put("data", hs_admin_data);
         values.put(hs_admin);
-        markeplaceUrl.put("index", 1);
-        markeplaceUrl.put("type", "url");
-        String url = marketplaceUrl;
+        marketplaceUrl.put("index", 1);
+        marketplaceUrl.put("type", "url");
+        String url = this.marketplaceUrl;
         if (resourceTypePath.equals("trainings/") || resourceTypePath.equals("guidelines/")) {
             url = url.replace("marketplace", "search.marketplace");
         }
-        markeplaceUrl.put("data", url + resourceTypePath + resourceId);
-        values.put(markeplaceUrl);
+        marketplaceUrl.put("data", url + resourceTypePath + resourceId);
+        values.put(marketplaceUrl);
         id.put("index", 2);
         id.put("type", "id");
         id.put("data", resourceId);

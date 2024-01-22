@@ -77,7 +77,7 @@ public class DatasourceManager extends ResourceManager<DatasourceBundle> impleme
 
         // if Datasource has ID -> check if it exists in OpenAIRE Datasources list
         if (datasourceBundle.getId() != null && !datasourceBundle.getId().equals("")) {
-            checkOpenAIREIDExistance(datasourceBundle);
+            checkOpenAIREIDExistence(datasourceBundle);
         }
         datasourceBundle.setId(datasourceBundle.getDatasource().getServiceId());
         logger.trace("User '{}' is attempting to add a new Datasource: {}", auth, datasourceBundle);
@@ -277,7 +277,7 @@ public class DatasourceManager extends ResourceManager<DatasourceBundle> impleme
     }
 
     // OpenAIRE
-    private void checkOpenAIREIDExistance(DatasourceBundle datasourceBundle) {
+    private void checkOpenAIREIDExistence(DatasourceBundle datasourceBundle) {
         Datasource datasource = openAIREDatasourceManager.get(datasourceBundle.getId());
         if (datasource != null) {
             datasourceBundle.setOriginalOpenAIREId(datasourceBundle.getId());
