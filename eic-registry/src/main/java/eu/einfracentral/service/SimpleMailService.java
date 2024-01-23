@@ -130,13 +130,17 @@ public class SimpleMailService implements MailService {
                     for (int i = 0; i < e.getInvalidAddresses().length; i++) {
                         Address invalidAddress = e.getInvalidAddresses()[i];
                         logger.debug("Invalid e-mail address: {}", invalidAddress);
-                        to.remove(invalidAddress.toString());
-                        cc.remove(invalidAddress.toString());
-                        bcc.remove(invalidAddress.toString());
+
+                        // Remove invalid address from the new lists
+                        toList.remove(invalidAddress.toString());
+                        ccList.remove(invalidAddress.toString());
+                        bccList.remove(invalidAddress.toString());
                     }
-                    message.setRecipients(Message.RecipientType.TO, createAddresses(to));
-                    message.setRecipients(Message.RecipientType.CC, createAddresses(cc));
-                    message.setRecipients(Message.RecipientType.BCC, createAddresses(bcc));
+
+                    // Set recipients using the new lists
+                    message.setRecipients(Message.RecipientType.TO, createAddresses(toList));
+                    message.setRecipients(Message.RecipientType.CC, createAddresses(ccList));
+                    message.setRecipients(Message.RecipientType.BCC, createAddresses(bccList));
                 } else {
                     logger.error(e);
                 }
