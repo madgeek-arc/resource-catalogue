@@ -6,6 +6,8 @@ import eu.openminted.registry.core.domain.Paging;
 import org.springframework.security.core.Authentication;
 import org.springframework.util.MultiValueMap;
 
+import java.util.Map;
+
 public interface DatasourceService extends ResourceService<DatasourceBundle, Authentication> {
 
     /**
@@ -49,7 +51,7 @@ public interface DatasourceService extends ResourceService<DatasourceBundle, Aut
     /**
      * Create a FacetFilter for fetching Datasources
      *
-     * @param allRequestParams All the @RequestParams given
+     * @param allRequestParams {@link MultiValueMap} of all the Requested Parameters given
      * @param catalogueId      The ID of the Catalogue
      * @return {@link FacetFilter}
      */

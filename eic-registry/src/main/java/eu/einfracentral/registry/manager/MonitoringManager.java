@@ -84,7 +84,7 @@ public class MonitoringManager extends ResourceManager<MonitoringBundle> impleme
         } else if (resourceType.equals("training_resource")) {
             ResourceValidationUtils.checkIfResourceBundleIsActiveAndApprovedAndNotPublic(resourceId, catalogueId, trainingResourceService, resourceType);
         } else {
-            throw new ValidationException("Field resourceType should be either 'service', 'datasource' or 'training_resource'");
+            throw new ValidationException("Field resourceType should be either 'service' or 'training_resource'");
         }
 
         super.validate(monitoringBundle);

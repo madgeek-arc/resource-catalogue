@@ -1246,8 +1246,8 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
                     providerBundle.getId(), auth).getResults());
             trainingResources.addAll(trainingResourceService.getResourceBundles(providerBundle.getProvider().
                     getCatalogueId(), providerBundle.getId(), auth).getResults());
-            interoperabilityRecords.addAll(interoperabilityRecordService.getResourceBundles(providerBundle.getProvider().
-                    getCatalogueId(), providerBundle.getId(), auth).getResults());
+            interoperabilityRecords.addAll(interoperabilityRecordService.getInteroperabilityRecordBundles(providerBundle.
+                    getProvider().getCatalogueId(), providerBundle.getId(), auth).getResults());
         }
         createMapValuesForHLE(services, "service", mapValuesList);
         createMapValuesForHLE(trainingResources, "training_resource", mapValuesList);

@@ -1,6 +1,8 @@
 package eu.einfracentral.registry.service;
 
-import eu.einfracentral.domain.*;
+import eu.einfracentral.domain.LoggingInfo;
+import eu.einfracentral.domain.ProviderBundle;
+import eu.einfracentral.domain.ResourceHistory;
 import eu.einfracentral.dto.ExtendedValue;
 import eu.einfracentral.dto.MapValues;
 import eu.openminted.registry.core.domain.FacetFilter;
@@ -31,6 +33,7 @@ public interface ProviderService<T, U extends Authentication> extends ResourceSe
      * @param provider       Provider
      * @param catalogueId    The ID of the Catalogue
      * @param authentication Authentication
+     * @return {@link T}
      */
     T add(T provider, String catalogueId, Authentication authentication);
 
@@ -48,6 +51,7 @@ public interface ProviderService<T, U extends Authentication> extends ResourceSe
      *
      * @param id   Provider's ID
      * @param auth Authentication
+     * @return {@link T}
      */
     T get(String id, U auth);
 
@@ -57,6 +61,7 @@ public interface ProviderService<T, U extends Authentication> extends ResourceSe
      * @param catalogueId Catalogue's ID
      * @param providerId  Provider's ID
      * @param auth        Authentication
+     * @return {@link T}
      */
     T get(String catalogueId, String providerId, U auth);
 
@@ -65,6 +70,7 @@ public interface ProviderService<T, U extends Authentication> extends ResourceSe
      *
      * @param email          User's email
      * @param authentication Authentication
+     * @return {@link List}&lt;{@link T}&gt;
      */
     List<T> getServiceProviders(String email, U authentication);
 
@@ -73,6 +79,7 @@ public interface ProviderService<T, U extends Authentication> extends ResourceSe
      *
      * @param providerId     Provider's ID
      * @param authentication Authentication
+     * @return True/False
      */
     boolean hasAdminAcceptedTerms(String providerId, U authentication);
 
@@ -88,6 +95,7 @@ public interface ProviderService<T, U extends Authentication> extends ResourceSe
      * Validates a specific URL regarding the ability to open a connection
      *
      * @param urlForValidation URL to be validated
+     * @return True/False
      * @deprecated Validates a specific URL regarding the response's status code
      */
     boolean validateUrl(URL urlForValidation) throws Throwable;
@@ -111,6 +119,8 @@ public interface ProviderService<T, U extends Authentication> extends ResourceSe
 
     /**
      * Get a list of Inactive Providers
+     *
+     * @return {@link List}&lt;{@link T}&gt;
      */
     List<T> getInactive();
 
@@ -121,147 +131,177 @@ public interface ProviderService<T, U extends Authentication> extends ResourceSe
      * @param status Provider's new status
      * @param active Provider's new active field
      * @param auth   Authentication
+     * @return {@link T}
      */
     T verifyProvider(String id, String status, Boolean active, U auth);
 
     /**
-     * @param providerId
-     * @param active
-     * @param auth
-     * @return
+     * Sets a Provider as active/inactive.
+     *
+     * @param providerId Provider ID
+     * @param active     True/False
+     * @param auth       Authentication
+     * @return {@link ProviderBundle}
      */
     ProviderBundle publish(String providerId, Boolean active, Authentication auth);
 
     /**
-     * @param authentication
+     * Delete User's Info from his Providers. Also deletes any user Event actions
+     *
+     * @param authentication Authentication
      */
     void deleteUserInfo(Authentication authentication);
 
     /**
      * Get the History of the Provider with the specified id.
      *
-     * @param id
-     * @param catalogueId
-     * @return
+     * @param id          The ID of the Provider
+     * @param catalogueId The ID of the Catalogue
+     * @return {@link Paging}&lt;{@link ResourceHistory}&gt;
      */
     Paging<ResourceHistory> getHistory(String id, String catalogueId);
 
     /**
-     * @param provider
-     * @param comment
-     * @param auth
-     * @return
+     * Update a Provider of the EOSC Catalogue.
+     *
+     * @param provider Provider
+     * @param comment  Comment
+     * @param auth     Authentication
+     * @return {@link ProviderBundle}
      */
     ProviderBundle update(ProviderBundle provider, String comment, Authentication auth);
 
     /**
-     * @param provider
-     * @param catalogueId
-     * @param comment
-     * @param auth
-     * @return
+     * Update a Provider of an external Catalogue, providing its Catalogue ID
+     *
+     * @param provider    Provider
+     * @param catalogueId Catalogue ID
+     * @param comment     Comment
+     * @param auth        Authentication
+     * @return {@link ProviderBundle}
      */
     ProviderBundle update(ProviderBundle provider, String catalogueId, String comment, Authentication auth);
 
     /**
-     * @param providerId
-     * @param catalogueId
-     * @param actionType
-     * @param auth
-     * @return
+     * Audit a Provider
+     *
+     * @param providerId  Provider ID
+     * @param catalogueId Catalogue ID
+     * @param comment     Comment
+     * @param actionType  Audit's action type
+     * @param auth        Authentication
+     * @return {@link ProviderBundle}
      */
     ProviderBundle auditProvider(String providerId, String catalogueId, String comment,
                                  LoggingInfo.ActionType actionType, Authentication auth);
 
     /**
-     * @param ff
-     * @param auth
-     * @param auditingInterval
-     * @return
+     * Get a paging of random Providers
+     *
+     * @param ff               FacetFilter
+     * @param auditingInterval Auditing Interval (in months)
+     * @param auth             Authentication
+     * @return {@link Paging}&lt;{@link ProviderBundle}&gt;
      */
     Paging<ProviderBundle> getRandomProviders(FacetFilter ff, String auditingInterval, Authentication auth);
 
     /**
-     * Get the History of the Provider with the specified id.
+     * Get the history of the specific Provider of the specific Catalogue ID
      *
-     * @param id
-     * @param catalogueId
-     * @return
+     * @param id          Provider ID
+     * @param catalogueId Catalogue ID
+     * @return {@link Paging}&lt;{@link LoggingInfo}&gt;
      */
     Paging<LoggingInfo> getLoggingInfoHistory(String id, String catalogueId);
 
     /**
-     * @param auditState
-     * @param ff
-     * @param ret
-     * @param auth
-     * @return
+     * Determine the corresponding Audit State for a List of Providers
+     *
+     * @param auditState Audit State
+     * @param ff         FacetFilter
+     * @param ret        List of Providers
+     * @param auth       Authentication
+     * @return {@link Paging}&lt;{@link ProviderBundle}&gt;
      */
     Paging<ProviderBundle> determineAuditState(Set<String> auditState, FacetFilter ff, List<ProviderBundle> ret,
                                                Authentication auth);
 
     /**
-     * @param ff
-     * @param orderDirection
-     * @param orderField
-     * @return
+     * Creates a query for searching Providers
+     *
+     * @param ff             FacetFilter
+     * @param orderDirection ASC/DSC
+     * @param orderField     Field of ordering
+     * @return {@link List}&lt;{@link Map}&lt;{@link String}, {@link Object}&gt;&gt;
      */
     List<Map<String, Object>> createQueryForProviderFilters(FacetFilter ff, String orderDirection, String orderField);
 
     /**
-     * @param providerBundle
-     * @param providerBundlePaging
-     * @param quantity
-     * @param from
-     * @return
+     * Create correct quantity facets when searching Providers with audit state
+     *
+     * @param providerBundle       Provider Bundle
+     * @param providerBundlePaging Paging with Provider Bundles
+     * @param quantity             Quantity facet filter
+     * @param from                 From facet filter
+     * @return {@link Paging}&lt;{@link ProviderBundle}&gt;
      */
     Paging<ProviderBundle> createCorrectQuantityFacets(List<ProviderBundle> providerBundle,
                                                        Paging<ProviderBundle> providerBundlePaging, int quantity,
                                                        int from);
 
     /**
-     * Get the service resource.
+     * Get a Provider gives its ID
      *
-     * @param id
-     * @param catalogueId
-     * @return Resource
+     * @param id          Provider ID
+     * @param catalogueId Catalogue ID
+     * @return {@link Resource}
      */
     Resource getResource(String id, String catalogueId);
 
     /**
-     * @param ff
-     * @param resourceType
-     * @param auth
-     * @return
+     * Get a Provider's rejected resources
+     *
+     * @param ff           FacetFilter
+     * @param resourceType Resource Type
+     * @param auth         Authentication
+     * @return {@link Paging}&lt;?&gt;
      */
     Paging<?> getRejectedResources(final FacetFilter ff, String resourceType, Authentication auth);
 
     /**
-     * @param providerBundle
-     * @param auth
-     * @return
+     * Create Public Provider
+     *
+     * @param providerBundle Provider Bundle
+     * @param auth           Authentication
+     * @return {@link ProviderBundle}
      */
     ProviderBundle createPublicProvider(ProviderBundle providerBundle, Authentication auth);
 
     /**
-     * @param providerId
-     * @param catalogueId
-     * @param suspend
-     * @param auth
-     * @return
+     * Suspend the Provider given its ID
+     *
+     * @param providerId  Provider ID
+     * @param catalogueId Catalogue ID
+     * @param suspend     True/False
+     * @param auth        Authentication
+     * @return {@link ProviderBundle}
      */
     ProviderBundle suspend(String providerId, String catalogueId, boolean suspend, Authentication auth);
 
     /**
-     * @param providerName
-     * @return
+     * Given a Provider Name, return the corresponding HLE Vocabulary if exists, else return null
+     *
+     * @param providerName Provider's Name
+     * @return {@link String}
      */
     String determineHostingLegalEntity(String providerName);
 
     /**
-     * @param hle
-     * @param auth
-     * @return
+     * Return a List of triplets {ID, Name, Catalogue ID} given a specific HLE Vocabulary ID
+     *
+     * @param hle  Hosting Legal Entity ID
+     * @param auth Authentication
+     * @return {@link List}&lt;{@link MapValues}&lt;{@link ExtendedValue}&gt;&gt;
      */
     List<MapValues<ExtendedValue>> getAllResourcesUnderASpecificHLE(String hle, Authentication auth);
 }

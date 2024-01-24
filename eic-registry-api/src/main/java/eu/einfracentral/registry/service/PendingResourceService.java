@@ -17,40 +17,44 @@ public interface PendingResourceService<T extends Bundle> extends ResourceServic
     /**
      * Transforms the resource to pending.
      *
-     * @param t
-     * @param auth
+     * @param t    resource
+     * @param auth Authentication
+     * @return {@link T}
      */
     T transformToPending(T t, Authentication auth);
 
     /**
      * Transforms the resource with the specified id to pending.
      *
-     * @param id
-     * @param auth
+     * @param id   resource ID
+     * @param auth Authentication
+     * @return {@link T}
      */
     T transformToPending(String id, Authentication auth);
 
     /**
      * Transforms the resource to active.
      *
-     * @param t
-     * @param auth
+     * @param t    resource
+     * @param auth Authentication
+     * @return {@link T}
      */
     T transformToActive(T t, Authentication auth);
 
     /**
      * Transforms the resource with the specified id to active.
      *
-     * @param id
-     * @param auth
+     * @param id   resource ID
+     * @param auth Authentication
+     * @return {@link T}
      */
     T transformToActive(String id, Authentication auth);
 
     /**
      * Get the id using the originalId of the resource.
      *
-     * @param originalId
-     * @return
+     * @param originalId Original resource ID
+     * @return {@link String}
      */
     default String getId(String originalId) {
         FacetFilter ff = new FacetFilter();
@@ -69,7 +73,7 @@ public interface PendingResourceService<T extends Bundle> extends ResourceServic
     /**
      * Get a mapping of resource ids with original ids.
      *
-     * @return
+     * @return {@link Map}&lt;{@link String},{@link String}&gt;
      */
     default Map<String, String> getIdOriginalIdMap() {
         FacetFilter ff = new FacetFilter();
@@ -81,37 +85,43 @@ public interface PendingResourceService<T extends Bundle> extends ResourceServic
     }
 
     /**
-     * @param authentication
-     * @return
+     * Get a List of all Pending resources for a specific authenticated User
+     *
+     * @param authentication Authentication
+     * @return {@link List}&lt;{@link T}&gt;
      */
     List<T> getMy(Authentication authentication);
 
     /**
-     * @param providerId
-     * @param authentication
-     * @return
+     * Returns True if a User has accepted the Terms & Conditions, else returns False
+     *
+     * @param providerId     The ID of the Provider
+     * @param authentication Authentication
+     * @return True/False
      */
     boolean hasAdminAcceptedTerms(String providerId, Authentication authentication);
 
     /**
-     * @param providerId
-     * @param authentication
+     * Updates the list of Provider user emails that have accepted the Terms & Conditions
+     *
+     * @param providerId     The ID of the Provider
+     * @param authentication Authentication
      */
     void adminAcceptedTerms(String providerId, Authentication authentication);
 
     /**
-     * Get the service resource.
+     * Get the Pending Service, providing its ID
      *
-     * @param serviceId
-     * @return Resource
+     * @param serviceId The ID of the Service
+     * @return {@link Resource}
      */
     Resource getPendingResourceViaServiceId(String serviceId);
 
     /**
-     * Get the provider resource.
+     * Get the Pending Provider, providing its ID
      *
-     * @param providerId
-     * @return Resource
+     * @param providerId The ID of the Provider
+     * @return {@link Resource}
      */
     Resource getPendingResourceViaProviderId(String providerId);
 //    DatasourceBundle getOpenAIREDatasource(Datasource datasource);
