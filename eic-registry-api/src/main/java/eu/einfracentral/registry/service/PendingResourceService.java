@@ -95,7 +95,7 @@ public interface PendingResourceService<T extends Bundle> extends ResourceServic
     /**
      * Returns True if a User has accepted the Terms & Conditions, else returns False
      *
-     * @param providerId     The ID of the Provider
+     * @param providerId     Provider ID
      * @param authentication Authentication
      * @return True/False
      */
@@ -104,7 +104,7 @@ public interface PendingResourceService<T extends Bundle> extends ResourceServic
     /**
      * Updates the list of Provider user emails that have accepted the Terms & Conditions
      *
-     * @param providerId     The ID of the Provider
+     * @param providerId     Provider ID
      * @param authentication Authentication
      */
     void adminAcceptedTerms(String providerId, Authentication authentication);
@@ -112,7 +112,7 @@ public interface PendingResourceService<T extends Bundle> extends ResourceServic
     /**
      * Get the Pending Service, providing its ID
      *
-     * @param serviceId The ID of the Service
+     * @param serviceId Service ID
      * @return {@link Resource}
      */
     Resource getPendingResourceViaServiceId(String serviceId);
@@ -120,7 +120,7 @@ public interface PendingResourceService<T extends Bundle> extends ResourceServic
     /**
      * Get the Pending Provider, providing its ID
      *
-     * @param providerId The ID of the Provider
+     * @param providerId Provider ID
      * @return {@link Resource}
      */
     Resource getPendingResourceViaProviderId(String providerId);

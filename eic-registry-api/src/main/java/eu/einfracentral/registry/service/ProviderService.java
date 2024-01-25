@@ -31,7 +31,7 @@ public interface ProviderService<T, U extends Authentication> extends ResourceSe
      * Add a new Provider on a specific Catalogue.
      *
      * @param provider       Provider
-     * @param catalogueId    The ID of the Catalogue
+     * @param catalogueId    Catalogue ID
      * @param authentication Authentication
      * @return {@link T}
      */
@@ -155,8 +155,8 @@ public interface ProviderService<T, U extends Authentication> extends ResourceSe
     /**
      * Get the History of the Provider with the specified id.
      *
-     * @param id          The ID of the Provider
-     * @param catalogueId The ID of the Catalogue
+     * @param id          Provider ID
+     * @param catalogueId Catalogue ID
      * @return {@link Paging}&lt;{@link ResourceHistory}&gt;
      */
     Paging<ResourceHistory> getHistory(String id, String catalogueId);

@@ -13,7 +13,7 @@ public interface ProviderRequestService<U extends Authentication> extends Resour
     /**
      * Returns a list with all the requests made on a specific Provider
      *
-     * @param providerId     The ID of the Provider
+     * @param providerId     Provider ID
      * @param authentication Authentication
      * @return {@link List}&lt;{@link ProviderRequest}&gt;
      */

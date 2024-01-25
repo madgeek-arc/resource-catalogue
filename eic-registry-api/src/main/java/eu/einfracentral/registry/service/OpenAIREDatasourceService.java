@@ -13,7 +13,7 @@ public interface OpenAIREDatasourceService {
     /**
      * Get a specific external Datasource given its ID.
      *
-     * @param id The ID of the Datasource
+     * @param id Datasource ID
      * @return {@link Datasource}
      * @throws IOException If an input or output exception occurred
      */
@@ -31,7 +31,7 @@ public interface OpenAIREDatasourceService {
     /**
      * Returns various metrics of an OpenAIRE Datasource, given the EOSC Datasource ID
      *
-     * @param id The ID of the Datasource
+     * @param id Datasource ID
      * @return {@link Boolean}
      */
     OpenAIREMetrics getMetrics(String id);

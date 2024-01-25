@@ -11,7 +11,7 @@ public interface CatalogueService<T, U extends Authentication> extends ResourceS
     /**
      * Return a Catalogue given its ID
      *
-     * @param id   The ID of the Catalogue
+     * @param id   Catalogue ID
      * @param auth Authentication
      * @return {@link T}
      */
@@ -20,7 +20,7 @@ public interface CatalogueService<T, U extends Authentication> extends ResourceS
     /**
      * Check the existence of a Catalogue
      *
-     * @param id The ID of the Catalogue
+     * @param id Catalogue ID
      */
     void existsOrElseThrow(String id);
 
@@ -55,7 +55,7 @@ public interface CatalogueService<T, U extends Authentication> extends ResourceS
     /**
      * Verify (approve/reject) a Catalogue during its Onboarding process
      *
-     * @param id     The ID of the Catalogue
+     * @param id     Catalogue ID
      * @param status The Onboarding Status of the Catalogue
      * @param active boolean value marking a Catalogue as Active or Inactive
      * @param auth   Authentication
@@ -66,7 +66,7 @@ public interface CatalogueService<T, U extends Authentication> extends ResourceS
     /**
      * Activate/Deactivate a Catalogue
      *
-     * @param catalogueId The ID of the Catalogue
+     * @param catalogueId Catalogue ID
      * @param active      boolean value marking a Catalogue as Active or Inactive
      * @param auth        Authentication
      * @return {@link CatalogueBundle}
@@ -76,7 +76,7 @@ public interface CatalogueService<T, U extends Authentication> extends ResourceS
     /**
      * Has an Authenticated User accepted the EOSC Portal Terms & Conditions
      *
-     * @param catalogueId    The ID of the Catalogue
+     * @param catalogueId    Catalogue ID
      * @param authentication Authentication
      * @return <code>True</code> if Authenticated User has accepted Terms; <code>False</code> otherwise.
      */
@@ -85,7 +85,7 @@ public interface CatalogueService<T, U extends Authentication> extends ResourceS
     /**
      * Update a Catalogue's list of Users that has accepted the Terms & Conditions
      *
-     * @param catalogueId    The ID of the Catalogue
+     * @param catalogueId    Catalogue ID
      * @param authentication Authentication
      */
     void adminAcceptedTerms(String catalogueId, U authentication);
@@ -93,7 +93,7 @@ public interface CatalogueService<T, U extends Authentication> extends ResourceS
     /**
      * Suspend the Catalogue
      *
-     * @param catalogueId The ID of the Catalogue
+     * @param catalogueId Catalogue ID
      * @param suspend     boolean value marking a Catalogue as Suspended or Unsuspended
      * @param auth        Authentication
      * @return {@link CatalogueBundle}
@@ -103,7 +103,7 @@ public interface CatalogueService<T, U extends Authentication> extends ResourceS
     /**
      * Audit the Catalogue
      *
-     * @param id         The ID of the Catalogue
+     * @param id         Catalogue ID
      * @param actionType Validate or Invalidate action
      * @param auth       Authentication
      * @return {@link CatalogueBundle}

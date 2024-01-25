@@ -7,7 +7,7 @@ public interface MigrationService {
     /**
      * Migrate a Provider and all its resources to another Catalogue
      *
-     * @param providerId     The ID of the Provider
+     * @param providerId     Provider ID
      * @param catalogueId    The Catalogue ID in which the Provider is registered
      * @param newCatalogueId The new Catalogue ID in which the Provider will be registered
      * @param authentication Authentication

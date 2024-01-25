@@ -126,8 +126,8 @@ public interface InteroperabilityRecordService<T> extends ResourceService<T, Aut
      * Create a FacetFilter for fetching Interoperability Records
      *
      * @param allRequestParams {@link MultiValueMap} of all the Requested Parameters given
-     * @param catalogueId      The ID of the Catalogue
-     * @param providerId       The ID of the Provider
+     * @param catalogueId      Catalogue ID
+     * @param providerId       Provider ID
      * @return {@link FacetFilter}
      */
     FacetFilter createFacetFilterForFetchingInteroperabilityRecords(MultiValueMap<String, Object> allRequestParams,
