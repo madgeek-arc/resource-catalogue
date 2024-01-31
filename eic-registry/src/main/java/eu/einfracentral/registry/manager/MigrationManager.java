@@ -122,7 +122,7 @@ public class MigrationManager implements MigrationService {
             resource.setPayload(serviceBundleManager.serialize(serviceBundle));
             logger.debug("Migrating Service: {} of Catalogue: {} to Catalogue: {}", serviceBundle.getId(), catalogueId, newCatalogueId);
             resourceService.updateResource(resource);
-            if (sendJMS){
+            if (sendJMS) {
                 jmsService.convertAndSendTopic(jmsTopic, serviceBundle);
             }
         }
@@ -147,7 +147,7 @@ public class MigrationManager implements MigrationService {
             resource.setPayload(trainingResourceManager.serialize(trainingResourceBundle));
             logger.debug("Migrating Training Resource: {} of Catalogue: {} to Catalogue: {}", trainingResourceBundle.getId(), catalogueId, newCatalogueId);
             resourceService.updateResource(resource);
-            if (sendJMS){
+            if (sendJMS) {
                 jmsService.convertAndSendTopic(jmsTopic, trainingResourceBundle);
             }
         }
@@ -171,7 +171,7 @@ public class MigrationManager implements MigrationService {
             resource.setPayload(interoperabilityRecordManager.serialize(interoperabilityRecordBundle));
             logger.debug("Migrating Interoperability Record: {} of Catalogue: {} to Catalogue: {}", interoperabilityRecordBundle.getId(), catalogueId, newCatalogueId);
             resourceService.updateResource(resource);
-            if (sendJMS){
+            if (sendJMS) {
                 jmsService.convertAndSendTopic(jmsTopic, interoperabilityRecordBundle);
             }
         }
@@ -188,21 +188,21 @@ public class MigrationManager implements MigrationService {
         List<HelpdeskBundle> allHelpdeskBundles = helpdeskManager.getAll(ff, securityService.getAdminAccess()).getResults();
         List<MonitoringBundle> allMonitoringBundles = monitoringManager.getAll(ff, securityService.getAdminAccess()).getResults();
 
-        for (ServiceBundle serviceBundle : allServices){
+        for (ServiceBundle serviceBundle : allServices) {
             boolean entered = false;
             if (serviceBundle.getService().getRequiredResources() != null && !serviceBundle.getService().getRequiredResources().isEmpty()
-                    && serviceBundle.getService().getRequiredResources().contains(oldResourceId)){
+                    && serviceBundle.getService().getRequiredResources().contains(oldResourceId)) {
                 serviceBundle.getService().getRequiredResources().remove(oldResourceId);
                 serviceBundle.getService().getRequiredResources().add(newResourceId);
                 entered = true;
             }
             if (serviceBundle.getService().getRelatedResources() != null && !serviceBundle.getService().getRelatedResources().isEmpty()
-                    && serviceBundle.getService().getRelatedResources().contains(oldResourceId)){
+                    && serviceBundle.getService().getRelatedResources().contains(oldResourceId)) {
                 serviceBundle.getService().getRelatedResources().remove(oldResourceId);
                 serviceBundle.getService().getRelatedResources().add(newResourceId);
                 entered = true;
             }
-            if (entered){
+            if (entered) {
                 Resource resource = serviceBundleManager.getResource(serviceBundle.getId(), serviceBundle.getService().getCatalogueId());
                 resource.setPayload(serviceBundleManager.serialize(serviceBundle));
                 resourceService.updateResource(resource);
@@ -211,9 +211,9 @@ public class MigrationManager implements MigrationService {
             }
         }
 
-        for (TrainingResourceBundle trainingResourceBundle : allTrainingResources){
+        for (TrainingResourceBundle trainingResourceBundle : allTrainingResources) {
             if (trainingResourceBundle.getTrainingResource().getEoscRelatedServices() != null && !trainingResourceBundle.getTrainingResource().getEoscRelatedServices().isEmpty()
-                    && trainingResourceBundle.getTrainingResource().getEoscRelatedServices().contains(oldResourceId)){
+                    && trainingResourceBundle.getTrainingResource().getEoscRelatedServices().contains(oldResourceId)) {
                 trainingResourceBundle.getTrainingResource().getEoscRelatedServices().remove(oldResourceId);
                 trainingResourceBundle.getTrainingResource().getEoscRelatedServices().add(newResourceId);
                 Resource resource = trainingResourceManager.getResource(trainingResourceBundle.getId(), trainingResourceBundle.getTrainingResource().getCatalogueId());
@@ -225,8 +225,8 @@ public class MigrationManager implements MigrationService {
             }
         }
 
-        for (DatasourceBundle datasourceBundle : allDatasourceBundles){
-            if (datasourceBundle.getDatasource().getServiceId().equals(oldResourceId)){
+        for (DatasourceBundle datasourceBundle : allDatasourceBundles) {
+            if (datasourceBundle.getDatasource().getServiceId().equals(oldResourceId)) {
                 datasourceBundle.getDatasource().setServiceId(newResourceId);
                 Resource resource = datasourceManager.getResource(datasourceBundle.getId());
                 resource.setPayload(datasourceManager.serialize(datasourceBundle));
@@ -235,8 +235,8 @@ public class MigrationManager implements MigrationService {
             }
         }
 
-        for (ResourceInteroperabilityRecordBundle resourceInteroperabilityRecordBundle : allResourceInteroperabilityRecords){
-            if (resourceInteroperabilityRecordBundle.getResourceInteroperabilityRecord().getResourceId().equals(oldResourceId)){
+        for (ResourceInteroperabilityRecordBundle resourceInteroperabilityRecordBundle : allResourceInteroperabilityRecords) {
+            if (resourceInteroperabilityRecordBundle.getResourceInteroperabilityRecord().getResourceId().equals(oldResourceId)) {
                 resourceInteroperabilityRecordBundle.getResourceInteroperabilityRecord().setResourceId(newResourceId);
                 Resource resource = resourceInteroperabilityRecordManager.getResource(resourceInteroperabilityRecordBundle.getId());
                 resource.setPayload(resourceInteroperabilityRecordManager.serialize(resourceInteroperabilityRecordBundle));
@@ -246,8 +246,8 @@ public class MigrationManager implements MigrationService {
             }
         }
 
-        for (HelpdeskBundle helpdeskBundle : allHelpdeskBundles){
-            if (helpdeskBundle.getHelpdesk().getServiceId().equals(oldResourceId)){
+        for (HelpdeskBundle helpdeskBundle : allHelpdeskBundles) {
+            if (helpdeskBundle.getHelpdesk().getServiceId().equals(oldResourceId)) {
                 helpdeskBundle.getHelpdesk().setServiceId(newResourceId);
                 Resource resource = helpdeskManager.getResource(helpdeskBundle.getId());
                 resource.setPayload(helpdeskManager.serialize(helpdeskBundle));
@@ -256,8 +256,8 @@ public class MigrationManager implements MigrationService {
             }
         }
 
-        for (MonitoringBundle monitoringBundle : allMonitoringBundles){
-            if (monitoringBundle.getMonitoring().getServiceId().equals(oldResourceId)){
+        for (MonitoringBundle monitoringBundle : allMonitoringBundles) {
+            if (monitoringBundle.getMonitoring().getServiceId().equals(oldResourceId)) {
                 monitoringBundle.getMonitoring().setServiceId(newResourceId);
                 Resource resource = monitoringManager.getResource(monitoringBundle.getId());
                 resource.setPayload(monitoringManager.serialize(monitoringBundle));

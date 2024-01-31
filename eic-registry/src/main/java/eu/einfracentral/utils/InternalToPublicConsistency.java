@@ -160,7 +160,7 @@ public class InternalToPublicConsistency {
 
     }
 
-    protected FacetFilter createFacetFilter(String status){
+    protected FacetFilter createFacetFilter(String status) {
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(10000);
         ff.addFilter("published", false);

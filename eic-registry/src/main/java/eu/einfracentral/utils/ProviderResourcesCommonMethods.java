@@ -85,7 +85,7 @@ public class ProviderResourcesCommonMethods {
     public void checkCatalogueIdConsistency(Object o, String catalogueId) {
         catalogueService.existsOrElseThrow(catalogueId);
         if (o != null) {
-            if (o instanceof ProviderBundle){
+            if (o instanceof ProviderBundle) {
                 if (((ProviderBundle) o).getPayload().getCatalogueId() == null || ((ProviderBundle) o).getPayload().getCatalogueId().equals("")) {
                     throw new ValidationException("Provider's 'catalogueId' cannot be null or empty");
                 } else {
@@ -94,7 +94,7 @@ public class ProviderResourcesCommonMethods {
                     }
                 }
             }
-            if (o instanceof ServiceBundle){
+            if (o instanceof ServiceBundle) {
                 if (((ServiceBundle) o).getPayload().getCatalogueId() == null || ((ServiceBundle) o).getPayload().getCatalogueId().equals("")) {
                     throw new ValidationException("Service's 'catalogueId' cannot be null or empty");
                 } else {
@@ -103,7 +103,7 @@ public class ProviderResourcesCommonMethods {
                     }
                 }
             }
-            if (o instanceof TrainingResourceBundle){
+            if (o instanceof TrainingResourceBundle) {
                 if (((TrainingResourceBundle) o).getPayload().getCatalogueId() == null || ((TrainingResourceBundle) o).getPayload().getCatalogueId().equals("")) {
                     throw new ValidationException("Training Resource's 'catalogueId' cannot be null or empty");
                 } else {
@@ -112,7 +112,7 @@ public class ProviderResourcesCommonMethods {
                     }
                 }
             }
-            if (o instanceof InteroperabilityRecordBundle){
+            if (o instanceof InteroperabilityRecordBundle) {
                 if (((InteroperabilityRecordBundle) o).getPayload().getCatalogueId() == null || ((InteroperabilityRecordBundle) o).getPayload().getCatalogueId().equals("")) {
                     throw new ValidationException("Interoperability Record's 'catalogueId' cannot be null or empty");
                 } else {
@@ -157,7 +157,8 @@ public class ProviderResourcesCommonMethods {
                             if (!providerBundle.getMetadata().isPublished() && !providerBundle.getProvider().getCatalogueId().equals(catalogueId)) {
                                 throw new ValidationException("Cross Catalogue reference is prohibited. Found in field 'resourceProviders");
                             }
-                        } catch (ResourceNotFoundException e) {}
+                        } catch (ResourceNotFoundException e) {
+                        }
                     }
                 }
             }
@@ -222,7 +223,8 @@ public class ProviderResourcesCommonMethods {
                         if (!interoperabilityRecordBundle.getMetadata().isPublished() && !interoperabilityRecordBundle.getInteroperabilityRecord().getCatalogueId().equals(catalogueId)) {
                             throw new ValidationException("Cross Catalogue reference is prohibited. Found in field 'interoperabilityRecordIds");
                         }
-                    } catch (ResourceNotFoundException e) {}
+                    } catch (ResourceNotFoundException e) {
+                    }
                 }
             }
         }
@@ -306,14 +308,14 @@ public class ProviderResourcesCommonMethods {
         LoggingInfo loggingInfo;
 
         // distinction between system's (onboarding stage) and user's activation
-        if (active){
+        if (active) {
             try {
                 loggingInfo = createLoggingInfo(auth, LoggingInfo.Types.UPDATE.getKey(),
                         LoggingInfo.ActionType.ACTIVATED.getKey());
             } catch (InsufficientAuthenticationException e) {
                 loggingInfo = LoggingInfo.systemUpdateLoggingInfo(LoggingInfo.ActionType.ACTIVATED.getKey());
             }
-        } else{
+        } else {
             try {
                 loggingInfo = createLoggingInfo(auth, LoggingInfo.Types.UPDATE.getKey(),
                         LoggingInfo.ActionType.DEACTIVATED.getKey());
@@ -467,7 +469,7 @@ public class ProviderResourcesCommonMethods {
         JSONObject hs_admin_data = new JSONObject();
         JSONObject hs_admin_data_value = new JSONObject();
         JSONObject id = new JSONObject();
-        JSONObject markeplaceUrl = new JSONObject();
+        JSONObject marketplaceUrl = new JSONObject();
         hs_admin_data_value.put("index", 301);
         hs_admin_data_value.put("handle", pidPrefix + "/" + pidUsername);
         hs_admin_data_value.put("permissions", "011111110011");
@@ -478,14 +480,14 @@ public class ProviderResourcesCommonMethods {
         hs_admin.put("type", "HS_ADMIN");
         hs_admin.put("data", hs_admin_data);
         values.put(hs_admin);
-        markeplaceUrl.put("index", 1);
-        markeplaceUrl.put("type", "url");
-        String url = marketplaceUrl;
+        marketplaceUrl.put("index", 1);
+        marketplaceUrl.put("type", "url");
+        String url = this.marketplaceUrl;
         if (resourceTypePath.equals("trainings/") || resourceTypePath.equals("guidelines/")) {
             url = url.replace("marketplace", "search.marketplace");
         }
-        markeplaceUrl.put("data", url + resourceTypePath + resourceId);
-        values.put(markeplaceUrl);
+        marketplaceUrl.put("data", url + resourceTypePath + resourceId);
+        values.put(marketplaceUrl);
         id.put("index", 2);
         id.put("type", "id");
         id.put("data", resourceId);
@@ -515,7 +517,7 @@ public class ProviderResourcesCommonMethods {
         if (status.equals(vocabularyService.get("pending resource").getId())) {
             throw new ValidationException("You cannot delete a Template that is under review");
         }
-        if (isPublished){
+        if (isPublished) {
             throw new ValidationException("You cannot directly delete a Public Resource");
         }
     }
@@ -729,18 +731,18 @@ public class ProviderResourcesCommonMethods {
         boolean hasBeenUpdatedAfterAudit = false;
         String auditActionType = "";
         int auditIndex = -1;
-        for (LoggingInfo loggingInfo : sorted){
+        for (LoggingInfo loggingInfo : sorted) {
             auditIndex++;
-            if (loggingInfo.getType().equals(LoggingInfo.Types.AUDIT.getKey())){
+            if (loggingInfo.getType().equals(LoggingInfo.Types.AUDIT.getKey())) {
                 hasBeenAudited = true;
                 auditActionType = loggingInfo.getActionType();
                 break;
             }
         }
         // update after audit
-        if (hasBeenAudited){
-            for (int i=0; i<auditIndex; i++){
-                if (sorted.get(i).getType().equals(LoggingInfo.Types.UPDATE.getKey())){
+        if (hasBeenAudited) {
+            for (int i = 0; i < auditIndex; i++) {
+                if (sorted.get(i).getType().equals(LoggingInfo.Types.UPDATE.getKey())) {
                     hasBeenUpdatedAfterAudit = true;
                     break;
                 }

@@ -139,7 +139,7 @@ public class LoggingInfo {
         return ret;
     }
 
-    public static LoggingInfo systemUpdateLoggingInfo(String actionType){
+    public static LoggingInfo systemUpdateLoggingInfo(String actionType) {
         LoggingInfo ret = new LoggingInfo();
         ret.setDate(String.valueOf(System.currentTimeMillis()));
         ret.setType(Types.UPDATE.getKey());
@@ -149,42 +149,42 @@ public class LoggingInfo {
     }
 
     // find the AUDIT_STATE of a specific Provider or Resource through its LoggingInfo list
-    public static String createAuditVocabularyStatuses(List<LoggingInfo> loggingInfoList){
+    public static String createAuditVocabularyStatuses(List<LoggingInfo> loggingInfoList) {
         loggingInfoList.sort(Comparator.comparing(LoggingInfo::getDate).reversed());
         boolean hasBeenAudited = false;
         boolean hasBeenUpdatedAfterAudit = false;
         String auditActionType = "";
         int auditIndex = -1;
-        for (LoggingInfo loggingInfo : loggingInfoList){
+        for (LoggingInfo loggingInfo : loggingInfoList) {
             auditIndex++;
-            if (loggingInfo.getType().equals(Types.AUDIT.getKey())){
+            if (loggingInfo.getType().equals(Types.AUDIT.getKey())) {
                 hasBeenAudited = true;
                 auditActionType = loggingInfo.getActionType();
                 break;
             }
         }
         // if we have an update after the audit
-        if (hasBeenAudited){
-            for (int i=0; i<auditIndex; i++){
-                if (loggingInfoList.get(i).getType().equals(Types.UPDATE.getKey())){
+        if (hasBeenAudited) {
+            for (int i = 0; i < auditIndex; i++) {
+                if (loggingInfoList.get(i).getType().equals(Types.UPDATE.getKey())) {
                     hasBeenUpdatedAfterAudit = true;
                     break;
                 }
             }
         }
         String ret;
-        if (!hasBeenAudited){
+        if (!hasBeenAudited) {
             ret = "Not Audited";
-        } else if (!hasBeenUpdatedAfterAudit){
-            if (auditActionType.equals(ActionType.INVALID.getKey())){
+        } else if (!hasBeenUpdatedAfterAudit) {
+            if (auditActionType.equals(ActionType.INVALID.getKey())) {
                 ret = "Invalid and not updated";
-            } else{
+            } else {
                 ret = "Valid and not updated";
             }
         } else {
-            if (auditActionType.equals(ActionType.INVALID.getKey())){
+            if (auditActionType.equals(ActionType.INVALID.getKey())) {
                 ret = "Invalid and updated";
-            } else{
+            } else {
                 ret = "Valid and updated";
             }
         }

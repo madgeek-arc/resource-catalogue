@@ -25,7 +25,7 @@ public class ServiceProviderDomain {
     private String scientificDomain;
 
     /**
-     * The subbranch of science, scientific subdicipline that is related to the Resource.
+     * The subbranch of science, scientific sub-discipline that is related to the Resource.
      */
     @XmlElement(required = true)
     @ApiModelProperty(position = 2, required = true)

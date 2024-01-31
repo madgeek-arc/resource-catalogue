@@ -60,7 +60,7 @@ public interface VocabularyService extends ResourceService<Vocabulary, Authentic
      * Adds an aggregation of Vocabularies
      *
      * @param newVocabularies List of Vocabularies to be added
-     * @param auth Authentication
+     * @param auth            Authentication
      */
     void addAll(List<Vocabulary> newVocabularies, Authentication auth);
 

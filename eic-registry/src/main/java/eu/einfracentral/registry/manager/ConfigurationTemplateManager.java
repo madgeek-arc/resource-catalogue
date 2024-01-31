@@ -20,7 +20,7 @@ public class ConfigurationTemplateManager extends ResourceManager<ConfigurationT
     }
 
     public ConfigurationTemplateBundle addConfigurationTemplate(ConfigurationTemplateBundle configurationTemplateBundle,
-                                                               Authentication auth) {
+                                                                Authentication auth) {
         configurationTemplateBundle.setId(UUID.randomUUID().toString());
         validate(configurationTemplateBundle);
         super.add(configurationTemplateBundle, auth);

@@ -12,46 +12,57 @@ public interface
 ResourceService<T, U extends Authentication> extends ResourceCRUDService<T, U> {
 
     /**
-     * @param field
-     * @return
+     * Get resources by a specific field.
+     *
+     * @param field Field of Training Resource
+     * @return {@link Map}&lt;{@link String},{@link List}&lt;{@link T}&gt;&gt;
      */
     Map<String, List<T>> getBy(String field);
 
     /**
-     * @param ids
-     * @return
+     * Get a List of resources, providing their IDs
+     *
+     * @param ids List of resource IDs
+     * @return {@link List}&lt;{@link T}&gt;
      */
     List<T> getSome(String... ids);
 
     /**
+     * Get a resource, providing one or more key values
      *
-     * @param keyValues
-     * @return
+     * @param keyValues Key Values
+     * @return {@link T}
      */
     T get(SearchService.KeyValue... keyValues);
 
     /**
-     * @return
+     * Delete all resources
+     *
+     * @return {@link List}&lt;{@link T}&gt;
      */
     List<T> delAll();
 
     /**
-     * @param t
-     * @return
+     * Validate a resource
+     *
+     * @param t resource
+     * @return {@link T}
      */
     T validate(T t);
 
     /**
-     * @param id
-     * @return
+     * Get a Resource, providing its ID
+     *
+     * @param id resource ID
+     * @return {@link Resource}
      */
     Resource getResource(String id);
 
     /**
-     * Check if resource exists.
+     * Check if a resource exists.
      *
-     * @param t
-     * @return
+     * @param t resource
+     * @return True/False
      */
     boolean exists(T t);
 }

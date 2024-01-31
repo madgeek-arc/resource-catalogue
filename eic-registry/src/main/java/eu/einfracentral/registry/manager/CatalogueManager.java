@@ -45,7 +45,7 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
     private final TrainingResourceService<TrainingResourceBundle> trainingResourceService;
     private final InteroperabilityRecordService<InteroperabilityRecordBundle> interoperabilityRecordService;
     private final ProviderResourcesCommonMethods commonMethods;
-    private final String columnsOfInterest = "catalogue_id, name"; // variable with DB tables a keyword is been searched on
+    private final String columnsOfInterest = "catalogue_id, name"; // variable with DB tables a keyword is searched on
 
     @Value("${project.catalogue.name}")
     private String catalogueName;
@@ -102,7 +102,7 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
             }
         }
         // else return the Catalogue ONLY if it is active
-        if (catalogueBundle.getStatus().equals(vocabularyService.get("approved catalogue").getId())){
+        if (catalogueBundle.getStatus().equals(vocabularyService.get("approved catalogue").getId())) {
             return catalogueBundle;
         }
         throw new ValidationException("You cannot view the specific Catalogue");
@@ -131,7 +131,7 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
             // if user is CATALOGUE ADMIN return all his Catalogues (rejected, pending) with their sensitive data (Users, MainContact) too
             User user = User.of(auth);
             Browsing<CatalogueBundle> catalogues = super.getAll(ff, auth);
-            for (CatalogueBundle catalogueBundle : catalogues.getResults()){
+            for (CatalogueBundle catalogueBundle : catalogues.getResults()) {
                 if (catalogueBundle.getStatus().equals(vocabularyService.get("approved catalogue").getId()) ||
                         securityService.userIsCatalogueAdmin(user, catalogueBundle.getId())) {
                     retList.add(catalogueBundle);
@@ -163,7 +163,7 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
     @Override
     public CatalogueBundle add(CatalogueBundle catalogue, Authentication auth) {
 
-        if (catalogue.getId() == null || catalogue.getId().equals("")){
+        if (catalogue.getId() == null || catalogue.getId().equals("")) {
             catalogue.setId(idCreator.createCatalogueId(catalogue.getCatalogue()));
         }
         logger.trace("User '{}' is attempting to add a new Catalogue: {}", auth, catalogue);
@@ -255,7 +255,7 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
         String id = catalogueBundle.getId();
 
         // Block accidental deletion of main Catalogue
-        if (id.equals(catalogueName)){
+        if (id.equals(catalogueName)) {
             throw new ValidationException(String.format("You cannot delete [%s] Catalogue.", catalogueName));
         }
 
@@ -301,7 +301,7 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
         ff.addFilter("catalogue_id", id);
         // Get all Catalogue's Resources
         List<T> allResources = service.getAll(ff, auth).getResults();
-        for (T resource : allResources){
+        for (T resource : allResources) {
             try {
                 logger.info("Deleting resource: {}", resource);
                 service.delete(resource);
@@ -312,7 +312,7 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
     }
 
     private void addAuthenticatedUser(Object object, Authentication auth) {
-        if (object instanceof Catalogue){
+        if (object instanceof Catalogue) {
             Catalogue catalogue = (Catalogue) object;
             List<User> users;
             User authUser = User.of(auth);
@@ -324,7 +324,7 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
                 users.add(authUser);
                 catalogue.setUsers(users);
             }
-        } else{
+        } else {
             Provider provider = (Provider) object;
             List<User> users;
             User authUser = User.of(auth);
@@ -427,7 +427,7 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
     public CatalogueBundle publish(String catalogueId, Boolean active, Authentication auth) {
         CatalogueBundle catalogue = get(catalogueId);
         if ((catalogue.getStatus().equals(vocabularyService.get("pending catalogue").getId()) ||
-                catalogue.getStatus().equals(vocabularyService.get("rejected catalogue").getId())) && !catalogue.isActive()){
+                catalogue.getStatus().equals(vocabularyService.get("rejected catalogue").getId())) && !catalogue.isActive()) {
             throw new ValidationException(String.format("You cannot activate this Catalogue, because it's Inactive with status = [%s]", catalogue.getStatus()));
         }
         List<LoggingInfo> loggingInfoList = commonMethods.returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(catalogue, auth);
@@ -488,7 +488,7 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
         return super.update(catalogue, auth);
     }
 
-    private FacetFilter createFacetFilter(String catalogueId){
+    private FacetFilter createFacetFilter(String catalogueId) {
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(10000);
         ff.addFilter("published", false);

@@ -707,7 +707,7 @@ It is also possible to select Not a legal entity.]]>
       <xs:element name="scientificSubdomain" type="xs:string">
         <xs:annotation>
           <xs:documentation>
-            <![CDATA[The subbranch of science, scientific subdicipline that is related to the Resource.]]>
+            <![CDATA[The subbranch of science, scientific sub-discipline that is related to the Resource.]]>
           </xs:documentation>
         </xs:annotation>
       </xs:element>
@@ -1387,7 +1387,7 @@ use the date that would be preferred from a citation perspective.]]>
         <xs:annotation>
           <xs:documentation>
             <![CDATA[Standards related to the guideline
-This should point out to related standards only when it is a prerequisitite/depenendency, and likely to influence
+This should point out to related standards only when it is a prerequisite/dependency, and likely to influence
 a Provider's design towards interoperability based on the guideline.]]>
           </xs:documentation>
         </xs:annotation>
@@ -1453,7 +1453,7 @@ a Provider's design towards interoperability based on the guideline.]]>
       <xs:element name="title" type="xs:string">
         <xs:annotation>
           <xs:documentation>
-            <![CDATA[A name or title by which a resource is known. May be the title of a dataset or the name of a piece of software.]]>
+            <![CDATA[A name or title by which a resource is known. It can be the title of a dataset or the name of a piece of software]]>
           </xs:documentation>
         </xs:annotation>
       </xs:element>
@@ -3576,7 +3576,7 @@ infrastructures.]]>
       <xs:element name="title" type="xs:string">
         <xs:annotation>
           <xs:documentation>
-            <![CDATA[The human readable name of the learning resource.]]>
+            <![CDATA[The human-readable name of the learning resource.]]>
           </xs:documentation>
         </xs:annotation>
       </xs:element>

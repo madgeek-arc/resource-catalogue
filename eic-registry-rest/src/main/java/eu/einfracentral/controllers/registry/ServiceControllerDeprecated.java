@@ -58,10 +58,10 @@ public class ServiceControllerDeprecated {
 
     @Autowired
     ServiceControllerDeprecated(ServiceBundleService<ServiceBundle> service,
-                      ProviderService<ProviderBundle, Authentication> provider,
-                      TrainingResourceService<TrainingResourceBundle> trainingResourceService,
-                      DataSource commonDataSource, GenericResourceService genericResourceService,
-                      SecurityService securityService) {
+                                ProviderService<ProviderBundle, Authentication> provider,
+                                TrainingResourceService<TrainingResourceBundle> trainingResourceService,
+                                DataSource commonDataSource, GenericResourceService genericResourceService,
+                                SecurityService securityService) {
         this.serviceBundleService = service;
         this.providerService = provider;
         this.trainingResourceService = trainingResourceService;
@@ -303,7 +303,7 @@ public class ServiceControllerDeprecated {
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     public ResponseEntity<Paging<?>> getRandomResources(@ApiIgnore @RequestParam Map<String, Object> allRequestParams,
                                                         @ApiIgnore Authentication auth) {
-        FacetFilter ff = FacetFilterUtils.createFacetFilter(allRequestParams);
+        FacetFilter ff = new FacetFilter();
         ff.setQuantity(allRequestParams.get("quantity") != null ? Integer.parseInt((String) allRequestParams.remove("quantity")) : 10);
         ff.setFilter(allRequestParams);
         ff.addFilter("status", "approved resource");

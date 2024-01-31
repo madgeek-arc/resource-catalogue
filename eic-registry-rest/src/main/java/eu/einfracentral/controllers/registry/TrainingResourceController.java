@@ -257,9 +257,9 @@ public class TrainingResourceController {
     @GetMapping(path = "adminPage/all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     public ResponseEntity<Paging<?>> getAllTrainingResourcesForAdminPage(@ApiIgnore @RequestParam MultiValueMap<String, Object> allRequestParams,
-                                                                                              @RequestParam(required = false) Set<String> auditState,
-                                                                                              @RequestParam(defaultValue = "all", name = "catalogue_id") String catalogueId,
-                                                                                              @ApiIgnore Authentication authentication) {
+                                                                         @RequestParam(required = false) Set<String> auditState,
+                                                                         @RequestParam(defaultValue = "all", name = "catalogue_id") String catalogueId,
+                                                                         @ApiIgnore Authentication authentication) {
 
         allRequestParams.addIfAbsent("catalogue_id", catalogueId);
         if (catalogueId != null && catalogueId.equals("all")) {

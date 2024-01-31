@@ -79,12 +79,12 @@ public class MonitoringManager extends ResourceManager<MonitoringBundle> impleme
         }
 
         // check if Resource exists and if User belongs to Resource's Provider Admins
-        if (resourceType.equals("service")){
+        if (resourceType.equals("service")) {
             ResourceValidationUtils.checkIfResourceBundleIsActiveAndApprovedAndNotPublic(resourceId, catalogueId, serviceBundleService, resourceType);
-        } else if (resourceType.equals("training_resource")){
+        } else if (resourceType.equals("training_resource")) {
             ResourceValidationUtils.checkIfResourceBundleIsActiveAndApprovedAndNotPublic(resourceId, catalogueId, trainingResourceService, resourceType);
-        } else{
-            throw new ValidationException("Field resourceType should be either 'service', 'datasource' or 'training_resource'");
+        } else {
+            throw new ValidationException("Field resourceType should be either 'service' or 'training_resource'");
         }
 
         super.validate(monitoringBundle);
@@ -153,7 +153,7 @@ public class MonitoringManager extends ResourceManager<MonitoringBundle> impleme
         existingResource.setResourceType(resourceType);
 
         // block user from updating serviceId
-        if (!ret.getMonitoring().getServiceId().equals(existingMonitoring.getMonitoring().getServiceId()) && !securityService.hasRole(auth, "ROLE_ADMIN")){
+        if (!ret.getMonitoring().getServiceId().equals(existingMonitoring.getMonitoring().getServiceId()) && !securityService.hasRole(auth, "ROLE_ADMIN")) {
             throw new ValidationException("You cannot change the Service Id with which this Monitoring is related");
         }
 
@@ -209,15 +209,15 @@ public class MonitoringManager extends ResourceManager<MonitoringBundle> impleme
         return res != null ? deserialize(res) : null;
     }
 
-    public void serviceTypeValidation(Monitoring monitoring){
+    public void serviceTypeValidation(Monitoring monitoring) {
         List<ServiceType> serviceTypeList = getAvailableServiceTypes();
         List<String> serviceTypeNames = new ArrayList<>();
-        for (ServiceType type : serviceTypeList){
+        for (ServiceType type : serviceTypeList) {
             serviceTypeNames.add(type.getName());
         }
-        for (MonitoringGroup monitoringGroup : monitoring.getMonitoringGroups()){
+        for (MonitoringGroup monitoringGroup : monitoring.getMonitoringGroups()) {
             String serviceType = monitoringGroup.getServiceType();
-            if (!serviceTypeNames.contains(serviceType)){
+            if (!serviceTypeNames.contains(serviceType)) {
                 throw new ValidationException(String.format("The serviceType you provided is wrong. Available serviceTypes are: '%s'", serviceTypeList));
             }
         }
@@ -225,9 +225,9 @@ public class MonitoringManager extends ResourceManager<MonitoringBundle> impleme
 
 
     // Argo GRNET Monitoring Status methods
-    public List<MonitoringStatus> createMonitoringAvailabilityObject(JsonArray results){
+    public List<MonitoringStatus> createMonitoringAvailabilityObject(JsonArray results) {
         List<MonitoringStatus> monitoringStatuses = new ArrayList<>();
-        for(int i=0; i<results.size(); i++){
+        for (int i = 0; i < results.size(); i++) {
             String date = results.get(i).getAsJsonObject().get("date").getAsString();
             String availability = results.get(i).getAsJsonObject().get("availability").getAsString();
             String reliability = results.get(i).getAsJsonObject().get("reliability").getAsString();
@@ -241,9 +241,9 @@ public class MonitoringManager extends ResourceManager<MonitoringBundle> impleme
         return monitoringStatuses;
     }
 
-    public List<MonitoringStatus> createMonitoringStatusObject(JsonArray results){
+    public List<MonitoringStatus> createMonitoringStatusObject(JsonArray results) {
         List<MonitoringStatus> monitoringStatuses = new ArrayList<>();
-        for(int i=0; i<results.size(); i++){
+        for (int i = 0; i < results.size(); i++) {
             String timestamp = results.get(i).getAsJsonObject().get("timestamp").getAsString();
             String value = results.get(i).getAsJsonObject().get("value").getAsString();
             MonitoringStatus monitoringStatus =

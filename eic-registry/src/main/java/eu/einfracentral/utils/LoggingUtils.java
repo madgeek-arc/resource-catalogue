@@ -14,5 +14,6 @@ public class LoggingUtils {
         return String.format("deleting : [resourceType=%s] with [id=%s] : [body=%s]", resourceTypeName, id, obj);
     }
 
-    private LoggingUtils() {}
+    private LoggingUtils() {
+    }
 }

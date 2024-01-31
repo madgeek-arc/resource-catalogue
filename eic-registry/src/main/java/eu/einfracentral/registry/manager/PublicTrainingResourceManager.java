@@ -114,12 +114,12 @@ public class PublicTrainingResourceManager extends AbstractPublicResourceManager
 
     @Override
     public void delete(TrainingResourceBundle trainingResourceBundle) {
-        try{
+        try {
             TrainingResourceBundle publicTrainingResourceBundle = get(String.format("%s.%s", trainingResourceBundle.getTrainingResource().getCatalogueId(), trainingResourceBundle.getId()));
             logger.info(String.format("Deleting public Training Resource with id [%s]", publicTrainingResourceBundle.getId()));
             super.delete(publicTrainingResourceBundle);
             jmsService.convertAndSendTopic("training_resource.delete", publicTrainingResourceBundle);
-        } catch (ResourceException | ResourceNotFoundException ignore){
+        } catch (ResourceException | ResourceNotFoundException ignore) {
         }
     }
 }

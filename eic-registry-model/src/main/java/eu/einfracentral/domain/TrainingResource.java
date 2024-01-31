@@ -28,7 +28,7 @@ public class TrainingResource implements Identifiable {
     private String id;
 
     /**
-     * The human readable name of the learning resource.
+     * The human-readable name of the learning resource.
      */
     @XmlElement(required = true)
     @ApiModelProperty(position = 2, required = true)

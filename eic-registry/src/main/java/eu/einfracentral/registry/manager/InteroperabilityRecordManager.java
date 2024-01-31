@@ -161,7 +161,7 @@ public class InteroperabilityRecordManager extends ResourceManager<Interoperabil
         validate(ret);
 
         // block Public Interoperability Record update
-        if (existingInteroperabilityRecord.getMetadata().isPublished()){
+        if (existingInteroperabilityRecord.getMetadata().isPublished()) {
             throw new ValidationException("You cannot directly update a Public Interoperability Record");
         }
 
@@ -405,33 +405,22 @@ public class InteroperabilityRecordManager extends ResourceManager<Interoperabil
         return super.update(interoperabilityRecordBundle, auth);
     }
 
-    @Override
-    public Paging<InteroperabilityRecordBundle> getResourceBundles(String catalogueId, String providerId,
-                                                                   Authentication auth) {
-        FacetFilter ff = new FacetFilter();
-        ff.addFilter("resource_organisation", providerId);
-        ff.addFilter("catalogue_id", catalogueId);
-        ff.setQuantity(maxQuantity);
-        ff.addOrderBy("title", "asc");
-        return this.getAll(ff, auth);
-    }
-
-    public InteroperabilityRecordBundle createPublicInteroperabilityRecord(InteroperabilityRecordBundle interoperabilityRecordBundle, Authentication auth){
+    public InteroperabilityRecordBundle createPublicInteroperabilityRecord(InteroperabilityRecordBundle interoperabilityRecordBundle, Authentication auth) {
         publicInteroperabilityRecordManager.add(interoperabilityRecordBundle, auth);
         return interoperabilityRecordBundle;
     }
 
-    public FacetFilter createFacetFilterForFetchingInteroperabilityRecords(MultiValueMap<String, Object> allRequestParams, String catalogueId, String providerId){
+    public FacetFilter createFacetFilterForFetchingInteroperabilityRecords(MultiValueMap<String, Object> allRequestParams, String catalogueId, String providerId) {
         FacetFilter ff = FacetFilterUtils.createMultiFacetFilter(allRequestParams);
         allRequestParams.remove("catalogue_id");
         allRequestParams.remove("provider_id");
-        if (catalogueId != null){
-            if (!catalogueId.equals("all")){
+        if (catalogueId != null) {
+            if (!catalogueId.equals("all")) {
                 ff.addFilter("catalogue_id", catalogueId);
             }
         }
-        if (providerId != null){
-            if (!providerId.equals("all")){
+        if (providerId != null) {
+            if (!providerId.equals("all")) {
                 ff.addFilter("provider_id", providerId);
             }
         }
@@ -440,7 +429,7 @@ public class InteroperabilityRecordManager extends ResourceManager<Interoperabil
         return ff;
     }
 
-    public void updateFacetFilterConsideringTheAuthorization(FacetFilter filter, Authentication auth){
+    public void updateFacetFilterConsideringTheAuthorization(FacetFilter filter, Authentication auth) {
         // if user is Unauthorized, return active/latest ONLY
         if (auth == null) {
             filter.addFilter("active", true);

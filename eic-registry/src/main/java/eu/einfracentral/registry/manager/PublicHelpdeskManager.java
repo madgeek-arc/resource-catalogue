@@ -119,12 +119,12 @@ public class PublicHelpdeskManager extends AbstractPublicResourceManager<Helpdes
 
     @Override
     public void delete(HelpdeskBundle helpdeskBundle) {
-        try{
+        try {
             HelpdeskBundle publicHelpdeskBundle = get(String.format("%s.%s", helpdeskBundle.getCatalogueId(), helpdeskBundle.getId()));
             logger.info(String.format("Deleting public Helpdesk with id [%s]", publicHelpdeskBundle.getId()));
             super.delete(publicHelpdeskBundle);
             jmsService.convertAndSendTopic("helpdesk.delete", publicHelpdeskBundle);
-        } catch (ResourceException | ResourceNotFoundException ignore){
+        } catch (ResourceException | ResourceNotFoundException ignore) {
         }
     }
 }

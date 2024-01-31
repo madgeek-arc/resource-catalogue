@@ -40,7 +40,7 @@ public class ProviderLocation {
     private String city;
 
     /**
-     * 	Region of incorporation or Physical location of the Provider or its coordinating centre in the case of distributed, virtual, and mobile providers.
+     * Region of incorporation or Physical location of the Provider or its coordinating centre in the case of distributed, virtual, and mobile providers.
      */
     @XmlElement
     @ApiModelProperty(position = 4)

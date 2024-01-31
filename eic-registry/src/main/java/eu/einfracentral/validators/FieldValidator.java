@@ -82,13 +82,13 @@ public class FieldValidator {
 
         // get declared fields of class
         List<Field> declaredFields = new ArrayList<>(Arrays.asList(o.getClass().getDeclaredFields()));
-        if (o instanceof ServiceBundle){
+        if (o instanceof ServiceBundle) {
             declaredFields.addAll(Arrays.asList(o.getClass().getSuperclass().getDeclaredFields()));
         }
-        if (o instanceof TrainingResourceBundle){
+        if (o instanceof TrainingResourceBundle) {
             declaredFields.addAll(Arrays.asList(o.getClass().getSuperclass().getDeclaredFields()));
         }
-        if (o instanceof InteroperabilityRecordBundle){
+        if (o instanceof InteroperabilityRecordBundle) {
             declaredFields.addAll(Arrays.asList(o.getClass().getSuperclass().getDeclaredFields()));
         }
 
@@ -296,7 +296,7 @@ public class FieldValidator {
                     if (annotation.containsResourceId()) {
                         ServiceBundle serviceBundle = serviceBundleService.getOrElseReturnNull(o.toString());
                         TrainingResourceBundle trainingResourceBundle = trainingResourceService.getOrElseReturnNull(o.toString());
-                        if (serviceBundle == null && trainingResourceBundle == null){
+                        if (serviceBundle == null && trainingResourceBundle == null) {
                             throw new ValidationException(
                                     String.format("Field '%s' should ONLY contain the ID of an existing Service " +
                                             "or Training Resource", field.getName()));
@@ -339,8 +339,8 @@ public class FieldValidator {
                                 String.format("Field '%s' should contain the ID of an existing Training Resource",
                                         field.getName()));
                     } else if ((eu.einfracentral.domain.Catalogue.class.equals(annotation.idClass())
-                        || CatalogueBundle.class.equals(annotation.idClass()))
-                        && catalogueService.get(o.toString()) == null) {
+                            || CatalogueBundle.class.equals(annotation.idClass()))
+                            && catalogueService.get(o.toString()) == null) {
                         throw new ValidationException(
                                 String.format("Field '%s' should contain the ID of an existing Catalogue",
                                         field.getName()));

@@ -192,7 +192,7 @@ public class EventManager extends ResourceManager<Event> implements EventService
             return new ArrayList<>();
         }
         Paging<Resource> eventResources = searchService.cqlQuery(String.format("type=\"%s\" AND event_user=\"%s\"",
-                eventType, AuthenticationInfo.getSub(authentication)), getResourceType(),
+                        eventType, AuthenticationInfo.getSub(authentication)), getResourceType(),
                 maxQuantity, 0, "creation_date", "DESC");
         return pagingToList(eventResources);
     }

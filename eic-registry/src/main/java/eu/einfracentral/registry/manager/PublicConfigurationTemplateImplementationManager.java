@@ -98,13 +98,13 @@ public class PublicConfigurationTemplateImplementationManager extends ResourceMa
 
     @Override
     public void delete(ConfigurationTemplateInstanceBundle configurationTemplateInstanceBundle) {
-        try{
+        try {
             ConfigurationTemplateInstanceBundle publicConfigurationTemplateInstanceBundle = get(String.format("%s.%s",
                     catalogueName, configurationTemplateInstanceBundle.getId()));
             logger.info(String.format("Deleting public ConfigurationTemplateInstanceBundle with id [%s]", publicConfigurationTemplateInstanceBundle.getId()));
             super.delete(publicConfigurationTemplateInstanceBundle);
             jmsService.convertAndSendTopic("configuration_template_instance.delete", publicConfigurationTemplateInstanceBundle);
-        } catch (ResourceException | ResourceNotFoundException ignore){
+        } catch (ResourceException | ResourceNotFoundException ignore) {
         }
     }
 

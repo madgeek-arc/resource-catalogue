@@ -106,13 +106,13 @@ public class PublicResourceInteroperabilityRecordManager extends AbstractPublicR
 
     @Override
     public void delete(ResourceInteroperabilityRecordBundle resourceInteroperabilityRecordBundle) {
-        try{
+        try {
             ResourceInteroperabilityRecordBundle publicResourceInteroperabilityRecordBundle = get(String.format("%s.%s",
                     resourceInteroperabilityRecordBundle.getResourceInteroperabilityRecord().getCatalogueId(), resourceInteroperabilityRecordBundle.getId()));
             logger.info(String.format("Deleting public ResourceInteroperabilityRecordBundle with id [%s]", publicResourceInteroperabilityRecordBundle.getId()));
             super.delete(publicResourceInteroperabilityRecordBundle);
             jmsService.convertAndSendTopic("resource_interoperability_record.delete", publicResourceInteroperabilityRecordBundle);
-        } catch (ResourceException | ResourceNotFoundException ignore){
+        } catch (ResourceException | ResourceNotFoundException ignore) {
         }
     }
 
