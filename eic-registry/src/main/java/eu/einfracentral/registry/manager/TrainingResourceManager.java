@@ -294,8 +294,8 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
         User user = User.of(auth);
 
         // update existing TrainingResource Metadata, Identifiers, MigrationStatus
-        ret.setMetadata(Metadata.updateMetadata(ret.getMetadata(), user.getFullName()));
-        ret.setMigrationStatus(ret.getMigrationStatus());
+        ret.setMetadata(Metadata.updateMetadata(existingTrainingResource.getMetadata(), user.getFullName()));
+        ret.setMigrationStatus(existingTrainingResource.getMigrationStatus());
 
         List<LoggingInfo> loggingInfoList = commonMethods.returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(existingTrainingResource, auth);
         LoggingInfo loggingInfo = commonMethods.createLoggingInfo(auth, LoggingInfo.Types.UPDATE.getKey(),

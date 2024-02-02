@@ -148,7 +148,7 @@ public class ProviderResourcesCommonMethods {
                 catalogueId = ((ResourceInteroperabilityRecordBundle) o).getResourceInteroperabilityRecord().getCatalogueId();
                 interoperabilityRecordIds = ((ResourceInteroperabilityRecordBundle) o).getResourceInteroperabilityRecord().getInteroperabilityRecordIds();
             }
-            if (resourceProviders != null && !resourceProviders.isEmpty()) {
+            if (resourceProviders != null && !resourceProviders.isEmpty() && resourceProviders.stream().anyMatch(Objects::nonNull)) {
                 for (String resourceProvider : resourceProviders) {
                     if (resourceProvider != null && !resourceProvider.equals("")) {
                         try {
@@ -162,7 +162,7 @@ public class ProviderResourcesCommonMethods {
                     }
                 }
             }
-            if (requiredResources != null && !requiredResources.isEmpty()) {
+            if (requiredResources != null && !requiredResources.isEmpty() && requiredResources.stream().anyMatch(Objects::nonNull)) {
                 for (String requiredResource : requiredResources) {
                     try {
                         ServiceBundle serviceBundle = genericResourceService.get("service", requiredResource);
@@ -180,7 +180,7 @@ public class ProviderResourcesCommonMethods {
                     }
                 }
             }
-            if (relatedResources != null && !relatedResources.isEmpty()) {
+            if (relatedResources != null && !relatedResources.isEmpty() && relatedResources.stream().anyMatch(Objects::nonNull)) {
                 for (String relatedResource : relatedResources) {
                     try {
                         ServiceBundle serviceBundle = genericResourceService.get("service", relatedResource);
@@ -198,7 +198,7 @@ public class ProviderResourcesCommonMethods {
                     }
                 }
             }
-            if (eoscRelatedServices != null && !eoscRelatedServices.isEmpty()) {
+            if (eoscRelatedServices != null && !eoscRelatedServices.isEmpty() && eoscRelatedServices.stream().anyMatch(Objects::nonNull)) {
                 for (String eoscRelatedService : eoscRelatedServices) {
                     try {
                         ServiceBundle serviceBundle = genericResourceService.get("service", eoscRelatedService);
@@ -216,7 +216,7 @@ public class ProviderResourcesCommonMethods {
                     }
                 }
             }
-            if (interoperabilityRecordIds != null && !interoperabilityRecordIds.isEmpty()) {
+            if (interoperabilityRecordIds != null && !interoperabilityRecordIds.isEmpty() && interoperabilityRecordIds.stream().anyMatch(Objects::nonNull)) {
                 for (String interoperabilityRecordId : interoperabilityRecordIds) {
                     try {
                         InteroperabilityRecordBundle interoperabilityRecordBundle = genericResourceService.get("interoperability_record", interoperabilityRecordId);
