@@ -55,6 +55,9 @@ public class ServiceControllerDeprecated {
     @Value("${project.catalogue.name}")
     private String catalogueName;
 
+    @Value("${project.name:Resource Catalogue}")
+    private String projectName;
+
 
     @Autowired
     ServiceControllerDeprecated(ServiceBundleService<ServiceBundle> service,
@@ -80,7 +83,7 @@ public class ServiceControllerDeprecated {
 
         // Block users of deleting Services of another Catalogue
         if (!service.getService().getCatalogueId().equals(catalogueName)) {
-            throw new ValidationException("You cannot delete a Service of a non EOSC Catalogue.");
+            throw new ValidationException(String.format("You cannot delete a Service of a non [%s] Catalogue.", projectName));
         }
         //TODO: Maybe return Provider's template status to 'no template status' if this was its only Service
         serviceBundleService.delete(service);

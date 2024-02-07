@@ -37,7 +37,7 @@ public class ProviderRequestManager extends ResourceManager<ProviderRequest> imp
     private final SecurityService securityService;
     private final Configuration cfg;
 
-    @Value("${project.name}")
+    @Value("${project.name:Resource Catalogue}")
     private String projectName;
 
     @Autowired
@@ -118,7 +118,7 @@ public class ProviderRequestManager extends ResourceManager<ProviderRequest> imp
             providerContactNames.remove(key);
 
             String providerSubject = String.format("[%s] You have a new message from user [%s]-[%s], considering the Provider [%s]", projectName, message.getSenderName(), message.getSenderEmail(), entry.getKey());
-            String userSubject = String.format("[%s] Your message considering the EOSC Services has been sent successfully", projectName);
+            String userSubject = String.format("[%s] Your message considering the [%s] Services has been sent successfully", projectName, projectName);
 
             root.put("providerContactLastName", fullname.getKey());
             root.put("providerContactFirstName", fullname.getValue());

@@ -46,7 +46,7 @@ public class InternalToPublicConsistency {
     private final MailService mailService;
 
 
-    @Value("${project.name}")
+    @Value("${project.name:Resource Catalogue}")
     private String projectName;
     @Value("${resource.consistency.enable}")
     private boolean enableConsistencyEmails;

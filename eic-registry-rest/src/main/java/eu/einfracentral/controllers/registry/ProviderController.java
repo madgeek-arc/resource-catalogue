@@ -54,6 +54,9 @@ public class ProviderController {
     @Value("${auditing.interval:6}")
     private String auditingInterval;
 
+    @Value("${project.name:Resource Catalogue}")
+    private String projectName;
+
     @Autowired
     ProviderController(ProviderService<ProviderBundle, Authentication> service,
                        ServiceBundleService<ServiceBundle> serviceBundleService,
@@ -78,7 +81,7 @@ public class ProviderController {
         }
         // Block users of deleting Providers of another Catalogue
         if (!provider.getProvider().getCatalogueId().equals(catalogueName)) {
-            throw new ValidationException("You cannot delete a Provider of a non EOSC Catalogue.");
+            throw new ValidationException(String.format("You cannot delete a Provider of a non [%s] Catalogue.", projectName));
         }
         logger.info("Deleting provider: {} of the catalogue: {}", provider.getProvider().getName(), provider.getProvider().getCatalogueId());
 

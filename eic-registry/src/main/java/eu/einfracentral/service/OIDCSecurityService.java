@@ -40,7 +40,7 @@ public class OIDCSecurityService implements SecurityService {
     @Value("${project.catalogue.name}")
     private String catalogueName;
 
-    @Value("${project.name:}")
+    @Value("${project.name:Resource Catalogue}")
     private String projectName;
 
     @Value("${mail.smtp.from:}")

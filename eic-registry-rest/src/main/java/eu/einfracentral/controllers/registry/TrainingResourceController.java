@@ -49,6 +49,9 @@ public class TrainingResourceController {
     @Value("${project.catalogue.name}")
     private String catalogueName;
 
+    @Value("${project.name:Resource Catalogue}")
+    private String projectName;
+
     @Autowired
     TrainingResourceController(TrainingResourceService<TrainingResourceBundle> trainingResourceService,
                                ProviderService<ProviderBundle, Authentication> providerService,
@@ -68,7 +71,7 @@ public class TrainingResourceController {
 
         // Block users of deleting Services of another Catalogue
         if (!trainingResourceBundle.getTrainingResource().getCatalogueId().equals(catalogueName)) {
-            throw new ValidationException("You cannot delete a Training Resource of a non EOSC Catalogue.");
+            throw new ValidationException(String.format("You cannot delete a Training Resource of a non [%s] Catalogue.", projectName));
         }
         //TODO: Maybe return Provider's template status to 'no template status' if this was its only TR
         trainingResourceService.delete(trainingResourceBundle);

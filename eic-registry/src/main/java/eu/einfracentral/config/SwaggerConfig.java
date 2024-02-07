@@ -32,7 +32,7 @@ public class SwaggerConfig {
     @Value("${swagger.url}")
     String platform;
 
-    @Value("${project.name:}")
+    @Value("${project.name:Resource Catalogue}")
     String projectName;
 
     @Value("${project.debug:false}")
