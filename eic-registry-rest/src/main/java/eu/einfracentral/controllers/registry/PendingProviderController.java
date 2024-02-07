@@ -76,7 +76,7 @@ public class PendingProviderController extends ResourceController<ProviderBundle
         ProviderBundle providerBundle = pendingProviderService.get(provider.getId());
         providerBundle.setProvider(provider);
 
-        // validate the Provider and update afterwards ( update may change provider id and all of its services ids )
+        // validate the Provider and update afterward ( update may change provider id and all of its services ids )
         providerManager.validate(providerBundle);
 
         update(providerBundle, auth);

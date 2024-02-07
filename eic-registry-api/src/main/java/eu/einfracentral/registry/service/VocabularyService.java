@@ -2,9 +2,9 @@ package eu.einfracentral.registry.service;
 
 import eu.einfracentral.domain.Vocabulary;
 import eu.einfracentral.dto.VocabularyTree;
-import eu.openminted.registry.core.domain.FacetFilter;
 import org.springframework.security.core.Authentication;
 
+import java.lang.reflect.Array;
 import java.util.List;
 import java.util.Map;
 
@@ -13,63 +13,67 @@ public interface VocabularyService extends ResourceService<Vocabulary, Authentic
     /**
      * Retrieves Vocabulary based on id or throws exception if not found.
      *
-     * @return
+     * @param id Vocabulary ID
+     * @return {@link Vocabulary}
      */
     Vocabulary getOrElseThrow(String id);
 
     /**
-     * @param name
-     * @return
+     * Get the members of a Region providing its name (WW or EU)
+     *
+     * @param name Region name
+     * @return {@link Array} of {@link String}
      */
     String[] getRegion(String name);
 
     /**
-     * Get parent vocabulary.
+     * Get parent Vocabulary.
      *
-     * @param id
-     * @return
+     * @param id Vocabulary ID
+     * @return {@link Vocabulary}
      */
     Vocabulary getParent(String id);
 
     /**
-     * Get all vocabularies by type in a Map.
+     * Get all Vocabularies by type in a Map.
      *
-     * @return
+     * @return {@link Map}&lt;{@link Vocabulary.Type}, {@link List}&lt;{@link Vocabulary}&gt;&gt;
      */
     Map<Vocabulary.Type, List<Vocabulary>> getAllVocabulariesByType();
 
     /**
-     * Get all vocabularies of a specific type.
+     * Get a List of all Vocabularies of a specific Type
      *
-     * @param type
-     * @return
+     * @param type Vocabulary Type
+     * @return {@link List}&lt;{@link Vocabulary}&gt;
      */
     List<Vocabulary> getByType(Vocabulary.Type type);
 
     /**
-     * Get all vocabularies in a Map.
+     * Get all Vocabularies in a Map.
      *
-     * @return
+     * @return {@link Map}&lt;{@link String}, {@link Vocabulary}&gt;
      */
     Map<String, Vocabulary> getVocabulariesMap();
 
     /**
-     * Get vocabularies in a Map.
+     * Adds an aggregation of Vocabularies
      *
-     * @param ff
-     * @return
-     */
-    Map<String, Vocabulary> getVocabulariesMap(FacetFilter ff);
-
-    /**
-     * Adds all new vocs.
+     * @param newVocabularies List of Vocabularies to be added
+     * @param auth            Authentication
      */
     void addAll(List<Vocabulary> newVocabularies, Authentication auth);
 
     /**
-     * Deletes all vocs.
+     * Deletes all Vocabularies.
      */
     void deleteAll(Authentication auth);
 
+    /**
+     * Returns a Tree of parents and children for a specific Vocabulary Type
+     *
+     * @param type Vocabulary Type
+     * @return {@link VocabularyTree}
+     */
     VocabularyTree getVocabulariesTree(Vocabulary.Type type);
 }

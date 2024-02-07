@@ -98,18 +98,18 @@ public class Metadata {
         return metadata;
     }
 
-    public static List<String> adminAcceptedTerms(String userEmail){
+    public static List<String> adminAcceptedTerms(String userEmail) {
         List<String> acceptedList = new ArrayList<>();
         acceptedList.add(userEmail);
         return acceptedList;
     }
 
-    public static List<String> updateAcceptedTermsList(List<String> terms, String userEmail){
-        if (terms == null || terms.isEmpty()){
+    public static List<String> updateAcceptedTermsList(List<String> terms, String userEmail) {
+        if (terms == null || terms.isEmpty()) {
             terms = new ArrayList<>();
             terms.add(userEmail);
         }
-        if (!terms.contains(userEmail)){
+        if (!terms.contains(userEmail)) {
             terms.add(userEmail);
         }
         return terms;

@@ -207,7 +207,7 @@ public class ServiceExtensionsController {
         for (HelpdeskBundle helpdeskBundle : allHelpdesks) {
             try {
                 helpdeskService.createPublicResource(helpdeskBundle, auth);
-            } catch (ResourceException e){
+            } catch (ResourceException e) {
                 logger.info("Helpdesk with ID {} is already registered as Public", helpdeskBundle.getId());
             }
         }
@@ -432,7 +432,7 @@ public class ServiceExtensionsController {
         for (MonitoringBundle monitoringBundle : allMonitorings) {
             try {
                 monitoringService.createPublicResource(monitoringBundle, auth);
-            } catch (ResourceException e){
+            } catch (ResourceException e) {
                 logger.info("Monitoring with ID {} is already registered as Public", monitoringBundle.getId());
             }
         }

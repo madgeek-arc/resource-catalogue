@@ -6,7 +6,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 @Service
-public class DatasourceSync extends AbstractSyncService<Datasource>{
+public class DatasourceSync extends AbstractSyncService<Datasource> {
 
     @Autowired
     public DatasourceSync(@Value("${sync.host:}") String host, @Value("${sync.token.filepath:}") String filename, @Value("${sync.enable}") boolean enabled) {

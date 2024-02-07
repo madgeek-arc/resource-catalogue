@@ -204,6 +204,12 @@
       "name": "status",
       "path": "//*[local-name()='status']/text()",
       "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
+      "name": "audit_state",
+      "path": "//*[local-name()='auditState']/text()",
+      "type": "java.lang.String"
     }
   ],
   "indexMapperClass": "eu.openminted.registry.core.index.DefaultIndexMapper",

@@ -66,11 +66,11 @@ public class HelpdeskValidator implements Validator {
             field.setAccessible(true);
             Object fieldValue = field.get(target);
             if (fieldValue != null && !fieldValue.equals("")) {
-                if (fieldValue instanceof ArrayList){ // front may return a 0 items list (non-empty)
-                    if (!((ArrayList<?>) fieldValue).isEmpty()){
+                if (fieldValue instanceof ArrayList) { // front may return a 0 items list (non-empty)
+                    if (!((ArrayList<?>) fieldValue).isEmpty()) {
                         errors.rejectValue(fieldName, fieldName + ".non-empty", notAcceptableField(fieldName, type));
                     }
-                } else{
+                } else {
                     errors.rejectValue(fieldName, fieldName + ".non-empty", notAcceptableField(fieldName, type));
                 }
             }

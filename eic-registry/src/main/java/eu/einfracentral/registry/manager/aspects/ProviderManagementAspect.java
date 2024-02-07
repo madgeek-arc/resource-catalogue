@@ -147,7 +147,8 @@ public class ProviderManagementAspect {
             if (!ret.equals(providerBundle)) {
                 publicProviderManager.update(ObjectUtils.clone(ret), null);
             }
-        } catch (ResourceException | ResourceNotFoundException ignore) {}
+        } catch (ResourceException | ResourceNotFoundException ignore) {
+        }
     }
 
     @Async
@@ -159,7 +160,8 @@ public class ProviderManagementAspect {
     public void updatePublicProvider(final ProviderBundle providerBundle) {
         try {
             publicProviderManager.update(ObjectUtils.clone(providerBundle), null);
-        } catch (ResourceException | ResourceNotFoundException ignore) {}
+        } catch (ResourceException | ResourceNotFoundException ignore) {
+        }
     }
 
     @Async
@@ -233,10 +235,10 @@ public class ProviderManagementAspect {
             "|| execution(* eu.einfracentral.registry.manager.InteroperabilityRecordManager.verifyResource(..))",
             returning = "interoperabilityRecordBundle")
     public void addResourceAsPublic(final InteroperabilityRecordBundle interoperabilityRecordBundle) {
-        if (interoperabilityRecordBundle.getStatus().equals("approved interoperability record") && interoperabilityRecordBundle.isActive()){
-            try{
+        if (interoperabilityRecordBundle.getStatus().equals("approved interoperability record") && interoperabilityRecordBundle.isActive()) {
+            try {
                 publicInteroperabilityRecordManager.get(String.format("%s.%s", interoperabilityRecordBundle.getInteroperabilityRecord().getCatalogueId(), interoperabilityRecordBundle.getId()));
-            } catch (ResourceException | ResourceNotFoundException e){
+            } catch (ResourceException | ResourceNotFoundException e) {
                 publicInteroperabilityRecordManager.add(ObjectUtils.clone(interoperabilityRecordBundle), null);
             }
         }
@@ -250,7 +252,8 @@ public class ProviderManagementAspect {
             if (!ret.equals(serviceBundle)) {
                 publicServiceManager.update(ObjectUtils.clone(ret), null);
             }
-        } catch (ResourceException | ResourceNotFoundException ignore) {}
+        } catch (ResourceException | ResourceNotFoundException ignore) {
+        }
     }
 
     @Async
@@ -262,7 +265,8 @@ public class ProviderManagementAspect {
     public void updatePublicResource(final ServiceBundle serviceBundle) {
         try {
             publicServiceManager.update(ObjectUtils.clone(serviceBundle), null);
-        } catch (ResourceException | ResourceNotFoundException ignore) {}
+        } catch (ResourceException | ResourceNotFoundException ignore) {
+        }
     }
 
     @Async
@@ -273,7 +277,8 @@ public class ProviderManagementAspect {
             if (!ret.equals(trainingResourceBundle)) {
                 publicTrainingResourceManager.update(ObjectUtils.clone(ret), null);
             }
-        } catch (ResourceException | ResourceNotFoundException ignore) {}
+        } catch (ResourceException | ResourceNotFoundException ignore) {
+        }
     }
 
     @Async
@@ -285,7 +290,8 @@ public class ProviderManagementAspect {
     public void updatePublicResource(final TrainingResourceBundle trainingResourceBundle) {
         try {
             publicTrainingResourceManager.update(ObjectUtils.clone(trainingResourceBundle), null);
-        } catch (ResourceException | ResourceNotFoundException ignore) {}
+        } catch (ResourceException | ResourceNotFoundException ignore) {
+        }
     }
 
     @Async
@@ -296,7 +302,8 @@ public class ProviderManagementAspect {
             if (!ret.equals(interoperabilityRecordBundle)) {
                 publicInteroperabilityRecordManager.update(ObjectUtils.clone(ret), null);
             }
-        } catch (ResourceException | ResourceNotFoundException ignore) {}
+        } catch (ResourceException | ResourceNotFoundException ignore) {
+        }
     }
 
     @Async
@@ -306,9 +313,10 @@ public class ProviderManagementAspect {
             "|| execution(* eu.einfracentral.registry.manager.InteroperabilityRecordManager.auditResource(..))",
             returning = "interoperabilityRecordBundle")
     public void updatePublicResource(final InteroperabilityRecordBundle interoperabilityRecordBundle) {
-        try{
+        try {
             publicInteroperabilityRecordManager.update(ObjectUtils.clone(interoperabilityRecordBundle), null);
-        } catch (ResourceException | ResourceNotFoundException ignore){}
+        } catch (ResourceException | ResourceNotFoundException ignore) {
+        }
     }
 
     @Async
@@ -397,7 +405,8 @@ public class ProviderManagementAspect {
             if (!ret.equals(datasourceBundle)) {
                 publicDatasourceManager.update(ObjectUtils.clone(ret), null);
             }
-        } catch (ResourceException | ResourceNotFoundException ignore) {}
+        } catch (ResourceException | ResourceNotFoundException ignore) {
+        }
     }
 
     @Async
@@ -406,7 +415,8 @@ public class ProviderManagementAspect {
     public void updatePublicDatasource(final DatasourceBundle datasourceBundle) {
         try {
             publicDatasourceManager.update(ObjectUtils.clone(datasourceBundle), null);
-        } catch (ResourceException | ResourceNotFoundException ignore) {}
+        } catch (ResourceException | ResourceNotFoundException ignore) {
+        }
     }
 
     @Async
@@ -438,7 +448,8 @@ public class ProviderManagementAspect {
             if (!ret.equals(resourceInteroperabilityRecordBundle)) {
                 publicResourceInteroperabilityRecordManager.update(ObjectUtils.clone(ret), null);
             }
-        } catch (ResourceException | ResourceNotFoundException ignore) {}
+        } catch (ResourceException | ResourceNotFoundException ignore) {
+        }
     }
 
     @Async
@@ -452,9 +463,9 @@ public class ProviderManagementAspect {
     @AfterReturning(pointcut = "execution(* eu.einfracentral.registry.manager.ConfigurationTemplateInstanceManager.add(..))",
             returning = "configurationTemplateInstanceBundle")
     public void addConfigurationTemplateInstanceAsPublic(final ConfigurationTemplateInstanceBundle configurationTemplateInstanceBundle) {
-        try{
+        try {
             publicConfigurationTemplateImplementationManager.get(String.format("%s.%s", catalogueName, configurationTemplateInstanceBundle.getId()));
-        } catch (ResourceException | ResourceNotFoundException e){
+        } catch (ResourceException | ResourceNotFoundException e) {
             publicConfigurationTemplateImplementationManager.add(ObjectUtils.clone(configurationTemplateInstanceBundle), null);
         }
     }
@@ -467,7 +478,8 @@ public class ProviderManagementAspect {
             if (!ret.equals(configurationTemplateInstanceBundle)) {
                 publicConfigurationTemplateImplementationManager.update(ObjectUtils.clone(ret), null);
             }
-        } catch (ResourceException | ResourceNotFoundException ignore) {}
+        } catch (ResourceException | ResourceNotFoundException ignore) {
+        }
     }
 
     @Async

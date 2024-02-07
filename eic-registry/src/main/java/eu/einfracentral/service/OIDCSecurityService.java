@@ -40,7 +40,7 @@ public class OIDCSecurityService implements SecurityService {
     @Value("${project.catalogue.name}")
     private String catalogueName;
 
-    @Value("${project.name:}")
+    @Value("${project.name:Resource Catalogue}")
     private String projectName;
 
     @Value("${mail.smtp.from:}")
@@ -224,6 +224,7 @@ public class OIDCSecurityService implements SecurityService {
         User user = User.of(auth);
         return userIsResourceProviderAdmin(user, resourceId, catalogueName);
     }
+
     @Override
     public boolean isResourceProviderAdmin(Authentication auth, String resourceId, String catalogueId) {
         if (hasRole(auth, "ROLE_ANONYMOUS")) {
@@ -277,13 +278,13 @@ public class OIDCSecurityService implements SecurityService {
         InteroperabilityRecordBundle interoperabilityRecordBundle = new InteroperabilityRecordBundle();
         try {
             serviceBundle = serviceBundleService.getOrElseReturnNull(resourceId, catalogueId);
-            if (serviceBundle == null){
+            if (serviceBundle == null) {
                 trainingResourceBundle = trainingResourceService.getOrElseReturnNull(resourceId, catalogueId);
             }
-            if (serviceBundle == null && trainingResourceBundle == null){
+            if (serviceBundle == null && trainingResourceBundle == null) {
                 interoperabilityRecordBundle = interoperabilityRecordService.getOrElseReturnNull(resourceId, catalogueId);
             }
-            if (serviceBundle == null && trainingResourceBundle == null && interoperabilityRecordBundle == null){
+            if (serviceBundle == null && trainingResourceBundle == null && interoperabilityRecordBundle == null) {
                 serviceBundle = pendingServiceManager.get(resourceId);
             }
         } catch (RuntimeException e) {
@@ -291,12 +292,12 @@ public class OIDCSecurityService implements SecurityService {
         }
         List<String> allProviders = new ArrayList<>();
         String catalogue;
-        if (serviceBundle != null){
+        if (serviceBundle != null) {
             if (serviceBundle.getService().getResourceOrganisation() == null || serviceBundle.getService().getResourceOrganisation().equals("")) {
                 throw new ValidationException("Resource has no Resource Organisation");
             }
             allProviders.add(serviceBundle.getService().getResourceOrganisation());
-            if (serviceBundle.getService().getResourceProviders() != null){
+            if (serviceBundle.getService().getResourceProviders() != null) {
                 allProviders.addAll(serviceBundle.getService().getResourceProviders());
             }
             catalogue = serviceBundle.getService().getCatalogueId();
@@ -305,7 +306,7 @@ public class OIDCSecurityService implements SecurityService {
                 throw new ValidationException("Training Resource has no Resource Organisation");
             }
             allProviders.add(trainingResourceBundle.getTrainingResource().getResourceOrganisation());
-            if (trainingResourceBundle.getTrainingResource().getResourceProviders() != null){
+            if (trainingResourceBundle.getTrainingResource().getResourceProviders() != null) {
                 allProviders.addAll(trainingResourceBundle.getTrainingResource().getResourceProviders());
             }
             catalogue = trainingResourceBundle.getTrainingResource().getCatalogueId();
@@ -330,7 +331,7 @@ public class OIDCSecurityService implements SecurityService {
     @Override
     public boolean providerCanAddResources(Authentication auth, ServiceBundle serviceBundle) {
         String providerId = serviceBundle.getService().getResourceOrganisation();
-        if (serviceBundle.getService().getCatalogueId() == null || serviceBundle.getService().getCatalogueId().equals("")){
+        if (serviceBundle.getService().getCatalogueId() == null || serviceBundle.getService().getCatalogueId().equals("")) {
             serviceBundle.getService().setCatalogueId(catalogueName);
         }
         ProviderBundle provider = providerManager.get(serviceBundle.getService().getCatalogueId(), providerId, auth);
@@ -355,7 +356,7 @@ public class OIDCSecurityService implements SecurityService {
     @Override
     public <T extends eu.einfracentral.domain.Service> boolean providerCanAddResources(Authentication auth, T service) {
         List<String> providerIds = Collections.singletonList(service.getResourceOrganisation());
-        if (service.getCatalogueId() == null || service.getCatalogueId().equals("")){
+        if (service.getCatalogueId() == null || service.getCatalogueId().equals("")) {
             service.setCatalogueId(catalogueName);
         }
         for (String providerId : providerIds) {
@@ -381,7 +382,7 @@ public class OIDCSecurityService implements SecurityService {
 
     public boolean providerCanAddResources(Authentication auth, TrainingResource trainingResource) {
         List<String> providerIds = Collections.singletonList(trainingResource.getResourceOrganisation());
-        if (trainingResource.getCatalogueId() == null || trainingResource.getCatalogueId().equals("")){
+        if (trainingResource.getCatalogueId() == null || trainingResource.getCatalogueId().equals("")) {
             trainingResource.setCatalogueId(catalogueName);
         }
         for (String providerId : providerIds) {
@@ -406,7 +407,7 @@ public class OIDCSecurityService implements SecurityService {
     }
 
     public boolean providerCanAddResources(Authentication auth, InteroperabilityRecord interoperabilityRecord) {
-        if (interoperabilityRecord.getCatalogueId() == null || interoperabilityRecord.getCatalogueId().equals("")){
+        if (interoperabilityRecord.getCatalogueId() == null || interoperabilityRecord.getCatalogueId().equals("")) {
             interoperabilityRecord.setCatalogueId(catalogueName);
         }
         ProviderBundle provider = providerManager.get(interoperabilityRecord.getCatalogueId(), interoperabilityRecord.getProviderId(), auth);
@@ -420,20 +421,21 @@ public class OIDCSecurityService implements SecurityService {
     }
 
     @Override
-    public boolean providerIsActiveAndUserIsAdmin(Authentication auth, String resourceId){
+    public boolean providerIsActiveAndUserIsAdmin(Authentication auth, String resourceId) {
         return providerIsActiveAndUserIsAdmin(auth, resourceId, catalogueName);
     }
+
     @Override
     public boolean providerIsActiveAndUserIsAdmin(Authentication auth, String resourceId, String catalogueId) {
         ServiceBundle serviceBundle;
         TrainingResourceBundle trainingResourceBundle;
         InteroperabilityRecordBundle interoperabilityRecordBundle;
         List<String> providerIds;
-        try{
+        try {
             serviceBundle = serviceBundleService.get(resourceId, catalogueId);
             providerIds = Collections.singletonList(serviceBundle.getService().getResourceOrganisation());
         } catch (ResourceNotFoundException e) {
-            try{
+            try {
                 trainingResourceBundle = trainingResourceService.get(resourceId, catalogueId);
                 providerIds = Collections.singletonList(trainingResourceBundle.getPayload().getResourceOrganisation());
             } catch (ResourceNotFoundException j) {

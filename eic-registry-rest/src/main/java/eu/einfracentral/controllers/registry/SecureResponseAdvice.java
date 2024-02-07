@@ -117,15 +117,15 @@ public class SecureResponseAdvice<T> implements ResponseBodyAdvice<T> {
     }
 
     @SuppressWarnings("unchecked")
-    private void modifyTrainingResourceBundle(T trainingResourceBunle, Authentication auth) {
-        modifyLoggingInfoList((T) ((TrainingResourceBundle) trainingResourceBunle).getLoggingInfo());
-        modifyLoggingInfo((T) ((TrainingResourceBundle) trainingResourceBunle).getLatestAuditInfo());
-        modifyLoggingInfo((T) ((TrainingResourceBundle) trainingResourceBunle).getLatestUpdateInfo());
-        modifyLoggingInfo((T) ((TrainingResourceBundle) trainingResourceBunle).getLatestOnboardingInfo());
+    private void modifyTrainingResourceBundle(T trainingResourceBundle, Authentication auth) {
+        modifyLoggingInfoList((T) ((TrainingResourceBundle) trainingResourceBundle).getLoggingInfo());
+        modifyLoggingInfo((T) ((TrainingResourceBundle) trainingResourceBundle).getLatestAuditInfo());
+        modifyLoggingInfo((T) ((TrainingResourceBundle) trainingResourceBundle).getLatestUpdateInfo());
+        modifyLoggingInfo((T) ((TrainingResourceBundle) trainingResourceBundle).getLatestOnboardingInfo());
 
-        if (!this.securityService.isResourceProviderAdmin(auth, ((TrainingResourceBundle) trainingResourceBunle).getId(), ((TrainingResourceBundle) trainingResourceBunle).getTrainingResource().getCatalogueId())) {
-            ((TrainingResourceBundle) trainingResourceBunle).getTrainingResource().setContact(null);
-            ((TrainingResourceBundle) trainingResourceBunle).getMetadata().setTerms(null);
+        if (!this.securityService.isResourceProviderAdmin(auth, ((TrainingResourceBundle) trainingResourceBundle).getId(), ((TrainingResourceBundle) trainingResourceBundle).getTrainingResource().getCatalogueId())) {
+            ((TrainingResourceBundle) trainingResourceBundle).getTrainingResource().setContact(null);
+            ((TrainingResourceBundle) trainingResourceBundle).getMetadata().setTerms(null);
         }
     }
 

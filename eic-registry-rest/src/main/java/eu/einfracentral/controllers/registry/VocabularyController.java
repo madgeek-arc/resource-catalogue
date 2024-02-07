@@ -139,7 +139,7 @@ public class VocabularyController extends ResourceController<Vocabulary, Authent
     public void getSimilarHLEVocabularies() {
         List<Vocabulary> allHLE = vocabularyService.getByType(Vocabulary.Type.PROVIDER_HOSTING_LEGAL_ENTITY);
         List<String> allHLENames = new ArrayList<>();
-        for (Vocabulary voc : allHLE){
+        for (Vocabulary voc : allHLE) {
             allHLENames.add(voc.getName());
         }
         List<String> duplicateNames = allHLENames.stream()

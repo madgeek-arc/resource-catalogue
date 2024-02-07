@@ -49,6 +49,9 @@ public class TrainingResourceController {
     @Value("${project.catalogue.name}")
     private String catalogueName;
 
+    @Value("${project.name:Resource Catalogue}")
+    private String projectName;
+
     @Autowired
     TrainingResourceController(TrainingResourceService<TrainingResourceBundle> trainingResourceService,
                                ProviderService<ProviderBundle, Authentication> providerService,
@@ -68,7 +71,7 @@ public class TrainingResourceController {
 
         // Block users of deleting Services of another Catalogue
         if (!trainingResourceBundle.getTrainingResource().getCatalogueId().equals(catalogueName)) {
-            throw new ValidationException("You cannot delete a Training Resource of a non EOSC Catalogue.");
+            throw new ValidationException(String.format("You cannot delete a Training Resource of a non [%s] Catalogue.", projectName));
         }
         //TODO: Maybe return Provider's template status to 'no template status' if this was its only TR
         trainingResourceService.delete(trainingResourceBundle);
@@ -257,9 +260,9 @@ public class TrainingResourceController {
     @GetMapping(path = "adminPage/all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     public ResponseEntity<Paging<?>> getAllTrainingResourcesForAdminPage(@ApiIgnore @RequestParam MultiValueMap<String, Object> allRequestParams,
-                                                                                              @RequestParam(required = false) Set<String> auditState,
-                                                                                              @RequestParam(defaultValue = "all", name = "catalogue_id") String catalogueId,
-                                                                                              @ApiIgnore Authentication authentication) {
+                                                                         @RequestParam(required = false) Set<String> auditState,
+                                                                         @RequestParam(defaultValue = "all", name = "catalogue_id") String catalogueId,
+                                                                         @ApiIgnore Authentication authentication) {
 
         allRequestParams.addIfAbsent("catalogue_id", catalogueId);
         if (catalogueId != null && catalogueId.equals("all")) {
@@ -293,9 +296,7 @@ public class TrainingResourceController {
     @GetMapping(path = "randomResources", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     public ResponseEntity<Paging<TrainingResourceBundle>> getRandomResources(@ApiIgnore @RequestParam Map<String, Object> allRequestParams, @ApiIgnore Authentication auth) {
-        FacetFilter ff = new FacetFilter();
-        ff.setQuantity(allRequestParams.get("quantity") != null ? Integer.parseInt((String) allRequestParams.remove("quantity")) : 10);
-        ff.setFilter(allRequestParams);
+        FacetFilter ff = FacetFilterUtils.createFacetFilter(allRequestParams);
         ff.addFilter("status", "approved resource");
         ff.addFilter("published", false);
         Paging<TrainingResourceBundle> trainingResourceBundlePaging = trainingResourceService.getRandomResources(ff, auditingInterval, auth);

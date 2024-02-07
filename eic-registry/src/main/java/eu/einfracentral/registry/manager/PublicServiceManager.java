@@ -113,12 +113,12 @@ public class PublicServiceManager extends AbstractPublicResourceManager<ServiceB
 
     @Override
     public void delete(ServiceBundle serviceBundle) {
-        try{
+        try {
             ServiceBundle publicServiceBundle = get(String.format("%s.%s", serviceBundle.getService().getCatalogueId(), serviceBundle.getId()));
             logger.info(String.format("Deleting public Service with id [%s]", publicServiceBundle.getId()));
             super.delete(publicServiceBundle);
             jmsService.convertAndSendTopic("service.delete", publicServiceBundle);
-        } catch (ResourceException | ResourceNotFoundException ignore){
+        } catch (ResourceException | ResourceNotFoundException ignore) {
         }
     }
 }

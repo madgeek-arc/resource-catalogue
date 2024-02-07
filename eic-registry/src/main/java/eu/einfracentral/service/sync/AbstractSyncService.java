@@ -205,13 +205,13 @@ public abstract class AbstractSyncService<T extends Identifiable> implements Syn
             URI uri;
             logger.info("Verifying resource with id: {} - Host: {}", t.getId(), host);
             try {
-                if (t instanceof Provider){
+                if (t instanceof Provider) {
                     uri = new URI(host + controller + "/verifyProvider/" + t.getId() + "?active=true&status=approved%20provider").normalize();
-                } else if (t instanceof eu.einfracentral.domain.TrainingResource){
+                } else if (t instanceof eu.einfracentral.domain.TrainingResource) {
                     uri = new URI(host + controller + "/verifyTrainingResource/" + t.getId() + "?active=true&status=approved%20resource").normalize();
-                } else if (t instanceof eu.einfracentral.domain.Datasource){
+                } else if (t instanceof eu.einfracentral.domain.Datasource) {
                     uri = new URI(host + controller + "/verifyDatasource/" + t.getId() + "?active=true&status=approved%20resource").normalize();
-                } else{
+                } else {
                     uri = new URI(host + controller + "/verifyResource/" + t.getId() + "?active=true&status=approved%20resource").normalize();
                 }
                 HttpComponentsClientHttpRequestFactory requestFactory = new HttpComponentsClientHttpRequestFactory();

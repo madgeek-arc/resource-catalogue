@@ -41,10 +41,10 @@ public class ObjectUtils {
                 String toName = fromName.replace("get", "set");
 
                 try {
-                    Method toMetod = existing.getClass().getMethod(toName, fromMethod.getReturnType());
+                    Method toMethod = existing.getClass().getMethod(toName, fromMethod.getReturnType());
                     Object value = fromMethod.invoke(update, (Object[]) null);
                     if (value != null) {
-                        toMetod.invoke(existing, value);
+                        toMethod.invoke(existing, value);
                     }
                 } catch (Exception e) {
                     logger.error("ERROR", e);

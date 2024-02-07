@@ -14,6 +14,7 @@ import eu.einfracentral.utils.ObjectUtils;
 import eu.einfracentral.utils.ProviderResourcesCommonMethods;
 import eu.einfracentral.utils.ResourceValidationUtils;
 import eu.openminted.registry.core.domain.FacetFilter;
+import eu.openminted.registry.core.domain.Paging;
 import eu.openminted.registry.core.domain.Resource;
 import eu.openminted.registry.core.service.SearchService;
 import org.apache.logging.log4j.LogManager;
@@ -76,7 +77,7 @@ public class DatasourceManager extends ResourceManager<DatasourceBundle> impleme
 
         // if Datasource has ID -> check if it exists in OpenAIRE Datasources list
         if (datasourceBundle.getId() != null && !datasourceBundle.getId().equals("")) {
-            checkOpenAIREIDExistance(datasourceBundle);
+            checkOpenAIREIDExistence(datasourceBundle);
         }
         datasourceBundle.setId(datasourceBundle.getDatasource().getServiceId());
         logger.trace("User '{}' is attempting to add a new Datasource: {}", auth, datasourceBundle);
@@ -91,26 +92,23 @@ public class DatasourceManager extends ResourceManager<DatasourceBundle> impleme
         super.add(datasourceBundle, null);
         logger.debug("Adding Datasource for Service: {}", datasourceBundle.getDatasource().getServiceId());
 
-        if (datasourceBundle.getDatasource().getCatalogueId().equals(catalogueName)) {
-            registrationMailService.sendEmailsForDatasourceExtension(datasourceBundle, "post");
-        }
         return datasourceBundle;
     }
 
-    private DatasourceBundle differentiateInternalFromExternalCatalogueAddition(DatasourceBundle datasourceBundle) {
+    private void differentiateInternalFromExternalCatalogueAddition(DatasourceBundle datasourceBundle) {
         if (datasourceBundle.getDatasource().getCatalogueId().equals(catalogueName)) {
             datasourceBundle.setActive(false);
             datasourceBundle.setStatus(vocabularyService.get("pending datasource").getId());
             datasourceBundle.setLatestOnboardingInfo(datasourceBundle.getLoggingInfo().get(0));
+            registrationMailService.sendEmailsForDatasourceExtension(datasourceBundle, "post");
         } else {
             datasourceBundle.setActive(true);
             datasourceBundle.setStatus(vocabularyService.get("approved datasource").getId());
-            LoggingInfo loggingInfo = commonMethods.createLoggingInfo(securityService.getAdminAccess(), LoggingInfo.Types.ONBOARD.getKey(),
-                    LoggingInfo.ActionType.APPROVED.getKey());
+            LoggingInfo loggingInfo = commonMethods.createLoggingInfo(securityService.getAdminAccess(),
+                    LoggingInfo.Types.ONBOARD.getKey(), LoggingInfo.ActionType.APPROVED.getKey());
             datasourceBundle.getLoggingInfo().add(loggingInfo);
             datasourceBundle.setLatestOnboardingInfo(datasourceBundle.getLoggingInfo().get(1));
         }
-        return datasourceBundle;
     }
 
     @Override
@@ -256,6 +254,15 @@ public class DatasourceManager extends ResourceManager<DatasourceBundle> impleme
         logger.debug("Deleting Datasource: {}", datasourceBundle);
     }
 
+    @Override
+    public Paging<DatasourceBundle> getResourceBundles(String catalogueId, String serviceId, Authentication auth) {
+        FacetFilter ff = new FacetFilter();
+        ff.addFilter("service_id", serviceId);
+        ff.addFilter("catalogue_id", catalogueId);
+        ff.setQuantity(maxQuantity);
+        return this.getAll(ff, auth);
+    }
+
     public FacetFilter createFacetFilterForFetchingDatasources(MultiValueMap<String, Object> allRequestParams, String catalogueId) {
         FacetFilter ff = FacetFilterUtils.createMultiFacetFilter(allRequestParams);
         allRequestParams.remove("catalogue_id");
@@ -270,7 +277,7 @@ public class DatasourceManager extends ResourceManager<DatasourceBundle> impleme
     }
 
     // OpenAIRE
-    private void checkOpenAIREIDExistance(DatasourceBundle datasourceBundle) {
+    private void checkOpenAIREIDExistence(DatasourceBundle datasourceBundle) {
         Datasource datasource = openAIREDatasourceManager.get(datasourceBundle.getId());
         if (datasource != null) {
             datasourceBundle.setOriginalOpenAIREId(datasourceBundle.getId());

@@ -59,7 +59,7 @@ public class InteroperabilityRecord implements Identifiable {
     private List<Creator> creators;
 
     /**
-     * A name or title by which a resource is known. May be the title of a dataset or the name of a piece of software.
+     * A name or title by which a resource is known. It can be the title of a dataset or the name of a piece of software
      */
     @XmlElement(required = true)
     @ApiModelProperty(position = 6, required = true)
@@ -104,7 +104,7 @@ public class InteroperabilityRecord implements Identifiable {
 
     /**
      * Standards related to the guideline
-     * This should point out to related standards only when it is a prerequisitite/depenendency, and likely to influence
+     * This should point out to related standards only when it is a prerequisite/dependency, and likely to influence
      * a Provider's design towards interoperability based on the guideline.
      */
     @XmlElementWrapper(name = "relatedStandards")

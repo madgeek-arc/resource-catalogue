@@ -14,6 +14,7 @@ import eu.openminted.registry.core.service.ResourceService;
 import eu.openminted.registry.core.service.ResourceTypeService;
 import eu.openminted.registry.core.service.SearchService;
 import eu.openminted.registry.core.service.ServiceException;
+
 import java.lang.reflect.InvocationTargetException;
 import java.net.UnknownHostException;
 import java.util.*;
@@ -218,6 +219,14 @@ public class GenericManager implements GenericResourceService {
         }
     }
 
+    public <T> Browsing<T> getResultsWithoutFacets(FacetFilter filter) {
+        try {
+            return convertToBrowsing(searchService.search(filter), filter.getResourceType());
+        } catch (UnknownHostException e) {
+            throw new ServiceException(e);
+        }
+    }
+
     @Override
     public <T> Browsing<T> convertToBrowsing(@NotNull Paging<Resource> paging, String resourceTypeName) {
         Class<?> clazz = getClassFromResourceType(resourceTypeName);
@@ -326,7 +335,7 @@ public class GenericManager implements GenericResourceService {
 
     // facets are pre-sorted by 'count' field
     public void sortFacets(List<Facet> facets, String field) {
-        for (Iterator<Facet> iter = facets.listIterator(); iter.hasNext();) {
+        for (Iterator<Facet> iter = facets.listIterator(); iter.hasNext(); ) {
             Facet facet = iter.next();
             if (facet.getField().equals("catalogue_id") || facet.getField().equals(field)) {
                 try {

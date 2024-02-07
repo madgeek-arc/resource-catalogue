@@ -2,6 +2,8 @@ package eu.einfracentral.controllers.registry;
 
 import eu.einfracentral.annotations.Browse;
 import eu.einfracentral.domain.*;
+import eu.einfracentral.dto.ExtendedValue;
+import eu.einfracentral.dto.MapValues;
 import eu.einfracentral.exception.ResourceException;
 import eu.einfracentral.exception.ValidationException;
 import eu.einfracentral.registry.service.MigrationService;
@@ -52,6 +54,9 @@ public class ProviderController {
     @Value("${auditing.interval:6}")
     private String auditingInterval;
 
+    @Value("${project.name:Resource Catalogue}")
+    private String projectName;
+
     @Autowired
     ProviderController(ProviderService<ProviderBundle, Authentication> service,
                        ServiceBundleService<ServiceBundle> serviceBundleService,
@@ -76,7 +81,7 @@ public class ProviderController {
         }
         // Block users of deleting Providers of another Catalogue
         if (!provider.getProvider().getCatalogueId().equals(catalogueName)) {
-            throw new ValidationException("You cannot delete a Provider of a non EOSC Catalogue.");
+            throw new ValidationException(String.format("You cannot delete a Provider of a non [%s] Catalogue.", projectName));
         }
         logger.info("Deleting provider: {} of the catalogue: {}", provider.getProvider().getName(), provider.getProvider().getCatalogueId());
 
@@ -289,7 +294,7 @@ public class ProviderController {
                                                           @RequestParam String resourceType, @ApiIgnore Authentication auth) {
         allRequestParams.add("resource_organisation", providerId);
         allRequestParams.add("status", "rejected resource");
-        allRequestParams.add("published", "false");
+        allRequestParams.add("published", false);
         FacetFilter ff = FacetFilterUtils.createMultiFacetFilter(allRequestParams);
         return ResponseEntity.ok(providerService.getRejectedResources(ff, resourceType, auth));
     }
@@ -401,9 +406,7 @@ public class ProviderController {
     @GetMapping(path = "randomProviders", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     public ResponseEntity<Paging<ProviderBundle>> getRandomProviders(@ApiIgnore @RequestParam Map<String, Object> allRequestParams, @ApiIgnore Authentication auth) {
-        FacetFilter ff = new FacetFilter();
-        ff.setQuantity(allRequestParams.get("quantity") != null ? Integer.parseInt((String) allRequestParams.remove("quantity")) : 10);
-        ff.setFilter(allRequestParams);
+        FacetFilter ff = FacetFilterUtils.createFacetFilter(allRequestParams);
         ff.addFilter("status", "approved provider");
         ff.addFilter("published", false);
         Paging<ProviderBundle> providerBundlePaging = providerService.getRandomProviders(ff, auditingInterval, auth);
@@ -487,5 +490,18 @@ public class ProviderController {
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     public ProviderBundle suspendProvider(@RequestParam String providerId, @RequestParam String catalogueId, @RequestParam boolean suspend, @ApiIgnore Authentication auth) {
         return providerService.suspend(providerId, catalogueId, suspend, auth);
+    }
+
+    @Browse
+    @ApiOperation(value = "Given a HLE, get all Providers associated with it")
+    @GetMapping(path = "getAllResourcesUnderASpecificHLE", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
+    public List<MapValues<ExtendedValue>> getAllProvidersUnderASpecificHLE(@RequestParam String providerName, @ApiIgnore Authentication auth) {
+        String hle = providerService.determineHostingLegalEntity(providerName);
+        if (hle != null) {
+            return providerService.getAllResourcesUnderASpecificHLE(hle, auth);
+        } else {
+            return null;
+        }
     }
 }

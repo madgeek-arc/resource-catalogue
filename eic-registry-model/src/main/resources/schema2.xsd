@@ -7,6 +7,22 @@
       
   </xs:complexType>
     
+  <xs:simpleType name="auditState">
+        
+    <xs:restriction base="xs:string">
+            
+      <xs:enumeration value="VALID"/>
+            
+      <xs:enumeration value="NOT_AUDITED"/>
+            
+      <xs:enumeration value="INVALID_AND_UPDATED"/>
+            
+      <xs:enumeration value="INVALID_AND_NOT_UPDATED"/>
+          
+    </xs:restriction>
+      
+  </xs:simpleType>
+    
   <xs:simpleType name="userActionType">
         
     <xs:restriction base="xs:string">

@@ -15,76 +15,76 @@ import java.util.stream.Collectors;
 public interface StatisticsService {
 
     /**
-     * Get time series of addToProject for a service.
+     * Get time series of addToProject for a Service.
      *
-     * @param serviceId
-     * @param by
-     * @return
+     * @param serviceId Service ID
+     * @param by        interval (Day, Week, Month, Year)
+     * @return {@link Map}&lt;{@link String},{@link Integer}&gt;
      */
     Map<String, Integer> addToProject(String serviceId, Interval by);
 
     /**
-     * Get time series of visits for a service.
+     * Get time series of visits for a Service.
      *
-     * @param serviceId
-     * @param by
-     * @return
+     * @param serviceId Service ID
+     * @param by        interval (Day, Week, Month, Year)
+     * @return {@link Map}&lt;{@link String},{@link Integer}&gt;
      */
     Map<String, Integer> visits(String serviceId, Interval by);
 
     /**
-     * Get time series of ratings for a service.
+     * Get time series of ratings for a Service.
      *
-     * @param serviceId
-     * @param by
-     * @return
+     * @param serviceId Service ID
+     * @param by        interval (Day, Week, Month, Year)
+     * @return {@link Map}&lt;{@link String},{@link Float}&gt;
      */
     Map<String, Float> ratings(String serviceId, Interval by);
 
     /**
-     * Get time series of aggregate favourites for all services offered by a provider.
+     * Get time series of aggregate favourites for all Services offered by a provider.
      *
-     * @param providerId
-     * @param by
-     * @return
+     * @param providerId Provider ID
+     * @param by         interval (Day, Week, Month, Year)
+     * @return {@link Map}&lt;{@link String},{@link Integer}&gt;
      */
     Map<String, Integer> providerAddToProject(String providerId, Interval by);
 
     /**
-     * Get time series of aggregate visits for all services offered by a provider.
+     * Get time series of aggregate visits for all Services offered by a Provider.
      *
-     * @param providerId
-     * @param by
-     * @return
+     * @param providerId Provider ID
+     * @param by         interval (Day, Week, Month, Year)
+     * @return {@link Map}&lt;{@link String},{@link Integer}&gt;
      */
     Map<String, Integer> providerVisits(String providerId, Interval by);
 
     /**
-     * Get visitation percentages of a provider's services for the specified interval.
+     * Get visitation percentages of a Provider's Services for the specified interval.
      *
-     * @param providerId
-     * @param by
-     * @return
+     * @param providerId Provider ID
+     * @param by         interval (Day, Week, Month, Year)
+     * @return {@link Map}&lt;{@link String},{@link Float}&gt;
      */
     Map<String, Float> providerVisitation(String providerId, Interval by);
 
     /**
      * Get time series of aggregate ratings for all services offered by a provider.
      *
-     * @param providerId
-     * @param by
-     * @return
+     * @param providerId Provider ID
+     * @param by         interval (Day, Week, Month, Year)
+     * @return {@link Map}&lt;{@link String},{@link Float}&gt;
      */
     Map<String, Float> providerRatings(String providerId, Interval by);
 
     /**
      * Get the time series of the specified Event type.
      *
-     * @param type
-     * @param from
-     * @param to
-     * @param by
-     * @return
+     * @param type User actionType
+     * @param from from
+     * @param to   to
+     * @param by   interval (Day, Week, Month, Year)
+     * @return {@link Map}&lt;{@link DateTime},{@link Map}&lt;{@link String},{@link Long}&gt;&gt;
      */
     Map<DateTime, Map<String, Long>> events(Event.UserActionType type, Date from, Date to, Interval by);
 
@@ -123,40 +123,42 @@ public interface StatisticsService {
     /**
      * List of Place names and total number of Services offered by the specified Provider.
      *
-     * @param providerId
-     * @return
+     * @param providerId Provider ID
+     * @return {@link List}&lt;{@link PlaceCount}&gt;
      */
     List<PlaceCount> servicesPerPlace(String providerId);
 
     /**
      * List of Place names and total number of Services offered by the specified Provider.
      *
-     * @param providerId
-     * @return
+     * @param providerId Provider ID
+     * @param place      Place
+     * @return {@link List}&lt;{@link Value}&gt;
      */
     List<Value> servicesByPlace(String providerId, String place);
 
     /**
-     * Providing the Provider's id, get the relation between all his services and their respective countries.
+     * Providing the Provider's ID, get the relation between all his Services and their respective countries.
      *
-     * @param id
-     * @return
+     * @param id Provider ID
+     * @return {@link List}&lt;{@link MapValues}&gt;
      */
     List<MapValues> mapServicesToGeographicalAvailability(String id);
 
     /**
      * Get the relation between all the Services and their Coordinating Country.
      *
-     * @return
+     * @return {@link List}&lt;{@link MapValues}&gt;
      */
     List<MapValues> mapServicesToProviderCountry();
 
     /**
-     * Providing the Provider's id, get the relation between all his services and a specific Vocabulary (e.g. subcategories).
+     * Providing the Provider's ID, get the relation between all his Services and a specific Vocabulary
+     * (e.g. subcategories).
      *
-     * @param id
-     * @param vocabulary
-     * @return
+     * @param id         Provider ID
+     * @param vocabulary Vocabulary
+     * @return {@link List}&lt;{@link MapValues}&gt;
      */
     List<MapValues> mapServicesToVocabulary(String id, Vocabulary vocabulary);
 

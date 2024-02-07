@@ -69,5 +69,6 @@ public class ReflectUtils {
         return id;
     }
 
-    private ReflectUtils() {}
+    private ReflectUtils() {
+    }
 }

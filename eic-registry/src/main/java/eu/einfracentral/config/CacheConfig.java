@@ -31,7 +31,6 @@ public class CacheConfig {
     public static final String CACHE_EVENTS = "events";
     public static final String CACHE_SERVICE_EVENTS = "service_events";
     public static final String CACHE_VISITS = "visits";
-    public static final String CACHE_DATASOURCES = "datasources";
 
     protected RestTemplate restTemplate;
 
@@ -65,7 +64,7 @@ public class CacheConfig {
         return cacheManager;
     }
 
-//    @Scheduled(initialDelay = 0, fixedRate = 120000) //run every 2 min
+    //    @Scheduled(initialDelay = 0, fixedRate = 120000) //run every 2 min
     @Scheduled(cron = "0 0 12 ? * *") // At 12:00:00pm every day
     public void updateCache() throws IOException, InterruptedException {
         // Update Cache URL

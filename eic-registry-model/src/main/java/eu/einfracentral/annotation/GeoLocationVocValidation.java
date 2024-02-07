@@ -13,5 +13,6 @@ import java.lang.annotation.Target;
 public @interface GeoLocationVocValidation {
 
     Vocabulary.Type region();
+
     Vocabulary.Type country();
 }

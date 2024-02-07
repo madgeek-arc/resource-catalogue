@@ -122,16 +122,25 @@ public class SimpleMailService implements MailService {
             } catch (SendFailedException e) {
                 if (e.getInvalidAddresses().length > 0) {
                     logger.warn("Send mail failed. Attempting to remove invalid address");
+                    // Create new lists to make them modifiable
+                    List<String> toList = new ArrayList<>(to != null ? to : Collections.emptyList());
+                    List<String> ccList = new ArrayList<>(cc != null ? cc : Collections.emptyList());
+                    List<String> bccList = new ArrayList<>(bcc != null ? bcc : Collections.emptyList());
+
                     for (int i = 0; i < e.getInvalidAddresses().length; i++) {
                         Address invalidAddress = e.getInvalidAddresses()[i];
                         logger.debug("Invalid e-mail address: {}", invalidAddress);
-                        to.remove(invalidAddress.toString());
-                        cc.remove(invalidAddress.toString());
-                        bcc.remove(invalidAddress.toString());
+
+                        // Remove invalid address from the new lists
+                        toList.remove(invalidAddress.toString());
+                        ccList.remove(invalidAddress.toString());
+                        bccList.remove(invalidAddress.toString());
                     }
-                    message.setRecipients(Message.RecipientType.TO, createAddresses(to));
-                    message.setRecipients(Message.RecipientType.CC, createAddresses(cc));
-                    message.setRecipients(Message.RecipientType.BCC, createAddresses(bcc));
+
+                    // Set recipients using the new lists
+                    message.setRecipients(Message.RecipientType.TO, createAddresses(toList));
+                    message.setRecipients(Message.RecipientType.CC, createAddresses(ccList));
+                    message.setRecipients(Message.RecipientType.BCC, createAddresses(bccList));
                 } else {
                     logger.error(e);
                 }

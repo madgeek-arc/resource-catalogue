@@ -69,7 +69,8 @@ public class Helpdesk implements Identifiable {
     @FieldValidation(nullable = true)
     private Boolean webform;
 
-    public Helpdesk() {}
+    public Helpdesk() {
+    }
 
     public Helpdesk(String id, String serviceId, List<String> services, String helpdeskType, List<String> supportGroups, String organisation, List<String> emails, List<String> agents, List<String> signatures, Boolean ticketPreservation, Boolean webform) {
         this.id = id;

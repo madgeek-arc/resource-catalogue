@@ -21,6 +21,7 @@ import java.util.List;
 @RestController
 @RequestMapping("request")
 @Api(value = "Get information about a provider request.")
+@Deprecated
 public class ProviderRequestController extends ResourceController<ProviderRequest, Authentication> {
 
     private static final Logger logger = LogManager.getLogger(ProviderRequestController.class);

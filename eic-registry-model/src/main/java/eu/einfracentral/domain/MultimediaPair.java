@@ -29,7 +29,7 @@ public class MultimediaPair {
     @FieldValidation(nullable = true)
     private String multimediaName;
 
-    public MultimediaPair(){
+    public MultimediaPair() {
     }
 
     public MultimediaPair(URL multimediaURL, String multimediaName) {

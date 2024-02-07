@@ -20,7 +20,7 @@ public class MonitoringGroup {
     private String serviceType;
 
     @XmlElement(required = true)
-    @ApiModelProperty(position = 2, notes = "Εndpoint of the service", required = true)
+    @ApiModelProperty(position = 2, notes = "Endpoint of the service", required = true)
     @FieldValidation
     private String endpoint;
 

@@ -90,7 +90,7 @@ public class PendingProviderManager extends ResourceManager<ProviderBundle> impl
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(maxQuantity);
         List<ProviderBundle> providerList = providerManager.getAll(ff, auth).getResults();
-        for (ProviderBundle existingProvider : providerList){
+        for (ProviderBundle existingProvider : providerList) {
             if (providerBundle.getProvider().getId().equals(existingProvider.getProvider().getId()) && existingProvider.getProvider().getCatalogueId().equals(catalogueName)) {
                 throw new ValidationException(String.format("Provider with the specific id already exists on the [%s] Catalogue. Please refactor your 'abbreviation' field.", catalogueName));
             }
@@ -165,7 +165,7 @@ public class PendingProviderManager extends ResourceManager<ProviderBundle> impl
         }
 
         // update loggingInfo
-        List<LoggingInfo> loggingInfoList  = commonMethods.returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(providerBundle, auth);
+        List<LoggingInfo> loggingInfoList = commonMethods.returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(providerBundle, auth);
         LoggingInfo loggingInfo = commonMethods.createLoggingInfo(auth, LoggingInfo.Types.ONBOARD.getKey(),
                 LoggingInfo.ActionType.REGISTERED.getKey());
         loggingInfoList.add(loggingInfo);
@@ -234,10 +234,10 @@ public class PendingProviderManager extends ResourceManager<ProviderBundle> impl
         return super.getAll(ff, auth).getResults();
     }
 
-    public boolean hasAdminAcceptedTerms(String providerId, Authentication auth){
+    public boolean hasAdminAcceptedTerms(String providerId, Authentication auth) {
         ProviderBundle providerBundle = get(providerId);
         List<String> userList = new ArrayList<>();
-        for (User user : providerBundle.getProvider().getUsers()){
+        for (User user : providerBundle.getProvider().getUsers()) {
             userList.add(user.getEmail());
         }
         if ((providerBundle.getMetadata().getTerms() == null || providerBundle.getMetadata().getTerms().isEmpty())) {
@@ -253,7 +253,7 @@ public class PendingProviderManager extends ResourceManager<ProviderBundle> impl
         return true; // no modal
     }
 
-    public void adminAcceptedTerms(String providerId, Authentication auth){
+    public void adminAcceptedTerms(String providerId, Authentication auth) {
         update(get(providerId), auth);
     }
 
@@ -265,7 +265,7 @@ public class PendingProviderManager extends ResourceManager<ProviderBundle> impl
         return resources.getTotal() == 0 ? null : resources.getResults().get(0);
     }
 
-    public Resource getPendingResourceViaServiceId(String serviceId){
+    public Resource getPendingResourceViaServiceId(String serviceId) {
         return null;
     }
 //    public DatasourceBundle getOpenAIREDatasource(Datasource datasource){

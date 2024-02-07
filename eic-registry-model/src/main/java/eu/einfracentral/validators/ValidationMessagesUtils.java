@@ -6,5 +6,6 @@ public class ValidationMessagesUtils {
         return String.format("Field '%s' is mandatory", field);
     }
 
-    private ValidationMessagesUtils() {}
+    private ValidationMessagesUtils() {
+    }
 }

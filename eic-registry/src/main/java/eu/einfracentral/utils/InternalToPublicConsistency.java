@@ -46,7 +46,7 @@ public class InternalToPublicConsistency {
     private final MailService mailService;
 
 
-    @Value("${project.name}")
+    @Value("${project.name:Resource Catalogue}")
     private String projectName;
     @Value("${resource.consistency.enable}")
     private boolean enableConsistencyEmails;
@@ -160,7 +160,7 @@ public class InternalToPublicConsistency {
 
     }
 
-    protected FacetFilter createFacetFilter(String status){
+    protected FacetFilter createFacetFilter(String status) {
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(10000);
         ff.addFilter("published", false);

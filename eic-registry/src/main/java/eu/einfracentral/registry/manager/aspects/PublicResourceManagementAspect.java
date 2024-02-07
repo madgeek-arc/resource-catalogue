@@ -17,7 +17,7 @@ public class PublicResourceManagementAspect<T extends Bundle<?>> {
 
     private final PublicServiceManager publicServiceManager;
 
-    public PublicResourceManagementAspect(PublicServiceManager publicServiceManager){
+    public PublicResourceManagementAspect(PublicServiceManager publicServiceManager) {
         this.publicServiceManager = publicServiceManager;
     }
 

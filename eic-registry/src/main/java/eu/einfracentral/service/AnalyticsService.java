@@ -141,7 +141,7 @@ public class AnalyticsService implements Analytics {
             }
             return responseEntity.getBody();
         } catch (IllegalArgumentException e) {
-            logger.info ("URI is not absolute");
+            logger.info("URI is not absolute");
         } catch (Exception e) {
             logger.error("Could not retrieve analytics from matomo", e);
         }
