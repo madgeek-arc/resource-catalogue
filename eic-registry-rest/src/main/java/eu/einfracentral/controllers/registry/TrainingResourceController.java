@@ -95,7 +95,7 @@ public class TrainingResourceController {
 
     @ApiOperation(value = "Creates a new TrainingResource.")
     @PostMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.providerCanAddResources(#auth, #trainingResource)")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<TrainingResource> addTrainingResource(@RequestBody TrainingResource trainingResource, @ApiIgnore Authentication auth) {
         TrainingResourceBundle ret = this.trainingResourceService.addResource(new TrainingResourceBundle(trainingResource), auth);
         logger.info("User '{}' created a new Training Resource with title '{}' and id '{}'", auth.getName(), trainingResource.getTitle(), trainingResource.getId());

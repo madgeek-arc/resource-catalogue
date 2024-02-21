@@ -103,7 +103,7 @@ public class ProviderController {
     // Creates a new Provider.
 //    @Override
     @PostMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_USER')")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<Provider> add(@RequestBody Provider provider, @ApiIgnore Authentication auth) {
         ProviderBundle providerBundle = providerService.add(new ProviderBundle(provider), auth);
         logger.info("User '{}' added the Provider with name '{}' and id '{}'", auth.getName(), provider.getName(), provider.getId());

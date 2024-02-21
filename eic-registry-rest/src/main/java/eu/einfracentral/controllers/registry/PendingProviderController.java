@@ -59,19 +59,19 @@ public class PendingProviderController extends ResourceController<ProviderBundle
     }
 
     @PostMapping("/transform/pending")
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public void transformProviderToPending(@RequestParam String providerId, @ApiIgnore Authentication auth) {
         pendingProviderService.transformToPending(providerId, auth);
     }
 
     @PostMapping("/transform/active")
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public void transformProviderToActive(@RequestParam String providerId, @ApiIgnore Authentication auth) {
         pendingProviderService.transformToActive(providerId, auth);
     }
 
     @PutMapping(path = "/transform/active", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_USER')")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<Provider> updateAndPublish(@RequestBody Provider provider, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
         ProviderBundle providerBundle = pendingProviderService.get(provider.getId());
         providerBundle.setProvider(provider);
@@ -88,7 +88,7 @@ public class PendingProviderController extends ResourceController<ProviderBundle
     }
 
     @PutMapping(path = "/pending", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_USER')")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<Provider> temporarySavePending(@RequestBody Provider provider, @ApiIgnore Authentication auth) {
         ProviderBundle bundle = new ProviderBundle();
         provider.setId(idCreator.createProviderId(provider));
@@ -105,7 +105,7 @@ public class PendingProviderController extends ResourceController<ProviderBundle
     }
 
     @PutMapping(path = "/provider", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isProviderAdmin(#auth, #provider.id)")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<Provider> temporarySaveProvider(@RequestBody Provider provider, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
         pendingProviderService.transformToPending(provider.getId(), auth);
         ProviderBundle bundle = pendingProviderService.get(provider.getId());
