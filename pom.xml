@@ -309,9 +309,9 @@
 
     <repositories>
         <repository>
-            <id>omtd-snapshots</id>
+            <id>madgik-snapshots</id>
             <layout>default</layout>
-            <url>https://repo.openminted.eu/content/repositories/snapshots</url>
+            <url>https://repo.madgik.di.uoa.gr/content/repositories/snapshots</url>
             <releases>
                 <enabled>false</enabled>
             </releases>
@@ -320,9 +320,9 @@
             </snapshots>
         </repository>
         <repository>
-            <id>omtd-releases</id>
+            <id>madgik-releases</id>
             <layout>default</layout>
-            <url>https://repo.openminted.eu/content/repositories/releases</url>
+            <url>https://repo.madgik.di.uoa.gr/content/repositories/releases</url>
             <releases>
                 <enabled>true</enabled>
             </releases>
@@ -342,15 +342,15 @@
     <distributionManagement>
         <repository>
             <uniqueVersion>true</uniqueVersion>
-            <id>omtd-releases</id>
+            <id>madgik-releases</id>
             <layout>default</layout>
-            <url>https://repo.openminted.eu/content/repositories/releases</url>
+            <url>https://repo.madgik.di.uoa.gr/content/repositories/releases</url>
         </repository>
         <snapshotRepository>
             <uniqueVersion>true</uniqueVersion>
-            <id>omtd-snapshots</id>
+            <id>madgik-snapshots</id>
             <layout>default</layout>
-            <url>https://repo.openminted.eu/content/repositories/snapshots</url>
+            <url>https://repo.madgik.di.uoa.gr/content/repositories/snapshots</url>
         </snapshotRepository>
     </distributionManagement>
 
