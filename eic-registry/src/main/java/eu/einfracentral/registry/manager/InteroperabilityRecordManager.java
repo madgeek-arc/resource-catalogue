@@ -213,6 +213,15 @@ public class InteroperabilityRecordManager extends ResourceManager<Interoperabil
         return ret;
     }
 
+    @Override
+    public void delete(InteroperabilityRecordBundle interoperabilityRecordBundle) {
+        // block Public InteroperabilityRecordBundle deletions
+        if (interoperabilityRecordBundle.getMetadata().isPublished()) {
+            throw new ValidationException("You cannot directly delete a Public Interoperability Record");
+        }
+        super.delete(interoperabilityRecordBundle);
+    }
+
     @CacheEvict(cacheNames = {CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)
     public InteroperabilityRecordBundle verifyResource(String id, String status, Boolean active, Authentication auth) {
         Vocabulary statusVocabulary = vocabularyService.getOrElseThrow(status);
