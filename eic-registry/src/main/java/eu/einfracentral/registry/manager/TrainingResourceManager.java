@@ -4,6 +4,7 @@ import eu.einfracentral.domain.*;
 import eu.einfracentral.exception.ResourceException;
 import eu.einfracentral.exception.ResourceNotFoundException;
 import eu.einfracentral.exception.ValidationException;
+import eu.einfracentral.manager.GenericManager;
 import eu.einfracentral.registry.service.*;
 import eu.einfracentral.service.IdCreator;
 import eu.einfracentral.service.RegistrationMailService;
@@ -16,7 +17,6 @@ import eu.einfracentral.utils.ObjectUtils;
 import eu.einfracentral.utils.ProviderResourcesCommonMethods;
 import eu.einfracentral.validators.FieldValidator;
 import eu.openminted.registry.core.domain.*;
-import eu.openminted.registry.core.domain.index.IndexField;
 import eu.openminted.registry.core.service.ParserService;
 import eu.openminted.registry.core.service.SearchService;
 import eu.openminted.registry.core.service.ServiceException;
@@ -31,7 +31,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 
-import javax.annotation.PostConstruct;
 import javax.validation.constraints.NotNull;
 import java.net.UnknownHostException;
 import java.security.NoSuchAlgorithmException;
@@ -73,40 +72,10 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
     @Qualifier("trainingResourceSync")
     private final SynchronizerService<TrainingResource> synchronizerService;
     private final ProviderResourcesCommonMethods commonMethods;
-    private List<String> browseBy;
-    private Map<String, String> labels;
+    @Autowired
+    private final GenericManager genericManager;
     @Value("${project.catalogue.name}")
     private String catalogueName;
-
-    @PostConstruct
-    void initLabels() {
-        resourceType = resourceTypeService.getResourceType(getResourceType());
-        Set<String> browseSet = new HashSet<>();
-        Map<String, Set<String>> sets = new HashMap<>();
-        labels = new HashMap<>();
-        labels.put("resourceType", "Resource Type");
-        for (IndexField f : resourceTypeService.getResourceTypeIndexFields(getResourceType())) {
-            sets.putIfAbsent(f.getResourceType().getName(), new HashSet<>());
-            labels.put(f.getName(), f.getLabel());
-            if (f.getLabel() != null) {
-                sets.get(f.getResourceType().getName()).add(f.getName());
-            }
-        }
-        boolean flag = true;
-        for (Map.Entry<String, Set<String>> entry : sets.entrySet()) {
-            if (flag) {
-                browseSet.addAll(entry.getValue());
-                flag = false;
-            } else {
-                browseSet.retainAll(entry.getValue());
-            }
-        }
-        browseBy = new ArrayList<>();
-        browseBy.addAll(browseSet);
-        browseBy.add("resourceType");
-        java.util.Collections.sort(browseBy);
-        logger.info("Generated generic service for '{}'[{}]", getResourceType(), getClass().getSimpleName());
-    }
 
     public TrainingResourceManager(ProviderService<ProviderBundle, Authentication> providerService,
                                    IdCreator idCreator, @Lazy SecurityService securityService,
@@ -121,6 +90,7 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
                                    PublicMonitoringManager publicMonitoringManager,
                                    SynchronizerService<TrainingResource> synchronizerService,
                                    ProviderResourcesCommonMethods commonMethods,
+                                   GenericManager genericManager,
                                    @Lazy MigrationService migrationService) {
         super(TrainingResourceBundle.class);
         this.providerService = providerService;
@@ -137,6 +107,7 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
         this.publicMonitoringManager = publicMonitoringManager;
         this.synchronizerService = synchronizerService;
         this.commonMethods = commonMethods;
+        this.genericManager = genericManager;
         this.migrationService = migrationService;
     }
 
@@ -846,7 +817,7 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
             }
         }
 
-        ff.setBrowseBy(browseBy);
+        ff.setBrowseBy(genericManager.getBrowseBy(getResourceType()));
         ff.setResourceType(getResourceType());
 
         return getMatchingResources(ff);
@@ -854,7 +825,7 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
 
     @Override
     public Browsing<TrainingResourceBundle> getAllForAdmin(FacetFilter filter, Authentication auth) {
-        filter.setBrowseBy(browseBy);
+        filter.setBrowseBy(genericManager.getBrowseBy(getResourceType()));
         filter.setResourceType(getResourceType());
         return getMatchingResources(filter);
     }
@@ -885,7 +856,7 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
                 .stream()
                 .map(res -> parserPool.deserialize(res, typeParameterClass))
                 .collect(Collectors.toList());
-        return new Browsing<>(paging, results, labels);
+        return new Browsing<>(paging, results, genericManager.getLabels(getResourceType()));
     }
 
     public List<Facet> createCorrectFacets(List<Facet> serviceFacets, FacetFilter ff) {

@@ -5,6 +5,7 @@ import eu.einfracentral.domain.TrainingResourceBundle;
 import eu.einfracentral.exception.ResourceException;
 import eu.einfracentral.exception.ResourceNotFoundException;
 import eu.einfracentral.service.SecurityService;
+import eu.einfracentral.utils.FacetLabelService;
 import eu.einfracentral.utils.ProviderResourcesCommonMethods;
 import eu.openminted.registry.core.domain.Browsing;
 import eu.openminted.registry.core.domain.FacetFilter;
@@ -29,6 +30,8 @@ public class PublicTrainingResourceManager extends AbstractPublicResourceManager
     private final JmsService jmsService;
     private final SecurityService securityService;
     private ProviderResourcesCommonMethods commonMethods;
+    @Autowired
+    private FacetLabelService facetLabelService;
 
     @Autowired
     public PublicTrainingResourceManager(JmsService jmsService, SecurityService securityService,
@@ -46,7 +49,11 @@ public class PublicTrainingResourceManager extends AbstractPublicResourceManager
 
     @Override
     public Browsing<TrainingResourceBundle> getAll(FacetFilter facetFilter, Authentication authentication) {
-        return super.getAll(facetFilter, authentication);
+        Browsing<TrainingResourceBundle> browsing = super.getAll(facetFilter, authentication);
+        if (!browsing.getResults().isEmpty() && !browsing.getFacets().isEmpty()) {
+            browsing.setFacets(facetLabelService.createLabels(browsing.getFacets()));
+        }
+        return browsing;
     }
 
     @Override

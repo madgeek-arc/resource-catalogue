@@ -138,8 +138,6 @@ public class FacetLabelService {
         return ret;
     }
 
-    @Deprecated
-    @SuppressWarnings("unchecked")
     public List<Facet> createLabels(List<Facet> facets) {
         List<Facet> enrichedFacets = new TreeList(); // unchecked warning here
         FacetFilter ff = new FacetFilter();
