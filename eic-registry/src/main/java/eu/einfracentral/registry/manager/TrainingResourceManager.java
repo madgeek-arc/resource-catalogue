@@ -62,6 +62,8 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
     private final PublicHelpdeskManager publicHelpdeskManager;
     private final PublicMonitoringManager publicMonitoringManager;
     private final MigrationService migrationService;
+    private final ProviderResourcesCommonMethods commonMethods;
+    private final GenericManager genericManager;
     @Autowired
     private FacetLabelService facetLabelService;
     @Autowired
@@ -71,9 +73,6 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
     @Autowired
     @Qualifier("trainingResourceSync")
     private final SynchronizerService<TrainingResource> synchronizerService;
-    private final ProviderResourcesCommonMethods commonMethods;
-    @Autowired
-    private final GenericManager genericManager;
     @Value("${project.catalogue.name}")
     private String catalogueName;
 
