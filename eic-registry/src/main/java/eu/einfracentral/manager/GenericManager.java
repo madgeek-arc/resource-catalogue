@@ -346,4 +346,23 @@ public class GenericManager implements GenericResourceService {
             }
         }
     }
+
+    public List<String> getBrowseBy(String resourceType) {
+        for (Map.Entry<String, List<String>> entry : browseByMap.entrySet()) {
+            if (entry.getKey().equals(resourceType)) {
+                return entry.getValue();
+            }
+        }
+        return null;
+    }
+
+    public Map<String, String> getLabels(String resourceType) {
+        for (Map.Entry<String, Map<String, String>> entry : labelsMap.entrySet()) {
+            if (entry.getKey().equals(resourceType)) {
+                return entry.getValue();
+            }
+        }
+        return null;
+    }
+
 }

@@ -116,7 +116,7 @@ public class PublicProviderController {
             ff.addFilter("status", "approved provider");
         }
         List<Provider> providerList = new LinkedList<>();
-        Paging<ProviderBundle> providerBundlePaging = providerService.getAll(ff, auth);
+        Paging<ProviderBundle> providerBundlePaging = publicProviderManager.getAll(ff, auth);
         for (ProviderBundle providerBundle : providerBundlePaging.getResults()) {
             providerList.add(providerBundle.getProvider());
         }

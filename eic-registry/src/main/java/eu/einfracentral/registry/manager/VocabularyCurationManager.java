@@ -3,6 +3,7 @@ package eu.einfracentral.registry.manager;
 import eu.einfracentral.domain.*;
 import eu.einfracentral.domain.ServiceBundle;
 import eu.einfracentral.exception.ValidationException;
+import eu.einfracentral.manager.GenericManager;
 import eu.einfracentral.registry.service.*;
 import eu.einfracentral.service.RegistrationMailService;
 import eu.einfracentral.service.search.SearchServiceEIC;
@@ -36,8 +37,6 @@ public class VocabularyCurationManager extends ResourceManager<VocabularyCuratio
     private final ProviderService<ProviderBundle, Authentication> providerService;
     private final ServiceBundleService<ServiceBundle> serviceBundleService;
     private final TrainingResourceService<TrainingResourceBundle> trainingResourceService;
-    private List<String> browseBy;
-    private Map<String, String> labels;
 
     @Autowired
     private VocabularyService vocabularyService;
@@ -46,6 +45,8 @@ public class VocabularyCurationManager extends ResourceManager<VocabularyCuratio
     private FacetLabelService facetLabelService;
 
     private final AbstractServiceBundleManager<ServiceBundle> abstractServiceBundleManager;
+    @Autowired
+    private final GenericManager genericManager;
 
     @Autowired
     private SearchServiceEIC searchServiceEIC;
@@ -58,43 +59,15 @@ public class VocabularyCurationManager extends ResourceManager<VocabularyCuratio
     public VocabularyCurationManager(@Lazy RegistrationMailService registrationMailService, ProviderService providerService,
                                      ServiceBundleService<ServiceBundle> serviceBundleService,
                                      TrainingResourceService<TrainingResourceBundle> trainingResourceService,
-                                     AbstractServiceBundleManager<ServiceBundle> abstractServiceBundleManager) {
+                                     AbstractServiceBundleManager<ServiceBundle> abstractServiceBundleManager,
+                                     GenericManager genericManager) {
         super(VocabularyCuration.class);
         this.registrationMailService = registrationMailService;
         this.providerService = providerService;
         this.serviceBundleService = serviceBundleService;
         this.trainingResourceService = trainingResourceService;
         this.abstractServiceBundleManager = abstractServiceBundleManager;
-    }
-
-    @PostConstruct
-    void initLabels() {
-        resourceType = resourceTypeService.getResourceType(getResourceType());
-        Set<String> browseSet = new HashSet<>();
-        Map<String, Set<String>> sets = new HashMap<>();
-        labels = new HashMap<>();
-        labels.put("resourceType", "Resource Type");
-        for (IndexField f : resourceTypeService.getResourceTypeIndexFields(getResourceType())) {
-            sets.putIfAbsent(f.getResourceType().getName(), new HashSet<>());
-            labels.put(f.getName(), f.getLabel());
-            if (f.getLabel() != null) {
-                sets.get(f.getResourceType().getName()).add(f.getName());
-            }
-        }
-        boolean flag = true;
-        for (Map.Entry<String, Set<String>> entry : sets.entrySet()) {
-            if (flag) {
-                browseSet.addAll(entry.getValue());
-                flag = false;
-            } else {
-                browseSet.retainAll(entry.getValue());
-            }
-        }
-        browseBy = new ArrayList<>();
-        browseBy.addAll(browseSet);
-        browseBy.add("resourceType");
-        java.util.Collections.sort(browseBy);
-        logger.info("Generated generic service for '{}'[{}]", getResourceType(), getClass().getSimpleName());
+        this.genericManager = genericManager;
     }
 
     @Override
@@ -277,12 +250,10 @@ public class VocabularyCurationManager extends ResourceManager<VocabularyCuratio
     }
 
     public Browsing<VocabularyCuration> getAllVocabularyCurationRequests(FacetFilter ff, Authentication auth) {
-        List<String> orderedBrowseBy = new ArrayList<>();
+        List<String> browseBy = new ArrayList<>();
         browseBy.add("vocabulary");
-        orderedBrowseBy.add(browseBy.get(0));    // resourceType
-        orderedBrowseBy.add(browseBy.get(1));    // vocabulary
-
-        ff.setBrowseBy(orderedBrowseBy);
+        browseBy.add("resourceType");
+        ff.setBrowseBy(browseBy);
 
         Browsing<VocabularyCuration> vocabularyCurationBrowsing;
 
@@ -349,7 +320,7 @@ public class VocabularyCurationManager extends ResourceManager<VocabularyCuratio
                 .stream()
                 .map(res -> parserPool.deserialize(res, typeParameterClass))
                 .collect(Collectors.toList());
-        return new Browsing<>(paging, results, labels);
+        return new Browsing<>(paging, results, genericManager.getLabels(getResourceType()));
     }
 
 }
