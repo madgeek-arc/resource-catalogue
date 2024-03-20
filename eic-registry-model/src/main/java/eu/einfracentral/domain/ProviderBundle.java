@@ -1,6 +1,7 @@
 package eu.einfracentral.domain;
 
 import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 import java.util.List;
@@ -18,7 +19,8 @@ public class ProviderBundle extends Bundle<Provider> {
 //    @VocabularyValidation(type = Vocabulary.Type.TEMPLATE_STATE)
     private String templateStatus;
 
-    @XmlElement
+    @XmlElementWrapper(name = "transferContactInformation")
+    @XmlElement(name = "transferContactInformation")
     private List<ContactInfoTransfer> transferContactInformation;
 
     public ProviderBundle() {

@@ -505,8 +505,10 @@ public class ProviderController {
         }
     }
 
-    @PutMapping(path = "contactInfoTransferAcceptance", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    public void contactInfoTransferAcceptance(@RequestParam boolean acceptedTransfer, @ApiIgnore Authentication authentication) {
+    @ApiOperation(value = "Given a HLE, get all Providers associated with it")
+    @PutMapping(path = "updateContactInfoTransfer", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or hasRole('ROLE_PROVIDER')")
+    public void updateContactInfoTransfer(@RequestParam boolean acceptedTransfer, @ApiIgnore Authentication authentication) {
         providerService.updateContactInfoTransfer(acceptedTransfer, authentication);
     }
 }
