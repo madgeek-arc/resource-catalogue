@@ -3,35 +3,55 @@ package eu.einfracentral.registry.manager;
 import eu.einfracentral.domain.*;
 import eu.einfracentral.registry.service.CatalogueService;
 import eu.einfracentral.registry.service.ProviderService;
-import eu.einfracentral.service.ContactInformationService;
+import eu.einfracentral.registry.service.ContactInformationService;
+import eu.openminted.registry.core.domain.FacetFilter;
+import eu.openminted.registry.core.exception.ResourceNotFoundException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 
+import java.util.ArrayList;
 import java.util.List;
 
-@org.springframework.stereotype.Service("contactInformationManager")
-public class ContactInformationManager extends ResourceManager<Bundle>
-        implements ContactInformationService<Bundle, Authentication> {
+@org.springframework.stereotype.Service
+public class ContactInformationManager implements ContactInformationService {
 
     private final ProviderService<ProviderBundle, Authentication> providerService;
     private final CatalogueService<CatalogueBundle, Authentication> catalogueService;
 
-    public ContactInformationManager(Class<Bundle> typeParameterClass,
-                                     ProviderService<ProviderBundle, Authentication> providerService,
+    @Autowired
+    public ContactInformationManager(ProviderService<ProviderBundle, Authentication> providerService,
                                      CatalogueService<CatalogueBundle, Authentication> catalogueService) {
-        super(typeParameterClass);
         this.providerService = providerService;
-        this.catalogueService= catalogueService;
+        this.catalogueService = catalogueService;
     }
 
-    @Override
-    public String getResourceType() {
-        return null;
+    public List<String> getMy(Authentication authentication) {
+        List<String> myResources = new ArrayList<>();
+        FacetFilter ff = new FacetFilter();
+        ff.setQuantity(1000);
+        ff.addFilter("published", false);
+        List<CatalogueBundle> catalogueList = catalogueService.getMyCatalogues(authentication);
+        List<ProviderBundle> providerList = providerService.getMy(ff, authentication).getResults();
+        if (catalogueList != null && !catalogueList.isEmpty()) {
+            for (CatalogueBundle catalogueBundle : catalogueList) {
+                myResources.add(catalogueBundle.getCatalogue().getName());
+            }
+        }
+        if (providerList != null && !providerList.isEmpty()) {
+            for (ProviderBundle providerBundle : providerList) {
+                myResources.add(providerBundle.getProvider().getName());
+            }
+        }
+        return myResources;
     }
 
     public void updateContactInfoTransfer(boolean acceptedTransfer, Authentication auth) {
+        FacetFilter ff = new FacetFilter();
+        ff.setQuantity(1000);
+        ff.addFilter("published", false);
         ContactInfoTransfer contactInfoTransfer = createContactInfoTransfer(acceptedTransfer, auth);
         List<CatalogueBundle> catalogueList = catalogueService.getMyCatalogues(auth);
-        List<ProviderBundle> providerList = providerService.getMy(null, auth).getResults();
+        List<ProviderBundle> providerList = providerService.getMy(ff, auth).getResults();
         updateCatalogueContactInfoTransfer(contactInfoTransfer, catalogueList);
         updateProviderContactInfoTransfer(contactInfoTransfer, providerList);
     }
@@ -50,11 +70,16 @@ public class ContactInformationManager extends ResourceManager<Bundle>
             if (existingTransferList == null || existingTransferList.isEmpty()) {
                 catalogueBundle.setTransferContactInformation(List.of(contactInfoTransfer));
             } else {
-                if (!existingTransferList.contains(contactInfoTransfer)) {
-                    existingTransferList.add(contactInfoTransfer);
+                for (ContactInfoTransfer cit : existingTransferList) {
+                    if (cit.getEmail().equals(contactInfoTransfer.getEmail())) {
+                        cit.setAcceptedTransfer(contactInfoTransfer.getAcceptedTransfer());
+                    }
+                    break;
                 }
             }
-            super.update(catalogueBundle, null);
+            try {
+                catalogueService.update(catalogueBundle, null);
+            } catch (ResourceNotFoundException ignore) {}
         }
     }
 
@@ -65,11 +90,16 @@ public class ContactInformationManager extends ResourceManager<Bundle>
             if (existingTransferList == null || existingTransferList.isEmpty()) {
                 providerBundle.setTransferContactInformation(List.of(contactInfoTransfer));
             } else {
-                if (!existingTransferList.contains(contactInfoTransfer)) {
-                    existingTransferList.add(contactInfoTransfer);
+                for (ContactInfoTransfer cit : existingTransferList) {
+                    if (cit.getEmail().equals(contactInfoTransfer.getEmail())) {
+                        cit.setAcceptedTransfer(contactInfoTransfer.getAcceptedTransfer());
+                    }
+                    break;
                 }
             }
-            super.update(providerBundle, null);
+            try {
+                providerService.update(providerBundle, null);
+            } catch (ResourceNotFoundException ignore) {}
         }
     }
 }
