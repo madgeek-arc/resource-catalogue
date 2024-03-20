@@ -304,12 +304,4 @@ public interface ProviderService<T, U extends Authentication> extends ResourceSe
      * @return {@link List}&lt;{@link MapValues}&lt;{@link ExtendedValue}&gt;&gt;
      */
     List<MapValues<ExtendedValue>> getAllResourcesUnderASpecificHLE(String hle, Authentication auth);
-
-    /**
-     * Update the Provider's list of ContactTransferInfo
-     *
-     * @param acceptedTransfer boolean True/False
-     * @param authentication Authentication
-     */
-    void updateContactInfoTransfer(boolean acceptedTransfer, U authentication);
 }

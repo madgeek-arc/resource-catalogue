@@ -61,7 +61,7 @@ public class ServiceConfig extends AbstractHttpSessionApplicationInitializer {
                 ResourceExtras.class, InteroperabilityRecord.class, InteroperabilityRecordBundle.class,
                 ResourceInteroperabilityRecord.class, TrainingResource.class, TrainingResourceBundle.class,
                 ConfigurationTemplateBundle.class, ConfigurationTemplate.class, ConfigurationTemplateInstance.class,
-                ConfigurationTemplateInstanceBundle.class);
+                ConfigurationTemplateInstanceBundle.class, ContactInfoTransfer.class);
     }
 
     @Bean
