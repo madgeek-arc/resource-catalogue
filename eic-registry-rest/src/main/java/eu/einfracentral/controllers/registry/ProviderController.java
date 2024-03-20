@@ -504,4 +504,9 @@ public class ProviderController {
             return null;
         }
     }
+
+    @PutMapping(path = "contactInfoTransferAcceptance", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    public void contactInfoTransferAcceptance(@RequestParam boolean acceptedTransfer, @ApiIgnore Authentication authentication) {
+        providerService.updateContactInfoTransfer(acceptedTransfer, authentication);
+    }
 }

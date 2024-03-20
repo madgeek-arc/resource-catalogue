@@ -3,6 +3,7 @@ package eu.einfracentral.domain;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
+import java.util.List;
 import java.util.Objects;
 
 @XmlType
@@ -16,6 +17,9 @@ public class ProviderBundle extends Bundle<Provider> {
     @XmlElement
 //    @VocabularyValidation(type = Vocabulary.Type.TEMPLATE_STATE)
     private String templateStatus;
+
+    @XmlElement
+    private List<ContactInfoTransfer> transferContactInformation;
 
     public ProviderBundle() {
         // no arg constructor
@@ -64,6 +68,14 @@ public class ProviderBundle extends Bundle<Provider> {
 
     public void setTemplateStatus(String templateStatus) {
         this.templateStatus = templateStatus;
+    }
+
+    public List<ContactInfoTransfer> getTransferContactInformation() {
+        return transferContactInformation;
+    }
+
+    public void setTransferContactInformation(List<ContactInfoTransfer> transferContactInformation) {
+        this.transferContactInformation = transferContactInformation;
     }
 
     @Override
