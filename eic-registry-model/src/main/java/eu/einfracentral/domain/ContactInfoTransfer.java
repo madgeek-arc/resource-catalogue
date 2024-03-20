@@ -9,9 +9,11 @@ import java.util.Objects;
 @XmlRootElement(namespace = "http://einfracentral.eu")
 public class ContactInfoTransfer {
     @XmlElement(required = true)
+    @ApiModelProperty(position = 1, required = true)
     private String email;
     @XmlElement(required = true, defaultValue = "false")
-    private boolean acceptedTransfer;
+    @ApiModelProperty(position = 2, required = true)
+    private Boolean acceptedTransfer;
 
     public ContactInfoTransfer() {
     }
@@ -37,11 +39,11 @@ public class ContactInfoTransfer {
         this.email = email;
     }
 
-    public boolean hasAcceptedTransfer() {
+    public Boolean getAcceptedTransfer() {
         return acceptedTransfer;
     }
 
-    public void setAcceptedTransfer(boolean acceptedTransfer) {
+    public void setAcceptedTransfer(Boolean acceptedTransfer) {
         this.acceptedTransfer = acceptedTransfer;
     }
 

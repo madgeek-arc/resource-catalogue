@@ -1,26 +1,36 @@
 package eu.einfracentral.controllers.registry;
 
-import eu.einfracentral.domain.Bundle;
-import eu.einfracentral.service.ContactInformationService;
+import eu.einfracentral.registry.service.ContactInformationService;
+import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
+import java.util.List;
+
+@RestController
+@RequestMapping("contactInformation")
+@Api(value = "Contact Information Transfer")
 public class ContactInformationController {
 
-    private final ContactInformationService<Bundle, Authentication> contactInformationService;
+    private final ContactInformationService contactInformationService;
 
-    public ContactInformationController(ContactInformationService<Bundle, Authentication> contactInformationService) {
+    @Autowired
+    public ContactInformationController(ContactInformationService contactInformationService) {
         this.contactInformationService = contactInformationService;
     }
 
-    @ApiOperation(value = "Given a HLE, get all Providers associated with it")
+    @ApiOperation(value = "Get a list of Catalogues and Providers in which the User is Admin")
+    @GetMapping(path = "getMy", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    public List<String> getMy(@ApiIgnore Authentication authentication) {
+        return contactInformationService.getMy(authentication);
+    }
+
+    @ApiOperation(value = "Update the list of ContactInfoTransfer")
     @PutMapping(path = "updateContactInfoTransfer", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or hasRole('ROLE_PROVIDER')")
     public void updateContactInfoTransfer(@RequestParam boolean acceptedTransfer, @ApiIgnore Authentication authentication) {
         contactInformationService.updateContactInfoTransfer(acceptedTransfer, authentication);
     }

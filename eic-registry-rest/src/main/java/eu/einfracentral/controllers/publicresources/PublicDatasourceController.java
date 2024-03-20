@@ -32,7 +32,7 @@ import java.util.Map;
 @RequestMapping
 public class PublicDatasourceController {
 
-    private static final Logger logger = LogManager.getLogger(PublicProviderController.class);
+    private static final Logger logger = LogManager.getLogger(PublicDatasourceController.class);
     private static final Gson gson = new Gson();
 
     private final SecurityService securityService;
