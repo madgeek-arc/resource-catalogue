@@ -1992,7 +1992,19 @@ For embedded providers (2) - legal status of the hosting legal entity. It is als
                     
           <xs:element minOccurs="0" name="templateStatus" type="xs:string"/>
                     
-          <xs:element maxOccurs="unbounded" minOccurs="0" name="transferContactInformation" type="tns:contactInfoTransfer"/>
+          <xs:element minOccurs="0" name="transferContactInformation">
+                        
+            <xs:complexType>
+                            
+              <xs:sequence>
+                                
+                <xs:element maxOccurs="unbounded" minOccurs="0" name="transferContactInformation" type="tns:contactInfoTransfer"/>
+                              
+              </xs:sequence>
+                          
+            </xs:complexType>
+                      
+          </xs:element>
                   
         </xs:sequence>
               

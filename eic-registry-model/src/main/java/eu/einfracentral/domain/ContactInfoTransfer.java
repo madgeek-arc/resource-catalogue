@@ -12,6 +12,14 @@ public class ContactInfoTransfer {
     @XmlElement(required = true)
     private boolean acceptedTransfer;
 
+    public ContactInfoTransfer() {
+    }
+
+    public ContactInfoTransfer(String email, boolean acceptedTransfer) {
+        this.email = email;
+        this.acceptedTransfer = acceptedTransfer;
+    }
+
     public String getEmail() {
         return email;
     }
