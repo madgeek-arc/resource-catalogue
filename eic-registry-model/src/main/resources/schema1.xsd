@@ -680,7 +680,7 @@ It is also possible to select Not a legal entity.]]></xs:documentation>
         
     <xs:sequence>
             
-      <xs:element name="acceptedTransfer" type="xs:boolean"/>
+      <xs:element default="false" name="acceptedTransfer" type="xs:boolean"/>
             
       <xs:element name="email" type="xs:string"/>
           
