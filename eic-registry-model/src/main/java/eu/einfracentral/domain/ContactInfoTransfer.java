@@ -1,16 +1,16 @@
 package eu.einfracentral.domain;
 
+import io.swagger.annotations.ApiModelProperty;
+
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlType;
 import java.util.Objects;
 
-@XmlType
 @XmlRootElement(namespace = "http://einfracentral.eu")
 public class ContactInfoTransfer {
     @XmlElement(required = true)
     private String email;
-    @XmlElement(defaultValue = "false")
+    @XmlElement(required = true, defaultValue = "false")
     private boolean acceptedTransfer;
 
     public ContactInfoTransfer() {

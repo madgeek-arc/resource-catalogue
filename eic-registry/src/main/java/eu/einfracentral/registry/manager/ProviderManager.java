@@ -1295,27 +1295,4 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         mapValues.setValues(valueList);
         mapValuesList.add(mapValues);
     }
-
-    public void updateContactInfoTransfer(boolean acceptedTransfer, Authentication auth) {
-        ContactInfoTransfer contactInfoTransfer = createContactInfoTransfer(acceptedTransfer, auth);
-        List<ProviderBundle> providerList = getMy(null, auth).getResults();
-        for (ProviderBundle providerBundle : providerList) {
-            List<ContactInfoTransfer> existingTransferList = providerBundle.getTransferContactInformation();
-            if (existingTransferList == null || existingTransferList.isEmpty()) {
-                providerBundle.setTransferContactInformation(List.of(contactInfoTransfer));
-            } else {
-                if (!existingTransferList.contains(contactInfoTransfer)) {
-                    existingTransferList.add(contactInfoTransfer);
-                }
-            }
-            super.update(providerBundle, auth);
-        }
-    }
-
-    private ContactInfoTransfer createContactInfoTransfer(boolean acceptedTransfer, Authentication auth) {
-        ContactInfoTransfer contactInfoTransfer = new ContactInfoTransfer();
-        contactInfoTransfer.setEmail(User.of(auth).getEmail());
-        contactInfoTransfer.setAcceptedTransfer(acceptedTransfer);
-        return contactInfoTransfer;
-    }
 }
