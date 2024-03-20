@@ -83,14 +83,14 @@ public class ProviderBundle extends Bundle<Provider> {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof ProviderBundle)) return false;
+        if (o == null || getClass() != o.getClass()) return false;
         if (!super.equals(o)) return false;
         ProviderBundle that = (ProviderBundle) o;
-        return Objects.equals(status, that.status) && Objects.equals(templateStatus, that.templateStatus);
+        return Objects.equals(status, that.status) && Objects.equals(templateStatus, that.templateStatus) && Objects.equals(transferContactInformation, that.transferContactInformation);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), status, templateStatus);
+        return Objects.hash(super.hashCode(), status, templateStatus, transferContactInformation);
     }
 }

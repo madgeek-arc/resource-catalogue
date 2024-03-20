@@ -1304,7 +1304,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
             if (existingTransferList == null || existingTransferList.isEmpty()) {
                 providerBundle.setTransferContactInformation(List.of(contactInfoTransfer));
             } else {
-                if (!existingTransferList.contains(contactInfoTransfer.getEmail())) {
+                if (!existingTransferList.contains(contactInfoTransfer)) {
                     existingTransferList.add(contactInfoTransfer);
                 }
             }
