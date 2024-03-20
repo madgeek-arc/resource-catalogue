@@ -4,6 +4,7 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 
 @XmlType
@@ -16,6 +17,9 @@ public class CatalogueBundle extends Bundle<Catalogue> {
 
     @XmlElement
     private String auditState;
+
+    @XmlElement
+    private List<ContactInfoTransfer> transferContactInformation;
 
     public CatalogueBundle() {
         // no arg constructor
@@ -82,6 +86,14 @@ public class CatalogueBundle extends Bundle<Catalogue> {
 
     public void setAuditState(String auditState) {
         this.auditState = auditState;
+    }
+
+    public List<ContactInfoTransfer> getTransferContactInformation() {
+        return transferContactInformation;
+    }
+
+    public void setTransferContactInformation(List<ContactInfoTransfer> transferContactInformation) {
+        this.transferContactInformation = transferContactInformation;
     }
 
     @Override
