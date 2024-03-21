@@ -6,6 +6,8 @@ import eu.einfracentral.registry.service.ProviderService;
 import eu.einfracentral.registry.service.ContactInformationService;
 import eu.openminted.registry.core.domain.FacetFilter;
 import eu.openminted.registry.core.exception.ResourceNotFoundException;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 
@@ -14,6 +16,8 @@ import java.util.List;
 
 @org.springframework.stereotype.Service
 public class ContactInformationManager implements ContactInformationService {
+
+    private static final Logger logger = LogManager.getLogger(ContactInformationManager.class);
 
     private final ProviderService<ProviderBundle, Authentication> providerService;
     private final CatalogueService<CatalogueBundle, Authentication> catalogueService;
@@ -46,19 +50,22 @@ public class ContactInformationManager implements ContactInformationService {
     }
 
     public void updateContactInfoTransfer(boolean acceptedTransfer, Authentication auth) {
+        String email = User.of(auth).getEmail();
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(1000);
         ff.addFilter("published", false);
-        ContactInfoTransfer contactInfoTransfer = createContactInfoTransfer(acceptedTransfer, auth);
+        ContactInfoTransfer contactInfoTransfer = createContactInfoTransfer(acceptedTransfer, email);
         List<CatalogueBundle> catalogueList = catalogueService.getMyCatalogues(auth);
         List<ProviderBundle> providerList = providerService.getMy(ff, auth).getResults();
         updateCatalogueContactInfoTransfer(contactInfoTransfer, catalogueList);
         updateProviderContactInfoTransfer(contactInfoTransfer, providerList);
+        logger.info("User [{}] set his contact info transfer for all his/her Catalogues/Providers to [{}]",
+                email, acceptedTransfer);
     }
 
-    private ContactInfoTransfer createContactInfoTransfer(boolean acceptedTransfer, Authentication auth) {
+    private ContactInfoTransfer createContactInfoTransfer(boolean acceptedTransfer, String email) {
         ContactInfoTransfer contactInfoTransfer = new ContactInfoTransfer();
-        contactInfoTransfer.setEmail(User.of(auth).getEmail());
+        contactInfoTransfer.setEmail(email);
         contactInfoTransfer.setAcceptedTransfer(acceptedTransfer);
         return contactInfoTransfer;
     }
