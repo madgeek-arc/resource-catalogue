@@ -97,11 +97,16 @@ public class ContactInformationManager implements ContactInformationService {
             if (existingTransferList == null || existingTransferList.isEmpty()) {
                 providerBundle.setTransferContactInformation(List.of(contactInfoTransfer));
             } else {
+                boolean found = false;
                 for (ContactInfoTransfer cit : existingTransferList) {
                     if (cit.getEmail().equals(contactInfoTransfer.getEmail())) {
                         cit.setAcceptedTransfer(contactInfoTransfer.getAcceptedTransfer());
+                        found = true;
+                        break;
                     }
-                    break;
+                }
+                if (!found) {
+                    existingTransferList.add(contactInfoTransfer);
                 }
             }
             try {
