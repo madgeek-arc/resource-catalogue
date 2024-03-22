@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 @org.springframework.stereotype.Service
@@ -30,23 +31,51 @@ public class ContactInformationManager implements ContactInformationService {
     }
 
     public List<String> getMy(Authentication authentication) {
+        String email = User.of(authentication).getEmail();
         List<String> myResources = new ArrayList<>();
+        List<String> resourcesUserHasAnsweredFor = new ArrayList<>();
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(1000);
         ff.addFilter("published", false);
         List<CatalogueBundle> catalogueList = catalogueService.getMyCatalogues(authentication);
-        List<ProviderBundle> providerList = providerService.getMy(ff, authentication).getResults();
         if (catalogueList != null && !catalogueList.isEmpty()) {
             for (CatalogueBundle catalogueBundle : catalogueList) {
-                myResources.add(catalogueBundle.getCatalogue().getName());
+                myResources.add(catalogueBundle.getId());
+                List<ContactInfoTransfer> catalogueContactInfoTransferList = catalogueBundle.getTransferContactInformation();
+                if (catalogueContactInfoTransferList != null && !catalogueContactInfoTransferList.isEmpty()) {
+                    for (ContactInfoTransfer contactInfoTransfer : catalogueContactInfoTransferList) {
+                        if (contactInfoTransfer.getEmail().equals(email)) {
+                            resourcesUserHasAnsweredFor.add(catalogueBundle.getId());
+                            break;
+                        }
+                    }
+                }
             }
         }
+        List<ProviderBundle> providerList = providerService.getMy(ff, authentication).getResults();
         if (providerList != null && !providerList.isEmpty()) {
             for (ProviderBundle providerBundle : providerList) {
-                myResources.add(providerBundle.getProvider().getName());
+                myResources.add(providerBundle.getId());
+                List<ContactInfoTransfer> providerContactInfoTransferList = providerBundle.getTransferContactInformation();
+                if (providerContactInfoTransferList != null && !providerContactInfoTransferList.isEmpty()) {
+                    for (ContactInfoTransfer contactInfoTransfer : providerContactInfoTransferList) {
+                        if (contactInfoTransfer.getEmail().equals(email)) {
+                            resourcesUserHasAnsweredFor.add(providerBundle.getId());
+                            break;
+                        }
+                    }
+                }
             }
         }
-        return myResources;
+        if (!myResources.isEmpty()) {
+            if (new HashSet<>(resourcesUserHasAnsweredFor).containsAll(myResources)) {
+                return null;
+            } else {
+                return myResources;
+            }
+        } else {
+            return null;
+        }
     }
 
     public void updateContactInfoTransfer(boolean acceptedTransfer, Authentication auth) {
