@@ -77,17 +77,7 @@ public class ContactInformationManager implements ContactInformationService {
             if (existingTransferList == null || existingTransferList.isEmpty()) {
                 catalogueBundle.setTransferContactInformation(List.of(contactInfoTransfer));
             } else {
-                boolean found = false;
-                for (ContactInfoTransfer cit : existingTransferList) {
-                    if (cit.getEmail().equals(contactInfoTransfer.getEmail())) {
-                        cit.setAcceptedTransfer(contactInfoTransfer.getAcceptedTransfer());
-                        found = true;
-                        break;
-                    }
-                }
-                if (!found) {
-                    existingTransferList.add(contactInfoTransfer);
-                }
+                updateOrAddContactInfoTransfer(contactInfoTransfer, existingTransferList);
             }
             try {
                 catalogueService.update(catalogueBundle, null);
@@ -102,21 +92,26 @@ public class ContactInformationManager implements ContactInformationService {
             if (existingTransferList == null || existingTransferList.isEmpty()) {
                 providerBundle.setTransferContactInformation(List.of(contactInfoTransfer));
             } else {
-                boolean found = false;
-                for (ContactInfoTransfer cit : existingTransferList) {
-                    if (cit.getEmail().equals(contactInfoTransfer.getEmail())) {
-                        cit.setAcceptedTransfer(contactInfoTransfer.getAcceptedTransfer());
-                        found = true;
-                        break;
-                    }
-                }
-                if (!found) {
-                    existingTransferList.add(contactInfoTransfer);
-                }
+                updateOrAddContactInfoTransfer(contactInfoTransfer, existingTransferList);
             }
             try {
                 providerService.update(providerBundle, null);
             } catch (ResourceNotFoundException ignore) {}
+        }
+    }
+
+    private void updateOrAddContactInfoTransfer(ContactInfoTransfer contactInfoTransfer,
+                                                List<ContactInfoTransfer> existingTransferList) {
+        boolean found = false;
+        for (ContactInfoTransfer cit : existingTransferList) {
+            if (cit.getEmail().equals(contactInfoTransfer.getEmail())) {
+                cit.setAcceptedTransfer(contactInfoTransfer.getAcceptedTransfer());
+                found = true;
+                break;
+            }
+        }
+        if (!found) {
+            existingTransferList.add(contactInfoTransfer);
         }
     }
 }
