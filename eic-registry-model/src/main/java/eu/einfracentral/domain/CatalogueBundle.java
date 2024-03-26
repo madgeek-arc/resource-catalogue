@@ -102,11 +102,11 @@ public class CatalogueBundle extends Bundle<Catalogue> {
         if (o == null || getClass() != o.getClass()) return false;
         if (!super.equals(o)) return false;
         CatalogueBundle that = (CatalogueBundle) o;
-        return Objects.equals(status, that.status) && Objects.equals(auditState, that.auditState);
+        return Objects.equals(status, that.status) && Objects.equals(auditState, that.auditState) && Objects.equals(transferContactInformation, that.transferContactInformation);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), status, auditState);
+        return Objects.hash(super.hashCode(), status, auditState, transferContactInformation);
     }
 }
