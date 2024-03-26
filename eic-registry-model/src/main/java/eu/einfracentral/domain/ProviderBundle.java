@@ -83,7 +83,7 @@ public class ProviderBundle extends Bundle<Provider> {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (!(o instanceof ProviderBundle)) return false;
         if (!super.equals(o)) return false;
         ProviderBundle that = (ProviderBundle) o;
         return Objects.equals(status, that.status) && Objects.equals(templateStatus, that.templateStatus) && Objects.equals(transferContactInformation, that.transferContactInformation);
