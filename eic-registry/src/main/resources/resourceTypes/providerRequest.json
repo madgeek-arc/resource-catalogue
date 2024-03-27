@@ -21,7 +21,7 @@
       "type": "java.lang.String"
     }
   ],
-  "indexMapperClass": "eu.openminted.registry.core.index.DefaultIndexMapper",
+  "indexMapperClass": "gr.uoa.di.madgik.registry.index.DefaultIndexMapper",
   "name": "provider_request",
   "aliasGroup": "resourceTypes",
   "payloadType": "xml",

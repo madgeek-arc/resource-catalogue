@@ -2,7 +2,7 @@ package eu.einfracentral.registry.service;
 
 import eu.einfracentral.domain.Datasource;
 import eu.einfracentral.dto.OpenAIREMetrics;
-import eu.openminted.registry.core.domain.FacetFilter;
+import gr.uoa.di.madgik.registry.domain.FacetFilter;
 
 import java.io.IOException;
 import java.util.List;

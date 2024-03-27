@@ -1,8 +1,8 @@
 package eu.einfracentral.registry.service;
 
-import eu.openminted.registry.core.domain.Resource;
-import eu.openminted.registry.core.service.ResourceCRUDService;
-import eu.openminted.registry.core.service.SearchService;
+import gr.uoa.di.madgik.registry.domain.Resource;
+import gr.uoa.di.madgik.registry.service.ResourceCRUDService;
+import gr.uoa.di.madgik.registry.service.SearchService;
 import org.springframework.security.core.Authentication;
 
 import java.util.List;

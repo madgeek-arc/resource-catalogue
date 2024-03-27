@@ -2,7 +2,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>eu.einfracentral</groupId>
     <artifactId>eic</artifactId>
-    <version>4.1.2-SNAPSHOT</version>
+    <version>5.0.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <modules>
@@ -37,7 +37,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <logging.version>2.17.2</logging.version>
         <jackson.version.core>2.14.0</jackson.version.core>
-        <registry-core.version>2.7.3</registry-core.version>
+        <registry-core.version>3.0.0-SNAPSHOT</registry-core.version>
         <springfox.version>2.7.0</springfox.version>
         <javax.mail-version>1.4.3</javax.mail-version>
         <javax.servlet-api.version>3.1.0</javax.servlet-api.version>
@@ -77,17 +77,27 @@
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>eu.openminted</groupId>
+                <groupId>gr.uoa.di.madgik</groupId>
                 <artifactId>registry-core-api</artifactId>
                 <version>${registry-core.version}</version>
             </dependency>
             <dependency>
-                <groupId>eu.openminted</groupId>
+                <groupId>gr.uoa.di.madgik</groupId>
+                <artifactId>registry-core-elasticsearch</artifactId>
+                <version>${registry-core.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>gr.uoa.di.madgik</groupId>
+                <artifactId>registry-core-jms</artifactId>
+                <version>${registry-core.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>gr.uoa.di.madgik</groupId>
                 <artifactId>registry-core-rest</artifactId>
                 <version>${registry-core.version}</version>
             </dependency>
             <dependency>
-                <groupId>eu.openminted</groupId>
+                <groupId>gr.uoa.di.madgik</groupId>
                 <artifactId>registry-core-helper</artifactId>
                 <version>${registry-core.version}</version>
             </dependency>

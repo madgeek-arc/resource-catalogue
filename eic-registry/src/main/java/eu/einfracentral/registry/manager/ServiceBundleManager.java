@@ -10,11 +10,11 @@ import eu.einfracentral.service.RegistrationMailService;
 import eu.einfracentral.service.SecurityService;
 import eu.einfracentral.utils.ObjectUtils;
 import eu.einfracentral.utils.ProviderResourcesCommonMethods;
-import eu.openminted.registry.core.domain.Browsing;
-import eu.openminted.registry.core.domain.FacetFilter;
-import eu.openminted.registry.core.domain.Paging;
-import eu.openminted.registry.core.domain.Resource;
-import eu.openminted.registry.core.service.ServiceException;
+import gr.uoa.di.madgik.registry.domain.Browsing;
+import gr.uoa.di.madgik.registry.domain.FacetFilter;
+import gr.uoa.di.madgik.registry.domain.Paging;
+import gr.uoa.di.madgik.registry.domain.Resource;
+import gr.uoa.di.madgik.registry.service.ServiceException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -402,7 +402,7 @@ public class ServiceBundleManager extends AbstractServiceBundleManager<ServiceBu
         logger.info("Verifying Resource: {}", serviceBundle);
         try {
             providerService.update(resourceProvider, auth);
-        } catch (eu.openminted.registry.core.exception.ResourceNotFoundException e) {
+        } catch (gr.uoa.di.madgik.registry.exception.ResourceNotFoundException e) {
             throw new ResourceNotFoundException(e.getMessage());
         }
         return super.update(serviceBundle, auth);
@@ -711,7 +711,7 @@ public class ServiceBundleManager extends AbstractServiceBundleManager<ServiceBu
             try {
                 commonMethods.suspendResource(datasourceBundle, catalogueId, suspend, auth);
                 datasourceService.update(datasourceBundle, auth);
-            } catch (eu.openminted.registry.core.exception.ResourceNotFoundException e) {
+            } catch (gr.uoa.di.madgik.registry.exception.ResourceNotFoundException e) {
                 throw new RuntimeException(e);
             }
         }
@@ -721,7 +721,7 @@ public class ServiceBundleManager extends AbstractServiceBundleManager<ServiceBu
             try {
                 commonMethods.suspendResource(helpdeskBundle, catalogueId, suspend, auth);
                 helpdeskService.update(helpdeskBundle, auth);
-            } catch (eu.openminted.registry.core.exception.ResourceNotFoundException e) {
+            } catch (gr.uoa.di.madgik.registry.exception.ResourceNotFoundException e) {
                 throw new RuntimeException(e);
             }
         }
@@ -730,7 +730,7 @@ public class ServiceBundleManager extends AbstractServiceBundleManager<ServiceBu
             try {
                 commonMethods.suspendResource(monitoringBundle, catalogueId, suspend, auth);
                 monitoringService.update(monitoringBundle, auth);
-            } catch (eu.openminted.registry.core.exception.ResourceNotFoundException e) {
+            } catch (gr.uoa.di.madgik.registry.exception.ResourceNotFoundException e) {
                 throw new RuntimeException(e);
             }
         }
@@ -740,7 +740,7 @@ public class ServiceBundleManager extends AbstractServiceBundleManager<ServiceBu
             try {
                 commonMethods.suspendResource(resourceInteroperabilityRecordBundle, catalogueId, suspend, auth);
                 resourceInteroperabilityRecordService.update(resourceInteroperabilityRecordBundle, auth);
-            } catch (eu.openminted.registry.core.exception.ResourceNotFoundException e) {
+            } catch (gr.uoa.di.madgik.registry.exception.ResourceNotFoundException e) {
                 throw new RuntimeException(e);
             }
         }

@@ -12,10 +12,10 @@ import eu.einfracentral.service.SynchronizerService;
 import eu.einfracentral.utils.ObjectUtils;
 import eu.einfracentral.utils.ProviderResourcesCommonMethods;
 import eu.einfracentral.validators.FieldValidator;
-import eu.openminted.registry.core.domain.*;
-import eu.openminted.registry.core.exception.ResourceNotFoundException;
-import eu.openminted.registry.core.service.ResourceCRUDService;
-import eu.openminted.registry.core.service.VersionService;
+import gr.uoa.di.madgik.registry.domain.*;
+import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
+import gr.uoa.di.madgik.registry.service.ResourceCRUDService;
+import gr.uoa.di.madgik.registry.service.VersionService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.mitre.openid.connect.model.OIDCAuthenticationToken;
@@ -1095,7 +1095,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     public Resource getResource(String providerId, String catalogueId) {
         Paging<Resource> resources;
         resources = searchService
-                .cqlQuery(String.format("provider_id = \"%s\" AND catalogue_id = \"%s\"", providerId, catalogueId), resourceType.getName());
+                .cqlQuery(String.format("resource_internal_id = \"%s\" AND catalogue_id = \"%s\"", providerId, catalogueId), resourceType.getName());
         assert resources != null;
         return resources.getTotal() == 0 ? null : resources.getResults().get(0);
     }

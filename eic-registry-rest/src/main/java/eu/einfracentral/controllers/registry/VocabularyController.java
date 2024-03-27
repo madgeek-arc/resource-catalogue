@@ -3,7 +3,7 @@ package eu.einfracentral.controllers.registry;
 import eu.einfracentral.domain.Vocabulary;
 import eu.einfracentral.dto.VocabularyTree;
 import eu.einfracentral.registry.service.VocabularyService;
-import eu.openminted.registry.core.exception.ResourceNotFoundException;
+import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.apache.logging.log4j.LogManager;

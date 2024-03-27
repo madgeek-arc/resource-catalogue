@@ -7,13 +7,9 @@ import eu.einfracentral.service.GenericResourceService;
 import eu.einfracentral.utils.FacetLabelService;
 import eu.einfracentral.utils.ReflectUtils;
 import eu.einfracentral.utils.LoggingUtils;
-import eu.openminted.registry.core.domain.*;
-import eu.openminted.registry.core.domain.index.IndexField;
-import eu.openminted.registry.core.service.ParserService;
-import eu.openminted.registry.core.service.ResourceService;
-import eu.openminted.registry.core.service.ResourceTypeService;
-import eu.openminted.registry.core.service.SearchService;
-import eu.openminted.registry.core.service.ServiceException;
+import gr.uoa.di.madgik.registry.domain.*;
+import gr.uoa.di.madgik.registry.domain.index.IndexField;
+import gr.uoa.di.madgik.registry.service.*;
 
 import java.lang.reflect.InvocationTargetException;
 import java.net.UnknownHostException;
@@ -120,7 +116,7 @@ public class GenericManager implements GenericResourceService {
         Resource res;
         T ret;
         try {
-            res = searchService.searchId(resourceTypeName, new SearchService.KeyValue(field, value));
+            res = searchService.searchFields(resourceTypeName, new SearchService.KeyValue(field, value));
             if (throwOnNull && res == null) {
                 throw new ResourceException(String.format("%s '%s' does not exist!", resourceTypeName, value), HttpStatus.NOT_FOUND);
             }
@@ -194,14 +190,6 @@ public class GenericManager implements GenericResourceService {
     public <T> T get(String resourceTypeName, String id) {
         Resource res = searchResource(resourceTypeName, id, true);
         return (T) parserPool.deserialize(res, getClassFromResourceType(res.getResourceTypeName()));
-    }
-
-    @Override
-    public <T> Browsing<T> cqlQuery(FacetFilter filter) {
-        Set<String> browseBy = new HashSet<>(filter.getBrowseBy());
-        browseBy.addAll(browseByMap.get(filter.getResourceType()));
-        filter.setBrowseBy(new ArrayList<>(browseBy));
-        return convertToBrowsing(searchService.cqlQuery(filter), filter.getResourceType());
     }
 
     @Override
@@ -303,7 +291,7 @@ public class GenericManager implements GenericResourceService {
     public Resource searchResource(String resourceTypeName, String id, boolean throwOnNull) {
         Resource res = null;
         try {
-            res = searchService.searchId(resourceTypeName, new SearchService.KeyValue("resource_internal_id", id));
+            res = searchService.searchFields(resourceTypeName, new SearchService.KeyValue("resource_internal_id", id));
         } catch (UnknownHostException e) {
             logger.error(e.getMessage(), e);
         }
@@ -318,7 +306,7 @@ public class GenericManager implements GenericResourceService {
     public Resource searchResource(String resourceTypeName, SearchService.KeyValue... keyValues) {
         Resource res = null;
         try {
-            res = searchService.searchId(resourceTypeName, keyValues);
+            res = searchService.searchFields(resourceTypeName, keyValues);
         } catch (UnknownHostException e) {
             logger.error(e.getMessage(), e);
         }
@@ -339,9 +327,9 @@ public class GenericManager implements GenericResourceService {
             Facet facet = iter.next();
             if (facet.getField().equals("catalogue_id") || facet.getField().equals(field)) {
                 try {
-                    facet.getValues().sort(Comparator.comparing(eu.openminted.registry.core.domain.Value::getLabel, String.CASE_INSENSITIVE_ORDER));
+                    facet.getValues().sort(Comparator.comparing(gr.uoa.di.madgik.registry.domain.Value::getLabel, String.CASE_INSENSITIVE_ORDER));
                 } catch (NullPointerException e) {
-                    facet.getValues().sort(Comparator.comparing(eu.openminted.registry.core.domain.Value::getValue, String.CASE_INSENSITIVE_ORDER));
+                    facet.getValues().sort(Comparator.comparing(gr.uoa.di.madgik.registry.domain.Value::getValue, String.CASE_INSENSITIVE_ORDER));
                 }
             }
         }

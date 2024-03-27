@@ -12,10 +12,10 @@ import eu.einfracentral.utils.FacetFilterUtils;
 import eu.einfracentral.utils.ObjectUtils;
 import eu.einfracentral.utils.ProviderResourcesCommonMethods;
 import eu.einfracentral.validators.FieldValidator;
-import eu.openminted.registry.core.domain.Browsing;
-import eu.openminted.registry.core.domain.FacetFilter;
-import eu.openminted.registry.core.domain.Paging;
-import eu.openminted.registry.core.domain.Resource;
+import gr.uoa.di.madgik.registry.domain.Browsing;
+import gr.uoa.di.madgik.registry.domain.FacetFilter;
+import gr.uoa.di.madgik.registry.domain.Paging;
+import gr.uoa.di.madgik.registry.domain.Resource;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -326,7 +326,7 @@ public class InteroperabilityRecordManager extends ResourceManager<Interoperabil
     public List<Resource> getResources(String id) {
         Paging<Resource> resources;
         resources = searchService
-                .cqlQuery(String.format("%s_id = \"%s\"", resourceType.getName(), id),
+                .cqlQuery(String.format("resource_internal_id = \"%s\"", id),
                         resourceType.getName(), maxQuantity, 0, "modifiedAt", "DESC");
         if (resources != null) {
             return resources.getResults();
@@ -355,7 +355,7 @@ public class InteroperabilityRecordManager extends ResourceManager<Interoperabil
     public Resource getResource(String id, String catalogueId) {
         Paging<Resource> resources;
         resources = searchService
-                .cqlQuery(String.format("%s_id = \"%s\"  AND catalogue_id = \"%s\"", resourceType.getName(), id, catalogueId),
+                .cqlQuery(String.format("resource_internal_id = \"%s\"  AND catalogue_id = \"%s\"", id, catalogueId),
                         resourceType.getName(), maxQuantity, 0, "modifiedAt", "DESC");
         if (resources.getTotal() > 0) {
             return resources.getResults().get(0);

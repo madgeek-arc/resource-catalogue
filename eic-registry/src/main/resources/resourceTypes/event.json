@@ -50,7 +50,7 @@
       "primaryKey": false
     }
   ],
-  "indexMapperClass": "eu.openminted.registry.core.index.DefaultIndexMapper",
+  "indexMapperClass": "gr.uoa.di.madgik.registry.index.DefaultIndexMapper",
   "name": "event",
   "aliasGroup": "resourceTypes",
   "payloadType": "xml",

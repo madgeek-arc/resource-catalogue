@@ -3,7 +3,7 @@ package eu.einfracentral.registry.manager;
 import eu.einfracentral.domain.*;
 import eu.einfracentral.registry.service.CatalogueService;
 import eu.einfracentral.service.SecurityService;
-import eu.openminted.registry.core.domain.FacetFilter;
+import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 

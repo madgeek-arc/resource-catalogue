@@ -2,7 +2,7 @@ package eu.einfracentral.controllers.registry;
 
 import eu.einfracentral.domain.*;
 import eu.einfracentral.registry.service.*;
-import eu.openminted.registry.core.domain.FacetFilter;
+import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.http.HttpStatus;

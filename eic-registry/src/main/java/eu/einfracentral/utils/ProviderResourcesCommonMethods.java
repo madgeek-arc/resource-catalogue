@@ -6,9 +6,9 @@ import eu.einfracentral.exception.ValidationException;
 import eu.einfracentral.registry.service.*;
 import eu.einfracentral.service.GenericResourceService;
 import eu.einfracentral.service.SecurityService;
-import eu.openminted.registry.core.domain.Browsing;
-import eu.openminted.registry.core.domain.FacetFilter;
-import eu.openminted.registry.core.domain.Paging;
+import gr.uoa.di.madgik.registry.domain.Browsing;
+import gr.uoa.di.madgik.registry.domain.FacetFilter;
+import gr.uoa.di.madgik.registry.domain.Paging;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
@@ -546,7 +546,7 @@ public class ProviderResourcesCommonMethods {
             try {
                 logger.info("Deleting Datasource of Service with id: {}", serviceId);
                 datasourceService.delete(datasourceBundle);
-            } catch (eu.openminted.registry.core.exception.ResourceNotFoundException e) {
+            } catch (gr.uoa.di.madgik.registry.exception.ResourceNotFoundException e) {
                 logger.error(e);
             }
         }
@@ -559,7 +559,7 @@ public class ProviderResourcesCommonMethods {
             try {
                 logger.info("Deleting Helpdesk of {} with id: {}", resourceType, resourceId);
                 helpdeskService.delete(helpdeskBundle);
-            } catch (eu.openminted.registry.core.exception.ResourceNotFoundException e) {
+            } catch (gr.uoa.di.madgik.registry.exception.ResourceNotFoundException e) {
                 logger.error(e);
             }
         }
@@ -568,7 +568,7 @@ public class ProviderResourcesCommonMethods {
             try {
                 logger.info("Deleting Monitoring of {} with id: {}", resourceType, resourceId);
                 monitoringService.delete(monitoringBundle);
-            } catch (eu.openminted.registry.core.exception.ResourceNotFoundException e) {
+            } catch (gr.uoa.di.madgik.registry.exception.ResourceNotFoundException e) {
                 logger.error(e);
             }
         }
@@ -578,7 +578,7 @@ public class ProviderResourcesCommonMethods {
             try {
                 logger.info("Deleting ResourceInteroperabilityRecord of {} with id: {}", resourceType, resourceId);
                 resourceInteroperabilityRecordService.delete(resourceInteroperabilityRecordBundle);
-            } catch (eu.openminted.registry.core.exception.ResourceNotFoundException e) {
+            } catch (gr.uoa.di.madgik.registry.exception.ResourceNotFoundException e) {
                 logger.error(e);
             }
         }

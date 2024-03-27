@@ -10,10 +10,10 @@ import eu.einfracentral.service.SecurityService;
 import eu.einfracentral.utils.ObjectUtils;
 import eu.einfracentral.utils.ProviderResourcesCommonMethods;
 import eu.einfracentral.validators.FieldValidator;
-import eu.openminted.registry.core.domain.Browsing;
-import eu.openminted.registry.core.domain.FacetFilter;
-import eu.openminted.registry.core.domain.Resource;
-import eu.openminted.registry.core.service.ResourceCRUDService;
+import gr.uoa.di.madgik.registry.domain.Browsing;
+import gr.uoa.di.madgik.registry.domain.FacetFilter;
+import gr.uoa.di.madgik.registry.domain.Resource;
+import gr.uoa.di.madgik.registry.service.ResourceCRUDService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -305,7 +305,7 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
             try {
                 logger.info("Deleting resource: {}", resource);
                 service.delete(resource);
-            } catch (eu.openminted.registry.core.exception.ResourceNotFoundException e) {
+            } catch (gr.uoa.di.madgik.registry.exception.ResourceNotFoundException e) {
                 logger.error(e);
             }
         }

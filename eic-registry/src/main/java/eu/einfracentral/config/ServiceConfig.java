@@ -27,7 +27,7 @@ import java.util.Random;
 
 @Configuration
 @ComponentScan(value = {
-        "eu.openminted.registry.core",
+        "gr.uoa.di.madgik.registry",
         "eu.einfracentral.manager",
         "eu.einfracentral.registry.manager",
         "eu.einfracentral.utils",

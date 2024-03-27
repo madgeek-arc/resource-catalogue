@@ -1,8 +1,8 @@
 package eu.einfracentral.registry.service;
 
 import eu.einfracentral.domain.VocabularyCuration;
-import eu.openminted.registry.core.domain.Browsing;
-import eu.openminted.registry.core.domain.FacetFilter;
+import gr.uoa.di.madgik.registry.domain.Browsing;
+import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import org.springframework.security.core.Authentication;
 
 public interface VocabularyCurationService<T, U extends Authentication> extends ResourceService<VocabularyCuration,

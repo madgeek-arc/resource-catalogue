@@ -142,7 +142,7 @@
       "type": "java.lang.Boolean"
     }
   ],
-  "indexMapperClass": "eu.openminted.registry.core.index.DefaultIndexMapper",
+  "indexMapperClass": "gr.uoa.di.madgik.registry.index.DefaultIndexMapper",
   "name": "monitoring",
   "aliasGroup": "resourceTypes",
   "payloadType": "xml",

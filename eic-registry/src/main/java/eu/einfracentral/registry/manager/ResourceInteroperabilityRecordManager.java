@@ -11,9 +11,9 @@ import eu.einfracentral.service.SecurityService;
 import eu.einfracentral.utils.ObjectUtils;
 import eu.einfracentral.utils.ProviderResourcesCommonMethods;
 import eu.einfracentral.utils.ResourceValidationUtils;
-import eu.openminted.registry.core.domain.Paging;
-import eu.openminted.registry.core.domain.Resource;
-import eu.openminted.registry.core.service.SearchService;
+import gr.uoa.di.madgik.registry.domain.Paging;
+import gr.uoa.di.madgik.registry.domain.Resource;
+import gr.uoa.di.madgik.registry.service.SearchService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.http.HttpStatus;
@@ -117,7 +117,7 @@ public class ResourceInteroperabilityRecordManager extends ResourceManager<Resou
     public Resource getResource(String id, String catalogueId) {
         Paging<Resource> resources;
         resources = searchService
-                .cqlQuery(String.format("%s_id = \"%s\"  AND catalogue_id = \"%s\"", resourceType.getName(), id, catalogueId),
+                .cqlQuery(String.format("resource_internal_id = \"%s\"  AND catalogue_id = \"%s\"", id, catalogueId),
                         resourceType.getName(), maxQuantity, 0, "resource_internal_id", "DESC");
         if (resources.getTotal() > 0) {
             return resources.getResults().get(0);

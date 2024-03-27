@@ -10,11 +10,11 @@ import eu.einfracentral.service.IdCreator;
 import eu.einfracentral.service.RegistrationMailService;
 import eu.einfracentral.service.SecurityService;
 import eu.einfracentral.utils.ProviderResourcesCommonMethods;
-import eu.openminted.registry.core.domain.FacetFilter;
-import eu.openminted.registry.core.domain.Paging;
-import eu.openminted.registry.core.domain.Resource;
-import eu.openminted.registry.core.domain.ResourceType;
-import eu.openminted.registry.core.exception.ResourceNotFoundException;
+import gr.uoa.di.madgik.registry.domain.FacetFilter;
+import gr.uoa.di.madgik.registry.domain.Paging;
+import gr.uoa.di.madgik.registry.domain.Resource;
+import gr.uoa.di.madgik.registry.domain.ResourceType;
+import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -260,7 +260,7 @@ public class PendingProviderManager extends ResourceManager<ProviderBundle> impl
     public Resource getPendingResourceViaProviderId(String providerId) {
         Paging<Resource> resources;
         resources = searchService
-                .cqlQuery(String.format("pending_provider_id = \"%s\" AND catalogue_id = \"%s\"", providerId, catalogueName), resourceType.getName());
+                .cqlQuery(String.format("resource_internal_id = \"%s\" AND catalogue_id = \"%s\"", providerId, catalogueName), resourceType.getName());
         assert resources != null;
         return resources.getTotal() == 0 ? null : resources.getResults().get(0);
     }

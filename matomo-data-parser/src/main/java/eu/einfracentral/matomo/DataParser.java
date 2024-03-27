@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.i18n.phonenumbers.NumberParseException;
 import eu.einfracentral.registry.service.EventService;
-import eu.openminted.registry.core.exception.ResourceNotFoundException;
+import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;

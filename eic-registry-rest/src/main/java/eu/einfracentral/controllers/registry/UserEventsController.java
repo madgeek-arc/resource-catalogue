@@ -5,7 +5,7 @@ import eu.einfracentral.domain.Service;
 import eu.einfracentral.domain.ServiceBundle;
 import eu.einfracentral.registry.service.EventService;
 import eu.einfracentral.registry.service.ServiceBundleService;
-import eu.openminted.registry.core.domain.FacetFilter;
+import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;

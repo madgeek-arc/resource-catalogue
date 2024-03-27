@@ -4,12 +4,12 @@ import eu.einfracentral.domain.Bundle;
 import eu.einfracentral.domain.LoggingInfo;
 import eu.einfracentral.domain.TrainingResource;
 import eu.einfracentral.domain.TrainingResourceBundle;
-import eu.openminted.registry.core.domain.Browsing;
-import eu.openminted.registry.core.domain.FacetFilter;
-import eu.openminted.registry.core.domain.Paging;
-import eu.openminted.registry.core.domain.Resource;
-import eu.openminted.registry.core.exception.ResourceNotFoundException;
-import eu.openminted.registry.core.service.SearchService;
+import gr.uoa.di.madgik.registry.domain.Browsing;
+import gr.uoa.di.madgik.registry.domain.FacetFilter;
+import gr.uoa.di.madgik.registry.domain.Paging;
+import gr.uoa.di.madgik.registry.domain.Resource;
+import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
+import gr.uoa.di.madgik.registry.service.SearchService;
 import org.springframework.security.core.Authentication;
 
 import java.util.List;

@@ -2,7 +2,7 @@ package eu.einfracentral.controllers.registry;
 
 import eu.einfracentral.domain.Event;
 import eu.einfracentral.registry.service.EventService;
-import eu.openminted.registry.core.exception.ResourceNotFoundException;
+import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;

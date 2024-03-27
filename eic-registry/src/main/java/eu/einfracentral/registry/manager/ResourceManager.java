@@ -4,13 +4,13 @@ import eu.einfracentral.domain.Identifiable;
 import eu.einfracentral.exception.ResourceException;
 import eu.einfracentral.registry.service.ResourceService;
 import eu.einfracentral.validators.FieldValidator;
-import eu.openminted.registry.core.domain.Browsing;
-import eu.openminted.registry.core.domain.FacetFilter;
-import eu.openminted.registry.core.domain.Resource;
-import eu.openminted.registry.core.service.AbstractGenericService;
-import eu.openminted.registry.core.service.ParserService;
-import eu.openminted.registry.core.service.SearchService;
-import eu.openminted.registry.core.service.ServiceException;
+import gr.uoa.di.madgik.registry.domain.Browsing;
+import gr.uoa.di.madgik.registry.domain.FacetFilter;
+import gr.uoa.di.madgik.registry.domain.Resource;
+import gr.uoa.di.madgik.registry.service.AbstractGenericService;
+import gr.uoa.di.madgik.registry.service.ParserService;
+import gr.uoa.di.madgik.registry.service.SearchService;
+import gr.uoa.di.madgik.registry.service.ServiceException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.elasticsearch.ElasticsearchStatusException;
@@ -176,7 +176,7 @@ public abstract class ResourceManager<T extends Identifiable> extends AbstractGe
     protected Resource where(boolean throwOnNull, SearchService.KeyValue... keyValues) {
         Resource ret;
         try {
-            ret = searchService.searchId(resourceType.getName(), keyValues);
+            ret = searchService.searchFields(resourceType.getName(), keyValues);
             if (throwOnNull && ret == null) {
                 throw new ResourceException(String.format("%s does not exist!", resourceType.getName()), HttpStatus.NOT_FOUND);
             }

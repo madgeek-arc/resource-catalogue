@@ -2,7 +2,7 @@ package eu.einfracentral.registry.service;
 
 import com.google.i18n.phonenumbers.NumberParseException;
 import eu.einfracentral.domain.Event;
-import eu.openminted.registry.core.exception.ResourceNotFoundException;
+import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import org.springframework.security.core.Authentication;
 
 import java.util.Date;

@@ -7,7 +7,7 @@ import eu.einfracentral.domain.Datasource;
 import eu.einfracentral.dto.OpenAIREMetrics;
 import eu.einfracentral.exception.ResourceNotFoundException;
 import eu.einfracentral.registry.service.OpenAIREDatasourceService;
-import eu.openminted.registry.core.domain.FacetFilter;
+import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.json.JSONArray;

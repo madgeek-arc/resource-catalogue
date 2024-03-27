@@ -3,7 +3,7 @@ package eu.einfracentral.controllers.registry;
 import eu.einfracentral.domain.EmailMessage;
 import eu.einfracentral.domain.ProviderRequest;
 import eu.einfracentral.registry.service.ProviderRequestService;
-import eu.openminted.registry.core.exception.ResourceNotFoundException;
+import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import io.swagger.annotations.Api;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

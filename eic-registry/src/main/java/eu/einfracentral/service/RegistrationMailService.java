@@ -6,7 +6,7 @@ import eu.einfracentral.exception.ResourceNotFoundException;
 import eu.einfracentral.exception.ValidationException;
 import eu.einfracentral.registry.manager.*;
 import eu.einfracentral.registry.service.MailService;
-import eu.openminted.registry.core.domain.FacetFilter;
+import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;

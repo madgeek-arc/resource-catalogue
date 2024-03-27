@@ -16,10 +16,10 @@ import eu.einfracentral.utils.FacetLabelService;
 import eu.einfracentral.utils.ObjectUtils;
 import eu.einfracentral.utils.ProviderResourcesCommonMethods;
 import eu.einfracentral.validators.FieldValidator;
-import eu.openminted.registry.core.domain.*;
-import eu.openminted.registry.core.service.ParserService;
-import eu.openminted.registry.core.service.SearchService;
-import eu.openminted.registry.core.service.ServiceException;
+import gr.uoa.di.madgik.registry.domain.*;
+import gr.uoa.di.madgik.registry.service.ParserService;
+import gr.uoa.di.madgik.registry.service.SearchService;
+import gr.uoa.di.madgik.registry.service.ServiceException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -438,7 +438,7 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
         logger.info("Verifying Training Resource: {}", trainingResourceBundle);
         try {
             providerService.update(resourceProvider, auth);
-        } catch (eu.openminted.registry.core.exception.ResourceNotFoundException e) {
+        } catch (gr.uoa.di.madgik.registry.exception.ResourceNotFoundException e) {
             throw new ResourceNotFoundException(e.getMessage());
         }
         return update(trainingResourceBundle, auth);
@@ -698,7 +698,7 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
     public Resource getResource(String id, String catalogueId) {
         Paging<Resource> resources;
         resources = searchService
-                .cqlQuery(String.format("%s_id = \"%s\"  AND catalogue_id = \"%s\"", resourceType.getName(), id, catalogueId),
+                .cqlQuery(String.format("resource_internal_id = \"%s\"  AND catalogue_id = \"%s\"", id, catalogueId),
                         resourceType.getName(), maxQuantity, 0, "modifiedAt", "DESC");
         if (resources.getTotal() > 0) {
             return resources.getResults().get(0);
@@ -720,7 +720,7 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
     public List<Resource> getResources(String id, String catalogueId) {
         Paging<Resource> resources;
         resources = searchService
-                .cqlQuery(String.format("%s_id = \"%s\"  AND catalogue_id = \"%s\"", resourceType.getName(), id, catalogueId),
+                .cqlQuery(String.format("resource_internal_id = \"%s\"  AND catalogue_id = \"%s\"", id, catalogueId),
                         resourceType.getName(), maxQuantity, 0, "modifiedAt", "DESC");
         if (resources != null) {
             return resources.getResults();
@@ -752,7 +752,7 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
     public boolean exists(SearchService.KeyValue... ids) {
         Resource resource;
         try {
-            resource = this.searchService.searchId(getResourceType(), ids);
+            resource = this.searchService.searchFields(getResourceType(), ids);
             return resource != null;
         } catch (UnknownHostException e) {
             logger.error(e);
@@ -1049,7 +1049,7 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
             try {
                 commonMethods.suspendResource(helpdeskBundle, catalogueId, suspend, auth);
                 helpdeskService.update(helpdeskBundle, auth);
-            } catch (eu.openminted.registry.core.exception.ResourceNotFoundException e) {
+            } catch (gr.uoa.di.madgik.registry.exception.ResourceNotFoundException e) {
                 throw new RuntimeException(e);
             }
         }
@@ -1058,7 +1058,7 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
             try {
                 commonMethods.suspendResource(monitoringBundle, catalogueId, suspend, auth);
                 monitoringService.update(monitoringBundle, auth);
-            } catch (eu.openminted.registry.core.exception.ResourceNotFoundException e) {
+            } catch (gr.uoa.di.madgik.registry.exception.ResourceNotFoundException e) {
                 throw new RuntimeException(e);
             }
         }
@@ -1068,7 +1068,7 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
             try {
                 commonMethods.suspendResource(resourceInteroperabilityRecordBundle, catalogueId, suspend, auth);
                 resourceInteroperabilityRecordService.update(resourceInteroperabilityRecordBundle, auth);
-            } catch (eu.openminted.registry.core.exception.ResourceNotFoundException e) {
+            } catch (gr.uoa.di.madgik.registry.exception.ResourceNotFoundException e) {
                 throw new RuntimeException(e);
             }
         }

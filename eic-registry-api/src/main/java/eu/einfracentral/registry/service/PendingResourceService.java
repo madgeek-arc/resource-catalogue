@@ -2,9 +2,9 @@ package eu.einfracentral.registry.service;
 
 import eu.einfracentral.domain.Bundle;
 import eu.einfracentral.exception.ResourceException;
-import eu.openminted.registry.core.domain.Browsing;
-import eu.openminted.registry.core.domain.FacetFilter;
-import eu.openminted.registry.core.domain.Resource;
+import gr.uoa.di.madgik.registry.domain.Browsing;
+import gr.uoa.di.madgik.registry.domain.FacetFilter;
+import gr.uoa.di.madgik.registry.domain.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 

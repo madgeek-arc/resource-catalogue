@@ -1,9 +1,9 @@
 package eu.einfracentral.service.search;
 
 import eu.einfracentral.utils.FacetFilterUtils;
-import eu.openminted.registry.core.domain.FacetFilter;
-import eu.openminted.registry.core.service.SearchService;
-import eu.openminted.registry.core.service.SearchServiceImpl;
+import gr.uoa.di.madgik.registry.domain.FacetFilter;
+import gr.uoa.di.madgik.registry.elasticsearch.service.ElasticSearchService;
+import gr.uoa.di.madgik.registry.service.SearchService;
 import org.bouncycastle.util.Strings;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.index.query.BoolQueryBuilder;
@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
 
 import static org.elasticsearch.index.query.QueryBuilders.*;
 
-public abstract class AbstractSearchService extends SearchServiceImpl implements SearchService {
+public abstract class AbstractSearchService extends ElasticSearchService implements SearchService {
 
     public AbstractSearchService(RestHighLevelClient client) {
         super(client);

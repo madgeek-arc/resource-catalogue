@@ -1,7 +1,7 @@
 package eu.einfracentral.service;
 
-import eu.openminted.registry.core.domain.*;
-import eu.openminted.registry.core.service.SearchService;
+import gr.uoa.di.madgik.registry.domain.*;
+import gr.uoa.di.madgik.registry.service.SearchService;
 
 import javax.validation.constraints.NotNull;
 import java.lang.reflect.InvocationTargetException;
@@ -19,14 +19,6 @@ public interface GenericResourceService {
      * @param <T>
      */
     <T> T get(String resourceTypeName, String field, String value, boolean throwOnNull);
-
-    /**
-     *
-     * @param filter
-     * @return
-     * @param <T>
-     */
-    <T> Browsing<T> cqlQuery(FacetFilter filter);
 
     /**
      *

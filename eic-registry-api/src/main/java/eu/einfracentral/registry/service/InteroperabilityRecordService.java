@@ -3,8 +3,8 @@ package eu.einfracentral.registry.service;
 import eu.einfracentral.domain.Bundle;
 import eu.einfracentral.domain.InteroperabilityRecordBundle;
 import eu.einfracentral.domain.LoggingInfo;
-import eu.openminted.registry.core.domain.FacetFilter;
-import eu.openminted.registry.core.domain.Paging;
+import gr.uoa.di.madgik.registry.domain.FacetFilter;
+import gr.uoa.di.madgik.registry.domain.Paging;
 import org.springframework.security.core.Authentication;
 import org.springframework.util.MultiValueMap;
 

@@ -3,7 +3,7 @@ package eu.einfracentral.controllers.registry;
 import eu.einfracentral.domain.*;
 import eu.einfracentral.service.AuthoritiesMapper;
 import eu.einfracentral.service.SecurityService;
-import eu.openminted.registry.core.domain.Paging;
+import gr.uoa.di.madgik.registry.domain.Paging;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;

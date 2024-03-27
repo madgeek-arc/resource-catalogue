@@ -5,9 +5,9 @@ import eu.einfracentral.domain.ProviderBundle;
 import eu.einfracentral.domain.ResourceHistory;
 import eu.einfracentral.dto.ExtendedValue;
 import eu.einfracentral.dto.MapValues;
-import eu.openminted.registry.core.domain.FacetFilter;
-import eu.openminted.registry.core.domain.Paging;
-import eu.openminted.registry.core.domain.Resource;
+import gr.uoa.di.madgik.registry.domain.FacetFilter;
+import gr.uoa.di.madgik.registry.domain.Paging;
+import gr.uoa.di.madgik.registry.domain.Resource;
 import org.springframework.security.core.Authentication;
 
 import java.net.URL;

@@ -12,9 +12,9 @@ import eu.einfracentral.utils.FacetLabelService;
 import eu.einfracentral.utils.ProviderResourcesCommonMethods;
 import eu.einfracentral.utils.TextUtils;
 import eu.einfracentral.validators.FieldValidator;
-import eu.openminted.registry.core.domain.*;
-import eu.openminted.registry.core.domain.index.IndexField;
-import eu.openminted.registry.core.service.*;
+import gr.uoa.di.madgik.registry.domain.*;
+import gr.uoa.di.madgik.registry.domain.index.IndexField;
+import gr.uoa.di.madgik.registry.service.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -302,7 +302,7 @@ public abstract class AbstractServiceBundleManager<T extends ServiceBundle> exte
     public boolean exists(SearchService.KeyValue... ids) {
         Resource resource;
         try {
-            resource = this.searchService.searchId(getResourceType(), ids);
+            resource = this.searchService.searchFields(getResourceType(), ids);
             return resource != null;
         } catch (UnknownHostException e) {
             logger.error(e);

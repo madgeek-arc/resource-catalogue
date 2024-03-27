@@ -12,7 +12,7 @@ import org.springframework.web.servlet.config.annotation.*;
 
 @Configuration
 @ComponentScan({
-        "eu.openminted.registry.core.controllers",
+        "gr.uoa.di.madgik.registry.controllers",
         "eu.einfracentral.controllers",
         "eu.einfracentral.registry.controller",
         "eu.einfracentral.recdb.controllers"})

@@ -9,7 +9,7 @@ import eu.einfracentral.registry.service.MailService;
 import eu.einfracentral.registry.service.ProviderRequestService;
 import eu.einfracentral.registry.service.ProviderService;
 import eu.einfracentral.service.SecurityService;
-import eu.openminted.registry.core.domain.FacetFilter;
+import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;

@@ -2,13 +2,13 @@ package eu.einfracentral.registry.service;
 
 
 import eu.einfracentral.domain.*;
-import eu.openminted.registry.core.domain.Browsing;
-import eu.openminted.registry.core.domain.FacetFilter;
-import eu.openminted.registry.core.domain.Paging;
-import eu.openminted.registry.core.domain.Resource;
-import eu.openminted.registry.core.exception.ResourceNotFoundException;
-import eu.openminted.registry.core.service.ResourceCRUDService;
-import eu.openminted.registry.core.service.SearchService;
+import gr.uoa.di.madgik.registry.domain.Browsing;
+import gr.uoa.di.madgik.registry.domain.FacetFilter;
+import gr.uoa.di.madgik.registry.domain.Paging;
+import gr.uoa.di.madgik.registry.domain.Resource;
+import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
+import gr.uoa.di.madgik.registry.service.ResourceCRUDService;
+import gr.uoa.di.madgik.registry.service.SearchService;
 import org.springframework.security.core.Authentication;
 import org.springframework.util.MultiValueMap;
 
