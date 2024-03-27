@@ -232,7 +232,7 @@
   "aliasGroup": "resourceTypes",
   "payloadType": "xml",
   "properties": {
-    "class": "eu.einfracentral.domain.TrainingResourceBundle"
+    "class": "gr.uoa.di.madgik.domain.TrainingResourceBundle"
   },
   "schemaUrl": "https://raw.githubusercontent.com/madgeek-arc/resource-catalogue/develop/eic-registry-model/src/main/resources/schema1.xsd"
 }

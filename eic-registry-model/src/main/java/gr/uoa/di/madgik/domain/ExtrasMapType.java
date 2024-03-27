@@ -1,0 +1,8 @@
+package gr.uoa.di.madgik.domain;
+
+import java.util.ArrayList;
+import java.util.List;
+
+public class ExtrasMapType {
+    public List<ExtrasType> entry = new ArrayList<>();
+}

@@ -1,4 +1,4 @@
-//package eu.einfracentral.domain;
+//package gr.uoa.di.madgik.domain;
 //
 //import org.junit.Test;
 //

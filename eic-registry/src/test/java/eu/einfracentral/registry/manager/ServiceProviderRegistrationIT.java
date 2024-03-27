@@ -1,11 +1,12 @@
-package eu.einfracentral.registry.manager;
+package gr.uoa.di.madgik.registry.manager;
 
-import eu.einfracentral.config.ServiceConfig;
-import eu.einfracentral.domain.*;
-import eu.einfracentral.registry.service.ServiceBundleService;
-import eu.einfracentral.registry.service.ProviderService;
-import eu.einfracentral.registry.service.VocabularyService;
-import eu.einfracentral.service.SecurityService;
+import gr.uoa.di.madgik.config.ServiceConfig;
+import gr.uoa.di.madgik.domain.*;
+import gr.uoa.di.madgik.domain.*;
+import gr.uoa.di.madgik.service.ServiceBundleService;
+import gr.uoa.di.madgik.service.ProviderService;
+import gr.uoa.di.madgik.service.VocabularyService;
+import gr.uoa.di.madgik.service.SecurityService;
 import gr.uoa.di.madgik.registry.configuration.ElasticConfiguration;
 import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.registry.service.ServiceException;

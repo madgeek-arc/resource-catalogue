@@ -26,7 +26,7 @@
   "aliasGroup": "resourceTypes",
   "payloadType": "xml",
   "properties": {
-    "class": "eu.einfracentral.domain.ProviderRequest"
+    "class": "gr.uoa.di.madgik.domain.ProviderRequest"
   },
   "schemaUrl": "https://raw.githubusercontent.com/madgeek-arc/resource-catalogue/master/eic-registry-model/src/main/resources/schema1.xsd"
 }

@@ -57,7 +57,7 @@
         <Logger name="org.springframework" level="warn">
             <AppenderRef ref="Console"/>
         </Logger>
-        <Logger name="eu.einfracentral.service.SynchronizerService" level="info">
+        <Logger name="gr.uoa.di.madgik.service.SynchronizerService" level="info">
             <AppenderRef ref="SyncRollingFile"/>
         </Logger>
     </Loggers>

@@ -1,4 +1,4 @@
-package eu.einfracentral.registry.service;
+package gr.uoa.di.madgik.registry.service;
 
 import org.junit.Test;
 

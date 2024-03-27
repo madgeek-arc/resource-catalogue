@@ -145,7 +145,7 @@
   "aliasGroup": "resourceTypes",
   "payloadType": "xml",
   "properties": {
-    "class": "eu.einfracentral.domain.DatasourceBundle"
+    "class": "gr.uoa.di.madgik.domain.DatasourceBundle"
   },
   "schemaUrl": "https://raw.githubusercontent.com/madgeek-arc/resource-catalogue/develop/eic-registry-model/src/main/resources/schema1.xsd"
 }
