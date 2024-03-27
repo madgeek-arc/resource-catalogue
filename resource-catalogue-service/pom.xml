@@ -24,8 +24,15 @@
 
     <profiles>
         <profile>
+            <id>basic</id>
+        </profile>
+        <profile>
             <id>eosc</id>
             <dependencies>
+                <dependency>
+                    <groupId>gr.uoa.di.madgik</groupId>
+                    <artifactId>resource-catalogue-elastic</artifactId>
+                </dependency>
                 <dependency>
                     <groupId>gr.uoa.di.madgik</groupId>
                     <artifactId>matomo-data-parser</artifactId>

@@ -27,7 +27,6 @@ import org.springframework.validation.Validator;
 import javax.annotation.PostConstruct;
 import javax.validation.constraints.NotNull;
 import java.lang.reflect.Field;
-import java.net.UnknownHostException;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.util.*;

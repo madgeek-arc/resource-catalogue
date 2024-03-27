@@ -8,7 +8,6 @@ import org.bouncycastle.util.Strings;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.DisMaxQueryBuilder;
-import org.elasticsearch.index.query.QueryBuilders;
 
 import java.util.*;
 import java.util.stream.Collectors;

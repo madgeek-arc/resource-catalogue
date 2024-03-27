@@ -39,7 +39,7 @@
     <properties>
         <java.version>1.8</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <logging.version>2.17.2</logging.version>
+        <logging.version>2.21.1</logging.version>
         <jackson.version.core>2.14.0</jackson.version.core>
         <registry-core.version>3.0.0-SNAPSHOT</registry-core.version>
         <springfox.version>2.7.0</springfox.version>
@@ -78,6 +78,11 @@
             <dependency>
                 <groupId>gr.uoa.di.madgik</groupId>
                 <artifactId>resource-catalogue-rest</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>gr.uoa.di.madgik</groupId>
+                <artifactId>resource-catalogue-elastic</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
