@@ -24,6 +24,9 @@
         <module>
             recdb
         </module>
+        <module>
+            resource-catalogue-elastic
+        </module>
     </modules>
 
     <licenses>

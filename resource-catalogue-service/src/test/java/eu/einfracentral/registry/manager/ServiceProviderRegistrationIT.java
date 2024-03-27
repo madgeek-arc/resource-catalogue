@@ -1,11 +1,12 @@
 package gr.uoa.di.madgik.registry.manager;
 
-import gr.uoa.di.madgik.config.ServiceConfig;
-import gr.uoa.di.madgik.domain.*;
-import gr.uoa.di.madgik.service.ServiceBundleService;
-import gr.uoa.di.madgik.service.ProviderService;
-import gr.uoa.di.madgik.service.VocabularyService;
-import gr.uoa.di.madgik.service.SecurityService;
+import gr.uoa.di.madgik.resourcecatalogue.config.ServiceConfig;
+import gr.uoa.di.madgik.resourcecatalogue.domain.*;
+import gr.uoa.di.madgik.resourcecatalogue.domain.*;
+import gr.uoa.di.madgik.resourcecatalogue.service.ServiceBundleService;
+import gr.uoa.di.madgik.resourcecatalogue.service.ProviderService;
+import gr.uoa.di.madgik.resourcecatalogue.service.VocabularyService;
+import gr.uoa.di.madgik.resourcecatalogue.service.SecurityService;
 import gr.uoa.di.madgik.registry.configuration.ElasticConfiguration;
 import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.registry.service.ServiceException;

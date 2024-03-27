@@ -86,7 +86,7 @@
   "aliasGroup": "resourceTypes",
   "payloadType": "xml",
   "properties": {
-    "class": "gr.uoa.di.madgik.domain.VocabularyCuration"
+    "class": "gr.uoa.di.madgik.resourcecatalogue.domain.VocabularyCuration"
   },
   "schemaUrl": "https://raw.githubusercontent.com/madgeek-arc/resource-catalogue/master/resource-catalogue-model/src/main/resources/schema1.xsd"
 }

@@ -1,4 +1,4 @@
-//package gr.uoa.di.madgik.domain;
+//package gr.uoa.di.madgik.resourcecatalogue.domain;
 //
 //import org.junit.Test;
 //

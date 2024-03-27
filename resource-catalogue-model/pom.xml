@@ -101,7 +101,7 @@
                 <configuration>
                     <jsonLibrary>jackson2</jsonLibrary>
                     <classPatterns>
-                        <pattern>gr.uoa.di.madgik.domain.**</pattern>
+                        <pattern>gr.uoa.di.madgik.resourcecatalogue.domain.**</pattern>
                         <pattern>gr.uoa.di.madgik.dto.**</pattern>
                     </classPatterns>
                     <outputFile>target/model.ts</outputFile>

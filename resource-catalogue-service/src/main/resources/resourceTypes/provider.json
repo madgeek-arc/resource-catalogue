@@ -286,7 +286,7 @@
   "aliasGroup": "resourceTypes",
   "payloadType": "xml",
   "properties": {
-    "class": "gr.uoa.di.madgik.domain.ProviderBundle"
+    "class": "gr.uoa.di.madgik.resourcecatalogue.domain.ProviderBundle"
   },
   "schemaUrl": "https://raw.githubusercontent.com/madgeek-arc/resource-catalogue/develop/resource-catalogue-model/src/main/resources/schema1.xsd"
 }
