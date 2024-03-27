@@ -28,13 +28,7 @@ import java.util.Random;
 @Configuration
 @ComponentScan(value = {
         "gr.uoa.di.madgik.registry",
-        "gr.uoa.di.madgik.manager",
-        "gr.uoa.di.madgik.registry.manager",
-        "gr.uoa.di.madgik.utils",
-        "gr.uoa.di.madgik.validators",
-        "gr.uoa.di.madgik.service",
-        "gr.uoa.di.madgik.matomo",
-        "gr.uoa.di.madgik.recdb"})
+        "gr.uoa.di.madgik.resourcecatalogue"})
 @Import(CacheConfig.class)
 @PropertySource(value = {"classpath:application.properties", "classpath:registry.properties"})
 @EnableSpringHttpSession
