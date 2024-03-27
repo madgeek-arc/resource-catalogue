@@ -23,13 +23,11 @@ public class ContactInformationController {
         this.contactInformationService = contactInformationService;
     }
 
-    @ApiOperation(value = "Get a list of Catalogues and Providers in which the User is Admin")
     @GetMapping(path = "getMy", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public List<String> getMy(@ApiIgnore Authentication authentication) {
         return contactInformationService.getMy(authentication);
     }
 
-    @ApiOperation(value = "Update the list of ContactInfoTransfer")
     @PutMapping(path = "updateContactInfoTransfer", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public void updateContactInfoTransfer(@RequestParam boolean acceptedTransfer, @ApiIgnore Authentication authentication) {
         contactInformationService.updateContactInfoTransfer(acceptedTransfer, authentication);
