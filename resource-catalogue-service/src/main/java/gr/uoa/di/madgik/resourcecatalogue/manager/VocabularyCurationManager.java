@@ -1,16 +1,16 @@
 package gr.uoa.di.madgik.resourcecatalogue.manager;
 
+import gr.uoa.di.madgik.registry.service.SearchService;
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
 import gr.uoa.di.madgik.resourcecatalogue.exception.ValidationException;
-import gr.uoa.di.madgik.resourcecatalogue.domain.*;
 import gr.uoa.di.madgik.resourcecatalogue.service.RegistrationMailService;
-import gr.uoa.di.madgik.resourcecatalogue.service.search.SearchServiceEIC;
-import gr.uoa.di.madgik.resourcecatalogue.utils.FacetLabelService;
+import gr.uoa.di.madgik.resourcecatalogue.utils.DefaultFacetLabelService;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
 import gr.uoa.di.madgik.registry.domain.Browsing;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.registry.domain.Resource;
+import gr.uoa.di.madgik.resourcecatalogue.utils.FacetLabelService;
 import org.apache.commons.lang3.time.DateUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -46,7 +46,7 @@ public class VocabularyCurationManager extends ResourceManager<VocabularyCuratio
     private final GenericManager genericManager;
 
     @Autowired
-    private SearchServiceEIC searchServiceEIC;
+    private SearchService searchService;
 
     @Value("${project.catalogue.name}")
     private String catalogueName;
@@ -256,7 +256,7 @@ public class VocabularyCurationManager extends ResourceManager<VocabularyCuratio
 
         vocabularyCurationBrowsing = getResults(ff);
         if (!vocabularyCurationBrowsing.getResults().isEmpty() && !vocabularyCurationBrowsing.getFacets().isEmpty()) {
-            vocabularyCurationBrowsing.setFacets(facetLabelService.createLabels(vocabularyCurationBrowsing.getFacets()));
+            vocabularyCurationBrowsing.setFacets(facetLabelService.generateLabels(vocabularyCurationBrowsing.getFacets()));
         }
         return vocabularyCurationBrowsing;
     }
@@ -306,7 +306,7 @@ public class VocabularyCurationManager extends ResourceManager<VocabularyCuratio
     protected Browsing<VocabularyCuration> getResults(FacetFilter filter) {
         Browsing<VocabularyCuration> browsing;
         filter.setResourceType(getResourceType());
-        browsing = convertToBrowsingEIC(searchServiceEIC.search(filter));
+        browsing = convertToBrowsingEIC(searchService.search(filter));
 
         browsing.setFacets(abstractServiceBundleManager.createCorrectFacets(browsing.getFacets(), filter));
         return browsing;

@@ -1,13 +1,11 @@
-package gr.uoa.di.madgik.registry.manager;
+package gr.uoa.di.madgik.resourcecatalogue.manager;
 
 import gr.uoa.di.madgik.resourcecatalogue.config.ServiceConfig;
-import gr.uoa.di.madgik.resourcecatalogue.domain.*;
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
 import gr.uoa.di.madgik.resourcecatalogue.service.ServiceBundleService;
 import gr.uoa.di.madgik.resourcecatalogue.service.ProviderService;
 import gr.uoa.di.madgik.resourcecatalogue.service.VocabularyService;
 import gr.uoa.di.madgik.resourcecatalogue.service.SecurityService;
-import gr.uoa.di.madgik.registry.configuration.ElasticConfiguration;
 import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.registry.service.ServiceException;
 import org.apache.logging.log4j.LogManager;
@@ -48,8 +46,6 @@ public class ServiceProviderRegistrationIT {
     @Autowired
     SecurityService securityService;
 
-    @Autowired
-    ElasticConfiguration elastic;
 
     @Test
     public void addInvalidProviderTest() throws MalformedURLException {

@@ -1,9 +1,9 @@
 package gr.uoa.di.madgik.resourcecatalogue.service.search;
 
-import gr.uoa.di.madgik.resourcecatalogue.utils.FacetFilterUtils;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.elasticsearch.service.ElasticSearchService;
 import gr.uoa.di.madgik.registry.service.SearchService;
+import gr.uoa.di.madgik.resourcecatalogue.utils.FacetFilterUtils;
 import org.bouncycastle.util.Strings;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.index.query.BoolQueryBuilder;
@@ -95,7 +95,7 @@ public abstract class AbstractSearchService extends ElasticSearchService impleme
 
             qBuilder.minimumShouldMatch(1);
         } else {
-            qBuilder.must(QueryBuilders.matchAllQuery());
+            qBuilder.must(matchAllQuery());
         }
 
         // Custom Filters
@@ -105,7 +105,7 @@ public abstract class AbstractSearchService extends ElasticSearchService impleme
     }
 
     protected DisMaxQueryBuilder createDisMaxQuery(String key, List<Object> filters) {
-        DisMaxQueryBuilder qb = QueryBuilders.disMaxQuery();
+        DisMaxQueryBuilder qb = disMaxQuery();
         for (Object f : filters) {
             qb.add(termQuery(key, (String) f));
         }
@@ -124,7 +124,7 @@ public abstract class AbstractSearchService extends ElasticSearchService impleme
      * @return {@link DisMaxQueryBuilder}
      */
     protected DisMaxQueryBuilder createMatchQuery(List<Object> fields, List<String> keywords, Float boost, Float tieBreaker) {
-        DisMaxQueryBuilder qb = QueryBuilders.disMaxQuery();
+        DisMaxQueryBuilder qb = disMaxQuery();
         for (Object field : fields) {
             for (String keyword : keywords) {
                 /*for (int i = 0; i < keyword.length(); i++) {
@@ -159,7 +159,7 @@ public abstract class AbstractSearchService extends ElasticSearchService impleme
      * @return {@link DisMaxQueryBuilder}
      */
     protected DisMaxQueryBuilder createPhraseQuery(List<Object> fields, List<String> phrases, Float boost, Float tieBreaker) {
-        DisMaxQueryBuilder qb = QueryBuilders.disMaxQuery();
+        DisMaxQueryBuilder qb = disMaxQuery();
         for (Object field : fields) {
             for (String phrase : phrases) {
                 qb.add(matchPhraseQuery((String) field, phrase));

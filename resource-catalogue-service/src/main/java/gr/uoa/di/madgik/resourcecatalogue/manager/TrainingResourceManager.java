@@ -4,14 +4,9 @@ import gr.uoa.di.madgik.resourcecatalogue.domain.*;
 import gr.uoa.di.madgik.resourcecatalogue.exception.ResourceException;
 import gr.uoa.di.madgik.resourcecatalogue.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.exception.ValidationException;
-import gr.uoa.di.madgik.resourcecatalogue.domain.*;
 import gr.uoa.di.madgik.resourcecatalogue.service.RegistrationMailService;
-import gr.uoa.di.madgik.resourcecatalogue.service.search.SearchServiceEIC;
-import gr.uoa.di.madgik.resourcecatalogue.utils.ObjectUtils;
+import gr.uoa.di.madgik.resourcecatalogue.utils.*;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
-import gr.uoa.di.madgik.resourcecatalogue.utils.FacetFilterUtils;
-import gr.uoa.di.madgik.resourcecatalogue.utils.FacetLabelService;
-import gr.uoa.di.madgik.resourcecatalogue.utils.ProviderResourcesCommonMethods;
 import gr.uoa.di.madgik.resourcecatalogue.validators.FieldValidator;
 import gr.uoa.di.madgik.registry.domain.*;
 import gr.uoa.di.madgik.registry.service.ParserService;
@@ -66,7 +61,7 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
     @Autowired
     private FieldValidator fieldValidator;
     @Autowired
-    private SearchServiceEIC searchServiceEIC;
+    private SearchService searchServiceEIC;
     @Autowired
     @Qualifier("trainingResourceSync")
     private final SynchronizerService<TrainingResource> synchronizerService;
@@ -748,13 +743,8 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
     @Override
     public boolean exists(SearchService.KeyValue... ids) {
         Resource resource;
-        try {
-            resource = this.searchService.searchFields(getResourceType(), ids);
-            return resource != null;
-        } catch (UnknownHostException e) {
-            logger.error(e);
-            throw new ServiceException(e);
-        }
+        resource = this.searchService.searchFields(getResourceType(), ids);
+        return resource != null;
     }
 
     @Override
@@ -831,7 +821,7 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
 
         resources = getResults(ff);
         if (!resources.getResults().isEmpty() && !resources.getFacets().isEmpty()) {
-            resources.setFacets(facetLabelService.createLabels(resources.getFacets()));
+            resources.setFacets(facetLabelService.generateLabels(resources.getFacets()));
         }
 
         return resources;

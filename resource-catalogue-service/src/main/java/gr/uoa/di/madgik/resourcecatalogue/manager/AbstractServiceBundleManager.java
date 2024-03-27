@@ -7,13 +7,9 @@ import gr.uoa.di.madgik.resourcecatalogue.exception.ValidationException;
 import gr.uoa.di.madgik.registry.service.*;
 import gr.uoa.di.madgik.resourcecatalogue.config.Properties.Cache;
 import gr.uoa.di.madgik.resourcecatalogue.service.AnalyticsService;
-import gr.uoa.di.madgik.resourcecatalogue.service.search.SearchServiceEIC;
-import gr.uoa.di.madgik.resourcecatalogue.utils.FacetLabelService;
-import gr.uoa.di.madgik.resourcecatalogue.utils.ProviderResourcesCommonMethods;
-import gr.uoa.di.madgik.resourcecatalogue.utils.TextUtils;
+import gr.uoa.di.madgik.resourcecatalogue.utils.*;
 import gr.uoa.di.madgik.resourcecatalogue.validators.FieldValidator;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
-import gr.uoa.di.madgik.resourcecatalogue.utils.FacetFilterUtils;
 import gr.uoa.di.madgik.registry.domain.*;
 import gr.uoa.di.madgik.registry.domain.index.IndexField;
 import org.apache.logging.log4j.LogManager;
@@ -59,7 +55,7 @@ public abstract class AbstractServiceBundleManager<T extends ServiceBundle> exte
     @Autowired
     private AnalyticsService analyticsService;
     @Autowired
-    private SearchServiceEIC searchServiceEIC;
+    private @Qualifier("eicSearchService") SearchService searchService;
     @Autowired
     private IdCreator idCreator;
     private List<String> browseBy;
@@ -301,13 +297,8 @@ public abstract class AbstractServiceBundleManager<T extends ServiceBundle> exte
     @Override
     public boolean exists(SearchService.KeyValue... ids) {
         Resource resource;
-        try {
-            resource = this.searchService.searchFields(getResourceType(), ids);
-            return resource != null;
-        } catch (UnknownHostException e) {
-            logger.error(e);
-            throw new ServiceException(e);
-        }
+        resource = this.searchService.searchFields(getResourceType(), ids);
+        return resource != null;
     }
 
     String serialize(T serviceBundle) {
@@ -377,7 +368,7 @@ public abstract class AbstractServiceBundleManager<T extends ServiceBundle> exte
 
         resources = genericResourceService.getResults(ff);
         if (!resources.getResults().isEmpty() && !resources.getFacets().isEmpty()) {
-            resources.setFacets(facetLabelService.createLabels(resources.getFacets()));
+            resources.setFacets(facetLabelService.generateLabels(resources.getFacets()));
         }
 
         return resources;
@@ -401,7 +392,7 @@ public abstract class AbstractServiceBundleManager<T extends ServiceBundle> exte
     protected Browsing<T> getResults(FacetFilter filter) {
         Browsing<T> browsing;
         filter.setResourceType(getResourceType());
-        browsing = convertToBrowsingEIC(searchServiceEIC.search(filter));
+        browsing = convertToBrowsingEIC(searchService.search(filter));
 
         browsing.setFacets(createCorrectFacets(browsing.getFacets(), filter));
         return browsing;
@@ -427,7 +418,7 @@ public abstract class AbstractServiceBundleManager<T extends ServiceBundle> exte
             FacetFilter facetFilter = FacetFilterUtils.createMultiFacetFilter(someFilters);
             facetFilter.setResourceType(getResourceType());
             facetFilter.setBrowseBy(Collections.singletonList(filterKey));
-            List<Facet> facetsCategory = convertToBrowsingEIC(searchServiceEIC.search(facetFilter)).getFacets();
+            List<Facet> facetsCategory = convertToBrowsingEIC(searchService.search(facetFilter)).getFacets();
 
             for (Facet facet : serviceFacets) {
                 if (facet.getField().equals(filterKey)) {

@@ -1,22 +1,16 @@
 package gr.uoa.di.madgik.resourcecatalogue.manager;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import gr.uoa.di.madgik.resourcecatalogue.exception.ResourceException;
-import gr.uoa.di.madgik.resourcecatalogue.exception.ResourceNotFoundException;
-import gr.uoa.di.madgik.resourcecatalogue.utils.LoggingUtils;
-import gr.uoa.di.madgik.resourcecatalogue.service.GenericResourceService;
-import gr.uoa.di.madgik.resourcecatalogue.utils.FacetLabelService;
-import gr.uoa.di.madgik.resourcecatalogue.utils.ReflectUtils;
 import gr.uoa.di.madgik.registry.domain.*;
 import gr.uoa.di.madgik.registry.domain.index.IndexField;
 import gr.uoa.di.madgik.registry.service.*;
-
-import java.lang.reflect.InvocationTargetException;
-import java.net.UnknownHostException;
-import java.util.*;
-import java.util.stream.Collectors;
-
-
+import gr.uoa.di.madgik.resourcecatalogue.exception.ResourceException;
+import gr.uoa.di.madgik.resourcecatalogue.exception.ResourceNotFoundException;
+import gr.uoa.di.madgik.resourcecatalogue.service.GenericResourceService;
+import gr.uoa.di.madgik.resourcecatalogue.utils.DefaultFacetLabelService;
+import gr.uoa.di.madgik.resourcecatalogue.utils.FacetLabelService;
+import gr.uoa.di.madgik.resourcecatalogue.utils.LoggingUtils;
+import gr.uoa.di.madgik.resourcecatalogue.utils.ReflectUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -26,6 +20,9 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import javax.validation.constraints.NotNull;
+import java.lang.reflect.InvocationTargetException;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Component
 public class GenericManager implements GenericResourceService {
@@ -43,7 +40,7 @@ public class GenericManager implements GenericResourceService {
 
     protected GenericManager(@Qualifier("eicSearchService") SearchService searchService, ResourceService resourceService,
                              ResourceTypeService resourceTypeService, ParserService parserPool,
-                             FacetLabelService facetLabelService) {
+                             DefaultFacetLabelService facetLabelService) {
         this.searchService = searchService;
         this.resourceService = resourceService;
         this.resourceTypeService = resourceTypeService;
@@ -115,16 +112,11 @@ public class GenericManager implements GenericResourceService {
     public <T> T get(String resourceTypeName, String field, String value, boolean throwOnNull) {
         Resource res;
         T ret;
-        try {
-            res = searchService.searchFields(resourceTypeName, new SearchService.KeyValue(field, value));
-            if (throwOnNull && res == null) {
-                throw new ResourceException(String.format("%s '%s' does not exist!", resourceTypeName, value), HttpStatus.NOT_FOUND);
-            }
-            ret = (T) parserPool.deserialize(res, getClassFromResourceType(resourceTypeName));
-        } catch (UnknownHostException e) {
-            logger.error(e.getMessage(), e);
-            throw new ServiceException(e);
+        res = searchService.searchFields(resourceTypeName, new SearchService.KeyValue(field, value));
+        if (throwOnNull && res == null) {
+            throw new ResourceException(String.format("%s '%s' does not exist!", resourceTypeName, value), HttpStatus.NOT_FOUND);
         }
+        ret = (T) parserPool.deserialize(res, getClassFromResourceType(resourceTypeName));
         return ret;
     }
 
@@ -197,22 +189,14 @@ public class GenericManager implements GenericResourceService {
         Set<String> browseBy = new HashSet<>(filter.getBrowseBy());
         browseBy.addAll(browseByMap.get(filter.getResourceType()));
         filter.setBrowseBy(new ArrayList<>(browseBy));
-        try {
-            Browsing<T> browsing;
-            browsing = convertToBrowsing(searchService.search(filter), filter.getResourceType());
-            browsing.setFacets(facetLabelService.generateLabels(browsing.getFacets()));
-            return browsing;
-        } catch (UnknownHostException e) {
-            throw new ServiceException(e);
-        }
+        Browsing<T> browsing;
+        browsing = convertToBrowsing(searchService.search(filter), filter.getResourceType());
+        browsing.setFacets(facetLabelService.generateLabels(browsing.getFacets()));
+        return browsing;
     }
 
     public <T> Browsing<T> getResultsWithoutFacets(FacetFilter filter) {
-        try {
-            return convertToBrowsing(searchService.search(filter), filter.getResourceType());
-        } catch (UnknownHostException e) {
-            throw new ServiceException(e);
-        }
+        return convertToBrowsing(searchService.search(filter), filter.getResourceType());
     }
 
     @Override
@@ -289,12 +273,7 @@ public class GenericManager implements GenericResourceService {
 
     @Override
     public Resource searchResource(String resourceTypeName, String id, boolean throwOnNull) {
-        Resource res = null;
-        try {
-            res = searchService.searchFields(resourceTypeName, new SearchService.KeyValue("resource_internal_id", id));
-        } catch (UnknownHostException e) {
-            logger.error(e.getMessage(), e);
-        }
+        Resource res = searchService.searchFields(resourceTypeName, new SearchService.KeyValue("resource_internal_id", id));
         if (throwOnNull) {
             return Optional.ofNullable(res)
                     .orElseThrow(() -> new ResourceNotFoundException(id, resourceTypeName));
@@ -304,12 +283,7 @@ public class GenericManager implements GenericResourceService {
 
     @Override
     public Resource searchResource(String resourceTypeName, SearchService.KeyValue... keyValues) {
-        Resource res = null;
-        try {
-            res = searchService.searchFields(resourceTypeName, keyValues);
-        } catch (UnknownHostException e) {
-            logger.error(e.getMessage(), e);
-        }
+        Resource res = searchService.searchFields(resourceTypeName, keyValues);
         return res;
     }
 

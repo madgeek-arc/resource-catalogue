@@ -1,4 +1,4 @@
-package gr.uoa.di.madgik.registry.service;
+package gr.uoa.di.madgik.resourcecatalogue.service;
 
 import org.junit.Test;
 

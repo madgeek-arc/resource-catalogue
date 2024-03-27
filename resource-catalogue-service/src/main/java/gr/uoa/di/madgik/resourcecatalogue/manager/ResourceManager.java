@@ -13,7 +13,6 @@ import gr.uoa.di.madgik.registry.service.SearchService;
 import gr.uoa.di.madgik.registry.service.ServiceException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.elasticsearch.ElasticsearchStatusException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpStatus;
@@ -55,7 +54,7 @@ public abstract class ResourceManager<T extends Identifiable> extends AbstractGe
         Browsing<T> browsing;
         try {
             browsing = getResults(ff);
-        } catch (ElasticsearchStatusException e) {
+        } catch (Exception e) {
             throw new ServiceException("Search error, check search parameters"); // check elastic status
         }
         return browsing;
@@ -175,13 +174,9 @@ public abstract class ResourceManager<T extends Identifiable> extends AbstractGe
 
     protected Resource where(boolean throwOnNull, SearchService.KeyValue... keyValues) {
         Resource ret;
-        try {
-            ret = searchService.searchFields(resourceType.getName(), keyValues);
-            if (throwOnNull && ret == null) {
-                throw new ResourceException(String.format("%s does not exist!", resourceType.getName()), HttpStatus.NOT_FOUND);
-            }
-        } catch (UnknownHostException e) {
-            throw new ResourceException(e, HttpStatus.INTERNAL_SERVER_ERROR);
+        ret = searchService.searchFields(resourceType.getName(), keyValues);
+        if (throwOnNull && ret == null) {
+            throw new ResourceException(String.format("%s does not exist!", resourceType.getName()), HttpStatus.NOT_FOUND);
         }
         return ret;
     }

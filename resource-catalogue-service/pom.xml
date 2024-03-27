@@ -68,10 +68,6 @@
         </dependency>
         <dependency>
             <groupId>gr.uoa.di.madgik</groupId>
-            <artifactId>registry-core-elasticsearch</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>gr.uoa.di.madgik</groupId>
             <artifactId>registry-core-jms</artifactId>
         </dependency>
 

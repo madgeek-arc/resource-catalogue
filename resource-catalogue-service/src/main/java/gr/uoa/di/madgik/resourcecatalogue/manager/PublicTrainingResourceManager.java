@@ -4,6 +4,7 @@ import gr.uoa.di.madgik.resourcecatalogue.domain.Identifiers;
 import gr.uoa.di.madgik.resourcecatalogue.domain.TrainingResourceBundle;
 import gr.uoa.di.madgik.resourcecatalogue.exception.ResourceException;
 import gr.uoa.di.madgik.resourcecatalogue.exception.ResourceNotFoundException;
+import gr.uoa.di.madgik.resourcecatalogue.utils.DefaultFacetLabelService;
 import gr.uoa.di.madgik.resourcecatalogue.utils.FacetLabelService;
 import gr.uoa.di.madgik.resourcecatalogue.utils.JmsService;
 import gr.uoa.di.madgik.resourcecatalogue.utils.ProviderResourcesCommonMethods;
@@ -30,16 +31,17 @@ public class PublicTrainingResourceManager extends AbstractPublicResourceManager
     private final JmsService jmsService;
     private final SecurityService securityService;
     private ProviderResourcesCommonMethods commonMethods;
-    @Autowired
-    private FacetLabelService facetLabelService;
+    private final FacetLabelService facetLabelService;
 
     @Autowired
     public PublicTrainingResourceManager(JmsService jmsService, SecurityService securityService,
-                                         ProviderResourcesCommonMethods commonMethods) {
+                                         ProviderResourcesCommonMethods commonMethods,
+                                         FacetLabelService facetLabelService) {
         super(TrainingResourceBundle.class);
         this.jmsService = jmsService;
         this.securityService = securityService;
         this.commonMethods = commonMethods;
+        this.facetLabelService = facetLabelService;
     }
 
     @Override
@@ -51,7 +53,7 @@ public class PublicTrainingResourceManager extends AbstractPublicResourceManager
     public Browsing<TrainingResourceBundle> getAll(FacetFilter facetFilter, Authentication authentication) {
         Browsing<TrainingResourceBundle> browsing = super.getAll(facetFilter, authentication);
         if (!browsing.getResults().isEmpty() && !browsing.getFacets().isEmpty()) {
-            browsing.setFacets(facetLabelService.createLabels(browsing.getFacets()));
+            browsing.setFacets(facetLabelService.generateLabels(browsing.getFacets()));
         }
         return browsing;
     }

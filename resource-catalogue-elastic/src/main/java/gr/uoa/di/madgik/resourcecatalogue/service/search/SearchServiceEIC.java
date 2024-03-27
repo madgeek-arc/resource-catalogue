@@ -5,14 +5,12 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.index.query.BoolQueryBuilder;
-import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Map;
 
 @Service("eicSearchService")
-@PropertySource({"classpath:application.properties", "classpath:registry.properties"})
 public class SearchServiceEIC extends AbstractSearchService implements SearchService {
 
     private static final Logger logger = LogManager.getLogger(SearchServiceEIC.class);

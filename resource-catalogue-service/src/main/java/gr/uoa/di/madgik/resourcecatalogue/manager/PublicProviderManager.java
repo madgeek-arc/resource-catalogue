@@ -1,16 +1,16 @@
 package gr.uoa.di.madgik.resourcecatalogue.manager;
 
+import gr.uoa.di.madgik.registry.domain.Browsing;
+import gr.uoa.di.madgik.registry.domain.FacetFilter;
+import gr.uoa.di.madgik.registry.service.ResourceCRUDService;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Identifiers;
 import gr.uoa.di.madgik.resourcecatalogue.domain.ProviderBundle;
 import gr.uoa.di.madgik.resourcecatalogue.exception.ResourceException;
 import gr.uoa.di.madgik.resourcecatalogue.exception.ResourceNotFoundException;
+import gr.uoa.di.madgik.resourcecatalogue.service.SecurityService;
 import gr.uoa.di.madgik.resourcecatalogue.utils.FacetLabelService;
 import gr.uoa.di.madgik.resourcecatalogue.utils.JmsService;
 import gr.uoa.di.madgik.resourcecatalogue.utils.ProviderResourcesCommonMethods;
-import gr.uoa.di.madgik.resourcecatalogue.service.SecurityService;
-import gr.uoa.di.madgik.registry.domain.Browsing;
-import gr.uoa.di.madgik.registry.domain.FacetFilter;
-import gr.uoa.di.madgik.registry.service.ResourceCRUDService;
 import org.apache.commons.beanutils.BeanUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -30,16 +30,16 @@ public class PublicProviderManager extends ResourceManager<ProviderBundle> imple
     private final JmsService jmsService;
     private final SecurityService securityService;
     private final ProviderResourcesCommonMethods commonMethods;
-    @Autowired
-    private FacetLabelService facetLabelService;
+    private final FacetLabelService facetLabelService;
 
-    @Autowired
     public PublicProviderManager(JmsService jmsService, SecurityService securityService,
-                                 ProviderResourcesCommonMethods commonMethods) {
+                                 ProviderResourcesCommonMethods commonMethods,
+                                 FacetLabelService facetLabelService) {
         super(ProviderBundle.class);
         this.jmsService = jmsService;
         this.securityService = securityService;
         this.commonMethods = commonMethods;
+        this.facetLabelService = facetLabelService;
     }
 
     @Override
@@ -51,7 +51,7 @@ public class PublicProviderManager extends ResourceManager<ProviderBundle> imple
     public Browsing<ProviderBundle> getAll(FacetFilter facetFilter, Authentication authentication) {
         Browsing<ProviderBundle> browsing = super.getAll(facetFilter, authentication);
         if (!browsing.getResults().isEmpty() && !browsing.getFacets().isEmpty()) {
-            browsing.setFacets(facetLabelService.createLabels(browsing.getFacets()));
+            browsing.setFacets(facetLabelService.generateLabels(browsing.getFacets()));
         }
         return browsing;
     }
