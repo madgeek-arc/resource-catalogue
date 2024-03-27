@@ -146,7 +146,7 @@ public class GenericManager implements GenericResourceService {
         } catch (Exception e) {
             logger.warn("Could not find field 'id'.", e);
         }
-        if (id == null || id.isBlank()) {
+        if (id == null || id.isEmpty()) {
             id = UUID.randomUUID().toString();
             ReflectUtils.setId(clazz, resource, id);
         }
