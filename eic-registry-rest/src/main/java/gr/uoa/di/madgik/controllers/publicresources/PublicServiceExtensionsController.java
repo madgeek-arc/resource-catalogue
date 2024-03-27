@@ -3,7 +3,6 @@ package gr.uoa.di.madgik.controllers.publicresources;
 import com.google.gson.Gson;
 import gr.uoa.di.madgik.annotations.Browse;
 import gr.uoa.di.madgik.domain.*;
-import gr.uoa.di.madgik.domain.*;
 import gr.uoa.di.madgik.service.HelpdeskService;
 import gr.uoa.di.madgik.service.MonitoringService;
 import gr.uoa.di.madgik.service.ResourceService;

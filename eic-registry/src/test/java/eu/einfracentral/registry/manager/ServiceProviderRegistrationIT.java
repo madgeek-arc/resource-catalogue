@@ -2,7 +2,6 @@ package gr.uoa.di.madgik.registry.manager;
 
 import gr.uoa.di.madgik.config.ServiceConfig;
 import gr.uoa.di.madgik.domain.*;
-import gr.uoa.di.madgik.domain.*;
 import gr.uoa.di.madgik.service.ServiceBundleService;
 import gr.uoa.di.madgik.service.ProviderService;
 import gr.uoa.di.madgik.service.VocabularyService;

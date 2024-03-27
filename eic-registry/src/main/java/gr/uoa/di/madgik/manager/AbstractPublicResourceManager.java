@@ -1,7 +1,6 @@
 package gr.uoa.di.madgik.manager;
 
 import gr.uoa.di.madgik.domain.*;
-import gr.uoa.di.madgik.domain.*;
 import gr.uoa.di.madgik.service.CatalogueService;
 import gr.uoa.di.madgik.service.SecurityService;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;

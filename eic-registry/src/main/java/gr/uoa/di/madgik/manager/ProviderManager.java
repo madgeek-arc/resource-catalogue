@@ -1,11 +1,9 @@
 package gr.uoa.di.madgik.manager;
 
 import gr.uoa.di.madgik.domain.*;
-import gr.uoa.di.madgik.domain.*;
 import gr.uoa.di.madgik.dto.ExtendedValue;
 import gr.uoa.di.madgik.dto.MapValues;
 import gr.uoa.di.madgik.exception.ValidationException;
-import gr.uoa.di.madgik.registry.service.*;
 import gr.uoa.di.madgik.service.*;
 import gr.uoa.di.madgik.utils.ObjectUtils;
 import gr.uoa.di.madgik.utils.ProviderResourcesCommonMethods;

@@ -5,7 +5,6 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import gr.uoa.di.madgik.annotations.Browse;
 import gr.uoa.di.madgik.domain.*;
-import gr.uoa.di.madgik.domain.*;
 import gr.uoa.di.madgik.dto.MonitoringStatus;
 import gr.uoa.di.madgik.dto.ServiceType;
 import gr.uoa.di.madgik.exception.ResourceException;

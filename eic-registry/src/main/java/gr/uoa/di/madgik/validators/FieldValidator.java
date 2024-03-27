@@ -2,13 +2,10 @@ package gr.uoa.di.madgik.validators;
 
 import gr.uoa.di.madgik.annotation.*;
 import gr.uoa.di.madgik.domain.*;
-import gr.uoa.di.madgik.annotation.*;
-import gr.uoa.di.madgik.domain.*;
 import gr.uoa.di.madgik.exception.ResourceException;
 import gr.uoa.di.madgik.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.exception.ValidationException;
 import gr.uoa.di.madgik.manager.ProviderManager;
-import gr.uoa.di.madgik.registry.service.*;
 import gr.uoa.di.madgik.service.*;
 import org.apache.commons.validator.routines.EmailValidator;
 import org.apache.logging.log4j.LogManager;

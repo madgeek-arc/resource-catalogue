@@ -1,12 +1,10 @@
 package gr.uoa.di.madgik.manager;
 
 import gr.uoa.di.madgik.domain.*;
-import gr.uoa.di.madgik.domain.*;
 import gr.uoa.di.madgik.exception.ResourceException;
 import gr.uoa.di.madgik.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.exception.ValidationException;
 import gr.uoa.di.madgik.registry.service.*;
-import gr.uoa.di.madgik.service.*;
 import gr.uoa.di.madgik.service.*;
 import gr.uoa.di.madgik.service.search.SearchServiceEIC;
 import gr.uoa.di.madgik.utils.FacetFilterUtils;
@@ -17,7 +15,6 @@ import gr.uoa.di.madgik.validators.FieldValidator;
 import gr.uoa.di.madgik.config.CacheConfig;
 import gr.uoa.di.madgik.registry.domain.*;
 import gr.uoa.di.madgik.registry.domain.index.IndexField;
-import gr.uoa.di.madgik.registry.service.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;

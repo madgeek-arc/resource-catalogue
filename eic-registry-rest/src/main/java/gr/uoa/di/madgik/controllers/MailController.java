@@ -2,7 +2,6 @@ package gr.uoa.di.madgik.controllers;
 
 import com.google.common.collect.Lists;
 import gr.uoa.di.madgik.domain.*;
-import gr.uoa.di.madgik.domain.*;
 import gr.uoa.di.madgik.service.MailService;
 import gr.uoa.di.madgik.service.PendingResourceService;
 import gr.uoa.di.madgik.service.ProviderService;

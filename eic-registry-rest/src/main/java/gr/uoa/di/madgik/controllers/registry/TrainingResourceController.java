@@ -2,7 +2,6 @@ package gr.uoa.di.madgik.controllers.registry;
 
 import gr.uoa.di.madgik.annotations.Browse;
 import gr.uoa.di.madgik.domain.*;
-import gr.uoa.di.madgik.domain.*;
 import gr.uoa.di.madgik.exception.ValidationException;
 import gr.uoa.di.madgik.service.ProviderService;
 import gr.uoa.di.madgik.service.TrainingResourceService;

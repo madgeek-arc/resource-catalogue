@@ -1,7 +1,6 @@
 package gr.uoa.di.madgik.config.security;
 
 import com.nimbusds.jwt.JWT;
-import gr.uoa.di.madgik.domain.*;
 import gr.uoa.di.madgik.domain.CatalogueBundle;
 import gr.uoa.di.madgik.domain.ProviderBundle;
 import gr.uoa.di.madgik.domain.User;

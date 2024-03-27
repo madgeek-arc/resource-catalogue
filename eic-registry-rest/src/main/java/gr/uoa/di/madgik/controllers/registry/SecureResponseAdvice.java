@@ -1,7 +1,6 @@
 package gr.uoa.di.madgik.controllers.registry;
 
 import gr.uoa.di.madgik.domain.*;
-import gr.uoa.di.madgik.domain.*;
 import gr.uoa.di.madgik.service.AuthoritiesMapper;
 import gr.uoa.di.madgik.service.SecurityService;
 import gr.uoa.di.madgik.registry.domain.Paging;

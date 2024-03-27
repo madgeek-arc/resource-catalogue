@@ -1,11 +1,9 @@
 package gr.uoa.di.madgik.manager;
 
 import gr.uoa.di.madgik.domain.*;
-import gr.uoa.di.madgik.domain.*;
 import gr.uoa.di.madgik.exception.ResourceException;
 import gr.uoa.di.madgik.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.exception.ValidationException;
-import gr.uoa.di.madgik.registry.service.*;
 import gr.uoa.di.madgik.service.*;
 import gr.uoa.di.madgik.service.search.SearchServiceEIC;
 import gr.uoa.di.madgik.utils.FacetFilterUtils;

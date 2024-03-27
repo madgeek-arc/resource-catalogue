@@ -1,14 +1,12 @@
 package gr.uoa.di.madgik.service;
 
 import gr.uoa.di.madgik.domain.*;
-import gr.uoa.di.madgik.domain.*;
 import gr.uoa.di.madgik.exception.ResourceException;
 import gr.uoa.di.madgik.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.exception.ValidationException;
 import gr.uoa.di.madgik.manager.CatalogueManager;
 import gr.uoa.di.madgik.manager.PendingProviderManager;
 import gr.uoa.di.madgik.manager.ProviderManager;
-import gr.uoa.di.madgik.registry.service.*;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.service.ServiceException;
 import org.mitre.openid.connect.model.DefaultUserInfo;

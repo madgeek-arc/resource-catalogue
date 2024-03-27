@@ -18,13 +18,6 @@
         </license>
     </licenses>
 
-    <scm>
-        <connection>scm:git:ssh://git@github.com/madgeek-arc/resource-catalogue.git</connection>
-        <developerConnection>scm:git:ssh://git@github.com/madgeek-arc/resource-catalogue.git</developerConnection>
-        <url>https://github.com/madgeek-arc/resource-catalogue.git</url>
-      <tag>HEAD</tag>
-  </scm>
-
     <properties>
         <maven-war-plugin.version>3.2.3</maven-war-plugin.version>
     </properties>

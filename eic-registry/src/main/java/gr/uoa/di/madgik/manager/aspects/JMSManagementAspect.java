@@ -1,6 +1,5 @@
 package gr.uoa.di.madgik.manager.aspects;
 
-import gr.uoa.di.madgik.domain.*;
 import gr.uoa.di.madgik.domain.CatalogueBundle;
 import gr.uoa.di.madgik.domain.HelpdeskBundle;
 import gr.uoa.di.madgik.domain.MonitoringBundle;

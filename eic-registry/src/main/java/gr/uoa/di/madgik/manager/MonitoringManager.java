@@ -2,7 +2,6 @@ package gr.uoa.di.madgik.manager;
 
 import com.google.gson.JsonArray;
 import gr.uoa.di.madgik.domain.*;
-import gr.uoa.di.madgik.domain.*;
 import gr.uoa.di.madgik.dto.MonitoringStatus;
 import gr.uoa.di.madgik.dto.ServiceType;
 import gr.uoa.di.madgik.exception.ResourceNotFoundException;

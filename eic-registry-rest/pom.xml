@@ -15,12 +15,6 @@
             <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
         </license>
     </licenses>
-    <scm>
-        <connection>scm:git:ssh://git@github.com/madgeek-arc/resource-catalogue.git</connection>
-        <developerConnection>scm:git:ssh://git@github.com/madgeek-arc/resource-catalogue.git</developerConnection>
-        <url>https://github.com/madgeek-arc/resource-catalogue.git</url>
-      <tag>HEAD</tag>
-  </scm>
     <dependencies>
         <dependency>
             <groupId>gr.uoa.di.madgik</groupId>

@@ -2,9 +2,7 @@ package gr.uoa.di.madgik.controllers.registry;
 
 import gr.uoa.di.madgik.annotations.Browse;
 import gr.uoa.di.madgik.domain.*;
-import gr.uoa.di.madgik.domain.*;
 import gr.uoa.di.madgik.exception.ValidationException;
-import gr.uoa.di.madgik.registry.service.*;
 import gr.uoa.di.madgik.service.*;
 import gr.uoa.di.madgik.utils.FacetFilterUtils;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;

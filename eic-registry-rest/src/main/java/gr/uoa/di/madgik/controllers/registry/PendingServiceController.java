@@ -1,7 +1,6 @@
 package gr.uoa.di.madgik.controllers.registry;
 
 import gr.uoa.di.madgik.annotations.Browse;
-import gr.uoa.di.madgik.domain.*;
 import gr.uoa.di.madgik.domain.ProviderBundle;
 import gr.uoa.di.madgik.domain.Service;
 import gr.uoa.di.madgik.domain.ServiceBundle;

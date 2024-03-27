@@ -1,8 +1,6 @@
 package gr.uoa.di.madgik.controllers.registry;
 
 import gr.uoa.di.madgik.domain.*;
-import gr.uoa.di.madgik.registry.service.*;
-import gr.uoa.di.madgik.domain.*;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.service.*;
 import io.swagger.annotations.Api;

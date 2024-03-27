@@ -1,6 +1,5 @@
 package gr.uoa.di.madgik.manager;
 
-import gr.uoa.di.madgik.domain.*;
 import gr.uoa.di.madgik.domain.LoggingInfo;
 import gr.uoa.di.madgik.domain.Metadata;
 import gr.uoa.di.madgik.domain.ProviderBundle;
