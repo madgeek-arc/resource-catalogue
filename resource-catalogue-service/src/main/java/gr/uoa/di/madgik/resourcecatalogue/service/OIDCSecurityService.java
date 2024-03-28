@@ -46,9 +46,8 @@ public class OIDCSecurityService implements SecurityService {
     @Value("${mail.smtp.from:}")
     private String projectEmail;
 
-    @Autowired
-    OIDCSecurityService(ProviderManager providerManager, CatalogueManager catalogueManager,
-                        ServiceBundleService<ServiceBundle> serviceBundleService,
+    OIDCSecurityService(@Lazy ProviderManager providerManager, CatalogueManager catalogueManager,
+                        @Lazy ServiceBundleService<ServiceBundle> serviceBundleService,
                         @Lazy TrainingResourceService<TrainingResourceBundle> trainingResourceService,
                         @Lazy PendingProviderManager pendingProviderManager,
                         @Lazy PendingResourceService<ServiceBundle> pendingServiceManager,

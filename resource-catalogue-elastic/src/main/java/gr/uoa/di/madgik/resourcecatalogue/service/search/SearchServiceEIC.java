@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Map;
 
-@Service("eicSearchService")
+//@Service
 public class SearchServiceEIC extends AbstractSearchService implements SearchService {
 
     private static final Logger logger = LogManager.getLogger(SearchServiceEIC.class);

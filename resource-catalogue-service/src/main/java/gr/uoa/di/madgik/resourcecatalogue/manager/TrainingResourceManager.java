@@ -60,7 +60,7 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
     @Autowired
     private FieldValidator fieldValidator;
     @Autowired
-    private SearchService searchServiceEIC;
+    private SearchService searchService;
     @Autowired
     @Qualifier("trainingResourceSync")
     private final SynchronizerService<TrainingResource> synchronizerService;
@@ -830,7 +830,7 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
     protected Browsing<TrainingResourceBundle> getResults(FacetFilter filter) {
         Browsing<TrainingResourceBundle> browsing;
         filter.setResourceType(getResourceType());
-        browsing = convertToBrowsingEIC(searchServiceEIC.search(filter));
+        browsing = convertToBrowsingEIC(searchService.search(filter));
 
         browsing.setFacets(createCorrectFacets(browsing.getFacets(), filter));
         return browsing;
@@ -864,7 +864,7 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
             FacetFilter facetFilter = FacetFilterUtils.createMultiFacetFilter(someFilters);
             facetFilter.setResourceType(getResourceType());
             facetFilter.setBrowseBy(Collections.singletonList(filterKey));
-            List<Facet> facetsCategory = convertToBrowsingEIC(searchServiceEIC.search(facetFilter)).getFacets();
+            List<Facet> facetsCategory = convertToBrowsingEIC(searchService.search(facetFilter)).getFacets();
 
             for (Facet facet : serviceFacets) {
                 if (facet.getField().equals(filterKey)) {

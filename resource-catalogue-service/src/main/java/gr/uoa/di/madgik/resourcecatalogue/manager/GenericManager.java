@@ -38,8 +38,10 @@ public class GenericManager implements GenericResourceService {
     private Map<String, List<String>> browseByMap;
     private Map<String, Map<String, String>> labelsMap;
 
-    protected GenericManager(@Qualifier("eicSearchService") SearchService searchService, ResourceService resourceService,
-                             ResourceTypeService resourceTypeService, ParserService parserPool,
+    protected GenericManager(SearchService searchService,
+                             ResourceService resourceService,
+                             ResourceTypeService resourceTypeService,
+                             ParserService parserPool,
                              DefaultFacetLabelService facetLabelService) {
         this.searchService = searchService;
         this.resourceService = resourceService;

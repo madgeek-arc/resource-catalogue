@@ -80,7 +80,7 @@
                 </executions>
                 <configuration>
                     <sources>
-                        <source>${basedir}/src/main/java/gr/uoa/di/madgik/domain</source>
+                        <source>${basedir}/src/main/java/gr/uoa/di/madgik/resourcecatalogue/domain</source>
                     </sources>
                     <outputDirectory>${basedir}/src/main/resources</outputDirectory>
                 </configuration>

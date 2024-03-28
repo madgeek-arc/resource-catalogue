@@ -8,7 +8,6 @@ import gr.uoa.di.madgik.resourcecatalogue.domain.configurationTemplates.Configur
 import freemarker.template.TemplateExceptionHandler;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.*;
-import org.springframework.jms.annotation.EnableJms;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.session.MapSessionRepository;
 import org.springframework.session.SessionRepository;
@@ -28,19 +27,11 @@ import java.util.Random;
 @ComponentScan(value = {
         "gr.uoa.di.madgik.registry",
         "gr.uoa.di.madgik.resourcecatalogue"})
-@Import(CacheConfig.class)
 @PropertySource(value = {"classpath:application.properties", "classpath:registry.properties"})
 @EnableSpringHttpSession
 @EnableAspectJAutoProxy
 @EnableAsync
-@EnableJms
 public class ServiceConfig extends AbstractHttpSessionApplicationInitializer {
-
-    @Value("${jms.host}")
-    private String jmsHost;
-
-    @Value("${jms.prefix}")
-    private String jmsPrefix;
 
 
     @Bean
@@ -58,7 +49,7 @@ public class ServiceConfig extends AbstractHttpSessionApplicationInitializer {
     }
 
     @Bean
-    freemarker.template.Configuration freeMaker() throws IOException {
+    freemarker.template.Configuration freeMarker() throws IOException {
         freemarker.template.Configuration cfg = new freemarker.template.Configuration(freemarker.template.Configuration.VERSION_2_3_28);
         cfg.setDirectoryForTemplateLoading(new File(Objects.requireNonNull(getClass().getClassLoader().getResource("templates")).getFile()));
         cfg.setDefaultEncoding("UTF-8");

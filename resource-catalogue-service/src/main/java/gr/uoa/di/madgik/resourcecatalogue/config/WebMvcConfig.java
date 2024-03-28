@@ -11,11 +11,6 @@ import org.springframework.web.servlet.config.annotation.*;
 
 
 @Configuration
-@ComponentScan({
-        "gr.uoa.di.madgik.registry.controllers",
-        "gr.uoa.di.madgik.controllers",
-        "gr.uoa.di.madgik.registry.controller",
-        "gr.uoa.di.madgik.recdb.controllers"})
 @EnableWebMvc
 @EnableAspectJAutoProxy
 public class WebMvcConfig implements WebMvcConfigurer {
@@ -60,3 +55,4 @@ public class WebMvcConfig implements WebMvcConfigurer {
         registry.addInterceptor(matomoInterceptor);
     }
 }
+

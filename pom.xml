@@ -27,6 +27,9 @@
         <module>
             resource-catalogue-elastic
         </module>
+        <module>
+            resource-catalogue-jms
+        </module>
     </modules>
 
     <licenses>
@@ -87,6 +90,11 @@
             </dependency>
             <dependency>
                 <groupId>gr.uoa.di.madgik</groupId>
+                <artifactId>resource-catalogue-jms</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>gr.uoa.di.madgik</groupId>
                 <artifactId>registry-core-api</artifactId>
                 <version>${registry-core.version}</version>
             </dependency>
@@ -134,9 +142,10 @@
             </dependency>
             <dependency>
                 <groupId>org.apache.logging.log4j</groupId>
-                <artifactId>log4j-slf4j-impl</artifactId>
+                <artifactId>log4j-slf4j2-impl</artifactId>
                 <version>${logging.version}</version>
             </dependency>
+
             <dependency>
                 <groupId>org.codehaus.jackson</groupId>
                 <artifactId>jackson-mapper-asl</artifactId>

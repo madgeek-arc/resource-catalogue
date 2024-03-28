@@ -28,7 +28,6 @@ import java.util.stream.StreamSupport;
 import static gr.uoa.di.madgik.resourcecatalogue.config.Properties.Cache.CACHE_VISITS;
 
 @Component
-@PropertySource({"classpath:application.properties", "classpath:registry.properties"})
 public class AnalyticsService implements Analytics {
 
     private static final Logger logger = LogManager.getLogger(AnalyticsService.class);

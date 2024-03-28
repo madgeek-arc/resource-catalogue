@@ -25,8 +25,6 @@ import static gr.uoa.di.madgik.resourcecatalogue.config.Properties.Cache.*;
 public class CacheConfig {
     private static final Logger logger = LogManager.getLogger(CacheConfig.class);
 
-    protected RestTemplate restTemplate;
-
     @Bean
     public CacheManager cacheManager() {
         SimpleCacheManager cacheManager = new SimpleCacheManager();

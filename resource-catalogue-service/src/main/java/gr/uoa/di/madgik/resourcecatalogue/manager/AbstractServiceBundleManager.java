@@ -54,7 +54,7 @@ public abstract class AbstractServiceBundleManager<T extends ServiceBundle> exte
     @Autowired
     private AnalyticsService analyticsService;
     @Autowired
-    private @Qualifier("eicSearchService") SearchService searchService;
+    private SearchService searchService;
     @Autowired
     private IdCreator idCreator;
     private List<String> browseBy;

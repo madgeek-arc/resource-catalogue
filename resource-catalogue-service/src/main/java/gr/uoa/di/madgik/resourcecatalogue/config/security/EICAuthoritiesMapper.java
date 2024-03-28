@@ -32,7 +32,6 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Component
-@PropertySource({"classpath:application.properties", "classpath:registry.properties"})
 public class EICAuthoritiesMapper implements OIDCAuthoritiesMapper, AuthoritiesMapper {
 
     private static final Logger logger = LogManager.getLogger(EICAuthoritiesMapper.class);
@@ -51,7 +50,6 @@ public class EICAuthoritiesMapper implements OIDCAuthoritiesMapper, AuthoritiesM
 
     private final ReentrantLock lock = new ReentrantLock();
 
-    @Autowired
     public EICAuthoritiesMapper(@Value("${project.admins}") String admins,
                                 @Value("${project.admins.epot}") String epotAdmins,
                                 @Value("${elastic.index.max_result_window:10000}") int maxQuantity,
