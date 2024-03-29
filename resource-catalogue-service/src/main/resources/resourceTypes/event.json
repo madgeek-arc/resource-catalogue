@@ -57,5 +57,5 @@
   "properties": {
     "class": "gr.uoa.di.madgik.resourcecatalogue.domain.Event"
   },
-  "schemaUrl": "https://raw.githubusercontent.com/madgeek-arc/resource-catalogue/version/5/resource-catalogue-model/src/main/resources/schema1.xsd""
+  "schemaUrl": "https://raw.githubusercontent.com/madgeek-arc/resource-catalogue/version/5/resource-catalogue-model/src/main/resources/schema1.xsd"
 }
