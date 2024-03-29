@@ -95,6 +95,11 @@
             </dependency>
             <dependency>
                 <groupId>gr.uoa.di.madgik</groupId>
+                <artifactId>resource-catalogue-matomo</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>gr.uoa.di.madgik</groupId>
                 <artifactId>registry-core-api</artifactId>
                 <version>${registry-core.version}</version>
             </dependency>
