@@ -26,7 +26,13 @@ import java.util.Random;
 @Configuration
 @ComponentScan(value = {
         "gr.uoa.di.madgik.registry",
-        "gr.uoa.di.madgik.resourcecatalogue"})
+        "gr.uoa.di.madgik.resourcecatalogue.manager",
+        "gr.uoa.di.madgik.resourcecatalogue.utils",
+        "gr.uoa.di.madgik.resourcecatalogue.validators",
+        "gr.uoa.di.madgik.resourcecatalogue.service",
+        "gr.uoa.di.madgik.resourcecatalogue.matomo",
+        "gr.uoa.di.madgik.resourcecatalogue.recdb"})
+@Import(CacheConfig.class)
 @PropertySource(value = {"classpath:application.properties", "classpath:registry.properties"})
 @EnableSpringHttpSession
 @EnableAspectJAutoProxy
