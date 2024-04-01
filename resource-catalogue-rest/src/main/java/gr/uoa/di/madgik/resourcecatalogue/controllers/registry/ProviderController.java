@@ -148,10 +148,10 @@ public class ProviderController {
     @Browse
     @ApiImplicitParam(name = "suspended", value = "Suspended", defaultValue = "false", dataType = "boolean", paramType = "query")
     @GetMapping(path = "all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    public ResponseEntity<Paging<Provider>> getAll(@ApiIgnore @RequestParam Map<String, Object> allRequestParams,
+    public ResponseEntity<Paging<Provider>> getAll(@ApiIgnore @RequestParam MultiValueMap<String, Object> allRequestParams,
                                                    @RequestParam(defaultValue = "all", name = "catalogue_id") String catalogueIds,
                                                    @ApiIgnore Authentication auth) {
-        allRequestParams.putIfAbsent("catalogue_id", catalogueIds);
+        allRequestParams.putIfAbsent("catalogue_id", Collections.singletonList(catalogueIds));
         if (catalogueIds != null && catalogueIds.equals("all")) {
             allRequestParams.remove("catalogue_id");
         }
@@ -295,7 +295,7 @@ public class ProviderController {
         allRequestParams.add("resource_organisation", providerId);
         allRequestParams.add("status", "rejected resource");
         allRequestParams.add("published", false);
-        FacetFilter ff = FacetFilterUtils.createMultiFacetFilter(allRequestParams);
+        FacetFilter ff = FacetFilterUtils.createFacetFilter(allRequestParams);
         return ResponseEntity.ok(providerService.getRejectedResources(ff, resourceType, auth));
     }
 

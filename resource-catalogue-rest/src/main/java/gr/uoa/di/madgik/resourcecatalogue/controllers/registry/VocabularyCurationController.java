@@ -66,7 +66,7 @@ public class VocabularyCurationController extends ResourceController<VocabularyC
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     public ResponseEntity<Paging<VocabularyCuration>> getAllVocabularyCurationRequests(@ApiIgnore @RequestParam MultiValueMap<String, Object> allRequestParams, @RequestParam(required = false) Set<String> status,
                                                                                        @RequestParam(required = false) Set<String> vocabulary, @ApiIgnore Authentication authentication) {
-        FacetFilter ff = FacetFilterUtils.createMultiFacetFilter(allRequestParams);
+        FacetFilter ff = FacetFilterUtils.createFacetFilter(allRequestParams);
         return ResponseEntity.ok(vocabularyCurationService.getAllVocabularyCurationRequests(ff, authentication));
     }
 

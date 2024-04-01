@@ -607,7 +607,7 @@ public class ProviderResourcesCommonMethods {
         FacetFilter ff2 = new FacetFilter();
         ff2.setFilter(new HashMap<>(ff.getFilter()));
         // remove auditState from ff2 filter
-        ((MultiValueMap<String, Object>) ff2.getFilter().get("multi-filter")).remove("auditState");
+        ff2.getFilter().remove("auditState");
         ff2.setQuantity(maxQuantity);
         ff2.setFrom(0);
         ff2.setResourceType(resourceType);

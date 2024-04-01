@@ -80,7 +80,7 @@ public class DatasourceController {
     public ResponseEntity<Paging<Datasource>> getAllDatasources(@ApiIgnore @RequestParam MultiValueMap<String, Object> allRequestParams,
                                                                 @RequestParam(defaultValue = "all", name = "catalogue_id") String catalogueId,
                                                                 @ApiIgnore Authentication auth) {
-        FacetFilter ff = datasourceService.createFacetFilterForFetchingDatasources(allRequestParams, catalogueId);
+        FacetFilter ff = createFacetFilterForFetchingDatasources(allRequestParams, catalogueId);
         List<Datasource> datasourceList = new LinkedList<>();
         Paging<DatasourceBundle> paging = genericResourceService.getResults(ff);
         for (DatasourceBundle datasourceBundle : paging.getResults()) {
@@ -97,7 +97,7 @@ public class DatasourceController {
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     public ResponseEntity<Paging<?>> getAllDatasourcesForAdminPage(@ApiIgnore @RequestParam MultiValueMap<String, Object> allRequestParams,
                                                                    @RequestParam(defaultValue = "all", name = "catalogue_id") String catalogueId) {
-        FacetFilter ff = datasourceService.createFacetFilterForFetchingDatasources(allRequestParams, catalogueId);
+        FacetFilter ff = createFacetFilterForFetchingDatasources(allRequestParams, catalogueId);
         Paging<?> paging = genericResourceService.getResults(ff);
         genericResourceService.sortFacets(paging.getFacets(), "service_id");
         return ResponseEntity.ok(paging);
@@ -189,7 +189,7 @@ public class DatasourceController {
     @Browse
     @GetMapping(path = "/getAllOpenAIREDatasources", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<Paging<Datasource>> getAllOpenAIREDatasources(@ApiIgnore @RequestParam MultiValueMap<String, Object> allRequestParams) throws IOException {
-        FacetFilter ff = FacetFilterUtils.createMultiFacetFilter(allRequestParams);
+        FacetFilter ff = FacetFilterUtils.createFacetFilter(allRequestParams);
         Map<Integer, List<Datasource>> datasourceMap = openAIREDatasourceService.getAll(ff);
         Paging<Datasource> datasourcePaging = new Paging<>();
         datasourcePaging.setTotal(datasourceMap.keySet().iterator().next());
@@ -203,5 +203,25 @@ public class DatasourceController {
     @GetMapping(path = "isMetricsValid/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
     public OpenAIREMetrics getOpenaireMetrics(@PathVariable("id") String id) {
         return openAIREDatasourceService.getMetrics(id);
+    }
+
+    /**
+     * Create a FacetFilter for fetching Datasources
+     *
+     * @param allRequestParams {@link MultiValueMap} of all the Requested Parameters given
+     * @param catalogueId      Catalogue ID
+     * @return {@link FacetFilter}
+     */
+    private FacetFilter createFacetFilterForFetchingDatasources(MultiValueMap<String, Object> allRequestParams, String catalogueId) {
+        FacetFilter ff = FacetFilterUtils.createFacetFilter(allRequestParams);
+        allRequestParams.remove("catalogue_id");
+        if (catalogueId != null) {
+            if (!catalogueId.equals("all")) {
+                ff.addFilter("catalogue_id", catalogueId);
+            }
+        }
+        ff.addFilter("published", false);
+        ff.setResourceType("datasource");
+        return ff;
     }
 }

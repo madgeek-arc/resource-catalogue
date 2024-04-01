@@ -47,16 +47,6 @@ public interface DatasourceService extends ResourceService<DatasourceBundle, Aut
     void updateBundle(DatasourceBundle datasourceBundle, Authentication auth);
 
     /**
-     * Create a FacetFilter for fetching Datasources
-     *
-     * @param allRequestParams {@link MultiValueMap} of all the Requested Parameters given
-     * @param catalogueId      Catalogue ID
-     * @return {@link FacetFilter}
-     */
-    FacetFilter createFacetFilterForFetchingDatasources(MultiValueMap<String, Object> allRequestParams,
-                                                        String catalogueId);
-
-    /**
      * Returns True/False according to if the specific Datasource
      * is already registered in the OpenAIRE Catalogue
      *

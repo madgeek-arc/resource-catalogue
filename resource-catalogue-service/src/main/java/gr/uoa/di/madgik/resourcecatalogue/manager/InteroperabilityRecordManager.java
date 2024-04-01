@@ -418,7 +418,7 @@ public class InteroperabilityRecordManager extends ResourceManager<Interoperabil
     }
 
     public FacetFilter createFacetFilterForFetchingInteroperabilityRecords(MultiValueMap<String, Object> allRequestParams, String catalogueId, String providerId) {
-        FacetFilter ff = FacetFilterUtils.createMultiFacetFilter(allRequestParams);
+        FacetFilter ff = FacetFilterUtils.createFacetFilter(allRequestParams);
         allRequestParams.remove("catalogue_id");
         allRequestParams.remove("provider_id");
         if (catalogueId != null) {

@@ -614,7 +614,7 @@ public abstract class AbstractServiceBundleManager<T extends ServiceBundle> exte
     }
 
     public FacetFilter createFacetFilterForFetchingServices(MultiValueMap<String, Object> allRequestParams, String catalogueId) {
-        FacetFilter ff = FacetFilterUtils.createMultiFacetFilter(allRequestParams);
+        FacetFilter ff = FacetFilterUtils.createFacetFilter(allRequestParams);
         allRequestParams.remove("catalogue_id");
         if (catalogueId != null) {
             if (!catalogueId.equals("all")) {

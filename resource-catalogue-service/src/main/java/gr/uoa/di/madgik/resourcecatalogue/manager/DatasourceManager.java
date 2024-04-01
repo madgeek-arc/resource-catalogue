@@ -262,19 +262,6 @@ public class DatasourceManager extends ResourceManager<DatasourceBundle> impleme
         return this.getAll(ff, auth);
     }
 
-    public FacetFilter createFacetFilterForFetchingDatasources(MultiValueMap<String, Object> allRequestParams, String catalogueId) {
-        FacetFilter ff = FacetFilterUtils.createMultiFacetFilter(allRequestParams);
-        allRequestParams.remove("catalogue_id");
-        if (catalogueId != null) {
-            if (!catalogueId.equals("all")) {
-                ff.addFilter("catalogue_id", catalogueId);
-            }
-        }
-        ff.addFilter("published", false);
-        ff.setResourceType("datasource");
-        return ff;
-    }
-
     // OpenAIRE
     private void checkOpenAIREIDExistence(DatasourceBundle datasourceBundle) {
         Datasource datasource = openAIREDatasourceManager.get(datasourceBundle.getId());

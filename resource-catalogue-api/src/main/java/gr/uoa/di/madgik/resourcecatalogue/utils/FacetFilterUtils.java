@@ -11,7 +11,6 @@ import java.util.stream.Collectors;
 
 public class FacetFilterUtils {
 
-    public static final String MULTI_FILTER = "multi-filter";
     public static final String SEARCH_FIELDS = "searchFields";
     public static final String SEARCHABLE_AREA = "searchableArea";
 
@@ -20,29 +19,10 @@ public class FacetFilterUtils {
     private FacetFilterUtils() {
     }
 
-    @Deprecated
-    public static Map<String, Object> createOrderBy(String field, String orderType) {
-        Map<String, Object> sort = new HashMap<>();
-        Map<String, Object> order = new HashMap<>();
-        order.put("order", orderType);
-        sort.put(field, order);
-        return sort;
-    }
-
     // Gets all given filters
     public static Map<String, List<Object>> getFacetFilterFilters(FacetFilter ff) {
         Map<String, Object> filters = new LinkedHashMap<>(ff.getFilter());
         Map<String, List<Object>> allFilters = new LinkedHashMap<>();
-
-        // check if a MultiValueMap filter exists inside the filter
-        if (filters.get(MULTI_FILTER) != null) {
-            MultiValueMap<String, Object> multiFilter = (MultiValueMap<String, Object>) filters.remove(MULTI_FILTER);
-
-            for (Map.Entry<String, List<Object>> entry : multiFilter.entrySet()) {
-                // fill the variable with the multiple filters
-                allFilters.put(entry.getKey(), entry.getValue());
-            }
-        }
 
         // fill the variable with the rest of the filters
         for (Map.Entry<String, Object> ffEntry : filters.entrySet()) {
@@ -122,42 +102,31 @@ public class FacetFilterUtils {
         return ff;
     }
 
-    public static FacetFilter createMultiFacetFilter(Map<String, List<Object>> allRequestParams) {
-        MultiValueMap<String, Object> requestParams = new LinkedMultiValueMap<>(allRequestParams);
-        return createMultiFacetFilter(requestParams);
+    public static FacetFilter createMultiFacetFilter(Map<String, List<Object>> params) {
+        MultiValueMap<String, Object> requestParams = new LinkedMultiValueMap<>(params);
+        return createFacetFilter(requestParams);
     }
 
-    public static FacetFilter createMultiFacetFilter(MultiValueMap<String, Object> allRequestParams) {
-        logger.debug("Request params: {}", allRequestParams);
-        FacetFilter facetFilter = new FacetFilter();
-        facetFilter.setKeyword(allRequestParams.get("query") != null ? (String) allRequestParams.remove("query").get(0) : "");
-        facetFilter.setFrom(allRequestParams.get("from") != null ? Integer.parseInt((String) allRequestParams.remove("from").get(0)) : 0);
-        facetFilter.setQuantity(allRequestParams.get("quantity") != null ? Integer.parseInt((String) allRequestParams.remove("quantity").get(0)) : 10);
+    public static FacetFilter createFacetFilter(MultiValueMap<String, Object> params) {
+        logger.debug("Request params: {}", params);
+        FacetFilter ff = new FacetFilter();
+        ff.setKeyword(params.get("query") != null ? (String) params.remove("query").get(0) : "");
+        ff.setFrom(params.get("from") != null ? Integer.parseInt((String) params.remove("from").get(0)) : 0);
+        ff.setQuantity(params.get("quantity") != null ? Integer.parseInt((String) params.remove("quantity").get(0)) : 10);
         Map<String, Object> sort = new HashMap<>();
         Map<String, Object> order = new HashMap<>();
-        String orderDirection = allRequestParams.get("order") != null ? (String) allRequestParams.remove("order").get(0) : "asc";
-        String orderField = allRequestParams.get("orderField") != null ? (String) allRequestParams.remove("orderField").get(0) : null;
+        String orderDirection = params.get("order") != null ? (String) params.remove("order").get(0) : "asc";
+        String orderField = params.get("orderField") != null ? (String) params.remove("orderField").get(0) : null;
         if (orderField != null) {
             order.put("order", orderDirection);
             sort.put(orderField, order);
-            facetFilter.setOrderBy(sort);
+            ff.setOrderBy(sort);
         }
-        if (!allRequestParams.isEmpty()) {
-            Set<Map.Entry<String, List<Object>>> filterSet = allRequestParams.entrySet();
-            for (Map.Entry<String, List<Object>> entry : filterSet) {
-                // split values separated by comma to entries and replace existing <key,value> pair with the new one
-                allRequestParams.replace(entry.getKey(), new LinkedList<>(
-                        entry.getValue()
-                                .stream()
-                                .flatMap(e -> Arrays.stream(e.toString().split(",")))
-                                .distinct()
-                                .collect(Collectors.toList()))
-                );
+        if (!params.isEmpty()) {
+            for (Map.Entry<String, List<Object>> filter : params.entrySet()) {
+                ff.addFilter(filter.getKey(), filter.getValue());
             }
-            Map<String, Object> multiFilter = new LinkedHashMap<>();
-            multiFilter.put(MULTI_FILTER, allRequestParams);
-            facetFilter.setFilter(multiFilter);
         }
-        return facetFilter;
+        return ff;
     }
 }
