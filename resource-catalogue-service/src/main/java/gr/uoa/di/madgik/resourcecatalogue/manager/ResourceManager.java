@@ -140,12 +140,8 @@ public abstract class ResourceManager<T extends Identifiable> extends AbstractGe
         return whereID(t.getId(), false) != null;
     }
 
-    public ParserService.ParserServiceTypes getCoreFormat() {
-        return ParserService.ParserServiceTypes.XML;
-    }
-
     protected String serialize(T t) {
-        String ret = parserPool.serialize(t, getCoreFormat());
+        String ret = parserPool.serialize(t, ParserService.ParserServiceTypes.fromString(resourceType.getPayloadType()));
         if (ret.equals("failed")) {
             throw new ResourceException(String.format("Not a valid %s!", resourceType.getName()), HttpStatus.BAD_REQUEST);
         }
