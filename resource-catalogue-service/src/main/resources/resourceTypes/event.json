@@ -1,61 +1,54 @@
 {
-  "indexFields": [
-    {
-      "multivalued": false,
-      "name": "resource_internal_id",
-      "path": "//*[local-name()='id']/text()",
-      "type": "java.lang.String",
-      "primaryKey": true
+    "indexFields": [
+        {
+            "label": null,
+            "multivalued": false,
+            "name": "resource_internal_id",
+            "path": "$.id",
+            "primaryKey": true,
+            "type": "java.lang.String"
+        },
+        {
+            "label": null,
+            "multivalued": false,
+            "name": "value",
+            "path": "$.value",
+            "type": "java.lang.Float"
+        },
+        {
+            "label": null,
+            "multivalued": false,
+            "name": "instant",
+            "path": "$.instant",
+            "type": "java.util.Date"
+        },
+        {
+            "label": null,
+            "multivalued": false,
+            "name": "service",
+            "path": "$.service",
+            "type": "java.lang.String"
+        },
+        {
+            "label": null,
+            "multivalued": false,
+            "name": "type",
+            "path": "$.type",
+            "type": "java.lang.String"
+        },
+        {
+            "label": null,
+            "multivalued": false,
+            "name": "event_user",
+            "path": "$.user",
+            "type": "java.lang.String"
+        }
+    ],
+    "indexMapperClass": "gr.uoa.di.madgik.registry.index.DefaultIndexMapper",
+    "name": "event",
+    "payloadType": "json",
+    "properties": {
+        "class": "gr.uoa.di.madgik.resourcecatalogue.domain.Event"
     },
-    {
-      "multivalued": false,
-      "name": "event_id",
-      "path": "//*[local-name()='id']/text()",
-      "type": "java.lang.String",
-      "primaryKey": true
-    },
-    {
-      "multivalued": false,
-      "name": "value",
-      "path": "//*[local-name()='value']/text()",
-      "type": "java.lang.Float",
-      "primaryKey": false
-    },
-    {
-      "multivalued": false,
-      "name": "instant",
-      "path": "//*[local-name()='instant']/text()",
-      "type": "java.util.Date",
-      "primaryKey": false
-    },
-    {
-      "multivalued": false,
-      "name": "service",
-      "path": "//*[local-name()='service']/text()",
-      "type": "java.lang.String",
-      "primaryKey": false
-    },
-    {
-      "multivalued": false,
-      "name": "type",
-      "path": "//*[local-name()='type']/text()",
-      "type": "java.lang.String",
-      "primaryKey": false
-    },
-    {
-      "multivalued": false,
-      "name": "event_user",
-      "path": "//*[local-name()='user']/text()",
-      "type": "java.lang.String",
-      "primaryKey": false
-    }
-  ],
-  "indexMapperClass": "gr.uoa.di.madgik.registry.index.DefaultIndexMapper",
-  "name": "event",
-  "aliasGroup": "resourceTypes",
-  "payloadType": "xml",
-  "properties": {
-    "class": "gr.uoa.di.madgik.resourcecatalogue.domain.Event"
-  },
-  "schemaUrl": "https://raw.githubusercontent.com/madgeek-arc/resource-catalogue/version/5/resource-catalogue-model/src/main/resources/schema1.xsd"
+    "schema": "{\n\t\"$schema\": \"https://json-schema.org/draft/2019-09/schema\"\n}"
 }

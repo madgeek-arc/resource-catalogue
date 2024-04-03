@@ -1,56 +1,42 @@
 {
-  "indexFields": [
-    {
-      "defaultValue": null,
-      "label": "resource_internal_id",
-      "multivalued": false,
-      "name": "resource_internal_id",
-      "path": "//*[local-name()='id']/text()",
-      "primaryKey": true,
-      "type": "java.lang.String"
+    "aliasGroup": "resourceTypes",
+    "indexFields": [
+        {
+            "label": null,
+            "multivalued": false,
+            "name": "resource_internal_id",
+            "path": "$.id",
+            "primaryKey": true,
+            "type": "java.lang.String"
+        },
+        {
+            "label": "Vocabulary Name",
+            "multivalued": false,
+            "name": "name",
+            "path": "$.name",
+            "type": "java.lang.String"
+        },
+        {
+            "label": "Vocabulary Type",
+            "multivalued": false,
+            "name": "type",
+            "path": "$.type",
+            "type": "java.lang.String"
+        },
+        {
+            "label": null,
+            "multivalued": false,
+            "name": "parent_id",
+            "path": "$.parentId",
+            "type": "java.lang.String"
+        }
+    ],
+    "indexMapperClass": "gr.uoa.di.madgik.registry.index.DefaultIndexMapper",
+    "aliases": ["resourceTypes"],
+    "name": "vocabulary",
+    "payloadType": "json",
+    "properties": {
+        "class": "gr.uoa.di.madgik.resourcecatalogue.domain.Vocabulary"
     },
-    {
-      "defaultValue": null,
-      "label": "vocabulary_id",
-      "multivalued": false,
-      "name": "vocabulary_id",
-      "path": "//*[local-name()='id']/text()",
-      "primaryKey": true,
-      "type": "java.lang.String"
-    },
-    {
-      "defaultValue": null,
-      "label": "name",
-      "multivalued": false,
-      "name": "name",
-      "path": "//*[local-name()='name']/text()",
-      "primaryKey": false,
-      "type": "java.lang.String"
-    },
-    {
-      "defaultValue": null,
-      "label": "Vocabulary Type",
-      "multivalued": false,
-      "name": "type",
-      "path": "//*[local-name()='type']/text()",
-      "primaryKey": false,
-      "type": "java.lang.String"
-    },
-    {
-      "defaultValue": null,
-      "multivalued": true,
-      "name": "parent_id",
-      "path": "//*[local-name()='parentId']/text()",
-      "primaryKey": false,
-      "type": "java.lang.String"
-    }
-  ],
-  "indexMapperClass": "gr.uoa.di.madgik.registry.index.DefaultIndexMapper",
-  "name": "vocabulary",
-  "aliasGroup": "resourceTypes",
-  "payloadType": "xml",
-  "properties": {
-    "class": "gr.uoa.di.madgik.resourcecatalogue.domain.Vocabulary"
-  },
-  "schemaUrl": "https://raw.githubusercontent.com/madgeek-arc/resource-catalogue/version/5/resource-catalogue-model/src/main/resources/schema1.xsd"
+    "schema": "{\n\t\"$schema\": \"https://json-schema.org/draft/2019-09/schema\"\n}"
 }
