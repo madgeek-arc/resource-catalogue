@@ -19,6 +19,8 @@
     
   <xs:element name="configurationTemplateInstanceBundle" type="tns:configurationTemplateInstanceBundle"/>
     
+  <xs:element name="contactInfoTransfer" type="tns:contactInfoTransfer"/>
+    
   <xs:element name="creator" type="tns:creator"/>
     
   <xs:element name="creatorAffiliationInfo" type="tns:creatorAffiliationInfo"/>
@@ -663,12 +665,26 @@ It is also possible to select Not a legal entity.]]></xs:documentation>
           <xs:element minOccurs="0" ref="tns:catalogue"/>
                     
           <xs:element minOccurs="0" name="status" type="xs:string"/>
+                    
+          <xs:element maxOccurs="unbounded" minOccurs="0" name="transferContactInformation" type="tns:contactInfoTransfer"/>
                   
         </xs:sequence>
               
       </xs:extension>
           
     </xs:complexContent>
+      
+  </xs:complexType>
+    
+  <xs:complexType name="contactInfoTransfer">
+        
+    <xs:sequence>
+            
+      <xs:element default="false" name="acceptedTransfer" type="xs:boolean"/>
+            
+      <xs:element name="email" type="xs:string"/>
+          
+    </xs:sequence>
       
   </xs:complexType>
     
@@ -1975,6 +1991,20 @@ For embedded providers (2) - legal status of the hosting legal entity. It is als
           <xs:element minOccurs="0" name="status" type="xs:string"/>
                     
           <xs:element minOccurs="0" name="templateStatus" type="xs:string"/>
+                    
+          <xs:element minOccurs="0" name="transferContactInformation">
+                        
+            <xs:complexType>
+                            
+              <xs:sequence>
+                                
+                <xs:element maxOccurs="unbounded" minOccurs="0" name="transferContactInformation" type="tns:contactInfoTransfer"/>
+                              
+              </xs:sequence>
+                          
+            </xs:complexType>
+                      
+          </xs:element>
                   
         </xs:sequence>
               

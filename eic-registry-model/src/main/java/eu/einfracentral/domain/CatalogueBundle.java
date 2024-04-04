@@ -4,6 +4,7 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 
 @XmlType
@@ -16,6 +17,9 @@ public class CatalogueBundle extends Bundle<Catalogue> {
 
     @XmlElement
     private String auditState;
+
+    @XmlElement
+    private List<ContactInfoTransfer> transferContactInformation;
 
     public CatalogueBundle() {
         // no arg constructor
@@ -84,17 +88,25 @@ public class CatalogueBundle extends Bundle<Catalogue> {
         this.auditState = auditState;
     }
 
+    public List<ContactInfoTransfer> getTransferContactInformation() {
+        return transferContactInformation;
+    }
+
+    public void setTransferContactInformation(List<ContactInfoTransfer> transferContactInformation) {
+        this.transferContactInformation = transferContactInformation;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         if (!super.equals(o)) return false;
         CatalogueBundle that = (CatalogueBundle) o;
-        return Objects.equals(status, that.status) && Objects.equals(auditState, that.auditState);
+        return Objects.equals(status, that.status) && Objects.equals(auditState, that.auditState) && Objects.equals(transferContactInformation, that.transferContactInformation);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), status, auditState);
+        return Objects.hash(super.hashCode(), status, auditState, transferContactInformation);
     }
 }

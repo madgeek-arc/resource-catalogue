@@ -1,8 +1,10 @@
 package eu.einfracentral.domain;
 
 import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
+import java.util.List;
 import java.util.Objects;
 
 @XmlType
@@ -16,6 +18,10 @@ public class ProviderBundle extends Bundle<Provider> {
     @XmlElement
 //    @VocabularyValidation(type = Vocabulary.Type.TEMPLATE_STATE)
     private String templateStatus;
+
+    @XmlElementWrapper(name = "transferContactInformation")
+    @XmlElement(name = "transferContactInformation")
+    private List<ContactInfoTransfer> transferContactInformation;
 
     public ProviderBundle() {
         // no arg constructor
@@ -66,17 +72,25 @@ public class ProviderBundle extends Bundle<Provider> {
         this.templateStatus = templateStatus;
     }
 
+    public List<ContactInfoTransfer> getTransferContactInformation() {
+        return transferContactInformation;
+    }
+
+    public void setTransferContactInformation(List<ContactInfoTransfer> transferContactInformation) {
+        this.transferContactInformation = transferContactInformation;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof ProviderBundle)) return false;
         if (!super.equals(o)) return false;
         ProviderBundle that = (ProviderBundle) o;
-        return Objects.equals(status, that.status) && Objects.equals(templateStatus, that.templateStatus);
+        return Objects.equals(status, that.status) && Objects.equals(templateStatus, that.templateStatus) && Objects.equals(transferContactInformation, that.transferContactInformation);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), status, templateStatus);
+        return Objects.hash(super.hashCode(), status, templateStatus, transferContactInformation);
     }
 }
