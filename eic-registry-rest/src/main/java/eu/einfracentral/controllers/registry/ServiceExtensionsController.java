@@ -140,7 +140,7 @@ public class ServiceExtensionsController {
 
     @ApiOperation(value = "Updates the Helpdesk with the given id.")
     @PutMapping(path = "/helpdesk", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth, #helpdesk.serviceId, #catalogueId)")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<Helpdesk> updateHelpdesk(@Valid @RequestBody Helpdesk helpdesk,
                                                    @RequestParam(defaultValue = "${project.catalogue.name}", name = "catalogue_id") String catalogueId,
                                                    @ApiIgnore Authentication auth) throws ResourceNotFoundException {
@@ -153,7 +153,7 @@ public class ServiceExtensionsController {
 
     // Deletes the Helpdesk with the specific ID.
     @DeleteMapping(path = "/helpdesk/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<Helpdesk> deleteHelpdeskById(@PathVariable("id") String id, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
         HelpdeskBundle helpdeskBundle = helpdeskService.get(id);
         if (helpdeskBundle == null) {
@@ -169,7 +169,7 @@ public class ServiceExtensionsController {
     // Deletes the Helpdesk of the specific Service of the specific Catalogue.
     @ApiOperation(value = "Deletes the Helpdesk of the specific Service of the specific Catalogue.")
     @DeleteMapping(path = "/helpdesk/{catalogueId}/{serviceId}", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth, #serviceId, #catalogueId)")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<Helpdesk> deleteHelpdesk(@PathVariable("catalogueId") String catalogueId,
                                                    @PathVariable("serviceId") String serviceId,
                                                    @ApiIgnore Authentication auth) throws ResourceNotFoundException {
@@ -287,7 +287,7 @@ public class ServiceExtensionsController {
 
     @ApiOperation(value = "Updates the Monitoring with the given id.")
     @PutMapping(path = "/monitoring", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth, #monitoring.serviceId, #catalogueId)")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<Monitoring> updateMonitoring(@Valid @RequestBody Monitoring monitoring,
                                                        @RequestParam(defaultValue = "${project.catalogue.name}", name = "catalogue_id") String catalogueId,
                                                        @ApiIgnore Authentication auth) throws ResourceNotFoundException {
@@ -300,7 +300,7 @@ public class ServiceExtensionsController {
 
     // Deletes the Helpdesk of the given Service ID of the given Catalogue.
     @DeleteMapping(path = "/monitoring/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<Monitoring> deleteMonitoringById(@PathVariable("id") String id, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
         MonitoringBundle monitoringBundle = monitoringService.get(id);
         if (monitoringBundle == null) {
@@ -316,7 +316,7 @@ public class ServiceExtensionsController {
     // Deletes the Monitoring of the specific Service of the specific Catalogue.
     @ApiOperation(value = "Deletes the Monitoring of the specific Service of the specific Catalogue.")
     @DeleteMapping(path = "/monitoring/{catalogueId}/{serviceId}", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth, #serviceId, #catalogueId)")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<Monitoring> deleteMonitoring(@PathVariable("catalogueId") String catalogueId,
                                                        @PathVariable("serviceId") String serviceId,
                                                        @ApiIgnore Authentication auth) throws ResourceNotFoundException {

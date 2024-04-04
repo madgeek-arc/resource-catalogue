@@ -71,7 +71,7 @@ public class VocabularyCurationController extends ResourceController<VocabularyC
     }
 
     @PutMapping(path = "approveOrRejectVocabularyCuration", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public void approveOrRejectVocabularyCuration(@RequestBody VocabularyCuration vocabularyCuration, @RequestParam boolean approved,
                                                   @RequestParam(required = false) String rejectionReason, @ApiIgnore Authentication authentication) {
         vocabularyCurationService.approveOrRejectVocabularyCuration(vocabularyCuration, approved, rejectionReason, authentication);

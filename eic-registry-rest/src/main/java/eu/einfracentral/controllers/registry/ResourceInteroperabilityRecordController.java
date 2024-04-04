@@ -91,7 +91,7 @@ public class ResourceInteroperabilityRecordController {
 
     @ApiOperation(value = "Updates the ResourceInteroperabilityRecord with the given id.")
     @PutMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth, #resourceInteroperabilityRecord.resourceId, #resourceInteroperabilityRecord.catalogueId)")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<ResourceInteroperabilityRecord> updateResourceInteroperabilityRecord(@RequestBody ResourceInteroperabilityRecord resourceInteroperabilityRecord,
                                                                                                @ApiIgnore Authentication auth) throws ResourceNotFoundException {
         ResourceInteroperabilityRecordBundle resourceInteroperabilityRecordBundle = resourceInteroperabilityRecordService.get(resourceInteroperabilityRecord.getId());
@@ -102,7 +102,7 @@ public class ResourceInteroperabilityRecordController {
     }
 
     @DeleteMapping(path = "{resourceId}/{resourceInteroperabilityRecordId}", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth, #resourceId)")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<ResourceInteroperabilityRecord> deleteResourceInteroperabilityRecordById(@PathVariable("resourceId") String resourceId,
                                                                                                    @PathVariable("resourceInteroperabilityRecordId") String resourceInteroperabilityRecordId,
                                                                                                    @ApiIgnore Authentication auth) throws ResourceNotFoundException {

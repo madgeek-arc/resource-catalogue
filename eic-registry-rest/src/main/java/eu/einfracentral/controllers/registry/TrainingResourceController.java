@@ -62,7 +62,7 @@ public class TrainingResourceController {
     }
 
     @DeleteMapping(path = {"{id}"}, produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth, #id)")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<TrainingResourceBundle> delete(@PathVariable("id") String id,
                                                          @RequestParam(defaultValue = "${project.catalogue.name}", name = "catalogue_id") String catalogueId,
                                                          @ApiIgnore Authentication auth) throws ResourceNotFoundException {
@@ -103,7 +103,7 @@ public class TrainingResourceController {
     }
 
     @ApiOperation(value = "Updates the TrainingResource assigned the given id with the given TrainingResource, keeping a version of revisions.")
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth,#trainingResource)")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PutMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<TrainingResource> updateTrainingResource(@RequestBody TrainingResource trainingResource, @RequestParam(required = false) String comment, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
         TrainingResourceBundle ret = this.trainingResourceService.updateResource(new TrainingResourceBundle(trainingResource), comment, auth);
@@ -113,7 +113,7 @@ public class TrainingResourceController {
 
     // Accept/Reject a Resource.
     @PatchMapping(path = "verifyTrainingResource/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<TrainingResourceBundle> verifyTrainingResource(@PathVariable("id") String id, @RequestParam(required = false) Boolean active,
                                                                          @RequestParam(required = false) String status, @ApiIgnore Authentication auth) {
         TrainingResourceBundle trainingResourceBundle = trainingResourceService.verifyResource(id, status, active, auth);
@@ -233,7 +233,7 @@ public class TrainingResourceController {
 
     // Providing the Training Resource id, set the Training Resource to active or inactive.
     @PatchMapping(path = "publish/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.providerIsActiveAndUserIsAdmin(#auth, #id)")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<TrainingResourceBundle> setActive(@PathVariable String id, @RequestParam Boolean active, @ApiIgnore Authentication auth) {
         logger.info("User '{}-{}' attempts to save Training Resource with id '{}' as '{}'", User.of(auth).getFullName(), User.of(auth).getEmail(), id, active);
         return ResponseEntity.ok(trainingResourceService.publish(id, active, auth));
@@ -279,7 +279,7 @@ public class TrainingResourceController {
     }
 
     @PatchMapping(path = "auditResource/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<TrainingResourceBundle> auditResource(@PathVariable("id") String id, @RequestParam("catalogueId") String catalogueId,
                                                                 @RequestParam(required = false) String comment,
                                                                 @RequestParam LoggingInfo.ActionType actionType, @ApiIgnore Authentication auth) {
@@ -320,7 +320,7 @@ public class TrainingResourceController {
 
     // Move a Training Resource to another Provider
     @PostMapping(path = {"changeProvider"}, produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public void changeProvider(@RequestParam String resourceId, @RequestParam String newProvider, @RequestParam(required = false) String comment, @ApiIgnore Authentication authentication) {
         trainingResourceService.changeProvider(resourceId, newProvider, comment, authentication);
     }
@@ -362,7 +362,7 @@ public class TrainingResourceController {
 
     @ApiOperation(value = "Suspends a specific Training Resource.")
     @PutMapping(path = "suspend", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public TrainingResourceBundle suspendTrainingResource(@RequestParam String trainingResourceId, @RequestParam String catalogueId, @RequestParam boolean suspend, @ApiIgnore Authentication auth) {
         return trainingResourceService.suspend(trainingResourceId, catalogueId, suspend, auth);
     }
