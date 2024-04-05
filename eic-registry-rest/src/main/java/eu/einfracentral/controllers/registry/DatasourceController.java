@@ -115,7 +115,7 @@ public class DatasourceController {
 
     @ApiOperation(value = "Updates the Datasource with the given id.")
     @PutMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth, #datasource.serviceId, #datasource.catalogueId)")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<Datasource> updateHDatasource(@Valid @RequestBody Datasource datasource,
                                                         @RequestParam(required = false) String comment,
                                                         @ApiIgnore Authentication auth) throws ResourceNotFoundException {
@@ -127,7 +127,7 @@ public class DatasourceController {
     }
 
     @DeleteMapping(path = "{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<Datasource> deleteDatasourceById(@PathVariable("id") String id, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
         DatasourceBundle datasourceBundle = datasourceService.get(id);
         if (datasourceBundle == null) {
@@ -145,7 +145,7 @@ public class DatasourceController {
     // Deletes the Datasource of the specific Service of the specific Catalogue.
     @ApiOperation(value = "Deletes the Datasource of the specific Service of the specific Catalogue.")
     @DeleteMapping(path = "/{catalogueId}/{serviceId}", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth, #serviceId, #catalogueId)")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<Datasource> deleteDatasource(@PathVariable("catalogueId") String catalogueId,
                                                        @PathVariable("serviceId") String serviceId,
                                                        @ApiIgnore Authentication auth) throws ResourceNotFoundException {
@@ -166,7 +166,7 @@ public class DatasourceController {
 
     // Accept/Reject a Datasource.
     @PatchMapping(path = "verifyDatasource/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<DatasourceBundle> verifyDatasource(@PathVariable("id") String id, @RequestParam(required = false) Boolean active,
                                                              @RequestParam(required = false) String status, @ApiIgnore Authentication auth) {
         DatasourceBundle resource = datasourceService.verifyDatasource(id, status, active, auth);

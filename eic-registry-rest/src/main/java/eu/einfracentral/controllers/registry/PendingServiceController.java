@@ -58,7 +58,7 @@ public class PendingServiceController extends ResourceController<ServiceBundle, 
     }
 
     @DeleteMapping(path = "{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth, #id)")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<ServiceBundle> delete(@PathVariable("id") String id, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
         ServiceBundle service = pendingServiceManager.get(id);
         pendingServiceManager.delete(service);
@@ -91,7 +91,7 @@ public class PendingServiceController extends ResourceController<ServiceBundle, 
     }
 
     @PostMapping(path = "/updateResource", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth, #service)")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<Service> updateService(@RequestBody Service service, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
         ServiceBundle serviceBundle = pendingServiceManager.get(service.getId());
         serviceBundle.setService(service);
