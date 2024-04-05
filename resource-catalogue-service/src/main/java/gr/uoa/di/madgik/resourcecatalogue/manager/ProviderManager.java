@@ -972,9 +972,9 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
 
         String query; // TODO: Replace with StringBuilder
         if (ff.getFilter().entrySet().isEmpty()) {
-            query = "SELECT provider_id,catalogue_id FROM provider_view WHERE catalogue_id = '" + catalogueName + "'";
+            query = "SELECT resource_internal_id,catalogue_id FROM provider_view WHERE catalogue_id = '" + catalogueName + "'";
         } else {
-            query = "SELECT provider_id,catalogue_id FROM provider_view WHERE";
+            query = "SELECT resource_internal_id,catalogue_id FROM provider_view WHERE";
         }
 
         boolean firstTime = true;
@@ -1093,7 +1093,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     public Resource getResource(String providerId, String catalogueId) {
         Paging<Resource> resources;
         resources = searchService
-                .cqlQuery(String.format("resource_internal_id = \"%s\" AND catalogue_id = \"%s\"", providerId, catalogueId), resourceType.getName());
+                .cqlQuery(String.format("resource_internal_id = '%s' AND catalogue_id = '%s'", providerId, catalogueId), resourceType.getName());
         assert resources != null;
         return resources.getTotal() == 0 ? null : resources.getResults().get(0);
     }

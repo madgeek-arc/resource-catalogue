@@ -230,7 +230,7 @@ public class ProviderController {
         Paging<ProviderBundle> retPaging = providerService.getAll(ff, auth);
         if (records != null && !records.isEmpty()) {
             for (Map<String, Object> record : records) {
-                ret.add(providerService.get((String) record.get("catalogue_id"), (String) record.get("provider_id"), auth));
+                ret.add(providerService.get((String) record.get("catalogue_id"), (String) record.get("resource_internal_id"), auth));
             }
         }
         if (auditState == null) {
