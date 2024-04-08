@@ -9,6 +9,41 @@
             "type": "java.lang.String"
         },
         {
+            "label": "User ID",
+            "multivalued": true,
+            "name": "user_id",
+            "path": "$.vocabularyEntryRequests[*].userId",
+            "type": "java.lang.String"
+        },
+        {
+            "label": "Resource ID",
+            "multivalued": true,
+            "name": "resource_id",
+            "path": "$.vocabularyEntryRequests[*].resourceId",
+            "type": "java.lang.String"
+        },
+        {
+            "label": "Provider ID",
+            "multivalued": true,
+            "name": "provider_id",
+            "path": "$.vocabularyEntryRequests[*].providerId",
+            "type": "java.lang.String"
+        },
+        {
+            "label": "Date of Request",
+            "multivalued": true,
+            "name": "date_of_request",
+            "path": "$.vocabularyEntryRequests[*].dateOfRequest",
+            "type": "java.util.Date"
+        },
+        {
+            "label": "Resource Type",
+            "multivalued": true,
+            "name": "resource_Type",
+            "path": "$.vocabularyEntryRequests[*].resourceType",
+            "type": "java.lang.String"
+        },
+        {
             "label": "Entry Value Name",
             "multivalued": false,
             "name": "entry_value_name",
