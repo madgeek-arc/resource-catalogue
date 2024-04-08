@@ -2,7 +2,7 @@ package gr.uoa.di.madgik.resourcecatalogue.domain;
 
 import gr.uoa.di.madgik.resourcecatalogue.annotation.FieldValidation;
 import gr.uoa.di.madgik.resourcecatalogue.annotation.VocabularyValidation;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
@@ -21,17 +21,17 @@ public class Datasource implements Identifiable {
      * A persistent identifier, a unique reference to the Datasource in the context of the EOSC Portal.
      */
     @XmlElement
-    @ApiModelProperty(position = 1, example = "(required on PUT only)")
+    @Schema(example = "(required on PUT only)")
     @FieldValidation
     private String id;
 
     @XmlElement(required = true)
-    @ApiModelProperty(position = 2, notes = "Service ID", required = true)
+    @Schema(required = true)
     @FieldValidation(containsId = true, idClass = Service.class)
     private String serviceId;
 
     @XmlElement(required = true)
-    @ApiModelProperty(position = 3, notes = "Catalogue ID", required = true)
+    @Schema(required = true)
     @FieldValidation(containsId = true, idClass = Catalogue.class)
     private String catalogueId;
 
@@ -42,7 +42,7 @@ public class Datasource implements Identifiable {
      * Criteria for submitting content to the repository as well as product preparation guidelines can be stated. Concepts for quality assurance may be provided.
      */
     @XmlElement
-    @ApiModelProperty(position = 4, example = "https://example.com")
+    @Schema(example = "https://example.com")
     @FieldValidation(nullable = true)
     private URL submissionPolicyURL;
 
@@ -52,7 +52,7 @@ public class Datasource implements Identifiable {
      * utility of the content
      */
     @XmlElement
-    @ApiModelProperty(position = 5, example = "https://example.com")
+    @Schema(example = "https://example.com")
     @FieldValidation(nullable = true)
     private URL preservationPolicyURL;
 
@@ -60,7 +60,7 @@ public class Datasource implements Identifiable {
      * If data versioning is supported: the data source explicitly allows the deposition of different versions of the same object
      */
     @XmlElement
-    @ApiModelProperty(position = 6)
+    @Schema()
     @FieldValidation(nullable = true)
     private Boolean versionControl;
 
@@ -69,7 +69,7 @@ public class Datasource implements Identifiable {
      */
     @XmlElementWrapper(name = "persistentIdentitySystems")
     @XmlElement(name = "persistentIdentitySystem")
-    @ApiModelProperty(position = 7)
+    @Schema()
     @FieldValidation(nullable = true)
     private List<PersistentIdentitySystem> persistentIdentitySystems;
 
@@ -79,7 +79,7 @@ public class Datasource implements Identifiable {
      * The property defines the jurisdiction of the users of the data source, based on the vocabulary for this property
      */
     @XmlElement(required = true)
-    @ApiModelProperty(position = 8, required = true)
+    @Schema(required = true)
     @FieldValidation(containsId = true, idClass = Vocabulary.class)
     @VocabularyValidation(type = Vocabulary.Type.DS_JURISDICTION)
     private String jurisdiction;
@@ -88,7 +88,7 @@ public class Datasource implements Identifiable {
      * The specific type of the data source based on the vocabulary defined for this property
      */
     @XmlElement(required = true)
-    @ApiModelProperty(position = 9, required = true)
+    @Schema(required = true)
     @FieldValidation(containsId = true, idClass = Vocabulary.class)
     @VocabularyValidation(type = Vocabulary.Type.DS_CLASSIFICATION)
     private String datasourceClassification;
@@ -98,7 +98,7 @@ public class Datasource implements Identifiable {
      */
     @XmlElementWrapper(required = true, name = "researchEntityTypes")
     @XmlElement(name = "researchEntityType")
-    @ApiModelProperty(position = 10, required = true)
+    @Schema(required = true)
     @FieldValidation(containsId = true, idClass = Vocabulary.class)
     @VocabularyValidation(type = Vocabulary.Type.DS_RESEARCH_ENTITY_TYPE)
     private List<String> researchEntityTypes;
@@ -107,7 +107,7 @@ public class Datasource implements Identifiable {
      * Boolean value specifying if the data source is dedicated to a given discipline or is instead discipline agnostic
      */
     @XmlElement(required = true)
-    @ApiModelProperty(position = 11, required = true)
+    @Schema(required = true)
     @FieldValidation()
     private Boolean thematic;
 
@@ -119,7 +119,7 @@ public class Datasource implements Identifiable {
      */
     @XmlElementWrapper(name = "researchProductLicensings")
     @XmlElement(name = "researchProductLicensing")
-    @ApiModelProperty(position = 12)
+    @Schema()
     @FieldValidation(nullable = true)
     private List<ResearchProductLicensing> researchProductLicensings;
 
@@ -128,7 +128,7 @@ public class Datasource implements Identifiable {
      */
     @XmlElementWrapper(name = "researchProductAccessPolicies")
     @XmlElement(name = "researchProductAccessPolicy")
-    @ApiModelProperty(position = 13)
+    @Schema()
     @FieldValidation(nullable = true, containsId = true, idClass = Vocabulary.class)
     @VocabularyValidation(type = Vocabulary.Type.DS_COAR_ACCESS_RIGHTS_1_0)
     private List<String> researchProductAccessPolicies;
@@ -140,7 +140,7 @@ public class Datasource implements Identifiable {
      * Access and re-use of metadata
      */
     @XmlElement
-    @ApiModelProperty(position = 14)
+    @Schema()
     @FieldValidation(nullable = true)
     private ResearchProductMetadataLicensing researchProductMetadataLicensing;
 
@@ -149,7 +149,7 @@ public class Datasource implements Identifiable {
      */
     @XmlElementWrapper(name = "researchProductMetadataAccessPolicies")
     @XmlElement(name = "researchProductMetadataAccessPolicy")
-    @ApiModelProperty(position = 15)
+    @Schema()
     @FieldValidation(nullable = true, containsId = true, idClass = Vocabulary.class)
     @VocabularyValidation(type = Vocabulary.Type.DS_COAR_ACCESS_RIGHTS_1_0)
     private List<String> researchProductMetadataAccessPolicies;
@@ -160,7 +160,7 @@ public class Datasource implements Identifiable {
      * Boolean value specifying if the data source requires the harvesting of Research Products into the Research Catalogue
      */
     @XmlElement
-    @ApiModelProperty(position = 16)
+    @Schema()
     @FieldValidation(nullable = true)
     private Boolean harvestable;
 

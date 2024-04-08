@@ -1,7 +1,7 @@
 package gr.uoa.di.madgik.resourcecatalogue.domain;
 
 import gr.uoa.di.madgik.resourcecatalogue.annotation.FieldValidation;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -17,27 +17,27 @@ public class VocabularyEntryRequest {
     private static final Logger logger = LogManager.getLogger(User.class);
 
     @XmlElement(required = true)
-    @ApiModelProperty(position = 1, required = true)
+    @Schema(required = true)
     @FieldValidation
     private String userId;
 
     @XmlElement
-    @ApiModelProperty(position = 2)
+    @Schema()
     @FieldValidation(nullable = true, containsId = true, containsResourceId = true)
     private String resourceId;
 
     @XmlElement
-    @ApiModelProperty(position = 3)
+    @Schema()
     @FieldValidation(nullable = true, containsId = true, idClass = Provider.class)
     private String providerId;
 
     @XmlElement(required = true)
-    @ApiModelProperty(position = 4, required = true)
+    @Schema(required = true)
     @FieldValidation
     private Date dateOfRequest;
 
     @XmlElement(required = true)
-    @ApiModelProperty(position = 5, required = true)
+    @Schema(required = true)
     @FieldValidation
     private String resourceType;
 

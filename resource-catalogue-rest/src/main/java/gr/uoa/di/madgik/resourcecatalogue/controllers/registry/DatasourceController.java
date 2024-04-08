@@ -11,9 +11,13 @@ import gr.uoa.di.madgik.resourcecatalogue.utils.FacetFilterUtils;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiOperation;
+
+
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.context.annotation.Lazy;
@@ -24,7 +28,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
-import springfox.documentation.annotations.ApiIgnore;
+
 
 import javax.validation.Valid;
 import java.io.IOException;
@@ -34,7 +38,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping({"datasource"})
-@Api(description = "Operations for Datasources")
+@Tag(name = "datasource-controller", description = "Operations for Datasources")
 public class DatasourceController {
 
     private static final Logger logger = LogManager.getLogger(DatasourceController.class);
@@ -50,18 +54,18 @@ public class DatasourceController {
         this.openAIREDatasourceService = openAIREDatasourceService;
     }
 
-    @ApiOperation(value = "Returns the Datasource with the given id.")
+    @Operation(description = "Returns the Datasource with the given id.")
     @GetMapping(path = "{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity<Datasource> getDatasource(@PathVariable("id") String id) {
         Datasource datasource = datasourceService.get(id).getDatasource();
         return new ResponseEntity<>(datasource, HttpStatus.OK);
     }
 
-    @ApiOperation(value = "Returns the Datasource of the given Service of the given Catalogue.")
+    @Operation(description = "Returns the Datasource of the given Service of the given Catalogue.")
     @GetMapping(path = "/byService/{serviceId}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity<Datasource> getDatasourceByServiceId(@PathVariable("serviceId") String serviceId,
                                                                @RequestParam(defaultValue = "${project.catalogue.name}", name = "catalogue_id") String catalogueId,
-                                                               @ApiIgnore Authentication auth) {
+                                                               @Parameter(hidden = true) Authentication auth) {
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(1000);
         ff.addFilter("catalogue_id", catalogueId);
@@ -73,13 +77,13 @@ public class DatasourceController {
         return new ResponseEntity<>(null, HttpStatus.OK);
     }
 
-    @ApiOperation(value = "Filter a list of Datasources based on a set of filters or get a list of all Datasources in the Catalogue.")
+    @Operation(description = "Filter a list of Datasources based on a set of filters or get a list of all Datasources in the Catalogue.")
     @Browse
-    @ApiImplicitParam(name = "suspended", value = "Suspended", defaultValue = "false", dataType = "boolean", paramType = "query")
+    @Parameter(name = "suspended", description = "Suspended", content = @Content(schema = @Schema(type = "boolean", defaultValue = "false")))
     @GetMapping(path = "/all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    public ResponseEntity<Paging<Datasource>> getAllDatasources(@ApiIgnore @RequestParam MultiValueMap<String, Object> allRequestParams,
+    public ResponseEntity<Paging<Datasource>> getAllDatasources(@Parameter(hidden = true) @RequestParam MultiValueMap<String, Object> allRequestParams,
                                                                 @RequestParam(defaultValue = "all", name = "catalogue_id") String catalogueId,
-                                                                @ApiIgnore Authentication auth) {
+                                                                @Parameter(hidden = true) Authentication auth) {
         FacetFilter ff = createFacetFilterForFetchingDatasources(allRequestParams, catalogueId);
         List<Datasource> datasourceList = new LinkedList<>();
         Paging<DatasourceBundle> paging = genericResourceService.getResults(ff);
@@ -92,10 +96,10 @@ public class DatasourceController {
     }
 
     @Browse
-    @ApiImplicitParam(name = "suspended", value = "Suspended", defaultValue = "false", dataType = "boolean", paramType = "query")
+    @Parameter(name = "suspended", description = "Suspended", content = @Content(schema = @Schema(type = "boolean", defaultValue = "false")))
     @GetMapping(path = "adminPage/all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
-    public ResponseEntity<Paging<?>> getAllDatasourcesForAdminPage(@ApiIgnore @RequestParam MultiValueMap<String, Object> allRequestParams,
+    public ResponseEntity<Paging<?>> getAllDatasourcesForAdminPage(@Parameter(hidden = true) @RequestParam MultiValueMap<String, Object> allRequestParams,
                                                                    @RequestParam(defaultValue = "all", name = "catalogue_id") String catalogueId) {
         FacetFilter ff = createFacetFilterForFetchingDatasources(allRequestParams, catalogueId);
         Paging<?> paging = genericResourceService.getResults(ff);
@@ -103,22 +107,22 @@ public class DatasourceController {
         return ResponseEntity.ok(paging);
     }
 
-    @ApiOperation(value = "Creates a new Datasource.")
+    @Operation(description = "Creates a new Datasource.")
     @PostMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<Datasource> addDatasource(@Valid @RequestBody Datasource datasource,
-                                                    @ApiIgnore Authentication auth) {
+                                                    @Parameter(hidden = true) Authentication auth) {
         DatasourceBundle datasourceBundle = datasourceService.add(new DatasourceBundle(datasource), auth);
         logger.info("User '{}' added the Datasource with id '{}'", auth.getName(), datasource.getId());
         return new ResponseEntity<>(datasourceBundle.getDatasource(), HttpStatus.CREATED);
     }
 
-    @ApiOperation(value = "Updates the Datasource with the given id.")
+    @Operation(description = "Updates the Datasource with the given id.")
     @PutMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth, #datasource.serviceId, #datasource.catalogueId)")
     public ResponseEntity<Datasource> updateHDatasource(@Valid @RequestBody Datasource datasource,
                                                         @RequestParam(required = false) String comment,
-                                                        @ApiIgnore Authentication auth) throws ResourceNotFoundException {
+                                                        @Parameter(hidden = true) Authentication auth) throws ResourceNotFoundException {
         DatasourceBundle datasourceBundle = datasourceService.get(datasource.getId());
         datasourceBundle.setDatasource(datasource);
         datasourceBundle = datasourceService.update(datasourceBundle, comment, auth);
@@ -128,7 +132,7 @@ public class DatasourceController {
 
     @DeleteMapping(path = "{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
-    public ResponseEntity<Datasource> deleteDatasourceById(@PathVariable("id") String id, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
+    public ResponseEntity<Datasource> deleteDatasourceById(@PathVariable("id") String id, @Parameter(hidden = true) Authentication auth) throws ResourceNotFoundException {
         DatasourceBundle datasourceBundle = datasourceService.get(id);
         if (datasourceBundle == null) {
             return new ResponseEntity<>(HttpStatus.GONE);
@@ -143,12 +147,12 @@ public class DatasourceController {
     }
 
     // Deletes the Datasource of the specific Service of the specific Catalogue.
-    @ApiOperation(value = "Deletes the Datasource of the specific Service of the specific Catalogue.")
+    @Operation(description = "Deletes the Datasource of the specific Service of the specific Catalogue.")
     @DeleteMapping(path = "/{catalogueId}/{serviceId}", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth, #serviceId, #catalogueId)")
     public ResponseEntity<Datasource> deleteDatasource(@PathVariable("catalogueId") String catalogueId,
                                                        @PathVariable("serviceId") String serviceId,
-                                                       @ApiIgnore Authentication auth) throws ResourceNotFoundException {
+                                                       @Parameter(hidden = true) Authentication auth) throws ResourceNotFoundException {
         Datasource datasource = getDatasourceByServiceId(serviceId, catalogueId, auth).getBody();
         assert datasource != null;
         DatasourceBundle datasourceBundle = datasourceService.get(datasource.getId());
@@ -168,7 +172,7 @@ public class DatasourceController {
     @PatchMapping(path = "verifyDatasource/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     public ResponseEntity<DatasourceBundle> verifyDatasource(@PathVariable("id") String id, @RequestParam(required = false) Boolean active,
-                                                             @RequestParam(required = false) String status, @ApiIgnore Authentication auth) {
+                                                             @RequestParam(required = false) String status, @Parameter(hidden = true) Authentication auth) {
         DatasourceBundle resource = datasourceService.verifyDatasource(id, status, active, auth);
         logger.info("User '{}' updated Datasource with id '{}' [status: {}] [active: {}]", auth, resource.getDatasource().getId(), status, active);
         return new ResponseEntity<>(resource, HttpStatus.OK);
@@ -188,7 +192,7 @@ public class DatasourceController {
 
     @Browse
     @GetMapping(path = "/getAllOpenAIREDatasources", produces = {MediaType.APPLICATION_JSON_VALUE})
-    public ResponseEntity<Paging<Datasource>> getAllOpenAIREDatasources(@ApiIgnore @RequestParam MultiValueMap<String, Object> allRequestParams) throws IOException {
+    public ResponseEntity<Paging<Datasource>> getAllOpenAIREDatasources(@Parameter(hidden = true) @RequestParam MultiValueMap<String, Object> allRequestParams) throws IOException {
         FacetFilter ff = FacetFilterUtils.createFacetFilter(allRequestParams);
         Map<Integer, List<Datasource>> datasourceMap = openAIREDatasourceService.getAll(ff);
         Paging<Datasource> datasourcePaging = new Paging<>();

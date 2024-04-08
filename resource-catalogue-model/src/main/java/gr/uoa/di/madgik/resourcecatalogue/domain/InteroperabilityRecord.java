@@ -3,7 +3,7 @@ package gr.uoa.di.madgik.resourcecatalogue.domain;
 import gr.uoa.di.madgik.resourcecatalogue.annotation.FieldValidation;
 import gr.uoa.di.madgik.resourcecatalogue.annotation.VocabularyValidation;
 import gr.uoa.di.madgik.resourcecatalogue.domain.interoperabilityRecord.internalFields.*;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
@@ -21,14 +21,14 @@ public class InteroperabilityRecord implements Identifiable {
      * EOSC Interoperability ID (auto-assigned).
      */
     @XmlElement(required = true)
-    @ApiModelProperty(position = 1, required = true, example = "(auto-assigned)")
+    @Schema(required = true, example = "(auto-assigned)")
     private String id;
 
     /**
      * The Catalogue this Interoperability Record is originally registered at.
      */
     @XmlElement(required = true)
-    @ApiModelProperty(position = 2, required = true)
+    @Schema(required = true)
     @FieldValidation(containsId = true, idClass = Catalogue.class)
     private String catalogueId;
 
@@ -36,7 +36,7 @@ public class InteroperabilityRecord implements Identifiable {
      * The Provider this Interoperability Record is originally registered at.
      */
     @XmlElement(required = true)
-    @ApiModelProperty(position = 3, required = true)
+    @Schema(required = true)
     @FieldValidation(containsId = true, idClass = Provider.class)
     private String providerId;
 
@@ -44,7 +44,7 @@ public class InteroperabilityRecord implements Identifiable {
      * Interoperability Record Identifier Info
      */
     @XmlElement(required = true)
-    @ApiModelProperty(position = 4, required = true)
+    @Schema(required = true)
     @FieldValidation
     private IdentifierInfo identifierInfo;
 
@@ -54,7 +54,7 @@ public class InteroperabilityRecord implements Identifiable {
      */
     @XmlElementWrapper(required = true, name = "creators")
     @XmlElement(name = "creator")
-    @ApiModelProperty(position = 5, required = true)
+    @Schema(required = true)
     @FieldValidation
     private List<Creator> creators;
 
@@ -62,7 +62,7 @@ public class InteroperabilityRecord implements Identifiable {
      * A name or title by which a resource is known. It can be the title of a dataset or the name of a piece of software
      */
     @XmlElement(required = true)
-    @ApiModelProperty(position = 6, required = true)
+    @Schema(required = true)
     @FieldValidation
     private String title;
 
@@ -73,7 +73,7 @@ public class InteroperabilityRecord implements Identifiable {
      * use the date that would be preferred from a citation perspective.
      */
     @XmlElement(required = true)
-    @ApiModelProperty(position = 7, required = true)
+    @Schema(required = true)
     @FieldValidation
     private int publicationYear;
 
@@ -82,7 +82,7 @@ public class InteroperabilityRecord implements Identifiable {
      */
     @XmlElementWrapper(required = true, name = "resourceTypesInfo")
     @XmlElement(name = "resourceTypeInfo")
-    @ApiModelProperty(position = 8, required = true)
+    @Schema(required = true)
     @FieldValidation
     private List<ResourceTypeInfo> resourceTypesInfo;
 
@@ -90,7 +90,7 @@ public class InteroperabilityRecord implements Identifiable {
      * Time/date the record was created.
      */
     @XmlElement
-    @ApiModelProperty(position = 9)
+    @Schema()
     @FieldValidation(nullable = true)
     private String created;
 
@@ -98,7 +98,7 @@ public class InteroperabilityRecord implements Identifiable {
      * Time/date the record was last saved, with or without modifications.
      */
     @XmlElement
-    @ApiModelProperty(position = 10)
+    @Schema()
     @FieldValidation(nullable = true)
     private String updated;
 
@@ -109,7 +109,7 @@ public class InteroperabilityRecord implements Identifiable {
      */
     @XmlElementWrapper(name = "relatedStandards")
     @XmlElement(name = "relatedStandard")
-    @ApiModelProperty(position = 11)
+    @Schema()
     @FieldValidation(nullable = true)
     private List<RelatedStandard> relatedStandards;
 
@@ -118,7 +118,7 @@ public class InteroperabilityRecord implements Identifiable {
      */
     @XmlElementWrapper(required = true, name = "rights")
     @XmlElement(name = "right")
-    @ApiModelProperty(position = 12, required = true)
+    @Schema(required = true)
     @FieldValidation
     private List<Right> rights;
 
@@ -127,7 +127,7 @@ public class InteroperabilityRecord implements Identifiable {
      * May be used for technical information.
      */
     @XmlElement(required = true)
-    @ApiModelProperty(position = 13, required = true)
+    @Schema(required = true)
     @FieldValidation
     private String description;
 
@@ -135,7 +135,7 @@ public class InteroperabilityRecord implements Identifiable {
      * Status of the resource.
      */
     @XmlElement(required = true)
-    @ApiModelProperty(position = 14, required = true)
+    @Schema(required = true)
     @FieldValidation(containsId = true, idClass = Vocabulary.class)
     @VocabularyValidation(type = Vocabulary.Type.IR_STATUS)
     private String status;
@@ -144,7 +144,7 @@ public class InteroperabilityRecord implements Identifiable {
      * Intended Audience for the Guideline.
      */
     @XmlElement
-    @ApiModelProperty(position = 15)
+    @Schema()
     @FieldValidation(nullable = true, containsId = true, idClass = Vocabulary.class)
     @VocabularyValidation(type = Vocabulary.Type.SCIENTIFIC_DOMAIN)
     private String domain;
@@ -153,7 +153,7 @@ public class InteroperabilityRecord implements Identifiable {
      * The type of record within the registry
      */
     @XmlElement(required = true)
-    @ApiModelProperty(position = 16, required = true)
+    @Schema(required = true)
     @FieldValidation(containsId = true, idClass = Vocabulary.class)
     @VocabularyValidation(type = Vocabulary.Type.IR_EOSC_GUIDELINE_TYPE)
     private String eoscGuidelineType;
@@ -163,7 +163,7 @@ public class InteroperabilityRecord implements Identifiable {
      */
     @XmlElementWrapper(name = "eoscIntegrationOptions")
     @XmlElement(name = "eoscIntegrationOption")
-    @ApiModelProperty(position = 17)
+    @Schema()
     @FieldValidation(nullable = true)
     private List<String> eoscIntegrationOptions;
 
@@ -172,7 +172,7 @@ public class InteroperabilityRecord implements Identifiable {
      */
     @XmlElementWrapper(name = "alternativeIdentifiers")
     @XmlElement(name = "alternativeIdentifier")
-    @ApiModelProperty(position = 18)
+    @Schema()
     @FieldValidation(nullable = true)
     private List<AlternativeIdentifier> alternativeIdentifiers;
 

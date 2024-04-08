@@ -1,7 +1,7 @@
 package gr.uoa.di.madgik.resourcecatalogue.domain;
 
 import gr.uoa.di.madgik.resourcecatalogue.annotation.FieldValidation;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
@@ -15,7 +15,7 @@ public class ResourceExtras {
 
     @XmlElementWrapper(name = "eoscIFGuidelines")
     @XmlElement(name = "eoscIFGuideline")
-    @ApiModelProperty(position = 1)
+    @Schema()
     @FieldValidation(nullable = true)
     private List<EOSCIFGuidelines> eoscIFGuidelines;
 

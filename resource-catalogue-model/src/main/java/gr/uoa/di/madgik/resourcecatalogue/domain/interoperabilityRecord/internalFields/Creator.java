@@ -1,7 +1,7 @@
 package gr.uoa.di.madgik.resourcecatalogue.domain.interoperabilityRecord.internalFields;
 
 import gr.uoa.di.madgik.resourcecatalogue.annotation.FieldValidation;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -16,7 +16,7 @@ public class Creator {
      * Creator's full name and name type
      */
     @XmlElement(required = true)
-    @ApiModelProperty(position = 1, required = true)
+    @Schema(required = true)
     @FieldValidation
     private CreatorNameTypeInfo creatorNameTypeInfo;
 
@@ -24,7 +24,7 @@ public class Creator {
      * The personal or first name of the creator.
      */
     @XmlElement
-    @ApiModelProperty(position = 2)
+    @Schema()
     @FieldValidation(nullable = true)
     private String givenName;
 
@@ -32,7 +32,7 @@ public class Creator {
      * The surname or last name of the creator.
      */
     @XmlElement
-    @ApiModelProperty(position = 3)
+    @Schema()
     @FieldValidation(nullable = true)
     private String familyName;
 
@@ -40,7 +40,7 @@ public class Creator {
      * Uniquely identifies an individual or legal entity, according to various schemes.
      */
     @XmlElement
-    @ApiModelProperty(position = 4)
+    @Schema()
     @FieldValidation(nullable = true)
     private String nameIdentifier;
 
@@ -48,7 +48,7 @@ public class Creator {
      * Affiliation
      */
     @XmlElement
-    @ApiModelProperty(position = 5)
+    @Schema()
     @FieldValidation(nullable = true)
     private CreatorAffiliationInfo creatorAffiliationInfo;
 

@@ -1,7 +1,7 @@
 package gr.uoa.di.madgik.resourcecatalogue.domain;
 
 import gr.uoa.di.madgik.resourcecatalogue.annotation.FieldValidation;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -14,12 +14,12 @@ import java.util.Objects;
 public class Metric {
 
     @XmlElement
-    @ApiModelProperty(position = 1, notes = "Url to the repository hosting the code")
+    @Schema
     @FieldValidation(nullable = true)
     private URL probe;
 
     @XmlElement
-    @ApiModelProperty(position = 2)
+    @Schema()
     @FieldValidation(nullable = true)
     private URL metric;
 

@@ -1,7 +1,7 @@
 package gr.uoa.di.madgik.resourcecatalogue.domain;
 
 import gr.uoa.di.madgik.resourcecatalogue.annotation.FieldValidation;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
@@ -15,18 +15,18 @@ import java.util.Objects;
 public class MonitoringGroup {
 
     @XmlElement(required = true)
-    @ApiModelProperty(position = 1, notes = "Unique identifier of the service type", required = true)
+    @Schema(required = true)
     @FieldValidation
     private String serviceType;
 
     @XmlElement(required = true)
-    @ApiModelProperty(position = 2, notes = "Endpoint of the service", required = true)
+    @Schema(required = true)
     @FieldValidation
     private String endpoint;
 
     @XmlElementWrapper(name = "metrics")
     @XmlElement(name = "metric")
-    @ApiModelProperty(position = 3)
+    @Schema()
     @FieldValidation(nullable = true)
     private List<Metric> metrics;
 

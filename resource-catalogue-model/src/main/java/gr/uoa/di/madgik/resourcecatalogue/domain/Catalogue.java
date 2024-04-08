@@ -2,7 +2,7 @@ package gr.uoa.di.madgik.resourcecatalogue.domain;
 
 import gr.uoa.di.madgik.resourcecatalogue.annotation.FieldValidation;
 import gr.uoa.di.madgik.resourcecatalogue.annotation.VocabularyValidation;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
@@ -22,14 +22,14 @@ public class Catalogue implements Identifiable {
      * A persistent identifier, a unique reference to the  (Multi-Provider Regional or Thematic) Catalogue in the context of the EOSC Portal.
      */
     @XmlElement(required = true)
-    @ApiModelProperty(position = 1, required = true)
+    @Schema(required = true)
     private String id;
 
     /**
      * An abbreviation of the (Multi-Provider Regional or Thematic) Catalogue Name.
      */
     @XmlElement(required = true)
-    @ApiModelProperty(position = 2, required = true)
+    @Schema(required = true)
     @FieldValidation
     private String abbreviation;
 
@@ -37,7 +37,7 @@ public class Catalogue implements Identifiable {
      * Full Name of the (Multi-Provider Regional or Thematic) Catalogue.
      */
     @XmlElement(required = true)
-    @ApiModelProperty(position = 3, required = true)
+    @Schema(required = true)
     @FieldValidation
     private String name;
 
@@ -45,7 +45,7 @@ public class Catalogue implements Identifiable {
      * Website with information about the (Multi-Provider Regional or Thematic) Catalogue.
      */
     @XmlElement(required = true)
-    @ApiModelProperty(position = 4, example = "https://example.com", required = true)
+    @Schema(example = "https://example.com", required = true)
     @FieldValidation
     private URL website;
 
@@ -53,7 +53,7 @@ public class Catalogue implements Identifiable {
      * A Y/N question to define whether the (Multi-Provider Regional or Thematic) Catalogue is owned by a Legal Entity or not.
      */
     @XmlElement(required = true)
-    @ApiModelProperty(position = 5, required = true)
+    @Schema(required = true)
     @FieldValidation
     private boolean legalEntity;
 
@@ -63,7 +63,7 @@ public class Catalogue implements Identifiable {
      * It is also possible to select Not a legal entity.
      */
     @XmlElement
-    @ApiModelProperty(position = 6, notes = "Vocabulary ID")
+    @Schema
     @FieldValidation(nullable = true, containsId = true, idClass = Vocabulary.class)
     @VocabularyValidation(type = Vocabulary.Type.PROVIDER_LEGAL_STATUS)
     private String legalStatus;
@@ -72,7 +72,7 @@ public class Catalogue implements Identifiable {
      * Name of the organisation legally hosting (housing) the Catalogue or its coordinating centre.
      */
     @XmlElement
-    @ApiModelProperty(position = 7, notes = "Vocabulary ID")
+    @Schema
     @FieldValidation(nullable = true, containsId = true, idClass = Vocabulary.class)
     @VocabularyValidation(type = Vocabulary.Type.PROVIDER_HOSTING_LEGAL_ENTITY)
     private String hostingLegalEntity;
@@ -81,7 +81,7 @@ public class Catalogue implements Identifiable {
      * Inclusion Criteria
      */
     @XmlElement(required = true)
-    @ApiModelProperty(position = 8, example = "https://example.com", required = true)
+    @Schema(example = "https://example.com", required = true)
     @FieldValidation
     private URL inclusionCriteria;
 
@@ -89,7 +89,7 @@ public class Catalogue implements Identifiable {
      * Validation Process
      */
     @XmlElement(required = true)
-    @ApiModelProperty(position = 9, example = "https://example.com", required = true)
+    @Schema(example = "https://example.com", required = true)
     @FieldValidation
     private URL validationProcess;
 
@@ -97,7 +97,7 @@ public class Catalogue implements Identifiable {
      * In terms of sustainability, what is the expected life of the catalogue
      */
     @XmlElement(required = true)
-    @ApiModelProperty(position = 10, required = true)
+    @Schema(required = true)
     @FieldValidation
     private String endOfLife;
 
@@ -107,7 +107,7 @@ public class Catalogue implements Identifiable {
      * A high-level description of the Catalogue in fairly non-technical terms, with the vision, mission, objectives, background, experience.
      */
     @XmlElement(required = true)
-    @ApiModelProperty(position = 11, required = true)
+    @Schema(required = true)
     @FieldValidation
     private String description;
 
@@ -115,7 +115,7 @@ public class Catalogue implements Identifiable {
      * A high-level description of the Catalogue's scope.
      */
     @XmlElement(required = true)
-    @ApiModelProperty(position = 12, required = true)
+    @Schema(required = true)
     @FieldValidation
     private String scope;
 
@@ -123,7 +123,7 @@ public class Catalogue implements Identifiable {
      * Link to the logo/visual identity of the Catalogue.
      */
     @XmlElement(required = true)
-    @ApiModelProperty(position = 13, example = "https://example.com", required = true)
+    @Schema(example = "https://example.com", required = true)
     @FieldValidation
     private URL logo;
 
@@ -132,7 +132,7 @@ public class Catalogue implements Identifiable {
      */
     @XmlElementWrapper(name = "multimedia")
     @XmlElement(name = "multimedia")
-    @ApiModelProperty(position = 14)
+    @Schema()
     @FieldValidation(nullable = true)
     private List<MultimediaPair> multimedia;
 
@@ -143,7 +143,7 @@ public class Catalogue implements Identifiable {
      */
     @XmlElementWrapper(name = "scientificDomains")
     @XmlElement(name = "scientificDomain")
-    @ApiModelProperty(position = 15, notes = "Vocabulary ID")
+    @Schema
     @FieldValidation(nullable = true)
     private List<ServiceProviderDomain> scientificDomains;
 
@@ -152,7 +152,7 @@ public class Catalogue implements Identifiable {
      */
     @XmlElementWrapper(name = "tags")
     @XmlElement(name = "tag")
-    @ApiModelProperty(position = 16)
+    @Schema()
     @FieldValidation(nullable = true)
     private List<String> tags;
 
@@ -162,7 +162,7 @@ public class Catalogue implements Identifiable {
      * Physical location of the Catalogue.
      */
     @XmlElement(required = true)
-    @ApiModelProperty(position = 17, required = true)
+    @Schema(required = true)
     @FieldValidation
     private ProviderLocation location;
 
@@ -172,7 +172,7 @@ public class Catalogue implements Identifiable {
      * Catalogue's main contact info.
      */
     @XmlElement(required = true)
-    @ApiModelProperty(position = 18, required = true)
+    @Schema(required = true)
     @FieldValidation
     private ProviderMainContact mainContact;
 
@@ -181,7 +181,7 @@ public class Catalogue implements Identifiable {
      */
     @XmlElementWrapper(required = true, name = "publicContacts")
     @XmlElement(name = "publicContact")
-    @ApiModelProperty(position = 19, required = true)
+    @Schema(required = true)
     @FieldValidation
     private List<ProviderPublicContact> publicContacts;
 
@@ -192,7 +192,7 @@ public class Catalogue implements Identifiable {
      */
     @XmlElementWrapper(name = "participatingCountries")
     @XmlElement(name = "participatingCountry")
-    @ApiModelProperty(position = 20, notes = "Vocabulary ID")
+    @Schema
     @FieldValidation(nullable = true, containsId = true, idClass = Vocabulary.class)
     @VocabularyValidation(type = Vocabulary.Type.COUNTRY)
     private List<String> participatingCountries;
@@ -202,7 +202,7 @@ public class Catalogue implements Identifiable {
      */
     @XmlElementWrapper(name = "affiliations")
     @XmlElement(name = "affiliation")
-    @ApiModelProperty(position = 21)
+    @Schema()
     @FieldValidation(nullable = true)
     private List<String> affiliations;
 
@@ -211,7 +211,7 @@ public class Catalogue implements Identifiable {
      */
     @XmlElementWrapper(name = "networks")
     @XmlElement(name = "network")
-    @ApiModelProperty(position = 22, notes = "Vocabulary ID")
+    @Schema
     @FieldValidation(nullable = true, containsId = true, idClass = Vocabulary.class)
     @VocabularyValidation(type = Vocabulary.Type.PROVIDER_NETWORK)
     private List<String> networks;
@@ -220,7 +220,7 @@ public class Catalogue implements Identifiable {
     // Extra needed fields
     @XmlElementWrapper(name = "users", required = true)
     @XmlElement(name = "user")
-    @ApiModelProperty(position = 23, required = true)
+    @Schema(required = true)
     @FieldValidation
     private List<User> users;
 

@@ -17,7 +17,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Component
-@PropertySource({"classpath:application.properties", "classpath:registry.properties"})
+//@PropertySource({"classpath:application.properties", "classpath:registry.properties"})
 public class SimpleMailService implements MailService {
 
     private static final Logger logger = LogManager.getLogger(SimpleMailService.class);

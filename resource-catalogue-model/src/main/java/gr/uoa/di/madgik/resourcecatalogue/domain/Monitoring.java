@@ -2,7 +2,7 @@ package gr.uoa.di.madgik.resourcecatalogue.domain;
 
 import gr.uoa.di.madgik.resourcecatalogue.annotation.FieldValidation;
 import gr.uoa.di.madgik.resourcecatalogue.annotation.VocabularyValidation;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
@@ -16,23 +16,23 @@ import java.util.Objects;
 public class Monitoring implements Identifiable {
 
     @XmlElement()
-    @ApiModelProperty(position = 1, notes = "Monitoring ID", example = "(required on PUT only)")
+    @Schema(example = "(required on PUT only)")
     private String id;
 
     @XmlElement(required = true)
-    @ApiModelProperty(position = 2, notes = "Service ID", required = true)
+    @Schema(required = true)
     @FieldValidation(containsId = true, containsResourceId = true)
     private String serviceId;
 
     @XmlElement()
-    @ApiModelProperty(position = 3, notes = "Who is responsible for the monitoring of this Service")
+    @Schema
     @FieldValidation(nullable = true, containsId = true, idClass = Vocabulary.class)
     @VocabularyValidation(type = Vocabulary.Type.MONITORING_MONITORED_BY)
     private String monitoredBy;
 
     @XmlElementWrapper(name = "monitoringGroups", required = true)
     @XmlElement(name = "monitoringGroup")
-    @ApiModelProperty(position = 4, notes = "Unique identifier of the service type", required = true)
+    @Schema(required = true)
     @FieldValidation
     private List<MonitoringGroup> monitoringGroups;
 

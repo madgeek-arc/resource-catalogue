@@ -3,7 +3,7 @@ package gr.uoa.di.madgik.resourcecatalogue.domain.interoperabilityRecord.interna
 import gr.uoa.di.madgik.resourcecatalogue.annotation.FieldValidation;
 import gr.uoa.di.madgik.resourcecatalogue.annotation.VocabularyValidation;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Vocabulary;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -18,7 +18,7 @@ public class ResourceTypeInfo {
      * A description of the resource.
      */
     @XmlElement(required = true)
-    @ApiModelProperty(position = 1, required = true)
+    @Schema(required = true)
     @FieldValidation
     private String resourceType;
 
@@ -26,7 +26,7 @@ public class ResourceTypeInfo {
      * The general type of a resource.
      */
     @XmlElement(required = true)
-    @ApiModelProperty(position = 2, required = true)
+    @Schema(required = true)
     @FieldValidation(containsId = true, idClass = Vocabulary.class)
     @VocabularyValidation(type = Vocabulary.Type.IR_RESOURCE_TYPE_GENERAL)
     private String resourceTypeGeneral;

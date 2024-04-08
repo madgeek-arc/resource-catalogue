@@ -11,8 +11,12 @@ import gr.uoa.di.madgik.resourcecatalogue.service.ResourceService;
 import gr.uoa.di.madgik.resourcecatalogue.service.SecurityService;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.domain.Paging;
-import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiOperation;
+
+
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -22,7 +26,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
-import springfox.documentation.annotations.ApiIgnore;
+
 
 import java.util.LinkedList;
 import java.util.List;
@@ -47,9 +51,9 @@ public class PublicDatasourceController {
         this.publicDatasourceManager = publicDatasourceManager;
     }
 
-    @ApiOperation(value = "Returns the Public Datasource with the given id.")
+    @Operation(description = "Returns the Public Datasource with the given id.")
     @GetMapping(path = "public/datasource/{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    public ResponseEntity<?> getPublicDatasource(@PathVariable("id") String id, @ApiIgnore Authentication auth) {
+    public ResponseEntity<?> getPublicDatasource(@PathVariable("id") String id, @Parameter(hidden = true) Authentication auth) {
         DatasourceBundle datasourceBundle = datasourceService.get(id);
         if (auth != null && auth.isAuthenticated()) {
             User user = User.of(auth);
@@ -72,7 +76,7 @@ public class PublicDatasourceController {
 
     @GetMapping(path = "public/datasource/datasourceBundle/{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
-    public ResponseEntity<?> getPublicDatasourceBundle(@PathVariable("id") String id, @ApiIgnore Authentication auth) {
+    public ResponseEntity<?> getPublicDatasourceBundle(@PathVariable("id") String id, @Parameter(hidden = true) Authentication auth) {
         DatasourceBundle datasourceBundle = datasourceService.get(id);
         if (auth != null && auth.isAuthenticated()) {
             User user = User.of(auth);
@@ -93,13 +97,13 @@ public class PublicDatasourceController {
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(gson.toJson("You cannot view the specific Datasource."));
     }
 
-    @ApiOperation(value = "Filter a list of Public Datasources based on a set of filters or get a list of all Public Resources in the Catalogue.")
+    @Operation(description = "Filter a list of Public Datasources based on a set of filters or get a list of all Public Resources in the Catalogue.")
     @Browse
-    @ApiImplicitParam(name = "suspended", value = "Suspended", defaultValue = "false", dataType = "boolean", paramType = "query")
+    @Parameter(name = "suspended", description = "Suspended", content = @Content(schema = @Schema(type = "boolean", defaultValue = "false")))
     @GetMapping(path = "public/datasource/all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    public ResponseEntity<Paging<Datasource>> getAllPublicDatasources(@ApiIgnore @RequestParam Map<String, Object> allRequestParams,
+    public ResponseEntity<Paging<Datasource>> getAllPublicDatasources(@Parameter(hidden = true) @RequestParam Map<String, Object> allRequestParams,
                                                                       @RequestParam(defaultValue = "all", name = "catalogue_id") String catalogueId,
-                                                                      @ApiIgnore Authentication auth) {
+                                                                      @Parameter(hidden = true) Authentication auth) {
         allRequestParams.putIfAbsent("catalogue_id", catalogueId);
         if (catalogueId != null && catalogueId.equals("all")) {
             allRequestParams.remove("catalogue_id");
@@ -123,12 +127,12 @@ public class PublicDatasourceController {
     }
 
     @Browse
-    @ApiImplicitParam(name = "suspended", value = "Suspended", defaultValue = "false", dataType = "boolean", paramType = "query")
+    @Parameter(name = "suspended", description = "Suspended", content = @Content(schema = @Schema(type = "boolean", defaultValue = "false")))
     @GetMapping(path = "public/datasource/adminPage/all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
-    public ResponseEntity<Paging<DatasourceBundle>> getAllPublicDatasourceBundles(@ApiIgnore @RequestParam Map<String, Object> allRequestParams,
+    public ResponseEntity<Paging<DatasourceBundle>> getAllPublicDatasourceBundles(@Parameter(hidden = true) @RequestParam Map<String, Object> allRequestParams,
                                                                                   @RequestParam(defaultValue = "all", name = "catalogue_id") String catalogueId,
-                                                                                  @ApiIgnore Authentication auth) {
+                                                                                  @Parameter(hidden = true) Authentication auth) {
         allRequestParams.putIfAbsent("catalogue_id", catalogueId);
         if (catalogueId != null && catalogueId.equals("all")) {
             allRequestParams.remove("catalogue_id");
@@ -149,7 +153,7 @@ public class PublicDatasourceController {
     }
 
     @GetMapping(path = "public/datasource/my", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    public ResponseEntity<List<DatasourceBundle>> getMyPublicDatasources(@ApiIgnore Authentication auth) {
+    public ResponseEntity<List<DatasourceBundle>> getMyPublicDatasources(@Parameter(hidden = true) Authentication auth) {
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(10000);
         ff.addFilter("published", true);

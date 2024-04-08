@@ -4,21 +4,25 @@ import gr.uoa.di.madgik.resourcecatalogue.domain.*;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
+
+
+import io.swagger.v3.oas.annotations.Hidden;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
-import springfox.documentation.annotations.ApiIgnore;
+
 
 import java.util.List;
 
 @RestController
 @RequestMapping("pid")
-@Api(value = "Get information about a specific Resource via its PID")
+@Tag(name = "pid-controller", description = "Get information about a specific Resource via its PID")
 public class PIDController {
 
     private final PIDService pidService;
@@ -38,7 +42,7 @@ public class PIDController {
         this.interoperabilityRecordService = interoperabilityRecordService;
     }
 
-    @ApiOperation(value = "Returns the Resource with the given PID.")
+    @Operation(description = "Returns the Resource with the given PID.")
     @GetMapping(path = "{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity<?> get(@RequestParam String resourceType, @PathVariable("id") String pid) {
         Bundle<?> bundle = pidService.get(resourceType, pid);
@@ -48,10 +52,10 @@ public class PIDController {
         return new ResponseEntity<>(null, HttpStatus.OK);
     }
 
-    @ApiIgnore
+    @Parameter(hidden = true)
     @PutMapping(path = "updateAllHandles", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public void updateAllHandles(@ApiIgnore Authentication auth) {
+    public void updateAllHandles(@Parameter(hidden = true) Authentication auth) {
         FacetFilter ff = createFacetFilter();
         List<ProviderBundle> allPublishedProviders = providerService.getAll(ff, auth).getResults();
         for (ProviderBundle providerBundle : allPublishedProviders) {

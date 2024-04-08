@@ -11,7 +11,9 @@ import gr.uoa.di.madgik.registry.service.ServiceException;
 import gr.uoa.di.madgik.resourcecatalogue.exception.ResourceException;
 import gr.uoa.di.madgik.resourcecatalogue.exception.ValidationException;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
-import io.swagger.annotations.Api;
+
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,11 +26,11 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
-import springfox.documentation.annotations.ApiIgnore;
+
 
 @RestController
 @RequestMapping({"pendingService"})
-@Api(description = "Operations for Pending Services", tags = {"pending-resource-controller"})
+@Tag(description = "Operations for Pending Services", name = "pending-resource-controller")
 public class PendingServiceController extends ResourceController<ServiceBundle, Authentication> {
 
     private static final Logger logger = LogManager.getLogger(PendingServiceController.class);
@@ -57,7 +59,7 @@ public class PendingServiceController extends ResourceController<ServiceBundle, 
 
     @DeleteMapping(path = "{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth, #id)")
-    public ResponseEntity<ServiceBundle> delete(@PathVariable("id") String id, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
+    public ResponseEntity<ServiceBundle> delete(@PathVariable("id") String id, @Parameter(hidden = true) Authentication auth) throws ResourceNotFoundException {
         ServiceBundle service = pendingServiceManager.get(id);
         pendingServiceManager.delete(service);
         logger.info("User '{}' deleted Pending Resource '{}' with id: '{}'", auth.getName(), service.getService().getName(), service.getService().getId());
@@ -72,8 +74,8 @@ public class PendingServiceController extends ResourceController<ServiceBundle, 
     @Browse
     @GetMapping(path = "/byProvider/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isProviderAdmin(#auth,#id,true)")
-    public ResponseEntity<Paging<?>> getProviderPendingServices(@ApiIgnore @RequestParam MultiValueMap<String, Object> allRequestParams,
-                                                                @PathVariable String id, @ApiIgnore Authentication auth) {
+    public ResponseEntity<Paging<?>> getProviderPendingServices(@Parameter(hidden = true) @RequestParam MultiValueMap<String, Object> allRequestParams,
+                                                                @PathVariable String id, @Parameter(hidden = true) Authentication auth) {
         FacetFilter ff = serviceBundleService.createFacetFilterForFetchingServices(allRequestParams, catalogueName);
         ff.addFilter("resource_organisation", id);
         ff.setResourceType("pending_service");
@@ -83,14 +85,14 @@ public class PendingServiceController extends ResourceController<ServiceBundle, 
 
     @PostMapping(path = "/addResource", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public ResponseEntity<Service> addService(@RequestBody Service service, @ApiIgnore Authentication auth) {
+    public ResponseEntity<Service> addService(@RequestBody Service service, @Parameter(hidden = true) Authentication auth) {
         ServiceBundle serviceBundle = new ServiceBundle(service);
         return new ResponseEntity<>(pendingServiceManager.add(serviceBundle, auth).getService(), HttpStatus.CREATED);
     }
 
     @PostMapping(path = "/updateResource", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth, #service)")
-    public ResponseEntity<Service> updateService(@RequestBody Service service, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
+    public ResponseEntity<Service> updateService(@RequestBody Service service, @Parameter(hidden = true) Authentication auth) throws ResourceNotFoundException {
         ServiceBundle serviceBundle = pendingServiceManager.get(service.getId());
         serviceBundle.setService(service);
         return new ResponseEntity<>(pendingServiceManager.update(serviceBundle, auth).getService(), HttpStatus.OK);
@@ -98,19 +100,19 @@ public class PendingServiceController extends ResourceController<ServiceBundle, 
 
     @PostMapping("/transform/pending")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public void transformServiceToPending(@RequestParam String serviceId, @ApiIgnore Authentication auth) {
+    public void transformServiceToPending(@RequestParam String serviceId, @Parameter(hidden = true) Authentication auth) {
         pendingServiceManager.transformToPending(serviceId, auth);
     }
 
     @PostMapping("/transform/resource")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public void transformServiceToInfra(@RequestParam String serviceId, @ApiIgnore Authentication auth) {
+    public void transformServiceToInfra(@RequestParam String serviceId, @Parameter(hidden = true) Authentication auth) {
         pendingServiceManager.transformToActive(serviceId, auth);
     }
 
     @PutMapping(path = "/pending", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PostAuthorize("hasRole('ROLE_ADMIN')")
-    public ResponseEntity<Service> temporarySavePending(@RequestBody Service service, @ApiIgnore Authentication auth) {
+    public ResponseEntity<Service> temporarySavePending(@RequestBody Service service, @Parameter(hidden = true) Authentication auth) {
         ServiceBundle serviceBundle = new ServiceBundle();
         ServiceBundle toCreateId = new ServiceBundle();
         toCreateId.setService(service);
@@ -129,7 +131,7 @@ public class PendingServiceController extends ResourceController<ServiceBundle, 
 
     @PutMapping(path = "/resource", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public ResponseEntity<Service> temporarySaveService(@RequestBody Service service, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
+    public ResponseEntity<Service> temporarySaveService(@RequestBody Service service, @Parameter(hidden = true) Authentication auth) throws ResourceNotFoundException {
         pendingServiceManager.transformToPending(service.getId(), auth);
         ServiceBundle serviceBundle = pendingServiceManager.get(service.getId());
         serviceBundle.setService(service);
@@ -138,7 +140,7 @@ public class PendingServiceController extends ResourceController<ServiceBundle, 
 
     @PutMapping(path = "/transform/resource", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public ResponseEntity<Service> pendingToInfra(@RequestBody Service service, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
+    public ResponseEntity<Service> pendingToInfra(@RequestBody Service service, @Parameter(hidden = true) Authentication auth) throws ResourceNotFoundException {
         if (service == null) {
             throw new ServiceException("Cannot add a null Resource");
         }

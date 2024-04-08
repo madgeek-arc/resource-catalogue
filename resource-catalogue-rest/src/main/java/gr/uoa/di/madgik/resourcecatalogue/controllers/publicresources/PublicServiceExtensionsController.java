@@ -10,7 +10,9 @@ import gr.uoa.di.madgik.resourcecatalogue.service.ResourceService;
 import gr.uoa.di.madgik.resourcecatalogue.service.SecurityService;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.domain.Paging;
-import io.swagger.annotations.ApiOperation;
+
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -20,7 +22,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
-import springfox.documentation.annotations.ApiIgnore;
+
 
 import java.util.LinkedList;
 import java.util.List;
@@ -52,9 +54,9 @@ public class PublicServiceExtensionsController {
     }
 
     //SECTION: HELPDESK
-    @ApiOperation(value = "Returns the Public Helpdesk with the given id.")
+    @Operation(description = "Returns the Public Helpdesk with the given id.")
     @GetMapping(path = "public/helpdesk/{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    public ResponseEntity<?> getPublicHelpdesk(@PathVariable("id") String id, @ApiIgnore Authentication auth) {
+    public ResponseEntity<?> getPublicHelpdesk(@PathVariable("id") String id, @Parameter(hidden = true) Authentication auth) {
         HelpdeskBundle helpdeskBundle = helpdeskService.get(id);
         if (auth != null && auth.isAuthenticated()) {
             User user = User.of(auth);
@@ -75,7 +77,7 @@ public class PublicServiceExtensionsController {
 
     @GetMapping(path = "public/helpdesk/helpdeskBundle/{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
-    public ResponseEntity<?> getPublicHelpdeskBundle(@PathVariable("id") String id, @ApiIgnore Authentication auth) {
+    public ResponseEntity<?> getPublicHelpdeskBundle(@PathVariable("id") String id, @Parameter(hidden = true) Authentication auth) {
         HelpdeskBundle helpdeskBundle = helpdeskService.get(id);
         if (auth != null && auth.isAuthenticated()) {
             User user = User.of(auth);
@@ -94,13 +96,13 @@ public class PublicServiceExtensionsController {
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(gson.toJson("You cannot view the specific Helpdesk."));
     }
 
-    @ApiOperation(value = "Filter a list of Public Helpdesks based on a set of filters or get a list of all Public Resources in the Catalogue.")
+    @Operation(description = "Filter a list of Public Helpdesks based on a set of filters or get a list of all Public Resources in the Catalogue.")
     @Browse
-//    @ApiImplicitParam(name = "suspended", value = "Suspended", defaultValue = "false", dataType = "boolean", paramType = "query")
+//    @Parameter(name = "suspended", description = "Suspended", content = @Content(schema = @Schema(type = "boolean", defaultValue = "false")))
     @GetMapping(path = "public/helpdesk/all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    public ResponseEntity<Paging<Helpdesk>> getAllPublicHelpdesks(@ApiIgnore @RequestParam Map<String, Object> allRequestParams,
+    public ResponseEntity<Paging<Helpdesk>> getAllPublicHelpdesks(@Parameter(hidden = true) @RequestParam Map<String, Object> allRequestParams,
                                                                   @RequestParam(defaultValue = "all", name = "catalogue_id") String catalogueId,
-                                                                  @ApiIgnore Authentication auth) {
+                                                                  @Parameter(hidden = true) Authentication auth) {
         allRequestParams.putIfAbsent("catalogue_id", catalogueId);
         if (catalogueId != null && catalogueId.equals("all")) {
             allRequestParams.remove("catalogue_id");
@@ -123,12 +125,12 @@ public class PublicServiceExtensionsController {
     }
 
     @Browse
-//    @ApiImplicitParam(name = "suspended", value = "Suspended", defaultValue = "false", dataType = "boolean", paramType = "query")
+//    @Parameter(name = "suspended", description = "Suspended", content = @Content(schema = @Schema(type = "boolean", defaultValue = "false")))
     @GetMapping(path = "public/helpdesk/adminPage/all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
-    public ResponseEntity<Paging<HelpdeskBundle>> getAllPublicHelpdeskBundles(@ApiIgnore @RequestParam Map<String, Object> allRequestParams,
+    public ResponseEntity<Paging<HelpdeskBundle>> getAllPublicHelpdeskBundles(@Parameter(hidden = true) @RequestParam Map<String, Object> allRequestParams,
                                                                               @RequestParam(defaultValue = "all", name = "catalogue_id") String catalogueId,
-                                                                              @ApiIgnore Authentication auth) {
+                                                                              @Parameter(hidden = true) Authentication auth) {
         allRequestParams.putIfAbsent("catalogue_id", catalogueId);
         if (catalogueId != null && catalogueId.equals("all")) {
             allRequestParams.remove("catalogue_id");
@@ -148,7 +150,7 @@ public class PublicServiceExtensionsController {
     }
 
     @GetMapping(path = "public/helpdesk/my", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    public ResponseEntity<List<HelpdeskBundle>> getMyPublicHelpdesks(@ApiIgnore Authentication auth) {
+    public ResponseEntity<List<HelpdeskBundle>> getMyPublicHelpdesks(@Parameter(hidden = true) Authentication auth) {
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(10000);
         ff.addFilter("published", true);
@@ -158,9 +160,9 @@ public class PublicServiceExtensionsController {
 
 
     //SECTION: MONITORING
-    @ApiOperation(value = "Returns the Public Monitoring with the given id.")
+    @Operation(description = "Returns the Public Monitoring with the given id.")
     @GetMapping(path = "public/monitoring/{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    public ResponseEntity<?> getPublicMonitoring(@PathVariable("id") String id, @ApiIgnore Authentication auth) {
+    public ResponseEntity<?> getPublicMonitoring(@PathVariable("id") String id, @Parameter(hidden = true) Authentication auth) {
         MonitoringBundle monitoringBundle = monitoringService.get(id);
         if (auth != null && auth.isAuthenticated()) {
             User user = User.of(auth);
@@ -181,7 +183,7 @@ public class PublicServiceExtensionsController {
 
     @GetMapping(path = "public/monitoring/monitoringBundle/{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
-    public ResponseEntity<?> getPublicMonitoringBundle(@PathVariable("id") String id, @ApiIgnore Authentication auth) {
+    public ResponseEntity<?> getPublicMonitoringBundle(@PathVariable("id") String id, @Parameter(hidden = true) Authentication auth) {
         MonitoringBundle monitoringBundle = monitoringService.get(id);
         if (auth != null && auth.isAuthenticated()) {
             User user = User.of(auth);
@@ -200,13 +202,13 @@ public class PublicServiceExtensionsController {
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(gson.toJson("You cannot view the specific Monitoring."));
     }
 
-    @ApiOperation(value = "Filter a list of Public Monitorings based on a set of filters or get a list of all Public Resources in the Catalogue.")
+    @Operation(description = "Filter a list of Public Monitorings based on a set of filters or get a list of all Public Resources in the Catalogue.")
     @Browse
-//    @ApiImplicitParam(name = "suspended", value = "Suspended", defaultValue = "false", dataType = "boolean", paramType = "query")
+//    @Parameter(name = "suspended", description = "Suspended", content = @Content(schema = @Schema(type = "boolean", defaultValue = "false")))
     @GetMapping(path = "public/monitoring/all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    public ResponseEntity<Paging<Monitoring>> getAllPublicMonitorings(@ApiIgnore @RequestParam Map<String, Object> allRequestParams,
+    public ResponseEntity<Paging<Monitoring>> getAllPublicMonitorings(@Parameter(hidden = true) @RequestParam Map<String, Object> allRequestParams,
                                                                       @RequestParam(defaultValue = "all", name = "catalogue_id") String catalogueId,
-                                                                      @ApiIgnore Authentication auth) {
+                                                                      @Parameter(hidden = true) Authentication auth) {
         allRequestParams.putIfAbsent("catalogue_id", catalogueId);
         if (catalogueId != null && catalogueId.equals("all")) {
             allRequestParams.remove("catalogue_id");
@@ -229,12 +231,12 @@ public class PublicServiceExtensionsController {
     }
 
     @Browse
-//    @ApiImplicitParam(name = "suspended", value = "Suspended", defaultValue = "false", dataType = "boolean", paramType = "query")
+//    @Parameter(name = "suspended", description = "Suspended", content = @Content(schema = @Schema(type = "boolean", defaultValue = "false")))
     @GetMapping(path = "public/monitoring/adminPage/all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
-    public ResponseEntity<Paging<MonitoringBundle>> getAllPublicMonitoringBundles(@ApiIgnore @RequestParam Map<String, Object> allRequestParams,
+    public ResponseEntity<Paging<MonitoringBundle>> getAllPublicMonitoringBundles(@Parameter(hidden = true) @RequestParam Map<String, Object> allRequestParams,
                                                                                   @RequestParam(defaultValue = "all", name = "catalogue_id") String catalogueId,
-                                                                                  @ApiIgnore Authentication auth) {
+                                                                                  @Parameter(hidden = true) Authentication auth) {
         allRequestParams.putIfAbsent("catalogue_id", catalogueId);
         if (catalogueId != null && catalogueId.equals("all")) {
             allRequestParams.remove("catalogue_id");
@@ -254,7 +256,7 @@ public class PublicServiceExtensionsController {
     }
 
     @GetMapping(path = "public/monitoring/my", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    public ResponseEntity<List<MonitoringBundle>> getMyPublicMonitorings(@ApiIgnore Authentication auth) {
+    public ResponseEntity<List<MonitoringBundle>> getMyPublicMonitorings(@Parameter(hidden = true) Authentication auth) {
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(10000);
         ff.addFilter("published", true);

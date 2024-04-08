@@ -18,10 +18,10 @@ import org.springframework.security.oauth2.common.exceptions.UnauthorizedUserExc
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -35,7 +35,7 @@ public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionH
     protected ResponseEntity<Object> handleConflict(Exception ex, WebRequest request) {
         logger.warn("", ex);
         logger.debug(ex);
-        String url = ((ServletWebRequest) request).getRequest().getRequestURL().toString();
+        String url = ((HttpServletRequest) request).getRequestURL().toString();
         ServerError se = new ServerError(url, ex);
         return handleExceptionInternal(ex, se, new HttpHeaders(), HttpStatus.CONFLICT, request);
     }
@@ -44,7 +44,7 @@ public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionH
     protected ResponseEntity<Object> handleNotFound(Exception ex, WebRequest request) {
         logger.info(ex.getMessage());
         logger.debug(ex);
-        String url = ((ServletWebRequest) request).getRequest().getRequestURL().toString();
+        String url = ((HttpServletRequest) request).getRequestURL().toString();
         ServerError se = new ServerError(url, ex);
         return handleExceptionInternal(ex, se, new HttpHeaders(), HttpStatus.NOT_FOUND, request);
     }
@@ -54,7 +54,7 @@ public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionH
     protected ResponseEntity<Object> handleUnauthorized(Exception ex, WebRequest request) {
         logger.info(ex.getMessage());
         logger.debug(ex);
-        String url = ((ServletWebRequest) request).getRequest().getRequestURL().toString();
+        String url = ((HttpServletRequest) request).getRequestURL().toString();
         ServerError se = new ServerError(url, ex);
         return handleExceptionInternal(ex, se, new HttpHeaders(), HttpStatus.UNAUTHORIZED, request);
     }
@@ -63,7 +63,7 @@ public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionH
     protected ResponseEntity<Object> handleForbidden(Exception ex, WebRequest request) {
         logger.info(ex.getMessage());
         logger.debug(ex);
-        String url = ((ServletWebRequest) request).getRequest().getRequestURL().toString();
+        String url = ((HttpServletRequest) request).getRequestURL().toString();
         ServerError se = new ServerError(url, ex);
         return handleExceptionInternal(ex, se, new HttpHeaders(), HttpStatus.FORBIDDEN, request);
     }
@@ -72,7 +72,7 @@ public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionH
     protected ResponseEntity<Object> handleResourceException(ResourceException ex, WebRequest request) {
         logger.info(ex.getMessage());
         logger.debug(ex);
-        String url = ((ServletWebRequest) request).getRequest().getRequestURL().toString();
+        String url = ((HttpServletRequest) request).getRequestURL().toString();
         ServerError se = new ServerError(url, ex);
         return handleExceptionInternal(ex, se, new HttpHeaders(), ex.getStatus(), request);
     }
@@ -81,7 +81,7 @@ public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionH
     protected ResponseEntity<Object> handleValidationException(ValidationException ex, WebRequest request) {
         logger.info(ex.getMessage());
         logger.debug(ex);
-        String url = ((ServletWebRequest) request).getRequest().getRequestURL().toString();
+        String url = ((HttpServletRequest) request).getRequestURL().toString();
         ServerError se = new ServerError(url, ex);
         return handleExceptionInternal(ex, se, new HttpHeaders(), ex.getStatus(), request);
     }
@@ -89,7 +89,7 @@ public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionH
     @ExceptionHandler(value = {ServiceException.class})
     protected ResponseEntity<Object> handleServiceException(Exception ex, WebRequest request) {
         logger.error("", ex);
-        String url = ((ServletWebRequest) request).getRequest().getRequestURL().toString();
+        String url = ((HttpServletRequest) request).getRequestURL().toString();
         ServerError se = new ServerError(url, ex);
         return handleExceptionInternal(ex, se, new HttpHeaders(), HttpStatus.INTERNAL_SERVER_ERROR, request);
     }
@@ -99,12 +99,11 @@ public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionH
         String errorId = UUID.randomUUID().toString();
         String response = String.format("Please send the following error code to the system administrators. Error Code: %s", errorId);
         logger.error("Error Code: {}", errorId, ex);
-        String url = ((ServletWebRequest) request).getRequest().getRequestURL().toString();
+        String url = ((HttpServletRequest) request).getRequestURL().toString();
         ServerError se = new ServerError(url, new RuntimeException(response));
         return handleExceptionInternal(ex, se, new HttpHeaders(), HttpStatus.INTERNAL_SERVER_ERROR, request);
     }
 
-    @Override
     protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex,
                                                                   HttpHeaders headers,
                                                                   HttpStatus status, WebRequest request) {

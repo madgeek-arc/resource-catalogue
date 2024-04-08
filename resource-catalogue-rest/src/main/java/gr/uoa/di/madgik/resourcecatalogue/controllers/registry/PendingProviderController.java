@@ -7,7 +7,9 @@ import gr.uoa.di.madgik.resourcecatalogue.service.PendingResourceService;
 import gr.uoa.di.madgik.resourcecatalogue.service.ProviderService;
 import gr.uoa.di.madgik.resourcecatalogue.service.IdCreator;
 import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
-import io.swagger.annotations.Api;
+
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,14 +19,14 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
-import springfox.documentation.annotations.ApiIgnore;
+
 
 import java.util.List;
 import java.util.Map;
 
 @RestController
 @RequestMapping("pendingProvider")
-@Api(value = "Get information about a Pending Provider")
+@Tag(name = "pending-provider-controller", description = "Get information about a Pending Provider")
 public class PendingProviderController extends ResourceController<ProviderBundle, Authentication> {
 
     private static final Logger logger = LogManager.getLogger(PendingProviderController.class);
@@ -33,7 +35,6 @@ public class PendingProviderController extends ResourceController<ProviderBundle
     private final ProviderService<ProviderBundle, Authentication> providerManager;
     private final IdCreator idCreator;
 
-    @Autowired
     PendingProviderController(PendingResourceService<ProviderBundle> pendingProviderService,
                               ProviderService<ProviderBundle, Authentication> providerManager,
                               IdCreator idCreator) {
@@ -60,19 +61,19 @@ public class PendingProviderController extends ResourceController<ProviderBundle
 
     @PostMapping("/transform/pending")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public void transformProviderToPending(@RequestParam String providerId, @ApiIgnore Authentication auth) {
+    public void transformProviderToPending(@RequestParam String providerId, @Parameter(hidden = true) Authentication auth) {
         pendingProviderService.transformToPending(providerId, auth);
     }
 
     @PostMapping("/transform/active")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public void transformProviderToActive(@RequestParam String providerId, @ApiIgnore Authentication auth) {
+    public void transformProviderToActive(@RequestParam String providerId, @Parameter(hidden = true) Authentication auth) {
         pendingProviderService.transformToActive(providerId, auth);
     }
 
     @PutMapping(path = "/transform/active", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public ResponseEntity<Provider> updateAndPublish(@RequestBody Provider provider, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
+    public ResponseEntity<Provider> updateAndPublish(@RequestBody Provider provider, @Parameter(hidden = true) Authentication auth) throws ResourceNotFoundException {
         ProviderBundle providerBundle = pendingProviderService.get(provider.getId());
         providerBundle.setProvider(provider);
 
@@ -89,7 +90,7 @@ public class PendingProviderController extends ResourceController<ProviderBundle
 
     @PutMapping(path = "/pending", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public ResponseEntity<Provider> temporarySavePending(@RequestBody Provider provider, @ApiIgnore Authentication auth) {
+    public ResponseEntity<Provider> temporarySavePending(@RequestBody Provider provider, @Parameter(hidden = true) Authentication auth) {
         ProviderBundle bundle = new ProviderBundle();
         provider.setId(idCreator.createProviderId(provider));
         try {
@@ -106,7 +107,7 @@ public class PendingProviderController extends ResourceController<ProviderBundle
 
     @PutMapping(path = "/provider", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public ResponseEntity<Provider> temporarySaveProvider(@RequestBody Provider provider, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
+    public ResponseEntity<Provider> temporarySaveProvider(@RequestBody Provider provider, @Parameter(hidden = true) Authentication auth) throws ResourceNotFoundException {
         pendingProviderService.transformToPending(provider.getId(), auth);
         ProviderBundle bundle = pendingProviderService.get(provider.getId());
         bundle.setProvider(provider);
@@ -115,17 +116,17 @@ public class PendingProviderController extends ResourceController<ProviderBundle
 
     // Get a list of Providers in which you are admin.
     @GetMapping(path = "getMyPendingProviders", produces = {MediaType.APPLICATION_JSON_VALUE})
-    public ResponseEntity<List<ProviderBundle>> getMyPendingProviders(@ApiIgnore Authentication auth) {
+    public ResponseEntity<List<ProviderBundle>> getMyPendingProviders(@Parameter(hidden = true) Authentication auth) {
         return new ResponseEntity<>(pendingProviderService.getMy(auth), HttpStatus.OK);
     }
 
     @GetMapping(path = "hasAdminAcceptedTerms", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    public boolean hasAdminAcceptedTerms(@RequestParam String providerId, @ApiIgnore Authentication authentication) {
+    public boolean hasAdminAcceptedTerms(@RequestParam String providerId, @Parameter(hidden = true) Authentication authentication) {
         return pendingProviderService.hasAdminAcceptedTerms(providerId, authentication);
     }
 
     @PutMapping(path = "adminAcceptedTerms", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    public void adminAcceptedTerms(@RequestParam String providerId, @ApiIgnore Authentication authentication) {
+    public void adminAcceptedTerms(@RequestParam String providerId, @Parameter(hidden = true) Authentication authentication) {
         pendingProviderService.adminAcceptedTerms(providerId, authentication);
     }
 

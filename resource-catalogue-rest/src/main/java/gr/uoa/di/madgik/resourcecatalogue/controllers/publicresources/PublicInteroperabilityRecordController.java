@@ -13,8 +13,12 @@ import gr.uoa.di.madgik.resourcecatalogue.service.ResourceService;
 import gr.uoa.di.madgik.resourcecatalogue.service.SecurityService;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.domain.Paging;
-import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiOperation;
+
+
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -24,7 +28,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
-import springfox.documentation.annotations.ApiIgnore;
+
 
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -55,7 +59,7 @@ public class PublicInteroperabilityRecordController {
         this.publicInteroperabilityRecordManager = publicInteroperabilityRecordManager;
     }
 
-    @ApiOperation(value = "Returns the Public Interoperability Record with the given id.")
+    @Operation(description = "Returns the Public Interoperability Record with the given id.")
     @GetMapping(path = "public/interoperabilityRecord/{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity<?> getPublicInteroperabilityRecord(@PathVariable("id") String id,
                                                              @RequestParam(defaultValue = "${project.catalogue.name}", name = "catalogue_id") String catalogueId) {
@@ -71,7 +75,7 @@ public class PublicInteroperabilityRecordController {
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth, #id, #catalogueId)")
     public ResponseEntity<?> getPublicInteroperabilityRecordBundle(@PathVariable("id") String id,
                                                                    @RequestParam(defaultValue = "${project.catalogue.name}", name = "catalogue_id") String catalogueId,
-                                                                   @ApiIgnore Authentication auth) {
+                                                                   @Parameter(hidden = true) Authentication auth) {
         InteroperabilityRecordBundle interoperabilityRecordBundle = interoperabilityRecordService.get(id, catalogueId);
         if (auth != null && auth.isAuthenticated()) {
             User user = User.of(auth);
@@ -91,13 +95,13 @@ public class PublicInteroperabilityRecordController {
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(gson.toJson("You cannot view the specific Interoperability Record."));
     }
 
-    @ApiOperation(value = "Filter a list of Public Interoperability Records based on a set of filters or get a list of all Public Interoperability Records in the Catalogue.")
+    @Operation(description = "Filter a list of Public Interoperability Records based on a set of filters or get a list of all Public Interoperability Records in the Catalogue.")
     @Browse
-    @ApiImplicitParam(name = "suspended", value = "Suspended", defaultValue = "false", dataType = "boolean", paramType = "query")
+    @Parameter(name = "suspended", description = "Suspended", content = @Content(schema = @Schema(type = "boolean", defaultValue = "false")))
     @GetMapping(path = "public/interoperabilityRecord/all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    public ResponseEntity<Paging<InteroperabilityRecord>> getAllPublicInteroperabilityRecords(@ApiIgnore @RequestParam Map<String, Object> allRequestParams,
+    public ResponseEntity<Paging<InteroperabilityRecord>> getAllPublicInteroperabilityRecords(@Parameter(hidden = true) @RequestParam Map<String, Object> allRequestParams,
                                                                                               @RequestParam(defaultValue = "all", name = "catalogue_id") String catalogueId,
-                                                                                              @ApiIgnore Authentication auth) {
+                                                                                              @Parameter(hidden = true) Authentication auth) {
         allRequestParams.putIfAbsent("catalogue_id", catalogueId);
         if (catalogueId != null && catalogueId.equals("all")) {
             allRequestParams.remove("catalogue_id");
@@ -117,12 +121,12 @@ public class PublicInteroperabilityRecordController {
     }
 
     @Browse
-    @ApiImplicitParam(name = "suspended", value = "Suspended", defaultValue = "false", dataType = "boolean", paramType = "query")
+    @Parameter(name = "suspended", description = "Suspended", content = @Content(schema = @Schema(type = "boolean", defaultValue = "false")))
     @GetMapping(path = "public/interoperabilityRecord/bundle/all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
-    public ResponseEntity<Paging<InteroperabilityRecordBundle>> getAllPublicInteroperabilityRecordBundles(@ApiIgnore @RequestParam Map<String, Object> allRequestParams,
+    public ResponseEntity<Paging<InteroperabilityRecordBundle>> getAllPublicInteroperabilityRecordBundles(@Parameter(hidden = true) @RequestParam Map<String, Object> allRequestParams,
                                                                                                           @RequestParam(defaultValue = "all", name = "catalogue_id") String catalogueId,
-                                                                                                          @ApiIgnore Authentication auth) {
+                                                                                                          @Parameter(hidden = true) Authentication auth) {
         allRequestParams.putIfAbsent("catalogue_id", catalogueId);
         if (catalogueId != null && catalogueId.equals("all")) {
             allRequestParams.remove("catalogue_id");
@@ -142,7 +146,7 @@ public class PublicInteroperabilityRecordController {
         return new ResponseEntity<>(interoperabilityRecordPaging, HttpStatus.OK);
     }
 
-    @ApiOperation(value = "Returns the Public Related Resources of a specific Interoperability Record given its id.")
+    @Operation(description = "Returns the Public Related Resources of a specific Interoperability Record given its id.")
     @GetMapping(path = "public/interoperabilityRecord/relatedResources/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
     public List<String> getAllInteroperabilityRecordRelatedResources(@PathVariable String id) {
         List<String> allInteroperabilityRecordRelatedResources = new ArrayList<>();
@@ -159,7 +163,7 @@ public class PublicInteroperabilityRecordController {
     }
 
     @GetMapping(path = "public/interoperabilityRecord/my", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    public ResponseEntity<List<InteroperabilityRecordBundle>> getMyPublicInteroperabilityRecords(@ApiIgnore Authentication auth) {
+    public ResponseEntity<List<InteroperabilityRecordBundle>> getMyPublicInteroperabilityRecords(@Parameter(hidden = true) Authentication auth) {
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(10000);
         ff.addFilter("published", true);

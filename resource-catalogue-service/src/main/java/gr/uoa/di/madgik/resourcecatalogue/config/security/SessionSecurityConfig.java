@@ -34,6 +34,8 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import javax.servlet.http.Cookie;
+
+import javax.servlet.Filter;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -41,7 +43,6 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @Configuration
-@PropertySource({"classpath:application.properties", "classpath:registry.properties"})
 @Order(2)
 public class SessionSecurityConfig extends WebSecurityConfigurerAdapter {
 
@@ -108,8 +109,8 @@ public class SessionSecurityConfig extends WebSecurityConfigurerAdapter {
 //                .addHeaderWriter(new XFrameOptionsHeaderWriter(XFrameOptionsHeaderWriter.XFrameOptionsMode.SAMEORIGIN))
                 .httpStrictTransportSecurity().disable()
                 .and()
-                .addFilterBefore(openIdConnectAuthenticationFilter(),
-                        AbstractPreAuthenticatedProcessingFilter.class)
+//                .addFilterBefore((Filter) openIdConnectAuthenticationFilter(),
+//                        (Class<? extends Filter>) AbstractPreAuthenticatedProcessingFilter.class)
                 .authorizeRequests()
                 .regexMatchers("/resourcesync/.*").permitAll()
                 .regexMatchers("/restore/", "/resources.*", "/resourceType.*", "/search.*")
@@ -139,8 +140,8 @@ public class SessionSecurityConfig extends WebSecurityConfigurerAdapter {
     @Bean
     CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList("*")); // TODO: set origins
-        configuration.setAllowedMethods(Arrays.asList("*")); // TODO: set methods
+        configuration.setAllowedOrigins(List.of("*"));
+        configuration.setAllowedMethods(List.of("*"));
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
         return source;
