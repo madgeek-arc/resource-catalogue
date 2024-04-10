@@ -38,7 +38,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping({"datasource"})
-@Tag(name = "datasource-controller", description = "Operations for Datasources")
+@Tag(name = "datasource")
 public class DatasourceController {
 
     private static final Logger logger = LogManager.getLogger(DatasourceController.class);

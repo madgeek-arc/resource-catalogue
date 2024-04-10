@@ -9,8 +9,6 @@ import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 
-
-import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -33,7 +31,7 @@ import java.util.*;
 
 @RestController
 @RequestMapping("catalogue")
-@Tag(name = "catalogue-controller", description = "Get information about a Catalogue")
+@Tag(name = "catalogue", description = "Operations about Catalogues and their resources")
 public class CatalogueController {
 
     private static final Logger logger = LogManager.getLogger(CatalogueController.class);

@@ -25,7 +25,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("info")
-@Tag(name = "Info Controller", description = "Get General Information")
+@Tag(name = "info", description = "Total number of Providers and Services in the Resource Catalogue")
 public class InfoController {
 
     private final ServiceBundleService<ServiceBundle> serviceBundleService;

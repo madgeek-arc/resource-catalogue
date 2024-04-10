@@ -31,7 +31,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("configurationTemplateInstance")
-@Tag(name = "Configuration Template Instance", description = "Operations for Configuration Template Instances")
+@Tag(name = "configuration template instance")
 public class ConfigurationTemplateInstanceController {
 
     private static final Logger logger = LogManager.getLogger(ConfigurationTemplateInstanceController.class);

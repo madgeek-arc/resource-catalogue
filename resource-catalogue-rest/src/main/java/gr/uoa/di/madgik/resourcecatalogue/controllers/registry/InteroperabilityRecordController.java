@@ -39,7 +39,7 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping({"interoperabilityRecord"})
-@Tag(name = "interoperability-record-controller", description = "Operations for Interoperability Records")
+@Tag(name = "interoperability record")
 public class InteroperabilityRecordController {
 
     private static final Logger logger = LogManager.getLogger(InteroperabilityRecordController.class);
