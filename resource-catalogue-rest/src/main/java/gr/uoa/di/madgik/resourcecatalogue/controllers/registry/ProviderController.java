@@ -44,7 +44,7 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("provider")
-@Tag(name = "Provider Controller", description = "Get information about a Provider")
+@Tag(name = "provider")
 public class ProviderController {
 
     private static final Logger logger = LogManager.getLogger(ProviderController.class);
@@ -97,7 +97,7 @@ public class ProviderController {
         return new ResponseEntity<>(provider.getProvider(), HttpStatus.OK);
     }
 
-    @Operation(description = "Returns the Provider with the given id.")
+    @Operation(summary = "Returns the Provider with the given id.")
     @GetMapping(path = "{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity<Provider> get(@PathVariable("id") String id,
                                         @RequestParam(defaultValue = "${project.catalogue.name}", name = "catalogue_id") String catalogueId,
@@ -125,7 +125,7 @@ public class ProviderController {
     }
 
     //    @Override
-    @Operation(description = "Updates the Provider assigned the given id with the given Provider, keeping a version of revisions.")
+    @Operation(summary = "Updates the Provider assigned the given id with the given Provider, keeping a version of revisions.")
     @PutMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isProviderAdmin(#auth,#provider.id,#provider.catalogueId)")
     public ResponseEntity<Provider> update(@RequestBody Provider provider,
@@ -150,7 +150,7 @@ public class ProviderController {
         return new ResponseEntity<>(providerBundle, HttpStatus.OK);
     }
 
-    @Operation(description = "Filter a list of Providers based on a set of filters or get a list of all Providers in the Catalogue.",
+    @Operation(summary = "Filter a list of Providers based on a set of filters or get a list of all Providers in the Catalogue.",
             security = { @SecurityRequirement(name = "bearer-key") })
     @Browse
     @Parameter(name = "suspended", description = "Suspended", content = @Content(schema = @Schema(type = "boolean", defaultValue = "false")))
@@ -248,7 +248,7 @@ public class ProviderController {
         }
     }
 
-    @Operation(description = "Get a list of services offered by a Provider.")
+    @Operation(summary = "Get a list of services offered by a Provider.")
     @GetMapping(path = "services/{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity<List<? extends Service>> getServices(@PathVariable("id") String id, @Parameter(hidden = true) Authentication auth) {
         return new ResponseEntity<>(serviceBundleService.getResources(id, auth), HttpStatus.OK);
@@ -428,7 +428,7 @@ public class ProviderController {
         return ResponseEntity.ok(loggingInfoHistory);
     }
 
-    @Operation(description = "Validates the Provider without actually changing the repository.")
+    @Operation(summary = "Validates the Provider without actually changing the repository.")
     @PostMapping(path = "validate", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<Boolean> validate(@RequestBody Provider provider) {
         ResponseEntity<Boolean> ret = ResponseEntity.ok(providerService.validate(new ProviderBundle(provider)) != null);

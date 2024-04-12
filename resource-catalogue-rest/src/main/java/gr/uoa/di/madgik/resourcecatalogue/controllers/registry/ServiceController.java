@@ -41,7 +41,7 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("service")
-@Tag(description = "Operations for Services", name = "service-controller")
+@Tag(name = "service")
 public class ServiceController {
 
     private static final Logger logger = LogManager.getLogger(ServiceController.class);
@@ -94,14 +94,14 @@ public class ServiceController {
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
-    @Operation(description = "Get the most current version of a specific Resource, providing the Resource id.")
+    @Operation(summary = "Get the most current version of a specific Resource, providing the Resource id.")
     @GetMapping(path = "{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     @PreAuthorize("@securityService.resourceIsActive(#id, #catalogueId) or hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth, #id)")
     public ResponseEntity<?> getService(@PathVariable("id") String id, @RequestParam(defaultValue = "${project.catalogue.name}", name = "catalogue_id") String catalogueId, @Parameter(hidden = true) Authentication auth) {
         return new ResponseEntity<>(serviceBundleService.get(id, catalogueId).getService(), HttpStatus.OK);
     }
 
-    @Operation(description = "Creates a new Resource.")
+    @Operation(summary = "Creates a new Resource.")
     @PostMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<Service> addService(@RequestBody Service service, @Parameter(hidden = true) Authentication auth) {
@@ -110,7 +110,7 @@ public class ServiceController {
         return new ResponseEntity<>(ret.getService(), HttpStatus.CREATED);
     }
 
-    @Operation(description = "Updates the Resource assigned the given id with the given Resource, keeping a version of revisions.")
+    @Operation(summary = "Updates the Resource assigned the given id with the given Resource, keeping a version of revisions.")
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth,#service)")
     @PutMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<Service> updateService(@RequestBody Service service, @RequestParam(required = false) String comment, @Parameter(hidden = true) Authentication auth) throws ResourceNotFoundException {
@@ -129,7 +129,7 @@ public class ServiceController {
         return new ResponseEntity<>(resource, HttpStatus.OK);
     }
 
-    @Operation(description = "Validates the Resource without actually changing the repository.")
+    @Operation(summary = "Validates the Resource without actually changing the repository.")
     @PostMapping(path = "validate", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<Boolean> validate(@RequestBody Service service) {
         ResponseEntity<Boolean> ret = ResponseEntity.ok(serviceBundleService.validate(new ServiceBundle(service)));
@@ -137,7 +137,7 @@ public class ServiceController {
         return ret;
     }
 
-    @Operation(description = "Filter a list of Resources based on a set of filters or get a list of all Resources in the Catalogue.")
+    @Operation(summary = "Filter a list of Resources based on a set of filters or get a list of all Resources in the Catalogue.")
     @Browse
     @Parameter(name = "suspended", description = "Suspended", content = @Content(schema = @Schema(type = "boolean", defaultValue = "false")))
     @GetMapping(path = "all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
@@ -150,7 +150,7 @@ public class ServiceController {
         return ResponseEntity.ok(paging);
     }
 
-    @Operation(description = "Get all Service and Datasource Bundles as ServiceBundles.")
+    @Operation(summary = "Get all Service and Datasource Bundles as ServiceBundles.")
     @Browse
     @Parameter(name = "suspended", description = "Suspended", content = @Content(schema = @Schema(type = "boolean", defaultValue = "false")))
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
@@ -184,7 +184,7 @@ public class ServiceController {
         return serviceBundleService.getChildrenFromParent(type, parent, rec);
     }
 
-    //    @Operation(description = "Get a list of Resources based on a set of ids.")
+    //    @Operation(summary = "Get a list of Resources based on a set of ids.")
     @Parameters({
             @Parameter(name = "ids", description = "Comma-separated list of Resource ids", schema = @Schema(type = "string"))
     })
@@ -194,7 +194,7 @@ public class ServiceController {
                 serviceBundleService.getByIds(auth, ids).stream().map(ServiceBundle::getService).collect(Collectors.toList()));
     }
 
-    @Operation(description = "Get all Resources in the catalogue organized by an attribute, e.g. get Resources organized in categories.")
+    @Operation(summary = "Get all Resources in the catalogue organized by an attribute, e.g. get Resources organized in categories.")
     @GetMapping(path = "by/{field}", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<Map<String, List<Service>>> getServicesBy(@PathVariable(value = "field") Service.Field field, @Parameter(hidden = true) Authentication auth) throws NoSuchFieldException {
         Map<String, List<ServiceBundle>> results;
@@ -415,7 +415,7 @@ public class ServiceController {
         return ResponseEntity.ok(serviceBundleService.createPublicResource(serviceBundle, auth));
     }
 
-    @Operation(description = "Suspends a specific Service.")
+    @Operation(summary = "Suspends a specific Service.")
     @PutMapping(path = "suspend", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     public ServiceBundle suspendService(@RequestParam String serviceId, @RequestParam String catalogueId, @RequestParam boolean suspend, @Parameter(hidden = true) Authentication auth) {

@@ -27,7 +27,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping({"serviceBundle"})
-@Tag(name = "service-bundle-controller", description = "Get Information about a Service Bundle")
+@Tag(name = "service bundle")
 public class ServiceBundleController {
 
     private static final Logger logger = LogManager.getLogger(ServiceBundleController.class.getName());

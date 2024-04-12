@@ -34,7 +34,7 @@ public class RecommendationController {
         this.recommendationService = recommendationService;
     }
 
-    @Operation(description = "Given a specific user email, returns Service Recommendations.")
+    @Operation(summary = "Given a specific user email, returns Service Recommendations.")
     @GetMapping(path = "getRecommendationServices/{limit}", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<List<Service>> getRecommendationServices(@PathVariable("limit") int limit, @Parameter(hidden = true) Authentication auth) {
         logger.trace("Getting user recommended Services");

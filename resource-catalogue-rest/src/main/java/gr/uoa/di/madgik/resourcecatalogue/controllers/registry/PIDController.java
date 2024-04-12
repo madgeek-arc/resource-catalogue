@@ -22,7 +22,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("pid")
-@Tag(name = "pid-controller", description = "Get information about a specific Resource via its PID")
+@Tag(name = "pid", description = "Get information about a specific resource via its PID")
 public class PIDController {
 
     private final PIDService pidService;
@@ -42,7 +42,7 @@ public class PIDController {
         this.interoperabilityRecordService = interoperabilityRecordService;
     }
 
-    @Operation(description = "Returns the Resource with the given PID.")
+    @Operation(summary = "Returns the Resource with the given PID.")
     @GetMapping(path = "{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity<?> get(@RequestParam String resourceType, @PathVariable("id") String pid) {
         Bundle<?> bundle = pidService.get(resourceType, pid);

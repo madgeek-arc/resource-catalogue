@@ -14,6 +14,7 @@ import gr.uoa.di.madgik.registry.domain.Paging;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -31,6 +32,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping
+@Tag(name = "public resource interoperability record")
 public class PublicResourceInteroperabilityRecordController {
 
     private static final Logger logger = LogManager.getLogger(PublicResourceInteroperabilityRecordController.class);
@@ -50,7 +52,7 @@ public class PublicResourceInteroperabilityRecordController {
         this.publicResourceInteroperabilityRecordManager = publicResourceInteroperabilityRecordManager;
     }
 
-    @Operation(description = "Returns the Public Resource Interoperability Record with the given id.")
+    @Operation(summary = "Returns the Public Resource Interoperability Record with the given id.")
     @GetMapping(path = "public/resourceInteroperabilityRecord/{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity<?> getPublicResourceInteroperabilityRecord(@PathVariable("id") String id) {
         ResourceInteroperabilityRecordBundle resourceInteroperabilityRecordBundle = resourceInteroperabilityRecordService.get(id);
@@ -82,7 +84,7 @@ public class PublicResourceInteroperabilityRecordController {
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(gson.toJson("You cannot view the specific Resource Interoperability Record."));
     }
 
-    @Operation(description = "Filter a list of Public Resource Interoperability Records based on a set of filters or get a list of all Public Resource Interoperability Records in the Catalogue.")
+    @Operation(summary = "Filter a list of Public Resource Interoperability Records based on a set of filters or get a list of all Public Resource Interoperability Records in the Catalogue.")
     @Browse
     @GetMapping(path = "public/resourceInteroperabilityRecord/all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity<Paging<ResourceInteroperabilityRecord>> getAllPublicResourceInteroperabilityRecords(@Parameter(hidden = true) @RequestParam Map<String, Object> allRequestParams,

@@ -41,7 +41,7 @@ public class ConfigurationTemplateInstanceController {
         this.configurationTemplateInstanceService = configurationTemplateInstanceService;
     }
 
-    @Operation(description = "Returns the ConfigurationTemplateInstance with the given id.")
+    @Operation(summary = "Returns the ConfigurationTemplateInstance with the given id.")
     @GetMapping(path = "{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity<ConfigurationTemplateInstanceDto> getConfigurationTemplateInstance(@PathVariable("id") String id) {
         ConfigurationTemplateInstance configurationTemplateInstance = configurationTemplateInstanceService.get(id).getConfigurationTemplateInstance();
@@ -49,7 +49,7 @@ public class ConfigurationTemplateInstanceController {
         return new ResponseEntity<>(ret, HttpStatus.OK);
     }
 
-    @Operation(description = "Filter a list of ConfigurationTemplateInstances based on a set of filters or get a list of all ConfigurationTemplateInstances in the Catalogue.")
+    @Operation(summary = "Filter a list of ConfigurationTemplateInstances based on a set of filters or get a list of all ConfigurationTemplateInstances in the Catalogue.")
     @Browse
     @GetMapping(path = "all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity<Paging<ConfigurationTemplateInstanceDto>> getAllConfigurationTemplateInstances(@Parameter(hidden = true) @RequestParam Map<String, Object> allRequestParams,
@@ -66,7 +66,7 @@ public class ConfigurationTemplateInstanceController {
         return new ResponseEntity<>(configurationTemplateInstancePaging, HttpStatus.OK);
     }
 
-    @Operation(description = "Returns a List of ConfigurationTemplateInstance associated with the given 'resourceId'")
+    @Operation(summary = "Returns a List of ConfigurationTemplateInstance associated with the given 'resourceId'")
     @GetMapping(path = "getAllByResourceId/{resourceId}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity<List<ConfigurationTemplateInstanceDto>> getConfigurationTemplateInstancesByResourceId(@PathVariable("resourceId") String resourceId) {
         List<ConfigurationTemplateInstance> configurationTemplateInstances = configurationTemplateInstanceService.getConfigurationTemplateInstancesByResourceId(resourceId);
@@ -77,7 +77,7 @@ public class ConfigurationTemplateInstanceController {
         return new ResponseEntity<>(ret, HttpStatus.OK);
     }
 
-    //    @Operation(description = "Returns a List of ConfigurationTemplateInstance associated with the given 'configurationTemplateId'")
+    //    @Operation(summary = "Returns a List of ConfigurationTemplateInstance associated with the given 'configurationTemplateId'")
     @GetMapping(path = "getAllByConfigurationTemplateId/{configurationTemplateId}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity<List<ConfigurationTemplateInstanceDto>> getConfigurationTemplateInstancesByConfigurationTemplateId(@PathVariable("configurationTemplateId") String configurationTemplateId) {
         List<ConfigurationTemplateInstance> configurationTemplateInstances = configurationTemplateInstanceService.getConfigurationTemplateInstancesByConfigurationTemplateId(configurationTemplateId);
@@ -88,7 +88,7 @@ public class ConfigurationTemplateInstanceController {
         return new ResponseEntity<>(ret, HttpStatus.OK);
     }
 
-    //    @Operation(description = "Create a new ConfigurationTemplateInstance.")
+    //    @Operation(summary = "Create a new ConfigurationTemplateInstance.")
     @PostMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<ConfigurationTemplateInstance> addConfigurationTemplateInstance(@RequestBody ConfigurationTemplateInstance configurationTemplateInstance,
@@ -98,7 +98,7 @@ public class ConfigurationTemplateInstanceController {
         return new ResponseEntity<>(configurationTemplateInstanceBundle.getConfigurationTemplateInstance(), HttpStatus.CREATED);
     }
 
-    //    @Operation(description = "Add a List of ConfigurationTemplateInstances.")
+    //    @Operation(summary = "Add a List of ConfigurationTemplateInstances.")
     @PostMapping(path = "addAll", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<List<ConfigurationTemplateInstance>> addConfigurationTemplateInstances(@RequestBody List<ConfigurationTemplateInstance> configurationTemplateInstances,
@@ -110,7 +110,7 @@ public class ConfigurationTemplateInstanceController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    //    @Operation(description = "Updates the ConfigurationTemplateInstance with the given id.")
+    //    @Operation(summary = "Updates the ConfigurationTemplateInstance with the given id.")
     @PutMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<ConfigurationTemplateInstance> updateConfigurationTemplateInstance(@RequestBody ConfigurationTemplateInstance configurationTemplateInstance,

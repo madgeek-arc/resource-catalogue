@@ -30,7 +30,7 @@ public class ConfigurationTemplateController {
         this.configurationTemplateService = configurationTemplateService;
     }
 
-    //    @Operation(description = "Create a new ConfigurationTemplate.")
+    //    @Operation(summary = "Create a new ConfigurationTemplate.")
     @PostMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<ConfigurationTemplate> addConfigurationTemplate(@RequestBody ConfigurationTemplate configurationTemplate,

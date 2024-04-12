@@ -54,14 +54,14 @@ public class DatasourceController {
         this.openAIREDatasourceService = openAIREDatasourceService;
     }
 
-    @Operation(description = "Returns the Datasource with the given id.")
+    @Operation(summary = "Returns the Datasource with the given id.")
     @GetMapping(path = "{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity<Datasource> getDatasource(@PathVariable("id") String id) {
         Datasource datasource = datasourceService.get(id).getDatasource();
         return new ResponseEntity<>(datasource, HttpStatus.OK);
     }
 
-    @Operation(description = "Returns the Datasource of the given Service of the given Catalogue.")
+    @Operation(summary = "Returns the Datasource of the given Service of the given Catalogue.")
     @GetMapping(path = "/byService/{serviceId}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity<Datasource> getDatasourceByServiceId(@PathVariable("serviceId") String serviceId,
                                                                @RequestParam(defaultValue = "${project.catalogue.name}", name = "catalogue_id") String catalogueId,

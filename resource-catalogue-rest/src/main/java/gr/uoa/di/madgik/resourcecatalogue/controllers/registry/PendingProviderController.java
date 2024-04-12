@@ -26,7 +26,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("pendingProvider")
-@Tag(name = "pending-provider-controller", description = "Get information about a Pending Provider")
+@Tag(name = "pending provider")
 public class PendingProviderController extends ResourceController<ProviderBundle, Authentication> {
 
     private static final Logger logger = LogManager.getLogger(PendingProviderController.class);

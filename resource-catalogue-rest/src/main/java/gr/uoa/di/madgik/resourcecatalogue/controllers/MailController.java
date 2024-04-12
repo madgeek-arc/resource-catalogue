@@ -4,6 +4,7 @@ import com.google.common.collect.Lists;
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +21,7 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("mails")
+@Tag(name = "mails", description = "Send emails to Users")
 public class MailController {
 
     private static final Logger logger = LogManager.getLogger(MailController.class);

@@ -58,7 +58,7 @@ public class InteroperabilityRecordController {
         this.securityService = securityService;
     }
 
-    @Operation(description = "Creates a new Interoperability Record.")
+    @Operation(summary = "Creates a new Interoperability Record.")
     @PostMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<InteroperabilityRecord> add(@RequestBody InteroperabilityRecord interoperabilityRecord, @Parameter(hidden = true) Authentication auth) {
@@ -67,7 +67,7 @@ public class InteroperabilityRecordController {
         return new ResponseEntity<>(ret.getInteroperabilityRecord(), HttpStatus.CREATED);
     }
 
-    @Operation(description = "Updates the InteroperabilityRecord with the given id.")
+    @Operation(summary = "Updates the InteroperabilityRecord with the given id.")
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth,#interoperabilityRecord)")
     @PutMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<InteroperabilityRecord> update(@RequestBody InteroperabilityRecord interoperabilityRecord,
@@ -92,7 +92,7 @@ public class InteroperabilityRecordController {
         return new ResponseEntity<>(interoperabilityRecordBundle.getInteroperabilityRecord(), HttpStatus.OK);
     }
 
-    @Operation(description = "Returns the Interoperability Record with the given id.")
+    @Operation(summary = "Returns the Interoperability Record with the given id.")
     @GetMapping(path = "{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity<InteroperabilityRecord> getInteroperabilityRecord(@PathVariable("id") String id,
                                                                             @RequestParam(defaultValue = "${project.catalogue.name}", name = "catalogue_id") String catalogueId) {
@@ -108,7 +108,7 @@ public class InteroperabilityRecordController {
         return new ResponseEntity<>(interoperabilityRecordService.get(id, catalogueId), HttpStatus.OK);
     }
 
-    @Operation(description = "Get all Interoperability Records")
+    @Operation(summary = "Get all Interoperability Records")
     @Browse
     @Parameter(name = "suspended", description = "Suspended", content = @Content(schema = @Schema(type = "boolean", defaultValue = "false")))
     @GetMapping(path = "all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
@@ -127,7 +127,7 @@ public class InteroperabilityRecordController {
         return ResponseEntity.ok(new Paging<>(interoperabilityRecordPaging.getTotal(), interoperabilityRecordPaging.getFrom(), interoperabilityRecordPaging.getTo(), interoperabilityRecords, interoperabilityRecordPaging.getFacets()));
     }
 
-    @Operation(description = "Get all Interoperability Record Bundles")
+    @Operation(summary = "Get all Interoperability Record Bundles")
     @Browse
     @Parameter(name = "suspended", description = "Suspended", content = @Content(schema = @Schema(type = "boolean", defaultValue = "false")))
     @GetMapping(path = "bundle/all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
@@ -162,7 +162,7 @@ public class InteroperabilityRecordController {
         return ResponseEntity.ok(interoperabilityRecordService.publish(id, active, auth));
     }
 
-    @Operation(description = "Validates the Interoperability Record without actually changing the repository.")
+    @Operation(summary = "Validates the Interoperability Record without actually changing the repository.")
     @PostMapping(path = "validate", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<Boolean> validate(@RequestBody InteroperabilityRecord interoperabilityRecord) {
         ResponseEntity<Boolean> ret = ResponseEntity.ok(interoperabilityRecordService.validateInteroperabilityRecord(new InteroperabilityRecordBundle(interoperabilityRecord)));
@@ -197,7 +197,7 @@ public class InteroperabilityRecordController {
         return ResponseEntity.ok(loggingInfoHistory);
     }
 
-    @Operation(description = "Returns the Related Resources of a specific Interoperability Record given its id.")
+    @Operation(summary = "Returns the Related Resources of a specific Interoperability Record given its id.")
     @GetMapping(path = {"relatedResources/{id}"}, produces = {MediaType.APPLICATION_JSON_VALUE})
     public List<String> getAllInteroperabilityRecordRelatedResources(@PathVariable String id) {
         List<String> allInteroperabilityRecordRelatedResources = new ArrayList<>();
@@ -277,7 +277,7 @@ public class InteroperabilityRecordController {
         return ResponseEntity.ok(interoperabilityRecordService.createPublicInteroperabilityRecord(interoperabilityRecordBundle, auth));
     }
 
-    @Operation(description = "Suspends a specific Interoperability Record.")
+    @Operation(summary = "Suspends a specific Interoperability Record.")
     @PutMapping(path = "suspend", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     public InteroperabilityRecordBundle suspendInteroperabilityRecord(@RequestParam String interoperabilityRecordId, @RequestParam String catalogueId, @RequestParam boolean suspend, @Parameter(hidden = true) Authentication auth) {

@@ -13,6 +13,7 @@ import gr.uoa.di.madgik.registry.domain.Paging;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.http.HttpStatus;
@@ -29,6 +30,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping
+@Tag(name = "public configuration template instance")
 public class PublicConfigurationTemplateInstanceController {
 
     private static final Logger logger = LogManager.getLogger(PublicConfigurationTemplateInstanceController.class);

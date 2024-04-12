@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping({"resourceTemplateBundles"})
-@Tag(description = "Operations for Provider Templates", name = "resource-template-bundle-controller")
+@Tag(name = "resource template", description = "Operations for Provider Templates")
 public class ResourceTemplateBundleController {
 
     private final ServiceBundleService<ServiceBundle> serviceBundleService;

@@ -40,7 +40,7 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping({"trainingResource"})
-@Tag(name = "training-resource-controller", description = "Operations for Training Resources")
+@Tag(name = "training resource")
 public class TrainingResourceController {
 
     private static final Logger logger = LogManager.getLogger(TrainingResourceController.class.getName());
@@ -85,7 +85,7 @@ public class TrainingResourceController {
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
-    @Operation(description = "Get the most current version of a specific Training Resource, providing the Resource id.")
+    @Operation(summary = "Get the most current version of a specific Training Resource, providing the Resource id.")
     @GetMapping(path = "{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     @PreAuthorize("@securityService.trainingResourceIsActive(#id, #catalogueId) or hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth, #id)")
     public ResponseEntity<TrainingResource> getTrainingResource(@PathVariable("id") String id, @RequestParam(defaultValue = "${project.catalogue.name}", name = "catalogue_id") String catalogueId, @Parameter(hidden = true) Authentication auth) {
@@ -98,7 +98,7 @@ public class TrainingResourceController {
         return new ResponseEntity<>(trainingResourceService.get(id, catalogueId), HttpStatus.OK);
     }
 
-    @Operation(description = "Creates a new TrainingResource.")
+    @Operation(summary = "Creates a new TrainingResource.")
     @PostMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<TrainingResource> addTrainingResource(@RequestBody TrainingResource trainingResource, @Parameter(hidden = true) Authentication auth) {
@@ -107,7 +107,7 @@ public class TrainingResourceController {
         return new ResponseEntity<>(ret.getTrainingResource(), HttpStatus.CREATED);
     }
 
-    @Operation(description = "Updates the TrainingResource assigned the given id with the given TrainingResource, keeping a version of revisions.")
+    @Operation(summary = "Updates the TrainingResource assigned the given id with the given TrainingResource, keeping a version of revisions.")
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth,#trainingResource)")
     @PutMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<TrainingResource> updateTrainingResource(@RequestBody TrainingResource trainingResource, @RequestParam(required = false) String comment, @Parameter(hidden = true) Authentication auth) throws ResourceNotFoundException {
@@ -126,7 +126,7 @@ public class TrainingResourceController {
         return new ResponseEntity<>(trainingResourceBundle, HttpStatus.OK);
     }
 
-    @Operation(description = "Validates the Training Resource without actually changing the repository.")
+    @Operation(summary = "Validates the Training Resource without actually changing the repository.")
     @PostMapping(path = "validate", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<Boolean> validate(@RequestBody TrainingResource trainingResource) {
         ResponseEntity<Boolean> ret = ResponseEntity.ok(trainingResourceService.validateTrainingResource(new TrainingResourceBundle(trainingResource)));
@@ -134,7 +134,7 @@ public class TrainingResourceController {
         return ret;
     }
 
-    @Operation(description = "Filter a list of Training Resources based on a set of filters or get a list of all Training Resources in the Catalogue.")
+    @Operation(summary = "Filter a list of Training Resources based on a set of filters or get a list of all Training Resources in the Catalogue.")
     @Browse
     @Parameter(name = "suspended", description = "Suspended", content = @Content(schema = @Schema(type = "boolean", defaultValue = "false")))
     @GetMapping(path = "all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
@@ -164,7 +164,7 @@ public class TrainingResourceController {
         return trainingResourceService.getChildrenFromParent(type, parent, rec);
     }
 
-    //    @Operation(description = "Get a list of Training Resources based on a set of ids.")
+    //    @Operation(summary = "Get a list of Training Resources based on a set of ids.")
     @Parameters({
             @Parameter(name = "ids", description = "Comma-separated list of Training Resource ids", content = @Content(schema = @Schema(type = "boolean", defaultValue = "")))
     })
@@ -173,7 +173,7 @@ public class TrainingResourceController {
         return ResponseEntity.ok(trainingResourceService.getByIds(auth, ids));
     }
 
-    @Operation(description = "Get all Training Resources in the catalogue organized by an attribute, e.g. get Training Resources organized in categories.")
+    @Operation(summary = "Get all Training Resources in the catalogue organized by an attribute, e.g. get Training Resources organized in categories.")
     @GetMapping(path = "by/{field}", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<Map<String, List<TrainingResource>>> getTrainingResourcesBy(@PathVariable(value = "field") Service.Field field, @Parameter(hidden = true) Authentication auth) throws NoSuchFieldException {
         Map<String, List<TrainingResourceBundle>> results;
@@ -365,7 +365,7 @@ public class TrainingResourceController {
         return ret;
     }
 
-    @Operation(description = "Suspends a specific Training Resource.")
+    @Operation(summary = "Suspends a specific Training Resource.")
     @PutMapping(path = "suspend", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     public TrainingResourceBundle suspendTrainingResource(@RequestParam String trainingResourceId, @RequestParam String catalogueId, @RequestParam boolean suspend, @Parameter(hidden = true) Authentication auth) {
