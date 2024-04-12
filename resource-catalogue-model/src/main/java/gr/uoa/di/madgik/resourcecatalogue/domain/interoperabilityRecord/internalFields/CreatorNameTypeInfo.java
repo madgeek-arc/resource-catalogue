@@ -18,7 +18,7 @@ public class CreatorNameTypeInfo {
      * The full name of the creator.
      */
     @XmlElement(required = true)
-    @Schema(required = true)
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     @FieldValidation
     private String creatorName;
 
@@ -26,7 +26,7 @@ public class CreatorNameTypeInfo {
      * The type of name
      */
     @XmlElement(required = true)
-    @Schema(required = true)
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     @FieldValidation(containsId = true, idClass = Vocabulary.class)
     @VocabularyValidation(type = Vocabulary.Type.IR_NAME_TYPE)
     private String nameType;

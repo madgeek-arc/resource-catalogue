@@ -19,7 +19,7 @@ public class ServiceProviderDomain {
      * The branch of science, scientific discipline that is related to the Resource.
      */
     @XmlElement(required = true)
-    @Schema(required = true)
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     @FieldValidation(containsId = true, idClass = Vocabulary.class)
     @VocabularyValidation(type = Vocabulary.Type.SCIENTIFIC_DOMAIN)
     private String scientificDomain;
@@ -28,7 +28,7 @@ public class ServiceProviderDomain {
      * The subbranch of science, scientific sub-discipline that is related to the Resource.
      */
     @XmlElement(required = true)
-    @Schema(required = true)
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     @FieldValidation(containsId = true, idClass = Vocabulary.class)
     @VocabularyValidation(type = Vocabulary.Type.SCIENTIFIC_SUBDOMAIN)
     private String scientificSubdomain;

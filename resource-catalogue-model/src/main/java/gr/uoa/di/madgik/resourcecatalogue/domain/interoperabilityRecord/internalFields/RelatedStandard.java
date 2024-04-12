@@ -17,7 +17,7 @@ public class RelatedStandard {
      * The name of the related standard.
      */
     @XmlElement
-    @Schema()
+    @Schema
     @FieldValidation(nullable = true)
     private String relatedStandardIdentifier;
 
@@ -25,7 +25,7 @@ public class RelatedStandard {
      * The URI of the related standard.
      */
     @XmlElement
-    @Schema()
+    @Schema
     @FieldValidation(nullable = true)
     private URL relatedStandardURI;
 

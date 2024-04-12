@@ -19,18 +19,18 @@ public class ResourceInteroperabilityRecord implements Identifiable {
     private String id;
 
     @XmlElement(required = true)
-    @Schema(required = true)
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     @FieldValidation(containsId = true, containsResourceId = true)
     private String resourceId;
 
     @XmlElement(required = true)
-    @Schema(required = true)
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     @FieldValidation(containsId = true, idClass = Catalogue.class)
     private String catalogueId;
 
     @XmlElementWrapper(name = "interoperabilityRecordIds", required = true)
     @XmlElement(name = "interoperabilityRecordId")
-    @Schema(required = true)
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     @FieldValidation(containsId = true, idClass = InteroperabilityRecord.class)
     private List<String> interoperabilityRecordIds;
 

@@ -19,7 +19,7 @@ public class ProviderMerilDomain {
      * MERIL scientific domain classification.
      */
     @XmlElement(required = true)
-    @Schema(required = true)
+    @Schema
     @FieldValidation(containsId = true, idClass = Vocabulary.class)
     @VocabularyValidation(type = Vocabulary.Type.PROVIDER_MERIL_SCIENTIFIC_DOMAIN)
     private String merilScientificDomain;
@@ -28,7 +28,7 @@ public class ProviderMerilDomain {
      * MERIL scientific subdomain classification.
      */
     @XmlElement(required = true)
-    @Schema(required = true)
+    @Schema
     @FieldValidation(containsId = true, idClass = Vocabulary.class)
     @VocabularyValidation(type = Vocabulary.Type.PROVIDER_MERIL_SCIENTIFIC_SUBDOMAIN)
     private String merilScientificSubdomain;

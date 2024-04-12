@@ -17,27 +17,27 @@ public class VocabularyEntryRequest {
     private static final Logger logger = LogManager.getLogger(User.class);
 
     @XmlElement(required = true)
-    @Schema(required = true)
+    @Schema
     @FieldValidation
     private String userId;
 
     @XmlElement
-    @Schema()
+    @Schema
     @FieldValidation(nullable = true, containsId = true, containsResourceId = true)
     private String resourceId;
 
     @XmlElement
-    @Schema()
+    @Schema
     @FieldValidation(nullable = true, containsId = true, idClass = Provider.class)
     private String providerId;
 
     @XmlElement(required = true)
-    @Schema(required = true)
+    @Schema
     @FieldValidation
     private Date dateOfRequest;
 
     @XmlElement(required = true)
-    @Schema(required = true)
+    @Schema
     @FieldValidation
     private String resourceType;
 

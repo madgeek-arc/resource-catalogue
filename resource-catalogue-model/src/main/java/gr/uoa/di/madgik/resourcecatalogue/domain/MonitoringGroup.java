@@ -15,18 +15,18 @@ import java.util.Objects;
 public class MonitoringGroup {
 
     @XmlElement(required = true)
-    @Schema(required = true)
+    @Schema
     @FieldValidation
     private String serviceType;
 
     @XmlElement(required = true)
-    @Schema(required = true)
+    @Schema
     @FieldValidation
     private String endpoint;
 
     @XmlElementWrapper(name = "metrics")
     @XmlElement(name = "metric")
-    @Schema()
+    @Schema
     @FieldValidation(nullable = true)
     private List<Metric> metrics;
 

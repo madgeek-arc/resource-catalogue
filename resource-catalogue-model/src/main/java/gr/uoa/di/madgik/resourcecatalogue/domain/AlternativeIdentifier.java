@@ -13,12 +13,12 @@ import java.util.Objects;
 public class AlternativeIdentifier {
 
     @XmlElement()
-    @Schema()
+    @Schema
     @FieldValidation(nullable = true)
     private String type;
 
     @XmlElement()
-    @Schema()
+    @Schema
     @FieldValidation(nullable = true)
     private String value;
 

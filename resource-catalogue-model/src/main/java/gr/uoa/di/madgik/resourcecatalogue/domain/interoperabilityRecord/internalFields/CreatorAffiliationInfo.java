@@ -16,7 +16,7 @@ public class CreatorAffiliationInfo {
      * The organizational or institutional affiliation of the creator.
      */
     @XmlElement
-    @Schema()
+    @Schema
     @FieldValidation(nullable = true)
     private String affiliation;
 
@@ -24,7 +24,7 @@ public class CreatorAffiliationInfo {
      * Uniquely identifies the organizational affiliation of the creator.
      */
     @XmlElement
-    @Schema()
+    @Schema
     @FieldValidation(nullable = true)
     private String affiliationIdentifier;
 

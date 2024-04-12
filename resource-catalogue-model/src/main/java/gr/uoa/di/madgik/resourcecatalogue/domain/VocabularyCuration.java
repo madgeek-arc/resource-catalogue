@@ -20,48 +20,48 @@ public class VocabularyCuration implements Identifiable {
     private static final Logger logger = LogManager.getLogger(User.class);
 
     @XmlElement(required = true)
-    @Schema(required = true)
+    @Schema
 //    @FieldValidation
     private String id;
 
     @XmlElementWrapper(required = true, name = "vocabularyEntryRequests")
     @XmlElement(name = "vocabularyEntryRequest")
-    @Schema(required = true)
+    @Schema
     @FieldValidation
     private List<VocabularyEntryRequest> vocabularyEntryRequests;
 
     @XmlElement(required = true)
-    @Schema(required = true)
+    @Schema
     @FieldValidation
     private String entryValueName;
 
     @XmlElement(required = true)
-    @Schema(required = true)
+    @Schema
     @FieldValidation
     private String vocabulary;
 
     @XmlElement
-    @Schema()
+    @Schema
     @FieldValidation(nullable = true, containsId = true, idClass = Vocabulary.class)
     private String parent;
 
     @XmlElement(required = true)
-    @Schema(required = true)
+    @Schema
     @FieldValidation
     private String status;
 
     @XmlElement
-    @Schema()
+    @Schema
     @FieldValidation(nullable = true)
     private String rejectionReason;
 
     @XmlElement
-    @Schema()
+    @Schema
     @FieldValidation(nullable = true)
     private Date resolutionDate;
 
     @XmlElement
-    @Schema()
+    @Schema
     @FieldValidation(nullable = true)
     private String resolutionUser;
 

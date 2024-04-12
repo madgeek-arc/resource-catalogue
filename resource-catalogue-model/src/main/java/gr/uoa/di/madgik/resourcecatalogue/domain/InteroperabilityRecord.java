@@ -28,7 +28,7 @@ public class InteroperabilityRecord implements Identifiable {
      * The Catalogue this Interoperability Record is originally registered at.
      */
     @XmlElement(required = true)
-    @Schema(required = true)
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     @FieldValidation(containsId = true, idClass = Catalogue.class)
     private String catalogueId;
 
@@ -36,7 +36,7 @@ public class InteroperabilityRecord implements Identifiable {
      * The Provider this Interoperability Record is originally registered at.
      */
     @XmlElement(required = true)
-    @Schema(required = true)
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     @FieldValidation(containsId = true, idClass = Provider.class)
     private String providerId;
 
@@ -44,7 +44,7 @@ public class InteroperabilityRecord implements Identifiable {
      * Interoperability Record Identifier Info
      */
     @XmlElement(required = true)
-    @Schema(required = true)
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     @FieldValidation
     private IdentifierInfo identifierInfo;
 
@@ -54,7 +54,7 @@ public class InteroperabilityRecord implements Identifiable {
      */
     @XmlElementWrapper(required = true, name = "creators")
     @XmlElement(name = "creator")
-    @Schema(required = true)
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     @FieldValidation
     private List<Creator> creators;
 
@@ -62,7 +62,7 @@ public class InteroperabilityRecord implements Identifiable {
      * A name or title by which a resource is known. It can be the title of a dataset or the name of a piece of software
      */
     @XmlElement(required = true)
-    @Schema(required = true)
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     @FieldValidation
     private String title;
 
@@ -73,7 +73,7 @@ public class InteroperabilityRecord implements Identifiable {
      * use the date that would be preferred from a citation perspective.
      */
     @XmlElement(required = true)
-    @Schema(required = true)
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     @FieldValidation
     private int publicationYear;
 
@@ -82,7 +82,7 @@ public class InteroperabilityRecord implements Identifiable {
      */
     @XmlElementWrapper(required = true, name = "resourceTypesInfo")
     @XmlElement(name = "resourceTypeInfo")
-    @Schema(required = true)
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     @FieldValidation
     private List<ResourceTypeInfo> resourceTypesInfo;
 
@@ -90,7 +90,7 @@ public class InteroperabilityRecord implements Identifiable {
      * Time/date the record was created.
      */
     @XmlElement
-    @Schema()
+    @Schema
     @FieldValidation(nullable = true)
     private String created;
 
@@ -98,7 +98,7 @@ public class InteroperabilityRecord implements Identifiable {
      * Time/date the record was last saved, with or without modifications.
      */
     @XmlElement
-    @Schema()
+    @Schema
     @FieldValidation(nullable = true)
     private String updated;
 
@@ -109,7 +109,7 @@ public class InteroperabilityRecord implements Identifiable {
      */
     @XmlElementWrapper(name = "relatedStandards")
     @XmlElement(name = "relatedStandard")
-    @Schema()
+    @Schema
     @FieldValidation(nullable = true)
     private List<RelatedStandard> relatedStandards;
 
@@ -118,7 +118,7 @@ public class InteroperabilityRecord implements Identifiable {
      */
     @XmlElementWrapper(required = true, name = "rights")
     @XmlElement(name = "right")
-    @Schema(required = true)
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     @FieldValidation
     private List<Right> rights;
 
@@ -127,7 +127,7 @@ public class InteroperabilityRecord implements Identifiable {
      * May be used for technical information.
      */
     @XmlElement(required = true)
-    @Schema(required = true)
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     @FieldValidation
     private String description;
 
@@ -135,7 +135,7 @@ public class InteroperabilityRecord implements Identifiable {
      * Status of the resource.
      */
     @XmlElement(required = true)
-    @Schema(required = true)
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     @FieldValidation(containsId = true, idClass = Vocabulary.class)
     @VocabularyValidation(type = Vocabulary.Type.IR_STATUS)
     private String status;
@@ -144,7 +144,7 @@ public class InteroperabilityRecord implements Identifiable {
      * Intended Audience for the Guideline.
      */
     @XmlElement
-    @Schema()
+    @Schema
     @FieldValidation(nullable = true, containsId = true, idClass = Vocabulary.class)
     @VocabularyValidation(type = Vocabulary.Type.SCIENTIFIC_DOMAIN)
     private String domain;
@@ -153,7 +153,7 @@ public class InteroperabilityRecord implements Identifiable {
      * The type of record within the registry
      */
     @XmlElement(required = true)
-    @Schema(required = true)
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     @FieldValidation(containsId = true, idClass = Vocabulary.class)
     @VocabularyValidation(type = Vocabulary.Type.IR_EOSC_GUIDELINE_TYPE)
     private String eoscGuidelineType;
@@ -163,7 +163,7 @@ public class InteroperabilityRecord implements Identifiable {
      */
     @XmlElementWrapper(name = "eoscIntegrationOptions")
     @XmlElement(name = "eoscIntegrationOption")
-    @Schema()
+    @Schema
     @FieldValidation(nullable = true)
     private List<String> eoscIntegrationOptions;
 
@@ -172,7 +172,7 @@ public class InteroperabilityRecord implements Identifiable {
      */
     @XmlElementWrapper(name = "alternativeIdentifiers")
     @XmlElement(name = "alternativeIdentifier")
-    @Schema()
+    @Schema
     @FieldValidation(nullable = true)
     private List<AlternativeIdentifier> alternativeIdentifiers;
 

@@ -20,7 +20,7 @@ public class Monitoring implements Identifiable {
     private String id;
 
     @XmlElement(required = true)
-    @Schema(required = true)
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     @FieldValidation(containsId = true, containsResourceId = true)
     private String serviceId;
 
@@ -32,7 +32,7 @@ public class Monitoring implements Identifiable {
 
     @XmlElementWrapper(name = "monitoringGroups", required = true)
     @XmlElement(name = "monitoringGroup")
-    @Schema(required = true)
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     @FieldValidation
     private List<MonitoringGroup> monitoringGroups;
 
