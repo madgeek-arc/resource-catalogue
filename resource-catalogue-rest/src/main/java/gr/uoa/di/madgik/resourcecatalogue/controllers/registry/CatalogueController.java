@@ -9,8 +9,6 @@ import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 
-
-import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -33,7 +31,7 @@ import java.util.*;
 
 @RestController
 @RequestMapping("catalogue")
-@Tag(name = "catalogue-controller", description = "Get information about a Catalogue")
+@Tag(name = "catalogue", description = "Operations about Catalogues and their resources")
 public class CatalogueController {
 
     private static final Logger logger = LogManager.getLogger(CatalogueController.class);
@@ -65,7 +63,7 @@ public class CatalogueController {
     }
 
     //SECTION: CATALOGUE
-    @Operation(description = "Returns the Catalogue with the given id.")
+    @Operation(summary = "Returns the Catalogue with the given id.")
     @GetMapping(path = "{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity<Catalogue> getCatalogue(@PathVariable("id") String id, @Parameter(hidden = true) Authentication auth) {
         Catalogue catalogue = catalogueManager.get(id, auth).getCatalogue();
@@ -89,7 +87,7 @@ public class CatalogueController {
     }
 
     //    @Override
-    @Operation(description = "Updates a specific Catalogue")
+    @Operation(summary = "Updates a specific Catalogue")
     @PutMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isCatalogueAdmin(#auth,#catalogue.id)")
     public ResponseEntity<Catalogue> updateCatalogue(@RequestBody Catalogue catalogue, @RequestParam(required = false) String comment, @Parameter(hidden = true) Authentication auth) throws ResourceNotFoundException {
@@ -111,7 +109,7 @@ public class CatalogueController {
         return new ResponseEntity<>(catalogueBundle, HttpStatus.OK);
     }
 
-    @Operation(description = "Get a list of all Catalogues in the Portal.")
+    @Operation(summary = "Get a list of all Catalogues in the Portal.")
     @Browse
     @Parameter(name = "suspended", description = "Suspended", content = @Content(schema = @Schema(type = "boolean", defaultValue = "false")))
     @GetMapping(path = "all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
@@ -183,7 +181,7 @@ public class CatalogueController {
     }
 
     @Parameter(hidden = true)
-    @Operation(description = "Deletes the Catalogue with the given id.")
+    @Operation(summary = "Deletes the Catalogue with the given id.")
 //    @DeleteMapping(path = "delete/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     public ResponseEntity<Catalogue> deleteCatalogue(@PathVariable("id") String id,
@@ -198,7 +196,7 @@ public class CatalogueController {
         return new ResponseEntity<>(catalogueBundle.getCatalogue(), HttpStatus.OK);
     }
 
-    @Operation(description = "Suspends a Catalogue and all its resources")
+    @Operation(summary = "Suspends a Catalogue and all its resources")
     @PutMapping(path = "suspend", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     public CatalogueBundle suspendCatalogue(@RequestParam String catalogueId, @RequestParam boolean suspend, @Parameter(hidden = true) Authentication auth) {

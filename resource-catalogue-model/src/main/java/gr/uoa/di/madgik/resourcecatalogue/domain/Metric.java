@@ -19,7 +19,7 @@ public class Metric {
     private URL probe;
 
     @XmlElement
-    @Schema()
+    @Schema
     @FieldValidation(nullable = true)
     private URL metric;
 

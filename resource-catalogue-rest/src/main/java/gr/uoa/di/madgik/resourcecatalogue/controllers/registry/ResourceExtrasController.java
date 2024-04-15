@@ -6,6 +6,7 @@ import gr.uoa.di.madgik.resourcecatalogue.service.ServiceBundleService;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.http.HttpStatus;
@@ -20,7 +21,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("resource-extras")
-//@Tag(value = "Modify a Resource's extra info")
+@Tag(name = "resource extras", description = "Update a Service's EOSC Interoperability Framework Guidelines")
 @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
 public class ResourceExtrasController {
 
@@ -32,7 +33,7 @@ public class ResourceExtrasController {
         this.serviceBundleService = serviceBundleService;
     }
 
-    @Operation(description = "Update a specific Service's EOSC Interoperability Framework Guidelines given its ID")
+    @Operation(summary = "Update a specific Service's EOSC Interoperability Framework Guidelines given its ID")
     @PutMapping(path = "/update/eoscIFGuidelines", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     public ResponseEntity<ServiceBundle> updateEOSCIFGuidelines(@RequestParam String serviceId, @RequestParam String catalogueId,

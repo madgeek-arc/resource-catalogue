@@ -25,7 +25,7 @@ import java.util.Set;
 
 @RestController
 @RequestMapping("vocabularyCuration")
-@Tag(name = "vocabulary-curation-controller", description = "Get information about a Vocabulary Curation")
+@Tag(name = "vocabulary curation", description = "Operations about new Vocabulary suggestions")
 public class VocabularyCurationController extends ResourceController<VocabularyCuration, Authentication> {
 
     private static final Logger logger = LogManager.getLogger(VocabularyCurationController.class);
@@ -37,7 +37,7 @@ public class VocabularyCurationController extends ResourceController<VocabularyC
         this.vocabularyCurationService = service;
     }
 
-    //    @Operation(description = "Get Vocabulary Curation by ID")
+    //    @Operation(summary = "Get Vocabulary Curation by ID")
     @GetMapping(path = "{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
     @Override
     public ResponseEntity<VocabularyCuration> get(@PathVariable("id") String id, @Parameter(hidden = true) Authentication authentication) {
@@ -45,7 +45,7 @@ public class VocabularyCurationController extends ResourceController<VocabularyC
     }
 
     @Override
-//    @Operation(description = "Creates a new Vocabulary Curation Request.")
+//    @Operation(summary = "Creates a new Vocabulary Curation Request.")
     @PostMapping(produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity<VocabularyCuration> add(@RequestBody VocabularyCuration vocabularyCuration, @Parameter(hidden = true) Authentication auth) {
         ResponseEntity<VocabularyCuration> ret = super.add(vocabularyCuration, auth);
@@ -53,7 +53,7 @@ public class VocabularyCurationController extends ResourceController<VocabularyC
         return ret;
     }
 
-    //    @Operation(description = "Creates a new Vocabulary Curation Request (front-end use).")
+    //    @Operation(summary = "Creates a new Vocabulary Curation Request (front-end use).")
     @PostMapping(path = "addFront", produces = {MediaType.APPLICATION_JSON_VALUE})
     public VocabularyCuration addFront(@RequestParam(required = false) String resourceId, @RequestParam(required = false) String providerId,
                                        @RequestParam String resourceType, @RequestParam String entryValueName, @RequestParam String vocabulary,
@@ -62,7 +62,7 @@ public class VocabularyCurationController extends ResourceController<VocabularyC
         return vocabularyCurationService.addFront(resourceId, providerId, resourceType, entryValueName, vocabulary, parent, auth);
     }
 
-    //    @Operation(description = "Filter a list of Vocabulary Curation Requests based on a set of filters or get a list of all Vocabulary Curation Requests in the Catalogue.")
+    //    @Operation(summary = "Filter a list of Vocabulary Curation Requests based on a set of filters or get a list of all Vocabulary Curation Requests in the Catalogue.")
     @Browse
     @GetMapping(path = "vocabularyCurationRequests/all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")

@@ -17,6 +17,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -35,6 +36,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping
+@Tag(name = "public training resource")
 public class PublicTrainingResourceController {
 
     private static final Logger logger = LogManager.getLogger(PublicTrainingResourceController.class);
@@ -53,7 +55,7 @@ public class PublicTrainingResourceController {
         this.publicTrainingResourceManager = publicTrainingResourceManager;
     }
 
-    @Operation(description = "Returns the Public Training Resource with the given id.")
+    @Operation(summary = "Returns the Public Training Resource with the given id.")
     @GetMapping(path = "public/trainingResource/{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity<?> getPublicTrainingResource(@PathVariable("id") String id,
                                                        @RequestParam(defaultValue = "${project.catalogue.name}", name = "catalogue_id") String catalogueId,

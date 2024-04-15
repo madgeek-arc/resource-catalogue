@@ -13,6 +13,7 @@ import gr.uoa.di.madgik.registry.domain.Paging;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -30,6 +31,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping
+@Tag(name = "public service extensions", description = "Get Information about Public Services' Helpdesks/Monitorings")
 public class PublicServiceExtensionsController {
 
     private static final Logger logger = LogManager.getLogger(PublicServiceExtensionsController.class);

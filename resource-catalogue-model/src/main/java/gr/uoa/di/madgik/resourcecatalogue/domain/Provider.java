@@ -24,7 +24,7 @@ public class Provider implements Identifiable {
      * A persistent identifier, a unique reference to the Provider in the context of the EOSC Portal.
      */
     @XmlElement(required = true)
-    @Schema(required = true, example = "(required on PUT only)")
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED, example = "(required on PUT only)")
 //    @FieldValidation
     private String id;
 
@@ -32,7 +32,7 @@ public class Provider implements Identifiable {
      * An abbreviation of the Provider Name as assigned by the Provider.
      */
     @XmlElement(required = true)
-    @Schema(required = true)
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     @FieldValidation
     private String abbreviation;
 
@@ -40,7 +40,7 @@ public class Provider implements Identifiable {
      * Full Name of the Provider/Organisation offering the resource and acting as main contact point.
      */
     @XmlElement(required = true)
-    @Schema(required = true)
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     @FieldValidation
     private String name;
 
@@ -48,7 +48,7 @@ public class Provider implements Identifiable {
      * Website with information about the Provider.
      */
     @XmlElement(required = true)
-    @Schema(example = "https://example.com", required = true)
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED, example = "https://example.com")
     @FieldValidation
     private URL website;
 
@@ -56,7 +56,7 @@ public class Provider implements Identifiable {
      * A Y/N question to define whether the Provider is a Legal Entity or not.
      */
     @XmlElement(required = true)
-    @Schema(required = true)
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     @FieldValidation
     private boolean legalEntity;
 
@@ -87,7 +87,7 @@ public class Provider implements Identifiable {
      */
     @XmlElementWrapper(name = "alternativeIdentifiers")
     @XmlElement(name = "alternativeIdentifier")
-    @Schema()
+    @Schema
     @FieldValidation(nullable = true)
     private List<AlternativeIdentifier> alternativeIdentifiers;
 
@@ -97,7 +97,7 @@ public class Provider implements Identifiable {
      * A high-level description of the Provider in fairly non-technical terms, with the vision, mission, objectives, background, experience.
      */
     @XmlElement(required = true)
-    @Schema(required = true)
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     @FieldValidation
     private String description;
 
@@ -105,7 +105,7 @@ public class Provider implements Identifiable {
      * Link to the logo/visual identity of the Provider.
      */
     @XmlElement(required = true)
-    @Schema(example = "https://example.com", required = true)
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED, example = "https://example.com")
     @FieldValidation
     private URL logo;
 
@@ -114,7 +114,7 @@ public class Provider implements Identifiable {
      */
     @XmlElementWrapper(name = "multimedia")
     @XmlElement(name = "multimedia")
-    @Schema()
+    @Schema
     @FieldValidation(nullable = true)
     private List<MultimediaPair> multimedia;
 
@@ -134,7 +134,7 @@ public class Provider implements Identifiable {
      */
     @XmlElementWrapper(name = "tags")
     @XmlElement(name = "tag")
-    @Schema()
+    @Schema
     @FieldValidation(nullable = true)
     private List<String> tags;
 
@@ -154,7 +154,7 @@ public class Provider implements Identifiable {
      * Physical location of the Provider or its coordinating centre in the case of distributed, virtual, and mobile Providers.
      */
     @XmlElement(required = true)
-    @Schema(required = true)
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     @FieldValidation
     private ProviderLocation location;
 
@@ -164,7 +164,7 @@ public class Provider implements Identifiable {
      * Provider's main contact info.
      */
     @XmlElement(required = true)
-    @Schema(required = true)
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     @FieldValidation
     private ProviderMainContact mainContact;
 
@@ -173,7 +173,7 @@ public class Provider implements Identifiable {
      */
     @XmlElementWrapper(required = true, name = "publicContacts")
     @XmlElement(name = "publicContact")
-    @Schema(required = true)
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     @FieldValidation
     private List<ProviderPublicContact> publicContacts;
 
@@ -193,7 +193,7 @@ public class Provider implements Identifiable {
      */
     @XmlElementWrapper(name = "certifications")
     @XmlElement(name = "certification")
-    @Schema()
+    @Schema
     @FieldValidation(nullable = true)
     private List<String> certifications;
 
@@ -214,7 +214,7 @@ public class Provider implements Identifiable {
      */
     @XmlElementWrapper(name = "affiliations")
     @XmlElement(name = "affiliation")
-    @Schema()
+    @Schema
     @FieldValidation(nullable = true)
     private List<String> affiliations;
 
@@ -232,7 +232,7 @@ public class Provider implements Identifiable {
      * The Catalogue this Provider is originally registered at.
      */
     @XmlElement
-    @Schema()
+    @Schema
     @FieldValidation(nullable = true, containsId = true, idClass = Catalogue.class)
     private String catalogueId;
 
@@ -292,7 +292,7 @@ public class Provider implements Identifiable {
      */
     @XmlElementWrapper(name = "nationalRoadmaps")
     @XmlElement(name = "nationalRoadmap")
-    @Schema()
+    @Schema
     @FieldValidation(nullable = true)
     private List<String> nationalRoadmaps;
 
@@ -300,7 +300,7 @@ public class Provider implements Identifiable {
     // Extra needed fields
     @XmlElementWrapper(name = "users", required = true)
     @XmlElement(name = "user")
-    @Schema(required = true)
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     @FieldValidation
     private List<User> users;
 

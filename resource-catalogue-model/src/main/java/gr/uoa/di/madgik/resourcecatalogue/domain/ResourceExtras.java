@@ -15,7 +15,7 @@ public class ResourceExtras {
 
     @XmlElementWrapper(name = "eoscIFGuidelines")
     @XmlElement(name = "eoscIFGuideline")
-    @Schema()
+    @Schema
     @FieldValidation(nullable = true)
     private List<EOSCIFGuidelines> eoscIFGuidelines;
 

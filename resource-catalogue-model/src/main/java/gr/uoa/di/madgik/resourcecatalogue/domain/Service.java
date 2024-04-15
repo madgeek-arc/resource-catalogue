@@ -35,7 +35,7 @@ public class Service implements Identifiable {
      * An abbreviation of the Resource Name as assigned by the Provider
      */
     @XmlElement(required = true)
-    @Schema(required = true)
+    @Schema
     @FieldValidation
     private String abbreviation;
 
@@ -43,7 +43,7 @@ public class Service implements Identifiable {
      * Resource Full Name as assigned by the Provider.
      */
     @XmlElement(required = true)
-    @Schema(required = true)
+    @Schema
     @FieldValidation
     private String name;
 
@@ -51,7 +51,7 @@ public class Service implements Identifiable {
      * The name (or abbreviation) of the organisation that manages or delivers the resource, or that coordinates resource delivery in a federated scenario.
      */
     @XmlElement(required = true)
-    @Schema(required = true)
+    @Schema
     @FieldValidation(containsId = true, idClass = Provider.class)
     private String resourceOrganisation;
 
@@ -68,7 +68,7 @@ public class Service implements Identifiable {
      * Webpage with information about the Resource usually hosted and maintained by the Provider.
      */
     @XmlElement(required = true)
-    @Schema(example = "https://example.com", required = true)
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED, example = "https://example.com")
     @FieldValidation
     private URL webpage;
 
@@ -77,7 +77,7 @@ public class Service implements Identifiable {
      */
     @XmlElementWrapper(name = "alternativeIdentifiers")
     @XmlElement(name = "alternativeIdentifier")
-    @Schema()
+    @Schema
     @FieldValidation(nullable = true)
     private List<AlternativeIdentifier> alternativeIdentifiers;
 
@@ -90,7 +90,7 @@ public class Service implements Identifiable {
      * c) list of customers, communities, users, etc. using the Resource.
      */
     @XmlElement(required = true)
-    @Schema(required = true)
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     @FieldValidation
     private String description;
 
@@ -98,7 +98,7 @@ public class Service implements Identifiable {
      * Short catch-phrase for marketing and advertising purposes. It will be usually displayed close to the Resource name and should refer to the main value or purpose of the Resource.
      */
     @XmlElement(required = true)
-    @Schema(required = true)
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     @FieldValidation
     private String tagline;
 
@@ -106,7 +106,7 @@ public class Service implements Identifiable {
      * Link to the logo/visual identity of the Resource. The logo will be visible at the Portal. If there is no specific logo for the Resource the logo of the Provider may be used.
      */
     @XmlElement(required = true)
-    @Schema(example = "https://example.com", required = true)
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED, example = "https://example.com")
     @FieldValidation
     private URL logo;
 
@@ -115,7 +115,7 @@ public class Service implements Identifiable {
      */
     @XmlElementWrapper(name = "multimedia")
     @XmlElement(name = "multimedia")
-    @Schema()
+    @Schema
     @FieldValidation(nullable = true)
     private List<MultimediaPair> multimedia;
 
@@ -124,7 +124,7 @@ public class Service implements Identifiable {
      */
     @XmlElementWrapper(name = "useCases")
     @XmlElement(name = "useCase")
-    @Schema()
+    @Schema
     @FieldValidation(nullable = true)
     private List<UseCasesPair> useCases;
 
@@ -135,7 +135,7 @@ public class Service implements Identifiable {
      */
     @XmlElementWrapper(name = "scientificDomains", required = true)
     @XmlElement(name = "scientificDomain")
-    @Schema(required = true)
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     @FieldValidation
     private List<ServiceProviderDomain> scientificDomains;
 
@@ -145,7 +145,7 @@ public class Service implements Identifiable {
      */
     @XmlElementWrapper(name = "categories", required = true)
     @XmlElement(name = "category")
-    @Schema(required = true)
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     @FieldValidation
     private List<ServiceCategory> categories;
 
@@ -154,7 +154,7 @@ public class Service implements Identifiable {
      */
     @XmlElementWrapper(name = "targetUsers", required = true)
     @XmlElement(name = "targetUser")
-    @Schema(required = true)
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     @FieldValidation(containsId = true, idClass = Vocabulary.class)
     @VocabularyValidation(type = Vocabulary.Type.TARGET_USER)
     private List<String> targetUsers;
@@ -184,7 +184,7 @@ public class Service implements Identifiable {
      */
     @XmlElementWrapper(name = "tags")
     @XmlElement(name = "tag")
-    @Schema()
+    @Schema
     @FieldValidation(nullable = true)
     private List<String> tags;
 
@@ -193,7 +193,7 @@ public class Service implements Identifiable {
      * infrastructures.
      */
     @XmlElement()
-    @Schema()
+    @Schema
     @FieldValidation(nullable = true)
     private Boolean horizontalService;
 
@@ -224,7 +224,7 @@ public class Service implements Identifiable {
      */
     @XmlElementWrapper(name = "geographicalAvailabilities", required = true)
     @XmlElement(name = "geographicalAvailability")
-    @Schema(required = true)
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     @FieldValidation(containsId = true, idClass = Vocabulary.class)
     @GeoLocationVocValidation(region = Vocabulary.Type.REGION, country = Vocabulary.Type.COUNTRY)
     private List<String> geographicalAvailabilities;
@@ -234,7 +234,7 @@ public class Service implements Identifiable {
      */
     @XmlElementWrapper(name = "languageAvailabilities", required = true)
     @XmlElement(name = "languageAvailability")
-    @Schema(required = true)
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     @FieldValidation(containsId = true, idClass = Vocabulary.class)
     @VocabularyValidation(type = Vocabulary.Type.LANGUAGE)
     private List<String> languageAvailabilities;
@@ -257,7 +257,7 @@ public class Service implements Identifiable {
      * Service's Main Contact/Resource Owner info.
      */
     @XmlElement(required = true)
-    @Schema(required = true)
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     @FieldValidation
     private ServiceMainContact mainContact;
 
@@ -266,7 +266,7 @@ public class Service implements Identifiable {
      */
     @XmlElementWrapper(required = true, name = "publicContacts")
     @XmlElement(name = "publicContact")
-    @Schema(required = true)
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     @FieldValidation
     private List<ServicePublicContact> publicContacts;
 
@@ -274,7 +274,7 @@ public class Service implements Identifiable {
      * The email to ask more information from the Provider about this Resource.
      */
     @XmlElement(required = true)
-    @Schema(required = true)
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     @EmailValidation
     private String helpdeskEmail;
 
@@ -282,7 +282,7 @@ public class Service implements Identifiable {
      * The email to contact the Provider for critical security issues about this Resource.
      */
     @XmlElement(required = true)
-    @Schema(required = true)
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     @EmailValidation
     private String securityContactEmail;
 
@@ -292,7 +292,7 @@ public class Service implements Identifiable {
      * The Technology Readiness Level of the Resource (to be further updated in the context of the EOSC).
      */
     @XmlElement(required = true)
-    @Schema(required = true)
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     @FieldValidation(containsId = true, idClass = Vocabulary.class)
     @VocabularyValidation(type = Vocabulary.Type.TRL)
     private String trl;
@@ -311,7 +311,7 @@ public class Service implements Identifiable {
      */
     @XmlElementWrapper(name = "certifications")
     @XmlElement(name = "certification")
-    @Schema()
+    @Schema
     @FieldValidation(nullable = true)
     private List<String> certifications;
 
@@ -320,7 +320,7 @@ public class Service implements Identifiable {
      */
     @XmlElementWrapper(name = "standards")
     @XmlElement(name = "standard")
-    @Schema()
+    @Schema
     @FieldValidation(nullable = true)
     private List<String> standards;
 
@@ -329,7 +329,7 @@ public class Service implements Identifiable {
      */
     @XmlElementWrapper(name = "openSourceTechnologies")
     @XmlElement(name = "openSourceTechnology")
-    @Schema()
+    @Schema
     @FieldValidation(nullable = true)
     private List<String> openSourceTechnologies;
 
@@ -337,7 +337,7 @@ public class Service implements Identifiable {
      * Version of the Resource that is in force.
      */
     @XmlElement
-    @Schema()
+    @Schema
     @FieldValidation(nullable = true)
     private String version;
 
@@ -353,7 +353,7 @@ public class Service implements Identifiable {
      * Summary of the Resource features updated from the previous version.
      */
     @XmlElementWrapper(name = "changeLog")
-    @Schema()
+    @Schema
     @FieldValidation(nullable = true)
     private List<String> changeLog;
 
@@ -364,7 +364,7 @@ public class Service implements Identifiable {
      */
     @XmlElementWrapper(name = "requiredResources")
     @XmlElement(name = "requiredResource")
-    @Schema()
+    @Schema
     @FieldValidation(nullable = true, containsId = true, containsResourceId = true)
     private List<String> requiredResources;
 
@@ -373,7 +373,7 @@ public class Service implements Identifiable {
      */
     @XmlElementWrapper(name = "relatedResources")
     @XmlElement(name = "relatedResource")
-    @Schema()
+    @Schema
     @FieldValidation(nullable = true, containsId = true, containsResourceId = true)
     private List<String> relatedResources;
 
@@ -391,7 +391,7 @@ public class Service implements Identifiable {
      * The Catalogue this Resource is originally registered at.
      */
     @XmlElement
-    @Schema()
+    @Schema
     @FieldValidation(nullable = true, containsId = true, idClass = Catalogue.class)
     private String catalogueId;
 
@@ -421,7 +421,7 @@ public class Service implements Identifiable {
      */
     @XmlElementWrapper(name = "grantProjectNames")
     @XmlElement(name = "grantProjectName")
-    @Schema()
+    @Schema
     @FieldValidation(nullable = true)
     private List<String> grantProjectNames;
 
@@ -447,7 +447,7 @@ public class Service implements Identifiable {
      * Webpage describing the rules, Resource conditions and usage policy which one must agree to abide by in order to use the Resource.
      */
     @XmlElement(required = true)
-    @Schema(example = "https://example.com", required = true)
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED, example = "https://example.com")
     @FieldValidation
     private URL termsOfUse;
 
@@ -455,7 +455,7 @@ public class Service implements Identifiable {
      * Link to the privacy policy applicable to the Resource.
      */
     @XmlElement(required = true)
-    @Schema(example = "https://example.com", required = true)
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED, example = "https://example.com")
     @FieldValidation
     private URL privacyPolicy;
 
@@ -505,7 +505,7 @@ public class Service implements Identifiable {
      * Information on the order type (requires an ordering procedure, or no ordering and if fully open or requires authentication).
      */
     @XmlElement(required = true)
-    @Schema(required = true)
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     @FieldValidation(containsId = true, idClass = Vocabulary.class)
     @VocabularyValidation(type = Vocabulary.Type.ORDER_TYPE)
     private String orderType;

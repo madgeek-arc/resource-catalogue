@@ -4,6 +4,7 @@ import gr.uoa.di.madgik.resourcecatalogue.domain.Event;
 import gr.uoa.di.madgik.resourcecatalogue.service.EventService;
 import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +22,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("event")
+@Tag(name = "event")
 public class EventController extends ResourceController<Event, Authentication> {
 
     private EventService eventService;

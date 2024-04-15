@@ -44,7 +44,7 @@ import java.util.*;
 
 @RestController
 @RequestMapping("service-extensions")
-@Tag(name = "service-extensions-controller", description = "Get information about Service Helpdesk and Monitoring")
+@Tag(name = "service extensions", description = "Operations about Services' Helpdesks/Monitorings")
 public class ServiceExtensionsController {
 
     private static final Logger logger = LogManager.getLogger(ServiceExtensionsController.class);
@@ -78,7 +78,7 @@ public class ServiceExtensionsController {
     }
 
     //SECTION: HELPDESK
-    @Operation(description = "Returns the Helpdesk with the given id.")
+    @Operation(summary = "Returns the Helpdesk with the given id.")
     @GetMapping(path = "/helpdesk/{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity<Helpdesk> getHelpdesk(@PathVariable("id") String id) {
         Helpdesk helpdesk = helpdeskService.get(id).getHelpdesk();
@@ -92,7 +92,7 @@ public class ServiceExtensionsController {
         return new ResponseEntity<>(helpdesk, HttpStatus.OK);
     }
 
-    @Operation(description = "Returns the Helpdesk of the given Service of the given Catalogue.")
+    @Operation(summary = "Returns the Helpdesk of the given Service of the given Catalogue.")
     @GetMapping(path = "/helpdesk/byService/{serviceId}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity<Helpdesk> getHelpdeskByServiceId(@PathVariable("serviceId") String serviceId,
                                                            @RequestParam(defaultValue = "${project.catalogue.name}", name = "catalogue_id") String catalogueId,
@@ -109,7 +109,7 @@ public class ServiceExtensionsController {
         return new ResponseEntity<>(null, HttpStatus.OK);
     }
 
-    @Operation(description = "Filter a list of Helpdesks based on a set of filters or get a list of all Helpdesks in the Catalogue.")
+    @Operation(summary = "Filter a list of Helpdesks based on a set of filters or get a list of all Helpdesks in the Catalogue.")
     @Browse
     @GetMapping(path = "/helpdesk/all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity<Paging<Helpdesk>> getAllHelpdesks(@Parameter(hidden = true) @RequestParam Map<String, Object> allRequestParams,
@@ -130,7 +130,7 @@ public class ServiceExtensionsController {
         return new ResponseEntity<>(helpdeskPaging, HttpStatus.OK);
     }
 
-    @Operation(description = "Creates a new Helpdesk.")
+    @Operation(summary = "Creates a new Helpdesk.")
     @PostMapping(path = "/helpdesk", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<Helpdesk> addHelpdesk(@Valid @RequestBody Helpdesk helpdesk,
@@ -142,7 +142,7 @@ public class ServiceExtensionsController {
         return new ResponseEntity<>(helpdeskBundle.getHelpdesk(), HttpStatus.CREATED);
     }
 
-    @Operation(description = "Updates the Helpdesk with the given id.")
+    @Operation(summary = "Updates the Helpdesk with the given id.")
     @PutMapping(path = "/helpdesk", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth, #helpdesk.serviceId, #catalogueId)")
     public ResponseEntity<Helpdesk> updateHelpdesk(@Valid @RequestBody Helpdesk helpdesk,
@@ -171,7 +171,7 @@ public class ServiceExtensionsController {
     }
 
     // Deletes the Helpdesk of the specific Service of the specific Catalogue.
-    @Operation(description = "Deletes the Helpdesk of the specific Service of the specific Catalogue.")
+    @Operation(summary = "Deletes the Helpdesk of the specific Service of the specific Catalogue.")
     @DeleteMapping(path = "/helpdesk/{catalogueId}/{serviceId}", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth, #serviceId, #catalogueId)")
     public ResponseEntity<Helpdesk> deleteHelpdesk(@PathVariable("catalogueId") String catalogueId,
@@ -219,7 +219,7 @@ public class ServiceExtensionsController {
 
 
     //SECTION: MONITORING
-    @Operation(description = "Returns the Monitoring with the given id.")
+    @Operation(summary = "Returns the Monitoring with the given id.")
     @GetMapping(path = "/monitoring/{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity<Monitoring> getMonitoring(@PathVariable("id") String id) {
         Monitoring monitoring = monitoringService.get(id).getMonitoring();
@@ -233,7 +233,7 @@ public class ServiceExtensionsController {
         return new ResponseEntity<>(monitoring, HttpStatus.OK);
     }
 
-    @Operation(description = "Returns the Monitoring of the given Service of the given Catalogue.")
+    @Operation(summary = "Returns the Monitoring of the given Service of the given Catalogue.")
     @GetMapping(path = "/monitoring/byService/{serviceId}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity<Monitoring> getMonitoringByServiceId(@PathVariable("serviceId") String serviceId,
                                                                @RequestParam(defaultValue = "${project.catalogue.name}", name = "catalogue_id") String catalogueId,
@@ -250,7 +250,7 @@ public class ServiceExtensionsController {
         return new ResponseEntity<>(null, HttpStatus.OK);
     }
 
-    @Operation(description = "Filter a list of Monitorings based on a set of filters or get a list of all Monitorings in the Catalogue.")
+    @Operation(summary = "Filter a list of Monitorings based on a set of filters or get a list of all Monitorings in the Catalogue.")
     @Browse
     @GetMapping(path = "monitoring/all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity<Paging<Monitoring>> getAllMonitorings(@Parameter(hidden = true) @RequestParam Map<String, Object> allRequestParams,
@@ -271,13 +271,13 @@ public class ServiceExtensionsController {
         return new ResponseEntity<>(monitoringPaging, HttpStatus.OK);
     }
 
-    @Operation(description = "Returns all the available Monitoring serviceTypes")
+    @Operation(summary = "Returns all the available Monitoring serviceTypes")
     @GetMapping(path = "/monitoring/serviceTypes", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity<List<ServiceType>> getAvailableServiceTypes() {
         return new ResponseEntity<>(monitoringService.getAvailableServiceTypes(), HttpStatus.OK);
     }
 
-    @Operation(description = "Creates a new Monitoring.")
+    @Operation(summary = "Creates a new Monitoring.")
     @PostMapping(path = "/monitoring", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<Monitoring> addMonitoring(@Valid @RequestBody Monitoring monitoring,
@@ -289,7 +289,7 @@ public class ServiceExtensionsController {
         return new ResponseEntity<>(monitoringBundle.getMonitoring(), HttpStatus.CREATED);
     }
 
-    @Operation(description = "Updates the Monitoring with the given id.")
+    @Operation(summary = "Updates the Monitoring with the given id.")
     @PutMapping(path = "/monitoring", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth, #monitoring.serviceId, #catalogueId)")
     public ResponseEntity<Monitoring> updateMonitoring(@Valid @RequestBody Monitoring monitoring,
@@ -318,7 +318,7 @@ public class ServiceExtensionsController {
     }
 
     // Deletes the Monitoring of the specific Service of the specific Catalogue.
-    @Operation(description = "Deletes the Monitoring of the specific Service of the specific Catalogue.")
+    @Operation(summary = "Deletes the Monitoring of the specific Service of the specific Catalogue.")
     @DeleteMapping(path = "/monitoring/{catalogueId}/{serviceId}", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth, #serviceId, #catalogueId)")
     public ResponseEntity<Monitoring> deleteMonitoring(@PathVariable("catalogueId") String catalogueId,

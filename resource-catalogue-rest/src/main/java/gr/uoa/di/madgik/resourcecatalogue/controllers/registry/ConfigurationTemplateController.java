@@ -3,8 +3,8 @@ package gr.uoa.di.madgik.resourcecatalogue.controllers.registry;
 import gr.uoa.di.madgik.resourcecatalogue.domain.configurationTemplates.ConfigurationTemplate;
 import gr.uoa.di.madgik.resourcecatalogue.domain.configurationTemplates.ConfigurationTemplateBundle;
 import gr.uoa.di.madgik.resourcecatalogue.service.ConfigurationTemplateService;
-import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.http.HttpStatus;
@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("configurationTemplate")
-//@Tag(value = "Operations for Configuration Templates")
+@Tag(name = "configuration template")
 public class ConfigurationTemplateController {
 
     private static final Logger logger = LogManager.getLogger(ConfigurationTemplateController.class);
@@ -30,7 +30,7 @@ public class ConfigurationTemplateController {
         this.configurationTemplateService = configurationTemplateService;
     }
 
-    //    @Operation(description = "Create a new ConfigurationTemplate.")
+    //    @Operation(summary = "Create a new ConfigurationTemplate.")
     @PostMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<ConfigurationTemplate> addConfigurationTemplate(@RequestBody ConfigurationTemplate configurationTemplate,

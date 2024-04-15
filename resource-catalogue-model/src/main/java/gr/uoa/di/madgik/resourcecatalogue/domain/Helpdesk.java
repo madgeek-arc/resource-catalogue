@@ -20,7 +20,7 @@ public class Helpdesk implements Identifiable {
     private String id;
 
     @XmlElement(required = true)
-    @Schema(required = true)
+    @Schema
     @FieldValidation(containsId = true, containsResourceId = true)
     private String serviceId;
 

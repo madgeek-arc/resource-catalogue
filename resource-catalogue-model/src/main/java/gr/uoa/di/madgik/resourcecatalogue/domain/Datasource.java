@@ -26,12 +26,12 @@ public class Datasource implements Identifiable {
     private String id;
 
     @XmlElement(required = true)
-    @Schema(required = true)
+    @Schema
     @FieldValidation(containsId = true, idClass = Service.class)
     private String serviceId;
 
     @XmlElement(required = true)
-    @Schema(required = true)
+    @Schema
     @FieldValidation(containsId = true, idClass = Catalogue.class)
     private String catalogueId;
 
@@ -60,7 +60,7 @@ public class Datasource implements Identifiable {
      * If data versioning is supported: the data source explicitly allows the deposition of different versions of the same object
      */
     @XmlElement
-    @Schema()
+    @Schema
     @FieldValidation(nullable = true)
     private Boolean versionControl;
 
@@ -69,7 +69,7 @@ public class Datasource implements Identifiable {
      */
     @XmlElementWrapper(name = "persistentIdentitySystems")
     @XmlElement(name = "persistentIdentitySystem")
-    @Schema()
+    @Schema
     @FieldValidation(nullable = true)
     private List<PersistentIdentitySystem> persistentIdentitySystems;
 
@@ -79,7 +79,7 @@ public class Datasource implements Identifiable {
      * The property defines the jurisdiction of the users of the data source, based on the vocabulary for this property
      */
     @XmlElement(required = true)
-    @Schema(required = true)
+    @Schema
     @FieldValidation(containsId = true, idClass = Vocabulary.class)
     @VocabularyValidation(type = Vocabulary.Type.DS_JURISDICTION)
     private String jurisdiction;
@@ -88,7 +88,7 @@ public class Datasource implements Identifiable {
      * The specific type of the data source based on the vocabulary defined for this property
      */
     @XmlElement(required = true)
-    @Schema(required = true)
+    @Schema
     @FieldValidation(containsId = true, idClass = Vocabulary.class)
     @VocabularyValidation(type = Vocabulary.Type.DS_CLASSIFICATION)
     private String datasourceClassification;
@@ -98,7 +98,7 @@ public class Datasource implements Identifiable {
      */
     @XmlElementWrapper(required = true, name = "researchEntityTypes")
     @XmlElement(name = "researchEntityType")
-    @Schema(required = true)
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     @FieldValidation(containsId = true, idClass = Vocabulary.class)
     @VocabularyValidation(type = Vocabulary.Type.DS_RESEARCH_ENTITY_TYPE)
     private List<String> researchEntityTypes;
@@ -107,7 +107,7 @@ public class Datasource implements Identifiable {
      * Boolean value specifying if the data source is dedicated to a given discipline or is instead discipline agnostic
      */
     @XmlElement(required = true)
-    @Schema(required = true)
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     @FieldValidation()
     private Boolean thematic;
 
@@ -119,7 +119,7 @@ public class Datasource implements Identifiable {
      */
     @XmlElementWrapper(name = "researchProductLicensings")
     @XmlElement(name = "researchProductLicensing")
-    @Schema()
+    @Schema
     @FieldValidation(nullable = true)
     private List<ResearchProductLicensing> researchProductLicensings;
 
@@ -128,7 +128,7 @@ public class Datasource implements Identifiable {
      */
     @XmlElementWrapper(name = "researchProductAccessPolicies")
     @XmlElement(name = "researchProductAccessPolicy")
-    @Schema()
+    @Schema
     @FieldValidation(nullable = true, containsId = true, idClass = Vocabulary.class)
     @VocabularyValidation(type = Vocabulary.Type.DS_COAR_ACCESS_RIGHTS_1_0)
     private List<String> researchProductAccessPolicies;
@@ -140,7 +140,7 @@ public class Datasource implements Identifiable {
      * Access and re-use of metadata
      */
     @XmlElement
-    @Schema()
+    @Schema
     @FieldValidation(nullable = true)
     private ResearchProductMetadataLicensing researchProductMetadataLicensing;
 
@@ -149,7 +149,7 @@ public class Datasource implements Identifiable {
      */
     @XmlElementWrapper(name = "researchProductMetadataAccessPolicies")
     @XmlElement(name = "researchProductMetadataAccessPolicy")
-    @Schema()
+    @Schema
     @FieldValidation(nullable = true, containsId = true, idClass = Vocabulary.class)
     @VocabularyValidation(type = Vocabulary.Type.DS_COAR_ACCESS_RIGHTS_1_0)
     private List<String> researchProductMetadataAccessPolicies;
@@ -160,7 +160,7 @@ public class Datasource implements Identifiable {
      * Boolean value specifying if the data source requires the harvesting of Research Products into the Research Catalogue
      */
     @XmlElement
-    @Schema()
+    @Schema
     @FieldValidation(nullable = true)
     private Boolean harvestable;
 

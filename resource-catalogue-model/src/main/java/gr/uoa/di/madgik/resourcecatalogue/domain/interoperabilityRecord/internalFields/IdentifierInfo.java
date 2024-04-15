@@ -20,7 +20,7 @@ public class IdentifierInfo {
      * versions. The record's primary key for locating it in the EOSC-IF database.
      */
     @XmlElement(required = true)
-    @Schema(required = true)
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     @FieldValidation
     private String identifier;
 
@@ -28,7 +28,7 @@ public class IdentifierInfo {
      * The type of Identifier.
      */
     @XmlElement(required = true)
-    @Schema(required = true)
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     @FieldValidation(containsId = true, idClass = Vocabulary.class)
     @VocabularyValidation(type = Vocabulary.Type.IR_IDENTIFIER_TYPE)
     private String identifierType;

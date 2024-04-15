@@ -6,6 +6,7 @@ import gr.uoa.di.madgik.resourcecatalogue.domain.ServiceBundle;
 import gr.uoa.di.madgik.resourcecatalogue.service.EventService;
 import gr.uoa.di.madgik.resourcecatalogue.service.ServiceBundleService;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -21,8 +22,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+@Deprecated
 @RestController
 @RequestMapping("userEvents")
+@Tag(name = "user events", description = "Get information about a User's favourite Services and ratings")
 public class UserEventsController {
 
     private final EventService eventService;

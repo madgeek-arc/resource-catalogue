@@ -30,7 +30,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping({"pendingService"})
-@Tag(description = "Operations for Pending Services", name = "pending-resource-controller")
+@Tag(name = "pending service")
 public class PendingServiceController extends ResourceController<ServiceBundle, Authentication> {
 
     private static final Logger logger = LogManager.getLogger(PendingServiceController.class);

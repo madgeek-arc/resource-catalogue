@@ -1,5 +1,6 @@
 package gr.uoa.di.madgik.resourcecatalogue.controllers;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -11,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("logging")
+@Tag(name = "logging", description = "Set Root and/or Log Levels")
 public class LoggingController {
 
     private static final Logger logger = LogManager.getLogger(LoggingController.class);

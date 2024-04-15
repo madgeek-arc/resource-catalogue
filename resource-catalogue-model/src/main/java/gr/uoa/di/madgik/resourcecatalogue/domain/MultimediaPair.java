@@ -17,7 +17,7 @@ public class MultimediaPair {
      * Link to video, slideshow, photos, screenshots with details of the Provider.
      */
     @XmlElement(required = true)
-    @Schema(required = true)
+    @Schema
     @FieldValidation()
     private URL multimediaURL;
 
@@ -25,7 +25,7 @@ public class MultimediaPair {
      * Short description of the Multimedia content.
      */
     @XmlElement()
-    @Schema()
+    @Schema
     @FieldValidation(nullable = true)
     private String multimediaName;
 

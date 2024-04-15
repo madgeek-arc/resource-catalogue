@@ -17,6 +17,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -34,6 +35,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping
+@Tag(name = "public datasource")
 public class PublicDatasourceController {
 
     private static final Logger logger = LogManager.getLogger(PublicProviderController.class);
@@ -51,7 +53,7 @@ public class PublicDatasourceController {
         this.publicDatasourceManager = publicDatasourceManager;
     }
 
-    @Operation(description = "Returns the Public Datasource with the given id.")
+    @Operation(summary = "Returns the Public Datasource with the given id.")
     @GetMapping(path = "public/datasource/{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity<?> getPublicDatasource(@PathVariable("id") String id, @Parameter(hidden = true) Authentication auth) {
         DatasourceBundle datasourceBundle = datasourceService.get(id);
@@ -97,7 +99,7 @@ public class PublicDatasourceController {
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(gson.toJson("You cannot view the specific Datasource."));
     }
 
-    @Operation(description = "Filter a list of Public Datasources based on a set of filters or get a list of all Public Resources in the Catalogue.")
+    @Operation(summary = "Filter a list of Public Datasources based on a set of filters or get a list of all Public Resources in the Catalogue.")
     @Browse
     @Parameter(name = "suspended", description = "Suspended", content = @Content(schema = @Schema(type = "boolean", defaultValue = "false")))
     @GetMapping(path = "public/datasource/all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})

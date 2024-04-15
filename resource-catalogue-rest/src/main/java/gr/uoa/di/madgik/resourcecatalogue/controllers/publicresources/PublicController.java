@@ -21,7 +21,7 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping
-@Tag(name = "Public Controller", description = "General methods related to Public Resources")
+@Tag(name = "public", description = "General methods related to Public resources")
 public class PublicController {
 
     private final GenericResourceService genericResourceService;

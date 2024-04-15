@@ -18,17 +18,17 @@ public class ConfigurationTemplateInstance implements Identifiable {
     private String id;
 
     @XmlElement(required = true)
-    @Schema(required = true)
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     @FieldValidation(containsId = true, containsResourceId = true)
     private String resourceId;
 
     @XmlElement(required = true)
-    @Schema(required = true)
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     @FieldValidation(containsId = true, idClass = ConfigurationTemplate.class)
     private String configurationTemplateId;
 
     @XmlElement(required = true)
-    @Schema(required = true)
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     @FieldValidation
     private String payload;
 

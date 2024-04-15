@@ -25,7 +25,7 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("vocabulary")
-@Tag(name = "vocabulary-controller", description = "Get information about the vocabularies")
+@Tag(name = "vocabulary")
 public class VocabularyController extends ResourceController<Vocabulary, Authentication> {
 
     private static final Logger logger = LogManager.getLogger(VocabularyController.class);
@@ -41,44 +41,44 @@ public class VocabularyController extends ResourceController<Vocabulary, Authent
      * Open methods
      **/
 
-    @Operation(description = "Returns a list of EU countries.")
+    @Operation(summary = "Returns a list of EU countries.")
     @GetMapping(path = "countries/EU", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<String[]> getEU() {
         return new ResponseEntity<>(vocabularyService.getRegion("EU"), HttpStatus.OK);
     }
 
-    @Operation(description = "Returns a list of WW countries.")
+    @Operation(summary = "Returns a list of WW countries.")
     @GetMapping(path = "countries/WW", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<String[]> getWW() {
         return new ResponseEntity<>(vocabularyService.getRegion("WW"), HttpStatus.OK);
     }
 
-    @Operation(description = "Get by ID")
+    @Operation(summary = "Get by ID")
     @GetMapping(path = "{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
     @Override
     public ResponseEntity<Vocabulary> get(@PathVariable("id") String id, @Parameter(hidden = true) Authentication authentication) {
         return new ResponseEntity<>(vocabularyService.get(id), HttpStatus.OK);
     }
 
-    //    @Operation(description = "Returns a tree structure of Categories")
+    //    @Operation(summary = "Returns a tree structure of Categories")
     @GetMapping(path = "vocabularyTree/{type}", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<VocabularyTree> getVocabularyTree(@PathVariable("type") Vocabulary.Type type) {
         return new ResponseEntity<>(vocabularyService.getVocabulariesTree(type), HttpStatus.OK);
     }
 
-    //    @Operation(description = "Returns a map structure of vocabularies")
+    //    @Operation(summary = "Returns a map structure of vocabularies")
     @GetMapping(path = "vocabularyMap", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<Map<String, Vocabulary>> getVocabularyMap() {
         return new ResponseEntity<>(vocabularyService.getVocabulariesMap(), HttpStatus.OK);
     }
 
-    @Operation(description = "Get a Map of vocabulary types and their respective entries")
+    @Operation(summary = "Get a Map of vocabulary types and their respective entries")
     @GetMapping(path = "/byType", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<Map<Vocabulary.Type, List<Vocabulary>>> getAllVocabulariesByType() {
         return new ResponseEntity<>(vocabularyService.getAllVocabulariesByType(), HttpStatus.OK);
     }
 
-    @Operation(description = "Get vocabularies by type")
+    @Operation(summary = "Get vocabularies by type")
     @GetMapping(path = "/byType/{type}", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<List<Vocabulary>> getByType(@PathVariable(value = "type") Vocabulary.Type type) {
         return new ResponseEntity<>(vocabularyService.getByType(type), HttpStatus.OK);
@@ -89,7 +89,7 @@ public class VocabularyController extends ResourceController<Vocabulary, Authent
      * Secured methods
      **/
 
-//    @Operation(description = "Adds a new Vocabulary")
+//    @Operation(summary = "Adds a new Vocabulary")
     @PostMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     @Override
@@ -97,7 +97,7 @@ public class VocabularyController extends ResourceController<Vocabulary, Authent
         return super.add(vocabulary, auth);
     }
 
-    //    @Operation(description = "Updates a Vocabulary")
+    //    @Operation(summary = "Updates a Vocabulary")
     @PutMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     @Override
@@ -105,7 +105,7 @@ public class VocabularyController extends ResourceController<Vocabulary, Authent
         return super.update(vocabulary, auth);
     }
 
-    //    @Operation(description = "Deletes a Vocabulary")
+    //    @Operation(summary = "Deletes a Vocabulary")
     @DeleteMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     @Override
@@ -113,21 +113,21 @@ public class VocabularyController extends ResourceController<Vocabulary, Authent
         return super.delete(vocabulary, auth);
     }
 
-    //    @Operation(description = "Adds all new Vocabularies")
+    //    @Operation(summary = "Adds all new Vocabularies")
     @PostMapping(path = "/addAll", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     public void addAll(@RequestBody List<Vocabulary> newVocabularies, @Parameter(hidden = true) Authentication auth) {
         vocabularyService.addAll(newVocabularies, auth);
     }
 
-    //    @Operation(description = "Delete All Vocs")
+    //    @Operation(summary = "Delete All Vocs")
     @DeleteMapping(path = "/deleteAll", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public void deleteAll(@Parameter(hidden = true) Authentication auth) {
         vocabularyService.deleteAll(auth);
     }
 
-    //    @Operation(description = "Delete all Vocs of a specific type")
+    //    @Operation(summary = "Delete all Vocs of a specific type")
     @DeleteMapping(path = "/deleteByType/{type}", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public void deleteByType(@PathVariable(value = "type") Vocabulary.Type type, @Parameter(hidden = true) Authentication auth) throws ResourceNotFoundException {

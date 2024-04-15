@@ -15,6 +15,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.http.HttpStatus;
@@ -32,6 +33,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping
+@Tag(name = "public service")
 public class PublicServiceController {
 
     private static final Logger logger = LogManager.getLogger(PublicServiceController.class);
