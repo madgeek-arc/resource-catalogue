@@ -15,10 +15,16 @@ import gr.uoa.di.madgik.resourcecatalogue.utils.FacetFilterUtils;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiImplicitParams;
-import io.swagger.annotations.ApiOperation;
+
+
+import io.swagger.v3.oas.annotations.Hidden;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.Parameters;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,7 +36,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
-import springfox.documentation.annotations.ApiIgnore;
+
 
 import java.net.URL;
 import java.util.*;
@@ -38,7 +44,7 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("provider")
-@Api(value = "Get information about a Provider")
+@Tag(name = "Provider Controller", description = "Get information about a Provider")
 public class ProviderController {
 
     private static final Logger logger = LogManager.getLogger(ProviderController.class);
@@ -74,7 +80,7 @@ public class ProviderController {
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     public ResponseEntity<Provider> delete(@PathVariable("id") String id,
                                            @RequestParam(defaultValue = "${project.catalogue.name}", name = "catalogue_id") String catalogueId,
-                                           @ApiIgnore Authentication auth) {
+                                           @Parameter(hidden = true) Authentication auth) {
         ProviderBundle provider = providerService.get(catalogueId, id, auth);
         if (provider == null) {
             return new ResponseEntity<>(HttpStatus.GONE);
@@ -91,11 +97,11 @@ public class ProviderController {
         return new ResponseEntity<>(provider.getProvider(), HttpStatus.OK);
     }
 
-    @ApiOperation(value = "Returns the Provider with the given id.")
+    @Operation(description = "Returns the Provider with the given id.")
     @GetMapping(path = "{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity<Provider> get(@PathVariable("id") String id,
                                         @RequestParam(defaultValue = "${project.catalogue.name}", name = "catalogue_id") String catalogueId,
-                                        @ApiIgnore Authentication auth) {
+                                        @Parameter(hidden = true) Authentication auth) {
         Provider provider = providerService.get(catalogueId, id, auth).getProvider();
         return new ResponseEntity<>(provider, HttpStatus.OK);
     }
@@ -104,7 +110,7 @@ public class ProviderController {
 //    @Override
     @PostMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public ResponseEntity<Provider> add(@RequestBody Provider provider, @ApiIgnore Authentication auth) {
+    public ResponseEntity<Provider> add(@RequestBody Provider provider, @Parameter(hidden = true) Authentication auth) {
         ProviderBundle providerBundle = providerService.add(new ProviderBundle(provider), auth);
         logger.info("User '{}' added the Provider with name '{}' and id '{}'", auth.getName(), provider.getName(), provider.getId());
         return new ResponseEntity<>(providerBundle.getProvider(), HttpStatus.CREATED);
@@ -112,20 +118,20 @@ public class ProviderController {
 
     @PostMapping(path = "/bundle", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public ResponseEntity<ProviderBundle> addBundle(@RequestBody ProviderBundle provider, @ApiIgnore Authentication auth) {
+    public ResponseEntity<ProviderBundle> addBundle(@RequestBody ProviderBundle provider, @Parameter(hidden = true) Authentication auth) {
         ProviderBundle providerBundle = providerService.add(provider, auth);
         logger.info("User '{}' added the Provider with name '{}' and id '{}'", auth.getName(), providerBundle.getProvider().getName(), provider.getId());
         return new ResponseEntity<>(providerBundle, HttpStatus.CREATED);
     }
 
     //    @Override
-    @ApiOperation(value = "Updates the Provider assigned the given id with the given Provider, keeping a version of revisions.")
+    @Operation(description = "Updates the Provider assigned the given id with the given Provider, keeping a version of revisions.")
     @PutMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isProviderAdmin(#auth,#provider.id,#provider.catalogueId)")
     public ResponseEntity<Provider> update(@RequestBody Provider provider,
                                            @RequestParam(defaultValue = "${project.catalogue.name}", name = "catalogue_id") String catalogueId,
                                            @RequestParam(required = false) String comment,
-                                           @ApiIgnore Authentication auth) throws ResourceNotFoundException {
+                                           @Parameter(hidden = true) Authentication auth) throws ResourceNotFoundException {
         ProviderBundle providerBundle = providerService.get(catalogueId, provider.getId(), auth);
         providerBundle.setProvider(provider);
         if (comment == null || comment.equals("")) {
@@ -138,19 +144,20 @@ public class ProviderController {
 
     @PutMapping(path = "/bundle", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public ResponseEntity<ProviderBundle> updateBundle(@RequestBody ProviderBundle provider, @ApiIgnore Authentication auth) throws ResourceNotFoundException {
+    public ResponseEntity<ProviderBundle> updateBundle(@RequestBody ProviderBundle provider, @Parameter(hidden = true) Authentication auth) throws ResourceNotFoundException {
         ProviderBundle providerBundle = providerService.update(provider, auth);
         logger.info("User '{}' updated the Provider with name '{}' and id '{}'", auth.getName(), providerBundle.getProvider().getName(), provider.getId());
         return new ResponseEntity<>(providerBundle, HttpStatus.OK);
     }
 
-    @ApiOperation(value = "Filter a list of Providers based on a set of filters or get a list of all Providers in the Catalogue.")
+    @Operation(description = "Filter a list of Providers based on a set of filters or get a list of all Providers in the Catalogue.",
+            security = { @SecurityRequirement(name = "bearer-key") })
     @Browse
-    @ApiImplicitParam(name = "suspended", value = "Suspended", defaultValue = "false", dataType = "boolean", paramType = "query")
+    @Parameter(name = "suspended", description = "Suspended", content = @Content(schema = @Schema(type = "boolean", defaultValue = "false")))
     @GetMapping(path = "all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    public ResponseEntity<Paging<Provider>> getAll(@ApiIgnore @RequestParam MultiValueMap<String, Object> allRequestParams,
+    public ResponseEntity<Paging<Provider>> getAll(@Parameter(hidden = true) @RequestParam MultiValueMap<String, Object> allRequestParams,
                                                    @RequestParam(defaultValue = "all", name = "catalogue_id") String catalogueIds,
-                                                   @ApiIgnore Authentication auth) {
+                                                   @Parameter(hidden = true) Authentication auth) {
         allRequestParams.putIfAbsent("catalogue_id", Collections.singletonList(catalogueIds));
         if (catalogueIds != null && catalogueIds.equals("all")) {
             allRequestParams.remove("catalogue_id");
@@ -171,19 +178,19 @@ public class ProviderController {
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isProviderAdmin(#auth, #id, #catalogueId)")
     public ResponseEntity<ProviderBundle> getProviderBundle(@PathVariable("id") String id,
                                                             @RequestParam(defaultValue = "${project.catalogue.name}", name = "catalogue_id") String catalogueId,
-                                                            @ApiIgnore Authentication auth) {
+                                                            @Parameter(hidden = true) Authentication auth) {
         return new ResponseEntity<>(providerService.get(catalogueId, id, auth), HttpStatus.OK);
     }
 
     // Filter a list of Providers based on a set of filters or get a list of all Providers in the Catalogue.
     @Browse
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "suspended", value = "Suspended", defaultValue = "false", dataType = "boolean", paramType = "query"),
-            @ApiImplicitParam(name = "active", value = "Active", defaultValue = "true", dataType = "boolean", paramType = "query")
+    @Parameters({
+            @Parameter(name = "suspended", description = "Suspended", content = @Content(schema = @Schema(type = "boolean", defaultValue = "false"))),
+            @Parameter(name = "active", description = "Active", content = @Content(schema = @Schema(type = "boolean", defaultValue = "true")))
     })
     @GetMapping(path = "bundle/all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
-    public ResponseEntity<Paging<ProviderBundle>> getAllProviderBundles(@ApiIgnore @RequestParam Map<String, Object> allRequestParams, @ApiIgnore Authentication auth,
+    public ResponseEntity<Paging<ProviderBundle>> getAllProviderBundles(@Parameter(hidden = true) @RequestParam Map<String, Object> allRequestParams, @Parameter(hidden = true) Authentication auth,
                                                                         @RequestParam(required = false) Set<String> status, @RequestParam(required = false) Set<String> templateStatus,
                                                                         @RequestParam(required = false) Set<String> auditState, @RequestParam(required = false) Set<String> catalogue_id) {
         FacetFilter ff = new FacetFilter();
@@ -241,16 +248,16 @@ public class ProviderController {
         }
     }
 
-    @ApiOperation(value = "Get a list of services offered by a Provider.")
+    @Operation(description = "Get a list of services offered by a Provider.")
     @GetMapping(path = "services/{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    public ResponseEntity<List<? extends Service>> getServices(@PathVariable("id") String id, @ApiIgnore Authentication auth) {
+    public ResponseEntity<List<? extends Service>> getServices(@PathVariable("id") String id, @Parameter(hidden = true) Authentication auth) {
         return new ResponseEntity<>(serviceBundleService.getResources(id, auth), HttpStatus.OK);
     }
 
     @Browse
     @GetMapping(path = "byCatalogue/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isCatalogueAdmin(#auth,#id)")
-    public ResponseEntity<Paging<ProviderBundle>> getProvidersByCatalogue(@ApiIgnore @RequestParam Map<String, Object> allRequestParams, @ApiIgnore Authentication auth,
+    public ResponseEntity<Paging<ProviderBundle>> getProvidersByCatalogue(@Parameter(hidden = true) @RequestParam Map<String, Object> allRequestParams, @Parameter(hidden = true) Authentication auth,
                                                                           @RequestParam(required = false) Set<String> status, @RequestParam(required = false) Set<String> templateStatus,
                                                                           @RequestParam(required = false) Set<String> auditState, @PathVariable String id) {
         Set<String> catalogueId = new LinkedHashSet<>();
@@ -260,7 +267,7 @@ public class ProviderController {
 
     // Get a list of Providers in which the given user is admin.
     @GetMapping(path = "getServiceProviders", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    public ResponseEntity<List<Provider>> getServiceProviders(@RequestParam("email") String email, @ApiIgnore Authentication auth) {
+    public ResponseEntity<List<Provider>> getServiceProviders(@RequestParam("email") String email, @Parameter(hidden = true) Authentication auth) {
         List<Provider> providers = providerService.getServiceProviders(email, auth)
                 .stream()
                 .map(ProviderBundle::getProvider)
@@ -270,7 +277,7 @@ public class ProviderController {
 
     // Get a list of Providers in which you are admin.
     @GetMapping(path = "getMyServiceProviders", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    public ResponseEntity<List<ProviderBundle>> getMyServiceProviders(@ApiIgnore Authentication auth) {
+    public ResponseEntity<List<ProviderBundle>> getMyServiceProviders(@Parameter(hidden = true) Authentication auth) {
         return new ResponseEntity<>(providerService.getMy(null, auth).getResults(), HttpStatus.OK);
     }
 
@@ -290,8 +297,8 @@ public class ProviderController {
     // Get the rejected services of the given Provider.
     @Browse
     @GetMapping(path = "resources/rejected/{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    public ResponseEntity<Paging<?>> getRejectedResources(@PathVariable("id") String providerId, @ApiIgnore @RequestParam MultiValueMap<String, Object> allRequestParams,
-                                                          @RequestParam String resourceType, @ApiIgnore Authentication auth) {
+    public ResponseEntity<Paging<?>> getRejectedResources(@PathVariable("id") String providerId, @Parameter(hidden = true) @RequestParam MultiValueMap<String, Object> allRequestParams,
+                                                          @RequestParam String resourceType, @Parameter(hidden = true) Authentication auth) {
         allRequestParams.add("resource_organisation", providerId);
         allRequestParams.add("status", "rejected resource");
         allRequestParams.add("published", false);
@@ -301,7 +308,7 @@ public class ProviderController {
 
     // Get all inactive Providers.
     @GetMapping(path = "inactive/all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    public ResponseEntity<List<Provider>> getInactive(@ApiIgnore Authentication auth) {
+    public ResponseEntity<List<Provider>> getInactive(@Parameter(hidden = true) Authentication auth) {
         List<Provider> ret = providerService.getInactive()
                 .stream()
                 .map(ProviderBundle::getProvider)
@@ -313,7 +320,7 @@ public class ProviderController {
     @PatchMapping(path = "verifyProvider/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     public ResponseEntity<ProviderBundle> verifyProvider(@PathVariable("id") String id, @RequestParam(required = false) Boolean active,
-                                                         @RequestParam(required = false) String status, @ApiIgnore Authentication auth) {
+                                                         @RequestParam(required = false) String status, @Parameter(hidden = true) Authentication auth) {
         ProviderBundle provider = providerService.verifyProvider(id, status, active, auth);
         logger.info("User '{}' updated Provider with name '{}' [status: {}] [active: {}]", auth, provider.getProvider().getName(), status, active);
         return new ResponseEntity<>(provider, HttpStatus.OK);
@@ -323,7 +330,7 @@ public class ProviderController {
     @PatchMapping(path = "publish/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.providerIsActiveAndUserIsAdmin(#auth, #id)")
     public ResponseEntity<ProviderBundle> publish(@PathVariable("id") String id, @RequestParam(required = false) Boolean active,
-                                                  @ApiIgnore Authentication auth) {
+                                                  @Parameter(hidden = true) Authentication auth) {
         ProviderBundle provider = providerService.publish(id, active, auth);
         logger.info("User '{}-{}' attempts to save Provider with id '{}' as '{}'", User.of(auth).getFullName(), User.of(auth).getEmail(), id, active);
         return new ResponseEntity<>(provider, HttpStatus.OK);
@@ -333,7 +340,7 @@ public class ProviderController {
     @PatchMapping(path = "publishServices", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     public ResponseEntity<List<ServiceBundle>> publishServices(@RequestParam String id, @RequestParam Boolean active,
-                                                               @ApiIgnore Authentication auth) throws ResourceNotFoundException {
+                                                               @Parameter(hidden = true) Authentication auth) throws ResourceNotFoundException {
         ProviderBundle provider = providerService.get(catalogueName, id, auth);
         if (provider == null) {
             throw new ResourceException("Provider with id '" + id + "' does not exist.", HttpStatus.NOT_FOUND);
@@ -357,12 +364,12 @@ public class ProviderController {
     }
 
     @GetMapping(path = "hasAdminAcceptedTerms", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    public boolean hasAdminAcceptedTerms(@RequestParam String providerId, @ApiIgnore Authentication authentication) {
+    public boolean hasAdminAcceptedTerms(@RequestParam String providerId, @Parameter(hidden = true) Authentication authentication) {
         return providerService.hasAdminAcceptedTerms(providerId, authentication);
     }
 
     @PutMapping(path = "adminAcceptedTerms", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    public void adminAcceptedTerms(@RequestParam String providerId, @ApiIgnore Authentication authentication) {
+    public void adminAcceptedTerms(@RequestParam String providerId, @Parameter(hidden = true) Authentication authentication) {
         providerService.adminAcceptedTerms(providerId, authentication);
     }
 
@@ -372,7 +379,7 @@ public class ProviderController {
     }
 
     @GetMapping(path = "requestProviderDeletion", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    public void requestProviderDeletion(@RequestParam String providerId, @ApiIgnore Authentication authentication) {
+    public void requestProviderDeletion(@RequestParam String providerId, @Parameter(hidden = true) Authentication authentication) {
         providerService.requestProviderDeletion(providerId, authentication);
     }
 
@@ -393,19 +400,19 @@ public class ProviderController {
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     public ResponseEntity<ProviderBundle> auditProvider(@PathVariable("id") String id, @RequestParam("catalogueId") String catalogueId,
                                                         @RequestParam(required = false) String comment,
-                                                        @RequestParam LoggingInfo.ActionType actionType, @ApiIgnore Authentication auth) {
+                                                        @RequestParam LoggingInfo.ActionType actionType, @Parameter(hidden = true) Authentication auth) {
         ProviderBundle provider = providerService.auditProvider(id, catalogueId, comment, actionType, auth);
         logger.info("User '{}-{}' audited Provider with name '{}' of the '{}' Catalogue - [actionType: {}]", User.of(auth).getFullName(), User.of(auth).getEmail(),
                 provider.getProvider().getName(), provider.getProvider().getCatalogueId(), actionType);
         return new ResponseEntity<>(provider, HttpStatus.OK);
     }
 
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "quantity", value = "Quantity to be fetched", dataType = "string", paramType = "query")
+    @Parameters({
+            @Parameter(name = "quantity", description = "Quantity to be fetched", schema = @Schema(type = "string"))
     })
     @GetMapping(path = "randomProviders", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
-    public ResponseEntity<Paging<ProviderBundle>> getRandomProviders(@ApiIgnore @RequestParam Map<String, Object> allRequestParams, @ApiIgnore Authentication auth) {
+    public ResponseEntity<Paging<ProviderBundle>> getRandomProviders(@Parameter(hidden = true) @RequestParam Map<String, Object> allRequestParams, @Parameter(hidden = true) Authentication auth) {
         FacetFilter ff = FacetFilterUtils.createFacetFilter(allRequestParams);
         ff.addFilter("status", "approved provider");
         ff.addFilter("published", false);
@@ -421,7 +428,7 @@ public class ProviderController {
         return ResponseEntity.ok(loggingInfoHistory);
     }
 
-    @ApiOperation(value = "Validates the Provider without actually changing the repository.")
+    @Operation(description = "Validates the Provider without actually changing the repository.")
     @PostMapping(path = "validate", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<Boolean> validate(@RequestBody Provider provider) {
         ResponseEntity<Boolean> ret = ResponseEntity.ok(providerService.validate(new ProviderBundle(provider)) != null);
@@ -470,33 +477,33 @@ public class ProviderController {
     @PutMapping(path = "changeCatalogue", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     public ResponseEntity<ProviderBundle> changeCatalogue(@RequestParam String catalogueId, @RequestParam String providerId,
-                                                          @RequestParam String newCatalogueId, @ApiIgnore Authentication authentication) {
+                                                          @RequestParam String newCatalogueId, @Parameter(hidden = true) Authentication authentication) {
         ProviderBundle providerBundle = migrationService.changeProviderCatalogue(providerId, catalogueId, newCatalogueId, authentication);
         return ResponseEntity.ok(providerBundle);
     }
 
     // Create a Public ProviderBundle if something went bad during its creation
-    @ApiIgnore
+    @Hidden
     @PostMapping(path = "createPublicProvider", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public ResponseEntity<ProviderBundle> createPublicProvider(@RequestBody ProviderBundle providerBundle, @ApiIgnore Authentication auth) {
+    public ResponseEntity<ProviderBundle> createPublicProvider(@RequestBody ProviderBundle providerBundle, @Parameter(hidden = true) Authentication auth) {
         logger.info("User '{}-{}' attempts to create a Public Provider from Provider '{}'-'{}' of the '{}' Catalogue", User.of(auth).getFullName(),
                 User.of(auth).getEmail(), providerBundle.getId(), providerBundle.getProvider().getName(), providerBundle.getProvider().getCatalogueId());
         return ResponseEntity.ok(providerService.createPublicProvider(providerBundle, auth));
     }
 
-    @ApiOperation(value = "Suspends a Provider and all its resources")
+    @Operation(description = "Suspends a Provider and all its resources")
     @PutMapping(path = "suspend", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
-    public ProviderBundle suspendProvider(@RequestParam String providerId, @RequestParam String catalogueId, @RequestParam boolean suspend, @ApiIgnore Authentication auth) {
+    public ProviderBundle suspendProvider(@RequestParam String providerId, @RequestParam String catalogueId, @RequestParam boolean suspend, @Parameter(hidden = true) Authentication auth) {
         return providerService.suspend(providerId, catalogueId, suspend, auth);
     }
 
     @Browse
-    @ApiOperation(value = "Given a HLE, get all Providers associated with it")
+    @Operation(description = "Given a HLE, get all Providers associated with it")
     @GetMapping(path = "getAllResourcesUnderASpecificHLE", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
-    public List<MapValues<ExtendedValue>> getAllProvidersUnderASpecificHLE(@RequestParam String providerName, @ApiIgnore Authentication auth) {
+    public List<MapValues<ExtendedValue>> getAllProvidersUnderASpecificHLE(@RequestParam String providerName, @Parameter(hidden = true) Authentication auth) {
         String hle = providerService.determineHostingLegalEntity(providerName);
         if (hle != null) {
             return providerService.getAllResourcesUnderASpecificHLE(hle, auth);

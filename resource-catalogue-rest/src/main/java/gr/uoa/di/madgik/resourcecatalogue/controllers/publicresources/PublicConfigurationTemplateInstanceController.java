@@ -10,7 +10,9 @@ import gr.uoa.di.madgik.resourcecatalogue.service.SecurityService;
 import gr.uoa.di.madgik.resourcecatalogue.utils.FacetFilterUtils;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.domain.Paging;
-import io.swagger.annotations.ApiOperation;
+
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.http.HttpStatus;
@@ -19,7 +21,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
-import springfox.documentation.annotations.ApiIgnore;
+
 
 import java.util.LinkedList;
 import java.util.List;
@@ -42,7 +44,7 @@ public class PublicConfigurationTemplateInstanceController {
         this.configurationTemplateInstanceService = configurationTemplateInstanceService;
     }
 
-    @ApiOperation(value = "Returns the Public Configuration Template Instance with the given id.")
+    @Operation(description = "Returns the Public Configuration Template Instance with the given id.")
     @GetMapping(path = "public/configurationTemplateInstance/{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity<?> getPublicConfigurationTemplateInstance(@PathVariable("id") String id) {
         ConfigurationTemplateInstanceBundle configurationTemplateInstanceBundle = configurationTemplateInstanceService.get(id);
@@ -56,7 +58,7 @@ public class PublicConfigurationTemplateInstanceController {
     @GetMapping(path = "public/configurationTemplateInstance/bundle/{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     public ResponseEntity<?> getPublicConfigurationTemplateInstanceBundle(@PathVariable("id") String id,
-                                                                          @ApiIgnore Authentication auth) {
+                                                                          @Parameter(hidden = true) Authentication auth) {
         ConfigurationTemplateInstanceBundle configurationTemplateInstanceBundle = configurationTemplateInstanceService.get(id);
         if (auth != null && auth.isAuthenticated()) {
             User user = User.of(auth);
@@ -74,11 +76,11 @@ public class PublicConfigurationTemplateInstanceController {
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(gson.toJson("You cannot view the specific Configuration Template Instance."));
     }
 
-    @ApiOperation(value = "Filter a list of Public Configuration Template Instances based on a set of filters or get a list of all Public Configuration Template Instances in the Catalogue.")
+    @Operation(description = "Filter a list of Public Configuration Template Instances based on a set of filters or get a list of all Public Configuration Template Instances in the Catalogue.")
     @Browse
     @GetMapping(path = "public/configurationTemplateInstance/all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    public ResponseEntity<Paging<ConfigurationTemplateInstanceDto>> getAllPublicConfigurationTemplateInstances(@ApiIgnore @RequestParam Map<String, Object> allRequestParams,
-                                                                                                               @ApiIgnore Authentication auth) {
+    public ResponseEntity<Paging<ConfigurationTemplateInstanceDto>> getAllPublicConfigurationTemplateInstances(@Parameter(hidden = true) @RequestParam Map<String, Object> allRequestParams,
+                                                                                                               @Parameter(hidden = true) Authentication auth) {
 
         FacetFilter ff = FacetFilterUtils.createFacetFilter(allRequestParams);
         ff.addFilter("published", true);
@@ -95,8 +97,8 @@ public class PublicConfigurationTemplateInstanceController {
     @Browse
     @GetMapping(path = "public/configurationTemplateInstance/bundle/all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
-    public ResponseEntity<Paging<ConfigurationTemplateInstanceBundle>> getAllPublicConfigurationTemplateInstanceBundles(@ApiIgnore @RequestParam Map<String, Object> allRequestParams,
-                                                                                                                        @ApiIgnore Authentication auth) {
+    public ResponseEntity<Paging<ConfigurationTemplateInstanceBundle>> getAllPublicConfigurationTemplateInstanceBundles(@Parameter(hidden = true) @RequestParam Map<String, Object> allRequestParams,
+                                                                                                                        @Parameter(hidden = true) Authentication auth) {
         FacetFilter ff = FacetFilterUtils.createFacetFilter(allRequestParams);
         ff.addFilter("published", true);
         Paging<ConfigurationTemplateInstanceBundle> configurationTemplateInstanceBundlePaging = configurationTemplateInstanceService.getAll(ff, auth);

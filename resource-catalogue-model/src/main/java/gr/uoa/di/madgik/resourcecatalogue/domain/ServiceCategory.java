@@ -2,7 +2,7 @@ package gr.uoa.di.madgik.resourcecatalogue.domain;
 
 import gr.uoa.di.madgik.resourcecatalogue.annotation.FieldValidation;
 import gr.uoa.di.madgik.resourcecatalogue.annotation.VocabularyValidation;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -19,7 +19,7 @@ public class ServiceCategory {
      * A named group of Resources that offer access to the same type of Resources
      */
     @XmlElement(required = true)
-    @ApiModelProperty(position = 1, required = true)
+    @Schema(required = true)
     @FieldValidation(containsId = true, idClass = Vocabulary.class)
     @VocabularyValidation(type = Vocabulary.Type.CATEGORY)
     private String category;
@@ -28,7 +28,7 @@ public class ServiceCategory {
      * A named group of Resources that offer access to the same type of Resource or capabilities, within the defined Resource Category.
      */
     @XmlElement(required = true)
-    @ApiModelProperty(position = 2, required = true)
+    @Schema(required = true)
     @FieldValidation(containsId = true, idClass = Vocabulary.class)
     @VocabularyValidation(type = Vocabulary.Type.SUBCATEGORY)
     private String subcategory;

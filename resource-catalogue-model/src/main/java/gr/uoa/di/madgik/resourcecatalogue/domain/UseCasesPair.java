@@ -1,7 +1,7 @@
 package gr.uoa.di.madgik.resourcecatalogue.domain;
 
 import gr.uoa.di.madgik.resourcecatalogue.annotation.FieldValidation;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -17,7 +17,7 @@ public class UseCasesPair {
      * Link to use cases supported by this Resource.
      */
     @XmlElement(required = true)
-    @ApiModelProperty(position = 1, required = true)
+    @Schema(required = true)
     @FieldValidation()
     private URL useCaseURL;
 
@@ -25,7 +25,7 @@ public class UseCasesPair {
      * Short description of the Multimedia content.
      */
     @XmlElement()
-    @ApiModelProperty(position = 2)
+    @Schema()
     @FieldValidation(nullable = true)
     private String useCaseName;
 

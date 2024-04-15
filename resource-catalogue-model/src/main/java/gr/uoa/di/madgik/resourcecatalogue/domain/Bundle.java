@@ -1,7 +1,7 @@
 package gr.uoa.di.madgik.resourcecatalogue.domain;
 
 import gr.uoa.di.madgik.resourcecatalogue.annotation.FieldValidation;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -15,7 +15,7 @@ import java.util.Objects;
 @XmlRootElement(namespace = "http://einfracentral.eu")
 public abstract class Bundle<T extends Identifiable> implements Identifiable {
 
-    @ApiModelProperty(hidden = true)
+    @Schema(hidden = true)
     @XmlTransient
     @FieldValidation
     private T payload;

@@ -1,7 +1,7 @@
 package gr.uoa.di.madgik.resourcecatalogue.domain;
 
 import gr.uoa.di.madgik.resourcecatalogue.annotation.FieldValidation;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 import javax.xml.bind.annotation.XmlElement;
 import java.net.URL;
@@ -13,7 +13,7 @@ public class ResearchProductLicensing {
      * Research product license name
      */
     @XmlElement(required = true)
-    @ApiModelProperty(position = 1, required = true)
+    @Schema(required = true)
     @FieldValidation()
     private String researchProductLicenseName;
 
@@ -21,7 +21,7 @@ public class ResearchProductLicensing {
      * Research product license URL
      */
     @XmlElement(required = true)
-    @ApiModelProperty(position = 2, required = true)
+    @Schema(required = true)
     @FieldValidation()
     private URL researchProductLicenseURL;
 

@@ -5,22 +5,19 @@ import gr.uoa.di.madgik.resourcecatalogue.domain.configurationTemplates.Configur
 import gr.uoa.di.madgik.resourcecatalogue.domain.configurationTemplates.ConfigurationTemplateBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.configurationTemplates.ConfigurationTemplateInstance;
 import gr.uoa.di.madgik.resourcecatalogue.domain.configurationTemplates.ConfigurationTemplateInstanceBundle;
-import freemarker.template.TemplateExceptionHandler;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.*;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.session.MapSessionRepository;
 import org.springframework.session.SessionRepository;
 import org.springframework.session.config.annotation.web.http.EnableSpringHttpSession;
-import org.springframework.session.web.context.AbstractHttpSessionApplicationInitializer;
 import org.springframework.session.web.http.CookieSerializer;
 import org.springframework.session.web.http.DefaultCookieSerializer;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
-import java.io.File;
-import java.io.IOException;
-import java.util.Objects;
 import java.util.Random;
 
 @Configuration
@@ -32,12 +29,10 @@ import java.util.Random;
         "gr.uoa.di.madgik.resourcecatalogue.service",
         "gr.uoa.di.madgik.resourcecatalogue.matomo",
         "gr.uoa.di.madgik.resourcecatalogue.recdb"})
-@Import(CacheConfig.class)
-@PropertySource(value = {"classpath:application.properties", "classpath:registry.properties"})
 @EnableSpringHttpSession
 @EnableAspectJAutoProxy
 @EnableAsync
-public class ServiceConfig extends AbstractHttpSessionApplicationInitializer {
+public class ServiceConfig {
 
 
     @Bean
@@ -52,17 +47,6 @@ public class ServiceConfig extends AbstractHttpSessionApplicationInitializer {
                 ResourceInteroperabilityRecord.class, TrainingResource.class, TrainingResourceBundle.class,
                 ConfigurationTemplateBundle.class, ConfigurationTemplate.class, ConfigurationTemplateInstance.class,
                 ConfigurationTemplateInstanceBundle.class);
-    }
-
-    @Bean
-    freemarker.template.Configuration freeMarker() throws IOException {
-        freemarker.template.Configuration cfg = new freemarker.template.Configuration(freemarker.template.Configuration.VERSION_2_3_28);
-        cfg.setDirectoryForTemplateLoading(new File(Objects.requireNonNull(getClass().getClassLoader().getResource("templates")).getFile()));
-        cfg.setDefaultEncoding("UTF-8");
-        cfg.setTemplateExceptionHandler(TemplateExceptionHandler.RETHROW_HANDLER);
-        cfg.setLogTemplateExceptions(false);
-        cfg.setWrapUncheckedExceptions(true);
-        return cfg;
     }
 
     @Bean

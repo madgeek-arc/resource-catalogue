@@ -3,7 +3,7 @@ package gr.uoa.di.madgik.resourcecatalogue.domain;
 import gr.uoa.di.madgik.resourcecatalogue.annotation.EmailValidation;
 import gr.uoa.di.madgik.resourcecatalogue.annotation.FieldValidation;
 import gr.uoa.di.madgik.resourcecatalogue.annotation.PhoneValidation;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -20,7 +20,7 @@ public class ProviderMainContact {
      * First Name of the Provider's main contact person/Provider manager.
      */
     @XmlElement(required = true)
-    @ApiModelProperty(position = 1, required = true)
+    @Schema(required = true)
     @FieldValidation
     private String firstName;
 
@@ -28,7 +28,7 @@ public class ProviderMainContact {
      * Last Name of the Provider's main contact person/Provider manager.
      */
     @XmlElement
-    @ApiModelProperty(position = 2)
+    @Schema()
     @FieldValidation(nullable = true)
     private String lastName;
 
@@ -36,7 +36,7 @@ public class ProviderMainContact {
      * Email of the Provider's main contact person/Provider manager.
      */
     @XmlElement(required = true)
-    @ApiModelProperty(position = 3, required = true)
+    @Schema(required = true)
     @EmailValidation
     private String email;
 
@@ -44,7 +44,7 @@ public class ProviderMainContact {
      * Phone of the Provider's main contact person/Provider manager.
      */
     @XmlElement
-    @ApiModelProperty(position = 4)
+    @Schema()
     @PhoneValidation(nullable = true)
     private String phone;
 
@@ -52,7 +52,7 @@ public class ProviderMainContact {
      * Position of the Provider's main contact person/Provider manager.
      */
     @XmlElement
-    @ApiModelProperty(position = 5)
+    @Schema()
     @FieldValidation(nullable = true)
     private String position;
 

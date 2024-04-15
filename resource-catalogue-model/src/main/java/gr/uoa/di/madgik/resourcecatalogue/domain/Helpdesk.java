@@ -1,7 +1,7 @@
 package gr.uoa.di.madgik.resourcecatalogue.domain;
 
 import gr.uoa.di.madgik.resourcecatalogue.annotation.FieldValidation;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
@@ -16,56 +16,57 @@ import java.util.Objects;
 public class Helpdesk implements Identifiable {
 
     @XmlElement
-    @ApiModelProperty(position = 1, notes = "Monitoring ID", example = "(required on PUT only)")
+    @Schema(example = "(required on PUT only)")
     private String id;
 
     @XmlElement(required = true)
-    @ApiModelProperty(position = 2, notes = "Service ID", required = true)
+    @Schema(required = true)
     @FieldValidation(containsId = true, containsResourceId = true)
     private String serviceId;
 
     @XmlElementWrapper(name = "services")
     @XmlElement(name = "service")
-    @ApiModelProperty(position = 3, notes = "free text")
+    @Schema
     private List<String> services;
 
     @XmlElement
-    @ApiModelProperty(position = 4, notes = "Unique identifier of the helpdesk type")
+    @Schema
     private String helpdeskType;
 
     @XmlElementWrapper(name = "supportGroups")
     @XmlElement(name = "supportGroup")
-    @ApiModelProperty(position = 5, notes = "Support group to be created in the helpdesk for the provider")
+    @Schema
     private List<String> supportGroups;
 
     @XmlElement
-    @ApiModelProperty(position = 6, notes = "Name of organisation")
+    @Schema
     @FieldValidation(nullable = true)
     private String organisation;
 
     @XmlElementWrapper(name = "emails")
     @XmlElement(name = "email")
-    @ApiModelProperty(position = 7, notes = "E-mail for direct assignment of the tickets, bypassing the L1 support")
+    @Schema
+    // E-mail for direct assignment of the tickets, bypassing the L1 support
     private List<String> emails;
 
     @XmlElementWrapper(name = "agents")
     @XmlElement(name = "agent")
-    @ApiModelProperty(position = 8, notes = "Person involved in ticket management")
+    @Schema
     private List<String> agents;
 
     @XmlElementWrapper(name = "signatures")
     @XmlElement(name = "signature")
-    @ApiModelProperty(position = 9, notes = "Automatic signature to be used in the answers to the tickets")
+    @Schema
     @FieldValidation(nullable = true)
     private List<String> signatures;
 
     @XmlElement
-    @ApiModelProperty(position = 10, notes = "Should the tickets be stored in the helpdesk system in dedicated group")
+    @Schema
     @FieldValidation(nullable = true)
     private Boolean ticketPreservation;
 
     @XmlElement
-    @ApiModelProperty(position = 11, notes = "Webform required to generate ticket directly on webpage")
+    @Schema
     @FieldValidation(nullable = true)
     private Boolean webform;
 

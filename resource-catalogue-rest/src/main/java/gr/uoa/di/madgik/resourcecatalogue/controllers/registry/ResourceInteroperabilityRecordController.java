@@ -9,8 +9,12 @@ import gr.uoa.di.madgik.resourcecatalogue.service.ResourceInteroperabilityRecord
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
+
+
+import io.swagger.v3.oas.annotations.Hidden;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.http.HttpStatus;
@@ -19,7 +23,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
-import springfox.documentation.annotations.ApiIgnore;
+
 
 import java.util.LinkedList;
 import java.util.List;
@@ -27,7 +31,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("resourceInteroperabilityRecord")
-@Api(value = "Operations for Resource Interoperability Records")
+@Tag(name = "Resource Interoperability Record", description = "Operations for Resource Interoperability Records")
 public class ResourceInteroperabilityRecordController {
 
     private static final Logger logger = LogManager.getLogger(ResourceInteroperabilityRecordController.class);
@@ -38,19 +42,19 @@ public class ResourceInteroperabilityRecordController {
         this.resourceInteroperabilityRecordService = resourceInteroperabilityRecordService;
     }
 
-    @ApiOperation(value = "Returns the ResourceInteroperabilityRecord with the given id.")
+    @Operation(description = "Returns the ResourceInteroperabilityRecord with the given id.")
     @GetMapping(path = "{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    public ResponseEntity<ResourceInteroperabilityRecord> getResourceInteroperabilityRecord(@PathVariable("id") String id, @ApiIgnore Authentication auth) {
+    public ResponseEntity<ResourceInteroperabilityRecord> getResourceInteroperabilityRecord(@PathVariable("id") String id, @Parameter(hidden = true) Authentication auth) {
         ResourceInteroperabilityRecord resourceInteroperabilityRecord = resourceInteroperabilityRecordService.get(id).getResourceInteroperabilityRecord();
         return new ResponseEntity<>(resourceInteroperabilityRecord, HttpStatus.OK);
     }
 
-    @ApiOperation(value = "Filter a list of ResourceInteroperabilityRecords based on a set of filters or get a list of all ResourceInteroperabilityRecords in the Catalogue.")
+    @Operation(description = "Filter a list of ResourceInteroperabilityRecords based on a set of filters or get a list of all ResourceInteroperabilityRecords in the Catalogue.")
     @Browse
     @GetMapping(path = "all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    public ResponseEntity<Paging<ResourceInteroperabilityRecord>> getAllResourceInteroperabilityRecords(@ApiIgnore @RequestParam Map<String, Object> allRequestParams,
+    public ResponseEntity<Paging<ResourceInteroperabilityRecord>> getAllResourceInteroperabilityRecords(@Parameter(hidden = true) @RequestParam Map<String, Object> allRequestParams,
                                                                                                         @RequestParam(defaultValue = "all", name = "catalogue_id") String catalogueIds,
-                                                                                                        @ApiIgnore Authentication auth) {
+                                                                                                        @Parameter(hidden = true) Authentication auth) {
         allRequestParams.putIfAbsent("catalogue_id", catalogueIds);
         if (catalogueIds != null && catalogueIds.equals("all")) {
             allRequestParams.remove("catalogue_id");
@@ -67,7 +71,7 @@ public class ResourceInteroperabilityRecordController {
         return new ResponseEntity<>(resourceInteroperabilityRecordPaging, HttpStatus.OK);
     }
 
-    @ApiOperation(value = "Returns the ResourceInteroperabilityRecord of the given Resource of the given Catalogue.")
+    @Operation(description = "Returns the ResourceInteroperabilityRecord of the given Resource of the given Catalogue.")
     @GetMapping(path = "/byResource/{resourceId}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity<ResourceInteroperabilityRecord> getResourceInteroperabilityRecordByResourceId(@PathVariable("resourceId") String resourceId,
                                                                                                         @RequestParam(defaultValue = "${project.catalogue.name}", name = "catalogue_id") String catalogueId) {
@@ -79,21 +83,21 @@ public class ResourceInteroperabilityRecordController {
         return new ResponseEntity<>(null, HttpStatus.OK);
     }
 
-    @ApiOperation(value = "Creates a new ResourceInteroperabilityRecord.")
+    @Operation(description = "Creates a new ResourceInteroperabilityRecord.")
     @PostMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<ResourceInteroperabilityRecord> addResourceInteroperabilityRecord(@RequestBody ResourceInteroperabilityRecord resourceInteroperabilityRecord,
-                                                                                            @RequestParam String resourceType, @ApiIgnore Authentication auth) {
+                                                                                            @RequestParam String resourceType, @Parameter(hidden = true) Authentication auth) {
         ResourceInteroperabilityRecordBundle resourceInteroperabilityRecordBundle = resourceInteroperabilityRecordService.add(new ResourceInteroperabilityRecordBundle(resourceInteroperabilityRecord), resourceType, auth);
         logger.info("User '{}' added the ResourceInteroperabilityRecord with id '{}'", auth.getName(), resourceInteroperabilityRecord.getId());
         return new ResponseEntity<>(resourceInteroperabilityRecordBundle.getResourceInteroperabilityRecord(), HttpStatus.CREATED);
     }
 
-    @ApiOperation(value = "Updates the ResourceInteroperabilityRecord with the given id.")
+    @Operation(description = "Updates the ResourceInteroperabilityRecord with the given id.")
     @PutMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth, #resourceInteroperabilityRecord.resourceId, #resourceInteroperabilityRecord.catalogueId)")
     public ResponseEntity<ResourceInteroperabilityRecord> updateResourceInteroperabilityRecord(@RequestBody ResourceInteroperabilityRecord resourceInteroperabilityRecord,
-                                                                                               @ApiIgnore Authentication auth) throws ResourceNotFoundException {
+                                                                                               @Parameter(hidden = true) Authentication auth) throws ResourceNotFoundException {
         ResourceInteroperabilityRecordBundle resourceInteroperabilityRecordBundle = resourceInteroperabilityRecordService.get(resourceInteroperabilityRecord.getId());
         resourceInteroperabilityRecordBundle.setResourceInteroperabilityRecord(resourceInteroperabilityRecord);
         resourceInteroperabilityRecordBundle = resourceInteroperabilityRecordService.update(resourceInteroperabilityRecordBundle, auth);
@@ -105,7 +109,7 @@ public class ResourceInteroperabilityRecordController {
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth, #resourceId)")
     public ResponseEntity<ResourceInteroperabilityRecord> deleteResourceInteroperabilityRecordById(@PathVariable("resourceId") String resourceId,
                                                                                                    @PathVariable("resourceInteroperabilityRecordId") String resourceInteroperabilityRecordId,
-                                                                                                   @ApiIgnore Authentication auth) throws ResourceNotFoundException {
+                                                                                                   @Parameter(hidden = true) Authentication auth) throws ResourceNotFoundException {
         ResourceInteroperabilityRecordBundle resourceInteroperabilityRecordBundle = resourceInteroperabilityRecordService.get(resourceInteroperabilityRecordId);
         if (resourceInteroperabilityRecordBundle == null) {
             return new ResponseEntity<>(HttpStatus.GONE);
@@ -125,10 +129,10 @@ public class ResourceInteroperabilityRecordController {
     }
 
     // Create a Public ResourceInteroperabilityRecord if something went bad during its creation
-    @ApiIgnore
+    @Hidden
     @PostMapping(path = "createPublicResourceInteroperabilityRecord", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public ResponseEntity<ResourceInteroperabilityRecordBundle> createPublicResourceInteroperabilityRecord(@RequestBody ResourceInteroperabilityRecordBundle resourceInteroperabilityRecordBundle, @ApiIgnore Authentication auth) {
+    public ResponseEntity<ResourceInteroperabilityRecordBundle> createPublicResourceInteroperabilityRecord(@RequestBody ResourceInteroperabilityRecordBundle resourceInteroperabilityRecordBundle, @Parameter(hidden = true) Authentication auth) {
         logger.info("User '{}-{}' attempts to create a Public Resource Interoperability Record from Resource Interoperability Record '{}' of the '{}' Catalogue", User.of(auth).getFullName(),
                 User.of(auth).getEmail(), resourceInteroperabilityRecordBundle.getId(), resourceInteroperabilityRecordBundle.getResourceInteroperabilityRecord().getCatalogueId());
         return ResponseEntity.ok(resourceInteroperabilityRecordService.createPublicResourceInteroperabilityRecord(resourceInteroperabilityRecordBundle, auth));

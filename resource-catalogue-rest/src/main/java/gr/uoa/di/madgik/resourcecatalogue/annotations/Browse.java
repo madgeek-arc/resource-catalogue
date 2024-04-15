@@ -1,7 +1,14 @@
 package gr.uoa.di.madgik.resourcecatalogue.annotations;
 
-import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiImplicitParams;
+
+
+
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.Parameters;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -10,12 +17,12 @@ import java.lang.annotation.Target;
 
 @Target({ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
-@ApiImplicitParams({
-        @ApiImplicitParam(name = "query", value = "Keyword to refine the search", dataType = "string", paramType = "query"),
-        @ApiImplicitParam(name = "from", value = "Starting index in the result set", dataType = "string", paramType = "query"),
-        @ApiImplicitParam(name = "quantity", value = "Quantity to be fetched", dataType = "string", paramType = "query"),
-        @ApiImplicitParam(name = "order", value = "asc / desc", dataType = "string", paramType = "query"),
-        @ApiImplicitParam(name = "orderField", value = "Order field", dataType = "string", paramType = "query")
+@Parameters({
+        @Parameter(in = ParameterIn.QUERY, name = "query", description = "Keyword to refine the search"),
+        @Parameter(in = ParameterIn.QUERY, name = "from", description = "Starting index in the result set", content = @Content(schema = @Schema(type = "string", defaultValue = "0"))),
+        @Parameter(in = ParameterIn.QUERY, name = "quantity", description = "Quantity to be fetched", content = @Content(schema = @Schema(type = "string", defaultValue = "10"))),
+        @Parameter(in = ParameterIn.QUERY, name = "order", description = "Order of results", content = @Content(schema = @Schema(type = "string", defaultValue = "asc", allowableValues = {"asc", "desc"}))),
+        @Parameter(in = ParameterIn.QUERY, name = "orderField", description = "Field to use for ordering")
 })
 public @interface Browse {
 }

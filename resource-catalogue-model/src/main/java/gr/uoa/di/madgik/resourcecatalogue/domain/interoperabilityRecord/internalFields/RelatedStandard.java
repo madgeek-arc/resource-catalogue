@@ -1,7 +1,7 @@
 package gr.uoa.di.madgik.resourcecatalogue.domain.interoperabilityRecord.internalFields;
 
 import gr.uoa.di.madgik.resourcecatalogue.annotation.FieldValidation;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -17,7 +17,7 @@ public class RelatedStandard {
      * The name of the related standard.
      */
     @XmlElement
-    @ApiModelProperty(position = 1)
+    @Schema()
     @FieldValidation(nullable = true)
     private String relatedStandardIdentifier;
 
@@ -25,7 +25,7 @@ public class RelatedStandard {
      * The URI of the related standard.
      */
     @XmlElement
-    @ApiModelProperty(position = 2)
+    @Schema()
     @FieldValidation(nullable = true)
     private URL relatedStandardURI;
 

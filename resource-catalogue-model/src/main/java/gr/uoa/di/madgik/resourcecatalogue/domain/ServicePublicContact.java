@@ -4,7 +4,7 @@ package gr.uoa.di.madgik.resourcecatalogue.domain;
 import gr.uoa.di.madgik.resourcecatalogue.annotation.EmailValidation;
 import gr.uoa.di.madgik.resourcecatalogue.annotation.FieldValidation;
 import gr.uoa.di.madgik.resourcecatalogue.annotation.PhoneValidation;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -22,7 +22,7 @@ public class ServicePublicContact {
      * First Name of the Resource's contact person to be displayed at the portal.
      */
     @XmlElement
-    @ApiModelProperty(position = 1)
+    @Schema()
     @FieldValidation(nullable = true)
     private String firstName;
 
@@ -30,7 +30,7 @@ public class ServicePublicContact {
      * Last Name of the Resource's contact person to be displayed at the portal.
      */
     @XmlElement
-    @ApiModelProperty(position = 2)
+    @Schema()
     @FieldValidation(nullable = true)
     private String lastName;
 
@@ -38,7 +38,7 @@ public class ServicePublicContact {
      * Email of the Resource's contact person or a generic email of the Provider to be displayed at the portal.
      */
     @XmlElement(required = true)
-    @ApiModelProperty(position = 3, required = true)
+    @Schema(required = true)
     @EmailValidation
     private String email;
 
@@ -46,7 +46,7 @@ public class ServicePublicContact {
      * Telephone of the Resource's contact person to be displayed at the portal.
      */
     @XmlElement
-    @ApiModelProperty(position = 4)
+    @Schema()
     @PhoneValidation(nullable = true)
     private String phone;
 
@@ -54,7 +54,7 @@ public class ServicePublicContact {
      * Position of the Resource's contact person to be displayed at the portal.
      */
     @XmlElement
-    @ApiModelProperty(position = 5)
+    @Schema()
     @FieldValidation(nullable = true)
     private String position;
 
@@ -62,7 +62,7 @@ public class ServicePublicContact {
      * The organisation to which the contact is affiliated.
      */
     @XmlElement
-    @ApiModelProperty(position = 6)
+    @Schema()
     @FieldValidation(nullable = true)
     private String organisation;
 

@@ -2,11 +2,9 @@ package gr.uoa.di.madgik.resourcecatalogue.config;
 
 import gr.uoa.di.madgik.resourcecatalogue.utils.MatomoInterceptor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
-import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.web.servlet.config.annotation.*;
 
 
@@ -15,20 +13,9 @@ import org.springframework.web.servlet.config.annotation.*;
         "gr.uoa.di.madgik.registry.controllers",
         "gr.uoa.di.madgik.resourcecatalogue.controllers",
         "gr.uoa.di.madgik.resourcecatalogue.recdb.controllers"})
-@EnableWebMvc
+//@EnableWebMvc
 @EnableAspectJAutoProxy
 public class WebMvcConfig implements WebMvcConfigurer {
-
-    @Override
-    public void configurePathMatch(PathMatchConfigurer configurer) {
-        configurer.setUseSuffixPatternMatch(false);
-    }
-
-    @Override
-    public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        registry.addResourceHandler("swagger-ui.html").addResourceLocations("classpath:/META-INF/resources/");
-        registry.addResourceHandler("/webjars/**").addResourceLocations("classpath:/META-INF/resources/webjars/");
-    }
 
     @Override
     public void addCorsMappings(CorsRegistry registry) {
@@ -46,10 +33,6 @@ public class WebMvcConfig implements WebMvcConfigurer {
 //        return jsonConverter;
 //    }
 
-    @Bean
-    public static PropertySourcesPlaceholderConfigurer propertyConfigurer() {
-        return new PropertySourcesPlaceholderConfigurer();
-    }
 
     @Autowired
     MatomoInterceptor matomoInterceptor;

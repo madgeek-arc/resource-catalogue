@@ -2,7 +2,7 @@ package gr.uoa.di.madgik.resourcecatalogue.domain.configurationTemplates;
 
 import gr.uoa.di.madgik.resourcecatalogue.annotation.FieldValidation;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Identifiable;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -14,21 +14,21 @@ import java.util.Objects;
 public class ConfigurationTemplateInstance implements Identifiable {
 
     @XmlElement
-    @ApiModelProperty(position = 1, example = "(required on PUT only)")
+    @Schema(example = "(required on PUT only)")
     private String id;
 
     @XmlElement(required = true)
-    @ApiModelProperty(position = 2, required = true)
+    @Schema(required = true)
     @FieldValidation(containsId = true, containsResourceId = true)
     private String resourceId;
 
     @XmlElement(required = true)
-    @ApiModelProperty(position = 3, required = true)
+    @Schema(required = true)
     @FieldValidation(containsId = true, idClass = ConfigurationTemplate.class)
     private String configurationTemplateId;
 
     @XmlElement(required = true)
-    @ApiModelProperty(position = 4, required = true)
+    @Schema(required = true)
     @FieldValidation
     private String payload;
 

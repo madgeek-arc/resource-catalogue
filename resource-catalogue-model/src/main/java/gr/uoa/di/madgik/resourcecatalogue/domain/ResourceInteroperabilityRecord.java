@@ -1,7 +1,7 @@
 package gr.uoa.di.madgik.resourcecatalogue.domain;
 
 import gr.uoa.di.madgik.resourcecatalogue.annotation.FieldValidation;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
@@ -15,22 +15,22 @@ import java.util.Objects;
 public class ResourceInteroperabilityRecord implements Identifiable {
 
     @XmlElement()
-    @ApiModelProperty(position = 1, notes = "Resource Interoperability Record ID", example = "(required on PUT only)")
+    @Schema(example = "(required on PUT only)")
     private String id;
 
     @XmlElement(required = true)
-    @ApiModelProperty(position = 2, notes = "Resource ID", required = true)
+    @Schema(required = true)
     @FieldValidation(containsId = true, containsResourceId = true)
     private String resourceId;
 
     @XmlElement(required = true)
-    @ApiModelProperty(position = 3, notes = "Catalogue ID", required = true)
+    @Schema(required = true)
     @FieldValidation(containsId = true, idClass = Catalogue.class)
     private String catalogueId;
 
     @XmlElementWrapper(name = "interoperabilityRecordIds", required = true)
     @XmlElement(name = "interoperabilityRecordId")
-    @ApiModelProperty(position = 4, notes = "Unique identifier of the Interoperability Record", required = true)
+    @Schema(required = true)
     @FieldValidation(containsId = true, idClass = InteroperabilityRecord.class)
     private List<String> interoperabilityRecordIds;
 

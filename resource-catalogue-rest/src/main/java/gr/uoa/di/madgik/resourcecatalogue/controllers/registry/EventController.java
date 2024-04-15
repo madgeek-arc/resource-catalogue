@@ -3,6 +3,7 @@ package gr.uoa.di.madgik.resourcecatalogue.controllers.registry;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Event;
 import gr.uoa.di.madgik.resourcecatalogue.service.EventService;
 import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
+import io.swagger.v3.oas.annotations.Parameter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,7 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
-import springfox.documentation.annotations.ApiIgnore;
+
 
 import java.util.Date;
 import java.util.List;
@@ -36,14 +37,14 @@ public class EventController extends ResourceController<Event, Authentication> {
     // Retrieve the event with a specific ID.
     @GetMapping(path = "event/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
     @Override
-    public ResponseEntity<Event> get(@PathVariable String id, @ApiIgnore Authentication authentication) {
+    public ResponseEntity<Event> get(@PathVariable String id, @Parameter(hidden = true) Authentication authentication) {
         return new ResponseEntity<>(eventService.get(id), HttpStatus.OK);
     }
 
     @Override
     @PostMapping(path = "addEvent", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public ResponseEntity<Event> add(@RequestBody Event event, @ApiIgnore Authentication authentication) {
+    public ResponseEntity<Event> add(@RequestBody Event event, @Parameter(hidden = true) Authentication authentication) {
         logger.info("User '{}' attempting to add a new Event '{}' with type '{}'", authentication.getName(), event, event.getType());
         return new ResponseEntity<>(eventService.add(event, authentication), HttpStatus.CREATED);
     }
@@ -51,7 +52,7 @@ public class EventController extends ResourceController<Event, Authentication> {
     @Override
     @PutMapping(path = "updateEvent", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public ResponseEntity<Event> update(@RequestBody Event event, @ApiIgnore Authentication authentication) throws ResourceNotFoundException {
+    public ResponseEntity<Event> update(@RequestBody Event event, @Parameter(hidden = true) Authentication authentication) throws ResourceNotFoundException {
         logger.info("User '{}' attempting to update Event '{}' ", authentication.getName(), event);
         return new ResponseEntity<>(eventService.update(event, authentication), HttpStatus.OK);
     }
@@ -59,7 +60,7 @@ public class EventController extends ResourceController<Event, Authentication> {
     @Override
     @DeleteMapping(path = "deleteEvent", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public ResponseEntity<Event> delete(@RequestBody Event event, @ApiIgnore Authentication authentication) throws ResourceNotFoundException {
+    public ResponseEntity<Event> delete(@RequestBody Event event, @Parameter(hidden = true) Authentication authentication) throws ResourceNotFoundException {
         logger.info("User '{}' attempting to delete Event '{}' ", authentication.getName(), event);
         eventService.delete(event);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);

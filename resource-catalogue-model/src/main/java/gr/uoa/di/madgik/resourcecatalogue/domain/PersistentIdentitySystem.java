@@ -2,7 +2,7 @@ package gr.uoa.di.madgik.resourcecatalogue.domain;
 
 import gr.uoa.di.madgik.resourcecatalogue.annotation.FieldValidation;
 import gr.uoa.di.madgik.resourcecatalogue.annotation.VocabularyValidation;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
@@ -15,7 +15,7 @@ public class PersistentIdentitySystem {
      * Specify the EntityType to which the persistent identifier is referring to.
      */
     @XmlElement(required = true)
-    @ApiModelProperty(position = 1, required = true)
+    @Schema(required = true)
     @FieldValidation()
     @VocabularyValidation(type = Vocabulary.Type.DS_RESEARCH_ENTITY_TYPE)
     private String persistentIdentityEntityType;
@@ -25,7 +25,7 @@ public class PersistentIdentitySystem {
      */
     @XmlElementWrapper(required = true, name = "persistentIdentityEntityTypeSchemes")
     @XmlElement(name = "persistentIdentityEntityType")
-    @ApiModelProperty(position = 2, required = true)
+    @Schema(required = true)
     @FieldValidation()
     @VocabularyValidation(type = Vocabulary.Type.DS_PERSISTENT_IDENTITY_SCHEME)
     private List<String> persistentIdentityEntityTypeSchemes;

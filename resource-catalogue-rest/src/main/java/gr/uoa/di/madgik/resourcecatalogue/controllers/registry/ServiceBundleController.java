@@ -8,7 +8,9 @@ import gr.uoa.di.madgik.resourcecatalogue.service.GenericResourceService;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
-import io.swagger.annotations.Api;
+
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,14 +20,14 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
-import springfox.documentation.annotations.ApiIgnore;
+
 
 import java.util.List;
 import java.util.Map;
 
 @RestController
 @RequestMapping({"serviceBundle"})
-@Api(value = "Get Information about a Service Bundle")
+@Tag(name = "service-bundle-controller", description = "Get Information about a Service Bundle")
 public class ServiceBundleController {
 
     private static final Logger logger = LogManager.getLogger(ServiceBundleController.class.getName());
@@ -43,7 +45,7 @@ public class ServiceBundleController {
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<ServiceBundle> delete(@PathVariable("id") String id,
                                                 @RequestParam(defaultValue = "${project.catalogue.name}", name = "catalogue_id") String catalogueId,
-                                                @ApiIgnore Authentication authentication) throws ResourceNotFoundException {
+                                                @Parameter(hidden = true) Authentication authentication) throws ResourceNotFoundException {
         ServiceBundle service;
         service = serviceBundleService.get(id, catalogueId);
         if (service == null) {
@@ -57,7 +59,7 @@ public class ServiceBundleController {
 
     @DeleteMapping(path = "delete/all", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public ResponseEntity<ServiceBundle> deleteAll(@ApiIgnore Authentication authentication) throws ResourceNotFoundException {
+    public ResponseEntity<ServiceBundle> deleteAll(@Parameter(hidden = true) Authentication authentication) throws ResourceNotFoundException {
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(10000);
         List<ServiceBundle> services = serviceBundleService.getAll(ff, null).getResults();
@@ -72,7 +74,7 @@ public class ServiceBundleController {
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth, #id)")
     public ResponseEntity<?> get(@PathVariable("id") String id,
                                  @RequestParam(defaultValue = "${project.catalogue.name}", name = "catalogue_id") String catalogueId,
-                                 @ApiIgnore Authentication auth) {
+                                 @Parameter(hidden = true) Authentication auth) {
         return new ResponseEntity<>(serviceBundleService.get(id, catalogueId), HttpStatus.OK);
     }
 
@@ -87,14 +89,14 @@ public class ServiceBundleController {
 
     @PutMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public ResponseEntity<ServiceBundle> update(@RequestBody ServiceBundle service, @ApiIgnore Authentication authentication) throws ResourceNotFoundException {
+    public ResponseEntity<ServiceBundle> update(@RequestBody ServiceBundle service, @Parameter(hidden = true) Authentication authentication) throws ResourceNotFoundException {
         ResponseEntity<ServiceBundle> ret = new ResponseEntity<>(serviceBundleService.update(service, authentication), HttpStatus.OK);
         logger.info("User '{}' updated ServiceBundle '{}' with id: {}", authentication, service.getService().getName(), service.getService().getId());
         return ret;
     }
 
     @PostMapping(path = "validate", produces = {MediaType.APPLICATION_JSON_VALUE})
-    public ResponseEntity<Boolean> validate(@RequestBody ServiceBundle service, @ApiIgnore Authentication auth) {
+    public ResponseEntity<Boolean> validate(@RequestBody ServiceBundle service, @Parameter(hidden = true) Authentication auth) {
         ResponseEntity<Boolean> ret = ResponseEntity.ok(serviceBundleService.validate(service));
         logger.info("Validating ServiceBundle: {}", service.getService().getName());
         return ret;
@@ -104,8 +106,8 @@ public class ServiceBundleController {
     @GetMapping(path = "all", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     public ResponseEntity<Paging<?>> getAll(@RequestParam(defaultValue = "all", name = "catalogue_id") String catalogueId,
-                                            @ApiIgnore @RequestParam Map<String, Object> allRequestParams,
-                                            @ApiIgnore Authentication authentication) {
+                                            @Parameter(hidden = true) @RequestParam Map<String, Object> allRequestParams,
+                                            @Parameter(hidden = true) Authentication authentication) {
         FacetFilter ff = serviceBundleService.createFacetFilterForFetchingServices(allRequestParams, catalogueId);
         serviceBundleService.updateFacetFilterConsideringTheAuthorization(ff, authentication);
         Paging<?> paging = genericResourceService.getResults(ff);
@@ -114,7 +116,7 @@ public class ServiceBundleController {
 
     @GetMapping(path = "by/{field}", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
-    public ResponseEntity<Map<String, List<ServiceBundle>>> getBy(@PathVariable String field, @ApiIgnore Authentication auth) throws NoSuchFieldException {
+    public ResponseEntity<Map<String, List<ServiceBundle>>> getBy(@PathVariable String field, @Parameter(hidden = true) Authentication auth) throws NoSuchFieldException {
         return ResponseEntity.ok(serviceBundleService.getBy(field, auth));
     }
 
@@ -122,7 +124,7 @@ public class ServiceBundleController {
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<ServiceBundle> setActive(@PathVariable String id, @PathVariable String version,
                                                    @RequestParam boolean active,
-                                                   @ApiIgnore Authentication auth) throws ResourceNotFoundException {
+                                                   @Parameter(hidden = true) Authentication auth) throws ResourceNotFoundException {
         ServiceBundle service = serviceBundleService.get(id, version);
         service.setActive(active);
         Metadata metadata = service.getMetadata();

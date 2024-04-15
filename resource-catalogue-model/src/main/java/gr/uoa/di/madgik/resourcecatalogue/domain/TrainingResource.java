@@ -3,7 +3,7 @@ package gr.uoa.di.madgik.resourcecatalogue.domain;
 import gr.uoa.di.madgik.resourcecatalogue.annotation.FieldValidation;
 import gr.uoa.di.madgik.resourcecatalogue.annotation.GeoLocationVocValidation;
 import gr.uoa.di.madgik.resourcecatalogue.annotation.VocabularyValidation;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
@@ -23,7 +23,7 @@ public class TrainingResource implements Identifiable {
      * A persistent identifier, a unique reference to the Resource.
      */
     @XmlElement
-    @ApiModelProperty(position = 1, example = "(required on PUT only)")
+    @Schema(example = "(required on PUT only)")
     @FieldValidation
     private String id;
 
@@ -31,7 +31,7 @@ public class TrainingResource implements Identifiable {
      * The human-readable name of the learning resource.
      */
     @XmlElement(required = true)
-    @ApiModelProperty(position = 2, required = true)
+    @Schema(required = true)
     @FieldValidation
     private String title;
 
@@ -39,7 +39,7 @@ public class TrainingResource implements Identifiable {
      * The name of the organisation that manages or delivers the resource, or that coordinates the Resource delivery in a federated scenario.
      */
     @XmlElement(required = true)
-    @ApiModelProperty(position = 3, required = true)
+    @Schema(required = true)
     @FieldValidation(containsId = true, idClass = Provider.class)
     private String resourceOrganisation;
 
@@ -48,7 +48,7 @@ public class TrainingResource implements Identifiable {
      */
     @XmlElementWrapper(name = "resourceProviders")
     @XmlElement(name = "resourceProvider")
-    @ApiModelProperty(position = 4)
+    @Schema()
     @FieldValidation(nullable = true, containsId = true, idClass = Provider.class)
     private List<String> resourceProviders;
 
@@ -57,7 +57,7 @@ public class TrainingResource implements Identifiable {
      */
     @XmlElementWrapper(name = "authors", required = true)
     @XmlElement(name = "author")
-    @ApiModelProperty(position = 5, required = true)
+    @Schema(required = true)
     @FieldValidation
     private List<String> authors;
 
@@ -66,7 +66,7 @@ public class TrainingResource implements Identifiable {
      * contextual information including the direct resolvable link to the resource, if applicable.
      */
     @XmlElement(required = true)
-    @ApiModelProperty(position = 6, example = "https://example.com", required = true)
+    @Schema(example = "https://example.com", required = true)
     @FieldValidation
     private URL url;
 
@@ -75,7 +75,7 @@ public class TrainingResource implements Identifiable {
      * that is the used scheme (e.g., Web Address URL, DOI, ARK, etc.).
      */
     @XmlElement
-    @ApiModelProperty(position = 7, notes = "Vocabulary ID")
+    @Schema
     @FieldValidation(nullable = true, containsId = true, idClass = Vocabulary.class)
     @VocabularyValidation(type = Vocabulary.Type.TR_URL_TYPE)
     private String urlType;
@@ -85,7 +85,7 @@ public class TrainingResource implements Identifiable {
      */
     @XmlElementWrapper(name = "eoscRelatedServices")
     @XmlElement(name = "eoscRelatedService")
-    @ApiModelProperty(position = 8)
+    @Schema()
     @FieldValidation(nullable = true, containsId = true, containsResourceId = true)
     private List<String> eoscRelatedServices;
 
@@ -94,7 +94,7 @@ public class TrainingResource implements Identifiable {
      */
     @XmlElementWrapper(name = "alternativeIdentifiers")
     @XmlElement(name = "alternativeIdentifier")
-    @ApiModelProperty(position = 9)
+    @Schema()
     @FieldValidation(nullable = true)
     private List<AlternativeIdentifier> alternativeIdentifiers;
 
@@ -104,7 +104,7 @@ public class TrainingResource implements Identifiable {
      * A brief synopsis about or description of the learning resource.
      */
     @XmlElement
-    @ApiModelProperty(position = 10)
+    @Schema()
     @FieldValidation(nullable = true)
     private String description;
 
@@ -113,7 +113,7 @@ public class TrainingResource implements Identifiable {
      */
     @XmlElementWrapper(name = "keywords")
     @XmlElement(name = "keyword")
-    @ApiModelProperty(position = 11)
+    @Schema()
     @FieldValidation(nullable = true)
     private List<String> keywords;
 
@@ -121,7 +121,7 @@ public class TrainingResource implements Identifiable {
      * A license document that applies to this content, typically indicated by URL.
      */
     @XmlElement(required = true)
-    @ApiModelProperty(position = 12, required = true)
+    @Schema(required = true)
     @FieldValidation
     private String license;
 
@@ -129,7 +129,7 @@ public class TrainingResource implements Identifiable {
      * The access status of a resource (open, restricted, paid).
      */
     @XmlElement(required = true)
-    @ApiModelProperty(position = 13, notes = "Vocabulary ID", required = true)
+    @Schema(required = true)
     @FieldValidation(containsId = true, idClass = Vocabulary.class)
     @VocabularyValidation(type = Vocabulary.Type.TR_ACCESS_RIGHT)
     private String accessRights;
@@ -138,7 +138,7 @@ public class TrainingResource implements Identifiable {
      * The version date for the most recently published or broadcast resource.
      */
     @XmlElement(required = true)
-    @ApiModelProperty(position = 14, example = "2020-01-01", required = true)
+    @Schema(example = "2020-01-01", required = true)
     @FieldValidation
     private Date versionDate;
 
@@ -149,7 +149,7 @@ public class TrainingResource implements Identifiable {
      */
     @XmlElementWrapper(name = "targetGroups", required = true)
     @XmlElement(name = "targetGroup")
-    @ApiModelProperty(position = 15, notes = "Vocabulary ID", required = true)
+    @Schema(required = true)
     @FieldValidation(containsId = true, idClass = Vocabulary.class)
     @VocabularyValidation(type = Vocabulary.Type.TARGET_USER)
     private List<String> targetGroups;
@@ -159,7 +159,7 @@ public class TrainingResource implements Identifiable {
      */
     @XmlElementWrapper(name = "learningResourceTypes")
     @XmlElement(name = "learningResourceType")
-    @ApiModelProperty(position = 16, notes = "Vocabulary ID")
+    @Schema
     @FieldValidation(nullable = true, containsId = true, idClass = Vocabulary.class)
     @VocabularyValidation(type = Vocabulary.Type.TR_DCMI_TYPE)
     private List<String> learningResourceTypes;
@@ -169,7 +169,7 @@ public class TrainingResource implements Identifiable {
      */
     @XmlElementWrapper(name = "learningOutcomes", required = true)
     @XmlElement(name = "learningOutcome")
-    @ApiModelProperty(position = 17, required = true)
+    @Schema(required = true)
     @FieldValidation
     private List<String> learningOutcomes;
 
@@ -177,7 +177,7 @@ public class TrainingResource implements Identifiable {
      * Target skill level in the topic being taught.
      */
     @XmlElement(required = true)
-    @ApiModelProperty(position = 18, notes = "Vocabulary ID", required = true)
+    @Schema(required = true)
     @FieldValidation(containsId = true, idClass = Vocabulary.class)
     @VocabularyValidation(type = Vocabulary.Type.TR_EXPERTISE_LEVEL)
     private String expertiseLevel;
@@ -187,7 +187,7 @@ public class TrainingResource implements Identifiable {
      */
     @XmlElementWrapper(name = "contentResourceTypes")
     @XmlElement(name = "contentResourceType")
-    @ApiModelProperty(position = 19, notes = "Vocabulary ID")
+    @Schema
     @FieldValidation(nullable = true, containsId = true, idClass = Vocabulary.class)
     @VocabularyValidation(type = Vocabulary.Type.TR_CONTENT_RESOURCE_TYPE)
     private List<String> contentResourceTypes;
@@ -197,7 +197,7 @@ public class TrainingResource implements Identifiable {
      */
     @XmlElementWrapper(name = "qualifications")
     @XmlElement(name = "qualification")
-    @ApiModelProperty(position = 20, notes = "Vocabulary ID")
+    @Schema
     @FieldValidation(nullable = true, containsId = true, idClass = Vocabulary.class)
     @VocabularyValidation(type = Vocabulary.Type.TR_QUALIFICATION)
     private List<String> qualifications;
@@ -206,7 +206,7 @@ public class TrainingResource implements Identifiable {
      * Approximate or typical time it takes to work with or through the learning resource for the typical intended target audience.
      */
     @XmlElement
-    @ApiModelProperty(position = 21)
+    @Schema()
     @FieldValidation(nullable = true)
     private String duration;
 
@@ -217,7 +217,7 @@ public class TrainingResource implements Identifiable {
      */
     @XmlElementWrapper(name = "languages", required = true)
     @XmlElement(name = "language")
-    @ApiModelProperty(position = 22, notes = "Vocabulary ID", required = true)
+    @Schema(required = true)
     @FieldValidation(containsId = true, idClass = Vocabulary.class)
     @VocabularyValidation(type = Vocabulary.Type.LANGUAGE)
     private List<String> languages;
@@ -227,7 +227,7 @@ public class TrainingResource implements Identifiable {
      */
     @XmlElementWrapper(name = "geographicalAvailabilities", required = true)
     @XmlElement(name = "geographicalAvailability")
-    @ApiModelProperty(position = 23, notes = "Vocabulary ID", required = true)
+    @Schema(required = true)
     @FieldValidation(containsId = true, idClass = Vocabulary.class)
     @GeoLocationVocValidation(region = Vocabulary.Type.REGION, country = Vocabulary.Type.COUNTRY)
     private List<String> geographicalAvailabilities;
@@ -239,7 +239,7 @@ public class TrainingResource implements Identifiable {
      */
     @XmlElementWrapper(name = "scientificDomains", required = true)
     @XmlElement(name = "scientificDomain")
-    @ApiModelProperty(position = 24, notes = "Vocabulary ID", required = true)
+    @Schema(required = true)
     @FieldValidation
     private List<ServiceProviderDomain> scientificDomains;
 
@@ -249,7 +249,7 @@ public class TrainingResource implements Identifiable {
      * Training Resource's Main Contact Owner info.
      */
     @XmlElement(required = true)
-    @ApiModelProperty(position = 25, required = true)
+    @Schema(required = true)
     @FieldValidation
     private ServiceMainContact contact;
 
@@ -259,7 +259,7 @@ public class TrainingResource implements Identifiable {
      * The Catalogue this Training Resource is originally registered at.
      */
     @XmlElement
-    @ApiModelProperty(position = 26)
+    @Schema()
     @FieldValidation(nullable = true, containsId = true, idClass = Catalogue.class)
     private String catalogueId;
 

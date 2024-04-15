@@ -4,7 +4,6 @@ import org.mitre.openid.connect.client.OIDCAuthenticationProvider;
 import org.mitre.openid.connect.client.service.ServerConfigurationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.annotation.Order;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
@@ -13,8 +12,9 @@ import org.springframework.security.web.authentication.preauth.AbstractPreAuthen
 import org.springframework.security.web.util.matcher.RequestHeaderRequestMatcher;
 import org.springframework.web.filter.GenericFilterBean;
 
+import javax.servlet.Filter;
+
 @Configuration
-@PropertySource({"classpath:application.properties", "classpath:registry.properties"})
 @Order(1)
 public class TokenSecurityConfig extends WebSecurityConfigurerAdapter {
 
@@ -38,7 +38,7 @@ public class TokenSecurityConfig extends WebSecurityConfigurerAdapter {
                 .and()
                 .authenticationProvider(openIdConnectAuthenticationProvider)
                 .addFilterBefore(filter,
-                        AbstractPreAuthenticatedProcessingFilter.class)
+                        (Class<? extends Filter>) AbstractPreAuthenticatedProcessingFilter.class)
                 .authorizeRequests()
                 .regexMatchers("/restore/", "/resources.*", "/resourceType.*", "/search.*")
                 .hasAnyRole("ADMIN")

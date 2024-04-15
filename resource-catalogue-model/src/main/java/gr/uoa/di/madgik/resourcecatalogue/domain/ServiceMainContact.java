@@ -3,7 +3,7 @@ package gr.uoa.di.madgik.resourcecatalogue.domain;
 import gr.uoa.di.madgik.resourcecatalogue.annotation.EmailValidation;
 import gr.uoa.di.madgik.resourcecatalogue.annotation.FieldValidation;
 import gr.uoa.di.madgik.resourcecatalogue.annotation.PhoneValidation;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -21,7 +21,7 @@ public class ServiceMainContact {
      * First Name of the Resource's main contact person/manager.
      */
     @XmlElement(required = true)
-    @ApiModelProperty(position = 1, required = true)
+    @Schema(required = true)
     @FieldValidation
     private String firstName;
 
@@ -29,7 +29,7 @@ public class ServiceMainContact {
      * Last Name of the Resource's main contact person/manager.
      */
     @XmlElement(required = true)
-    @ApiModelProperty(position = 2, required = true)
+    @Schema(required = true)
     @FieldValidation
     private String lastName;
 
@@ -37,7 +37,7 @@ public class ServiceMainContact {
      * Email of the Resource's main contact person/manager.
      */
     @XmlElement(required = true)
-    @ApiModelProperty(position = 3, required = true)
+    @Schema(required = true)
     @EmailValidation
     private String email;
 
@@ -45,7 +45,7 @@ public class ServiceMainContact {
      * Telephone of the Resource's main contact person/manager.
      */
     @XmlElement
-    @ApiModelProperty(position = 4)
+    @Schema()
     @PhoneValidation(nullable = true)
     private String phone;
 
@@ -53,7 +53,7 @@ public class ServiceMainContact {
      * Position of the Resource's main contact person/manager.
      */
     @XmlElement
-    @ApiModelProperty(position = 5)
+    @Schema()
     @FieldValidation(nullable = true)
     private String position;
 
@@ -61,7 +61,7 @@ public class ServiceMainContact {
      * The organisation to which the contact is affiliated.
      */
     @XmlElement
-    @ApiModelProperty(position = 6)
+    @Schema()
     @FieldValidation(nullable = true)
     private String organisation;
 

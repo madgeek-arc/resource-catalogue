@@ -3,7 +3,7 @@ package gr.uoa.di.madgik.resourcecatalogue.domain.configurationTemplates;
 import gr.uoa.di.madgik.resourcecatalogue.annotation.FieldValidation;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Identifiable;
 import gr.uoa.di.madgik.resourcecatalogue.domain.InteroperabilityRecord;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 import org.json.simple.JSONObject;
 
 import javax.xml.bind.annotation.XmlElement;
@@ -15,27 +15,27 @@ import javax.xml.bind.annotation.XmlType;
 public class ConfigurationTemplate implements Identifiable {
 
     @XmlElement
-    @ApiModelProperty(position = 1, example = "(required on PUT only)")
+    @Schema(example = "(required on PUT only)")
     @FieldValidation
     private String id;
 
     @XmlElement(required = true)
-    @ApiModelProperty(position = 2, required = true)
+    @Schema(required = true)
     @FieldValidation(containsId = true, idClass = InteroperabilityRecord.class)
     private String interoperabilityRecordId;
 
     @XmlElement(required = true)
-    @ApiModelProperty(position = 3, required = true)
+    @Schema(required = true)
     @FieldValidation
     private String name;
 
     @XmlElement(required = true)
-    @ApiModelProperty(position = 4, required = true)
+    @Schema(required = true)
     @FieldValidation
     private String description;
 
     @XmlElement(required = true)
-    @ApiModelProperty(position = 4, required = true)
+    @Schema(required = true)
     @FieldValidation
     private JSONObject formModel;
 
