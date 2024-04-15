@@ -7,7 +7,6 @@ import gr.uoa.di.madgik.resourcecatalogue.domain.TrainingResourceBundle;
 import gr.uoa.di.madgik.registry.domain.Browsing;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.domain.Paging;
-import gr.uoa.di.madgik.registry.domain.Resource;
 import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.registry.service.SearchService;
 import org.springframework.security.core.Authentication;
@@ -115,15 +114,6 @@ public interface TrainingResourceService<T> extends ResourceService<T, Authentic
      * @return True/False
      */
     boolean validateTrainingResource(TrainingResourceBundle trainingResourceBundle);
-
-    /**
-     * Get Training Resource.
-     *
-     * @param id          Training Resource ID
-     * @param catalogueId Catalogue ID
-     * @return {@link Resource}
-     */
-    Resource getResource(String id, String catalogueId);
 
     /**
      * Sets a Training Resource as active/inactive.

@@ -1,9 +1,5 @@
 package gr.uoa.di.madgik.resourcecatalogue.manager;
 
-import gr.uoa.di.madgik.resourcecatalogue.domain.Identifiable;
-import gr.uoa.di.madgik.resourcecatalogue.exception.ResourceException;
-import gr.uoa.di.madgik.resourcecatalogue.validators.FieldValidator;
-import gr.uoa.di.madgik.resourcecatalogue.service.ResourceService;
 import gr.uoa.di.madgik.registry.domain.Browsing;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.domain.Resource;
@@ -11,6 +7,10 @@ import gr.uoa.di.madgik.registry.service.AbstractGenericService;
 import gr.uoa.di.madgik.registry.service.ParserService;
 import gr.uoa.di.madgik.registry.service.SearchService;
 import gr.uoa.di.madgik.registry.service.ServiceException;
+import gr.uoa.di.madgik.resourcecatalogue.domain.Identifiable;
+import gr.uoa.di.madgik.resourcecatalogue.exception.ResourceException;
+import gr.uoa.di.madgik.resourcecatalogue.service.ResourceService;
+import gr.uoa.di.madgik.resourcecatalogue.validators.FieldValidator;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,6 +45,19 @@ public abstract class ResourceManager<T extends Identifiable> extends AbstractGe
     @Override
     public Resource getResource(String id) {
         return whereID(id, true);
+    }
+
+    @Override
+    public Resource getResource(String id, String catalogueId) {
+        FacetFilter ff = new FacetFilter();
+        ff.addFilter("resource_internal_id", id);
+        ff.addFilter("catalogue_id", catalogueId);
+        ff.setResourceType(resourceType.getName());
+        return searchService.searchFields(
+                resourceType.getName(),
+                new SearchService.KeyValue("resource_internal_id", id),
+                new SearchService.KeyValue("catalogue_id", catalogueId)
+        );
     }
 
     @Override

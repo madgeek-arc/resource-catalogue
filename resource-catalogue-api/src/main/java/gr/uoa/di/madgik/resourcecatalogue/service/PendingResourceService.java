@@ -4,7 +4,6 @@ import gr.uoa.di.madgik.resourcecatalogue.domain.Bundle;
 import gr.uoa.di.madgik.resourcecatalogue.exception.ResourceException;
 import gr.uoa.di.madgik.registry.domain.Browsing;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
-import gr.uoa.di.madgik.registry.domain.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 
@@ -108,22 +107,4 @@ public interface PendingResourceService<T extends Bundle> extends ResourceServic
      * @param authentication Authentication
      */
     void adminAcceptedTerms(String providerId, Authentication authentication);
-
-    /**
-     * Get the Pending Service, providing its ID
-     *
-     * @param serviceId Service ID
-     * @return {@link Resource}
-     */
-    Resource getPendingResourceViaServiceId(String serviceId);
-
-    /**
-     * Get the Pending Provider, providing its ID
-     *
-     * @param providerId Provider ID
-     * @return {@link Resource}
-     */
-    Resource getPendingResourceViaProviderId(String providerId);
-//    DatasourceBundle getOpenAIREDatasource(Datasource datasource);
-
 }

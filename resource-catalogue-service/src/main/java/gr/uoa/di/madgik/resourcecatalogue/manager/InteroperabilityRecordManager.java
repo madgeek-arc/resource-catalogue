@@ -1,19 +1,18 @@
 package gr.uoa.di.madgik.resourcecatalogue.manager;
 
-import gr.uoa.di.madgik.resourcecatalogue.domain.*;
-import gr.uoa.di.madgik.resourcecatalogue.exception.ResourceException;
-import gr.uoa.di.madgik.resourcecatalogue.exception.ResourceNotFoundException;
-import gr.uoa.di.madgik.resourcecatalogue.exception.ValidationException;
-import gr.uoa.di.madgik.resourcecatalogue.service.RegistrationMailService;
-import gr.uoa.di.madgik.resourcecatalogue.utils.ObjectUtils;
-import gr.uoa.di.madgik.resourcecatalogue.utils.ProviderResourcesCommonMethods;
-import gr.uoa.di.madgik.resourcecatalogue.validators.FieldValidator;
-import gr.uoa.di.madgik.resourcecatalogue.service.*;
-import gr.uoa.di.madgik.resourcecatalogue.utils.FacetFilterUtils;
 import gr.uoa.di.madgik.registry.domain.Browsing;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.registry.domain.Resource;
+import gr.uoa.di.madgik.resourcecatalogue.domain.*;
+import gr.uoa.di.madgik.resourcecatalogue.exception.ResourceException;
+import gr.uoa.di.madgik.resourcecatalogue.exception.ResourceNotFoundException;
+import gr.uoa.di.madgik.resourcecatalogue.exception.ValidationException;
+import gr.uoa.di.madgik.resourcecatalogue.service.*;
+import gr.uoa.di.madgik.resourcecatalogue.utils.FacetFilterUtils;
+import gr.uoa.di.madgik.resourcecatalogue.utils.ObjectUtils;
+import gr.uoa.di.madgik.resourcecatalogue.utils.ProviderResourcesCommonMethods;
+import gr.uoa.di.madgik.resourcecatalogue.validators.FieldValidator;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,7 +24,10 @@ import org.springframework.security.core.Authentication;
 import org.springframework.util.MultiValueMap;
 
 import java.security.NoSuchAlgorithmException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Set;
 
 import static gr.uoa.di.madgik.resourcecatalogue.config.Properties.Cache.CACHE_FEATURED;
 import static gr.uoa.di.madgik.resourcecatalogue.config.Properties.Cache.CACHE_PROVIDERS;
@@ -300,36 +302,25 @@ public class InteroperabilityRecordManager extends ResourceManager<Interoperabil
         return true;
     }
 
+    // TODO: refactor
     public Paging<LoggingInfo> getLoggingInfoHistory(String id, String catalogueId) {
         InteroperabilityRecordBundle interoperabilityRecordBundle;
         try {
             interoperabilityRecordBundle = get(id, catalogueId);
-            List<Resource> allResources = getResources(interoperabilityRecordBundle.getInteroperabilityRecord().getId()); // get all versions
-            allResources.sort(Comparator.comparing((Resource::getCreationDate)));
+            Resource resource = getResource(interoperabilityRecordBundle.getInteroperabilityRecord().getId()); // get all versions
+
             List<LoggingInfo> loggingInfoList = new ArrayList<>();
-            for (Resource resource : allResources) {
-                InteroperabilityRecordBundle interoperabilityRecordResource = deserialize(resource);
-                if (interoperabilityRecordResource.getLoggingInfo() != null) {
-                    loggingInfoList.addAll(interoperabilityRecordResource.getLoggingInfo());
-                }
+            InteroperabilityRecordBundle interoperabilityRecordResource = deserialize(resource);
+            if (interoperabilityRecordResource.getLoggingInfo() != null) {
+                loggingInfoList.addAll(interoperabilityRecordResource.getLoggingInfo());
             }
+
             loggingInfoList.sort(Comparator.comparing(LoggingInfo::getDate).reversed());
             return new Browsing<>(loggingInfoList.size(), 0, loggingInfoList.size(), loggingInfoList, null);
         } catch (ResourceNotFoundException e) {
             logger.info(String.format("Interoperability Record with id [%s] not found", id));
         }
         return null;
-    }
-
-    public List<Resource> getResources(String id) {
-        Paging<Resource> resources;
-        resources = searchService
-                .cqlQuery(String.format("resource_internal_id = \"%s\"", id),
-                        resourceType.getName(), maxQuantity, 0, "modifiedAt", "DESC");
-        if (resources != null) {
-            return resources.getResults();
-        }
-        return Collections.emptyList();
     }
 
     public InteroperabilityRecordBundle getOrElseReturnNull(String id, String catalogueId) {
@@ -348,17 +339,6 @@ public class InteroperabilityRecordManager extends ResourceManager<Interoperabil
             throw new ResourceNotFoundException(String.format("Could not find Interoperability Record with id: %s and catalogueId: %s", id, catalogueId));
         }
         return deserialize(resource);
-    }
-
-    public Resource getResource(String id, String catalogueId) {
-        Paging<Resource> resources;
-        resources = searchService
-                .cqlQuery(String.format("resource_internal_id = \"%s\"  AND catalogue_id = \"%s\"", id, catalogueId),
-                        resourceType.getName(), maxQuantity, 0, "modifiedAt", "DESC");
-        if (resources.getTotal() > 0) {
-            return resources.getResults().get(0);
-        }
-        return null;
     }
 
     @Override

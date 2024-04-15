@@ -1,17 +1,19 @@
 package gr.uoa.di.madgik.resourcecatalogue.manager;
 
-import gr.uoa.di.madgik.resourcecatalogue.domain.*;
-import gr.uoa.di.madgik.resourcecatalogue.exception.ResourceException;
-import gr.uoa.di.madgik.resourcecatalogue.exception.ResourceNotFoundException;
-import gr.uoa.di.madgik.resourcecatalogue.exception.ValidationException;
-import gr.uoa.di.madgik.resourcecatalogue.service.RegistrationMailService;
-import gr.uoa.di.madgik.resourcecatalogue.utils.*;
-import gr.uoa.di.madgik.resourcecatalogue.service.*;
-import gr.uoa.di.madgik.resourcecatalogue.validators.FieldValidator;
 import gr.uoa.di.madgik.registry.domain.*;
 import gr.uoa.di.madgik.registry.service.ParserService;
 import gr.uoa.di.madgik.registry.service.SearchService;
 import gr.uoa.di.madgik.registry.service.ServiceException;
+import gr.uoa.di.madgik.resourcecatalogue.domain.*;
+import gr.uoa.di.madgik.resourcecatalogue.exception.ResourceException;
+import gr.uoa.di.madgik.resourcecatalogue.exception.ResourceNotFoundException;
+import gr.uoa.di.madgik.resourcecatalogue.exception.ValidationException;
+import gr.uoa.di.madgik.resourcecatalogue.service.*;
+import gr.uoa.di.madgik.resourcecatalogue.utils.FacetFilterUtils;
+import gr.uoa.di.madgik.resourcecatalogue.utils.FacetLabelService;
+import gr.uoa.di.madgik.resourcecatalogue.utils.ObjectUtils;
+import gr.uoa.di.madgik.resourcecatalogue.utils.ProviderResourcesCommonMethods;
+import gr.uoa.di.madgik.resourcecatalogue.validators.FieldValidator;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -200,7 +202,7 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
         }
 
         String serialized;
-        serialized = parserPool.serialize(trainingResourceBundle, ParserService.ParserServiceTypes.XML);
+        serialized = parserPool.serialize(trainingResourceBundle, ParserService.ParserServiceTypes.fromString(resourceType.getPayloadType()));
         Resource created = new Resource();
         created.setPayload(serialized);
         created.setResourceType(resourceType);
@@ -682,17 +684,6 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
         List<TrainingResourceBundle> allResources = getAll(ff, null).getResults();
         if (allResources.size() > 0) {
             return allResources.get(0);
-        }
-        return null;
-    }
-
-    public Resource getResource(String id, String catalogueId) {
-        Paging<Resource> resources;
-        resources = searchService
-                .cqlQuery(String.format("resource_internal_id = \"%s\"  AND catalogue_id = \"%s\"", id, catalogueId),
-                        resourceType.getName(), maxQuantity, 0, "modifiedAt", "DESC");
-        if (resources.getTotal() > 0) {
-            return resources.getResults().get(0);
         }
         return null;
     }

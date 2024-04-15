@@ -1,17 +1,22 @@
 package gr.uoa.di.madgik.resourcecatalogue.manager;
 
+import gr.uoa.di.madgik.registry.domain.*;
+import gr.uoa.di.madgik.registry.domain.index.IndexField;
+import gr.uoa.di.madgik.registry.service.AbstractGenericService;
+import gr.uoa.di.madgik.registry.service.ParserService;
+import gr.uoa.di.madgik.registry.service.SearchService;
+import gr.uoa.di.madgik.registry.service.ServiceException;
+import gr.uoa.di.madgik.resourcecatalogue.config.Properties.Cache;
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
 import gr.uoa.di.madgik.resourcecatalogue.exception.ResourceException;
 import gr.uoa.di.madgik.resourcecatalogue.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.exception.ValidationException;
-import gr.uoa.di.madgik.registry.service.*;
-import gr.uoa.di.madgik.resourcecatalogue.config.Properties.Cache;
-import gr.uoa.di.madgik.resourcecatalogue.service.AnalyticsService;
-import gr.uoa.di.madgik.resourcecatalogue.utils.*;
-import gr.uoa.di.madgik.resourcecatalogue.validators.FieldValidator;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
-import gr.uoa.di.madgik.registry.domain.*;
-import gr.uoa.di.madgik.registry.domain.index.IndexField;
+import gr.uoa.di.madgik.resourcecatalogue.utils.FacetFilterUtils;
+import gr.uoa.di.madgik.resourcecatalogue.utils.FacetLabelService;
+import gr.uoa.di.madgik.resourcecatalogue.utils.ProviderResourcesCommonMethods;
+import gr.uoa.di.madgik.resourcecatalogue.utils.TextUtils;
+import gr.uoa.di.madgik.resourcecatalogue.validators.FieldValidator;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -179,7 +184,7 @@ public abstract class AbstractServiceBundleManager<T extends ServiceBundle> exte
         prettifyServiceTextFields(serviceBundle, ",");
 
         String serialized;
-        serialized = parserPool.serialize(serviceBundle, ParserService.ParserServiceTypes.XML);
+        serialized = parserPool.serialize(serviceBundle, ParserService.ParserServiceTypes.fromString(resourceType.getPayloadType()));
         Resource created = new Resource();
         created.setPayload(serialized);
         created.setResourceType(resourceType);
@@ -302,7 +307,7 @@ public abstract class AbstractServiceBundleManager<T extends ServiceBundle> exte
 
     String serialize(T serviceBundle) {
         String serialized;
-        serialized = parserPool.serialize(serviceBundle, ParserService.ParserServiceTypes.XML);
+        serialized = parserPool.serialize(serviceBundle, ParserService.ParserServiceTypes.fromString(resourceType.getPayloadType()));
         return serialized;
     }
 

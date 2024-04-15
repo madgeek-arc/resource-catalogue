@@ -7,7 +7,6 @@ import gr.uoa.di.madgik.resourcecatalogue.dto.ExtendedValue;
 import gr.uoa.di.madgik.resourcecatalogue.dto.MapValues;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.domain.Paging;
-import gr.uoa.di.madgik.registry.domain.Resource;
 import org.springframework.security.core.Authentication;
 
 import java.net.URL;
@@ -248,15 +247,6 @@ public interface ProviderService<T, U extends Authentication> extends ResourceSe
     Paging<ProviderBundle> createCorrectQuantityFacets(List<ProviderBundle> providerBundle,
                                                        Paging<ProviderBundle> providerBundlePaging, int quantity,
                                                        int from);
-
-    /**
-     * Get a Provider gives its ID
-     *
-     * @param id          Provider ID
-     * @param catalogueId Catalogue ID
-     * @return {@link Resource}
-     */
-    Resource getResource(String id, String catalogueId);
 
     /**
      * Get a Provider's rejected resources

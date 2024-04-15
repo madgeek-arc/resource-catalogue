@@ -59,6 +59,15 @@ ResourceService<T, U extends Authentication> extends ResourceCRUDService<T, U> {
     Resource getResource(String id);
 
     /**
+     * Get a Resource, providing its ID and the catalogue ID
+     *
+     * @param id resource ID
+     * @param catalogueId the catalogue ID
+     * @return {@link Resource}
+     */
+    Resource getResource(String id, String catalogueId);
+
+    /**
      * Check if a resource exists.
      *
      * @param t resource

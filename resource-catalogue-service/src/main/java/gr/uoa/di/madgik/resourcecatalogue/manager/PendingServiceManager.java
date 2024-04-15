@@ -1,20 +1,19 @@
 package gr.uoa.di.madgik.resourcecatalogue.manager;
 
+import gr.uoa.di.madgik.registry.domain.FacetFilter;
+import gr.uoa.di.madgik.registry.domain.Resource;
+import gr.uoa.di.madgik.registry.domain.ResourceType;
+import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.domain.LoggingInfo;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Metadata;
 import gr.uoa.di.madgik.resourcecatalogue.domain.ServiceBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.User;
 import gr.uoa.di.madgik.resourcecatalogue.exception.ValidationException;
-import gr.uoa.di.madgik.resourcecatalogue.service.ServiceBundleService;
-import gr.uoa.di.madgik.resourcecatalogue.service.PendingResourceService;
-import gr.uoa.di.madgik.resourcecatalogue.service.VocabularyService;
 import gr.uoa.di.madgik.resourcecatalogue.service.IdCreator;
+import gr.uoa.di.madgik.resourcecatalogue.service.PendingResourceService;
+import gr.uoa.di.madgik.resourcecatalogue.service.ServiceBundleService;
+import gr.uoa.di.madgik.resourcecatalogue.service.VocabularyService;
 import gr.uoa.di.madgik.resourcecatalogue.utils.ProviderResourcesCommonMethods;
-import gr.uoa.di.madgik.registry.domain.FacetFilter;
-import gr.uoa.di.madgik.registry.domain.Paging;
-import gr.uoa.di.madgik.registry.domain.Resource;
-import gr.uoa.di.madgik.registry.domain.ResourceType;
-import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -101,7 +100,7 @@ public class PendingServiceManager extends ResourceManager<ServiceBundle> implem
     @CacheEvict(cacheNames = {CACHE_VISITS, CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)
     public ServiceBundle update(ServiceBundle serviceBundle, Authentication auth) {
         // get existing resource
-        Resource existing = this.getPendingResourceViaServiceId(serviceBundle.getService().getId());
+        Resource existing = getResource(serviceBundle.getService().getId(), catalogueName);
         // block catalogueId updates from Provider Admins
         serviceBundle.getService().setCatalogueId(catalogueName);
         logger.trace("User '{}' is attempting to update the Pending Service with id {}", auth, serviceBundle.getId());
@@ -160,7 +159,7 @@ public class PendingServiceManager extends ResourceManager<ServiceBundle> implem
         serviceBundle.setMetadata(Metadata.updateMetadata(serviceBundle.getMetadata(), User.of(auth).getFullName(), User.of(auth).getEmail()));
 
         ResourceType infraResourceType = resourceTypeService.getResourceType("service");
-        Resource resource = this.getPendingResourceViaServiceId(serviceBundle.getId());
+        Resource resource = getResource(serviceBundle.getId(), catalogueName);
         resource.setResourceType(resourceType);
         resourceService.changeResourceType(resource, infraResourceType);
 
@@ -191,20 +190,5 @@ public class PendingServiceManager extends ResourceManager<ServiceBundle> implem
 
     public void adminAcceptedTerms(String providerId, Authentication auth) {
         // We need this method on PendingProviderManager. Both PendingManagers share the same Service - PendingResourceService
-    }
-
-    public Resource getPendingResourceViaServiceId(String serviceId) {
-        Paging<Resource> resources;
-        resources = searchService
-                .cqlQuery(String.format("resource_internal_id = \"%s\" AND catalogue_id = \"%s\"", serviceId, catalogueName),
-                        resourceType.getName(), maxQuantity, 0, "modifiedAt", "DESC");
-        if (resources.getTotal() > 0) {
-            return resources.getResults().get(0);
-        }
-        return null;
-    }
-
-    public Resource getPendingResourceViaProviderId(String providerId) {
-        return null;
     }
 }
