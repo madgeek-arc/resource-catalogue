@@ -9,6 +9,7 @@ import gr.uoa.di.madgik.resourcecatalogue.exception.ResourceException;
 import gr.uoa.di.madgik.resourcecatalogue.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.exception.ValidationException;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
+import gr.uoa.di.madgik.resourcecatalogue.utils.Auditable;
 import gr.uoa.di.madgik.resourcecatalogue.utils.FacetFilterUtils;
 import gr.uoa.di.madgik.resourcecatalogue.utils.ObjectUtils;
 import gr.uoa.di.madgik.resourcecatalogue.utils.ProviderResourcesCommonMethods;
@@ -27,7 +28,6 @@ import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Set;
 
 import static gr.uoa.di.madgik.resourcecatalogue.config.Properties.Cache.CACHE_FEATURED;
 import static gr.uoa.di.madgik.resourcecatalogue.config.Properties.Cache.CACHE_PROVIDERS;
@@ -113,6 +113,7 @@ public class InteroperabilityRecordManager extends ResourceManager<Interoperabil
         List<LoggingInfo> loggingInfoList = commonMethods.returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(interoperabilityRecordBundle, auth);
         interoperabilityRecordBundle.setLoggingInfo(loggingInfoList);
         interoperabilityRecordBundle.setLatestOnboardingInfo(loggingInfoList.get(0));
+        interoperabilityRecordBundle.setAuditState(Auditable.NOT_AUDITED);
 
         interoperabilityRecordBundle.getInteroperabilityRecord().setCreated(String.valueOf(System.currentTimeMillis()));
         interoperabilityRecordBundle.getInteroperabilityRecord().setUpdated(interoperabilityRecordBundle.getInteroperabilityRecord().getCreated());
@@ -186,6 +187,7 @@ public class InteroperabilityRecordManager extends ResourceManager<Interoperabil
         ret.setActive(existingInteroperabilityRecord.isActive());
         ret.setStatus(existingInteroperabilityRecord.getStatus());
         ret.setSuspended(existingInteroperabilityRecord.isSuspended());
+        ret.setAuditState(commonMethods.determineAuditState(ret.getLoggingInfo()));
 
         // updated && created
         ret.getInteroperabilityRecord().setCreated(existingInteroperabilityRecord.getInteroperabilityRecord().getCreated());
@@ -383,12 +385,21 @@ public class InteroperabilityRecordManager extends ResourceManager<Interoperabil
         InteroperabilityRecordBundle interoperabilityRecordBundle = get(interoperabilityRecordId, catalogueId);
         ProviderBundle provider = providerService.get(catalogueId, interoperabilityRecordBundle.getInteroperabilityRecord().getProviderId(), auth);
         commonMethods.auditResource(interoperabilityRecordBundle, comment, actionType, auth);
+        if (actionType.getKey().equals(LoggingInfo.ActionType.VALID.getKey())) {
+            interoperabilityRecordBundle.setAuditState(Auditable.VALID);
+        }
+        if (actionType.getKey().equals(LoggingInfo.ActionType.INVALID.getKey())) {
+            interoperabilityRecordBundle.setAuditState(Auditable.INVALID_AND_NOT_UPDATED);
+        }
 
         // send notification emails to Provider Admins
         registrationMailService.notifyProviderAdminsForBundleAuditing(interoperabilityRecordBundle, "Interoperability Record",
                 interoperabilityRecordBundle.getInteroperabilityRecord().getTitle(), provider.getProvider().getUsers());
 
-        logger.info(String.format("Auditing Interoperability Record [%s]-[%s]", catalogueId, interoperabilityRecordId));
+        logger.info("User '{}-{}' audited Interoperability Record '{}'-'{}' with [actionType: {}]",
+                User.of(auth).getFullName(), User.of(auth).getEmail(),
+                interoperabilityRecordBundle.getInteroperabilityRecord().getId(),
+                interoperabilityRecordBundle.getInteroperabilityRecord().getTitle(), actionType);
         return super.update(interoperabilityRecordBundle, auth);
     }
 
@@ -428,10 +439,6 @@ public class InteroperabilityRecordManager extends ResourceManager<Interoperabil
                 filter.addFilter("active", true);
             }
         }
-    }
-
-    public Paging<Bundle<?>> getAllForAdminWithAuditStates(FacetFilter ff, Set<String> auditState) {
-        return commonMethods.getAllForAdminWithAuditStates(ff, auditState, this.resourceType.getName());
     }
 
     @CacheEvict(cacheNames = {CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)

@@ -14,7 +14,6 @@ import org.springframework.util.MultiValueMap;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 public interface ServiceBundleService<T> extends ResourceCRUDService<T, Authentication> {
 
@@ -256,14 +255,6 @@ public interface ServiceBundleService<T> extends ResourceCRUDService<T, Authenti
      */
     T changeProvider(String resourceId, String newProvider, String comment, Authentication auth);
 
-    /**
-     * Get a paging with all Service Bundles belonging to a specific audit state
-     *
-     * @param ff         FacetFilter
-     * @param auditState Audit State
-     * @return {@link Paging}&lt;{@link Bundle}&lt;?&gt;&gt;
-     */
-    Paging<Bundle<?>> getAllForAdminWithAuditStates(FacetFilter ff, Set<String> auditState);
 
     /**
      * Updates the EOSC Interoperability Framework Guidelines of the specific Service Bundle

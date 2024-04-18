@@ -6,7 +6,6 @@ import gr.uoa.di.madgik.resourcecatalogue.exception.ValidationException;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
 import gr.uoa.di.madgik.registry.domain.Browsing;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
-import gr.uoa.di.madgik.registry.domain.Paging;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
@@ -26,7 +25,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.json.*;
-import org.springframework.util.MultiValueMap;
 
 @Component
 public class ProviderResourcesCommonMethods {
@@ -600,112 +598,6 @@ public class ProviderResourcesCommonMethods {
         return null;
     }
 
-    // TODO: Hard refactor
-    public Paging<Bundle<?>> getAllForAdminWithAuditStates(FacetFilter ff, Set<String> auditState, String resourceType) {
-        List<Bundle<?>> valid = new ArrayList<>();
-        List<Bundle<?>> notAudited = new ArrayList<>();
-        List<Bundle<?>> invalidAndUpdated = new ArrayList<>();
-        List<Bundle<?>> invalidAndNotUpdated = new ArrayList<>();
-
-        int quantity = ff.getQuantity();
-        int from = ff.getFrom();
-        int to = 0;
-
-        FacetFilter ff2 = new FacetFilter();
-        ff2.setFilter(new HashMap<>(ff.getFilter()));
-        // remove auditState from ff2 filter
-        ff2.getFilter().remove("auditState");
-        ff2.setQuantity(maxQuantity);
-        ff2.setFrom(0);
-        ff2.setResourceType(resourceType);
-        Paging<Bundle<?>> retPaging;
-        Paging<Bundle<?>> allResults = genericResourceService.getResults(ff2);
-        List<Bundle<?>> ret = new ArrayList<>();
-        for (Bundle<?> bundle : allResults.getResults()) {
-            String auditVocStatus;
-            try {
-                auditVocStatus = LoggingInfo.createAuditVocabularyStatuses(bundle.getLoggingInfo());
-            } catch (NullPointerException e) { // bundle has null loggingInfo
-                continue;
-            }
-            switch (auditVocStatus) {
-                case "Valid and updated":
-                case "Valid and not updated":
-                    valid.add(bundle);
-                    break;
-                case "Not Audited":
-                    notAudited.add(bundle);
-                    break;
-                case "Invalid and updated":
-                    invalidAndUpdated.add(bundle);
-                    break;
-                case "Invalid and not updated":
-                    invalidAndNotUpdated.add(bundle);
-                    break;
-                default:
-                    throw new IllegalStateException("Unexpected value: " + auditVocStatus);
-            }
-        }
-        for (String state : auditState) {
-            switch (state) {
-                case "Valid":
-                    ret.addAll(valid);
-                    break;
-                case "Not Audited":
-                    ret.addAll(notAudited);
-                    break;
-                case "Invalid and updated":
-                    ret.addAll(invalidAndUpdated);
-                    break;
-                case "Invalid and not updated":
-                    ret.addAll(invalidAndNotUpdated);
-                    break;
-                default:
-                    throw new ValidationException(String.format("The audit state [%s] you have provided is wrong", state));
-            }
-        }
-        if (!ret.isEmpty()) {
-            List<Bundle<?>> retWithCorrectQuantity = new ArrayList<>();
-            if (from == 0) {
-                if (quantity <= ret.size()) {
-                    for (int i = from; i <= quantity - 1; i++) {
-                        retWithCorrectQuantity.add(ret.get(i));
-                    }
-                } else {
-                    retWithCorrectQuantity.addAll(ret);
-                }
-                to = retWithCorrectQuantity.size();
-            } else {
-                if (quantity + from > ret.size()) {
-                    to = ret.size();
-                } else {
-                    to = quantity + from;
-                }
-                boolean indexOutOfBound = false;
-                if (quantity <= ret.size()) {
-                    for (int i = from; i < quantity + from; i++) {
-                        try {
-                            retWithCorrectQuantity.add(ret.get(i));
-                        } catch (IndexOutOfBoundsException e) {
-                            indexOutOfBound = true;
-                            break;
-                        }
-                    }
-                    if (indexOutOfBound) {
-                        to = ret.size();
-                    }
-                } else {
-                    retWithCorrectQuantity.addAll(ret.subList(from, ret.size()));
-                }
-            }
-            ret = retWithCorrectQuantity;
-        } else {
-            from = 0;
-        }
-        retPaging = new Paging<>(ret.size(), from, to, ret, allResults.getFacets());
-        return retPaging;
-    }
-
     public void restrictPrefixRepetitionOnPublicResources(String id, String cataloguePrefix) {
         String regex = cataloguePrefix + ".";
         Pattern pattern = Pattern.compile(regex);
@@ -757,15 +649,15 @@ public class ProviderResourcesCommonMethods {
 
         String auditState;
         if (!hasBeenAudited) {
-            auditState = CatalogueBundle.AuditState.NOT_AUDITED.getKey();
+            auditState = Auditable.NOT_AUDITED;
         } else if (!hasBeenUpdatedAfterAudit) {
             auditState = auditActionType.equals(LoggingInfo.ActionType.INVALID.getKey()) ?
-                    CatalogueBundle.AuditState.INVALID_AND_NOT_UPDATED.getKey() :
-                    CatalogueBundle.AuditState.VALID.getKey();
+                    Auditable.INVALID_AND_NOT_UPDATED :
+                    Auditable.VALID;
         } else {
             auditState = auditActionType.equals(LoggingInfo.ActionType.INVALID.getKey()) ?
-                    CatalogueBundle.AuditState.INVALID_AND_UPDATED.getKey() :
-                    CatalogueBundle.AuditState.VALID.getKey();
+                    Auditable.INVALID_AND_UPDATED :
+                    Auditable.VALID;
         }
 
         return auditState;

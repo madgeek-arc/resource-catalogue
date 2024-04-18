@@ -9,6 +9,7 @@ import gr.uoa.di.madgik.resourcecatalogue.dto.ExtendedValue;
 import gr.uoa.di.madgik.resourcecatalogue.dto.MapValues;
 import gr.uoa.di.madgik.resourcecatalogue.exception.ValidationException;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
+import gr.uoa.di.madgik.resourcecatalogue.utils.Auditable;
 import gr.uoa.di.madgik.resourcecatalogue.utils.ObjectUtils;
 import gr.uoa.di.madgik.resourcecatalogue.utils.ProviderResourcesCommonMethods;
 import gr.uoa.di.madgik.resourcecatalogue.validators.FieldValidator;
@@ -22,8 +23,6 @@ import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.annotation.Lazy;
-import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
-import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.common.exceptions.UnauthorizedUserException;
@@ -204,6 +203,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         ret.setActive(existingProvider.isActive());
         ret.setStatus(existingProvider.getStatus());
         ret.setSuspended(existingProvider.isSuspended());
+        ret.setAuditState(commonMethods.determineAuditState(ret.getLoggingInfo()));
         existingResource.setPayload(serialize(ret));
         existingResource.setResourceType(resourceType);
         resourceService.updateResource(existingResource);
@@ -811,12 +811,20 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     public ProviderBundle auditProvider(String providerId, String catalogueId, String comment, LoggingInfo.ActionType actionType, Authentication auth) {
         ProviderBundle provider = getWithCatalogue(providerId, catalogueId);
         commonMethods.auditResource(provider, comment, actionType, auth);
+        if (actionType.getKey().equals(LoggingInfo.ActionType.VALID.getKey())) {
+            provider.setAuditState(Auditable.VALID);
+        }
+        if (actionType.getKey().equals(LoggingInfo.ActionType.INVALID.getKey())) {
+            provider.setAuditState(Auditable.INVALID_AND_NOT_UPDATED);
+        }
 
         // send notification emails to Provider Admins
         registrationMailService.notifyProviderAdminsForBundleAuditing(provider, "Provider",
                 provider.getProvider().getName(), provider.getProvider().getUsers());
 
-        logger.info(String.format("Auditing Provider [%s]-[%s]", catalogueId, provider));
+        logger.info("User '{}-{}' audited Provider '{}'-'{}' with [actionType: {}]",
+                User.of(auth).getFullName(), User.of(auth).getEmail(),
+                provider.getProvider().getId(), provider.getProvider().getName(), actionType);
         return super.update(provider, auth);
     }
 
@@ -854,240 +862,6 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         return null;
     }
 
-    public Paging<ProviderBundle> determineAuditState(Set<String> auditState, FacetFilter ff, List<ProviderBundle> providers, Authentication auth) {
-        List<ProviderBundle> valid = new ArrayList<>();
-        List<ProviderBundle> notAudited = new ArrayList<>();
-        List<ProviderBundle> invalidAndUpdated = new ArrayList<>();
-        List<ProviderBundle> invalidAndNotUpdated = new ArrayList<>();
-
-        Paging<ProviderBundle> retPaging = getAll(ff, auth);
-        List<ProviderBundle> allWithoutAuditFilterList = new ArrayList<>();
-        if (providers.isEmpty()) {
-            allWithoutAuditFilterList = getAll(ff, auth).getResults();
-        } else {
-            allWithoutAuditFilterList.addAll(providers);
-        }
-        List<ProviderBundle> ret = new ArrayList<>();
-        for (ProviderBundle providerBundle : allWithoutAuditFilterList) {
-            String auditVocStatus;
-            try {
-                auditVocStatus = LoggingInfo.createAuditVocabularyStatuses(providerBundle.getLoggingInfo());
-            } catch (NullPointerException e) { // providerBundle has null loggingInfo
-                continue;
-            }
-            switch (auditVocStatus) {
-                case "Valid and updated":
-                case "Valid and not updated":
-                    valid.add(providerBundle);
-                    break;
-                case "Not Audited":
-                    notAudited.add(providerBundle);
-                    break;
-                case "Invalid and updated":
-                    invalidAndUpdated.add(providerBundle);
-                    break;
-                case "Invalid and not updated":
-                    invalidAndNotUpdated.add(providerBundle);
-                    break;
-                default:
-                    throw new IllegalStateException("Unexpected value: " + auditVocStatus);
-            }
-        }
-        for (String state : auditState) {
-            if (state.equals("Valid")) {
-                ret.addAll(valid);
-            } else if (state.equals("Not Audited")) {
-                ret.addAll(notAudited);
-            } else if (state.equals("Invalid and updated")) {
-                ret.addAll(invalidAndUpdated);
-            } else if (state.equals("Invalid and not updated")) {
-                ret.addAll(invalidAndNotUpdated);
-            } else {
-                throw new ValidationException(String.format("The audit state [%s] you have provided is wrong", state));
-            }
-        }
-        return createCorrectQuantityFacets(ret, retPaging, ff.getQuantity(), ff.getFrom());
-    }
-
-    public Paging<ProviderBundle> createCorrectQuantityFacets(List<ProviderBundle> providerBundle, Paging<ProviderBundle> providerBundlePaging,
-                                                              int quantity, int from) {
-        if (!providerBundle.isEmpty()) {
-            List<ProviderBundle> retWithCorrectQuantity = new ArrayList<>();
-            if (from == 0) {
-                if (quantity <= providerBundle.size()) {
-                    for (int i = from; i <= quantity - 1; i++) {
-                        retWithCorrectQuantity.add(providerBundle.get(i));
-                    }
-                } else {
-                    retWithCorrectQuantity.addAll(providerBundle);
-                }
-                providerBundlePaging.setTo(retWithCorrectQuantity.size());
-            } else {
-                boolean indexOutOfBound = false;
-                if (quantity <= providerBundle.size()) {
-                    for (int i = from; i < quantity + from; i++) {
-                        try {
-                            retWithCorrectQuantity.add(providerBundle.get(i));
-                            if (quantity + from > providerBundle.size()) {
-                                providerBundlePaging.setTo(providerBundle.size());
-                            } else {
-                                providerBundlePaging.setTo(quantity + from);
-                            }
-                        } catch (IndexOutOfBoundsException e) {
-                            indexOutOfBound = true;
-                            continue;
-                        }
-                    }
-                    if (indexOutOfBound) {
-                        providerBundlePaging.setTo(providerBundle.size());
-                    }
-                } else {
-                    retWithCorrectQuantity.addAll(providerBundle);
-                    if (quantity + from > providerBundle.size()) {
-                        providerBundlePaging.setTo(providerBundle.size());
-                    } else {
-                        providerBundlePaging.setTo(quantity + from);
-                    }
-                }
-            }
-            providerBundlePaging.setFrom(from);
-            providerBundlePaging.setResults(retWithCorrectQuantity);
-            providerBundlePaging.setTotal(providerBundle.size());
-        } else {
-            providerBundlePaging.setResults(providerBundle);
-            providerBundlePaging.setTotal(0);
-            providerBundlePaging.setFrom(0);
-            providerBundlePaging.setTo(0);
-        }
-        return providerBundlePaging;
-    }
-
-    // TODO: refactor / delete?...
-    public List<Map<String, Object>> createQueryForProviderFilters(FacetFilter ff, String orderDirection, String orderField) {
-        String keyword = ff.getKeyword();
-        NamedParameterJdbcTemplate namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(dataSource);
-        MapSqlParameterSource in = new MapSqlParameterSource();
-
-        String query; // TODO: Replace with StringBuilder
-        if (ff.getFilter().entrySet().isEmpty()) {
-            query = "SELECT resource_internal_id,catalogue_id FROM provider_view WHERE catalogue_id = '" + catalogueName + "'";
-        } else {
-            query = "SELECT resource_internal_id,catalogue_id FROM provider_view WHERE";
-        }
-
-        boolean firstTime = true;
-        for (Map.Entry<String, Object> entry : ff.getFilter().entrySet()) {
-            in.addValue(entry.getKey(), entry.getValue());
-            // suspended
-            if (entry.getKey().equals("suspended")) {
-                if (firstTime) {
-                    query += String.format(" (suspended=%s)", entry.getValue().toString());
-                    firstTime = false;
-                } else {
-                    query += String.format(" AND (suspended=%s)", entry.getValue().toString());
-                }
-                if (query.contains(",")) {
-                    query = query.replaceAll(", ", "' OR suspended='");
-                }
-            }
-            // active
-            if (entry.getKey().equals("active")) {
-                if (firstTime) {
-                    query += String.format(" (active=%s)", entry.getValue().toString());
-                    firstTime = false;
-                } else {
-                    query += String.format(" AND (active=%s)", entry.getValue().toString());
-                }
-                if (query.contains(",")) {
-                    query = query.replaceAll(", ", "' OR active='");
-                }
-            }
-            // published
-            if (entry.getKey().equals("published")) {
-                if (firstTime) {
-                    query += String.format(" (published=%s)", entry.getValue().toString());
-                    firstTime = false;
-                } else {
-                    query += String.format(" AND (published=%s)", entry.getValue().toString());
-                }
-                if (query.contains(",")) {
-                    query = query.replaceAll(", ", "' OR published='");
-                }
-            }
-            // status
-            if (entry.getKey().equals("status")) {
-                if (firstTime) {
-                    query += String.format(" (status=%s)", entry.getValue().toString());
-                    firstTime = false;
-                } else {
-                    query += String.format(" AND (status=%s)", entry.getValue().toString());
-                }
-                if (query.contains(",")) {
-                    query = query.replaceAll(", ", "' OR status='");
-                }
-            }
-            // templateStatus
-            if (entry.getKey().equals("templateStatus")) {
-                if (firstTime) {
-                    query += String.format(" (templateStatus=%s)", entry.getValue().toString());
-                    firstTime = false;
-                } else {
-                    query += String.format(" AND (templateStatus=%s)", entry.getValue().toString());
-                }
-                if (query.contains(",")) {
-                    query = query.replaceAll(", ", "' OR templateStatus='");
-                }
-            }
-            // catalogue_id
-            if (entry.getKey().equals("catalogue_id")) {
-                if (firstTime) {
-                    if (((LinkedHashSet) entry.getValue()).contains("all")) {
-                        query += String.format(" (catalogue_id LIKE '%%%%')");
-                        firstTime = false;
-                        continue;
-                    } else {
-                        query += String.format(" (catalogue_id=%s)", entry.getValue().toString());
-                        firstTime = false;
-                    }
-                } else {
-                    if (((LinkedHashSet) entry.getValue()).contains("all")) {
-                        query += String.format(" AND (catalogue_id LIKE '%%%%')");
-                        continue;
-                    } else {
-                        query += String.format(" AND (catalogue_id=%s)", entry.getValue().toString());
-                    }
-                }
-                if (query.contains(",")) {
-                    query = query.replaceAll(", ", "' OR catalogue_id='");
-                }
-            }
-        }
-
-        // keyword on search bar
-        if (keyword != null && !keyword.equals("")) {
-            // replace apostrophes to avoid bad sql grammar
-            if (keyword.contains("'")) {
-                keyword = keyword.replaceAll("'", "''");
-            }
-            query += String.format(" AND upper(CONCAT(%s))", columnsOfInterest) + " like '%" + String.format("%s", keyword.toUpperCase()) + "%'";
-        }
-
-        // order/orderField
-        if (orderField != null && !orderField.equals("")) {
-            query += String.format(" ORDER BY %s", orderField);
-        } else {
-            query += " ORDER BY name";
-        }
-        if (orderDirection != null && !orderDirection.equals("")) {
-            query += String.format(" %s", orderDirection);
-        }
-
-        query = query.replaceAll("\\[", "'").replaceAll("\\]", "'");
-        logger.debug(query);
-
-        return namedParameterJdbcTemplate.queryForList(query, in);
-    }
-
     private ProviderBundle onboard(ProviderBundle provider, String catalogueId, Authentication auth) {
         // create LoggingInfo
         List<LoggingInfo> loggingInfoList = commonMethods.returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(provider, auth);
@@ -1107,7 +881,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
                     LoggingInfo.ActionType.APPROVED.getKey()));
         }
 
-        // latestOnboardingInfo
+        provider.setAuditState(Auditable.NOT_AUDITED);
         provider.setLatestOnboardingInfo(loggingInfoList.get(loggingInfoList.size() - 1));
 
         return provider;

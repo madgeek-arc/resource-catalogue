@@ -1,6 +1,7 @@
 package gr.uoa.di.madgik.resourcecatalogue.domain;
 
 import gr.uoa.di.madgik.resourcecatalogue.annotation.FieldValidation;
+import gr.uoa.di.madgik.resourcecatalogue.utils.Auditable;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -9,7 +10,7 @@ import javax.xml.bind.annotation.XmlType;
 //@Document
 @XmlType
 @XmlRootElement(namespace = "http://einfracentral.eu")
-public class ServiceBundle extends Bundle<Service> {
+public class ServiceBundle extends Bundle<Service> implements Auditable {
 
     @XmlElement
     private String status;
@@ -17,6 +18,9 @@ public class ServiceBundle extends Bundle<Service> {
     @XmlElement
     @FieldValidation(nullable = true)
     private ResourceExtras resourceExtras;
+
+    @XmlElement
+    private String auditState;
 
     public ServiceBundle() {
         // No arg constructor
@@ -33,11 +37,13 @@ public class ServiceBundle extends Bundle<Service> {
     }
 
     @Override
-    public String toString() {
-        return "ServiceBundle{" +
-                "status='" + status + '\'' +
-                ", resourceExtras=" + resourceExtras +
-                '}';
+    public String getId() {
+        return super.getId();
+    }
+
+    @Override
+    public void setId(String id) {
+        super.setId(id);
     }
 
     @XmlElement(name = "service")
@@ -47,17 +53,6 @@ public class ServiceBundle extends Bundle<Service> {
 
     public void setService(Service service) {
         this.setPayload(service);
-    }
-
-    //    @Id
-    @Override
-    public String getId() {
-        return super.getId();
-    }
-
-    @Override
-    public void setId(String id) {
-        super.setId(id);
     }
 
     public String getStatus() {
@@ -74,5 +69,21 @@ public class ServiceBundle extends Bundle<Service> {
 
     public void setResourceExtras(ResourceExtras resourceExtras) {
         this.resourceExtras = resourceExtras;
+    }
+
+    public String getAuditState() {
+        return auditState;
+    }
+
+    public void setAuditState(String auditState) {
+        this.auditState = auditState;
+    }
+
+    @Override
+    public String toString() {
+        return "ServiceBundle{" +
+                "status='" + status + '\'' +
+                ", resourceExtras=" + resourceExtras +
+                '}';
     }
 }

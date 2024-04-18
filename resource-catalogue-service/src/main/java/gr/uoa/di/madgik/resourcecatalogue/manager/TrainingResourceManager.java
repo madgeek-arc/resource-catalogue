@@ -9,10 +9,7 @@ import gr.uoa.di.madgik.resourcecatalogue.exception.ResourceException;
 import gr.uoa.di.madgik.resourcecatalogue.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.exception.ValidationException;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
-import gr.uoa.di.madgik.resourcecatalogue.utils.FacetFilterUtils;
-import gr.uoa.di.madgik.resourcecatalogue.utils.FacetLabelService;
-import gr.uoa.di.madgik.resourcecatalogue.utils.ObjectUtils;
-import gr.uoa.di.madgik.resourcecatalogue.utils.ProviderResourcesCommonMethods;
+import gr.uoa.di.madgik.resourcecatalogue.utils.*;
 import gr.uoa.di.madgik.resourcecatalogue.validators.FieldValidator;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -179,6 +176,7 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
 
         // LoggingInfo
         trainingResourceBundle.setLoggingInfo(loggingInfoList);
+        trainingResourceBundle.setAuditState(Auditable.NOT_AUDITED);
 
         logger.info("Adding Training Resource: {}", trainingResourceBundle);
         TrainingResourceBundle ret;
@@ -275,6 +273,7 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
         ret.setActive(existingTrainingResource.isActive());
         ret.setStatus(existingTrainingResource.getStatus());
         ret.setSuspended(existingTrainingResource.isSuspended());
+        ret.setAuditState(commonMethods.determineAuditState(ret.getLoggingInfo()));
 
         // if Resource's status = "rejected resource", update to "pending resource" & Provider templateStatus to "pending template"
         if (existingTrainingResource.getStatus().equals(vocabularyService.get("rejected resource").getId())) {
@@ -557,12 +556,20 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
         TrainingResourceBundle trainingResource = get(trainingResourceId, catalogueId);
         ProviderBundle provider = providerService.get(catalogueId, trainingResource.getTrainingResource().getResourceOrganisation(), auth);
         commonMethods.auditResource(trainingResource, comment, actionType, auth);
+        if (actionType.getKey().equals(LoggingInfo.ActionType.VALID.getKey())) {
+            trainingResource.setAuditState(Auditable.VALID);
+        }
+        if (actionType.getKey().equals(LoggingInfo.ActionType.INVALID.getKey())) {
+            trainingResource.setAuditState(Auditable.INVALID_AND_NOT_UPDATED);
+        }
 
         // send notification emails to Provider Admins
         registrationMailService.notifyProviderAdminsForBundleAuditing(trainingResource, "Training Resource",
                 trainingResource.getTrainingResource().getTitle(), provider.getProvider().getUsers());
 
-        logger.info(String.format("Auditing Training Resource [%s]-[%s]", catalogueId, trainingResourceId));
+        logger.info("User '{}-{}' audited Training Resource '{}'-'{}' with [actionType: {}]",
+                User.of(auth).getFullName(), User.of(auth).getEmail(),
+                trainingResource.getTrainingResource().getId(), trainingResource.getTrainingResource().getTitle(), actionType);
         return super.update(trainingResource, auth);
     }
 
@@ -914,10 +921,6 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
             }
         }
         return null;
-    }
-
-    public Paging<Bundle<?>> getAllForAdminWithAuditStates(FacetFilter ff, Set<String> auditState) {
-        return commonMethods.getAllForAdminWithAuditStates(ff, auditState, this.resourceType.getName());
     }
 
     @Override

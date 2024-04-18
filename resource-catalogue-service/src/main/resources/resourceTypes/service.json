@@ -345,6 +345,13 @@
             "name": "portfolios",
             "path": "$.service.extras.portfolios[*]",
             "type": "java.lang.String"
+        },
+        {
+            "label": null,
+            "multivalued": false,
+            "name": "audit_state",
+            "path": "$.auditState",
+            "type": "java.lang.String"
         }
     ],
     "indexMapperClass": "gr.uoa.di.madgik.registry.index.DefaultIndexMapper",

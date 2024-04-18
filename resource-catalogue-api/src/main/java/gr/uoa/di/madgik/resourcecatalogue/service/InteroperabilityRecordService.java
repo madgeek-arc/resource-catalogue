@@ -1,14 +1,11 @@
 package gr.uoa.di.madgik.resourcecatalogue.service;
 
-import gr.uoa.di.madgik.resourcecatalogue.domain.Bundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.InteroperabilityRecordBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.LoggingInfo;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.domain.Paging;
 import org.springframework.security.core.Authentication;
 import org.springframework.util.MultiValueMap;
-
-import java.util.Set;
 
 public interface InteroperabilityRecordService<T> extends ResourceService<T, Authentication> {
 
@@ -165,13 +162,4 @@ public interface InteroperabilityRecordService<T> extends ResourceService<T, Aut
      */
     InteroperabilityRecordBundle suspend(String interoperabilityRecordId, String catalogueId, boolean suspend,
                                          Authentication auth);
-
-    /**
-     * Get a paging with all Interoperability Record Bundles belonging to a specific audit state
-     *
-     * @param ff         FacetFilter
-     * @param auditState Audit State
-     * @return {@link Paging}&lt;{@link Bundle}&lt;?&gt;&gt;
-     */
-    Paging<Bundle<?>> getAllForAdminWithAuditStates(FacetFilter ff, Set<String> auditState);
 }

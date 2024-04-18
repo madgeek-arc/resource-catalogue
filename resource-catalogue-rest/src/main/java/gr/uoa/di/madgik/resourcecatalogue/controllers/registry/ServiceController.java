@@ -272,32 +272,26 @@ public class ServiceController {
         return ResponseEntity.ok(services);
     }
 
-    // FIXME: query doesn't work when auditState != null.
     @Browse
     @Parameter(name = "suspended", description = "Suspended", content = @Content(schema = @Schema(type = "boolean", defaultValue = "false")))
     @GetMapping(path = "adminPage/all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
-    public ResponseEntity<Paging<?>> getAllServicesForAdminPage(@Parameter(hidden = true) @RequestParam MultiValueMap<String, Object> allRequestParams,
-                                                                @RequestParam(required = false) Set<String> auditState,
-                                                                @RequestParam(defaultValue = "all", name = "catalogue_id") String catalogueId) {
-        FacetFilter ff = serviceBundleService.createFacetFilterForFetchingServices(allRequestParams, catalogueId);
-        if (auditState == null) {
-            Paging<?> paging = genericResourceService.getResults(ff);
-            genericResourceService.sortFacets(paging.getFacets(), "resource_organisation");
-            return ResponseEntity.ok(paging);
-        } else {
-            return ResponseEntity.ok(serviceBundleService.getAllForAdminWithAuditStates(ff, auditState));
-        }
+    public ResponseEntity<Paging<?>> getAllServicesForAdminPage(@Parameter(hidden = true) @RequestParam MultiValueMap<String, Object> allRequestParams) {
+        FacetFilter ff = FacetFilterUtils.createFacetFilter(allRequestParams);
+        ff.setResourceType("service");
+        ff.addFilter("published", false);
+        Paging<ServiceBundle> paging = genericResourceService.getResults(ff);
+        return ResponseEntity.ok(paging);
     }
 
     @PatchMapping(path = "auditResource/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
-    public ResponseEntity<ServiceBundle> auditService(@PathVariable("id") String id, @RequestParam("catalogueId") String catalogueId,
+    public ResponseEntity<ServiceBundle> auditService(@PathVariable("id") String id,
+                                                      @RequestParam("catalogueId") String catalogueId,
                                                       @RequestParam(required = false) String comment,
-                                                      @RequestParam LoggingInfo.ActionType actionType, @Parameter(hidden = true) Authentication auth) {
+                                                      @RequestParam LoggingInfo.ActionType actionType,
+                                                      @Parameter(hidden = true) Authentication auth) {
         ServiceBundle service = serviceBundleService.auditResource(id, catalogueId, comment, actionType, auth);
-        logger.info("User '{}-{}' audited Service with name '{}' of the '{}' Catalogue - [actionType: {}]", User.of(auth).getFullName(), User.of(auth).getEmail(),
-                service.getService().getName(), service.getService().getCatalogueId(), actionType);
         return new ResponseEntity<>(service, HttpStatus.OK);
     }
 
@@ -312,8 +306,8 @@ public class ServiceController {
         FacetFilter ff = FacetFilterUtils.createFacetFilter(allRequestParams);
         ff.addFilter("status", "approved resource");
         ff.addFilter("published", false);
-
-        return new ResponseEntity<>(serviceBundleService.getRandomResources(ff, auditingInterval, auth), HttpStatus.OK);
+        Paging<ServiceBundle> serviceBundlePaging = serviceBundleService.getRandomResources(ff, auditingInterval, auth);
+        return new ResponseEntity<>(serviceBundlePaging, HttpStatus.OK);
     }
 
     // Get all modification details of a specific Resource based on id.

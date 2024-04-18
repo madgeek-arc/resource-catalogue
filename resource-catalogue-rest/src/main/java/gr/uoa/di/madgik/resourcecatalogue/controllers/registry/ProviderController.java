@@ -6,11 +6,7 @@ import gr.uoa.di.madgik.resourcecatalogue.dto.ExtendedValue;
 import gr.uoa.di.madgik.resourcecatalogue.dto.MapValues;
 import gr.uoa.di.madgik.resourcecatalogue.exception.ResourceException;
 import gr.uoa.di.madgik.resourcecatalogue.exception.ValidationException;
-import gr.uoa.di.madgik.resourcecatalogue.service.MigrationService;
-import gr.uoa.di.madgik.resourcecatalogue.service.ProviderService;
-import gr.uoa.di.madgik.resourcecatalogue.service.ServiceBundleService;
-import gr.uoa.di.madgik.resourcecatalogue.service.TrainingResourceService;
-import gr.uoa.di.madgik.resourcecatalogue.service.SecurityService;
+import gr.uoa.di.madgik.resourcecatalogue.service.*;
 import gr.uoa.di.madgik.resourcecatalogue.utils.FacetFilterUtils;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.domain.Paging;
@@ -53,6 +49,7 @@ public class ProviderController {
     private final TrainingResourceService<TrainingResourceBundle> trainingResourceService;
     private final SecurityService securityService;
     private final MigrationService migrationService;
+    private final GenericResourceService genericResourceService;
 
     @Value("${project.catalogue.name}")
     private String catalogueName;
@@ -67,12 +64,14 @@ public class ProviderController {
     ProviderController(ProviderService<ProviderBundle, Authentication> service,
                        ServiceBundleService<ServiceBundle> serviceBundleService,
                        TrainingResourceService<TrainingResourceBundle> trainingResourceService,
-                       SecurityService securityService, MigrationService migrationService) {
+                       SecurityService securityService, MigrationService migrationService,
+                       GenericResourceService genericResourceService) {
         this.providerService = service;
         this.serviceBundleService = serviceBundleService;
         this.trainingResourceService = trainingResourceService;
         this.securityService = securityService;
         this.migrationService = migrationService;
+        this.genericResourceService = genericResourceService;
     }
 
     // Deletes the Provider with the given id.
@@ -190,62 +189,12 @@ public class ProviderController {
     })
     @GetMapping(path = "bundle/all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
-    public ResponseEntity<Paging<ProviderBundle>> getAllProviderBundles(@Parameter(hidden = true) @RequestParam Map<String, Object> allRequestParams, @Parameter(hidden = true) Authentication auth,
-                                                                        @RequestParam(required = false) Set<String> status, @RequestParam(required = false) Set<String> templateStatus,
-                                                                        @RequestParam(required = false) Set<String> auditState, @RequestParam(required = false) Set<String> catalogue_id) {
-        FacetFilter ff = new FacetFilter();
-        if (allRequestParams.get("suspended") != null) {
-            ff.addFilter("suspended", allRequestParams.get("suspended"));
-        }
-        if (allRequestParams.get("active") != null) {
-            ff.addFilter("active", allRequestParams.get("active"));
-        }
-        ff.setKeyword(allRequestParams.get("query") != null ? (String) allRequestParams.remove("query") : "");
-        ff.setFrom(allRequestParams.get("from") != null ? Integer.parseInt((String) allRequestParams.remove("from")) : 0);
-        ff.setQuantity(allRequestParams.get("quantity") != null ? Integer.parseInt((String) allRequestParams.remove("quantity")) : 10);
-        Map<String, Object> sort = new HashMap<>();
-        Map<String, Object> order = new HashMap<>();
-        String orderDirection = allRequestParams.get("order") != null ? (String) allRequestParams.remove("order") : "asc";
-        String orderField = allRequestParams.get("orderField") != null ? (String) allRequestParams.remove("orderField") : null;
-        if (orderField != null) {
-            order.put("order", orderDirection);
-            sort.put(orderField, order);
-            ff.setOrderBy(sort);
-        }
-        if (status != null) {
-            ff.addFilter("status", status);
-        }
-        if (templateStatus != null) {
-            ff.addFilter("templateStatus", templateStatus);
-        }
-        Set<String> catalogueNameToSet = new LinkedHashSet<>();
-        if (catalogue_id != null) {
-            if (catalogue_id.contains("all")) {
-                catalogueNameToSet.add("all");
-                ff.addFilter("catalogue_id", catalogueNameToSet);
-            } else {
-                ff.addFilter("catalogue_id", catalogue_id);
-            }
-        } else {
-            catalogueNameToSet.add(catalogueName);
-            ff.addFilter("catalogue_id", catalogueNameToSet);
-        }
+    public ResponseEntity<Paging<ProviderBundle>> getAllProviderBundles(@Parameter(hidden = true) @RequestParam MultiValueMap<String, Object> allRequestParams) {
+        FacetFilter ff = FacetFilterUtils.createFacetFilter(allRequestParams);
+        ff.setResourceType("provider");
         ff.addFilter("published", false);
-
-        List<Map<String, Object>> records = providerService.createQueryForProviderFilters(ff, orderDirection, orderField);
-        List<ProviderBundle> ret = new ArrayList<>();
-        Paging<ProviderBundle> retPaging = providerService.getAll(ff, auth);
-        if (records != null && !records.isEmpty()) {
-            for (Map<String, Object> record : records) {
-                ret.add(providerService.get((String) record.get("catalogue_id"), (String) record.get("resource_internal_id"), auth));
-            }
-        }
-        if (auditState == null) {
-            return ResponseEntity.ok(providerService.createCorrectQuantityFacets(ret, retPaging, ff.getQuantity(), ff.getFrom()));
-        } else {
-            Paging<ProviderBundle> retWithAuditState = providerService.determineAuditState(auditState, ff, ret, auth);
-            return ResponseEntity.ok(retWithAuditState);
-        }
+        Paging<ProviderBundle> paging = genericResourceService.getResults(ff);
+        return ResponseEntity.ok(paging);
     }
 
     @Operation(summary = "Get a list of services offered by a Provider.")
@@ -257,12 +206,13 @@ public class ProviderController {
     @Browse
     @GetMapping(path = "byCatalogue/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isCatalogueAdmin(#auth,#id)")
-    public ResponseEntity<Paging<ProviderBundle>> getProvidersByCatalogue(@Parameter(hidden = true) @RequestParam Map<String, Object> allRequestParams, @Parameter(hidden = true) Authentication auth,
-                                                                          @RequestParam(required = false) Set<String> status, @RequestParam(required = false) Set<String> templateStatus,
-                                                                          @RequestParam(required = false) Set<String> auditState, @PathVariable String id) {
-        Set<String> catalogueId = new LinkedHashSet<>();
-        catalogueId.add(id);
-        return getAllProviderBundles(allRequestParams, auth, status, templateStatus, auditState, catalogueId);
+    public ResponseEntity<Paging<ProviderBundle>> getProvidersByCatalogue(@Parameter(hidden = true) @RequestParam Map<String, Object> allRequestParams,
+                                                                          @PathVariable String id) {
+        FacetFilter ff = FacetFilterUtils.createFacetFilter(allRequestParams);
+        ff.setResourceType("provider");
+        ff.addFilter("catalogue_id", id);
+        Paging<ProviderBundle> paging = genericResourceService.getResults(ff);
+        return ResponseEntity.ok(paging);
     }
 
     // Get a list of Providers in which the given user is admin.
@@ -398,12 +348,12 @@ public class ProviderController {
 
     @PatchMapping(path = "auditProvider/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
-    public ResponseEntity<ProviderBundle> auditProvider(@PathVariable("id") String id, @RequestParam("catalogueId") String catalogueId,
+    public ResponseEntity<ProviderBundle> auditProvider(@PathVariable("id") String id,
+                                                        @RequestParam("catalogueId") String catalogueId,
                                                         @RequestParam(required = false) String comment,
-                                                        @RequestParam LoggingInfo.ActionType actionType, @Parameter(hidden = true) Authentication auth) {
+                                                        @RequestParam LoggingInfo.ActionType actionType,
+                                                        @Parameter(hidden = true) Authentication auth) {
         ProviderBundle provider = providerService.auditProvider(id, catalogueId, comment, actionType, auth);
-        logger.info("User '{}-{}' audited Provider with name '{}' of the '{}' Catalogue - [actionType: {}]", User.of(auth).getFullName(), User.of(auth).getEmail(),
-                provider.getProvider().getName(), provider.getProvider().getCatalogueId(), actionType);
         return new ResponseEntity<>(provider, HttpStatus.OK);
     }
 

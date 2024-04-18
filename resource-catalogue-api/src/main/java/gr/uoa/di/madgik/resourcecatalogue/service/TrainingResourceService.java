@@ -1,6 +1,5 @@
 package gr.uoa.di.madgik.resourcecatalogue.service;
 
-import gr.uoa.di.madgik.resourcecatalogue.domain.Bundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.LoggingInfo;
 import gr.uoa.di.madgik.resourcecatalogue.domain.TrainingResource;
 import gr.uoa.di.madgik.resourcecatalogue.domain.TrainingResourceBundle;
@@ -13,7 +12,6 @@ import org.springframework.security.core.Authentication;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 public interface TrainingResourceService<T> extends ResourceService<T, Authentication> {
 
@@ -250,15 +248,6 @@ public interface TrainingResourceService<T> extends ResourceService<T, Authentic
      * @return {@link T}
      */
     T changeProvider(String resourceId, String newProvider, String comment, Authentication auth);
-
-    /**
-     * Get a paging with all Training Resource Bundles belonging to a specific audit state
-     *
-     * @param ff         FacetFilter
-     * @param auditState Audit State
-     * @return {@link Paging}&lt;{@link Bundle}&lt;?&gt;&gt;
-     */
-    Paging<Bundle<?>> getAllForAdminWithAuditStates(FacetFilter ff, Set<String> auditState);
 
     /**
      * Get a specific Training Resource of the EOSC Catalogue, given its ID, or return null

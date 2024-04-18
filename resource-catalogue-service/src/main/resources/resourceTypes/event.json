@@ -45,6 +45,7 @@
         }
     ],
     "indexMapperClass": "gr.uoa.di.madgik.registry.index.DefaultIndexMapper",
+    "aliases": ["resourceTypes"],
     "name": "event",
     "payloadType": "json",
     "properties": {

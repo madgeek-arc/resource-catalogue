@@ -1478,6 +1478,8 @@ versions. The record's primary key for locating it in the EOSC-IF database.]]></
                 
         <xs:sequence>
                     
+          <xs:element minOccurs="0" name="auditState" type="xs:string"/>
+                    
           <xs:element minOccurs="0" ref="tns:interoperabilityRecord"/>
                     
           <xs:element minOccurs="0" name="status" type="xs:string"/>
@@ -1969,6 +1971,8 @@ For embedded providers (2) - legal status of the hosting legal entity. It is als
       <xs:extension base="tns:bundle">
                 
         <xs:sequence>
+                    
+          <xs:element minOccurs="0" name="auditState" type="xs:string"/>
                     
           <xs:element minOccurs="0" ref="tns:provider"/>
                     
@@ -2840,6 +2844,8 @@ infrastructures.]]></xs:documentation>
                 
         <xs:sequence>
                     
+          <xs:element minOccurs="0" name="auditState" type="xs:string"/>
+                    
           <xs:element minOccurs="0" ref="tns:resourceExtras"/>
                     
           <xs:element minOccurs="0" ref="tns:service"/>
@@ -3170,6 +3176,8 @@ that is the used scheme (e.g., Web Address URL, DOI, ARK, etc.).]]></xs:document
       <xs:extension base="tns:bundle">
                 
         <xs:sequence>
+                    
+          <xs:element minOccurs="0" name="auditState" type="xs:string"/>
                     
           <xs:element minOccurs="0" name="status" type="xs:string"/>
                     

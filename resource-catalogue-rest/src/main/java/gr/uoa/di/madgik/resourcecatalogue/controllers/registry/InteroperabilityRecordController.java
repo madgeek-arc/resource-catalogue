@@ -13,7 +13,6 @@ import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 
 
-import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -34,7 +33,6 @@ import org.springframework.web.bind.annotation.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 @RestController
@@ -132,18 +130,12 @@ public class InteroperabilityRecordController {
     @Parameter(name = "suspended", description = "Suspended", content = @Content(schema = @Schema(type = "boolean", defaultValue = "false")))
     @GetMapping(path = "bundle/all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
-    public ResponseEntity<Paging<?>> getAllBundles(@Parameter(hidden = true) @RequestParam MultiValueMap<String, Object> allRequestParams,
-                                                   @RequestParam(required = false) Set<String> auditState,
-                                                   @RequestParam(defaultValue = "all", name = "catalogue_id") String catalogueId,
-                                                   @RequestParam(defaultValue = "all", name = "provider_id") String providerId) {
-        FacetFilter ff = interoperabilityRecordService.createFacetFilterForFetchingInteroperabilityRecords(allRequestParams, catalogueId, providerId);
-        if (auditState == null) {
-            Paging<InteroperabilityRecordBundle> paging = genericResourceService.getResults(ff);
-            genericResourceService.sortFacets(paging.getFacets(), "provider_id");
-            return ResponseEntity.ok(paging);
-        } else {
-            return ResponseEntity.ok(interoperabilityRecordService.getAllForAdminWithAuditStates(ff, auditState));
-        }
+    public ResponseEntity<Paging<?>> getAllBundles(@Parameter(hidden = true) @RequestParam MultiValueMap<String, Object> allRequestParams) {
+        FacetFilter ff = FacetFilterUtils.createFacetFilter(allRequestParams);
+        ff.setResourceType("interoperability_record");
+        ff.addFilter("published", false);
+        Paging<ServiceBundle> paging = genericResourceService.getResults(ff);
+        return ResponseEntity.ok(paging);
     }
 
     @PatchMapping(path = "verify/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
@@ -181,12 +173,12 @@ public class InteroperabilityRecordController {
 
     @PatchMapping(path = "auditResource/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
-    public ResponseEntity<InteroperabilityRecordBundle> auditResource(@PathVariable("id") String id, @RequestParam("catalogueId") String catalogueId,
+    public ResponseEntity<InteroperabilityRecordBundle> auditResource(@PathVariable("id") String id,
+                                                                      @RequestParam("catalogueId") String catalogueId,
                                                                       @RequestParam(required = false) String comment,
-                                                                      @RequestParam LoggingInfo.ActionType actionType, @Parameter(hidden = true) Authentication auth) {
+                                                                      @RequestParam LoggingInfo.ActionType actionType,
+                                                                      @Parameter(hidden = true) Authentication auth) {
         InteroperabilityRecordBundle interoperabilityRecordBundle = interoperabilityRecordService.auditResource(id, catalogueId, comment, actionType, auth);
-        logger.info("User '{}-{}' audited Interoperability Record with name '{}' of the '{}' Catalogue - [actionType: {}]", User.of(auth).getFullName(), User.of(auth).getEmail(),
-                interoperabilityRecordBundle.getInteroperabilityRecord().getTitle(), interoperabilityRecordBundle.getInteroperabilityRecord().getCatalogueId(), actionType);
         return new ResponseEntity<>(interoperabilityRecordBundle, HttpStatus.OK);
     }
 

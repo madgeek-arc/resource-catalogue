@@ -3,6 +3,7 @@ package gr.uoa.di.madgik.resourcecatalogue.controllers.registry;
 import gr.uoa.di.madgik.resourcecatalogue.annotations.Browse;
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
 import gr.uoa.di.madgik.resourcecatalogue.exception.ValidationException;
+import gr.uoa.di.madgik.resourcecatalogue.service.GenericResourceService;
 import gr.uoa.di.madgik.resourcecatalogue.service.ProviderService;
 import gr.uoa.di.madgik.resourcecatalogue.service.TrainingResourceService;
 import gr.uoa.di.madgik.resourcecatalogue.utils.FacetFilterUtils;
@@ -47,6 +48,7 @@ public class TrainingResourceController {
     private final TrainingResourceService<TrainingResourceBundle> trainingResourceService;
     private final ProviderService<ProviderBundle, Authentication> providerService;
     private final DataSource commonDataSource;
+    private final GenericResourceService genericResourceService;
 
     @Value("${auditing.interval:6}")
     private String auditingInterval;
@@ -60,10 +62,11 @@ public class TrainingResourceController {
     @Autowired
     TrainingResourceController(TrainingResourceService<TrainingResourceBundle> trainingResourceService,
                                ProviderService<ProviderBundle, Authentication> providerService,
-                               DataSource commonDataSource) {
+                               DataSource commonDataSource, GenericResourceService genericResourceService) {
         this.trainingResourceService = trainingResourceService;
         this.providerService = providerService;
         this.commonDataSource = commonDataSource;
+        this.genericResourceService = genericResourceService;
     }
 
     @DeleteMapping(path = {"{id}"}, produces = {MediaType.APPLICATION_JSON_VALUE})
@@ -259,38 +262,26 @@ public class TrainingResourceController {
         return ResponseEntity.ok(trainingResources);
     }
 
-    // FIXME: query doesn't work when auditState != null.
     @Browse
     @Parameter(name = "suspended", description = "Suspended", content = @Content(schema = @Schema(type = "boolean", defaultValue = "false")))
     @GetMapping(path = "adminPage/all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
-    public ResponseEntity<Paging<?>> getAllTrainingResourcesForAdminPage(@Parameter(hidden = true) @RequestParam MultiValueMap<String, Object> allRequestParams,
-                                                                         @RequestParam(required = false) Set<String> auditState,
-                                                                         @RequestParam(defaultValue = "all", name = "catalogue_id") String catalogueId,
-                                                                         @Parameter(hidden = true) Authentication authentication) {
-
-        allRequestParams.addIfAbsent("catalogue_id", catalogueId);
-        if (catalogueId != null && catalogueId.equals("all")) {
-            allRequestParams.remove("catalogue_id");
-        }
+    public ResponseEntity<Paging<?>> getAllTrainingResourcesForAdminPage(@Parameter(hidden = true) @RequestParam MultiValueMap<String, Object> allRequestParams) {
         FacetFilter ff = FacetFilterUtils.createFacetFilter(allRequestParams);
+        ff.setResourceType("training_resource");
         ff.addFilter("published", false);
-
-        if (auditState == null) {
-            return ResponseEntity.ok(trainingResourceService.getAllForAdmin(ff, authentication));
-        } else {
-            return ResponseEntity.ok(trainingResourceService.getAllForAdminWithAuditStates(ff, auditState));
-        }
+        Paging<ServiceBundle> paging = genericResourceService.getResults(ff);
+        return ResponseEntity.ok(paging);
     }
 
     @PatchMapping(path = "auditResource/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
-    public ResponseEntity<TrainingResourceBundle> auditResource(@PathVariable("id") String id, @RequestParam("catalogueId") String catalogueId,
+    public ResponseEntity<TrainingResourceBundle> auditResource(@PathVariable("id") String id,
+                                                                @RequestParam("catalogueId") String catalogueId,
                                                                 @RequestParam(required = false) String comment,
-                                                                @RequestParam LoggingInfo.ActionType actionType, @Parameter(hidden = true) Authentication auth) {
+                                                                @RequestParam LoggingInfo.ActionType actionType,
+                                                                @Parameter(hidden = true) Authentication auth) {
         TrainingResourceBundle trainingResource = trainingResourceService.auditResource(id, catalogueId, comment, actionType, auth);
-        logger.info("User '{}-{}' audited Training Resource with name '{}' of the '{}' Catalogue - [actionType: {}]", User.of(auth).getFullName(), User.of(auth).getEmail(),
-                trainingResource.getTrainingResource().getTitle(), trainingResource.getTrainingResource().getCatalogueId(), actionType);
         return new ResponseEntity<>(trainingResource, HttpStatus.OK);
     }
 

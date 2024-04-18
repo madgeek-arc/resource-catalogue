@@ -3,9 +3,9 @@ package gr.uoa.di.madgik.resourcecatalogue.manager;
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
 import gr.uoa.di.madgik.resourcecatalogue.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.exception.ValidationException;
-import gr.uoa.di.madgik.resourcecatalogue.domain.*;
 import gr.uoa.di.madgik.resourcecatalogue.service.RegistrationMailService;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
+import gr.uoa.di.madgik.resourcecatalogue.utils.Auditable;
 import gr.uoa.di.madgik.resourcecatalogue.utils.ObjectUtils;
 import gr.uoa.di.madgik.resourcecatalogue.utils.ProviderResourcesCommonMethods;
 import gr.uoa.di.madgik.resourcecatalogue.validators.FieldValidator;
@@ -44,7 +44,6 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
     private final TrainingResourceService<TrainingResourceBundle> trainingResourceService;
     private final InteroperabilityRecordService<InteroperabilityRecordBundle> interoperabilityRecordService;
     private final ProviderResourcesCommonMethods commonMethods;
-    private final String columnsOfInterest = "catalogue_id, name"; // variable with DB tables a keyword is searched on
 
     @Value("${project.catalogue.name}")
     private String catalogueName;
@@ -173,7 +172,7 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
         catalogue.setLoggingInfo(loggingInfoList);
         catalogue.setActive(false);
         catalogue.setStatus(vocabularyService.get("pending catalogue").getId());
-        catalogue.setAuditState(CatalogueBundle.AuditState.NOT_AUDITED.getKey());
+        catalogue.setAuditState(Auditable.NOT_AUDITED);
 
         // latestOnboardingInfo
         catalogue.setLatestOnboardingInfo(loggingInfoList.get(0));
@@ -474,12 +473,11 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
     public CatalogueBundle auditCatalogue(String catalogueId, String comment, LoggingInfo.ActionType actionType, Authentication auth) {
         CatalogueBundle catalogue = get(catalogueId);
         commonMethods.auditResource(catalogue, comment, actionType, auth);
-        // TODO: if it works as expected, move below if statements to commonMethods.auditResource() - generalize
         if (actionType.getKey().equals(LoggingInfo.ActionType.VALID.getKey())) {
-            catalogue.setAuditState(CatalogueBundle.AuditState.VALID.getKey());
+            catalogue.setAuditState(Auditable.VALID);
         }
         if (actionType.getKey().equals(LoggingInfo.ActionType.INVALID.getKey())) {
-            catalogue.setAuditState(CatalogueBundle.AuditState.INVALID_AND_NOT_UPDATED.getKey());
+            catalogue.setAuditState(Auditable.INVALID_AND_NOT_UPDATED);
         }
         logger.info("User '{}-{}' audited Catalogue '{}'-'{}' with [actionType: {}]",
                 User.of(auth).getFullName(), User.of(auth).getEmail(),

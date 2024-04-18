@@ -10,6 +10,7 @@ import gr.uoa.di.madgik.resourcecatalogue.exception.ResourceException;
 import gr.uoa.di.madgik.resourcecatalogue.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.exception.ValidationException;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
+import gr.uoa.di.madgik.resourcecatalogue.utils.Auditable;
 import gr.uoa.di.madgik.resourcecatalogue.utils.ObjectUtils;
 import gr.uoa.di.madgik.resourcecatalogue.utils.ProviderResourcesCommonMethods;
 import org.apache.logging.log4j.LogManager;
@@ -25,7 +26,6 @@ import org.springframework.security.core.Authentication;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import static gr.uoa.di.madgik.resourcecatalogue.config.Properties.Cache.CACHE_FEATURED;
@@ -165,6 +165,7 @@ public class ServiceBundleManager extends AbstractServiceBundleManager<ServiceBu
 
         // LoggingInfo
         serviceBundle.setLoggingInfo(loggingInfoList);
+        serviceBundle.setAuditState(Auditable.NOT_AUDITED);
 
         logger.info("Adding Service: {}", serviceBundle);
         ServiceBundle ret;
@@ -256,6 +257,7 @@ public class ServiceBundleManager extends AbstractServiceBundleManager<ServiceBu
         ret.setActive(existingService.isActive());
         ret.setStatus(existingService.getStatus());
         ret.setSuspended(existingService.isSuspended());
+        ret.setAuditState(commonMethods.determineAuditState(ret.getLoggingInfo()));
 
         // if Resource's status = "rejected resource", update to "pending resource" & Provider templateStatus to "pending template"
         if (existingService.getStatus().equals(vocabularyService.get("rejected resource").getId())) {
@@ -527,12 +529,20 @@ public class ServiceBundleManager extends AbstractServiceBundleManager<ServiceBu
         ServiceBundle service = get(serviceId, catalogueId);
         ProviderBundle provider = providerService.get(catalogueId, service.getService().getResourceOrganisation(), auth);
         commonMethods.auditResource(service, comment, actionType, auth);
+        if (actionType.getKey().equals(LoggingInfo.ActionType.VALID.getKey())) {
+            service.setAuditState(Auditable.VALID);
+        }
+        if (actionType.getKey().equals(LoggingInfo.ActionType.INVALID.getKey())) {
+            service.setAuditState(Auditable.INVALID_AND_NOT_UPDATED);
+        }
 
         // send notification emails to Provider Admins
         registrationMailService.notifyProviderAdminsForBundleAuditing(service, "Service",
                 service.getService().getName(), provider.getProvider().getUsers());
 
-        logger.info(String.format("Auditing Service [%s]-[%s]", catalogueId, serviceId));
+        logger.info("User '{}-{}' audited Service '{}'-'{}' with [actionType: {}]",
+                User.of(auth).getFullName(), User.of(auth).getEmail(),
+                service.getService().getId(), service.getService().getName(), actionType);
         return super.update(service, auth);
     }
 
@@ -743,9 +753,4 @@ public class ServiceBundleManager extends AbstractServiceBundleManager<ServiceBu
         }
         return super.update(serviceBundle, auth);
     }
-
-    public Paging<Bundle<?>> getAllForAdminWithAuditStates(FacetFilter ff, Set<String> auditState) {
-        return commonMethods.getAllForAdminWithAuditStates(ff, auditState, this.resourceType.getName());
-    }
-
 }

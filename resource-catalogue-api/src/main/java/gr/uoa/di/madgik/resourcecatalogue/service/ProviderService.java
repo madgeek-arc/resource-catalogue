@@ -11,8 +11,6 @@ import org.springframework.security.core.Authentication;
 
 import java.net.URL;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 public interface ProviderService<T, U extends Authentication> extends ResourceService<T, Authentication> {
 
@@ -212,41 +210,6 @@ public interface ProviderService<T, U extends Authentication> extends ResourceSe
      * @return {@link Paging}&lt;{@link LoggingInfo}&gt;
      */
     Paging<LoggingInfo> getLoggingInfoHistory(String id, String catalogueId);
-
-    /**
-     * Determine the corresponding Audit State for a List of Providers
-     *
-     * @param auditState Audit State
-     * @param ff         FacetFilter
-     * @param ret        List of Providers
-     * @param auth       Authentication
-     * @return {@link Paging}&lt;{@link ProviderBundle}&gt;
-     */
-    Paging<ProviderBundle> determineAuditState(Set<String> auditState, FacetFilter ff, List<ProviderBundle> ret,
-                                               Authentication auth);
-
-    /**
-     * Creates a query for searching Providers
-     *
-     * @param ff             FacetFilter
-     * @param orderDirection ASC/DSC
-     * @param orderField     Field of ordering
-     * @return {@link List}&lt;{@link Map}&lt;{@link String}, {@link Object}&gt;&gt;
-     */
-    List<Map<String, Object>> createQueryForProviderFilters(FacetFilter ff, String orderDirection, String orderField);
-
-    /**
-     * Create correct quantity facets when searching Providers with audit state
-     *
-     * @param providerBundle       Provider Bundle
-     * @param providerBundlePaging Paging with Provider Bundles
-     * @param quantity             Quantity facet filter
-     * @param from                 From facet filter
-     * @return {@link Paging}&lt;{@link ProviderBundle}&gt;
-     */
-    Paging<ProviderBundle> createCorrectQuantityFacets(List<ProviderBundle> providerBundle,
-                                                       Paging<ProviderBundle> providerBundlePaging, int quantity,
-                                                       int from);
 
     /**
      * Get a Provider's rejected resources

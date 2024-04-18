@@ -1,5 +1,7 @@
 package gr.uoa.di.madgik.resourcecatalogue.domain;
 
+import gr.uoa.di.madgik.resourcecatalogue.utils.Auditable;
+
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
@@ -8,10 +10,13 @@ import java.util.Objects;
 //@Document
 @XmlType
 @XmlRootElement(namespace = "http://einfracentral.eu")
-public class TrainingResourceBundle extends Bundle<TrainingResource> {
+public class TrainingResourceBundle extends Bundle<TrainingResource> implements Auditable {
 
     @XmlElement
     private String status;
+
+    @XmlElement
+    private String auditState;
 
     public TrainingResourceBundle() {
         // No arg constructor
@@ -27,12 +32,14 @@ public class TrainingResourceBundle extends Bundle<TrainingResource> {
         this.setMetadata(metadata);
     }
 
-    public String getStatus() {
-        return status;
+    @Override
+    public String getId() {
+        return super.getId();
     }
 
-    public void setStatus(String status) {
-        this.status = status;
+    @Override
+    public void setId(String id) {
+        super.setId(id);
     }
 
     @XmlElement(name = "trainingResource")
@@ -44,21 +51,27 @@ public class TrainingResourceBundle extends Bundle<TrainingResource> {
         this.setPayload(trainingResource);
     }
 
-    //    @Id
-    @Override
-    public String getId() {
-        return super.getId();
+    public String getStatus() {
+        return status;
     }
 
-    @Override
-    public void setId(String id) {
-        super.setId(id);
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public String getAuditState() {
+        return auditState;
+    }
+
+    public void setAuditState(String auditState) {
+        this.auditState = auditState;
     }
 
     @Override
     public String toString() {
         return "TrainingResourceBundle{" +
                 "status='" + status + '\'' +
+                ", auditState='" + auditState + '\'' +
                 '}';
     }
 
@@ -68,12 +81,12 @@ public class TrainingResourceBundle extends Bundle<TrainingResource> {
         if (o == null || getClass() != o.getClass()) return false;
         if (!super.equals(o)) return false;
         TrainingResourceBundle that = (TrainingResourceBundle) o;
-        return Objects.equals(status, that.status);
+        return Objects.equals(status, that.status) && Objects.equals(auditState, that.auditState);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), status);
+        return Objects.hash(super.hashCode(), status, auditState);
     }
 }
 
