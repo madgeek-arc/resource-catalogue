@@ -4,7 +4,6 @@ import gr.uoa.di.madgik.registry.service.SearchService;
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
 import gr.uoa.di.madgik.resourcecatalogue.exception.ValidationException;
 import gr.uoa.di.madgik.resourcecatalogue.service.RegistrationMailService;
-import gr.uoa.di.madgik.resourcecatalogue.utils.DefaultFacetLabelService;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
 import gr.uoa.di.madgik.registry.domain.Browsing;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
@@ -16,7 +15,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.mitre.openid.connect.model.OIDCAuthenticationToken;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.core.Authentication;
@@ -86,7 +84,7 @@ public class VocabularyCurationManager extends ResourceManager<VocabularyCuratio
         vocabularyCuration.setResolutionDate(null);
         vocabularyCuration.setResolutionUser(null);
         for (VocabularyEntryRequest vocEntryRequest : vocabularyCuration.getVocabularyEntryRequests()) {
-            vocEntryRequest.setDateOfRequest(now());
+            vocEntryRequest.setDateOfRequest(DateUtils.truncate(new Date(), Calendar.DAY_OF_MONTH));
             vocEntryRequest.setUserId(((OIDCAuthenticationToken) auth).getUserInfo().getEmail());
         }
         // if vocabularyCuration doesn't exist
@@ -243,10 +241,6 @@ public class VocabularyCurationManager extends ResourceManager<VocabularyCuratio
         return vocabularyCuration;
     }
 
-    public Date now() {
-        return DateUtils.truncate(new Date(), Calendar.DAY_OF_MONTH);
-    }
-
     public Browsing<VocabularyCuration> getAllVocabularyCurationRequests(FacetFilter ff, Authentication auth) {
         List<String> browseBy = new ArrayList<>();
         browseBy.add("vocabulary");
@@ -264,7 +258,7 @@ public class VocabularyCurationManager extends ResourceManager<VocabularyCuratio
 
     public void approveOrRejectVocabularyCuration(VocabularyCuration vocabularyCuration, boolean approved, String rejectionReason, Authentication authentication) {
         vocabularyCuration.setResolutionUser(User.of(authentication).getEmail());
-        vocabularyCuration.setResolutionDate(now());
+        vocabularyCuration.setResolutionDate(DateUtils.truncate(new Date(), Calendar.DAY_OF_MONTH));
         logger.info("Updating VocabularyRequest " + vocabularyCuration.getEntryValueName());
         if (approved) {
             vocabularyCuration.setStatus(VocabularyCuration.Status.APPROVED.getKey());

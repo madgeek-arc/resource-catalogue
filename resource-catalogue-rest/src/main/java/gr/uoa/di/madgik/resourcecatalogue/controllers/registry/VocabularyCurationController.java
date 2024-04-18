@@ -1,5 +1,6 @@
 package gr.uoa.di.madgik.resourcecatalogue.controllers.registry;
 
+import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.annotations.Browse;
 import gr.uoa.di.madgik.resourcecatalogue.domain.VocabularyCuration;
 import gr.uoa.di.madgik.resourcecatalogue.utils.FacetFilterUtils;
@@ -21,6 +22,7 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
 
 
+import java.util.List;
 import java.util.Set;
 
 @RestController
@@ -79,4 +81,18 @@ public class VocabularyCurationController extends ResourceController<VocabularyC
         vocabularyCurationService.approveOrRejectVocabularyCuration(vocabularyCuration, approved, rejectionReason, authentication);
     }
 
+    @Override
+    @DeleteMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public ResponseEntity<VocabularyCuration> delete(@RequestBody VocabularyCuration vocabularyCuration,
+                                                     @Parameter(hidden = true) Authentication auth) throws ResourceNotFoundException {
+        return super.delete(vocabularyCuration, auth);
+    }
+
+    @Override
+    @DeleteMapping(path = "all", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public ResponseEntity<List<VocabularyCuration>> delAll(@Parameter(hidden = true) Authentication auth) {
+        throw new UnsupportedOperationException("Not Implemented Yet!");
+    }
 }
