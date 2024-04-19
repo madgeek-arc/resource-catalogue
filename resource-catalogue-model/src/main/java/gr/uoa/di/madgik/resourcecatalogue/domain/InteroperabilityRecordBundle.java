@@ -1,7 +1,5 @@
 package gr.uoa.di.madgik.resourcecatalogue.domain;
 
-import gr.uoa.di.madgik.resourcecatalogue.utils.Auditable;
-
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
@@ -9,7 +7,7 @@ import java.util.Objects;
 
 @XmlType
 @XmlRootElement(namespace = "http://einfracentral.eu")
-public class InteroperabilityRecordBundle extends Bundle<InteroperabilityRecord> implements Auditable {
+public class InteroperabilityRecordBundle extends Bundle<InteroperabilityRecord> {
 
     @XmlElement
     private String status;

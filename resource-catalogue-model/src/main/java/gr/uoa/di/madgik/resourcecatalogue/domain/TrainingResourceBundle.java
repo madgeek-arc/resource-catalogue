@@ -1,7 +1,5 @@
 package gr.uoa.di.madgik.resourcecatalogue.domain;
 
-import gr.uoa.di.madgik.resourcecatalogue.utils.Auditable;
-
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
@@ -10,7 +8,7 @@ import java.util.Objects;
 //@Document
 @XmlType
 @XmlRootElement(namespace = "http://einfracentral.eu")
-public class TrainingResourceBundle extends Bundle<TrainingResource> implements Auditable {
+public class TrainingResourceBundle extends Bundle<TrainingResource> {
 
     @XmlElement
     private String status;
