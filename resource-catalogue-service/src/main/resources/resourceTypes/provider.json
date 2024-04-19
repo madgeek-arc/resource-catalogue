@@ -58,10 +58,24 @@
             "type": "java.lang.String"
         },
         {
+            "label": "Scientific Domain",
+            "multivalued": true,
+            "name": "scientific_domains",
+            "path": "$.provider.scientificDomains[*]",
+            "type": "java.lang.String"
+        },
+        {
             "label": "Scientific Subdomain",
             "multivalued": true,
             "name": "scientific_subdomains",
             "path": "$.provider.scientificDomains[*].scientificSubdomain",
+            "type": "java.lang.String"
+        },
+        {
+            "label": "Meril Scientific Domain",
+            "multivalued": true,
+            "name": "meril_scientific_domains",
+            "path": "$.provider.merilScientificDomains[*]",
             "type": "java.lang.String"
         },
         {

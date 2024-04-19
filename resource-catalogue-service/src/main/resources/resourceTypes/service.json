@@ -44,10 +44,24 @@
             "type": "java.lang.String"
         },
         {
+            "label": "Category",
+            "multivalued": true,
+            "name": "categories",
+            "path": "$.service.categories[*]",
+            "type": "java.lang.String"
+        },
+        {
             "label": "Subcategory",
             "multivalued": true,
             "name": "subcategories",
             "path": "$.service.categories[*].subcategory",
+            "type": "java.lang.String"
+        },
+        {
+            "label": "Scientific Domain",
+            "multivalued": true,
+            "name": "scientific_domains",
+            "path": "$.service.scientificDomains[*]",
             "type": "java.lang.String"
         },
         {

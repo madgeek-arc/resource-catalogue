@@ -44,6 +44,13 @@
             "type": "java.lang.String"
         },
         {
+            "label": "Scientific Domain",
+            "multivalued": true,
+            "name": "scientific_domains",
+            "path": "$.catalogue.scientificDomains[*]",
+            "type": "java.lang.String"
+        },
+        {
             "label": "Scientific Subdomain",
             "multivalued": true,
             "name": "scientific_subdomains",

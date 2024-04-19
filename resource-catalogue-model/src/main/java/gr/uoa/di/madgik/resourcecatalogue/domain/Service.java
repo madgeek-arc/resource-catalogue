@@ -139,7 +139,6 @@ public class Service implements Identifiable {
     @FieldValidation
     private List<ServiceProviderDomain> scientificDomains;
 
-    // TO BE DEPRECATED - MARCH 2024
     /**
      * A named group of Resources that offer access to the same type of Resources.
      */
