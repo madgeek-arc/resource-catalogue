@@ -2,12 +2,10 @@ package gr.uoa.di.madgik.resourcecatalogue.controllers.publicresources;
 
 import com.google.gson.Gson;
 import gr.uoa.di.madgik.resourcecatalogue.annotations.Browse;
+import gr.uoa.di.madgik.resourcecatalogue.annotations.BrowseCatalogue;
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
+import gr.uoa.di.madgik.resourcecatalogue.service.*;
 import gr.uoa.di.madgik.resourcecatalogue.utils.FacetFilterUtils;
-import gr.uoa.di.madgik.resourcecatalogue.service.HelpdeskService;
-import gr.uoa.di.madgik.resourcecatalogue.service.MonitoringService;
-import gr.uoa.di.madgik.resourcecatalogue.service.ResourceService;
-import gr.uoa.di.madgik.resourcecatalogue.service.SecurityService;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.domain.Paging;
 
@@ -24,8 +22,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
-
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -42,17 +38,20 @@ public class PublicServiceExtensionsController {
     private final ResourceService<HelpdeskBundle, Authentication> publicHelpdeskManager;
     private final MonitoringService<MonitoringBundle, Authentication> monitoringService;
     private final ResourceService<MonitoringBundle, Authentication> publicMonitoringManager;
+    private final GenericResourceService genericResourceService;
 
     public PublicServiceExtensionsController(SecurityService securityService,
                                              HelpdeskService<HelpdeskBundle, Authentication> helpdeskService,
                                              MonitoringService<MonitoringBundle, Authentication> monitoringService,
                                              @Qualifier("publicHelpdeskManager") ResourceService<HelpdeskBundle, Authentication> publicHelpdeskManager,
-                                             @Qualifier("publicMonitoringManager") ResourceService<MonitoringBundle, Authentication> publicMonitoringManager) {
+                                             @Qualifier("publicMonitoringManager") ResourceService<MonitoringBundle, Authentication> publicMonitoringManager,
+                                             GenericResourceService genericResourceService) {
         this.securityService = securityService;
         this.helpdeskService = helpdeskService;
         this.monitoringService = monitoringService;
         this.publicHelpdeskManager = publicHelpdeskManager;
         this.publicMonitoringManager = publicMonitoringManager;
+        this.genericResourceService = genericResourceService;
     }
 
     //SECTION: HELPDESK
@@ -100,55 +99,26 @@ public class PublicServiceExtensionsController {
 
     @Operation(description = "Filter a list of Public Helpdesks based on a set of filters or get a list of all Public Resources in the Catalogue.")
     @Browse
-//    @Parameter(name = "suspended", description = "Suspended", content = @Content(schema = @Schema(type = "boolean", defaultValue = "false")))
+    @BrowseCatalogue
     @GetMapping(path = "public/helpdesk/all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    public ResponseEntity<Paging<Helpdesk>> getAllPublicHelpdesks(@Parameter(hidden = true) @RequestParam Map<String, Object> allRequestParams,
-                                                                  @RequestParam(defaultValue = "all", name = "catalogue_id") String catalogueId,
-                                                                  @Parameter(hidden = true) Authentication auth) {
-        allRequestParams.putIfAbsent("catalogue_id", catalogueId);
-        if (catalogueId != null && catalogueId.equals("all")) {
-            allRequestParams.remove("catalogue_id");
-        }
+    public ResponseEntity<Paging<Helpdesk>> getAllPublicHelpdesks(@Parameter(hidden = true) @RequestParam Map<String, Object> allRequestParams) {
         FacetFilter ff = FacetFilterUtils.createFacetFilter(allRequestParams);
+        ff.setResourceType("helpdesk");
         ff.addFilter("published", true);
-        if (auth != null && auth.isAuthenticated() && (securityService.hasRole(auth, "ROLE_ADMIN") || securityService.hasRole(auth, "ROLE_EPOT"))) {
-            logger.info("Getting all published Helpdesks for Admin/Epot");
-        } else {
-            ff.addFilter("active", true);
-        }
-        List<Helpdesk> helpdeskList = new LinkedList<>();
-        Paging<HelpdeskBundle> helpdeskBundlePaging = publicHelpdeskManager.getAll(ff, auth);
-        for (HelpdeskBundle helpdeskBundle : helpdeskBundlePaging.getResults()) {
-            helpdeskList.add(helpdeskBundle.getHelpdesk());
-        }
-        Paging<Helpdesk> helpdeskPaging = new Paging<>(helpdeskBundlePaging.getTotal(), helpdeskBundlePaging.getFrom(),
-                helpdeskBundlePaging.getTo(), helpdeskList, helpdeskBundlePaging.getFacets());
-        return new ResponseEntity<>(helpdeskPaging, HttpStatus.OK);
+        Paging<Helpdesk> paging = genericResourceService.getResults(ff).map(r -> ((HelpdeskBundle) r).getPayload());
+        return ResponseEntity.ok(paging);
     }
 
     @Browse
-//    @Parameter(name = "suspended", description = "Suspended", content = @Content(schema = @Schema(type = "boolean", defaultValue = "false")))
+    @BrowseCatalogue
     @GetMapping(path = "public/helpdesk/adminPage/all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
-    public ResponseEntity<Paging<HelpdeskBundle>> getAllPublicHelpdeskBundles(@Parameter(hidden = true) @RequestParam Map<String, Object> allRequestParams,
-                                                                              @RequestParam(defaultValue = "all", name = "catalogue_id") String catalogueId,
-                                                                              @Parameter(hidden = true) Authentication auth) {
-        allRequestParams.putIfAbsent("catalogue_id", catalogueId);
-        if (catalogueId != null && catalogueId.equals("all")) {
-            allRequestParams.remove("catalogue_id");
-        }
+    public ResponseEntity<Paging<HelpdeskBundle>> getAllPublicHelpdeskBundles(@Parameter(hidden = true) @RequestParam Map<String, Object> allRequestParams) {
         FacetFilter ff = FacetFilterUtils.createFacetFilter(allRequestParams);
+        ff.setResourceType("helpdesk");
         ff.addFilter("published", true);
-        if (auth != null && auth.isAuthenticated() && (securityService.hasRole(auth, "ROLE_ADMIN") || securityService.hasRole(auth, "ROLE_EPOT"))) {
-            logger.info("Getting all published Helpdesks for Admin/Epot");
-        } else {
-            ff.addFilter("active", true);
-        }
-        Paging<HelpdeskBundle> helpdeskBundlePaging = helpdeskService.getAll(ff, auth);
-        List<HelpdeskBundle> helpdeskBundleList = new LinkedList<>(helpdeskBundlePaging.getResults());
-        Paging<HelpdeskBundle> helpdeskPaging = new Paging<>(helpdeskBundlePaging.getTotal(), helpdeskBundlePaging.getFrom(),
-                helpdeskBundlePaging.getTo(), helpdeskBundleList, helpdeskBundlePaging.getFacets());
-        return new ResponseEntity<>(helpdeskPaging, HttpStatus.OK);
+        Paging<HelpdeskBundle> paging = genericResourceService.getResults(ff);
+        return ResponseEntity.ok(paging);
     }
 
     @GetMapping(path = "public/helpdesk/my", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
@@ -206,55 +176,25 @@ public class PublicServiceExtensionsController {
 
     @Operation(description = "Filter a list of Public Monitorings based on a set of filters or get a list of all Public Resources in the Catalogue.")
     @Browse
-//    @Parameter(name = "suspended", description = "Suspended", content = @Content(schema = @Schema(type = "boolean", defaultValue = "false")))
+    @BrowseCatalogue
     @GetMapping(path = "public/monitoring/all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    public ResponseEntity<Paging<Monitoring>> getAllPublicMonitorings(@Parameter(hidden = true) @RequestParam Map<String, Object> allRequestParams,
-                                                                      @RequestParam(defaultValue = "all", name = "catalogue_id") String catalogueId,
-                                                                      @Parameter(hidden = true) Authentication auth) {
-        allRequestParams.putIfAbsent("catalogue_id", catalogueId);
-        if (catalogueId != null && catalogueId.equals("all")) {
-            allRequestParams.remove("catalogue_id");
-        }
+    public ResponseEntity<Paging<Monitoring>> getAllPublicMonitorings(@Parameter(hidden = true) @RequestParam Map<String, Object> allRequestParams) {
         FacetFilter ff = FacetFilterUtils.createFacetFilter(allRequestParams);
+        ff.setResourceType("monitoring");
         ff.addFilter("published", true);
-        if (auth != null && auth.isAuthenticated() && (securityService.hasRole(auth, "ROLE_ADMIN") || securityService.hasRole(auth, "ROLE_EPOT"))) {
-            logger.info("Getting all published Monitorings for Admin/Epot");
-        } else {
-            ff.addFilter("active", true);
-        }
-        List<Monitoring> monitoringList = new LinkedList<>();
-        Paging<MonitoringBundle> monitoringBundlePaging = publicMonitoringManager.getAll(ff, auth);
-        for (MonitoringBundle monitoringBundle : monitoringBundlePaging.getResults()) {
-            monitoringList.add(monitoringBundle.getMonitoring());
-        }
-        Paging<Monitoring> monitoringPaging = new Paging<>(monitoringBundlePaging.getTotal(), monitoringBundlePaging.getFrom(),
-                monitoringBundlePaging.getTo(), monitoringList, monitoringBundlePaging.getFacets());
-        return new ResponseEntity<>(monitoringPaging, HttpStatus.OK);
+        Paging<Monitoring> paging = genericResourceService.getResults(ff).map(r -> ((MonitoringBundle) r).getPayload());
+        return ResponseEntity.ok(paging);
     }
 
     @Browse
-//    @Parameter(name = "suspended", description = "Suspended", content = @Content(schema = @Schema(type = "boolean", defaultValue = "false")))
     @GetMapping(path = "public/monitoring/adminPage/all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
-    public ResponseEntity<Paging<MonitoringBundle>> getAllPublicMonitoringBundles(@Parameter(hidden = true) @RequestParam Map<String, Object> allRequestParams,
-                                                                                  @RequestParam(defaultValue = "all", name = "catalogue_id") String catalogueId,
-                                                                                  @Parameter(hidden = true) Authentication auth) {
-        allRequestParams.putIfAbsent("catalogue_id", catalogueId);
-        if (catalogueId != null && catalogueId.equals("all")) {
-            allRequestParams.remove("catalogue_id");
-        }
+    public ResponseEntity<Paging<MonitoringBundle>> getAllPublicMonitoringBundles(@Parameter(hidden = true) @RequestParam Map<String, Object> allRequestParams) {
         FacetFilter ff = FacetFilterUtils.createFacetFilter(allRequestParams);
+        ff.setResourceType("monitoring");
         ff.addFilter("published", true);
-        if (auth != null && auth.isAuthenticated() && (securityService.hasRole(auth, "ROLE_ADMIN") || securityService.hasRole(auth, "ROLE_EPOT"))) {
-            logger.info("Getting all published Monitorings for Admin/Epot");
-        } else {
-            ff.addFilter("active", true);
-        }
-        Paging<MonitoringBundle> monitoringBundlePaging = monitoringService.getAll(ff, auth);
-        List<MonitoringBundle> monitoringBundleList = new LinkedList<>(monitoringBundlePaging.getResults());
-        Paging<MonitoringBundle> monitoringPaging = new Paging<>(monitoringBundlePaging.getTotal(), monitoringBundlePaging.getFrom(),
-                monitoringBundlePaging.getTo(), monitoringBundleList, monitoringBundlePaging.getFacets());
-        return new ResponseEntity<>(monitoringPaging, HttpStatus.OK);
+        Paging<MonitoringBundle> paging = genericResourceService.getResults(ff);
+        return ResponseEntity.ok(paging);
     }
 
     @GetMapping(path = "public/monitoring/my", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})

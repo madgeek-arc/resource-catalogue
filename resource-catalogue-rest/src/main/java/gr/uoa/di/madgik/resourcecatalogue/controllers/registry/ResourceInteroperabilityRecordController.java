@@ -1,15 +1,17 @@
 package gr.uoa.di.madgik.resourcecatalogue.controllers.registry;
 
 import gr.uoa.di.madgik.resourcecatalogue.annotations.Browse;
+import gr.uoa.di.madgik.resourcecatalogue.annotations.BrowseCatalogue;
+import gr.uoa.di.madgik.resourcecatalogue.domain.DatasourceBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.ResourceInteroperabilityRecord;
 import gr.uoa.di.madgik.resourcecatalogue.domain.ResourceInteroperabilityRecordBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.User;
+import gr.uoa.di.madgik.resourcecatalogue.service.GenericResourceService;
 import gr.uoa.di.madgik.resourcecatalogue.utils.FacetFilterUtils;
 import gr.uoa.di.madgik.resourcecatalogue.service.ResourceInteroperabilityRecordService;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
-
 
 import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
@@ -24,7 +26,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
-
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -37,9 +38,12 @@ public class ResourceInteroperabilityRecordController {
     private static final Logger logger = LogManager.getLogger(ResourceInteroperabilityRecordController.class);
 
     private final ResourceInteroperabilityRecordService<ResourceInteroperabilityRecordBundle> resourceInteroperabilityRecordService;
+    private final GenericResourceService genericResourceService;
 
-    public ResourceInteroperabilityRecordController(ResourceInteroperabilityRecordService<ResourceInteroperabilityRecordBundle> resourceInteroperabilityRecordService) {
+    public ResourceInteroperabilityRecordController(ResourceInteroperabilityRecordService<ResourceInteroperabilityRecordBundle> resourceInteroperabilityRecordService,
+                                                    GenericResourceService genericResourceService) {
         this.resourceInteroperabilityRecordService = resourceInteroperabilityRecordService;
+        this.genericResourceService = genericResourceService;
     }
 
     @Operation(summary = "Returns the ResourceInteroperabilityRecord with the given id.")
@@ -51,24 +55,14 @@ public class ResourceInteroperabilityRecordController {
 
     @Operation(summary = "Filter a list of ResourceInteroperabilityRecords based on a set of filters or get a list of all ResourceInteroperabilityRecords in the Catalogue.")
     @Browse
+    @BrowseCatalogue
     @GetMapping(path = "all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    public ResponseEntity<Paging<ResourceInteroperabilityRecord>> getAllResourceInteroperabilityRecords(@Parameter(hidden = true) @RequestParam Map<String, Object> allRequestParams,
-                                                                                                        @RequestParam(defaultValue = "all", name = "catalogue_id") String catalogueIds,
-                                                                                                        @Parameter(hidden = true) Authentication auth) {
-        allRequestParams.putIfAbsent("catalogue_id", catalogueIds);
-        if (catalogueIds != null && catalogueIds.equals("all")) {
-            allRequestParams.remove("catalogue_id");
-        }
+    public ResponseEntity<Paging<ResourceInteroperabilityRecord>> getAllResourceInteroperabilityRecords(@Parameter(hidden = true) @RequestParam Map<String, Object> allRequestParams) {
         FacetFilter ff = FacetFilterUtils.createFacetFilter(allRequestParams);
+        ff.setResourceType("resource_interoperability_record");
         ff.addFilter("published", false);
-        List<ResourceInteroperabilityRecord> resourceInteroperabilityRecordList = new LinkedList<>();
-        Paging<ResourceInteroperabilityRecordBundle> resourceInteroperabilityRecordBundlePaging = resourceInteroperabilityRecordService.getAll(ff, auth);
-        for (ResourceInteroperabilityRecordBundle resourceInteroperabilityRecordBundle : resourceInteroperabilityRecordBundlePaging.getResults()) {
-            resourceInteroperabilityRecordList.add(resourceInteroperabilityRecordBundle.getResourceInteroperabilityRecord());
-        }
-        Paging<ResourceInteroperabilityRecord> resourceInteroperabilityRecordPaging = new Paging<>(resourceInteroperabilityRecordBundlePaging.getTotal(), resourceInteroperabilityRecordBundlePaging.getFrom(),
-                resourceInteroperabilityRecordBundlePaging.getTo(), resourceInteroperabilityRecordList, resourceInteroperabilityRecordBundlePaging.getFacets());
-        return new ResponseEntity<>(resourceInteroperabilityRecordPaging, HttpStatus.OK);
+        Paging<ResourceInteroperabilityRecord> paging = genericResourceService.getResults(ff).map(r -> ((ResourceInteroperabilityRecordBundle) r).getPayload());
+        return ResponseEntity.ok(paging);
     }
 
     @Operation(summary = "Returns the ResourceInteroperabilityRecord of the given Resource of the given Catalogue.")

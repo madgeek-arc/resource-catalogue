@@ -2,16 +2,15 @@ package gr.uoa.di.madgik.resourcecatalogue.controllers.publicresources;
 
 import com.google.gson.Gson;
 import gr.uoa.di.madgik.resourcecatalogue.annotations.Browse;
-import gr.uoa.di.madgik.resourcecatalogue.domain.Datasource;
-import gr.uoa.di.madgik.resourcecatalogue.domain.DatasourceBundle;
-import gr.uoa.di.madgik.resourcecatalogue.domain.User;
+import gr.uoa.di.madgik.resourcecatalogue.annotations.BrowseCatalogue;
+import gr.uoa.di.madgik.resourcecatalogue.domain.*;
+import gr.uoa.di.madgik.resourcecatalogue.service.GenericResourceService;
 import gr.uoa.di.madgik.resourcecatalogue.utils.FacetFilterUtils;
 import gr.uoa.di.madgik.resourcecatalogue.service.DatasourceService;
 import gr.uoa.di.madgik.resourcecatalogue.service.ResourceService;
 import gr.uoa.di.madgik.resourcecatalogue.service.SecurityService;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.domain.Paging;
-
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -28,8 +27,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
-
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -44,13 +41,16 @@ public class PublicDatasourceController {
     private final SecurityService securityService;
     private final DatasourceService datasourceService;
     private final ResourceService<DatasourceBundle, Authentication> publicDatasourceManager;
+    private final GenericResourceService genericResourceService;
 
     public PublicDatasourceController(SecurityService securityService,
                                       DatasourceService datasourceService,
-                                      @Qualifier("publicDatasourceManager") ResourceService<DatasourceBundle, Authentication> publicDatasourceManager) {
+                                      @Qualifier("publicDatasourceManager") ResourceService<DatasourceBundle, Authentication> publicDatasourceManager,
+                                      GenericResourceService genericResourceService) {
         this.securityService = securityService;
         this.datasourceService = datasourceService;
         this.publicDatasourceManager = publicDatasourceManager;
+        this.genericResourceService = genericResourceService;
     }
 
     @Operation(summary = "Returns the Public Datasource with the given id.")
@@ -101,57 +101,29 @@ public class PublicDatasourceController {
 
     @Operation(summary = "Filter a list of Public Datasources based on a set of filters or get a list of all Public Resources in the Catalogue.")
     @Browse
+    @BrowseCatalogue
     @Parameter(name = "suspended", description = "Suspended", content = @Content(schema = @Schema(type = "boolean", defaultValue = "false")))
     @GetMapping(path = "public/datasource/all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    public ResponseEntity<Paging<Datasource>> getAllPublicDatasources(@Parameter(hidden = true) @RequestParam Map<String, Object> allRequestParams,
-                                                                      @RequestParam(defaultValue = "all", name = "catalogue_id") String catalogueId,
-                                                                      @Parameter(hidden = true) Authentication auth) {
-        allRequestParams.putIfAbsent("catalogue_id", catalogueId);
-        if (catalogueId != null && catalogueId.equals("all")) {
-            allRequestParams.remove("catalogue_id");
-        }
+    public ResponseEntity<Paging<Datasource>> getAllPublicDatasources(@Parameter(hidden = true) @RequestParam Map<String, Object> allRequestParams) {
         FacetFilter ff = FacetFilterUtils.createFacetFilter(allRequestParams);
+        ff.setResourceType("datasource");
         ff.addFilter("published", true);
-        if (auth != null && auth.isAuthenticated() && (securityService.hasRole(auth, "ROLE_ADMIN") || securityService.hasRole(auth, "ROLE_EPOT"))) {
-            logger.info("Getting all published Datasources for Admin/Epot");
-        } else {
-            ff.addFilter("active", true);
-            ff.addFilter("status", "approved datasource");
-        }
-        List<Datasource> datasourceList = new LinkedList<>();
-        Paging<DatasourceBundle> datasourceBundlePaging = publicDatasourceManager.getAll(ff, auth);
-        for (DatasourceBundle datasourceBundle : datasourceBundlePaging.getResults()) {
-            datasourceList.add(datasourceBundle.getDatasource());
-        }
-        Paging<Datasource> datasourcePaging = new Paging<>(datasourceBundlePaging.getTotal(), datasourceBundlePaging.getFrom(),
-                datasourceBundlePaging.getTo(), datasourceList, datasourceBundlePaging.getFacets());
-        return new ResponseEntity<>(datasourcePaging, HttpStatus.OK);
+        ff.addFilter("status", "approved datasource");
+        Paging<Datasource> paging = genericResourceService.getResults(ff).map(r -> ((DatasourceBundle) r).getPayload());
+        return ResponseEntity.ok(paging);
     }
 
     @Browse
+    @BrowseCatalogue
     @Parameter(name = "suspended", description = "Suspended", content = @Content(schema = @Schema(type = "boolean", defaultValue = "false")))
     @GetMapping(path = "public/datasource/adminPage/all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
-    public ResponseEntity<Paging<DatasourceBundle>> getAllPublicDatasourceBundles(@Parameter(hidden = true) @RequestParam Map<String, Object> allRequestParams,
-                                                                                  @RequestParam(defaultValue = "all", name = "catalogue_id") String catalogueId,
-                                                                                  @Parameter(hidden = true) Authentication auth) {
-        allRequestParams.putIfAbsent("catalogue_id", catalogueId);
-        if (catalogueId != null && catalogueId.equals("all")) {
-            allRequestParams.remove("catalogue_id");
-        }
+    public ResponseEntity<Paging<DatasourceBundle>> getAllPublicDatasourceBundles(@Parameter(hidden = true) @RequestParam Map<String, Object> allRequestParams) {
         FacetFilter ff = FacetFilterUtils.createFacetFilter(allRequestParams);
+        ff.setResourceType("datasource");
         ff.addFilter("published", true);
-        if (auth != null && auth.isAuthenticated() && (securityService.hasRole(auth, "ROLE_ADMIN") || securityService.hasRole(auth, "ROLE_EPOT"))) {
-            logger.info("Getting all published Datasources for Admin/Epot");
-        } else {
-            ff.addFilter("active", true);
-            ff.addFilter("status", "approved datasource");
-        }
-        Paging<DatasourceBundle> datasourceBundlePaging = datasourceService.getAll(ff, auth);
-        List<DatasourceBundle> datasourceBundleList = new LinkedList<>(datasourceBundlePaging.getResults());
-        Paging<DatasourceBundle> datasourcePaging = new Paging<>(datasourceBundlePaging.getTotal(), datasourceBundlePaging.getFrom(),
-                datasourceBundlePaging.getTo(), datasourceBundleList, datasourceBundlePaging.getFacets());
-        return new ResponseEntity<>(datasourcePaging, HttpStatus.OK);
+        Paging<DatasourceBundle> paging = genericResourceService.getResults(ff);
+        return ResponseEntity.ok(paging);
     }
 
     @GetMapping(path = "public/datasource/my", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})

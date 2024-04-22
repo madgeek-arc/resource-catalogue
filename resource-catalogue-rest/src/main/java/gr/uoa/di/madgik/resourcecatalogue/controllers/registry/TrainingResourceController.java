@@ -1,6 +1,7 @@
 package gr.uoa.di.madgik.resourcecatalogue.controllers.registry;
 
 import gr.uoa.di.madgik.resourcecatalogue.annotations.Browse;
+import gr.uoa.di.madgik.resourcecatalogue.annotations.BrowseCatalogue;
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
 import gr.uoa.di.madgik.resourcecatalogue.exception.ValidationException;
 import gr.uoa.di.madgik.resourcecatalogue.service.GenericResourceService;
@@ -11,7 +12,6 @@ import gr.uoa.di.madgik.registry.domain.Browsing;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
-
 
 import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
@@ -33,7 +33,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
-
 
 import javax.sql.DataSource;
 import java.util.*;
@@ -139,20 +138,17 @@ public class TrainingResourceController {
 
     @Operation(summary = "Filter a list of Training Resources based on a set of filters or get a list of all Training Resources in the Catalogue.")
     @Browse
+    @BrowseCatalogue
     @Parameter(name = "suspended", description = "Suspended", content = @Content(schema = @Schema(type = "boolean", defaultValue = "false")))
     @GetMapping(path = "all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    public ResponseEntity<Paging<TrainingResource>> getAllTrainingResources(@RequestParam(defaultValue = "all", name = "catalogue_id") String catalogueIds,
-                                                                            @Parameter(hidden = true) @RequestParam MultiValueMap<String, Object> allRequestParams,
-                                                                            @Parameter(hidden = true) Authentication authentication) {
-        allRequestParams.addIfAbsent("catalogue_id", catalogueIds);
-        if (catalogueIds != null && catalogueIds.equals("all")) {
-            allRequestParams.remove("catalogue_id");
-        }
+    public ResponseEntity<Paging<TrainingResource>> getAllTrainingResources(@Parameter(hidden = true) @RequestParam MultiValueMap<String, Object> allRequestParams) {
         FacetFilter ff = FacetFilterUtils.createFacetFilter(allRequestParams);
+        ff.setResourceType("training_resource");
         ff.addFilter("published", false);
-        Paging<TrainingResourceBundle> trainingResourceBundles = trainingResourceService.getAll(ff, authentication);
-        List<TrainingResource> trainingResources = trainingResourceBundles.getResults().stream().map(TrainingResourceBundle::getTrainingResource).collect(Collectors.toList());
-        return ResponseEntity.ok(new Paging<>(trainingResourceBundles.getTotal(), trainingResourceBundles.getFrom(), trainingResourceBundles.getTo(), trainingResources, trainingResourceBundles.getFacets()));
+        ff.addFilter("active", true);
+        ff.addFilter("status", "approved resource");
+        Paging<TrainingResource> paging = genericResourceService.getResults(ff).map(r -> ((TrainingResourceBundle) r).getPayload());
+        return ResponseEntity.ok(paging);
     }
 
     @GetMapping(path = "/childrenFromParent", produces = {MediaType.APPLICATION_JSON_VALUE})
@@ -198,21 +194,21 @@ public class TrainingResourceController {
         return ResponseEntity.ok(trainingResourceResults);
     }
 
-    // FIXME: active parameter for EPOT/ADMINS doesn't work, we always return everything to them
     @Browse
     @GetMapping(path = "byProvider/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
-//    @PreAuthorize("hasRole('ROLE_ADMIN') or @securityService.isProviderAdmin(#auth,#id,#catalogueId)")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isProviderAdmin(#auth,#id,#catalogueId)")
     public ResponseEntity<Paging<TrainingResourceBundle>> getTrainingResourcesByProvider(@Parameter(hidden = true) @RequestParam MultiValueMap<String, Object> allRequestParams,
                                                                                          @RequestParam(defaultValue = "${project.catalogue.name}", name = "catalogue_id") String catalogueId,
-                                                                                         @PathVariable String id, @Parameter(hidden = true) Authentication auth) {
-        allRequestParams.addIfAbsent("catalogue_id", catalogueId);
-        if (catalogueId != null && catalogueId.equals("all")) {
-            allRequestParams.remove("catalogue_id");
-        }
+                                                                                         @PathVariable String id,
+                                                                                         @Parameter(hidden = true) Authentication auth) {
         FacetFilter ff = FacetFilterUtils.createFacetFilter(allRequestParams);
-        ff.addFilter("resource_organisation", id);
+        ff.setResourceType("training_resource");
         ff.addFilter("published", false);
-        return ResponseEntity.ok(trainingResourceService.getAll(ff, auth));
+        ff.addFilter("catalogue_id", catalogueId);
+        ff.addFilter("resource_organisation", id);
+        ff.addFilter("active", true);
+        Paging<TrainingResourceBundle> paging = genericResourceService.getResults(ff);
+        return ResponseEntity.ok(paging);
     }
 
     @Browse
@@ -263,14 +259,15 @@ public class TrainingResourceController {
     }
 
     @Browse
+    @BrowseCatalogue
     @Parameter(name = "suspended", description = "Suspended", content = @Content(schema = @Schema(type = "boolean", defaultValue = "false")))
     @GetMapping(path = "adminPage/all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
-    public ResponseEntity<Paging<?>> getAllTrainingResourcesForAdminPage(@Parameter(hidden = true) @RequestParam MultiValueMap<String, Object> allRequestParams) {
+    public ResponseEntity<Paging<TrainingResourceBundle>> getAllTrainingResourcesForAdminPage(@Parameter(hidden = true) @RequestParam MultiValueMap<String, Object> allRequestParams) {
         FacetFilter ff = FacetFilterUtils.createFacetFilter(allRequestParams);
         ff.setResourceType("training_resource");
         ff.addFilter("published", false);
-        Paging<ServiceBundle> paging = genericResourceService.getResults(ff);
+        Paging<TrainingResourceBundle> paging = genericResourceService.getResults(ff);
         return ResponseEntity.ok(paging);
     }
 

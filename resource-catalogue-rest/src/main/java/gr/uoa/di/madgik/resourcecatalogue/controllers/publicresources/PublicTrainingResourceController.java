@@ -2,16 +2,17 @@ package gr.uoa.di.madgik.resourcecatalogue.controllers.publicresources;
 
 import com.google.gson.Gson;
 import gr.uoa.di.madgik.resourcecatalogue.annotations.Browse;
+import gr.uoa.di.madgik.resourcecatalogue.annotations.BrowseCatalogue;
 import gr.uoa.di.madgik.resourcecatalogue.domain.TrainingResource;
 import gr.uoa.di.madgik.resourcecatalogue.domain.TrainingResourceBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.User;
+import gr.uoa.di.madgik.resourcecatalogue.service.GenericResourceService;
 import gr.uoa.di.madgik.resourcecatalogue.service.ResourceService;
 import gr.uoa.di.madgik.resourcecatalogue.service.TrainingResourceService;
 import gr.uoa.di.madgik.resourcecatalogue.service.SecurityService;
 import gr.uoa.di.madgik.resourcecatalogue.utils.FacetFilterUtils;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.domain.Paging;
-
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -28,8 +29,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
-
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -45,14 +44,17 @@ public class PublicTrainingResourceController {
     private final SecurityService securityService;
     private final TrainingResourceService<TrainingResourceBundle> trainingResourceBundleService;
     private final ResourceService<TrainingResourceBundle, Authentication> publicTrainingResourceManager;
+    private final GenericResourceService genericResourceService;
 
 
     PublicTrainingResourceController(SecurityService securityService,
                                      TrainingResourceService<TrainingResourceBundle> trainingResourceBundleService,
-                                     @Qualifier("publicTrainingResourceManager") ResourceService<TrainingResourceBundle, Authentication> publicTrainingResourceManager) {
+                                     @Qualifier("publicTrainingResourceManager") ResourceService<TrainingResourceBundle, Authentication> publicTrainingResourceManager,
+                                     GenericResourceService genericResourceService) {
         this.securityService = securityService;
         this.trainingResourceBundleService = trainingResourceBundleService;
         this.publicTrainingResourceManager = publicTrainingResourceManager;
+        this.genericResourceService = genericResourceService;
     }
 
     @Operation(summary = "Returns the Public Training Resource with the given id.")
@@ -105,57 +107,30 @@ public class PublicTrainingResourceController {
 
     @Operation(description = "Filter a list of Public Training Resources based on a set of filters or get a list of all Public Training Resources in the Catalogue.")
     @Browse
+    @BrowseCatalogue
     @Parameter(name = "suspended", description = "Suspended", content = @Content(schema = @Schema(type = "boolean", defaultValue = "false")))
     @GetMapping(path = "public/trainingResource/all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    public ResponseEntity<Paging<TrainingResource>> getAllPublicTrainingResources(@Parameter(hidden = true) @RequestParam Map<String, Object> allRequestParams,
-                                                                                  @RequestParam(defaultValue = "all", name = "catalogue_id") String catalogueId,
-                                                                                  @Parameter(hidden = true) Authentication auth) {
-        allRequestParams.putIfAbsent("catalogue_id", catalogueId);
-        if (catalogueId != null && catalogueId.equals("all")) {
-            allRequestParams.remove("catalogue_id");
-        }
+    public ResponseEntity<Paging<TrainingResource>> getAllPublicTrainingResources(@Parameter(hidden = true) @RequestParam Map<String, Object> allRequestParams) {
         FacetFilter ff = FacetFilterUtils.createFacetFilter(allRequestParams);
+        ff.setResourceType("training_resource");
         ff.addFilter("published", true);
-        if (auth != null && auth.isAuthenticated() && (securityService.hasRole(auth, "ROLE_ADMIN") || securityService.hasRole(auth, "ROLE_EPOT"))) {
-            logger.info("Getting all published Training Resources for Admin/Epot");
-        } else {
-            ff.addFilter("active", true);
-            ff.addFilter("status", "approved resource");
-        }
-        List<TrainingResource> trainingResourceList = new LinkedList<>();
-        Paging<TrainingResourceBundle> trainingResourceBundlePaging = publicTrainingResourceManager.getAll(ff, auth);
-        for (TrainingResourceBundle trainingResourceBundle : trainingResourceBundlePaging.getResults()) {
-            trainingResourceList.add(trainingResourceBundle.getTrainingResource());
-        }
-        Paging<TrainingResource> trainingResourcePaging = new Paging<>(trainingResourceBundlePaging.getTotal(), trainingResourceBundlePaging.getFrom(),
-                trainingResourceBundlePaging.getTo(), trainingResourceList, trainingResourceBundlePaging.getFacets());
-        return new ResponseEntity<>(trainingResourcePaging, HttpStatus.OK);
+        ff.addFilter("active", true);
+        ff.addFilter("status", "approved resource");
+        Paging<TrainingResource> paging = genericResourceService.getResults(ff).map(r -> ((TrainingResourceBundle) r).getPayload());
+        return ResponseEntity.ok(paging);
     }
 
     @Browse
+    @BrowseCatalogue
     @Parameter(name = "suspended", description = "Suspended", content = @Content(schema = @Schema(type = "boolean", defaultValue = "false")))
     @GetMapping(path = "public/trainingResource/adminPage/all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
-    public ResponseEntity<Paging<TrainingResourceBundle>> getAllPublicTrainingResourceBundles(@Parameter(hidden = true) @RequestParam Map<String, Object> allRequestParams,
-                                                                                              @RequestParam(defaultValue = "all", name = "catalogue_id") String catalogueId,
-                                                                                              @Parameter(hidden = true) Authentication auth) {
-        allRequestParams.putIfAbsent("catalogue_id", catalogueId);
-        if (catalogueId != null && catalogueId.equals("all")) {
-            allRequestParams.remove("catalogue_id");
-        }
+    public ResponseEntity<Paging<TrainingResourceBundle>> getAllPublicTrainingResourceBundles(@Parameter(hidden = true) @RequestParam Map<String, Object> allRequestParams) {
         FacetFilter ff = FacetFilterUtils.createFacetFilter(allRequestParams);
+        ff.setResourceType("training_resource");
         ff.addFilter("published", true);
-        if (auth != null && auth.isAuthenticated() && (securityService.hasRole(auth, "ROLE_ADMIN") || securityService.hasRole(auth, "ROLE_EPOT"))) {
-            logger.info("Getting all published Training Resources for Admin/Epot");
-        } else {
-            ff.addFilter("active", true);
-            ff.addFilter("status", "approved resource");
-        }
-        Paging<TrainingResourceBundle> trainingResourceBundlePaging = trainingResourceBundleService.getAll(ff, auth);
-        List<TrainingResourceBundle> trainingResourceBundleList = new LinkedList<>(trainingResourceBundlePaging.getResults());
-        Paging<TrainingResourceBundle> trainingResourcePaging = new Paging<>(trainingResourceBundlePaging.getTotal(), trainingResourceBundlePaging.getFrom(),
-                trainingResourceBundlePaging.getTo(), trainingResourceBundleList, trainingResourceBundlePaging.getFacets());
-        return new ResponseEntity<>(trainingResourcePaging, HttpStatus.OK);
+        Paging<TrainingResourceBundle> paging = genericResourceService.getResults(ff);
+        return ResponseEntity.ok(paging);
     }
 
     @GetMapping(path = "public/trainingResource/my", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})

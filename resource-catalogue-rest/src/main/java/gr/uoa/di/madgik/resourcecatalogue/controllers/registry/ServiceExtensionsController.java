@@ -4,10 +4,12 @@ import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import gr.uoa.di.madgik.resourcecatalogue.annotations.Browse;
+import gr.uoa.di.madgik.resourcecatalogue.annotations.BrowseCatalogue;
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
 import gr.uoa.di.madgik.resourcecatalogue.dto.MonitoringStatus;
 import gr.uoa.di.madgik.resourcecatalogue.dto.ServiceType;
 import gr.uoa.di.madgik.resourcecatalogue.exception.ResourceException;
+import gr.uoa.di.madgik.resourcecatalogue.service.GenericResourceService;
 import gr.uoa.di.madgik.resourcecatalogue.utils.FacetFilterUtils;
 import gr.uoa.di.madgik.resourcecatalogue.service.HelpdeskService;
 import gr.uoa.di.madgik.resourcecatalogue.service.MonitoringService;
@@ -18,7 +20,6 @@ import gr.uoa.di.madgik.resourcecatalogue.validators.MonitoringValidator;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
-
 
 import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
@@ -36,7 +37,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
-
 
 import javax.validation.Valid;
 import java.time.OffsetDateTime;
@@ -57,6 +57,7 @@ public class ServiceExtensionsController {
     private String monitoringStatus;
     @Value("${argo.grnet.monitoring.token}")
     private String monitoringToken;
+    private final GenericResourceService genericResourceService;
 
     @InitBinder("helpdesk")
     protected void initHelpdeskBinder(WebDataBinder binder) {
@@ -71,10 +72,12 @@ public class ServiceExtensionsController {
     @Autowired
     ServiceExtensionsController(HelpdeskService<HelpdeskBundle, Authentication> helpdeskService,
                                 MonitoringService<MonitoringBundle, Authentication> monitoringService,
-                                ServiceBundleService<ServiceBundle> serviceBundleService) {
+                                ServiceBundleService<ServiceBundle> serviceBundleService,
+                                GenericResourceService genericResourceService) {
         this.helpdeskService = helpdeskService;
         this.monitoringService = monitoringService;
         this.serviceBundleService = serviceBundleService;
+        this.genericResourceService = genericResourceService;
     }
 
     //SECTION: HELPDESK
@@ -111,23 +114,14 @@ public class ServiceExtensionsController {
 
     @Operation(summary = "Filter a list of Helpdesks based on a set of filters or get a list of all Helpdesks in the Catalogue.")
     @Browse
+    @BrowseCatalogue
     @GetMapping(path = "/helpdesk/all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    public ResponseEntity<Paging<Helpdesk>> getAllHelpdesks(@Parameter(hidden = true) @RequestParam Map<String, Object> allRequestParams,
-                                                            @RequestParam(defaultValue = "all", name = "catalogue_id") String catalogueIds,
-                                                            @Parameter(hidden = true) Authentication auth) {
-        allRequestParams.putIfAbsent("catalogue_id", catalogueIds);
-        if (catalogueIds != null && catalogueIds.equals("all")) {
-            allRequestParams.remove("catalogue_id");
-        }
+    public ResponseEntity<Paging<Helpdesk>> getAllHelpdesks(@Parameter(hidden = true) @RequestParam Map<String, Object> allRequestParams) {
         FacetFilter ff = FacetFilterUtils.createFacetFilter(allRequestParams);
-        List<Helpdesk> helpdeskList = new LinkedList<>();
-        Paging<HelpdeskBundle> helpdeskBundlePaging = helpdeskService.getAll(ff, auth);
-        for (HelpdeskBundle helpdeskBundle : helpdeskBundlePaging.getResults()) {
-            helpdeskList.add(helpdeskBundle.getHelpdesk());
-        }
-        Paging<Helpdesk> helpdeskPaging = new Paging<>(helpdeskBundlePaging.getTotal(), helpdeskBundlePaging.getFrom(),
-                helpdeskBundlePaging.getTo(), helpdeskList, helpdeskBundlePaging.getFacets());
-        return new ResponseEntity<>(helpdeskPaging, HttpStatus.OK);
+        ff.setResourceType("helpdesk");
+        ff.addFilter("published", false);
+        Paging<Helpdesk> paging = genericResourceService.getResults(ff).map(r -> ((HelpdeskBundle) r).getPayload());
+        return ResponseEntity.ok(paging);
     }
 
     @Operation(summary = "Creates a new Helpdesk.")
@@ -253,22 +247,12 @@ public class ServiceExtensionsController {
     @Operation(summary = "Filter a list of Monitorings based on a set of filters or get a list of all Monitorings in the Catalogue.")
     @Browse
     @GetMapping(path = "monitoring/all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    public ResponseEntity<Paging<Monitoring>> getAllMonitorings(@Parameter(hidden = true) @RequestParam Map<String, Object> allRequestParams,
-                                                                @RequestParam(defaultValue = "all", name = "catalogue_id") String catalogueIds,
-                                                                @Parameter(hidden = true) Authentication auth) {
-        allRequestParams.putIfAbsent("catalogue_id", catalogueIds);
-        if (catalogueIds != null && catalogueIds.equals("all")) {
-            allRequestParams.remove("catalogue_id");
-        }
+    public ResponseEntity<Paging<Monitoring>> getAllMonitorings(@Parameter(hidden = true) @RequestParam Map<String, Object> allRequestParams) {
         FacetFilter ff = FacetFilterUtils.createFacetFilter(allRequestParams);
-        List<Monitoring> monitoringList = new LinkedList<>();
-        Paging<MonitoringBundle> monitoringBundlePaging = monitoringService.getAll(ff, auth);
-        for (MonitoringBundle monitoringBundle : monitoringBundlePaging.getResults()) {
-            monitoringList.add(monitoringBundle.getMonitoring());
-        }
-        Paging<Monitoring> monitoringPaging = new Paging<>(monitoringBundlePaging.getTotal(), monitoringBundlePaging.getFrom(),
-                monitoringBundlePaging.getTo(), monitoringList, monitoringBundlePaging.getFacets());
-        return new ResponseEntity<>(monitoringPaging, HttpStatus.OK);
+        ff.setResourceType("monitoring");
+        ff.addFilter("published", false);
+        Paging<Monitoring> paging = genericResourceService.getResults(ff).map(r -> ((MonitoringBundle) r).getPayload());
+        return ResponseEntity.ok(paging);
     }
 
     @Operation(summary = "Returns all the available Monitoring serviceTypes")

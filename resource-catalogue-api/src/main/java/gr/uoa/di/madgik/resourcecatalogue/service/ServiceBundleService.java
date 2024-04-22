@@ -10,7 +10,6 @@ import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.registry.service.ResourceCRUDService;
 import gr.uoa.di.madgik.registry.service.SearchService;
 import org.springframework.security.core.Authentication;
-import org.springframework.util.MultiValueMap;
 
 import java.util.List;
 import java.util.Map;
@@ -293,33 +292,6 @@ public interface ServiceBundleService<T> extends ResourceCRUDService<T, Authenti
      * @return {@link T}
      */
     T createPublicResource(T resource, Authentication auth);
-
-    /**
-     * Create a FacetFilter for fetching Services
-     *
-     * @param allRequestParams {@link Map} of all the Requested Parameters given
-     * @param catalogueId      Catalogue ID
-     * @return {@link FacetFilter}
-     */
-    FacetFilter createFacetFilterForFetchingServices(Map<String, Object> allRequestParams, String catalogueId);
-
-    /**
-     * Create a FacetFilter for fetching Services
-     *
-     * @param allRequestParams {@link MultiValueMap} of all the Requested Parameters given
-     * @param catalogueId      Catalogue ID
-     * @return {@link FacetFilter}
-     */
-    FacetFilter createFacetFilterForFetchingServices(MultiValueMap<String, Object> allRequestParams,
-                                                     String catalogueId);
-
-    /**
-     * Updates the FacetFilter considering the authorization rights
-     *
-     * @param filter FacetFilter
-     * @param auth   Authorization
-     */
-    void updateFacetFilterConsideringTheAuthorization(FacetFilter filter, Authentication auth);
 
     /**
      * Suspend the Service given its ID

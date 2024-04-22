@@ -26,7 +26,6 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
-import org.springframework.util.MultiValueMap;
 import org.springframework.validation.Validator;
 
 import javax.annotation.PostConstruct;
@@ -153,7 +152,7 @@ public abstract class AbstractServiceBundleManager<T extends ServiceBundle> exte
     @Override
     public Browsing<T> getAll(FacetFilter filter, Authentication auth) {
         // if user is Unauthorized, return active/latest ONLY
-        updateFacetFilterConsideringTheAuthorization(filter, auth);
+        filter.addFilter("active", true);
 
         filter.setBrowseBy(browseBy);
         filter.setResourceType(getResourceType());
@@ -603,53 +602,5 @@ public abstract class AbstractServiceBundleManager<T extends ServiceBundle> exte
                 LoggingInfo.ActionType.UPDATED.getKey());
         loggingInfoList.add(loggingInfo);
         bundle.setLoggingInfo(loggingInfoList);
-    }
-
-    public FacetFilter createFacetFilterForFetchingServices(Map<String, Object> allRequestParams, String catalogueId) {
-        FacetFilter ff = FacetFilterUtils.createFacetFilter(allRequestParams);
-        allRequestParams.remove("catalogue_id");
-        if (catalogueId != null) {
-            if (!catalogueId.equals("all")) {
-                ff.addFilter("catalogue_id", catalogueId);
-            }
-        }
-        ff.addFilter("published", false);
-        ff.setResourceType("service");
-        return ff;
-    }
-
-    public FacetFilter createFacetFilterForFetchingServices(MultiValueMap<String, Object> allRequestParams, String catalogueId) {
-        FacetFilter ff = FacetFilterUtils.createFacetFilter(allRequestParams);
-        allRequestParams.remove("catalogue_id");
-        if (catalogueId != null) {
-            if (!catalogueId.equals("all")) {
-                ff.addFilter("catalogue_id", catalogueId);
-            }
-        }
-        ff.addFilter("published", false);
-        ff.setResourceType("service");
-        return ff;
-    }
-
-    public void updateFacetFilterConsideringTheAuthorization(FacetFilter filter, Authentication auth) {
-        // if user is Unauthorized, return active/latest ONLY
-        if (auth == null) {
-            filter.addFilter("active", true);
-        }
-        if (auth != null && auth.isAuthenticated()) {
-            // if user is Authorized with ROLE_USER, return active/latest ONLY
-            if (!securityService.hasRole(auth, "ROLE_PROVIDER") && !securityService.hasRole(auth, "ROLE_EPOT") &&
-                    !securityService.hasRole(auth, "ROLE_ADMIN")) {
-                filter.addFilter("active", true);
-            }
-        }
-    }
-
-    private List<String> getAllProviderIds() {
-        FacetFilter ff = new FacetFilter();
-        ff.setQuantity(10000);
-        ff.addFilter("published", false);
-        List<ProviderBundle> allProviders = providerService.getAll(ff, securityService.getAdminAccess()).getResults();
-        return allProviders.stream().map(Bundle::getId).collect(Collectors.toList());
     }
 }

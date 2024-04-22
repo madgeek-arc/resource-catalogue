@@ -1,6 +1,7 @@
 package gr.uoa.di.madgik.resourcecatalogue.controllers.registry;
 
 import gr.uoa.di.madgik.resourcecatalogue.annotations.Browse;
+import gr.uoa.di.madgik.resourcecatalogue.annotations.BrowseCatalogue;
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
 import gr.uoa.di.madgik.resourcecatalogue.dto.Value;
 import gr.uoa.di.madgik.resourcecatalogue.utils.FacetFilterUtils;
@@ -11,7 +12,6 @@ import gr.uoa.di.madgik.resourcecatalogue.service.SecurityService;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
-
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -28,7 +28,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
-
 
 import java.util.ArrayList;
 import java.util.List;
@@ -108,33 +107,30 @@ public class InteroperabilityRecordController {
 
     @Operation(summary = "Get all Interoperability Records")
     @Browse
+    @BrowseCatalogue
     @Parameter(name = "suspended", description = "Suspended", content = @Content(schema = @Schema(type = "boolean", defaultValue = "false")))
     @GetMapping(path = "all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    public ResponseEntity<Paging<InteroperabilityRecord>> getAll(@RequestParam(defaultValue = "all", name = "catalogue_id") String catalogueId,
-                                                                 @Parameter(hidden = true) @RequestParam Map<String, Object> allRequestParams,
-                                                                 @Parameter(hidden = true) Authentication auth) {
-        allRequestParams.putIfAbsent("catalogue_id", catalogueId);
-        if (catalogueId != null && catalogueId.equals("all")) {
-            allRequestParams.remove("catalogue_id");
-        }
+    public ResponseEntity<Paging<InteroperabilityRecord>> getAll(@Parameter(hidden = true) @RequestParam Map<String, Object> allRequestParams) {
         FacetFilter ff = FacetFilterUtils.createFacetFilter(allRequestParams);
+        ff.setResourceType("interoperability_record");
         ff.addFilter("published", false);
+        ff.addFilter("active", true);
         ff.addFilter("status", "approved interoperability record");
-        Paging<InteroperabilityRecordBundle> interoperabilityRecordPaging = interoperabilityRecordService.getAll(ff, auth);
-        List<InteroperabilityRecord> interoperabilityRecords = interoperabilityRecordPaging.getResults().stream().map(InteroperabilityRecordBundle::getInteroperabilityRecord).collect(Collectors.toList());
-        return ResponseEntity.ok(new Paging<>(interoperabilityRecordPaging.getTotal(), interoperabilityRecordPaging.getFrom(), interoperabilityRecordPaging.getTo(), interoperabilityRecords, interoperabilityRecordPaging.getFacets()));
+        Paging<InteroperabilityRecord> paging = genericResourceService.getResults(ff).map(r -> ((InteroperabilityRecordBundle) r).getPayload());
+        return ResponseEntity.ok(paging);
     }
 
     @Operation(summary = "Get all Interoperability Record Bundles")
     @Browse
+    @BrowseCatalogue
     @Parameter(name = "suspended", description = "Suspended", content = @Content(schema = @Schema(type = "boolean", defaultValue = "false")))
     @GetMapping(path = "bundle/all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
-    public ResponseEntity<Paging<?>> getAllBundles(@Parameter(hidden = true) @RequestParam MultiValueMap<String, Object> allRequestParams) {
+    public ResponseEntity<Paging<InteroperabilityRecordBundle>> getAllBundles(@Parameter(hidden = true) @RequestParam MultiValueMap<String, Object> allRequestParams) {
         FacetFilter ff = FacetFilterUtils.createFacetFilter(allRequestParams);
         ff.setResourceType("interoperability_record");
         ff.addFilter("published", false);
-        Paging<ServiceBundle> paging = genericResourceService.getResults(ff);
+        Paging<InteroperabilityRecordBundle> paging = genericResourceService.getResults(ff);
         return ResponseEntity.ok(paging);
     }
 
@@ -163,12 +159,19 @@ public class InteroperabilityRecordController {
 
     @Browse
     @GetMapping(path = "byProvider/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isProviderAdmin(#auth,#id,#catalogueId)")
     public ResponseEntity<Paging<InteroperabilityRecordBundle>> getInteroperabilityRecordsByProvider(@Parameter(hidden = true) @RequestParam MultiValueMap<String, Object> allRequestParams,
                                                                                                      @RequestParam(defaultValue = "${project.catalogue.name}", name = "catalogue_id") String catalogueId,
-                                                                                                     @PathVariable String id, @Parameter(hidden = true) Authentication auth) {
-        FacetFilter ff = interoperabilityRecordService.createFacetFilterForFetchingInteroperabilityRecords(allRequestParams, catalogueId, id);
-        interoperabilityRecordService.updateFacetFilterConsideringTheAuthorization(ff, auth);
-        return ResponseEntity.ok(genericResourceService.getResults(ff));
+                                                                                                     @PathVariable String id,
+                                                                                                     @Parameter(hidden = true) Authentication auth) {
+        FacetFilter ff = FacetFilterUtils.createFacetFilter(allRequestParams);
+        ff.setResourceType("interoperability_record");
+        ff.addFilter("published", false);
+        ff.addFilter("catalogue_id", catalogueId);
+        ff.addFilter("providerId", id);
+        ff.addFilter("active", true);
+        Paging<InteroperabilityRecordBundle> paging = genericResourceService.getResults(ff);
+        return ResponseEntity.ok(paging);
     }
 
     @PatchMapping(path = "auditResource/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})

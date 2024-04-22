@@ -12,6 +12,7 @@ import gr.uoa.di.madgik.resourcecatalogue.exception.ResourceException;
 import gr.uoa.di.madgik.resourcecatalogue.exception.ValidationException;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
 
+import gr.uoa.di.madgik.resourcecatalogue.utils.FacetFilterUtils;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.apache.logging.log4j.LogManager;
@@ -73,13 +74,16 @@ public class PendingServiceController extends ResourceController<ServiceBundle, 
 
     @Browse
     @GetMapping(path = "/byProvider/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isProviderAdmin(#auth,#id,true)")
-    public ResponseEntity<Paging<?>> getProviderPendingServices(@Parameter(hidden = true) @RequestParam MultiValueMap<String, Object> allRequestParams,
-                                                                @PathVariable String id, @Parameter(hidden = true) Authentication auth) {
-        FacetFilter ff = serviceBundleService.createFacetFilterForFetchingServices(allRequestParams, catalogueName);
-        ff.addFilter("resource_organisation", id);
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isProviderAdmin(#auth,#id)")
+    public ResponseEntity<Paging<ServiceBundle>> getProviderPendingServices(@Parameter(hidden = true) @RequestParam MultiValueMap<String, Object> allRequestParams,
+                                                                            @PathVariable String id,
+                                                                            @Parameter(hidden = true) Authentication auth) {
+        FacetFilter ff = FacetFilterUtils.createFacetFilter(allRequestParams);
         ff.setResourceType("pending_service");
-        Paging<?> paging = genericResourceService.getResults(ff);
+        ff.addFilter("published", false);
+        ff.addFilter("resource_organisation", id);
+        ff.addFilter("catalogue_id", catalogueName);
+        Paging<ServiceBundle> paging = genericResourceService.getResults(ff);
         return ResponseEntity.ok(paging);
     }
 

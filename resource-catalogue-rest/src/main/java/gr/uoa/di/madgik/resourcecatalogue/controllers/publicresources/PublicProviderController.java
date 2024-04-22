@@ -2,16 +2,15 @@ package gr.uoa.di.madgik.resourcecatalogue.controllers.publicresources;
 
 import com.google.gson.Gson;
 import gr.uoa.di.madgik.resourcecatalogue.annotations.Browse;
-import gr.uoa.di.madgik.resourcecatalogue.domain.Provider;
-import gr.uoa.di.madgik.resourcecatalogue.domain.ProviderBundle;
-import gr.uoa.di.madgik.resourcecatalogue.domain.User;
+import gr.uoa.di.madgik.resourcecatalogue.annotations.BrowseCatalogue;
+import gr.uoa.di.madgik.resourcecatalogue.domain.*;
+import gr.uoa.di.madgik.resourcecatalogue.service.GenericResourceService;
 import gr.uoa.di.madgik.resourcecatalogue.utils.FacetFilterUtils;
 import gr.uoa.di.madgik.resourcecatalogue.service.ProviderService;
 import gr.uoa.di.madgik.resourcecatalogue.service.ResourceService;
 import gr.uoa.di.madgik.resourcecatalogue.service.SecurityService;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.domain.Paging;
-
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -28,8 +27,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
-
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -44,13 +41,16 @@ public class PublicProviderController {
     private final SecurityService securityService;
     private final ProviderService<ProviderBundle, Authentication> providerService;
     private final ResourceService<ProviderBundle, Authentication> publicProviderManager;
+    private final GenericResourceService genericResourceService;
 
     public PublicProviderController(SecurityService securityService,
                                     ProviderService<ProviderBundle, Authentication> providerService,
-                                    @Qualifier("publicProviderManager") ResourceService<ProviderBundle, Authentication> publicProviderManager) {
+                                    @Qualifier("publicProviderManager") ResourceService<ProviderBundle, Authentication> publicProviderManager,
+                                    GenericResourceService genericResourceService) {
         this.securityService = securityService;
         this.providerService = providerService;
         this.publicProviderManager = publicProviderManager;
+        this.genericResourceService = genericResourceService;
     }
 
     @Operation(description = "Returns the Public Provider with the given id.")
@@ -104,57 +104,30 @@ public class PublicProviderController {
 
     @Operation(description = "Filter a list of Public Providers based on a set of filters or get a list of all Public Providers in the Catalogue.")
     @Browse
+    @BrowseCatalogue
     @Parameter(name = "suspended", description = "Suspended", content = @Content(schema = @Schema(type = "boolean", defaultValue = "false")))
     @GetMapping(path = "public/provider/all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    public ResponseEntity<Paging<Provider>> getAllPublicProviders(@Parameter(hidden = true) @RequestParam Map<String, Object> allRequestParams,
-                                                                  @RequestParam(defaultValue = "all", name = "catalogue_id") String catalogueId,
-                                                                  @Parameter(hidden = true) Authentication auth) {
-        allRequestParams.putIfAbsent("catalogue_id", catalogueId);
-        if (catalogueId != null && catalogueId.equals("all")) {
-            allRequestParams.remove("catalogue_id");
-        }
+    public ResponseEntity<Paging<Provider>> getAllPublicProviders(@Parameter(hidden = true) @RequestParam Map<String, Object> allRequestParams) {
         FacetFilter ff = FacetFilterUtils.createFacetFilter(allRequestParams);
+        ff.setResourceType("provider");
         ff.addFilter("published", true);
-        if (auth != null && auth.isAuthenticated() && (securityService.hasRole(auth, "ROLE_ADMIN") || securityService.hasRole(auth, "ROLE_EPOT"))) {
-            logger.info("Getting all published Providers for Admin/Epot");
-        } else {
-            ff.addFilter("active", true);
-            ff.addFilter("status", "approved provider");
-        }
-        List<Provider> providerList = new LinkedList<>();
-        Paging<ProviderBundle> providerBundlePaging = publicProviderManager.getAll(ff, auth);
-        for (ProviderBundle providerBundle : providerBundlePaging.getResults()) {
-            providerList.add(providerBundle.getProvider());
-        }
-        Paging<Provider> providerPaging = new Paging<>(providerBundlePaging.getTotal(), providerBundlePaging.getFrom(),
-                providerBundlePaging.getTo(), providerList, providerBundlePaging.getFacets());
-        return new ResponseEntity<>(providerPaging, HttpStatus.OK);
+        ff.addFilter("active", true);
+        ff.addFilter("status", "approved provider");
+        Paging<Provider> paging = genericResourceService.getResults(ff).map(r -> ((ProviderBundle) r).getPayload());
+        return ResponseEntity.ok(paging);
     }
 
     @Browse
+    @BrowseCatalogue
     @Parameter(name = "suspended", description = "Suspended", content = @Content(schema = @Schema(type = "boolean", defaultValue = "false")))
     @GetMapping(path = "public/provider/bundle/all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
-    public ResponseEntity<Paging<ProviderBundle>> getAllPublicProviderBundles(@Parameter(hidden = true) @RequestParam Map<String, Object> allRequestParams,
-                                                                              @RequestParam(defaultValue = "all", name = "catalogue_id") String catalogueId,
-                                                                              @Parameter(hidden = true) Authentication auth) {
-        allRequestParams.putIfAbsent("catalogue_id", catalogueId);
-        if (catalogueId != null && catalogueId.equals("all")) {
-            allRequestParams.remove("catalogue_id");
-        }
+    public ResponseEntity<Paging<ProviderBundle>> getAllPublicProviderBundles(@Parameter(hidden = true) @RequestParam Map<String, Object> allRequestParams) {
         FacetFilter ff = FacetFilterUtils.createFacetFilter(allRequestParams);
+        ff.setResourceType("provider");
         ff.addFilter("published", true);
-        if (auth != null && auth.isAuthenticated() && (securityService.hasRole(auth, "ROLE_ADMIN") || securityService.hasRole(auth, "ROLE_EPOT"))) {
-            logger.info("Getting all published Providers for Admin/Epot");
-        } else {
-            ff.addFilter("active", true);
-            ff.addFilter("status", "approved provider");
-        }
-        Paging<ProviderBundle> providerBundlePaging = providerService.getAll(ff, auth);
-        List<ProviderBundle> providerList = new LinkedList<>(providerBundlePaging.getResults());
-        Paging<ProviderBundle> providerPaging = new Paging<>(providerBundlePaging.getTotal(), providerBundlePaging.getFrom(),
-                providerBundlePaging.getTo(), providerList, providerBundlePaging.getFacets());
-        return new ResponseEntity<>(providerPaging, HttpStatus.OK);
+        Paging<ProviderBundle> paging = genericResourceService.getResults(ff);
+        return ResponseEntity.ok(paging);
     }
 
     @GetMapping(path = "public/provider/my", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})

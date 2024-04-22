@@ -2,10 +2,8 @@ package gr.uoa.di.madgik.resourcecatalogue.service;
 
 import gr.uoa.di.madgik.resourcecatalogue.domain.InteroperabilityRecordBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.LoggingInfo;
-import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.domain.Paging;
 import org.springframework.security.core.Authentication;
-import org.springframework.util.MultiValueMap;
 
 public interface InteroperabilityRecordService<T> extends ResourceService<T, Authentication> {
 
@@ -118,25 +116,6 @@ public interface InteroperabilityRecordService<T> extends ResourceService<T, Aut
      */
     Paging<InteroperabilityRecordBundle> getInteroperabilityRecordBundles(String catalogueId, String providerId,
                                                                           Authentication auth);
-
-    /**
-     * Create a FacetFilter for fetching Interoperability Records
-     *
-     * @param allRequestParams {@link MultiValueMap} of all the Requested Parameters given
-     * @param catalogueId      Catalogue ID
-     * @param providerId       Provider ID
-     * @return {@link FacetFilter}
-     */
-    FacetFilter createFacetFilterForFetchingInteroperabilityRecords(MultiValueMap<String, Object> allRequestParams,
-                                                                    String catalogueId, String providerId);
-
-    /**
-     * Updates the FacetFilter considering the authorization rights
-     *
-     * @param filter FacetFilter
-     * @param auth   Authorization
-     */
-    void updateFacetFilterConsideringTheAuthorization(FacetFilter filter, Authentication auth);
 
     /**
      * Audit an Interoperability Record

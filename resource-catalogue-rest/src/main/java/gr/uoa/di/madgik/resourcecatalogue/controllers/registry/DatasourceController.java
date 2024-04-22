@@ -1,6 +1,7 @@
 package gr.uoa.di.madgik.resourcecatalogue.controllers.registry;
 
 import gr.uoa.di.madgik.resourcecatalogue.annotations.Browse;
+import gr.uoa.di.madgik.resourcecatalogue.annotations.BrowseCatalogue;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Datasource;
 import gr.uoa.di.madgik.resourcecatalogue.domain.DatasourceBundle;
 import gr.uoa.di.madgik.resourcecatalogue.dto.OpenAIREMetrics;
@@ -11,7 +12,6 @@ import gr.uoa.di.madgik.resourcecatalogue.utils.FacetFilterUtils;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
-
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -29,10 +29,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
 
-
 import javax.validation.Valid;
 import java.io.IOException;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -79,31 +77,29 @@ public class DatasourceController {
 
     @Operation(description = "Filter a list of Datasources based on a set of filters or get a list of all Datasources in the Catalogue.")
     @Browse
+    @BrowseCatalogue
     @Parameter(name = "suspended", description = "Suspended", content = @Content(schema = @Schema(type = "boolean", defaultValue = "false")))
     @GetMapping(path = "/all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    public ResponseEntity<Paging<Datasource>> getAllDatasources(@Parameter(hidden = true) @RequestParam MultiValueMap<String, Object> allRequestParams,
-                                                                @RequestParam(defaultValue = "all", name = "catalogue_id") String catalogueId,
-                                                                @Parameter(hidden = true) Authentication auth) {
-        FacetFilter ff = createFacetFilterForFetchingDatasources(allRequestParams, catalogueId);
-        List<Datasource> datasourceList = new LinkedList<>();
-        Paging<DatasourceBundle> paging = genericResourceService.getResults(ff);
-        for (DatasourceBundle datasourceBundle : paging.getResults()) {
-            datasourceList.add(datasourceBundle.getDatasource());
-        }
-        Paging<Datasource> datasourcePaging = new Paging<>(paging.getTotal(), paging.getFrom(),
-                paging.getTo(), datasourceList, paging.getFacets());
-        return new ResponseEntity<>(datasourcePaging, HttpStatus.OK);
+    public ResponseEntity<Paging<Datasource>> getAllDatasources(@Parameter(hidden = true) @RequestParam MultiValueMap<String, Object> allRequestParams) {
+        FacetFilter ff = FacetFilterUtils.createFacetFilter(allRequestParams);
+        ff.setResourceType("datasource");
+        ff.addFilter("published", false);
+        ff.addFilter("active", true);
+        ff.addFilter("status", "approved datasource");
+        Paging<Datasource> paging = genericResourceService.getResults(ff).map(r -> ((DatasourceBundle) r).getPayload());
+        return ResponseEntity.ok(paging);
     }
 
     @Browse
+    @BrowseCatalogue
     @Parameter(name = "suspended", description = "Suspended", content = @Content(schema = @Schema(type = "boolean", defaultValue = "false")))
     @GetMapping(path = "adminPage/all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
-    public ResponseEntity<Paging<?>> getAllDatasourcesForAdminPage(@Parameter(hidden = true) @RequestParam MultiValueMap<String, Object> allRequestParams,
-                                                                   @RequestParam(defaultValue = "all", name = "catalogue_id") String catalogueId) {
-        FacetFilter ff = createFacetFilterForFetchingDatasources(allRequestParams, catalogueId);
-        Paging<?> paging = genericResourceService.getResults(ff);
-        genericResourceService.sortFacets(paging.getFacets(), "service_id");
+    public ResponseEntity<Paging<DatasourceBundle>> getAllDatasourcesForAdminPage(@Parameter(hidden = true) @RequestParam MultiValueMap<String, Object> allRequestParams) {
+        FacetFilter ff = FacetFilterUtils.createFacetFilter(allRequestParams);
+        ff.setResourceType("datasource");
+        ff.addFilter("published", false);
+        Paging<DatasourceBundle> paging = genericResourceService.getResults(ff);
         return ResponseEntity.ok(paging);
     }
 
@@ -207,25 +203,5 @@ public class DatasourceController {
     @GetMapping(path = "isMetricsValid/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
     public OpenAIREMetrics getOpenaireMetrics(@PathVariable("id") String id) {
         return openAIREDatasourceService.getMetrics(id);
-    }
-
-    /**
-     * Create a FacetFilter for fetching Datasources
-     *
-     * @param allRequestParams {@link MultiValueMap} of all the Requested Parameters given
-     * @param catalogueId      Catalogue ID
-     * @return {@link FacetFilter}
-     */
-    private FacetFilter createFacetFilterForFetchingDatasources(MultiValueMap<String, Object> allRequestParams, String catalogueId) {
-        FacetFilter ff = FacetFilterUtils.createFacetFilter(allRequestParams);
-        allRequestParams.remove("catalogue_id");
-        if (catalogueId != null) {
-            if (!catalogueId.equals("all")) {
-                ff.addFilter("catalogue_id", catalogueId);
-            }
-        }
-        ff.addFilter("published", false);
-        ff.setResourceType("datasource");
-        return ff;
     }
 }

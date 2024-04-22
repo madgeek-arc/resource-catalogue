@@ -1,6 +1,7 @@
 package gr.uoa.di.madgik.resourcecatalogue.controllers.registry;
 
 import gr.uoa.di.madgik.resourcecatalogue.annotations.Browse;
+import gr.uoa.di.madgik.resourcecatalogue.annotations.BrowseCatalogue;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Metadata;
 import gr.uoa.di.madgik.resourcecatalogue.domain.ServiceBundle;
 import gr.uoa.di.madgik.resourcecatalogue.service.ServiceBundleService;
@@ -9,6 +10,7 @@ import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 
+import gr.uoa.di.madgik.resourcecatalogue.utils.FacetFilterUtils;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.apache.logging.log4j.LogManager;
@@ -20,7 +22,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
-
 
 import java.util.List;
 import java.util.Map;
@@ -103,14 +104,14 @@ public class ServiceBundleController {
     }
 
     @Browse
+    @BrowseCatalogue
     @GetMapping(path = "all", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
-    public ResponseEntity<Paging<?>> getAll(@RequestParam(defaultValue = "all", name = "catalogue_id") String catalogueId,
-                                            @Parameter(hidden = true) @RequestParam Map<String, Object> allRequestParams,
-                                            @Parameter(hidden = true) Authentication authentication) {
-        FacetFilter ff = serviceBundleService.createFacetFilterForFetchingServices(allRequestParams, catalogueId);
-        serviceBundleService.updateFacetFilterConsideringTheAuthorization(ff, authentication);
-        Paging<?> paging = genericResourceService.getResults(ff);
+    public ResponseEntity<Paging<ServiceBundle>> getAll(@Parameter(hidden = true) @RequestParam Map<String, Object> allRequestParams) {
+        FacetFilter ff = FacetFilterUtils.createFacetFilter(allRequestParams);
+        ff.setResourceType("service");
+        ff.addFilter("published", false);
+        Paging<ServiceBundle> paging = genericResourceService.getResults(ff);
         return ResponseEntity.ok(paging);
     }
 

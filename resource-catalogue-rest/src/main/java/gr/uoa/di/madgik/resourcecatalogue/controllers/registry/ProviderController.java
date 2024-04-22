@@ -1,6 +1,7 @@
 package gr.uoa.di.madgik.resourcecatalogue.controllers.registry;
 
 import gr.uoa.di.madgik.resourcecatalogue.annotations.Browse;
+import gr.uoa.di.madgik.resourcecatalogue.annotations.BrowseCatalogue;
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
 import gr.uoa.di.madgik.resourcecatalogue.dto.ExtendedValue;
 import gr.uoa.di.madgik.resourcecatalogue.dto.MapValues;
@@ -11,7 +12,6 @@ import gr.uoa.di.madgik.resourcecatalogue.utils.FacetFilterUtils;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
-
 
 import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
@@ -32,7 +32,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
-
 
 import java.net.URL;
 import java.util.*;
@@ -152,25 +151,17 @@ public class ProviderController {
     @Operation(summary = "Filter a list of Providers based on a set of filters or get a list of all Providers in the Catalogue.",
             security = { @SecurityRequirement(name = "bearer-key") })
     @Browse
+    @BrowseCatalogue
     @Parameter(name = "suspended", description = "Suspended", content = @Content(schema = @Schema(type = "boolean", defaultValue = "false")))
     @GetMapping(path = "all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    public ResponseEntity<Paging<Provider>> getAll(@Parameter(hidden = true) @RequestParam MultiValueMap<String, Object> allRequestParams,
-                                                   @RequestParam(defaultValue = "all", name = "catalogue_id") String catalogueIds,
-                                                   @Parameter(hidden = true) Authentication auth) {
-        allRequestParams.putIfAbsent("catalogue_id", Collections.singletonList(catalogueIds));
-        if (catalogueIds != null && catalogueIds.equals("all")) {
-            allRequestParams.remove("catalogue_id");
-        }
+    public ResponseEntity<Paging<Provider>> getAll(@Parameter(hidden = true) @RequestParam MultiValueMap<String, Object> allRequestParams) {
         FacetFilter ff = FacetFilterUtils.createFacetFilter(allRequestParams);
+        ff.setResourceType("provider");
         ff.addFilter("published", false);
-        List<Provider> providerList = new LinkedList<>();
-        Paging<ProviderBundle> providerBundlePaging = providerService.getAll(ff, auth);
-        for (ProviderBundle providerBundle : providerBundlePaging.getResults()) {
-            providerList.add(providerBundle.getProvider());
-        }
-        Paging<Provider> providerPaging = new Paging<>(providerBundlePaging.getTotal(), providerBundlePaging.getFrom(),
-                providerBundlePaging.getTo(), providerList, providerBundlePaging.getFacets());
-        return new ResponseEntity<>(providerPaging, HttpStatus.OK);
+        ff.addFilter("active", true);
+        ff.addFilter("status", "approved provider");
+        Paging<Provider> paging = genericResourceService.getResults(ff).map(r -> ((ProviderBundle) r).getPayload());
+        return ResponseEntity.ok(paging);
     }
 
     @GetMapping(path = "bundle/{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
@@ -183,6 +174,7 @@ public class ProviderController {
 
     // Filter a list of Providers based on a set of filters or get a list of all Providers in the Catalogue.
     @Browse
+    @BrowseCatalogue
     @Parameters({
             @Parameter(name = "suspended", description = "Suspended", content = @Content(schema = @Schema(type = "boolean", defaultValue = "false"))),
             @Parameter(name = "active", description = "Active", content = @Content(schema = @Schema(type = "boolean", defaultValue = "true")))

@@ -1,16 +1,18 @@
 package gr.uoa.di.madgik.resourcecatalogue.controllers.publicresources;
 
 import com.google.gson.Gson;
+import gr.uoa.di.madgik.registry.domain.Browsing;
 import gr.uoa.di.madgik.resourcecatalogue.annotations.Browse;
+import gr.uoa.di.madgik.resourcecatalogue.annotations.BrowseCatalogue;
+import gr.uoa.di.madgik.resourcecatalogue.domain.Service;
 import gr.uoa.di.madgik.resourcecatalogue.domain.ServiceBundle;
 import gr.uoa.di.madgik.resourcecatalogue.service.ServiceBundleService;
 import gr.uoa.di.madgik.resourcecatalogue.service.GenericResourceService;
 import gr.uoa.di.madgik.resourcecatalogue.service.SecurityService;
-import gr.uoa.di.madgik.registry.domain.Browsing;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.domain.Paging;
 
-
+import gr.uoa.di.madgik.resourcecatalogue.utils.FacetFilterUtils;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -25,7 +27,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.common.exceptions.UnauthorizedUserException;
 import org.springframework.web.bind.annotation.*;
-
 
 import java.util.ArrayList;
 import java.util.List;
@@ -75,29 +76,29 @@ public class PublicServiceController {
 
     @Operation(description = "Filter a list of Public Services based on a set of filters or get a list of all Public Services in the Catalogue.")
     @Browse
+    @BrowseCatalogue
     @Parameter(name = "suspended", description = "Suspended", content = @Content(schema = @Schema(type = "boolean", defaultValue = "false")))
     @GetMapping(path = "public/service/all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    public ResponseEntity<Paging<?>> getAllPublicServices(@RequestParam(defaultValue = "all", name = "catalogue_id") String catalogueId,
-                                                          @Parameter(hidden = true) @RequestParam Map<String, Object> allRequestParams,
-                                                          @Parameter(hidden = true) Authentication authentication) {
-        FacetFilter ff = serviceBundleService.createFacetFilterForFetchingServices(allRequestParams, catalogueId);
-        ff.getFilter().put("published", true);
-        serviceBundleService.updateFacetFilterConsideringTheAuthorization(ff, authentication);
-        Paging<?> paging = genericResourceService.getResults(ff).map(r -> ((ServiceBundle) r).getPayload());
+    public ResponseEntity<Paging<Service>> getAllPublicServices(@Parameter(hidden = true) @RequestParam Map<String, Object> allRequestParams) {
+        FacetFilter ff = FacetFilterUtils.createFacetFilter(allRequestParams);
+        ff.setResourceType("service");
+        ff.addFilter("published", true);
+        ff.addFilter("active", true);
+        ff.addFilter("status", "approved resource");
+        Paging<Service> paging = genericResourceService.getResults(ff).map(r -> ((ServiceBundle) r).getPayload());
         return ResponseEntity.ok(paging);
     }
 
     @Browse
+    @BrowseCatalogue
     @Parameter(name = "suspended", description = "Suspended", content = @Content(schema = @Schema(type = "boolean", defaultValue = "false")))
     @GetMapping(path = "public/service/adminPage/all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
-    public ResponseEntity<Paging<?>> getAllPublicServiceBundles(@RequestParam(defaultValue = "all", name = "catalogue_id") String catalogueId,
-                                                                @Parameter(hidden = true) @RequestParam Map<String, Object> allRequestParams,
-                                                                @Parameter(hidden = true) Authentication authentication) {
-        FacetFilter ff = serviceBundleService.createFacetFilterForFetchingServices(allRequestParams, catalogueId);
-        ff.getFilter().put("published", true);
-        serviceBundleService.updateFacetFilterConsideringTheAuthorization(ff, authentication);
-        Paging<?> paging = genericResourceService.getResults(ff);
+    public ResponseEntity<Paging<ServiceBundle>> getAllPublicServiceBundles(@Parameter(hidden = true) @RequestParam Map<String, Object> allRequestParams) {
+        FacetFilter ff = FacetFilterUtils.createFacetFilter(allRequestParams);
+        ff.setResourceType("service");
+        ff.addFilter("published", true);
+        Paging<ServiceBundle> paging = genericResourceService.getResults(ff);
         return ResponseEntity.ok(paging);
     }
 

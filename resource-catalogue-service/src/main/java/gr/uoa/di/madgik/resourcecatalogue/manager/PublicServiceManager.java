@@ -50,7 +50,7 @@ public class PublicServiceManager extends AbstractPublicResourceManager<ServiceB
 
     @Override
     public Browsing<ServiceBundle> getAll(FacetFilter facetFilter, Authentication authentication) {
-        Browsing<ServiceBundle> browsing = getAll(facetFilter, authentication);
+        Browsing<ServiceBundle> browsing = super.getAll(facetFilter, authentication);
         if (!browsing.getResults().isEmpty() && !browsing.getFacets().isEmpty()) {
             browsing.setFacets(facetLabelService.generateLabels(browsing.getFacets()));
         }

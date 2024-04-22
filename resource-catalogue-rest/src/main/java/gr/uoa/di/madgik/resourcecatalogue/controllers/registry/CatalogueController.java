@@ -236,20 +236,15 @@ public class CatalogueController {
     @Browse
     @Parameter(name = "suspended", description = "Suspended", content = @Content(schema = @Schema(type = "boolean", defaultValue = "false")))
     @GetMapping(path = "{catalogueId}/provider/all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    public ResponseEntity<Paging<Provider>> getAllCatalogueProviders(@Parameter(hidden = true) @RequestParam Map<String, Object> allRequestParams, @PathVariable("catalogueId") String catalogueId, @Parameter(hidden = true) Authentication auth) {
+    public ResponseEntity<Paging<Provider>> getAllCatalogueProviders(@Parameter(hidden = true) @RequestParam Map<String, Object> allRequestParams,
+                                                                     @PathVariable("catalogueId") String catalogueId) {
         FacetFilter ff = FacetFilterUtils.createFacetFilter(allRequestParams);
+        ff.setResourceType("provider");
         ff.addFilter("published", false);
-        if (!catalogueId.equals("all")) {
-            ff.addFilter("catalogue_id", catalogueId);
-        }
-        List<Provider> providerList = new LinkedList<>();
-        Paging<ProviderBundle> providerBundlePaging = providerManager.getAll(ff, auth);
-        for (ProviderBundle providerBundle : providerBundlePaging.getResults()) {
-            providerList.add(providerBundle.getProvider());
-        }
-        Paging<Provider> providerPaging = new Paging<>(providerBundlePaging.getTotal(), providerBundlePaging.getFrom(),
-                providerBundlePaging.getTo(), providerList, providerBundlePaging.getFacets());
-        return new ResponseEntity<>(providerPaging, HttpStatus.OK);
+        ff.addFilter("status", "approved provider");
+        ff.addFilter("catalogue_id", catalogueId);
+        Paging<Provider> paging = genericResourceService.getResults(ff).map(r -> ((ProviderBundle) r).getPayload());
+        return ResponseEntity.ok(paging);
     }
 
     @Operation(description = "Creates a new Provider for the specific Catalogue.")
@@ -334,11 +329,14 @@ public class CatalogueController {
     @Operation(description = "Get all the Services of a specific Provider of a specific Catalogue")
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     @GetMapping(path = "{catalogueId}/{providerId}/service/all", produces = {MediaType.APPLICATION_JSON_VALUE})
-    public ResponseEntity<Paging<?>> getProviderServices(@PathVariable String catalogueId, @PathVariable String providerId,
+    public ResponseEntity<Paging<Service>> getProviderServices(@PathVariable String catalogueId, @PathVariable String providerId,
                                                          @Parameter(hidden = true) @RequestParam Map<String, Object> allRequestParams) {
-        FacetFilter ff = serviceBundleService.createFacetFilterForFetchingServices(allRequestParams, catalogueId);
+        FacetFilter ff = FacetFilterUtils.createFacetFilter(allRequestParams);
+        ff.setResourceType("service");
+        ff.addFilter("published", false);
+        ff.addFilter("catalogue_id", catalogueId);
         ff.addFilter("resource_organisation", providerId);
-        Paging<?> paging = genericResourceService.getResults(ff).map(r -> ((ServiceBundle) r).getPayload());
+        Paging<Service> paging = genericResourceService.getResults(ff).map(r -> ((ServiceBundle) r).getPayload());
         return ResponseEntity.ok(paging);
     }
 
