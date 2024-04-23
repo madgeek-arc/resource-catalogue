@@ -88,7 +88,7 @@ public class PendingServiceController extends ResourceController<ServiceBundle, 
     }
 
     @PostMapping(path = "/addResource", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasRole('ROLE_USER')")
     public ResponseEntity<Service> addService(@RequestBody Service service, @Parameter(hidden = true) Authentication auth) {
         ServiceBundle serviceBundle = new ServiceBundle(service);
         return new ResponseEntity<>(pendingServiceManager.add(serviceBundle, auth).getService(), HttpStatus.CREATED);
@@ -103,19 +103,19 @@ public class PendingServiceController extends ResourceController<ServiceBundle, 
     }
 
     @PostMapping("/transform/pending")
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth, #serviceId)")
     public void transformServiceToPending(@RequestParam String serviceId, @Parameter(hidden = true) Authentication auth) {
         pendingServiceManager.transformToPending(serviceId, auth);
     }
 
     @PostMapping("/transform/resource")
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth, #serviceId)")
     public void transformServiceToInfra(@RequestParam String serviceId, @Parameter(hidden = true) Authentication auth) {
         pendingServiceManager.transformToActive(serviceId, auth);
     }
 
     @PutMapping(path = "/pending", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PostAuthorize("hasRole('ROLE_ADMIN')")
+    @PostAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth, returnObject.body)")
     public ResponseEntity<Service> temporarySavePending(@RequestBody Service service, @Parameter(hidden = true) Authentication auth) {
         ServiceBundle serviceBundle = new ServiceBundle();
         ServiceBundle toCreateId = new ServiceBundle();
@@ -134,7 +134,7 @@ public class PendingServiceController extends ResourceController<ServiceBundle, 
     }
 
     @PutMapping(path = "/resource", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth, #service)")
     public ResponseEntity<Service> temporarySaveService(@RequestBody Service service, @Parameter(hidden = true) Authentication auth) throws ResourceNotFoundException {
         pendingServiceManager.transformToPending(service.getId(), auth);
         ServiceBundle serviceBundle = pendingServiceManager.get(service.getId());
@@ -143,7 +143,7 @@ public class PendingServiceController extends ResourceController<ServiceBundle, 
     }
 
     @PutMapping(path = "/transform/resource", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth, #service)")
     public ResponseEntity<Service> pendingToInfra(@RequestBody Service service, @Parameter(hidden = true) Authentication auth) throws ResourceNotFoundException {
         if (service == null) {
             throw new ServiceException("Cannot add a null Resource");

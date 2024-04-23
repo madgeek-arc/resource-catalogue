@@ -107,7 +107,7 @@ public class ProviderController {
     // Creates a new Provider.
 //    @Override
     @PostMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasRole('ROLE_USER')")
     public ResponseEntity<Provider> add(@RequestBody Provider provider, @Parameter(hidden = true) Authentication auth) {
         ProviderBundle providerBundle = providerService.add(new ProviderBundle(provider), auth);
         logger.info("User '{}' added the Provider with name '{}' and id '{}'", auth.getName(), provider.getName(), provider.getId());
@@ -199,12 +199,12 @@ public class ProviderController {
     @GetMapping(path = "byCatalogue/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isCatalogueAdmin(#auth,#id)")
     public ResponseEntity<Paging<ProviderBundle>> getProvidersByCatalogue(@Parameter(hidden = true) @RequestParam Map<String, Object> allRequestParams,
-                                                                          @PathVariable String id) {
+                                                                          @PathVariable String id,
+                                                                          @Parameter(hidden = true) Authentication auth) {
         FacetFilter ff = FacetFilterUtils.createFacetFilter(allRequestParams);
-        ff.setResourceType("provider");
         ff.addFilter("catalogue_id", id);
-        Paging<ProviderBundle> paging = genericResourceService.getResults(ff);
-        return ResponseEntity.ok(paging);
+        ff.addFilter("published", false);
+        return ResponseEntity.ok(providerService.getAll(ff, auth));
     }
 
     // Get a list of Providers in which the given user is admin.
