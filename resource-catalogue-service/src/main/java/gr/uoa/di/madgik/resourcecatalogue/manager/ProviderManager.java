@@ -426,12 +426,17 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     }
 
     private void deleteBundle(ProviderBundle providerBundle) {
+        Resource existingResource = getResource(providerBundle.getId(), providerBundle.getProvider().getCatalogueId());
+        ProviderBundle existingProvider = deserialize(existingResource);
+
         // block Public Provider update
-        if (providerBundle.getMetadata().isPublished()) {
+        if (existingProvider.getMetadata().isPublished()) {
             throw new ValidationException("You cannot directly delete a Public Provider");
         }
-        logger.info("Deleting Provider: {}", providerBundle);
-        super.delete(providerBundle);
+        logger.info("Deleting Provider: {}", existingProvider);
+        existingResource.setPayload(serialize(existingProvider));
+        existingResource.setResourceType(resourceType);
+        resourceService.deleteResource(existingResource.getId());
     }
 
     @Override
@@ -443,8 +448,11 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         }
         logger.trace("verifyProvider with id: '{}' | status -> '{}' | active -> '{}'", id, status, active);
         ProviderBundle provider = get(catalogueName, id, auth);
-        provider.setStatus(vocabularyService.get(status).getId());
-        List<LoggingInfo> loggingInfoList = commonMethods.returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(provider, auth);
+        Resource existingResource = getResource(provider.getId(), provider.getProvider().getCatalogueId());
+        ProviderBundle existingProvider = deserialize(existingResource);
+
+        existingProvider.setStatus(vocabularyService.get(status).getId());
+        List<LoggingInfo> loggingInfoList = commonMethods.returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(existingProvider, auth);
         LoggingInfo loggingInfo = null;
 
         switch (status) {
@@ -452,15 +460,15 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
                 if (active == null) {
                     active = true;
                 }
-                provider.setActive(active);
+                existingProvider.setActive(active);
                 loggingInfo = commonMethods.createLoggingInfo(auth, LoggingInfo.Types.ONBOARD.getKey(),
                         LoggingInfo.ActionType.APPROVED.getKey());
 
                 // add Provider's Name as a HLE Vocabulary
-                checkAndAddProviderToHLEVocabulary(provider);
+                checkAndAddProviderToHLEVocabulary(existingProvider);
                 break;
             case "rejected provider":
-                provider.setActive(false);
+                existingProvider.setActive(false);
                 loggingInfo = commonMethods.createLoggingInfo(auth, LoggingInfo.Types.ONBOARD.getKey(),
                         LoggingInfo.ActionType.REJECTED.getKey());
                 break;
@@ -469,49 +477,58 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         }
         loggingInfoList.add(loggingInfo);
         loggingInfoList.sort(Comparator.comparing(LoggingInfo::getDate));
-        provider.setLoggingInfo(loggingInfoList);
+        existingProvider.setLoggingInfo(loggingInfoList);
 
         // latestOnboardingInfo
-        provider.setLatestOnboardingInfo(loggingInfo);
+        existingProvider.setLatestOnboardingInfo(loggingInfo);
 
-        logger.info("Verifying Provider: {}", provider);
-        return super.update(provider, auth);
+        logger.info("Verifying Provider: {}", existingProvider);
+        existingResource.setPayload(serialize(existingProvider));
+        existingResource.setResourceType(resourceType);
+        resourceService.updateResource(existingResource);
+        return existingProvider;
     }
 
     @Override
     @CacheEvict(value = CACHE_PROVIDERS, allEntries = true)
     public ProviderBundle publish(String providerId, Boolean active, Authentication auth) {
         ProviderBundle provider = getWithCatalogue(providerId, catalogueName);
-        if ((provider.getStatus().equals(vocabularyService.get("pending provider").getId()) ||
-                provider.getStatus().equals(vocabularyService.get("rejected provider").getId())) && !provider.isActive()) {
-            throw new ValidationException(String.format("You cannot activate this Provider, because it's Inactive with status = [%s]", provider.getStatus()));
+        Resource existingResource = getResource(provider.getId(), provider.getProvider().getCatalogueId());
+        ProviderBundle existingProvider = deserialize(existingResource);
+
+        if ((existingProvider.getStatus().equals(vocabularyService.get("pending provider").getId()) ||
+                existingProvider.getStatus().equals(vocabularyService.get("rejected provider").getId())) && !existingProvider.isActive()) {
+            throw new ValidationException(String.format("You cannot activate this Provider, because it's Inactive with status = [%s]", existingProvider.getStatus()));
         }
-        List<LoggingInfo> loggingInfoList = commonMethods.returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(provider, auth);
+        List<LoggingInfo> loggingInfoList = commonMethods.returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(existingProvider, auth);
         LoggingInfo loggingInfo;
 
         if (active == null) {
             active = false;
         }
-        provider.setActive(active);
+        existingProvider.setActive(active);
         if (active) {
             loggingInfo = commonMethods.createLoggingInfo(auth, LoggingInfo.Types.UPDATE.getKey(),
                     LoggingInfo.ActionType.ACTIVATED.getKey());
-            logger.info("Activating Provider: {}", provider);
+            logger.info("Activating Provider: {}", existingProvider);
         } else {
             loggingInfo = commonMethods.createLoggingInfo(auth, LoggingInfo.Types.UPDATE.getKey(),
                     LoggingInfo.ActionType.DEACTIVATED.getKey());
-            logger.info("Deactivating Provider: {}", provider);
+            logger.info("Deactivating Provider: {}", existingProvider);
         }
-        activateProviderResources(provider.getId(), active, auth);
+        activateProviderResources(existingProvider.getId(), active, auth);
         loggingInfoList.add(loggingInfo);
-        provider.setLoggingInfo(loggingInfoList);
+        existingProvider.setLoggingInfo(loggingInfoList);
 
         // latestLoggingInfo
-        provider.setLatestUpdateInfo(loggingInfo);
-        provider.setLatestOnboardingInfo(commonMethods.setLatestLoggingInfo(loggingInfoList, LoggingInfo.Types.ONBOARD.getKey()));
-        provider.setLatestAuditInfo(commonMethods.setLatestLoggingInfo(loggingInfoList, LoggingInfo.Types.AUDIT.getKey()));
+        existingProvider.setLatestUpdateInfo(loggingInfo);
+        existingProvider.setLatestOnboardingInfo(commonMethods.setLatestLoggingInfo(loggingInfoList, LoggingInfo.Types.ONBOARD.getKey()));
+        existingProvider.setLatestAuditInfo(commonMethods.setLatestLoggingInfo(loggingInfoList, LoggingInfo.Types.AUDIT.getKey()));
 
-        return super.update(provider, auth);
+        existingResource.setPayload(serialize(existingProvider));
+        existingResource.setResourceType(resourceType);
+        resourceService.updateResource(existingResource);
+        return existingProvider;
     }
 
     @Override
@@ -810,22 +827,29 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     @CacheEvict(value = CACHE_PROVIDERS, allEntries = true)
     public ProviderBundle auditProvider(String providerId, String catalogueId, String comment, LoggingInfo.ActionType actionType, Authentication auth) {
         ProviderBundle provider = getWithCatalogue(providerId, catalogueId);
-        commonMethods.auditResource(provider, comment, actionType, auth);
+        Resource existingResource = getResource(provider.getId(), provider.getProvider().getCatalogueId());
+        ProviderBundle existingProvider = deserialize(existingResource);
+
+        commonMethods.auditResource(existingProvider, comment, actionType, auth);
         if (actionType.getKey().equals(LoggingInfo.ActionType.VALID.getKey())) {
-            provider.setAuditState(Auditable.VALID);
+            existingProvider.setAuditState(Auditable.VALID);
         }
         if (actionType.getKey().equals(LoggingInfo.ActionType.INVALID.getKey())) {
-            provider.setAuditState(Auditable.INVALID_AND_NOT_UPDATED);
+            existingProvider.setAuditState(Auditable.INVALID_AND_NOT_UPDATED);
         }
 
         // send notification emails to Provider Admins
-        registrationMailService.notifyProviderAdminsForBundleAuditing(provider, "Provider",
-                provider.getProvider().getName(), provider.getProvider().getUsers());
+        registrationMailService.notifyProviderAdminsForBundleAuditing(existingProvider, "Provider",
+                existingProvider.getProvider().getName(), existingProvider.getProvider().getUsers());
 
         logger.info("User '{}-{}' audited Provider '{}'-'{}' with [actionType: {}]",
                 User.of(auth).getFullName(), User.of(auth).getEmail(),
-                provider.getProvider().getId(), provider.getProvider().getName(), actionType);
-        return super.update(provider, auth);
+                existingProvider.getProvider().getId(), existingProvider.getProvider().getName(), actionType);
+
+        existingResource.setPayload(serialize(existingProvider));
+        existingResource.setResourceType(resourceType);
+        resourceService.updateResource(existingResource);
+        return existingProvider;
     }
 
     public Paging<ProviderBundle> getRandomProviders(FacetFilter ff, String auditingInterval, Authentication auth) {
@@ -951,11 +975,15 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     @CacheEvict(value = CACHE_PROVIDERS, allEntries = true)
     public ProviderBundle suspend(String providerId, String catalogueId, boolean suspend, Authentication auth) {
         ProviderBundle providerBundle = get(catalogueId, providerId, auth);
-        commonMethods.suspensionValidation(providerBundle, catalogueId, providerId, suspend, auth);
+        Resource existingResource = getResource(providerBundle.getId(), providerBundle.getProvider().getCatalogueId());
+        ProviderBundle existingProvider = deserialize(existingResource);
+        commonMethods.suspensionValidation(existingProvider, catalogueId, providerId, suspend, auth);
 
         // Suspend Provider
-        commonMethods.suspendResource(providerBundle, catalogueId, suspend, auth);
-        super.update(providerBundle, auth);
+        commonMethods.suspendResource(existingProvider, catalogueId, suspend, auth);
+        existingResource.setPayload(serialize(existingProvider));
+        existingResource.setResourceType(resourceType);
+        resourceService.updateResource(existingResource);
         Objects.requireNonNull(cacheManager.getCache(CACHE_PROVIDERS)).clear();
 
         // Suspend Provider's resources

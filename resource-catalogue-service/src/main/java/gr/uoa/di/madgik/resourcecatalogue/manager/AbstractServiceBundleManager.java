@@ -322,15 +322,6 @@ public abstract class AbstractServiceBundleManager<T extends ServiceBundle> exte
         return getResource(serviceBundle.getService().getId(), serviceBundle.getService().getCatalogueId()) != null;
     }
 
-    public Resource getResourceById(String resourceId) {
-        List<Resource> resource = searchService.cqlQuery(String.format("id = \"%s\"", resourceId), resourceType.getName(),
-                1, 0, "modifiedAt", "DESC").getResults();
-        if (resource.isEmpty()) {
-            return null;
-        }
-        return resource.get(0);
-    }
-
     public Resource getResource(String id, String catalogueId) {
         Paging<Resource> resources;
         resources = searchService
