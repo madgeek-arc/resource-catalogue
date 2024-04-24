@@ -57,31 +57,32 @@ public class MailController {
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public void sendToAll(@RequestParam(defaultValue = "") List<String> cc, @RequestParam String subject,
                           @RequestParam(defaultValue = "false") Boolean includeCatalogueAdmins,
-                          @RequestParam(defaultValue = "false") Boolean includeContacts,
+                          @RequestParam(defaultValue = "false") Boolean includeProviderCatalogueContacts,
+                          @RequestParam(defaultValue = "false") Boolean includeResourceContacts,
                           @RequestBody String text) throws MessagingException {
         int partitionSize = 100;
         if (cc != null) {
             partitionSize -= cc.size();
         }
-        List<String> allEmails = getAllEmails(includeCatalogueAdmins, includeContacts);
+        List<String> allEmails = getAllEmails(includeCatalogueAdmins, includeProviderCatalogueContacts, includeResourceContacts);
         for (List<String> bccChunk : Lists.partition(allEmails, partitionSize)) {
             logger.info(String.format("Sending emails to: %s", String.join(", ", bccChunk)));
             mailService.sendMail(new ArrayList<>(), cc, bccChunk, subject, text);
         }
     }
 
-    List<String> getAllEmails(Boolean includeCatalogueAdmins, Boolean includeContacts) {
+    List<String> getAllEmails(Boolean includeCatalogueAdmins, Boolean includeProviderCatalogueContacts,
+                              Boolean includeResourceContacts) {
         Set<String> emails = new HashSet<>();
 
-        boolean includeContactsFlag = includeContacts != null && includeContacts;
-        FacetFilter facetFilter = createFacetFilter(); //TODO: test this
+        FacetFilter facetFilter = createFacetFilter(false);
         Authentication adminAccess = securityService.getAdminAccess();
 
-        addEmailsFromProviders(emails, facetFilter, adminAccess, includeContactsFlag);
+        addEmailsFromProviders(emails, facetFilter, adminAccess, includeProviderCatalogueContacts);
         if (includeCatalogueAdmins != null && includeCatalogueAdmins) {
-            addEmailsFromCatalogues(emails, facetFilter, adminAccess, includeContactsFlag);
+            addEmailsFromCatalogues(emails, createFacetFilter(true), adminAccess, includeProviderCatalogueContacts);
         }
-        if (includeContactsFlag) {
+        if (includeResourceContacts != null && includeResourceContacts) {
             addEmailsFromServices(emails, facetFilter, adminAccess);
             addEmailsFromTrainingResources(emails, facetFilter, adminAccess);
         }
@@ -89,13 +90,14 @@ public class MailController {
         return emails.stream().sorted().collect(Collectors.toList());
     }
 
-    private void addEmailsFromProviders(Set<String> emails, FacetFilter facetFilter, Authentication adminAccess, boolean includeContacts) {
+    private void addEmailsFromProviders(Set<String> emails, FacetFilter facetFilter, Authentication adminAccess,
+                                        Boolean includeProviderCatalogueContacts) {
         List<ProviderBundle> allProviders = providerService.getAll(facetFilter, adminAccess).getResults();
         allProviders.addAll(pendingProviderService.getAll(facetFilter, adminAccess).getResults());
 
         for (ProviderBundle providerBundle : allProviders) {
             emails.addAll(providerBundle.getProvider().getUsers().stream().map(User::getEmail).collect(Collectors.toSet()));
-            if (includeContacts) {
+            if (includeProviderCatalogueContacts != null && includeProviderCatalogueContacts) {
                 emails.add(providerBundle.getProvider().getMainContact().getEmail());
                 emails.addAll(providerBundle.getProvider().getPublicContacts().stream().map(ProviderPublicContact::getEmail).collect(Collectors.toSet()));
             }
@@ -128,9 +130,12 @@ public class MailController {
         }
     }
 
-    private FacetFilter createFacetFilter() {
+    private FacetFilter createFacetFilter(boolean isCatalogue) {
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(10000);
+        if (!isCatalogue) {
+            ff.addFilter("published", false);
+        }
         return ff;
     }
 }

@@ -56,7 +56,7 @@ public class CSVController {
         Paging<ProviderBundle> providers = providerService.getAll(createFacetFilter(published), auth);
         String csvData = listProvidersToCSV(providers.getResults());
         response.setHeader("Content-disposition", "attachment; filename=" + "providers.csv");
-        logger.info("User {} downloaded Providers CSV list", User.of(auth));
+        logger.info("User {} downloaded Providers CSV list", User.of(auth).getEmail());
         return ResponseEntity.ok(csvData);
     }
 
@@ -69,7 +69,7 @@ public class CSVController {
         Paging<ServiceBundle> serviceBundles = serviceBundleService.getAll(createFacetFilter(published), auth);
         String csvData = listServicesToCSV(serviceBundles.getResults());
         response.setHeader("Content-disposition", "attachment; filename=" + "services.csv");
-        logger.info("User {} downloaded Services CSV list", User.of(auth));
+        logger.info("User {} downloaded Services CSV list", User.of(auth).getEmail());
         return ResponseEntity.ok(csvData);
     }
 
