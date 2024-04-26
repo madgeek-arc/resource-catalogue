@@ -344,18 +344,7 @@ public class ServiceBundleManager extends AbstractServiceBundleManager<ServiceBu
             throw new ValidationException(String.format("Vocabulary %s does not consist a Resource State!", status));
         }
         logger.trace("verifyResource with id: '{}' | status -> '{}' | active -> '{}'", id, status, active);
-        String[] parts = id.split("\\.");
-        String providerId = parts[0];
-        ServiceBundle serviceBundle = null;
-        List<ServiceBundle> serviceBundles = getResourceBundles(providerId, auth);
-        for (ServiceBundle service : serviceBundles) {
-            if (service.getService().getId().equals(id)) {
-                serviceBundle = service;
-            }
-        }
-        if (serviceBundle == null) {
-            throw new ValidationException(String.format("The Resource with id '%s' does not exist", id));
-        }
+        ServiceBundle serviceBundle = getCatalogueResource(catalogueName, id, auth);
         serviceBundle.setStatus(vocabularyService.get(status).getId());
         ProviderBundle resourceProvider = providerService.get(serviceBundle.getService().getCatalogueId(), serviceBundle.getService().getResourceOrganisation(), auth);
         List<LoggingInfo> loggingInfoList = commonMethods.returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(serviceBundle, auth);
