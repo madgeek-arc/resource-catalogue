@@ -354,10 +354,10 @@
             "type": "java.lang.String"
         },
         {
-            "label": "Portfolios",
-            "multivalued": true,
-            "name": "portfolios",
-            "path": "$.service.extras.portfolios[*]",
+            "label": null,
+            "multivalued": false,
+            "name": "audit_state",
+            "path": "$.auditState",
             "type": "java.lang.String"
         }
     ],
