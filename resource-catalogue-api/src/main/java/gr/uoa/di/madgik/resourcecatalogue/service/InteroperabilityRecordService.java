@@ -1,9 +1,11 @@
 package gr.uoa.di.madgik.resourcecatalogue.service;
 
+import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.resourcecatalogue.domain.InteroperabilityRecordBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.LoggingInfo;
-import gr.uoa.di.madgik.registry.domain.Paging;
 import org.springframework.security.core.Authentication;
+
+import java.util.List;
 
 public interface InteroperabilityRecordService<T> extends ResourceService<T, Authentication> {
 
@@ -141,4 +143,12 @@ public interface InteroperabilityRecordService<T> extends ResourceService<T, Aut
      */
     InteroperabilityRecordBundle suspend(String interoperabilityRecordId, String catalogueId, boolean suspend,
                                          Authentication auth);
+
+    /**
+     * Add a list of InteroperabilityRecordBundles on the Resource Catalogue
+     *
+     * @param interoperabilityRecordList List of InteroperabilityRecordBundles
+     * @param auth                       Authentication
+     */
+    void addBulk(List<InteroperabilityRecordBundle> interoperabilityRecordList, Authentication auth);
 }

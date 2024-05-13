@@ -3,6 +3,8 @@ package gr.uoa.di.madgik.resourcecatalogue.service;
 import gr.uoa.di.madgik.resourcecatalogue.domain.ResourceInteroperabilityRecordBundle;
 import org.springframework.security.core.Authentication;
 
+import java.util.List;
+
 public interface ResourceInteroperabilityRecordService<T> extends ResourceService<T, Authentication> {
 
     /**
@@ -53,4 +55,12 @@ public interface ResourceInteroperabilityRecordService<T> extends ResourceServic
      * @return {@link ResourceInteroperabilityRecordBundle}
      */
     ResourceInteroperabilityRecordBundle getWithResourceId(String resourceId, String catalogueId);
+
+    /**
+     * Add a list of ResourceInteroperabilityRecordBundles on the Resource Catalogue
+     *
+     * @param resourceInteroperabilityRecordList List of ResourceInteroperabilityRecordBundles
+     * @param auth                               Authentication
+     */
+    void addBulk(List<ResourceInteroperabilityRecordBundle> resourceInteroperabilityRecordList, Authentication auth);
 }

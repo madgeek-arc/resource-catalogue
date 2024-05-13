@@ -1,12 +1,12 @@
 package gr.uoa.di.madgik.resourcecatalogue.service;
 
+import gr.uoa.di.madgik.registry.domain.FacetFilter;
+import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.resourcecatalogue.domain.LoggingInfo;
 import gr.uoa.di.madgik.resourcecatalogue.domain.ProviderBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.ResourceHistory;
 import gr.uoa.di.madgik.resourcecatalogue.dto.ExtendedValue;
 import gr.uoa.di.madgik.resourcecatalogue.dto.MapValues;
-import gr.uoa.di.madgik.registry.domain.FacetFilter;
-import gr.uoa.di.madgik.registry.domain.Paging;
 import org.springframework.security.core.Authentication;
 
 import java.net.URL;
@@ -257,4 +257,12 @@ public interface ProviderService<T, U extends Authentication> extends ResourceSe
      * @return {@link List}&lt;{@link MapValues}&lt;{@link ExtendedValue}&gt;&gt;
      */
     List<MapValues<ExtendedValue>> getAllResourcesUnderASpecificHLE(String hle, Authentication auth);
+
+    /**
+     * Add a list of ProviderBundles on the Resource Catalogue
+     *
+     * @param providerList List of ProviderBundles
+     * @param auth         Authentication
+     */
+    void addBulk(List<ProviderBundle> providerList, Authentication auth);
 }

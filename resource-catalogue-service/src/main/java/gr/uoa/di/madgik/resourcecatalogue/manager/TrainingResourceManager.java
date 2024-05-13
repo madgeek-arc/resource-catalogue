@@ -1055,4 +1055,10 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
         return super.update(trainingResourceBundle, auth);
     }
 
+    public void addBulk(List<TrainingResourceBundle> trainingResourceList, Authentication auth) {
+        for (TrainingResourceBundle trainingResourceBundle : trainingResourceList) {
+            super.add(trainingResourceBundle, auth);
+        }
+    }
+
 }

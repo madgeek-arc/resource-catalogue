@@ -1,10 +1,10 @@
 package gr.uoa.di.madgik.resourcecatalogue.service;
 
-import gr.uoa.di.madgik.resourcecatalogue.domain.DatasourceBundle;
-import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.domain.Paging;
+import gr.uoa.di.madgik.resourcecatalogue.domain.DatasourceBundle;
 import org.springframework.security.core.Authentication;
-import org.springframework.util.MultiValueMap;
+
+import java.util.List;
 
 public interface DatasourceService extends ResourceService<DatasourceBundle, Authentication> {
 
@@ -64,4 +64,12 @@ public interface DatasourceService extends ResourceService<DatasourceBundle, Aut
      * @return {@link Paging}&lt;{@link DatasourceBundle}&gt;
      */
     Paging<DatasourceBundle> getResourceBundles(String catalogueId, String serviceId, Authentication auth);
+
+    /**
+     * Add a list of DatasourceBundles on the Resource Catalogue
+     *
+     * @param datasourceList List of DatasourceBundles
+     * @param auth           Authentication
+     */
+    void addBulk(List<DatasourceBundle> datasourceList, Authentication auth);
 }

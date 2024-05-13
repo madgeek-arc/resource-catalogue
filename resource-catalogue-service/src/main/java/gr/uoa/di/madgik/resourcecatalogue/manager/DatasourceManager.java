@@ -11,7 +11,6 @@ import gr.uoa.di.madgik.resourcecatalogue.service.DatasourceService;
 import gr.uoa.di.madgik.resourcecatalogue.service.ServiceBundleService;
 import gr.uoa.di.madgik.resourcecatalogue.service.VocabularyService;
 import gr.uoa.di.madgik.resourcecatalogue.service.SecurityService;
-import gr.uoa.di.madgik.resourcecatalogue.utils.FacetFilterUtils;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.registry.domain.Resource;
@@ -22,7 +21,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.core.Authentication;
-import org.springframework.util.MultiValueMap;
 
 import java.util.Comparator;
 import java.util.List;
@@ -288,6 +286,12 @@ public class DatasourceManager extends ResourceManager<DatasourceBundle> impleme
             throw new ResourceNotFoundException(String.format("There is no Datasource with ID [%s]", id));
         }
         return found;
+    }
+
+    public void addBulk(List<DatasourceBundle> datasourceList, Authentication auth) {
+        for (DatasourceBundle datasourceBundle : datasourceList) {
+            super.add(datasourceBundle, auth);
+        }
     }
 
 //    public DatasourceBundle createPublicResource(DatasourceBundle datasourceBundle, Authentication auth){

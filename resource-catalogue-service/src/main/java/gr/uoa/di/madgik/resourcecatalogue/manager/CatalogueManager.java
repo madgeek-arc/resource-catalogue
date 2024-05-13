@@ -492,4 +492,10 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
         ff.addFilter("catalogue_id", catalogueId);
         return ff;
     }
+
+    public void addBulk(List<CatalogueBundle> catalogueList, Authentication auth) {
+        for (CatalogueBundle catalogueBundle : catalogueList) {
+            super.add(catalogueBundle, auth);
+        }
+    }
 }

@@ -413,4 +413,10 @@ public class ServiceController {
     public ServiceBundle suspendService(@RequestParam String serviceId, @RequestParam String catalogueId, @RequestParam boolean suspend, @Parameter(hidden = true) Authentication auth) {
         return serviceBundleService.suspend(serviceId, catalogueId, suspend, auth);
     }
+
+    @PostMapping(path = "/addBulk", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public void addBulk(@RequestBody List<ServiceBundle> serviceList, @Parameter(hidden = true) Authentication auth) {
+        serviceBundleService.addBulk(serviceList, auth);
+    }
 }

@@ -3,7 +3,6 @@ package gr.uoa.di.madgik.resourcecatalogue.manager;
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
 import gr.uoa.di.madgik.resourcecatalogue.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.exception.ValidationException;
-import gr.uoa.di.madgik.resourcecatalogue.domain.*;
 import gr.uoa.di.madgik.resourcecatalogue.service.RegistrationMailService;
 import gr.uoa.di.madgik.resourcecatalogue.utils.ObjectUtils;
 import gr.uoa.di.madgik.resourcecatalogue.utils.ProviderResourcesCommonMethods;
@@ -172,5 +171,11 @@ public class HelpdeskManager extends ResourceManager<HelpdeskBundle> implements 
     public HelpdeskBundle createPublicResource(HelpdeskBundle helpdeskBundle, Authentication auth) {
         publicHelpdeskManager.add(helpdeskBundle, auth);
         return helpdeskBundle;
+    }
+
+    public void addBulk(List<HelpdeskBundle> helpdeskList, Authentication auth) {
+        for (HelpdeskBundle helpdeskBundle : helpdeskList) {
+            super.add(helpdeskBundle, auth);
+        }
     }
 }

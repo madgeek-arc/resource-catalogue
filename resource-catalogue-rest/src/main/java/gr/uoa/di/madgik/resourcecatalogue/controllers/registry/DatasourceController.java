@@ -204,4 +204,10 @@ public class DatasourceController {
     public OpenAIREMetrics getOpenaireMetrics(@PathVariable("id") String id) {
         return openAIREDatasourceService.getMetrics(id);
     }
+
+    @PostMapping(path = "/addBulk", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public void addBulk(@RequestBody List<DatasourceBundle> datasourceList, @Parameter(hidden = true) Authentication auth) {
+        datasourceService.addBulk(datasourceList, auth);
+    }
 }

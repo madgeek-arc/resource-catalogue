@@ -513,4 +513,10 @@ public class CatalogueController {
         logger.info("User '{}' deleted the Interoperability Record with title '{}' and id '{}'", auth.getName(), interoperabilityRecordBundle.getInteroperabilityRecord().getTitle(), interoperabilityRecordBundle.getId());
         return new ResponseEntity<>(interoperabilityRecordBundle.getInteroperabilityRecord(), HttpStatus.OK);
     }
+
+    @PostMapping(path = "/addBulk", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public void addBulk(@RequestBody List<CatalogueBundle> catalogueList, @Parameter(hidden = true) Authentication auth) {
+        catalogueManager.addBulk(catalogueList, auth);
+    }
 }

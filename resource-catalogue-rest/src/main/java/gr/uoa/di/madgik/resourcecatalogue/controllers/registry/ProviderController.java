@@ -453,4 +453,10 @@ public class ProviderController {
             return null;
         }
     }
+
+    @PostMapping(path = "/addBulk", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public void addBulk(@RequestBody List<ProviderBundle> providerList, @Parameter(hidden = true) Authentication auth) {
+        providerService.addBulk(providerList, auth);
+    }
 }

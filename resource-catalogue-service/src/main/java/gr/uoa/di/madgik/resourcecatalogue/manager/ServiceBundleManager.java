@@ -742,4 +742,10 @@ public class ServiceBundleManager extends AbstractServiceBundleManager<ServiceBu
         }
         return super.update(serviceBundle, auth);
     }
+
+    public void addBulk(List<ServiceBundle> serviceList, Authentication auth) {
+        for (ServiceBundle serviceBundle : serviceList) {
+            super.add(serviceBundle, auth);
+        }
+    }
 }

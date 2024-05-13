@@ -2,10 +2,7 @@ package gr.uoa.di.madgik.resourcecatalogue.controllers.registry;
 
 import gr.uoa.di.madgik.resourcecatalogue.annotations.Browse;
 import gr.uoa.di.madgik.resourcecatalogue.annotations.BrowseCatalogue;
-import gr.uoa.di.madgik.resourcecatalogue.domain.DatasourceBundle;
-import gr.uoa.di.madgik.resourcecatalogue.domain.ResourceInteroperabilityRecord;
-import gr.uoa.di.madgik.resourcecatalogue.domain.ResourceInteroperabilityRecordBundle;
-import gr.uoa.di.madgik.resourcecatalogue.domain.User;
+import gr.uoa.di.madgik.resourcecatalogue.domain.*;
 import gr.uoa.di.madgik.resourcecatalogue.service.GenericResourceService;
 import gr.uoa.di.madgik.resourcecatalogue.utils.FacetFilterUtils;
 import gr.uoa.di.madgik.resourcecatalogue.service.ResourceInteroperabilityRecordService;
@@ -24,9 +21,9 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -62,6 +59,19 @@ public class ResourceInteroperabilityRecordController {
         ff.setResourceType("resource_interoperability_record");
         ff.addFilter("published", false);
         Paging<ResourceInteroperabilityRecord> paging = genericResourceService.getResults(ff).map(r -> ((ResourceInteroperabilityRecordBundle) r).getPayload());
+        return ResponseEntity.ok(paging);
+    }
+
+    @Browse
+    @BrowseCatalogue
+    @GetMapping(path = "bundle/all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
+    public ResponseEntity<Paging<ResourceInteroperabilityRecordBundle>> getAllResourceInteroperabilityRecordBundles(
+            @Parameter(hidden = true) @RequestParam MultiValueMap<String, Object> allRequestParams) {
+        FacetFilter ff = FacetFilterUtils.createFacetFilter(allRequestParams);
+        ff.setResourceType("resource_interoperability_record");
+        ff.addFilter("published", false);
+        Paging<ResourceInteroperabilityRecordBundle> paging = genericResourceService.getResults(ff);
         return ResponseEntity.ok(paging);
     }
 
@@ -130,5 +140,11 @@ public class ResourceInteroperabilityRecordController {
         logger.info("User '{}-{}' attempts to create a Public Resource Interoperability Record from Resource Interoperability Record '{}' of the '{}' Catalogue", User.of(auth).getFullName(),
                 User.of(auth).getEmail(), resourceInteroperabilityRecordBundle.getId(), resourceInteroperabilityRecordBundle.getResourceInteroperabilityRecord().getCatalogueId());
         return ResponseEntity.ok(resourceInteroperabilityRecordService.createPublicResourceInteroperabilityRecord(resourceInteroperabilityRecordBundle, auth));
+    }
+
+    @PostMapping(path = "/addBulk", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public void addBulk(@RequestBody List<ResourceInteroperabilityRecordBundle> resourceInteroperabilityRecordList, @Parameter(hidden = true) Authentication auth) {
+        resourceInteroperabilityRecordService.addBulk(resourceInteroperabilityRecordList, auth);
     }
 }

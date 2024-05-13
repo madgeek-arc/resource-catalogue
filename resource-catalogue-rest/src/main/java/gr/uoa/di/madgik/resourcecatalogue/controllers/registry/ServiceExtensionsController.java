@@ -35,6 +35,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
 
@@ -121,6 +122,18 @@ public class ServiceExtensionsController {
         ff.setResourceType("helpdesk");
         ff.addFilter("published", false);
         Paging<Helpdesk> paging = genericResourceService.getResults(ff).map(r -> ((HelpdeskBundle) r).getPayload());
+        return ResponseEntity.ok(paging);
+    }
+
+    @Browse
+    @BrowseCatalogue
+    @GetMapping(path = "/helpdesk/bundle/all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
+    public ResponseEntity<Paging<HelpdeskBundle>> getAllHelpdeskBundles(@Parameter(hidden = true) @RequestParam MultiValueMap<String, Object> allRequestParams) {
+        FacetFilter ff = FacetFilterUtils.createFacetFilter(allRequestParams);
+        ff.setResourceType("helpdesk");
+        ff.addFilter("published", false);
+        Paging<HelpdeskBundle> paging = genericResourceService.getResults(ff);
         return ResponseEntity.ok(paging);
     }
 
@@ -252,6 +265,18 @@ public class ServiceExtensionsController {
         ff.setResourceType("monitoring");
         ff.addFilter("published", false);
         Paging<Monitoring> paging = genericResourceService.getResults(ff).map(r -> ((MonitoringBundle) r).getPayload());
+        return ResponseEntity.ok(paging);
+    }
+
+    @Browse
+    @BrowseCatalogue
+    @GetMapping(path = "/monitoring/bundle/all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
+    public ResponseEntity<Paging<MonitoringBundle>> getAllMonitoringBundles(@Parameter(hidden = true) @RequestParam MultiValueMap<String, Object> allRequestParams) {
+        FacetFilter ff = FacetFilterUtils.createFacetFilter(allRequestParams);
+        ff.setResourceType("monitoring");
+        ff.addFilter("published", false);
+        Paging<MonitoringBundle> paging = genericResourceService.getResults(ff);
         return ResponseEntity.ok(paging);
     }
 
@@ -424,6 +449,18 @@ public class ServiceExtensionsController {
                 logger.info("Monitoring with ID {} is already registered as Public", monitoringBundle.getId());
             }
         }
+    }
+
+    @PostMapping(path = "/helpdesk/addBulk", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public void addBulkHelpdesks(@RequestBody List<HelpdeskBundle> helpdeskList, @Parameter(hidden = true) Authentication auth) {
+        helpdeskService.addBulk(helpdeskList, auth);
+    }
+
+    @PostMapping(path = "/monitoring/addBulk", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public void addBulkMonitorings(@RequestBody List<MonitoringBundle> monitoringList, @Parameter(hidden = true) Authentication auth) {
+        monitoringService.addBulk(monitoringList, auth);
     }
 
 }

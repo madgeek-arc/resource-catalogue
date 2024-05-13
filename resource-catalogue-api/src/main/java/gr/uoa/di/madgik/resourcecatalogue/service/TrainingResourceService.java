@@ -1,13 +1,13 @@
 package gr.uoa.di.madgik.resourcecatalogue.service;
 
-import gr.uoa.di.madgik.resourcecatalogue.domain.LoggingInfo;
-import gr.uoa.di.madgik.resourcecatalogue.domain.TrainingResource;
-import gr.uoa.di.madgik.resourcecatalogue.domain.TrainingResourceBundle;
 import gr.uoa.di.madgik.registry.domain.Browsing;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.registry.service.SearchService;
+import gr.uoa.di.madgik.resourcecatalogue.domain.LoggingInfo;
+import gr.uoa.di.madgik.resourcecatalogue.domain.TrainingResource;
+import gr.uoa.di.madgik.resourcecatalogue.domain.TrainingResourceBundle;
 import org.springframework.security.core.Authentication;
 
 import java.util.List;
@@ -296,4 +296,12 @@ public interface TrainingResourceService<T> extends ResourceService<T, Authentic
      */
     void publishTrainingResourceRelatedResources(String id, String catalogueId, Boolean active,
                                                  Authentication auth);
+
+    /**
+     * Add a list of TrainingResourceBundles on the Resource Catalogue
+     *
+     * @param trainingResourceList List of TrainingResourceBundles
+     * @param auth                 Authentication
+     */
+    void addBulk(List<TrainingResourceBundle> trainingResourceList, Authentication auth);
 }

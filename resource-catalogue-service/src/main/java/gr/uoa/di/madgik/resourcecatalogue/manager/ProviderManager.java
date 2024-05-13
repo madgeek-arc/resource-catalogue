@@ -1085,4 +1085,10 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         mapValues.setValues(valueList);
         mapValuesList.add(mapValues);
     }
+
+    public void addBulk(List<ProviderBundle> providerList, Authentication auth) {
+        for (ProviderBundle providerBundle : providerList) {
+            super.add(providerBundle, auth);
+        }
+    }
 }

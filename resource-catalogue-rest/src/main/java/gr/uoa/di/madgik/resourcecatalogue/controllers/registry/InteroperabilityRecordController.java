@@ -278,4 +278,10 @@ public class InteroperabilityRecordController {
     public InteroperabilityRecordBundle suspendInteroperabilityRecord(@RequestParam String interoperabilityRecordId, @RequestParam String catalogueId, @RequestParam boolean suspend, @Parameter(hidden = true) Authentication auth) {
         return interoperabilityRecordService.suspend(interoperabilityRecordId, catalogueId, suspend, auth);
     }
+
+    @PostMapping(path = "/addBulk", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public void addBulk(@RequestBody List<InteroperabilityRecordBundle> interoperabilityRecordList, @Parameter(hidden = true) Authentication auth) {
+        interoperabilityRecordService.addBulk(interoperabilityRecordList, auth);
+    }
 }

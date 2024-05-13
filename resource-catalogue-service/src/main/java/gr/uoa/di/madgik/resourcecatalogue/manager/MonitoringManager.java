@@ -2,7 +2,6 @@ package gr.uoa.di.madgik.resourcecatalogue.manager;
 
 import com.google.gson.JsonArray;
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
-import gr.uoa.di.madgik.resourcecatalogue.domain.*;
 import gr.uoa.di.madgik.resourcecatalogue.dto.MonitoringStatus;
 import gr.uoa.di.madgik.resourcecatalogue.dto.ServiceType;
 import gr.uoa.di.madgik.resourcecatalogue.exception.ResourceNotFoundException;
@@ -257,5 +256,11 @@ public class MonitoringManager extends ResourceManager<MonitoringBundle> impleme
     public MonitoringBundle createPublicResource(MonitoringBundle monitoringBundle, Authentication auth) {
         publicMonitoringManager.add(monitoringBundle, auth);
         return monitoringBundle;
+    }
+
+    public void addBulk(List<MonitoringBundle> monitoringList, Authentication auth) {
+        for (MonitoringBundle monitoringBundle : monitoringList) {
+            super.add(monitoringBundle, auth);
+        }
     }
 }

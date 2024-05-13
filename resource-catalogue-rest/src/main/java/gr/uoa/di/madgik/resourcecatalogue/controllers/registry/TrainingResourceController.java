@@ -362,4 +362,9 @@ public class TrainingResourceController {
         return trainingResourceService.suspend(trainingResourceId, catalogueId, suspend, auth);
     }
 
+    @PostMapping(path = "/addBulk", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public void addBulk(@RequestBody List<TrainingResourceBundle> trainingResourceList, @Parameter(hidden = true) Authentication auth) {
+        trainingResourceService.addBulk(trainingResourceList, auth);
+    }
 }

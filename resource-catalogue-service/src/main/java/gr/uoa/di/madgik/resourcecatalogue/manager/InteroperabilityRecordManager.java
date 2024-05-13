@@ -10,7 +10,6 @@ import gr.uoa.di.madgik.resourcecatalogue.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.exception.ValidationException;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
 import gr.uoa.di.madgik.resourcecatalogue.utils.Auditable;
-import gr.uoa.di.madgik.resourcecatalogue.utils.FacetFilterUtils;
 import gr.uoa.di.madgik.resourcecatalogue.utils.ObjectUtils;
 import gr.uoa.di.madgik.resourcecatalogue.utils.ProviderResourcesCommonMethods;
 import gr.uoa.di.madgik.resourcecatalogue.validators.FieldValidator;
@@ -22,7 +21,6 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
-import org.springframework.util.MultiValueMap;
 
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
@@ -415,5 +413,11 @@ public class InteroperabilityRecordManager extends ResourceManager<Interoperabil
                 interoperabilityRecordBundle.getInteroperabilityRecord().getProviderId(), suspend, auth);
         commonMethods.suspendResource(interoperabilityRecordBundle, catalogueId, suspend, auth);
         return super.update(interoperabilityRecordBundle, auth);
+    }
+
+    public void addBulk(List<InteroperabilityRecordBundle> interoperabilityRecordList, Authentication auth) {
+        for (InteroperabilityRecordBundle interoperabilityRecordBundle : interoperabilityRecordList) {
+            super.add(interoperabilityRecordBundle, auth);
+        }
     }
 }
