@@ -247,10 +247,6 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     public ProviderBundle get(String catalogueId, String providerId, Authentication auth) {
         ProviderBundle providerBundle = getWithCatalogue(providerId, catalogueId);
         CatalogueBundle catalogueBundle = catalogueService.get(catalogueId);
-        if (providerBundle == null) {
-            throw new gr.uoa.di.madgik.resourcecatalogue.exception.ResourceNotFoundException(
-                    String.format("Could not find provider with id: %s", providerId));
-        }
         if (catalogueBundle == null) {
             throw new gr.uoa.di.madgik.resourcecatalogue.exception.ResourceNotFoundException(
                     String.format("Could not find catalogue with id: %s", catalogueId));
