@@ -145,6 +145,7 @@ public class LoggingInfo {
         ret.setType(Types.UPDATE.getKey());
         ret.setActionType(actionType);
         ret.setUserRole("system");
+        ret.setUserFullName("system");
         return ret;
     }
 
