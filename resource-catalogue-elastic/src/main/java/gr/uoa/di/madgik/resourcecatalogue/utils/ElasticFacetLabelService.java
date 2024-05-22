@@ -3,11 +3,12 @@ package gr.uoa.di.madgik.resourcecatalogue.utils;
 import gr.uoa.di.madgik.registry.domain.Facet;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.elasticsearch.action.search.SearchRequest;
-import org.elasticsearch.action.search.SearchResponse;
+import org.elasticsearch.ElasticsearchStatusException;
+import org.elasticsearch.action.search.*;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestHighLevelClient;
-import org.elasticsearch.common.document.DocumentField;
+import org.elasticsearch.core.TimeValue;
+import org.elasticsearch.search.Scroll;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.springframework.context.annotation.Primary;
@@ -17,7 +18,6 @@ import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Primary
 @Order(Ordered.HIGHEST_PRECEDENCE)
@@ -27,57 +27,76 @@ public class ElasticFacetLabelService implements FacetLabelService {
     private static final Logger logger = LogManager.getLogger(ElasticFacetLabelService.class);
     private final RestHighLevelClient client;
 
-    @org.springframework.beans.factory.annotation.Value("${elastic.index.max_result_window:10000}")
-    private int maxQuantity;
-
     ElasticFacetLabelService(RestHighLevelClient client) {
         this.client = client;
     }
 
     @Override
     public List<Facet> generateLabels(List<Facet> facets) {
-        Map<String, String> vocabularyValues = getIdNameFields();
+        Map<String, String> vocabularyValues = null;
+        try {
+            vocabularyValues = getIdNameFields();
+        } catch (IOException e) {
+            logger.warn(e.getMessage(), e);
+        }
 
         for (Facet facet : facets) {
-            facet.getValues().forEach(value -> value.setLabel(getLabelElseKeepValue(value.getValue(), vocabularyValues)));
+            Map<String, String> finalVocabularyValues = vocabularyValues;
+            facet.getValues().forEach(value -> value.setLabel(getLabelElseKeepValue(value.getValue(), finalVocabularyValues)));
         }
         return facets;
     }
 
-    private Map<String, String> getIdNameFields() {
+    private Map<String, String> getIdNameFields() throws IOException, ElasticsearchStatusException {
         Map<String, String> idNameMap = new TreeMap<>();
-        SearchRequest searchRequest = new SearchRequest();
 
+        final Scroll scroll = new Scroll(TimeValue.timeValueSeconds(1L));
+        SearchRequest searchRequest = new SearchRequest("resourceTypes");
+        searchRequest.scroll(scroll);
         SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
         searchSourceBuilder
-                .from(0)
                 .size(10000)
-                .docValueField("*_id")
                 .docValueField("resource_internal_id")
                 .docValueField("name")
+                .docValueField("title")
                 .fetchSource(false)
                 .explain(true);
         searchRequest.source(searchSourceBuilder);
 
-        SearchResponse response = null;
-        try {
-            response = client.search(searchRequest, RequestOptions.DEFAULT);
+        SearchResponse searchResponse = client.search(searchRequest, RequestOptions.DEFAULT);
+        String scrollId = searchResponse.getScrollId();
+        SearchHit[] searchHits = searchResponse.getHits().getHits();
 
-            List<SearchHit> hits = Arrays.stream(response.getHits().getHits()).collect(Collectors.toList());
+        while (searchHits != null && searchHits.length > 0) {
 
-            for (SearchHit hit : hits) {
-                hit.getFields().remove("_id");
-                if (hit.getFields().containsKey("resource_internal_id") && hit.getFields().containsKey("name")) {
-                    idNameMap.put((String) hit.getFields().get("resource_internal_id").getValues().get(0), (String) hit.getFields().get("name").getValues().get(0));
-                } else if (hit.getFields().containsKey("name") && hit.getFields().size() > 1) {
-                    String name = (String) hit.getFields().remove("name").getValues().get(0);
-                    List<DocumentField> id = (List<DocumentField>) hit.getFields().values();
-                    idNameMap.put((String) id.get(0).getValues().get(0), name);
+            for (SearchHit hit : searchHits) {
+                if (hit.getFields().containsKey("resource_internal_id")) {
+                    String id = (String) hit.getFields().get("resource_internal_id").getValues().get(0);
+                    if (hit.getFields().containsKey("name")) {
+                        idNameMap.put(id, (String) hit.getFields().get("name").getValues().get(0));
+                    } else if (hit.getFields().containsKey("title")) {
+                        idNameMap.put(id, (String) hit.getFields().get("title").getValues().get(0));
+                    }
+                } else {
+                    logger.error("Could not create id - name value. \nHit: {}", hit);
                 }
             }
-        } catch (IOException e) {
-            logger.error("Error retrieving Id / Name values from all resources.", e);
+
+            SearchScrollRequest scrollRequest = new SearchScrollRequest(scrollId);
+            scrollRequest.scroll(scroll);
+            searchResponse = client.scroll(scrollRequest, RequestOptions.DEFAULT);
+            scrollId = searchResponse.getScrollId();
+            searchHits = searchResponse.getHits().getHits();
         }
+
+        ClearScrollRequest clearScrollRequest = new ClearScrollRequest();
+        clearScrollRequest.addScrollId(scrollId);
+        ClearScrollResponse clearScrollResponse = client.clearScroll(clearScrollRequest, RequestOptions.DEFAULT);
+        boolean succeeded = clearScrollResponse.isSucceeded();
+        if (!succeeded) {
+            logger.error("clear scroll request failed...");
+        }
+
         return idNameMap;
     }
 
