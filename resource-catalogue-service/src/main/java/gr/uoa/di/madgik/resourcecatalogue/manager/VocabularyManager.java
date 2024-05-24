@@ -1,6 +1,5 @@
 package gr.uoa.di.madgik.resourcecatalogue.manager;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import gr.uoa.di.madgik.registry.domain.Browsing;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.domain.Resource;
@@ -18,17 +17,12 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpStatus;
 import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
-import java.io.IOException;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static gr.uoa.di.madgik.resourcecatalogue.config.Properties.Cache.*;
 
@@ -36,7 +30,7 @@ import static gr.uoa.di.madgik.resourcecatalogue.config.Properties.Cache.*;
 public class VocabularyManager extends ResourceManager<Vocabulary> implements VocabularyService {
     private static final Logger logger = LogManager.getLogger(VocabularyManager.class);
 
-    private final Map<String, Region> regions = new HashMap<>();
+    private final Map<String, String[]> regions = new HashMap<>();
 
     private final ProviderManager providerManager;
 
@@ -44,10 +38,15 @@ public class VocabularyManager extends ResourceManager<Vocabulary> implements Vo
 
     private final IdCreator idCreator;
 
+    @PostConstruct
+    private void postConstruct() {
+        logger.debug("Initializing Regions");
+        regions.put("EU", getRegion("EU"));
+        regions.put("WW", getRegion("WW"));
+    }
+
     public VocabularyManager(@Lazy ProviderManager providerManager, @Lazy IdCreator idCreator, @Lazy SecurityService securityService) {
         super(Vocabulary.class);
-        regions.put("EU", new Region("https://restcountries.com/v3.1/region/europe?fields=cca2"));
-        regions.put("WW", new Region("https://restcountries.com/v3.1/all?fields=cca2"));
         this.providerManager = providerManager;
         this.idCreator = idCreator;
         this.securityService = securityService;
@@ -71,11 +70,15 @@ public class VocabularyManager extends ResourceManager<Vocabulary> implements Vo
 
     @Override
     public String[] getRegion(String name) {
-        Region region = regions.get(name);
-        if (region.getMembers() == null || region.getMembers().length == 0) {
-            fetchRegion(region);
+        List<Vocabulary> allCountries = getByType(Vocabulary.Type.COUNTRY);
+        if (name.equals("WW")) {
+            return allCountries.stream().map(Vocabulary::getId).toArray(String[]::new);
+        } else {
+            return allCountries.stream()
+                    .filter(vocabulary -> !vocabulary.getExtras().isEmpty())
+                    .map(Vocabulary::getId)
+                    .toArray(String[]::new);
         }
-        return region.getMembers();
     }
 
     @Override
@@ -121,18 +124,24 @@ public class VocabularyManager extends ResourceManager<Vocabulary> implements Vo
     }
 
     @Override
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @CacheEvict(value = {CACHE_VOCABULARIES, CACHE_VOCABULARY_MAP, CACHE_VOCABULARY_TREE}, allEntries = true)
-    public void addAll(List<Vocabulary> vocabularies, Authentication auth) {
+    public void addBulk(List<Vocabulary> vocabularies, Authentication auth) {
         for (Vocabulary vocabulary : vocabularies) {
             add(vocabulary, auth);
         }
     }
 
     @Override
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @CacheEvict(value = {CACHE_VOCABULARIES, CACHE_VOCABULARY_MAP, CACHE_VOCABULARY_TREE}, allEntries = true)
-    public void deleteAll(Authentication auth) {
+    public void updateBulk(List<Vocabulary> vocabularies, Authentication auth) {
+        for (Vocabulary vocabulary : vocabularies) {
+            update(vocabulary, auth);
+        }
+    }
+
+    @Override
+    @CacheEvict(value = {CACHE_VOCABULARIES, CACHE_VOCABULARY_MAP, CACHE_VOCABULARY_TREE}, allEntries = true)
+    public void deleteBulk(Authentication auth) {
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(maxQuantity);
         List<Vocabulary> allVocs = getAll(ff, auth).getResults();
@@ -218,77 +227,6 @@ public class VocabularyManager extends ResourceManager<Vocabulary> implements Vo
         resourceService.updateResource(existing);
         logger.debug("Updating Vocabulary {}", vocabulary);
         return vocabulary;
-    }
-
-    private void fetchRegion(Region region) {
-        try {
-            HttpURLConnection c = (HttpURLConnection) new URL(region.getSource()).openConnection();
-            c.setRequestMethod("GET");
-            c.setRequestProperty("Accept", "application/json");
-            if (c.getResponseCode() == 200) {
-                Country[] countries = new ObjectMapper().readValue(c.getInputStream(), Country[].class);
-                c.disconnect();
-                region.setMembers(Stream.of(countries).map(e -> e.cca2).toArray(String[]::new));
-            }
-        } catch (IOException e) {
-            logger.error("ERROR", e);
-        }
-    }
-
-    @PostConstruct
-    private void postConstruct() {
-        regions.forEach((key, value) -> this.fetchRegion(value));
-    }
-
-    private static class Country {
-        private String cca2;
-        private List<String> capital;
-        private List<String> altSpellings;
-
-        public String getCca2() {
-            return cca2;
-        }
-
-        public void setCca2(String cca2) {
-            this.cca2 = cca2;
-        }
-
-        public List<String> getCapital() {
-            return capital;
-        }
-
-        public void setCapital(List<String> capital) {
-            this.capital = capital;
-        }
-
-        public List<String> getAltSpellings() {
-            return altSpellings;
-        }
-
-        public void setAltSpellings(List<String> altSpellings) {
-            this.altSpellings = altSpellings;
-        }
-    }
-
-    private static class Region {
-        private String[] members = null;
-        private String source;
-
-        private Region(String source) {
-            this.source = source;
-        }
-
-        public String[] getMembers() {
-            return members;
-        }
-
-        public void setMembers(String[] members) {
-            this.members = members;
-        }
-
-        public String getSource() {
-            return source;
-        }
     }
 
     //    @Scheduled(initialDelay = 0, fixedRate = 120000)

@@ -5,7 +5,6 @@ import gr.uoa.di.madgik.resourcecatalogue.dto.VocabularyTree;
 import gr.uoa.di.madgik.resourcecatalogue.service.VocabularyService;
 import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 
-
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -60,13 +59,11 @@ public class VocabularyController extends ResourceController<Vocabulary, Authent
         return new ResponseEntity<>(vocabularyService.get(id), HttpStatus.OK);
     }
 
-    //    @Operation(summary = "Returns a tree structure of Categories")
     @GetMapping(path = "vocabularyTree/{type}", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<VocabularyTree> getVocabularyTree(@PathVariable("type") Vocabulary.Type type) {
         return new ResponseEntity<>(vocabularyService.getVocabulariesTree(type), HttpStatus.OK);
     }
 
-    //    @Operation(summary = "Returns a map structure of vocabularies")
     @GetMapping(path = "vocabularyMap", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<Map<String, Vocabulary>> getVocabularyMap() {
         return new ResponseEntity<>(vocabularyService.getVocabulariesMap(), HttpStatus.OK);
@@ -89,7 +86,6 @@ public class VocabularyController extends ResourceController<Vocabulary, Authent
      * Secured methods
      **/
 
-//    @Operation(summary = "Adds a new Vocabulary")
     @PostMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     @Override
@@ -97,7 +93,6 @@ public class VocabularyController extends ResourceController<Vocabulary, Authent
         return super.add(vocabulary, auth);
     }
 
-    //    @Operation(summary = "Updates a Vocabulary")
     @PutMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     @Override
@@ -105,7 +100,6 @@ public class VocabularyController extends ResourceController<Vocabulary, Authent
         return super.update(vocabulary, auth);
     }
 
-    //    @Operation(summary = "Deletes a Vocabulary")
     @DeleteMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     @Override
@@ -113,21 +107,24 @@ public class VocabularyController extends ResourceController<Vocabulary, Authent
         return super.delete(vocabulary, auth);
     }
 
-    //    @Operation(summary = "Adds all new Vocabularies")
-    @PostMapping(path = "/addAll", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
-    public void addAll(@RequestBody List<Vocabulary> newVocabularies, @Parameter(hidden = true) Authentication auth) {
-        vocabularyService.addAll(newVocabularies, auth);
-    }
-
-    //    @Operation(summary = "Delete All Vocs")
-    @DeleteMapping(path = "/deleteAll", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PostMapping(path = "/addBulk", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public void deleteAll(@Parameter(hidden = true) Authentication auth) {
-        vocabularyService.deleteAll(auth);
+    public void addBulk(@RequestBody List<Vocabulary> newVocabularies, @Parameter(hidden = true) Authentication auth) {
+        vocabularyService.addBulk(newVocabularies, auth);
     }
 
-    //    @Operation(summary = "Delete all Vocs of a specific type")
+    @PutMapping(path = "/updateBulk", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public void updateBulk(@RequestBody List<Vocabulary> vocabularies, @Parameter(hidden = true) Authentication auth) {
+        vocabularyService.updateBulk(vocabularies, auth);
+    }
+
+    @DeleteMapping(path = "/deleteBulk", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public void deleteBulk(@Parameter(hidden = true) Authentication auth) {
+        vocabularyService.deleteBulk(auth);
+    }
+
     @DeleteMapping(path = "/deleteByType/{type}", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public void deleteByType(@PathVariable(value = "type") Vocabulary.Type type, @Parameter(hidden = true) Authentication auth) throws ResourceNotFoundException {

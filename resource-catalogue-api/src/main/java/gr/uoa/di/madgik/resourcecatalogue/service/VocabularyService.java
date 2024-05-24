@@ -59,15 +59,23 @@ public interface VocabularyService extends ResourceService<Vocabulary, Authentic
     /**
      * Adds an aggregation of Vocabularies
      *
-     * @param newVocabularies List of Vocabularies to be added
-     * @param auth            Authentication
+     * @param vocabularies List of Vocabularies to be added
+     * @param auth         Authentication
      */
-    void addAll(List<Vocabulary> newVocabularies, Authentication auth);
+    void addBulk(List<Vocabulary> vocabularies, Authentication auth);
+
+    /**
+     * Updates an aggregation of Vocabularies
+     *
+     * @param vocabularies List of Vocabularies to be updated
+     * @param auth         Authentication
+     */
+    void updateBulk(List<Vocabulary> vocabularies, Authentication auth);
 
     /**
      * Deletes all Vocabularies.
      */
-    void deleteAll(Authentication auth);
+    void deleteBulk(Authentication auth);
 
     /**
      * Returns a Tree of parents and children for a specific Vocabulary Type
