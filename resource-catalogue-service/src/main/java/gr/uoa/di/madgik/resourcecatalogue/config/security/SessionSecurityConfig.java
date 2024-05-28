@@ -75,9 +75,6 @@ public class SessionSecurityConfig extends WebSecurityConfigurerAdapter {
     @Value("${oidc.clientSecret}")
     private String oidcClientSecret;
 
-    @Value("${oidc.logout:https://aai.eosc-portal.eu/oidc/saml/logout}")
-    private String oidcLogoutURL;
-
     @Value("#{'${oidc.scopes}'.split(',')}")
     private List<String> scopes;
 
@@ -119,9 +116,10 @@ public class SessionSecurityConfig extends WebSecurityConfigurerAdapter {
                 .deleteCookies("SESSION")
                 .invalidateHttpSession(true)
                 .logoutUrl("/openid_logout")
-                .logoutSuccessUrl(oidcLogoutURL +
-                        "?post_logout_redirect_uri=" + webappFrontUrl +
-                        "&client_id=" + oidcClientId) // Keycloak
+                .logoutSuccessUrl(webappFrontUrl)
+//                .logoutSuccessUrl(oidcLogoutURL +
+//                        "?post_logout_redirect_uri=" + webappFrontUrl +
+//                        "&client_id=" + oidcClientId) // Keycloak
 //                    .logoutSuccessUrl(oidcLogoutURL + "?redirect=" + webappFrontUrl) // MITREid
                 .deleteCookies("info")
                 .and().exceptionHandling()
