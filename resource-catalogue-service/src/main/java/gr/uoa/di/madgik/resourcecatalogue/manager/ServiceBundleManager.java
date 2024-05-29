@@ -387,7 +387,7 @@ public class ServiceBundleManager extends AbstractServiceBundleManager<ServiceBu
                 break;
         }
 
-        logger.info("Verifying Resource: {}", serviceBundle);
+        logger.info("Verifying Service: {}", serviceBundle);
         try {
             providerService.update(resourceProvider, auth);
         } catch (gr.uoa.di.madgik.registry.exception.ResourceNotFoundException e) {
@@ -404,7 +404,7 @@ public class ServiceBundleManager extends AbstractServiceBundleManager<ServiceBu
 
         if ((service.getStatus().equals(vocabularyService.get("pending resource").getId()) ||
                 service.getStatus().equals(vocabularyService.get("rejected resource").getId())) && !service.isActive()) {
-            throw new ValidationException(String.format("You cannot activate this Resource, because it's Inactive with status = [%s]", service.getStatus()));
+            throw new ValidationException(String.format("You cannot activate this Service, because it's Inactive with status = [%s]", service.getStatus()));
         }
 
         ProviderBundle providerBundle = providerService.get(service.getService().getCatalogueId(), service.getService().getResourceOrganisation(), auth);
@@ -606,7 +606,7 @@ public class ServiceBundleManager extends AbstractServiceBundleManager<ServiceBu
             loggingInfoList.sort(Comparator.comparing(LoggingInfo::getDate).reversed());
             return new Browsing<>(loggingInfoList.size(), 0, loggingInfoList.size(), loggingInfoList, null);
         } catch (ResourceNotFoundException e) {
-            logger.info(String.format("Resource with id [%s] not found", id));
+            logger.info(String.format("Service with id [%s] not found", id));
         }
         return null;
     }
