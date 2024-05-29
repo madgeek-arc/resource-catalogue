@@ -29,6 +29,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 @Service
 public abstract class AbstractSyncService<T extends Identifiable> implements SynchronizerService<T> {
     private static final Logger logger = LogManager.getLogger(AbstractSyncService.class);
+    private static boolean isInitialized = false;
 
     protected RestTemplate restTemplate;
     protected boolean active = false;
@@ -49,15 +50,18 @@ public abstract class AbstractSyncService<T extends Identifiable> implements Syn
         if (!"".equals(host) && enabled) {
             active = true;
         }
-        if ("".equals(filename)) {
-            logger.warn("'sync.token.filepath' value not set");
-        }
         this.queue = new LinkedBlockingQueue<>();
     }
 
     @PostConstruct
     void init() {
         this.controller = getController();
+        if (!isInitialized) {
+            if ("".equals(filename)) {
+                logger.warn("'sync.token.filepath' value not set");
+            }
+            isInitialized = true;
+        }
     }
 
     public BlockingQueue<Pair<T, String>> getQueue() {
