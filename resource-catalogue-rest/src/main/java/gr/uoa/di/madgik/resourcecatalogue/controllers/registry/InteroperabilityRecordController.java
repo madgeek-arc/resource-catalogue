@@ -169,7 +169,6 @@ public class InteroperabilityRecordController {
         ff.addFilter("published", false);
         ff.addFilter("catalogue_id", catalogueId);
         ff.addFilter("providerId", id);
-        ff.addFilter("active", true);
         Paging<InteroperabilityRecordBundle> paging = genericResourceService.getResults(ff);
         return ResponseEntity.ok(paging);
     }

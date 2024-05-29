@@ -212,7 +212,6 @@ public class ServiceController {
         ff.addFilter("published", false);
         ff.addFilter("catalogue_id", catalogueId);
         ff.addFilter("resource_organisation", id);
-        ff.addFilter("active", true);
         Paging<ServiceBundle> paging = genericResourceService.getResults(ff);
         return ResponseEntity.ok(paging);
     }
