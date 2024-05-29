@@ -8,6 +8,7 @@ import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.registry.service.ServiceException;
+import gr.uoa.di.madgik.resourcecatalogue.domain.User;
 import gr.uoa.di.madgik.resourcecatalogue.exception.ResourceException;
 import gr.uoa.di.madgik.resourcecatalogue.exception.ValidationException;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
@@ -63,7 +64,7 @@ public class PendingServiceController extends ResourceController<ServiceBundle, 
     public ResponseEntity<ServiceBundle> delete(@PathVariable("id") String id, @Parameter(hidden = true) Authentication auth) throws ResourceNotFoundException {
         ServiceBundle service = pendingServiceManager.get(id);
         pendingServiceManager.delete(service);
-        logger.info("User '{}' deleted Pending Resource '{}' with id: '{}'", auth.getName(), service.getService().getName(), service.getService().getId());
+        logger.info("User '{}' deleted Pending Resource '{}' with id: '{}'", User.of(auth).getEmail(), service.getService().getName(), service.getService().getId());
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
@@ -168,14 +169,14 @@ public class PendingServiceController extends ResourceController<ServiceBundle, 
 
         if (serviceBundle == null) { // if existing Pending Service is null, create a new Active Service
             serviceBundle = serviceBundleService.addResource(new ServiceBundle(service), auth);
-            logger.info("User '{}' added Resource:\n{}", auth.getName(), serviceBundle);
+            logger.info("User '{}' added Resource:\n{}", User.of(auth).getEmail(), serviceBundle);
         } else { // else update Pending Service and transform it to Active Service
             if (serviceBundle.getService().getVersion() != null && serviceBundle.getService().getVersion().equals("")) {
                 serviceBundle.getService().setVersion(null);
             }
             serviceBundle.setService(service); // important to keep other fields of ServiceBundle
             serviceBundle = pendingServiceManager.update(serviceBundle, auth);
-            logger.info("User '{}' updated Pending Resource:\n{}", auth.getName(), serviceBundle);
+            logger.info("User '{}' updated Pending Resource:\n{}", User.of(auth).getEmail(), serviceBundle);
 
             // transform to active
             serviceBundle = pendingServiceManager.transformToActive(serviceBundle.getId(), auth);

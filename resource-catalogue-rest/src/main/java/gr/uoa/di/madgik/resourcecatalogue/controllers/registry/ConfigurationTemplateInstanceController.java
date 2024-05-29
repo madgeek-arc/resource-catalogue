@@ -1,6 +1,7 @@
 package gr.uoa.di.madgik.resourcecatalogue.controllers.registry;
 
 import gr.uoa.di.madgik.resourcecatalogue.annotations.Browse;
+import gr.uoa.di.madgik.resourcecatalogue.domain.User;
 import gr.uoa.di.madgik.resourcecatalogue.domain.configurationTemplates.ConfigurationTemplateInstance;
 import gr.uoa.di.madgik.resourcecatalogue.domain.configurationTemplates.ConfigurationTemplateInstanceBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.configurationTemplates.ConfigurationTemplateInstanceDto;
@@ -94,7 +95,7 @@ public class ConfigurationTemplateInstanceController {
     public ResponseEntity<ConfigurationTemplateInstance> addConfigurationTemplateInstance(@RequestBody ConfigurationTemplateInstance configurationTemplateInstance,
                                                                                           @Parameter(hidden = true) Authentication auth) {
         ConfigurationTemplateInstanceBundle configurationTemplateInstanceBundle = configurationTemplateInstanceService.add(new ConfigurationTemplateInstanceBundle(configurationTemplateInstance), auth);
-        logger.info("User '{}' added the Configuration Template Instance with id '{}'", auth.getName(), configurationTemplateInstance.getId());
+        logger.info("User '{}' added the Configuration Template Instance with id '{}'", User.of(auth).getEmail(), configurationTemplateInstance.getId());
         return new ResponseEntity<>(configurationTemplateInstanceBundle.getConfigurationTemplateInstance(), HttpStatus.CREATED);
     }
 
@@ -105,7 +106,7 @@ public class ConfigurationTemplateInstanceController {
                                                                                                  @Parameter(hidden = true) Authentication auth) {
         for (ConfigurationTemplateInstance configurationTemplateInstance : configurationTemplateInstances) {
             configurationTemplateInstanceService.add(new ConfigurationTemplateInstanceBundle(configurationTemplateInstance), auth);
-            logger.info("User '{}' added the Configuration Template Instance with id '{}'", auth.getName(), configurationTemplateInstance.getId());
+            logger.info("User '{}' added the Configuration Template Instance with id '{}'", User.of(auth).getEmail(), configurationTemplateInstance.getId());
         }
         return new ResponseEntity<>(HttpStatus.OK);
     }
@@ -118,7 +119,7 @@ public class ConfigurationTemplateInstanceController {
         ConfigurationTemplateInstanceBundle configurationTemplateInstanceBundle = configurationTemplateInstanceService.get(configurationTemplateInstance.getId());
         configurationTemplateInstanceBundle.setConfigurationTemplateInstance(configurationTemplateInstance);
         configurationTemplateInstanceBundle = configurationTemplateInstanceService.update(configurationTemplateInstanceBundle, auth);
-        logger.info("User '{}' updated the Configuration Template Instance with id '{}'", auth.getName(), configurationTemplateInstanceBundle.getId());
+        logger.info("User '{}' updated the Configuration Template Instance with id '{}'", User.of(auth).getEmail(), configurationTemplateInstanceBundle.getId());
         return new ResponseEntity<>(configurationTemplateInstanceBundle.getConfigurationTemplateInstance(), HttpStatus.OK);
     }
 
@@ -132,7 +133,7 @@ public class ConfigurationTemplateInstanceController {
         }
         logger.info("Deleting Configuration Template Instance: {}", configurationTemplateInstanceBundle.getConfigurationTemplateInstance().getId());
         configurationTemplateInstanceService.delete(configurationTemplateInstanceBundle);
-        logger.info("User '{}' deleted the Configuration Template Instance with id '{}'", auth.getName(),
+        logger.info("User '{}' deleted the Configuration Template Instance with id '{}'", User.of(auth).getEmail(),
                 configurationTemplateInstanceBundle.getConfigurationTemplateInstance().getId());
         return new ResponseEntity<>(configurationTemplateInstanceBundle.getConfigurationTemplateInstance(), HttpStatus.OK);
     }

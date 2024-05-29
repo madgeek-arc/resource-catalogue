@@ -74,7 +74,7 @@ public class CatalogueController {
     @PreAuthorize("hasRole('ROLE_USER')")
     public ResponseEntity<Catalogue> addCatalogue(@RequestBody Catalogue catalogue, @Parameter(hidden = true) Authentication auth) {
         CatalogueBundle catalogueBundle = catalogueManager.add(new CatalogueBundle(catalogue), auth);
-        logger.info("User '{}' added the Catalogue with name '{}' and id '{}'", auth.getName(), catalogue.getName(), catalogue.getId());
+        logger.info("User '{}' added the Catalogue with name '{}' and id '{}'", User.of(auth).getEmail(), catalogue.getName(), catalogue.getId());
         return new ResponseEntity<>(catalogueBundle.getCatalogue(), HttpStatus.CREATED);
     }
 
@@ -82,7 +82,7 @@ public class CatalogueController {
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<CatalogueBundle> addCatalogueBundle(@RequestBody CatalogueBundle catalogue, @Parameter(hidden = true) Authentication auth) {
         CatalogueBundle catalogueBundle = catalogueManager.add(catalogue, auth);
-        logger.info("User '{}' added the Catalogue with name '{}' and id '{}'", auth.getName(), catalogueBundle.getCatalogue().getName(), catalogue.getId());
+        logger.info("User '{}' added the Catalogue with name '{}' and id '{}'", User.of(auth).getEmail(), catalogueBundle.getCatalogue().getName(), catalogue.getId());
         return new ResponseEntity<>(catalogueBundle, HttpStatus.CREATED);
     }
 
@@ -97,7 +97,7 @@ public class CatalogueController {
             comment = "no comment";
         }
         catalogueBundle = catalogueManager.update(catalogueBundle, comment, auth);
-        logger.info("User '{}' updated the Catalogue with name '{}' and id '{}'", auth.getName(), catalogue.getName(), catalogue.getId());
+        logger.info("User '{}' updated the Catalogue with name '{}' and id '{}'", User.of(auth).getEmail(), catalogue.getName(), catalogue.getId());
         return new ResponseEntity<>(catalogueBundle.getCatalogue(), HttpStatus.OK);
     }
 
@@ -105,7 +105,7 @@ public class CatalogueController {
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<CatalogueBundle> updateCatalogueBundle(@RequestBody CatalogueBundle catalogue, @Parameter(hidden = true) Authentication auth) throws ResourceNotFoundException {
         CatalogueBundle catalogueBundle = catalogueManager.update(catalogue, auth);
-        logger.info("User '{}' updated the Catalogue with name '{}' and id '{}'", auth.getName(), catalogueBundle.getCatalogue().getName(), catalogue.getId());
+        logger.info("User '{}' updated the Catalogue with name '{}' and id '{}'", User.of(auth).getEmail(), catalogueBundle.getCatalogue().getName(), catalogue.getId());
         return new ResponseEntity<>(catalogueBundle, HttpStatus.OK);
     }
 
@@ -192,7 +192,7 @@ public class CatalogueController {
         }
         catalogueManager.delete(catalogueBundle);
         logger.info("User '{}' deleted the Catalogue with id '{}' and name '{} along with all its related Resources'",
-                auth.getName(), catalogueBundle.getCatalogue().getId(), catalogueBundle.getCatalogue().getName());
+                User.of(auth).getEmail(), catalogueBundle.getCatalogue().getId(), catalogueBundle.getCatalogue().getName());
         return new ResponseEntity<>(catalogueBundle.getCatalogue(), HttpStatus.OK);
     }
 
@@ -252,7 +252,7 @@ public class CatalogueController {
     @PreAuthorize("hasRole('ROLE_USER')")
     public ResponseEntity<Provider> addCatalogueProvider(@RequestBody Provider provider, @PathVariable String catalogueId, @Parameter(hidden = true) Authentication auth) {
         ProviderBundle providerBundle = providerManager.add(new ProviderBundle(provider), catalogueId, auth);
-        logger.info("User '{}' added the Provider with name '{}' and id '{}' in the Catalogue '{}'", auth.getName(), provider.getName(), provider.getId(), catalogueId);
+        logger.info("User '{}' added the Provider with name '{}' and id '{}' in the Catalogue '{}'", User.of(auth).getEmail(), provider.getName(), provider.getId(), catalogueId);
         return new ResponseEntity<>(providerBundle.getProvider(), HttpStatus.CREATED);
     }
 
@@ -260,7 +260,7 @@ public class CatalogueController {
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<ProviderBundle> addCatalogueProviderBundle(@RequestBody ProviderBundle provider, @PathVariable String catalogueId, @Parameter(hidden = true) Authentication auth) {
         ProviderBundle providerBundle = providerManager.add(provider, catalogueId, auth);
-        logger.info("User '{}' added the Provider with name '{}' and id '{}' in the Catalogue '{}'", auth.getName(), provider.getProvider().getName(), provider.getProvider().getId(), catalogueId);
+        logger.info("User '{}' added the Provider with name '{}' and id '{}' in the Catalogue '{}'", User.of(auth).getEmail(), provider.getProvider().getName(), provider.getProvider().getId(), catalogueId);
         return new ResponseEntity<>(providerBundle, HttpStatus.CREATED);
     }
 
@@ -274,7 +274,7 @@ public class CatalogueController {
             comment = "no comment";
         }
         providerBundle = providerManager.update(providerBundle, comment, auth);
-        logger.info("User '{}' updated the Provider with name '{}' and id '{} of the Catalogue '{}'", auth.getName(), provider.getName(), provider.getId(), catalogueId);
+        logger.info("User '{}' updated the Provider with name '{}' and id '{} of the Catalogue '{}'", User.of(auth).getEmail(), provider.getName(), provider.getId(), catalogueId);
         return new ResponseEntity<>(providerBundle.getProvider(), HttpStatus.OK);
     }
 
@@ -282,7 +282,7 @@ public class CatalogueController {
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<ProviderBundle> updateCatalogueProviderBundle(@RequestBody ProviderBundle provider, @PathVariable String catalogueId, @RequestParam(required = false) String comment, @Parameter(hidden = true) Authentication auth) throws ResourceNotFoundException {
         ProviderBundle providerBundle = providerManager.update(provider, auth);
-        logger.info("User '{}' updated the Provider with name '{}' and id '{} of the Catalogue '{}'", auth.getName(), provider.getProvider().getName(), provider.getProvider().getId(), catalogueId);
+        logger.info("User '{}' updated the Provider with name '{}' and id '{} of the Catalogue '{}'", User.of(auth).getEmail(), provider.getProvider().getName(), provider.getProvider().getId(), catalogueId);
         return new ResponseEntity<>(providerBundle, HttpStatus.OK);
     }
 
@@ -297,7 +297,7 @@ public class CatalogueController {
             return new ResponseEntity<>(HttpStatus.GONE);
         }
         providerManager.delete(provider);
-        logger.info("User '{}' deleted the Provider with name '{}' and id '{}'", auth.getName(), provider.getProvider().getName(), provider.getId());
+        logger.info("User '{}' deleted the Provider with name '{}' and id '{}'", User.of(auth).getEmail(), provider.getProvider().getName(), provider.getId());
         return new ResponseEntity<>(provider.getProvider(), HttpStatus.OK);
     }
 
@@ -313,7 +313,7 @@ public class CatalogueController {
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.providerCanAddResources(#auth, #service)")
     public ResponseEntity<Service> addCatalogueService(@RequestBody Service service, @PathVariable String catalogueId, @Parameter(hidden = true) Authentication auth) {
         ServiceBundle ret = this.serviceBundleService.addResource(new ServiceBundle(service), catalogueId, auth);
-        logger.info("User '{}' added the Service with name '{}' and id '{}' in the Catalogue '{}'", auth.getName(), service.getName(), service.getId(), catalogueId);
+        logger.info("User '{}' added the Service with name '{}' and id '{}' in the Catalogue '{}'", User.of(auth).getEmail(), service.getName(), service.getId(), catalogueId);
         return new ResponseEntity<>(ret.getService(), HttpStatus.CREATED);
     }
 
@@ -322,7 +322,7 @@ public class CatalogueController {
     @PutMapping(path = "{catalogueId}/service", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<Service> updateCatalogueService(@RequestBody Service service, @PathVariable String catalogueId, @RequestParam(required = false) String comment, @Parameter(hidden = true) Authentication auth) throws ResourceNotFoundException {
         ServiceBundle ret = this.serviceBundleService.updateResource(new ServiceBundle(service), catalogueId, comment, auth);
-        logger.info("User '{}' updated the Service with name '{}' and id '{} of the Catalogue '{}'", auth.getName(), service.getName(), service.getId(), catalogueId);
+        logger.info("User '{}' updated the Service with name '{}' and id '{} of the Catalogue '{}'", User.of(auth).getEmail(), service.getName(), service.getId(), catalogueId);
         return new ResponseEntity<>(ret.getService(), HttpStatus.OK);
     }
 
@@ -351,7 +351,7 @@ public class CatalogueController {
             return new ResponseEntity<>(HttpStatus.GONE);
         }
         serviceBundleService.delete(serviceBundle);
-        logger.info("User '{}' deleted the Service with name '{}' and id '{}'", auth.getName(), serviceBundle.getService().getName(), serviceBundle.getId());
+        logger.info("User '{}' deleted the Service with name '{}' and id '{}'", User.of(auth).getEmail(), serviceBundle.getService().getName(), serviceBundle.getId());
         return new ResponseEntity<>(serviceBundle.getService(), HttpStatus.OK);
     }
 
@@ -368,7 +368,7 @@ public class CatalogueController {
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth, #datasource.serviceId, #datasource.catalogueId)")
     public ResponseEntity<Datasource> addCatalogueDatasource(@RequestBody Datasource datasource, @Parameter(hidden = true) Authentication auth) {
         DatasourceBundle ret = this.datasourceService.add(new DatasourceBundle(datasource), auth);
-        logger.info("User '{}' added the Datasource with id '{}' in the Catalogue '{}'", auth.getName(), datasource.getId(), datasource.getCatalogueId());
+        logger.info("User '{}' added the Datasource with id '{}' in the Catalogue '{}'", User.of(auth).getEmail(), datasource.getId(), datasource.getCatalogueId());
         return new ResponseEntity<>(ret.getDatasource(), HttpStatus.CREATED);
     }
 
@@ -379,7 +379,7 @@ public class CatalogueController {
                                                                 @RequestParam(required = false) String comment,
                                                                 @Parameter(hidden = true) Authentication auth) {
         DatasourceBundle ret = this.datasourceService.update(new DatasourceBundle(datasource), comment, auth);
-        logger.info("User '{}' updated the Datasource with id '{} of the Catalogue '{}'", auth.getName(), datasource.getId(), datasource.getCatalogueId());
+        logger.info("User '{}' updated the Datasource with id '{} of the Catalogue '{}'", User.of(auth).getEmail(), datasource.getId(), datasource.getCatalogueId());
         return new ResponseEntity<>(ret.getDatasource(), HttpStatus.OK);
     }
 
@@ -394,7 +394,7 @@ public class CatalogueController {
             return new ResponseEntity<>(HttpStatus.GONE);
         }
         datasourceService.delete(datasourceBundle);
-        logger.info("User '{}' deleted the Datasource with id '{}'", auth.getName(), datasourceBundle.getId());
+        logger.info("User '{}' deleted the Datasource with id '{}'", User.of(auth).getEmail(), datasourceBundle.getId());
         return new ResponseEntity<>(datasourceBundle.getDatasource(), HttpStatus.OK);
     }
 
@@ -419,7 +419,7 @@ public class CatalogueController {
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.providerCanAddResources(#auth, #trainingResource)")
     public ResponseEntity<TrainingResource> addCatalogueTrainingResource(@RequestBody TrainingResource trainingResource, @PathVariable String catalogueId, @Parameter(hidden = true) Authentication auth) {
         TrainingResourceBundle ret = this.trainingResourceService.addResource(new TrainingResourceBundle(trainingResource), catalogueId, auth);
-        logger.info("User '{}' added the Training Resource with title '{}' and id '{}' in the Catalogue '{}'", auth.getName(), trainingResource.getTitle(), trainingResource.getId(), catalogueId);
+        logger.info("User '{}' added the Training Resource with title '{}' and id '{}' in the Catalogue '{}'", User.of(auth).getEmail(), trainingResource.getTitle(), trainingResource.getId(), catalogueId);
         return new ResponseEntity<>(ret.getTrainingResource(), HttpStatus.CREATED);
     }
 
@@ -428,7 +428,7 @@ public class CatalogueController {
     @PutMapping(path = "{catalogueId}/trainingResource", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<TrainingResource> updateCatalogueTrainingResource(@RequestBody TrainingResource trainingResource, @PathVariable String catalogueId, @RequestParam(required = false) String comment, @Parameter(hidden = true) Authentication auth) throws ResourceNotFoundException {
         TrainingResourceBundle ret = this.trainingResourceService.updateResource(new TrainingResourceBundle(trainingResource), catalogueId, comment, auth);
-        logger.info("User '{}' updated the Training Resource with title '{}' and id '{} of the Catalogue '{}'", auth.getName(), trainingResource.getTitle(), trainingResource.getId(), catalogueId);
+        logger.info("User '{}' updated the Training Resource with title '{}' and id '{} of the Catalogue '{}'", User.of(auth).getEmail(), trainingResource.getTitle(), trainingResource.getId(), catalogueId);
         return new ResponseEntity<>(ret.getTrainingResource(), HttpStatus.OK);
     }
 
@@ -451,7 +451,7 @@ public class CatalogueController {
             return new ResponseEntity<>(HttpStatus.GONE);
         }
         trainingResourceService.delete(trainingResourceBundle);
-        logger.info("User '{}' deleted the Training Resource with title '{}' and id '{}'", auth.getName(), trainingResourceBundle.getTrainingResource().getTitle(), trainingResourceBundle.getId());
+        logger.info("User '{}' deleted the Training Resource with title '{}' and id '{}'", User.of(auth).getEmail(), trainingResourceBundle.getTrainingResource().getTitle(), trainingResourceBundle.getId());
         return new ResponseEntity<>(trainingResourceBundle.getTrainingResource(), HttpStatus.OK);
     }
 
@@ -478,7 +478,7 @@ public class CatalogueController {
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth, #interoperabilityRecord)")
     public ResponseEntity<InteroperabilityRecord> addCatalogueInteroperabilityRecord(@RequestBody InteroperabilityRecord interoperabilityRecord, @PathVariable String catalogueId, @Parameter(hidden = true) Authentication auth) {
         InteroperabilityRecordBundle ret = this.interoperabilityRecordService.add(new InteroperabilityRecordBundle(interoperabilityRecord), catalogueId, auth);
-        logger.info("User '{}' added the Interoperability Record with title '{}' and id '{}' in the Catalogue '{}'", auth.getName(), interoperabilityRecord.getTitle(), interoperabilityRecord.getId(), catalogueId);
+        logger.info("User '{}' added the Interoperability Record with title '{}' and id '{}' in the Catalogue '{}'", User.of(auth).getEmail(), interoperabilityRecord.getTitle(), interoperabilityRecord.getId(), catalogueId);
         return new ResponseEntity<>(ret.getInteroperabilityRecord(), HttpStatus.CREATED);
     }
 
@@ -487,7 +487,7 @@ public class CatalogueController {
     @PutMapping(path = "{catalogueId}/interoperabilityRecord", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<InteroperabilityRecord> updateCatalogueInteroperabilityRecord(@RequestBody InteroperabilityRecord interoperabilityRecord, @PathVariable String catalogueId, @Parameter(hidden = true) Authentication auth) throws ResourceNotFoundException {
         InteroperabilityRecordBundle ret = this.interoperabilityRecordService.update(new InteroperabilityRecordBundle(interoperabilityRecord), catalogueId, auth);
-        logger.info("User '{}' updated the Interoperability Record with title '{}' and id '{} of the Catalogue '{}'", auth.getName(), interoperabilityRecord.getTitle(), interoperabilityRecord.getId(), catalogueId);
+        logger.info("User '{}' updated the Interoperability Record with title '{}' and id '{} of the Catalogue '{}'", User.of(auth).getEmail(), interoperabilityRecord.getTitle(), interoperabilityRecord.getId(), catalogueId);
         return new ResponseEntity<>(ret.getInteroperabilityRecord(), HttpStatus.OK);
     }
 
@@ -510,7 +510,7 @@ public class CatalogueController {
             return new ResponseEntity<>(HttpStatus.GONE);
         }
         interoperabilityRecordService.delete(interoperabilityRecordBundle);
-        logger.info("User '{}' deleted the Interoperability Record with title '{}' and id '{}'", auth.getName(), interoperabilityRecordBundle.getInteroperabilityRecord().getTitle(), interoperabilityRecordBundle.getId());
+        logger.info("User '{}' deleted the Interoperability Record with title '{}' and id '{}'", User.of(auth).getEmail(), interoperabilityRecordBundle.getInteroperabilityRecord().getTitle(), interoperabilityRecordBundle.getId());
         return new ResponseEntity<>(interoperabilityRecordBundle.getInteroperabilityRecord(), HttpStatus.OK);
     }
 

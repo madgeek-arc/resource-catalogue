@@ -91,7 +91,7 @@ public class ProviderController {
 
         // delete Provider
         providerService.delete(provider);
-        logger.info("User '{}' deleted the Provider with name '{}' and id '{}'", auth.getName(), provider.getProvider().getName(), provider.getId());
+        logger.info("User '{}' deleted the Provider with name '{}' and id '{}'", User.of(auth).getEmail(), provider.getProvider().getName(), provider.getId());
         return new ResponseEntity<>(provider.getProvider(), HttpStatus.OK);
     }
 
@@ -110,7 +110,7 @@ public class ProviderController {
     @PreAuthorize("hasRole('ROLE_USER')")
     public ResponseEntity<Provider> add(@RequestBody Provider provider, @Parameter(hidden = true) Authentication auth) {
         ProviderBundle providerBundle = providerService.add(new ProviderBundle(provider), auth);
-        logger.info("User '{}' added the Provider with name '{}' and id '{}'", auth.getName(), provider.getName(), provider.getId());
+        logger.info("User '{}' added the Provider with name '{}' and id '{}'", User.of(auth).getEmail(), provider.getName(), provider.getId());
         return new ResponseEntity<>(providerBundle.getProvider(), HttpStatus.CREATED);
     }
 
@@ -118,7 +118,7 @@ public class ProviderController {
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<ProviderBundle> addBundle(@RequestBody ProviderBundle provider, @Parameter(hidden = true) Authentication auth) {
         ProviderBundle providerBundle = providerService.add(provider, auth);
-        logger.info("User '{}' added the Provider with name '{}' and id '{}'", auth.getName(), providerBundle.getProvider().getName(), provider.getId());
+        logger.info("User '{}' added the Provider with name '{}' and id '{}'", User.of(auth).getEmail(), providerBundle.getProvider().getName(), provider.getId());
         return new ResponseEntity<>(providerBundle, HttpStatus.CREATED);
     }
 
@@ -136,7 +136,8 @@ public class ProviderController {
             comment = "no comment";
         }
         providerBundle = providerService.update(providerBundle, comment, auth);
-        logger.info("User '{}' updated the Provider with name '{}' and id '{}'", auth.getName(), provider.getName(), provider.getId());
+        logger.info("User '{}' updated the Provider with name '{}' and id '{}'", User.of(auth).getEmail(),
+                provider.getName(), provider.getId());
         return new ResponseEntity<>(providerBundle.getProvider(), HttpStatus.OK);
     }
 
@@ -144,7 +145,7 @@ public class ProviderController {
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<ProviderBundle> updateBundle(@RequestBody ProviderBundle provider, @Parameter(hidden = true) Authentication auth) throws ResourceNotFoundException {
         ProviderBundle providerBundle = providerService.update(provider, auth);
-        logger.info("User '{}' updated the Provider with name '{}' and id '{}'", auth.getName(), providerBundle.getProvider().getName(), provider.getId());
+        logger.info("User '{}' updated the Provider with name '{}' and id '{}'", User.of(auth).getEmail(), providerBundle.getProvider().getName(), provider.getId());
         return new ResponseEntity<>(providerBundle, HttpStatus.OK);
     }
 
@@ -300,7 +301,7 @@ public class ProviderController {
             metadata.setModifiedAt(String.valueOf(System.currentTimeMillis()));
             serviceBundleService.update(service, auth);
             logger.info("User '{}' published(updated) all Services of the Provider with name '{}'",
-                    auth.getName(), provider.getProvider().getName());
+                    User.of(auth).getEmail(), provider.getProvider().getName());
         }
         return new ResponseEntity<>(services, HttpStatus.OK);
     }

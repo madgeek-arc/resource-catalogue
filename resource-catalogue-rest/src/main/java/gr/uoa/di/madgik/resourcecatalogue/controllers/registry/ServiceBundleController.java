@@ -4,6 +4,7 @@ import gr.uoa.di.madgik.resourcecatalogue.annotations.Browse;
 import gr.uoa.di.madgik.resourcecatalogue.annotations.BrowseCatalogue;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Metadata;
 import gr.uoa.di.madgik.resourcecatalogue.domain.ServiceBundle;
+import gr.uoa.di.madgik.resourcecatalogue.domain.User;
 import gr.uoa.di.madgik.resourcecatalogue.service.ServiceBundleService;
 import gr.uoa.di.madgik.resourcecatalogue.service.GenericResourceService;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
@@ -133,9 +134,9 @@ public class ServiceBundleController {
         metadata.setModifiedAt(String.valueOf(System.currentTimeMillis()));
         service.setMetadata(metadata);
         if (active) {
-            logger.info("User '{}' set ServiceBundle '{}' with id: {} as active", auth.getName(), service.getService().getName(), service.getService().getId());
+            logger.info("User '{}' set ServiceBundle '{}' with id: {} as active", User.of(auth).getEmail(), service.getService().getName(), service.getService().getId());
         } else {
-            logger.info("User '{}' set ServiceBundle '{}' with id: {} as inactive", auth.getName(), service.getService().getName(), service.getService().getId());
+            logger.info("User '{}' set ServiceBundle '{}' with id: {} as inactive", User.of(auth).getEmail(), service.getService().getName(), service.getService().getId());
         }
         return ResponseEntity.ok(serviceBundleService.update(service, auth));
     }

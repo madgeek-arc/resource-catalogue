@@ -1,5 +1,6 @@
 package gr.uoa.di.madgik.resourcecatalogue.controllers.registry;
 
+import gr.uoa.di.madgik.resourcecatalogue.domain.User;
 import gr.uoa.di.madgik.resourcecatalogue.domain.configurationTemplates.ConfigurationTemplate;
 import gr.uoa.di.madgik.resourcecatalogue.domain.configurationTemplates.ConfigurationTemplateBundle;
 import gr.uoa.di.madgik.resourcecatalogue.service.ConfigurationTemplateService;
@@ -36,7 +37,7 @@ public class ConfigurationTemplateController {
     public ResponseEntity<ConfigurationTemplate> addConfigurationTemplate(@RequestBody ConfigurationTemplate configurationTemplate,
                                                                           @Parameter(hidden = true) Authentication auth) {
         ConfigurationTemplateBundle configurationTemplateBundle = configurationTemplateService.addConfigurationTemplate(new ConfigurationTemplateBundle(configurationTemplate), auth);
-        logger.info("User '{}' added the Configuration Template Instance with id '{}'", auth.getName(), configurationTemplate.getId());
+        logger.info("User '{}' added the Configuration Template Instance with id '{}'", User.of(auth).getEmail(), configurationTemplate.getId());
         return new ResponseEntity<>(configurationTemplateBundle.getConfigurationTemplate(), HttpStatus.CREATED);
     }
 }

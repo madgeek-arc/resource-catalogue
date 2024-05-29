@@ -82,7 +82,7 @@ public class TrainingResourceController {
         }
         //TODO: Maybe return Provider's template status to 'no template status' if this was its only TR
         trainingResourceService.delete(trainingResourceBundle);
-        logger.info("User '{}' deleted Training Resource '{}' with id: '{}' of the Catalogue: '{}'", auth.getName(), trainingResourceBundle.getTrainingResource().getTitle(),
+        logger.info("User '{}' deleted Training Resource '{}' with id: '{}' of the Catalogue: '{}'", User.of(auth).getEmail(), trainingResourceBundle.getTrainingResource().getTitle(),
                 trainingResourceBundle.getTrainingResource().getId(), trainingResourceBundle.getTrainingResource().getCatalogueId());
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
@@ -105,7 +105,7 @@ public class TrainingResourceController {
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.providerCanAddResources(#auth, #trainingResource)")
     public ResponseEntity<TrainingResource> addTrainingResource(@RequestBody TrainingResource trainingResource, @Parameter(hidden = true) Authentication auth) {
         TrainingResourceBundle ret = this.trainingResourceService.addResource(new TrainingResourceBundle(trainingResource), auth);
-        logger.info("User '{}' created a new Training Resource with title '{}' and id '{}'", auth.getName(), trainingResource.getTitle(), trainingResource.getId());
+        logger.info("User '{}' created a new Training Resource with title '{}' and id '{}'", User.of(auth).getEmail(), trainingResource.getTitle(), trainingResource.getId());
         return new ResponseEntity<>(ret.getTrainingResource(), HttpStatus.CREATED);
     }
 
@@ -114,7 +114,7 @@ public class TrainingResourceController {
     @PutMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<TrainingResource> updateTrainingResource(@RequestBody TrainingResource trainingResource, @RequestParam(required = false) String comment, @Parameter(hidden = true) Authentication auth) throws ResourceNotFoundException {
         TrainingResourceBundle ret = this.trainingResourceService.updateResource(new TrainingResourceBundle(trainingResource), comment, auth);
-        logger.info("User '{}' updated Training Resource with title '{}' and id '{}'", auth.getName(), trainingResource.getTitle(), trainingResource.getId());
+        logger.info("User '{}' updated Training Resource with title '{}' and id '{}'", User.of(auth).getEmail(), trainingResource.getTitle(), trainingResource.getId());
         return new ResponseEntity<>(ret.getTrainingResource(), HttpStatus.OK);
     }
 

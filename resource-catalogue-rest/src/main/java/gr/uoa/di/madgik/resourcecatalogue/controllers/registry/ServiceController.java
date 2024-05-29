@@ -86,7 +86,7 @@ public class ServiceController {
         }
         //TODO: Maybe return Provider's template status to 'no template status' if this was its only Service
         serviceBundleService.delete(service);
-        logger.info("User '{}' deleted Resource '{}' with id: '{}' of the Catalogue: '{}'", auth.getName(), service.getService().getName(),
+        logger.info("User '{}' deleted Resource '{}' with id: '{}' of the Catalogue: '{}'", User.of(auth).getEmail(), service.getService().getName(),
                 service.getService().getId(), service.getService().getCatalogueId());
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
@@ -104,7 +104,7 @@ public class ServiceController {
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.providerCanAddResources(#auth, #service)")
     public ResponseEntity<Service> addService(@RequestBody Service service, @Parameter(hidden = true) Authentication auth) {
         ServiceBundle ret = this.serviceBundleService.addResource(new ServiceBundle(service), auth);
-        logger.info("User '{}' created a new Resource with name '{}' and id '{}'", auth.getName(), service.getName(), service.getId());
+        logger.info("User '{}' created a new Resource with name '{}' and id '{}'", User.of(auth).getEmail(), service.getName(), service.getId());
         return new ResponseEntity<>(ret.getService(), HttpStatus.CREATED);
     }
 
@@ -113,7 +113,7 @@ public class ServiceController {
     @PutMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<Service> updateService(@RequestBody Service service, @RequestParam(required = false) String comment, @Parameter(hidden = true) Authentication auth) throws ResourceNotFoundException {
         ServiceBundle ret = this.serviceBundleService.updateResource(new ServiceBundle(service), comment, auth);
-        logger.info("User '{}' updated Resource with name '{}' and id '{}'", auth.getName(), service.getName(), service.getId());
+        logger.info("User '{}' updated Resource with name '{}' and id '{}'", User.of(auth).getEmail(), service.getName(), service.getId());
         return new ResponseEntity<>(ret.getService(), HttpStatus.OK);
     }
 

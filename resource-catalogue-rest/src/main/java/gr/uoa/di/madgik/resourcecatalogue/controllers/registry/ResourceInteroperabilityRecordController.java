@@ -93,7 +93,7 @@ public class ResourceInteroperabilityRecordController {
     public ResponseEntity<ResourceInteroperabilityRecord> addResourceInteroperabilityRecord(@RequestBody ResourceInteroperabilityRecord resourceInteroperabilityRecord,
                                                                                             @RequestParam String resourceType, @Parameter(hidden = true) Authentication auth) {
         ResourceInteroperabilityRecordBundle resourceInteroperabilityRecordBundle = resourceInteroperabilityRecordService.add(new ResourceInteroperabilityRecordBundle(resourceInteroperabilityRecord), resourceType, auth);
-        logger.info("User '{}' added the ResourceInteroperabilityRecord with id '{}'", auth.getName(), resourceInteroperabilityRecord.getId());
+        logger.info("User '{}' added the ResourceInteroperabilityRecord with id '{}'", User.of(auth).getEmail(), resourceInteroperabilityRecord.getId());
         return new ResponseEntity<>(resourceInteroperabilityRecordBundle.getResourceInteroperabilityRecord(), HttpStatus.CREATED);
     }
 
@@ -105,7 +105,7 @@ public class ResourceInteroperabilityRecordController {
         ResourceInteroperabilityRecordBundle resourceInteroperabilityRecordBundle = resourceInteroperabilityRecordService.get(resourceInteroperabilityRecord.getId());
         resourceInteroperabilityRecordBundle.setResourceInteroperabilityRecord(resourceInteroperabilityRecord);
         resourceInteroperabilityRecordBundle = resourceInteroperabilityRecordService.update(resourceInteroperabilityRecordBundle, auth);
-        logger.info("User '{}' updated the ResourceInteroperabilityRecord with id '{}'", auth.getName(), resourceInteroperabilityRecordBundle.getId());
+        logger.info("User '{}' updated the ResourceInteroperabilityRecord with id '{}'", User.of(auth).getEmail(), resourceInteroperabilityRecordBundle.getId());
         return new ResponseEntity<>(resourceInteroperabilityRecordBundle.getResourceInteroperabilityRecord(), HttpStatus.OK);
     }
 
@@ -121,7 +121,7 @@ public class ResourceInteroperabilityRecordController {
         logger.info("Deleting ResourceInteroperabilityRecord: {} of the Catalogue: {}", resourceInteroperabilityRecordBundle.getResourceInteroperabilityRecord().getId(),
                 resourceInteroperabilityRecordBundle.getResourceInteroperabilityRecord().getCatalogueId());
         resourceInteroperabilityRecordService.delete(resourceInteroperabilityRecordBundle);
-        logger.info("User '{}' deleted the ResourceInteroperabilityRecord with id '{}' of the Catalogue '{}'", auth.getName(),
+        logger.info("User '{}' deleted the ResourceInteroperabilityRecord with id '{}' of the Catalogue '{}'", User.of(auth).getEmail(),
                 resourceInteroperabilityRecordBundle.getResourceInteroperabilityRecord().getId(), resourceInteroperabilityRecordBundle.getResourceInteroperabilityRecord().getCatalogueId());
         return new ResponseEntity<>(resourceInteroperabilityRecordBundle.getResourceInteroperabilityRecord(), HttpStatus.OK);
     }
