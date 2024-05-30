@@ -2,6 +2,7 @@ package gr.uoa.di.madgik.resourcecatalogue.controllers.registry;
 
 import gr.uoa.di.madgik.resourcecatalogue.domain.Provider;
 import gr.uoa.di.madgik.resourcecatalogue.domain.ProviderBundle;
+import gr.uoa.di.madgik.resourcecatalogue.domain.User;
 import gr.uoa.di.madgik.resourcecatalogue.exception.ResourceException;
 import gr.uoa.di.madgik.resourcecatalogue.service.PendingResourceService;
 import gr.uoa.di.madgik.resourcecatalogue.service.ProviderService;
@@ -12,7 +13,6 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -102,6 +102,7 @@ public class PendingProviderController extends ResourceController<ProviderBundle
             bundle.setProvider(provider);
             bundle = pendingProviderService.add(bundle, auth);
         }
+        logger.info("User '{}' saved a Draft Provider with id '{}'", User.of(auth).getEmail(), provider.getId());
         return new ResponseEntity<>(bundle.getProvider(), HttpStatus.OK);
     }
 

@@ -1,6 +1,7 @@
 package gr.uoa.di.madgik.resourcecatalogue.manager;
 
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
+import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.registry.domain.Resource;
 import gr.uoa.di.madgik.registry.domain.ResourceType;
 import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
@@ -113,7 +114,7 @@ public class PendingProviderManager extends ResourceManager<ProviderBundle> impl
     @CacheEvict(value = CACHE_PROVIDERS, allEntries = true)
     public ProviderBundle update(ProviderBundle providerBundle, Authentication auth) {
         // get existing resource
-        Resource existing = whereID(providerBundle.getId(), true);
+        Resource existing = getPendingResourceViaProviderId(providerBundle.getId());
         // block catalogueId updates from Provider Admins
         providerBundle.getProvider().setCatalogueId(catalogueName);
         logger.trace("User '{}' is attempting to update the Pending Provider: {}", auth, providerBundle);
@@ -178,7 +179,7 @@ public class PendingProviderManager extends ResourceManager<ProviderBundle> impl
         providerBundle.setMetadata(Metadata.updateMetadata(providerBundle.getMetadata(), User.of(auth).getFullName(), User.of(auth).getEmail()));
 
         ResourceType providerResourceType = resourceTypeService.getResourceType("provider");
-        Resource resource = getResource(providerBundle.getId(), catalogueName);
+        Resource resource = getPendingResourceViaProviderId(providerBundle.getId());
         resource.setResourceType(resourceType);
         resourceService.changeResourceType(resource, providerResourceType);
 
@@ -248,6 +249,15 @@ public class PendingProviderManager extends ResourceManager<ProviderBundle> impl
             return false; // pop-up modal
         }
         return true; // no modal
+    }
+
+    private Resource getPendingResourceViaProviderId(String providerId) {
+        Paging<Resource> resources;
+        resources = searchService
+                .cqlQuery(String.format("resource_internal_id = \"%s\" AND catalogue_id = \"%s\"", providerId, catalogueName),
+                        resourceType.getName());
+        assert resources != null;
+        return resources.getTotal() == 0 ? null : resources.getResults().get(0);
     }
 
     public void adminAcceptedTerms(String providerId, Authentication auth) {

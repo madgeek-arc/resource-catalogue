@@ -1,6 +1,7 @@
 package gr.uoa.di.madgik.resourcecatalogue.manager;
 
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
+import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.registry.domain.Resource;
 import gr.uoa.di.madgik.registry.domain.ResourceType;
 import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
@@ -100,7 +101,7 @@ public class PendingServiceManager extends ResourceManager<ServiceBundle> implem
     @CacheEvict(cacheNames = {CACHE_VISITS, CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)
     public ServiceBundle update(ServiceBundle serviceBundle, Authentication auth) {
         // get existing resource
-        Resource existing = getResource(serviceBundle.getService().getId(), catalogueName);
+        Resource existing = getPendingResourceViaServiceId(serviceBundle.getService().getId());
         // block catalogueId updates from Provider Admins
         serviceBundle.getService().setCatalogueId(catalogueName);
         logger.trace("User '{}' is attempting to update the Pending Service with id {}", auth, serviceBundle.getId());
@@ -159,7 +160,7 @@ public class PendingServiceManager extends ResourceManager<ServiceBundle> implem
         serviceBundle.setMetadata(Metadata.updateMetadata(serviceBundle.getMetadata(), User.of(auth).getFullName(), User.of(auth).getEmail()));
 
         ResourceType infraResourceType = resourceTypeService.getResourceType("service");
-        Resource resource = getResource(serviceBundle.getId(), catalogueName);
+        Resource resource = getPendingResourceViaServiceId(serviceBundle.getId());
         resource.setResourceType(resourceType);
         resourceService.changeResourceType(resource, infraResourceType);
 
@@ -186,6 +187,15 @@ public class PendingServiceManager extends ResourceManager<ServiceBundle> implem
 
     public boolean hasAdminAcceptedTerms(String providerId, Authentication auth) {
         return true;
+    }
+
+    private Resource getPendingResourceViaServiceId(String serviceId) {
+        Paging<Resource> resources;
+        resources = searchService
+                .cqlQuery(String.format("resource_internal_id = \"%s\" AND catalogue_id = \"%s\"", serviceId, catalogueName),
+                        resourceType.getName());
+        assert resources != null;
+        return resources.getTotal() == 0 ? null : resources.getResults().get(0);
     }
 
     public void adminAcceptedTerms(String providerId, Authentication auth) {

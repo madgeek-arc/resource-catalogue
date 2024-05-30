@@ -131,6 +131,7 @@ public class PendingServiceController extends ResourceController<ServiceBundle, 
             serviceBundle.setService(service);
             serviceBundle = pendingServiceManager.add(serviceBundle, auth);
         }
+        logger.info("User '{}' saved a Draft Service with id '{}'", User.of(auth).getEmail(), service.getId());
         return new ResponseEntity<>(serviceBundle.getService(), HttpStatus.OK);
     }
 
