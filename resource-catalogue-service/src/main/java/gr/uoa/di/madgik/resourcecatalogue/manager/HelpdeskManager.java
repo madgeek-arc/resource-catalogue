@@ -1,18 +1,14 @@
 package gr.uoa.di.madgik.resourcecatalogue.manager;
 
+import gr.uoa.di.madgik.registry.domain.Resource;
+import gr.uoa.di.madgik.registry.service.SearchService;
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
 import gr.uoa.di.madgik.resourcecatalogue.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.exception.ValidationException;
-import gr.uoa.di.madgik.resourcecatalogue.service.RegistrationMailService;
+import gr.uoa.di.madgik.resourcecatalogue.service.*;
 import gr.uoa.di.madgik.resourcecatalogue.utils.ObjectUtils;
 import gr.uoa.di.madgik.resourcecatalogue.utils.ProviderResourcesCommonMethods;
 import gr.uoa.di.madgik.resourcecatalogue.utils.ResourceValidationUtils;
-import gr.uoa.di.madgik.resourcecatalogue.service.HelpdeskService;
-import gr.uoa.di.madgik.resourcecatalogue.service.ServiceBundleService;
-import gr.uoa.di.madgik.resourcecatalogue.service.TrainingResourceService;
-import gr.uoa.di.madgik.resourcecatalogue.service.SecurityService;
-import gr.uoa.di.madgik.registry.domain.Resource;
-import gr.uoa.di.madgik.registry.service.SearchService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,7 +16,6 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.security.core.Authentication;
 
 import java.util.List;
-import java.util.UUID;
 
 @org.springframework.stereotype.Service("helpdeskManager")
 public class HelpdeskManager extends ResourceManager<HelpdeskBundle> implements HelpdeskService<HelpdeskBundle, Authentication> {
@@ -32,6 +27,7 @@ public class HelpdeskManager extends ResourceManager<HelpdeskBundle> implements 
     private final SecurityService securityService;
     private final RegistrationMailService registrationMailService;
     private final ProviderResourcesCommonMethods commonMethods;
+    private final IdCreator idCreator;
 
     @Autowired
     public HelpdeskManager(ServiceBundleService<ServiceBundle> serviceBundleService,
@@ -39,7 +35,8 @@ public class HelpdeskManager extends ResourceManager<HelpdeskBundle> implements 
                            PublicHelpdeskManager publicHelpdeskManager,
                            @Lazy SecurityService securityService,
                            @Lazy RegistrationMailService registrationMailService,
-                           ProviderResourcesCommonMethods commonMethods) {
+                           ProviderResourcesCommonMethods commonMethods,
+                           IdCreator idCreator) {
         super(HelpdeskBundle.class);
         this.serviceBundleService = serviceBundleService;
         this.trainingResourceService = trainingResourceService;
@@ -47,6 +44,7 @@ public class HelpdeskManager extends ResourceManager<HelpdeskBundle> implements 
         this.securityService = securityService;
         this.registrationMailService = registrationMailService;
         this.commonMethods = commonMethods;
+        this.idCreator = idCreator;
     }
 
     @Override
@@ -80,7 +78,7 @@ public class HelpdeskManager extends ResourceManager<HelpdeskBundle> implements 
     public HelpdeskBundle add(HelpdeskBundle helpdesk, String resourceType, Authentication auth) {
         validate(helpdesk, resourceType);
 
-        helpdesk.setId(UUID.randomUUID().toString());
+        helpdesk.setId(idCreator.generate(getResourceType()));
         logger.trace("User '{}' is attempting to add a new Helpdesk: {}", auth, helpdesk);
 
         helpdesk.setMetadata(Metadata.createMetadata(User.of(auth).getFullName(), User.of(auth).getEmail()));

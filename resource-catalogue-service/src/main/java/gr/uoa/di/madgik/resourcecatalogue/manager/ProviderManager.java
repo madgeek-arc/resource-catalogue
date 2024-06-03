@@ -132,7 +132,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         // prohibit EOSC related Alternative Identifier Types
         commonMethods.prohibitEOSCRelatedPIDs(provider.getProvider().getAlternativeIdentifiers());
 
-        provider.setId(idCreator.createProviderId(provider.getProvider()));
+        provider.setId(idCreator.generate(getResourceType()));
         addAuthenticatedUser(provider.getProvider(), auth);
         validate(provider);
         provider.setMetadata(Metadata.createMetadata(User.of(auth).getFullName(), User.of(auth).getEmail()));

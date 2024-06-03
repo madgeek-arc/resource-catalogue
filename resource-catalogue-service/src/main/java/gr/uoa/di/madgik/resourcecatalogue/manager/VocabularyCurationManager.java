@@ -1,14 +1,13 @@
 package gr.uoa.di.madgik.resourcecatalogue.manager;
 
-import gr.uoa.di.madgik.registry.service.SearchService;
-import gr.uoa.di.madgik.resourcecatalogue.domain.*;
-import gr.uoa.di.madgik.resourcecatalogue.exception.ValidationException;
-import gr.uoa.di.madgik.resourcecatalogue.service.RegistrationMailService;
-import gr.uoa.di.madgik.resourcecatalogue.service.*;
 import gr.uoa.di.madgik.registry.domain.Browsing;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.registry.domain.Resource;
+import gr.uoa.di.madgik.registry.service.SearchService;
+import gr.uoa.di.madgik.resourcecatalogue.domain.*;
+import gr.uoa.di.madgik.resourcecatalogue.exception.ValidationException;
+import gr.uoa.di.madgik.resourcecatalogue.service.*;
 import gr.uoa.di.madgik.resourcecatalogue.utils.FacetLabelService;
 import org.apache.commons.lang3.time.DateUtils;
 import org.apache.logging.log4j.LogManager;
@@ -49,6 +48,7 @@ public class VocabularyCurationManager extends ResourceManager<VocabularyCuratio
 
     @Value("${project.catalogue.name}")
     private String catalogueName;
+    private final IdCreator idCreator;
 
 
     @Autowired
@@ -56,7 +56,7 @@ public class VocabularyCurationManager extends ResourceManager<VocabularyCuratio
                                      ServiceBundleService<ServiceBundle> serviceBundleService,
                                      TrainingResourceService<TrainingResourceBundle> trainingResourceService,
                                      AbstractServiceBundleManager<ServiceBundle> abstractServiceBundleManager,
-                                     GenericManager genericManager) {
+                                     GenericManager genericManager, IdCreator idCreator) {
         super(VocabularyCuration.class);
         this.registrationMailService = registrationMailService;
         this.providerService = providerService;
@@ -64,6 +64,7 @@ public class VocabularyCurationManager extends ResourceManager<VocabularyCuratio
         this.trainingResourceService = trainingResourceService;
         this.abstractServiceBundleManager = abstractServiceBundleManager;
         this.genericManager = genericManager;
+        this.idCreator = idCreator;
     }
 
     @Override
@@ -73,11 +74,7 @@ public class VocabularyCurationManager extends ResourceManager<VocabularyCuratio
 
     @Override
     public VocabularyCuration add(VocabularyCuration vocabularyCuration, String resourceType, Authentication auth) {
-        if ((vocabularyCuration.getId() == null) || vocabularyCuration.getId().equals("")) {
-            vocabularyCuration.setId(UUID.randomUUID().toString());
-        } else {
-            throw new ValidationException("You must not provide a VocabularyCuration id");
-        }
+        vocabularyCuration.setId(idCreator.generate("cur"));
         // set status, dateOfRequest, userId
         vocabularyCuration.setStatus(VocabularyCuration.Status.PENDING.getKey());
         vocabularyCuration.setRejectionReason(null);

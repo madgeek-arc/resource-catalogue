@@ -15,7 +15,6 @@ import org.springframework.security.core.Authentication;
 
 import java.util.Comparator;
 import java.util.List;
-import java.util.UUID;
 
 @org.springframework.stereotype.Service("resourceInteroperabilityRecordManager")
 public class ResourceInteroperabilityRecordManager extends ResourceManager<ResourceInteroperabilityRecordBundle>
@@ -28,12 +27,14 @@ public class ResourceInteroperabilityRecordManager extends ResourceManager<Resou
     private final PublicResourceInteroperabilityRecordManager publicResourceInteroperabilityRecordManager;
     private final SecurityService securityService;
     private final ProviderResourcesCommonMethods commonMethods;
+    private final IdCreator idCreator;
 
     public ResourceInteroperabilityRecordManager(ServiceBundleService<ServiceBundle> serviceBundleService,
                                                  TrainingResourceService<TrainingResourceBundle> trainingResourceService,
                                                  InteroperabilityRecordService<InteroperabilityRecordBundle> interoperabilityRecordService,
                                                  SecurityService securityService, ProviderResourcesCommonMethods commonMethods,
-                                                 PublicResourceInteroperabilityRecordManager publicResourceInteroperabilityRecordManager) {
+                                                 PublicResourceInteroperabilityRecordManager publicResourceInteroperabilityRecordManager,
+                                                 IdCreator idCreator) {
         super(ResourceInteroperabilityRecordBundle.class);
         this.serviceBundleService = serviceBundleService;
         this.trainingResourceService = trainingResourceService;
@@ -41,6 +42,7 @@ public class ResourceInteroperabilityRecordManager extends ResourceManager<Resou
         this.securityService = securityService;
         this.commonMethods = commonMethods;
         this.publicResourceInteroperabilityRecordManager = publicResourceInteroperabilityRecordManager;
+        this.idCreator = idCreator;
     }
 
     @Override
@@ -77,7 +79,7 @@ public class ResourceInteroperabilityRecordManager extends ResourceManager<Resou
         validate(resourceInteroperabilityRecordBundle, resourceType);
         commonMethods.checkRelatedResourceIDsConsistency(resourceInteroperabilityRecordBundle);
 
-        resourceInteroperabilityRecordBundle.setId(UUID.randomUUID().toString());
+        resourceInteroperabilityRecordBundle.setId(idCreator.generate("rir"));
         logger.trace("User '{}' is attempting to add a new ResourceInteroperabilityRecord: {}", auth, resourceInteroperabilityRecordBundle);
 
         resourceInteroperabilityRecordBundle.setMetadata(Metadata.createMetadata(User.of(auth).getFullName(), User.of(auth).getEmail()));

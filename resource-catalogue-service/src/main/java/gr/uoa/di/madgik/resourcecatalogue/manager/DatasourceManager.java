@@ -1,20 +1,16 @@
 package gr.uoa.di.madgik.resourcecatalogue.manager;
 
-import gr.uoa.di.madgik.resourcecatalogue.domain.*;
-import gr.uoa.di.madgik.resourcecatalogue.exception.ResourceNotFoundException;
-import gr.uoa.di.madgik.resourcecatalogue.exception.ValidationException;
-import gr.uoa.di.madgik.resourcecatalogue.service.RegistrationMailService;
-import gr.uoa.di.madgik.resourcecatalogue.utils.ObjectUtils;
-import gr.uoa.di.madgik.resourcecatalogue.utils.ProviderResourcesCommonMethods;
-import gr.uoa.di.madgik.resourcecatalogue.utils.ResourceValidationUtils;
-import gr.uoa.di.madgik.resourcecatalogue.service.DatasourceService;
-import gr.uoa.di.madgik.resourcecatalogue.service.ServiceBundleService;
-import gr.uoa.di.madgik.resourcecatalogue.service.VocabularyService;
-import gr.uoa.di.madgik.resourcecatalogue.service.SecurityService;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.registry.domain.Resource;
 import gr.uoa.di.madgik.registry.service.SearchService;
+import gr.uoa.di.madgik.resourcecatalogue.domain.*;
+import gr.uoa.di.madgik.resourcecatalogue.exception.ResourceNotFoundException;
+import gr.uoa.di.madgik.resourcecatalogue.exception.ValidationException;
+import gr.uoa.di.madgik.resourcecatalogue.service.*;
+import gr.uoa.di.madgik.resourcecatalogue.utils.ObjectUtils;
+import gr.uoa.di.madgik.resourcecatalogue.utils.ProviderResourcesCommonMethods;
+import gr.uoa.di.madgik.resourcecatalogue.utils.ResourceValidationUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,6 +33,7 @@ public class DatasourceManager extends ResourceManager<DatasourceBundle> impleme
     private final OpenAIREDatasourceManager openAIREDatasourceManager;
     @Value("${project.catalogue.name}")
     private String catalogueName;
+    private final IdCreator idCreator;
 
     @Autowired
     public DatasourceManager(ServiceBundleService<ServiceBundle> serviceBundleService,
@@ -44,7 +41,8 @@ public class DatasourceManager extends ResourceManager<DatasourceBundle> impleme
                              @Lazy RegistrationMailService registrationMailService,
                              @Lazy VocabularyService vocabularyService,
                              ProviderResourcesCommonMethods commonMethods,
-                             OpenAIREDatasourceManager openAIREDatasourceManager) {
+                             OpenAIREDatasourceManager openAIREDatasourceManager,
+                             IdCreator idCreator) {
         super(DatasourceBundle.class);
         this.serviceBundleService = serviceBundleService;
         this.securityService = securityService;
@@ -52,6 +50,7 @@ public class DatasourceManager extends ResourceManager<DatasourceBundle> impleme
         this.vocabularyService = vocabularyService;
         this.commonMethods = commonMethods;
         this.openAIREDatasourceManager = openAIREDatasourceManager;
+        this.idCreator = idCreator;
     }
 
     @Override
@@ -76,7 +75,7 @@ public class DatasourceManager extends ResourceManager<DatasourceBundle> impleme
         if (datasourceBundle.getId() != null && !datasourceBundle.getId().equals("")) {
             checkOpenAIREIDExistence(datasourceBundle);
         }
-        datasourceBundle.setId(datasourceBundle.getDatasource().getServiceId());
+        datasourceBundle.setId(idCreator.generate(getResourceType()));
         logger.trace("User '{}' is attempting to add a new Datasource: {}", auth, datasourceBundle);
 
         this.validate(datasourceBundle);

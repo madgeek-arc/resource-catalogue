@@ -1,52 +1,14 @@
 package gr.uoa.di.madgik.resourcecatalogue.service;
 
-import gr.uoa.di.madgik.resourcecatalogue.domain.*;
-import gr.uoa.di.madgik.resourcecatalogue.domain.*;
-import gr.uoa.di.madgik.resourcecatalogue.domain.*;
-
-import java.security.NoSuchAlgorithmException;
-
 public interface IdCreator {
 
     /**
-     * Creates id for {@link Provider}
+     * Generate ID for all user-generated resources
      *
-     * @param provider Provider
+     * @param resourceType resourceType
      * @return {@link String}
      */
-    String createProviderId(Provider provider);
-
-    /**
-     * Creates id for {@link ServiceBundle}
-     *
-     * @param serviceBundle Service
-     * @return {@link String}
-     */
-    String createServiceId(ServiceBundle serviceBundle);
-
-    /**
-     * Creates id for {@link TrainingResourceBundle}
-     *
-     * @param trainingResourceBundle TrainingResource
-     * @return {@link String}
-     */
-    String createTrainingResourceId(TrainingResourceBundle trainingResourceBundle) throws NoSuchAlgorithmException;
-
-    /**
-     * Creates id for {@link Catalogue}
-     *
-     * @param catalogue Catalogue
-     * @return {@link String}
-     */
-    String createCatalogueId(Catalogue catalogue);
-
-    /**
-     * Creates id for {@link InteroperabilityRecord}
-     *
-     * @param interoperabilityRecord InteroperabilityRecord
-     * @return {@link String}
-     */
-    String createInteroperabilityRecordId(InteroperabilityRecord interoperabilityRecord) throws NoSuchAlgorithmException;
+    String generate(String resourceType);
 
     /**
      * Strip accents, replace special characters and transform a string to lowercase

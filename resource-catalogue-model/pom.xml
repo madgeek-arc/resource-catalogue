@@ -34,11 +34,6 @@
             <artifactId>jaxb-api</artifactId>
         </dependency>
         <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
             <groupId>org.mitre</groupId>
             <artifactId>openid-connect-client</artifactId>
         </dependency>

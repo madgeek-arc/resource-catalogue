@@ -132,7 +132,7 @@ public class ServiceBundleManager extends AbstractServiceBundleManager<ServiceBu
         // prohibit EOSC related Alternative Identifier Types
         commonMethods.prohibitEOSCRelatedPIDs(serviceBundle.getService().getAlternativeIdentifiers());
 
-        serviceBundle.setId(idCreator.createServiceId(serviceBundle));
+        serviceBundle.setId(idCreator.generate(getResourceType()));
         validate(serviceBundle);
 
         boolean active = providerBundle
@@ -668,21 +668,13 @@ public class ServiceBundleManager extends AbstractServiceBundleManager<ServiceBu
             resourceProviders.add(newProviderId);
         }
 
-        // update id
-        String initialId = serviceBundle.getId();
-        String[] parts = initialId.split("\\.");
-        String serviceId = parts[1];
-        String newResourceId = newProviderId + "." + serviceId;
-        serviceBundle.setId(newResourceId);
-        serviceBundle.getService().setId(newResourceId);
-
         // add Resource, delete the old one
         add(serviceBundle, auth);
         publicServiceManager.delete(get(resourceId, catalogueName)); // FIXME: ProviderManagementAspect's deletePublicDatasource is not triggered
         delete(get(resourceId, catalogueName));
 
         // update other resources which had the old resource ID on their fields
-        migrationService.updateRelatedToTheIdFieldsOfOtherResourcesOfThePortal(resourceId, newResourceId);
+        migrationService.updateRelatedToTheIdFieldsOfOtherResourcesOfThePortal(resourceId, resourceId); //TODO: SEE IF IT WORKS AS INTENDED AND REMOVE
 
         // emails to EPOT, old and new Provider
         registrationMailService.sendEmailsForMovedResources(oldProvider, newProvider, serviceBundle, auth);

@@ -121,7 +121,7 @@ public class PendingServiceController extends ResourceController<ServiceBundle, 
         ServiceBundle serviceBundle = new ServiceBundle();
         ServiceBundle toCreateId = new ServiceBundle();
         toCreateId.setService(service);
-        service.setId(idCreator.createServiceId(toCreateId));
+        service.setId(idCreator.generate("dse"));
         try {
             serviceBundle = pendingServiceManager.get(service.getId());
             serviceBundle.setService(service);
@@ -153,9 +153,7 @@ public class PendingServiceController extends ResourceController<ServiceBundle, 
         ServiceBundle serviceBundle = null;
 
         try { // check if service already exists
-            if (service.getId() == null || "".equals(service.getId())) { // if service id is not given, create it
-                service.setId(idCreator.createServiceId(new ServiceBundle(service)));
-            }
+            service.setId(idCreator.generate("dse"));
             serviceBundle = this.pendingServiceManager.get(service.getId());
         } catch (ResourceException e) {
             // continue with the creation of the service

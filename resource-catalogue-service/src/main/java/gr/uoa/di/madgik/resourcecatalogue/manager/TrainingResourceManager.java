@@ -1,6 +1,9 @@
 package gr.uoa.di.madgik.resourcecatalogue.manager;
 
-import gr.uoa.di.madgik.registry.domain.*;
+import gr.uoa.di.madgik.registry.domain.Browsing;
+import gr.uoa.di.madgik.registry.domain.FacetFilter;
+import gr.uoa.di.madgik.registry.domain.Paging;
+import gr.uoa.di.madgik.registry.domain.Resource;
 import gr.uoa.di.madgik.registry.service.ParserService;
 import gr.uoa.di.madgik.registry.service.SearchService;
 import gr.uoa.di.madgik.registry.service.ServiceException;
@@ -9,7 +12,10 @@ import gr.uoa.di.madgik.resourcecatalogue.exception.ResourceException;
 import gr.uoa.di.madgik.resourcecatalogue.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.exception.ValidationException;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
-import gr.uoa.di.madgik.resourcecatalogue.utils.*;
+import gr.uoa.di.madgik.resourcecatalogue.utils.Auditable;
+import gr.uoa.di.madgik.resourcecatalogue.utils.FacetLabelService;
+import gr.uoa.di.madgik.resourcecatalogue.utils.ObjectUtils;
+import gr.uoa.di.madgik.resourcecatalogue.utils.ProviderResourcesCommonMethods;
 import gr.uoa.di.madgik.resourcecatalogue.validators.FieldValidator;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -23,7 +29,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 
 import javax.validation.constraints.NotNull;
-import java.security.NoSuchAlgorithmException;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.util.*;
@@ -139,11 +144,7 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
         if (providerBundle.getTemplateStatus().equals("pending template")) {
             throw new ValidationException(String.format("The Provider with id %s has already registered a Resource Template.", providerBundle.getId()));
         }
-        try {
-            trainingResourceBundle.setId(idCreator.createTrainingResourceId(trainingResourceBundle));
-        } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException(e);
-        }
+        trainingResourceBundle.setId(idCreator.generate(getResourceType()));
         validateTrainingResource(trainingResourceBundle);
 
         boolean active = providerBundle
@@ -188,13 +189,7 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
     @Override
     public TrainingResourceBundle add(TrainingResourceBundle trainingResourceBundle, Authentication auth) {
         logger.trace("User '{}' is attempting to add a new Training Resource: {}", auth, trainingResourceBundle);
-        if (trainingResourceBundle.getTrainingResource().getId() == null) {
-            try {
-                trainingResourceBundle.getTrainingResource().setId(idCreator.createTrainingResourceId(trainingResourceBundle));
-            } catch (NoSuchAlgorithmException e) {
-                throw new RuntimeException(e);
-            }
-        }
+        trainingResourceBundle.getTrainingResource().setId(idCreator.generate(getResourceType()));
         if (exists(trainingResourceBundle)) {
             throw new ResourceException("Training Resource already exists!", HttpStatus.CONFLICT);
         }
@@ -950,13 +945,6 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
         if (resourceProviders.contains(oldProvider.getId())) {
             resourceProviders.remove(oldProvider.getId());
             resourceProviders.add(newProviderId);
-        }
-
-        // update id
-        try {
-            trainingResourceBundle.setId(idCreator.createTrainingResourceId(trainingResourceBundle));
-        } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException(e);
         }
 
         // add Resource, delete the old one

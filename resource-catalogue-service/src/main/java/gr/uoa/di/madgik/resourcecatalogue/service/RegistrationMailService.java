@@ -494,14 +494,14 @@ public class RegistrationMailService {
             }
 
             if (modified.after(yesterdayTimestamp) && modified.before(todayTimestamp)) {
-                if (bundle.getId().contains(".")) {
+                if (bundle.getId().contains("ser")) {
                     updatedServices.add(bundle.getId());
                 } else {
                     updatedProviders.add(bundle.getId());
                 }
             }
             if (registered.after(yesterdayTimestamp) && registered.before(todayTimestamp)) {
-                if (bundle.getId().contains(".")) {
+                if (bundle.getId().contains("ser")) {
                     newServices.add(bundle.getId());
                 } else {
                     newProviders.add(bundle.getId());

@@ -92,7 +92,7 @@ public class PendingProviderController extends ResourceController<ProviderBundle
     @PreAuthorize("hasRole('ROLE_USER')")
     public ResponseEntity<Provider> temporarySavePending(@RequestBody Provider provider, @Parameter(hidden = true) Authentication auth) {
         ProviderBundle bundle = new ProviderBundle();
-        provider.setId(idCreator.createProviderId(provider));
+        provider.setId(idCreator.generate("dpr"));
         try {
             bundle = pendingProviderService.get(provider.getId());
             bundle.setProvider(provider);

@@ -22,7 +22,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 
-import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -94,11 +93,7 @@ public class InteroperabilityRecordManager extends ResourceManager<Interoperabil
             throw new ValidationException(String.format("The Provider ID '%s' you provided is not yet approved",
                     interoperabilityRecordBundle.getInteroperabilityRecord().getProviderId()));
         }
-        try {
-            interoperabilityRecordBundle.getInteroperabilityRecord().setId(idCreator.createInteroperabilityRecordId(interoperabilityRecordBundle.getInteroperabilityRecord()));
-        } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException(e);
-        }
+        interoperabilityRecordBundle.setId(idCreator.generate(getResourceType()));
         validate(interoperabilityRecordBundle);
 
         // status
