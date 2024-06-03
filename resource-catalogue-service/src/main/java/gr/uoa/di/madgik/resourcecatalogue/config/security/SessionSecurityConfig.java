@@ -109,8 +109,8 @@ public class SessionSecurityConfig extends WebSecurityConfigurerAdapter {
 //                .addHeaderWriter(new XFrameOptionsHeaderWriter(XFrameOptionsHeaderWriter.XFrameOptionsMode.SAMEORIGIN))
                 .httpStrictTransportSecurity().disable()
                 .and()
-//                .addFilterBefore((Filter) openIdConnectAuthenticationFilter(),
-//                        (Class<? extends Filter>) AbstractPreAuthenticatedProcessingFilter.class)
+                .addFilterBefore((Filter) openIdConnectAuthenticationFilter(),
+                        (Class<? extends Filter>) AbstractPreAuthenticatedProcessingFilter.class)
                 .authorizeRequests()
                 .regexMatchers("/resourcesync/.*").permitAll()
                 .regexMatchers("/restore/", "/resources.*", "/resourceType.*", "/search.*")
