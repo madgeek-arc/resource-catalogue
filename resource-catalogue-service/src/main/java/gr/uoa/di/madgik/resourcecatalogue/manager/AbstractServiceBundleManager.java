@@ -169,7 +169,6 @@ public abstract class AbstractServiceBundleManager<T extends ServiceBundle> exte
     @CacheEvict(cacheNames = {Cache.CACHE_VISITS, Cache.CACHE_PROVIDERS, Cache.CACHE_FEATURED}, allEntries = true)
     public T add(T serviceBundle, Authentication auth) {
         logger.trace("User '{}' is attempting to add a new Resource: {}", auth, serviceBundle);
-        serviceBundle.getService().setId(idCreator.generate(getResourceType()));
         // if Resource version is empty set it null
         if ("".equals(serviceBundle.getService().getVersion())) {
             serviceBundle.getService().setVersion(null);

@@ -189,7 +189,6 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
     @Override
     public TrainingResourceBundle add(TrainingResourceBundle trainingResourceBundle, Authentication auth) {
         logger.trace("User '{}' is attempting to add a new Training Resource: {}", auth, trainingResourceBundle);
-        trainingResourceBundle.getTrainingResource().setId(idCreator.generate(getResourceType()));
         if (exists(trainingResourceBundle)) {
             throw new ResourceException("Training Resource already exists!", HttpStatus.CONFLICT);
         }
@@ -367,18 +366,7 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
             throw new ValidationException(String.format("Vocabulary %s does not consist a Resource State!", status));
         }
         logger.trace("verifyResource with id: '{}' | status -> '{}' | active -> '{}'", id, status, active);
-        String[] parts = id.split("\\.");
-        String providerId = parts[0];
-        TrainingResourceBundle trainingResourceBundle = null;
-        List<TrainingResourceBundle> trainingResourceBundles = getResourceBundles(providerId, auth);
-        for (TrainingResourceBundle trainingResource : trainingResourceBundles) {
-            if (trainingResource.getTrainingResource().getId().equals(id)) {
-                trainingResourceBundle = trainingResource;
-            }
-        }
-        if (trainingResourceBundle == null) {
-            throw new ValidationException(String.format("The Training Resource with id '%s' does not exist", id));
-        }
+        TrainingResourceBundle trainingResourceBundle = getCatalogueResource(catalogueName, id, auth);
         trainingResourceBundle.setStatus(vocabularyService.get(status).getId());
         ProviderBundle resourceProvider = providerService.get(trainingResourceBundle.getTrainingResource().getCatalogueId(),
                 trainingResourceBundle.getTrainingResource().getResourceOrganisation(), auth);

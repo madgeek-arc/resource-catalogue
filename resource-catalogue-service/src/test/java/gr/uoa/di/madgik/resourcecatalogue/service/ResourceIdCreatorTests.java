@@ -24,8 +24,8 @@ public class ResourceIdCreatorTests {
                 "helpdesk",
                 "interoperability_record",
                 "monitoring",
-                "dpr", //draft_provider
-                "dse", //draft_service
+                "pro", //draft_provider
+                "ser", //draft_service
                 "provider",
                 "rir", //resource_interoperability_record
                 "service",
