@@ -10,6 +10,6 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 @EnableWebSecurity
 @EnableGlobalMethodSecurity(prePostEnabled = true, securedEnabled = true, proxyTargetClass = true, mode = AdviceMode
         .PROXY)
-@ComponentScan(basePackageClasses = SessionSecurityConfig.class)
+//@ComponentScan(basePackageClasses = SessionSecurityConfig.class)
 public class SecurityRootConfig {
 }
