@@ -20,7 +20,6 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.PostConstruct;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -30,20 +29,11 @@ import static gr.uoa.di.madgik.resourcecatalogue.config.Properties.Cache.*;
 public class VocabularyManager extends ResourceManager<Vocabulary> implements VocabularyService {
     private static final Logger logger = LogManager.getLogger(VocabularyManager.class);
 
-    private final Map<String, String[]> regions = new HashMap<>();
-
     private final ProviderManager providerManager;
 
     private final SecurityService securityService;
 
     private final IdCreator idCreator;
-
-    @PostConstruct
-    private void postConstruct() {
-        logger.debug("Initializing Regions");
-        regions.put("EU", getRegion("EU"));
-        regions.put("WW", getRegion("WW"));
-    }
 
     public VocabularyManager(@Lazy ProviderManager providerManager, @Lazy IdCreator idCreator, @Lazy SecurityService securityService) {
         super(Vocabulary.class);
@@ -75,7 +65,8 @@ public class VocabularyManager extends ResourceManager<Vocabulary> implements Vo
             return allCountries.stream().map(Vocabulary::getId).toArray(String[]::new);
         } else {
             return allCountries.stream()
-                    .filter(vocabulary -> !vocabulary.getExtras().isEmpty())
+                    .filter(vocabulary -> vocabulary.getExtras().containsKey("region"))
+                    .filter(vocabulary -> vocabulary.getExtras().get("region").equals(name))
                     .map(Vocabulary::getId)
                     .toArray(String[]::new);
         }
