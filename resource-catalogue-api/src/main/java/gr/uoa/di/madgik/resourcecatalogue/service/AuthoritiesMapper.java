@@ -1,5 +1,9 @@
 package gr.uoa.di.madgik.resourcecatalogue.service;
 
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+
+import java.util.Set;
+
 public interface AuthoritiesMapper {
 
     /**
@@ -17,6 +21,14 @@ public interface AuthoritiesMapper {
      * @return True/False
      */
     boolean isEPOT(String email);
+
+    /**
+     * Returns user's authorities.
+     *
+     * @param email User's email
+     * @return the authorities of the user
+     */
+    Set<SimpleGrantedAuthority> getAuthorities(String email);
 
     /**
      * Update Authorities

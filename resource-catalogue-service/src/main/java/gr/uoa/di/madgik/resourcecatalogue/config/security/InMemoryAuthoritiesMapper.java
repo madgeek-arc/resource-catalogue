@@ -1,6 +1,5 @@
 package gr.uoa.di.madgik.resourcecatalogue.config.security;
 
-import com.nimbusds.jwt.JWT;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.service.ServiceException;
 import gr.uoa.di.madgik.resourcecatalogue.domain.CatalogueBundle;
@@ -9,11 +8,8 @@ import gr.uoa.di.madgik.resourcecatalogue.domain.User;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.mitre.openid.connect.client.OIDCAuthoritiesMapper;
-import org.mitre.openid.connect.model.UserInfo;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.common.exceptions.UnauthorizedUserException;
 import org.springframework.stereotype.Component;
@@ -26,14 +22,12 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Component
-public class EICAuthoritiesMapper implements OIDCAuthoritiesMapper, AuthoritiesMapper {
+public class InMemoryAuthoritiesMapper implements AuthoritiesMapper {
 
-    private static final Logger logger = LogManager.getLogger(EICAuthoritiesMapper.class);
+    private static final Logger logger = LogManager.getLogger(InMemoryAuthoritiesMapper.class);
     private Set<String> providerUsers = new HashSet<>();
     private Set<String> catalogueUsers = new HashSet<>();
     private final Map<String, Set<SimpleGrantedAuthority>> adminsAndEpot = new HashMap<>();
-    private final String admins;
-    private final String epotAdmins;
     private final int maxQuantity;
 
     private final ProviderService<ProviderBundle, Authentication> providerService;
@@ -41,58 +35,45 @@ public class EICAuthoritiesMapper implements OIDCAuthoritiesMapper, AuthoritiesM
     private final CatalogueService<CatalogueBundle, Authentication> catalogueService;
     private final PendingResourceService<ProviderBundle> pendingProviderService;
     private final SecurityService securityService;
+    private final ResourceCatalogueProperties catalogueProperties;
 
     private final ReentrantLock lock = new ReentrantLock();
 
-    public EICAuthoritiesMapper(@Value("${project.admins}") String admins,
-                                @Value("${project.admins.epot}") String epotAdmins,
-                                @Value("${elastic.index.max_result_window:10000}") int maxQuantity,
-                                ProviderService<ProviderBundle, Authentication> manager,
-                                CatalogueService<CatalogueBundle, Authentication> catalogueService,
-                                PendingResourceService<ProviderBundle> pendingProviderService,
-                                SecurityService securityService) {
+    public InMemoryAuthoritiesMapper(@Value("${elastic.index.max_result_window:10000}") int maxQuantity,
+                                     ResourceCatalogueProperties catalogueProperties,
+                                     ProviderService<ProviderBundle, Authentication> manager,
+                                     CatalogueService<CatalogueBundle, Authentication> catalogueService,
+                                     PendingResourceService<ProviderBundle> pendingProviderService,
+                                     SecurityService securityService) {
+        this.catalogueProperties = catalogueProperties;
         this.providerService = manager;
         this.catalogueService = catalogueService;
         this.pendingProviderService = pendingProviderService;
         this.securityService = securityService;
         this.maxQuantity = maxQuantity;
-        if (admins == null) {
+        if (catalogueProperties.getAdmins().isEmpty()) {
             throw new ServiceException("No Admins Provided");
         }
-        this.admins = admins;
-        this.epotAdmins = epotAdmins;
     }
 
     @PostConstruct
     void createAdminsOnStartup() {
-        mergeRoles(adminsAndEpot, Arrays.stream(epotAdmins.replace(" ", "").split(","))
+        mergeRoles(adminsAndEpot, catalogueProperties.getOnboardingTeam()
+                .stream()
                 .map(String::toLowerCase)
                 .collect(Collectors.toMap(
                         Function.identity(),
                         a -> new SimpleGrantedAuthority("ROLE_EPOT"))
                 ));
 
-        mergeRoles(adminsAndEpot, Arrays.stream(admins.replace(" ", "").split(","))
+        mergeRoles(adminsAndEpot, catalogueProperties.getAdmins()
+                .stream()
                 .map(String::toLowerCase)
                 .collect(Collectors.toMap(
                         Function.identity(),
                         a -> new SimpleGrantedAuthority("ROLE_ADMIN"))
                 ));
         updateAuthorities();
-    }
-
-    @Override
-    public Collection<? extends GrantedAuthority> mapAuthorities(JWT idToken, UserInfo userInfo) {
-        Set<GrantedAuthority> out = new HashSet<>();
-        if (idToken == null || userInfo == null) {
-            throw new UnauthorizedUserException("token is not valid or it has expired");
-        }
-
-        out.add(new SimpleGrantedAuthority("ROLE_USER"));
-        out.addAll(getAuthorities(userInfo.getEmail()));
-        String authoritiesString = out.stream().map(GrantedAuthority::getAuthority).collect(Collectors.joining(","));
-        logger.info("User '{}' with email '{}' mapped as '{}'", userInfo.getSub(), userInfo.getEmail(), authoritiesString);
-        return out;
     }
 
     @Override
@@ -151,7 +132,8 @@ public class EICAuthoritiesMapper implements OIDCAuthoritiesMapper, AuthoritiesM
         logger.debug("Update Authorities took {} ms", (System.nanoTime() - time) / 1000000);
     }
 
-    private Set<SimpleGrantedAuthority> getAuthorities(String email) {
+    @Override
+    public Set<SimpleGrantedAuthority> getAuthorities(String email) {
         long time = System.nanoTime();
         updateAuthorities();
 

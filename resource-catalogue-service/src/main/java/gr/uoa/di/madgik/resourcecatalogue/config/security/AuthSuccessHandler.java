@@ -1,9 +1,12 @@
 package gr.uoa.di.madgik.resourcecatalogue.config.security;
 
+import com.nimbusds.jose.util.Base64;
+import org.json.simple.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
@@ -16,6 +19,8 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.time.Instant;
 import java.util.Date;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Component
 public class AuthSuccessHandler implements AuthenticationSuccessHandler {
@@ -36,10 +41,29 @@ public class AuthSuccessHandler implements AuthenticationSuccessHandler {
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
-        Cookie cookie = new Cookie("AccessToken", ((OidcUser) authentication.getPrincipal()).getIdToken().getTokenValue());
-        cookie.setMaxAge(createCookieMaxAge(authentication));
+        int expireSec = createCookieMaxAge(authentication);
+
+        OidcUser user = (OidcUser) authentication.getPrincipal();
+
+        List<String> roles = authentication.getAuthorities()
+                .stream()
+                .map(GrantedAuthority::getAuthority)
+                .collect(Collectors.toList());
+        logger.info("Authentication: {}", authentication);
+        logger.info("UserInfo: {}\nAuthorities: {}", user.getClaims(), roles);
+
+        JSONObject info = new JSONObject(user.getClaims());
+        info.put("roles", roles);
+        info.put("expireSec", expireSec);
+
+        Cookie cookie = new Cookie("info", Base64.encode(info.toString()).toString());
+        cookie.setMaxAge(expireSec);
         cookie.setPath("/");
 //        cookie.setSecure(true);
+
+        Cookie token = new Cookie("AccessToken", ((OidcUser) authentication.getPrincipal()).getIdToken().getTokenValue());
+        token.setPath("/");
+        response.addCookie(token);
 
         response.addCookie(cookie);
         response.sendRedirect(catalogueProperties.getLoginRedirect());
