@@ -17,8 +17,8 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.oauth2.common.exceptions.UnauthorizedUserException;
 import org.springframework.stereotype.Service;
 
 import javax.sql.DataSource;
@@ -276,7 +276,7 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
     @Override
     public List<CatalogueBundle> getMyCatalogues(Authentication auth) {
         if (auth == null) {
-            throw new UnauthorizedUserException("Please log in.");
+            throw new InsufficientAuthenticationException("Please log in.");
         }
         User user = User.of(auth);
         FacetFilter ff = new FacetFilter();

@@ -14,9 +14,8 @@ import gr.uoa.di.madgik.resourcecatalogue.utils.ProviderResourcesCommonMethods;
 import org.apache.commons.beanutils.BeanUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.oauth2.common.exceptions.UnauthorizedUserException;
 import org.springframework.stereotype.Service;
 
 import java.lang.reflect.InvocationTargetException;
@@ -59,7 +58,7 @@ public class PublicProviderManager extends ResourceManager<ProviderBundle> imple
     @Override
     public Browsing<ProviderBundle> getMy(FacetFilter facetFilter, Authentication authentication) {
         if (authentication == null) {
-            throw new UnauthorizedUserException("Please log in.");
+            throw new InsufficientAuthenticationException("Please log in.");
         }
 
         List<ProviderBundle> providerList = new ArrayList<>();

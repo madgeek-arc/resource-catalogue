@@ -12,7 +12,6 @@ import gr.uoa.di.madgik.resourcecatalogue.utils.FacetLabelService;
 import org.apache.commons.lang3.time.DateUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.mitre.openid.connect.model.OIDCAuthenticationToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
@@ -74,6 +73,7 @@ public class VocabularyCurationManager extends ResourceManager<VocabularyCuratio
 
     @Override
     public VocabularyCuration add(VocabularyCuration vocabularyCuration, String resourceType, Authentication auth) {
+        User user = User.of(auth);
         vocabularyCuration.setId(idCreator.generate("cur"));
         // set status, dateOfRequest, userId
         vocabularyCuration.setStatus(VocabularyCuration.Status.PENDING.getKey());
@@ -82,14 +82,14 @@ public class VocabularyCurationManager extends ResourceManager<VocabularyCuratio
         vocabularyCuration.setResolutionUser(null);
         for (VocabularyEntryRequest vocEntryRequest : vocabularyCuration.getVocabularyEntryRequests()) {
             vocEntryRequest.setDateOfRequest(DateUtils.truncate(new Date(), Calendar.DAY_OF_MONTH));
-            vocEntryRequest.setUserId(((OIDCAuthenticationToken) auth).getUserInfo().getEmail());
+            vocEntryRequest.setUserId(user.getEmail());
         }
         // if vocabularyCuration doesn't exist
         validate(vocabularyCuration, resourceType, auth);
         if (vocabularyCuration.getVocabularyEntryRequests().size() == 1) {
             super.add(vocabularyCuration, auth);
             logger.info("Adding Vocabulary Curation: {}", vocabularyCuration);
-            registrationMailService.sendVocabularyCurationEmails(vocabularyCuration, ((OIDCAuthenticationToken) auth).getUserInfo().getName());
+            registrationMailService.sendVocabularyCurationEmails(vocabularyCuration, user.getName());
             // if vocabularyCuration already exists in "pending"
         } else {
             update(vocabularyCuration, auth);

@@ -9,9 +9,9 @@ import gr.uoa.di.madgik.resourcecatalogue.service.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.oauth2.common.exceptions.UnauthorizedUserException;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
@@ -141,7 +141,7 @@ public class InMemoryAuthoritiesMapper implements AuthoritiesMapper {
 
         try {
             if (!lock.tryLock(10, TimeUnit.SECONDS)) {
-                throw new UnauthorizedUserException("Could not authorize user. Try again...");
+                throw new InsufficientAuthenticationException("Could not authorize user. Try again...");
             }
             if (providerUsers.contains(email.toLowerCase())) {
                 authorities.add(new SimpleGrantedAuthority("ROLE_PROVIDER"));

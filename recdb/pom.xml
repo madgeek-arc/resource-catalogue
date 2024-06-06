@@ -98,11 +98,6 @@
             <version>1.8.0</version>
         </dependency>
         <dependency>
-            <groupId>org.mitre</groupId>
-            <artifactId>openid-connect-common</artifactId>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
             <groupId>gr.uoa.di.madgik</groupId>
             <artifactId>resource-catalogue-model</artifactId>
             <scope>compile</scope>

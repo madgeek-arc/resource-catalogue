@@ -15,7 +15,6 @@ import gr.uoa.di.madgik.resourcecatalogue.utils.ProviderResourcesCommonMethods;
 import gr.uoa.di.madgik.resourcecatalogue.validators.FieldValidator;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.mitre.openid.connect.model.OIDCAuthenticationToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -23,9 +22,9 @@ import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.oauth2.common.exceptions.UnauthorizedUserException;
 
 import javax.sql.DataSource;
 import java.net.URL;
@@ -532,7 +531,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     public List<ProviderBundle> getServiceProviders(String email, Authentication auth) {
         List<ProviderBundle> providers;
         if (auth == null) {
-            throw new UnauthorizedUserException("Please log in.");
+            throw new InsufficientAuthenticationException("Please log in.");
         } else if (securityService.hasRole(auth, "ROLE_ADMIN") ||
                 securityService.hasRole(auth, "ROLE_EPOT")) {
             FacetFilter ff = new FacetFilter();
@@ -564,7 +563,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     @Cacheable(value = CACHE_PROVIDERS, key = "(#auth!=null?#auth:'')")
     public Browsing<ProviderBundle> getMy(FacetFilter ff, Authentication auth) {
         if (auth == null) {
-            throw new UnauthorizedUserException("Please log in.");
+            throw new InsufficientAuthenticationException("Please log in.");
         }
         User user = User.of(auth);
         if (ff == null) {
@@ -712,8 +711,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     @CacheEvict(value = {CACHE_PROVIDERS, CACHE_SERVICE_EVENTS, CACHE_EVENTS}, allEntries = true)
     public void deleteUserInfo(Authentication authentication) {
         logger.trace("User '{}' is attempting to delete his User Info", authentication);
-        String userEmail = ((OIDCAuthenticationToken) authentication).getUserInfo().getEmail();
-        String userId = ((OIDCAuthenticationToken) authentication).getUserInfo().getSub();
+        User authenticatedUser = User.of(authentication);
         List<Event> allUserEvents = new ArrayList<>();
         allUserEvents.addAll(eventService.getUserEvents(Event.UserActionType.FAVOURITE.getKey(), authentication));
         allUserEvents.addAll(eventService.getUserEvents(Event.UserActionType.RATING.getKey(), authentication));
@@ -730,11 +728,11 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
             List<User> updatedUsers = new ArrayList<>();
             for (User user : providerBundle.getProvider().getUsers()) {
                 if (user.getId() != null && !"".equals(user.getId())) {
-                    if (!user.getId().equals(userId)) {
+                    if (!user.getId().equals(authenticatedUser.getId())) {
                         updatedUsers.add(user);
                     }
                 } else {
-                    if (!user.getEmail().equals("") && !user.getEmail().equalsIgnoreCase(userEmail)) {
+                    if (!user.getEmail().equals("") && !user.getEmail().equalsIgnoreCase(authenticatedUser.getEmail())) {
                         updatedUsers.add(user);
                     }
                 }

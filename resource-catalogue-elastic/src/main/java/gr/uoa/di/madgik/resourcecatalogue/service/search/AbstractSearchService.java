@@ -4,7 +4,6 @@ import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.elasticsearch.service.ElasticSearchService;
 import gr.uoa.di.madgik.registry.service.SearchService;
 import gr.uoa.di.madgik.resourcecatalogue.utils.FacetFilterUtils;
-import org.bouncycastle.util.Strings;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.DisMaxQueryBuilder;
@@ -49,7 +48,7 @@ public abstract class AbstractSearchService extends ElasticSearchService impleme
             List<String> phrases = new ArrayList<>();
 
             // find quoted terms and keep them as is
-            List<String> parts = Arrays.stream(Strings.split(keyword, '"')).collect(Collectors.toList());
+            List<String> parts = Arrays.stream(keyword.split("\"")).collect(Collectors.toList());
             if (parts.size() > 1 && parts.size() % 2 == 1) {
                 for (int i = 0; i < parts.size(); i++) {
                     if (i % 2 == 1) {

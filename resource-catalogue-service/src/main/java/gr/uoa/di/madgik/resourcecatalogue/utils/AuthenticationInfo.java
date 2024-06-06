@@ -1,8 +1,8 @@
 package gr.uoa.di.madgik.resourcecatalogue.utils;
 
-import gr.uoa.di.madgik.resourcecatalogue.exception.OIDCAuthenticationException;
-import org.mitre.openid.connect.model.OIDCAuthenticationToken;
+import gr.uoa.di.madgik.resourcecatalogue.exception.OidcAuthenticationException;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 
 public class AuthenticationInfo {
 
@@ -10,30 +10,31 @@ public class AuthenticationInfo {
     }
 
     public static String getSub(Authentication auth) {
-        return getOIDC(auth).getSub();
+        return getOidcUser(auth).getSubject();
     }
 
     public static String getEmail(Authentication auth) {
-        return getOIDC(auth).getUserInfo().getEmail();
+        return getOidcUser(auth).getEmail();
     }
 
     public static String getName(Authentication auth) {
-        return getOIDC(auth).getUserInfo().getName();
+        return getOidcUser(auth).getName();
     }
 
     public static String getGivenName(Authentication auth) {
-        return getOIDC(auth).getUserInfo().getGivenName();
+        return getOidcUser(auth).getGivenName();
     }
 
     public static String getFamilyName(Authentication auth) {
-        return getOIDC(auth).getUserInfo().getFamilyName();
+        return getOidcUser(auth).getFamilyName();
     }
 
-    private static OIDCAuthenticationToken getOIDC(Authentication auth) {
-        if (auth instanceof OIDCAuthenticationToken) {
-            return ((OIDCAuthenticationToken) auth);
+    private static OidcUser getOidcUser(Authentication auth) {
+        if (auth.getPrincipal() instanceof OidcUser) {
+            OidcUser principal = ((OidcUser) auth.getPrincipal());
+            return principal;
         } else {
-            throw new OIDCAuthenticationException("Could not retrieve user details. Authentication is not an instance of OIDCAuthentication");
+            throw new OidcAuthenticationException("Could not retrieve user details.");
         }
     }
 }

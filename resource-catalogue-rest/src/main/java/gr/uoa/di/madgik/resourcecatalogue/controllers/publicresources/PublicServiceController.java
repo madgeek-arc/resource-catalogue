@@ -24,8 +24,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.oauth2.common.exceptions.UnauthorizedUserException;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
@@ -110,7 +110,7 @@ public class PublicServiceController {
         ff.setResourceType("service");
         ff.addOrderBy("name", "asc");
         if (auth == null) {
-            throw new UnauthorizedUserException("Please log in.");
+            throw new InsufficientAuthenticationException("Please log in.");
         }
         List<Object> resourceBundleList = new ArrayList<>();
         Paging<?> paging = genericResourceService.getResults(ff);
