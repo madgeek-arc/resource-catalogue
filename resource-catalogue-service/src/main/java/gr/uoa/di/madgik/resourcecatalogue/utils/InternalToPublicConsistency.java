@@ -1,20 +1,19 @@
 package gr.uoa.di.madgik.resourcecatalogue.utils;
 
+import freemarker.template.Configuration;
+import freemarker.template.Template;
+import freemarker.template.TemplateException;
+import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
 import gr.uoa.di.madgik.resourcecatalogue.exception.ResourceException;
 import gr.uoa.di.madgik.resourcecatalogue.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.manager.*;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
-import gr.uoa.di.madgik.registry.domain.FacetFilter;
-import freemarker.template.Configuration;
-import freemarker.template.Template;
-import freemarker.template.TemplateException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
 import javax.mail.MessagingException;
@@ -27,7 +26,7 @@ public class InternalToPublicConsistency {
 
     private static final Logger logger = LogManager.getLogger(InternalToPublicConsistency.class);
 
-    private final ProviderService<ProviderBundle, Authentication> providerService;
+    private final ProviderService<ProviderBundle> providerService;
     private final ServiceBundleService<ServiceBundle> serviceBundleService;
     private final TrainingResourceService<TrainingResourceBundle> trainingResourceService;
     private final InteroperabilityRecordService<InteroperabilityRecordBundle> interoperabilityRecordService;
@@ -54,7 +53,7 @@ public class InternalToPublicConsistency {
     @Value("${resource.consistency.cc}")
     private String consistencyCC;
 
-    public InternalToPublicConsistency(ProviderService<ProviderBundle, Authentication> providerService,
+    public InternalToPublicConsistency(ProviderService<ProviderBundle> providerService,
                                        ServiceBundleService<ServiceBundle> serviceBundleService,
                                        TrainingResourceService<TrainingResourceBundle> trainingResourceService,
                                        InteroperabilityRecordService<InteroperabilityRecordBundle> interoperabilityRecordService,

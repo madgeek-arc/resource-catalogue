@@ -6,7 +6,8 @@ public class Properties {
     }
 
     public static class Cache {
-        private Cache() {}
+        private Cache() {
+        }
 
         public static final String CACHE_PROVIDERS = "providers";
         public static final String CACHE_VOCABULARIES = "vocabularies";

@@ -33,12 +33,12 @@ import static gr.uoa.di.madgik.resourcecatalogue.config.Properties.Cache.CACHE_P
 public class InteroperabilityRecordManager extends ResourceManager<InteroperabilityRecordBundle> implements InteroperabilityRecordService<InteroperabilityRecordBundle> {
 
     private static final Logger logger = LogManager.getLogger(InteroperabilityRecordManager.class);
-    private final ProviderService<ProviderBundle, Authentication> providerService;
+    private final ProviderService<ProviderBundle> providerService;
     private final IdCreator idCreator;
     private final SecurityService securityService;
     private final VocabularyService vocabularyService;
     private final PublicInteroperabilityRecordManager publicInteroperabilityRecordManager;
-    private final CatalogueService<CatalogueBundle, Authentication> catalogueService;
+    private final CatalogueService<CatalogueBundle> catalogueService;
     private final RegistrationMailService registrationMailService;
     private final ProviderResourcesCommonMethods commonMethods;
     @Autowired
@@ -46,10 +46,10 @@ public class InteroperabilityRecordManager extends ResourceManager<Interoperabil
     @Value("${project.catalogue.name}")
     private String catalogueName;
 
-    public InteroperabilityRecordManager(ProviderService<ProviderBundle, Authentication> providerService, IdCreator idCreator,
+    public InteroperabilityRecordManager(ProviderService<ProviderBundle> providerService, IdCreator idCreator,
                                          SecurityService securityService, VocabularyService vocabularyService,
                                          PublicInteroperabilityRecordManager publicInteroperabilityRecordManager,
-                                         CatalogueService<CatalogueBundle, Authentication> catalogueService,
+                                         CatalogueService<CatalogueBundle> catalogueService,
                                          RegistrationMailService registrationMailService, ProviderResourcesCommonMethods commonMethods) {
         super(InteroperabilityRecordBundle.class);
         this.providerService = providerService;

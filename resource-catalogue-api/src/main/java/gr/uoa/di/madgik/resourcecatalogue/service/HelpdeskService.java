@@ -5,7 +5,7 @@ import org.springframework.security.core.Authentication;
 
 import java.util.List;
 
-public interface HelpdeskService<T, U extends Authentication> extends ResourceService<T, Authentication> {
+public interface HelpdeskService<T> extends ResourceService<T> {
 
     HelpdeskBundle add(HelpdeskBundle helpdesk, String resourceType, Authentication auth);
 

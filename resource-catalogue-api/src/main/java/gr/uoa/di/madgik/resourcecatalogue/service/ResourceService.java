@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Map;
 
 public interface
-ResourceService<T, U extends Authentication> extends ResourceCRUDService<T, U> {
+ResourceService<T> extends ResourceCRUDService<T, Authentication> {
 
     /**
      * Get resources by a specific field.
@@ -61,7 +61,7 @@ ResourceService<T, U extends Authentication> extends ResourceCRUDService<T, U> {
     /**
      * Get a Resource, providing its ID and the catalogue ID
      *
-     * @param id resource ID
+     * @param id          resource ID
      * @param catalogueId the catalogue ID
      * @return {@link Resource}
      */

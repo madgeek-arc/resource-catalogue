@@ -26,7 +26,7 @@ import java.util.List;
 
 
 @org.springframework.stereotype.Service("monitoringManager")
-public class MonitoringManager extends ResourceManager<MonitoringBundle> implements MonitoringService<MonitoringBundle, Authentication> {
+public class MonitoringManager extends ResourceManager<MonitoringBundle> implements MonitoringService<MonitoringBundle> {
 
     private static final Logger logger = LogManager.getLogger(MonitoringManager.class);
     private final ServiceBundleService<ServiceBundle> serviceBundleService;

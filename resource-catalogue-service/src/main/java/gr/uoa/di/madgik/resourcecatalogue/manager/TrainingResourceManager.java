@@ -44,15 +44,15 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
 
     private static final Logger logger = LogManager.getLogger(ServiceBundleManager.class);
 
-    private final ProviderService<ProviderBundle, Authentication> providerService;
+    private final ProviderService<ProviderBundle> providerService;
     private final IdCreator idCreator;
     private final SecurityService securityService;
     private final RegistrationMailService registrationMailService;
     private final VocabularyService vocabularyService;
-    private final HelpdeskService<HelpdeskBundle, Authentication> helpdeskService;
-    private final MonitoringService<MonitoringBundle, Authentication> monitoringService;
+    private final HelpdeskService<HelpdeskBundle> helpdeskService;
+    private final MonitoringService<MonitoringBundle> monitoringService;
     private final ResourceInteroperabilityRecordService<ResourceInteroperabilityRecordBundle> resourceInteroperabilityRecordService;
-    private final CatalogueService<CatalogueBundle, Authentication> catalogueService;
+    private final CatalogueService<CatalogueBundle> catalogueService;
     private final PublicTrainingResourceManager publicTrainingResourceManager;
     private final PublicHelpdeskManager publicHelpdeskManager;
     private final PublicMonitoringManager publicMonitoringManager;
@@ -71,14 +71,14 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
     @Value("${project.catalogue.name}")
     private String catalogueName;
 
-    public TrainingResourceManager(ProviderService<ProviderBundle, Authentication> providerService,
+    public TrainingResourceManager(ProviderService<ProviderBundle> providerService,
                                    IdCreator idCreator, @Lazy SecurityService securityService,
                                    @Lazy RegistrationMailService registrationMailService,
                                    @Lazy VocabularyService vocabularyService,
-                                   @Lazy HelpdeskService<HelpdeskBundle, Authentication> helpdeskService,
-                                   @Lazy MonitoringService<MonitoringBundle, Authentication> monitoringService,
+                                   @Lazy HelpdeskService<HelpdeskBundle> helpdeskService,
+                                   @Lazy MonitoringService<MonitoringBundle> monitoringService,
                                    @Lazy ResourceInteroperabilityRecordService<ResourceInteroperabilityRecordBundle> resourceInteroperabilityRecordService,
-                                   CatalogueService<CatalogueBundle, Authentication> catalogueService,
+                                   CatalogueService<CatalogueBundle> catalogueService,
                                    PublicTrainingResourceManager publicTrainingResourceManager,
                                    PublicHelpdeskManager publicHelpdeskManager,
                                    PublicMonitoringManager publicMonitoringManager,

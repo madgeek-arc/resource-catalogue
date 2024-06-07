@@ -1,21 +1,22 @@
 package gr.uoa.di.madgik.resourcecatalogue.manager;
 
-import gr.uoa.di.madgik.resourcecatalogue.domain.*;
+import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
 import gr.uoa.di.madgik.resourcecatalogue.service.CatalogueService;
 import gr.uoa.di.madgik.resourcecatalogue.service.SecurityService;
-import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.Authentication;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 public abstract class AbstractPublicResourceManager<T extends Identifiable> extends ResourceManager<T> {
 
     @Autowired
     private SecurityService securityService;
     @Autowired
-    private CatalogueService<CatalogueBundle, Authentication> catalogueService;
+    private CatalogueService<CatalogueBundle> catalogueService;
 
     public AbstractPublicResourceManager(Class<T> typeParameterClass) {
         super(typeParameterClass);

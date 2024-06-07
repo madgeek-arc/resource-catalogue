@@ -36,17 +36,17 @@ public class ServiceBundleManager extends AbstractServiceBundleManager<ServiceBu
 
     private static final Logger logger = LogManager.getLogger(ServiceBundleManager.class);
 
-    private final ProviderService<ProviderBundle, Authentication> providerService;
+    private final ProviderService<ProviderBundle> providerService;
     private final IdCreator idCreator;
     private final SecurityService securityService;
     private final RegistrationMailService registrationMailService;
     private final VocabularyService vocabularyService;
-    private final CatalogueService<CatalogueBundle, Authentication> catalogueService;
+    private final CatalogueService<CatalogueBundle> catalogueService;
     private final PublicServiceManager publicServiceManager;
     private final MigrationService migrationService;
     private final DatasourceService datasourceService;
-    private final HelpdeskService<HelpdeskBundle, Authentication> helpdeskService;
-    private final MonitoringService<MonitoringBundle, Authentication> monitoringService;
+    private final HelpdeskService<HelpdeskBundle> helpdeskService;
+    private final MonitoringService<MonitoringBundle> monitoringService;
     private final PublicHelpdeskManager publicHelpdeskManager;
     private final PublicMonitoringManager publicMonitoringManager;
     private final PublicDatasourceManager publicDatasourceManager;
@@ -57,16 +57,16 @@ public class ServiceBundleManager extends AbstractServiceBundleManager<ServiceBu
     private String catalogueName;
 
     @Autowired
-    public ServiceBundleManager(ProviderService<ProviderBundle, Authentication> providerService,
+    public ServiceBundleManager(ProviderService<ProviderBundle> providerService,
                                 IdCreator idCreator, @Lazy SecurityService securityService,
                                 @Lazy RegistrationMailService registrationMailService,
                                 @Lazy VocabularyService vocabularyService,
-                                CatalogueService<CatalogueBundle, Authentication> catalogueService,
+                                CatalogueService<CatalogueBundle> catalogueService,
                                 @Lazy PublicServiceManager publicServiceManager,
                                 @Lazy MigrationService migrationService,
                                 @Lazy DatasourceService datasourceService,
-                                @Lazy HelpdeskService<HelpdeskBundle, Authentication> helpdeskService,
-                                @Lazy MonitoringService<MonitoringBundle, Authentication> monitoringService,
+                                @Lazy HelpdeskService<HelpdeskBundle> helpdeskService,
+                                @Lazy MonitoringService<MonitoringBundle> monitoringService,
                                 @Lazy PublicHelpdeskManager publicHelpdeskManager,
                                 @Lazy PublicMonitoringManager publicMonitoringManager,
                                 @Lazy PublicDatasourceManager publicDatasourceManager,

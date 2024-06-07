@@ -1,13 +1,12 @@
 package gr.uoa.di.madgik.resourcecatalogue.controllers.registry;
 
+import gr.uoa.di.madgik.registry.domain.FacetFilter;
+import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.annotations.Browse;
 import gr.uoa.di.madgik.resourcecatalogue.domain.VocabularyCuration;
-import gr.uoa.di.madgik.resourcecatalogue.utils.FacetFilterUtils;
 import gr.uoa.di.madgik.resourcecatalogue.service.VocabularyCurationService;
-import gr.uoa.di.madgik.registry.domain.FacetFilter;
-import gr.uoa.di.madgik.registry.domain.Paging;
-
+import gr.uoa.di.madgik.resourcecatalogue.utils.FacetFilterUtils;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.apache.logging.log4j.LogManager;
@@ -21,20 +20,19 @@ import org.springframework.security.core.Authentication;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
 
-
 import java.util.List;
 import java.util.Set;
 
 @RestController
 @RequestMapping("vocabularyCuration")
 @Tag(name = "vocabulary curation", description = "Operations about new Vocabulary suggestions")
-public class VocabularyCurationController extends ResourceController<VocabularyCuration, Authentication> {
+public class VocabularyCurationController extends ResourceController<VocabularyCuration> {
 
     private static final Logger logger = LogManager.getLogger(VocabularyCurationController.class);
-    private VocabularyCurationService<VocabularyCuration, Authentication> vocabularyCurationService;
+    private VocabularyCurationService<VocabularyCuration> vocabularyCurationService;
 
     @Autowired
-    VocabularyCurationController(VocabularyCurationService<VocabularyCuration, Authentication> service) {
+    VocabularyCurationController(VocabularyCurationService<VocabularyCuration> service) {
         super(service);
         this.vocabularyCurationService = service;
     }

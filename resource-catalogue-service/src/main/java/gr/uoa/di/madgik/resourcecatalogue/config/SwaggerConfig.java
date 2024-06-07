@@ -15,9 +15,6 @@ public class SwaggerConfig {
 
     private static final Logger logger = LogManager.getLogger(SwaggerConfig.class);
 
-    @Value("${swagger.url}")
-    String platform;
-
     @Value("${project.name}")
     String projectName;
 

@@ -7,7 +7,7 @@ import org.springframework.security.core.Authentication;
 
 import java.util.List;
 
-public interface InteroperabilityRecordService<T> extends ResourceService<T, Authentication> {
+public interface InteroperabilityRecordService<T> extends ResourceService<T> {
 
     /**
      * Add a new Interoperability Record on an existing Catalogue, providing the Catalogue's ID

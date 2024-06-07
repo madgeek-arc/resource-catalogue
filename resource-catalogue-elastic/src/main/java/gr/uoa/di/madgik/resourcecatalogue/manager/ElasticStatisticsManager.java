@@ -1,6 +1,11 @@
 package gr.uoa.di.madgik.resourcecatalogue.manager;
 
+import gr.uoa.di.madgik.registry.domain.FacetFilter;
+import gr.uoa.di.madgik.registry.domain.Paging;
+import gr.uoa.di.madgik.registry.domain.Resource;
 import gr.uoa.di.madgik.registry.service.ParserService;
+import gr.uoa.di.madgik.registry.service.SearchService;
+import gr.uoa.di.madgik.registry.service.ServiceException;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Event;
 import gr.uoa.di.madgik.resourcecatalogue.domain.ProviderBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Service;
@@ -8,11 +13,6 @@ import gr.uoa.di.madgik.resourcecatalogue.domain.ServiceBundle;
 import gr.uoa.di.madgik.resourcecatalogue.dto.MapValues;
 import gr.uoa.di.madgik.resourcecatalogue.dto.PlaceCount;
 import gr.uoa.di.madgik.resourcecatalogue.dto.Value;
-import gr.uoa.di.madgik.registry.domain.FacetFilter;
-import gr.uoa.di.madgik.registry.domain.Paging;
-import gr.uoa.di.madgik.registry.domain.Resource;
-import gr.uoa.di.madgik.registry.service.SearchService;
-import gr.uoa.di.madgik.registry.service.ServiceException;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -40,7 +40,6 @@ import org.springframework.core.annotation.Order;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.scheduling.annotation.EnableScheduling;
-import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
 import javax.sql.DataSource;
@@ -60,7 +59,7 @@ public class ElasticStatisticsManager implements StatisticsService {
     private static final Logger logger = LogManager.getLogger(ElasticStatisticsManager.class);
     private final RestHighLevelClient client;
     private final Analytics analyticsService;
-    private final ProviderService<ProviderBundle, Authentication> providerService;
+    private final ProviderService<ProviderBundle> providerService;
     private final SearchService searchService;
     private final ParserService parserService;
     private final ServiceBundleService<ServiceBundle> serviceBundleManager;
@@ -71,7 +70,7 @@ public class ElasticStatisticsManager implements StatisticsService {
     private int maxQuantity;
 
     ElasticStatisticsManager(RestHighLevelClient client, Analytics analyticsService,
-                             ProviderService<ProviderBundle, Authentication> providerService,
+                             ProviderService<ProviderBundle> providerService,
                              SearchService searchService, ParserService parserService,
                              ServiceBundleService<ServiceBundle> serviceBundleManager, VocabularyService vocabularyService,
                              DataSource dataSource) {

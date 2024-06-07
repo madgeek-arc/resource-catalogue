@@ -1,76 +1,78 @@
 {
-    "indexFields": [
-        {
-            "label": null,
-            "multivalued": false,
-            "name": "resource_internal_id",
-            "path": "$.resourceInteroperabilityRecord.id",
-            "primaryKey": true,
-            "type": "java.lang.String"
-        },
-        {
-            "label": "Resource ID",
-            "multivalued": false,
-            "name": "resource_id",
-            "path": "$.resourceInteroperabilityRecord.resourceId",
-            "type": "java.lang.String"
-        },
-        {
-            "label": "Catalogue ID",
-            "multivalued": false,
-            "name": "catalogue_id",
-            "path": "$.resourceInteroperabilityRecord.catalogueId",
-            "type": "java.lang.String"
-        },
-        {
-            "label": "Interoperability Record ID",
-            "multivalued": false,
-            "name": "interoperability_record_ids",
-            "path": "$.resourceInteroperabilityRecord.interoperabilityRecordIds[*]",
-            "type": "java.lang.String"
-        },
-        {
-            "label": null,
-            "multivalued": false,
-            "name": "registeredBy",
-            "path": "$.metadata.registeredBy",
-            "type": "java.lang.String"
-        },
-        {
-            "label": null,
-            "multivalued": false,
-            "name": "modifiedBy",
-            "path": "$.metadata.modifiedBy",
-            "type": "java.lang.String"
-        },
-        {
-            "label": null,
-            "multivalued": false,
-            "name": "registeredAt",
-            "path": "$.metadata.registeredAt",
-            "type": "java.util.Date"
-        },
-        {
-            "label": null,
-            "multivalued": false,
-            "name": "modifiedAt",
-            "path": "$.metadata.modifiedAt",
-            "type": "java.util.Date"
-        },
-        {
-            "label": null,
-            "multivalued": false,
-            "name": "published",
-            "path": "$.metadata.published",
-            "type": "java.lang.Boolean"
-        }
-    ],
-    "indexMapperClass": "gr.uoa.di.madgik.registry.index.DefaultIndexMapper",
-    "aliases": ["resourceTypes"],
-    "name": "resource_interoperability_record",
-    "payloadType": "json",
-    "properties": {
-        "class": "gr.uoa.di.madgik.resourcecatalogue.domain.ResourceInteroperabilityRecordBundle"
+  "indexFields": [
+    {
+      "label": null,
+      "multivalued": false,
+      "name": "resource_internal_id",
+      "path": "$.resourceInteroperabilityRecord.id",
+      "primaryKey": true,
+      "type": "java.lang.String"
     },
-    "schema": "{\n\t\"$schema\": \"https://json-schema.org/draft/2019-09/schema\"\n}"
+    {
+      "label": "Resource ID",
+      "multivalued": false,
+      "name": "resource_id",
+      "path": "$.resourceInteroperabilityRecord.resourceId",
+      "type": "java.lang.String"
+    },
+    {
+      "label": "Catalogue ID",
+      "multivalued": false,
+      "name": "catalogue_id",
+      "path": "$.resourceInteroperabilityRecord.catalogueId",
+      "type": "java.lang.String"
+    },
+    {
+      "label": "Interoperability Record ID",
+      "multivalued": false,
+      "name": "interoperability_record_ids",
+      "path": "$.resourceInteroperabilityRecord.interoperabilityRecordIds[*]",
+      "type": "java.lang.String"
+    },
+    {
+      "label": null,
+      "multivalued": false,
+      "name": "registeredBy",
+      "path": "$.metadata.registeredBy",
+      "type": "java.lang.String"
+    },
+    {
+      "label": null,
+      "multivalued": false,
+      "name": "modifiedBy",
+      "path": "$.metadata.modifiedBy",
+      "type": "java.lang.String"
+    },
+    {
+      "label": null,
+      "multivalued": false,
+      "name": "registeredAt",
+      "path": "$.metadata.registeredAt",
+      "type": "java.util.Date"
+    },
+    {
+      "label": null,
+      "multivalued": false,
+      "name": "modifiedAt",
+      "path": "$.metadata.modifiedAt",
+      "type": "java.util.Date"
+    },
+    {
+      "label": null,
+      "multivalued": false,
+      "name": "published",
+      "path": "$.metadata.published",
+      "type": "java.lang.Boolean"
+    }
+  ],
+  "indexMapperClass": "gr.uoa.di.madgik.registry.index.DefaultIndexMapper",
+  "aliases": [
+    "resourceTypes"
+  ],
+  "name": "resource_interoperability_record",
+  "payloadType": "json",
+  "properties": {
+    "class": "gr.uoa.di.madgik.resourcecatalogue.domain.ResourceInteroperabilityRecordBundle"
+  },
+  "schema": "{\n\t\"$schema\": \"https://json-schema.org/draft/2019-09/schema\"\n}"
 }

@@ -6,7 +6,7 @@ import org.springframework.security.core.Authentication;
 
 import java.util.List;
 
-public interface CatalogueService<T, U extends Authentication> extends ResourceService<T, Authentication> {
+public interface CatalogueService<T> extends ResourceService<T> {
 
     /**
      * Return a Catalogue given its ID
@@ -15,7 +15,7 @@ public interface CatalogueService<T, U extends Authentication> extends ResourceS
      * @param auth Authentication
      * @return {@link T}
      */
-    T get(String id, U auth);
+    T get(String id, Authentication auth);
 
     /**
      * Check the existence of a Catalogue
@@ -50,7 +50,7 @@ public interface CatalogueService<T, U extends Authentication> extends ResourceS
      * @param authentication Authentication
      * @return {@link List}&lt;{@link T}&gt;
      */
-    List<T> getMyCatalogues(U authentication);
+    List<T> getMyCatalogues(Authentication authentication);
 
     /**
      * Verify (approve/reject) a Catalogue during its Onboarding process
@@ -61,7 +61,7 @@ public interface CatalogueService<T, U extends Authentication> extends ResourceS
      * @param auth   Authentication
      * @return {@link T}
      */
-    T verifyCatalogue(String id, String status, Boolean active, U auth);
+    T verifyCatalogue(String id, String status, Boolean active, Authentication auth);
 
     /**
      * Activate/Deactivate a Catalogue
@@ -80,7 +80,7 @@ public interface CatalogueService<T, U extends Authentication> extends ResourceS
      * @param authentication Authentication
      * @return <code>True</code> if Authenticated User has accepted Terms; <code>False</code> otherwise.
      */
-    boolean hasAdminAcceptedTerms(String catalogueId, U authentication);
+    boolean hasAdminAcceptedTerms(String catalogueId, Authentication authentication);
 
     /**
      * Update a Catalogue's list of Users that has accepted the Terms & Conditions
@@ -88,7 +88,7 @@ public interface CatalogueService<T, U extends Authentication> extends ResourceS
      * @param catalogueId    Catalogue ID
      * @param authentication Authentication
      */
-    void adminAcceptedTerms(String catalogueId, U authentication);
+    void adminAcceptedTerms(String catalogueId, Authentication authentication);
 
     /**
      * Suspend the Catalogue

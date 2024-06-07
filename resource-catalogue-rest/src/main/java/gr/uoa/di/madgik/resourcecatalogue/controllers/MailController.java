@@ -1,9 +1,9 @@
 package gr.uoa.di.madgik.resourcecatalogue.controllers;
 
 import com.google.common.collect.Lists;
+import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
-import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -29,9 +29,9 @@ public class MailController {
     @Autowired
     MailService mailService;
     @Autowired
-    CatalogueService<CatalogueBundle, Authentication> catalogueService;
+    CatalogueService<CatalogueBundle> catalogueService;
     @Autowired
-    ProviderService<ProviderBundle, Authentication> providerService;
+    ProviderService<ProviderBundle> providerService;
     @Autowired
     PendingResourceService<ProviderBundle> pendingProviderService;
     @Autowired

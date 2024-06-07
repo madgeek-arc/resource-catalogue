@@ -26,7 +26,6 @@ import org.springframework.security.authentication.InsufficientAuthenticationExc
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 
-import javax.sql.DataSource;
 import java.net.URL;
 import java.time.Instant;
 import java.time.ZoneId;
@@ -38,7 +37,7 @@ import static gr.uoa.di.madgik.resourcecatalogue.utils.VocabularyValidationUtils
 import static gr.uoa.di.madgik.resourcecatalogue.utils.VocabularyValidationUtils.validateScientificDomains;
 
 @org.springframework.stereotype.Service("providerManager")
-public class ProviderManager extends ResourceManager<ProviderBundle> implements ProviderService<ProviderBundle, Authentication> {
+public class ProviderManager extends ResourceManager<ProviderBundle> implements ProviderService<ProviderBundle> {
 
     private static final Logger logger = LogManager.getLogger(ProviderManager.class);
     private final ServiceBundleService<ServiceBundle> serviceBundleService;
@@ -55,8 +54,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     private final RegistrationMailService registrationMailService;
     private final VersionService versionService;
     private final VocabularyService vocabularyService;
-    private final DataSource dataSource;
-    private final CatalogueService<CatalogueBundle, Authentication> catalogueService;
+    private final CatalogueService<CatalogueBundle> catalogueService;
     private final SynchronizerService<Provider> synchronizerService;
     private final ProviderResourcesCommonMethods commonMethods;
     @Autowired
@@ -73,10 +71,10 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
                            @Lazy SecurityService securityService, @Lazy FieldValidator fieldValidator,
                            @Lazy RegistrationMailService registrationMailService, IdCreator idCreator,
                            EventService eventService, VersionService versionService,
-                           VocabularyService vocabularyService, DataSource dataSource,
+                           VocabularyService vocabularyService,
                            @Qualifier("providerSync") SynchronizerService<Provider> synchronizerService,
                            ProviderResourcesCommonMethods commonMethods,
-                           CatalogueService<CatalogueBundle, Authentication> catalogueService,
+                           CatalogueService<CatalogueBundle> catalogueService,
                            @Lazy PublicServiceManager publicServiceManager,
                            @Lazy PublicProviderManager publicProviderManager,
                            @Lazy TrainingResourceService<TrainingResourceBundle> trainingResourceService,
@@ -92,7 +90,6 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         this.registrationMailService = registrationMailService;
         this.versionService = versionService;
         this.vocabularyService = vocabularyService;
-        this.dataSource = dataSource;
         this.synchronizerService = synchronizerService;
         this.commonMethods = commonMethods;
         this.catalogueService = catalogueService;

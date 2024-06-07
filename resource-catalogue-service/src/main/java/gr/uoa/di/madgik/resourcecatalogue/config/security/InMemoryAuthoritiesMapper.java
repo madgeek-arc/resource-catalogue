@@ -10,7 +10,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.InsufficientAuthenticationException;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Component;
 
@@ -30,9 +29,9 @@ public class InMemoryAuthoritiesMapper implements AuthoritiesMapper {
     private final Map<String, Set<SimpleGrantedAuthority>> adminsAndEpot = new HashMap<>();
     private final int maxQuantity;
 
-    private final ProviderService<ProviderBundle, Authentication> providerService;
+    private final ProviderService<ProviderBundle> providerService;
 
-    private final CatalogueService<CatalogueBundle, Authentication> catalogueService;
+    private final CatalogueService<CatalogueBundle> catalogueService;
     private final PendingResourceService<ProviderBundle> pendingProviderService;
     private final SecurityService securityService;
     private final ResourceCatalogueProperties catalogueProperties;
@@ -41,8 +40,8 @@ public class InMemoryAuthoritiesMapper implements AuthoritiesMapper {
 
     public InMemoryAuthoritiesMapper(@Value("${elastic.index.max_result_window:10000}") int maxQuantity,
                                      ResourceCatalogueProperties catalogueProperties,
-                                     ProviderService<ProviderBundle, Authentication> manager,
-                                     CatalogueService<CatalogueBundle, Authentication> catalogueService,
+                                     ProviderService<ProviderBundle> manager,
+                                     CatalogueService<CatalogueBundle> catalogueService,
                                      PendingResourceService<ProviderBundle> pendingProviderService,
                                      SecurityService securityService) {
         this.catalogueProperties = catalogueProperties;

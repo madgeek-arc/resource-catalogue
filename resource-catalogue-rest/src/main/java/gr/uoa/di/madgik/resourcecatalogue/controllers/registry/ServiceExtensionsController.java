@@ -3,6 +3,9 @@ package gr.uoa.di.madgik.resourcecatalogue.controllers.registry;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
+import gr.uoa.di.madgik.registry.domain.FacetFilter;
+import gr.uoa.di.madgik.registry.domain.Paging;
+import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.annotations.Browse;
 import gr.uoa.di.madgik.resourcecatalogue.annotations.BrowseCatalogue;
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
@@ -10,17 +13,13 @@ import gr.uoa.di.madgik.resourcecatalogue.dto.MonitoringStatus;
 import gr.uoa.di.madgik.resourcecatalogue.dto.ServiceType;
 import gr.uoa.di.madgik.resourcecatalogue.exception.ResourceException;
 import gr.uoa.di.madgik.resourcecatalogue.service.GenericResourceService;
-import gr.uoa.di.madgik.resourcecatalogue.utils.FacetFilterUtils;
 import gr.uoa.di.madgik.resourcecatalogue.service.HelpdeskService;
 import gr.uoa.di.madgik.resourcecatalogue.service.MonitoringService;
 import gr.uoa.di.madgik.resourcecatalogue.service.ServiceBundleService;
 import gr.uoa.di.madgik.resourcecatalogue.utils.CreateArgoGrnetHttpRequest;
+import gr.uoa.di.madgik.resourcecatalogue.utils.FacetFilterUtils;
 import gr.uoa.di.madgik.resourcecatalogue.validators.HelpdeskValidator;
 import gr.uoa.di.madgik.resourcecatalogue.validators.MonitoringValidator;
-import gr.uoa.di.madgik.registry.domain.FacetFilter;
-import gr.uoa.di.madgik.registry.domain.Paging;
-import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
-
 import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -41,7 +40,9 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.time.OffsetDateTime;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("service-extensions")
@@ -49,8 +50,8 @@ import java.util.*;
 public class ServiceExtensionsController {
 
     private static final Logger logger = LogManager.getLogger(ServiceExtensionsController.class);
-    private final HelpdeskService<HelpdeskBundle, Authentication> helpdeskService;
-    private final MonitoringService<MonitoringBundle, Authentication> monitoringService;
+    private final HelpdeskService<HelpdeskBundle> helpdeskService;
+    private final MonitoringService<MonitoringBundle> monitoringService;
     private final ServiceBundleService<ServiceBundle> serviceBundleService;
     @Value("${argo.grnet.monitoring.availability}")
     private String monitoringAvailability;
@@ -71,8 +72,8 @@ public class ServiceExtensionsController {
     }
 
     @Autowired
-    ServiceExtensionsController(HelpdeskService<HelpdeskBundle, Authentication> helpdeskService,
-                                MonitoringService<MonitoringBundle, Authentication> monitoringService,
+    ServiceExtensionsController(HelpdeskService<HelpdeskBundle> helpdeskService,
+                                MonitoringService<MonitoringBundle> monitoringService,
                                 ServiceBundleService<ServiceBundle> serviceBundleService,
                                 GenericResourceService genericResourceService) {
         this.helpdeskService = helpdeskService;

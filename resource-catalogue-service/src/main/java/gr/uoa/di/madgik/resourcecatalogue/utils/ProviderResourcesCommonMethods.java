@@ -38,11 +38,11 @@ public class ProviderResourcesCommonMethods {
     @Value("${elastic.index.max_result_window:10000}")
     protected int maxQuantity;
 
-    private final CatalogueService<CatalogueBundle, Authentication> catalogueService;
-    private final ProviderService<ProviderBundle, Authentication> providerService;
+    private final CatalogueService<CatalogueBundle> catalogueService;
+    private final ProviderService<ProviderBundle> providerService;
     private final DatasourceService datasourceService;
-    private final HelpdeskService<HelpdeskBundle, Authentication> helpdeskService;
-    private final MonitoringService<MonitoringBundle, Authentication> monitoringService;
+    private final HelpdeskService<HelpdeskBundle> helpdeskService;
+    private final MonitoringService<MonitoringBundle> monitoringService;
     private final ResourceInteroperabilityRecordService<ResourceInteroperabilityRecordBundle> resourceInteroperabilityRecordService;
     private final GenericResourceService genericResourceService;
     private final VocabularyService vocabularyService;
@@ -61,11 +61,11 @@ public class ProviderResourcesCommonMethods {
     @Value("${marketplace.url}")
     private String marketplaceUrl;
 
-    public ProviderResourcesCommonMethods(@Lazy CatalogueService<CatalogueBundle, Authentication> catalogueService,
-                                          @Lazy ProviderService<ProviderBundle, Authentication> providerService,
+    public ProviderResourcesCommonMethods(@Lazy CatalogueService<CatalogueBundle> catalogueService,
+                                          @Lazy ProviderService<ProviderBundle> providerService,
                                           @Lazy DatasourceService datasourceService,
-                                          @Lazy HelpdeskService<HelpdeskBundle, Authentication> helpdeskService,
-                                          @Lazy MonitoringService<MonitoringBundle, Authentication> monitoringService,
+                                          @Lazy HelpdeskService<HelpdeskBundle> helpdeskService,
+                                          @Lazy MonitoringService<MonitoringBundle> monitoringService,
                                           @Lazy ResourceInteroperabilityRecordService<ResourceInteroperabilityRecordBundle>
                                                   resourceInteroperabilityRecordService,
                                           @Lazy GenericResourceService genericResourceService,

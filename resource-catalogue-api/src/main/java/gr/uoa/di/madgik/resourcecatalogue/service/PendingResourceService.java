@@ -1,9 +1,9 @@
 package gr.uoa.di.madgik.resourcecatalogue.service;
 
-import gr.uoa.di.madgik.resourcecatalogue.domain.Bundle;
-import gr.uoa.di.madgik.resourcecatalogue.exception.ResourceException;
 import gr.uoa.di.madgik.registry.domain.Browsing;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
+import gr.uoa.di.madgik.resourcecatalogue.domain.Bundle;
+import gr.uoa.di.madgik.resourcecatalogue.exception.ResourceException;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 
@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-public interface PendingResourceService<T extends Bundle> extends ResourceService<T, Authentication> {
+public interface PendingResourceService<T extends Bundle> extends ResourceService<T> {
 
     /**
      * Transforms the resource to pending.

@@ -1,15 +1,15 @@
 package gr.uoa.di.madgik.resourcecatalogue.service;
 
 import com.google.i18n.phonenumbers.NumberParseException;
-import gr.uoa.di.madgik.resourcecatalogue.domain.Event;
 import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
+import gr.uoa.di.madgik.resourcecatalogue.domain.Event;
 import org.springframework.security.core.Authentication;
 
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
-public interface EventService extends ResourceService<Event, Authentication> {
+public interface EventService extends ResourceService<Event> {
 
     /**
      * Get all events of a specific type.
@@ -57,7 +57,6 @@ public interface EventService extends ResourceService<Event, Authentication> {
     Map<String, List<Float>> getAllServiceEventValues(String eventType, Authentication authentication);
 
     /**
-     *
      * @param events
      */
     void deleteEvents(List<Event> events);

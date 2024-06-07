@@ -32,12 +32,12 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping({"pendingService"})
 @Tag(name = "pending service")
-public class PendingServiceController extends ResourceController<ServiceBundle, Authentication> {
+public class PendingServiceController extends ResourceController<ServiceBundle> {
 
     private static final Logger logger = LogManager.getLogger(PendingServiceController.class);
     private final PendingResourceService<ServiceBundle> pendingServiceManager;
     private final ServiceBundleService<ServiceBundle> serviceBundleService;
-    private final ProviderService<ProviderBundle, Authentication> providerService;
+    private final ProviderService<ProviderBundle> providerService;
     private GenericResourceService genericResourceService;
     private final IdCreator idCreator;
 
@@ -47,7 +47,7 @@ public class PendingServiceController extends ResourceController<ServiceBundle, 
     @Autowired
     PendingServiceController(PendingResourceService<ServiceBundle> pendingServiceManager,
                              ServiceBundleService<ServiceBundle> serviceBundleService,
-                             ProviderService<ProviderBundle, Authentication> providerService,
+                             ProviderService<ProviderBundle> providerService,
                              GenericResourceService genericResourceService,
                              IdCreator idCreator) {
         super(pendingServiceManager);

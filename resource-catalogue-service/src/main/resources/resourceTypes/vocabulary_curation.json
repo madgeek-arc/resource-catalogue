@@ -1,97 +1,99 @@
 {
-    "indexFields": [
-        {
-            "label": null,
-            "multivalued": false,
-            "name": "resource_internal_id",
-            "path": "$.id",
-            "primaryKey": true,
-            "type": "java.lang.String"
-        },
-        {
-            "label": "User ID",
-            "multivalued": true,
-            "name": "user_id",
-            "path": "$.vocabularyEntryRequests[*].userId",
-            "type": "java.lang.String"
-        },
-        {
-            "label": "Resource ID",
-            "multivalued": true,
-            "name": "resource_id",
-            "path": "$.vocabularyEntryRequests[*].resourceId",
-            "type": "java.lang.String"
-        },
-        {
-            "label": "Provider ID",
-            "multivalued": true,
-            "name": "provider_id",
-            "path": "$.vocabularyEntryRequests[*].providerId",
-            "type": "java.lang.String"
-        },
-        {
-            "label": "Date of Request",
-            "multivalued": true,
-            "name": "date_of_request",
-            "path": "$.vocabularyEntryRequests[*].dateOfRequest",
-            "type": "java.util.Date"
-        },
-        {
-            "label": "Resource Type",
-            "multivalued": true,
-            "name": "resource_Type",
-            "path": "$.vocabularyEntryRequests[*].resourceType",
-            "type": "java.lang.String"
-        },
-        {
-            "label": "Entry Value Name",
-            "multivalued": false,
-            "name": "entry_value_name",
-            "path": "$.entryValueName",
-            "type": "java.lang.String"
-        },
-        {
-            "label": "Vocabulary",
-            "multivalued": false,
-            "name": "vocabulary",
-            "path": "$.vocabulary",
-            "type": "java.lang.String"
-        },
-        {
-            "label": "Parent",
-            "multivalued": false,
-            "name": "parent",
-            "path": "$.parent",
-            "type": "java.lang.String"
-        },
-        {
-            "label": "Status",
-            "multivalued": false,
-            "name": "status",
-            "path": "$.status",
-            "type": "java.lang.String"
-        },
-        {
-            "label": "Resolution Date",
-            "multivalued": false,
-            "name": "resolution_date",
-            "path": "$.resolutionDate",
-            "type": "java.util.Date"
-        },
-        {
-            "label": "Resolution User",
-            "multivalued": false,
-            "name": "resolution_user",
-            "path": "$.resolutionUser",
-            "type": "java.lang.String"
-        }
-    ],
-    "indexMapperClass": "gr.uoa.di.madgik.registry.index.DefaultIndexMapper",
-    "aliases": ["resourceTypes"],
-    "name": "vocabulary_curation",
-    "payloadType": "json",
-    "properties": {
-        "class": "gr.uoa.di.madgik.resourcecatalogue.domain.VocabularyCuration"
+  "indexFields": [
+    {
+      "label": null,
+      "multivalued": false,
+      "name": "resource_internal_id",
+      "path": "$.id",
+      "primaryKey": true,
+      "type": "java.lang.String"
     },
-    "schema": "{\n\t\"$schema\": \"https://json-schema.org/draft/2019-09/schema\"\n}"
+    {
+      "label": "User ID",
+      "multivalued": true,
+      "name": "user_id",
+      "path": "$.vocabularyEntryRequests[*].userId",
+      "type": "java.lang.String"
+    },
+    {
+      "label": "Resource ID",
+      "multivalued": true,
+      "name": "resource_id",
+      "path": "$.vocabularyEntryRequests[*].resourceId",
+      "type": "java.lang.String"
+    },
+    {
+      "label": "Provider ID",
+      "multivalued": true,
+      "name": "provider_id",
+      "path": "$.vocabularyEntryRequests[*].providerId",
+      "type": "java.lang.String"
+    },
+    {
+      "label": "Date of Request",
+      "multivalued": true,
+      "name": "date_of_request",
+      "path": "$.vocabularyEntryRequests[*].dateOfRequest",
+      "type": "java.util.Date"
+    },
+    {
+      "label": "Resource Type",
+      "multivalued": true,
+      "name": "resource_Type",
+      "path": "$.vocabularyEntryRequests[*].resourceType",
+      "type": "java.lang.String"
+    },
+    {
+      "label": "Entry Value Name",
+      "multivalued": false,
+      "name": "entry_value_name",
+      "path": "$.entryValueName",
+      "type": "java.lang.String"
+    },
+    {
+      "label": "Vocabulary",
+      "multivalued": false,
+      "name": "vocabulary",
+      "path": "$.vocabulary",
+      "type": "java.lang.String"
+    },
+    {
+      "label": "Parent",
+      "multivalued": false,
+      "name": "parent",
+      "path": "$.parent",
+      "type": "java.lang.String"
+    },
+    {
+      "label": "Status",
+      "multivalued": false,
+      "name": "status",
+      "path": "$.status",
+      "type": "java.lang.String"
+    },
+    {
+      "label": "Resolution Date",
+      "multivalued": false,
+      "name": "resolution_date",
+      "path": "$.resolutionDate",
+      "type": "java.util.Date"
+    },
+    {
+      "label": "Resolution User",
+      "multivalued": false,
+      "name": "resolution_user",
+      "path": "$.resolutionUser",
+      "type": "java.lang.String"
+    }
+  ],
+  "indexMapperClass": "gr.uoa.di.madgik.registry.index.DefaultIndexMapper",
+  "aliases": [
+    "resourceTypes"
+  ],
+  "name": "vocabulary_curation",
+  "payloadType": "json",
+  "properties": {
+    "class": "gr.uoa.di.madgik.resourcecatalogue.domain.VocabularyCuration"
+  },
+  "schema": "{\n\t\"$schema\": \"https://json-schema.org/draft/2019-09/schema\"\n}"
 }

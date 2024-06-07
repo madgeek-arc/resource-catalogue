@@ -13,7 +13,7 @@ import org.springframework.security.core.Authentication;
 import java.util.List;
 import java.util.Map;
 
-public interface TrainingResourceService<T> extends ResourceService<T, Authentication> {
+public interface TrainingResourceService<T> extends ResourceService<T> {
 
     /**
      * Add a new Training Resource on the EOSC Catalogue

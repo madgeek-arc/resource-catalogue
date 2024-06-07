@@ -1,4 +1,3 @@
-
 package gr.uoa.di.madgik.resourcecatalogue.domain;
 
 import gr.uoa.di.madgik.resourcecatalogue.annotation.EmailValidation;

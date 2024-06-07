@@ -1,8 +1,8 @@
 package gr.uoa.di.madgik.resourcecatalogue.service;
 
+import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Datasource;
 import gr.uoa.di.madgik.resourcecatalogue.dto.OpenAIREMetrics;
-import gr.uoa.di.madgik.registry.domain.FacetFilter;
 
 import java.io.IOException;
 import java.util.List;

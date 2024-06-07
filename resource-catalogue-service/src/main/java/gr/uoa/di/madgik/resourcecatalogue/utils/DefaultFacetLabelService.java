@@ -12,7 +12,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
-import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
@@ -22,13 +21,13 @@ import java.util.*;
 public class DefaultFacetLabelService implements FacetLabelService {
 
     private static final Logger logger = LogManager.getLogger(DefaultFacetLabelService.class);
-    private final ProviderService<ProviderBundle, Authentication> providerService;
+    private final ProviderService<ProviderBundle> providerService;
     private final VocabularyService vocabularyService;
 
     @org.springframework.beans.factory.annotation.Value("${elastic.index.max_result_window:10000}")
     private int maxQuantity;
 
-    DefaultFacetLabelService(ProviderService<ProviderBundle, Authentication> providerService,
+    DefaultFacetLabelService(ProviderService<ProviderBundle> providerService,
                              VocabularyService vocabularyService) {
         this.providerService = providerService;
         this.vocabularyService = vocabularyService;

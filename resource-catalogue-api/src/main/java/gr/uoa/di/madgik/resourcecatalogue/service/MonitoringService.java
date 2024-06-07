@@ -8,7 +8,7 @@ import org.springframework.security.core.Authentication;
 
 import java.util.List;
 
-public interface MonitoringService<T, U extends Authentication> extends ResourceService<T, Authentication> {
+public interface MonitoringService<T> extends ResourceService<T> {
 
     /**
      * Creates a new Monitoring

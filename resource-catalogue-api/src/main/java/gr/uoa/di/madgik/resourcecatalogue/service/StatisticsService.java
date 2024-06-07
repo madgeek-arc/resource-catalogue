@@ -1,7 +1,6 @@
 package gr.uoa.di.madgik.resourcecatalogue.service;
 
 
-
 import gr.uoa.di.madgik.resourcecatalogue.domain.Event;
 import gr.uoa.di.madgik.resourcecatalogue.dto.MapValues;
 import gr.uoa.di.madgik.resourcecatalogue.dto.PlaceCount;

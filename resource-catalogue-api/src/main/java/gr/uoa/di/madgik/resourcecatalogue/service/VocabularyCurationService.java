@@ -1,12 +1,11 @@
 package gr.uoa.di.madgik.resourcecatalogue.service;
 
-import gr.uoa.di.madgik.resourcecatalogue.domain.VocabularyCuration;
 import gr.uoa.di.madgik.registry.domain.Browsing;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
+import gr.uoa.di.madgik.resourcecatalogue.domain.VocabularyCuration;
 import org.springframework.security.core.Authentication;
 
-public interface VocabularyCurationService<T, U extends Authentication> extends ResourceService<VocabularyCuration,
-        Authentication> {
+public interface VocabularyCurationService<T> extends ResourceService<VocabularyCuration> {
 
     /**
      * Add a new VocabularyCuration from UI

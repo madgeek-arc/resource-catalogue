@@ -6,7 +6,7 @@ import org.springframework.security.core.Authentication;
 
 import java.util.List;
 
-public interface DatasourceService extends ResourceService<DatasourceBundle, Authentication> {
+public interface DatasourceService extends ResourceService<DatasourceBundle> {
 
     /**
      * Get the Datasource sub-profile of the specific Service of the specific Catalogue

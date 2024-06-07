@@ -1,15 +1,12 @@
 package gr.uoa.di.madgik.resourcecatalogue.manager.aspects;
 
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
-import gr.uoa.di.madgik.resourcecatalogue.domain.*;
 import gr.uoa.di.madgik.resourcecatalogue.domain.configurationTemplates.ConfigurationTemplateInstanceBundle;
 import gr.uoa.di.madgik.resourcecatalogue.exception.ResourceException;
 import gr.uoa.di.madgik.resourcecatalogue.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.manager.*;
-import gr.uoa.di.madgik.resourcecatalogue.manager.*;
-import gr.uoa.di.madgik.resourcecatalogue.service.RegistrationMailService;
-import gr.uoa.di.madgik.resourcecatalogue.utils.ObjectUtils;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
+import gr.uoa.di.madgik.resourcecatalogue.utils.ObjectUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.aspectj.lang.JoinPoint;
@@ -20,7 +17,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.scheduling.annotation.Async;
-import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
 import static gr.uoa.di.madgik.resourcecatalogue.config.Properties.Cache.CACHE_PROVIDERS;
@@ -31,7 +27,7 @@ public class ProviderManagementAspect {
 
     private static final Logger logger = LogManager.getLogger(ProviderManagementAspect.class);
 
-    private final ProviderService<ProviderBundle, Authentication> providerService;
+    private final ProviderService<ProviderBundle> providerService;
     private final ServiceBundleService<ServiceBundle> serviceBundleService;
     private final TrainingResourceService<TrainingResourceBundle> trainingResourceService;
     private final PublicProviderManager publicProviderManager;
@@ -47,7 +43,7 @@ public class ProviderManagementAspect {
     private String catalogueName;
 
     @Autowired
-    public ProviderManagementAspect(ProviderService<ProviderBundle, Authentication> providerService,
+    public ProviderManagementAspect(ProviderService<ProviderBundle> providerService,
                                     ServiceBundleService<ServiceBundle> serviceBundleService,
                                     TrainingResourceService<TrainingResourceBundle> trainingResourceService,
                                     PublicProviderManager publicProviderManager,

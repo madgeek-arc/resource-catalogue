@@ -5,7 +5,7 @@ import org.springframework.security.core.Authentication;
 
 import java.util.List;
 
-public interface ResourceInteroperabilityRecordService<T> extends ResourceService<T, Authentication> {
+public interface ResourceInteroperabilityRecordService<T> extends ResourceService<T> {
 
     /**
      * Add a new ResourceInteroperabilityRecord Bundle, related to the specific resource type

@@ -1,9 +1,6 @@
 package gr.uoa.di.madgik.resourcecatalogue.annotations;
 
 
-
-
-import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Parameters;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;

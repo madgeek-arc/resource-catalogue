@@ -1,13 +1,13 @@
 package gr.uoa.di.madgik.resourcecatalogue.controllers.registry;
 
 import com.google.gson.Gson;
+import gr.uoa.di.madgik.registry.domain.FacetFilter;
+import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.resourcecatalogue.domain.ProviderBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.ServiceBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.User;
 import gr.uoa.di.madgik.resourcecatalogue.service.ProviderService;
 import gr.uoa.di.madgik.resourcecatalogue.service.ServiceBundleService;
-import gr.uoa.di.madgik.registry.domain.FacetFilter;
-import gr.uoa.di.madgik.registry.domain.Paging;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.apache.logging.log4j.LogManager;
@@ -25,7 +25,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-
 import javax.servlet.http.HttpServletResponse;
 import java.util.List;
 
@@ -36,13 +35,13 @@ public class CSVController {
 
     private static Logger logger = LogManager.getLogger(CSVController.class);
     private final ServiceBundleService<ServiceBundle> serviceBundleService;
-    private final ProviderService<ProviderBundle, Authentication> providerService;
+    private final ProviderService<ProviderBundle> providerService;
 
     @Value("${elastic.index.max_result_window:10000}")
     private int maxQuantity;
 
     @Autowired
-    CSVController(ServiceBundleService<ServiceBundle> service, ProviderService<ProviderBundle, Authentication> provider) {
+    CSVController(ServiceBundleService<ServiceBundle> service, ProviderService<ProviderBundle> provider) {
         this.serviceBundleService = service;
         this.providerService = provider;
     }

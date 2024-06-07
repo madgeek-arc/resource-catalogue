@@ -49,7 +49,7 @@ public abstract class AbstractServiceBundleManager<T extends ServiceBundle> exte
     @Autowired
     private VocabularyService vocabularyService;
     @Autowired
-    private ProviderService<ProviderBundle, Authentication> providerService;
+    private ProviderService<ProviderBundle> providerService;
     @Autowired
     private FacetLabelService facetLabelService;
     @Autowired

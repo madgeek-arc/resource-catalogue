@@ -25,16 +25,16 @@ import java.util.Map;
 @RestController
 @RequestMapping("pendingProvider")
 @Tag(name = "pending provider")
-public class PendingProviderController extends ResourceController<ProviderBundle, Authentication> {
+public class PendingProviderController extends ResourceController<ProviderBundle> {
 
     private static final Logger logger = LogManager.getLogger(PendingProviderController.class);
 
     private final PendingResourceService<ProviderBundle> pendingProviderService;
-    private final ProviderService<ProviderBundle, Authentication> providerManager;
+    private final ProviderService<ProviderBundle> providerManager;
     private final IdCreator idCreator;
 
     PendingProviderController(PendingResourceService<ProviderBundle> pendingProviderService,
-                              ProviderService<ProviderBundle, Authentication> providerManager,
+                              ProviderService<ProviderBundle> providerManager,
                               IdCreator idCreator) {
         super(pendingProviderService);
         this.pendingProviderService = pendingProviderService;

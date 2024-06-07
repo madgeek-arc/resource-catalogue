@@ -1,14 +1,13 @@
 package gr.uoa.di.madgik.resourcecatalogue.controllers.registry;
 
-import gr.uoa.di.madgik.resourcecatalogue.annotations.Browse;
-import gr.uoa.di.madgik.resourcecatalogue.domain.*;
-import gr.uoa.di.madgik.resourcecatalogue.exception.ValidationException;
-import gr.uoa.di.madgik.resourcecatalogue.utils.FacetFilterUtils;
-import gr.uoa.di.madgik.resourcecatalogue.service.*;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
-
+import gr.uoa.di.madgik.resourcecatalogue.annotations.Browse;
+import gr.uoa.di.madgik.resourcecatalogue.domain.*;
+import gr.uoa.di.madgik.resourcecatalogue.exception.ValidationException;
+import gr.uoa.di.madgik.resourcecatalogue.service.*;
+import gr.uoa.di.madgik.resourcecatalogue.utils.FacetFilterUtils;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -26,8 +25,9 @@ import org.springframework.security.core.Authentication;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
 
-
-import java.util.*;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("catalogue")
@@ -35,8 +35,8 @@ import java.util.*;
 public class CatalogueController {
 
     private static final Logger logger = LogManager.getLogger(CatalogueController.class);
-    private final CatalogueService<CatalogueBundle, Authentication> catalogueManager;
-    private final ProviderService<ProviderBundle, Authentication> providerManager;
+    private final CatalogueService<CatalogueBundle> catalogueManager;
+    private final ProviderService<ProviderBundle> providerManager;
     private final ServiceBundleService<ServiceBundle> serviceBundleService;
     private final DatasourceService datasourceService;
     private final TrainingResourceService<TrainingResourceBundle> trainingResourceService;
@@ -46,8 +46,8 @@ public class CatalogueController {
     private String catalogueName;
 
     @Autowired
-    CatalogueController(CatalogueService<CatalogueBundle, Authentication> catalogueManager,
-                        ProviderService<ProviderBundle, Authentication> providerManager,
+    CatalogueController(CatalogueService<CatalogueBundle> catalogueManager,
+                        ProviderService<ProviderBundle> providerManager,
                         ServiceBundleService<ServiceBundle> serviceBundleService,
                         DatasourceService datasourceService,
                         TrainingResourceService<TrainingResourceBundle> trainingResourceService,
@@ -330,7 +330,7 @@ public class CatalogueController {
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     @GetMapping(path = "{catalogueId}/{providerId}/service/all", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<Paging<Service>> getProviderServices(@PathVariable String catalogueId, @PathVariable String providerId,
-                                                         @Parameter(hidden = true) @RequestParam Map<String, Object> allRequestParams) {
+                                                               @Parameter(hidden = true) @RequestParam Map<String, Object> allRequestParams) {
         FacetFilter ff = FacetFilterUtils.createFacetFilter(allRequestParams);
         ff.setResourceType("service");
         ff.addFilter("published", false);

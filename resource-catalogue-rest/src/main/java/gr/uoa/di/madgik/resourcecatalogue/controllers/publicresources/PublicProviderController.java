@@ -1,17 +1,18 @@
 package gr.uoa.di.madgik.resourcecatalogue.controllers.publicresources;
 
 import com.google.gson.Gson;
+import gr.uoa.di.madgik.registry.domain.FacetFilter;
+import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.resourcecatalogue.annotations.Browse;
 import gr.uoa.di.madgik.resourcecatalogue.annotations.BrowseCatalogue;
-import gr.uoa.di.madgik.resourcecatalogue.domain.*;
+import gr.uoa.di.madgik.resourcecatalogue.domain.Provider;
+import gr.uoa.di.madgik.resourcecatalogue.domain.ProviderBundle;
+import gr.uoa.di.madgik.resourcecatalogue.domain.User;
 import gr.uoa.di.madgik.resourcecatalogue.service.GenericResourceService;
-import gr.uoa.di.madgik.resourcecatalogue.utils.FacetFilterUtils;
 import gr.uoa.di.madgik.resourcecatalogue.service.ProviderService;
 import gr.uoa.di.madgik.resourcecatalogue.service.ResourceService;
 import gr.uoa.di.madgik.resourcecatalogue.service.SecurityService;
-import gr.uoa.di.madgik.registry.domain.FacetFilter;
-import gr.uoa.di.madgik.registry.domain.Paging;
-
+import gr.uoa.di.madgik.resourcecatalogue.utils.FacetFilterUtils;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -39,13 +40,13 @@ public class PublicProviderController {
     private static final Gson gson = new Gson();
 
     private final SecurityService securityService;
-    private final ProviderService<ProviderBundle, Authentication> providerService;
-    private final ResourceService<ProviderBundle, Authentication> publicProviderManager;
+    private final ProviderService<ProviderBundle> providerService;
+    private final ResourceService<ProviderBundle> publicProviderManager;
     private final GenericResourceService genericResourceService;
 
     public PublicProviderController(SecurityService securityService,
-                                    ProviderService<ProviderBundle, Authentication> providerService,
-                                    @Qualifier("publicProviderManager") ResourceService<ProviderBundle, Authentication> publicProviderManager,
+                                    ProviderService<ProviderBundle> providerService,
+                                    @Qualifier("publicProviderManager") ResourceService<ProviderBundle> publicProviderManager,
                                     GenericResourceService genericResourceService) {
         this.securityService = securityService;
         this.providerService = providerService;

@@ -8,7 +8,7 @@ import java.lang.reflect.Array;
 import java.util.List;
 import java.util.Map;
 
-public interface VocabularyService extends ResourceService<Vocabulary, Authentication> {
+public interface VocabularyService extends ResourceService<Vocabulary> {
 
     /**
      * Retrieves Vocabulary based on id or throws exception if not found.

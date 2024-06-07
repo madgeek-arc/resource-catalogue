@@ -12,7 +12,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
-import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -33,7 +32,7 @@ public class FieldValidator {
     private final ProviderManager providerService;
     private final ServiceBundleService<ServiceBundle> serviceBundleService;
     private final TrainingResourceService<TrainingResourceBundle> trainingResourceService;
-    private final CatalogueService<CatalogueBundle, Authentication> catalogueService;
+    private final CatalogueService<CatalogueBundle> catalogueService;
     private final InteroperabilityRecordService<InteroperabilityRecordBundle> interoperabilityRecordService;
 
     private static final String MANDATORY_FIELD = "Field '%s' is mandatory.";
@@ -46,7 +45,7 @@ public class FieldValidator {
                           ProviderManager providerService,
                           @Lazy ServiceBundleService<ServiceBundle> serviceBundleService,
                           @Lazy TrainingResourceService<TrainingResourceBundle> trainingResourceService,
-                          @Lazy CatalogueService<CatalogueBundle, Authentication> catalogueService,
+                          @Lazy CatalogueService<CatalogueBundle> catalogueService,
                           @Lazy InteroperabilityRecordService<InteroperabilityRecordBundle> interoperabilityRecordService) {
         this.vocabularyService = vocabularyService;
         this.providerService = providerService;

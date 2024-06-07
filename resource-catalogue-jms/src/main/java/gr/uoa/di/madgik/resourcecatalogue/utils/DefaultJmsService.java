@@ -7,7 +7,6 @@ import org.springframework.jms.core.JmsTemplate;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
-import gr.uoa.di.madgik.resourcecatalogue.utils.JmsService;
 
 @Service
 @Primary

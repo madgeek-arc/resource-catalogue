@@ -12,7 +12,7 @@ import org.springframework.security.core.Authentication;
 import java.net.URL;
 import java.util.List;
 
-public interface ProviderService<T, U extends Authentication> extends ResourceService<T, Authentication> {
+public interface ProviderService<T> extends ResourceService<T> {
 
     /**
      * Add a new Provider on the Project's Catalogue.
@@ -50,7 +50,7 @@ public interface ProviderService<T, U extends Authentication> extends ResourceSe
      * @param auth Authentication
      * @return {@link T}
      */
-    T get(String id, U auth);
+    T get(String id, Authentication auth);
 
     /**
      * Get a Provider of a specific Catalogue providing the Provider's ID and the Catalogue's ID.
@@ -60,7 +60,7 @@ public interface ProviderService<T, U extends Authentication> extends ResourceSe
      * @param auth        Authentication
      * @return {@link T}
      */
-    T get(String catalogueId, String providerId, U auth);
+    T get(String catalogueId, String providerId, Authentication auth);
 
     /**
      * Get a list of Providers in which the given User's email is Admin
@@ -69,7 +69,7 @@ public interface ProviderService<T, U extends Authentication> extends ResourceSe
      * @param authentication Authentication
      * @return {@link List}&lt;{@link T}&gt;
      */
-    List<T> getServiceProviders(String email, U authentication);
+    List<T> getServiceProviders(String email, Authentication authentication);
 
     /**
      * Return true if the specific User has accepted the Provider's registration terms
@@ -78,7 +78,7 @@ public interface ProviderService<T, U extends Authentication> extends ResourceSe
      * @param authentication Authentication
      * @return True/False
      */
-    boolean hasAdminAcceptedTerms(String providerId, U authentication);
+    boolean hasAdminAcceptedTerms(String providerId, Authentication authentication);
 
     /**
      * Update the Provider's list of Users that have accepted the Provider's registration terms
@@ -86,7 +86,7 @@ public interface ProviderService<T, U extends Authentication> extends ResourceSe
      * @param providerId     Provider's ID
      * @param authentication Authentication
      */
-    void adminAcceptedTerms(String providerId, U authentication);
+    void adminAcceptedTerms(String providerId, Authentication authentication);
 
     /**
      * Validates a specific URL regarding the ability to open a connection
@@ -130,7 +130,7 @@ public interface ProviderService<T, U extends Authentication> extends ResourceSe
      * @param auth   Authentication
      * @return {@link T}
      */
-    T verifyProvider(String id, String status, Boolean active, U auth);
+    T verifyProvider(String id, String status, Boolean active, Authentication auth);
 
     /**
      * Sets a Provider as active/inactive.

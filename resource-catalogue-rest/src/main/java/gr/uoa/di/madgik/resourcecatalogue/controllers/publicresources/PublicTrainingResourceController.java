@@ -1,6 +1,8 @@
 package gr.uoa.di.madgik.resourcecatalogue.controllers.publicresources;
 
 import com.google.gson.Gson;
+import gr.uoa.di.madgik.registry.domain.FacetFilter;
+import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.resourcecatalogue.annotations.Browse;
 import gr.uoa.di.madgik.resourcecatalogue.annotations.BrowseCatalogue;
 import gr.uoa.di.madgik.resourcecatalogue.domain.TrainingResource;
@@ -8,12 +10,9 @@ import gr.uoa.di.madgik.resourcecatalogue.domain.TrainingResourceBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.User;
 import gr.uoa.di.madgik.resourcecatalogue.service.GenericResourceService;
 import gr.uoa.di.madgik.resourcecatalogue.service.ResourceService;
-import gr.uoa.di.madgik.resourcecatalogue.service.TrainingResourceService;
 import gr.uoa.di.madgik.resourcecatalogue.service.SecurityService;
+import gr.uoa.di.madgik.resourcecatalogue.service.TrainingResourceService;
 import gr.uoa.di.madgik.resourcecatalogue.utils.FacetFilterUtils;
-import gr.uoa.di.madgik.registry.domain.FacetFilter;
-import gr.uoa.di.madgik.registry.domain.Paging;
-
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -43,13 +42,13 @@ public class PublicTrainingResourceController {
 
     private final SecurityService securityService;
     private final TrainingResourceService<TrainingResourceBundle> trainingResourceBundleService;
-    private final ResourceService<TrainingResourceBundle, Authentication> publicTrainingResourceManager;
+    private final ResourceService<TrainingResourceBundle> publicTrainingResourceManager;
     private final GenericResourceService genericResourceService;
 
 
     PublicTrainingResourceController(SecurityService securityService,
                                      TrainingResourceService<TrainingResourceBundle> trainingResourceBundleService,
-                                     @Qualifier("publicTrainingResourceManager") ResourceService<TrainingResourceBundle, Authentication> publicTrainingResourceManager,
+                                     @Qualifier("publicTrainingResourceManager") ResourceService<TrainingResourceBundle> publicTrainingResourceManager,
                                      GenericResourceService genericResourceService) {
         this.securityService = securityService;
         this.trainingResourceBundleService = trainingResourceBundleService;

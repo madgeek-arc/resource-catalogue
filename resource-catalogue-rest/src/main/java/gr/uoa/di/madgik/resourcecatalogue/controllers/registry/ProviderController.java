@@ -1,5 +1,8 @@
 package gr.uoa.di.madgik.resourcecatalogue.controllers.registry;
 
+import gr.uoa.di.madgik.registry.domain.FacetFilter;
+import gr.uoa.di.madgik.registry.domain.Paging;
+import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.annotations.Browse;
 import gr.uoa.di.madgik.resourcecatalogue.annotations.BrowseCatalogue;
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
@@ -9,10 +12,6 @@ import gr.uoa.di.madgik.resourcecatalogue.exception.ResourceException;
 import gr.uoa.di.madgik.resourcecatalogue.exception.ValidationException;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
 import gr.uoa.di.madgik.resourcecatalogue.utils.FacetFilterUtils;
-import gr.uoa.di.madgik.registry.domain.FacetFilter;
-import gr.uoa.di.madgik.registry.domain.Paging;
-import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
-
 import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -34,7 +33,9 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URL;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestController
@@ -43,7 +44,7 @@ import java.util.stream.Collectors;
 public class ProviderController {
 
     private static final Logger logger = LogManager.getLogger(ProviderController.class);
-    private final ProviderService<ProviderBundle, Authentication> providerService;
+    private final ProviderService<ProviderBundle> providerService;
     private final ServiceBundleService<ServiceBundle> serviceBundleService;
     private final TrainingResourceService<TrainingResourceBundle> trainingResourceService;
     private final SecurityService securityService;
@@ -60,7 +61,7 @@ public class ProviderController {
     private String projectName;
 
     @Autowired
-    ProviderController(ProviderService<ProviderBundle, Authentication> service,
+    ProviderController(ProviderService<ProviderBundle> service,
                        ServiceBundleService<ServiceBundle> serviceBundleService,
                        TrainingResourceService<TrainingResourceBundle> trainingResourceService,
                        SecurityService securityService, MigrationService migrationService,
@@ -150,7 +151,7 @@ public class ProviderController {
     }
 
     @Operation(summary = "Filter a list of Providers based on a set of filters or get a list of all Providers in the Catalogue.",
-            security = { @SecurityRequirement(name = "bearer-key") })
+            security = {@SecurityRequirement(name = "bearer-key")})
     @Browse
     @BrowseCatalogue
     @Parameter(name = "suspended", description = "Suspended", content = @Content(schema = @Schema(type = "boolean", defaultValue = "false")))

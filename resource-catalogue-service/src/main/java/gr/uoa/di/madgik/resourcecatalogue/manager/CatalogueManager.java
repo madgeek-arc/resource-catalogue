@@ -31,7 +31,7 @@ import java.util.stream.Collectors;
 import static gr.uoa.di.madgik.resourcecatalogue.utils.VocabularyValidationUtils.validateScientificDomains;
 
 @Service("catalogueManager")
-public class CatalogueManager extends ResourceManager<CatalogueBundle> implements CatalogueService<CatalogueBundle, Authentication> {
+public class CatalogueManager extends ResourceManager<CatalogueBundle> implements CatalogueService<CatalogueBundle> {
 
     private static final Logger logger = LogManager.getLogger(CatalogueManager.class);
     private final SecurityService securityService;
@@ -40,7 +40,7 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
     private final FieldValidator fieldValidator;
     private final RegistrationMailService registrationMailService;
     private final DataSource dataSource;
-    private final ProviderService<ProviderBundle, Authentication> providerService;
+    private final ProviderService<ProviderBundle> providerService;
     private final ServiceBundleService<ServiceBundle> serviceBundleService;
     private final TrainingResourceService<TrainingResourceBundle> trainingResourceService;
     private final InteroperabilityRecordService<InteroperabilityRecordBundle> interoperabilityRecordService;
@@ -51,7 +51,7 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
 
     @Autowired
     public CatalogueManager(IdCreator idCreator, DataSource dataSource,
-                            @Lazy ProviderService<ProviderBundle, Authentication> providerService,
+                            @Lazy ProviderService<ProviderBundle> providerService,
                             @Lazy ServiceBundleService<ServiceBundle> serviceBundleService,
                             @Lazy TrainingResourceService<TrainingResourceBundle> trainingResourceService,
                             @Lazy InteroperabilityRecordService<InteroperabilityRecordBundle> interoperabilityRecordService,

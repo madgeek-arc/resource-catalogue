@@ -21,12 +21,12 @@ import java.util.List;
 public class PIDController {
 
     private final PIDService pidService;
-    private final ProviderService<ProviderBundle, Authentication> providerService;
+    private final ProviderService<ProviderBundle> providerService;
     private final ServiceBundleService<ServiceBundle> serviceService;
     private final TrainingResourceService<TrainingResourceBundle> trainingResourceService;
     private final InteroperabilityRecordService<InteroperabilityRecordBundle> interoperabilityRecordService;
 
-    public PIDController(PIDService pidService, ProviderService<ProviderBundle, Authentication> providerService,
+    public PIDController(PIDService pidService, ProviderService<ProviderBundle> providerService,
                          ServiceBundleService<ServiceBundle> serviceService,
                          TrainingResourceService<TrainingResourceBundle> trainingResourceService,
                          InteroperabilityRecordService<InteroperabilityRecordBundle> interoperabilityRecordService) {

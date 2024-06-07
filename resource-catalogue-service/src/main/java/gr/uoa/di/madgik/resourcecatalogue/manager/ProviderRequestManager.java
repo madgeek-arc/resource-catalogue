@@ -1,18 +1,14 @@
 package gr.uoa.di.madgik.resourcecatalogue.manager;
 
-import gr.uoa.di.madgik.resourcecatalogue.domain.EmailMessage;
-import gr.uoa.di.madgik.resourcecatalogue.domain.ServiceBundle;
-import gr.uoa.di.madgik.resourcecatalogue.domain.ProviderBundle;
-import gr.uoa.di.madgik.resourcecatalogue.domain.ProviderRequest;
-import gr.uoa.di.madgik.resourcecatalogue.service.ServiceBundleService;
-import gr.uoa.di.madgik.resourcecatalogue.service.MailService;
-import gr.uoa.di.madgik.resourcecatalogue.service.ProviderRequestService;
-import gr.uoa.di.madgik.resourcecatalogue.service.ProviderService;
-import gr.uoa.di.madgik.resourcecatalogue.service.SecurityService;
-import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
+import gr.uoa.di.madgik.registry.domain.FacetFilter;
+import gr.uoa.di.madgik.resourcecatalogue.domain.EmailMessage;
+import gr.uoa.di.madgik.resourcecatalogue.domain.ProviderBundle;
+import gr.uoa.di.madgik.resourcecatalogue.domain.ProviderRequest;
+import gr.uoa.di.madgik.resourcecatalogue.domain.ServiceBundle;
+import gr.uoa.di.madgik.resourcecatalogue.service.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,7 +29,7 @@ public class ProviderRequestManager extends ResourceManager<ProviderRequest> imp
     private static final Logger logger = LogManager.getLogger(ProviderRequestManager.class);
     private final MailService mailService;
     private final ServiceBundleService<ServiceBundle> serviceBundleService;
-    private final ProviderService<ProviderBundle, Authentication> providerService;
+    private final ProviderService<ProviderBundle> providerService;
     private final SecurityService securityService;
     private final Configuration cfg;
 
@@ -43,7 +39,7 @@ public class ProviderRequestManager extends ResourceManager<ProviderRequest> imp
     @Autowired
     public ProviderRequestManager(MailService mailService, Configuration cfg,
                                   ServiceBundleService<ServiceBundle> serviceBundleService,
-                                  ProviderService<ProviderBundle, Authentication> providerService,
+                                  ProviderService<ProviderBundle> providerService,
                                   SecurityService securityService) {
         super(ProviderRequest.class);
         this.mailService = mailService;

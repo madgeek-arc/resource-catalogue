@@ -1,14 +1,13 @@
 package gr.uoa.di.madgik.resourcecatalogue.controllers.publicresources;
 
 import com.google.gson.Gson;
+import gr.uoa.di.madgik.registry.domain.FacetFilter;
+import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.resourcecatalogue.annotations.Browse;
 import gr.uoa.di.madgik.resourcecatalogue.annotations.BrowseCatalogue;
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
 import gr.uoa.di.madgik.resourcecatalogue.utils.FacetFilterUtils;
-import gr.uoa.di.madgik.registry.domain.FacetFilter;
-import gr.uoa.di.madgik.registry.domain.Paging;
-
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -34,17 +33,17 @@ public class PublicServiceExtensionsController {
     private static final Gson gson = new Gson();
 
     private final SecurityService securityService;
-    private final HelpdeskService<HelpdeskBundle, Authentication> helpdeskService;
-    private final ResourceService<HelpdeskBundle, Authentication> publicHelpdeskManager;
-    private final MonitoringService<MonitoringBundle, Authentication> monitoringService;
-    private final ResourceService<MonitoringBundle, Authentication> publicMonitoringManager;
+    private final HelpdeskService<HelpdeskBundle> helpdeskService;
+    private final ResourceService<HelpdeskBundle> publicHelpdeskManager;
+    private final MonitoringService<MonitoringBundle> monitoringService;
+    private final ResourceService<MonitoringBundle> publicMonitoringManager;
     private final GenericResourceService genericResourceService;
 
     public PublicServiceExtensionsController(SecurityService securityService,
-                                             HelpdeskService<HelpdeskBundle, Authentication> helpdeskService,
-                                             MonitoringService<MonitoringBundle, Authentication> monitoringService,
-                                             @Qualifier("publicHelpdeskManager") ResourceService<HelpdeskBundle, Authentication> publicHelpdeskManager,
-                                             @Qualifier("publicMonitoringManager") ResourceService<MonitoringBundle, Authentication> publicMonitoringManager,
+                                             HelpdeskService<HelpdeskBundle> helpdeskService,
+                                             MonitoringService<MonitoringBundle> monitoringService,
+                                             @Qualifier("publicHelpdeskManager") ResourceService<HelpdeskBundle> publicHelpdeskManager,
+                                             @Qualifier("publicMonitoringManager") ResourceService<MonitoringBundle> publicMonitoringManager,
                                              GenericResourceService genericResourceService) {
         this.securityService = securityService;
         this.helpdeskService = helpdeskService;
