@@ -46,7 +46,7 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
     private final InteroperabilityRecordService<InteroperabilityRecordBundle> interoperabilityRecordService;
     private final ProviderResourcesCommonMethods commonMethods;
 
-    @Value("${project.catalogue.name}")
+    @Value("${catalogue.name}")
     private String catalogueName;
 
     @Autowired

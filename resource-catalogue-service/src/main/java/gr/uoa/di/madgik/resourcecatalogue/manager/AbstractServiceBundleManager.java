@@ -67,7 +67,7 @@ public abstract class AbstractServiceBundleManager<T extends ServiceBundle> exte
     private SecurityService securityService;
     @Autowired
     private FieldValidator fieldValidator;
-    @Value("${project.catalogue.name}")
+    @Value("${catalogue.name}")
     private String catalogueName;
 
     @Autowired

@@ -63,7 +63,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     //TODO: maybe add description on DB and elastic too
     private final String columnsOfInterest = "provider_id, name"; // variable with DB tables a keyword is been searched on
 
-    @Value("${project.catalogue.name}")
+    @Value("${catalogue.name}")
     private String catalogueName;
 
     @Autowired

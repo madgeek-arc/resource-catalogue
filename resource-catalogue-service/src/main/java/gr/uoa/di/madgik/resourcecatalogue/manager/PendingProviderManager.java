@@ -43,7 +43,7 @@ public class PendingProviderManager extends ResourceManager<ProviderBundle> impl
     private final VocabularyService vocabularyService;
     private final ProviderResourcesCommonMethods commonMethods;
 
-    @Value("${project.catalogue.name}")
+    @Value("${catalogue.name}")
     private String catalogueName;
 
     @Autowired

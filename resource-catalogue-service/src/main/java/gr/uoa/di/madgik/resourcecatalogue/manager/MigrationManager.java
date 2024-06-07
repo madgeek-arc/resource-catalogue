@@ -36,7 +36,7 @@ public class MigrationManager implements MigrationService {
     private final JmsService jmsService;
     private final SecurityService securityService;
 
-    @Value("${project.catalogue.name}")
+    @Value("${catalogue.name}")
     private String catalogueName;
     @Value("${elastic.index.max_result_window:10000}")
     private int maxQuantity;

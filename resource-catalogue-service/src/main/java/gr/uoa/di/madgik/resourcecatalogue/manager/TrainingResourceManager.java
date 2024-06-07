@@ -68,7 +68,7 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
     @Autowired
     @Qualifier("trainingResourceSync")
     private final SynchronizerService<TrainingResource> synchronizerService;
-    @Value("${project.catalogue.name}")
+    @Value("${catalogue.name}")
     private String catalogueName;
 
     public TrainingResourceManager(ProviderService<ProviderBundle> providerService,

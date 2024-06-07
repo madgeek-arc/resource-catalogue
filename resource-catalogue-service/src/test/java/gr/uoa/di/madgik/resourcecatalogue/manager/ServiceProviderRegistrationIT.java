@@ -35,7 +35,7 @@ public class ServiceProviderRegistrationIT {
     private static final Logger logger = LogManager.getLogger(ServiceProviderRegistrationIT.class);
 
     @Autowired
-    ProviderService<ProviderBundle, Authentication> providerService;
+    ProviderService<ProviderBundle> providerService;
 
     @Autowired
     ServiceBundleService<ServiceBundle> serviceBundleService;

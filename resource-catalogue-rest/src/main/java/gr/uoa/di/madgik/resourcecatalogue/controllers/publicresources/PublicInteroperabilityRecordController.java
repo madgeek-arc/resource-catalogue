@@ -61,7 +61,7 @@ public class PublicInteroperabilityRecordController {
     @Operation(description = "Returns the Public Interoperability Record with the given id.")
     @GetMapping(path = "public/interoperabilityRecord/{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity<?> getPublicInteroperabilityRecord(@PathVariable("id") String id,
-                                                             @RequestParam(defaultValue = "${project.catalogue.name}", name = "catalogue_id") String catalogueId) {
+                                                             @RequestParam(defaultValue = "${catalogue.name}", name = "catalogue_id") String catalogueId) {
         InteroperabilityRecordBundle interoperabilityRecordBundle = interoperabilityRecordService.get(id, catalogueId);
         if (interoperabilityRecordBundle.getMetadata().isPublished() && interoperabilityRecordBundle.isActive()
                 && interoperabilityRecordBundle.getStatus().equals("approved interoperability record")) {
@@ -73,7 +73,7 @@ public class PublicInteroperabilityRecordController {
     @GetMapping(path = "public/interoperabilityRecord/bundle/{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth, #id, #catalogueId)")
     public ResponseEntity<?> getPublicInteroperabilityRecordBundle(@PathVariable("id") String id,
-                                                                   @RequestParam(defaultValue = "${project.catalogue.name}", name = "catalogue_id") String catalogueId,
+                                                                   @RequestParam(defaultValue = "${catalogue.name}", name = "catalogue_id") String catalogueId,
                                                                    @Parameter(hidden = true) Authentication auth) {
         InteroperabilityRecordBundle interoperabilityRecordBundle = interoperabilityRecordService.get(id, catalogueId);
         if (auth != null && auth.isAuthenticated()) {

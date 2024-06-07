@@ -62,7 +62,7 @@ public class DatasourceController {
     @Operation(summary = "Returns the Datasource of the given Service of the given Catalogue.")
     @GetMapping(path = "/byService/{serviceId}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity<Datasource> getDatasourceByServiceId(@PathVariable("serviceId") String serviceId,
-                                                               @RequestParam(defaultValue = "${project.catalogue.name}", name = "catalogue_id") String catalogueId,
+                                                               @RequestParam(defaultValue = "${catalogue.name}", name = "catalogue_id") String catalogueId,
                                                                @Parameter(hidden = true) Authentication auth) {
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(1000);

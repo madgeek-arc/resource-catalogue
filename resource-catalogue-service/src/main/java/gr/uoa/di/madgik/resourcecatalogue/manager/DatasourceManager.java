@@ -31,7 +31,7 @@ public class DatasourceManager extends ResourceManager<DatasourceBundle> impleme
     private final VocabularyService vocabularyService;
     private final ProviderResourcesCommonMethods commonMethods;
     private final OpenAIREDatasourceManager openAIREDatasourceManager;
-    @Value("${project.catalogue.name}")
+    @Value("${catalogue.name}")
     private String catalogueName;
     private final IdCreator idCreator;
 

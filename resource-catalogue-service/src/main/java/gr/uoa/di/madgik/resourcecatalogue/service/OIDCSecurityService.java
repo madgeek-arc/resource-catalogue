@@ -33,7 +33,7 @@ public class OIDCSecurityService implements SecurityService {
     private final InteroperabilityRecordService<InteroperabilityRecordBundle> interoperabilityRecordService;
     private final Authentication adminAccess = new AdminAuthentication();
 
-    @Value("${project.catalogue.name}")
+    @Value("${catalogue.name}")
     private String catalogueName;
 
     OIDCSecurityService(@Lazy ProviderManager providerManager, CatalogueManager catalogueManager,

@@ -45,7 +45,7 @@ public class ServiceBundleController {
     @DeleteMapping(path = {"{id}"}, produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<ServiceBundle> delete(@PathVariable("id") String id,
-                                                @RequestParam(defaultValue = "${project.catalogue.name}", name = "catalogue_id") String catalogueId,
+                                                @RequestParam(defaultValue = "${catalogue.name}", name = "catalogue_id") String catalogueId,
                                                 @Parameter(hidden = true) Authentication authentication) throws ResourceNotFoundException {
         ServiceBundle service;
         service = serviceBundleService.get(id, catalogueId);
@@ -74,7 +74,7 @@ public class ServiceBundleController {
     @GetMapping(path = "{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth, #id)")
     public ResponseEntity<?> get(@PathVariable("id") String id,
-                                 @RequestParam(defaultValue = "${project.catalogue.name}", name = "catalogue_id") String catalogueId,
+                                 @RequestParam(defaultValue = "${catalogue.name}", name = "catalogue_id") String catalogueId,
                                  @Parameter(hidden = true) Authentication auth) {
         return new ResponseEntity<>(serviceBundleService.get(id, catalogueId), HttpStatus.OK);
     }

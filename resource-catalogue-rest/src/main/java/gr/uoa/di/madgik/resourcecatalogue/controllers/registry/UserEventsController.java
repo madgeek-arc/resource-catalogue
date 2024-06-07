@@ -31,7 +31,7 @@ public class UserEventsController {
     private final EventService eventService;
     private final ServiceBundleService<ServiceBundle> serviceBundleService;
 
-    @Value("${project.catalogue.name}")
+    @Value("${catalogue.name}")
     private String catalogueName;
 
     @Autowired

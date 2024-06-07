@@ -41,7 +41,7 @@ public class PendingServiceController extends ResourceController<ServiceBundle> 
     private GenericResourceService genericResourceService;
     private final IdCreator idCreator;
 
-    @Value("${project.catalogue.name}")
+    @Value("${catalogue.name}")
     private String catalogueName;
 
     @Autowired

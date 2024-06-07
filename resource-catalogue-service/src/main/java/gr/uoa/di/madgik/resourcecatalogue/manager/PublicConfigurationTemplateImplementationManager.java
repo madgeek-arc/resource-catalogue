@@ -29,7 +29,7 @@ public class PublicConfigurationTemplateImplementationManager extends ResourceMa
     private static final Logger logger = LogManager.getLogger(PublicConfigurationTemplateImplementationManager.class);
     private final JmsService jmsService;
     private final SecurityService securityService;
-    @Value("${project.catalogue.name}")
+    @Value("${catalogue.name}")
     private String catalogueName;
 
 

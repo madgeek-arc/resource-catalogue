@@ -43,7 +43,7 @@ public class InteroperabilityRecordManager extends ResourceManager<Interoperabil
     private final ProviderResourcesCommonMethods commonMethods;
     @Autowired
     private FieldValidator fieldValidator;
-    @Value("${project.catalogue.name}")
+    @Value("${catalogue.name}")
     private String catalogueName;
 
     public InteroperabilityRecordManager(ProviderService<ProviderBundle> providerService, IdCreator idCreator,

@@ -39,7 +39,7 @@ public class ProviderManagementAspect {
     private final RegistrationMailService registrationMailService;
     private final SecurityService securityService;
     private final PublicResourceInteroperabilityRecordManager publicResourceInteroperabilityRecordManager;
-    @Value("${project.catalogue.name}")
+    @Value("${catalogue.name}")
     private String catalogueName;
 
     @Autowired

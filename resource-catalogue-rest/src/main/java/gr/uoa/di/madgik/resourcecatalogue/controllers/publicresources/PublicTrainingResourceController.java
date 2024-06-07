@@ -59,7 +59,7 @@ public class PublicTrainingResourceController {
     @Operation(summary = "Returns the Public Training Resource with the given id.")
     @GetMapping(path = "public/trainingResource/{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity<?> getPublicTrainingResource(@PathVariable("id") String id,
-                                                       @RequestParam(defaultValue = "${project.catalogue.name}", name = "catalogue_id") String catalogueId,
+                                                       @RequestParam(defaultValue = "${catalogue.name}", name = "catalogue_id") String catalogueId,
                                                        @Parameter(hidden = true) Authentication auth) {
         TrainingResourceBundle trainingResourceBundle = trainingResourceBundleService.get(id, catalogueId);
         if (auth != null && auth.isAuthenticated()) {
@@ -83,7 +83,7 @@ public class PublicTrainingResourceController {
     @GetMapping(path = "public/trainingResource/trainingResourceBundle/{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth, #id, #catalogueId)")
     public ResponseEntity<?> getPublicTrainingResourceBundle(@PathVariable("id") String id,
-                                                             @RequestParam(defaultValue = "${project.catalogue.name}", name = "catalogue_id") String catalogueId,
+                                                             @RequestParam(defaultValue = "${catalogue.name}", name = "catalogue_id") String catalogueId,
                                                              @Parameter(hidden = true) Authentication auth) {
         TrainingResourceBundle trainingResourceBundle = trainingResourceBundleService.get(id, catalogueId);
         if (auth != null && auth.isAuthenticated()) {

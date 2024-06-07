@@ -53,7 +53,7 @@ public class ServiceBundleManager extends AbstractServiceBundleManager<ServiceBu
     private final ResourceInteroperabilityRecordService<ResourceInteroperabilityRecordBundle> resourceInteroperabilityRecordService;
     private final ProviderResourcesCommonMethods commonMethods;
 
-    @Value("${project.catalogue.name}")
+    @Value("${catalogue.name}")
     private String catalogueName;
 
     @Autowired

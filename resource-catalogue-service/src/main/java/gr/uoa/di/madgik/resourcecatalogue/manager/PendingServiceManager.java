@@ -41,7 +41,7 @@ public class PendingServiceManager extends ResourceManager<ServiceBundle> implem
     private ServiceBundleManager serviceBundleManager;
     private final ProviderResourcesCommonMethods commonMethods;
 
-    @Value("${project.catalogue.name}")
+    @Value("${catalogue.name}")
     private String catalogueName;
 
     @Autowired

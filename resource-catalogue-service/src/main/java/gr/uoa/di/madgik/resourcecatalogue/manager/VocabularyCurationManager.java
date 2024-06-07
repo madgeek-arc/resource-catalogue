@@ -45,7 +45,7 @@ public class VocabularyCurationManager extends ResourceManager<VocabularyCuratio
     @Autowired
     private SearchService searchService;
 
-    @Value("${project.catalogue.name}")
+    @Value("${catalogue.name}")
     private String catalogueName;
     private final IdCreator idCreator;
 

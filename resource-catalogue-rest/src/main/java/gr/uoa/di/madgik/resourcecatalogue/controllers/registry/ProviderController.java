@@ -51,13 +51,13 @@ public class ProviderController {
     private final MigrationService migrationService;
     private final GenericResourceService genericResourceService;
 
-    @Value("${project.catalogue.name}")
+    @Value("${catalogue.name}")
     private String catalogueName;
 
     @Value("${auditing.interval:6}")
     private String auditingInterval;
 
-    @Value("${project.name:Resource Catalogue}")
+    @Value("${catalogue.name:Resource Catalogue}")
     private String projectName;
 
     @Autowired
@@ -78,7 +78,7 @@ public class ProviderController {
     @DeleteMapping(path = "{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     public ResponseEntity<Provider> delete(@PathVariable("id") String id,
-                                           @RequestParam(defaultValue = "${project.catalogue.name}", name = "catalogue_id") String catalogueId,
+                                           @RequestParam(defaultValue = "${catalogue.name}", name = "catalogue_id") String catalogueId,
                                            @Parameter(hidden = true) Authentication auth) {
         ProviderBundle provider = providerService.get(catalogueId, id, auth);
         if (provider == null) {
@@ -99,7 +99,7 @@ public class ProviderController {
     @Operation(summary = "Returns the Provider with the given id.")
     @GetMapping(path = "{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity<Provider> get(@PathVariable("id") String id,
-                                        @RequestParam(defaultValue = "${project.catalogue.name}", name = "catalogue_id") String catalogueId,
+                                        @RequestParam(defaultValue = "${catalogue.name}", name = "catalogue_id") String catalogueId,
                                         @Parameter(hidden = true) Authentication auth) {
         Provider provider = providerService.get(catalogueId, id, auth).getProvider();
         return new ResponseEntity<>(provider, HttpStatus.OK);
@@ -128,7 +128,7 @@ public class ProviderController {
     @PutMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isProviderAdmin(#auth,#provider.id,#provider.catalogueId)")
     public ResponseEntity<Provider> update(@RequestBody Provider provider,
-                                           @RequestParam(defaultValue = "${project.catalogue.name}", name = "catalogue_id") String catalogueId,
+                                           @RequestParam(defaultValue = "${catalogue.name}", name = "catalogue_id") String catalogueId,
                                            @RequestParam(required = false) String comment,
                                            @Parameter(hidden = true) Authentication auth) throws ResourceNotFoundException {
         ProviderBundle providerBundle = providerService.get(catalogueId, provider.getId(), auth);
@@ -169,7 +169,7 @@ public class ProviderController {
     @GetMapping(path = "bundle/{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isProviderAdmin(#auth, #id, #catalogueId)")
     public ResponseEntity<ProviderBundle> getProviderBundle(@PathVariable("id") String id,
-                                                            @RequestParam(defaultValue = "${project.catalogue.name}", name = "catalogue_id") String catalogueId,
+                                                            @RequestParam(defaultValue = "${catalogue.name}", name = "catalogue_id") String catalogueId,
                                                             @Parameter(hidden = true) Authentication auth) {
         return new ResponseEntity<>(providerService.get(catalogueId, id, auth), HttpStatus.OK);
     }
@@ -335,7 +335,7 @@ public class ProviderController {
     // Get all modification details of a specific Provider based on id.
     @GetMapping(path = {"history/{id}"}, produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<Paging<ResourceHistory>> history(@PathVariable String id,
-                                                           @RequestParam(defaultValue = "${project.catalogue.name}", name = "catalogue_id") String catalogueId) {
+                                                           @RequestParam(defaultValue = "${catalogue.name}", name = "catalogue_id") String catalogueId) {
         Paging<ResourceHistory> history = this.providerService.getHistory(id, catalogueId);
         return ResponseEntity.ok(history);
     }
@@ -367,7 +367,7 @@ public class ProviderController {
     // Get all modification details of a specific Provider based on id.
     @GetMapping(path = {"loggingInfoHistory/{id}"}, produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<Paging<LoggingInfo>> loggingInfoHistory(@PathVariable String id,
-                                                                  @RequestParam(defaultValue = "${project.catalogue.name}", name = "catalogue_id") String catalogueId) {
+                                                                  @RequestParam(defaultValue = "${catalogue.name}", name = "catalogue_id") String catalogueId) {
         Paging<LoggingInfo> loggingInfoHistory = this.providerService.getLoggingInfoHistory(id, catalogueId);
         return ResponseEntity.ok(loggingInfoHistory);
     }

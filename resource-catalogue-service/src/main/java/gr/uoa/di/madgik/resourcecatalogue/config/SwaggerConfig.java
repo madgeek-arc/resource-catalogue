@@ -15,13 +15,13 @@ public class SwaggerConfig {
 
     private static final Logger logger = LogManager.getLogger(SwaggerConfig.class);
 
-    @Value("${project.name}")
+    @Value("${catalogue.name}")
     String projectName;
 
-    @Value("${project.version}")
+    @Value("${catalogue.version}")
     String projectVersion;
 
-    @Value("${project.debug:false}")
+    @Value("${catalogue.debug:false}")
     public boolean isLocalhost;
 
     @Bean

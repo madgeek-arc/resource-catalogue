@@ -33,7 +33,7 @@ public class ProviderRequestManager extends ResourceManager<ProviderRequest> imp
     private final SecurityService securityService;
     private final Configuration cfg;
 
-    @Value("${project.name:Resource Catalogue}")
+    @Value("${catalogue.name:Resource Catalogue}")
     private String projectName;
 
     @Autowired

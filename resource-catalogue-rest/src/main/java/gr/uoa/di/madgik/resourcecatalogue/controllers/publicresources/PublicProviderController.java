@@ -57,7 +57,7 @@ public class PublicProviderController {
     @Operation(description = "Returns the Public Provider with the given id.")
     @GetMapping(path = "public/provider/{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity<?> getPublicProvider(@PathVariable("id") String id,
-                                               @RequestParam(defaultValue = "${project.catalogue.name}", name = "catalogue_id") String catalogueId,
+                                               @RequestParam(defaultValue = "${catalogue.name}", name = "catalogue_id") String catalogueId,
                                                @Parameter(hidden = true) Authentication auth) {
         ProviderBundle providerBundle = providerService.get(catalogueId, id, auth);
         if (auth != null && auth.isAuthenticated()) {
@@ -82,7 +82,7 @@ public class PublicProviderController {
     @GetMapping(path = "public/provider/bundle/{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isProviderAdmin(#auth, #id, #catalogueId)")
     public ResponseEntity<?> getPublicProviderBundle(@PathVariable("id") String id,
-                                                     @RequestParam(defaultValue = "${project.catalogue.name}", name = "catalogue_id") String catalogueId,
+                                                     @RequestParam(defaultValue = "${catalogue.name}", name = "catalogue_id") String catalogueId,
                                                      @Parameter(hidden = true) Authentication auth) {
         ProviderBundle providerBundle = providerService.get(catalogueId, id, auth);
         if (auth != null && auth.isAuthenticated()) {
