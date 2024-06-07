@@ -67,8 +67,8 @@ public class User implements Identifiable {
             OAuth2User principal = ((OAuth2AuthenticationToken) auth).getPrincipal();
             user.id = principal.getAttribute("subject");
             user.email = principal.getAttribute("email");
-            user.name = principal.getAttribute("givenName");
-            user.surname = principal.getAttribute("familyName");
+            user.name = principal.getAttribute("given_name");
+            user.surname = principal.getAttribute("family_name");
         } else if (auth.isAuthenticated()) {
             user.name = auth.getName();
             user.id = "";

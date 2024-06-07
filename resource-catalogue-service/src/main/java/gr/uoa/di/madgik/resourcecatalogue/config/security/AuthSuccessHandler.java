@@ -1,5 +1,7 @@
 package gr.uoa.di.madgik.resourcecatalogue.config.security;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nimbusds.jose.util.Base64;
 import org.json.simple.JSONObject;
 import org.slf4j.Logger;
@@ -19,7 +21,9 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.time.Instant;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Component
@@ -28,6 +32,7 @@ public class AuthSuccessHandler implements AuthenticationSuccessHandler {
     private static final Logger logger = LoggerFactory.getLogger(AuthSuccessHandler.class);
 
     private final ResourceCatalogueProperties catalogueProperties;
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Autowired
     public AuthSuccessHandler(ResourceCatalogueProperties catalogueProperties) {
@@ -43,20 +48,8 @@ public class AuthSuccessHandler implements AuthenticationSuccessHandler {
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
         int expireSec = createCookieMaxAge(authentication);
 
-        OidcUser user = (OidcUser) authentication.getPrincipal();
-
-        List<String> roles = authentication.getAuthorities()
-                .stream()
-                .map(GrantedAuthority::getAuthority)
-                .collect(Collectors.toList());
-        logger.info("Authentication: {}", authentication);
-        logger.info("UserInfo: {}\nAuthorities: {}", user.getClaims(), roles);
-
-        JSONObject info = new JSONObject(user.getClaims());
-        info.put("roles", roles);
-        info.put("expireSec", expireSec);
-
-        Cookie cookie = new Cookie("info", Base64.encode(info.toString()).toString());
+        String userInfo = createUserInfoJson(authentication);
+        Cookie cookie = new Cookie("info", Base64.encode(userInfo).toString());
         cookie.setMaxAge(expireSec);
         cookie.setPath("/");
 //        cookie.setSecure(true);
@@ -67,6 +60,25 @@ public class AuthSuccessHandler implements AuthenticationSuccessHandler {
 
         response.addCookie(cookie);
         response.sendRedirect(catalogueProperties.getLoginRedirect());
+    }
+
+    private String createUserInfoJson(Authentication authentication) throws JsonProcessingException {
+        OidcUser user = (OidcUser) authentication.getPrincipal();
+        List<String> roles = authentication.getAuthorities()
+                .stream()
+                .map(GrantedAuthority::getAuthority)
+                .collect(Collectors.toList());
+        logger.info("Authentication: {}", authentication);
+        logger.info("UserInfo: {}\nAuthorities: {}", user.getClaims(), roles);
+
+        Map<String, Object> info = new HashMap<>();
+        info.put("sub", user.getSubject());
+        info.put("given_name", user.getGivenName());
+        info.put("family_name", user.getFamilyName());
+        info.put("roles", roles);
+        info.put("expireSec", createCookieMaxAge(authentication));
+
+        return objectMapper.writeValueAsString(info);
     }
 
     private int createCookieMaxAge(Authentication authentication) {
