@@ -17,7 +17,6 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpStatus;
@@ -121,7 +120,7 @@ public class PendingServiceController extends ResourceController<ServiceBundle> 
         ServiceBundle serviceBundle = new ServiceBundle();
         ServiceBundle toCreateId = new ServiceBundle();
         toCreateId.setService(service);
-        service.setId(idCreator.generate("ser"));
+        service.setId(idCreator.generate("pending_service"));
         try {
             serviceBundle = pendingServiceManager.get(service.getId());
             serviceBundle.setService(service);

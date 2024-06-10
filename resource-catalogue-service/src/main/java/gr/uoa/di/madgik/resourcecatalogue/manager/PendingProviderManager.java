@@ -80,7 +80,7 @@ public class PendingProviderManager extends ResourceManager<ProviderBundle> impl
     @CacheEvict(value = CACHE_PROVIDERS, allEntries = true)
     public ProviderBundle add(ProviderBundle providerBundle, Authentication auth) {
 
-        providerBundle.setId(idCreator.generate("pro"));
+        providerBundle.setId(idCreator.generate(getResourceType()));
 
         // Check if there is a Provider with the specific id
         FacetFilter ff = new FacetFilter();

@@ -79,7 +79,7 @@ public class ResourceInteroperabilityRecordManager extends ResourceManager<Resou
         validate(resourceInteroperabilityRecordBundle, resourceType);
         commonMethods.checkRelatedResourceIDsConsistency(resourceInteroperabilityRecordBundle);
 
-        resourceInteroperabilityRecordBundle.setId(idCreator.generate("rir"));
+        resourceInteroperabilityRecordBundle.setId(idCreator.generate(getResourceType()));
         logger.trace("User '{}' is attempting to add a new ResourceInteroperabilityRecord: {}", auth, resourceInteroperabilityRecordBundle);
 
         resourceInteroperabilityRecordBundle.setMetadata(Metadata.createMetadata(User.of(auth).getFullName(), User.of(auth).getEmail()));
