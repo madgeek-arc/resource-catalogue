@@ -400,13 +400,13 @@ public class ProviderResourcesCommonMethods {
     private AlternativeIdentifier createAlternativeIdentifierForPID(Bundle<?> bundle, String resourceTypePath) {
         if (bundle.getMetadata().isPublished()) {
             // create PID
-            String pid = ShortHashGenerator(bundle.getId());
+            String pid = bundle.getId();
             // create AlternativeIdentifier
             AlternativeIdentifier alternativeIdentifier = new AlternativeIdentifier();
             alternativeIdentifier.setType("EOSC PID");
             alternativeIdentifier.setValue(pid);
             // post PID
-            postPID(bundle.getId(), pid, resourceTypePath);
+            postPID(pid, resourceTypePath);
             return alternativeIdentifier;
         } else {
             return null;
@@ -434,9 +434,9 @@ public class ProviderResourcesCommonMethods {
         }
     }
 
-    private void postPID(String resourceId, String pid, String resourceTypePath) {
+    private void postPID(String pid, String resourceTypePath) {
         String url = pidApi + pidPrefix + "/" + pid;
-        String payload = createPID(resourceId, resourceTypePath);
+        String payload = createPID(pid, resourceTypePath);
         HttpURLConnection con;
         try {
             con = (HttpURLConnection) new URL(url).openConnection();
@@ -464,7 +464,7 @@ public class ProviderResourcesCommonMethods {
             while ((responseLine = br.readLine()) != null) {
                 response.append(responseLine.trim());
             }
-            logger.info("Resource with ID [{}] has been posted with PID [{}]", resourceId, pid);
+            logger.info("Resource with ID [{}] has been posted with PID [{}]", pid, pid);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -491,6 +491,7 @@ public class ProviderResourcesCommonMethods {
         marketplaceUrl.put("index", 1);
         marketplaceUrl.put("type", "url");
         String url = this.marketplaceUrl;
+        //TODO: Refactor this according to new endpoints
         if (resourceTypePath.equals("trainings/") || resourceTypePath.equals("guidelines/")) {
             url = url.replace("marketplace", "search.marketplace");
         }
@@ -505,10 +506,10 @@ public class ProviderResourcesCommonMethods {
     }
 
     public Bundle<?> getPublicResourceViaPID(String resourceType, String pid) {
-        List<String> resourceTypes = Arrays.asList("catalogue", "provider", "service", "datasource",
-                "training_resource", "interoperability_record", "helpdesk", "monitoring");
+        List<String> resourceTypes = Arrays.asList("provider", "service", "training_resource",
+                "interoperability_record", "tool");
         if (!resourceTypes.contains(resourceType)) {
-            throw new ValidationException("The resource type you provided does not exist -> " + resourceType);
+            throw new ValidationException("The resource type you provided is not associated with a PID -> " + resourceType);
         }
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(10000);
