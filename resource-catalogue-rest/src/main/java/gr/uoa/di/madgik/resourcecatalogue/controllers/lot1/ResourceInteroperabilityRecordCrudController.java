@@ -20,7 +20,7 @@ import java.util.List;
 
 @Profile("crud")
 @RestController
-@RequestMapping("resourceInteroperabilityRecords")
+@RequestMapping("resource-interoperability-records")
 @Tag(name = "resource interoperability records")
 public class ResourceInteroperabilityRecordCrudController extends ResourceController<ResourceInteroperabilityRecordBundle> {
 

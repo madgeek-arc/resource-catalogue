@@ -41,16 +41,6 @@
                 </dependency>
             </dependencies>
         </profile>
-        <profile>
-            <id>catris</id>
-            <dependencies>
-                <dependency>
-                    <groupId>gr.uoa.di.madgik</groupId>
-                    <artifactId>catris-recdb</artifactId>
-                    <version>5.0.0-SNAPSHOT</version>
-                </dependency>
-            </dependencies>
-        </profile>
     </profiles>
 
     <dependencies>
@@ -92,6 +82,16 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-freemarker</artifactId>
+        </dependency>
+
+        <!-- Redis Session -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-redis</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.session</groupId>
+            <artifactId>spring-session-data-redis</artifactId>
         </dependency>
 
         <dependency>

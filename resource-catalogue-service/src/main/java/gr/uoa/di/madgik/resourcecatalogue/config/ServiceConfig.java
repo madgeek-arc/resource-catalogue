@@ -55,17 +55,12 @@ public class ServiceConfig {
     @Bean
     public CookieSerializer cookieSerializer() {
         DefaultCookieSerializer defaultCookieSerializer = new DefaultCookieSerializer();
-        defaultCookieSerializer.setCookieName("EICSESSION");
+        defaultCookieSerializer.setCookieName("SESSION");
         defaultCookieSerializer.setCookiePath("/");
 //        defaultCookieSerializer.setUseSecureCookie(Boolean.parseBoolean(env.getProperty(COOKIE_SECURE)));
         defaultCookieSerializer.setUseHttpOnlyCookie(true);
 //        defaultCookieSerializer.setDomainNamePattern("^.+?\\.(\\w+\\.[a-z]+)$");
         return defaultCookieSerializer;
-    }
-
-    @Bean
-    public SessionRepository sessionRepository() {
-        return new MapSessionRepository();
     }
 
     @Bean

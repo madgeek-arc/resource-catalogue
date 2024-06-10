@@ -20,7 +20,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 
-@Profile("beyond")
 @RestController
 @RequestMapping("configurationTemplate")
 @Tag(name = "configuration template")

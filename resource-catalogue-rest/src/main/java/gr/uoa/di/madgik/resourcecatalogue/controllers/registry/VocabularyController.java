@@ -24,7 +24,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-@Profile("beyond")
 @RestController
 @RequestMapping("vocabulary")
 @Tag(name = "vocabulary")

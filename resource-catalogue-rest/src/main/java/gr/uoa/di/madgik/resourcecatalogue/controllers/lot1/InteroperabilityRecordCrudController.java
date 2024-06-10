@@ -31,7 +31,7 @@ import java.util.Objects;
 
 @Profile("crud")
 @RestController
-@RequestMapping({"interoperabilityRecords"})
+@RequestMapping({"interoperability-records"})
 @Tag(name = "interoperability records")
 public class InteroperabilityRecordCrudController {
 

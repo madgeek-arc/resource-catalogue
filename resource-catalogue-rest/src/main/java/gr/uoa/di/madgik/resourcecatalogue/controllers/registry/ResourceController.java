@@ -76,13 +76,13 @@ public abstract class ResourceController<T extends Identifiable> {
 
     // Filter a list of Resources based on a set of filters.
     @Browse
-    @GetMapping(path = "all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    @GetMapping(produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity<Paging<T>> getAll(@Parameter(hidden = true) @RequestParam Map<String, Object> allRequestParams, @Parameter(hidden = true) Authentication auth) {
         FacetFilter ff = FacetFilterUtils.createFacetFilter(allRequestParams);
         return new ResponseEntity<>(service.getAll(ff, null), HttpStatus.OK);
     }
 
-    @GetMapping(path = "byID/{ids}", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @GetMapping(path = "ids/{ids}", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<List<T>> getSome(@PathVariable String[] ids, @Parameter(hidden = true) Authentication auth) {
         return new ResponseEntity<>(service.getSome(ids), HttpStatus.OK);
     }
