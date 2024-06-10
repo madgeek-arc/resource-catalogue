@@ -1,11 +1,12 @@
 package gr.uoa.di.madgik.resourcecatalogue.service;
 
 import gr.uoa.di.madgik.resourcecatalogue.domain.configurationTemplates.ConfigurationTemplateInstance;
+import gr.uoa.di.madgik.resourcecatalogue.domain.configurationTemplates.ConfigurationTemplateInstanceBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.configurationTemplates.ConfigurationTemplateInstanceDto;
 
 import java.util.List;
 
-public interface ConfigurationTemplateInstanceService<T> extends ResourceService<T> {
+public interface ConfigurationTemplateInstanceService extends ResourceService<ConfigurationTemplateInstanceBundle> {
 
     /**
      * Return a List of ConfigurationTemplateInstances providing a resource ID

@@ -28,9 +28,9 @@ public class ProviderManagementAspect {
 
     private static final Logger logger = LoggerFactory.getLogger(ProviderManagementAspect.class);
 
-    private final ProviderService<ProviderBundle> providerService;
-    private final ServiceBundleService<ServiceBundle> serviceBundleService;
-    private final TrainingResourceService<TrainingResourceBundle> trainingResourceService;
+    private final ProviderService providerService;
+    private final ServiceBundleService serviceBundleService;
+    private final TrainingResourceService trainingResourceService;
     private final PublicProviderManager publicProviderManager;
     private final PublicServiceManager publicServiceManager;
     private final PublicDatasourceManager publicDatasourceManager;
@@ -44,9 +44,9 @@ public class ProviderManagementAspect {
     @Value("${catalogue.id}")
     private String catalogueId;
 
-    public ProviderManagementAspect(ProviderService<ProviderBundle> providerService,
-                                    ServiceBundleService<ServiceBundle> serviceBundleService,
-                                    TrainingResourceService<TrainingResourceBundle> trainingResourceService,
+    public ProviderManagementAspect(ProviderService providerService,
+                                    ServiceBundleService serviceBundleService,
+                                    TrainingResourceService trainingResourceService,
                                     PublicProviderManager publicProviderManager,
                                     PublicServiceManager publicServiceManager,
                                     PublicDatasourceManager publicDatasourceManager,
@@ -80,8 +80,8 @@ public class ProviderManagementAspect {
     }
 
     //TODO: ADD PendingTrainingResourceManager execution
-    @AfterReturning(pointcut = "execution(* gr.uoa.di.madgik.resourcecatalogue.manager.TrainingResourceManager.addResource(..))" +
-            "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.TrainingResourceManager.updateResource(..))",
+    @AfterReturning(pointcut = "execution(* gr.uoa.di.madgik.resourcecatalogue.manager.TrainingResourceManager.add(..))" +
+            "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.TrainingResourceManager.update(..))",
             returning = "trainingResourceBundle")
     public void updateProviderState(final TrainingResourceBundle trainingResourceBundle) {
         logger.trace("Updating Provider States");
@@ -214,7 +214,7 @@ public class ProviderManagementAspect {
 
     //TODO: ADD PendingTrainingResourceManager execution
     @Async
-    @AfterReturning(pointcut = "execution(* gr.uoa.di.madgik.resourcecatalogue.manager.TrainingResourceManager.addResource(..))" +
+    @AfterReturning(pointcut = "execution(* gr.uoa.di.madgik.resourcecatalogue.manager.TrainingResourceManager.add(..))" +
             "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.TrainingResourceManager.verifyResource(..))" +
             "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.TrainingResourceManager.changeProvider(..))",
             returning = "trainingResourceBundle")
@@ -268,7 +268,7 @@ public class ProviderManagementAspect {
     }
 
     @Async
-    @AfterReturning(pointcut = "execution(* gr.uoa.di.madgik.resourcecatalogue.manager.TrainingResourceManager.updateResource(..)) " +
+    @AfterReturning(pointcut = "execution(* gr.uoa.di.madgik.resourcecatalogue.manager.TrainingResourceManager.update(..)) " +
             "&& args(trainingResourceBundle,..)", returning = "ret", argNames = "trainingResourceBundle,ret")
     public void updatePublicResource(TrainingResourceBundle trainingResourceBundle, TrainingResourceBundle ret) {
         try {

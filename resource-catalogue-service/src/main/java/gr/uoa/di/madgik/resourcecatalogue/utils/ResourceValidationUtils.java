@@ -32,7 +32,7 @@ public class ResourceValidationUtils {
     }
 
     public static void checkIfResourceBundleIsActiveAndApprovedAndNotPublic(String resourceId, String catalogueId,
-                                                                            TrainingResourceService<TrainingResourceBundle> trainingResourceService,
+                                                                            TrainingResourceService trainingResourceService,
                                                                             String resourceType) {
         TrainingResourceBundle trainingResourceBundle;
         resourceType = StringUtils.capitalize(resourceType);

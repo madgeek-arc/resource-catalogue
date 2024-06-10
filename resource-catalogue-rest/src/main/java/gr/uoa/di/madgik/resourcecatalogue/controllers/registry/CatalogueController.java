@@ -36,23 +36,23 @@ import java.util.Map;
 public class CatalogueController {
 
     private static final Logger logger = LogManager.getLogger(CatalogueController.class);
-    private final CatalogueService<CatalogueBundle> catalogueManager;
-    private final ProviderService<ProviderBundle> providerManager;
+    private final CatalogueService catalogueManager;
+    private final ProviderService providerManager;
     private final ServiceBundleService<ServiceBundle> serviceBundleService;
     private final DatasourceService datasourceService;
-    private final TrainingResourceService<TrainingResourceBundle> trainingResourceService;
-    private final InteroperabilityRecordService<InteroperabilityRecordBundle> interoperabilityRecordService;
+    private final TrainingResourceService trainingResourceService;
+    private final InteroperabilityRecordService interoperabilityRecordService;
     private final GenericResourceService genericResourceService;
 
     @Value("${catalogue.id}")
     private String catalogueId;
 
-    CatalogueController(CatalogueService<CatalogueBundle> catalogueManager,
-                        ProviderService<ProviderBundle> providerManager,
+    CatalogueController(CatalogueService catalogueManager,
+                        ProviderService providerManager,
                         ServiceBundleService<ServiceBundle> serviceBundleService,
                         DatasourceService datasourceService,
-                        TrainingResourceService<TrainingResourceBundle> trainingResourceService,
-                        InteroperabilityRecordService<InteroperabilityRecordBundle> interoperabilityRecordService,
+                        TrainingResourceService trainingResourceService,
+                        InteroperabilityRecordService interoperabilityRecordService,
                         GenericResourceService genericResourceService) {
         this.catalogueManager = catalogueManager;
         this.providerManager = providerManager;
@@ -419,7 +419,7 @@ public class CatalogueController {
     @PostMapping(path = "{catalogueId}/trainingResource", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.providerCanAddResources(#auth, #trainingResource)")
     public ResponseEntity<TrainingResource> addCatalogueTrainingResource(@RequestBody TrainingResource trainingResource, @PathVariable String catalogueId, @Parameter(hidden = true) Authentication auth) {
-        TrainingResourceBundle ret = this.trainingResourceService.addResource(new TrainingResourceBundle(trainingResource), catalogueId, auth);
+        TrainingResourceBundle ret = this.trainingResourceService.add(new TrainingResourceBundle(trainingResource), catalogueId, auth);
         logger.info("User '{}' added the Training Resource with title '{}' and id '{}' in the Catalogue '{}'", User.of(auth).getEmail(), trainingResource.getTitle(), trainingResource.getId(), catalogueId);
         return new ResponseEntity<>(ret.getTrainingResource(), HttpStatus.CREATED);
     }
@@ -428,7 +428,7 @@ public class CatalogueController {
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth,#trainingResource)")
     @PutMapping(path = "{catalogueId}/trainingResource", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<TrainingResource> updateCatalogueTrainingResource(@RequestBody TrainingResource trainingResource, @PathVariable String catalogueId, @RequestParam(required = false) String comment, @Parameter(hidden = true) Authentication auth) throws ResourceNotFoundException {
-        TrainingResourceBundle ret = this.trainingResourceService.updateResource(new TrainingResourceBundle(trainingResource), catalogueId, comment, auth);
+        TrainingResourceBundle ret = this.trainingResourceService.update(new TrainingResourceBundle(trainingResource), catalogueId, comment, auth);
         logger.info("User '{}' updated the Training Resource with title '{}' and id '{} of the Catalogue '{}'", User.of(auth).getEmail(), trainingResource.getTitle(), trainingResource.getId(), catalogueId);
         return new ResponseEntity<>(ret.getTrainingResource(), HttpStatus.OK);
     }

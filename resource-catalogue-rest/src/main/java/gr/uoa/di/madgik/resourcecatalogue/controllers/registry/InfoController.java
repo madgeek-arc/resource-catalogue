@@ -27,10 +27,10 @@ import java.util.Map;
 @Tag(name = "info", description = "Total number of Providers and Services in the Resource Catalogue")
 public class InfoController {
 
-    private final ServiceBundleService<ServiceBundle> serviceBundleService;
-    private final ProviderService<ProviderBundle> providerService;
+    private final ServiceBundleService serviceBundleService;
+    private final ProviderService providerService;
 
-    InfoController(ServiceBundleService<ServiceBundle> service, ProviderService<ProviderBundle> provider) {
+    InfoController(ServiceBundleService service, ProviderService provider) {
         this.serviceBundleService = service;
         this.providerService = provider;
     }

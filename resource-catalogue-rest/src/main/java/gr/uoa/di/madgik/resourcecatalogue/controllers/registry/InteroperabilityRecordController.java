@@ -41,14 +41,14 @@ import java.util.stream.Collectors;
 public class InteroperabilityRecordController {
 
     private static final Logger logger = LogManager.getLogger(InteroperabilityRecordController.class);
-    private final InteroperabilityRecordService<InteroperabilityRecordBundle> interoperabilityRecordService;
-    private final ResourceInteroperabilityRecordService<ResourceInteroperabilityRecordBundle> resourceInteroperabilityRecordService;
+    private final InteroperabilityRecordService interoperabilityRecordService;
+    private final ResourceInteroperabilityRecordService resourceInteroperabilityRecordService;
     private final GenericResourceService genericResourceService;
     private final SecurityService securityService;
 
     @Autowired
-    public InteroperabilityRecordController(InteroperabilityRecordService<InteroperabilityRecordBundle> interoperabilityRecordService,
-                                            ResourceInteroperabilityRecordService<ResourceInteroperabilityRecordBundle> resourceInteroperabilityRecordService,
+    public InteroperabilityRecordController(InteroperabilityRecordService interoperabilityRecordService,
+                                            ResourceInteroperabilityRecordService resourceInteroperabilityRecordService,
                                             GenericResourceService genericResourceService, SecurityService securityService) {
         this.interoperabilityRecordService = interoperabilityRecordService;
         this.resourceInteroperabilityRecordService = resourceInteroperabilityRecordService;

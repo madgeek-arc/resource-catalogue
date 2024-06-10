@@ -20,12 +20,12 @@ import java.util.List;
 public class ServiceDatasourceValidator implements Validator {
 
     private static final Logger logger = LoggerFactory.getLogger(ServiceDatasourceValidator.class);
-    private final ServiceBundleService<ServiceBundle> serviceBundleService;
+    private final ServiceBundleService serviceBundleService;
     private final String catalogueName;
 
     @Autowired
     public ServiceDatasourceValidator(@Value("${catalogue.id}") String catalogueName,
-                                      @Lazy ServiceBundleService<ServiceBundle> serviceBundleService) {
+                                      @Lazy ServiceBundleService serviceBundleService) {
         this.catalogueName = catalogueName;
         this.serviceBundleService = serviceBundleService;
     }

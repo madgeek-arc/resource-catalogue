@@ -7,7 +7,7 @@ import org.springframework.security.core.Authentication;
 
 import java.util.List;
 
-public interface InteroperabilityRecordService<T> extends ResourceService<T> {
+public interface InteroperabilityRecordService extends ResourceService<InteroperabilityRecordBundle> {
 
     /**
      * Add a new Interoperability Record on an existing Catalogue, providing the Catalogue's ID
@@ -127,9 +127,9 @@ public interface InteroperabilityRecordService<T> extends ResourceService<T> {
      * @param comment     Comment
      * @param actionType  Audit's action type
      * @param auth        Authentication
-     * @return {@link T}
+     * @return {@link InteroperabilityRecordBundle}
      */
-    T auditResource(String resourceId, String catalogueId, String comment, LoggingInfo.ActionType actionType,
+    InteroperabilityRecordBundle auditResource(String resourceId, String catalogueId, String comment, LoggingInfo.ActionType actionType,
                     Authentication auth);
 
     /**

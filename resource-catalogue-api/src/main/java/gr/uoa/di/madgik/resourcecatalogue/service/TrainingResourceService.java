@@ -13,16 +13,7 @@ import org.springframework.security.core.Authentication;
 import java.util.List;
 import java.util.Map;
 
-public interface TrainingResourceService<T> extends ResourceService<T> {
-
-    /**
-     * Add a new Training Resource on the EOSC Catalogue
-     *
-     * @param resource Training Resource
-     * @param auth     Authentication
-     * @return {@link T}
-     */
-    T addResource(T resource, Authentication auth);
+public interface TrainingResourceService extends ResourceService<TrainingResourceBundle> {
 
     /**
      * Add a new Training Resource on an external Catalogue, providing the Catalogue's ID
@@ -30,9 +21,9 @@ public interface TrainingResourceService<T> extends ResourceService<T> {
      * @param resource    Training Resource
      * @param catalogueId Catalogue ID
      * @param auth        Authentication
-     * @return {@link T}
+     * @return {@link   TrainingResourceBundle}
      */
-    T addResource(T resource, String catalogueId, Authentication auth);
+      TrainingResourceBundle add(  TrainingResourceBundle resource, String catalogueId, Authentication auth);
 
     /**
      * Update a Training Resource of the EOSC Catalogue.
@@ -40,10 +31,10 @@ public interface TrainingResourceService<T> extends ResourceService<T> {
      * @param resource Training Resource
      * @param comment  Comment
      * @param auth     Authentication
-     * @return {@link T}
+     * @return {@link   TrainingResourceBundle}
      * @throws ResourceNotFoundException The Resource was not found
      */
-    T updateResource(T resource, String comment, Authentication auth) throws ResourceNotFoundException;
+      TrainingResourceBundle update(  TrainingResourceBundle resource, String comment, Authentication auth) throws ResourceNotFoundException;
 
     /**
      * Update a Training Resource of an external Catalogue, providing its Catalogue ID
@@ -52,10 +43,10 @@ public interface TrainingResourceService<T> extends ResourceService<T> {
      * @param catalogueId Catalogue ID
      * @param comment     Comment
      * @param auth        Authentication
-     * @return {@link T}
+     * @return {@link   TrainingResourceBundle}
      * @throws ResourceNotFoundException The Resource was not found
      */
-    T updateResource(T resource, String catalogueId, String comment, Authentication auth)
+      TrainingResourceBundle update(  TrainingResourceBundle resource, String catalogueId, String comment, Authentication auth)
             throws ResourceNotFoundException;
 
     /**
@@ -64,28 +55,28 @@ public interface TrainingResourceService<T> extends ResourceService<T> {
      * @param catalogueId Catalogue ID
      * @param resourceId  Training Resource ID
      * @param auth        Authentication
-     * @return {@link T}
+     * @return {@link   TrainingResourceBundle}
      */
-    T getCatalogueResource(String catalogueId, String resourceId, Authentication auth);
+      TrainingResourceBundle getCatalogueResource(String catalogueId, String resourceId, Authentication auth);
 
     /**
      * Returns the Training Resource with the specified ID
      *
      * @param id          Training Resource ID
      * @param catalogueId Catalogue ID
-     * @return {@link T}
+     * @return {@link   TrainingResourceBundle}
      */
-    T get(String id, String catalogueId);
+      TrainingResourceBundle get(String id, String catalogueId);
 
     /**
      * Get Training Resource Bundles by a specific field.
      *
      * @param field Field of Training Resource
      * @param auth  Authentication
-     * @return {@link Map}&lt;{@link String},{@link List}&lt;{@link T}&gt;&gt;
+     * @return {@link Map}&lt;{@link String},{@link List}&lt;{@link   TrainingResourceBundle}&gt;&gt;
      * @throws NoSuchFieldException The field does not exist
      */
-    Map<String, List<T>> getBy(String field, Authentication auth) throws NoSuchFieldException;
+    Map<String, List<  TrainingResourceBundle>> getBy(String field, Authentication auth) throws NoSuchFieldException;
 
     /**
      * Get Training Resources with the specified ids.
@@ -119,9 +110,9 @@ public interface TrainingResourceService<T> extends ResourceService<T> {
      * @param resourceId Training Resource ID
      * @param active     True/False
      * @param auth       Authentication
-     * @return {@link T}
+     * @return {@link   TrainingResourceBundle}
      */
-    T publish(String resourceId, Boolean active, Authentication auth);
+      TrainingResourceBundle publish(String resourceId, Boolean active, Authentication auth);
 
     /**
      * Return children vocabularies from parent vocabularies
@@ -138,9 +129,9 @@ public interface TrainingResourceService<T> extends ResourceService<T> {
      *
      * @param filter FacetFilter
      * @param auth   Authentication
-     * @return {@link Browsing}&lt;{@link T}&gt;
+     * @return {@link Browsing}&lt;{@link   TrainingResourceBundle}&gt;
      */
-    Browsing<T> getAllForAdmin(FacetFilter filter, Authentication auth);
+    Browsing<  TrainingResourceBundle> getAllForAdmin(FacetFilter filter, Authentication auth);
 
     /**
      * Audit a Training Resource
@@ -150,9 +141,9 @@ public interface TrainingResourceService<T> extends ResourceService<T> {
      * @param comment     Comment
      * @param actionType  Audit's action type
      * @param auth        Authentication
-     * @return {@link T}
+     * @return {@link   TrainingResourceBundle}
      */
-    T auditResource(String resourceId, String catalogueId, String comment, LoggingInfo.ActionType actionType,
+      TrainingResourceBundle auditResource(String resourceId, String catalogueId, String comment, LoggingInfo.ActionType actionType,
                     Authentication auth);
 
     /**
@@ -161,18 +152,18 @@ public interface TrainingResourceService<T> extends ResourceService<T> {
      * @param ff               FacetFilter
      * @param auditingInterval Auditing Interval (in months)
      * @param auth             Authentication
-     * @return {@link Paging}&lt;{@link T}&gt;
+     * @return {@link Paging}&lt;{@link   TrainingResourceBundle}&gt;
      */
-    Paging<T> getRandomResources(FacetFilter ff, String auditingInterval, Authentication auth);
+    Paging<  TrainingResourceBundle> getRandomResources(FacetFilter ff, String auditingInterval, Authentication auth);
 
     /**
      * Get a list of Training Resource Bundles of a specific Provider of the EOSC Catalogue
      *
      * @param providerId Provider ID
      * @param auth       Authentication
-     * @return {@link List}&lt;{@link T}&gt;
+     * @return {@link List}&lt;{@link   TrainingResourceBundle}&gt;
      */
-    List<T> getResourceBundles(String providerId, Authentication auth);
+    List<  TrainingResourceBundle> getResourceBundles(String providerId, Authentication auth);
 
     /**
      * Get a paging of Training Resource Bundles of a specific Provider of an external Catalogue
@@ -180,9 +171,9 @@ public interface TrainingResourceService<T> extends ResourceService<T> {
      * @param catalogueId Catalogue ID
      * @param providerId  Provider ID
      * @param auth        Authentication
-     * @return {@link Paging}&lt;{@link T}&gt;
+     * @return {@link Paging}&lt;{@link   TrainingResourceBundle}&gt;
      */
-    Paging<T> getResourceBundles(String catalogueId, String providerId, Authentication auth);
+    Paging<  TrainingResourceBundle> getResourceBundles(String catalogueId, String providerId, Authentication auth);
 
     /**
      * Get a list of Training Resources of a specific Provider of the EOSC Catalogue
@@ -206,9 +197,9 @@ public interface TrainingResourceService<T> extends ResourceService<T> {
      * Get all inactive Training Resources of a specific Provider, providing its ID
      *
      * @param providerId Provider ID
-     * @return {@link List}&lt;{@link T}&gt;
+     * @return {@link List}&lt;{@link   TrainingResourceBundle}&gt;
      */
-    List<T> getInactiveResources(String providerId);
+    List<  TrainingResourceBundle> getInactiveResources(String providerId);
 
     /**
      * Send email notifications to all Providers with outdated Training Resources
@@ -234,9 +225,9 @@ public interface TrainingResourceService<T> extends ResourceService<T> {
      * @param status Training Resource's status (approved/rejected)
      * @param active True/False
      * @param auth   Authentication
-     * @return {@link T}
+     * @return {@link   TrainingResourceBundle}
      */
-    T verifyResource(String id, String status, Boolean active, Authentication auth);
+      TrainingResourceBundle verifyResource(String id, String status, Boolean active, Authentication auth);
 
     /**
      * Change the Provider of the specific Training Resource
@@ -245,9 +236,9 @@ public interface TrainingResourceService<T> extends ResourceService<T> {
      * @param newProvider New Provider ID
      * @param comment     Comment
      * @param auth        Authentication
-     * @return {@link T}
+     * @return {@link   TrainingResourceBundle}
      */
-    T changeProvider(String resourceId, String newProvider, String comment, Authentication auth);
+      TrainingResourceBundle changeProvider(String resourceId, String newProvider, String comment, Authentication auth);
 
     /**
      * Get a specific Training Resource of the EOSC Catalogue, given its ID, or return null
@@ -271,9 +262,9 @@ public interface TrainingResourceService<T> extends ResourceService<T> {
      *
      * @param resource Training Resource
      * @param auth     Authentication
-     * @return {@link T}
+     * @return {@link   TrainingResourceBundle}
      */
-    T createPublicResource(T resource, Authentication auth);
+      TrainingResourceBundle createPublicResource(  TrainingResourceBundle resource, Authentication auth);
 
     /**
      * Suspend the Training Resource given its ID

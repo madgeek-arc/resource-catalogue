@@ -18,20 +18,20 @@ import java.util.List;
 
 @org.springframework.stereotype.Service("resourceInteroperabilityRecordManager")
 public class ResourceInteroperabilityRecordManager extends ResourceManager<ResourceInteroperabilityRecordBundle>
-        implements ResourceInteroperabilityRecordService<ResourceInteroperabilityRecordBundle> {
+        implements ResourceInteroperabilityRecordService {
 
     private static final Logger logger = LoggerFactory.getLogger(ResourceInteroperabilityRecordManager.class);
-    private final ServiceBundleService<ServiceBundle> serviceBundleService;
-    private final TrainingResourceService<TrainingResourceBundle> trainingResourceService;
-    private final InteroperabilityRecordService<InteroperabilityRecordBundle> interoperabilityRecordService;
+    private final ServiceBundleService serviceBundleService;
+    private final TrainingResourceService trainingResourceService;
+    private final InteroperabilityRecordService interoperabilityRecordService;
     private final PublicResourceInteroperabilityRecordManager publicResourceInteroperabilityRecordManager;
     private final SecurityService securityService;
     private final ProviderResourcesCommonMethods commonMethods;
     private final IdCreator idCreator;
 
-    public ResourceInteroperabilityRecordManager(ServiceBundleService<ServiceBundle> serviceBundleService,
-                                                 TrainingResourceService<TrainingResourceBundle> trainingResourceService,
-                                                 InteroperabilityRecordService<InteroperabilityRecordBundle> interoperabilityRecordService,
+    public ResourceInteroperabilityRecordManager(ServiceBundleService serviceBundleService,
+                                                 TrainingResourceService trainingResourceService,
+                                                 InteroperabilityRecordService interoperabilityRecordService,
                                                  SecurityService securityService, ProviderResourcesCommonMethods commonMethods,
                                                  PublicResourceInteroperabilityRecordManager publicResourceInteroperabilityRecordManager,
                                                  IdCreator idCreator) {

@@ -59,7 +59,7 @@ public class ElasticStatisticsManager implements StatisticsService {
     private static final Logger logger = LogManager.getLogger(ElasticStatisticsManager.class);
     private final RestHighLevelClient client;
     private final Analytics analyticsService;
-    private final ProviderService<ProviderBundle> providerService;
+    private final ProviderService providerService;
     private final SearchService searchService;
     private final ParserService parserService;
     private final ServiceBundleService<ServiceBundle> serviceBundleManager;
@@ -70,7 +70,7 @@ public class ElasticStatisticsManager implements StatisticsService {
     private int maxQuantity;
 
     ElasticStatisticsManager(RestHighLevelClient client, Analytics analyticsService,
-                             ProviderService<ProviderBundle> providerService,
+                             ProviderService providerService,
                              SearchService searchService, ParserService parserService,
                              ServiceBundleService<ServiceBundle> serviceBundleManager, VocabularyService vocabularyService,
                              DataSource dataSource) {

@@ -18,11 +18,11 @@ import org.springframework.security.core.Authentication;
 import java.util.List;
 
 @org.springframework.stereotype.Service("helpdeskManager")
-public class HelpdeskManager extends ResourceManager<HelpdeskBundle> implements HelpdeskService<HelpdeskBundle> {
+public class HelpdeskManager extends ResourceManager<HelpdeskBundle> implements HelpdeskService {
 
     private static final Logger logger = LoggerFactory.getLogger(HelpdeskManager.class);
-    private final ServiceBundleService<ServiceBundle> serviceBundleService;
-    private final TrainingResourceService<TrainingResourceBundle> trainingResourceService;
+    private final ServiceBundleService serviceBundleService;
+    private final TrainingResourceService trainingResourceService;
     private final PublicHelpdeskManager publicHelpdeskManager;
     private final SecurityService securityService;
     private final RegistrationMailService registrationMailService;
@@ -30,8 +30,8 @@ public class HelpdeskManager extends ResourceManager<HelpdeskBundle> implements 
     private final IdCreator idCreator;
 
     @Autowired
-    public HelpdeskManager(ServiceBundleService<ServiceBundle> serviceBundleService,
-                           TrainingResourceService<TrainingResourceBundle> trainingResourceService,
+    public HelpdeskManager(ServiceBundleService serviceBundleService,
+                           TrainingResourceService trainingResourceService,
                            PublicHelpdeskManager publicHelpdeskManager,
                            @Lazy SecurityService securityService,
                            @Lazy RegistrationMailService registrationMailService,

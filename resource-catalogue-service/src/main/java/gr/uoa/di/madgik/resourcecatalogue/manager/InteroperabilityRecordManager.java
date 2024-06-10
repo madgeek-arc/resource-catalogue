@@ -30,25 +30,25 @@ import static gr.uoa.di.madgik.resourcecatalogue.config.Properties.Cache.CACHE_F
 import static gr.uoa.di.madgik.resourcecatalogue.config.Properties.Cache.CACHE_PROVIDERS;
 
 @org.springframework.stereotype.Service("interoperabilityRecordManager")
-public class InteroperabilityRecordManager extends ResourceManager<InteroperabilityRecordBundle> implements InteroperabilityRecordService<InteroperabilityRecordBundle> {
+public class InteroperabilityRecordManager extends ResourceManager<InteroperabilityRecordBundle> implements InteroperabilityRecordService {
 
     private static final Logger logger = LoggerFactory.getLogger(InteroperabilityRecordManager.class);
-    private final ProviderService<ProviderBundle> providerService;
+    private final ProviderService providerService;
     private final IdCreator idCreator;
     private final SecurityService securityService;
     private final VocabularyService vocabularyService;
     private final PublicInteroperabilityRecordManager publicInteroperabilityRecordManager;
-    private final CatalogueService<CatalogueBundle> catalogueService;
+    private final CatalogueService catalogueService;
     private final RegistrationMailService registrationMailService;
     private final ProviderResourcesCommonMethods commonMethods;
 
     @Value("${catalogue.id}")
     private String catalogueId;
 
-    public InteroperabilityRecordManager(ProviderService<ProviderBundle> providerService, IdCreator idCreator,
+    public InteroperabilityRecordManager(ProviderService providerService, IdCreator idCreator,
                                          SecurityService securityService, VocabularyService vocabularyService,
                                          PublicInteroperabilityRecordManager publicInteroperabilityRecordManager,
-                                         CatalogueService<CatalogueBundle> catalogueService,
+                                         CatalogueService catalogueService,
                                          RegistrationMailService registrationMailService, ProviderResourcesCommonMethods commonMethods) {
         super(InteroperabilityRecordBundle.class);
         this.providerService = providerService;

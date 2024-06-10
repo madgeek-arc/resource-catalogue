@@ -43,13 +43,13 @@ public class PublicTrainingResourceController {
     private static final Gson gson = new Gson();
 
     private final SecurityService securityService;
-    private final TrainingResourceService<TrainingResourceBundle> trainingResourceBundleService;
+    private final TrainingResourceService trainingResourceBundleService;
     private final ResourceService<TrainingResourceBundle> publicTrainingResourceManager;
     private final GenericResourceService genericResourceService;
 
 
     PublicTrainingResourceController(SecurityService securityService,
-                                     TrainingResourceService<TrainingResourceBundle> trainingResourceBundleService,
+                                     TrainingResourceService trainingResourceBundleService,
                                      @Qualifier("publicTrainingResourceManager") ResourceService<TrainingResourceBundle> publicTrainingResourceManager,
                                      GenericResourceService genericResourceService) {
         this.securityService = securityService;

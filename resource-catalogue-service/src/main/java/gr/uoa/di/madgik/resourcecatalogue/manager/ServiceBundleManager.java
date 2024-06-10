@@ -35,40 +35,40 @@ public class ServiceBundleManager extends AbstractServiceBundleManager<ServiceBu
 
     private static final Logger logger = LoggerFactory.getLogger(ServiceBundleManager.class);
 
-    private final ProviderService<ProviderBundle> providerService;
+    private final ProviderService providerService;
     private final IdCreator idCreator;
     private final SecurityService securityService;
     private final RegistrationMailService registrationMailService;
     private final VocabularyService vocabularyService;
-    private final CatalogueService<CatalogueBundle> catalogueService;
+    private final CatalogueService catalogueService;
     private final PublicServiceManager publicServiceManager;
     private final MigrationService migrationService;
     private final DatasourceService datasourceService;
-    private final HelpdeskService<HelpdeskBundle> helpdeskService;
-    private final MonitoringService<MonitoringBundle> monitoringService;
+    private final HelpdeskService helpdeskService;
+    private final MonitoringService monitoringService;
     private final PublicHelpdeskManager publicHelpdeskManager;
     private final PublicMonitoringManager publicMonitoringManager;
     private final PublicDatasourceManager publicDatasourceManager;
-    private final ResourceInteroperabilityRecordService<ResourceInteroperabilityRecordBundle> resourceInteroperabilityRecordService;
+    private final ResourceInteroperabilityRecordService resourceInteroperabilityRecordService;
     private final ProviderResourcesCommonMethods commonMethods;
 
     @Value("${catalogue.id}")
     private String catalogueId;
 
-    public ServiceBundleManager(ProviderService<ProviderBundle> providerService,
+    public ServiceBundleManager(ProviderService providerService,
                                 IdCreator idCreator, @Lazy SecurityService securityService,
                                 @Lazy RegistrationMailService registrationMailService,
                                 @Lazy VocabularyService vocabularyService,
-                                CatalogueService<CatalogueBundle> catalogueService,
+                                CatalogueService catalogueService,
                                 @Lazy PublicServiceManager publicServiceManager,
                                 @Lazy MigrationService migrationService,
                                 @Lazy DatasourceService datasourceService,
-                                @Lazy HelpdeskService<HelpdeskBundle> helpdeskService,
-                                @Lazy MonitoringService<MonitoringBundle> monitoringService,
+                                @Lazy HelpdeskService helpdeskService,
+                                @Lazy MonitoringService monitoringService,
                                 @Lazy PublicHelpdeskManager publicHelpdeskManager,
                                 @Lazy PublicMonitoringManager publicMonitoringManager,
                                 @Lazy PublicDatasourceManager publicDatasourceManager,
-                                @Lazy ResourceInteroperabilityRecordService<ResourceInteroperabilityRecordBundle>
+                                @Lazy ResourceInteroperabilityRecordService
                                         resourceInteroperabilityRecordService,
                                 ProviderResourcesCommonMethods commonMethods) {
         super(ServiceBundle.class);

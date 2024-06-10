@@ -4,7 +4,6 @@ import gr.uoa.di.madgik.registry.domain.Browsing;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.registry.domain.Resource;
-import gr.uoa.di.madgik.registry.service.ParserService;
 import gr.uoa.di.madgik.registry.service.SearchService;
 import gr.uoa.di.madgik.registry.service.ServiceException;
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
@@ -40,19 +39,19 @@ import static gr.uoa.di.madgik.resourcecatalogue.utils.VocabularyValidationUtils
 import static java.util.stream.Collectors.toList;
 
 @org.springframework.stereotype.Service
-public class TrainingResourceManager extends ResourceManager<TrainingResourceBundle> implements TrainingResourceService<TrainingResourceBundle> {
+public class TrainingResourceManager extends ResourceManager<TrainingResourceBundle> implements TrainingResourceService {
 
     private static final Logger logger = LoggerFactory.getLogger(ServiceBundleManager.class);
 
-    private final ProviderService<ProviderBundle> providerService;
+    private final ProviderService providerService;
     private final IdCreator idCreator;
     private final SecurityService securityService;
     private final RegistrationMailService registrationMailService;
     private final VocabularyService vocabularyService;
-    private final HelpdeskService<HelpdeskBundle> helpdeskService;
-    private final MonitoringService<MonitoringBundle> monitoringService;
-    private final ResourceInteroperabilityRecordService<ResourceInteroperabilityRecordBundle> resourceInteroperabilityRecordService;
-    private final CatalogueService<CatalogueBundle> catalogueService;
+    private final HelpdeskService helpdeskService;
+    private final MonitoringService monitoringService;
+    private final ResourceInteroperabilityRecordService resourceInteroperabilityRecordService;
+    private final CatalogueService catalogueService;
     private final PublicTrainingResourceManager publicTrainingResourceManager;
     private final PublicHelpdeskManager publicHelpdeskManager;
     private final PublicMonitoringManager publicMonitoringManager;
@@ -72,14 +71,14 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
     @Value("${catalogue.id}")
     private String catalogueId;
 
-    public TrainingResourceManager(ProviderService<ProviderBundle> providerService,
+    public TrainingResourceManager(ProviderService providerService,
                                    IdCreator idCreator, @Lazy SecurityService securityService,
                                    @Lazy RegistrationMailService registrationMailService,
                                    @Lazy VocabularyService vocabularyService,
-                                   @Lazy HelpdeskService<HelpdeskBundle> helpdeskService,
-                                   @Lazy MonitoringService<MonitoringBundle> monitoringService,
-                                   @Lazy ResourceInteroperabilityRecordService<ResourceInteroperabilityRecordBundle> resourceInteroperabilityRecordService,
-                                   CatalogueService<CatalogueBundle> catalogueService,
+                                   @Lazy HelpdeskService helpdeskService,
+                                   @Lazy MonitoringService monitoringService,
+                                   @Lazy ResourceInteroperabilityRecordService resourceInteroperabilityRecordService,
+                                   CatalogueService catalogueService,
                                    PublicTrainingResourceManager publicTrainingResourceManager,
                                    PublicHelpdeskManager publicHelpdeskManager,
                                    PublicMonitoringManager publicMonitoringManager,
@@ -114,14 +113,14 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
     @Override
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.providerCanAddResources(#auth, #trainingResourceBundle.payload)")
     @CacheEvict(cacheNames = {CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)
-    public TrainingResourceBundle addResource(TrainingResourceBundle trainingResourceBundle, Authentication auth) {
-        return addResource(trainingResourceBundle, null, auth);
+    public TrainingResourceBundle add(TrainingResourceBundle trainingResourceBundle, Authentication auth) {
+        return add(trainingResourceBundle, null, auth);
     }
 
     @Override
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.providerCanAddResources(#auth, #trainingResourceBundle.payload)")
     @CacheEvict(cacheNames = {CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)
-    public TrainingResourceBundle addResource(TrainingResourceBundle trainingResourceBundle, String catalogueId, Authentication auth) {
+    public TrainingResourceBundle add(TrainingResourceBundle trainingResourceBundle, String catalogueId, Authentication auth) {
         if (catalogueId == null || catalogueId.equals("")) { // add catalogue provider
             trainingResourceBundle.getTrainingResource().setCatalogueId(this.catalogueId);
         } else { // add provider from external catalogue
@@ -182,37 +181,21 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
 
         logger.info("Adding Training Resource: {}", trainingResourceBundle);
         TrainingResourceBundle ret;
-        ret = add(trainingResourceBundle, auth);
+
+        ret = super.add(trainingResourceBundle, auth);
+
+        synchronizerService.syncAdd(ret.getTrainingResource());
 
         return ret;
     }
 
     @Override
-    public TrainingResourceBundle add(TrainingResourceBundle trainingResourceBundle, Authentication auth) {
-        logger.trace("User '{}' is attempting to add a new Training Resource: {}", auth, trainingResourceBundle);
-        if (exists(trainingResourceBundle)) {
-            throw new ResourceException("Training Resource already exists!", HttpStatus.CONFLICT);
-        }
-
-        String serialized;
-        serialized = parserPool.serialize(trainingResourceBundle, ParserService.ParserServiceTypes.fromString(resourceType.getPayloadType()));
-        Resource created = new Resource();
-        created.setPayload(serialized);
-        created.setResourceType(resourceType);
-
-        resourceService.addResource(created);
-        synchronizerService.syncAdd(trainingResourceBundle.getTrainingResource());
-
-        return trainingResourceBundle;
+    public TrainingResourceBundle update(TrainingResourceBundle trainingResourceBundle, String comment, Authentication auth) {
+        return update(trainingResourceBundle, trainingResourceBundle.getTrainingResource().getCatalogueId(), comment, auth);
     }
 
     @Override
-    public TrainingResourceBundle updateResource(TrainingResourceBundle trainingResourceBundle, String comment, Authentication auth) {
-        return updateResource(trainingResourceBundle, trainingResourceBundle.getTrainingResource().getCatalogueId(), comment, auth);
-    }
-
-    @Override
-    public TrainingResourceBundle updateResource(TrainingResourceBundle trainingResourceBundle, String catalogueId, String comment, Authentication auth) {
+    public TrainingResourceBundle update(TrainingResourceBundle trainingResourceBundle, String catalogueId, String comment, Authentication auth) {
 
         TrainingResourceBundle ret = ObjectUtils.clone(trainingResourceBundle);
         TrainingResourceBundle existingTrainingResource;
@@ -287,8 +270,10 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
             }
         }
 
-        ret = update(ret, auth);
         logger.info("Updating Training Resource: {}", ret);
+        ret = super.update(ret, auth);
+
+        synchronizerService.syncUpdate(ret.getTrainingResource());
 
         // send notification emails to Portal Admins
         if (ret.getLatestAuditInfo() != null && ret.getLatestUpdateInfo() != null) {
@@ -300,26 +285,6 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
         }
 
         return ret;
-    }
-
-    @Override
-    public TrainingResourceBundle update(TrainingResourceBundle trainingResourceBundle, Authentication auth) {
-        logger.trace("User '{}' is attempting to update the Training Resource: {}", auth, trainingResourceBundle);
-
-        Resource existing = getResource(trainingResourceBundle.getTrainingResource().getId(), trainingResourceBundle.getTrainingResource().getCatalogueId());
-        if (existing == null) {
-            throw new ResourceNotFoundException(
-                    String.format("Could not update Training Resource with id '%s' because it does not exist",
-                            trainingResourceBundle.getTrainingResource().getId()));
-        }
-
-        existing.setPayload(serialize(trainingResourceBundle));
-        existing.setResourceType(resourceType);
-
-        resourceService.updateResource(existing);
-        synchronizerService.syncUpdate(trainingResourceBundle.getTrainingResource());
-
-        return trainingResourceBundle;
     }
 
     public TrainingResourceBundle getCatalogueResource(String catalogueId, String trainingResourceId, Authentication auth) {

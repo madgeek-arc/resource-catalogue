@@ -16,7 +16,7 @@ public abstract class AbstractPublicResourceManager<T extends Identifiable> exte
     @Autowired
     private SecurityService securityService;
     @Autowired
-    private CatalogueService<CatalogueBundle> catalogueService;
+    private CatalogueService catalogueService;
 
     public AbstractPublicResourceManager(Class<T> typeParameterClass) {
         super(typeParameterClass);

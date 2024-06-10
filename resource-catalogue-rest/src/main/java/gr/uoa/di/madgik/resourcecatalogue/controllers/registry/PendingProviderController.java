@@ -32,11 +32,11 @@ public class PendingProviderController extends ResourceController<ProviderBundle
     private static final Logger logger = LogManager.getLogger(PendingProviderController.class);
 
     private final PendingResourceService<ProviderBundle> pendingProviderService;
-    private final ProviderService<ProviderBundle> providerManager;
+    private final ProviderService providerManager;
     private final IdCreator idCreator;
 
     PendingProviderController(PendingResourceService<ProviderBundle> pendingProviderService,
-                              ProviderService<ProviderBundle> providerManager,
+                              ProviderService providerManager,
                               IdCreator idCreator) {
         super(pendingProviderService);
         this.pendingProviderService = pendingProviderService;

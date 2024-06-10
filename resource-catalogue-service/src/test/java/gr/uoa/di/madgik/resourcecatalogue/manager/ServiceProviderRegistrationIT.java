@@ -34,10 +34,10 @@ public class ServiceProviderRegistrationIT {
     private static final Logger logger = LoggerFactory.getLogger(ServiceProviderRegistrationIT.class);
 
     @Autowired
-    ProviderService<ProviderBundle> providerService;
+    ProviderService providerService;
 
     @Autowired
-    ServiceBundleService<ServiceBundle> serviceBundleService;
+    ServiceBundleService serviceBundleService;
 
     @Autowired
     VocabularyService vocabularyService;

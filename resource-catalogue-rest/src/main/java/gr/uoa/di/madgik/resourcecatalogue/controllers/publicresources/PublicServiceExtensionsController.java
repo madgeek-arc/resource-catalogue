@@ -35,15 +35,15 @@ public class PublicServiceExtensionsController {
     private static final Gson gson = new Gson();
 
     private final SecurityService securityService;
-    private final HelpdeskService<HelpdeskBundle> helpdeskService;
+    private final HelpdeskService helpdeskService;
     private final ResourceService<HelpdeskBundle> publicHelpdeskManager;
-    private final MonitoringService<MonitoringBundle> monitoringService;
+    private final MonitoringService monitoringService;
     private final ResourceService<MonitoringBundle> publicMonitoringManager;
     private final GenericResourceService genericResourceService;
 
     public PublicServiceExtensionsController(SecurityService securityService,
-                                             HelpdeskService<HelpdeskBundle> helpdeskService,
-                                             MonitoringService<MonitoringBundle> monitoringService,
+                                             HelpdeskService helpdeskService,
+                                             MonitoringService monitoringService,
                                              @Qualifier("publicHelpdeskManager") ResourceService<HelpdeskBundle> publicHelpdeskManager,
                                              @Qualifier("publicMonitoringManager") ResourceService<MonitoringBundle> publicMonitoringManager,
                                              GenericResourceService genericResourceService) {

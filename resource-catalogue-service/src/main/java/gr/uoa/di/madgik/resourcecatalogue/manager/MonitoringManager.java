@@ -26,11 +26,11 @@ import java.util.List;
 
 
 @org.springframework.stereotype.Service("monitoringManager")
-public class MonitoringManager extends ResourceManager<MonitoringBundle> implements MonitoringService<MonitoringBundle> {
+public class MonitoringManager extends ResourceManager<MonitoringBundle> implements MonitoringService {
 
     private static final Logger logger = LoggerFactory.getLogger(MonitoringManager.class);
-    private final ServiceBundleService<ServiceBundle> serviceBundleService;
-    private final TrainingResourceService<TrainingResourceBundle> trainingResourceService;
+    private final ServiceBundleService serviceBundleService;
+    private final TrainingResourceService trainingResourceService;
     private final PublicMonitoringManager publicMonitoringManager;
     private final SecurityService securityService;
     private final RegistrationMailService registrationMailService;
@@ -44,8 +44,8 @@ public class MonitoringManager extends ResourceManager<MonitoringBundle> impleme
     private final IdCreator idCreator;
 
 
-    public MonitoringManager(ServiceBundleService<ServiceBundle> serviceBundleService,
-                             TrainingResourceService<TrainingResourceBundle> trainingResourceService,
+    public MonitoringManager(ServiceBundleService serviceBundleService,
+                             TrainingResourceService trainingResourceService,
                              PublicMonitoringManager publicMonitoringManager,
                              @Lazy SecurityService securityService,
                              @Lazy RegistrationMailService registrationMailService,

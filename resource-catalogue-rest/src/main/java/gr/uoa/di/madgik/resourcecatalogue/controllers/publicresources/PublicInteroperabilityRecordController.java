@@ -42,15 +42,15 @@ public class PublicInteroperabilityRecordController {
     private static final Gson gson = new Gson();
 
     private final SecurityService securityService;
-    private final InteroperabilityRecordService<InteroperabilityRecordBundle> interoperabilityRecordService;
-    private final ResourceInteroperabilityRecordService<ResourceInteroperabilityRecordBundle> resourceInteroperabilityRecordService;
+    private final InteroperabilityRecordService interoperabilityRecordService;
+    private final ResourceInteroperabilityRecordService resourceInteroperabilityRecordService;
     private final ResourceService<InteroperabilityRecordBundle> publicInteroperabilityRecordManager;
     private final GenericResourceService genericResourceService;
 
 
     PublicInteroperabilityRecordController(SecurityService securityService,
-                                           InteroperabilityRecordService<InteroperabilityRecordBundle> interoperabilityRecordService,
-                                           ResourceInteroperabilityRecordService<ResourceInteroperabilityRecordBundle> resourceInteroperabilityRecordService,
+                                           InteroperabilityRecordService interoperabilityRecordService,
+                                           ResourceInteroperabilityRecordService resourceInteroperabilityRecordService,
                                            @Qualifier("publicInteroperabilityRecordManager") ResourceService<InteroperabilityRecordBundle> publicInteroperabilityRecordManager,
                                            GenericResourceService genericResourceService) {
         this.securityService = securityService;

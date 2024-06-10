@@ -30,7 +30,7 @@ import java.util.stream.Collectors;
 import static gr.uoa.di.madgik.resourcecatalogue.utils.VocabularyValidationUtils.validateScientificDomains;
 
 @Service("catalogueManager")
-public class CatalogueManager extends ResourceManager<CatalogueBundle> implements CatalogueService<CatalogueBundle> {
+public class CatalogueManager extends ResourceManager<CatalogueBundle> implements CatalogueService {
 
     private static final Logger logger = LoggerFactory.getLogger(CatalogueManager.class);
     private final SecurityService securityService;
@@ -38,20 +38,20 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
     private final IdCreator idCreator;
     private final FieldValidator fieldValidator;
     private final RegistrationMailService registrationMailService;
-    private final ProviderService<ProviderBundle> providerService;
-    private final ServiceBundleService<ServiceBundle> serviceBundleService;
-    private final TrainingResourceService<TrainingResourceBundle> trainingResourceService;
-    private final InteroperabilityRecordService<InteroperabilityRecordBundle> interoperabilityRecordService;
+    private final ProviderService providerService;
+    private final ServiceBundleService serviceBundleService;
+    private final TrainingResourceService trainingResourceService;
+    private final InteroperabilityRecordService interoperabilityRecordService;
     private final ProviderResourcesCommonMethods commonMethods;
 
     @Value("${catalogue.id}")
     private String catalogueId;
 
     public CatalogueManager(IdCreator idCreator,
-                            @Lazy ProviderService<ProviderBundle> providerService,
-                            @Lazy ServiceBundleService<ServiceBundle> serviceBundleService,
-                            @Lazy TrainingResourceService<TrainingResourceBundle> trainingResourceService,
-                            @Lazy InteroperabilityRecordService<InteroperabilityRecordBundle> interoperabilityRecordService,
+                            @Lazy ProviderService providerService,
+                            @Lazy ServiceBundleService serviceBundleService,
+                            @Lazy TrainingResourceService trainingResourceService,
+                            @Lazy InteroperabilityRecordService interoperabilityRecordService,
                             @Lazy FieldValidator fieldValidator,
                             @Lazy SecurityService securityService,
                             @Lazy VocabularyService vocabularyService,

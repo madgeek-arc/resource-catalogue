@@ -24,12 +24,12 @@ import java.util.*;
 
 @Component
 @Deprecated
-public class ProviderRequestManager extends ResourceManager<ProviderRequest> implements ProviderRequestService<Authentication> {
+public class ProviderRequestManager extends ResourceManager<ProviderRequest> implements ProviderRequestService {
 
     private static final Logger logger = LoggerFactory.getLogger(ProviderRequestManager.class);
     private final MailService mailService;
     private final ServiceBundleService<ServiceBundle> serviceBundleService;
-    private final ProviderService<ProviderBundle> providerService;
+    private final ProviderService providerService;
     private final SecurityService securityService;
     private final Configuration cfg;
 
@@ -39,7 +39,7 @@ public class ProviderRequestManager extends ResourceManager<ProviderRequest> imp
     @Autowired
     public ProviderRequestManager(MailService mailService, Configuration cfg,
                                   ServiceBundleService<ServiceBundle> serviceBundleService,
-                                  ProviderService<ProviderBundle> providerService,
+                                  ProviderService providerService,
                                   SecurityService securityService) {
         super(ProviderRequest.class);
         this.mailService = mailService;

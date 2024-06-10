@@ -31,17 +31,17 @@ public class MailController {
     @Autowired
     MailService mailService;
     @Autowired
-    CatalogueService<CatalogueBundle> catalogueService;
+    CatalogueService catalogueService;
     @Autowired
-    ProviderService<ProviderBundle> providerService;
+    ProviderService providerService;
     @Autowired
     PendingResourceService<ProviderBundle> pendingProviderService;
     @Autowired
-    ServiceBundleService<ServiceBundle> serviceBundleService;
+    ServiceBundleService serviceBundleService;
     @Autowired
     PendingResourceService<ServiceBundle> pendingServiceService;
     @Autowired
-    TrainingResourceService<TrainingResourceBundle> trainingResourceService;
+    TrainingResourceService trainingResourceService;
     @Autowired
     SecurityService securityService;
 

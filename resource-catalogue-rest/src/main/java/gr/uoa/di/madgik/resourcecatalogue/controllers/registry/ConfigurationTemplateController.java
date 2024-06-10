@@ -26,9 +26,9 @@ import org.springframework.web.bind.annotation.RestController;
 public class ConfigurationTemplateController {
 
     private static final Logger logger = LogManager.getLogger(ConfigurationTemplateController.class);
-    private final ConfigurationTemplateService<ConfigurationTemplateBundle> configurationTemplateService;
+    private final ConfigurationTemplateService configurationTemplateService;
 
-    public ConfigurationTemplateController(ConfigurationTemplateService<ConfigurationTemplateBundle> configurationTemplateService) {
+    public ConfigurationTemplateController(ConfigurationTemplateService configurationTemplateService) {
         this.configurationTemplateService = configurationTemplateService;
     }
 

@@ -30,9 +30,9 @@ import java.util.List;
 public class ConfigurationTemplateInstanceCrudController extends ResourceController<ConfigurationTemplateInstanceBundle> {
 
     private static final Logger logger = LogManager.getLogger(ConfigurationTemplateInstanceCrudController.class);
-    private final ConfigurationTemplateInstanceService<ConfigurationTemplateInstanceBundle> configurationTemplateInstanceService;
+    private final ConfigurationTemplateInstanceService configurationTemplateInstanceService;
 
-    public ConfigurationTemplateInstanceCrudController(ConfigurationTemplateInstanceService<ConfigurationTemplateInstanceBundle> configurationTemplateInstanceService) {
+    public ConfigurationTemplateInstanceCrudController(ConfigurationTemplateInstanceService configurationTemplateInstanceService) {
         super(configurationTemplateInstanceService);
         this.configurationTemplateInstanceService = configurationTemplateInstanceService;
     }

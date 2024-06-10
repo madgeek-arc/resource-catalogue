@@ -28,9 +28,9 @@ public class OIDCSecurityService implements SecurityService {
     private final CatalogueManager catalogueManager;
     private final PendingProviderManager pendingProviderManager;
     private final ServiceBundleService<ServiceBundle> serviceBundleService;
-    private final TrainingResourceService<TrainingResourceBundle> trainingResourceService;
+    private final TrainingResourceService trainingResourceService;
     private final PendingResourceService<ServiceBundle> pendingServiceManager;
-    private final InteroperabilityRecordService<InteroperabilityRecordBundle> interoperabilityRecordService;
+    private final InteroperabilityRecordService interoperabilityRecordService;
     private final Authentication adminAccess = new AdminAuthentication();
 
     @Value("${catalogue.id}")
@@ -38,10 +38,10 @@ public class OIDCSecurityService implements SecurityService {
 
     OIDCSecurityService(@Lazy ProviderManager providerManager, CatalogueManager catalogueManager,
                         @Lazy ServiceBundleService<ServiceBundle> serviceBundleService,
-                        @Lazy TrainingResourceService<TrainingResourceBundle> trainingResourceService,
+                        @Lazy TrainingResourceService trainingResourceService,
                         @Lazy PendingProviderManager pendingProviderManager,
                         @Lazy PendingResourceService<ServiceBundle> pendingServiceManager,
-                        @Lazy InteroperabilityRecordService<InteroperabilityRecordBundle> interoperabilityRecordService) {
+                        @Lazy InteroperabilityRecordService interoperabilityRecordService) {
         this.providerManager = providerManager;
         this.catalogueManager = catalogueManager;
         this.serviceBundleService = serviceBundleService;

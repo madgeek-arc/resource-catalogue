@@ -12,17 +12,17 @@ import org.springframework.security.core.Authentication;
 import java.net.URL;
 import java.util.List;
 
-public interface ProviderService<T> extends ResourceService<T> {
+public interface ProviderService extends ResourceService<ProviderBundle> {
 
     /**
      * Add a new Provider on the Project's Catalogue.
      *
      * @param provider       Provider
      * @param authentication Authentication
-     * @return {@link T}
+     * @return {@link ProviderBundle}
      */
     @Override
-    T add(T provider, Authentication authentication);
+    ProviderBundle add(ProviderBundle provider, Authentication authentication);
 
     /**
      * Add a new Provider on a specific Catalogue.
@@ -30,9 +30,9 @@ public interface ProviderService<T> extends ResourceService<T> {
      * @param provider       Provider
      * @param catalogueId    Catalogue ID
      * @param authentication Authentication
-     * @return {@link T}
+     * @return {@link ProviderBundle}
      */
-    T add(T provider, String catalogueId, Authentication authentication);
+    ProviderBundle add(ProviderBundle provider, String catalogueId, Authentication authentication);
 
     /**
      * Deletes the provider and all the corresponding services.
@@ -41,16 +41,16 @@ public interface ProviderService<T> extends ResourceService<T> {
      * @param provider Provider
      */
     @Override
-    void delete(T provider);
+    void delete(ProviderBundle provider);
 
     /**
      * Get a Provider of the Project's Catalogue providing the Provider's ID.
      *
      * @param id   Provider's ID
      * @param auth Authentication
-     * @return {@link T}
+     * @return {@link ProviderBundle}
      */
-    T get(String id, Authentication auth);
+    ProviderBundle get(String id, Authentication auth);
 
     /**
      * Get a Provider of a specific Catalogue providing the Provider's ID and the Catalogue's ID.
@@ -58,18 +58,18 @@ public interface ProviderService<T> extends ResourceService<T> {
      * @param catalogueId Catalogue's ID
      * @param providerId  Provider's ID
      * @param auth        Authentication
-     * @return {@link T}
+     * @return {@link ProviderBundle}
      */
-    T get(String catalogueId, String providerId, Authentication auth);
+    ProviderBundle get(String catalogueId, String providerId, Authentication auth);
 
     /**
      * Get a list of Providers in which the given User's email is Admin
      *
      * @param email          User's email
      * @param authentication Authentication
-     * @return {@link List}&lt;{@link T}&gt;
+     * @return {@link List}&lt;{@link ProviderBundle}&gt;
      */
-    List<T> getServiceProviders(String email, Authentication authentication);
+    List<ProviderBundle> getServiceProviders(String email, Authentication authentication);
 
     /**
      * Return true if the specific User has accepted the Provider's registration terms
@@ -117,9 +117,9 @@ public interface ProviderService<T> extends ResourceService<T> {
     /**
      * Get a list of Inactive Providers
      *
-     * @return {@link List}&lt;{@link T}&gt;
+     * @return {@link List}&lt;{@link ProviderBundle}&gt;
      */
-    List<T> getInactive();
+    List<ProviderBundle> getInactive();
 
     /**
      * Verify (Accept/Reject during the onboarding process) a specific Provider
@@ -128,9 +128,9 @@ public interface ProviderService<T> extends ResourceService<T> {
      * @param status Provider's new status
      * @param active Provider's new active field
      * @param auth   Authentication
-     * @return {@link T}
+     * @return {@link ProviderBundle}
      */
-    T verifyProvider(String id, String status, Boolean active, Authentication auth);
+    ProviderBundle verifyProvider(String id, String status, Boolean active, Authentication auth);
 
     /**
      * Sets a Provider as active/inactive.

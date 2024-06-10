@@ -52,9 +52,9 @@ import java.util.Map;
 public class ServiceExtensionsController {
 
     private static final Logger logger = LogManager.getLogger(ServiceExtensionsController.class);
-    private final HelpdeskService<HelpdeskBundle> helpdeskService;
-    private final MonitoringService<MonitoringBundle> monitoringService;
-    private final ServiceBundleService<ServiceBundle> serviceBundleService;
+    private final HelpdeskService helpdeskService;
+    private final MonitoringService monitoringService;
+    private final ServiceBundleService serviceBundleService;
     @Value("${argo.grnet.monitoring.availability}")
     private String monitoringAvailability;
     @Value("${argo.grnet.monitoring.status}")
@@ -74,9 +74,9 @@ public class ServiceExtensionsController {
     }
 
     @Autowired
-    ServiceExtensionsController(HelpdeskService<HelpdeskBundle> helpdeskService,
-                                MonitoringService<MonitoringBundle> monitoringService,
-                                ServiceBundleService<ServiceBundle> serviceBundleService,
+    ServiceExtensionsController(HelpdeskService helpdeskService,
+                                MonitoringService monitoringService,
+                                ServiceBundleService serviceBundleService,
                                 GenericResourceService genericResourceService) {
         this.helpdeskService = helpdeskService;
         this.monitoringService = monitoringService;

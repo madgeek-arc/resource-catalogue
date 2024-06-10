@@ -33,11 +33,11 @@ public class EventManager extends ResourceManager<Event> implements EventService
 
     private static final Logger logger = LoggerFactory.getLogger(EventManager.class);
     private final ParserService parserService;
-    private final ServiceBundleService<ServiceBundle> serviceBundleService;
+    private final ServiceBundleService serviceBundleService;
 
     @Autowired
     public EventManager(ParserService parserService,
-                        @Lazy ServiceBundleService<ServiceBundle> serviceBundleService) {
+                        @Lazy ServiceBundleService serviceBundleService) {
         super(Event.class);
         this.parserService = parserService;
         this.serviceBundleService = serviceBundleService;

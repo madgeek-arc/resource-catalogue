@@ -7,7 +7,7 @@ import org.springframework.security.core.Authentication;
 
 @org.springframework.stereotype.Service("configurationTemplateManager")
 public class ConfigurationTemplateManager extends ResourceManager<ConfigurationTemplateBundle>
-        implements ConfigurationTemplateService<ConfigurationTemplateBundle> {
+        implements ConfigurationTemplateService {
 
     private final IdCreator idCreator;
 

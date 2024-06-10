@@ -37,11 +37,11 @@ public class PublicConfigurationTemplateInstanceController {
     private static final Gson gson = new Gson();
 
     private final SecurityService securityService;
-    private final ConfigurationTemplateInstanceService<ConfigurationTemplateInstanceBundle> configurationTemplateInstanceService;
+    private final ConfigurationTemplateInstanceService configurationTemplateInstanceService;
 
 
     PublicConfigurationTemplateInstanceController(SecurityService securityService,
-                                                  ConfigurationTemplateInstanceService<ConfigurationTemplateInstanceBundle> configurationTemplateInstanceService) {
+                                                  ConfigurationTemplateInstanceService configurationTemplateInstanceService) {
         this.securityService = securityService;
         this.configurationTemplateInstanceService = configurationTemplateInstanceService;
     }

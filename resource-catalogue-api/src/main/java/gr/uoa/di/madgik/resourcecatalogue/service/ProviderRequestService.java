@@ -7,7 +7,7 @@ import org.springframework.security.core.Authentication;
 import java.util.List;
 
 @Deprecated
-public interface ProviderRequestService<U extends Authentication> extends ResourceService<ProviderRequest> {
+public interface ProviderRequestService extends ResourceService<ProviderRequest> {
 
     /**
      * Returns a list with all the requests made on a specific Provider
@@ -16,7 +16,7 @@ public interface ProviderRequestService<U extends Authentication> extends Resour
      * @param authentication Authentication
      * @return {@link List}&lt;{@link ProviderRequest}&gt;
      */
-    List<ProviderRequest> getAllProviderRequests(String providerId, U authentication);
+    List<ProviderRequest> getAllProviderRequests(String providerId, Authentication authentication);
 
     /**
      * Send mails to all related to the Service List resource Providers
@@ -24,5 +24,5 @@ public interface ProviderRequestService<U extends Authentication> extends Resour
      * @param serviceIds A List of Service IDs
      * @param message    EmailMessage
      */
-    void sendMailsToProviders(List<String> serviceIds, EmailMessage message, U authentication);
+    void sendMailsToProviders(List<String> serviceIds, EmailMessage message, Authentication authentication);
 }

@@ -21,13 +21,13 @@ import java.util.*;
 public class DefaultFacetLabelService implements FacetLabelService {
 
     private static final Logger logger = LoggerFactory.getLogger(DefaultFacetLabelService.class);
-    private final ProviderService<ProviderBundle> providerService;
+    private final ProviderService providerService;
     private final VocabularyService vocabularyService;
 
     @org.springframework.beans.factory.annotation.Value("${elastic.index.max_result_window:10000}")
     private int maxQuantity;
 
-    DefaultFacetLabelService(ProviderService<ProviderBundle> providerService,
+    DefaultFacetLabelService(ProviderService providerService,
                              VocabularyService vocabularyService) {
         this.providerService = providerService;
         this.vocabularyService = vocabularyService;

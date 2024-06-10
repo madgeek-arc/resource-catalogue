@@ -36,9 +36,9 @@ import java.util.Objects;
 public class InteroperabilityRecordCrudController {
 
     private static final Logger logger = LogManager.getLogger(InteroperabilityRecordCrudController.class);
-    private final InteroperabilityRecordService<InteroperabilityRecordBundle> interoperabilityRecordService;
+    private final InteroperabilityRecordService interoperabilityRecordService;
 
-    public InteroperabilityRecordCrudController(InteroperabilityRecordService<InteroperabilityRecordBundle> interoperabilityRecordService) {
+    public InteroperabilityRecordCrudController(InteroperabilityRecordService interoperabilityRecordService) {
         this.interoperabilityRecordService = interoperabilityRecordService;
     }
 

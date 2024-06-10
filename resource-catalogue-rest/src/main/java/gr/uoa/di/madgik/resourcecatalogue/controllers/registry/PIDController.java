@@ -23,15 +23,15 @@ import java.util.List;
 public class PIDController {
 
     private final PIDService pidService;
-    private final ProviderService<ProviderBundle> providerService;
-    private final ServiceBundleService<ServiceBundle> serviceService;
-    private final TrainingResourceService<TrainingResourceBundle> trainingResourceService;
-    private final InteroperabilityRecordService<InteroperabilityRecordBundle> interoperabilityRecordService;
+    private final ProviderService providerService;
+    private final ServiceBundleService serviceService;
+    private final TrainingResourceService trainingResourceService;
+    private final InteroperabilityRecordService interoperabilityRecordService;
 
-    public PIDController(PIDService pidService, ProviderService<ProviderBundle> providerService,
-                         ServiceBundleService<ServiceBundle> serviceService,
-                         TrainingResourceService<TrainingResourceBundle> trainingResourceService,
-                         InteroperabilityRecordService<InteroperabilityRecordBundle> interoperabilityRecordService) {
+    public PIDController(PIDService pidService, ProviderService providerService,
+                         ServiceBundleService serviceService,
+                         TrainingResourceService trainingResourceService,
+                         InteroperabilityRecordService interoperabilityRecordService) {
         this.pidService = pidService;
         this.providerService = providerService;
         this.serviceService = serviceService;

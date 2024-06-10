@@ -38,7 +38,7 @@ public class PendingServiceController extends ResourceController<ServiceBundle> 
     private static final Logger logger = LogManager.getLogger(PendingServiceController.class);
     private final PendingResourceService<ServiceBundle> pendingServiceManager;
     private final ServiceBundleService<ServiceBundle> serviceBundleService;
-    private final ProviderService<ProviderBundle> providerService;
+    private final ProviderService providerService;
     private GenericResourceService genericResourceService;
     private final IdCreator idCreator;
 
@@ -47,7 +47,7 @@ public class PendingServiceController extends ResourceController<ServiceBundle> 
 
     PendingServiceController(PendingResourceService<ServiceBundle> pendingServiceManager,
                              ServiceBundleService<ServiceBundle> serviceBundleService,
-                             ProviderService<ProviderBundle> providerService,
+                             ProviderService providerService,
                              GenericResourceService genericResourceService,
                              IdCreator idCreator) {
         super(pendingServiceManager);

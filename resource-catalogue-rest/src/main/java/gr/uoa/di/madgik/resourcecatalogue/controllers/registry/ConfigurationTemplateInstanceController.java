@@ -35,9 +35,9 @@ import java.util.Map;
 public class ConfigurationTemplateInstanceController {
 
     private static final Logger logger = LogManager.getLogger(ConfigurationTemplateInstanceController.class);
-    private final ConfigurationTemplateInstanceService<ConfigurationTemplateInstanceBundle> configurationTemplateInstanceService;
+    private final ConfigurationTemplateInstanceService configurationTemplateInstanceService;
 
-    public ConfigurationTemplateInstanceController(ConfigurationTemplateInstanceService<ConfigurationTemplateInstanceBundle> configurationTemplateInstanceService) {
+    public ConfigurationTemplateInstanceController(ConfigurationTemplateInstanceService configurationTemplateInstanceService) {
         this.configurationTemplateInstanceService = configurationTemplateInstanceService;
     }
 

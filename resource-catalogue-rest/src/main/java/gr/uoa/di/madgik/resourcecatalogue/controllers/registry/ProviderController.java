@@ -45,9 +45,9 @@ import java.util.stream.Collectors;
 public class ProviderController {
 
     private static final Logger logger = LogManager.getLogger(ProviderController.class);
-    private final ProviderService<ProviderBundle> providerService;
+    private final ProviderService providerService;
     private final ServiceBundleService<ServiceBundle> serviceBundleService;
-    private final TrainingResourceService<TrainingResourceBundle> trainingResourceService;
+    private final TrainingResourceService trainingResourceService;
     private final SecurityService securityService;
     private final MigrationService migrationService;
     private final GenericResourceService genericResourceService;
@@ -61,9 +61,9 @@ public class ProviderController {
     @Value("${catalogue.name:Resource Catalogue}")
     private String catalogueName;
 
-    ProviderController(ProviderService<ProviderBundle> service,
+    ProviderController(ProviderService service,
                        ServiceBundleService<ServiceBundle> serviceBundleService,
-                       TrainingResourceService<TrainingResourceBundle> trainingResourceService,
+                       TrainingResourceService trainingResourceService,
                        SecurityService securityService, MigrationService migrationService,
                        GenericResourceService genericResourceService) {
         this.providerService = service;

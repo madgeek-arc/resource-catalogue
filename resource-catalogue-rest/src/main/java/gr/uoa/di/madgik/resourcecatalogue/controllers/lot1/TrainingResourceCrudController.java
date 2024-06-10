@@ -22,10 +22,10 @@ import java.util.List;
 public class TrainingResourceCrudController extends ResourceController<TrainingResourceBundle> {
 
     private static final Logger logger = LogManager.getLogger(TrainingResourceCrudController.class.getName());
-    private final TrainingResourceService<TrainingResourceBundle> trainingResourceService;
+    private final TrainingResourceService trainingResourceService;
 
 
-    TrainingResourceCrudController(TrainingResourceService<TrainingResourceBundle> trainingResourceService) {
+    TrainingResourceCrudController(TrainingResourceService trainingResourceService) {
         super(trainingResourceService);
         this.trainingResourceService = trainingResourceService;
     }

@@ -38,12 +38,12 @@ public class ProviderResourcesCommonMethods {
     @Value("${elastic.index.max_result_window:10000}")
     protected int maxQuantity;
 
-    private final CatalogueService<CatalogueBundle> catalogueService;
-    private final ProviderService<ProviderBundle> providerService;
+    private final CatalogueService catalogueService;
+    private final ProviderService providerService;
     private final DatasourceService datasourceService;
-    private final HelpdeskService<HelpdeskBundle> helpdeskService;
-    private final MonitoringService<MonitoringBundle> monitoringService;
-    private final ResourceInteroperabilityRecordService<ResourceInteroperabilityRecordBundle> resourceInteroperabilityRecordService;
+    private final HelpdeskService helpdeskService;
+    private final MonitoringService monitoringService;
+    private final ResourceInteroperabilityRecordService resourceInteroperabilityRecordService;
     private final GenericResourceService genericResourceService;
     private final VocabularyService vocabularyService;
     private final SecurityService securityService;
@@ -61,12 +61,12 @@ public class ProviderResourcesCommonMethods {
     @Value("${marketplace.url}")
     private String marketplaceUrl;
 
-    public ProviderResourcesCommonMethods(@Lazy CatalogueService<CatalogueBundle> catalogueService,
-                                          @Lazy ProviderService<ProviderBundle> providerService,
+    public ProviderResourcesCommonMethods(@Lazy CatalogueService catalogueService,
+                                          @Lazy ProviderService providerService,
                                           @Lazy DatasourceService datasourceService,
-                                          @Lazy HelpdeskService<HelpdeskBundle> helpdeskService,
-                                          @Lazy MonitoringService<MonitoringBundle> monitoringService,
-                                          @Lazy ResourceInteroperabilityRecordService<ResourceInteroperabilityRecordBundle>
+                                          @Lazy HelpdeskService helpdeskService,
+                                          @Lazy MonitoringService monitoringService,
+                                          @Lazy ResourceInteroperabilityRecordService
                                                   resourceInteroperabilityRecordService,
                                           @Lazy GenericResourceService genericResourceService,
                                           @Lazy VocabularyService vocabularyService,

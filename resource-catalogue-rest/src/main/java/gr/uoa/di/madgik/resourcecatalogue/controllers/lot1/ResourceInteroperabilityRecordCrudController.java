@@ -26,9 +26,9 @@ public class ResourceInteroperabilityRecordCrudController extends ResourceContro
 
     private static final Logger logger = LogManager.getLogger(ResourceInteroperabilityRecordCrudController.class);
 
-    private final ResourceInteroperabilityRecordService<ResourceInteroperabilityRecordBundle> resourceInteroperabilityRecordService;
+    private final ResourceInteroperabilityRecordService resourceInteroperabilityRecordService;
 
-    public ResourceInteroperabilityRecordCrudController(ResourceInteroperabilityRecordService<ResourceInteroperabilityRecordBundle> resourceInteroperabilityRecordService) {
+    public ResourceInteroperabilityRecordCrudController(ResourceInteroperabilityRecordService resourceInteroperabilityRecordService) {
         super(resourceInteroperabilityRecordService);
         this.resourceInteroperabilityRecordService = resourceInteroperabilityRecordService;
     }

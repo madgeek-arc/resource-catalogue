@@ -49,7 +49,7 @@ public class ServiceController {
 
     private static final Logger logger = LogManager.getLogger(ServiceController.class);
     private final ServiceBundleService<ServiceBundle> serviceBundleService;
-    private final ProviderService<ProviderBundle> providerService;
+    private final ProviderService providerService;
     private final DataSource commonDataSource;
     private final GenericResourceService genericResourceService;
     private final SecurityService securityService;
@@ -64,7 +64,7 @@ public class ServiceController {
     private String catalogueName;
 
     ServiceController(ServiceBundleService<ServiceBundle> service,
-                      ProviderService<ProviderBundle> provider,
+                      ProviderService provider,
                       DataSource commonDataSource, GenericResourceService genericResourceService,
                       SecurityService securityService) {
         this.serviceBundleService = service;

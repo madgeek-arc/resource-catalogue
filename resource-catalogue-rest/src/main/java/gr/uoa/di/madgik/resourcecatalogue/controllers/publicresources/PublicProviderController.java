@@ -42,12 +42,12 @@ public class PublicProviderController {
     private static final Gson gson = new Gson();
 
     private final SecurityService securityService;
-    private final ProviderService<ProviderBundle> providerService;
+    private final ProviderService providerService;
     private final ResourceService<ProviderBundle> publicProviderManager;
     private final GenericResourceService genericResourceService;
 
     public PublicProviderController(SecurityService securityService,
-                                    ProviderService<ProviderBundle> providerService,
+                                    ProviderService providerService,
                                     @Qualifier("publicProviderManager") ResourceService<ProviderBundle> publicProviderManager,
                                     GenericResourceService genericResourceService) {
         this.securityService = securityService;

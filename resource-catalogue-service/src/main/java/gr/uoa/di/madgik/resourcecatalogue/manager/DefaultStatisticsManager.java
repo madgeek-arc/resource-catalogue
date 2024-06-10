@@ -42,7 +42,7 @@ public class DefaultStatisticsManager implements StatisticsService {
 
     private static final Logger logger = LoggerFactory.getLogger(DefaultStatisticsManager.class);
     private final Analytics analyticsService;
-    private final ProviderService<ProviderBundle> providerService;
+    private final ProviderService providerService;
     private final SearchService searchService;
     private final ParserService parserService;
     private final ServiceBundleManager serviceBundleManager;
@@ -53,7 +53,7 @@ public class DefaultStatisticsManager implements StatisticsService {
     private int maxQuantity;
 
     DefaultStatisticsManager(Analytics analyticsService,
-                             ProviderService<ProviderBundle> providerService,
+                             ProviderService providerService,
                              SearchService searchService, ParserService parserService,
                              ServiceBundleManager serviceBundleManager, VocabularyService vocabularyService,
                              DataSource dataSource) {

@@ -27,9 +27,9 @@ public class ResourceExtrasController {
 
     private static final Logger logger = LogManager.getLogger(ResourceExtrasController.class);
 
-    private final ServiceBundleService<ServiceBundle> serviceBundleService;
+    private final ServiceBundleService serviceBundleService;
 
-    public ResourceExtrasController(ServiceBundleService<ServiceBundle> serviceBundleService) {
+    public ResourceExtrasController(ServiceBundleService serviceBundleService) {
         this.serviceBundleService = serviceBundleService;
     }
 

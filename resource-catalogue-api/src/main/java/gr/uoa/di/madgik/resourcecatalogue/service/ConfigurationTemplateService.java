@@ -3,7 +3,7 @@ package gr.uoa.di.madgik.resourcecatalogue.service;
 import gr.uoa.di.madgik.resourcecatalogue.domain.configurationTemplates.ConfigurationTemplateBundle;
 import org.springframework.security.core.Authentication;
 
-public interface ConfigurationTemplateService<T> extends ResourceService<T> {
+public interface ConfigurationTemplateService extends ResourceService<ConfigurationTemplateBundle> {
 
     /**
      * Add a new Configuration Template.

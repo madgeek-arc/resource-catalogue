@@ -25,9 +25,9 @@ import java.util.List;
 public class ProviderCrudController extends ResourceController<ProviderBundle> {
 
     private static final Logger logger = LogManager.getLogger(ProviderCrudController.class);
-    private final ProviderService<ProviderBundle> providerService;
+    private final ProviderService providerService;
 
-    ProviderCrudController(ProviderService<ProviderBundle> providerService) {
+    ProviderCrudController(ProviderService providerService) {
         super(providerService);
         this.providerService = providerService;
     }

@@ -36,14 +36,14 @@ import java.util.List;
 public class CSVController {
 
     private static Logger logger = LogManager.getLogger(CSVController.class);
-    private final ServiceBundleService<ServiceBundle> serviceBundleService;
-    private final ProviderService<ProviderBundle> providerService;
+    private final ServiceBundleService serviceBundleService;
+    private final ProviderService providerService;
 
     @Value("${elastic.index.max_result_window:10000}")
     private int maxQuantity;
 
     @Autowired
-    CSVController(ServiceBundleService<ServiceBundle> service, ProviderService<ProviderBundle> provider) {
+    CSVController(ServiceBundleService service, ProviderService provider) {
         this.serviceBundleService = service;
         this.providerService = provider;
     }

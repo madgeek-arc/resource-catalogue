@@ -29,9 +29,9 @@ public class InMemoryAuthoritiesMapper implements AuthoritiesMapper {
     private final Map<String, Set<SimpleGrantedAuthority>> adminsAndEpot = new HashMap<>();
     private final int maxQuantity;
 
-    private final ProviderService<ProviderBundle> providerService;
+    private final ProviderService providerService;
 
-    private final CatalogueService<CatalogueBundle> catalogueService;
+    private final CatalogueService catalogueService;
     private final PendingResourceService<ProviderBundle> pendingProviderService;
     private final SecurityService securityService;
     private final ResourceCatalogueProperties catalogueProperties;
@@ -40,8 +40,8 @@ public class InMemoryAuthoritiesMapper implements AuthoritiesMapper {
 
     public InMemoryAuthoritiesMapper(@Value("${elastic.index.max_result_window:10000}") int maxQuantity,
                                      ResourceCatalogueProperties catalogueProperties,
-                                     ProviderService<ProviderBundle> manager,
-                                     CatalogueService<CatalogueBundle> catalogueService,
+                                     ProviderService manager,
+                                     CatalogueService catalogueService,
                                      PendingResourceService<ProviderBundle> pendingProviderService,
                                      SecurityService securityService) {
         this.catalogueProperties = catalogueProperties;

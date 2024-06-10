@@ -6,16 +6,16 @@ import org.springframework.security.core.Authentication;
 
 import java.util.List;
 
-public interface CatalogueService<T> extends ResourceService<T> {
+public interface CatalogueService extends ResourceService<CatalogueBundle> {
 
     /**
      * Return a Catalogue given its ID
      *
      * @param id   Catalogue ID
      * @param auth Authentication
-     * @return {@link T}
+     * @return {@link CatalogueBundle}
      */
-    T get(String id, Authentication auth);
+    CatalogueBundle get(String id, Authentication auth);
 
     /**
      * Check the existence of a Catalogue
@@ -29,10 +29,10 @@ public interface CatalogueService<T> extends ResourceService<T> {
      *
      * @param catalogue      Catalogue to be added
      * @param authentication Authentication
-     * @return {@link T}
+     * @return {@link CatalogueBundle}
      */
     @Override
-    T add(T catalogue, Authentication authentication);
+    CatalogueBundle add(CatalogueBundle catalogue, Authentication authentication);
 
     /**
      * Update an existing Catalogue
@@ -48,9 +48,9 @@ public interface CatalogueService<T> extends ResourceService<T> {
      * Return a List of Catalogue a User has access in
      *
      * @param authentication Authentication
-     * @return {@link List}&lt;{@link T}&gt;
+     * @return {@link List}&lt;{@link CatalogueBundle}&gt;
      */
-    List<T> getMyCatalogues(Authentication authentication);
+    List<CatalogueBundle> getMyCatalogues(Authentication authentication);
 
     /**
      * Verify (approve/reject) a Catalogue during its Onboarding process
@@ -59,9 +59,9 @@ public interface CatalogueService<T> extends ResourceService<T> {
      * @param status The Onboarding Status of the Catalogue
      * @param active boolean value marking a Catalogue as Active or Inactive
      * @param auth   Authentication
-     * @return {@link T}
+     * @return {@link CatalogueBundle}
      */
-    T verifyCatalogue(String id, String status, Boolean active, Authentication auth);
+    CatalogueBundle verifyCatalogue(String id, String status, Boolean active, Authentication auth);
 
     /**
      * Activate/Deactivate a Catalogue

@@ -35,7 +35,7 @@ public class PendingProviderManager extends ResourceManager<ProviderBundle> impl
 
     private static final Logger logger = LoggerFactory.getLogger(PendingProviderManager.class);
 
-    private final ProviderService<ProviderBundle> providerManager;
+    private final ProviderService providerManager;
     private final IdCreator idCreator;
     private final RegistrationMailService registrationMailService;
     private final SecurityService securityService;
@@ -45,7 +45,7 @@ public class PendingProviderManager extends ResourceManager<ProviderBundle> impl
     @Value("${catalogue.id}")
     private String catalogueId;
 
-    public PendingProviderManager(ProviderService<ProviderBundle> providerManager,
+    public PendingProviderManager(ProviderService providerManager,
                                   IdCreator idCreator, @Lazy RegistrationMailService registrationMailService,
                                   @Lazy SecurityService securityService, @Lazy VocabularyService vocabularyService,
                                   ProviderResourcesCommonMethods commonMethods) {

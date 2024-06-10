@@ -28,20 +28,20 @@ import java.util.List;
 
 @org.springframework.stereotype.Service("configurationTemplateInstanceManager")
 public class ConfigurationTemplateInstanceManager extends ResourceManager<ConfigurationTemplateInstanceBundle>
-        implements ConfigurationTemplateInstanceService<ConfigurationTemplateInstanceBundle> {
+        implements ConfigurationTemplateInstanceService {
 
     private static final Logger logger = LoggerFactory.getLogger(ConfigurationTemplateInstanceManager.class);
-    private final ConfigurationTemplateInstanceService<ConfigurationTemplateInstanceBundle> configurationTemplateInstanceService;
-    private final ResourceInteroperabilityRecordService<ResourceInteroperabilityRecordBundle> resourceInteroperabilityRecordService;
+    private final ConfigurationTemplateInstanceService configurationTemplateInstanceService;
+    private final ResourceInteroperabilityRecordService resourceInteroperabilityRecordService;
 
-    private final ConfigurationTemplateService<ConfigurationTemplateBundle> configurationTemplateService;
+    private final ConfigurationTemplateService configurationTemplateService;
     private final SecurityService securityService;
     private final ProviderResourcesCommonMethods commonMethods;
     private final IdCreator idCreator;
 
-    public ConfigurationTemplateInstanceManager(@Lazy ConfigurationTemplateInstanceService<ConfigurationTemplateInstanceBundle> configurationTemplateInstanceService,
-                                                @Lazy ConfigurationTemplateService<ConfigurationTemplateBundle> configurationTemplateService,
-                                                @Lazy ResourceInteroperabilityRecordService<ResourceInteroperabilityRecordBundle> resourceInteroperabilityRecordService,
+    public ConfigurationTemplateInstanceManager(@Lazy ConfigurationTemplateInstanceService configurationTemplateInstanceService,
+                                                @Lazy ConfigurationTemplateService configurationTemplateService,
+                                                @Lazy ResourceInteroperabilityRecordService resourceInteroperabilityRecordService,
                                                 SecurityService securityService, ProviderResourcesCommonMethods commonMethods,
                                                 IdCreator idCreator) {
         super(ConfigurationTemplateInstanceBundle.class);

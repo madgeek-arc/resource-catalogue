@@ -40,12 +40,12 @@ public class PublicResourceInteroperabilityRecordController {
     private static final Gson gson = new Gson();
 
     private final SecurityService securityService;
-    private final ResourceInteroperabilityRecordService<ResourceInteroperabilityRecordBundle> resourceInteroperabilityRecordService;
+    private final ResourceInteroperabilityRecordService resourceInteroperabilityRecordService;
     private final ResourceService<ResourceInteroperabilityRecordBundle> publicResourceInteroperabilityRecordManager;
     private final GenericResourceService genericResourceService;
 
     PublicResourceInteroperabilityRecordController(SecurityService securityService,
-                                                   ResourceInteroperabilityRecordService<ResourceInteroperabilityRecordBundle> resourceInteroperabilityRecordService,
+                                                   ResourceInteroperabilityRecordService resourceInteroperabilityRecordService,
                                                    @Qualifier("publicResourceInteroperabilityRecordManager") ResourceService<ResourceInteroperabilityRecordBundle> publicResourceInteroperabilityRecordManager,
                                                    GenericResourceService genericResourceService) {
 

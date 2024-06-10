@@ -37,12 +37,12 @@ import static gr.uoa.di.madgik.resourcecatalogue.utils.VocabularyValidationUtils
 import static gr.uoa.di.madgik.resourcecatalogue.utils.VocabularyValidationUtils.validateScientificDomains;
 
 @org.springframework.stereotype.Service("providerManager")
-public class ProviderManager extends ResourceManager<ProviderBundle> implements ProviderService<ProviderBundle> {
+public class ProviderManager extends ResourceManager<ProviderBundle> implements ProviderService {
 
     private static final Logger logger = LoggerFactory.getLogger(ProviderManager.class);
-    private final ServiceBundleService<ServiceBundle> serviceBundleService;
-    private final TrainingResourceService<TrainingResourceBundle> trainingResourceService;
-    private final InteroperabilityRecordService<InteroperabilityRecordBundle> interoperabilityRecordService;
+    private final ServiceBundleService serviceBundleService;
+    private final TrainingResourceService trainingResourceService;
+    private final InteroperabilityRecordService interoperabilityRecordService;
     private final PublicServiceManager publicServiceManager;
     private final PublicProviderManager publicProviderManager;
     private final PublicTrainingResourceManager publicTrainingResourceManager;
@@ -54,7 +54,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     private final RegistrationMailService registrationMailService;
     private final VersionService versionService;
     private final VocabularyService vocabularyService;
-    private final CatalogueService<CatalogueBundle> catalogueService;
+    private final CatalogueService catalogueService;
     private final SynchronizerService<Provider> synchronizerService;
     private final ProviderResourcesCommonMethods commonMethods;
     @Autowired
@@ -63,18 +63,18 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     @Value("${catalogue.id}")
     private String catalogueId;
 
-    public ProviderManager(@Lazy ServiceBundleService<ServiceBundle> serviceBundleService,
+    public ProviderManager(@Lazy ServiceBundleService serviceBundleService,
                            @Lazy SecurityService securityService, @Lazy FieldValidator fieldValidator,
                            @Lazy RegistrationMailService registrationMailService, IdCreator idCreator,
                            EventService eventService, VersionService versionService,
                            VocabularyService vocabularyService,
                            @Qualifier("providerSync") SynchronizerService<Provider> synchronizerService,
                            ProviderResourcesCommonMethods commonMethods,
-                           CatalogueService<CatalogueBundle> catalogueService,
+                           CatalogueService catalogueService,
                            @Lazy PublicServiceManager publicServiceManager,
                            @Lazy PublicProviderManager publicProviderManager,
-                           @Lazy TrainingResourceService<TrainingResourceBundle> trainingResourceService,
-                           @Lazy InteroperabilityRecordService<InteroperabilityRecordBundle> interoperabilityRecordService,
+                           @Lazy TrainingResourceService trainingResourceService,
+                           @Lazy InteroperabilityRecordService interoperabilityRecordService,
                            @Lazy PublicTrainingResourceManager publicTrainingResourceManager,
                            @Lazy PublicInteroperabilityRecordManager publicInteroperabilityRecordManager) {
         super(ProviderBundle.class);

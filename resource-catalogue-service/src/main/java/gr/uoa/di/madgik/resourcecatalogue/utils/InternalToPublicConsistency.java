@@ -26,11 +26,11 @@ public class InternalToPublicConsistency {
 
     private static final Logger logger = LoggerFactory.getLogger(InternalToPublicConsistency.class);
 
-    private final ProviderService<ProviderBundle> providerService;
-    private final ServiceBundleService<ServiceBundle> serviceBundleService;
-    private final TrainingResourceService<TrainingResourceBundle> trainingResourceService;
-    private final InteroperabilityRecordService<InteroperabilityRecordBundle> interoperabilityRecordService;
-    private final ResourceInteroperabilityRecordService<ResourceInteroperabilityRecordBundle> resourceInteroperabilityRecordService;
+    private final ProviderService providerService;
+    private final ServiceBundleService serviceBundleService;
+    private final TrainingResourceService trainingResourceService;
+    private final InteroperabilityRecordService interoperabilityRecordService;
+    private final ResourceInteroperabilityRecordService resourceInteroperabilityRecordService;
 
 
     private final PublicProviderManager publicProviderManager;
@@ -53,11 +53,11 @@ public class InternalToPublicConsistency {
     @Value("${resource.consistency.cc}")
     private String consistencyCC;
 
-    public InternalToPublicConsistency(ProviderService<ProviderBundle> providerService,
-                                       ServiceBundleService<ServiceBundle> serviceBundleService,
-                                       TrainingResourceService<TrainingResourceBundle> trainingResourceService,
-                                       InteroperabilityRecordService<InteroperabilityRecordBundle> interoperabilityRecordService,
-                                       ResourceInteroperabilityRecordService<ResourceInteroperabilityRecordBundle> resourceInteroperabilityRecordService,
+    public InternalToPublicConsistency(ProviderService providerService,
+                                       ServiceBundleService serviceBundleService,
+                                       TrainingResourceService trainingResourceService,
+                                       InteroperabilityRecordService interoperabilityRecordService,
+                                       ResourceInteroperabilityRecordService resourceInteroperabilityRecordService,
                                        PublicProviderManager publicProviderManager, PublicServiceManager publicServiceManager,
                                        PublicTrainingResourceManager publicTrainingResourceManager,
                                        PublicInteroperabilityRecordManager publicInteroperabilityRecordManager,
