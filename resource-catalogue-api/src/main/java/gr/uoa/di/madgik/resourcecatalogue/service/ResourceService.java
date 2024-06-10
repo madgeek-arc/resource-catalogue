@@ -8,8 +8,7 @@ import org.springframework.security.core.Authentication;
 import java.util.List;
 import java.util.Map;
 
-public interface
-ResourceService<T> extends ResourceCRUDService<T, Authentication> {
+public interface ResourceService<T> extends ResourceCRUDService<T, Authentication> {
 
     /**
      * Get resources by a specific field.
