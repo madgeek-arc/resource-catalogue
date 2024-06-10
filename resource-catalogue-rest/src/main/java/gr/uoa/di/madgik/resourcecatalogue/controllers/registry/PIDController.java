@@ -6,6 +6,7 @@ import gr.uoa.di.madgik.resourcecatalogue.service.*;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@Profile("beyond")
 @RestController
 @RequestMapping("pid")
 @Tag(name = "pid", description = "Get information about a specific resource via its PID")

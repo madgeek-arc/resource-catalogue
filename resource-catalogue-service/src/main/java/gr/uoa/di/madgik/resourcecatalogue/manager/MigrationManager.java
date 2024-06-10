@@ -9,7 +9,6 @@ import gr.uoa.di.madgik.resourcecatalogue.service.SecurityService;
 import gr.uoa.di.madgik.resourcecatalogue.utils.JmsService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
@@ -36,12 +35,11 @@ public class MigrationManager implements MigrationService {
     private final JmsService jmsService;
     private final SecurityService securityService;
 
-    @Value("${catalogue.name}")
-    private String catalogueName;
+    @Value("${catalogue.id}")
+    private String catalogueId;
     @Value("${elastic.index.max_result_window:10000}")
     private int maxQuantity;
 
-    @Autowired
     public MigrationManager(ServiceBundleManager serviceBundleManager, PublicServiceManager publicServiceManager,
                             TrainingResourceManager trainingResourceManager, DatasourceManager datasourceManager,
                             InteroperabilityRecordManager interoperabilityRecordManager,
@@ -220,7 +218,7 @@ public class MigrationManager implements MigrationService {
                 resource.setPayload(trainingResourceManager.serialize(trainingResourceBundle));
                 resourceService.updateResource(resource);
                 // update Public Training Resource
-                TrainingResourceBundle updatedTrainingResourceBundle = trainingResourceManager.get(newResourceId, catalogueName);
+                TrainingResourceBundle updatedTrainingResourceBundle = trainingResourceManager.get(newResourceId, catalogueId);
                 publicTrainingResourceManager.update(updatedTrainingResourceBundle, securityService.getAdminAccess());
             }
         }

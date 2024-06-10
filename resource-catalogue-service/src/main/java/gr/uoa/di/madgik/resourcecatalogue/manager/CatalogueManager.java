@@ -14,7 +14,6 @@ import gr.uoa.di.madgik.resourcecatalogue.utils.ProviderResourcesCommonMethods;
 import gr.uoa.di.madgik.resourcecatalogue.validators.FieldValidator;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.authentication.InsufficientAuthenticationException;
@@ -39,18 +38,16 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
     private final IdCreator idCreator;
     private final FieldValidator fieldValidator;
     private final RegistrationMailService registrationMailService;
-    private final DataSource dataSource;
     private final ProviderService<ProviderBundle> providerService;
     private final ServiceBundleService<ServiceBundle> serviceBundleService;
     private final TrainingResourceService<TrainingResourceBundle> trainingResourceService;
     private final InteroperabilityRecordService<InteroperabilityRecordBundle> interoperabilityRecordService;
     private final ProviderResourcesCommonMethods commonMethods;
 
-    @Value("${catalogue.name}")
-    private String catalogueName;
+    @Value("${catalogue.id}")
+    private String catalogueId;
 
-    @Autowired
-    public CatalogueManager(IdCreator idCreator, DataSource dataSource,
+    public CatalogueManager(IdCreator idCreator,
                             @Lazy ProviderService<ProviderBundle> providerService,
                             @Lazy ServiceBundleService<ServiceBundle> serviceBundleService,
                             @Lazy TrainingResourceService<TrainingResourceBundle> trainingResourceService,
@@ -65,7 +62,6 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
         this.vocabularyService = vocabularyService;
         this.idCreator = idCreator;
         this.fieldValidator = fieldValidator;
-        this.dataSource = dataSource;
         this.registrationMailService = registrationMailService;
         this.providerService = providerService;
         this.serviceBundleService = serviceBundleService;
@@ -252,8 +248,8 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
         String id = catalogueBundle.getId();
 
         // Block accidental deletion of main Catalogue
-        if (id.equals(catalogueName)) {
-            throw new ValidationException(String.format("You cannot delete [%s] Catalogue.", catalogueName));
+        if (id.equals(catalogueId)) {
+            throw new ValidationException(String.format("You cannot delete [%s] Catalogue.", catalogueId));
         }
 
         // Delete Catalogue along with all its related Resources

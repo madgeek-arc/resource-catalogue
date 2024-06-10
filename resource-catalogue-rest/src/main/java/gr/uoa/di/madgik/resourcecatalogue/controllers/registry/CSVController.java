@@ -16,6 +16,7 @@ import org.json.CDL;
 import org.json.JSONArray;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Profile;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -28,6 +29,7 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.servlet.http.HttpServletResponse;
 import java.util.List;
 
+@Profile("beyond")
 @RestController
 @RequestMapping("exportToCSV")
 @Tag(name = "csv", description = "Download Providers and/or Services to CSV")

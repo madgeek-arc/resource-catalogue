@@ -1,4 +1,4 @@
-package gr.uoa.di.madgik.resourcecatalogue.controllers.registry;
+package gr.uoa.di.madgik.resourcecatalogue.controllers.lot1;
 
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.domain.Paging;
@@ -15,7 +15,6 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -27,19 +26,18 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Map;
 
-@Profile("beyond")
+@Profile("crud")
 @RestController
-@RequestMapping({"serviceBundle"})
-@Tag(name = "service bundle")
-public class ServiceBundleController {
+@RequestMapping({"services"})
+@Tag(name = "services")
+public class ServiceCrudController {
 
-    private static final Logger logger = LogManager.getLogger(ServiceBundleController.class.getName());
+    private static final Logger logger = LogManager.getLogger(ServiceCrudController.class.getName());
     private final ServiceBundleService<ServiceBundle> serviceBundleService;
     private final GenericResourceService genericResourceService;
 
-    @Autowired
-    ServiceBundleController(ServiceBundleService<ServiceBundle> serviceBundleService,
-                            GenericResourceService genericResourceService) {
+    ServiceCrudController(ServiceBundleService<ServiceBundle> serviceBundleService,
+                          GenericResourceService genericResourceService) {
         this.serviceBundleService = serviceBundleService;
         this.genericResourceService = genericResourceService;
     }

@@ -7,6 +7,7 @@ import gr.uoa.di.madgik.resourcecatalogue.dto.Value;
 import gr.uoa.di.madgik.resourcecatalogue.service.StatisticsService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -16,6 +17,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
+@Profile("beyond")
 @RestController
 @RequestMapping("stats")
 @Tag(name = "statistics", description = "Get information about KPIs usage statistics")

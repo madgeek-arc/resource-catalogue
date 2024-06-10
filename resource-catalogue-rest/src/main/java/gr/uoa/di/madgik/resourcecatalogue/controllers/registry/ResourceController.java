@@ -26,7 +26,7 @@ public abstract class ResourceController<T extends Identifiable> {
 
     private static final Logger logger = LogManager.getLogger(ResourceController.class);
 
-    ResourceController(ResourceService<T> service) {
+    protected ResourceController(ResourceService<T> service) {
         this.service = service;
     }
 

@@ -15,7 +15,6 @@ import gr.uoa.di.madgik.resourcecatalogue.utils.ObjectUtils;
 import gr.uoa.di.madgik.resourcecatalogue.utils.ProviderResourcesCommonMethods;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.context.annotation.Lazy;
@@ -53,10 +52,9 @@ public class ServiceBundleManager extends AbstractServiceBundleManager<ServiceBu
     private final ResourceInteroperabilityRecordService<ResourceInteroperabilityRecordBundle> resourceInteroperabilityRecordService;
     private final ProviderResourcesCommonMethods commonMethods;
 
-    @Value("${catalogue.name}")
-    private String catalogueName;
+    @Value("${catalogue.id}")
+    private String catalogueId;
 
-    @Autowired
     public ServiceBundleManager(ProviderService<ProviderBundle> providerService,
                                 IdCreator idCreator, @Lazy SecurityService securityService,
                                 @Lazy RegistrationMailService registrationMailService,
@@ -109,7 +107,7 @@ public class ServiceBundleManager extends AbstractServiceBundleManager<ServiceBu
     @CacheEvict(cacheNames = {CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)
     public ServiceBundle addResource(ServiceBundle serviceBundle, String catalogueId, Authentication auth) {
         if (catalogueId == null || catalogueId.equals("")) { // add catalogue provider
-            serviceBundle.getService().setCatalogueId(catalogueName);
+            serviceBundle.getService().setCatalogueId(this.catalogueId);
         } else { // add provider from external catalogue
             commonMethods.checkCatalogueIdConsistency(serviceBundle, catalogueId);
         }
@@ -200,7 +198,7 @@ public class ServiceBundleManager extends AbstractServiceBundleManager<ServiceBu
 
 
         if (catalogueId == null || catalogueId.equals("")) {
-            ret.getService().setCatalogueId(catalogueName);
+            ret.getService().setCatalogueId(this.catalogueId);
         } else {
             commonMethods.checkCatalogueIdConsistency(ret, catalogueId);
         }
@@ -344,7 +342,7 @@ public class ServiceBundleManager extends AbstractServiceBundleManager<ServiceBu
             throw new ValidationException(String.format("Vocabulary %s does not consist a Resource State!", status));
         }
         logger.trace("verifyResource with id: '{}' | status -> '{}' | active -> '{}'", id, status, active);
-        ServiceBundle serviceBundle = getCatalogueResource(catalogueName, id, auth);
+        ServiceBundle serviceBundle = getCatalogueResource(catalogueId, id, auth);
         serviceBundle.setStatus(vocabularyService.get(status).getId());
         ProviderBundle resourceProvider = providerService.get(serviceBundle.getService().getCatalogueId(), serviceBundle.getService().getResourceOrganisation(), auth);
         List<LoggingInfo> loggingInfoList = commonMethods.returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(serviceBundle, auth);
@@ -400,7 +398,7 @@ public class ServiceBundleManager extends AbstractServiceBundleManager<ServiceBu
     public ServiceBundle publish(String serviceId, Boolean active, Authentication auth) {
         ServiceBundle service;
         String activeProvider = "";
-        service = this.get(serviceId, catalogueName);
+        service = this.get(serviceId, catalogueId);
 
         if ((service.getStatus().equals(vocabularyService.get("pending resource").getId()) ||
                 service.getStatus().equals(vocabularyService.get("rejected resource").getId())) && !service.isActive()) {
@@ -539,7 +537,7 @@ public class ServiceBundleManager extends AbstractServiceBundleManager<ServiceBu
     public List<ServiceBundle> getResourceBundles(String providerId, Authentication auth) {
         FacetFilter ff = new FacetFilter();
         ff.addFilter("resource_organisation", providerId);
-        ff.addFilter("catalogue_id", catalogueName);
+        ff.addFilter("catalogue_id", catalogueId);
         ff.setQuantity(maxQuantity);
         ff.addOrderBy("name", "asc");
         return this.getAll(ff, auth).getResults();
@@ -560,7 +558,7 @@ public class ServiceBundleManager extends AbstractServiceBundleManager<ServiceBu
         ProviderBundle providerBundle = providerService.get(providerId);
         FacetFilter ff = new FacetFilter();
         ff.addFilter("resource_organisation", providerId);
-        ff.addFilter("catalogue_id", catalogueName);
+        ff.addFilter("catalogue_id", catalogueId);
         ff.setQuantity(maxQuantity);
         ff.addOrderBy("name", "asc");
         if (auth != null && auth.isAuthenticated()) {
@@ -582,7 +580,7 @@ public class ServiceBundleManager extends AbstractServiceBundleManager<ServiceBu
     public List<Service> getResources(String providerId) {
         FacetFilter ff = new FacetFilter();
         ff.addFilter("resource_organisation", providerId);
-        ff.addFilter("catalogue_id", catalogueName);
+        ff.addFilter("catalogue_id", catalogueId);
         ff.addFilter("published", false);
         ff.setQuantity(maxQuantity);
         ff.addOrderBy("name", "asc");
@@ -619,14 +617,14 @@ public class ServiceBundleManager extends AbstractServiceBundleManager<ServiceBu
     }
 
     public ServiceBundle changeProvider(String resourceId, String newProviderId, String comment, Authentication auth) {
-        ServiceBundle serviceBundle = get(resourceId, catalogueName);
+        ServiceBundle serviceBundle = get(resourceId, catalogueId);
         // check Service's status
         if (!serviceBundle.getStatus().equals("approved resource")) {
             throw new ValidationException(String.format("You cannot move Service with id [%s] to another Provider as it" +
                     "is not yet Approved", serviceBundle.getId()));
         }
-        ProviderBundle newProvider = providerService.get(catalogueName, newProviderId, auth);
-        ProviderBundle oldProvider = providerService.get(catalogueName, serviceBundle.getService().getResourceOrganisation(), auth);
+        ProviderBundle newProvider = providerService.get(catalogueId, newProviderId, auth);
+        ProviderBundle oldProvider = providerService.get(catalogueId, serviceBundle.getService().getResourceOrganisation(), auth);
 
         // check that the 2 Providers co-exist under the same Catalogue
         if (!oldProvider.getProvider().getCatalogueId().equals(newProvider.getProvider().getCatalogueId())) {
@@ -670,8 +668,8 @@ public class ServiceBundleManager extends AbstractServiceBundleManager<ServiceBu
 
         // add Resource, delete the old one
         add(serviceBundle, auth);
-        publicServiceManager.delete(get(resourceId, catalogueName)); // FIXME: ProviderManagementAspect's deletePublicDatasource is not triggered
-        delete(get(resourceId, catalogueName));
+        publicServiceManager.delete(get(resourceId, catalogueId)); // FIXME: ProviderManagementAspect's deletePublicDatasource is not triggered
+        delete(get(resourceId, catalogueId));
 
         // update other resources which had the old resource ID on their fields
         migrationService.updateRelatedToTheIdFieldsOfOtherResourcesOfThePortal(resourceId, resourceId); //TODO: SEE IF IT WORKS AS INTENDED AND REMOVE

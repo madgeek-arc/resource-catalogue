@@ -22,8 +22,8 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -38,6 +38,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+@Profile("beyond")
 @RestController
 @RequestMapping("provider")
 @Tag(name = "provider")
@@ -51,16 +52,15 @@ public class ProviderController {
     private final MigrationService migrationService;
     private final GenericResourceService genericResourceService;
 
-    @Value("${catalogue.name}")
-    private String catalogueName;
+    @Value("${catalogue.id}")
+    private String catalogueId;
 
     @Value("${auditing.interval:6}")
     private String auditingInterval;
 
     @Value("${catalogue.name:Resource Catalogue}")
-    private String projectName;
+    private String catalogueName;
 
-    @Autowired
     ProviderController(ProviderService<ProviderBundle> service,
                        ServiceBundleService<ServiceBundle> serviceBundleService,
                        TrainingResourceService<TrainingResourceBundle> trainingResourceService,
@@ -78,15 +78,15 @@ public class ProviderController {
     @DeleteMapping(path = "{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     public ResponseEntity<Provider> delete(@PathVariable("id") String id,
-                                           @RequestParam(defaultValue = "${catalogue.name}", name = "catalogue_id") String catalogueId,
+                                           @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId,
                                            @Parameter(hidden = true) Authentication auth) {
         ProviderBundle provider = providerService.get(catalogueId, id, auth);
         if (provider == null) {
             return new ResponseEntity<>(HttpStatus.GONE);
         }
         // Block users of deleting Providers of another Catalogue
-        if (!provider.getProvider().getCatalogueId().equals(catalogueName)) {
-            throw new ValidationException(String.format("You cannot delete a Provider of a non [%s] Catalogue.", projectName));
+        if (!provider.getProvider().getCatalogueId().equals(this.catalogueId)) {
+            throw new ValidationException(String.format("You cannot delete a Provider of a non [%s] Catalogue.", catalogueName));
         }
         logger.info("Deleting provider: {} of the catalogue: {}", provider.getProvider().getName(), provider.getProvider().getCatalogueId());
 
@@ -99,7 +99,7 @@ public class ProviderController {
     @Operation(summary = "Returns the Provider with the given id.")
     @GetMapping(path = "{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity<Provider> get(@PathVariable("id") String id,
-                                        @RequestParam(defaultValue = "${catalogue.name}", name = "catalogue_id") String catalogueId,
+                                        @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId,
                                         @Parameter(hidden = true) Authentication auth) {
         Provider provider = providerService.get(catalogueId, id, auth).getProvider();
         return new ResponseEntity<>(provider, HttpStatus.OK);
@@ -128,7 +128,7 @@ public class ProviderController {
     @PutMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isProviderAdmin(#auth,#provider.id,#provider.catalogueId)")
     public ResponseEntity<Provider> update(@RequestBody Provider provider,
-                                           @RequestParam(defaultValue = "${catalogue.name}", name = "catalogue_id") String catalogueId,
+                                           @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId,
                                            @RequestParam(required = false) String comment,
                                            @Parameter(hidden = true) Authentication auth) throws ResourceNotFoundException {
         ProviderBundle providerBundle = providerService.get(catalogueId, provider.getId(), auth);
@@ -169,7 +169,7 @@ public class ProviderController {
     @GetMapping(path = "bundle/{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isProviderAdmin(#auth, #id, #catalogueId)")
     public ResponseEntity<ProviderBundle> getProviderBundle(@PathVariable("id") String id,
-                                                            @RequestParam(defaultValue = "${catalogue.name}", name = "catalogue_id") String catalogueId,
+                                                            @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId,
                                                             @Parameter(hidden = true) Authentication auth) {
         return new ResponseEntity<>(providerService.get(catalogueId, id, auth), HttpStatus.OK);
     }
@@ -285,14 +285,14 @@ public class ProviderController {
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     public ResponseEntity<List<ServiceBundle>> publishServices(@RequestParam String id, @RequestParam Boolean active,
                                                                @Parameter(hidden = true) Authentication auth) throws ResourceNotFoundException {
-        ProviderBundle provider = providerService.get(catalogueName, id, auth);
+        ProviderBundle provider = providerService.get(catalogueId, id, auth);
         if (provider == null) {
             throw new ResourceException("Provider with id '" + id + "' does not exist.", HttpStatus.NOT_FOUND);
         }
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(1000);
         ff.addFilter("resource_organisation", id);
-        ff.addFilter("catalogue_id", catalogueName);
+        ff.addFilter("catalogue_id", catalogueId);
         List<ServiceBundle> services = serviceBundleService.getAll(ff, auth).getResults();
         for (ServiceBundle service : services) {
             service.setActive(active);
@@ -335,7 +335,7 @@ public class ProviderController {
     // Get all modification details of a specific Provider based on id.
     @GetMapping(path = {"history/{id}"}, produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<Paging<ResourceHistory>> history(@PathVariable String id,
-                                                           @RequestParam(defaultValue = "${catalogue.name}", name = "catalogue_id") String catalogueId) {
+                                                           @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId) {
         Paging<ResourceHistory> history = this.providerService.getHistory(id, catalogueId);
         return ResponseEntity.ok(history);
     }
@@ -367,7 +367,7 @@ public class ProviderController {
     // Get all modification details of a specific Provider based on id.
     @GetMapping(path = {"loggingInfoHistory/{id}"}, produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<Paging<LoggingInfo>> loggingInfoHistory(@PathVariable String id,
-                                                                  @RequestParam(defaultValue = "${catalogue.name}", name = "catalogue_id") String catalogueId) {
+                                                                  @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId) {
         Paging<LoggingInfo> loggingInfoHistory = this.providerService.getLoggingInfoHistory(id, catalogueId);
         return ResponseEntity.ok(loggingInfoHistory);
     }

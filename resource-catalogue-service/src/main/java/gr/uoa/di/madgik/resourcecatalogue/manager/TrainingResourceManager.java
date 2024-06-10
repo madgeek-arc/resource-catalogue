@@ -68,8 +68,9 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
     @Autowired
     @Qualifier("trainingResourceSync")
     private final SynchronizerService<TrainingResource> synchronizerService;
-    @Value("${catalogue.name}")
-    private String catalogueName;
+
+    @Value("${catalogue.id}")
+    private String catalogueId;
 
     public TrainingResourceManager(ProviderService<ProviderBundle> providerService,
                                    IdCreator idCreator, @Lazy SecurityService securityService,
@@ -122,7 +123,7 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
     @CacheEvict(cacheNames = {CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)
     public TrainingResourceBundle addResource(TrainingResourceBundle trainingResourceBundle, String catalogueId, Authentication auth) {
         if (catalogueId == null || catalogueId.equals("")) { // add catalogue provider
-            trainingResourceBundle.getTrainingResource().setCatalogueId(catalogueName);
+            trainingResourceBundle.getTrainingResource().setCatalogueId(this.catalogueId);
         } else { // add provider from external catalogue
             commonMethods.checkCatalogueIdConsistency(trainingResourceBundle, catalogueId);
         }
@@ -226,7 +227,7 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
         }
 
         if (catalogueId == null || catalogueId.equals("")) {
-            ret.getTrainingResource().setCatalogueId(catalogueName);
+            ret.getTrainingResource().setCatalogueId(this.catalogueId);
         } else {
             commonMethods.checkCatalogueIdConsistency(ret, catalogueId);
         }
@@ -366,7 +367,7 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
             throw new ValidationException(String.format("Vocabulary %s does not consist a Resource State!", status));
         }
         logger.trace("verifyResource with id: '{}' | status -> '{}' | active -> '{}'", id, status, active);
-        TrainingResourceBundle trainingResourceBundle = getCatalogueResource(catalogueName, id, auth);
+        TrainingResourceBundle trainingResourceBundle = getCatalogueResource(catalogueId, id, auth);
         trainingResourceBundle.setStatus(vocabularyService.get(status).getId());
         ProviderBundle resourceProvider = providerService.get(trainingResourceBundle.getTrainingResource().getCatalogueId(),
                 trainingResourceBundle.getTrainingResource().getResourceOrganisation(), auth);
@@ -441,7 +442,7 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
     public TrainingResourceBundle publish(String trainingResourceId, Boolean active, Authentication auth) {
         TrainingResourceBundle trainingResourceBundle;
         String activeProvider = "";
-        trainingResourceBundle = this.get(trainingResourceId, catalogueName);
+        trainingResourceBundle = this.get(trainingResourceId, catalogueId);
 
         if ((trainingResourceBundle.getStatus().equals(vocabularyService.get("pending resource").getId()) ||
                 trainingResourceBundle.getStatus().equals(vocabularyService.get("rejected resource").getId())) && !trainingResourceBundle.isActive()) {
@@ -560,7 +561,7 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
     public List<TrainingResourceBundle> getResourceBundles(String providerId, Authentication auth) {
         FacetFilter ff = new FacetFilter();
         ff.addFilter("resource_organisation", providerId);
-        ff.addFilter("catalogue_id", catalogueName);
+        ff.addFilter("catalogue_id", catalogueId);
         ff.setQuantity(maxQuantity);
         ff.addOrderBy("title", "asc");
         return this.getAll(ff, auth).getResults();
@@ -581,7 +582,7 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
         ProviderBundle providerBundle = providerService.get(providerId);
         FacetFilter ff = new FacetFilter();
         ff.addFilter("resource_organisation", providerId);
-        ff.addFilter("catalogue_id", catalogueName);
+        ff.addFilter("catalogue_id", catalogueId);
         ff.setQuantity(maxQuantity);
         ff.addOrderBy("title", "asc");
         if (auth != null && auth.isAuthenticated()) {
@@ -603,7 +604,7 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
     public List<TrainingResourceBundle> getInactiveResources(String providerId) {
         FacetFilter ff = new FacetFilter();
         ff.addFilter("resource_organisation", providerId);
-        ff.addFilter("catalogue_id", catalogueName);
+        ff.addFilter("catalogue_id", catalogueId);
         ff.addFilter("active", false);
         ff.setFrom(0);
         ff.setQuantity(maxQuantity);
@@ -657,7 +658,7 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
     public TrainingResourceBundle get(String id) {
         TrainingResourceBundle resource = null;
         try {
-            resource = get(id, catalogueName);
+            resource = get(id, catalogueId);
         } catch (ResourceNotFoundException e) {
             resource = checkIdExistenceInOtherCatalogues(id);
             if (resource == null) {
@@ -682,7 +683,7 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
     public List<TrainingResource> getResources(String providerId) {
         FacetFilter ff = new FacetFilter();
         ff.addFilter("resource_organisation", providerId);
-        ff.addFilter("catalogue_id", catalogueName);
+        ff.addFilter("catalogue_id", catalogueId);
         ff.addFilter("published", false);
         ff.setQuantity(maxQuantity);
         ff.addOrderBy("title", "asc");
@@ -852,7 +853,7 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
     public TrainingResourceBundle getResourceTemplate(String providerId, Authentication auth) {
         FacetFilter ff = new FacetFilter();
         ff.addFilter("resource_organisation", providerId);
-        ff.addFilter("catalogue_id", catalogueName);
+        ff.addFilter("catalogue_id", catalogueId);
         List<TrainingResourceBundle> allProviderTrainingResources = getAll(ff, auth).getResults();
         for (TrainingResourceBundle trainingResourceBundle : allProviderTrainingResources) {
             if (trainingResourceBundle.getStatus().equals(vocabularyService.get("pending resource").getId())) {
@@ -874,7 +875,7 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
                 .map(id ->
                 {
                     try {
-                        return get(id, catalogueName).getTrainingResource();
+                        return get(id, catalogueId).getTrainingResource();
                     } catch (ServiceException | ResourceNotFoundException e) {
                         return null;
                     }
@@ -886,14 +887,14 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
     }
 
     public TrainingResourceBundle changeProvider(String resourceId, String newProviderId, String comment, Authentication auth) {
-        TrainingResourceBundle trainingResourceBundle = get(resourceId, catalogueName);
+        TrainingResourceBundle trainingResourceBundle = get(resourceId, catalogueId);
         // check Datasource's status
         if (!trainingResourceBundle.getStatus().equals("approved resource")) {
             throw new ValidationException(String.format("You cannot move Training Resource with id [%s] to another Provider as it" +
                     "is not yet Approved", trainingResourceBundle.getId()));
         }
-        ProviderBundle newProvider = providerService.get(catalogueName, newProviderId, auth);
-        ProviderBundle oldProvider = providerService.get(catalogueName, trainingResourceBundle.getTrainingResource().getResourceOrganisation(), auth);
+        ProviderBundle newProvider = providerService.get(catalogueId, newProviderId, auth);
+        ProviderBundle oldProvider = providerService.get(catalogueId, trainingResourceBundle.getTrainingResource().getResourceOrganisation(), auth);
 
         // check that the 2 Providers co-exist under the same Catalogue
         if (!oldProvider.getProvider().getCatalogueId().equals(newProvider.getProvider().getCatalogueId())) {
@@ -937,8 +938,8 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
 
         // add Resource, delete the old one
         add(trainingResourceBundle, auth);
-        publicTrainingResourceManager.delete(get(resourceId, catalogueName)); // FIXME: ProviderManagementAspect's deletePublicDatasource is not triggered
-        delete(get(resourceId, catalogueName));
+        publicTrainingResourceManager.delete(get(resourceId, catalogueId)); // FIXME: ProviderManagementAspect's deletePublicDatasource is not triggered
+        delete(get(resourceId, catalogueId));
 
         // update other resources which had the old resource ID on their fields
         migrationService.updateRelatedToTheIdFieldsOfOtherResourcesOfThePortal(resourceId, trainingResourceBundle.getId());

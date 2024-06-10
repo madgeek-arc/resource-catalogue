@@ -17,7 +17,6 @@ import gr.uoa.di.madgik.resourcecatalogue.service.VocabularyService;
 import gr.uoa.di.madgik.resourcecatalogue.utils.ProviderResourcesCommonMethods;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.context.annotation.Lazy;
@@ -41,10 +40,9 @@ public class PendingServiceManager extends ResourceManager<ServiceBundle> implem
     private ServiceBundleManager serviceBundleManager;
     private final ProviderResourcesCommonMethods commonMethods;
 
-    @Value("${catalogue.name}")
-    private String catalogueName;
+    @Value("${catalogue.id}")
+    private String catalogueId;
 
-    @Autowired
     public PendingServiceManager(ServiceBundleService<ServiceBundle> serviceBundleService,
                                  IdCreator idCreator, @Lazy VocabularyService vocabularyService,
                                  @Lazy ProviderManager providerManager, @Lazy ServiceBundleManager serviceBundleManager,
@@ -74,8 +72,8 @@ public class PendingServiceManager extends ResourceManager<ServiceBundle> implem
         ff.setQuantity(maxQuantity);
         List<ServiceBundle> resourceList = serviceBundleService.getAll(ff, auth).getResults();
         for (ServiceBundle existingResource : resourceList) {
-            if (service.getService().getId().equals(existingResource.getService().getId()) && existingResource.getService().getCatalogueId().equals(catalogueName)) {
-                throw new ValidationException(String.format("Service with the specific id already exists on the [%s] Catalogue. Please refactor your 'abbreviation' field.", catalogueName));
+            if (service.getService().getId().equals(existingResource.getService().getId()) && existingResource.getService().getCatalogueId().equals(catalogueId)) {
+                throw new ValidationException(String.format("Service with the specific id already exists on the [%s] Catalogue. Please refactor your 'abbreviation' field.", catalogueId));
             }
         }
         logger.trace("User '{}' is attempting to add a new Pending Service with id {}", auth, service.getId());
@@ -89,7 +87,7 @@ public class PendingServiceManager extends ResourceManager<ServiceBundle> implem
         loggingInfoList.add(loggingInfo);
         service.setLoggingInfo(loggingInfoList);
 
-        service.getService().setCatalogueId(catalogueName);
+        service.getService().setCatalogueId(catalogueId);
         service.setActive(false);
 
         super.add(service, auth);
@@ -103,7 +101,7 @@ public class PendingServiceManager extends ResourceManager<ServiceBundle> implem
         // get existing resource
         Resource existing = getPendingResourceViaServiceId(serviceBundle.getService().getId());
         // block catalogueId updates from Provider Admins
-        serviceBundle.getService().setCatalogueId(catalogueName);
+        serviceBundle.getService().setCatalogueId(catalogueId);
         logger.trace("User '{}' is attempting to update the Pending Service with id {}", auth, serviceBundle.getId());
         serviceBundle.setMetadata(Metadata.updateMetadata(serviceBundle.getMetadata(), User.of(auth).getFullName()));
         // save existing resource with new payload
@@ -124,8 +122,8 @@ public class PendingServiceManager extends ResourceManager<ServiceBundle> implem
     @CacheEvict(cacheNames = {CACHE_VISITS, CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)
     public ServiceBundle transformToPending(String serviceId, Authentication auth) {
         logger.trace("User '{}' is attempting to transform the Active Service with id {} to Pending", auth, serviceId);
-        ServiceBundle serviceBundle = serviceBundleService.get(serviceId, catalogueName);
-        Resource resource = serviceBundleService.getResource(serviceBundle.getService().getId(), catalogueName);
+        ServiceBundle serviceBundle = serviceBundleService.get(serviceId, catalogueId);
+        Resource resource = serviceBundleService.getResource(serviceBundle.getService().getId(), catalogueId);
         resource.setResourceTypeName("service");
         resourceService.changeResourceType(resource, resourceType);
         return serviceBundle;
@@ -192,7 +190,7 @@ public class PendingServiceManager extends ResourceManager<ServiceBundle> implem
     private Resource getPendingResourceViaServiceId(String serviceId) {
         Paging<Resource> resources;
         resources = searchService
-                .cqlQuery(String.format("resource_internal_id = \"%s\" AND catalogue_id = \"%s\"", serviceId, catalogueName),
+                .cqlQuery(String.format("resource_internal_id = \"%s\" AND catalogue_id = \"%s\"", serviceId, catalogueId),
                         resourceType.getName());
         assert resources != null;
         return resources.getTotal() == 0 ? null : resources.getResults().get(0);

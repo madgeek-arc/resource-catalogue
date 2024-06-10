@@ -21,6 +21,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -32,6 +33,7 @@ import java.util.List;
 import java.util.Map;
 
 
+@Profile("beyond")
 @RestController
 @RequestMapping
 @Tag(name = "public training resource")
@@ -59,7 +61,7 @@ public class PublicTrainingResourceController {
     @Operation(summary = "Returns the Public Training Resource with the given id.")
     @GetMapping(path = "public/trainingResource/{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity<?> getPublicTrainingResource(@PathVariable("id") String id,
-                                                       @RequestParam(defaultValue = "${catalogue.name}", name = "catalogue_id") String catalogueId,
+                                                       @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId,
                                                        @Parameter(hidden = true) Authentication auth) {
         TrainingResourceBundle trainingResourceBundle = trainingResourceBundleService.get(id, catalogueId);
         if (auth != null && auth.isAuthenticated()) {
@@ -83,7 +85,7 @@ public class PublicTrainingResourceController {
     @GetMapping(path = "public/trainingResource/trainingResourceBundle/{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth, #id, #catalogueId)")
     public ResponseEntity<?> getPublicTrainingResourceBundle(@PathVariable("id") String id,
-                                                             @RequestParam(defaultValue = "${catalogue.name}", name = "catalogue_id") String catalogueId,
+                                                             @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId,
                                                              @Parameter(hidden = true) Authentication auth) {
         TrainingResourceBundle trainingResourceBundle = trainingResourceBundleService.get(id, catalogueId);
         if (auth != null && auth.isAuthenticated()) {

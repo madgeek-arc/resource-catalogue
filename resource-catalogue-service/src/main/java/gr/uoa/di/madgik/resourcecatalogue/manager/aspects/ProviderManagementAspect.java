@@ -13,14 +13,15 @@ import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.After;
 import org.aspectj.lang.annotation.AfterReturning;
 import org.aspectj.lang.annotation.Aspect;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.context.annotation.Profile;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
 import static gr.uoa.di.madgik.resourcecatalogue.config.Properties.Cache.CACHE_PROVIDERS;
 
+@Profile("beyond")
 @Aspect
 @Component
 public class ProviderManagementAspect {
@@ -39,10 +40,10 @@ public class ProviderManagementAspect {
     private final RegistrationMailService registrationMailService;
     private final SecurityService securityService;
     private final PublicResourceInteroperabilityRecordManager publicResourceInteroperabilityRecordManager;
-    @Value("${catalogue.name}")
-    private String catalogueName;
 
-    @Autowired
+    @Value("${catalogue.id}")
+    private String catalogueId;
+
     public ProviderManagementAspect(ProviderService<ProviderBundle> providerService,
                                     ServiceBundleService<ServiceBundle> serviceBundleService,
                                     TrainingResourceService<TrainingResourceBundle> trainingResourceService,
@@ -93,7 +94,7 @@ public class ProviderManagementAspect {
             returning = "providerBundle")
     public void providerRegistrationEmails(final ProviderBundle providerBundle) {
         logger.trace("Sending Registration emails");
-        if (!providerBundle.getMetadata().isPublished() && providerBundle.getProvider().getCatalogueId().equals(catalogueName)) {
+        if (!providerBundle.getMetadata().isPublished() && providerBundle.getProvider().getCatalogueId().equals(catalogueId)) {
             registrationMailService.sendProviderMails(providerBundle, "providerManager");
         }
     }
@@ -349,7 +350,7 @@ public class ProviderManagementAspect {
     @Async
     @CacheEvict(value = CACHE_PROVIDERS, allEntries = true)
     public void updateServiceProviderStates(ServiceBundle serviceBundle) {
-        if (serviceBundle.getService().getCatalogueId().equals(catalogueName)) {
+        if (serviceBundle.getService().getCatalogueId().equals(catalogueId)) {
             try {
                 ProviderBundle providerBundle = providerService.get(serviceBundle.getService().getResourceOrganisation(), null);
                 if (providerBundle.getTemplateStatus().equals("no template status") || providerBundle.getTemplateStatus().equals("rejected template")) {
@@ -366,7 +367,7 @@ public class ProviderManagementAspect {
     @Async
     @CacheEvict(value = CACHE_PROVIDERS, allEntries = true)
     public void updateTrainingResourceProviderStates(TrainingResourceBundle trainingResourceBundle) {
-        if (trainingResourceBundle.getTrainingResource().getCatalogueId().equals(catalogueName)) {
+        if (trainingResourceBundle.getTrainingResource().getCatalogueId().equals(catalogueId)) {
             try {
                 ProviderBundle providerBundle = providerService.get(trainingResourceBundle.getTrainingResource().getResourceOrganisation(), null);
                 if (providerBundle.getTemplateStatus().equals("no template status") || providerBundle.getTemplateStatus().equals("rejected template")) {
@@ -461,7 +462,7 @@ public class ProviderManagementAspect {
             returning = "configurationTemplateInstanceBundle")
     public void addConfigurationTemplateInstanceAsPublic(final ConfigurationTemplateInstanceBundle configurationTemplateInstanceBundle) {
         try {
-            publicConfigurationTemplateImplementationManager.get(String.format("%s.%s", catalogueName, configurationTemplateInstanceBundle.getId()));
+            publicConfigurationTemplateImplementationManager.get(String.format("%s.%s", catalogueId, configurationTemplateInstanceBundle.getId()));
         } catch (ResourceException | ResourceNotFoundException e) {
             publicConfigurationTemplateImplementationManager.add(ObjectUtils.clone(configurationTemplateInstanceBundle), null);
         }

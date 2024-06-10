@@ -67,8 +67,8 @@ public abstract class AbstractServiceBundleManager<T extends ServiceBundle> exte
     private SecurityService securityService;
     @Autowired
     private FieldValidator fieldValidator;
-    @Value("${catalogue.name}")
-    private String catalogueName;
+    @Value("${catalogue.id}")
+    private String catalogueId;
 
     @Autowired
     @Qualifier("serviceValidator")
@@ -139,7 +139,7 @@ public abstract class AbstractServiceBundleManager<T extends ServiceBundle> exte
     public T get(String id) {
         T resource = null;
         try {
-            resource = get(id, catalogueName);
+            resource = get(id, catalogueId);
         } catch (ResourceNotFoundException e) {
             resource = checkIdExistenceInOtherCatalogues(id);
             if (resource == null) {
@@ -283,7 +283,7 @@ public abstract class AbstractServiceBundleManager<T extends ServiceBundle> exte
                 .map(id ->
                 {
                     try {
-                        return get(id, catalogueName);
+                        return get(id, catalogueId);
                     } catch (ServiceException | ResourceNotFoundException e) {
                         return null;
                     }
@@ -369,7 +369,7 @@ public abstract class AbstractServiceBundleManager<T extends ServiceBundle> exte
     public Bundle<?> getResourceTemplate(String providerId, Authentication auth) {
         FacetFilter ff = new FacetFilter();
         ff.addFilter("resource_organisation", providerId);
-        ff.addFilter("catalogue_id", catalogueName);
+        ff.addFilter("catalogue_id", catalogueId);
         List<T> allProviderResources = getAll(ff, auth).getResults();
         for (T resourceBundle : allProviderResources) {
             if (resourceBundle.getStatus().equals(vocabularyService.get("pending resource").getId())) {
@@ -576,7 +576,7 @@ public abstract class AbstractServiceBundleManager<T extends ServiceBundle> exte
     public List<T> getInactiveResources(String providerId) {
         FacetFilter ff = new FacetFilter();
         ff.addFilter("resource_organisation", providerId);
-        ff.addFilter("catalogue_id", catalogueName);
+        ff.addFilter("catalogue_id", catalogueId);
         ff.addFilter("active", false);
         ff.setFrom(0);
         ff.setQuantity(maxQuantity);

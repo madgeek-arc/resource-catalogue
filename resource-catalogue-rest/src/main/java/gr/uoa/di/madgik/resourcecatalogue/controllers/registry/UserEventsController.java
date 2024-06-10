@@ -7,8 +7,8 @@ import gr.uoa.di.madgik.resourcecatalogue.domain.ServiceBundle;
 import gr.uoa.di.madgik.resourcecatalogue.service.EventService;
 import gr.uoa.di.madgik.resourcecatalogue.service.ServiceBundleService;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Map;
 
 @Deprecated
+@Profile("beyond")
 @RestController
 @RequestMapping("userEvents")
 @Tag(name = "user events", description = "Get information about a User's favourite Services and ratings")
@@ -31,10 +32,9 @@ public class UserEventsController {
     private final EventService eventService;
     private final ServiceBundleService<ServiceBundle> serviceBundleService;
 
-    @Value("${catalogue.name}")
-    private String catalogueName;
+    @Value("${catalogue.id}")
+    private String catalogueId;
 
-    @Autowired
     UserEventsController(EventService eventService, ServiceBundleService<ServiceBundle> serviceBundleService) {
         this.eventService = eventService;
         this.serviceBundleService = serviceBundleService;
@@ -68,7 +68,7 @@ public class UserEventsController {
         }
         for (Map.Entry<String, Float> favouriteService : favouriteServices.entrySet()) {
             if (favouriteService.getValue() == 1) { // "1" is true
-                services.add(serviceBundleService.get(favouriteService.getKey(), catalogueName).getService());
+                services.add(serviceBundleService.get(favouriteService.getKey(), catalogueId).getService());
             }
         }
         return new ResponseEntity<>(services, HttpStatus.OK);
@@ -90,7 +90,7 @@ public class UserEventsController {
             serviceRatings.putIfAbsent(userEvent.getService(), userEvent.getValue());
         }
         for (Map.Entry<String, Float> serviceRating : serviceRatings.entrySet()) {
-            services.add(serviceBundleService.get(serviceRating.getKey(), catalogueName).getService());
+            services.add(serviceBundleService.get(serviceRating.getKey(), catalogueId).getService());
         }
         return new ResponseEntity<>(services, HttpStatus.OK);
     }

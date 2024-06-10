@@ -21,6 +21,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -34,6 +35,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
+@Profile("beyond")
 @RestController
 @RequestMapping({"datasource"})
 @Tag(name = "datasource")
@@ -62,7 +64,7 @@ public class DatasourceController {
     @Operation(summary = "Returns the Datasource of the given Service of the given Catalogue.")
     @GetMapping(path = "/byService/{serviceId}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity<Datasource> getDatasourceByServiceId(@PathVariable("serviceId") String serviceId,
-                                                               @RequestParam(defaultValue = "${catalogue.name}", name = "catalogue_id") String catalogueId,
+                                                               @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId,
                                                                @Parameter(hidden = true) Authentication auth) {
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(1000);

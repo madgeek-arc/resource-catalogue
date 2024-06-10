@@ -15,7 +15,6 @@ import gr.uoa.di.madgik.resourcecatalogue.service.*;
 import gr.uoa.di.madgik.resourcecatalogue.utils.ProviderResourcesCommonMethods;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -43,10 +42,9 @@ public class PendingProviderManager extends ResourceManager<ProviderBundle> impl
     private final VocabularyService vocabularyService;
     private final ProviderResourcesCommonMethods commonMethods;
 
-    @Value("${catalogue.name}")
-    private String catalogueName;
+    @Value("${catalogue.id}")
+    private String catalogueId;
 
-    @Autowired
     public PendingProviderManager(ProviderService<ProviderBundle> providerManager,
                                   IdCreator idCreator, @Lazy RegistrationMailService registrationMailService,
                                   @Lazy SecurityService securityService, @Lazy VocabularyService vocabularyService,
@@ -89,8 +87,8 @@ public class PendingProviderManager extends ResourceManager<ProviderBundle> impl
         ff.setQuantity(maxQuantity);
         List<ProviderBundle> providerList = providerManager.getAll(ff, auth).getResults();
         for (ProviderBundle existingProvider : providerList) {
-            if (providerBundle.getProvider().getId().equals(existingProvider.getProvider().getId()) && existingProvider.getProvider().getCatalogueId().equals(catalogueName)) {
-                throw new ValidationException(String.format("Provider with the specific id already exists on the [%s] Catalogue. Please refactor your 'abbreviation' field.", catalogueName));
+            if (providerBundle.getProvider().getId().equals(existingProvider.getProvider().getId()) && existingProvider.getProvider().getCatalogueId().equals(catalogueId)) {
+                throw new ValidationException(String.format("Provider with the specific id already exists on the [%s] Catalogue. Please refactor your 'abbreviation' field.", catalogueId));
             }
         }
         logger.trace("User '{}' is attempting to add a new Pending Provider: {}", auth, providerBundle);
@@ -102,7 +100,7 @@ public class PendingProviderManager extends ResourceManager<ProviderBundle> impl
         loggingInfoList.add(loggingInfo);
         providerBundle.setLoggingInfo(loggingInfoList);
 
-        providerBundle.getProvider().setCatalogueId(catalogueName);
+        providerBundle.getProvider().setCatalogueId(catalogueId);
 
         super.add(providerBundle, auth);
 
@@ -116,7 +114,7 @@ public class PendingProviderManager extends ResourceManager<ProviderBundle> impl
         // get existing resource
         Resource existing = getPendingResourceViaProviderId(providerBundle.getId());
         // block catalogueId updates from Provider Admins
-        providerBundle.getProvider().setCatalogueId(catalogueName);
+        providerBundle.getProvider().setCatalogueId(catalogueId);
         logger.trace("User '{}' is attempting to update the Pending Provider: {}", auth, providerBundle);
         providerBundle.setMetadata(Metadata.updateMetadata(providerBundle.getMetadata(), User.of(auth).getFullName(), User.of(auth).getEmail()));
         // save existing resource with new payload
@@ -146,7 +144,7 @@ public class PendingProviderManager extends ResourceManager<ProviderBundle> impl
     @CacheEvict(value = CACHE_PROVIDERS, allEntries = true)
     public ProviderBundle transformToPending(String providerId, Authentication auth) {
         logger.trace("User '{}' is attempting to transform the Active Provider with id '{}' to Pending", auth, providerId);
-        Resource resource = providerManager.getResource(providerId, catalogueName);
+        Resource resource = providerManager.getResource(providerId, catalogueId);
         resource.setResourceTypeName("provider");
         resourceService.changeResourceType(resource, resourceType);
         return deserialize(resource);
@@ -254,7 +252,7 @@ public class PendingProviderManager extends ResourceManager<ProviderBundle> impl
     private Resource getPendingResourceViaProviderId(String providerId) {
         Paging<Resource> resources;
         resources = searchService
-                .cqlQuery(String.format("resource_internal_id = \"%s\" AND catalogue_id = \"%s\"", providerId, catalogueName),
+                .cqlQuery(String.format("resource_internal_id = \"%s\" AND catalogue_id = \"%s\"", providerId, catalogueId),
                         resourceType.getName());
         assert resources != null;
         return resources.getTotal() == 0 ? null : resources.getResults().get(0);

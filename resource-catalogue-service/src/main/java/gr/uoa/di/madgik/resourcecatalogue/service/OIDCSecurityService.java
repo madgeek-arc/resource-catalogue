@@ -33,8 +33,8 @@ public class OIDCSecurityService implements SecurityService {
     private final InteroperabilityRecordService<InteroperabilityRecordBundle> interoperabilityRecordService;
     private final Authentication adminAccess = new AdminAuthentication();
 
-    @Value("${catalogue.name}")
-    private String catalogueName;
+    @Value("${catalogue.id}")
+    private String catalogueId;
 
     OIDCSecurityService(@Lazy ProviderManager providerManager, CatalogueManager catalogueManager,
                         @Lazy ServiceBundleService<ServiceBundle> serviceBundleService,
@@ -83,7 +83,7 @@ public class OIDCSecurityService implements SecurityService {
 
     @Override
     public boolean isProviderAdmin(Authentication auth, @NotNull String providerId) {
-        return isProviderAdmin(auth, providerId, catalogueName);
+        return isProviderAdmin(auth, providerId, catalogueId);
     }
 
     @Override
@@ -97,7 +97,7 @@ public class OIDCSecurityService implements SecurityService {
 
     @Override
     public boolean isProviderAdmin(Authentication auth, @NotNull String providerId, boolean noThrow) {
-        return isProviderAdmin(auth, providerId, catalogueName, noThrow);
+        return isProviderAdmin(auth, providerId, catalogueId, noThrow);
     }
 
     @Override
@@ -201,7 +201,7 @@ public class OIDCSecurityService implements SecurityService {
             return false;
         }
         User user = User.of(auth);
-        return userIsResourceProviderAdmin(user, resourceId, catalogueName);
+        return userIsResourceProviderAdmin(user, resourceId, catalogueId);
     }
 
     @Override
@@ -311,7 +311,7 @@ public class OIDCSecurityService implements SecurityService {
     public boolean providerCanAddResources(Authentication auth, ServiceBundle serviceBundle) {
         String providerId = serviceBundle.getService().getResourceOrganisation();
         if (serviceBundle.getService().getCatalogueId() == null || serviceBundle.getService().getCatalogueId().equals("")) {
-            serviceBundle.getService().setCatalogueId(catalogueName);
+            serviceBundle.getService().setCatalogueId(catalogueId);
         }
         ProviderBundle provider = providerManager.get(serviceBundle.getService().getCatalogueId(), providerId, auth);
         if (isProviderAdmin(auth, provider.getId(), provider.getPayload().getCatalogueId())) {
@@ -336,7 +336,7 @@ public class OIDCSecurityService implements SecurityService {
     public <T extends gr.uoa.di.madgik.resourcecatalogue.domain.Service> boolean providerCanAddResources(Authentication auth, T service) {
         List<String> providerIds = Collections.singletonList(service.getResourceOrganisation());
         if (service.getCatalogueId() == null || service.getCatalogueId().equals("")) {
-            service.setCatalogueId(catalogueName);
+            service.setCatalogueId(catalogueId);
         }
         for (String providerId : providerIds) {
             ProviderBundle provider = providerManager.get(service.getCatalogueId(), providerId, auth);
@@ -362,7 +362,7 @@ public class OIDCSecurityService implements SecurityService {
     public boolean providerCanAddResources(Authentication auth, TrainingResource trainingResource) {
         List<String> providerIds = Collections.singletonList(trainingResource.getResourceOrganisation());
         if (trainingResource.getCatalogueId() == null || trainingResource.getCatalogueId().equals("")) {
-            trainingResource.setCatalogueId(catalogueName);
+            trainingResource.setCatalogueId(catalogueId);
         }
         for (String providerId : providerIds) {
             ProviderBundle provider = providerManager.get(trainingResource.getCatalogueId(), providerId, auth);
@@ -387,7 +387,7 @@ public class OIDCSecurityService implements SecurityService {
 
     public boolean providerCanAddResources(Authentication auth, InteroperabilityRecord interoperabilityRecord) {
         if (interoperabilityRecord.getCatalogueId() == null || interoperabilityRecord.getCatalogueId().equals("")) {
-            interoperabilityRecord.setCatalogueId(catalogueName);
+            interoperabilityRecord.setCatalogueId(catalogueId);
         }
         ProviderBundle provider = providerManager.get(interoperabilityRecord.getCatalogueId(), interoperabilityRecord.getProviderId(), auth);
         if (isProviderAdmin(auth, provider.getId(), interoperabilityRecord.getCatalogueId())) {
@@ -401,7 +401,7 @@ public class OIDCSecurityService implements SecurityService {
 
     @Override
     public boolean providerIsActiveAndUserIsAdmin(Authentication auth, String resourceId) {
-        return providerIsActiveAndUserIsAdmin(auth, resourceId, catalogueName);
+        return providerIsActiveAndUserIsAdmin(auth, resourceId, catalogueId);
     }
 
     @Override

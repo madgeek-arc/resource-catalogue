@@ -45,12 +45,10 @@ public class VocabularyCurationManager extends ResourceManager<VocabularyCuratio
     @Autowired
     private SearchService searchService;
 
-    @Value("${catalogue.name}")
-    private String catalogueName;
+    @Value("${catalogue.id}")
+    private String catalogueId;
     private final IdCreator idCreator;
 
-
-    @Autowired
     public VocabularyCurationManager(@Lazy RegistrationMailService registrationMailService, ProviderService providerService,
                                      ServiceBundleService<ServiceBundle> serviceBundleService,
                                      TrainingResourceService<TrainingResourceBundle> trainingResourceService,
@@ -199,18 +197,18 @@ public class VocabularyCurationManager extends ResourceManager<VocabularyCuratio
         }
 
         // validate if providerId/resourceId exists
-        ProviderBundle providerBundle = providerService.get(catalogueName, vocabularyCuration.getVocabularyEntryRequests().get(0).getProviderId(), auth);
+        ProviderBundle providerBundle = providerService.get(catalogueId, vocabularyCuration.getVocabularyEntryRequests().get(0).getProviderId(), auth);
         switch (resourceType) {
             case "provider":
                 break;
             case "service":
-                ServiceBundle serviceBundle = serviceBundleService.get(vocabularyCuration.getVocabularyEntryRequests().get(0).getResourceId(), catalogueName);
+                ServiceBundle serviceBundle = serviceBundleService.get(vocabularyCuration.getVocabularyEntryRequests().get(0).getResourceId(), catalogueId);
                 if (!serviceBundle.getService().getResourceOrganisation().equals(providerBundle.getId())) {
                     throw new ValidationException(String.format("Provider with id [%s] does not have a Service with id [%s] registered.", providerBundle.getId(), serviceBundle.getId()));
                 }
                 break;
             case "training_resource":
-                TrainingResourceBundle trainingResourceBundle = trainingResourceService.get(vocabularyCuration.getVocabularyEntryRequests().get(0).getResourceId(), catalogueName);
+                TrainingResourceBundle trainingResourceBundle = trainingResourceService.get(vocabularyCuration.getVocabularyEntryRequests().get(0).getResourceId(), catalogueId);
                 if (!trainingResourceBundle.getTrainingResource().getResourceOrganisation().equals(providerBundle.getId())) {
                     throw new ValidationException(String.format("Provider with id [%s] does not have a Training Resource with id [%s] registered.", providerBundle.getId(), trainingResourceBundle.getId()));
                 }

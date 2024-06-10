@@ -60,13 +60,9 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     @Autowired
     CacheManager cacheManager;
 
-    //TODO: maybe add description on DB and elastic too
-    private final String columnsOfInterest = "provider_id, name"; // variable with DB tables a keyword is been searched on
+    @Value("${catalogue.id}")
+    private String catalogueId;
 
-    @Value("${catalogue.name}")
-    private String catalogueName;
-
-    @Autowired
     public ProviderManager(@Lazy ServiceBundleService<ServiceBundle> serviceBundleService,
                            @Lazy SecurityService securityService, @Lazy FieldValidator fieldValidator,
                            @Lazy RegistrationMailService registrationMailService, IdCreator idCreator,
@@ -166,7 +162,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         }
 
         if (catalogueId == null || catalogueId.equals("")) {
-            ret.getProvider().setCatalogueId(catalogueName);
+            ret.getProvider().setCatalogueId(this.catalogueId);
         } else {
             commonMethods.checkCatalogueIdConsistency(ret, catalogueId);
         }
@@ -439,7 +435,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
             throw new ValidationException(String.format("Vocabulary %s does not consist a Provider State!", status));
         }
         logger.trace("verifyProvider with id: '{}' | status -> '{}' | active -> '{}'", id, status, active);
-        ProviderBundle provider = get(catalogueName, id, auth);
+        ProviderBundle provider = get(catalogueId, id, auth);
         Resource existingResource = getResource(provider.getId(), provider.getProvider().getCatalogueId());
         ProviderBundle existingProvider = deserialize(existingResource);
 
@@ -484,7 +480,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     @Override
     @CacheEvict(value = CACHE_PROVIDERS, allEntries = true)
     public ProviderBundle publish(String providerId, Boolean active, Authentication auth) {
-        ProviderBundle provider = getWithCatalogue(providerId, catalogueName);
+        ProviderBundle provider = getWithCatalogue(providerId, catalogueId);
         Resource existingResource = getResource(provider.getId(), provider.getProvider().getCatalogueId());
         ProviderBundle existingProvider = deserialize(existingResource);
 
@@ -589,7 +585,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     public void activateProviderResources(String providerId, Boolean active, Authentication auth) {
         List<ServiceBundle> services = serviceBundleService.getResourceBundles(providerId, auth);
         List<TrainingResourceBundle> trainingResources = trainingResourceService.getResourceBundles(providerId, auth);
-        List<InteroperabilityRecordBundle> interoperabilityRecords = interoperabilityRecordService.getInteroperabilityRecordBundles(catalogueName, providerId, auth).getResults();
+        List<InteroperabilityRecordBundle> interoperabilityRecords = interoperabilityRecordService.getInteroperabilityRecordBundles(catalogueId, providerId, auth).getResults();
         if (active) {
             logger.info("Activating all Resources of the Provider with id: {}", providerId);
         } else {
@@ -741,15 +737,21 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
 
     private void addAuthenticatedUser(Provider provider, Authentication auth) {
         List<User> users;
-        User authUser = User.of(auth);
+        User authUser = null;
         users = provider.getUsers();
+        try {
+            authUser = User.of(auth);
+        } catch (InsufficientAuthenticationException ignore) {}
         if (users == null) {
             users = new ArrayList<>();
         }
-        if (users.stream().noneMatch(u -> u.getEmail().equalsIgnoreCase(authUser.getEmail()))) {
-            users.add(authUser);
-            provider.setUsers(users);
+        if (authUser != null) {
+            String authUserEmail = authUser.getEmail();
+            if (users.stream().noneMatch(u -> u.getEmail().equalsIgnoreCase(authUserEmail))) {
+                users.add(authUser);
+            }
         }
+        provider.setUsers(users);
     }
 
     // For front-end use
@@ -763,7 +765,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     }
 
     public boolean hasAdminAcceptedTerms(String providerId, Authentication auth) {
-        ProviderBundle providerBundle = get(catalogueName, providerId, auth);
+        ProviderBundle providerBundle = get(catalogueId, providerId, auth);
         List<String> userList = new ArrayList<>();
         for (User user : providerBundle.getProvider().getUsers()) {
             userList.add(user.getEmail().toLowerCase());
@@ -782,7 +784,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     }
 
     public void adminAcceptedTerms(String providerId, Authentication auth) {
-        update(get(providerId), catalogueName, auth);
+        update(get(providerId), catalogueId, auth);
     }
 
     public void adminDifferences(ProviderBundle updatedProvider, ProviderBundle existingProvider) {
@@ -807,7 +809,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     }
 
     public void requestProviderDeletion(String providerId, Authentication auth) {
-        ProviderBundle provider = getWithCatalogue(providerId, catalogueName);
+        ProviderBundle provider = getWithCatalogue(providerId, catalogueId);
         for (User user : provider.getProvider().getUsers()) {
             if (user.getEmail().equalsIgnoreCase(User.of(auth).getEmail())) {
                 registrationMailService.informPortalAdminsForProviderDeletion(provider, User.of(auth));
@@ -881,9 +883,9 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         // create LoggingInfo
         List<LoggingInfo> loggingInfoList = commonMethods.returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(provider, auth);
         provider.setLoggingInfo(loggingInfoList);
-        if (catalogueId == null || catalogueId.equals("") || catalogueId.equals(catalogueName)) {
+        if (catalogueId == null || catalogueId.equals("") || catalogueId.equals(this.catalogueId)) {
             // set catalogueId = eosc
-            provider.getProvider().setCatalogueId(catalogueName);
+            provider.getProvider().setCatalogueId(this.catalogueId);
             provider.setActive(false);
             provider.setStatus(vocabularyService.get("pending provider").getId());
             provider.setTemplateStatus(vocabularyService.get("no template status").getId());

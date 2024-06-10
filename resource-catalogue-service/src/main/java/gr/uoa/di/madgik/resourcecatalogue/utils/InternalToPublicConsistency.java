@@ -45,7 +45,7 @@ public class InternalToPublicConsistency {
 
 
     @Value("${catalogue.name:Resource Catalogue}")
-    private String projectName;
+    private String catalogueName;
     @Value("${resource.consistency.enable}")
     private boolean enableConsistencyEmails;
     @Value("${resource.consistency.email}")
@@ -173,13 +173,13 @@ public class InternalToPublicConsistency {
         Map<String, Object> root = new HashMap<>();
         StringWriter out = new StringWriter();
         root.put("logs", logs);
-        root.put("project", projectName);
+        root.put("project", catalogueName);
 
         try {
             Template temp = cfg.getTemplate("internalToPublicResourceConsistency.ftl");
             temp.process(root, out);
             String teamMail = out.getBuffer().toString();
-            String subject = String.format("[%s Portal] Internal to Public Resource Consistency Logs", projectName);
+            String subject = String.format("[%s Portal] Internal to Public Resource Consistency Logs", catalogueName);
             if (enableConsistencyEmails) {
                 mailService.sendMail(Collections.singletonList(consistencyEmail), null, Collections.singletonList(consistencyCC), subject, teamMail);
             }

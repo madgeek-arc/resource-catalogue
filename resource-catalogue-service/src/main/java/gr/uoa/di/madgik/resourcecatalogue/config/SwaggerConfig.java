@@ -15,7 +15,7 @@ public class SwaggerConfig {
 
     private static final Logger logger = LogManager.getLogger(SwaggerConfig.class);
 
-    @Value("${catalogue.name}")
+    @Value("${catalogue.id}")
     String projectName;
 
     @Value("${catalogue.version}")

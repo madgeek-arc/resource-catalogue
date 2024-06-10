@@ -41,10 +41,9 @@ public class InteroperabilityRecordManager extends ResourceManager<Interoperabil
     private final CatalogueService<CatalogueBundle> catalogueService;
     private final RegistrationMailService registrationMailService;
     private final ProviderResourcesCommonMethods commonMethods;
-    @Autowired
-    private FieldValidator fieldValidator;
-    @Value("${catalogue.name}")
-    private String catalogueName;
+
+    @Value("${catalogue.id}")
+    private String catalogueId;
 
     public InteroperabilityRecordManager(ProviderService<ProviderBundle> providerService, IdCreator idCreator,
                                          SecurityService securityService, VocabularyService vocabularyService,
@@ -79,7 +78,7 @@ public class InteroperabilityRecordManager extends ResourceManager<Interoperabil
     @CacheEvict(cacheNames = {CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)
     public InteroperabilityRecordBundle add(InteroperabilityRecordBundle interoperabilityRecordBundle, String catalogueId, Authentication auth) {
         if (catalogueId == null || catalogueId.equals("")) { // add catalogue provider
-            interoperabilityRecordBundle.getInteroperabilityRecord().setCatalogueId(catalogueName);
+            interoperabilityRecordBundle.getInteroperabilityRecord().setCatalogueId(this.catalogueId);
         } else { // external catalogue
             commonMethods.checkCatalogueIdConsistency(interoperabilityRecordBundle, catalogueId);
         }
@@ -144,7 +143,7 @@ public class InteroperabilityRecordManager extends ResourceManager<Interoperabil
         }
 
         if (catalogueId == null || catalogueId.equals("")) {
-            ret.getInteroperabilityRecord().setCatalogueId(catalogueName);
+            ret.getInteroperabilityRecord().setCatalogueId(this.catalogueId);
         } else {
             commonMethods.checkCatalogueIdConsistency(ret, catalogueId);
         }

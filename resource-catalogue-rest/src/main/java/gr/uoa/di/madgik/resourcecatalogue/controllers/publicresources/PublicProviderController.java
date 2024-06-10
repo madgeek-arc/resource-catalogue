@@ -21,6 +21,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -31,6 +32,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Map;
 
+@Profile("beyond")
 @RestController
 @RequestMapping
 @Tag(name = "public provider")
@@ -57,7 +59,7 @@ public class PublicProviderController {
     @Operation(description = "Returns the Public Provider with the given id.")
     @GetMapping(path = "public/provider/{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity<?> getPublicProvider(@PathVariable("id") String id,
-                                               @RequestParam(defaultValue = "${catalogue.name}", name = "catalogue_id") String catalogueId,
+                                               @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId,
                                                @Parameter(hidden = true) Authentication auth) {
         ProviderBundle providerBundle = providerService.get(catalogueId, id, auth);
         if (auth != null && auth.isAuthenticated()) {
@@ -82,7 +84,7 @@ public class PublicProviderController {
     @GetMapping(path = "public/provider/bundle/{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isProviderAdmin(#auth, #id, #catalogueId)")
     public ResponseEntity<?> getPublicProviderBundle(@PathVariable("id") String id,
-                                                     @RequestParam(defaultValue = "${catalogue.name}", name = "catalogue_id") String catalogueId,
+                                                     @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId,
                                                      @Parameter(hidden = true) Authentication auth) {
         ProviderBundle providerBundle = providerService.get(catalogueId, id, auth);
         if (auth != null && auth.isAuthenticated()) {

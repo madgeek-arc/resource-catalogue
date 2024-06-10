@@ -19,6 +19,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -29,6 +30,7 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
 
 
+@Profile("beyond")
 @RestController
 @RequestMapping({"pendingService"})
 @Tag(name = "pending service")
@@ -41,10 +43,9 @@ public class PendingServiceController extends ResourceController<ServiceBundle> 
     private GenericResourceService genericResourceService;
     private final IdCreator idCreator;
 
-    @Value("${catalogue.name}")
-    private String catalogueName;
+    @Value("${catalogue.id}")
+    private String catalogueId;
 
-    @Autowired
     PendingServiceController(PendingResourceService<ServiceBundle> pendingServiceManager,
                              ServiceBundleService<ServiceBundle> serviceBundleService,
                              ProviderService<ProviderBundle> providerService,
@@ -82,7 +83,7 @@ public class PendingServiceController extends ResourceController<ServiceBundle> 
         ff.setResourceType("pending_service");
         ff.addFilter("published", false);
         ff.addFilter("resource_organisation", id);
-        ff.addFilter("catalogue_id", catalogueName);
+        ff.addFilter("catalogue_id", catalogueId);
         Paging<ServiceBundle> paging = genericResourceService.getResults(ff);
         return ResponseEntity.ok(paging);
     }

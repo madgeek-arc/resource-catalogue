@@ -22,8 +22,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -41,6 +41,7 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 
+@Profile("beyond")
 @RestController
 @RequestMapping("service")
 @Tag(name = "service")
@@ -56,13 +57,12 @@ public class ServiceController {
     @Value("${auditing.interval:6}")
     private String auditingInterval;
 
-    @Value("${catalogue.name}")
-    private String catalogueName;
+    @Value("${catalogue.id}")
+    private String catalogueId;
 
     @Value("${catalogue.name:Resource Catalogue}")
-    private String projectName;
+    private String catalogueName;
 
-    @Autowired
     ServiceController(ServiceBundleService<ServiceBundle> service,
                       ProviderService<ProviderBundle> provider,
                       DataSource commonDataSource, GenericResourceService genericResourceService,
@@ -77,14 +77,14 @@ public class ServiceController {
     @DeleteMapping(path = {"{id}"}, produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth, #id)")
     public ResponseEntity<ServiceBundle> delete(@PathVariable("id") String id,
-                                                @RequestParam(defaultValue = "${catalogue.name}", name = "catalogue_id") String catalogueId,
+                                                @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId,
                                                 @Parameter(hidden = true) Authentication auth) throws ResourceNotFoundException {
         ServiceBundle service;
         service = serviceBundleService.get(id, catalogueId);
 
         // Block users of deleting Services of another Catalogue
-        if (!service.getService().getCatalogueId().equals(catalogueName)) {
-            throw new ValidationException(String.format("You cannot delete a Service of a non [%s] Catalogue.", projectName));
+        if (!service.getService().getCatalogueId().equals(this.catalogueId)) {
+            throw new ValidationException(String.format("You cannot delete a Service of a non [%s] Catalogue.", catalogueName));
         }
         //TODO: Maybe return Provider's template status to 'no template status' if this was its only Service
         serviceBundleService.delete(service);
@@ -97,7 +97,7 @@ public class ServiceController {
     @GetMapping(path = "{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     @PreAuthorize("@securityService.resourceIsActive(#id, #catalogueId) or hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth, #id)")
     public ResponseEntity<?> getService(@PathVariable("id") String id,
-                                        @RequestParam(defaultValue = "${catalogue.name}", name = "catalogue_id") String catalogueId) {
+                                        @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId) {
         return new ResponseEntity<>(serviceBundleService.get(id, catalogueId).getService(), HttpStatus.OK);
     }
 
@@ -206,7 +206,7 @@ public class ServiceController {
     @GetMapping(path = "byProvider/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isProviderAdmin(#auth,#id,#catalogueId)")
     public ResponseEntity<Paging<ServiceBundle>> getServicesByProvider(@Parameter(hidden = true) @RequestParam MultiValueMap<String, Object> allRequestParams,
-                                                                       @RequestParam(defaultValue = "${catalogue.name}", name = "catalogue_id") String catalogueId,
+                                                                       @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId,
                                                                        @PathVariable String id,
                                                                        @Parameter(hidden = true) Authentication auth) {
         FacetFilter ff = FacetFilterUtils.createFacetFilter(allRequestParams);
@@ -309,7 +309,7 @@ public class ServiceController {
     // Get all modification details of a specific Resource based on id.
     @GetMapping(path = {"loggingInfoHistory/{id}"}, produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<Paging<LoggingInfo>> loggingInfoHistory(@PathVariable String id,
-                                                                  @RequestParam(defaultValue = "${catalogue.name}", name = "catalogue_id") String catalogueId) {
+                                                                  @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId) {
         Paging<LoggingInfo> loggingInfoHistory = this.serviceBundleService.getLoggingInfoHistory(id, catalogueId);
         return ResponseEntity.ok(loggingInfoHistory);
     }
@@ -386,7 +386,7 @@ public class ServiceController {
     @GetMapping(path = "getSharedResources/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or @securityService.isProviderAdmin(#auth,#id)")
     public ResponseEntity<Paging<?>> getSharedResources(@Parameter(hidden = true) @RequestParam MultiValueMap<String, Object> allRequestParams,
-                                                        @RequestParam(defaultValue = "${catalogue.name}", name = "catalogue_id") String catalogueId,
+                                                        @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId,
                                                         @PathVariable String id, @Parameter(hidden = true) Authentication auth) {
         FacetFilter ff = FacetFilterUtils.createFacetFilter(allRequestParams);
         ff.setResourceType("service");

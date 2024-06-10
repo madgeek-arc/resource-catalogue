@@ -21,8 +21,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -40,6 +40,7 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 
+@Profile("beyond")
 @RestController
 @RequestMapping({"trainingResource"})
 @Tag(name = "training resource")
@@ -54,13 +55,12 @@ public class TrainingResourceController {
     @Value("${auditing.interval:6}")
     private String auditingInterval;
 
-    @Value("${catalogue.name}")
-    private String catalogueName;
+    @Value("${catalogue.id}")
+    private String catalogueId;
 
     @Value("${catalogue.name:Resource Catalogue}")
-    private String projectName;
+    private String catalogueName;
 
-    @Autowired
     TrainingResourceController(TrainingResourceService<TrainingResourceBundle> trainingResourceService,
                                ProviderService<ProviderBundle> providerService,
                                DataSource commonDataSource, GenericResourceService genericResourceService) {
@@ -73,14 +73,14 @@ public class TrainingResourceController {
     @DeleteMapping(path = {"{id}"}, produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth, #id)")
     public ResponseEntity<TrainingResourceBundle> delete(@PathVariable("id") String id,
-                                                         @RequestParam(defaultValue = "${catalogue.name}", name = "catalogue_id") String catalogueId,
+                                                         @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId,
                                                          @Parameter(hidden = true) Authentication auth) throws ResourceNotFoundException {
         TrainingResourceBundle trainingResourceBundle;
         trainingResourceBundle = trainingResourceService.get(id, catalogueId);
 
         // Block users of deleting Services of another Catalogue
-        if (!trainingResourceBundle.getTrainingResource().getCatalogueId().equals(catalogueName)) {
-            throw new ValidationException(String.format("You cannot delete a Training Resource of a non [%s] Catalogue.", projectName));
+        if (!trainingResourceBundle.getTrainingResource().getCatalogueId().equals(this.catalogueId)) {
+            throw new ValidationException(String.format("You cannot delete a Training Resource of a non [%s] Catalogue.", catalogueName));
         }
         //TODO: Maybe return Provider's template status to 'no template status' if this was its only TR
         trainingResourceService.delete(trainingResourceBundle);
@@ -92,13 +92,13 @@ public class TrainingResourceController {
     @Operation(summary = "Get the most current version of a specific Training Resource, providing the Resource id.")
     @GetMapping(path = "{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     @PreAuthorize("@securityService.trainingResourceIsActive(#id, #catalogueId) or hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth, #id)")
-    public ResponseEntity<TrainingResource> getTrainingResource(@PathVariable("id") String id, @RequestParam(defaultValue = "${catalogue.name}", name = "catalogue_id") String catalogueId, @Parameter(hidden = true) Authentication auth) {
+    public ResponseEntity<TrainingResource> getTrainingResource(@PathVariable("id") String id, @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId, @Parameter(hidden = true) Authentication auth) {
         return new ResponseEntity<>(trainingResourceService.get(id, catalogueId).getTrainingResource(), HttpStatus.OK);
     }
 
     @GetMapping(path = "bundle/{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth, #id)")
-    public ResponseEntity<TrainingResourceBundle> getTrainingResourceBundle(@PathVariable("id") String id, @RequestParam(defaultValue = "${catalogue.name}", name = "catalogue_id") String catalogueId, @Parameter(hidden = true) Authentication auth) {
+    public ResponseEntity<TrainingResourceBundle> getTrainingResourceBundle(@PathVariable("id") String id, @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId, @Parameter(hidden = true) Authentication auth) {
         return new ResponseEntity<>(trainingResourceService.get(id, catalogueId), HttpStatus.OK);
     }
 
@@ -200,7 +200,7 @@ public class TrainingResourceController {
     @GetMapping(path = "byProvider/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isProviderAdmin(#auth,#id,#catalogueId)")
     public ResponseEntity<Paging<TrainingResourceBundle>> getTrainingResourcesByProvider(@Parameter(hidden = true) @RequestParam MultiValueMap<String, Object> allRequestParams,
-                                                                                         @RequestParam(defaultValue = "${catalogue.name}", name = "catalogue_id") String catalogueId,
+                                                                                         @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId,
                                                                                          @PathVariable String id,
                                                                                          @Parameter(hidden = true) Authentication auth) {
         FacetFilter ff = FacetFilterUtils.createFacetFilter(allRequestParams);
@@ -302,7 +302,7 @@ public class TrainingResourceController {
     // Get all modification details of a specific Resource based on id.
     @GetMapping(path = {"loggingInfoHistory/{id}"}, produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<Paging<LoggingInfo>> loggingInfoHistory(@PathVariable String id,
-                                                                  @RequestParam(defaultValue = "${catalogue.name}", name = "catalogue_id") String catalogueId) {
+                                                                  @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId) {
         Paging<LoggingInfo> loggingInfoHistory = this.trainingResourceService.getLoggingInfoHistory(id, catalogueId);
         return ResponseEntity.ok(loggingInfoHistory);
     }

@@ -15,8 +15,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -29,6 +29,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+@Profile("beyond")
 @RestController
 @RequestMapping("catalogue")
 @Tag(name = "catalogue", description = "Operations about Catalogues and their resources")
@@ -42,10 +43,10 @@ public class CatalogueController {
     private final TrainingResourceService<TrainingResourceBundle> trainingResourceService;
     private final InteroperabilityRecordService<InteroperabilityRecordBundle> interoperabilityRecordService;
     private final GenericResourceService genericResourceService;
-    @Value("${catalogue.name}")
-    private String catalogueName;
 
-    @Autowired
+    @Value("${catalogue.id}")
+    private String catalogueId;
+
     CatalogueController(CatalogueService<CatalogueBundle> catalogueManager,
                         ProviderService<ProviderBundle> providerManager,
                         ServiceBundleService<ServiceBundle> serviceBundleService,
@@ -200,8 +201,8 @@ public class CatalogueController {
     @PutMapping(path = "suspend", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     public CatalogueBundle suspendCatalogue(@RequestParam String catalogueId, @RequestParam boolean suspend, @Parameter(hidden = true) Authentication auth) {
-        if (catalogueId.equalsIgnoreCase(catalogueName)) {
-            throw new ValidationException(String.format("You cannot suspend the [%s] Catalogue", catalogueName));
+        if (catalogueId.equalsIgnoreCase(this.catalogueId)) {
+            throw new ValidationException(String.format("You cannot suspend the [%s] Catalogue", this.catalogueId));
         }
         return catalogueManager.suspend(catalogueId, suspend, auth);
     }

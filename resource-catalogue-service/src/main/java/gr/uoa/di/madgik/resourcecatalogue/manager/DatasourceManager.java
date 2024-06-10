@@ -13,7 +13,6 @@ import gr.uoa.di.madgik.resourcecatalogue.utils.ProviderResourcesCommonMethods;
 import gr.uoa.di.madgik.resourcecatalogue.utils.ResourceValidationUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.core.Authentication;
@@ -31,11 +30,11 @@ public class DatasourceManager extends ResourceManager<DatasourceBundle> impleme
     private final VocabularyService vocabularyService;
     private final ProviderResourcesCommonMethods commonMethods;
     private final OpenAIREDatasourceManager openAIREDatasourceManager;
-    @Value("${catalogue.name}")
-    private String catalogueName;
     private final IdCreator idCreator;
 
-    @Autowired
+    @Value("${catalogue.id}")
+    private String catalogueId;
+
     public DatasourceManager(ServiceBundleService<ServiceBundle> serviceBundleService,
                              @Lazy SecurityService securityService,
                              @Lazy RegistrationMailService registrationMailService,
@@ -92,7 +91,7 @@ public class DatasourceManager extends ResourceManager<DatasourceBundle> impleme
     }
 
     private void differentiateInternalFromExternalCatalogueAddition(DatasourceBundle datasourceBundle) {
-        if (datasourceBundle.getDatasource().getCatalogueId().equals(catalogueName)) {
+        if (datasourceBundle.getDatasource().getCatalogueId().equals(catalogueId)) {
             datasourceBundle.setActive(false);
             datasourceBundle.setStatus(vocabularyService.get("pending datasource").getId());
             datasourceBundle.setLatestOnboardingInfo(datasourceBundle.getLoggingInfo().get(0));
