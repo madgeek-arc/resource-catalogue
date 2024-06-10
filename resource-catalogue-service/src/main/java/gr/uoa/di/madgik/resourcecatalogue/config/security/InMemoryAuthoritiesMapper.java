@@ -168,8 +168,9 @@ public class InMemoryAuthoritiesMapper implements AuthoritiesMapper {
                         .stream()
                         .filter(Objects::nonNull)
                         .map(User::getEmail)
+                        .filter(Objects::nonNull)
                         .map(String::toLowerCase))
-                .filter(u -> u != null && !"".equals(u))
+                .filter(u -> u != null && !Objects.equals("", u))
                 .collect(Collectors.toSet());
     }
 
