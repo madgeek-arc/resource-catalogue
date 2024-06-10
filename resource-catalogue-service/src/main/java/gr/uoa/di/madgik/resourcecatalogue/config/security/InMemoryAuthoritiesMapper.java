@@ -6,8 +6,8 @@ import gr.uoa.di.madgik.resourcecatalogue.domain.CatalogueBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.ProviderBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.User;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -23,7 +23,7 @@ import java.util.stream.Collectors;
 @Component
 public class InMemoryAuthoritiesMapper implements AuthoritiesMapper {
 
-    private static final Logger logger = LogManager.getLogger(InMemoryAuthoritiesMapper.class);
+    private static final Logger logger = LoggerFactory.getLogger(InMemoryAuthoritiesMapper.class);
     private Set<String> providerUsers = new HashSet<>();
     private Set<String> catalogueUsers = new HashSet<>();
     private final Map<String, Set<SimpleGrantedAuthority>> adminsAndEpot = new HashMap<>();
@@ -149,7 +149,7 @@ public class InMemoryAuthoritiesMapper implements AuthoritiesMapper {
                 authorities.add(new SimpleGrantedAuthority("ROLE_CATALOGUE_ADMIN"));
             }
         } catch (InterruptedException e) {
-            logger.error(e);
+            logger.error(e.getMessage(), e);
             throw new RuntimeException(e);
         } finally {
             lock.unlock();

@@ -1,7 +1,7 @@
 package gr.uoa.di.madgik.resourcecatalogue.utils;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.matomo.java.tracking.MatomoRequest;
 import org.matomo.java.tracking.MatomoTracker;
 import org.matomo.java.tracking.TrackerConfiguration;
@@ -20,7 +20,7 @@ import java.net.URI;
 @Component
 public class MatomoInterceptor implements AsyncHandlerInterceptor {
 
-    private static Logger logger = LogManager.getLogger(MatomoInterceptor.class);
+    private static Logger logger = LoggerFactory.getLogger(MatomoInterceptor.class);
 
     @Value("${apitracking.matomo.site:#{null}}")
     private Integer siteId;

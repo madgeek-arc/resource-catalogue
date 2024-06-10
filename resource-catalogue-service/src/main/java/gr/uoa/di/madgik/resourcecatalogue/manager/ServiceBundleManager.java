@@ -13,8 +13,8 @@ import gr.uoa.di.madgik.resourcecatalogue.service.*;
 import gr.uoa.di.madgik.resourcecatalogue.utils.Auditable;
 import gr.uoa.di.madgik.resourcecatalogue.utils.ObjectUtils;
 import gr.uoa.di.madgik.resourcecatalogue.utils.ProviderResourcesCommonMethods;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.context.annotation.Lazy;
@@ -33,7 +33,7 @@ import static gr.uoa.di.madgik.resourcecatalogue.config.Properties.Cache.CACHE_P
 @org.springframework.stereotype.Service
 public class ServiceBundleManager extends AbstractServiceBundleManager<ServiceBundle> implements ServiceBundleService<ServiceBundle> {
 
-    private static final Logger logger = LogManager.getLogger(ServiceBundleManager.class);
+    private static final Logger logger = LoggerFactory.getLogger(ServiceBundleManager.class);
 
     private final ProviderService<ProviderBundle> providerService;
     private final IdCreator idCreator;

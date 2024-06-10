@@ -12,8 +12,8 @@ import gr.uoa.di.madgik.resourcecatalogue.utils.Auditable;
 import gr.uoa.di.madgik.resourcecatalogue.utils.ObjectUtils;
 import gr.uoa.di.madgik.resourcecatalogue.utils.ProviderResourcesCommonMethods;
 import gr.uoa.di.madgik.resourcecatalogue.validators.FieldValidator;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.authentication.InsufficientAuthenticationException;
@@ -32,7 +32,7 @@ import static gr.uoa.di.madgik.resourcecatalogue.utils.VocabularyValidationUtils
 @Service("catalogueManager")
 public class CatalogueManager extends ResourceManager<CatalogueBundle> implements CatalogueService<CatalogueBundle> {
 
-    private static final Logger logger = LogManager.getLogger(CatalogueManager.class);
+    private static final Logger logger = LoggerFactory.getLogger(CatalogueManager.class);
     private final SecurityService securityService;
     private final VocabularyService vocabularyService;
     private final IdCreator idCreator;
@@ -299,7 +299,7 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
                 logger.info("Deleting resource: {}", resource);
                 service.delete(resource);
             } catch (gr.uoa.di.madgik.registry.exception.ResourceNotFoundException e) {
-                logger.error(e);
+                logger.error(e.getMessage(), e);
             }
         }
     }

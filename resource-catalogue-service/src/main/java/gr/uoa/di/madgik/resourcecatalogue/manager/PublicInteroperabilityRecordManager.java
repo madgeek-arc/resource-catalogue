@@ -11,8 +11,8 @@ import gr.uoa.di.madgik.resourcecatalogue.service.SecurityService;
 import gr.uoa.di.madgik.resourcecatalogue.utils.JmsService;
 import gr.uoa.di.madgik.resourcecatalogue.utils.ProviderResourcesCommonMethods;
 import org.apache.commons.beanutils.BeanUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.security.core.Authentication;
@@ -26,7 +26,7 @@ import java.util.List;
 public class PublicInteroperabilityRecordManager extends ResourceManager<InteroperabilityRecordBundle>
         implements ResourceCRUDService<InteroperabilityRecordBundle, Authentication> {
 
-    private static final Logger logger = LogManager.getLogger(PublicInteroperabilityRecordManager.class);
+    private static final Logger logger = LoggerFactory.getLogger(PublicInteroperabilityRecordManager.class);
     private final JmsService jmsService;
     private final SecurityService securityService;
     private final ProviderResourcesCommonMethods commonMethods;

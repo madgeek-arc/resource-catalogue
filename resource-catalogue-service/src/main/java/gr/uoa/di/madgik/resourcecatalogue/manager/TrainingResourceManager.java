@@ -17,8 +17,8 @@ import gr.uoa.di.madgik.resourcecatalogue.utils.FacetLabelService;
 import gr.uoa.di.madgik.resourcecatalogue.utils.ObjectUtils;
 import gr.uoa.di.madgik.resourcecatalogue.utils.ProviderResourcesCommonMethods;
 import gr.uoa.di.madgik.resourcecatalogue.validators.FieldValidator;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -42,7 +42,7 @@ import static java.util.stream.Collectors.toList;
 @org.springframework.stereotype.Service
 public class TrainingResourceManager extends ResourceManager<TrainingResourceBundle> implements TrainingResourceService<TrainingResourceBundle> {
 
-    private static final Logger logger = LogManager.getLogger(ServiceBundleManager.class);
+    private static final Logger logger = LoggerFactory.getLogger(ServiceBundleManager.class);
 
     private final ProviderService<ProviderBundle> providerService;
     private final IdCreator idCreator;

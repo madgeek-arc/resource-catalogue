@@ -5,8 +5,8 @@ import gr.uoa.di.madgik.resourcecatalogue.domain.ServiceBundle;
 import gr.uoa.di.madgik.resourcecatalogue.exception.ValidationException;
 import gr.uoa.di.madgik.resourcecatalogue.service.ServiceBundleService;
 import gr.uoa.di.madgik.resourcecatalogue.utils.VocabularyValidationUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
@@ -19,7 +19,7 @@ import java.util.List;
 @Component("serviceValidator")
 public class ServiceDatasourceValidator implements Validator {
 
-    private static final Logger logger = LogManager.getLogger(ServiceDatasourceValidator.class);
+    private static final Logger logger = LoggerFactory.getLogger(ServiceDatasourceValidator.class);
     private final ServiceBundleService<ServiceBundle> serviceBundleService;
     private final String catalogueName;
 

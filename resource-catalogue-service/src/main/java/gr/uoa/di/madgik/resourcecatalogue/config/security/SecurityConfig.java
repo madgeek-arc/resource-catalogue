@@ -13,6 +13,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.authority.mapping.GrantedAuthoritiesMapper;
 import org.springframework.security.oauth2.client.oidc.web.logout.OidcClientInitiatedLogoutSuccessHandler;
+import org.springframework.security.oauth2.client.registration.ClientRegistration;
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
 import org.springframework.security.oauth2.core.oidc.OidcIdToken;
 import org.springframework.security.oauth2.core.oidc.OidcUserInfo;
@@ -56,7 +57,7 @@ public class SecurityConfig {
                 .authorizeRequests(authorizeRequests ->
                         authorizeRequests
                                 .regexMatchers("/resourcesync/.*").permitAll()
-                                .regexMatchers("/restore/", "/resources.*", "/resourceType.*", "/search.*").hasAnyAuthority("ADMIN")
+                                .regexMatchers("/restore/", "/resources.*", "/resourceType.*", "/search.*").hasAnyAuthority("ROLE_ADMIN")
 
                                 .anyRequest().permitAll()
                 )
@@ -160,6 +161,9 @@ public class SecurityConfig {
     class GrantedAuthoritiesExtractor implements Converter<Jwt, Collection<GrantedAuthority>> {
 
         public Collection<GrantedAuthority> convert(Jwt jwt) {
+//            ClientRegistration registration = clientRegistrationRepository.findByRegistrationId(jwt.getId());
+//            String email = j.getEmail();
+
             String email = jwt.getClaimAsString("email");
             Collection<?> authorities = authoritiesMapper.getAuthorities(email);
             return authorities.stream()

@@ -10,8 +10,8 @@ import gr.uoa.di.madgik.resourcecatalogue.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.service.SecurityService;
 import gr.uoa.di.madgik.resourcecatalogue.utils.JmsService;
 import org.apache.commons.beanutils.BeanUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -25,7 +25,7 @@ import java.lang.reflect.InvocationTargetException;
 public class PublicConfigurationTemplateImplementationManager extends ResourceManager<ConfigurationTemplateInstanceBundle>
         implements ResourceCRUDService<ConfigurationTemplateInstanceBundle, Authentication> {
 
-    private static final Logger logger = LogManager.getLogger(PublicConfigurationTemplateImplementationManager.class);
+    private static final Logger logger = LoggerFactory.getLogger(PublicConfigurationTemplateImplementationManager.class);
     private final JmsService jmsService;
     private final SecurityService securityService;
 

@@ -15,8 +15,8 @@ import gr.uoa.di.madgik.resourcecatalogue.service.PendingResourceService;
 import gr.uoa.di.madgik.resourcecatalogue.service.ServiceBundleService;
 import gr.uoa.di.madgik.resourcecatalogue.service.VocabularyService;
 import gr.uoa.di.madgik.resourcecatalogue.utils.ProviderResourcesCommonMethods;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.context.annotation.Lazy;
@@ -31,7 +31,7 @@ import static gr.uoa.di.madgik.resourcecatalogue.config.Properties.Cache.*;
 @Service("pendingServiceManager")
 public class PendingServiceManager extends ResourceManager<ServiceBundle> implements PendingResourceService<ServiceBundle> {
 
-    private static final Logger logger = LogManager.getLogger(PendingServiceManager.class);
+    private static final Logger logger = LoggerFactory.getLogger(PendingServiceManager.class);
 
     private final ServiceBundleService<ServiceBundle> serviceBundleService;
     private final IdCreator idCreator;
@@ -165,7 +165,7 @@ public class PendingServiceManager extends ResourceManager<ServiceBundle> implem
         try {
             serviceBundle = serviceBundleService.update(serviceBundle, auth);
         } catch (ResourceNotFoundException e) {
-            logger.error(e);
+            logger.error(e.getMessage(), e);
         }
 
         return serviceBundle;

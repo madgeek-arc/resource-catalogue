@@ -8,8 +8,8 @@ import gr.uoa.di.madgik.resourcecatalogue.domain.Vocabulary;
 import gr.uoa.di.madgik.resourcecatalogue.service.ProviderService;
 import gr.uoa.di.madgik.resourcecatalogue.service.VocabularyService;
 import org.apache.commons.collections.list.TreeList;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
@@ -20,7 +20,7 @@ import java.util.*;
 @Component
 public class DefaultFacetLabelService implements FacetLabelService {
 
-    private static final Logger logger = LogManager.getLogger(DefaultFacetLabelService.class);
+    private static final Logger logger = LoggerFactory.getLogger(DefaultFacetLabelService.class);
     private final ProviderService<ProviderBundle> providerService;
     private final VocabularyService vocabularyService;
 
@@ -131,7 +131,7 @@ public class DefaultFacetLabelService implements FacetLabelService {
                             try {
                                 value.setLabel(toProperCase(toProperCase(value.getValue(), "-", "-"), "_", " "));
                             } catch (StringIndexOutOfBoundsException e) {
-                                logger.debug(e);
+                                logger.debug(e.getMessage(), e);
                             }
                         }
                 }

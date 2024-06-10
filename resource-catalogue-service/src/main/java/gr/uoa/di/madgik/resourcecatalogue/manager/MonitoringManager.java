@@ -13,8 +13,8 @@ import gr.uoa.di.madgik.resourcecatalogue.utils.CreateArgoGrnetHttpRequest;
 import gr.uoa.di.madgik.resourcecatalogue.utils.ObjectUtils;
 import gr.uoa.di.madgik.resourcecatalogue.utils.ProviderResourcesCommonMethods;
 import gr.uoa.di.madgik.resourcecatalogue.utils.ResourceValidationUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
@@ -28,7 +28,7 @@ import java.util.List;
 @org.springframework.stereotype.Service("monitoringManager")
 public class MonitoringManager extends ResourceManager<MonitoringBundle> implements MonitoringService<MonitoringBundle> {
 
-    private static final Logger logger = LogManager.getLogger(MonitoringManager.class);
+    private static final Logger logger = LoggerFactory.getLogger(MonitoringManager.class);
     private final ServiceBundleService<ServiceBundle> serviceBundleService;
     private final TrainingResourceService<TrainingResourceBundle> trainingResourceService;
     private final PublicMonitoringManager publicMonitoringManager;

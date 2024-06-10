@@ -9,8 +9,8 @@ import gr.uoa.di.madgik.resourcecatalogue.domain.ProviderBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.ProviderRequest;
 import gr.uoa.di.madgik.resourcecatalogue.domain.ServiceBundle;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
@@ -26,7 +26,7 @@ import java.util.*;
 @Deprecated
 public class ProviderRequestManager extends ResourceManager<ProviderRequest> implements ProviderRequestService<Authentication> {
 
-    private static final Logger logger = LogManager.getLogger(ProviderRequestManager.class);
+    private static final Logger logger = LoggerFactory.getLogger(ProviderRequestManager.class);
     private final MailService mailService;
     private final ServiceBundleService<ServiceBundle> serviceBundleService;
     private final ProviderService<ProviderBundle> providerService;

@@ -11,8 +11,8 @@ import gr.uoa.di.madgik.resourcecatalogue.domain.ServiceBundle;
 import gr.uoa.di.madgik.resourcecatalogue.service.EventService;
 import gr.uoa.di.madgik.resourcecatalogue.service.ServiceBundleService;
 import gr.uoa.di.madgik.resourcecatalogue.utils.AuthenticationInfo;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -31,7 +31,7 @@ import static gr.uoa.di.madgik.resourcecatalogue.config.Properties.Cache.CACHE_S
 @Component
 public class EventManager extends ResourceManager<Event> implements EventService {
 
-    private static final Logger logger = LogManager.getLogger(EventManager.class);
+    private static final Logger logger = LoggerFactory.getLogger(EventManager.class);
     private final ParserService parserService;
     private final ServiceBundleService<ServiceBundle> serviceBundleService;
 

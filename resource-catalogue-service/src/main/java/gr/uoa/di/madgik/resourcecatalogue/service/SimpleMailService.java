@@ -1,8 +1,8 @@
 package gr.uoa.di.madgik.resourcecatalogue.service;
 
 import gr.uoa.di.madgik.resourcecatalogue.config.security.ResourceCatalogueProperties;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
 //@PropertySource({"classpath:application.properties", "classpath:registry.properties"})
 public class SimpleMailService implements MailService {
 
-    private static final Logger logger = LogManager.getLogger(SimpleMailService.class);
+    private static final Logger logger = LoggerFactory.getLogger(SimpleMailService.class);
     private Session session;
 
     private final boolean enableEmails;
@@ -125,7 +125,7 @@ public class SimpleMailService implements MailService {
                     message.setRecipients(Message.RecipientType.CC, createAddresses(ccList));
                     message.setRecipients(Message.RecipientType.BCC, createAddresses(bccList));
                 } else {
-                    logger.error(e);
+                    logger.error(e.getMessage(), e);
                 }
             }
         }

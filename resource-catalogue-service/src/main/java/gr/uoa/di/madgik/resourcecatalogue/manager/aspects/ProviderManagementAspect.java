@@ -7,8 +7,8 @@ import gr.uoa.di.madgik.resourcecatalogue.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.manager.*;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
 import gr.uoa.di.madgik.resourcecatalogue.utils.ObjectUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.After;
 import org.aspectj.lang.annotation.AfterReturning;
@@ -26,7 +26,7 @@ import static gr.uoa.di.madgik.resourcecatalogue.config.Properties.Cache.CACHE_P
 @Component
 public class ProviderManagementAspect {
 
-    private static final Logger logger = LogManager.getLogger(ProviderManagementAspect.class);
+    private static final Logger logger = LoggerFactory.getLogger(ProviderManagementAspect.class);
 
     private final ProviderService<ProviderBundle> providerService;
     private final ServiceBundleService<ServiceBundle> serviceBundleService;
@@ -359,7 +359,7 @@ public class ProviderManagementAspect {
                     serviceBundleService.verifyResource(serviceBundle.getService().getId(), "pending resource", false, securityService.getAdminAccess());
                 }
             } catch (RuntimeException e) {
-                logger.error(e);
+                logger.error(e.getMessage(), e);
             }
         }
     }
@@ -376,7 +376,7 @@ public class ProviderManagementAspect {
                     trainingResourceService.verifyResource(trainingResourceBundle.getTrainingResource().getId(), "pending resource", false, securityService.getAdminAccess());
                 }
             } catch (RuntimeException e) {
-                logger.error(e);
+                logger.error(e.getMessage(), e);
             }
         }
     }

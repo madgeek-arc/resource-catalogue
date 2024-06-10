@@ -3,8 +3,8 @@ package gr.uoa.di.madgik.resourcecatalogue.manager.aspects;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Bundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.ServiceBundle;
 import gr.uoa.di.madgik.resourcecatalogue.manager.PublicServiceManager;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.aspectj.lang.annotation.AfterReturning;
 import org.aspectj.lang.annotation.Aspect;
 import org.springframework.scheduling.annotation.Async;
@@ -14,7 +14,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class PublicResourceManagementAspect<T extends Bundle<?>> {
 
-    private static final Logger logger = LogManager.getLogger(PublicResourceManagementAspect.class);
+    private static final Logger logger = LoggerFactory.getLogger(PublicResourceManagementAspect.class);
 
     private final PublicServiceManager publicServiceManager;
 

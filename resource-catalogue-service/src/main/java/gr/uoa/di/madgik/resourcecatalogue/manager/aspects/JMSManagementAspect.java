@@ -9,8 +9,8 @@ import gr.uoa.di.madgik.resourcecatalogue.manager.PublicHelpdeskManager;
 import gr.uoa.di.madgik.resourcecatalogue.manager.PublicMonitoringManager;
 import gr.uoa.di.madgik.resourcecatalogue.utils.JmsService;
 import gr.uoa.di.madgik.resourcecatalogue.utils.ObjectUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.After;
 import org.aspectj.lang.annotation.AfterReturning;
@@ -23,7 +23,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class JMSManagementAspect {
 
-    private static final Logger logger = LogManager.getLogger(JMSManagementAspect.class);
+    private static final Logger logger = LoggerFactory.getLogger(JMSManagementAspect.class);
     private final JmsService jmsService;
     private final PublicHelpdeskManager publicHelpdeskManager;
     private final PublicMonitoringManager publicMonitoringManager;

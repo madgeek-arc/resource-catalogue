@@ -7,8 +7,8 @@ import gr.uoa.di.madgik.resourcecatalogue.domain.*;
 import gr.uoa.di.madgik.resourcecatalogue.service.MigrationService;
 import gr.uoa.di.madgik.resourcecatalogue.service.SecurityService;
 import gr.uoa.di.madgik.resourcecatalogue.utils.JmsService;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
@@ -18,7 +18,7 @@ import java.util.List;
 @Service
 public class MigrationManager implements MigrationService {
 
-    private static final Logger logger = LogManager.getLogger(MigrationManager.class);
+    private static final Logger logger = LoggerFactory.getLogger(MigrationManager.class);
 
     private final ServiceBundleManager serviceBundleManager;
     private final PublicServiceManager publicServiceManager;

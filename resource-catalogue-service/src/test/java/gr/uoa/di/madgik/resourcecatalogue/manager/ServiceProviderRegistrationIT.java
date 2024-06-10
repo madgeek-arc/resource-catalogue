@@ -8,8 +8,8 @@ import gr.uoa.di.madgik.resourcecatalogue.service.VocabularyService;
 import gr.uoa.di.madgik.resourcecatalogue.service.SecurityService;
 import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.registry.service.ServiceException;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,7 +32,7 @@ import java.util.List;
 @WebAppConfiguration
 public class ServiceProviderRegistrationIT {
 
-    private static final Logger logger = LogManager.getLogger(ServiceProviderRegistrationIT.class);
+    private static final Logger logger = LoggerFactory.getLogger(ServiceProviderRegistrationIT.class);
 
     @Autowired
     ProviderService<ProviderBundle> providerService;

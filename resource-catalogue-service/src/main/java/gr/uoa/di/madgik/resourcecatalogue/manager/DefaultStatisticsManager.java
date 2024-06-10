@@ -16,8 +16,8 @@ import gr.uoa.di.madgik.resourcecatalogue.service.Analytics;
 import gr.uoa.di.madgik.resourcecatalogue.service.ProviderService;
 import gr.uoa.di.madgik.resourcecatalogue.service.StatisticsService;
 import gr.uoa.di.madgik.resourcecatalogue.service.VocabularyService;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.joda.time.DateTime;
 import org.postgresql.jdbc.PgArray;
 import org.springframework.cache.annotation.Cacheable;
@@ -40,7 +40,7 @@ import static gr.uoa.di.madgik.resourcecatalogue.config.Properties.Cache.CACHE_V
 @EnableScheduling
 public class DefaultStatisticsManager implements StatisticsService {
 
-    private static final Logger logger = LogManager.getLogger(DefaultStatisticsManager.class);
+    private static final Logger logger = LoggerFactory.getLogger(DefaultStatisticsManager.class);
     private final Analytics analyticsService;
     private final ProviderService<ProviderBundle> providerService;
     private final SearchService searchService;
@@ -331,7 +331,7 @@ public class DefaultStatisticsManager implements StatisticsService {
                 }
             }
         } catch (SQLException throwables) {
-            logger.error(throwables);
+            logger.error(throwables.getMessage(), throwables);
         }
 
         return toListMapValues(placeServices);
@@ -412,7 +412,7 @@ public class DefaultStatisticsManager implements StatisticsService {
                 }
             }
         } catch (SQLException throwables) {
-            logger.error(throwables);
+            logger.error(throwables.getMessage(), throwables);
         }
 
         return toListMapValues(vocabularyServices);

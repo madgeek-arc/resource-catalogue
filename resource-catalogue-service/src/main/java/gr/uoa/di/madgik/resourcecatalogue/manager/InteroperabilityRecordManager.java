@@ -13,8 +13,8 @@ import gr.uoa.di.madgik.resourcecatalogue.utils.Auditable;
 import gr.uoa.di.madgik.resourcecatalogue.utils.ObjectUtils;
 import gr.uoa.di.madgik.resourcecatalogue.utils.ProviderResourcesCommonMethods;
 import gr.uoa.di.madgik.resourcecatalogue.validators.FieldValidator;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheEvict;
@@ -32,7 +32,7 @@ import static gr.uoa.di.madgik.resourcecatalogue.config.Properties.Cache.CACHE_P
 @org.springframework.stereotype.Service("interoperabilityRecordManager")
 public class InteroperabilityRecordManager extends ResourceManager<InteroperabilityRecordBundle> implements InteroperabilityRecordService<InteroperabilityRecordBundle> {
 
-    private static final Logger logger = LogManager.getLogger(InteroperabilityRecordManager.class);
+    private static final Logger logger = LoggerFactory.getLogger(InteroperabilityRecordManager.class);
     private final ProviderService<ProviderBundle> providerService;
     private final IdCreator idCreator;
     private final SecurityService securityService;

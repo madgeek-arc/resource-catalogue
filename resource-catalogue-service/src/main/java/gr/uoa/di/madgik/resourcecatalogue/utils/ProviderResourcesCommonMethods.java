@@ -6,8 +6,8 @@ import gr.uoa.di.madgik.resourcecatalogue.domain.*;
 import gr.uoa.di.madgik.resourcecatalogue.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.exception.ValidationException;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
@@ -33,7 +33,7 @@ import java.util.regex.Pattern;
 @Component
 public class ProviderResourcesCommonMethods {
 
-    private static final Logger logger = LogManager.getLogger(ProviderResourcesCommonMethods.class);
+    private static final Logger logger = LoggerFactory.getLogger(ProviderResourcesCommonMethods.class);
 
     @Value("${elastic.index.max_result_window:10000}")
     protected int maxQuantity;
@@ -555,7 +555,7 @@ public class ProviderResourcesCommonMethods {
                 logger.info("Deleting Datasource of Service with id: {}", serviceId);
                 datasourceService.delete(datasourceBundle);
             } catch (gr.uoa.di.madgik.registry.exception.ResourceNotFoundException e) {
-                logger.error(e);
+                logger.error(e.getMessage(), e);
             }
         }
     }
@@ -568,7 +568,7 @@ public class ProviderResourcesCommonMethods {
                 logger.info("Deleting Helpdesk of {} with id: {}", resourceType, resourceId);
                 helpdeskService.delete(helpdeskBundle);
             } catch (gr.uoa.di.madgik.registry.exception.ResourceNotFoundException e) {
-                logger.error(e);
+                logger.error(e.getMessage(), e);
             }
         }
         MonitoringBundle monitoringBundle = monitoringService.get(resourceId, catalogueId);
@@ -577,7 +577,7 @@ public class ProviderResourcesCommonMethods {
                 logger.info("Deleting Monitoring of {} with id: {}", resourceType, resourceId);
                 monitoringService.delete(monitoringBundle);
             } catch (gr.uoa.di.madgik.registry.exception.ResourceNotFoundException e) {
-                logger.error(e);
+                logger.error(e.getMessage(), e);
             }
         }
         // resource interoperability records
@@ -587,7 +587,7 @@ public class ProviderResourcesCommonMethods {
                 logger.info("Deleting ResourceInteroperabilityRecord of {} with id: {}", resourceType, resourceId);
                 resourceInteroperabilityRecordService.delete(resourceInteroperabilityRecordBundle);
             } catch (gr.uoa.di.madgik.registry.exception.ResourceNotFoundException e) {
-                logger.error(e);
+                logger.error(e.getMessage(), e);
             }
         }
     }

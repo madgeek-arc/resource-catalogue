@@ -3,8 +3,8 @@ package gr.uoa.di.madgik.resourcecatalogue.manager;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Bundle;
 import gr.uoa.di.madgik.resourcecatalogue.service.PIDService;
 import gr.uoa.di.madgik.resourcecatalogue.utils.ProviderResourcesCommonMethods;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
@@ -21,7 +21,7 @@ import java.nio.charset.StandardCharsets;
 @org.springframework.stereotype.Service("pidManager")
 public class PIDManager implements PIDService {
 
-    private static final Logger logger = LogManager.getLogger(PIDManager.class);
+    private static final Logger logger = LoggerFactory.getLogger(PIDManager.class);
 
     private final ProviderResourcesCommonMethods commonMethods;
     @Value("${pid.username}")

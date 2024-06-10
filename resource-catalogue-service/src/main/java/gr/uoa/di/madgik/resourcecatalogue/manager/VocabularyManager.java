@@ -10,8 +10,8 @@ import gr.uoa.di.madgik.resourcecatalogue.exception.ResourceException;
 import gr.uoa.di.madgik.resourcecatalogue.service.IdCreator;
 import gr.uoa.di.madgik.resourcecatalogue.service.SecurityService;
 import gr.uoa.di.madgik.resourcecatalogue.service.VocabularyService;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.annotation.Lazy;
@@ -27,7 +27,7 @@ import static gr.uoa.di.madgik.resourcecatalogue.config.Properties.Cache.*;
 
 @Service
 public class VocabularyManager extends ResourceManager<Vocabulary> implements VocabularyService {
-    private static final Logger logger = LogManager.getLogger(VocabularyManager.class);
+    private static final Logger logger = LoggerFactory.getLogger(VocabularyManager.class);
 
     private final ProviderManager providerManager;
 
