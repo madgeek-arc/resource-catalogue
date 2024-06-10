@@ -65,7 +65,7 @@ public class ConfigurationTemplateInstanceManager extends ResourceManager<Config
         validate(configurationTemplateInstanceBundle);
         checkResourceIdAndConfigurationTemplateIdConsistency(configurationTemplateInstanceBundle, auth);
 
-        configurationTemplateInstanceBundle.setId(idCreator.generate("cti"));
+        configurationTemplateInstanceBundle.setId(idCreator.generate(getResourceType()));
         logger.trace("User '{}' is attempting to add a new ConfigurationTemplateInstance: {}", auth, configurationTemplateInstanceBundle);
 
         configurationTemplateInstanceBundle.setMetadata(Metadata.createMetadata(User.of(auth).getFullName(), User.of(auth).getEmail()));

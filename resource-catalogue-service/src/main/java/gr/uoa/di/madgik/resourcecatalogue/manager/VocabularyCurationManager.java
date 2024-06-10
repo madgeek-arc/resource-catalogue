@@ -72,7 +72,7 @@ public class VocabularyCurationManager extends ResourceManager<VocabularyCuratio
     @Override
     public VocabularyCuration add(VocabularyCuration vocabularyCuration, String resourceType, Authentication auth) {
         User user = User.of(auth);
-        vocabularyCuration.setId(idCreator.generate("cur"));
+        vocabularyCuration.setId(idCreator.generate(getResourceType()));
         // set status, dateOfRequest, userId
         vocabularyCuration.setStatus(VocabularyCuration.Status.PENDING.getKey());
         vocabularyCuration.setRejectionReason(null);
