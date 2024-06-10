@@ -30,9 +30,6 @@
             matomo
         </module>
         <module>
-            recdb
-        </module>
-        <module>
             resource-catalogue-elastic
         </module>
         <module>
