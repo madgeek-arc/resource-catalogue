@@ -13,7 +13,6 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.authority.mapping.GrantedAuthoritiesMapper;
 import org.springframework.security.oauth2.client.oidc.web.logout.OidcClientInitiatedLogoutSuccessHandler;
-import org.springframework.security.oauth2.client.registration.ClientRegistration;
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
 import org.springframework.security.oauth2.core.oidc.OidcIdToken;
 import org.springframework.security.oauth2.core.oidc.OidcUserInfo;
@@ -38,15 +37,18 @@ public class SecurityConfig {
 
     private final AuthenticationSuccessHandler authSuccessHandler;
     private final ClientRegistrationRepository clientRegistrationRepository;
+    private final UserInfoService userInfoService;
     private final ResourceCatalogueProperties resourceCatalogueProperties;
     private final AuthoritiesMapper authoritiesMapper;
 
     public SecurityConfig(AuthenticationSuccessHandler authSuccessHandler,
                           ClientRegistrationRepository clientRegistrationRepository,
+                          UserInfoService userInfoService,
                           ResourceCatalogueProperties resourceCatalogueProperties,
                           AuthoritiesMapper authoritiesMapper) {
         this.authSuccessHandler = authSuccessHandler;
         this.clientRegistrationRepository = clientRegistrationRepository;
+        this.userInfoService = userInfoService;
         this.resourceCatalogueProperties = resourceCatalogueProperties;
         this.authoritiesMapper = authoritiesMapper;
     }
@@ -68,8 +70,8 @@ public class SecurityConfig {
                                 .successHandler(authSuccessHandler))
 
                 .oauth2ResourceServer((oauth2) -> oauth2
-                        .jwt(jwtConfigurer -> jwtConfigurer
-                                .jwtAuthenticationConverter(grantedAuthoritiesExtractor()))
+                        .jwt()
+                        .jwtAuthenticationConverter(grantedAuthoritiesExtractor())
                 )
 
                 .logout(logout ->
@@ -161,10 +163,11 @@ public class SecurityConfig {
     class GrantedAuthoritiesExtractor implements Converter<Jwt, Collection<GrantedAuthority>> {
 
         public Collection<GrantedAuthority> convert(Jwt jwt) {
-//            ClientRegistration registration = clientRegistrationRepository.findByRegistrationId(jwt.getId());
-//            String email = j.getEmail();
-
             String email = jwt.getClaimAsString("email");
+            if (email == null) {
+                Map<String, Object> info = userInfoService.getUserInfo("eosc", jwt.getTokenValue());
+                email = info.get("email").toString();
+            }
             Collection<?> authorities = authoritiesMapper.getAuthorities(email);
             return authorities.stream()
                     .map(Object::toString)
