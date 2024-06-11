@@ -3,6 +3,7 @@ package gr.uoa.di.madgik.resourcecatalogue.manager;
 import gr.uoa.di.madgik.registry.domain.Browsing;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.service.ResourceCRUDService;
+import gr.uoa.di.madgik.resourcecatalogue.domain.AlternativeIdentifier;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Identifiers;
 import gr.uoa.di.madgik.resourcecatalogue.domain.ProviderBundle;
 import gr.uoa.di.madgik.resourcecatalogue.exception.ResourceException;
@@ -79,8 +80,20 @@ public class PublicProviderManager extends ResourceManager<ProviderBundle> imple
         providerBundle.setId(String.format("%s.%s", providerBundle.getProvider().getCatalogueId(), providerBundle.getId()));
         commonMethods.restrictPrefixRepetitionOnPublicResources(providerBundle.getId(), providerBundle.getProvider().getCatalogueId());
         providerBundle.getMetadata().setPublished(true);
-        // create PID and set it as Alternative Identifier
-        commonMethods.createPIDAndCorrespondingAlternativeIdentifier(providerBundle, "providers/");
+        // POST PID
+        String pid = "no_pid";
+        for (AlternativeIdentifier alternativeIdentifier : providerBundle.getProvider().getAlternativeIdentifiers()) {
+            if (alternativeIdentifier.getType().equalsIgnoreCase("EOSC PID")) {
+                pid = alternativeIdentifier.getValue();
+                break;
+            }
+        }
+        if (pid.equalsIgnoreCase("no_pid")) {
+            logger.info("Provider with id {} does not have a PID registered under its AlternativeIdentifiers.",
+                    providerBundle.getId());
+        } else {
+            commonMethods.postPID(pid, "providers/");
+        }
         ProviderBundle ret;
         logger.info(String.format("Provider [%s] is being published with id [%s]", lowerLevelProviderId, providerBundle.getId()));
         ret = super.add(providerBundle, null);

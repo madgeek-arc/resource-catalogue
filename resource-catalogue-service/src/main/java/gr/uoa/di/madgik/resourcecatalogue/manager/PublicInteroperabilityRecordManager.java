@@ -3,6 +3,7 @@ package gr.uoa.di.madgik.resourcecatalogue.manager;
 import gr.uoa.di.madgik.registry.domain.Browsing;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.service.ResourceCRUDService;
+import gr.uoa.di.madgik.resourcecatalogue.domain.AlternativeIdentifier;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Identifiers;
 import gr.uoa.di.madgik.resourcecatalogue.domain.InteroperabilityRecordBundle;
 import gr.uoa.di.madgik.resourcecatalogue.exception.ResourceException;
@@ -81,8 +82,20 @@ public class PublicInteroperabilityRecordManager extends ResourceManager<Interop
                 interoperabilityRecordBundle.getInteroperabilityRecord().getProviderId()));
 
         interoperabilityRecordBundle.getMetadata().setPublished(true);
-        // create PID and set it as Alternative Identifier
-        commonMethods.createPIDAndCorrespondingAlternativeIdentifier(interoperabilityRecordBundle, "guidelines/");
+        // POST PID
+        String pid = "no_pid";
+        for (AlternativeIdentifier alternativeIdentifier : interoperabilityRecordBundle.getInteroperabilityRecord().getAlternativeIdentifiers()) {
+            if (alternativeIdentifier.getType().equalsIgnoreCase("EOSC PID")) {
+                pid = alternativeIdentifier.getValue();
+                break;
+            }
+        }
+        if (pid.equalsIgnoreCase("no_pid")) {
+            logger.info("Interoperability Record with id {} does not have a PID registered under its AlternativeIdentifiers.",
+                    interoperabilityRecordBundle.getId());
+        } else {
+            commonMethods.postPID(pid, "guidelines/");
+        }
         InteroperabilityRecordBundle ret;
         logger.info(String.format("Interoperability Record [%s] is being published with id [%s]", lowerLevelResourceId, interoperabilityRecordBundle.getId()));
         ret = super.add(interoperabilityRecordBundle, null);

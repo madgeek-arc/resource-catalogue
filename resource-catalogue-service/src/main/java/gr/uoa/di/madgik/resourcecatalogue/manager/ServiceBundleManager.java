@@ -127,10 +127,13 @@ public class ServiceBundleManager extends AbstractServiceBundleManager<ServiceBu
             throw new ValidationException(String.format("The Provider with id %s has already registered a Resource Template.", providerBundle.getId()));
         }
 
-        // prohibit EOSC related Alternative Identifier Types
-        commonMethods.prohibitEOSCRelatedPIDs(serviceBundle.getService().getAlternativeIdentifiers());
-
         serviceBundle.setId(idCreator.generate(getResourceType()));
+
+        // register and ensure Resource Catalogue's PID uniqueness
+        commonMethods.createPIDAndCorrespondingAlternativeIdentifier(serviceBundle, getResourceType());
+        serviceBundle.getService().setAlternativeIdentifiers(commonMethods.ensureResourceCataloguePidUniqueness(serviceBundle.getId(),
+                serviceBundle.getService().getAlternativeIdentifiers()));
+
         validate(serviceBundle);
 
         boolean active = providerBundle
@@ -219,8 +222,9 @@ public class ServiceBundleManager extends AbstractServiceBundleManager<ServiceBu
             throw new ValidationException("You cannot directly update a Public Service");
         }
 
-        // prohibit EOSC related Alternative Identifier Types
-        commonMethods.prohibitEOSCRelatedPIDs(ret.getService().getAlternativeIdentifiers());
+        // ensure Resource Catalogue's PID uniqueness
+        serviceBundle.getService().setAlternativeIdentifiers(commonMethods.ensureResourceCataloguePidUniqueness(serviceBundle.getId(),
+                serviceBundle.getService().getAlternativeIdentifiers()));
 
         User user = User.of(auth);
 

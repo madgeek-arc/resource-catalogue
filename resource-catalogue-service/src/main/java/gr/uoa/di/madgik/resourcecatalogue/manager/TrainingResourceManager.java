@@ -127,9 +127,13 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
             commonMethods.checkCatalogueIdConsistency(trainingResourceBundle, catalogueId);
         }
         commonMethods.checkRelatedResourceIDsConsistency(trainingResourceBundle);
+        trainingResourceBundle.setId(idCreator.generate(getResourceType()));
 
-        // prohibit EOSC related Alternative Identifier Types
-        commonMethods.prohibitEOSCRelatedPIDs(trainingResourceBundle.getTrainingResource().getAlternativeIdentifiers());
+        // register and ensure Resource Catalogue's PID uniqueness
+        commonMethods.createPIDAndCorrespondingAlternativeIdentifier(trainingResourceBundle, getResourceType());
+        trainingResourceBundle.getTrainingResource().setAlternativeIdentifiers(
+                commonMethods.ensureResourceCataloguePidUniqueness(trainingResourceBundle.getId(),
+                        trainingResourceBundle.getTrainingResource().getAlternativeIdentifiers()));
 
         ProviderBundle providerBundle = providerService.get(trainingResourceBundle.getTrainingResource().getCatalogueId(), trainingResourceBundle.getTrainingResource().getResourceOrganisation(), auth);
         if (providerBundle == null) {
@@ -144,7 +148,6 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
         if (providerBundle.getTemplateStatus().equals("pending template")) {
             throw new ValidationException(String.format("The Provider with id %s has already registered a Resource Template.", providerBundle.getId()));
         }
-        trainingResourceBundle.setId(idCreator.generate(getResourceType()));
         validateTrainingResource(trainingResourceBundle);
 
         boolean active = providerBundle
@@ -216,8 +219,10 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
         }
         commonMethods.checkRelatedResourceIDsConsistency(ret);
 
-        // prohibit EOSC related Alternative Identifier Types
-        commonMethods.prohibitEOSCRelatedPIDs(ret.getTrainingResource().getAlternativeIdentifiers());
+        // ensure Resource Catalogue's PID uniqueness
+        trainingResourceBundle.getTrainingResource().setAlternativeIdentifiers(
+                commonMethods.ensureResourceCataloguePidUniqueness(trainingResourceBundle.getId(),
+                        trainingResourceBundle.getTrainingResource().getAlternativeIdentifiers()));
 
         logger.trace("User '{}' is attempting to update the Training Resource with id '{}' of the Catalogue '{}'", auth, ret.getTrainingResource().getId(), ret.getTrainingResource().getCatalogueId());
         validateTrainingResource(ret);

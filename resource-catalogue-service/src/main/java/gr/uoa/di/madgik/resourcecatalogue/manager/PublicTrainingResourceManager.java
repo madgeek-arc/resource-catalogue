@@ -3,6 +3,7 @@ package gr.uoa.di.madgik.resourcecatalogue.manager;
 import gr.uoa.di.madgik.registry.domain.Browsing;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.service.ResourceCRUDService;
+import gr.uoa.di.madgik.resourcecatalogue.domain.AlternativeIdentifier;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Identifiers;
 import gr.uoa.di.madgik.resourcecatalogue.domain.TrainingResourceBundle;
 import gr.uoa.di.madgik.resourcecatalogue.exception.ResourceException;
@@ -86,8 +87,20 @@ public class PublicTrainingResourceManager extends AbstractPublicResourceManager
         updateTrainingResourceIdsToPublic(trainingResourceBundle);
 
         trainingResourceBundle.getMetadata().setPublished(true);
-        // create PID and set it as Alternative Identifier
-        commonMethods.createPIDAndCorrespondingAlternativeIdentifier(trainingResourceBundle, "trainings/");
+        // POST PID
+        String pid = "no_pid";
+        for (AlternativeIdentifier alternativeIdentifier : trainingResourceBundle.getTrainingResource().getAlternativeIdentifiers()) {
+            if (alternativeIdentifier.getType().equalsIgnoreCase("EOSC PID")) {
+                pid = alternativeIdentifier.getValue();
+                break;
+            }
+        }
+        if (pid.equalsIgnoreCase("no_pid")) {
+            logger.info("Training Resource with id {} does not have a PID registered under its AlternativeIdentifiers.",
+                    trainingResourceBundle.getId());
+        } else {
+            commonMethods.postPID(pid, "trainings/");
+        }
         TrainingResourceBundle ret;
         logger.info(String.format("Training Resource [%s] is being published with id [%s]", lowerLevelResourceId, trainingResourceBundle.getId()));
         ret = super.add(trainingResourceBundle, null);

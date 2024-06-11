@@ -121,10 +121,13 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
 
         provider = onboard(provider, catalogueId, auth);
 
-        // prohibit EOSC related Alternative Identifier Types
-        commonMethods.prohibitEOSCRelatedPIDs(provider.getProvider().getAlternativeIdentifiers());
-
         provider.setId(idCreator.generate(getResourceType()));
+
+        // register and ensure Resource Catalogue's PID uniqueness
+        commonMethods.createPIDAndCorrespondingAlternativeIdentifier(provider, getResourceType());
+        provider.getProvider().setAlternativeIdentifiers(commonMethods.ensureResourceCataloguePidUniqueness(provider.getId(),
+                provider.getProvider().getAlternativeIdentifiers()));
+
         addAuthenticatedUser(provider.getProvider(), auth);
         validate(provider);
         provider.setMetadata(Metadata.createMetadata(User.of(auth).getFullName(), User.of(auth).getEmail()));
@@ -167,8 +170,9 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
             commonMethods.checkCatalogueIdConsistency(ret, catalogueId);
         }
 
-        // prohibit EOSC related Alternative Identifier Types
-        commonMethods.prohibitEOSCRelatedPIDs(ret.getProvider().getAlternativeIdentifiers());
+        // ensure Resource Catalogue's PID uniqueness
+        ret.getProvider().setAlternativeIdentifiers(commonMethods.ensureResourceCataloguePidUniqueness(ret.getId(),
+                ret.getProvider().getAlternativeIdentifiers()));
 
         // block Public Provider update
         if (ret.getMetadata().isPublished()) {
@@ -741,7 +745,8 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         users = provider.getUsers();
         try {
             authUser = User.of(auth);
-        } catch (InsufficientAuthenticationException ignore) {}
+        } catch (InsufficientAuthenticationException ignore) {
+        }
         if (users == null) {
             users = new ArrayList<>();
         }

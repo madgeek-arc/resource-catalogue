@@ -12,10 +12,8 @@ import gr.uoa.di.madgik.resourcecatalogue.service.*;
 import gr.uoa.di.madgik.resourcecatalogue.utils.Auditable;
 import gr.uoa.di.madgik.resourcecatalogue.utils.ObjectUtils;
 import gr.uoa.di.madgik.resourcecatalogue.utils.ProviderResourcesCommonMethods;
-import gr.uoa.di.madgik.resourcecatalogue.validators.FieldValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.http.HttpStatus;
@@ -82,9 +80,13 @@ public class InteroperabilityRecordManager extends ResourceManager<Interoperabil
         } else { // external catalogue
             commonMethods.checkCatalogueIdConsistency(interoperabilityRecordBundle, catalogueId);
         }
+        interoperabilityRecordBundle.setId(idCreator.generate(getResourceType()));
 
-        // prohibit EOSC related Alternative Identifier Types
-        commonMethods.prohibitEOSCRelatedPIDs(interoperabilityRecordBundle.getInteroperabilityRecord().getAlternativeIdentifiers());
+        // register and ensure Resource Catalogue's PID uniqueness
+        commonMethods.createPIDAndCorrespondingAlternativeIdentifier(interoperabilityRecordBundle, getResourceType());
+        interoperabilityRecordBundle.getInteroperabilityRecord().setAlternativeIdentifiers(
+                commonMethods.ensureResourceCataloguePidUniqueness(interoperabilityRecordBundle.getId(),
+                        interoperabilityRecordBundle.getInteroperabilityRecord().getAlternativeIdentifiers()));
 
         ProviderBundle providerBundle = providerService.get(interoperabilityRecordBundle.getInteroperabilityRecord().getCatalogueId(), interoperabilityRecordBundle.getInteroperabilityRecord().getProviderId(), auth);
         // check if Provider is approved
@@ -92,7 +94,6 @@ public class InteroperabilityRecordManager extends ResourceManager<Interoperabil
             throw new ValidationException(String.format("The Provider ID '%s' you provided is not yet approved",
                     interoperabilityRecordBundle.getInteroperabilityRecord().getProviderId()));
         }
-        interoperabilityRecordBundle.setId(idCreator.generate(getResourceType()));
         validate(interoperabilityRecordBundle);
 
         // status
@@ -148,8 +149,10 @@ public class InteroperabilityRecordManager extends ResourceManager<Interoperabil
             commonMethods.checkCatalogueIdConsistency(ret, catalogueId);
         }
 
-        // prohibit EOSC related Alternative Identifier Types
-        commonMethods.prohibitEOSCRelatedPIDs(ret.getInteroperabilityRecord().getAlternativeIdentifiers());
+        // ensure Resource Catalogue's PID uniqueness
+        interoperabilityRecordBundle.getInteroperabilityRecord().setAlternativeIdentifiers(
+                commonMethods.ensureResourceCataloguePidUniqueness(ret.getId(),
+                        ret.getInteroperabilityRecord().getAlternativeIdentifiers()));
 
         validate(ret);
 

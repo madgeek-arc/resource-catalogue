@@ -28,8 +28,6 @@ public class PIDManager implements PIDService {
     private String pidUsername;
     @Value("${pid.auth}")
     private String pidAuth;
-    @Value("${pid.prefix}")
-    private String pidPrefix;
     @Value("${pid.api}")
     private String pidApi;
     @Value("${marketplace.url}")
@@ -39,13 +37,14 @@ public class PIDManager implements PIDService {
         this.commonMethods = commonMethods;
     }
 
-    public Bundle<?> get(String resourceType, String pid) {
-        return commonMethods.getPublicResourceViaPID(resourceType, pid);
+    public Bundle<?> get(String pid, String resourceType) {
+        return commonMethods.getResourceViaPID(pid, resourceType);
     }
 
-    public void updatePID(String pid, String resourceId, String resourceTypePath) {
-        String url = pidApi + pidPrefix + "/" + pid;
-        String payload = formatPIDToIncludeMarketplaceUrl(resourceId, resourceTypePath);
+    public void updatePID(String pid, String resourceTypePath) {
+        String pidPrefix = commonMethods.determinePidPrefix(resourceTypePath);
+        String url = pidApi + pid;
+        String payload = formatPIDToIncludeMarketplaceUrl(pid, pidPrefix, resourceTypePath);
         HttpURLConnection con;
         try {
             con = (HttpURLConnection) new URL(url).openConnection();
@@ -73,13 +72,13 @@ public class PIDManager implements PIDService {
             while ((responseLine = br.readLine()) != null) {
                 response.append(responseLine.trim());
             }
-            logger.info("Updating PID {} for resource with ID {}", pid, resourceId);
+            logger.info("Updating PID {} for resource with ID {}", pid, pid);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
 
-    private String formatPIDToIncludeMarketplaceUrl(String resourceId, String resourceTypePath) {
+    private String formatPIDToIncludeMarketplaceUrl(String resourceId, String pidPrefix, String resourceTypePath) {
         JSONObject data = new JSONObject();
         JSONArray values = new JSONArray();
         JSONObject hs_admin = new JSONObject();
@@ -111,5 +110,17 @@ public class PIDManager implements PIDService {
         values.put(id);
         data.put("values", values);
         return data.toString();
+    }
+
+    @Override
+    public String determineResourceTypePath(String resourceType) {
+        return switch (resourceType) {
+            case "service" -> "services/";
+            case "tool" -> "tools/";
+            case "training_resource" -> "trainings/";
+            case "provider" -> "providers/";
+            case "interoperability_record" -> "guidelines/";
+            default -> "no_path";
+        };
     }
 }
