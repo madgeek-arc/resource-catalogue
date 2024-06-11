@@ -17,9 +17,9 @@ import java.util.List;
 
 @Profile("crud")
 @RestController
-@RequestMapping({"training-resources"})
+@RequestMapping(path = "training-resources", consumes = {MediaType.APPLICATION_JSON_VALUE}, produces = {MediaType.APPLICATION_JSON_VALUE})
 @Tag(name = "training resource")
-public class TrainingResourceCrudController extends ResourceController<TrainingResourceBundle> {
+public class TrainingResourceCrudController extends ResourceCrudController<TrainingResourceBundle> {
 
     private static final Logger logger = LogManager.getLogger(TrainingResourceCrudController.class.getName());
     private final TrainingResourceService trainingResourceService;
@@ -30,9 +30,9 @@ public class TrainingResourceCrudController extends ResourceController<TrainingR
         this.trainingResourceService = trainingResourceService;
     }
 
-    @PostMapping(path = "/bulk", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PostMapping(path = "/bulk")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public void addBulk(@RequestBody List<TrainingResourceBundle> trainingResourceList, @Parameter(hidden = true) Authentication auth) {
-        trainingResourceService.addBulk(trainingResourceList, auth);
+    public void addBulk(@RequestBody List<TrainingResourceBundle> bundles, @Parameter(hidden = true) Authentication auth) {
+        trainingResourceService.addBulk(bundles, auth);
     }
 }

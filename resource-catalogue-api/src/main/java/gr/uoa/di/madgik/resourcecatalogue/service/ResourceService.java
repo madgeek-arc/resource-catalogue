@@ -11,6 +11,14 @@ import java.util.Map;
 public interface ResourceService<T> extends ResourceCRUDService<T, Authentication> {
 
     /**
+     * Saves the provided resource. If it does not exist it creates it.
+     *
+     * @param t the resource to save
+     * @return the saved resource
+     */
+    T save(T t);
+
+    /**
      * Get resources by a specific field.
      *
      * @param field Field of Training Resource

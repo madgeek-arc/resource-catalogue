@@ -102,6 +102,17 @@ public abstract class ResourceManager<T extends Identifiable> extends AbstractGe
     }
 
     @Override
+    public final T save(T t) {
+        T saved;
+        if (exists(t)) {
+            saved = update(t, null);
+        } else {
+            saved = add(t, null);
+        }
+        return saved;
+    }
+
+    @Override
     public void delete(T t) {
         resourceService.deleteResource(whereID(t.getId(), true).getId());
         logger.debug("Deleting Resource {}", t);

@@ -31,85 +31,21 @@ import java.util.Objects;
 
 @Profile("crud")
 @RestController
-@RequestMapping({"interoperability-records"})
+@RequestMapping(path ="interoperability-records", consumes = {MediaType.APPLICATION_JSON_VALUE}, produces = {MediaType.APPLICATION_JSON_VALUE})
 @Tag(name = "interoperability records")
-public class InteroperabilityRecordCrudController {
+public class InteroperabilityRecordCrudController extends ResourceCrudController<InteroperabilityRecordBundle> {
 
     private static final Logger logger = LogManager.getLogger(InteroperabilityRecordCrudController.class);
     private final InteroperabilityRecordService interoperabilityRecordService;
 
     public InteroperabilityRecordCrudController(InteroperabilityRecordService interoperabilityRecordService) {
+        super(interoperabilityRecordService);
         this.interoperabilityRecordService = interoperabilityRecordService;
     }
 
-
-    @GetMapping(path = "{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-//    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth, #id)")
-    public ResponseEntity<InteroperabilityRecordBundle> get(@PathVariable("id") String id,
-                                                            @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId,
-                                                            @Parameter(hidden = true) Authentication auth) {
-        return new ResponseEntity<>(interoperabilityRecordService.get(id, catalogueId), HttpStatus.OK);
-    }
-
-    @Browse
-    @GetMapping(produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-//    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth, #id)")
-    public ResponseEntity<Paging<InteroperabilityRecordBundle>> get(@Parameter(hidden = true) @RequestParam Map<String, Object> allRequestParams,
-                                                                    @Parameter(hidden = true) Authentication auth) {
-        return new ResponseEntity<>(interoperabilityRecordService.getAll(FacetFilterUtils.createFacetFilter(allRequestParams), auth), HttpStatus.OK);
-    }
-
-    @Operation(summary = "Validates the Interoperability Record without actually changing the repository.")
-    @PostMapping(path = "validate", produces = {MediaType.APPLICATION_JSON_VALUE})
-    public ResponseEntity<Boolean> validate(@RequestBody InteroperabilityRecordBundle interoperabilityRecord) {
-        return ResponseEntity.ok(interoperabilityRecordService.validateInteroperabilityRecord(interoperabilityRecord));
-    }
-
-    @PostMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
-//    @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public ResponseEntity<InteroperabilityRecordBundle> add(@RequestBody InteroperabilityRecordBundle interoperabilityRecordBundle, Authentication authentication) {
-        ResponseEntity<InteroperabilityRecordBundle> ret = new ResponseEntity<>(interoperabilityRecordService.add(interoperabilityRecordBundle, authentication), HttpStatus.OK);
-        logger.info("User '{}' added InteroperabilityRecordBundle '{}' with id: {}", authentication, interoperabilityRecordBundle.getInteroperabilityRecord().getTitle(), interoperabilityRecordBundle.getId());
-        return ret;
-    }
-
-    @PostMapping(path = "/bulk", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PostMapping(path = "/bulk")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public void addBulk(@RequestBody List<InteroperabilityRecordBundle> interoperabilityRecordList, @Parameter(hidden = true) Authentication auth) {
-        interoperabilityRecordService.addBulk(interoperabilityRecordList, auth);
-    }
-
-    @PutMapping(path = "{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
-//    @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public ResponseEntity<InteroperabilityRecordBundle> update(@PathVariable String id, @RequestBody InteroperabilityRecordBundle interoperabilityRecord, @Parameter(hidden = true) Authentication authentication) throws ResourceNotFoundException {
-        if (!Objects.equals(id, interoperabilityRecord.getId())) {
-            throw new ResourceException("Not the same resource", HttpStatus.CONFLICT);
-        }
-        InteroperabilityRecordBundle interoperabilityRecordBundle = interoperabilityRecordService.update(interoperabilityRecord, authentication);
-        logger.info("User '{}' updated InteroperabilityRecordBundle '{}' with id: {}", authentication, interoperabilityRecordBundle.getInteroperabilityRecord().getTitle(), interoperabilityRecordBundle.getId());
-        return new ResponseEntity<>(interoperabilityRecordBundle, HttpStatus.OK);
-    }
-
-    @DeleteMapping("{id}")
-    public ResponseEntity<InteroperabilityRecordBundle> delete(@PathVariable("id") String id,
-                                                               @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId,
-                                                               @Parameter(hidden = true) Authentication auth) throws ResourceNotFoundException {
-        interoperabilityRecordService.delete(interoperabilityRecordService.get(id, catalogueId));
-        return new ResponseEntity<>(HttpStatus.OK);
-    }
-
-
-    private FacetFilter createFacetFilter(String catalogueId, boolean isPublic) {
-        FacetFilter ff = new FacetFilter();
-        ff.setQuantity(10000);
-        ff.addFilter("status", "approved interoperability record");
-        ff.addFilter("active", true);
-        if (isPublic) {
-            ff.addFilter("published", true);
-        } else {
-            ff.addFilter("catalogue_id", catalogueId);
-            ff.addFilter("published", false);
-        }
-        return ff;
+    public void addBulk(@RequestBody List<InteroperabilityRecordBundle> bundles, @Parameter(hidden = true) Authentication auth) {
+        interoperabilityRecordService.addBulk(bundles, auth);
     }
 }

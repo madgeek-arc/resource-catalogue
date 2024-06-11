@@ -1,6 +1,5 @@
 package gr.uoa.di.madgik.resourcecatalogue.controllers.lot1;
 
-import gr.uoa.di.madgik.resourcecatalogue.controllers.registry.ResourceController;
 import gr.uoa.di.madgik.resourcecatalogue.domain.ResourceInteroperabilityRecordBundle;
 import gr.uoa.di.madgik.resourcecatalogue.service.ResourceInteroperabilityRecordService;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -20,9 +19,9 @@ import java.util.List;
 
 @Profile("crud")
 @RestController
-@RequestMapping("resource-interoperability-records")
+@RequestMapping(path = "resource-interoperability-records", consumes = {MediaType.APPLICATION_JSON_VALUE}, produces = {MediaType.APPLICATION_JSON_VALUE})
 @Tag(name = "resource interoperability records")
-public class ResourceInteroperabilityRecordCrudController extends ResourceController<ResourceInteroperabilityRecordBundle> {
+public class ResourceInteroperabilityRecordCrudController extends ResourceCrudController<ResourceInteroperabilityRecordBundle> {
 
     private static final Logger logger = LogManager.getLogger(ResourceInteroperabilityRecordCrudController.class);
 
@@ -33,9 +32,9 @@ public class ResourceInteroperabilityRecordCrudController extends ResourceContro
         this.resourceInteroperabilityRecordService = resourceInteroperabilityRecordService;
     }
 
-    @PostMapping(path = "/bulk", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PostMapping(path = "/bulk")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public void addBulk(@RequestBody List<ResourceInteroperabilityRecordBundle> resourceInteroperabilityRecordList, @Parameter(hidden = true) Authentication auth) {
-        resourceInteroperabilityRecordService.addBulk(resourceInteroperabilityRecordList, auth);
+    public void addBulk(@RequestBody List<ResourceInteroperabilityRecordBundle> bundles, @Parameter(hidden = true) Authentication auth) {
+        resourceInteroperabilityRecordService.addBulk(bundles, auth);
     }
 }

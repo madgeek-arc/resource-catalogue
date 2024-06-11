@@ -20,9 +20,9 @@ import java.util.List;
 
 @Profile("crud")
 @RestController
-@RequestMapping("providers")
+@RequestMapping(path = "providers", consumes = {MediaType.APPLICATION_JSON_VALUE}, produces = {MediaType.APPLICATION_JSON_VALUE})
 @Tag(name = "providers")
-public class ProviderCrudController extends ResourceController<ProviderBundle> {
+public class ProviderCrudController extends ResourceCrudController<ProviderBundle> {
 
     private static final Logger logger = LogManager.getLogger(ProviderCrudController.class);
     private final ProviderService providerService;
@@ -32,10 +32,10 @@ public class ProviderCrudController extends ResourceController<ProviderBundle> {
         this.providerService = providerService;
     }
 
-    @PostMapping(path = "/bulk", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PostMapping(path = "/bulk")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public void addBulk(@RequestBody List<ProviderBundle> providerList, @Parameter(hidden = true) Authentication auth) {
-        providerService.addBulk(providerList, auth);
+    public void addBulk(@RequestBody List<ProviderBundle> bundles, @Parameter(hidden = true) Authentication auth) {
+        providerService.addBulk(bundles, auth);
     }
 
 }
