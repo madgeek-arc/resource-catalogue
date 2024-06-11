@@ -1,6 +1,5 @@
 package gr.uoa.di.madgik.resourcecatalogue.controllers.lot1;
 
-import gr.uoa.di.madgik.resourcecatalogue.controllers.registry.ResourceController;
 import gr.uoa.di.madgik.resourcecatalogue.domain.User;
 import gr.uoa.di.madgik.resourcecatalogue.domain.configurationTemplates.ConfigurationTemplateInstance;
 import gr.uoa.di.madgik.resourcecatalogue.domain.configurationTemplates.ConfigurationTemplateInstanceBundle;
@@ -25,9 +24,9 @@ import java.util.List;
 
 @Profile("crud")
 @RestController
-@RequestMapping("configuration-template-instances")
+@RequestMapping(path = "configuration-template-instances", consumes = {MediaType.APPLICATION_JSON_VALUE}, produces = {MediaType.APPLICATION_JSON_VALUE})
 @Tag(name = "configuration template instances")
-public class ConfigurationTemplateInstanceCrudController extends ResourceController<ConfigurationTemplateInstanceBundle> {
+public class ConfigurationTemplateInstanceCrudController extends ResourceCrudController<ConfigurationTemplateInstanceBundle> {
 
     private static final Logger logger = LogManager.getLogger(ConfigurationTemplateInstanceCrudController.class);
     private final ConfigurationTemplateInstanceService configurationTemplateInstanceService;

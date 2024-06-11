@@ -131,10 +131,10 @@ public class ServiceController {
 
     @Operation(summary = "Validates the Resource without actually changing the repository.")
     @PostMapping(path = "validate", produces = {MediaType.APPLICATION_JSON_VALUE})
-    public ResponseEntity<Boolean> validate(@RequestBody Service service) {
-        ResponseEntity<Boolean> ret = ResponseEntity.ok(serviceBundleService.validate(new ServiceBundle(service)));
+    public ResponseEntity<Void> validate(@RequestBody Service service) {
         logger.info("Validated Resource with name '{}' and id '{}'", service.getName(), service.getId());
-        return ret;
+        serviceBundleService.validate(new ServiceBundle(service));
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @Operation(summary = "Filter a list of Resources based on a set of filters or get a list of all Resources in the Catalogue.")

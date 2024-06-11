@@ -38,7 +38,7 @@ import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
 
-public abstract class AbstractServiceBundleManager<T extends ServiceBundle> extends AbstractGenericService<T> implements ServiceBundleService<T> {
+public abstract class AbstractServiceBundleManager<T extends ServiceBundle> extends ResourceManager<T> implements ServiceBundleService<T> {
 
     private static final Logger logger = LoggerFactory.getLogger(AbstractServiceBundleManager.class);
 
@@ -49,18 +49,12 @@ public abstract class AbstractServiceBundleManager<T extends ServiceBundle> exte
     @Autowired
     private VocabularyService vocabularyService;
     @Autowired
-    private ProviderService providerService;
-    @Autowired
     private FacetLabelService facetLabelService;
     @Autowired
     @Qualifier("serviceSync")
     private SynchronizerService<Service> synchronizerService;
     @Autowired
-    private AnalyticsService analyticsService;
-    @Autowired
     private SearchService searchService;
-    @Autowired
-    private IdCreator idCreator;
     private List<String> browseBy;
     private Map<String, String> labels;
     @Autowired
@@ -228,7 +222,7 @@ public abstract class AbstractServiceBundleManager<T extends ServiceBundle> exte
     }
 
     @Override
-    public boolean validate(ServiceBundle serviceBundle) {
+    public T validate(T serviceBundle) {
         Service service = serviceBundle.getService();
         //If we want to reject bad vocab ids instead of silently accept, here's where we do it
         logger.debug("Validating Resource with id: {}", service.getId());
@@ -240,7 +234,7 @@ public abstract class AbstractServiceBundleManager<T extends ServiceBundle> exte
         }
         serviceValidator.validate(serviceBundle, null);
 
-        return true;
+        return serviceBundle;
     }
 
     @Override
@@ -301,12 +295,6 @@ public abstract class AbstractServiceBundleManager<T extends ServiceBundle> exte
         return resource != null;
     }
 
-    String serialize(T serviceBundle) {
-        String serialized;
-        serialized = parserPool.serialize(serviceBundle, ParserService.ParserServiceTypes.fromString(resourceType.getPayloadType()));
-        return serialized;
-    }
-
     public T deserialize(Resource resource) {
         if (resource == null) {
             logger.warn("attempt to deserialize null resource");
@@ -315,7 +303,7 @@ public abstract class AbstractServiceBundleManager<T extends ServiceBundle> exte
         return parserPool.deserialize(resource, typeParameterClass);
     }
 
-    private boolean exists(T serviceBundle) {
+    public boolean exists(T serviceBundle) {
         return getResource(serviceBundle.getService().getId(), serviceBundle.getService().getCatalogueId()) != null;
     }
 

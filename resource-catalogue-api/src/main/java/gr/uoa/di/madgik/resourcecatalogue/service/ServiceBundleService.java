@@ -14,7 +14,7 @@ import org.springframework.security.core.Authentication;
 import java.util.List;
 import java.util.Map;
 
-public interface ServiceBundleService<T> extends ResourceCRUDService<T, Authentication> {
+public interface ServiceBundleService<T> extends ResourceService<T> {
 
     /**
      * Method to add a new resource.
@@ -109,14 +109,6 @@ public interface ServiceBundleService<T> extends ResourceCRUDService<T, Authenti
      * @return {@link Resource}
      */
     Resource getResource(String id, String catalogueId);
-
-    /**
-     * Validates the given resource.
-     *
-     * @param resource The Resource
-     * @return {@link boolean}
-     */
-    boolean validate(T resource);
 
     /**
      * Sets a Resource as active/inactive.

@@ -10,10 +10,7 @@ import gr.uoa.di.madgik.resourcecatalogue.domain.Metadata;
 import gr.uoa.di.madgik.resourcecatalogue.domain.ServiceBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.User;
 import gr.uoa.di.madgik.resourcecatalogue.exception.ValidationException;
-import gr.uoa.di.madgik.resourcecatalogue.service.IdCreator;
-import gr.uoa.di.madgik.resourcecatalogue.service.PendingResourceService;
-import gr.uoa.di.madgik.resourcecatalogue.service.ServiceBundleService;
-import gr.uoa.di.madgik.resourcecatalogue.service.VocabularyService;
+import gr.uoa.di.madgik.resourcecatalogue.service.*;
 import gr.uoa.di.madgik.resourcecatalogue.utils.ProviderResourcesCommonMethods;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,8 +33,7 @@ public class PendingServiceManager extends ResourceManager<ServiceBundle> implem
     private final ServiceBundleService<ServiceBundle> serviceBundleService;
     private final IdCreator idCreator;
     private final VocabularyService vocabularyService;
-    private final ProviderManager providerManager;
-    private ServiceBundleManager serviceBundleManager;
+    private final ProviderService providerService;
     private final ProviderResourcesCommonMethods commonMethods;
 
     @Value("${catalogue.id}")
@@ -45,14 +41,13 @@ public class PendingServiceManager extends ResourceManager<ServiceBundle> implem
 
     public PendingServiceManager(ServiceBundleService<ServiceBundle> serviceBundleService,
                                  IdCreator idCreator, @Lazy VocabularyService vocabularyService,
-                                 @Lazy ProviderManager providerManager, @Lazy ServiceBundleManager serviceBundleManager,
+                                 @Lazy ProviderService providerService,
                                  ProviderResourcesCommonMethods commonMethods) {
         super(ServiceBundle.class);
         this.serviceBundleService = serviceBundleService;
         this.idCreator = idCreator;
         this.vocabularyService = vocabularyService;
-        this.providerManager = providerManager;
-        this.serviceBundleManager = serviceBundleManager;
+        this.providerService = providerService;
         this.commonMethods = commonMethods;
     }
 
@@ -142,7 +137,7 @@ public class PendingServiceManager extends ResourceManager<ServiceBundle> implem
         loggingInfoList.add(loggingInfo);
 
         // set resource status according to Provider's templateStatus
-        if (providerManager.get(serviceBundle.getService().getResourceOrganisation()).getTemplateStatus().equals("approved template")) {
+        if (providerService.get(serviceBundle.getService().getResourceOrganisation()).getTemplateStatus().equals("approved template")) {
             serviceBundle.setStatus(vocabularyService.get("approved resource").getId());
             LoggingInfo loggingInfoApproved = commonMethods.createLoggingInfo(auth, LoggingInfo.Types.ONBOARD.getKey(),
                     LoggingInfo.ActionType.APPROVED.getKey());

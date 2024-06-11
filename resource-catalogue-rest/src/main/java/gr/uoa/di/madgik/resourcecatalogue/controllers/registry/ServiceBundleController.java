@@ -99,10 +99,10 @@ public class ServiceBundleController {
     }
 
     @PostMapping(path = "validate", produces = {MediaType.APPLICATION_JSON_VALUE})
-    public ResponseEntity<Boolean> validate(@RequestBody ServiceBundle service, @Parameter(hidden = true) Authentication auth) {
-        ResponseEntity<Boolean> ret = ResponseEntity.ok(serviceBundleService.validate(service));
+    public ResponseEntity<Void> validate(@RequestBody ServiceBundle service, @Parameter(hidden = true) Authentication auth) {
+        serviceBundleService.validate(service);
         logger.info("Validating ServiceBundle: {}", service.getService().getName());
-        return ret;
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @Browse

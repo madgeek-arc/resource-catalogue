@@ -31,10 +31,9 @@ import java.util.Set;
 public class VocabularyCurationController extends ResourceController<VocabularyCuration> {
 
     private static final Logger logger = LogManager.getLogger(VocabularyCurationController.class);
-    private VocabularyCurationService<VocabularyCuration> vocabularyCurationService;
+    private final VocabularyCurationService vocabularyCurationService;
 
-    @Autowired
-    VocabularyCurationController(VocabularyCurationService<VocabularyCuration> service) {
+    VocabularyCurationController(VocabularyCurationService service) {
         super(service);
         this.vocabularyCurationService = service;
     }
