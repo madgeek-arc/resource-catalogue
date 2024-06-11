@@ -5,7 +5,7 @@ import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.resourcecatalogue.domain.VocabularyCuration;
 import org.springframework.security.core.Authentication;
 
-public interface VocabularyCurationService<T> extends ResourceService<VocabularyCuration> {
+public interface VocabularyCurationService extends ResourceService<VocabularyCuration> {
 
     /**
      * Add a new VocabularyCuration from UI

@@ -24,7 +24,7 @@ import java.util.stream.Collectors;
 
 
 @Component
-public class VocabularyCurationManager extends ResourceManager<VocabularyCuration> implements VocabularyCurationService<VocabularyCuration> {
+public class VocabularyCurationManager extends ResourceManager<VocabularyCuration> implements VocabularyCurationService {
 
     private static final Logger logger = LoggerFactory.getLogger(VocabularyCurationManager.class);
     private final RegistrationMailService registrationMailService;

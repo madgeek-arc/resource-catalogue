@@ -40,7 +40,7 @@ import static gr.uoa.di.madgik.resourcecatalogue.utils.VocabularyValidationUtils
 public class ProviderManager extends ResourceManager<ProviderBundle> implements ProviderService {
 
     private static final Logger logger = LoggerFactory.getLogger(ProviderManager.class);
-    private final ServiceBundleService serviceBundleService;
+    private final ServiceBundleService<ServiceBundle> serviceBundleService;
     private final TrainingResourceService trainingResourceService;
     private final InteroperabilityRecordService interoperabilityRecordService;
     private final PublicServiceManager publicServiceManager;
@@ -63,7 +63,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     @Value("${catalogue.id}")
     private String catalogueId;
 
-    public ProviderManager(@Lazy ServiceBundleService serviceBundleService,
+    public ProviderManager(@Lazy ServiceBundleService<ServiceBundle> serviceBundleService,
                            @Lazy SecurityService securityService, @Lazy FieldValidator fieldValidator,
                            @Lazy RegistrationMailService registrationMailService, IdCreator idCreator,
                            EventService eventService, VersionService versionService,
@@ -917,6 +917,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         vocabularyService.add(newHostingLegalEntity, null);
     }
 
+    // TODO: refactor
     private void checkAndAddProviderToHLEVocabulary(ProviderBundle providerBundle) {
         List<Vocabulary> allHLE = vocabularyService.getByType(Vocabulary.Type.PROVIDER_HOSTING_LEGAL_ENTITY);
         List<String> allHLEIDs = new ArrayList<>();
@@ -934,17 +935,12 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     }
 
     public Paging<?> getRejectedResources(FacetFilter ff, String resourceType, Authentication auth) {
-        List<Bundle<?>> ret = new ArrayList<>();
         if (resourceType.equals("service")) {
             Browsing<ServiceBundle> providerRejectedResources = getResourceBundles(ff, serviceBundleService, auth);
-            ret.addAll(providerRejectedResources.getResults());
-            return new Paging<>(providerRejectedResources.getTotal(), providerRejectedResources.getFrom(),
-                    providerRejectedResources.getTo(), ret, providerRejectedResources.getFacets());
+            return new Paging<>(providerRejectedResources);
         } else if (resourceType.equals("training_resource")) {
             Browsing<TrainingResourceBundle> providerRejectedResources = getResourceBundles(ff, trainingResourceService, auth);
-            ret.addAll(providerRejectedResources.getResults());
-            return new Paging<>(providerRejectedResources.getTotal(), providerRejectedResources.getFrom(),
-                    providerRejectedResources.getTo(), ret, providerRejectedResources.getFacets());
+            return new Paging<>(providerRejectedResources);
         }
         return null;
     }
