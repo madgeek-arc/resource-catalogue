@@ -19,7 +19,7 @@ import java.util.List;
 
 @Profile("crud")
 @RestController
-@RequestMapping(path = "resource-interoperability-records", consumes = {MediaType.APPLICATION_JSON_VALUE}, produces = {MediaType.APPLICATION_JSON_VALUE})
+@RequestMapping(path = "resource-interoperability-records")
 @Tag(name = "resource interoperability records")
 public class ResourceInteroperabilityRecordCrudController extends ResourceCrudController<ResourceInteroperabilityRecordBundle> {
 

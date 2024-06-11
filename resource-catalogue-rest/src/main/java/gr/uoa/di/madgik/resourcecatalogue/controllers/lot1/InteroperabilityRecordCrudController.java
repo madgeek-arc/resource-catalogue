@@ -31,7 +31,7 @@ import java.util.Objects;
 
 @Profile("crud")
 @RestController
-@RequestMapping(path ="interoperability-records", consumes = {MediaType.APPLICATION_JSON_VALUE}, produces = {MediaType.APPLICATION_JSON_VALUE})
+@RequestMapping(path ="interoperability-records")
 @Tag(name = "interoperability records")
 public class InteroperabilityRecordCrudController extends ResourceCrudController<InteroperabilityRecordBundle> {
 

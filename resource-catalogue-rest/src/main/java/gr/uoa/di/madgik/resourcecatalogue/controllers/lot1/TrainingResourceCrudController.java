@@ -17,7 +17,7 @@ import java.util.List;
 
 @Profile("crud")
 @RestController
-@RequestMapping(path = "training-resources", consumes = {MediaType.APPLICATION_JSON_VALUE}, produces = {MediaType.APPLICATION_JSON_VALUE})
+@RequestMapping(path = "training-resources")
 @Tag(name = "training resource")
 public class TrainingResourceCrudController extends ResourceCrudController<TrainingResourceBundle> {
 

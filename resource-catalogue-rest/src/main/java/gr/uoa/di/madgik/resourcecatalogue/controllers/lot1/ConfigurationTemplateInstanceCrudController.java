@@ -24,7 +24,7 @@ import java.util.List;
 
 @Profile("crud")
 @RestController
-@RequestMapping(path = "configuration-template-instances", consumes = {MediaType.APPLICATION_JSON_VALUE}, produces = {MediaType.APPLICATION_JSON_VALUE})
+@RequestMapping(path = "configuration-template-instances")
 @Tag(name = "configuration template instances")
 public class ConfigurationTemplateInstanceCrudController extends ResourceCrudController<ConfigurationTemplateInstanceBundle> {
 

@@ -20,7 +20,7 @@ import java.util.List;
 
 @Profile("crud")
 @RestController
-@RequestMapping(path = "providers", consumes = {MediaType.APPLICATION_JSON_VALUE}, produces = {MediaType.APPLICATION_JSON_VALUE})
+@RequestMapping(path = "providers", produces = {MediaType.APPLICATION_JSON_VALUE})
 @Tag(name = "providers")
 public class ProviderCrudController extends ResourceCrudController<ProviderBundle> {
 
