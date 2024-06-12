@@ -77,25 +77,34 @@ public class EventController extends ResourceController<Event> {
         eventService.addVisitsOnDay(date, serviceId, noOfVisits, auth);
     }
 
-    @PostMapping(path = "visits/service/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PostMapping(path = "visits/service/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_USER')")
-    public ResponseEntity<Event> setVisit(@PathVariable String id, @RequestParam("visit") Float visit) throws Exception {
-        ResponseEntity<Event> ret = new ResponseEntity<>(eventService.setVisit(id, visit), HttpStatus.OK);
-        logger.info("Someone Visited Service with id '{}'", id);
+    public ResponseEntity<Event> setVisit(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
+                                          @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix,
+                                          @RequestParam("visit") Float visit) throws Exception {
+        String serviceId = prefix + "/" + suffix;
+        ResponseEntity<Event> ret = new ResponseEntity<>(eventService.setVisit(serviceId, visit), HttpStatus.OK);
+        logger.info("Someone Visited Service with id '{}'", serviceId);
         return ret;
     }
 
-    @PostMapping(path = "addToProject/service/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PostMapping(path = "addToProject/service/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_USER')")
-    public ResponseEntity<Event> setAddToProject(@PathVariable String id, @RequestParam("addToProject") Float addToProject) throws Exception {
+    public ResponseEntity<Event> setAddToProject(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
+                                                 @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix,
+                                                 @RequestParam("addToProject") Float addToProject) throws Exception {
+        String id = prefix + "/" + suffix;
         ResponseEntity<Event> ret = new ResponseEntity<>(eventService.setAddToProject(id, addToProject), HttpStatus.OK);
         logger.info("Someone Added To Project Service with id '{}'", id);
         return ret;
     }
 
-    @PostMapping(path = "order/service/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PostMapping(path = "order/service/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_USER')")
-    public ResponseEntity<Event> setOrder(@PathVariable String id, @RequestParam("order") Float order) throws Exception {
+    public ResponseEntity<Event> setOrder(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
+                                          @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix,
+                                          @RequestParam("order") Float order) throws Exception {
+        String id = prefix + "/" + suffix;
         ResponseEntity<Event> ret = new ResponseEntity<>(eventService.setOrder(id, order), HttpStatus.OK);
         logger.info("Someone Ordered Service with id '{}'", id);
         return ret;
@@ -116,33 +125,45 @@ public class EventController extends ResourceController<Event> {
         return new ResponseEntity<>(eventService.getEvents(Event.UserActionType.ORDER.getKey()), HttpStatus.OK);
     }
 
-    @GetMapping(path = "visit/service/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
-    public ResponseEntity<List<Event>> getServiceVisits(@PathVariable String id) {
+    @GetMapping(path = "visit/service/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE})
+    public ResponseEntity<List<Event>> getServiceVisits(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
+                                                        @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix) {
+        String id = prefix + "/" + suffix;
         return new ResponseEntity<>(eventService.getServiceEvents(Event.UserActionType.VISIT.getKey(), id), HttpStatus.OK);
     }
 
-    @GetMapping(path = "addToProject/service/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
-    public ResponseEntity<List<Event>> getServiceAddToProject(@PathVariable String id) {
+    @GetMapping(path = "addToProject/service/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE})
+    public ResponseEntity<List<Event>> getServiceAddToProject(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
+                                                              @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix) {
+        String id = prefix + "/" + suffix;
         return new ResponseEntity<>(eventService.getServiceEvents(Event.UserActionType.ADD_TO_PROJECT.getKey(), id), HttpStatus.OK);
     }
 
-    @GetMapping(path = "order/service/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
-    public ResponseEntity<List<Event>> getServiceOrders(@PathVariable String id) {
+    @GetMapping(path = "order/service/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE})
+    public ResponseEntity<List<Event>> getServiceOrders(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
+                                                        @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix) {
+        String id = prefix + "/" + suffix;
         return new ResponseEntity<>(eventService.getServiceEvents(Event.UserActionType.ORDER.getKey(), id), HttpStatus.OK);
     }
 
-    @GetMapping(path = "aggregate/visits/service/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
-    public int getServiceAggregatedVisits(@PathVariable String id) {
+    @GetMapping(path = "aggregate/visits/service/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE})
+    public int getServiceAggregatedVisits(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
+                                          @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix) {
+        String id = prefix + "/" + suffix;
         return eventService.getServiceAggregatedVisits(id);
     }
 
-    @GetMapping(path = "aggregate/addToProject/service/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
-    public int getServiceAggregatedAddToProject(@PathVariable String id) {
+    @GetMapping(path = "aggregate/addToProject/service/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE})
+    public int getServiceAggregatedAddToProject(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
+                                                @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix) {
+        String id = prefix + "/" + suffix;
         return eventService.getServiceAggregatedAddToProject(id);
     }
 
-    @GetMapping(path = "aggregate/order/service/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
-    public int getServiceAggregatedOrders(@PathVariable String id) {
+    @GetMapping(path = "aggregate/order/service/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE})
+    public int getServiceAggregatedOrders(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
+                                          @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix) {
+        String id = prefix + "/" + suffix;
         return eventService.getServiceAggregatedOrders(id);
     }
 }

@@ -26,9 +26,9 @@ import java.util.List;
 import static gr.uoa.di.madgik.resourcecatalogue.config.Properties.Cache.*;
 
 @Service("pendingServiceManager")
-public class PendingServiceManager extends ResourceManager<ServiceBundle> implements PendingResourceService<ServiceBundle> {
+public class DraftServiceManager extends ResourceManager<ServiceBundle> implements DraftResourceService<ServiceBundle> {
 
-    private static final Logger logger = LoggerFactory.getLogger(PendingServiceManager.class);
+    private static final Logger logger = LoggerFactory.getLogger(DraftServiceManager.class);
 
     private final ServiceBundleService<ServiceBundle> serviceBundleService;
     private final IdCreator idCreator;
@@ -39,10 +39,10 @@ public class PendingServiceManager extends ResourceManager<ServiceBundle> implem
     @Value("${catalogue.id}")
     private String catalogueId;
 
-    public PendingServiceManager(ServiceBundleService<ServiceBundle> serviceBundleService,
-                                 IdCreator idCreator, @Lazy VocabularyService vocabularyService,
-                                 @Lazy ProviderService providerService,
-                                 ProviderResourcesCommonMethods commonMethods) {
+    public DraftServiceManager(ServiceBundleService<ServiceBundle> serviceBundleService,
+                               IdCreator idCreator, @Lazy VocabularyService vocabularyService,
+                               @Lazy ProviderService providerService,
+                               ProviderResourcesCommonMethods commonMethods) {
         super(ServiceBundle.class);
         this.serviceBundleService = serviceBundleService;
         this.idCreator = idCreator;

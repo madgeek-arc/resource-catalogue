@@ -19,8 +19,8 @@ public class PIDManager implements PIDService {
         this.genericResourceService = genericResourceService;
     }
 
-    public Bundle<?> get(String pid) {
-        String prefix = pid.split("/")[0];
+    public Bundle<?> get(String prefix, String suffix) {
+        String pid = prefix + "/" + suffix;
         String resourceType = commonMethods.determineResourceTypeFromPidPrefix(prefix);
         if (!resourceType.equals("no_resource_type")) {
             FacetFilter ff = new FacetFilter();

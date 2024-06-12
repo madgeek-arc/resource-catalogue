@@ -42,8 +42,10 @@ public class ConfigurationTemplateInstanceController {
     }
 
     @Operation(summary = "Returns the ConfigurationTemplateInstance with the given id.")
-    @GetMapping(path = "{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    public ResponseEntity<ConfigurationTemplateInstanceDto> getConfigurationTemplateInstance(@PathVariable("id") String id) {
+    @GetMapping(path = "{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    public ResponseEntity<ConfigurationTemplateInstanceDto> getConfigurationTemplateInstance(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
+                                                                                             @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix) {
+        String id = prefix + "/" + suffix;
         ConfigurationTemplateInstance configurationTemplateInstance = configurationTemplateInstanceService.get(id).getConfigurationTemplateInstance();
         ConfigurationTemplateInstanceDto ret = configurationTemplateInstanceService.createConfigurationTemplateInstanceDto(configurationTemplateInstance);
         return new ResponseEntity<>(ret, HttpStatus.OK);
@@ -67,9 +69,11 @@ public class ConfigurationTemplateInstanceController {
     }
 
     @Operation(summary = "Returns a List of ConfigurationTemplateInstance associated with the given 'resourceId'")
-    @GetMapping(path = "getAllByResourceId/{resourceId}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    public ResponseEntity<List<ConfigurationTemplateInstanceDto>> getConfigurationTemplateInstancesByResourceId(@PathVariable("resourceId") String resourceId) {
-        List<ConfigurationTemplateInstance> configurationTemplateInstances = configurationTemplateInstanceService.getConfigurationTemplateInstancesByResourceId(resourceId);
+    @GetMapping(path = "getAllByResourceId/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    public ResponseEntity<List<ConfigurationTemplateInstanceDto>> getConfigurationTemplateInstancesByResourceId(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
+                                                                                                                @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix) {
+        String id = prefix + "/" + suffix;
+        List<ConfigurationTemplateInstance> configurationTemplateInstances = configurationTemplateInstanceService.getConfigurationTemplateInstancesByResourceId(id);
         List<ConfigurationTemplateInstanceDto> ret = new ArrayList<>();
         for (ConfigurationTemplateInstance configurationTemplateInstance : configurationTemplateInstances) {
             ret.add(configurationTemplateInstanceService.createConfigurationTemplateInstanceDto(configurationTemplateInstance));
@@ -78,9 +82,11 @@ public class ConfigurationTemplateInstanceController {
     }
 
     //    @Operation(summary = "Returns a List of ConfigurationTemplateInstance associated with the given 'configurationTemplateId'")
-    @GetMapping(path = "getAllByConfigurationTemplateId/{configurationTemplateId}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    public ResponseEntity<List<ConfigurationTemplateInstanceDto>> getConfigurationTemplateInstancesByConfigurationTemplateId(@PathVariable("configurationTemplateId") String configurationTemplateId) {
-        List<ConfigurationTemplateInstance> configurationTemplateInstances = configurationTemplateInstanceService.getConfigurationTemplateInstancesByConfigurationTemplateId(configurationTemplateId);
+    @GetMapping(path = "getAllByConfigurationTemplateId/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    public ResponseEntity<List<ConfigurationTemplateInstanceDto>> getConfigurationTemplateInstancesByConfigurationTemplateId(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
+                                                                                                                             @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix) {
+        String id = prefix + "/" + suffix;
+        List<ConfigurationTemplateInstance> configurationTemplateInstances = configurationTemplateInstanceService.getConfigurationTemplateInstancesByConfigurationTemplateId(id);
         List<ConfigurationTemplateInstanceDto> ret = new ArrayList<>();
         for (ConfigurationTemplateInstance configurationTemplateInstance : configurationTemplateInstances) {
             ret.add(configurationTemplateInstanceService.createConfigurationTemplateInstanceDto(configurationTemplateInstance));
@@ -122,11 +128,13 @@ public class ConfigurationTemplateInstanceController {
         return new ResponseEntity<>(configurationTemplateInstanceBundle.getConfigurationTemplateInstance(), HttpStatus.OK);
     }
 
-    //    @DeleteMapping(path = "{configurationTemplateInstanceId}", produces = {MediaType.APPLICATION_JSON_VALUE})
+    //    @DeleteMapping(path = "{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public ResponseEntity<ConfigurationTemplateInstance> deleteConfigurationTemplateInstance(@PathVariable("configurationTemplateInstanceId") String configurationTemplateInstanceId,
+    public ResponseEntity<ConfigurationTemplateInstance> deleteConfigurationTemplateInstance(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
+                                                                                             @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix,
                                                                                              @Parameter(hidden = true) Authentication auth) throws ResourceNotFoundException {
-        ConfigurationTemplateInstanceBundle configurationTemplateInstanceBundle = configurationTemplateInstanceService.get(configurationTemplateInstanceId);
+        String id = prefix + "/" + suffix;
+        ConfigurationTemplateInstanceBundle configurationTemplateInstanceBundle = configurationTemplateInstanceService.get(id);
         if (configurationTemplateInstanceBundle == null) {
             return new ResponseEntity<>(HttpStatus.GONE);
         }
@@ -137,9 +145,11 @@ public class ConfigurationTemplateInstanceController {
         return new ResponseEntity<>(configurationTemplateInstanceBundle.getConfigurationTemplateInstance(), HttpStatus.OK);
     }
 
-    @GetMapping(path = "getBundle/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @GetMapping(path = "getBundle/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public ResponseEntity<ConfigurationTemplateInstanceBundle> getBundle(@PathVariable("id") String id) {
+    public ResponseEntity<ConfigurationTemplateInstanceBundle> getBundle(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
+                                                                         @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix) {
+        String id = prefix + "/" + suffix;
         return new ResponseEntity<>(configurationTemplateInstanceService.get(id), HttpStatus.OK);
     }
 

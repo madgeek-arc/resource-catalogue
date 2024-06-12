@@ -35,11 +35,11 @@ public class MailController {
     @Autowired
     ProviderService providerService;
     @Autowired
-    PendingResourceService<ProviderBundle> pendingProviderService;
+    DraftResourceService<ProviderBundle> pendingProviderService;
     @Autowired
     ServiceBundleService serviceBundleService;
     @Autowired
-    PendingResourceService<ServiceBundle> pendingServiceService;
+    DraftResourceService<ServiceBundle> pendingServiceService;
     @Autowired
     TrainingResourceService trainingResourceService;
     @Autowired

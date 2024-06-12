@@ -47,8 +47,10 @@ public class ResourceInteroperabilityRecordController {
     }
 
     @Operation(summary = "Returns the ResourceInteroperabilityRecord with the given id.")
-    @GetMapping(path = "{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    public ResponseEntity<ResourceInteroperabilityRecord> getResourceInteroperabilityRecord(@PathVariable("id") String id, @Parameter(hidden = true) Authentication auth) {
+    @GetMapping(path = "{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    public ResponseEntity<ResourceInteroperabilityRecord> getResourceInteroperabilityRecord(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
+                                                                                            @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix) {
+        String id = prefix + "/" + suffix;
         ResourceInteroperabilityRecord resourceInteroperabilityRecord = resourceInteroperabilityRecordService.get(id).getResourceInteroperabilityRecord();
         return new ResponseEntity<>(resourceInteroperabilityRecord, HttpStatus.OK);
     }
@@ -79,11 +81,13 @@ public class ResourceInteroperabilityRecordController {
     }
 
     @Operation(summary = "Returns the ResourceInteroperabilityRecord of the given Resource of the given Catalogue.")
-    @GetMapping(path = "/byResource/{resourceId}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    public ResponseEntity<ResourceInteroperabilityRecord> getResourceInteroperabilityRecordByResourceId(@PathVariable("resourceId") String resourceId,
+    @GetMapping(path = "/byResource/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    public ResponseEntity<ResourceInteroperabilityRecord> getResourceInteroperabilityRecordByResourceId(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
+                                                                                                        @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix,
                                                                                                         @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId) {
+        String id = prefix + "/" + suffix;
         ResourceInteroperabilityRecordBundle resourceInteroperabilityRecordBundle = resourceInteroperabilityRecordService.
-                getWithResourceId(resourceId, catalogueId);
+                getWithResourceId(id, catalogueId);
         if (resourceInteroperabilityRecordBundle != null) {
             return new ResponseEntity<>(resourceInteroperabilityRecordBundle.getResourceInteroperabilityRecord(), HttpStatus.OK);
         }
@@ -112,11 +116,15 @@ public class ResourceInteroperabilityRecordController {
         return new ResponseEntity<>(resourceInteroperabilityRecordBundle.getResourceInteroperabilityRecord(), HttpStatus.OK);
     }
 
-    @DeleteMapping(path = "{resourceId}/{resourceInteroperabilityRecordId}", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth, #resourceId)")
-    public ResponseEntity<ResourceInteroperabilityRecord> deleteResourceInteroperabilityRecordById(@PathVariable("resourceId") String resourceId,
-                                                                                                   @PathVariable("resourceInteroperabilityRecordId") String resourceInteroperabilityRecordId,
+    @DeleteMapping(path = "{resourceIdPrefix}/{resourceIdSuffix}/{resourceInteroperabilityRecordIdPrefix}/{resourceInteroperabilityRecordIdSuffix}",
+            produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth, #resourceIdPrefix+'/'+resourceIdSuffix)")
+    public ResponseEntity<ResourceInteroperabilityRecord> deleteResourceInteroperabilityRecordById(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("resourceIdPrefix") String resourceIdPrefix,
+                                                                                                   @Parameter(description = "The right part of the ID after the '/'") @PathVariable("resourceIdSuffix") String resourceIdSuffix,
+                                                                                                   @Parameter(description = "The left part of the ID before the '/'") @PathVariable("resourceInteroperabilityRecordIdPrefix") String resourceInteroperabilityRecordIdPrefix,
+                                                                                                   @Parameter(description = "The right part of the ID after the '/'") @PathVariable("resourceInteroperabilityRecordIdSuffix") String resourceInteroperabilityRecordIdSuffix,
                                                                                                    @Parameter(hidden = true) Authentication auth) throws ResourceNotFoundException {
+        String resourceInteroperabilityRecordId = resourceInteroperabilityRecordIdPrefix + "/" + resourceInteroperabilityRecordIdSuffix;
         ResourceInteroperabilityRecordBundle resourceInteroperabilityRecordBundle = resourceInteroperabilityRecordService.get(resourceInteroperabilityRecordId);
         if (resourceInteroperabilityRecordBundle == null) {
             return new ResponseEntity<>(HttpStatus.GONE);
@@ -129,9 +137,12 @@ public class ResourceInteroperabilityRecordController {
         return new ResponseEntity<>(resourceInteroperabilityRecordBundle.getResourceInteroperabilityRecord(), HttpStatus.OK);
     }
 
-    @GetMapping(path = "bundle/{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    @GetMapping(path = "bundle/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
-    public ResponseEntity<ResourceInteroperabilityRecordBundle> getResourceInteroperabilityRecordBundle(@PathVariable("id") String id, @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId) {
+    public ResponseEntity<ResourceInteroperabilityRecordBundle> getResourceInteroperabilityRecordBundle(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
+                                                                                                        @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix,
+                                                                                                        @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId) {
+        String id = prefix + "/" + suffix;
         return new ResponseEntity<>(resourceInteroperabilityRecordService.get(id, catalogueId), HttpStatus.OK);
     }
 

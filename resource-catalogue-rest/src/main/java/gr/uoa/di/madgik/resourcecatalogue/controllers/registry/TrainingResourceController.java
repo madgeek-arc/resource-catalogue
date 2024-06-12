@@ -70,7 +70,7 @@ public class TrainingResourceController {
         this.genericResourceService = genericResourceService;
     }
 
-    @DeleteMapping(path = {"{id}"}, produces = {MediaType.APPLICATION_JSON_VALUE})
+    @DeleteMapping(path = "{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth, #id)")
     public ResponseEntity<TrainingResourceBundle> delete(@PathVariable("id") String id,
                                                          @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId,

@@ -7,10 +7,11 @@ public interface PIDService {
     /**
      * Get a Resource via its PID
      *
-     * @param pid PID
+     * @param prefix PID prefix
+     * @param suffix PID suffix
      * @return Bundle<?>
      */
-    Bundle<?> get(String pid);
+    Bundle<?> get(String prefix, String suffix);
 
     /**
      * Registers a PID on a specific resource

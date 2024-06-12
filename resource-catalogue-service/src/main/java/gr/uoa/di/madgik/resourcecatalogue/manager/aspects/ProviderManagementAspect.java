@@ -70,7 +70,7 @@ public class ProviderManagementAspect {
         this.securityService = securityService;
     }
 
-    @AfterReturning(pointcut = "execution(* gr.uoa.di.madgik.resourcecatalogue.manager.PendingServiceManager.transformToActive(..)) " +
+    @AfterReturning(pointcut = "execution(* gr.uoa.di.madgik.resourcecatalogue.manager.DraftServiceManager.transformToActive(..)) " +
             "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ServiceBundleManager.addResource(..))" +
             "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ServiceBundleManager.updateResource(..))",
             returning = "serviceBundle")
@@ -90,7 +90,7 @@ public class ProviderManagementAspect {
 
     @AfterReturning(pointcut = "execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ProviderManager.verifyProvider(..))" +
             "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ProviderManager.add(..))" +
-            "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.PendingProviderManager.transformToActive(..))",
+            "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.DraftProviderManager.transformToActive(..))",
             returning = "providerBundle")
     public void providerRegistrationEmails(final ProviderBundle providerBundle) {
         logger.trace("Sending Registration emails");
@@ -199,7 +199,7 @@ public class ProviderManagementAspect {
     @Async
     @AfterReturning(pointcut = "execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ServiceBundleManager.addResource(..))" +
             "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ServiceBundleManager.verifyResource(..))" +
-            "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.PendingServiceManager.transformToActive(..))" +
+            "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.DraftServiceManager.transformToActive(..))" +
             "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ServiceBundleManager.changeProvider(..))",
             returning = "serviceBundle")
     public void addResourceAsPublic(final ServiceBundle serviceBundle) {
