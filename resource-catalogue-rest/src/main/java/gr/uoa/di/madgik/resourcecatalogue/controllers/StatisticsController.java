@@ -5,6 +5,7 @@ import gr.uoa.di.madgik.resourcecatalogue.dto.MapValues;
 import gr.uoa.di.madgik.resourcecatalogue.dto.PlaceCount;
 import gr.uoa.di.madgik.resourcecatalogue.dto.Value;
 import gr.uoa.di.madgik.resourcecatalogue.service.StatisticsService;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
@@ -31,32 +32,47 @@ public class StatisticsController {
     }
 
     //    @Operation(summary = "Get visits per interval for a service.")
-    @GetMapping(path = "service/visits/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Map<String, Integer>> visits(@PathVariable("id") String id, @RequestParam(defaultValue = "MONTH") StatisticsService.Interval by) {
+    @GetMapping(path = "service/visits/{prefix}/{suffix}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Map<String, Integer>> visits(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
+                                                       @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix,
+                                                       @RequestParam(defaultValue = "MONTH") StatisticsService.Interval by) {
+        String id = prefix + "/" + suffix;
         return new ResponseEntity<>(statisticsService.visits(id, by), HttpStatus.OK);
     }
 
     //    @Operation(summary = "Get addToProject per interval for a service.")
-    @GetMapping(path = "service/addToProject/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Map<String, Integer>> addToProject(@PathVariable("id") String id, @RequestParam(defaultValue = "MONTH") StatisticsService.Interval by) {
+    @GetMapping(path = "service/addToProject/{prefix}/{suffix}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Map<String, Integer>> addToProject(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
+                                                             @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix,
+                                                             @RequestParam(defaultValue = "MONTH") StatisticsService.Interval by) {
+        String id = prefix + "/" + suffix;
         return new ResponseEntity<>(statisticsService.addToProject(id, by), HttpStatus.OK);
     }
 
     //    @Operation(summary = "Get aggregate visits per interval for all services offered by a provider.")
-    @GetMapping(path = "provider/visits/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Map<String, Integer>> pVisits(@PathVariable("id") String id, @RequestParam(defaultValue = "MONTH") StatisticsService.Interval by) {
+    @GetMapping(path = "provider/visits/{prefix}/{suffix}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Map<String, Integer>> pVisits(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
+                                                        @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix,
+                                                        @RequestParam(defaultValue = "MONTH") StatisticsService.Interval by) {
+        String id = prefix + "/" + suffix;
         return new ResponseEntity<>(statisticsService.providerVisits(id, by), HttpStatus.OK);
     }
 
     //    @Operation(summary = "Get aggregate 'addToProject per interval for all services offered by a provider.")
-    @GetMapping(path = "provider/addToProject/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Map<String, Integer>> pAddToProject(@PathVariable("id") String id, @RequestParam(defaultValue = "MONTH") StatisticsService.Interval by) {
+    @GetMapping(path = "provider/addToProject/{prefix}/{suffix}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Map<String, Integer>> pAddToProject(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
+                                                              @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix,
+                                                              @RequestParam(defaultValue = "MONTH") StatisticsService.Interval by) {
+        String id = prefix + "/" + suffix;
         return new ResponseEntity<>(statisticsService.providerAddToProject(id, by), HttpStatus.OK);
     }
 
     //    @Operation(summary = "Get percentage of visits for all services offered by a provider.")
-    @GetMapping(path = "provider/visitation/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Map<String, Float>> pVisitation(@PathVariable("id") String id, @RequestParam(defaultValue = "MONTH") StatisticsService.Interval by) {
+    @GetMapping(path = "provider/visitation/{prefix}/{suffix}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Map<String, Float>> pVisitation(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
+                                                          @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix,
+                                                          @RequestParam(defaultValue = "MONTH") StatisticsService.Interval by) {
+        String id = prefix + "/" + suffix;
         return new ResponseEntity<>(statisticsService.providerVisitation(id, by), HttpStatus.OK);
     }
 
@@ -99,24 +115,36 @@ public class StatisticsController {
     }
 
     //    @Operation(summary = "Get visits per interval for a datasource.")
-    @GetMapping(path = "datasource/visits/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Map<String, Integer>> datasourceVisits(@PathVariable("id") String id, @RequestParam(defaultValue = "MONTH") StatisticsService.Interval by) {
+    @GetMapping(path = "datasource/visits/{prefix}/{suffix}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Map<String, Integer>> datasourceVisits(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
+                                                                 @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix,
+                                                                 @RequestParam(defaultValue = "MONTH") StatisticsService.Interval by) {
+        String id = prefix + "/" + suffix;
         return new ResponseEntity<>(statisticsService.visits(id, by), HttpStatus.OK);
     }
 
     //    @Operation(summary = "Get addToProject per interval for a datasource.")
-    @GetMapping(path = "datasource/addToProject/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Map<String, Integer>> datasourceAddToProject(@PathVariable("id") String id, @RequestParam(defaultValue = "MONTH") StatisticsService.Interval by) {
+    @GetMapping(path = "datasource/addToProject/{prefix}/{suffix}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Map<String, Integer>> datasourceAddToProject(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
+                                                                       @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix,
+                                                                       @RequestParam(defaultValue = "MONTH") StatisticsService.Interval by) {
+        String id = prefix + "/" + suffix;
         return new ResponseEntity<>(statisticsService.addToProject(id, by), HttpStatus.OK);
     }
 
-    @GetMapping(path = "trainingResource/visits/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Map<String, Integer>> trainingResourceVisits(@PathVariable("id") String id, @RequestParam(defaultValue = "MONTH") StatisticsService.Interval by) {
+    @GetMapping(path = "trainingResource/visits/{prefix}/{suffix}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Map<String, Integer>> trainingResourceVisits(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
+                                                                       @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix,
+                                                                       @RequestParam(defaultValue = "MONTH") StatisticsService.Interval by) {
+        String id = prefix + "/" + suffix;
         return new ResponseEntity<>(statisticsService.visits(id, by), HttpStatus.OK);
     }
 
-    @GetMapping(path = "trainingResource/addToProject/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Map<String, Integer>> trainingResourceAddToProject(@PathVariable("id") String id, @RequestParam(defaultValue = "MONTH") StatisticsService.Interval by) {
+    @GetMapping(path = "trainingResource/addToProject/{prefix}/{suffix}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Map<String, Integer>> trainingResourceAddToProject(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
+                                                                             @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix,
+                                                                             @RequestParam(defaultValue = "MONTH") StatisticsService.Interval by) {
+        String id = prefix + "/" + suffix;
         return new ResponseEntity<>(statisticsService.addToProject(id, by), HttpStatus.OK);
     }
 }

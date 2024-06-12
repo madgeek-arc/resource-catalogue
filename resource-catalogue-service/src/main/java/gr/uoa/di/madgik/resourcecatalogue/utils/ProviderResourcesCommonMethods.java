@@ -52,15 +52,15 @@ public class ProviderResourcesCommonMethods {
     private String pidAuth;
     @Value("${pid.prefix}")
     private String pidPrefix;
-    @Value("${pid.prefix.services}")
+    @Value("${prefix.services}")
     private String servicesPrefix;
-    @Value("${pid.prefix.tools}")
+    @Value("${prefix.tools}")
     private String toolsPrefix;
-    @Value("${pid.prefix.trainings}")
+    @Value("${prefix.trainings}")
     private String trainingsPrefix;
-    @Value("${pid.prefix.providers}")
+    @Value("${prefix.providers}")
     private String providersPrefix;
-    @Value("${pid.prefix.ifguidelines}")
+    @Value("${prefix.guidelines}")
     private String guidelinesPrefix;
     @Value("${pid.api}")
     private String pidApi;

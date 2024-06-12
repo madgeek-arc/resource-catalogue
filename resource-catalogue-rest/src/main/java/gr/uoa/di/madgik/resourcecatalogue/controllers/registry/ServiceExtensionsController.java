@@ -86,24 +86,30 @@ public class ServiceExtensionsController {
 
     //SECTION: HELPDESK
     @Operation(summary = "Returns the Helpdesk with the given id.")
-    @GetMapping(path = "/helpdesk/{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    public ResponseEntity<Helpdesk> getHelpdesk(@PathVariable("id") String id) {
+    @GetMapping(path = "/helpdesk/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    public ResponseEntity<Helpdesk> getHelpdesk(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
+                                                @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix) {
+        String id = prefix + "/" + suffix;
         Helpdesk helpdesk = helpdeskService.get(id).getHelpdesk();
         return new ResponseEntity<>(helpdesk, HttpStatus.OK);
     }
 
-    @GetMapping(path = "/helpdesk/bundle/{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    @GetMapping(path = "/helpdesk/bundle/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
-    public ResponseEntity<HelpdeskBundle> getHelpdeskBundle(@PathVariable("id") String id) {
+    public ResponseEntity<HelpdeskBundle> getHelpdeskBundle(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
+                                                            @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix) {
+        String id = prefix + "/" + suffix;
         HelpdeskBundle helpdesk = helpdeskService.get(id);
         return new ResponseEntity<>(helpdesk, HttpStatus.OK);
     }
 
     @Operation(summary = "Returns the Helpdesk of the given Service of the given Catalogue.")
-    @GetMapping(path = "/helpdesk/byService/{serviceId}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    public ResponseEntity<Helpdesk> getHelpdeskByServiceId(@PathVariable("serviceId") String serviceId,
+    @GetMapping(path = "/helpdesk/byService/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    public ResponseEntity<Helpdesk> getHelpdeskByServiceId(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
+                                                           @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix,
                                                            @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId,
                                                            @Parameter(hidden = true) Authentication auth) {
+        String serviceId = prefix + "/" + suffix;
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(1000);
         List<HelpdeskBundle> allHelpdesks = helpdeskService.getAll(ff, auth).getResults();
@@ -166,9 +172,12 @@ public class ServiceExtensionsController {
     }
 
     // Deletes the Helpdesk with the specific ID.
-    @DeleteMapping(path = "/helpdesk/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @DeleteMapping(path = "/helpdesk/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
-    public ResponseEntity<Helpdesk> deleteHelpdeskById(@PathVariable("id") String id, @Parameter(hidden = true) Authentication auth) throws ResourceNotFoundException {
+    public ResponseEntity<Helpdesk> deleteHelpdeskById(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
+                                                       @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix,
+                                                       @Parameter(hidden = true) Authentication auth) throws ResourceNotFoundException {
+        String id = prefix + "/" + suffix;
         HelpdeskBundle helpdeskBundle = helpdeskService.get(id);
         if (helpdeskBundle == null) {
             return new ResponseEntity<>(HttpStatus.GONE);
@@ -182,12 +191,13 @@ public class ServiceExtensionsController {
 
     // Deletes the Helpdesk of the specific Service of the specific Catalogue.
     @Operation(summary = "Deletes the Helpdesk of the specific Service of the specific Catalogue.")
-    @DeleteMapping(path = "/helpdesk/{catalogueId}/{serviceId}", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth, #serviceId, #catalogueId)")
+    @DeleteMapping(path = "/helpdesk/{catalogueId}/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth, #prefix+'/'+suffix, #catalogueId)")
     public ResponseEntity<Helpdesk> deleteHelpdesk(@PathVariable("catalogueId") String catalogueId,
-                                                   @PathVariable("serviceId") String serviceId,
+                                                   @Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
+                                                   @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix,
                                                    @Parameter(hidden = true) Authentication auth) throws ResourceNotFoundException {
-        Helpdesk helpdesk = getHelpdeskByServiceId(serviceId, catalogueId, auth).getBody();
+        Helpdesk helpdesk = getHelpdeskByServiceId(prefix, suffix, catalogueId, auth).getBody();
         assert helpdesk != null;
         HelpdeskBundle helpdeskBundle = helpdeskService.get(helpdesk.getId());
         if (helpdeskBundle == null) {
@@ -230,24 +240,30 @@ public class ServiceExtensionsController {
 
     //SECTION: MONITORING
     @Operation(summary = "Returns the Monitoring with the given id.")
-    @GetMapping(path = "/monitoring/{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    public ResponseEntity<Monitoring> getMonitoring(@PathVariable("id") String id) {
+    @GetMapping(path = "/monitoring/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    public ResponseEntity<Monitoring> getMonitoring(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
+                                                    @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix) {
+        String id = prefix + "/" + suffix;
         Monitoring monitoring = monitoringService.get(id).getMonitoring();
         return new ResponseEntity<>(monitoring, HttpStatus.OK);
     }
 
-    @GetMapping(path = "/monitoring/bundle/{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    @GetMapping(path = "/monitoring/bundle/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
-    public ResponseEntity<MonitoringBundle> getMonitoringBundle(@PathVariable("id") String id) {
+    public ResponseEntity<MonitoringBundle> getMonitoringBundle(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
+                                                                @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix) {
+        String id = prefix + "/" + suffix;
         MonitoringBundle monitoring = monitoringService.get(id);
         return new ResponseEntity<>(monitoring, HttpStatus.OK);
     }
 
     @Operation(summary = "Returns the Monitoring of the given Service of the given Catalogue.")
-    @GetMapping(path = "/monitoring/byService/{serviceId}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    public ResponseEntity<Monitoring> getMonitoringByServiceId(@PathVariable("serviceId") String serviceId,
+    @GetMapping(path = "/monitoring/byService/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    public ResponseEntity<Monitoring> getMonitoringByServiceId(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
+                                                               @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix,
                                                                @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId,
                                                                @Parameter(hidden = true) Authentication auth) {
+        String serviceId = prefix + "/" + suffix;
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(1000);
         List<MonitoringBundle> allMonitorings = monitoringService.getAll(ff, auth).getResults();
@@ -315,9 +331,12 @@ public class ServiceExtensionsController {
     }
 
     // Deletes the Helpdesk of the given Service ID of the given Catalogue.
-    @DeleteMapping(path = "/monitoring/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @DeleteMapping(path = "/monitoring/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
-    public ResponseEntity<Monitoring> deleteMonitoringById(@PathVariable("id") String id, @Parameter(hidden = true) Authentication auth) throws ResourceNotFoundException {
+    public ResponseEntity<Monitoring> deleteMonitoringById(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
+                                                           @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix,
+                                                           @Parameter(hidden = true) Authentication auth) throws ResourceNotFoundException {
+        String id = prefix + "/" + suffix;
         MonitoringBundle monitoringBundle = monitoringService.get(id);
         if (monitoringBundle == null) {
             return new ResponseEntity<>(HttpStatus.GONE);
@@ -331,12 +350,13 @@ public class ServiceExtensionsController {
 
     // Deletes the Monitoring of the specific Service of the specific Catalogue.
     @Operation(summary = "Deletes the Monitoring of the specific Service of the specific Catalogue.")
-    @DeleteMapping(path = "/monitoring/{catalogueId}/{serviceId}", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth, #serviceId, #catalogueId)")
+    @DeleteMapping(path = "/monitoring/{catalogueId}/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth, #prefix+'/'+suffix, #catalogueId)")
     public ResponseEntity<Monitoring> deleteMonitoring(@PathVariable("catalogueId") String catalogueId,
-                                                       @PathVariable("serviceId") String serviceId,
+                                                       @Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
+                                                       @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix,
                                                        @Parameter(hidden = true) Authentication auth) throws ResourceNotFoundException {
-        Monitoring monitoring = getMonitoringByServiceId(serviceId, catalogueId, auth).getBody();
+        Monitoring monitoring = getMonitoringByServiceId(prefix, suffix, catalogueId, auth).getBody();
         assert monitoring != null;
         MonitoringBundle monitoringBundle = monitoringService.get(monitoring.getId());
         if (monitoringBundle == null) {
@@ -351,8 +371,13 @@ public class ServiceExtensionsController {
 
 
     // Argo GRNET Monitoring Status API calls
-    @GetMapping(path = "/monitoring/monitoringAvailability/{serviceId}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    public List<MonitoringStatus> getMonitoringAvailability(@PathVariable String serviceId, @RequestParam String start_time, @RequestParam String end_time) {
+    @GetMapping(path = "/monitoring/monitoringAvailability/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    public List<MonitoringStatus> getMonitoringAvailability(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
+                                                            @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix,
+                                                            @RequestParam String start_time,
+                                                            @RequestParam String end_time) {
+        String serviceId = prefix + "/" + suffix;
+        //TODO: test if url works
         String url = monitoringAvailability + serviceId + "?start_time=" + start_time + "&end_time=" + end_time;
         String response = CreateArgoGrnetHttpRequest.createHttpRequest(url, monitoringToken);
         List<MonitoringStatus> serviceMonitoringStatuses;
@@ -367,8 +392,12 @@ public class ServiceExtensionsController {
         return null;
     }
 
-    @GetMapping(path = "/monitoring/monitoringStatus/{serviceId}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    public List<MonitoringStatus> getMonitoringStatus(@PathVariable String serviceId, @RequestParam(defaultValue = "false") Boolean allStatuses) {
+    @GetMapping(path = "/monitoring/monitoringStatus/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    public List<MonitoringStatus> getMonitoringStatus(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
+                                                      @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix,
+                                                      @RequestParam(defaultValue = "false") Boolean allStatuses) {
+        String serviceId = prefix + "/" + suffix;
+        //TODO: test if url works
         String url = monitoringStatus + serviceId;
         if (allStatuses != null) {
             if (allStatuses) {
@@ -388,10 +417,15 @@ public class ServiceExtensionsController {
         return null;
     }
 
-    @GetMapping(path = "/monitoring/monitoringStatusOnSpecificPeriod/{serviceId}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    public List<MonitoringStatus> getMonitoringStatusOnSpecificPeriod(@PathVariable String serviceId, @RequestParam String from, @RequestParam String to) {
+    @GetMapping(path = "/monitoring/monitoringStatusOnSpecificPeriod/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    public List<MonitoringStatus> getMonitoringStatusOnSpecificPeriod(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
+                                                                      @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix,
+                                                                      @RequestParam String from,
+                                                                      @RequestParam String to) {
+        String serviceId = prefix + "/" + suffix;
         OffsetDateTime odtFrom = OffsetDateTime.parse(from + "T00:00:01Z");
         OffsetDateTime odtTo = OffsetDateTime.parse(to + "T23:59:59Z");
+        //TODO: test if url works
         String url = monitoringStatus + serviceId + "?start_time=" + odtFrom + "&end_time=" + odtTo;
         String response = CreateArgoGrnetHttpRequest.createHttpRequest(url, monitoringToken);
         List<MonitoringStatus> serviceMonitoringStatuses;
@@ -421,7 +455,7 @@ public class ServiceExtensionsController {
 
     private String getServiceMonitoringStatusValue(String serviceId) {
         try {
-            return getMonitoringStatus(serviceId, false).get(0).getValue();
+            return getMonitoringStatus(serviceId.split("/")[0], serviceId.split("/")[1], false).get(0).getValue();
         } catch (NullPointerException e) {
             return "";
         }
