@@ -1,6 +1,5 @@
 package gr.uoa.di.madgik.resourcecatalogue.controllers.lot1;
 
-import gr.uoa.di.madgik.resourcecatalogue.domain.User;
 import gr.uoa.di.madgik.resourcecatalogue.domain.configurationTemplates.ConfigurationTemplateInstance;
 import gr.uoa.di.madgik.resourcecatalogue.domain.configurationTemplates.ConfigurationTemplateInstanceBundle;
 import gr.uoa.di.madgik.resourcecatalogue.service.ConfigurationTemplateInstanceService;
@@ -43,7 +42,7 @@ public class ConfigurationTemplateInstanceCrudController extends ResourceCrudCon
                                                                                                  @Parameter(hidden = true) Authentication auth) {
         for (ConfigurationTemplateInstance configurationTemplateInstance : configurationTemplateInstances) {
             configurationTemplateInstanceService.add(new ConfigurationTemplateInstanceBundle(configurationTemplateInstance), auth);
-            logger.info("User '{}' added the Configuration Template Instance with id '{}'", User.of(auth).getEmail(), configurationTemplateInstance.getId());
+            logger.info("Added the Configuration Template Instance with id '{}'", configurationTemplateInstance.getId());
         }
         return new ResponseEntity<>(HttpStatus.OK);
     }

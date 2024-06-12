@@ -55,7 +55,7 @@ public class ServiceBundleController {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
         serviceBundleService.delete(service);
-        logger.info("User '{}' deleted ServiceBundle '{}' with id: '{}' of the Catalogue: '{}'", authentication, service.getService().getName(),
+        logger.info("Deleted ServiceBundle '{}' with id: '{}' of the Catalogue: '{}'", service.getService().getName(),
                 service.getService().getId(), service.getService().getCatalogueId());
         return new ResponseEntity<>(HttpStatus.GONE);
     }
@@ -85,7 +85,7 @@ public class ServiceBundleController {
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<ServiceBundle> add(@RequestBody ServiceBundle service, Authentication authentication) {
         ResponseEntity<ServiceBundle> ret = new ResponseEntity<>(serviceBundleService.add(service, authentication), HttpStatus.OK);
-        logger.info("User '{}' added ServiceBundle '{}' with id: {} and version: {}", authentication, service.getService().getName(), service.getService().getId(), service.getService().getVersion());
+        logger.info("Added ServiceBundle '{}' with id: {} and version: {}", service.getService().getName(), service.getService().getId(), service.getService().getVersion());
         logger.info(" Service Organisation: {}", service.getService().getResourceOrganisation());
         return ret;
     }
@@ -94,7 +94,7 @@ public class ServiceBundleController {
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<ServiceBundle> update(@RequestBody ServiceBundle service, @Parameter(hidden = true) Authentication authentication) throws ResourceNotFoundException {
         ResponseEntity<ServiceBundle> ret = new ResponseEntity<>(serviceBundleService.update(service, authentication), HttpStatus.OK);
-        logger.info("User '{}' updated ServiceBundle '{}' with id: {}", authentication, service.getService().getName(), service.getService().getId());
+        logger.info("Updated ServiceBundle '{}' with id: {}", service.getService().getName(), service.getService().getId());
         return ret;
     }
 

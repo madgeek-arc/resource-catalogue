@@ -12,11 +12,10 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.scheduling.annotation.EnableAsync;
-import org.springframework.session.MapSessionRepository;
-import org.springframework.session.SessionRepository;
 import org.springframework.session.config.annotation.web.http.EnableSpringHttpSession;
 import org.springframework.session.web.http.CookieSerializer;
 import org.springframework.session.web.http.DefaultCookieSerializer;
+import org.springframework.web.util.UrlPathHelper;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -37,6 +36,12 @@ import java.util.Random;
 @EnableConfigurationProperties(ResourceCatalogueProperties.class)
 public class ServiceConfig {
 
+    @Bean
+    public UrlPathHelper urlPathHelper() {
+        UrlPathHelper urlPathHelper = new UrlPathHelper();
+        urlPathHelper.setUrlDecode(false);
+        return urlPathHelper;
+    }
 
     @Bean
     JAXBContext eicJAXBContext() throws JAXBException {

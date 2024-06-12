@@ -110,7 +110,7 @@ public class InteroperabilityRecordManager extends ResourceManager<Interoperabil
 
         interoperabilityRecordBundle.getInteroperabilityRecord().setCreated(String.valueOf(System.currentTimeMillis()));
         interoperabilityRecordBundle.getInteroperabilityRecord().setUpdated(interoperabilityRecordBundle.getInteroperabilityRecord().getCreated());
-        logger.trace("User '{}' is attempting to add a new Interoperability Record: {}", auth, interoperabilityRecordBundle.getInteroperabilityRecord());
+        logger.trace("Attempting to add a new Interoperability Record: {}", interoperabilityRecordBundle.getInteroperabilityRecord());
         logger.info("Adding Interoperability Record: {}", interoperabilityRecordBundle.getInteroperabilityRecord());
         super.add(interoperabilityRecordBundle, auth);
         registrationMailService.sendEmailsForInteroperabilityRecordOnboarding(interoperabilityRecordBundle, User.of(auth));
@@ -129,7 +129,7 @@ public class InteroperabilityRecordManager extends ResourceManager<Interoperabil
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth, #interoperabilityRecordBundle.payload)")
     @CacheEvict(cacheNames = {CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)
     public InteroperabilityRecordBundle update(InteroperabilityRecordBundle interoperabilityRecordBundle, String catalogueId, Authentication auth) {
-        logger.trace("User '{}' is attempting to update the Interoperability Record with id '{}'", auth, interoperabilityRecordBundle.getId());
+        logger.trace("Attempting to update the Interoperability Record with id '{}'", interoperabilityRecordBundle.getId());
 
         InteroperabilityRecordBundle ret = ObjectUtils.clone(interoperabilityRecordBundle);
         InteroperabilityRecordBundle existingInteroperabilityRecord;

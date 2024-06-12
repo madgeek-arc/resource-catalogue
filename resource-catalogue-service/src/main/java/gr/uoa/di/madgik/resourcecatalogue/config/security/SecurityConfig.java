@@ -9,6 +9,7 @@ import org.springframework.core.convert.converter.Converter;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.authority.mapping.GrantedAuthoritiesMapper;
@@ -16,19 +17,16 @@ import org.springframework.security.oauth2.client.oidc.web.logout.OidcClientInit
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
 import org.springframework.security.oauth2.core.oidc.OidcIdToken;
 import org.springframework.security.oauth2.core.oidc.OidcUserInfo;
+import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 import org.springframework.security.oauth2.core.oidc.user.OidcUserAuthority;
 import org.springframework.security.oauth2.core.user.OAuth2UserAuthority;
 import org.springframework.security.oauth2.jwt.Jwt;
-import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
+import java.util.*;
 
 @Configuration
 public class SecurityConfig {
@@ -71,7 +69,7 @@ public class SecurityConfig {
 
                 .oauth2ResourceServer((oauth2) -> oauth2
                         .jwt()
-                        .jwtAuthenticationConverter(grantedAuthoritiesExtractor())
+                        .jwtAuthenticationConverter(authenticationConverter())
                 )
 
                 .logout(logout ->
@@ -154,25 +152,26 @@ public class SecurityConfig {
     }
 
     @Bean
-    Converter<Jwt, AbstractAuthenticationToken> grantedAuthoritiesExtractor() {
-        JwtAuthenticationConverter jwtAuthenticationConverter = new JwtAuthenticationConverter();
-        jwtAuthenticationConverter.setJwtGrantedAuthoritiesConverter(new GrantedAuthoritiesExtractor());
+    Converter<Jwt, AbstractAuthenticationToken> authenticationConverter() {
+        CustomJwtAuthenticationConverter jwtAuthenticationConverter = new CustomJwtAuthenticationConverter();
         return jwtAuthenticationConverter;
     }
 
-    class GrantedAuthoritiesExtractor implements Converter<Jwt, Collection<GrantedAuthority>> {
+    class CustomJwtAuthenticationConverter implements Converter<Jwt, AbstractAuthenticationToken> {
 
-        public Collection<GrantedAuthority> convert(Jwt jwt) {
+        public AbstractAuthenticationToken convert(Jwt jwt) {
             String email = jwt.getClaimAsString("email");
+            Map<String, Object> info = new HashMap<>();
             if (email == null) {
-                Map<String, Object> info = userInfoService.getUserInfo("eosc", jwt.getTokenValue());
+                info = userInfoService.getUserInfo("eosc", jwt.getTokenValue());
                 email = info.get("email").toString();
             }
-            Collection<?> authorities = authoritiesMapper.getAuthorities(email);
-            return authorities.stream()
-                    .map(Object::toString)
-                    .map(SimpleGrantedAuthority::new)
-                    .collect(Collectors.toList());
+            Map<String, Object> claims = new HashMap<>(jwt.getClaims());
+            claims.putAll(info);
+            Collection<GrantedAuthority> authorities = authoritiesMapper.getAuthorities(email);
+            Jwt token = new Jwt(jwt.getTokenValue(), jwt.getIssuedAt(), jwt.getExpiresAt(), jwt.getHeaders(), Collections.unmodifiableMap(claims));
+
+            return new JwtAuthenticationToken(token, authorities);
         }
     }
 }

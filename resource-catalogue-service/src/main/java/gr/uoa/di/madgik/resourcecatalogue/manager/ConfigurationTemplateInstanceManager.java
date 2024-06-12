@@ -14,11 +14,11 @@ import gr.uoa.di.madgik.resourcecatalogue.exception.ValidationException;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
 import gr.uoa.di.madgik.resourcecatalogue.utils.ObjectUtils;
 import gr.uoa.di.madgik.resourcecatalogue.utils.ProviderResourcesCommonMethods;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.core.Authentication;
 
@@ -66,7 +66,7 @@ public class ConfigurationTemplateInstanceManager extends ResourceManager<Config
         checkResourceIdAndConfigurationTemplateIdConsistency(configurationTemplateInstanceBundle, auth);
 
         configurationTemplateInstanceBundle.setId(idCreator.generate(getResourceType()));
-        logger.trace("User '{}' is attempting to add a new ConfigurationTemplateInstance: {}", auth, configurationTemplateInstanceBundle);
+        logger.trace("Attempting to add a new ConfigurationTemplateInstance: {}", configurationTemplateInstanceBundle);
 
         configurationTemplateInstanceBundle.setMetadata(Metadata.createMetadata(User.of(auth).getFullName(), User.of(auth).getEmail()));
         List<LoggingInfo> loggingInfoList = commonMethods.returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(configurationTemplateInstanceBundle, auth);
@@ -85,7 +85,7 @@ public class ConfigurationTemplateInstanceManager extends ResourceManager<Config
 
     @Override
     public ConfigurationTemplateInstanceBundle update(ConfigurationTemplateInstanceBundle configurationTemplateInstanceBundle, Authentication auth) {
-        logger.trace("User '{}' is attempting to update the ConfigurationTemplateInstance with id '{}'", auth, configurationTemplateInstanceBundle.getId());
+        logger.trace("Attempting to update the ConfigurationTemplateInstance with id '{}'", configurationTemplateInstanceBundle.getId());
 
         ConfigurationTemplateInstanceBundle ret = ObjectUtils.clone(configurationTemplateInstanceBundle);
         Resource existingResource = whereID(ret.getId(), true);

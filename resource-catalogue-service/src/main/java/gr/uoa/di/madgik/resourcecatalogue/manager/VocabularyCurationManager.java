@@ -6,6 +6,7 @@ import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.registry.domain.Resource;
 import gr.uoa.di.madgik.registry.service.SearchService;
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
+import gr.uoa.di.madgik.resourcecatalogue.exception.ResourceAlreadyExistsException;
 import gr.uoa.di.madgik.resourcecatalogue.exception.ValidationException;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
 import gr.uoa.di.madgik.resourcecatalogue.utils.FacetLabelService;
@@ -112,7 +113,7 @@ public class VocabularyCurationManager extends ResourceManager<VocabularyCuratio
             allVocsIds.add(vocabulary.getName());
         }
         if (allVocsIds.contains(vocabularyCuration.getEntryValueName())) {
-            throw new ValidationException("Vocabulary with name " + vocabularyCuration.getEntryValueName() + " already exists.");
+            throw new ResourceAlreadyExistsException("Vocabulary with name " + vocabularyCuration.getEntryValueName() + " already exists.");
         }
 
         // check if vocabularyCuration already exists in "pending"

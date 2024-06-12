@@ -84,7 +84,7 @@ public class TrainingResourceController {
         }
         //TODO: Maybe return Provider's template status to 'no template status' if this was its only TR
         trainingResourceService.delete(trainingResourceBundle);
-        logger.info("User '{}' deleted Training Resource '{}' with id: '{}' of the Catalogue: '{}'", User.of(auth).getEmail(), trainingResourceBundle.getTrainingResource().getTitle(),
+        logger.info("Deleted Training Resource '{}' with id: '{}' of the Catalogue: '{}'", trainingResourceBundle.getTrainingResource().getTitle(),
                 trainingResourceBundle.getTrainingResource().getId(), trainingResourceBundle.getTrainingResource().getCatalogueId());
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
@@ -116,7 +116,7 @@ public class TrainingResourceController {
     @PutMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<TrainingResource> updateTrainingResource(@RequestBody TrainingResource trainingResource, @RequestParam(required = false) String comment, @Parameter(hidden = true) Authentication auth) throws ResourceNotFoundException {
         TrainingResourceBundle ret = this.trainingResourceService.update(new TrainingResourceBundle(trainingResource), comment, auth);
-        logger.info("User '{}' updated Training Resource with title '{}' and id '{}'", User.of(auth).getEmail(), trainingResource.getTitle(), trainingResource.getId());
+        logger.info("Updated Training Resource with title '{}' and id '{}'", trainingResource.getTitle(), trainingResource.getId());
         return new ResponseEntity<>(ret.getTrainingResource(), HttpStatus.OK);
     }
 
@@ -126,7 +126,7 @@ public class TrainingResourceController {
     public ResponseEntity<TrainingResourceBundle> verifyTrainingResource(@PathVariable("id") String id, @RequestParam(required = false) Boolean active,
                                                                          @RequestParam(required = false) String status, @Parameter(hidden = true) Authentication auth) {
         TrainingResourceBundle trainingResourceBundle = trainingResourceService.verifyResource(id, status, active, auth);
-        logger.info("User '{}' updated Training Resource with title '{}' [status: {}] [active: {}]", auth, trainingResourceBundle.getTrainingResource().getTitle(), status, active);
+        logger.info("Updated Training Resource with title '{}' [status: {}] [active: {}]", trainingResourceBundle.getTrainingResource().getTitle(), status, active);
         return new ResponseEntity<>(trainingResourceBundle, HttpStatus.OK);
     }
 
@@ -344,7 +344,7 @@ public class TrainingResourceController {
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<TrainingResourceBundle> add(@RequestBody TrainingResourceBundle trainingResourceBundle, Authentication authentication) {
         ResponseEntity<TrainingResourceBundle> ret = new ResponseEntity<>(trainingResourceService.add(trainingResourceBundle, authentication), HttpStatus.OK);
-        logger.info("User '{}' added TrainingResourceBundle '{}' with id: {}", authentication, trainingResourceBundle.getTrainingResource().getTitle(), trainingResourceBundle.getTrainingResource().getId());
+        logger.info("Added TrainingResourceBundle '{}' with id: {}", trainingResourceBundle.getTrainingResource().getTitle(), trainingResourceBundle.getTrainingResource().getId());
         return ret;
     }
 
@@ -352,7 +352,7 @@ public class TrainingResourceController {
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<TrainingResourceBundle> update(@RequestBody TrainingResourceBundle trainingResourceBundle, @Parameter(hidden = true) Authentication authentication) throws ResourceNotFoundException {
         ResponseEntity<TrainingResourceBundle> ret = new ResponseEntity<>(trainingResourceService.update(trainingResourceBundle, authentication), HttpStatus.OK);
-        logger.info("User '{}' updated TrainingResourceBundle '{}' with id: {}", authentication, trainingResourceBundle.getTrainingResource().getTitle(), trainingResourceBundle.getTrainingResource().getId());
+        logger.info("Updated TrainingResourceBundle '{}' with id: {}", trainingResourceBundle.getTrainingResource().getTitle(), trainingResourceBundle.getTrainingResource().getId());
         return ret;
     }
 

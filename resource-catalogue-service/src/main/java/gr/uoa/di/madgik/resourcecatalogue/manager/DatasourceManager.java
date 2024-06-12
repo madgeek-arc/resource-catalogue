@@ -75,7 +75,7 @@ public class DatasourceManager extends ResourceManager<DatasourceBundle> impleme
             checkOpenAIREIDExistence(datasourceBundle);
         }
         datasourceBundle.setId(idCreator.generate(getResourceType()));
-        logger.trace("User '{}' is attempting to add a new Datasource: {}", auth, datasourceBundle);
+        logger.trace("Attempting to add a new Datasource: {}", datasourceBundle);
 
         this.validate(datasourceBundle);
 
@@ -108,7 +108,7 @@ public class DatasourceManager extends ResourceManager<DatasourceBundle> impleme
 
     @Override
     public DatasourceBundle update(DatasourceBundle datasourceBundle, String comment, Authentication auth) {
-        logger.trace("User '{}' is attempting to update the Datasource with id '{}'", auth, datasourceBundle.getId());
+        logger.trace("Attempting to update the Datasource with id '{}'", datasourceBundle.getId());
 
         DatasourceBundle ret = ObjectUtils.clone(datasourceBundle);
         Resource existingResource = whereID(ret.getId(), true);
@@ -160,7 +160,7 @@ public class DatasourceManager extends ResourceManager<DatasourceBundle> impleme
     }
 
     public void updateBundle(DatasourceBundle datasourceBundle, Authentication auth) {
-        logger.trace("User '{}' is attempting to update the Datasource: {}", auth, datasourceBundle);
+        logger.trace("Attempting to update the Datasource: {}", datasourceBundle);
 
         Resource existing = getResource(datasourceBundle.getId());
         if (existing == null) {

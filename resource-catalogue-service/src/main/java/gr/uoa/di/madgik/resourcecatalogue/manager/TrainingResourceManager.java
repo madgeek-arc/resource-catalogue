@@ -224,7 +224,7 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
                 commonMethods.ensureResourceCataloguePidUniqueness(trainingResourceBundle.getId(),
                         trainingResourceBundle.getTrainingResource().getAlternativeIdentifiers()));
 
-        logger.trace("User '{}' is attempting to update the Training Resource with id '{}' of the Catalogue '{}'", auth, ret.getTrainingResource().getId(), ret.getTrainingResource().getCatalogueId());
+        logger.trace("Attempting to update the Training Resource with id '{}' of the Catalogue '{}'", ret.getTrainingResource().getId(), ret.getTrainingResource().getCatalogueId());
         validateTrainingResource(ret);
 
         ProviderBundle providerBundle = providerService.get(ret.getTrainingResource().getCatalogueId(),

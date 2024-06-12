@@ -148,7 +148,7 @@ public class ServiceExtensionsController {
                                                 @RequestParam String resourceType,
                                                 @Parameter(hidden = true) Authentication auth) {
         HelpdeskBundle helpdeskBundle = helpdeskService.add(new HelpdeskBundle(helpdesk, catalogueId), resourceType, auth);
-        logger.info("User '{}' added the Helpdesk with id '{}'", User.of(auth).getEmail(), helpdesk.getId());
+        logger.info("Added the Helpdesk with id '{}'", helpdesk.getId());
         return new ResponseEntity<>(helpdeskBundle.getHelpdesk(), HttpStatus.CREATED);
     }
 
@@ -161,7 +161,7 @@ public class ServiceExtensionsController {
         HelpdeskBundle helpdeskBundle = helpdeskService.get(helpdesk.getId());
         helpdeskBundle.setHelpdesk(helpdesk);
         helpdeskBundle = helpdeskService.update(helpdeskBundle, auth);
-        logger.info("User '{}' updated the Helpdesk with id '{}'", User.of(auth).getEmail(), helpdesk.getId());
+        logger.info("Updated the Helpdesk with id '{}'", helpdesk.getId());
         return new ResponseEntity<>(helpdeskBundle.getHelpdesk(), HttpStatus.OK);
     }
 
@@ -176,7 +176,7 @@ public class ServiceExtensionsController {
         logger.info("Deleting Helpdesk: {} of the Catalogue: {}", helpdeskBundle.getHelpdesk().getId(), helpdeskBundle.getCatalogueId());
         // delete Helpdesk
         helpdeskService.delete(helpdeskBundle);
-        logger.info("User '{}' deleted the Helpdesk with id '{}' of the Catalogue '{}'", User.of(auth).getEmail(), helpdeskBundle.getHelpdesk().getId(), helpdeskBundle.getCatalogueId());
+        logger.info("Deleted the Helpdesk with id '{}' of the Catalogue '{}'", helpdeskBundle.getHelpdesk().getId(), helpdeskBundle.getCatalogueId());
         return new ResponseEntity<>(helpdeskBundle.getHelpdesk(), HttpStatus.OK);
     }
 
@@ -196,7 +196,7 @@ public class ServiceExtensionsController {
         logger.info("Deleting Helpdesk: {} of the Catalogue: {}", helpdeskBundle.getHelpdesk().getId(), helpdeskBundle.getCatalogueId());
         // delete Helpdesk
         helpdeskService.delete(helpdeskBundle);
-        logger.info("User '{}' deleted the Helpdesk with id '{}' of the Catalogue '{}'", User.of(auth).getEmail(), helpdeskBundle.getHelpdesk().getId(), helpdeskBundle.getCatalogueId());
+        logger.info("Deleted the Helpdesk with id '{}' of the Catalogue '{}'", helpdeskBundle.getHelpdesk().getId(), helpdeskBundle.getCatalogueId());
         return new ResponseEntity<>(helpdeskBundle.getHelpdesk(), HttpStatus.OK);
     }
 
@@ -297,7 +297,7 @@ public class ServiceExtensionsController {
                                                     @RequestParam String resourceType,
                                                     @Parameter(hidden = true) Authentication auth) {
         MonitoringBundle monitoringBundle = monitoringService.add(new MonitoringBundle(monitoring, catalogueId), resourceType, auth);
-        logger.info("User '{}' added the Monitoring with id '{}'", User.of(auth).getEmail(), monitoring.getId());
+        logger.info("Added the Monitoring with id '{}'", monitoring.getId());
         return new ResponseEntity<>(monitoringBundle.getMonitoring(), HttpStatus.CREATED);
     }
 
@@ -310,7 +310,7 @@ public class ServiceExtensionsController {
         MonitoringBundle monitoringBundle = monitoringService.get(monitoring.getId());
         monitoringBundle.setMonitoring(monitoring);
         monitoringBundle = monitoringService.update(monitoringBundle, auth);
-        logger.info("User '{}' updated the Monitoring with id '{}'", User.of(auth).getEmail(), monitoring.getId());
+        logger.info("Updated the Monitoring with id '{}'", monitoring.getId());
         return new ResponseEntity<>(monitoringBundle.getMonitoring(), HttpStatus.OK);
     }
 
@@ -325,7 +325,7 @@ public class ServiceExtensionsController {
         logger.info("Deleting Monitoring: {} of the Catalogue: {}", monitoringBundle.getMonitoring().getId(), monitoringBundle.getCatalogueId());
         // delete Monitoring
         monitoringService.delete(monitoringBundle);
-        logger.info("User '{}' deleted the Monitoring with id '{}' of the Catalogue '{}'", User.of(auth).getEmail(), monitoringBundle.getMonitoring().getId(), monitoringBundle.getCatalogueId());
+        logger.info("Deleted the Monitoring with id '{}' of the Catalogue '{}'", monitoringBundle.getMonitoring().getId(), monitoringBundle.getCatalogueId());
         return new ResponseEntity<>(monitoringBundle.getMonitoring(), HttpStatus.OK);
     }
 
@@ -345,7 +345,7 @@ public class ServiceExtensionsController {
         logger.info("Deleting Monitoring: {} of the Catalogue: {}", monitoringBundle.getMonitoring().getId(), monitoringBundle.getCatalogueId());
         // delete Monitoring
         monitoringService.delete(monitoringBundle);
-        logger.info("User '{}' deleted the Monitoring with id '{}' of the Catalogue '{}'", User.of(auth).getEmail(), monitoringBundle.getMonitoring().getId(), monitoringBundle.getCatalogueId());
+        logger.info("Deleted the Monitoring with id '{}' of the Catalogue '{}'", monitoringBundle.getMonitoring().getId(), monitoringBundle.getCatalogueId());
         return new ResponseEntity<>(monitoringBundle.getMonitoring(), HttpStatus.OK);
     }
 

@@ -13,10 +13,10 @@ import gr.uoa.di.madgik.resourcecatalogue.utils.CreateArgoGrnetHttpRequest;
 import gr.uoa.di.madgik.resourcecatalogue.utils.ObjectUtils;
 import gr.uoa.di.madgik.resourcecatalogue.utils.ProviderResourcesCommonMethods;
 import gr.uoa.di.madgik.resourcecatalogue.utils.ResourceValidationUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.core.Authentication;
@@ -99,7 +99,7 @@ public class MonitoringManager extends ResourceManager<MonitoringBundle> impleme
         validate(monitoring, resourceType);
 
         monitoring.setId(idCreator.generate(getResourceType()));
-        logger.trace("User '{}' is attempting to add a new Monitoring: {}", auth, monitoring);
+        logger.trace("Attempting to add a new Monitoring: {}", monitoring);
 
         monitoring.setMetadata(Metadata.createMetadata(User.of(auth).getFullName(), User.of(auth).getEmail()));
         List<LoggingInfo> loggingInfoList = commonMethods.returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(monitoring, auth);
@@ -121,7 +121,7 @@ public class MonitoringManager extends ResourceManager<MonitoringBundle> impleme
 
     @Override
     public MonitoringBundle update(MonitoringBundle monitoringBundle, Authentication auth) {
-        logger.trace("User '{}' is attempting to update the Monitoring with id '{}'", auth, monitoringBundle.getId());
+        logger.trace("Attempting to update the Monitoring with id '{}'", monitoringBundle.getId());
 
         MonitoringBundle ret = ObjectUtils.clone(monitoringBundle);
         Resource existingResource = whereID(ret.getId(), true);
@@ -165,7 +165,7 @@ public class MonitoringManager extends ResourceManager<MonitoringBundle> impleme
     }
 
     public void updateBundle(MonitoringBundle monitoringBundle, Authentication auth) {
-        logger.trace("User '{}' is attempting to update the Monitoring: {}", auth, monitoringBundle);
+        logger.trace("Attempting to update the Monitoring: {}", monitoringBundle);
 
         Resource existing = getResource(monitoringBundle.getId());
         if (existing == null) {

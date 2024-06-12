@@ -9,10 +9,13 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 import org.springframework.security.oauth2.core.user.OAuth2User;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
+import java.security.Principal;
 import java.util.Objects;
 
 @XmlType
@@ -63,6 +66,12 @@ public class User implements Identifiable {
             }
             user.name = principal.getGivenName();
             user.surname = principal.getFamilyName();
+        } else if (auth instanceof JwtAuthenticationToken) {
+            Jwt principal = (Jwt) auth.getPrincipal();
+            user.id = principal.getClaimAsString("sub");
+            user.email = principal.getClaimAsString("email");
+            user.name = principal.getClaimAsString("given_name");
+            user.surname = principal.getClaimAsString("family_name");
         } else if (auth instanceof OAuth2AuthenticationToken) {
             OAuth2User principal = ((OAuth2AuthenticationToken) auth).getPrincipal();
             user.id = principal.getAttribute("subject");
@@ -70,11 +79,8 @@ public class User implements Identifiable {
             user.name = principal.getAttribute("given_name");
             user.surname = principal.getAttribute("family_name");
         } else if (auth.isAuthenticated()) {
-            user.name = auth.getName();
-            user.id = "";
-            user.email = "";
-            user.surname = "";
             logger.warn("Authenticated User has missing information: {}", auth);
+            return null;
         } else {
             throw new InsufficientAuthenticationException("Could not create user. Insufficient user authentication");
         }

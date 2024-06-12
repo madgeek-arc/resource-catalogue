@@ -7,7 +7,6 @@ import gr.uoa.di.madgik.resourcecatalogue.annotations.Browse;
 import gr.uoa.di.madgik.resourcecatalogue.annotations.BrowseCatalogue;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Datasource;
 import gr.uoa.di.madgik.resourcecatalogue.domain.DatasourceBundle;
-import gr.uoa.di.madgik.resourcecatalogue.domain.User;
 import gr.uoa.di.madgik.resourcecatalogue.dto.OpenAIREMetrics;
 import gr.uoa.di.madgik.resourcecatalogue.service.DatasourceService;
 import gr.uoa.di.madgik.resourcecatalogue.service.GenericResourceService;
@@ -111,7 +110,7 @@ public class DatasourceController {
     public ResponseEntity<Datasource> addDatasource(@Valid @RequestBody Datasource datasource,
                                                     @Parameter(hidden = true) Authentication auth) {
         DatasourceBundle datasourceBundle = datasourceService.add(new DatasourceBundle(datasource), auth);
-        logger.info("User '{}' added the Datasource with id '{}'", User.of(auth).getEmail(), datasource.getId());
+        logger.info("Added the Datasource with id '{}'", datasource.getId());
         return new ResponseEntity<>(datasourceBundle.getDatasource(), HttpStatus.CREATED);
     }
 
@@ -124,7 +123,7 @@ public class DatasourceController {
         DatasourceBundle datasourceBundle = datasourceService.get(datasource.getId());
         datasourceBundle.setDatasource(datasource);
         datasourceBundle = datasourceService.update(datasourceBundle, comment, auth);
-        logger.info("User '{}' updated the Datasource with id '{}'", User.of(auth).getEmail(), datasource.getId());
+        logger.info("Updated the Datasource with id '{}'", datasource.getId());
         return new ResponseEntity<>(datasourceBundle.getDatasource(), HttpStatus.OK);
     }
 
@@ -139,7 +138,7 @@ public class DatasourceController {
                 datasourceBundle.getDatasource().getCatalogueId());
         // delete Datasource
         datasourceService.delete(datasourceBundle);
-        logger.info("User '{}' deleted the Datasource with id '{}' of the Catalogue '{}'", User.of(auth).getEmail(),
+        logger.info("Deleted the Datasource with id '{}' of the Catalogue '{}'",
                 datasourceBundle.getDatasource().getId(), datasourceBundle.getDatasource().getCatalogueId());
         return new ResponseEntity<>(datasourceBundle.getDatasource(), HttpStatus.OK);
     }
@@ -161,7 +160,7 @@ public class DatasourceController {
                 datasourceBundle.getDatasource().getCatalogueId());
         // delete Datasource
         datasourceService.delete(datasourceBundle);
-        logger.info("User '{}' deleted the Datasource with id '{}' of the Catalogue '{}'", User.of(auth).getEmail(), datasourceBundle.getDatasource().getId(),
+        logger.info("Deleted the Datasource with id '{}' of the Catalogue '{}'", datasourceBundle.getDatasource().getId(),
                 datasourceBundle.getDatasource().getCatalogueId());
         return new ResponseEntity<>(datasourceBundle.getDatasource(), HttpStatus.OK);
     }
@@ -172,7 +171,7 @@ public class DatasourceController {
     public ResponseEntity<DatasourceBundle> verifyDatasource(@PathVariable("id") String id, @RequestParam(required = false) Boolean active,
                                                              @RequestParam(required = false) String status, @Parameter(hidden = true) Authentication auth) {
         DatasourceBundle resource = datasourceService.verifyDatasource(id, status, active, auth);
-        logger.info("User '{}' updated Datasource with id '{}' [status: {}] [active: {}]", auth, resource.getDatasource().getId(), status, active);
+        logger.info("Updated Datasource with id '{}' [status: {}] [active: {}]", resource.getDatasource().getId(), status, active);
         return new ResponseEntity<>(resource, HttpStatus.OK);
     }
 

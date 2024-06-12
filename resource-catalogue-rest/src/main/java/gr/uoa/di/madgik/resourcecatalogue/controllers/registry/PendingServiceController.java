@@ -9,6 +9,7 @@ import gr.uoa.di.madgik.resourcecatalogue.domain.ProviderBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Service;
 import gr.uoa.di.madgik.resourcecatalogue.domain.ServiceBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.User;
+import gr.uoa.di.madgik.resourcecatalogue.exception.ResourceAlreadyExistsException;
 import gr.uoa.di.madgik.resourcecatalogue.exception.ResourceException;
 import gr.uoa.di.madgik.resourcecatalogue.exception.ValidationException;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
@@ -63,7 +64,7 @@ public class PendingServiceController extends ResourceController<ServiceBundle> 
     public ResponseEntity<ServiceBundle> delete(@PathVariable("id") String id, @Parameter(hidden = true) Authentication auth) throws ResourceNotFoundException {
         ServiceBundle service = pendingServiceManager.get(id);
         pendingServiceManager.delete(service);
-        logger.info("User '{}' deleted Pending Resource '{}' with id: '{}'", User.of(auth).getEmail(), service.getService().getName(), service.getService().getId());
+        logger.info("Deleted Pending Resource '{}' with id: '{}'", service.getService().getName(), service.getService().getId());
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
@@ -153,7 +154,7 @@ public class PendingServiceController extends ResourceController<ServiceBundle> 
 
         try { // check if service already exists
             serviceBundle = this.pendingServiceManager.get(service.getId());
-        } catch (ResourceException e) {
+        } catch (ResourceAlreadyExistsException e) {
             // continue with the creation of the service
         }
 
@@ -166,14 +167,14 @@ public class PendingServiceController extends ResourceController<ServiceBundle> 
 
         if (serviceBundle == null) { // if existing Pending Service is null, create a new Active Service
             serviceBundle = serviceBundleService.addResource(new ServiceBundle(service), auth);
-            logger.info("User '{}' added Resource:\n{}", User.of(auth).getEmail(), serviceBundle);
+            logger.info("Added Resource:\n{}", serviceBundle);
         } else { // else update Pending Service and transform it to Active Service
             if (serviceBundle.getService().getVersion() != null && serviceBundle.getService().getVersion().equals("")) {
                 serviceBundle.getService().setVersion(null);
             }
             serviceBundle.setService(service); // important to keep other fields of ServiceBundle
             serviceBundle = pendingServiceManager.update(serviceBundle, auth);
-            logger.info("User '{}' updated Pending Resource:\n{}", User.of(auth).getEmail(), serviceBundle);
+            logger.info("Updated Pending Resource:\n{}", serviceBundle);
 
             // transform to active
             serviceBundle = pendingServiceManager.transformToActive(serviceBundle.getId(), auth);

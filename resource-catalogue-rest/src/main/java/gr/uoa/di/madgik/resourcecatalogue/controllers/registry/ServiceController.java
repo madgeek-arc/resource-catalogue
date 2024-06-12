@@ -88,7 +88,7 @@ public class ServiceController {
         }
         //TODO: Maybe return Provider's template status to 'no template status' if this was its only Service
         serviceBundleService.delete(service);
-        logger.info("User '{}' deleted Resource '{}' with id: '{}' of the Catalogue: '{}'", User.of(auth).getEmail(), service.getService().getName(),
+        logger.info("Deleted Resource '{}' with id: '{}' of the Catalogue: '{}'", service.getService().getName(),
                 service.getService().getId(), service.getService().getCatalogueId());
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
@@ -115,7 +115,7 @@ public class ServiceController {
     @PutMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<Service> updateService(@RequestBody Service service, @RequestParam(required = false) String comment, @Parameter(hidden = true) Authentication auth) throws ResourceNotFoundException {
         ServiceBundle ret = this.serviceBundleService.updateResource(new ServiceBundle(service), comment, auth);
-        logger.info("User '{}' updated Resource with name '{}' and id '{}'", User.of(auth).getEmail(), service.getName(), service.getId());
+        logger.info("Updated Resource with name '{}' and id '{}'", service.getName(), service.getId());
         return new ResponseEntity<>(ret.getService(), HttpStatus.OK);
     }
 
@@ -125,7 +125,7 @@ public class ServiceController {
     public ResponseEntity<ServiceBundle> verifyResource(@PathVariable("id") String id, @RequestParam(required = false) Boolean active,
                                                         @RequestParam(required = false) String status, @Parameter(hidden = true) Authentication auth) {
         ServiceBundle resource = serviceBundleService.verifyResource(id, status, active, auth);
-        logger.info("User '{}' updated Resource with name '{}' [status: {}] [active: {}]", auth, resource.getService().getName(), status, active);
+        logger.info("Updated Resource with name '{}' [status: {}] [active: {}]", resource.getService().getName(), status, active);
         return new ResponseEntity<>(resource, HttpStatus.OK);
     }
 

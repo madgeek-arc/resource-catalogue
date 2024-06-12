@@ -7,18 +7,10 @@ import gr.uoa.di.madgik.resourcecatalogue.annotations.Browse;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Identifiable;
 import gr.uoa.di.madgik.resourcecatalogue.service.ResourceService;
 import gr.uoa.di.madgik.resourcecatalogue.utils.FacetFilterUtils;
-import io.swagger.v3.oas.annotations.ExternalDocumentation;
 import io.swagger.v3.oas.annotations.Hidden;
-import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.enums.ParameterIn;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.springdoc.core.annotations.RouterOperation;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -31,7 +23,6 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.Map;
 
-//the below line contains the only produces needed for spring to work in the entire project; all others are there until springfox fix their bugs
 @RequestMapping
 public abstract class ResourceCrudController<T extends Identifiable> {
     protected final ResourceService<T> service;
@@ -51,8 +42,6 @@ public abstract class ResourceCrudController<T extends Identifiable> {
         return id;
     }
 
-    @Operation(parameters = {
-            @Parameter(in = ParameterIn.PATH, name = "id", required = true, description = "Persistent Identifier", allowReserved = true, schema = @Schema(type = "string", format = "pid", accessMode = Schema.AccessMode.READ_ONLY)) })
     @GetMapping(path = "{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<T> get(@PathVariable(value = "id") String id,
                                  @Parameter(hidden = true) Authentication authentication) {
@@ -66,40 +55,37 @@ public abstract class ResourceCrudController<T extends Identifiable> {
      * wildcard characters ('*') as part of the path, so the swagger API calls always contain the '/**' suffix.
      * </p>
      *
-     * @param id the prefix of the pid
+     * @param id             the prefix of the pid
      * @param authentication the user authentication
-     * @param request the HttpServletRequest
+     * @param request        the HttpServletRequest
      * @return the resource identified by the provided pid
      */
     @Hidden
     @GetMapping(path = "{id}/**", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<T> getByPid(@PathVariable("id") @Parameter(allowReserved = true) String id,
-                                             @Parameter(hidden = true) Authentication authentication,
-                                             HttpServletRequest request) {
+                                      @Parameter(hidden = true) Authentication authentication,
+                                      HttpServletRequest request) {
         return new ResponseEntity<>(service.get(extractPid(id, request)), HttpStatus.OK);
     }
 
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-            public ResponseEntity<T> add(@RequestBody T t, @Parameter(hidden = true) Authentication auth) {
+    public ResponseEntity<T> add(@RequestBody T t, @Parameter(hidden = true) Authentication auth) {
         ResponseEntity<T> ret = new ResponseEntity<>(service.save(t), HttpStatus.CREATED);
-        logger.debug("User {} created a new {} with id {}", (auth == null) ? "unknown" : auth.getName(),
-                t.getClass().getSimpleName(), t.getId());
+        logger.debug("Created a new {} with id {}", t.getClass().getSimpleName(), t.getId());
         return ret;
     }
 
     @PutMapping(path = "{id}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<T> update(@RequestBody T t, @Parameter(hidden = true) Authentication auth) throws ResourceNotFoundException {
         ResponseEntity<T> ret = new ResponseEntity<>(service.save(t), HttpStatus.OK);
-        logger.debug("User {} updated {} with id {}", (auth == null) ? "unknown" : auth.getName(),
-                t.getClass().getSimpleName(), t.getId());
+        logger.debug("Updated {} with id {}", t.getClass().getSimpleName(), t.getId());
         return ret;
     }
 
     @PostMapping(path = "validate", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Void> validate(@RequestBody T t, @Parameter(hidden = true) Authentication auth) {
         service.validate(t);
-        logger.debug("User {} validated {} with id {}", (auth == null) ? "unknown" : auth.getName(),
-                t.getClass().getSimpleName(), t.getId());
+        logger.debug("Validated {} with id {}", t.getClass().getSimpleName(), t.getId());
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
@@ -107,8 +93,7 @@ public abstract class ResourceCrudController<T extends Identifiable> {
     public ResponseEntity<T> delete(@PathVariable String id, @Parameter(hidden = true) Authentication auth) throws ResourceNotFoundException {
         T resource = service.get(id);
         service.delete(resource);
-        logger.debug("User {} deleted {} with id {}", (auth == null) ? "unknown" : auth.getName(),
-                resource.getClass().getSimpleName(), resource.getId());
+        logger.debug("Deleted {} with id {}", resource.getClass().getSimpleName(), resource.getId());
         return new ResponseEntity<>(resource, HttpStatus.OK);
     }
 

@@ -9,7 +9,7 @@ import gr.uoa.di.madgik.resourcecatalogue.domain.LoggingInfo;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Metadata;
 import gr.uoa.di.madgik.resourcecatalogue.domain.ServiceBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.User;
-import gr.uoa.di.madgik.resourcecatalogue.exception.ValidationException;
+import gr.uoa.di.madgik.resourcecatalogue.exception.ResourceAlreadyExistsException;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
 import gr.uoa.di.madgik.resourcecatalogue.utils.ProviderResourcesCommonMethods;
 import org.slf4j.Logger;
@@ -68,10 +68,10 @@ public class PendingServiceManager extends ResourceManager<ServiceBundle> implem
         List<ServiceBundle> resourceList = serviceBundleService.getAll(ff, auth).getResults();
         for (ServiceBundle existingResource : resourceList) {
             if (service.getService().getId().equals(existingResource.getService().getId()) && existingResource.getService().getCatalogueId().equals(catalogueId)) {
-                throw new ValidationException(String.format("Service with the specific id already exists on the [%s] Catalogue. Please refactor your 'abbreviation' field.", catalogueId));
+                throw new ResourceAlreadyExistsException(String.format("Service with the specific id already exists on the [%s] Catalogue. Please refactor your 'abbreviation' field.", catalogueId));
             }
         }
-        logger.trace("User '{}' is attempting to add a new Pending Service with id {}", auth, service.getId());
+        logger.trace("Attempting to add a new Pending Service with id {}", service.getId());
 
         if (service.getMetadata() == null) {
             service.setMetadata(Metadata.createMetadata(User.of(auth).getFullName()));
@@ -97,7 +97,7 @@ public class PendingServiceManager extends ResourceManager<ServiceBundle> implem
         Resource existing = getPendingResourceViaServiceId(serviceBundle.getService().getId());
         // block catalogueId updates from Provider Admins
         serviceBundle.getService().setCatalogueId(catalogueId);
-        logger.trace("User '{}' is attempting to update the Pending Service with id {}", auth, serviceBundle.getId());
+        logger.trace("Attempting to update the Pending Service with id {}", serviceBundle.getId());
         serviceBundle.setMetadata(Metadata.updateMetadata(serviceBundle.getMetadata(), User.of(auth).getFullName()));
         // save existing resource with new payload
         existing.setPayload(serialize(serviceBundle));
@@ -116,7 +116,7 @@ public class PendingServiceManager extends ResourceManager<ServiceBundle> implem
     @Override
     @CacheEvict(cacheNames = {CACHE_VISITS, CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)
     public ServiceBundle transformToPending(String serviceId, Authentication auth) {
-        logger.trace("User '{}' is attempting to transform the Active Service with id {} to Pending", auth, serviceId);
+        logger.trace("Attempting to transform the Active Service with id {} to Pending", serviceId);
         ServiceBundle serviceBundle = serviceBundleService.get(serviceId, catalogueId);
         Resource resource = serviceBundleService.getResource(serviceBundle.getService().getId(), catalogueId);
         resource.setResourceTypeName("service");
@@ -127,7 +127,7 @@ public class PendingServiceManager extends ResourceManager<ServiceBundle> implem
     @Override
     @CacheEvict(cacheNames = {CACHE_VISITS, CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)
     public ServiceBundle transformToActive(ServiceBundle serviceBundle, Authentication auth) {
-        logger.trace("User '{}' is attempting to transform the Pending Service with id {} to Active", auth, serviceBundle.getId());
+        logger.trace("Attempting to transform the Pending Service with id {} to Active", serviceBundle.getId());
         serviceBundleService.validate(serviceBundle);
 
         // update loggingInfo

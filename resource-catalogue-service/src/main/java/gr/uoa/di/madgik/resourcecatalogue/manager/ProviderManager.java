@@ -10,6 +10,7 @@ import gr.uoa.di.madgik.resourcecatalogue.dto.MapValues;
 import gr.uoa.di.madgik.resourcecatalogue.exception.ValidationException;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
 import gr.uoa.di.madgik.resourcecatalogue.utils.Auditable;
+import gr.uoa.di.madgik.resourcecatalogue.utils.AuthenticationInfo;
 import gr.uoa.di.madgik.resourcecatalogue.utils.ObjectUtils;
 import gr.uoa.di.madgik.resourcecatalogue.utils.ProviderResourcesCommonMethods;
 import gr.uoa.di.madgik.resourcecatalogue.validators.FieldValidator;
@@ -117,7 +118,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     @Override
     @CacheEvict(value = CACHE_PROVIDERS, allEntries = true)
     public ProviderBundle add(ProviderBundle provider, String catalogueId, Authentication auth) {
-        logger.trace("User '{}' is attempting to add a new Provider: {} on Catalogue: {}", auth, provider, catalogueId);
+        logger.trace("Attempting to add a new Provider: {} on Catalogue: {}", provider, catalogueId);
 
         provider = onboard(provider, catalogueId, auth);
 
@@ -130,7 +131,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
 
         addAuthenticatedUser(provider.getProvider(), auth);
         validate(provider);
-        provider.setMetadata(Metadata.createMetadata(User.of(auth).getFullName(), User.of(auth).getEmail()));
+        provider.setMetadata(Metadata.createMetadata(AuthenticationInfo.getFullName(auth), AuthenticationInfo.getEmail(auth)));
 
         ProviderBundle ret;
         ret = super.add(provider, null);
@@ -152,7 +153,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     //    @Override
     @CacheEvict(value = CACHE_PROVIDERS, allEntries = true)
     public ProviderBundle update(ProviderBundle providerBundle, String catalogueId, String comment, Authentication auth) {
-        logger.trace("User '{}' is attempting to update the Provider with id '{}' of the Catalogue '{}'", auth, providerBundle, providerBundle.getProvider().getCatalogueId());
+        logger.trace("Attempting to update the Provider with id '{}' of the Catalogue '{}'", providerBundle, providerBundle.getProvider().getCatalogueId());
 
         ProviderBundle ret = ObjectUtils.clone(providerBundle);
         Resource existingResource = getResource(ret.getId(), ret.getProvider().getCatalogueId());
@@ -707,7 +708,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     @Override
     @CacheEvict(value = {CACHE_PROVIDERS, CACHE_SERVICE_EVENTS, CACHE_EVENTS}, allEntries = true)
     public void deleteUserInfo(Authentication authentication) {
-        logger.trace("User '{}' is attempting to delete his User Info", authentication);
+        logger.trace("Attempting to delete User Info '{}'", authentication);
         User authenticatedUser = User.of(authentication);
         List<Event> allUserEvents = new ArrayList<>();
         allUserEvents.addAll(eventService.getUserEvents(Event.UserActionType.FAVOURITE.getKey(), authentication));

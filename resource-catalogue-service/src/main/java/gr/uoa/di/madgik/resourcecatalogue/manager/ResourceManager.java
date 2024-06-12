@@ -8,6 +8,7 @@ import gr.uoa.di.madgik.registry.service.ParserService;
 import gr.uoa.di.madgik.registry.service.SearchService;
 import gr.uoa.di.madgik.registry.service.ServiceException;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Identifiable;
+import gr.uoa.di.madgik.resourcecatalogue.exception.ResourceAlreadyExistsException;
 import gr.uoa.di.madgik.resourcecatalogue.exception.ResourceException;
 import gr.uoa.di.madgik.resourcecatalogue.service.ResourceService;
 import gr.uoa.di.madgik.resourcecatalogue.validators.FieldValidator;
@@ -80,7 +81,7 @@ public abstract class ResourceManager<T extends Identifiable> extends AbstractGe
     @Override
     public T add(T t, Authentication auth) {
         if (exists(t)) {
-            throw new ResourceException(String.format("%s with id = '%s' already exists!", resourceType.getName(), t.getId()), HttpStatus.CONFLICT);
+            throw new ResourceAlreadyExistsException(String.format("%s with id = '%s' already exists!", resourceType.getName(), t.getId()));
         }
         String serialized = serialize(t);
         Resource created = new Resource();

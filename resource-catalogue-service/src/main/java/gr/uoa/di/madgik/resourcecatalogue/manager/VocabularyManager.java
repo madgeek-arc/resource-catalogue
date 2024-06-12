@@ -6,6 +6,7 @@ import gr.uoa.di.madgik.registry.domain.Resource;
 import gr.uoa.di.madgik.resourcecatalogue.domain.ProviderBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Vocabulary;
 import gr.uoa.di.madgik.resourcecatalogue.dto.VocabularyTree;
+import gr.uoa.di.madgik.resourcecatalogue.exception.ResourceAlreadyExistsException;
 import gr.uoa.di.madgik.resourcecatalogue.exception.ResourceException;
 import gr.uoa.di.madgik.resourcecatalogue.service.IdCreator;
 import gr.uoa.di.madgik.resourcecatalogue.service.SecurityService;
@@ -194,8 +195,7 @@ public class VocabularyManager extends ResourceManager<Vocabulary> implements Vo
             vocabulary.setId(id);
         }
         if (exists(vocabulary)) {
-            logger.error("{} already exists!\n{}", resourceType.getName(), vocabulary);
-            throw new ResourceException(String.format("%s already exists!", resourceType.getName()), HttpStatus.CONFLICT);
+            throw new ResourceAlreadyExistsException(String.format("%s already exists!%n%s", resourceType.getName(), vocabulary));
         }
         String serialized = serialize(vocabulary);
         Resource created = new Resource();

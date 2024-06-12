@@ -10,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.InsufficientAuthenticationException;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Component;
 
@@ -132,11 +133,11 @@ public class InMemoryAuthoritiesMapper implements AuthoritiesMapper {
     }
 
     @Override
-    public Set<SimpleGrantedAuthority> getAuthorities(String email) {
+    public Set<GrantedAuthority> getAuthorities(String email) {
         long time = System.nanoTime();
         updateAuthorities();
 
-        Set<SimpleGrantedAuthority> authorities = new HashSet<>();
+        Set<GrantedAuthority> authorities = new HashSet<>();
 
         try {
             if (!lock.tryLock(10, TimeUnit.SECONDS)) {

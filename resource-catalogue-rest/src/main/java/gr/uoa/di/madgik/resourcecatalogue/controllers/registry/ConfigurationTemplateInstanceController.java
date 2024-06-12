@@ -4,7 +4,6 @@ import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.annotations.Browse;
-import gr.uoa.di.madgik.resourcecatalogue.domain.User;
 import gr.uoa.di.madgik.resourcecatalogue.domain.configurationTemplates.ConfigurationTemplateInstance;
 import gr.uoa.di.madgik.resourcecatalogue.domain.configurationTemplates.ConfigurationTemplateInstanceBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.configurationTemplates.ConfigurationTemplateInstanceDto;
@@ -94,7 +93,7 @@ public class ConfigurationTemplateInstanceController {
     public ResponseEntity<ConfigurationTemplateInstance> addConfigurationTemplateInstance(@RequestBody ConfigurationTemplateInstance configurationTemplateInstance,
                                                                                           @Parameter(hidden = true) Authentication auth) {
         ConfigurationTemplateInstanceBundle configurationTemplateInstanceBundle = configurationTemplateInstanceService.add(new ConfigurationTemplateInstanceBundle(configurationTemplateInstance), auth);
-        logger.info("User '{}' added the Configuration Template Instance with id '{}'", User.of(auth).getEmail(), configurationTemplateInstance.getId());
+        logger.info("Added the Configuration Template Instance with id '{}'", configurationTemplateInstance.getId());
         return new ResponseEntity<>(configurationTemplateInstanceBundle.getConfigurationTemplateInstance(), HttpStatus.CREATED);
     }
 
@@ -105,7 +104,7 @@ public class ConfigurationTemplateInstanceController {
                                                                                                  @Parameter(hidden = true) Authentication auth) {
         for (ConfigurationTemplateInstance configurationTemplateInstance : configurationTemplateInstances) {
             configurationTemplateInstanceService.add(new ConfigurationTemplateInstanceBundle(configurationTemplateInstance), auth);
-            logger.info("User '{}' added the Configuration Template Instance with id '{}'", User.of(auth).getEmail(), configurationTemplateInstance.getId());
+            logger.info("Added the Configuration Template Instance with id '{}'", configurationTemplateInstance.getId());
         }
         return new ResponseEntity<>(HttpStatus.OK);
     }
@@ -118,7 +117,7 @@ public class ConfigurationTemplateInstanceController {
         ConfigurationTemplateInstanceBundle configurationTemplateInstanceBundle = configurationTemplateInstanceService.get(configurationTemplateInstance.getId());
         configurationTemplateInstanceBundle.setConfigurationTemplateInstance(configurationTemplateInstance);
         configurationTemplateInstanceBundle = configurationTemplateInstanceService.update(configurationTemplateInstanceBundle, auth);
-        logger.info("User '{}' updated the Configuration Template Instance with id '{}'", User.of(auth).getEmail(), configurationTemplateInstanceBundle.getId());
+        logger.info("Updated the Configuration Template Instance with id '{}'", configurationTemplateInstanceBundle.getId());
         return new ResponseEntity<>(configurationTemplateInstanceBundle.getConfigurationTemplateInstance(), HttpStatus.OK);
     }
 
@@ -132,7 +131,7 @@ public class ConfigurationTemplateInstanceController {
         }
         logger.info("Deleting Configuration Template Instance: {}", configurationTemplateInstanceBundle.getConfigurationTemplateInstance().getId());
         configurationTemplateInstanceService.delete(configurationTemplateInstanceBundle);
-        logger.info("User '{}' deleted the Configuration Template Instance with id '{}'", User.of(auth).getEmail(),
+        logger.info("Deleted the Configuration Template Instance with id '{}'",
                 configurationTemplateInstanceBundle.getConfigurationTemplateInstance().getId());
         return new ResponseEntity<>(configurationTemplateInstanceBundle.getConfigurationTemplateInstance(), HttpStatus.OK);
     }
@@ -147,7 +146,7 @@ public class ConfigurationTemplateInstanceController {
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<ConfigurationTemplateInstanceBundle> updateBundle(@RequestBody ConfigurationTemplateInstanceBundle configurationTemplateInstanceBundle, @Parameter(hidden = true) Authentication authentication) throws ResourceNotFoundException {
         ResponseEntity<ConfigurationTemplateInstanceBundle> ret = new ResponseEntity<>(configurationTemplateInstanceService.update(configurationTemplateInstanceBundle, authentication), HttpStatus.OK);
-        logger.info("User '{}' updated ConfigurationTemplateInstanceBundle with id: {}", authentication, configurationTemplateInstanceBundle.getConfigurationTemplateInstance().getId());
+        logger.info("Updated ConfigurationTemplateInstanceBundle with id: {}", configurationTemplateInstanceBundle.getConfigurationTemplateInstance().getId());
         return ret;
     }
 }

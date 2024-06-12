@@ -61,7 +61,7 @@ public class InteroperabilityRecordController {
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.providerCanAddResources(#auth, #interoperabilityRecord)")
     public ResponseEntity<InteroperabilityRecord> add(@RequestBody InteroperabilityRecord interoperabilityRecord, @Parameter(hidden = true) Authentication auth) {
         InteroperabilityRecordBundle ret = this.interoperabilityRecordService.add(new InteroperabilityRecordBundle(interoperabilityRecord), auth);
-        logger.info("User '{}' added a new Interoperability Record with id '{}' and title '{}'", User.of(auth).getEmail(), interoperabilityRecord.getId(), interoperabilityRecord.getTitle());
+        logger.info("Added a new Interoperability Record with id '{}' and title '{}'", interoperabilityRecord.getId(), interoperabilityRecord.getTitle());
         return new ResponseEntity<>(ret.getInteroperabilityRecord(), HttpStatus.CREATED);
     }
 
@@ -71,7 +71,7 @@ public class InteroperabilityRecordController {
     public ResponseEntity<InteroperabilityRecord> update(@RequestBody InteroperabilityRecord interoperabilityRecord,
                                                          @Parameter(hidden = true) Authentication auth) throws ResourceNotFoundException {
         InteroperabilityRecordBundle ret = this.interoperabilityRecordService.update(new InteroperabilityRecordBundle(interoperabilityRecord), auth);
-        logger.info("User '{}' updated Interoperability Record with id '{}' and title '{}'", User.of(auth).getEmail(), interoperabilityRecord.getId(), interoperabilityRecord.getTitle());
+        logger.info("Updated Interoperability Record with id '{}' and title '{}'", interoperabilityRecord.getId(), interoperabilityRecord.getTitle());
         return new ResponseEntity<>(ret.getInteroperabilityRecord(), HttpStatus.OK);
     }
 
@@ -86,7 +86,7 @@ public class InteroperabilityRecordController {
         }
         logger.info("Deleting Interoperability Record: {}", interoperabilityRecordBundle.getId());
         interoperabilityRecordService.delete(interoperabilityRecordBundle);
-        logger.info("User '{}' deleted the Interoperability Record with id '{}'", User.of(auth).getEmail(), interoperabilityRecordBundle.getId());
+        logger.info("Deleted the Interoperability Record with id '{}'", interoperabilityRecordBundle.getId());
         return new ResponseEntity<>(interoperabilityRecordBundle.getInteroperabilityRecord(), HttpStatus.OK);
     }
 
@@ -250,7 +250,7 @@ public class InteroperabilityRecordController {
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<InteroperabilityRecordBundle> add(@RequestBody InteroperabilityRecordBundle interoperabilityRecordBundle, Authentication authentication) {
         ResponseEntity<InteroperabilityRecordBundle> ret = new ResponseEntity<>(interoperabilityRecordService.add(interoperabilityRecordBundle, authentication), HttpStatus.OK);
-        logger.info("User '{}' added InteroperabilityRecordBundle '{}' with id: {}", authentication, interoperabilityRecordBundle.getInteroperabilityRecord().getTitle(), interoperabilityRecordBundle.getId());
+        logger.info("Added InteroperabilityRecordBundle '{}' with id: {}", interoperabilityRecordBundle.getInteroperabilityRecord().getTitle(), interoperabilityRecordBundle.getId());
         return ret;
     }
 
@@ -258,7 +258,7 @@ public class InteroperabilityRecordController {
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<InteroperabilityRecordBundle> update(@RequestBody InteroperabilityRecordBundle interoperabilityRecord, @Parameter(hidden = true) Authentication authentication) throws ResourceNotFoundException {
         InteroperabilityRecordBundle interoperabilityRecordBundle = interoperabilityRecordService.update(interoperabilityRecord, authentication);
-        logger.info("User '{}' updated InteroperabilityRecordBundle '{}' with id: {}", authentication, interoperabilityRecordBundle.getInteroperabilityRecord().getTitle(), interoperabilityRecordBundle.getId());
+        logger.info("Updated InteroperabilityRecordBundle '{}' with id: {}", interoperabilityRecordBundle.getInteroperabilityRecord().getTitle(), interoperabilityRecordBundle.getId());
         return new ResponseEntity<>(interoperabilityRecordBundle, HttpStatus.OK);
     }
 

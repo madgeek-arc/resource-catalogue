@@ -1,6 +1,5 @@
 package gr.uoa.di.madgik.resourcecatalogue.controllers.lot1;
 
-import gr.uoa.di.madgik.resourcecatalogue.controllers.registry.ResourceController;
 import gr.uoa.di.madgik.resourcecatalogue.domain.ProviderBundle;
 import gr.uoa.di.madgik.resourcecatalogue.service.ProviderService;
 import io.swagger.v3.oas.annotations.Parameter;

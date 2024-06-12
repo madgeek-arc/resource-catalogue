@@ -2,7 +2,10 @@ package gr.uoa.di.madgik.resourcecatalogue.manager;
 
 import gr.uoa.di.madgik.registry.domain.Resource;
 import gr.uoa.di.madgik.registry.service.SearchService;
-import gr.uoa.di.madgik.resourcecatalogue.domain.*;
+import gr.uoa.di.madgik.resourcecatalogue.domain.HelpdeskBundle;
+import gr.uoa.di.madgik.resourcecatalogue.domain.LoggingInfo;
+import gr.uoa.di.madgik.resourcecatalogue.domain.Metadata;
+import gr.uoa.di.madgik.resourcecatalogue.domain.User;
 import gr.uoa.di.madgik.resourcecatalogue.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.exception.ValidationException;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
@@ -79,7 +82,7 @@ public class HelpdeskManager extends ResourceManager<HelpdeskBundle> implements 
         validate(helpdesk, resourceType);
 
         helpdesk.setId(idCreator.generate(getResourceType()));
-        logger.trace("User '{}' is attempting to add a new Helpdesk: {}", auth, helpdesk);
+        logger.trace("Attempting to add a new Helpdesk: {}", helpdesk);
 
         helpdesk.setMetadata(Metadata.createMetadata(User.of(auth).getFullName(), User.of(auth).getEmail()));
         List<LoggingInfo> loggingInfoList = commonMethods.returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(helpdesk, auth);
@@ -104,7 +107,7 @@ public class HelpdeskManager extends ResourceManager<HelpdeskBundle> implements 
 
     @Override
     public HelpdeskBundle update(HelpdeskBundle helpdeskBundle, Authentication auth) {
-        logger.trace("User '{}' is attempting to update the Helpdesk with id '{}'", auth, helpdeskBundle.getId());
+        logger.trace("Attempting to update the Helpdesk with id '{}'", helpdeskBundle.getId());
 
         HelpdeskBundle ret = ObjectUtils.clone(helpdeskBundle);
         Resource existingResource = whereID(ret.getId(), true);
@@ -145,7 +148,7 @@ public class HelpdeskManager extends ResourceManager<HelpdeskBundle> implements 
     }
 
     public void updateBundle(HelpdeskBundle helpdeskBundle, Authentication auth) {
-        logger.trace("User '{}' is attempting to update the Helpdesk: {}", auth, helpdeskBundle);
+        logger.trace("Attempting to update the Helpdesk: {}", helpdeskBundle);
 
         Resource existing = getResource(helpdeskBundle.getId());
         if (existing == null) {

@@ -9,8 +9,7 @@ import gr.uoa.di.madgik.resourcecatalogue.domain.LoggingInfo;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Metadata;
 import gr.uoa.di.madgik.resourcecatalogue.domain.ProviderBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.User;
-import gr.uoa.di.madgik.resourcecatalogue.exception.ResourceException;
-import gr.uoa.di.madgik.resourcecatalogue.exception.ValidationException;
+import gr.uoa.di.madgik.resourcecatalogue.exception.ResourceAlreadyExistsException;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
 import gr.uoa.di.madgik.resourcecatalogue.utils.ProviderResourcesCommonMethods;
 import org.slf4j.Logger;
@@ -19,7 +18,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.annotation.Lazy;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
@@ -88,10 +86,10 @@ public class PendingProviderManager extends ResourceManager<ProviderBundle> impl
         List<ProviderBundle> providerList = providerManager.getAll(ff, auth).getResults();
         for (ProviderBundle existingProvider : providerList) {
             if (providerBundle.getProvider().getId().equals(existingProvider.getProvider().getId()) && existingProvider.getProvider().getCatalogueId().equals(catalogueId)) {
-                throw new ValidationException(String.format("Provider with the specific id already exists on the [%s] Catalogue. Please refactor your 'abbreviation' field.", catalogueId));
+                throw new ResourceAlreadyExistsException(String.format("Provider with the specific id already exists on the [%s] Catalogue. Please refactor your 'abbreviation' field.", catalogueId));
             }
         }
-        logger.trace("User '{}' is attempting to add a new Pending Provider: {}", auth, providerBundle);
+        logger.trace("Attempting to add a new Pending Provider: {}", providerBundle);
         providerBundle.setMetadata(Metadata.updateMetadata(providerBundle.getMetadata(), User.of(auth).getFullName(), User.of(auth).getEmail()));
 
         List<LoggingInfo> loggingInfoList = new ArrayList<>();
@@ -115,7 +113,7 @@ public class PendingProviderManager extends ResourceManager<ProviderBundle> impl
         Resource existing = getPendingResourceViaProviderId(providerBundle.getId());
         // block catalogueId updates from Provider Admins
         providerBundle.getProvider().setCatalogueId(catalogueId);
-        logger.trace("User '{}' is attempting to update the Pending Provider: {}", auth, providerBundle);
+        logger.trace("Attempting to update the Pending Provider: {}", providerBundle);
         providerBundle.setMetadata(Metadata.updateMetadata(providerBundle.getMetadata(), User.of(auth).getFullName(), User.of(auth).getEmail()));
         // save existing resource with new payload
         existing.setPayload(serialize(providerBundle));
@@ -143,7 +141,7 @@ public class PendingProviderManager extends ResourceManager<ProviderBundle> impl
     @Override
     @CacheEvict(value = CACHE_PROVIDERS, allEntries = true)
     public ProviderBundle transformToPending(String providerId, Authentication auth) {
-        logger.trace("User '{}' is attempting to transform the Active Provider with id '{}' to Pending", auth, providerId);
+        logger.trace("Attempting to transform the Active Provider with id '{}' to Pending", providerId);
         Resource resource = providerManager.getResource(providerId, catalogueId);
         resource.setResourceTypeName("provider");
         resourceService.changeResourceType(resource, resourceType);
@@ -154,10 +152,10 @@ public class PendingProviderManager extends ResourceManager<ProviderBundle> impl
     @Override
     @CacheEvict(value = CACHE_PROVIDERS, allEntries = true)
     public ProviderBundle transformToActive(ProviderBundle providerBundle, Authentication auth) {
-        logger.trace("User '{}' is attempting to transform the Pending Provider with id '{}' to Active", auth, providerBundle.getId());
+        logger.trace("Attempting to transform the Pending Provider with id '{}' to Active", providerBundle.getId());
         providerManager.validate(providerBundle);
         if (providerManager.exists(providerBundle)) {
-            throw new ResourceException(String.format("Provider with id = '%s' already exists!", providerBundle.getId()), HttpStatus.CONFLICT);
+            throw new ResourceAlreadyExistsException(String.format("Provider with id = '%s' already exists!", providerBundle.getId()));
         }
 
         // update loggingInfo

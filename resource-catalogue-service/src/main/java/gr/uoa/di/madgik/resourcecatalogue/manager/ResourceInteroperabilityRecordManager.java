@@ -2,7 +2,10 @@ package gr.uoa.di.madgik.resourcecatalogue.manager;
 
 import gr.uoa.di.madgik.registry.domain.Resource;
 import gr.uoa.di.madgik.registry.service.SearchService;
-import gr.uoa.di.madgik.resourcecatalogue.domain.*;
+import gr.uoa.di.madgik.resourcecatalogue.domain.LoggingInfo;
+import gr.uoa.di.madgik.resourcecatalogue.domain.Metadata;
+import gr.uoa.di.madgik.resourcecatalogue.domain.ResourceInteroperabilityRecordBundle;
+import gr.uoa.di.madgik.resourcecatalogue.domain.User;
 import gr.uoa.di.madgik.resourcecatalogue.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.exception.ValidationException;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
@@ -80,7 +83,7 @@ public class ResourceInteroperabilityRecordManager extends ResourceManager<Resou
         commonMethods.checkRelatedResourceIDsConsistency(resourceInteroperabilityRecordBundle);
 
         resourceInteroperabilityRecordBundle.setId(idCreator.generate(getResourceType()));
-        logger.trace("User '{}' is attempting to add a new ResourceInteroperabilityRecord: {}", auth, resourceInteroperabilityRecordBundle);
+        logger.trace("Attempting to add a new ResourceInteroperabilityRecord: {}", resourceInteroperabilityRecordBundle);
 
         resourceInteroperabilityRecordBundle.setMetadata(Metadata.createMetadata(User.of(auth).getFullName(), User.of(auth).getEmail()));
         List<LoggingInfo> loggingInfoList = commonMethods.returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(resourceInteroperabilityRecordBundle, auth);
@@ -112,7 +115,7 @@ public class ResourceInteroperabilityRecordManager extends ResourceManager<Resou
 
     @Override
     public ResourceInteroperabilityRecordBundle update(ResourceInteroperabilityRecordBundle resourceInteroperabilityRecordBundle, Authentication auth) {
-        logger.trace("User '{}' is attempting to update the ResourceInteroperabilityRecord with id '{}'", auth, resourceInteroperabilityRecordBundle.getId());
+        logger.trace("Attempting to update the ResourceInteroperabilityRecord with id '{}'", resourceInteroperabilityRecordBundle.getId());
 
         ResourceInteroperabilityRecordBundle ret = ObjectUtils.clone(resourceInteroperabilityRecordBundle);
         Resource existingResource = whereID(ret.getId(), true);

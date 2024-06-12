@@ -20,7 +20,6 @@ import org.springframework.security.authentication.InsufficientAuthenticationExc
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
-import javax.sql.DataSource;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -159,7 +158,7 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
     public CatalogueBundle add(CatalogueBundle catalogue, Authentication auth) {
 
         catalogue.setId(idCreator.generate(getResourceType()));
-        logger.trace("User '{}' is attempting to add a new Catalogue: {}", auth, catalogue);
+        logger.trace("Attempting to add a new Catalogue: {}", catalogue);
         addAuthenticatedUser(catalogue.getCatalogue(), auth);
         validate(catalogue);
         catalogue.setMetadata(Metadata.createMetadata(User.of(auth).getFullName(), User.of(auth).getEmail()));
@@ -182,7 +181,7 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
     }
 
     public CatalogueBundle update(CatalogueBundle catalogueBundle, String comment, Authentication auth) {
-        logger.trace("User '{}' is attempting to update the Catalogue with id '{}'", auth, catalogueBundle);
+        logger.trace("Attempting to update the Catalogue with id '{}'", catalogueBundle);
 
         CatalogueBundle ret = ObjectUtils.clone(catalogueBundle);
         Resource existingResource = whereID(ret.getId(), true);

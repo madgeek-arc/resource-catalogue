@@ -2,13 +2,12 @@ package gr.uoa.di.madgik.resourcecatalogue.manager;
 
 import gr.uoa.di.madgik.registry.domain.*;
 import gr.uoa.di.madgik.registry.domain.index.IndexField;
-import gr.uoa.di.madgik.registry.service.AbstractGenericService;
 import gr.uoa.di.madgik.registry.service.ParserService;
 import gr.uoa.di.madgik.registry.service.SearchService;
 import gr.uoa.di.madgik.registry.service.ServiceException;
 import gr.uoa.di.madgik.resourcecatalogue.config.Properties.Cache;
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
-import gr.uoa.di.madgik.resourcecatalogue.exception.ResourceException;
+import gr.uoa.di.madgik.resourcecatalogue.exception.ResourceAlreadyExistsException;
 import gr.uoa.di.madgik.resourcecatalogue.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.exception.ValidationException;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
@@ -23,7 +22,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.validation.Validator;
@@ -162,13 +160,13 @@ public abstract class AbstractServiceBundleManager<T extends ServiceBundle> exte
     @Override
     @CacheEvict(cacheNames = {Cache.CACHE_VISITS, Cache.CACHE_PROVIDERS, Cache.CACHE_FEATURED}, allEntries = true)
     public T add(T serviceBundle, Authentication auth) {
-        logger.trace("User '{}' is attempting to add a new Resource: {}", auth, serviceBundle);
+        logger.trace("Attempting to add a new Resource: {}", serviceBundle);
         // if Resource version is empty set it null
         if ("".equals(serviceBundle.getService().getVersion())) {
             serviceBundle.getService().setVersion(null);
         }
         if (exists(serviceBundle)) {
-            throw new ResourceException("Resource already exists!", HttpStatus.CONFLICT);
+            throw new ResourceAlreadyExistsException();
         }
 
         prettifyServiceTextFields(serviceBundle, ",");
@@ -188,7 +186,7 @@ public abstract class AbstractServiceBundleManager<T extends ServiceBundle> exte
     @Override
     @CacheEvict(cacheNames = {Cache.CACHE_VISITS, Cache.CACHE_PROVIDERS, Cache.CACHE_FEATURED}, allEntries = true)
     public T update(T serviceBundle, Authentication auth) {
-        logger.trace("User '{}' is attempting to update the Resource: {}", auth, serviceBundle);
+        logger.trace("Attempting to update the Resource: {}", serviceBundle);
         // if Resource version is empty set it null
         if ("".equals(serviceBundle.getService().getVersion())) {
             serviceBundle.getService().setVersion(null);

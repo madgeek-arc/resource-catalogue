@@ -207,7 +207,7 @@ public class ServiceBundleManager extends AbstractServiceBundleManager<ServiceBu
         }
         commonMethods.checkRelatedResourceIDsConsistency(ret);
 
-        logger.trace("User '{}' is attempting to update the Service with id '{}' of the Catalogue '{}'", auth, ret.getService().getId(), ret.getService().getCatalogueId());
+        logger.trace("Attempting to update the Service with id '{}' of the Catalogue '{}'", ret.getService().getId(), ret.getService().getCatalogueId());
         validate(ret);
 
         ProviderBundle providerBundle = providerService.get(ret.getService().getCatalogueId(), ret.getService().getResourceOrganisation(), auth);
