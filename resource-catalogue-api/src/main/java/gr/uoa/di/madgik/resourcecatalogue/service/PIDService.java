@@ -7,25 +7,16 @@ public interface PIDService {
     /**
      * Get a Resource via its PID
      *
-     * @param pid          PID
-     * @param resourceType Resource Type
+     * @param prefix PID prefix
+     * @param suffix PID suffix
      * @return Bundle<?>
      */
-    Bundle<?> get(String pid, String resourceType);
+    Bundle<?> get(String prefix, String suffix);
 
     /**
-     * Update the PID of a specific Public resource
+     * Registers a PID on a specific resource
      *
-     * @param pid              Resource's PID
-     * @param resourceTypePath Resource's type needed to create MP URL
+     * @param pid PID
      */
-    void updatePID(String pid, String resourceTypePath);
-
-    /**
-     * Given a resourceType, determine the url path the Resource needs to be redirected to when resolving on handler
-     *
-     * @param resourceType Resource's type needed to create MP URL
-     * @return String
-     */
-    String determineResourceTypePath(String resourceType);
+    void register(String pid);
 }

@@ -29,9 +29,9 @@ import java.util.Objects;
 import static gr.uoa.di.madgik.resourcecatalogue.config.Properties.Cache.CACHE_PROVIDERS;
 
 @Service("pendingProviderManager")
-public class PendingProviderManager extends ResourceManager<ProviderBundle> implements PendingResourceService<ProviderBundle> {
+public class DraftProviderManager extends ResourceManager<ProviderBundle> implements DraftResourceService<ProviderBundle> {
 
-    private static final Logger logger = LoggerFactory.getLogger(PendingProviderManager.class);
+    private static final Logger logger = LoggerFactory.getLogger(DraftProviderManager.class);
 
     private final ProviderService providerManager;
     private final IdCreator idCreator;
@@ -43,10 +43,10 @@ public class PendingProviderManager extends ResourceManager<ProviderBundle> impl
     @Value("${catalogue.id}")
     private String catalogueId;
 
-    public PendingProviderManager(ProviderService providerManager,
-                                  IdCreator idCreator, @Lazy RegistrationMailService registrationMailService,
-                                  @Lazy SecurityService securityService, @Lazy VocabularyService vocabularyService,
-                                  ProviderResourcesCommonMethods commonMethods) {
+    public DraftProviderManager(ProviderService providerManager,
+                                IdCreator idCreator, @Lazy RegistrationMailService registrationMailService,
+                                @Lazy SecurityService securityService, @Lazy VocabularyService vocabularyService,
+                                ProviderResourcesCommonMethods commonMethods) {
         super(ProviderBundle.class);
         this.providerManager = providerManager;
         this.idCreator = idCreator;

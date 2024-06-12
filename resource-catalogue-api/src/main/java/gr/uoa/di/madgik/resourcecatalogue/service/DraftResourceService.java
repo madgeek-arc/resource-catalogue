@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-public interface PendingResourceService<T extends Bundle> extends ResourceService<T> {
+public interface DraftResourceService<T extends Bundle> extends ResourceService<T> {
 
     /**
      * Transforms the resource to pending.

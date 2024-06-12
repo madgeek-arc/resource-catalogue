@@ -13,16 +13,32 @@ public class ResourceIdCreator implements IdCreator {
 
     private final SearchService searchService;
 
-    @Value("${pid.prefix.services}")
+    @Value("${prefix.services}")
     private String servicesPrefix;
-    @Value("${pid.prefix.tools}")
+    @Value("${prefix.tools}")
     private String toolsPrefix;
-    @Value("${pid.prefix.trainings}")
+    @Value("${prefix.trainings}")
     private String trainingsPrefix;
-    @Value("${pid.prefix.providers}")
+    @Value("${prefix.providers}")
     private String providersPrefix;
-    @Value("${pid.prefix.ifguidelines}")
-    private String ifguidelinesPrefix;
+    @Value("${prefix.guidelines}")
+    private String guidelinesPrefix;
+    @Value("${prefix.catalogues}")
+    private String cataloguesPrefix;
+    @Value("${prefix.configurationTemplates}")
+    private String configurationTemplatesPrefix;
+    @Value("${prefix.configurationTemplateInstances}")
+    private String configurationTemplateInstancesPrefix;
+    @Value("${prefix.datasources}")
+    private String datasourcesPrefix;
+    @Value("${prefix.helpdesks}")
+    private String helpdesksPrefix;
+    @Value("${prefix.monitorings}")
+    private String monitoringsPrefix;
+    @Value("${prefix.resourceInteroperabilityRecords}")
+    private String resourceInteroperabilityRecordsPrefix;
+    @Value("${prefix.vocabularyCurations}")
+    private String vocabularyCurationsPrefix;
 
     public ResourceIdCreator(SearchService searchService) {
         this.searchService = searchService;
@@ -45,16 +61,16 @@ public class ResourceIdCreator implements IdCreator {
             case "tool" -> toolsPrefix;
             case "training_resource" -> trainingsPrefix;
             case "provider", "pending_provider" -> providersPrefix;
-            case "interoperability_record" -> ifguidelinesPrefix;
+            case "interoperability_record" -> guidelinesPrefix;
             // non PID related
-            case "catalogue" -> "cat";
-            case "configuration_template" -> "con";
-            case "configuration_template_instance" -> "cti";
-            case "datasource" -> "dat";
-            case "helpdesk" -> "hel";
-            case "monitoring" -> "mon";
-            case "resource_interoperability_record" -> "rir";
-            case "vocabulary_curation" -> "cur";
+            case "catalogue" -> cataloguesPrefix;
+            case "configuration_template" -> configurationTemplatesPrefix;
+            case "configuration_template_instance" -> configurationTemplateInstancesPrefix;
+            case "datasource" -> datasourcesPrefix;
+            case "helpdesk" -> helpdesksPrefix;
+            case "monitoring" -> monitoringsPrefix;
+            case "resource_interoperability_record" -> resourceInteroperabilityRecordsPrefix;
+            case "vocabulary_curation" -> vocabularyCurationsPrefix;
             default -> "non";
         };
     }

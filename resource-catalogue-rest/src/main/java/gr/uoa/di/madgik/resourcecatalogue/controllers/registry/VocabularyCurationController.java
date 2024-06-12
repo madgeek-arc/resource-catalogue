@@ -38,9 +38,10 @@ public class VocabularyCurationController extends ResourceController<VocabularyC
     }
 
     //    @Operation(summary = "Get Vocabulary Curation by ID")
-    @GetMapping(path = "{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @Override
-    public ResponseEntity<VocabularyCuration> get(@PathVariable("id") String id, @Parameter(hidden = true) Authentication authentication) {
+    @GetMapping(path = "{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE})
+    public ResponseEntity<VocabularyCuration> get(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
+                                                  @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix) {
+        String id = prefix + "/" + suffix;
         return new ResponseEntity<>(vocabularyCurationService.get(id), HttpStatus.OK);
     }
 

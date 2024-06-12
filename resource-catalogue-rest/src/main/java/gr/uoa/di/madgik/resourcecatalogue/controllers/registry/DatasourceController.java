@@ -54,17 +54,21 @@ public class DatasourceController {
     }
 
     @Operation(summary = "Returns the Datasource with the given id.")
-    @GetMapping(path = "{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    public ResponseEntity<Datasource> getDatasource(@PathVariable("id") String id) {
+    @GetMapping(path = "{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    public ResponseEntity<Datasource> getDatasource(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
+                                                    @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix) {
+        String id = prefix + "/" + suffix;
         Datasource datasource = datasourceService.get(id).getDatasource();
         return new ResponseEntity<>(datasource, HttpStatus.OK);
     }
 
     @Operation(summary = "Returns the Datasource of the given Service of the given Catalogue.")
-    @GetMapping(path = "/byService/{serviceId}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    public ResponseEntity<Datasource> getDatasourceByServiceId(@PathVariable("serviceId") String serviceId,
+    @GetMapping(path = "/byService/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    public ResponseEntity<Datasource> getDatasourceByServiceId(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
+                                                               @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix,
                                                                @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId,
                                                                @Parameter(hidden = true) Authentication auth) {
+        String serviceId = prefix + "/" + suffix;
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(1000);
         ff.addFilter("catalogue_id", catalogueId);
@@ -127,9 +131,12 @@ public class DatasourceController {
         return new ResponseEntity<>(datasourceBundle.getDatasource(), HttpStatus.OK);
     }
 
-    @DeleteMapping(path = "{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @DeleteMapping(path = "{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
-    public ResponseEntity<Datasource> deleteDatasourceById(@PathVariable("id") String id, @Parameter(hidden = true) Authentication auth) throws ResourceNotFoundException {
+    public ResponseEntity<Datasource> deleteDatasourceById(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
+                                                           @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix,
+                                                           @Parameter(hidden = true) Authentication auth) throws ResourceNotFoundException {
+        String id = prefix + "/" + suffix;
         DatasourceBundle datasourceBundle = datasourceService.get(id);
         if (datasourceBundle == null) {
             return new ResponseEntity<>(HttpStatus.GONE);
@@ -145,12 +152,13 @@ public class DatasourceController {
 
     // Deletes the Datasource of the specific Service of the specific Catalogue.
     @Operation(description = "Deletes the Datasource of the specific Service of the specific Catalogue.")
-    @DeleteMapping(path = "/{catalogueId}/{serviceId}", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth, #serviceId, #catalogueId)")
+    @DeleteMapping(path = "/{catalogueId}/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth, #prefix+'/'+suffix, #catalogueId)")
     public ResponseEntity<Datasource> deleteDatasource(@PathVariable("catalogueId") String catalogueId,
-                                                       @PathVariable("serviceId") String serviceId,
+                                                       @Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
+                                                       @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix,
                                                        @Parameter(hidden = true) Authentication auth) throws ResourceNotFoundException {
-        Datasource datasource = getDatasourceByServiceId(serviceId, catalogueId, auth).getBody();
+        Datasource datasource = getDatasourceByServiceId(prefix, suffix, catalogueId, auth).getBody();
         assert datasource != null;
         DatasourceBundle datasourceBundle = datasourceService.get(datasource.getId());
         if (datasourceBundle == null) {
@@ -166,10 +174,14 @@ public class DatasourceController {
     }
 
     // Accept/Reject a Datasource.
-    @PatchMapping(path = "verifyDatasource/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PatchMapping(path = "verifyDatasource/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
-    public ResponseEntity<DatasourceBundle> verifyDatasource(@PathVariable("id") String id, @RequestParam(required = false) Boolean active,
-                                                             @RequestParam(required = false) String status, @Parameter(hidden = true) Authentication auth) {
+    public ResponseEntity<DatasourceBundle> verifyDatasource(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
+                                                             @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix,
+                                                             @RequestParam(required = false) Boolean active,
+                                                             @RequestParam(required = false) String status,
+                                                             @Parameter(hidden = true) Authentication auth) {
+        String id = prefix + "/" + suffix;
         DatasourceBundle resource = datasourceService.verifyDatasource(id, status, active, auth);
         logger.info("Updated Datasource with id '{}' [status: {}] [active: {}]", resource.getDatasource().getId(), status, active);
         return new ResponseEntity<>(resource, HttpStatus.OK);
@@ -182,8 +194,10 @@ public class DatasourceController {
         return ResponseEntity.ok(openAIREDatasourceService.get(datasourceId));
     }
 
-    @GetMapping(path = "isDatasourceRegisteredOnOpenAIRE/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
-    public boolean isDatasourceRegisteredOnOpenAIRE(@PathVariable("id") String id) {
+    @GetMapping(path = "isDatasourceRegisteredOnOpenAIRE/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE})
+    public boolean isDatasourceRegisteredOnOpenAIRE(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
+                                                    @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix) {
+        String id = prefix + "/" + suffix;
         return datasourceService.isDatasourceRegisteredOnOpenAIRE(id);
     }
 
@@ -201,8 +215,10 @@ public class DatasourceController {
                 datasourcePaging.getTo(), datasourcePaging.getResults(), datasourcePaging.getFacets()));
     }
 
-    @GetMapping(path = "isMetricsValid/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
-    public OpenAIREMetrics getOpenaireMetrics(@PathVariable("id") String id) {
+    @GetMapping(path = "isMetricsValid/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE})
+    public OpenAIREMetrics getOpenaireMetrics(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
+                                              @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix) {
+        String id = prefix + "/" + suffix;
         return openAIREDatasourceService.getMetrics(id);
     }
 

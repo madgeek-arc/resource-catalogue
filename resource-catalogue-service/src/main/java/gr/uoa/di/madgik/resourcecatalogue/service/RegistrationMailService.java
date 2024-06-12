@@ -35,10 +35,10 @@ public class RegistrationMailService {
     private final MailService mailService;
     private final Configuration cfg;
     private final ProviderManager providerManager;
-    private final PendingProviderManager pendingProviderManager;
+    private final DraftProviderManager pendingProviderManager;
     private final ServiceBundleManager serviceBundleManager;
     private final TrainingResourceManager trainingResourceManager;
-    private final PendingServiceManager pendingServiceManager;
+    private final DraftServiceManager pendingServiceManager;
     private final SecurityService securityService;
 
     // Properties
@@ -59,10 +59,10 @@ public class RegistrationMailService {
     @Autowired
     public RegistrationMailService(MailService mailService, Configuration cfg,
                                    ProviderManager providerManager,
-                                   @Lazy PendingProviderManager pendingProviderManager,
+                                   @Lazy DraftProviderManager pendingProviderManager,
                                    ServiceBundleManager serviceBundleManager,
                                    TrainingResourceManager trainingResourceManager,
-                                   PendingServiceManager pendingServiceManager,
+                                   DraftServiceManager pendingServiceManager,
                                    SecurityService securityService,
                                    ResourceCatalogueProperties properties) {
         this.mailService = mailService;

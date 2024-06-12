@@ -92,7 +92,7 @@ public class PublicProviderManager extends ResourceManager<ProviderBundle> imple
             logger.info("Provider with id {} does not have a PID registered under its AlternativeIdentifiers.",
                     providerBundle.getId());
         } else {
-            commonMethods.postPID(pid, "providers/");
+            commonMethods.postPID(pid);
         }
         ProviderBundle ret;
         logger.info(String.format("Provider [%s] is being published with id [%s]", lowerLevelProviderId, providerBundle.getId()));

@@ -33,7 +33,7 @@ public class InMemoryAuthoritiesMapper implements AuthoritiesMapper {
     private final ProviderService providerService;
 
     private final CatalogueService catalogueService;
-    private final PendingResourceService<ProviderBundle> pendingProviderService;
+    private final DraftResourceService<ProviderBundle> pendingProviderService;
     private final SecurityService securityService;
     private final ResourceCatalogueProperties catalogueProperties;
 
@@ -43,7 +43,7 @@ public class InMemoryAuthoritiesMapper implements AuthoritiesMapper {
                                      ResourceCatalogueProperties catalogueProperties,
                                      ProviderService manager,
                                      CatalogueService catalogueService,
-                                     PendingResourceService<ProviderBundle> pendingProviderService,
+                                     DraftResourceService<ProviderBundle> pendingProviderService,
                                      SecurityService securityService) {
         this.catalogueProperties = catalogueProperties;
         this.providerService = manager;

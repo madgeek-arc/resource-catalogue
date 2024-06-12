@@ -99,7 +99,7 @@ public class PublicTrainingResourceManager extends AbstractPublicResourceManager
             logger.info("Training Resource with id {} does not have a PID registered under its AlternativeIdentifiers.",
                     trainingResourceBundle.getId());
         } else {
-            commonMethods.postPID(pid, "trainings/");
+            commonMethods.postPID(pid);
         }
         TrainingResourceBundle ret;
         logger.info(String.format("Training Resource [%s] is being published with id [%s]", lowerLevelResourceId, trainingResourceBundle.getId()));

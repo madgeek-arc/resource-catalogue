@@ -7,7 +7,7 @@ import gr.uoa.di.madgik.resourcecatalogue.exception.ResourceException;
 import gr.uoa.di.madgik.resourcecatalogue.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.exception.ValidationException;
 import gr.uoa.di.madgik.resourcecatalogue.manager.CatalogueManager;
-import gr.uoa.di.madgik.resourcecatalogue.manager.PendingProviderManager;
+import gr.uoa.di.madgik.resourcecatalogue.manager.DraftProviderManager;
 import gr.uoa.di.madgik.resourcecatalogue.manager.ProviderManager;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
@@ -26,10 +26,10 @@ public class OIDCSecurityService implements SecurityService {
 
     private final ProviderManager providerManager;
     private final CatalogueManager catalogueManager;
-    private final PendingProviderManager pendingProviderManager;
+    private final DraftProviderManager pendingProviderManager;
     private final ServiceBundleService<ServiceBundle> serviceBundleService;
     private final TrainingResourceService trainingResourceService;
-    private final PendingResourceService<ServiceBundle> pendingServiceManager;
+    private final DraftResourceService<ServiceBundle> pendingServiceManager;
     private final InteroperabilityRecordService interoperabilityRecordService;
     private final Authentication adminAccess = new AdminAuthentication();
 
@@ -39,8 +39,8 @@ public class OIDCSecurityService implements SecurityService {
     OIDCSecurityService(@Lazy ProviderManager providerManager, CatalogueManager catalogueManager,
                         @Lazy ServiceBundleService<ServiceBundle> serviceBundleService,
                         @Lazy TrainingResourceService trainingResourceService,
-                        @Lazy PendingProviderManager pendingProviderManager,
-                        @Lazy PendingResourceService<ServiceBundle> pendingServiceManager,
+                        @Lazy DraftProviderManager pendingProviderManager,
+                        @Lazy DraftResourceService<ServiceBundle> pendingServiceManager,
                         @Lazy InteroperabilityRecordService interoperabilityRecordService) {
         this.providerManager = providerManager;
         this.catalogueManager = catalogueManager;
