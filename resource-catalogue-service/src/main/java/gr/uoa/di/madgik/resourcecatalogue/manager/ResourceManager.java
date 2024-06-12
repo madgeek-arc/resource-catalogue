@@ -10,6 +10,7 @@ import gr.uoa.di.madgik.registry.service.ServiceException;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Identifiable;
 import gr.uoa.di.madgik.resourcecatalogue.exception.ResourceAlreadyExistsException;
 import gr.uoa.di.madgik.resourcecatalogue.exception.ResourceException;
+import gr.uoa.di.madgik.resourcecatalogue.service.IdCreator;
 import gr.uoa.di.madgik.resourcecatalogue.service.ResourceService;
 import gr.uoa.di.madgik.resourcecatalogue.validators.FieldValidator;
 import org.slf4j.Logger;
@@ -19,6 +20,7 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
+import org.springframework.util.StringUtils;
 
 import java.util.List;
 import java.util.Map;
@@ -34,8 +36,17 @@ public abstract class ResourceManager<T extends Identifiable> extends AbstractGe
     @Autowired
     private FieldValidator fieldValidator;
 
+    @Lazy
+    @Autowired
+    private IdCreator idCreator;
+
     public ResourceManager(Class<T> typeParameterClass) {
         super(typeParameterClass);
+    }
+
+    @Override
+    public String createId(T t) {
+        return idCreator.generate(getResourceType());
     }
 
     @Override
@@ -108,6 +119,10 @@ public abstract class ResourceManager<T extends Identifiable> extends AbstractGe
         if (exists(t)) {
             saved = update(t, null);
         } else {
+            if (!StringUtils.hasText(t.getId())) {
+                String id = createId(t);
+                t.setId(id);
+            }
             saved = add(t, null);
         }
         return saved;

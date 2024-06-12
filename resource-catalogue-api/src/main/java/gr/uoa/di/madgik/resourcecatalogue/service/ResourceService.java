@@ -11,6 +11,13 @@ import java.util.Map;
 public interface ResourceService<T> extends ResourceCRUDService<T, Authentication> {
 
     /**
+     * Creates ID for the given resource.
+     *
+     * @return the created id
+     */
+    String createId(T t);
+
+    /**
      * Saves the provided resource. If it does not exist it creates it.
      *
      * @param t the resource to save

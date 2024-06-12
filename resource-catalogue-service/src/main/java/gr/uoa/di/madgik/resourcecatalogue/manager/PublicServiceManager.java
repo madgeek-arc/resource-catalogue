@@ -34,7 +34,8 @@ public class PublicServiceManager extends AbstractPublicResourceManager<ServiceB
     private final FacetLabelService facetLabelService;
 
     @Autowired
-    public PublicServiceManager(JmsService jmsService, SecurityService securityService,
+    public PublicServiceManager(JmsService jmsService,
+                                SecurityService securityService,
                                 ProviderResourcesCommonMethods commonMethods,
                                 FacetLabelService facetLabelService) {
         super(ServiceBundle.class);
