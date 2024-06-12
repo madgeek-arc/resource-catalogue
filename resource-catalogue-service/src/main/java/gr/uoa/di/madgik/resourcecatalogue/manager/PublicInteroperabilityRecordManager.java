@@ -94,7 +94,7 @@ public class PublicInteroperabilityRecordManager extends ResourceManager<Interop
             logger.info("Interoperability Record with id {} does not have a PID registered under its AlternativeIdentifiers.",
                     interoperabilityRecordBundle.getId());
         } else {
-            commonMethods.postPID(pid, "guidelines/");
+            commonMethods.postPID(pid);
         }
         InteroperabilityRecordBundle ret;
         logger.info(String.format("Interoperability Record [%s] is being published with id [%s]", lowerLevelResourceId, interoperabilityRecordBundle.getId()));

@@ -1,7 +1,5 @@
 package gr.uoa.di.madgik.resourcecatalogue.utils;
 
-import gr.uoa.di.madgik.registry.domain.Browsing;
-import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
 import gr.uoa.di.madgik.resourcecatalogue.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.exception.ValidationException;
@@ -63,7 +61,7 @@ public class ProviderResourcesCommonMethods {
     @Value("${pid.prefix.providers}")
     private String providersPrefix;
     @Value("${pid.prefix.ifguidelines}")
-    private String ifguidelinesPrefix;
+    private String guidelinesPrefix;
     @Value("${pid.api}")
     private String pidApi;
     @Value("${marketplace.url}")
@@ -398,61 +396,85 @@ public class ProviderResourcesCommonMethods {
     }
 
     private AlternativeIdentifier createAlternativeIdentifierForPID(Bundle<?> bundle) {
-        // create PID
-        String pid = bundle.getId();
-        // create AlternativeIdentifier
         AlternativeIdentifier alternativeIdentifier = new AlternativeIdentifier();
         alternativeIdentifier.setType("EOSC PID");
-        alternativeIdentifier.setValue(pid);
+        alternativeIdentifier.setValue(bundle.getId());
         return alternativeIdentifier;
     }
 
-    public void postPID(String pid, String resourceTypePath) {
-        String pidPrefix = determinePidPrefix(resourceTypePath);
-        String url = pidApi + pid;
-        String payload = createPID(pid, pidPrefix, resourceTypePath);
-        HttpURLConnection con;
-        try {
-            con = (HttpURLConnection) new URL(url).openConnection();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-        try {
-            con.setRequestMethod("PUT");
-        } catch (ProtocolException e) {
-            throw new RuntimeException(e);
-        }
-        con.setRequestProperty("Content-Type", "application/json");
-        con.setRequestProperty("Authorization", pidAuth);
-        con.setDoOutput(true);
-        try (OutputStream os = con.getOutputStream()) {
-            byte[] input = payload.getBytes(StandardCharsets.UTF_8);
-            os.write(input, 0, input.length);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-        try (BufferedReader br = new BufferedReader(
-                new InputStreamReader(con.getInputStream(), StandardCharsets.UTF_8))) {
-            StringBuilder response = new StringBuilder();
-            String responseLine;
-            while ((responseLine = br.readLine()) != null) {
-                response.append(responseLine.trim());
+    public void postPID(String pid) {
+        String pidPrefix = pid.split("/")[0];
+        String urlPath = determineUrlPathFromPidPrefix(pidPrefix);
+        if (!urlPath.equals("no_path")) {
+            String url = pidApi + pid;
+            String payload = createPID(pid, pidPrefix, urlPath);
+            HttpURLConnection con;
+            try {
+                con = (HttpURLConnection) new URL(url).openConnection();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
             }
-            logger.info("Resource with ID [{}] has been posted with PID [{}]", pid, pid);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+            try {
+                con.setRequestMethod("PUT");
+            } catch (ProtocolException e) {
+                throw new RuntimeException(e);
+            }
+            con.setRequestProperty("Content-Type", "application/json");
+            con.setRequestProperty("Authorization", pidAuth);
+            con.setDoOutput(true);
+            try (OutputStream os = con.getOutputStream()) {
+                byte[] input = payload.getBytes(StandardCharsets.UTF_8);
+                os.write(input, 0, input.length);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+            try (BufferedReader br = new BufferedReader(
+                    new InputStreamReader(con.getInputStream(), StandardCharsets.UTF_8))) {
+                StringBuilder response = new StringBuilder();
+                String responseLine;
+                while ((responseLine = br.readLine()) != null) {
+                    response.append(responseLine.trim());
+                }
+                logger.info("Resource with ID [{}] has been posted with PID [{}]", pid, pid);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        } else {
+            logger.info("Could not register/update PID for resource {}, because url path is wrong", pid);
         }
     }
 
-    public String determinePidPrefix(String resourceTypePath) {
-        return switch (resourceTypePath) {
-            case "services/" -> servicesPrefix;
-            case "tools/" -> toolsPrefix;
-            case "trainings/" -> trainingsPrefix;
-            case "providers/" -> providersPrefix;
-            case "guidelines/" -> ifguidelinesPrefix;
-            default -> pidPrefix; //old to be removed
-        };
+    public String determineResourceTypeFromPidPrefix(String prefix) {
+        if (prefix.equals(servicesPrefix)) {
+            return "service";
+        } else if (prefix.equals(toolsPrefix)) {
+            return "tool";
+        } else if (prefix.equals(trainingsPrefix)) {
+            return "training_resource";
+        } else if (prefix.equals(providersPrefix)) {
+            return "provider";
+        } else if (prefix.equals(guidelinesPrefix)) {
+            return "interoperability_record";
+        } else {
+            return "no_resource_type";
+        }
+    }
+
+    //TODO: Update with new URL paths
+    public String determineUrlPathFromPidPrefix(String prefix) {
+        if (prefix.equals(servicesPrefix)) {
+            return "services/";
+        } else if (prefix.equals(toolsPrefix)) {
+            return "tools/";
+        } else if (prefix.equals(trainingsPrefix)) {
+            return "trainings/";
+        } else if (prefix.equals(providersPrefix)) {
+            return "providers/";
+        } else if (prefix.equals(guidelinesPrefix)) {
+            return "guidelines/";
+        } else {
+            return "no_path";
+        }
     }
 
     private String createPID(String resourceId, String pidPrefix, String resourceTypePath) {
@@ -488,23 +510,6 @@ public class ProviderResourcesCommonMethods {
         values.put(id);
         data.put("values", values);
         return data.toString();
-    }
-
-    public Bundle<?> getResourceViaPID(String pid, String resourceType) {
-        List<String> resourceTypes = Arrays.asList("provider", "service", "training_resource",
-                "interoperability_record", "tool");
-        if (!resourceTypes.contains(resourceType)) {
-            throw new ValidationException("The resource type you provided is not associated with a PID -> " + resourceType);
-        }
-        FacetFilter ff = new FacetFilter();
-        ff.setQuantity(10000);
-        ff.setResourceType(resourceType);
-        ff.addFilter("resource_internal_id", pid);
-        Browsing<Bundle<?>> browsing = genericResourceService.getResults(ff);
-        if (!browsing.getResults().isEmpty()) {
-            return browsing.getResults().get(0);
-        }
-        return null;
     }
 
     public void blockResourceDeletion(String status, boolean isPublished) {
