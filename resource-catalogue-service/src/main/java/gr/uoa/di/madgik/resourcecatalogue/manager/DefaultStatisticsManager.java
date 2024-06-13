@@ -84,39 +84,17 @@ public class DefaultStatisticsManager implements StatisticsService {
     @Override
     @Cacheable(cacheNames = CACHE_VISITS, key = "#id+#by.getKey()")
     public Map<String, Integer> visits(String id, Interval by) {
-        throw new UnsupportedOperationException("Not implemented");
-//        try {
-//            return analyticsService.getVisitsForLabel("/service/" + id, by);
-//        } catch (Exception e) {
-//            logger.error("Could not find Matomo analytics", e);
-//        }
-//        return new HashMap<>();
+        throw new UnsupportedOperationException("Method has been removed");
     }
 
     @Override
     public Map<String, Integer> providerVisits(String id, Interval by) {
-        Map<String, Integer> results = new HashMap<>();
-        for (Service service : serviceBundleManager.getResources(id)) {
-            Set<Map.Entry<String, Integer>> entrySet = visits(service.getId(), by).entrySet();
-            for (Map.Entry<String, Integer> entry : entrySet) {
-                if (!results.containsKey(entry.getKey())) {
-                    results.put(entry.getKey(), entry.getValue());
-                } else {
-                    results.put(entry.getKey(), results.get(entry.getKey()) + entry.getValue());
-                }
-            }
-        }
-        return results;
+        throw new UnsupportedOperationException("Method has been removed");
     }
 
     @Override
     public Map<String, Float> providerVisitation(String id, Interval by) {
-        Map<String, Integer> counts = serviceBundleManager.getResources(id).stream().collect(Collectors.toMap(
-                Service::getName,
-                s -> visits(s.getId(), by).values().stream().mapToInt(Integer::intValue).sum()
-        ));
-        int grandTotal = counts.values().stream().mapToInt(Integer::intValue).sum();
-        return counts.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, v -> ((float) v.getValue()) / grandTotal));
+        throw new UnsupportedOperationException("Method has been removed");
     }
 
     public Map<DateTime, Map<String, Long>> events(Event.UserActionType type, Date from, Date to, Interval by) {
