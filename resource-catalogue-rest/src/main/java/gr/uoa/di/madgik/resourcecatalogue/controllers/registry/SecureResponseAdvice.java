@@ -32,7 +32,7 @@ public class SecureResponseAdvice<T> implements ResponseBodyAdvice<T> {
 
     @Autowired
     public SecureResponseAdvice(SecurityService securityService, AuthoritiesMapper authoritiesMapper,
-                                @Value("${project.registration.email:registration@catalogue.eu}") String epotEmail) {
+                                @Value("${catalogue.email-properties.registration-emails.to:registration@catalogue.eu}") String epotEmail) {
         this.securityService = securityService;
         this.authoritiesMapper = authoritiesMapper;
         this.epotEmail = epotEmail;
