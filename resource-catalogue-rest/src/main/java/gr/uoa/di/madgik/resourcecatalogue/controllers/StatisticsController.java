@@ -1,6 +1,5 @@
 package gr.uoa.di.madgik.resourcecatalogue.controllers;
 
-import gr.uoa.di.madgik.resourcecatalogue.domain.Event;
 import gr.uoa.di.madgik.resourcecatalogue.dto.MapValues;
 import gr.uoa.di.madgik.resourcecatalogue.dto.PlaceCount;
 import gr.uoa.di.madgik.resourcecatalogue.dto.Value;
@@ -14,7 +13,6 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -31,13 +29,15 @@ public class StatisticsController {
         this.statisticsService = statisticsService;
     }
 
+    @Deprecated(forRemoval = true)
     //    @Operation(summary = "Get visits per interval for a service.")
     @GetMapping(path = "service/visits/{prefix}/{suffix}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Map<String, Integer>> visits(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
                                                        @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix,
                                                        @RequestParam(defaultValue = "MONTH") StatisticsService.Interval by) {
         String id = prefix + "/" + suffix;
-        return new ResponseEntity<>(statisticsService.visits(id, by), HttpStatus.OK);
+//        return new ResponseEntity<>(statisticsService.visits(id, by), HttpStatus.OK);
+        throw new UnsupportedOperationException("Method has been removed");
     }
 
     //    @Operation(summary = "Get addToProject per interval for a service.")
@@ -49,13 +49,15 @@ public class StatisticsController {
         return new ResponseEntity<>(statisticsService.addToProject(id, by), HttpStatus.OK);
     }
 
+    @Deprecated(forRemoval = true)
     //    @Operation(summary = "Get aggregate visits per interval for all services offered by a provider.")
     @GetMapping(path = "provider/visits/{prefix}/{suffix}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Map<String, Integer>> pVisits(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
                                                         @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix,
                                                         @RequestParam(defaultValue = "MONTH") StatisticsService.Interval by) {
         String id = prefix + "/" + suffix;
-        return new ResponseEntity<>(statisticsService.providerVisits(id, by), HttpStatus.OK);
+//        return new ResponseEntity<>(statisticsService.providerVisits(id, by), HttpStatus.OK);
+        throw new UnsupportedOperationException("Method has been removed");
     }
 
     //    @Operation(summary = "Get aggregate 'addToProject per interval for all services offered by a provider.")
@@ -67,19 +69,15 @@ public class StatisticsController {
         return new ResponseEntity<>(statisticsService.providerAddToProject(id, by), HttpStatus.OK);
     }
 
+    @Deprecated(forRemoval = true)
     //    @Operation(summary = "Get percentage of visits for all services offered by a provider.")
     @GetMapping(path = "provider/visitation/{prefix}/{suffix}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Map<String, Float>> pVisitation(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
                                                           @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix,
                                                           @RequestParam(defaultValue = "MONTH") StatisticsService.Interval by) {
         String id = prefix + "/" + suffix;
-        return new ResponseEntity<>(statisticsService.providerVisitation(id, by), HttpStatus.OK);
-    }
-
-    // Returns the time series of the specified Event type.
-    @GetMapping(path = "events", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> events(@RequestParam Event.UserActionType type, @RequestParam Date from, @RequestParam Date to, @RequestParam StatisticsService.Interval by) {
-        return new ResponseEntity<>(statisticsService.events(type, from, to, by), HttpStatus.OK);
+//        return new ResponseEntity<>(statisticsService.providerVisitation(id, by), HttpStatus.OK);
+        throw new UnsupportedOperationException("Method has been removed");
     }
 
     //    @Operation(summary = "Providing the Provider's id, get the relation between all his services and their respective countries.")
@@ -114,13 +112,15 @@ public class StatisticsController {
         return new ResponseEntity<>(statisticsService.servicesByPlace(providerId, place), HttpStatus.OK);
     }
 
+    @Deprecated(forRemoval = true)
     //    @Operation(summary = "Get visits per interval for a datasource.")
     @GetMapping(path = "datasource/visits/{prefix}/{suffix}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Map<String, Integer>> datasourceVisits(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
                                                                  @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix,
                                                                  @RequestParam(defaultValue = "MONTH") StatisticsService.Interval by) {
         String id = prefix + "/" + suffix;
-        return new ResponseEntity<>(statisticsService.visits(id, by), HttpStatus.OK);
+//        return new ResponseEntity<>(statisticsService.visits(id, by), HttpStatus.OK);
+        throw new UnsupportedOperationException("Method has been removed");
     }
 
     //    @Operation(summary = "Get addToProject per interval for a datasource.")
@@ -132,12 +132,14 @@ public class StatisticsController {
         return new ResponseEntity<>(statisticsService.addToProject(id, by), HttpStatus.OK);
     }
 
+    @Deprecated(forRemoval = true)
     @GetMapping(path = "trainingResource/visits/{prefix}/{suffix}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Map<String, Integer>> trainingResourceVisits(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
                                                                        @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix,
                                                                        @RequestParam(defaultValue = "MONTH") StatisticsService.Interval by) {
         String id = prefix + "/" + suffix;
-        return new ResponseEntity<>(statisticsService.visits(id, by), HttpStatus.OK);
+//        return new ResponseEntity<>(statisticsService.visits(id, by), HttpStatus.OK);
+        throw new UnsupportedOperationException("Method has been removed");
     }
 
     @GetMapping(path = "trainingResource/addToProject/{prefix}/{suffix}", produces = MediaType.APPLICATION_JSON_VALUE)

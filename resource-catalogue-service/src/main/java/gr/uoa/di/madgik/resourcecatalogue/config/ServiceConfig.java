@@ -28,8 +28,7 @@ import java.util.Random;
         "gr.uoa.di.madgik.resourcecatalogue.utils",
         "gr.uoa.di.madgik.resourcecatalogue.validators",
         "gr.uoa.di.madgik.resourcecatalogue.service",
-        "gr.uoa.di.madgik.resourcecatalogue.matomo",
-        "gr.uoa.di.madgik.resourcecatalogue.recdb"})
+        "gr.uoa.di.madgik.resourcecatalogue.matomo"})
 @EnableSpringHttpSession
 @EnableAspectJAutoProxy
 @EnableAsync
