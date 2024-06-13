@@ -71,7 +71,7 @@ public class TrainingResourceController {
     }
 
     @DeleteMapping(path = "{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth, #prefix+'/'+suffix)")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth, #prefix+'/'+#suffix)")
     public ResponseEntity<TrainingResourceBundle> delete(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
                                                          @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix,
                                                          @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId,
@@ -93,7 +93,7 @@ public class TrainingResourceController {
 
     @Operation(summary = "Get the most current version of a specific Training Resource, providing the Resource id.")
     @GetMapping(path = "{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    @PreAuthorize("@securityService.trainingResourceIsActive(#prefix+'/'+suffix, #catalogueId) or hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth, #prefix+'/'+suffix)")
+    @PreAuthorize("@securityService.trainingResourceIsActive(#prefix+'/'+#suffix, #catalogueId) or hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth, #prefix+'/'+#suffix)")
     public ResponseEntity<TrainingResource> getTrainingResource(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
                                                                 @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix,
                                                                 @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId,
@@ -103,7 +103,7 @@ public class TrainingResourceController {
     }
 
     @GetMapping(path = "bundle/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth, #prefix+'/'+suffix)")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth, #prefix+'/'+#suffix)")
     public ResponseEntity<TrainingResourceBundle> getTrainingResourceBundle(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
                                                                             @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix,
                                                                             @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId, @Parameter(hidden = true) Authentication auth) {
@@ -178,12 +178,9 @@ public class TrainingResourceController {
         return trainingResourceService.getChildrenFromParent(type, parent, rec);
     }
 
-    //    @Operation(summary = "Get a list of Training Resources based on a set of ids.")
-    @Parameters({
-            @Parameter(name = "ids", description = "Comma-separated list of Training Resource ids", content = @Content(schema = @Schema(type = "boolean", defaultValue = "")))
-    })
-    @GetMapping(path = "byID/{ids}", produces = {MediaType.APPLICATION_JSON_VALUE})
-    public ResponseEntity<List<TrainingResource>> getSomeTrainingResources(@PathVariable("ids") String[] ids, @Parameter(hidden = true) Authentication auth) {
+    @Operation(summary = "Get a list of Training Resources based on a set of ids.")
+    @GetMapping(path = "ids", produces = {MediaType.APPLICATION_JSON_VALUE})
+    public ResponseEntity<List<TrainingResource>> getSomeTrainingResources(@RequestParam("ids") String[] ids, @Parameter(hidden = true) Authentication auth) {
         return ResponseEntity.ok(trainingResourceService.getByIds(auth, ids));
     }
 
@@ -211,7 +208,7 @@ public class TrainingResourceController {
 
     @Browse
     @GetMapping(path = "byProvider/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isProviderAdmin(#auth,#prefix+'/'+suffix,#catalogueId)")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isProviderAdmin(#auth,#prefix+'/'+#suffix,#catalogueId)")
     public ResponseEntity<Paging<TrainingResourceBundle>> getTrainingResourcesByProvider(@Parameter(hidden = true) @RequestParam MultiValueMap<String, Object> allRequestParams,
                                                                                          @Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
                                                                                          @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix,
@@ -255,7 +252,7 @@ public class TrainingResourceController {
 
     // Providing the Training Resource id, set the Training Resource to active or inactive.
     @PatchMapping(path = "publish/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.providerIsActiveAndUserIsAdmin(#auth, #prefix+'/'+suffix)")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.providerIsActiveAndUserIsAdmin(#auth, #prefix+'/'+#suffix)")
     public ResponseEntity<TrainingResourceBundle> setActive(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
                                                             @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix,
                                                             @RequestParam Boolean active,
@@ -349,7 +346,7 @@ public class TrainingResourceController {
 
     @Browse
     @GetMapping(path = "getSharedResources/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or @securityService.isProviderAdmin(#auth,#prefix+'/'+suffix)")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or @securityService.isProviderAdmin(#auth,#prefix+'/'+#suffix)")
     public ResponseEntity<Paging<TrainingResourceBundle>> getSharedResources(@Parameter(hidden = true) @RequestParam MultiValueMap<String, Object> allRequestParams,
                                                                              @Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
                                                                              @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix,
