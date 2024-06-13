@@ -111,8 +111,8 @@ public abstract class ResourceCrudController<T extends Identifiable> {
         return new ResponseEntity<>(service.getAll(ff, null), HttpStatus.OK);
     }
 
-    @GetMapping(path = "ids/{ids}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<List<T>> getSome(@PathVariable String[] ids, @Parameter(hidden = true) Authentication auth) {
+    @GetMapping(path = "ids", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<List<T>> getSome(@RequestParam("ids") String[] ids, @Parameter(hidden = true) Authentication auth) {
         return new ResponseEntity<>(service.getSome(ids), HttpStatus.OK);
     }
 
