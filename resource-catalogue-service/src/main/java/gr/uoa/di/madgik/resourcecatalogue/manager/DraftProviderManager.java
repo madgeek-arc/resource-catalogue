@@ -18,17 +18,17 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
-import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 import static gr.uoa.di.madgik.resourcecatalogue.config.Properties.Cache.CACHE_PROVIDERS;
 
-@Service("pendingProviderManager")
+@Service("draftProviderManager")
 public class DraftProviderManager extends ResourceManager<ProviderBundle> implements DraftResourceService<ProviderBundle> {
 
     private static final Logger logger = LoggerFactory.getLogger(DraftProviderManager.class);
@@ -36,7 +36,6 @@ public class DraftProviderManager extends ResourceManager<ProviderBundle> implem
     private final ProviderService providerManager;
     private final IdCreator idCreator;
     private final RegistrationMailService registrationMailService;
-    private final SecurityService securityService;
     private final VocabularyService vocabularyService;
     private final ProviderResourcesCommonMethods commonMethods;
 
@@ -45,13 +44,12 @@ public class DraftProviderManager extends ResourceManager<ProviderBundle> implem
 
     public DraftProviderManager(ProviderService providerManager,
                                 IdCreator idCreator, @Lazy RegistrationMailService registrationMailService,
-                                @Lazy SecurityService securityService, @Lazy VocabularyService vocabularyService,
+                                @Lazy VocabularyService vocabularyService,
                                 ProviderResourcesCommonMethods commonMethods) {
         super(ProviderBundle.class);
         this.providerManager = providerManager;
         this.idCreator = idCreator;
         this.registrationMailService = registrationMailService;
-        this.securityService = securityService;
         this.vocabularyService = vocabularyService;
         this.commonMethods = commonMethods;
     }
@@ -59,7 +57,7 @@ public class DraftProviderManager extends ResourceManager<ProviderBundle> implem
 
     @Override
     public String getResourceType() {
-        return "pending_provider";
+        return "draft_provider";
     }
 
     @Override
@@ -68,7 +66,7 @@ public class DraftProviderManager extends ResourceManager<ProviderBundle> implem
         ProviderBundle provider = super.get(id);
         if (provider == null) {
             throw new gr.uoa.di.madgik.resourcecatalogue.exception.ResourceNotFoundException(
-                    String.format("Could not find pending provider with id: %s", id));
+                    String.format("Could not find draft provider with id: %s", id));
         }
         return provider;
     }
@@ -89,7 +87,7 @@ public class DraftProviderManager extends ResourceManager<ProviderBundle> implem
                 throw new ResourceAlreadyExistsException(String.format("Provider with the specific id already exists on the [%s] Catalogue. Please refactor your 'abbreviation' field.", catalogueId));
             }
         }
-        logger.trace("Attempting to add a new Pending Provider: {}", providerBundle);
+        logger.trace("Attempting to add a new Draft Provider: {}", providerBundle);
         providerBundle.setMetadata(Metadata.updateMetadata(providerBundle.getMetadata(), User.of(auth).getFullName(), User.of(auth).getEmail()));
 
         List<LoggingInfo> loggingInfoList = new ArrayList<>();
@@ -105,6 +103,14 @@ public class DraftProviderManager extends ResourceManager<ProviderBundle> implem
         return providerBundle;
     }
 
+    @CacheEvict(value = CACHE_PROVIDERS, allEntries = true)
+    public ResponseEntity<ProviderBundle> addCrud(ProviderBundle providerBundle, Authentication auth) {
+        providerBundle.setId(idCreator.generate(getResourceType()));
+        super.add(providerBundle, auth);
+        logger.debug("Created a new Draft Provider with id {}", providerBundle.getId());
+        return new ResponseEntity<>(providerBundle, HttpStatus.CREATED);
+    }
+
 
     @Override
     @CacheEvict(value = CACHE_PROVIDERS, allEntries = true)
@@ -113,7 +119,7 @@ public class DraftProviderManager extends ResourceManager<ProviderBundle> implem
         Resource existing = getPendingResourceViaProviderId(providerBundle.getId());
         // block catalogueId updates from Provider Admins
         providerBundle.getProvider().setCatalogueId(catalogueId);
-        logger.trace("Attempting to update the Pending Provider: {}", providerBundle);
+        logger.trace("Attempting to update the Draft Provider: {}", providerBundle);
         providerBundle.setMetadata(Metadata.updateMetadata(providerBundle.getMetadata(), User.of(auth).getFullName(), User.of(auth).getEmail()));
         // save existing resource with new payload
         existing.setPayload(serialize(providerBundle));
@@ -133,26 +139,15 @@ public class DraftProviderManager extends ResourceManager<ProviderBundle> implem
 
     @Override
     @CacheEvict(value = CACHE_PROVIDERS, allEntries = true)
-    public ProviderBundle transformToPending(ProviderBundle providerBundle, Authentication auth) {
-        return transformToPending(providerBundle.getId(), auth);
+    public ProviderBundle transformToNonDraft(String providerId, Authentication auth) {
+        ProviderBundle providerBundle = get(providerId);
+        return transformToNonDraft(providerBundle, auth);
     }
-
 
     @Override
     @CacheEvict(value = CACHE_PROVIDERS, allEntries = true)
-    public ProviderBundle transformToPending(String providerId, Authentication auth) {
-        logger.trace("Attempting to transform the Active Provider with id '{}' to Pending", providerId);
-        Resource resource = providerManager.getResource(providerId, catalogueId);
-        resource.setResourceTypeName("provider");
-        resourceService.changeResourceType(resource, resourceType);
-        return deserialize(resource);
-    }
-
-
-    @Override
-    @CacheEvict(value = CACHE_PROVIDERS, allEntries = true)
-    public ProviderBundle transformToActive(ProviderBundle providerBundle, Authentication auth) {
-        logger.trace("Attempting to transform the Pending Provider with id '{}' to Active", providerBundle.getId());
+    public ProviderBundle transformToNonDraft(ProviderBundle providerBundle, Authentication auth) {
+        logger.trace("Attempting to transform the Draft Provider with id '{}' to Active", providerBundle.getId());
         providerManager.validate(providerBundle);
         if (providerManager.exists(providerBundle)) {
             throw new ResourceAlreadyExistsException(String.format("Provider with id = '%s' already exists!", providerBundle.getId()));
@@ -189,34 +184,6 @@ public class DraftProviderManager extends ResourceManager<ProviderBundle> implem
         return providerBundle;
     }
 
-
-    @Override
-    @CacheEvict(value = CACHE_PROVIDERS, allEntries = true)
-    public ProviderBundle transformToActive(String providerId, Authentication auth) {
-        ProviderBundle providerBundle = get(providerId);
-        return transformToActive(providerBundle, auth);
-    }
-
-    public boolean userIsPendingProviderAdmin(@NotNull User user, @NotNull ProviderBundle registeredProvider) {
-        if (registeredProvider.getProvider().getUsers() == null) {
-            return false;
-        }
-        return registeredProvider.getProvider().getUsers()
-                .parallelStream()
-                .filter(Objects::nonNull)
-                .anyMatch(u -> {
-                    if (u.getId() != null) {
-                        if (u.getEmail() != null) {
-                            return u.getId().equals(user.getId())
-                                    || u.getEmail().equalsIgnoreCase(user.getEmail());
-                        }
-                        return u.getId().equals(user.getId());
-                    }
-                    return u.getEmail().equalsIgnoreCase(user.getEmail());
-                });
-    }
-
-
     public List<ProviderBundle> getMy(Authentication auth) {
         if (auth == null) {
             return new ArrayList<>();
@@ -228,25 +195,6 @@ public class DraftProviderManager extends ResourceManager<ProviderBundle> implem
         return super.getAll(ff, auth).getResults();
     }
 
-    public boolean hasAdminAcceptedTerms(String providerId, Authentication auth) {
-        ProviderBundle providerBundle = get(providerId);
-        List<String> userList = new ArrayList<>();
-        for (User user : providerBundle.getProvider().getUsers()) {
-            userList.add(user.getEmail());
-        }
-        if ((providerBundle.getMetadata().getTerms() == null || providerBundle.getMetadata().getTerms().isEmpty())) {
-            if (userList.contains(User.of(auth).getEmail())) {
-                return false; //pop-up modal
-            } else {
-                return true; //no modal
-            }
-        }
-        if (!providerBundle.getMetadata().getTerms().contains(User.of(auth).getEmail()) && userList.contains(User.of(auth).getEmail())) {
-            return false; // pop-up modal
-        }
-        return true; // no modal
-    }
-
     private Resource getPendingResourceViaProviderId(String providerId) {
         Paging<Resource> resources;
         resources = searchService
@@ -254,9 +202,5 @@ public class DraftProviderManager extends ResourceManager<ProviderBundle> implem
                         resourceType.getName());
         assert resources != null;
         return resources.getTotal() == 0 ? null : resources.getResults().get(0);
-    }
-
-    public void adminAcceptedTerms(String providerId, Authentication auth) {
-        update(get(providerId), auth);
     }
 }

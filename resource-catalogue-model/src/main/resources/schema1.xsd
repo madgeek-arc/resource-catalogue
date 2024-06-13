@@ -133,6 +133,8 @@
             
       <xs:element name="active" type="xs:boolean"/>
             
+      <xs:element name="draft" type="xs:boolean"/>
+            
       <xs:element minOccurs="0" ref="tns:identifiers"/>
             
       <xs:element minOccurs="0" name="latestAuditInfo" type="tns:loggingInfo"/>

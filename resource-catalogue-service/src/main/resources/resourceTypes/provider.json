@@ -329,7 +329,8 @@
   ],
   "indexMapperClass": "gr.uoa.di.madgik.registry.index.DefaultIndexMapper",
   "aliases": [
-    "resourceTypes"
+    "resourceTypes",
+    "providers"
   ],
   "name": "provider",
   "payloadType": "json",

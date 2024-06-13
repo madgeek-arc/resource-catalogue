@@ -114,7 +114,7 @@ public class InMemoryAuthoritiesMapper implements AuthoritiesMapper {
         try {
             providers.addAll(pendingProviderService.getAll(ff, securityService.getAdminAccess()).getResults());
         } catch (Exception e) {
-            logger.warn("There are no Pending Provider entries in DB");
+            logger.warn("There are no Draft Provider entries in DB");
         }
 
         List<CatalogueBundle> catalogues = new ArrayList<>();

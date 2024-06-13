@@ -57,11 +57,11 @@ public class ResourceIdCreator implements IdCreator {
     private String createPrefix(String resourceType) {
         return switch (resourceType) {
             // PID related
-            case "service", "pending_service" -> servicesPrefix;
+            case "service", "draft_service" -> servicesPrefix;
             case "tool" -> toolsPrefix;
-            case "training_resource" -> trainingsPrefix;
-            case "provider", "pending_provider" -> providersPrefix;
-            case "interoperability_record" -> guidelinesPrefix;
+            case "training_resource", "draft_training_resource" -> trainingsPrefix;
+            case "provider", "draft_provider" -> providersPrefix;
+            case "interoperability_record", "draft_interoperability_record" -> guidelinesPrefix;
             // non PID related
             case "catalogue" -> cataloguesPrefix;
             case "configuration_template" -> configurationTemplatesPrefix;

@@ -5,31 +5,21 @@ import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Bundle;
 import gr.uoa.di.madgik.resourcecatalogue.exception.ResourceException;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 public interface DraftResourceService<T extends Bundle> extends ResourceService<T> {
 
     /**
      * Transforms the resource to pending.
      *
-     * @param t    resource
+     * @param t    Resource Bundle
      * @param auth Authentication
      * @return {@link T}
      */
-    T transformToPending(T t, Authentication auth);
-
-    /**
-     * Transforms the resource with the specified id to pending.
-     *
-     * @param id   resource ID
-     * @param auth Authentication
-     * @return {@link T}
-     */
-    T transformToPending(String id, Authentication auth);
+    ResponseEntity<T> addCrud(T t, Authentication auth);
 
     /**
      * Transforms the resource to active.
@@ -38,7 +28,7 @@ public interface DraftResourceService<T extends Bundle> extends ResourceService<
      * @param auth Authentication
      * @return {@link T}
      */
-    T transformToActive(T t, Authentication auth);
+    T transformToNonDraft(T t, Authentication auth);
 
     /**
      * Transforms the resource with the specified id to active.
@@ -47,7 +37,7 @@ public interface DraftResourceService<T extends Bundle> extends ResourceService<
      * @param auth Authentication
      * @return {@link T}
      */
-    T transformToActive(String id, Authentication auth);
+    T transformToNonDraft(String id, Authentication auth);
 
     /**
      * Get the id using the originalId of the resource.
@@ -70,41 +60,10 @@ public interface DraftResourceService<T extends Bundle> extends ResourceService<
     }
 
     /**
-     * Get a mapping of resource ids with original ids.
-     *
-     * @return {@link Map}&lt;{@link String},{@link String}&gt;
-     */
-    default Map<String, String> getIdOriginalIdMap() {
-        FacetFilter ff = new FacetFilter();
-        ff.setQuantity(10000);
-        return this.getAll(ff, null)
-                .getResults()
-                .stream()
-                .collect(Collectors.toMap(Bundle::getId, r -> r.getIdentifiers().getOriginalId()));
-    }
-
-    /**
      * Get a List of all Pending resources for a specific authenticated User
      *
      * @param authentication Authentication
      * @return {@link List}&lt;{@link T}&gt;
      */
     List<T> getMy(Authentication authentication);
-
-    /**
-     * Returns True if a User has accepted the Terms & Conditions, else returns False
-     *
-     * @param providerId     Provider ID
-     * @param authentication Authentication
-     * @return True/False
-     */
-    boolean hasAdminAcceptedTerms(String providerId, Authentication authentication);
-
-    /**
-     * Updates the list of Provider user emails that have accepted the Terms & Conditions
-     *
-     * @param providerId     Provider ID
-     * @param authentication Authentication
-     */
-    void adminAcceptedTerms(String providerId, Authentication authentication);
 }

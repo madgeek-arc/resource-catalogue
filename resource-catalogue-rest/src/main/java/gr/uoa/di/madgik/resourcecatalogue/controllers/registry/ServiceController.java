@@ -565,7 +565,7 @@ public class ServiceController {
 
         serviceBundleService.validate(serviceBundle);
         draftServiceService.update(serviceBundle, auth);
-        serviceBundle = draftServiceService.transformToActive(serviceBundle.getId(), auth);
+        serviceBundle = draftServiceService.transformToNonDraft(serviceBundle.getId(), auth);
 
         return new ResponseEntity<>(serviceBundle.getService(), HttpStatus.OK);
     }

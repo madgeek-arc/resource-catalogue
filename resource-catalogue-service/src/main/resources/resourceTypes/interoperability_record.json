@@ -179,6 +179,14 @@
       "type": "java.lang.Boolean"
     },
     {
+      "defaultValue": "false",
+      "label": null,
+      "multivalued": false,
+      "name": "draft",
+      "path": "$.draft",
+      "type": "java.lang.Boolean"
+    },
+    {
       "label": null,
       "multivalued": false,
       "name": "status",
@@ -195,7 +203,8 @@
   ],
   "indexMapperClass": "gr.uoa.di.madgik.registry.index.DefaultIndexMapper",
   "aliases": [
-    "resourceTypes"
+    "resourceTypes",
+    "guidelines"
   ],
   "name": "interoperability_record",
   "payloadType": "json",

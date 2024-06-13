@@ -237,8 +237,8 @@ public class ProviderController {
         return new ResponseEntity<>(providerService.getMy(null, auth).getResults(), HttpStatus.OK);
     }
 
-    // Get the pending services of the given Provider.
-    @GetMapping(path = "services/pending/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    // Get inactive Services of the given Provider.
+    @GetMapping(path = "services/inactive/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity<List<Service>> getInactiveServices(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
                                                              @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix) {
         String id = prefix + "/" + suffix;
@@ -557,7 +557,7 @@ public class ProviderController {
 
         providerService.validate(providerBundle);
         draftProviderService.update(providerBundle, auth);
-        providerBundle = draftProviderService.transformToActive(providerBundle.getId(), auth);
+        providerBundle = draftProviderService.transformToNonDraft(providerBundle.getId(), auth);
 
         return new ResponseEntity<>(providerBundle.getProvider(), HttpStatus.OK);
     }
