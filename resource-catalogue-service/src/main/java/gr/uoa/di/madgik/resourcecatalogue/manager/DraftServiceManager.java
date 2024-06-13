@@ -17,6 +17,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
@@ -25,7 +27,7 @@ import java.util.List;
 
 import static gr.uoa.di.madgik.resourcecatalogue.config.Properties.Cache.*;
 
-@Service("pendingServiceManager")
+@Service("draftServiceManager")
 public class DraftServiceManager extends ResourceManager<ServiceBundle> implements DraftResourceService<ServiceBundle> {
 
     private static final Logger logger = LoggerFactory.getLogger(DraftServiceManager.class);
@@ -53,7 +55,7 @@ public class DraftServiceManager extends ResourceManager<ServiceBundle> implemen
 
     @Override
     public String getResourceType() {
-        return "pending_service";
+        return "draft_service";
     }
 
     @Override
@@ -71,7 +73,7 @@ public class DraftServiceManager extends ResourceManager<ServiceBundle> implemen
                 throw new ResourceAlreadyExistsException(String.format("Service with the specific id already exists on the [%s] Catalogue. Please refactor your 'abbreviation' field.", catalogueId));
             }
         }
-        logger.trace("Attempting to add a new Pending Service with id {}", service.getId());
+        logger.trace("Attempting to add a new Draft Service with id {}", service.getId());
 
         if (service.getMetadata() == null) {
             service.setMetadata(Metadata.createMetadata(User.of(auth).getFullName()));
@@ -90,6 +92,14 @@ public class DraftServiceManager extends ResourceManager<ServiceBundle> implemen
         return service;
     }
 
+    @CacheEvict(value = CACHE_PROVIDERS, allEntries = true)
+    public ResponseEntity<ServiceBundle> addCrud(ServiceBundle serviceBundle, Authentication auth) {
+        serviceBundle.setId(idCreator.generate(getResourceType()));
+        super.add(serviceBundle, auth);
+        logger.debug("Created a new Draft Service with id {}", serviceBundle.getId());
+        return new ResponseEntity<>(serviceBundle, HttpStatus.CREATED);
+    }
+
     @Override
     @CacheEvict(cacheNames = {CACHE_VISITS, CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)
     public ServiceBundle update(ServiceBundle serviceBundle, Authentication auth) {
@@ -97,37 +107,33 @@ public class DraftServiceManager extends ResourceManager<ServiceBundle> implemen
         Resource existing = getPendingResourceViaServiceId(serviceBundle.getService().getId());
         // block catalogueId updates from Provider Admins
         serviceBundle.getService().setCatalogueId(catalogueId);
-        logger.trace("Attempting to update the Pending Service with id {}", serviceBundle.getId());
+        logger.trace("Attempting to update the Draft Service with id {}", serviceBundle.getId());
         serviceBundle.setMetadata(Metadata.updateMetadata(serviceBundle.getMetadata(), User.of(auth).getFullName()));
         // save existing resource with new payload
         existing.setPayload(serialize(serviceBundle));
         existing.setResourceType(resourceType);
         resourceService.updateResource(existing);
-        logger.debug("Updating Pending Service: {}", serviceBundle);
+        logger.debug("Updating Draft Service: {}", serviceBundle);
         return serviceBundle;
     }
 
     @Override
-    @CacheEvict(cacheNames = {CACHE_VISITS, CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)
-    public ServiceBundle transformToPending(ServiceBundle serviceBundle, Authentication auth) {
-        return transformToPending(serviceBundle.getId(), auth);
+    @CacheEvict(value = CACHE_PROVIDERS, allEntries = true)
+    public void delete(ServiceBundle serviceBundle) {
+        super.delete(serviceBundle);
     }
 
     @Override
     @CacheEvict(cacheNames = {CACHE_VISITS, CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)
-    public ServiceBundle transformToPending(String serviceId, Authentication auth) {
-        logger.trace("Attempting to transform the Active Service with id {} to Pending", serviceId);
-        ServiceBundle serviceBundle = serviceBundleService.get(serviceId, catalogueId);
-        Resource resource = serviceBundleService.getResource(serviceBundle.getService().getId(), catalogueId);
-        resource.setResourceTypeName("service");
-        resourceService.changeResourceType(resource, resourceType);
-        return serviceBundle;
+    public ServiceBundle transformToNonDraft(String serviceId, Authentication auth) {
+        ServiceBundle serviceBundle = this.get(serviceId);
+        return transformToNonDraft(serviceBundle, auth);
     }
 
     @Override
     @CacheEvict(cacheNames = {CACHE_VISITS, CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)
-    public ServiceBundle transformToActive(ServiceBundle serviceBundle, Authentication auth) {
-        logger.trace("Attempting to transform the Pending Service with id {} to Active", serviceBundle.getId());
+    public ServiceBundle transformToNonDraft(ServiceBundle serviceBundle, Authentication auth) {
+        logger.trace("Attempting to transform the Draft Service with id {} to Active", serviceBundle.getId());
         serviceBundleService.validate(serviceBundle);
 
         // update loggingInfo
@@ -166,14 +172,8 @@ public class DraftServiceManager extends ResourceManager<ServiceBundle> implemen
         return serviceBundle;
     }
 
-    @Override
-    @CacheEvict(cacheNames = {CACHE_VISITS, CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)
-    public ServiceBundle transformToActive(String serviceId, Authentication auth) {
-        ServiceBundle serviceBundle = this.get(serviceId);
-        return transformToActive(serviceBundle, auth);
-    }
-
     public List<ServiceBundle> getMy(Authentication auth) {
+        //TODO: Implement
         List<ServiceBundle> re = new ArrayList<>();
         return re;
     }
@@ -189,9 +189,5 @@ public class DraftServiceManager extends ResourceManager<ServiceBundle> implemen
                         resourceType.getName());
         assert resources != null;
         return resources.getTotal() == 0 ? null : resources.getResults().get(0);
-    }
-
-    public void adminAcceptedTerms(String providerId, Authentication auth) {
-        // We need this method on PendingProviderManager. Both PendingManagers share the same Service - PendingResourceService
     }
 }

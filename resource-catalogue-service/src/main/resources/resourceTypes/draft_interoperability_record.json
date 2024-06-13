@@ -4,99 +4,36 @@
       "label": null,
       "multivalued": false,
       "name": "resource_internal_id",
-      "path": "$.trainingResource.id",
+      "path": "$.interoperabilityRecord.id",
       "primaryKey": true,
-      "type": "java.lang.String"
-    },
-    {
-      "label": "Title",
-      "multivalued": false,
-      "name": "title",
-      "path": "$.trainingResource.title",
-      "type": "java.lang.String"
-    },
-    {
-      "label": "Resource Organisation",
-      "multivalued": false,
-      "name": "resource_organisation",
-      "path": "$.trainingResource.resourceOrganisation",
-      "type": "java.lang.String"
-    },
-    {
-      "label": "Resource Provider",
-      "multivalued": true,
-      "name": "resource_providers",
-      "path": "$.trainingResource.resourceProviders[*]",
-      "type": "java.lang.String"
-    },
-    {
-      "label": "Alternative Identifier Value",
-      "multivalued": true,
-      "name": "alternative_identifiers_values",
-      "path": "$.trainingResource.alternativeIdentifiers[*].value",
-      "type": "java.lang.String"
-    },
-    {
-      "label": "Author",
-      "multivalued": true,
-      "name": "authors",
-      "path": "$.trainingResource.authors[*]",
-      "type": "java.lang.String"
-    },
-    {
-      "label": "EOSC Related Service",
-      "multivalued": true,
-      "name": "eosc_related_services",
-      "path": "$.trainingResource.eoscRelatedServices[*]",
-      "type": "java.lang.String"
-    },
-    {
-      "label": "Keyword",
-      "multivalued": true,
-      "name": "keywords",
-      "path": "$.trainingResource.keywords[*]",
-      "type": "java.lang.String"
-    },
-    {
-      "label": "Target Group",
-      "multivalued": true,
-      "name": "target_groups",
-      "path": "$.trainingResource.targetGroups[*]",
-      "type": "java.lang.String"
-    },
-    {
-      "label": "Language",
-      "multivalued": true,
-      "name": "languages",
-      "path": "$.trainingResource.languages[*]",
-      "type": "java.lang.String"
-    },
-    {
-      "label": "Geographical Availability",
-      "multivalued": true,
-      "name": "geographical_availabilities",
-      "path": "$.trainingResource.geographicalAvailabilities[*]",
-      "type": "java.lang.String"
-    },
-    {
-      "label": "Scientific Domain",
-      "multivalued": true,
-      "name": "scientific_domains",
-      "path": "$.trainingResource.scientificDomains[*]",
-      "type": "java.lang.String"
-    },
-    {
-      "label": "Scientific Subdomain",
-      "multivalued": true,
-      "name": "scientific_subdomains",
-      "path": "$.trainingResource.scientificDomains[*].scientificSubdomain",
       "type": "java.lang.String"
     },
     {
       "label": "Catalogue ID",
       "multivalued": false,
       "name": "catalogue_id",
-      "path": "$.trainingResource.catalogueId",
+      "path": "$.interoperabilityRecord.catalogueId",
+      "type": "java.lang.String"
+    },
+    {
+      "label": "Provider ID",
+      "multivalued": false,
+      "name": "provider_id",
+      "path": "$.interoperabilityRecord.providerId",
+      "type": "java.lang.String"
+    },
+    {
+      "label": "Title",
+      "multivalued": false,
+      "name": "title",
+      "path": "$.interoperabilityRecord.title",
+      "type": "java.lang.String"
+    },
+    {
+      "label": "Alternative Identifier Value",
+      "multivalued": true,
+      "name": "alternative_identifiers_values",
+      "path": "$.interoperabilityRecord.alternativeIdentifiers[*].value",
       "type": "java.lang.String"
     },
     {
@@ -242,7 +179,7 @@
       "type": "java.lang.Boolean"
     },
     {
-      "defaultValue": "false",
+      "defaultValue": "true",
       "label": null,
       "multivalued": false,
       "name": "draft",
@@ -267,12 +204,12 @@
   "indexMapperClass": "gr.uoa.di.madgik.registry.index.DefaultIndexMapper",
   "aliases": [
     "resourceTypes",
-    "trainings"
+    "guidelines"
   ],
-  "name": "training_resource",
+  "name": "draft_interoperability_record",
   "payloadType": "json",
   "properties": {
-    "class": "gr.uoa.di.madgik.resourcecatalogue.domain.TrainingResourceBundle"
+    "class": "gr.uoa.di.madgik.resourcecatalogue.domain.InteroperabilityRecordBundle"
   },
   "schema": "{\n\t\"$schema\": \"https://json-schema.org/draft/2019-09/schema\"\n}"
 }

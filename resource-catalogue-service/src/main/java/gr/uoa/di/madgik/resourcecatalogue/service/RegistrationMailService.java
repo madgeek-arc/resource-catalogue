@@ -441,7 +441,7 @@ public class RegistrationMailService {
         List<String> updatedProviders = new ArrayList<>();
         List<String> updatedServices = new ArrayList<>();
 
-        // Fetch Active/Pending Services and Active/Pending Providers
+        // Fetch Services and Providers (including Drafts)
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(maxQuantity);
         ff.addFilter("published", false);
