@@ -123,10 +123,10 @@ public abstract class ResourceManager<T extends Identifiable> extends AbstractGe
             resourceService.updateResource(resource);
             logger.debug("Updated Resource: {}", t);
         } else { // add
-            if (!StringUtils.hasText(t.getId())) {
-                String id = createId(t);
-                t.setId(id);
-            }
+            // create id
+            String id = createId(t);
+            t.setId(id);
+            // save
             String serialized = serialize(t);
             resource.setPayload(serialized);
             resource.setResourceType(resourceType);
