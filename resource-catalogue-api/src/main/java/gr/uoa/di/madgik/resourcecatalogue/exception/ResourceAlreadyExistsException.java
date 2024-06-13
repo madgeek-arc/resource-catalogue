@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 public class ResourceAlreadyExistsException extends RuntimeException {
 
     public ResourceAlreadyExistsException() {
-        super();
+        super("Resource with the same ID already exists.");
     }
 
     public ResourceAlreadyExistsException(String msg) {

@@ -106,7 +106,8 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
 
     @Override
     public boolean exists(ProviderBundle providerBundle) {
-        return getResource(providerBundle.getProvider().getId(), providerBundle.getProvider().getCatalogueId()) != null;
+        return providerBundle.getId() != null &&
+                getResource(providerBundle.getProvider().getId(), providerBundle.getProvider().getCatalogueId()) != null;
     }
 
     @Override

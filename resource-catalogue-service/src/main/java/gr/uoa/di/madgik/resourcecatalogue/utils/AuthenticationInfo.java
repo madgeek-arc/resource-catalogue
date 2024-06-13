@@ -5,6 +5,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 import org.springframework.security.oauth2.jwt.Jwt;
 
+import java.util.HashMap;
 import java.util.Map;
 
 public class AuthenticationInfo {
@@ -13,27 +14,29 @@ public class AuthenticationInfo {
     }
 
     public static String getSub(Authentication auth) {
-        return getClaims(auth).get("sub").toString();
+        return getClaims(auth).getOrDefault("sub", "null").toString();
     }
 
     public static String getEmail(Authentication auth) {
-        return getClaims(auth).get("email").toString();
+        return getClaims(auth).getOrDefault("email", "null").toString();
     }
 
     public static String getFullName(Authentication auth) {
-        return getClaims(auth).get("name").toString();
+        return getClaims(auth).getOrDefault("name", "null").toString();
     }
 
     public static String getGivenName(Authentication auth) {
-        return getClaims(auth).get("given_name").toString();
+        return getClaims(auth).getOrDefault("given_name", "null").toString();
     }
 
     public static String getFamilyName(Authentication auth) {
-        return getClaims(auth).get("family_name").toString();
+        return getClaims(auth).getOrDefault("family_name", "null").toString();
     }
 
     private static Map<String, Object> getClaims(Authentication auth) {
-        if (auth.getPrincipal() instanceof OidcUser) {
+        if (auth == null) {
+            return new HashMap<>();
+        } else if (auth.getPrincipal() instanceof OidcUser) {
             OidcUser principal = ((OidcUser) auth.getPrincipal());
             return principal.getClaims();
         } else if (auth.getPrincipal() instanceof Jwt) {

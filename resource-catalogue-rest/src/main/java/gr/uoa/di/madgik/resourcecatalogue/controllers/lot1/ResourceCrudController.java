@@ -5,6 +5,7 @@ import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.annotations.Browse;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Identifiable;
+import gr.uoa.di.madgik.resourcecatalogue.exception.ResourceAlreadyExistsException;
 import gr.uoa.di.madgik.resourcecatalogue.service.ResourceService;
 import gr.uoa.di.madgik.resourcecatalogue.utils.FacetFilterUtils;
 import io.swagger.v3.oas.annotations.Hidden;
@@ -70,13 +71,18 @@ public abstract class ResourceCrudController<T extends Identifiable> {
 
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<T> add(@RequestBody T t, @Parameter(hidden = true) Authentication auth) {
+        if (service.exists(t))
+            throw new ResourceAlreadyExistsException();
         ResponseEntity<T> ret = new ResponseEntity<>(service.save(t), HttpStatus.CREATED);
         logger.debug("Created a new {} with id {}", t.getClass().getSimpleName(), t.getId());
         return ret;
     }
 
-    @PutMapping(path = "{id}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<T> update(@RequestBody T t, @Parameter(hidden = true) Authentication auth) throws ResourceNotFoundException {
+    @PutMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<T> update(@RequestBody T t,
+                                    @Parameter(hidden = true) Authentication auth) throws ResourceNotFoundException {
+        if (!service.exists(t))
+            throw new ResourceNotFoundException();
         ResponseEntity<T> ret = new ResponseEntity<>(service.save(t), HttpStatus.OK);
         logger.debug("Updated {} with id {}", t.getClass().getSimpleName(), t.getId());
         return ret;

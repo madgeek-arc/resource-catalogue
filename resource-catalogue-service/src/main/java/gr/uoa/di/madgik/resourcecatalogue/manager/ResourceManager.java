@@ -115,17 +115,25 @@ public abstract class ResourceManager<T extends Identifiable> extends AbstractGe
 
     @Override
     public final T save(T t) {
-        T saved;
-        if (exists(t)) {
-            saved = update(t, null);
-        } else {
+        Resource resource = new Resource();
+        if (exists(t)) { // update
+            resource = whereID(t.getId(), true);
+            resource.setPayload(serialize(t));
+            resource.setResourceType(resourceType);
+            resourceService.updateResource(resource);
+            logger.debug("Updated Resource: {}", t);
+        } else { // add
             if (!StringUtils.hasText(t.getId())) {
                 String id = createId(t);
                 t.setId(id);
             }
-            saved = add(t, null);
+            String serialized = serialize(t);
+            resource.setPayload(serialized);
+            resource.setResourceType(resourceType);
+            resourceService.addResource(resource);
+            logger.debug("Added Resource: {}", t);
         }
-        return saved;
+        return t;
     }
 
     @Override
@@ -177,7 +185,7 @@ public abstract class ResourceManager<T extends Identifiable> extends AbstractGe
 
     @Override
     public boolean exists(T t) {
-        return whereID(t.getId(), false) != null;
+        return t.getId() != null && whereID(t.getId(), false) != null;
     }
 
     protected String serialize(T t) {
@@ -204,7 +212,7 @@ public abstract class ResourceManager<T extends Identifiable> extends AbstractGe
     }
 
     protected Resource whereID(String id, boolean throwOnNull) {
-        return where(throwOnNull, new SearchService.KeyValue("resource_internal_id", id));
+        return id == null ? null : where(throwOnNull, new SearchService.KeyValue("resource_internal_id", id));
     }
 
     protected Resource where(boolean throwOnNull, SearchService.KeyValue... keyValues) {

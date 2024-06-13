@@ -302,7 +302,8 @@ public abstract class AbstractServiceBundleManager<T extends ServiceBundle> exte
     }
 
     public boolean exists(T serviceBundle) {
-        return getResource(serviceBundle.getService().getId(), serviceBundle.getService().getCatalogueId()) != null;
+        return serviceBundle.getId() != null &&
+                getResource(serviceBundle.getService().getId(), serviceBundle.getService().getCatalogueId()) != null;
     }
 
     public Resource getResource(String id, String catalogueId) {
