@@ -3,7 +3,6 @@ package gr.uoa.di.madgik.resourcecatalogue.manager;
 import gr.uoa.di.madgik.registry.domain.*;
 import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.registry.service.ResourceCRUDService;
-import gr.uoa.di.madgik.registry.service.SearchService;
 import gr.uoa.di.madgik.registry.service.VersionService;
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
 import gr.uoa.di.madgik.resourcecatalogue.dto.ExtendedValue;
@@ -146,13 +145,13 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         return ret;
     }
 
-    //    @Override
+    @Override
     @CacheEvict(value = CACHE_PROVIDERS, allEntries = true)
     public ProviderBundle update(ProviderBundle provider, String comment, Authentication auth) {
         return update(provider, provider.getProvider().getCatalogueId(), comment, auth);
     }
 
-    //    @Override
+    @Override
     @CacheEvict(value = CACHE_PROVIDERS, allEntries = true)
     public ProviderBundle update(ProviderBundle providerBundle, String catalogueId, String comment, Authentication auth) {
         logger.trace("Attempting to update the Provider with id '{}' of the Catalogue '{}'", providerBundle, providerBundle.getProvider().getCatalogueId());
@@ -436,13 +435,13 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
 
     @Override
     @CacheEvict(value = CACHE_PROVIDERS, allEntries = true)
-    public ProviderBundle verifyProvider(String id, String status, Boolean active, Authentication auth) {
+    public ProviderBundle verify(String id, String status, Boolean active, Authentication auth) {
         Vocabulary statusVocabulary = vocabularyService.getOrElseThrow(status);
         if (!statusVocabulary.getType().equals("Provider state")) {
             throw new ValidationException(String.format("Vocabulary %s does not consist a Provider State!", status));
         }
         logger.trace("verifyProvider with id: '{}' | status -> '{}' | active -> '{}'", id, status, active);
-        ProviderBundle provider = get(catalogueId, id, auth);
+        ProviderBundle provider = get(id, auth);
         Resource existingResource = getResource(provider.getId(), provider.getProvider().getCatalogueId());
         ProviderBundle existingProvider = deserialize(existingResource);
 
@@ -486,8 +485,8 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
 
     @Override
     @CacheEvict(value = CACHE_PROVIDERS, allEntries = true)
-    public ProviderBundle publish(String providerId, Boolean active, Authentication auth) {
-        ProviderBundle provider = getWithCatalogue(providerId, catalogueId);
+    public ProviderBundle publish(String id, Boolean active, Authentication auth) {
+        ProviderBundle provider = get(id);
         Resource existingResource = getResource(provider.getId(), provider.getProvider().getCatalogueId());
         ProviderBundle existingProvider = deserialize(existingResource);
 
@@ -773,7 +772,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     }
 
     public boolean hasAdminAcceptedTerms(String providerId, Authentication auth) {
-        ProviderBundle providerBundle = get(catalogueId, providerId, auth);
+        ProviderBundle providerBundle = get(providerId, auth);
         List<String> userList = new ArrayList<>();
         for (User user : providerBundle.getProvider().getUsers()) {
             userList.add(user.getEmail().toLowerCase());
@@ -816,8 +815,9 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         }
     }
 
+    @Override
     public void requestProviderDeletion(String providerId, Authentication auth) {
-        ProviderBundle provider = getWithCatalogue(providerId, catalogueId);
+        ProviderBundle provider = get(providerId);
         for (User user : provider.getProvider().getUsers()) {
             if (user.getEmail().equalsIgnoreCase(User.of(auth).getEmail())) {
                 registrationMailService.informPortalAdminsForProviderDeletion(provider, User.of(auth));
@@ -825,9 +825,10 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         }
     }
 
+    @Override
     @CacheEvict(value = CACHE_PROVIDERS, allEntries = true)
-    public ProviderBundle auditProvider(String providerId, String catalogueId, String comment, LoggingInfo.ActionType actionType, Authentication auth) {
-        ProviderBundle provider = getWithCatalogue(providerId, catalogueId);
+    public ProviderBundle audit(String providerId, String comment, LoggingInfo.ActionType actionType, Authentication auth) {
+        ProviderBundle provider = get(providerId);
         Resource existingResource = getResource(provider.getId(), provider.getProvider().getCatalogueId());
         ProviderBundle existingProvider = deserialize(existingResource);
 
@@ -853,6 +854,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         return existingProvider;
     }
 
+    @Override
     public Paging<ProviderBundle> getRandomProviders(FacetFilter ff, String auditingInterval, Authentication auth) {
         FacetFilter facetFilter = new FacetFilter();
         facetFilter.setQuantity(maxQuantity);
@@ -876,9 +878,9 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         return new Browsing<>(providersToBeAudited.size(), 0, providersToBeAudited.size(), providersToBeAudited, providerBrowsing.getFacets());
     }
 
-    //    @Override
-    public Paging<LoggingInfo> getLoggingInfoHistory(String id, String catalogueId) {
-        ProviderBundle providerBundle = getWithCatalogue(id, catalogueId);
+    @Override
+    public Paging<LoggingInfo> getLoggingInfoHistory(String id) {
+        ProviderBundle providerBundle = get(id);
         if (providerBundle.getLoggingInfo() != null) {
             List<LoggingInfo> loggingInfoList = providerBundle.getLoggingInfo();
             loggingInfoList.sort(Comparator.comparing(LoggingInfo::getDate).reversed());
@@ -937,6 +939,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         }
     }
 
+    @Override
     public Paging<?> getRejectedResources(FacetFilter ff, String resourceType, Authentication auth) {
         if (resourceType.equals("service")) {
             Browsing<ServiceBundle> providerRejectedResources = getResourceBundles(ff, serviceBundleService, auth);
@@ -959,20 +962,23 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         return service.getAll(filter, auth);
     }
 
+    @Override
     public ProviderBundle createPublicProvider(ProviderBundle providerBundle, Authentication auth) {
         publicProviderManager.add(providerBundle, auth);
         return providerBundle;
     }
 
+
+    @Override
     @CacheEvict(value = CACHE_PROVIDERS, allEntries = true)
-    public ProviderBundle suspend(String providerId, String catalogueId, boolean suspend, Authentication auth) {
-        ProviderBundle providerBundle = get(catalogueId, providerId, auth);
+    public ProviderBundle suspend(String providerId, boolean suspend, Authentication auth) {
+        ProviderBundle providerBundle = get(providerId, auth);
         Resource existingResource = getResource(providerBundle.getId(), providerBundle.getProvider().getCatalogueId());
         ProviderBundle existingProvider = deserialize(existingResource);
         commonMethods.suspensionValidation(existingProvider, catalogueId, providerId, suspend, auth);
 
         // Suspend Provider
-        commonMethods.suspendResource(existingProvider, catalogueId, suspend, auth);
+        commonMethods.suspendResource(existingProvider, suspend, auth);
         existingResource.setPayload(serialize(existingProvider));
         existingResource.setResourceType(resourceType);
         resourceService.updateResource(existingResource);
@@ -985,23 +991,24 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
 
         if (services != null && !services.isEmpty()) {
             for (ServiceBundle serviceBundle : services) {
-                serviceBundleService.suspend(serviceBundle.getId(), catalogueId, suspend, auth);
+                serviceBundleService.suspend(serviceBundle.getId(), suspend, auth);
             }
         }
         if (trainingResources != null && !trainingResources.isEmpty()) {
             for (TrainingResourceBundle trainingResourceBundle : trainingResources) {
-                trainingResourceService.suspend(trainingResourceBundle.getId(), catalogueId, suspend, auth);
+                trainingResourceService.suspend(trainingResourceBundle.getId(), suspend, auth);
             }
         }
         if (interoperabilityRecords != null && !interoperabilityRecords.isEmpty()) {
             for (InteroperabilityRecordBundle interoperabilityRecordBundle : interoperabilityRecords) {
-                interoperabilityRecordService.suspend(interoperabilityRecordBundle.getId(), catalogueId, suspend, auth);
+                interoperabilityRecordService.suspend(interoperabilityRecordBundle.getId(), suspend, auth);
             }
         }
 
         return providerBundle;
     }
 
+    @Override
     public String determineHostingLegalEntity(String providerName) {
         List<Vocabulary> hostingLegalEntityList = vocabularyService.getByType(Vocabulary.Type.PROVIDER_HOSTING_LEGAL_ENTITY);
         for (Vocabulary hle : hostingLegalEntityList) {
@@ -1012,6 +1019,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         return null;
     }
 
+    @Override
     public List<MapValues<ExtendedValue>> getAllResourcesUnderASpecificHLE(String hle, Authentication auth) {
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(10000);

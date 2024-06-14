@@ -19,7 +19,7 @@ import java.util.List;
 @Profile("crud")
 @RestController
 @RequestMapping(path = "training-resources")
-@Tag(name = "training resource")
+@Tag(name = "training resources")
 public class TrainingResourceCrudController extends ResourceCrudController<TrainingResourceBundle> {
 
     private static final Logger logger = LogManager.getLogger(TrainingResourceCrudController.class.getName());

@@ -150,7 +150,7 @@ public class InteroperabilityRecordController {
                                                                @RequestParam(required = false) String status,
                                                                @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
-        InteroperabilityRecordBundle interoperabilityRecordBundle = interoperabilityRecordService.verifyResource(id, status, active, auth);
+        InteroperabilityRecordBundle interoperabilityRecordBundle = interoperabilityRecordService.verify(id, status, active, auth);
         logger.info("User '{}' verified Interoperability Record with title '{}' [status: {}] [active: {}]", auth, interoperabilityRecordBundle.getInteroperabilityRecord().getTitle(), status, active);
         return new ResponseEntity<>(interoperabilityRecordBundle, HttpStatus.OK);
     }
@@ -200,7 +200,7 @@ public class InteroperabilityRecordController {
                                                                       @RequestParam LoggingInfo.ActionType actionType,
                                                                       @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
-        InteroperabilityRecordBundle interoperabilityRecordBundle = interoperabilityRecordService.auditResource(id, catalogueId, comment, actionType, auth);
+        InteroperabilityRecordBundle interoperabilityRecordBundle = interoperabilityRecordService.audit(id, comment, actionType, auth);
         return new ResponseEntity<>(interoperabilityRecordBundle, HttpStatus.OK);
     }
 
@@ -299,7 +299,7 @@ public class InteroperabilityRecordController {
     @PutMapping(path = "suspend", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     public InteroperabilityRecordBundle suspendInteroperabilityRecord(@RequestParam String interoperabilityRecordId, @RequestParam String catalogueId, @RequestParam boolean suspend, @Parameter(hidden = true) Authentication auth) {
-        return interoperabilityRecordService.suspend(interoperabilityRecordId, catalogueId, suspend, auth);
+        return interoperabilityRecordService.suspend(interoperabilityRecordId, suspend, auth);
     }
 
     @PostMapping(path = "/addBulk", produces = {MediaType.APPLICATION_JSON_VALUE})

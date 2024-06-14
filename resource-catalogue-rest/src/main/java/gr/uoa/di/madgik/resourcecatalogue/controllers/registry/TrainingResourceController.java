@@ -142,7 +142,7 @@ public class TrainingResourceController {
                                                                          @RequestParam(required = false) String status,
                                                                          @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
-        TrainingResourceBundle trainingResourceBundle = trainingResourceService.verifyResource(id, status, active, auth);
+        TrainingResourceBundle trainingResourceBundle = trainingResourceService.verify(id, status, active, auth);
         logger.info("Updated Training Resource with title '{}' [status: {}] [active: {}]", trainingResourceBundle.getTrainingResource().getTitle(), status, active);
         return new ResponseEntity<>(trainingResourceBundle, HttpStatus.OK);
     }
@@ -303,7 +303,7 @@ public class TrainingResourceController {
                                                                 @RequestParam LoggingInfo.ActionType actionType,
                                                                 @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
-        TrainingResourceBundle trainingResource = trainingResourceService.auditResource(id, catalogueId, comment, actionType, auth);
+        TrainingResourceBundle trainingResource = trainingResourceService.audit(id, comment, actionType, auth);
         return new ResponseEntity<>(trainingResource, HttpStatus.OK);
     }
 
@@ -391,7 +391,7 @@ public class TrainingResourceController {
     @PutMapping(path = "suspend", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     public TrainingResourceBundle suspendTrainingResource(@RequestParam String trainingResourceId, @RequestParam String catalogueId, @RequestParam boolean suspend, @Parameter(hidden = true) Authentication auth) {
-        return trainingResourceService.suspend(trainingResourceId, catalogueId, suspend, auth);
+        return trainingResourceService.suspend(trainingResourceId, suspend, auth);
     }
 
     @PostMapping(path = "/addBulk", produces = {MediaType.APPLICATION_JSON_VALUE})

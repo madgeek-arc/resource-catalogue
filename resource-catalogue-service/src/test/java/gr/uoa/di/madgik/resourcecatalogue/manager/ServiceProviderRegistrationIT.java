@@ -72,7 +72,7 @@ public class ServiceProviderRegistrationIT {
             provider = updateProvider(providerId);
             assert provider != null;
 
-            providerService.verifyProvider(providerId, "pending template submission", true, securityService.getAdminAccess());
+            providerService.verify(providerId, "pending template submission", true, securityService.getAdminAccess());
 
             serviceBundle = new ServiceBundle(createService("WP4_TestService", provider.getProvider()));
 
@@ -80,13 +80,13 @@ public class ServiceProviderRegistrationIT {
 
             assert serviceBundle != null;
 
-            providerService.verifyProvider(providerId, "rejected template", false, securityService.getAdminAccess());
+            providerService.verify(providerId, "rejected template", false, securityService.getAdminAccess());
 
             serviceBundleService.updateResource(serviceBundle, "woof", securityService.getAdminAccess());
 
-            providerService.verifyProvider(providerId, "approved", true, securityService.getAdminAccess());
-            providerService.verifyProvider(providerId, "approved", false, securityService.getAdminAccess());
-            providerService.verifyProvider(providerId, "rejected", false, securityService.getAdminAccess());
+            providerService.verify(providerId, "approved", true, securityService.getAdminAccess());
+            providerService.verify(providerId, "approved", false, securityService.getAdminAccess());
+            providerService.verify(providerId, "rejected", false, securityService.getAdminAccess());
 
         } catch (RuntimeException e) {
             logger.error("ERROR", e);

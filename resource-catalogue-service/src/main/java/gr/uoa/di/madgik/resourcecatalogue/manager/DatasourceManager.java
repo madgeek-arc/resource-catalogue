@@ -191,7 +191,7 @@ public class DatasourceManager extends ResourceManager<DatasourceBundle> impleme
         return super.validate(datasourceBundle);
     }
 
-    public DatasourceBundle verifyDatasource(String id, String status, Boolean active, Authentication auth) {
+    public DatasourceBundle verify(String id, String status, Boolean active, Authentication auth) {
         Vocabulary statusVocabulary = vocabularyService.getOrElseThrow(status);
         if (!statusVocabulary.getType().equals("Datasource state")) {
             throw new ValidationException(String.format("Vocabulary %s does not consist an Datasource state!", status));

@@ -54,11 +54,11 @@ public class ResourceInteroperabilityRecordManager extends ResourceManager<Resou
     }
 
     @Override
-    public ResourceInteroperabilityRecordBundle validate(ResourceInteroperabilityRecordBundle resourceInteroperabilityRecordBundle, String resourceType) {
-        String resourceId = resourceInteroperabilityRecordBundle.getResourceInteroperabilityRecord().getResourceId();
-        String catalogueId = resourceInteroperabilityRecordBundle.getResourceInteroperabilityRecord().getCatalogueId();
+    public ResourceInteroperabilityRecordBundle validate(ResourceInteroperabilityRecordBundle bundle, String resourceType) {
+        String resourceId = bundle.getResourceInteroperabilityRecord().getResourceId();
+        String catalogueId = bundle.getResourceInteroperabilityRecord().getCatalogueId();
 
-        ResourceInteroperabilityRecordBundle existing = getWithResourceId(resourceId, catalogueId);
+        ResourceInteroperabilityRecordBundle existing = getWithResourceId(resourceId);
         if (existing != null) {
             throw new ValidationException(String.format("Resource [%s] of the Catalogue [%s] has already a Resource " +
                     "Interoperability Record registered, with id: [%s]", resourceId, catalogueId, existing.getId()));
@@ -73,33 +73,34 @@ public class ResourceInteroperabilityRecordManager extends ResourceManager<Resou
             throw new ValidationException("Field 'resourceType' should be either 'service' or 'training_resource'");
         }
 
-        super.validate(resourceInteroperabilityRecordBundle);
-        return checkIfEachInteroperabilityRecordIsApproved(resourceInteroperabilityRecordBundle);
+        super.validate(bundle);
+        return checkIfEachInteroperabilityRecordIsApproved(bundle);
     }
 
     @Override
-    public ResourceInteroperabilityRecordBundle add(ResourceInteroperabilityRecordBundle resourceInteroperabilityRecordBundle, String resourceType, Authentication auth) {
-        validate(resourceInteroperabilityRecordBundle, resourceType);
-        commonMethods.checkRelatedResourceIDsConsistency(resourceInteroperabilityRecordBundle);
+    public ResourceInteroperabilityRecordBundle add(ResourceInteroperabilityRecordBundle bundle, String resourceType, Authentication auth) {
+        validate(bundle, resourceType);
+        commonMethods.checkRelatedResourceIDsConsistency(bundle);
 
-        resourceInteroperabilityRecordBundle.setId(idCreator.generate(getResourceType()));
-        logger.trace("Attempting to add a new ResourceInteroperabilityRecord: {}", resourceInteroperabilityRecordBundle);
+        bundle.setId(idCreator.generate(getResourceType()));
+        logger.trace("Attempting to add a new ResourceInteroperabilityRecord: {}", bundle);
 
-        resourceInteroperabilityRecordBundle.setMetadata(Metadata.createMetadata(User.of(auth).getFullName(), User.of(auth).getEmail()));
-        List<LoggingInfo> loggingInfoList = commonMethods.returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(resourceInteroperabilityRecordBundle, auth);
-        resourceInteroperabilityRecordBundle.setLoggingInfo(loggingInfoList);
-        resourceInteroperabilityRecordBundle.setLatestOnboardingInfo(loggingInfoList.get(0));
+        bundle.setMetadata(Metadata.createMetadata(User.of(auth).getFullName(), User.of(auth).getEmail()));
+        List<LoggingInfo> loggingInfoList = commonMethods.returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(bundle, auth);
+        bundle.setLoggingInfo(loggingInfoList);
+        bundle.setLatestOnboardingInfo(loggingInfoList.get(0));
 
         // active
-        resourceInteroperabilityRecordBundle.setActive(true);
+        bundle.setActive(true);
 
         ResourceInteroperabilityRecordBundle ret;
-        ret = super.add(resourceInteroperabilityRecordBundle, null);
-        logger.debug("Adding ResourceInteroperabilityRecord: {}", resourceInteroperabilityRecordBundle);
+        ret = super.add(bundle, null);
+        logger.debug("Adding ResourceInteroperabilityRecord: {}", bundle);
 
         return ret;
     }
 
+    @Override
     public ResourceInteroperabilityRecordBundle get(String id, String catalogueId) {
         Resource resource = getResource(id, catalogueId);
         if (resource == null) {
@@ -108,16 +109,16 @@ public class ResourceInteroperabilityRecordManager extends ResourceManager<Resou
         return deserialize(resource);
     }
 
-    public ResourceInteroperabilityRecordBundle getWithResourceId(String resourceId, String catalogueId) {
-        Resource res = where(false, new SearchService.KeyValue("resource_id", resourceId), new SearchService.KeyValue("catalogue_id", catalogueId));
+    public ResourceInteroperabilityRecordBundle getWithResourceId(String resourceId) {
+        Resource res = where(false, new SearchService.KeyValue("resource_id", resourceId));
         return res != null ? deserialize(res) : null;
     }
 
     @Override
-    public ResourceInteroperabilityRecordBundle update(ResourceInteroperabilityRecordBundle resourceInteroperabilityRecordBundle, Authentication auth) {
-        logger.trace("Attempting to update the ResourceInteroperabilityRecord with id '{}'", resourceInteroperabilityRecordBundle.getId());
+    public ResourceInteroperabilityRecordBundle update(ResourceInteroperabilityRecordBundle bundle, Authentication auth) {
+        logger.trace("Attempting to update the ResourceInteroperabilityRecord with id '{}'", bundle.getId());
 
-        ResourceInteroperabilityRecordBundle ret = ObjectUtils.clone(resourceInteroperabilityRecordBundle);
+        ResourceInteroperabilityRecordBundle ret = ObjectUtils.clone(bundle);
         Resource existingResource = whereID(ret.getId(), true);
         ResourceInteroperabilityRecordBundle existingInteroperabilityRecord = deserialize(existingResource);
         // check if there are actual changes in the ResourceInteroperabilityRecord
@@ -162,6 +163,7 @@ public class ResourceInteroperabilityRecordManager extends ResourceManager<Resou
         return ret;
     }
 
+    @Override
     public void delete(ResourceInteroperabilityRecordBundle resourceInteroperabilityRecordBundle) {
         // block Public ResourceInteroperabilityRecordBundle deletions
         if (resourceInteroperabilityRecordBundle.getMetadata().isPublished()) {
@@ -183,6 +185,7 @@ public class ResourceInteroperabilityRecordManager extends ResourceManager<Resou
         return resourceInteroperabilityRecordBundle;
     }
 
+    @Override
     public ResourceInteroperabilityRecordBundle createPublicResourceInteroperabilityRecord(ResourceInteroperabilityRecordBundle resourceInteroperabilityRecordBundle, Authentication auth) {
         publicResourceInteroperabilityRecordManager.add(resourceInteroperabilityRecordBundle, auth);
         return resourceInteroperabilityRecordBundle;

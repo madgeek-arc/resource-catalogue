@@ -1,4 +1,4 @@
-package gr.uoa.di.madgik.resourcecatalogue.controllers.registry;
+package gr.uoa.di.madgik.resourcecatalogue.controllers.lot1;
 
 import gr.uoa.di.madgik.resourcecatalogue.domain.Bundle;
 import gr.uoa.di.madgik.resourcecatalogue.service.PIDService;
@@ -13,8 +13,8 @@ import org.springframework.web.bind.annotation.*;
 
 @Profile("crud")
 @RestController
-@RequestMapping("pid")
-@Tag(name = "pid", description = "PID related operations")
+@RequestMapping("pids")
+@Tag(name = "pids", description = "PID related operations")
 public class PIDController {
 
     private final PIDService pidService;

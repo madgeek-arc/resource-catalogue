@@ -87,7 +87,7 @@ public class ResourceInteroperabilityRecordController {
                                                                                                         @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId) {
         String id = prefix + "/" + suffix;
         ResourceInteroperabilityRecordBundle resourceInteroperabilityRecordBundle = resourceInteroperabilityRecordService.
-                getWithResourceId(id, catalogueId);
+                getWithResourceId(id);
         if (resourceInteroperabilityRecordBundle != null) {
             return new ResponseEntity<>(resourceInteroperabilityRecordBundle.getResourceInteroperabilityRecord(), HttpStatus.OK);
         }

@@ -12,7 +12,7 @@ import org.springframework.security.core.Authentication;
 import java.net.URL;
 import java.util.List;
 
-public interface ProviderService extends ResourceService<ProviderBundle> {
+public interface ProviderService extends ResourceService<ProviderBundle>, BundleOperations<ProviderBundle> {
 
     /**
      * Add a new Provider on the Project's Catalogue.
@@ -72,23 +72,6 @@ public interface ProviderService extends ResourceService<ProviderBundle> {
     List<ProviderBundle> getServiceProviders(String email, Authentication authentication);
 
     /**
-     * Return true if the specific User has accepted the Provider's registration terms
-     *
-     * @param providerId     Provider's ID
-     * @param authentication Authentication
-     * @return True/False
-     */
-    boolean hasAdminAcceptedTerms(String providerId, Authentication authentication);
-
-    /**
-     * Update the Provider's list of Users that have accepted the Provider's registration terms
-     *
-     * @param providerId     Provider's ID
-     * @param authentication Authentication
-     */
-    void adminAcceptedTerms(String providerId, Authentication authentication);
-
-    /**
      * Validates a specific URL regarding the ability to open a connection
      *
      * @param urlForValidation URL to be validated
@@ -120,27 +103,6 @@ public interface ProviderService extends ResourceService<ProviderBundle> {
      * @return {@link List}&lt;{@link ProviderBundle}&gt;
      */
     List<ProviderBundle> getInactive();
-
-    /**
-     * Verify (Accept/Reject during the onboarding process) a specific Provider
-     *
-     * @param id     Provider's ID
-     * @param status Provider's new status
-     * @param active Provider's new active field
-     * @param auth   Authentication
-     * @return {@link ProviderBundle}
-     */
-    ProviderBundle verifyProvider(String id, String status, Boolean active, Authentication auth);
-
-    /**
-     * Sets a Provider as active/inactive.
-     *
-     * @param providerId Provider ID
-     * @param active     True/False
-     * @param auth       Authentication
-     * @return {@link ProviderBundle}
-     */
-    ProviderBundle publish(String providerId, Boolean active, Authentication auth);
 
     /**
      * Delete User's Info from his Providers. Also deletes any user Event actions
@@ -180,19 +142,6 @@ public interface ProviderService extends ResourceService<ProviderBundle> {
     ProviderBundle update(ProviderBundle provider, String catalogueId, String comment, Authentication auth);
 
     /**
-     * Audit a Provider
-     *
-     * @param providerId  Provider ID
-     * @param catalogueId Catalogue ID
-     * @param comment     Comment
-     * @param actionType  Audit's action type
-     * @param auth        Authentication
-     * @return {@link ProviderBundle}
-     */
-    ProviderBundle auditProvider(String providerId, String catalogueId, String comment,
-                                 LoggingInfo.ActionType actionType, Authentication auth);
-
-    /**
      * Get a paging of random Providers
      *
      * @param ff               FacetFilter
@@ -205,11 +154,10 @@ public interface ProviderService extends ResourceService<ProviderBundle> {
     /**
      * Get the history of the specific Provider of the specific Catalogue ID
      *
-     * @param id          Provider ID
-     * @param catalogueId Catalogue ID
+     * @param id Provider ID
      * @return {@link Paging}&lt;{@link LoggingInfo}&gt;
      */
-    Paging<LoggingInfo> getLoggingInfoHistory(String id, String catalogueId);
+    Paging<LoggingInfo> getLoggingInfoHistory(String id);
 
     /**
      * Get a Provider's rejected resources
@@ -229,17 +177,6 @@ public interface ProviderService extends ResourceService<ProviderBundle> {
      * @return {@link ProviderBundle}
      */
     ProviderBundle createPublicProvider(ProviderBundle providerBundle, Authentication auth);
-
-    /**
-     * Suspend the Provider given its ID
-     *
-     * @param providerId  Provider ID
-     * @param catalogueId Catalogue ID
-     * @param suspend     True/False
-     * @param auth        Authentication
-     * @return {@link ProviderBundle}
-     */
-    ProviderBundle suspend(String providerId, String catalogueId, boolean suspend, Authentication auth);
 
     /**
      * Given a Provider Name, return the corresponding HLE Vocabulary if exists, else return null

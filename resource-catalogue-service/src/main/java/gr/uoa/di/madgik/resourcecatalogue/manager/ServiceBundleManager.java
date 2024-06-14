@@ -113,7 +113,7 @@ public class ServiceBundleManager extends AbstractServiceBundleManager<ServiceBu
         }
         commonMethods.checkRelatedResourceIDsConsistency(serviceBundle);
 
-        ProviderBundle providerBundle = providerService.get(serviceBundle.getService().getCatalogueId(), serviceBundle.getService().getResourceOrganisation(), auth);
+        ProviderBundle providerBundle = providerService.get(serviceBundle.getService().getResourceOrganisation(), auth);
         if (providerBundle == null) {
             throw new ValidationException(String.format("Provider with id '%s' and catalogueId '%s' does not exist", serviceBundle.getService().getResourceOrganisation(), serviceBundle.getService().getCatalogueId()));
         }
@@ -210,7 +210,7 @@ public class ServiceBundleManager extends AbstractServiceBundleManager<ServiceBu
         logger.trace("Attempting to update the Service with id '{}' of the Catalogue '{}'", ret.getService().getId(), ret.getService().getCatalogueId());
         validate(ret);
 
-        ProviderBundle providerBundle = providerService.get(ret.getService().getCatalogueId(), ret.getService().getResourceOrganisation(), auth);
+        ProviderBundle providerBundle = providerService.get(ret.getService().getResourceOrganisation(), auth);
 
         // if service version is empty set it null
         if ("".equals(ret.getService().getVersion())) {
@@ -340,7 +340,7 @@ public class ServiceBundleManager extends AbstractServiceBundleManager<ServiceBu
     }
 
     @CacheEvict(cacheNames = {CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)
-    public ServiceBundle verifyResource(String id, String status, Boolean active, Authentication auth) {
+    public ServiceBundle verify(String id, String status, Boolean active, Authentication auth) {
         Vocabulary statusVocabulary = vocabularyService.getOrElseThrow(status);
         if (!statusVocabulary.getType().equals("Resource state")) {
             throw new ValidationException(String.format("Vocabulary %s does not consist a Resource State!", status));
@@ -348,7 +348,7 @@ public class ServiceBundleManager extends AbstractServiceBundleManager<ServiceBu
         logger.trace("verifyResource with id: '{}' | status -> '{}' | active -> '{}'", id, status, active);
         ServiceBundle serviceBundle = getCatalogueResource(catalogueId, id, auth);
         serviceBundle.setStatus(vocabularyService.get(status).getId());
-        ProviderBundle resourceProvider = providerService.get(serviceBundle.getService().getCatalogueId(), serviceBundle.getService().getResourceOrganisation(), auth);
+        ProviderBundle resourceProvider = providerService.get(serviceBundle.getService().getResourceOrganisation(), auth);
         List<LoggingInfo> loggingInfoList = commonMethods.returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(serviceBundle, auth);
         LoggingInfo loggingInfo;
 
@@ -409,7 +409,7 @@ public class ServiceBundleManager extends AbstractServiceBundleManager<ServiceBu
             throw new ValidationException(String.format("You cannot activate this Service, because it's Inactive with status = [%s]", service.getStatus()));
         }
 
-        ProviderBundle providerBundle = providerService.get(service.getService().getCatalogueId(), service.getService().getResourceOrganisation(), auth);
+        ProviderBundle providerBundle = providerService.get(service.getService().getResourceOrganisation(), auth);
         if (providerBundle.getStatus().equals("approved provider") && providerBundle.isActive()) {
             activeProvider = service.getService().getResourceOrganisation();
         }
@@ -516,9 +516,10 @@ public class ServiceBundleManager extends AbstractServiceBundleManager<ServiceBu
         }
     }
 
-    public ServiceBundle auditResource(String serviceId, String catalogueId, String comment, LoggingInfo.ActionType actionType, Authentication auth) {
-        ServiceBundle service = get(serviceId, catalogueId);
-        ProviderBundle provider = providerService.get(catalogueId, service.getService().getResourceOrganisation(), auth);
+    @Override
+    public ServiceBundle audit(String serviceId, String comment, LoggingInfo.ActionType actionType, Authentication auth) {
+        ServiceBundle service = get(serviceId);
+        ProviderBundle provider = providerService.get(service.getService().getResourceOrganisation(), auth);
         commonMethods.auditResource(service, comment, actionType, auth);
         if (actionType.getKey().equals(LoggingInfo.ActionType.VALID.getKey())) {
             service.setAuditState(Auditable.VALID);
@@ -621,14 +622,14 @@ public class ServiceBundleManager extends AbstractServiceBundleManager<ServiceBu
     }
 
     public ServiceBundle changeProvider(String resourceId, String newProviderId, String comment, Authentication auth) {
-        ServiceBundle serviceBundle = get(resourceId, catalogueId);
+        ServiceBundle serviceBundle = get(resourceId);
         // check Service's status
         if (!serviceBundle.getStatus().equals("approved resource")) {
             throw new ValidationException(String.format("You cannot move Service with id [%s] to another Provider as it" +
                     "is not yet Approved", serviceBundle.getId()));
         }
-        ProviderBundle newProvider = providerService.get(catalogueId, newProviderId, auth);
-        ProviderBundle oldProvider = providerService.get(catalogueId, serviceBundle.getService().getResourceOrganisation(), auth);
+        ProviderBundle newProvider = providerService.get(newProviderId, auth);
+        ProviderBundle oldProvider = providerService.get(serviceBundle.getService().getResourceOrganisation(), auth);
 
         // check that the 2 Providers co-exist under the same Catalogue
         if (!oldProvider.getProvider().getCatalogueId().equals(newProvider.getProvider().getCatalogueId())) {
@@ -689,46 +690,47 @@ public class ServiceBundleManager extends AbstractServiceBundleManager<ServiceBu
         return serviceBundle;
     }
 
+    @Override
     @CacheEvict(cacheNames = {CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)
-    public ServiceBundle suspend(String serviceId, String catalogueId, boolean suspend, Authentication auth) {
-        ServiceBundle serviceBundle = get(serviceId, catalogueId);
-        commonMethods.suspensionValidation(serviceBundle, catalogueId,
+    public ServiceBundle suspend(String serviceId, boolean suspend, Authentication auth) {
+        ServiceBundle serviceBundle = get(serviceId);
+        commonMethods.suspensionValidation(serviceBundle, serviceBundle.getService().getCatalogueId(),
                 serviceBundle.getService().getResourceOrganisation(), suspend, auth);
-        commonMethods.suspendResource(serviceBundle, catalogueId, suspend, auth);
+        commonMethods.suspendResource(serviceBundle, suspend, auth);
         // suspend Service's sub-profiles
-        DatasourceBundle datasourceBundle = datasourceService.get(serviceId, catalogueId);
+        DatasourceBundle datasourceBundle = datasourceService.get(serviceId);
         if (datasourceBundle != null) {
             try {
-                commonMethods.suspendResource(datasourceBundle, catalogueId, suspend, auth);
+                commonMethods.suspendResource(datasourceBundle, suspend, auth);
                 datasourceService.update(datasourceBundle, auth);
             } catch (gr.uoa.di.madgik.registry.exception.ResourceNotFoundException e) {
                 throw new RuntimeException(e);
             }
         }
         // suspend Service's extensions
-        HelpdeskBundle helpdeskBundle = helpdeskService.get(serviceId, catalogueId);
+        HelpdeskBundle helpdeskBundle = helpdeskService.get(serviceId);
         if (helpdeskBundle != null) {
             try {
-                commonMethods.suspendResource(helpdeskBundle, catalogueId, suspend, auth);
+                commonMethods.suspendResource(helpdeskBundle, suspend, auth);
                 helpdeskService.update(helpdeskBundle, auth);
             } catch (gr.uoa.di.madgik.registry.exception.ResourceNotFoundException e) {
                 throw new RuntimeException(e);
             }
         }
-        MonitoringBundle monitoringBundle = monitoringService.get(serviceId, catalogueId);
+        MonitoringBundle monitoringBundle = monitoringService.get(serviceId);
         if (monitoringBundle != null) {
             try {
-                commonMethods.suspendResource(monitoringBundle, catalogueId, suspend, auth);
+                commonMethods.suspendResource(monitoringBundle, suspend, auth);
                 monitoringService.update(monitoringBundle, auth);
             } catch (gr.uoa.di.madgik.registry.exception.ResourceNotFoundException e) {
                 throw new RuntimeException(e);
             }
         }
         // suspend ResourceInteroperabilityRecord
-        ResourceInteroperabilityRecordBundle resourceInteroperabilityRecordBundle = resourceInteroperabilityRecordService.getWithResourceId(serviceId, catalogueId);
+        ResourceInteroperabilityRecordBundle resourceInteroperabilityRecordBundle = resourceInteroperabilityRecordService.getWithResourceId(serviceId);
         if (resourceInteroperabilityRecordBundle != null) {
             try {
-                commonMethods.suspendResource(resourceInteroperabilityRecordBundle, catalogueId, suspend, auth);
+                commonMethods.suspendResource(resourceInteroperabilityRecordBundle, suspend, auth);
                 resourceInteroperabilityRecordService.update(resourceInteroperabilityRecordBundle, auth);
             } catch (gr.uoa.di.madgik.registry.exception.ResourceNotFoundException e) {
                 throw new RuntimeException(e);

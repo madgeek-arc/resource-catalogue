@@ -30,7 +30,7 @@ import java.util.Map;
 @Profile("crud")
 @RestController
 @RequestMapping(path = "datasources")
-@Tag(name = "datasource")
+@Tag(name = "datasources")
 public class DatasourceCrudController extends ResourceCrudController<DatasourceBundle> {
 
     private static final Logger logger = LogManager.getLogger(DatasourceCrudController.class);

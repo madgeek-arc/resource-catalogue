@@ -132,7 +132,7 @@ public class ServiceController {
                                                         @RequestParam(required = false) Boolean active,
                                                         @RequestParam(required = false) String status, @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
-        ServiceBundle resource = serviceBundleService.verifyResource(id, status, active, auth);
+        ServiceBundle resource = serviceBundleService.verify(id, status, active, auth);
         logger.info("Updated Resource with name '{}' [status: {}] [active: {}]", resource.getService().getName(), status, active);
         return new ResponseEntity<>(resource, HttpStatus.OK);
     }
@@ -301,7 +301,7 @@ public class ServiceController {
                                                       @RequestParam LoggingInfo.ActionType actionType,
                                                       @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
-        ServiceBundle service = serviceBundleService.auditResource(id, catalogueId, comment, actionType, auth);
+        ServiceBundle service = serviceBundleService.audit(id, comment, actionType, auth);
         return new ResponseEntity<>(service, HttpStatus.OK);
     }
 
@@ -435,7 +435,7 @@ public class ServiceController {
     @PutMapping(path = "suspend", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     public ServiceBundle suspendService(@RequestParam String serviceId, @RequestParam String catalogueId, @RequestParam boolean suspend, @Parameter(hidden = true) Authentication auth) {
-        return serviceBundleService.suspend(serviceId, catalogueId, suspend, auth);
+        return serviceBundleService.suspend(serviceId, suspend, auth);
     }
 
     @PostMapping(path = "/addBulk", produces = {MediaType.APPLICATION_JSON_VALUE})
@@ -512,9 +512,21 @@ public class ServiceController {
         return new ResponseEntity<>(draftServiceService.get(id).getService(), HttpStatus.OK);
     }
 
-    @GetMapping(path = "/draft/getMyDraftServices", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @GetMapping(path = "/draft/my", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<List<ServiceBundle>> getMyDraftServices(@Parameter(hidden = true) Authentication auth) {
         return new ResponseEntity<>(draftServiceService.getMy(auth), HttpStatus.OK);
+    }
+
+    @Browse
+    @GetMapping(path = "/draft/byProvider/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE})
+    public ResponseEntity<Browsing<ServiceBundle>> getDraftServices(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
+                                                                    @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix,
+                                                                    @Parameter(hidden = true) @RequestParam Map<String, Object> allRequestParams,
+                                                                    @Parameter(hidden = true) Authentication auth) {
+        String id = String.join("/", prefix, suffix);
+        FacetFilter ff = FacetFilterUtils.createFacetFilter(allRequestParams);
+        ff.addFilter("resource_organisation", id);
+        return new ResponseEntity<>(draftServiceService.getAll(FacetFilterUtils.createFacetFilter(allRequestParams), auth), HttpStatus.OK);
     }
 
     @PostMapping(path = "/draft", produces = {MediaType.APPLICATION_JSON_VALUE})
@@ -522,7 +534,7 @@ public class ServiceController {
     public ResponseEntity<Service> addDraftService(@RequestBody Service service, @Parameter(hidden = true) Authentication auth) {
         ServiceBundle serviceBundle = draftServiceService.add(new ServiceBundle(service), auth);
         logger.info("User '{}' added the Draft Service with name '{}' and id '{}'", User.of(auth).getEmail(),
-                service.getName(),  service.getId());
+                service.getName(), service.getId());
         return new ResponseEntity<>(serviceBundle.getService(), HttpStatus.CREATED);
     }
 
@@ -534,7 +546,7 @@ public class ServiceController {
         serviceBundle.setService(service);
         serviceBundle = draftServiceService.update(serviceBundle, auth);
         logger.info("User '{}' updated the Draft Service with name '{}' and id '{}'", User.of(auth).getEmail(),
-                service.getName(),  service.getId());
+                service.getName(), service.getId());
         return new ResponseEntity<>(serviceBundle.getService(), HttpStatus.OK);
     }
 

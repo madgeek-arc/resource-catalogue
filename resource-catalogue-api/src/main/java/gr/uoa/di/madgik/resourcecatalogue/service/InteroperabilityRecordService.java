@@ -5,9 +5,7 @@ import gr.uoa.di.madgik.resourcecatalogue.domain.InteroperabilityRecordBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.LoggingInfo;
 import org.springframework.security.core.Authentication;
 
-import java.util.List;
-
-public interface InteroperabilityRecordService extends ResourceService<InteroperabilityRecordBundle> {
+public interface InteroperabilityRecordService extends ResourceService<InteroperabilityRecordBundle>, BundleOperations<InteroperabilityRecordBundle> {
 
     /**
      * Add a new Interoperability Record on an existing Catalogue, providing the Catalogue's ID
@@ -50,27 +48,6 @@ public interface InteroperabilityRecordService extends ResourceService<Interoper
     InteroperabilityRecordBundle getOrElseReturnNull(String id, String catalogueId);
 
     /**
-     * Verify the Interoperability Record providing its ID
-     *
-     * @param id     Interoperability Record ID
-     * @param status Interoperability Record's status (approved/rejected)
-     * @param active True/False
-     * @param auth   Authentication
-     * @return {@link InteroperabilityRecordBundle}
-     */
-    InteroperabilityRecordBundle verifyResource(String id, String status, Boolean active, Authentication auth);
-
-    /**
-     * Sets an Interoperability Record as active/inactive.
-     *
-     * @param id     Interoperability Record ID
-     * @param active True/False
-     * @param auth   Authentication
-     * @return {@link InteroperabilityRecordBundle}
-     */
-    InteroperabilityRecordBundle publish(String id, Boolean active, Authentication auth);
-
-    /**
      * Validates the given Interoperability Record Bundle.
      *
      * @param interoperabilityRecordBundle Interoperability Record Bundle
@@ -103,7 +80,7 @@ public interface InteroperabilityRecordService extends ResourceService<Interoper
      * @param catalogueId              Catalogue ID
      * @param interoperabilityRecordId Interoperability Record ID
      * @param auth                     Authentication
-     * @return {@link T}
+     * @return {@link InteroperabilityRecordBundle}
      */
     InteroperabilityRecordBundle getCatalogueInteroperabilityRecord(String catalogueId, String interoperabilityRecordId,
                                                                     Authentication auth);
@@ -118,29 +95,4 @@ public interface InteroperabilityRecordService extends ResourceService<Interoper
      */
     Paging<InteroperabilityRecordBundle> getInteroperabilityRecordBundles(String catalogueId, String providerId,
                                                                           Authentication auth);
-
-    /**
-     * Audit an Interoperability Record
-     *
-     * @param resourceId  Interoperability Record ID
-     * @param catalogueId Catalogue ID
-     * @param comment     Comment
-     * @param actionType  Audit's action type
-     * @param auth        Authentication
-     * @return {@link InteroperabilityRecordBundle}
-     */
-    InteroperabilityRecordBundle auditResource(String resourceId, String catalogueId, String comment, LoggingInfo.ActionType actionType,
-                    Authentication auth);
-
-    /**
-     * Suspend the Interoperability Record given its ID
-     *
-     * @param interoperabilityRecordId Interoperability Record ID
-     * @param catalogueId              Catalogue ID
-     * @param suspend                  True/False
-     * @param auth                     Authentication
-     * @return {@link InteroperabilityRecordBundle}
-     */
-    InteroperabilityRecordBundle suspend(String interoperabilityRecordId, String catalogueId, boolean suspend,
-                                         Authentication auth);
 }

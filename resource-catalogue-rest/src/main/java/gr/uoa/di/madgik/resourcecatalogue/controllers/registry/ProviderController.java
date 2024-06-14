@@ -300,7 +300,7 @@ public class ProviderController {
                                                          @RequestParam(required = false) String status,
                                                          @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
-        ProviderBundle provider = providerService.verifyProvider(id, status, active, auth);
+        ProviderBundle provider = providerService.verify(id, status, active, auth);
         logger.info("Updated Provider with name '{}' [status: {}] [active: {}]", provider.getProvider().getName(), status, active);
         return new ResponseEntity<>(provider, HttpStatus.OK);
     }
@@ -389,7 +389,7 @@ public class ProviderController {
                                                         @RequestParam LoggingInfo.ActionType actionType,
                                                         @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
-        ProviderBundle provider = providerService.auditProvider(id, catalogueId, comment, actionType, auth);
+        ProviderBundle provider = providerService.audit(id, comment, actionType, auth);
         return new ResponseEntity<>(provider, HttpStatus.OK);
     }
 
@@ -409,10 +409,9 @@ public class ProviderController {
     // Get all modification details of a specific Provider based on id.
     @GetMapping(path = {"loggingInfoHistory/{prefix}/{suffix}"}, produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<Paging<LoggingInfo>> loggingInfoHistory(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
-                                                                  @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix,
-                                                                  @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId) {
+                                                                  @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix) {
         String id = prefix + "/" + suffix;
-        Paging<LoggingInfo> loggingInfoHistory = this.providerService.getLoggingInfoHistory(id, catalogueId);
+        Paging<LoggingInfo> loggingInfoHistory = this.providerService.getLoggingInfoHistory(id);
         return ResponseEntity.ok(loggingInfoHistory);
     }
 
@@ -484,7 +483,7 @@ public class ProviderController {
     @PutMapping(path = "suspend", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     public ProviderBundle suspendProvider(@RequestParam String providerId, @RequestParam String catalogueId, @RequestParam boolean suspend, @Parameter(hidden = true) Authentication auth) {
-        return providerService.suspend(providerId, catalogueId, suspend, auth);
+        return providerService.suspend(providerId, suspend, auth);
     }
 
     @Browse
@@ -525,7 +524,7 @@ public class ProviderController {
     public ResponseEntity<Provider> addDraftProvider(@RequestBody Provider provider, @Parameter(hidden = true) Authentication auth) {
         ProviderBundle providerBundle = draftProviderService.add(new ProviderBundle(provider), auth);
         logger.info("User '{}' added the Draft Provider with name '{}' and id '{}'", User.of(auth).getEmail(),
-                provider.getName(),  provider.getId());
+                provider.getName(), provider.getId());
         return new ResponseEntity<>(providerBundle.getProvider(), HttpStatus.CREATED);
     }
 
@@ -537,7 +536,7 @@ public class ProviderController {
         providerBundle.setProvider(provider);
         providerBundle = draftProviderService.update(providerBundle, auth);
         logger.info("User '{}' updated the Draft Provider with name '{}' and id '{}'", User.of(auth).getEmail(),
-                provider.getName(),  provider.getId());
+                provider.getName(), provider.getId());
         return new ResponseEntity<>(providerBundle.getProvider(), HttpStatus.OK);
     }
 
@@ -548,8 +547,7 @@ public class ProviderController {
                                                         @Parameter(hidden = true) Authentication auth)
             throws ResourceNotFoundException {
         String id = prefix + "/" + suffix;
-        ProviderBundle providerBundle = draftProviderService.get(id)
-                ;
+        ProviderBundle providerBundle = draftProviderService.get(id);
         if (providerBundle == null) {
             return new ResponseEntity<>(HttpStatus.GONE);
         }

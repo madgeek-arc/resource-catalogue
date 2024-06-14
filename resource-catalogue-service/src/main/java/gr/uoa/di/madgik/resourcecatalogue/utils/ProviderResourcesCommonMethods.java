@@ -246,7 +246,7 @@ public class ProviderResourcesCommonMethods {
         }
     }
 
-    public void suspendResource(Bundle<?> bundle, String catalogueId, boolean suspend, Authentication auth) {
+    public void suspendResource(Bundle<?> bundle, boolean suspend, Authentication auth) {
         if (bundle != null) {
             bundle.setSuspended(suspend);
 
@@ -265,8 +265,8 @@ public class ProviderResourcesCommonMethods {
             bundle.setLatestUpdateInfo(loggingInfo);
 
             String[] parts = bundle.getPayload().getClass().getName().split("\\.");
-            logger.info(String.format("User [%s] set 'suspended' of %s [%s]-[%s] to [%s]",
-                    User.of(auth).getEmail(), parts[3], catalogueId, bundle.getId(), suspend));
+            logger.info(String.format("User [%s] set 'suspended' of %s [%s] to [%s]",
+                    User.of(auth).getEmail(), parts[3], bundle.getId(), suspend));
         }
     }
 
@@ -281,7 +281,7 @@ public class ProviderResourcesCommonMethods {
                 throw new ValidationException("You cannot unsuspend a Provider when its Catalogue is suspended");
             }
         } else {
-            ProviderBundle providerBundle = providerService.get(catalogueId, providerId, auth);
+            ProviderBundle providerBundle = providerService.get(providerId, auth);
             if ((catalogueBundle.isSuspended() || providerBundle.isSuspended()) && !suspend) {
                 throw new ValidationException("You cannot unsuspend a Resource when its Provider and/or Catalogue are suspended");
             }
@@ -574,7 +574,7 @@ public class ProviderResourcesCommonMethods {
             }
         }
         // resource interoperability records
-        ResourceInteroperabilityRecordBundle resourceInteroperabilityRecordBundle = resourceInteroperabilityRecordService.getWithResourceId(resourceId, catalogueId);
+        ResourceInteroperabilityRecordBundle resourceInteroperabilityRecordBundle = resourceInteroperabilityRecordService.getWithResourceId(resourceId);
         if (resourceInteroperabilityRecordBundle != null) {
             try {
                 logger.info("Deleting ResourceInteroperabilityRecord of {} with id: {}", resourceType, resourceId);

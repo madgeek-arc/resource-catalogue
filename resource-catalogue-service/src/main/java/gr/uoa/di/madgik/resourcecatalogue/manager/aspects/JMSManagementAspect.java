@@ -37,7 +37,7 @@ public class JMSManagementAspect {
 
     @Async
     @AfterReturning(pointcut = "(execution(* gr.uoa.di.madgik.resourcecatalogue.manager.CatalogueManager.add(..)))" +
-            "|| (execution(* gr.uoa.di.madgik.resourcecatalogue.manager.CatalogueManager.verifyCatalogue(..)))",
+            "|| (execution(* gr.uoa.di.madgik.resourcecatalogue.manager.CatalogueManager.verify(..)))",
             returning = "catalogueBundle")
     public void sendJMSForCatalogueCreation(CatalogueBundle catalogueBundle) {
         if (catalogueBundle.getStatus().equals("approved catalogue") && catalogueBundle.isActive()) {
@@ -49,7 +49,7 @@ public class JMSManagementAspect {
     @AfterReturning(pointcut = "(execution(* gr.uoa.di.madgik.resourcecatalogue.manager.CatalogueManager.update(..)))" +
             "|| (execution(* gr.uoa.di.madgik.resourcecatalogue.manager.CatalogueManager.update(..)))" +
             "|| (execution(* gr.uoa.di.madgik.resourcecatalogue.manager.CatalogueManager.publish(..)))" +
-            "|| (execution(* gr.uoa.di.madgik.resourcecatalogue.manager.CatalogueManager.verifyCatalogue(..)))",
+            "|| (execution(* gr.uoa.di.madgik.resourcecatalogue.manager.CatalogueManager.verify(..)))",
             returning = "catalogueBundle")
     public void sendJMSForCatalogueUpdate(CatalogueBundle catalogueBundle) {
         if (catalogueBundle.getStatus().equals("approved catalogue")) {

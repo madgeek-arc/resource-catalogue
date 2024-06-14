@@ -4,8 +4,6 @@ import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.resourcecatalogue.domain.DatasourceBundle;
 import org.springframework.security.core.Authentication;
 
-import java.util.List;
-
 public interface DatasourceService extends ResourceService<DatasourceBundle> {
 
     /**
@@ -36,7 +34,7 @@ public interface DatasourceService extends ResourceService<DatasourceBundle> {
      * @param auth   Authentication
      * @return {@link DatasourceBundle}
      */
-    DatasourceBundle verifyDatasource(String id, String status, Boolean active, Authentication auth);
+    DatasourceBundle verify(String id, String status, Boolean active, Authentication auth);
 
     /**
      * Update the specific DatasourceBundle

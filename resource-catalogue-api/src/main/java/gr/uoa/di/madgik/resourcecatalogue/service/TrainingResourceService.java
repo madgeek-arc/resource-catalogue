@@ -4,7 +4,6 @@ import gr.uoa.di.madgik.registry.domain.Browsing;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
-import gr.uoa.di.madgik.registry.service.SearchService;
 import gr.uoa.di.madgik.resourcecatalogue.domain.LoggingInfo;
 import gr.uoa.di.madgik.resourcecatalogue.domain.TrainingResource;
 import gr.uoa.di.madgik.resourcecatalogue.domain.TrainingResourceBundle;
@@ -13,7 +12,7 @@ import org.springframework.security.core.Authentication;
 import java.util.List;
 import java.util.Map;
 
-public interface TrainingResourceService extends ResourceService<TrainingResourceBundle> {
+public interface TrainingResourceService extends ResourceService<TrainingResourceBundle>, BundleOperations<TrainingResourceBundle> {
 
     /**
      * Add a new Training Resource on an external Catalogue, providing the Catalogue's ID
@@ -87,15 +86,6 @@ public interface TrainingResourceService extends ResourceService<TrainingResourc
      */
     List<TrainingResource> getByIds(Authentication authentication, String... ids);
 
-
-    /**
-     * Check if the Training Resource exists.
-     *
-     * @param ids Training Resource IDs
-     * @return True/False
-     */
-    boolean exists(SearchService.KeyValue... ids);
-
     /**
      * Validates the given Training Resource Bundle.
      *
@@ -103,16 +93,6 @@ public interface TrainingResourceService extends ResourceService<TrainingResourc
      * @return True/False
      */
     boolean validateTrainingResource(TrainingResourceBundle trainingResourceBundle);
-
-    /**
-     * Sets a Training Resource as active/inactive.
-     *
-     * @param resourceId Training Resource ID
-     * @param active     True/False
-     * @param auth       Authentication
-     * @return {@link   TrainingResourceBundle}
-     */
-    TrainingResourceBundle publish(String resourceId, Boolean active, Authentication auth);
 
     /**
      * Return children vocabularies from parent vocabularies
@@ -132,19 +112,6 @@ public interface TrainingResourceService extends ResourceService<TrainingResourc
      * @return {@link Browsing}&lt;{@link   TrainingResourceBundle}&gt;
      */
     Browsing<TrainingResourceBundle> getAllForAdmin(FacetFilter filter, Authentication auth);
-
-    /**
-     * Audit a Training Resource
-     *
-     * @param resourceId  Training Resource ID
-     * @param catalogueId Catalogue ID
-     * @param comment     Comment
-     * @param actionType  Audit's action type
-     * @param auth        Authentication
-     * @return {@link   TrainingResourceBundle}
-     */
-    TrainingResourceBundle auditResource(String resourceId, String catalogueId, String comment, LoggingInfo.ActionType actionType,
-                                         Authentication auth);
 
     /**
      * Get a paging of random Training Resources
@@ -219,17 +186,6 @@ public interface TrainingResourceService extends ResourceService<TrainingResourc
     Paging<LoggingInfo> getLoggingInfoHistory(String id, String catalogueId);
 
     /**
-     * Verify the Training Resource providing its ID
-     *
-     * @param id     Training Resource ID
-     * @param status Training Resource's status (approved/rejected)
-     * @param active True/False
-     * @param auth   Authentication
-     * @return {@link   TrainingResourceBundle}
-     */
-    TrainingResourceBundle verifyResource(String id, String status, Boolean active, Authentication auth);
-
-    /**
      * Change the Provider of the specific Training Resource
      *
      * @param resourceId  Training Resource ID
@@ -265,17 +221,6 @@ public interface TrainingResourceService extends ResourceService<TrainingResourc
      * @return {@link   TrainingResourceBundle}
      */
     TrainingResourceBundle createPublicResource(TrainingResourceBundle resource, Authentication auth);
-
-    /**
-     * Suspend the Training Resource given its ID
-     *
-     * @param trainingResourceId Training Resource ID
-     * @param catalogueId        Catalogue ID
-     * @param suspend            True/False
-     * @param auth               Authentication
-     * @return {@link TrainingResourceBundle}
-     */
-    TrainingResourceBundle suspend(String trainingResourceId, String catalogueId, boolean suspend, Authentication auth);
 
     /**
      * Publish Training Resource's related resources

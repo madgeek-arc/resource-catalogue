@@ -56,8 +56,8 @@ public class StatisticsController {
                                                         @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix,
                                                         @RequestParam(defaultValue = "MONTH") StatisticsService.Interval by) {
         String id = prefix + "/" + suffix;
-//        return new ResponseEntity<>(statisticsService.providerVisits(id, by), HttpStatus.OK);
-        throw new UnsupportedOperationException("Method has been removed");
+        return new ResponseEntity<>(statisticsService.providerVisits(id, by), HttpStatus.OK);
+//        throw new UnsupportedOperationException("Method has been removed");
     }
 
     //    @Operation(summary = "Get aggregate 'addToProject per interval for all services offered by a provider.")
@@ -76,8 +76,8 @@ public class StatisticsController {
                                                           @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix,
                                                           @RequestParam(defaultValue = "MONTH") StatisticsService.Interval by) {
         String id = prefix + "/" + suffix;
-//        return new ResponseEntity<>(statisticsService.providerVisitation(id, by), HttpStatus.OK);
-        throw new UnsupportedOperationException("Method has been removed");
+        return new ResponseEntity<>(statisticsService.providerVisitation(id, by), HttpStatus.OK);
+//        throw new UnsupportedOperationException("Method has been removed");
     }
 
     //    @Operation(summary = "Providing the Provider's id, get the relation between all his services and their respective countries.")

@@ -3,8 +3,6 @@ package gr.uoa.di.madgik.resourcecatalogue.service;
 import gr.uoa.di.madgik.resourcecatalogue.domain.HelpdeskBundle;
 import org.springframework.security.core.Authentication;
 
-import java.util.List;
-
 public interface HelpdeskService extends ResourceService<HelpdeskBundle> {
 
     HelpdeskBundle add(HelpdeskBundle helpdesk, String resourceType, Authentication auth);

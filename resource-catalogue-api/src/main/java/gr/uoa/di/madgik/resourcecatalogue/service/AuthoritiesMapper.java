@@ -1,7 +1,6 @@
 package gr.uoa.di.madgik.resourcecatalogue.service;
 
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 import java.util.Set;
 

@@ -182,7 +182,7 @@ public class DatasourceController {
                                                              @RequestParam(required = false) String status,
                                                              @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
-        DatasourceBundle resource = datasourceService.verifyDatasource(id, status, active, auth);
+        DatasourceBundle resource = datasourceService.verify(id, status, active, auth);
         logger.info("Updated Datasource with id '{}' [status: {}] [active: {}]", resource.getDatasource().getId(), status, active);
         return new ResponseEntity<>(resource, HttpStatus.OK);
     }

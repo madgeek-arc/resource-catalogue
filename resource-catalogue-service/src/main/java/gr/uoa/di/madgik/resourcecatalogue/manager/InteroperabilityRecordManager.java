@@ -220,7 +220,7 @@ public class InteroperabilityRecordManager extends ResourceManager<Interoperabil
     }
 
     @CacheEvict(cacheNames = {CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)
-    public InteroperabilityRecordBundle verifyResource(String id, String status, Boolean active, Authentication auth) {
+    public InteroperabilityRecordBundle verify(String id, String status, Boolean active, Authentication auth) {
         Vocabulary statusVocabulary = vocabularyService.getOrElseThrow(status);
         if (!statusVocabulary.getType().equals("Interoperability Record state")) {
             throw new ValidationException(String.format("Vocabulary %s does not consist an Interoperability Record state!", status));
@@ -376,9 +376,9 @@ public class InteroperabilityRecordManager extends ResourceManager<Interoperabil
         throw new ValidationException("You cannot view the specific Interoperability Record");
     }
 
-    public InteroperabilityRecordBundle auditResource(String interoperabilityRecordId, String catalogueId, String comment, LoggingInfo.ActionType actionType, Authentication auth) {
-        InteroperabilityRecordBundle interoperabilityRecordBundle = get(interoperabilityRecordId, catalogueId);
-        ProviderBundle provider = providerService.get(catalogueId, interoperabilityRecordBundle.getInteroperabilityRecord().getProviderId(), auth);
+    public InteroperabilityRecordBundle audit(String id, String comment, LoggingInfo.ActionType actionType, Authentication auth) {
+        InteroperabilityRecordBundle interoperabilityRecordBundle = get(id);
+        ProviderBundle provider = providerService.get(interoperabilityRecordBundle.getInteroperabilityRecord().getProviderId(), auth);
         commonMethods.auditResource(interoperabilityRecordBundle, comment, actionType, auth);
         if (actionType.getKey().equals(LoggingInfo.ActionType.VALID.getKey())) {
             interoperabilityRecordBundle.setAuditState(Auditable.VALID);
@@ -404,11 +404,11 @@ public class InteroperabilityRecordManager extends ResourceManager<Interoperabil
     }
 
     @CacheEvict(cacheNames = {CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)
-    public InteroperabilityRecordBundle suspend(String interoperabilityRecordId, String catalogueId, boolean suspend, Authentication auth) {
-        InteroperabilityRecordBundle interoperabilityRecordBundle = get(interoperabilityRecordId, catalogueId);
-        commonMethods.suspensionValidation(interoperabilityRecordBundle, catalogueId,
+    public InteroperabilityRecordBundle suspend(String interoperabilityRecordId, boolean suspend, Authentication auth) {
+        InteroperabilityRecordBundle interoperabilityRecordBundle = get(interoperabilityRecordId);
+        commonMethods.suspensionValidation(interoperabilityRecordBundle, interoperabilityRecordBundle.getInteroperabilityRecord().getCatalogueId(),
                 interoperabilityRecordBundle.getInteroperabilityRecord().getProviderId(), suspend, auth);
-        commonMethods.suspendResource(interoperabilityRecordBundle, catalogueId, suspend, auth);
+        commonMethods.suspendResource(interoperabilityRecordBundle, suspend, auth);
         return super.update(interoperabilityRecordBundle, auth);
     }
 }

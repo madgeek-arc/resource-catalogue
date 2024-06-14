@@ -72,7 +72,7 @@ public class CatalogueController {
         return new ResponseEntity<>(catalogue, HttpStatus.OK);
     }
 
-//    @PostMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
+    //    @PostMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_USER')")
     public ResponseEntity<Catalogue> addCatalogue(@RequestBody Catalogue catalogue, @Parameter(hidden = true) Authentication auth) {
         CatalogueBundle catalogueBundle = catalogueManager.add(new CatalogueBundle(catalogue), auth);
@@ -145,7 +145,7 @@ public class CatalogueController {
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     public ResponseEntity<CatalogueBundle> verifyCatalogue(@PathVariable("id") String id, @RequestParam(required = false) Boolean active,
                                                            @RequestParam(required = false) String status, @Parameter(hidden = true) Authentication auth) {
-        CatalogueBundle catalogue = catalogueManager.verifyCatalogue(id, status, active, auth);
+        CatalogueBundle catalogue = catalogueManager.verify(id, status, active, auth);
         logger.info("Updated Catalogue with name '{}' [status: {}] [active: {}]", catalogue.getCatalogue().getName(), status, active);
         return new ResponseEntity<>(catalogue, HttpStatus.OK);
     }
@@ -214,7 +214,7 @@ public class CatalogueController {
                                                           @RequestParam(required = false) String comment,
                                                           @RequestParam LoggingInfo.ActionType actionType,
                                                           @Parameter(hidden = true) Authentication auth) {
-        CatalogueBundle catalogue = catalogueManager.auditCatalogue(id, comment, actionType, auth);
+        CatalogueBundle catalogue = catalogueManager.audit(id, comment, actionType, auth);
         return new ResponseEntity<>(catalogue, HttpStatus.OK);
     }
 
@@ -258,7 +258,7 @@ public class CatalogueController {
         return new ResponseEntity<>(providerBundle.getProvider(), HttpStatus.CREATED);
     }
 
-//    @PostMapping(path = "{catalogueId}/provider/bundle", produces = {MediaType.APPLICATION_JSON_VALUE})
+    //    @PostMapping(path = "{catalogueId}/provider/bundle", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<ProviderBundle> addCatalogueProviderBundle(@RequestBody ProviderBundle provider, @PathVariable String catalogueId, @Parameter(hidden = true) Authentication auth) {
         ProviderBundle providerBundle = providerManager.add(provider, catalogueId, auth);
@@ -280,7 +280,7 @@ public class CatalogueController {
         return new ResponseEntity<>(providerBundle.getProvider(), HttpStatus.OK);
     }
 
-//    @PutMapping(path = "{catalogueId}/provider/bundle", produces = {MediaType.APPLICATION_JSON_VALUE})
+    //    @PutMapping(path = "{catalogueId}/provider/bundle", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<ProviderBundle> updateCatalogueProviderBundle(@RequestBody ProviderBundle provider, @PathVariable String catalogueId, @RequestParam(required = false) String comment, @Parameter(hidden = true) Authentication auth) throws ResourceNotFoundException {
         ProviderBundle providerBundle = providerManager.update(provider, auth);

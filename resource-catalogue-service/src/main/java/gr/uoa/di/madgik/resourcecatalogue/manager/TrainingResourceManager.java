@@ -135,7 +135,7 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
                 commonMethods.ensureResourceCataloguePidUniqueness(trainingResourceBundle.getId(),
                         trainingResourceBundle.getTrainingResource().getAlternativeIdentifiers()));
 
-        ProviderBundle providerBundle = providerService.get(trainingResourceBundle.getTrainingResource().getCatalogueId(), trainingResourceBundle.getTrainingResource().getResourceOrganisation(), auth);
+        ProviderBundle providerBundle = providerService.get(trainingResourceBundle.getTrainingResource().getResourceOrganisation(), auth);
         if (providerBundle == null) {
             throw new ValidationException(String.format("Provider with id '%s' and catalogueId '%s' does not exist", trainingResourceBundle.getTrainingResource().getResourceOrganisation(), trainingResourceBundle.getTrainingResource().getCatalogueId()));
         }
@@ -227,8 +227,7 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
         logger.trace("Attempting to update the Training Resource with id '{}' of the Catalogue '{}'", ret.getTrainingResource().getId(), ret.getTrainingResource().getCatalogueId());
         validateTrainingResource(ret);
 
-        ProviderBundle providerBundle = providerService.get(ret.getTrainingResource().getCatalogueId(),
-                ret.getTrainingResource().getResourceOrganisation(), auth);
+        ProviderBundle providerBundle = providerService.get(ret.getTrainingResource().getResourceOrganisation(), auth);
 
         // block Public Training Resource update
         if (existingTrainingResource.getMetadata().isPublished()) {
@@ -292,6 +291,7 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
         return ret;
     }
 
+    @Override
     public TrainingResourceBundle getCatalogueResource(String catalogueId, String trainingResourceId, Authentication auth) {
         TrainingResourceBundle trainingResourceBundle = get(trainingResourceId, catalogueId);
         CatalogueBundle catalogueBundle = catalogueService.get(catalogueId);
@@ -331,7 +331,7 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
     }
 
     @CacheEvict(cacheNames = {CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)
-    public TrainingResourceBundle verifyResource(String id, String status, Boolean active, Authentication auth) {
+    public TrainingResourceBundle verify(String id, String status, Boolean active, Authentication auth) {
         Vocabulary statusVocabulary = vocabularyService.getOrElseThrow(status);
         if (!statusVocabulary.getType().equals("Resource state")) {
             throw new ValidationException(String.format("Vocabulary %s does not consist a Resource State!", status));
@@ -339,8 +339,7 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
         logger.trace("verifyResource with id: '{}' | status -> '{}' | active -> '{}'", id, status, active);
         TrainingResourceBundle trainingResourceBundle = getCatalogueResource(catalogueId, id, auth);
         trainingResourceBundle.setStatus(vocabularyService.get(status).getId());
-        ProviderBundle resourceProvider = providerService.get(trainingResourceBundle.getTrainingResource().getCatalogueId(),
-                trainingResourceBundle.getTrainingResource().getResourceOrganisation(), auth);
+        ProviderBundle resourceProvider = providerService.get(trainingResourceBundle.getTrainingResource().getResourceOrganisation(), auth);
         List<LoggingInfo> loggingInfoList = commonMethods.returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(trainingResourceBundle, auth);
         LoggingInfo loggingInfo;
 
@@ -419,7 +418,7 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
             throw new ValidationException(String.format("You cannot activate this Training Resource, because it's Inactive with status = [%s]", trainingResourceBundle.getStatus()));
         }
 
-        ProviderBundle providerBundle = providerService.get(trainingResourceBundle.getTrainingResource().getCatalogueId(), trainingResourceBundle.getTrainingResource().getResourceOrganisation(), auth);
+        ProviderBundle providerBundle = providerService.get(trainingResourceBundle.getTrainingResource().getResourceOrganisation(), auth);
         if (providerBundle.getStatus().equals("approved provider") && providerBundle.isActive()) {
             activeProvider = trainingResourceBundle.getTrainingResource().getResourceOrganisation();
         }
@@ -445,6 +444,7 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
         return trainingResourceBundle;
     }
 
+    @Override
     public void publishTrainingResourceRelatedResources(String id, String catalogueId, Boolean active, Authentication auth) {
         HelpdeskBundle helpdeskBundle = helpdeskService.get(id, catalogueId);
         MonitoringBundle monitoringBundle = monitoringService.get(id, catalogueId);
@@ -506,9 +506,10 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
         }
     }
 
-    public TrainingResourceBundle auditResource(String trainingResourceId, String catalogueId, String comment, LoggingInfo.ActionType actionType, Authentication auth) {
-        TrainingResourceBundle trainingResource = get(trainingResourceId, catalogueId);
-        ProviderBundle provider = providerService.get(catalogueId, trainingResource.getTrainingResource().getResourceOrganisation(), auth);
+    @Override
+    public TrainingResourceBundle audit(String trainingResourceId, String comment, LoggingInfo.ActionType actionType, Authentication auth) {
+        TrainingResourceBundle trainingResource = get(trainingResourceId);
+        ProviderBundle provider = providerService.get(trainingResource.getTrainingResource().getResourceOrganisation(), auth);
         commonMethods.auditResource(trainingResource, comment, actionType, auth);
         if (actionType.getKey().equals(LoggingInfo.ActionType.VALID.getKey())) {
             trainingResource.setAuditState(Auditable.VALID);
@@ -582,7 +583,7 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
         return this.getAll(ff, null).getResults();
     }
 
-    //    @Override
+    @Override
     public Paging<LoggingInfo> getLoggingInfoHistory(String id, String catalogueId) {
         TrainingResourceBundle trainingResourceBundle;
         try {
@@ -604,6 +605,7 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
         return null;
     }
 
+    @Override
     public void sendEmailNotificationsToProvidersWithOutdatedResources(String resourceId, Authentication auth) {
         String providerId = providerService.get(get(resourceId).getTrainingResource().getResourceOrganisation()).getId();
         String providerName = providerService.get(get(resourceId).getTrainingResource().getResourceOrganisation()).getProvider().getName();
@@ -611,11 +613,13 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
         registrationMailService.sendEmailNotificationsToProvidersWithOutdatedResources(resourceId);
     }
 
+    @Override
     public TrainingResourceBundle createPublicResource(TrainingResourceBundle trainingResourceBundle, Authentication auth) {
         publicTrainingResourceManager.add(trainingResourceBundle, auth);
         return trainingResourceBundle;
     }
 
+    @Override
     public TrainingResourceBundle get(String id, String catalogueId) {
         Resource resource = getResource(id, catalogueId);
         if (resource == null) {
@@ -625,6 +629,7 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
     }
 
     // Needed for FieldValidation
+    @Override
     public TrainingResourceBundle get(String id) {
         TrainingResourceBundle resource = null;
         try {
@@ -671,6 +676,7 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
         return Collections.emptyList();
     }
 
+    @Override
     public TrainingResourceBundle getOrElseReturnNull(String id) {
         TrainingResourceBundle trainingResourceBundle;
         try {
@@ -681,6 +687,7 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
         return trainingResourceBundle;
     }
 
+    @Override
     public TrainingResourceBundle getOrElseReturnNull(String id, String catalogueId) {
         TrainingResourceBundle trainingResourceBundle;
         try {
@@ -689,13 +696,6 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
             return null;
         }
         return trainingResourceBundle;
-    }
-
-    @Override
-    public boolean exists(SearchService.KeyValue... ids) {
-        Resource resource;
-        resource = this.searchService.searchFields(getResourceType(), ids);
-        return resource != null;
     }
 
     @Override
@@ -856,6 +856,7 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
         return resources;
     }
 
+    @Override
     public TrainingResourceBundle changeProvider(String resourceId, String newProviderId, String comment, Authentication auth) {
         TrainingResourceBundle trainingResourceBundle = get(resourceId, catalogueId);
         // check Datasource's status
@@ -863,8 +864,8 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
             throw new ValidationException(String.format("You cannot move Training Resource with id [%s] to another Provider as it" +
                     "is not yet Approved", trainingResourceBundle.getId()));
         }
-        ProviderBundle newProvider = providerService.get(catalogueId, newProviderId, auth);
-        ProviderBundle oldProvider = providerService.get(catalogueId, trainingResourceBundle.getTrainingResource().getResourceOrganisation(), auth);
+        ProviderBundle newProvider = providerService.get(newProviderId, auth);
+        ProviderBundle oldProvider = providerService.get(trainingResourceBundle.getTrainingResource().getResourceOrganisation(), auth);
 
         // check that the 2 Providers co-exist under the same Catalogue
         if (!oldProvider.getProvider().getCatalogueId().equals(newProvider.getProvider().getCatalogueId())) {
@@ -920,36 +921,37 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
         return trainingResourceBundle;
     }
 
+    @Override
     @CacheEvict(cacheNames = {CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)
-    public TrainingResourceBundle suspend(String trainingResourceId, String catalogueId, boolean suspend, Authentication auth) {
-        TrainingResourceBundle trainingResourceBundle = get(trainingResourceId, catalogueId);
-        commonMethods.suspensionValidation(trainingResourceBundle, catalogueId,
+    public TrainingResourceBundle suspend(String trainingResourceId, boolean suspend, Authentication auth) {
+        TrainingResourceBundle trainingResourceBundle = get(trainingResourceId);
+        commonMethods.suspensionValidation(trainingResourceBundle, trainingResourceBundle.getTrainingResource().getCatalogueId(),
                 trainingResourceBundle.getTrainingResource().getResourceOrganisation(), suspend, auth);
-        commonMethods.suspendResource(trainingResourceBundle, catalogueId, suspend, auth);
+        commonMethods.suspendResource(trainingResourceBundle, suspend, auth);
         // suspend Service's extensions
-        HelpdeskBundle helpdeskBundle = helpdeskService.get(trainingResourceId, catalogueId);
+        HelpdeskBundle helpdeskBundle = helpdeskService.get(trainingResourceId);
         if (helpdeskBundle != null) {
             try {
-                commonMethods.suspendResource(helpdeskBundle, catalogueId, suspend, auth);
+                commonMethods.suspendResource(helpdeskBundle, suspend, auth);
                 helpdeskService.update(helpdeskBundle, auth);
             } catch (gr.uoa.di.madgik.registry.exception.ResourceNotFoundException e) {
                 throw new RuntimeException(e);
             }
         }
-        MonitoringBundle monitoringBundle = monitoringService.get(trainingResourceId, catalogueId);
+        MonitoringBundle monitoringBundle = monitoringService.get(trainingResourceId);
         if (monitoringBundle != null) {
             try {
-                commonMethods.suspendResource(monitoringBundle, catalogueId, suspend, auth);
+                commonMethods.suspendResource(monitoringBundle, suspend, auth);
                 monitoringService.update(monitoringBundle, auth);
             } catch (gr.uoa.di.madgik.registry.exception.ResourceNotFoundException e) {
                 throw new RuntimeException(e);
             }
         }
         // suspend ResourceInteroperabilityRecord
-        ResourceInteroperabilityRecordBundle resourceInteroperabilityRecordBundle = resourceInteroperabilityRecordService.getWithResourceId(trainingResourceId, catalogueId);
+        ResourceInteroperabilityRecordBundle resourceInteroperabilityRecordBundle = resourceInteroperabilityRecordService.getWithResourceId(trainingResourceId);
         if (resourceInteroperabilityRecordBundle != null) {
             try {
-                commonMethods.suspendResource(resourceInteroperabilityRecordBundle, catalogueId, suspend, auth);
+                commonMethods.suspendResource(resourceInteroperabilityRecordBundle, suspend, auth);
                 resourceInteroperabilityRecordService.update(resourceInteroperabilityRecordBundle, auth);
             } catch (gr.uoa.di.madgik.registry.exception.ResourceNotFoundException e) {
                 throw new RuntimeException(e);

@@ -367,7 +367,7 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
     }
 
     @Override
-    public CatalogueBundle verifyCatalogue(String id, String status, Boolean active, Authentication auth) {
+    public CatalogueBundle verify(String id, String status, Boolean active, Authentication auth) {
         Vocabulary statusVocabulary = vocabularyService.getOrElseThrow(status);
         if (!statusVocabulary.getType().equals("Catalogue state")) {
             throw new ValidationException(String.format("Vocabulary %s does not consist a Catalogue State!", status));
@@ -407,8 +407,8 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
     }
 
     @Override
-    public CatalogueBundle publish(String catalogueId, Boolean active, Authentication auth) {
-        CatalogueBundle catalogue = get(catalogueId);
+    public CatalogueBundle publish(String id, Boolean active, Authentication auth) {
+        CatalogueBundle catalogue = get(id);
         if ((catalogue.getStatus().equals(vocabularyService.get("pending catalogue").getId()) ||
                 catalogue.getStatus().equals(vocabularyService.get("rejected catalogue").getId())) && !catalogue.isActive()) {
             throw new ValidationException(String.format("You cannot activate this Catalogue, because it's Inactive with status = [%s]", catalogue.getStatus()));
@@ -436,27 +436,27 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
         return super.update(catalogue, auth);
     }
 
-    public CatalogueBundle suspend(String catalogueId, boolean suspend, Authentication auth) {
-        CatalogueBundle catalogueBundle = get(catalogueId, auth);
+    public CatalogueBundle suspend(String id, boolean suspend, Authentication auth) {
+        CatalogueBundle catalogueBundle = get(id, auth);
 
         // Suspend Catalogue
-        commonMethods.suspendResource(catalogueBundle, catalogueId, suspend, auth);
+        commonMethods.suspendResource(catalogueBundle, suspend, auth);
         super.update(catalogueBundle, auth);
 
         // Suspend Catalogue's resources
-        List<ProviderBundle> providers = providerService.getAll(createFacetFilter(catalogueId), auth).getResults();
+        List<ProviderBundle> providers = providerService.getAll(createFacetFilter(id), auth).getResults();
 
         if (providers != null && !providers.isEmpty()) {
             for (ProviderBundle providerBundle : providers) {
-                providerService.suspend(providerBundle.getId(), catalogueId, suspend, auth);
+                providerService.suspend(providerBundle.getId(), suspend, auth);
             }
         }
 
         return catalogueBundle;
     }
 
-    public CatalogueBundle auditCatalogue(String catalogueId, String comment, LoggingInfo.ActionType actionType, Authentication auth) {
-        CatalogueBundle catalogue = get(catalogueId);
+    public CatalogueBundle audit(String id, String comment, LoggingInfo.ActionType actionType, Authentication auth) {
+        CatalogueBundle catalogue = get(id);
         commonMethods.auditResource(catalogue, comment, actionType, auth);
         if (actionType.getKey().equals(LoggingInfo.ActionType.VALID.getKey())) {
             catalogue.setAuditState(Auditable.VALID);
