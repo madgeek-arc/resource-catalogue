@@ -72,6 +72,7 @@ public class AuthSuccessHandler implements AuthenticationSuccessHandler {
 
         Map<String, Object> info = new HashMap<>();
         info.put("sub", user.getSubject());
+        info.put("email", user.getEmail());
         info.put("given_name", user.getGivenName());
         info.put("family_name", user.getFamilyName());
         info.put("roles", roles);
