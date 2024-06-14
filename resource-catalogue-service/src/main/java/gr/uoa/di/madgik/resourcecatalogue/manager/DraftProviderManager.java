@@ -1,9 +1,6 @@
 package gr.uoa.di.madgik.resourcecatalogue.manager;
 
-import gr.uoa.di.madgik.registry.domain.FacetFilter;
-import gr.uoa.di.madgik.registry.domain.Paging;
-import gr.uoa.di.madgik.registry.domain.Resource;
-import gr.uoa.di.madgik.registry.domain.ResourceType;
+import gr.uoa.di.madgik.registry.domain.*;
 import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.domain.LoggingInfo;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Metadata;
@@ -21,11 +18,13 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 
 import static gr.uoa.di.madgik.resourcecatalogue.config.Properties.Cache.CACHE_PROVIDERS;
 
+@Deprecated(forRemoval = true)
 @Service("draftProviderManager")
 public class DraftProviderManager extends ResourceManager<ProviderBundle> implements DraftResourceService<ProviderBundle> {
 
@@ -129,6 +128,51 @@ public class DraftProviderManager extends ResourceManager<ProviderBundle> implem
     public ProviderBundle transformToNonDraft(String providerId, Authentication auth) {
         ProviderBundle providerBundle = get(providerId);
         return transformToNonDraft(providerBundle, auth);
+    }
+
+    @Override
+    public ProviderBundle transformToDraft(ProviderBundle bundle, Authentication auth) {
+        return null;
+    }
+
+    @Override
+    public ProviderBundle transformToDraft(String id, Authentication auth) {
+        return null;
+    }
+
+    @Override
+    public String getDraftResourceType() {
+        return null;
+    }
+
+    @Override
+    public ProviderBundle addDraft(ProviderBundle bundle, Authentication authentication) {
+        return null;
+    }
+
+    @Override
+    public ProviderBundle updateDraft(ProviderBundle bundle, Authentication authentication) throws NoSuchFieldException, InvocationTargetException, NoSuchMethodException {
+        return null;
+    }
+
+    @Override
+    public void deleteDraft(String id, Authentication authentication) {
+
+    }
+
+    @Override
+    public ProviderBundle getDraft(String id, Authentication authentication) {
+        return null;
+    }
+
+    @Override
+    public Browsing<ProviderBundle> getAllDrafts(FacetFilter facetFilter, Authentication authentication) {
+        return null;
+    }
+
+    @Override
+    public List<ProviderBundle> getMyDrafts(Authentication authentication) {
+        return null;
     }
 
     @Override

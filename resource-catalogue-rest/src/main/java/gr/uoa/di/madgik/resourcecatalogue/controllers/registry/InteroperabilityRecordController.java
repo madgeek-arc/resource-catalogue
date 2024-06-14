@@ -309,70 +309,70 @@ public class InteroperabilityRecordController {
     }
 
     // Drafts
-    @GetMapping(path = "/draft/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE})
-    public ResponseEntity<InteroperabilityRecord> getDraftInteroperabilityRecord(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
-                                                                                 @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix) {
-        String id = prefix + "/" + suffix;
-        return new ResponseEntity<>(draftInteroperabilityRecordService.get(id).getInteroperabilityRecord(), HttpStatus.OK);
-    }
-
-    @GetMapping(path = "/draft/getMyDraftInteroperabilityRecords", produces = {MediaType.APPLICATION_JSON_VALUE})
-    public ResponseEntity<List<InteroperabilityRecordBundle>> getMyDraftInteroperabilityRecords(@Parameter(hidden = true) Authentication auth) {
-        return new ResponseEntity<>(draftInteroperabilityRecordService.getMy(auth), HttpStatus.OK);
-    }
-
-    @PostMapping(path = "/draft", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_USER')")
-    public ResponseEntity<InteroperabilityRecord> addDraftInteroperabilityRecord(@RequestBody InteroperabilityRecord interoperabilityRecord,
-                                                                                 @Parameter(hidden = true) Authentication auth) {
-        InteroperabilityRecordBundle interoperabilityRecordBundle = draftInteroperabilityRecordService.add(new InteroperabilityRecordBundle(interoperabilityRecord), auth);
-        logger.info("User '{}' added the Draft Interoperability Record with name '{}' and id '{}'", User.of(auth).getEmail(),
-                interoperabilityRecord.getTitle(), interoperabilityRecord.getId());
-        return new ResponseEntity<>(interoperabilityRecordBundle.getInteroperabilityRecord(), HttpStatus.CREATED);
-    }
-
-    @PutMapping(path = "/draft", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth, #interoperabilityRecord)")
-    public ResponseEntity<InteroperabilityRecord> updateDraftInteroperabilityRecord(@RequestBody InteroperabilityRecord interoperabilityRecord,
-                                                                                    @Parameter(hidden = true) Authentication auth)
-            throws ResourceNotFoundException {
-        InteroperabilityRecordBundle interoperabilityRecordBundle = draftInteroperabilityRecordService.get(interoperabilityRecord.getId());
-        interoperabilityRecordBundle.setInteroperabilityRecord(interoperabilityRecord);
-        interoperabilityRecordBundle = draftInteroperabilityRecordService.update(interoperabilityRecordBundle, auth);
-        logger.info("User '{}' updated the Draft Interoperability Record with name '{}' and id '{}'", User.of(auth).getEmail(),
-                interoperabilityRecord.getTitle(), interoperabilityRecord.getId());
-        return new ResponseEntity<>(interoperabilityRecordBundle.getInteroperabilityRecord(), HttpStatus.OK);
-    }
-
-    @DeleteMapping(path = "/draft/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth, #prefix+'/'+#suffix)")
-    public ResponseEntity<InteroperabilityRecord> deleteDraftInteroperabilityRecord(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
-                                                                                    @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix,
-                                                                                    @Parameter(hidden = true) Authentication auth)
-            throws ResourceNotFoundException {
-        String id = prefix + "/" + suffix;
-        InteroperabilityRecordBundle interoperabilityRecordBundle = draftInteroperabilityRecordService.get(id);
-        if (interoperabilityRecordBundle == null) {
-            return new ResponseEntity<>(HttpStatus.GONE);
-        }
-        draftInteroperabilityRecordService.delete(interoperabilityRecordBundle);
-        logger.info("User '{}' deleted the Draft Interoperability Record '{}'-'{}'", User.of(auth).getEmail(),
-                id, interoperabilityRecordBundle.getInteroperabilityRecord().getTitle());
-        return new ResponseEntity<>(interoperabilityRecordBundle.getInteroperabilityRecord(), HttpStatus.OK);
-    }
-
-    @PutMapping(path = "draft/transform", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_USER')")
-    public ResponseEntity<InteroperabilityRecord> transformToInteroperabilityRecord(@RequestBody InteroperabilityRecord interoperabilityRecord,
-                                                                                    @Parameter(hidden = true) Authentication auth)
-            throws ResourceNotFoundException {
-        InteroperabilityRecordBundle interoperabilityRecordBundle = draftInteroperabilityRecordService.get(interoperabilityRecord.getId());
-        interoperabilityRecordBundle.setInteroperabilityRecord(interoperabilityRecord);
-
-        interoperabilityRecordService.validate(interoperabilityRecordBundle);
-        draftInteroperabilityRecordService.update(interoperabilityRecordBundle, auth);
-        interoperabilityRecordBundle = draftInteroperabilityRecordService.transformToNonDraft(interoperabilityRecordBundle.getId(), auth);
-
-        return new ResponseEntity<>(interoperabilityRecordBundle.getInteroperabilityRecord(), HttpStatus.OK);
-    }
+//    @GetMapping(path = "/draft/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE})
+//    public ResponseEntity<InteroperabilityRecord> getDraftInteroperabilityRecord(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
+//                                                                                 @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix) {
+//        String id = prefix + "/" + suffix;
+//        return new ResponseEntity<>(draftInteroperabilityRecordService.get(id).getInteroperabilityRecord(), HttpStatus.OK);
+//    }
+//
+//    @GetMapping(path = "/draft/getMyDraftInteroperabilityRecords", produces = {MediaType.APPLICATION_JSON_VALUE})
+//    public ResponseEntity<List<InteroperabilityRecordBundle>> getMyDraftInteroperabilityRecords(@Parameter(hidden = true) Authentication auth) {
+//        return new ResponseEntity<>(draftInteroperabilityRecordService.getMy(auth), HttpStatus.OK);
+//    }
+//
+//    @PostMapping(path = "/draft", produces = {MediaType.APPLICATION_JSON_VALUE})
+//    @PreAuthorize("hasRole('ROLE_USER')")
+//    public ResponseEntity<InteroperabilityRecord> addDraftInteroperabilityRecord(@RequestBody InteroperabilityRecord interoperabilityRecord,
+//                                                                                 @Parameter(hidden = true) Authentication auth) {
+//        InteroperabilityRecordBundle interoperabilityRecordBundle = draftInteroperabilityRecordService.add(new InteroperabilityRecordBundle(interoperabilityRecord), auth);
+//        logger.info("User '{}' added the Draft Interoperability Record with name '{}' and id '{}'", User.of(auth).getEmail(),
+//                interoperabilityRecord.getTitle(), interoperabilityRecord.getId());
+//        return new ResponseEntity<>(interoperabilityRecordBundle.getInteroperabilityRecord(), HttpStatus.CREATED);
+//    }
+//
+//    @PutMapping(path = "/draft", produces = {MediaType.APPLICATION_JSON_VALUE})
+//    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth, #interoperabilityRecord)")
+//    public ResponseEntity<InteroperabilityRecord> updateDraftInteroperabilityRecord(@RequestBody InteroperabilityRecord interoperabilityRecord,
+//                                                                                    @Parameter(hidden = true) Authentication auth)
+//            throws ResourceNotFoundException {
+//        InteroperabilityRecordBundle interoperabilityRecordBundle = draftInteroperabilityRecordService.get(interoperabilityRecord.getId());
+//        interoperabilityRecordBundle.setInteroperabilityRecord(interoperabilityRecord);
+//        interoperabilityRecordBundle = draftInteroperabilityRecordService.update(interoperabilityRecordBundle, auth);
+//        logger.info("User '{}' updated the Draft Interoperability Record with name '{}' and id '{}'", User.of(auth).getEmail(),
+//                interoperabilityRecord.getTitle(), interoperabilityRecord.getId());
+//        return new ResponseEntity<>(interoperabilityRecordBundle.getInteroperabilityRecord(), HttpStatus.OK);
+//    }
+//
+//    @DeleteMapping(path = "/draft/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE})
+//    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth, #prefix+'/'+#suffix)")
+//    public ResponseEntity<InteroperabilityRecord> deleteDraftInteroperabilityRecord(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
+//                                                                                    @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix,
+//                                                                                    @Parameter(hidden = true) Authentication auth)
+//            throws ResourceNotFoundException {
+//        String id = prefix + "/" + suffix;
+//        InteroperabilityRecordBundle interoperabilityRecordBundle = draftInteroperabilityRecordService.get(id);
+//        if (interoperabilityRecordBundle == null) {
+//            return new ResponseEntity<>(HttpStatus.GONE);
+//        }
+//        draftInteroperabilityRecordService.delete(interoperabilityRecordBundle);
+//        logger.info("User '{}' deleted the Draft Interoperability Record '{}'-'{}'", User.of(auth).getEmail(),
+//                id, interoperabilityRecordBundle.getInteroperabilityRecord().getTitle());
+//        return new ResponseEntity<>(interoperabilityRecordBundle.getInteroperabilityRecord(), HttpStatus.OK);
+//    }
+//
+//    @PutMapping(path = "draft/transform", produces = {MediaType.APPLICATION_JSON_VALUE})
+//    @PreAuthorize("hasRole('ROLE_USER')")
+//    public ResponseEntity<InteroperabilityRecord> transformToInteroperabilityRecord(@RequestBody InteroperabilityRecord interoperabilityRecord,
+//                                                                                    @Parameter(hidden = true) Authentication auth)
+//            throws ResourceNotFoundException {
+//        InteroperabilityRecordBundle interoperabilityRecordBundle = draftInteroperabilityRecordService.get(interoperabilityRecord.getId());
+//        interoperabilityRecordBundle.setInteroperabilityRecord(interoperabilityRecord);
+//
+//        interoperabilityRecordService.validate(interoperabilityRecordBundle);
+//        draftInteroperabilityRecordService.update(interoperabilityRecordBundle, auth);
+//        interoperabilityRecordBundle = draftInteroperabilityRecordService.transformToNonDraft(interoperabilityRecordBundle.getId(), auth);
+//
+//        return new ResponseEntity<>(interoperabilityRecordBundle.getInteroperabilityRecord(), HttpStatus.OK);
+//    }
 }

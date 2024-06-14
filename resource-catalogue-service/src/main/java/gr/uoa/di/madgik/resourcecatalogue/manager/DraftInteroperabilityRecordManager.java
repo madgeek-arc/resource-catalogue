@@ -1,9 +1,6 @@
 package gr.uoa.di.madgik.resourcecatalogue.manager;
 
-import gr.uoa.di.madgik.registry.domain.FacetFilter;
-import gr.uoa.di.madgik.registry.domain.Paging;
-import gr.uoa.di.madgik.registry.domain.Resource;
-import gr.uoa.di.madgik.registry.domain.ResourceType;
+import gr.uoa.di.madgik.registry.domain.*;
 import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.domain.InteroperabilityRecordBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.LoggingInfo;
@@ -22,15 +19,17 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 
 import static gr.uoa.di.madgik.resourcecatalogue.config.Properties.Cache.*;
 
+@Deprecated(forRemoval = true)
 @Service("draftInteroperabilityRecordManager")
 public class DraftInteroperabilityRecordManager extends ResourceManager<InteroperabilityRecordBundle> implements DraftResourceService<InteroperabilityRecordBundle> {
 
-    private static final Logger logger = LoggerFactory.getLogger(DraftServiceManager.class);
+    private static final Logger logger = LoggerFactory.getLogger(DraftInteroperabilityRecordManager.class);
 
     private final InteroperabilityRecordService interoperabilityRecordService;
     private final IdCreator idCreator;
@@ -128,6 +127,51 @@ public class DraftInteroperabilityRecordManager extends ResourceManager<Interope
     public InteroperabilityRecordBundle transformToNonDraft(String id, Authentication auth) {
         InteroperabilityRecordBundle interoperabilityRecordBundle = this.get(id);
         return transformToNonDraft(interoperabilityRecordBundle, auth);
+    }
+
+    @Override
+    public InteroperabilityRecordBundle transformToDraft(InteroperabilityRecordBundle interoperabilityRecordBundle, Authentication auth) {
+        return null;
+    }
+
+    @Override
+    public InteroperabilityRecordBundle transformToDraft(String id, Authentication auth) {
+        return null;
+    }
+
+    @Override
+    public String getDraftResourceType() {
+        return null;
+    }
+
+    @Override
+    public InteroperabilityRecordBundle addDraft(InteroperabilityRecordBundle interoperabilityRecordBundle, Authentication authentication) {
+        return null;
+    }
+
+    @Override
+    public InteroperabilityRecordBundle updateDraft(InteroperabilityRecordBundle interoperabilityRecordBundle, Authentication authentication) throws NoSuchFieldException, InvocationTargetException, NoSuchMethodException {
+        return null;
+    }
+
+    @Override
+    public void deleteDraft(String id, Authentication authentication) {
+
+    }
+
+    @Override
+    public InteroperabilityRecordBundle getDraft(String id, Authentication authentication) {
+        return null;
+    }
+
+    @Override
+    public Browsing<InteroperabilityRecordBundle> getAllDrafts(FacetFilter facetFilter, Authentication authentication) {
+        return null;
+    }
+
+    @Override
+    public List<InteroperabilityRecordBundle> getMyDrafts(Authentication authentication) {
+        return null;
     }
 
     @Override

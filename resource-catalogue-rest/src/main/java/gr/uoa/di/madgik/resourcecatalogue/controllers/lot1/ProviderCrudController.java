@@ -31,15 +31,12 @@ public class ProviderCrudController extends ResourceCrudController<ProviderBundl
 
     private static final Logger logger = LogManager.getLogger(ProviderCrudController.class);
     private final ProviderService providerService;
-    private final DraftResourceService<ProviderBundle> draftProviderService;
     private final GenericResourceService genericResourceService;
 
     ProviderCrudController(ProviderService providerService,
-                           DraftResourceService<ProviderBundle> draftProviderService,
                            GenericResourceService genericResourceService) {
         super(providerService);
         this.providerService = providerService;
-        this.draftProviderService = draftProviderService;
         this.genericResourceService = genericResourceService;
     }
 
@@ -54,7 +51,7 @@ public class ProviderCrudController extends ResourceCrudController<ProviderBundl
     public ResponseEntity<ProviderBundle> add(@RequestBody ProviderBundle providerBundle,
                                               @Parameter(hidden = true) Authentication auth) {
         if (providerBundle.isDraft()) {
-            return new ResponseEntity<>(draftProviderService.save(providerBundle), HttpStatus.CREATED);
+            return new ResponseEntity<>(providerService.addDraft(providerBundle, auth), HttpStatus.CREATED);
         }
         return super.add(providerBundle, auth);
     }

@@ -32,6 +32,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
 
+import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -46,7 +47,6 @@ public class ProviderController {
 
     private static final Logger logger = LogManager.getLogger(ProviderController.class);
     private final ProviderService providerService;
-    private final DraftResourceService<ProviderBundle> draftProviderService;
     private final ServiceBundleService<ServiceBundle> serviceBundleService;
     private final TrainingResourceService trainingResourceService;
     private final SecurityService securityService;
@@ -66,13 +66,11 @@ public class ProviderController {
     private String pidPrefix;
 
     ProviderController(ProviderService providerService,
-                       DraftResourceService<ProviderBundle> draftProviderService,
                        ServiceBundleService<ServiceBundle> serviceBundleService,
                        TrainingResourceService trainingResourceService,
                        SecurityService securityService, MigrationService migrationService,
                        GenericResourceService genericResourceService) {
         this.providerService = providerService;
-        this.draftProviderService = draftProviderService;
         this.serviceBundleService = serviceBundleService;
         this.trainingResourceService = trainingResourceService;
         this.securityService = securityService;
@@ -511,18 +509,18 @@ public class ProviderController {
     public ResponseEntity<Provider> getDraftProvider(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
                                                      @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix) {
         String id = prefix + "/" + suffix;
-        return new ResponseEntity<>(draftProviderService.get(id).getProvider(), HttpStatus.OK);
+        return new ResponseEntity<>(providerService.getDraft(id, null).getProvider(), HttpStatus.OK);
     }
 
     @GetMapping(path = "/draft/getMyDraftProviders", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<List<ProviderBundle>> getMyDraftProviders(@Parameter(hidden = true) Authentication auth) {
-        return new ResponseEntity<>(draftProviderService.getMy(auth), HttpStatus.OK);
+        return new ResponseEntity<>(providerService.getMyDrafts(auth), HttpStatus.OK);
     }
 
     @PostMapping(path = "/draft", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_USER')")
     public ResponseEntity<Provider> addDraftProvider(@RequestBody Provider provider, @Parameter(hidden = true) Authentication auth) {
-        ProviderBundle providerBundle = draftProviderService.add(new ProviderBundle(provider), auth);
+        ProviderBundle providerBundle = providerService.addDraft(new ProviderBundle(provider), auth);
         logger.info("User '{}' added the Draft Provider with name '{}' and id '{}'", User.of(auth).getEmail(),
                 provider.getName(), provider.getId());
         return new ResponseEntity<>(providerBundle.getProvider(), HttpStatus.CREATED);
@@ -531,10 +529,10 @@ public class ProviderController {
     @PutMapping(path = "/draft", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isProviderAdmin(#auth,#provider.id,#provider.catalogueId)")
     public ResponseEntity<Provider> updateDraftProvider(@RequestBody Provider provider, @Parameter(hidden = true) Authentication auth)
-            throws ResourceNotFoundException {
-        ProviderBundle providerBundle = draftProviderService.get(provider.getId());
+            throws ResourceNotFoundException, NoSuchFieldException, InvocationTargetException, NoSuchMethodException {
+        ProviderBundle providerBundle = providerService.getDraft(provider.getId(), auth);
         providerBundle.setProvider(provider);
-        providerBundle = draftProviderService.update(providerBundle, auth);
+        providerBundle = providerService.updateDraft(providerBundle, auth);
         logger.info("User '{}' updated the Draft Provider with name '{}' and id '{}'", User.of(auth).getEmail(),
                 provider.getName(), provider.getId());
         return new ResponseEntity<>(providerBundle.getProvider(), HttpStatus.OK);
@@ -547,11 +545,11 @@ public class ProviderController {
                                                         @Parameter(hidden = true) Authentication auth)
             throws ResourceNotFoundException {
         String id = prefix + "/" + suffix;
-        ProviderBundle providerBundle = draftProviderService.get(id);
+        ProviderBundle providerBundle = providerService.getDraft(id, auth);
         if (providerBundle == null) {
             return new ResponseEntity<>(HttpStatus.GONE);
         }
-        draftProviderService.delete(providerBundle);
+        providerService.deleteDraft(providerBundle.getId(), auth);
         logger.info("User '{}' deleted the Draft Provider '{}'-'{}'", User.of(auth).getEmail(),
                 id, providerBundle.getProvider().getName());
         return new ResponseEntity<>(providerBundle.getProvider(), HttpStatus.OK);
@@ -560,13 +558,13 @@ public class ProviderController {
     @PutMapping(path = "draft/transform", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_USER')")
     public ResponseEntity<Provider> transformToProvider(@RequestBody Provider provider, @Parameter(hidden = true) Authentication auth)
-            throws ResourceNotFoundException {
-        ProviderBundle providerBundle = draftProviderService.get(provider.getId());
+            throws ResourceNotFoundException, NoSuchFieldException, InvocationTargetException, NoSuchMethodException {
+        ProviderBundle providerBundle = providerService.getDraft(provider.getId(), auth);
         providerBundle.setProvider(provider);
 
         providerService.validate(providerBundle);
-        draftProviderService.update(providerBundle, auth);
-        providerBundle = draftProviderService.transformToNonDraft(providerBundle.getId(), auth);
+        providerService.updateDraft(providerBundle, auth);
+        providerBundle = providerService.transformToNonDraft(providerBundle.getId(), auth);
 
         return new ResponseEntity<>(providerBundle.getProvider(), HttpStatus.OK);
     }

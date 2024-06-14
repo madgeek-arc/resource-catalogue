@@ -48,7 +48,7 @@ public class TrainingResourceCrudController extends ResourceCrudController<Train
     public ResponseEntity<TrainingResourceBundle> add(@RequestBody TrainingResourceBundle trainingResourceBundle,
                                                       @Parameter(hidden = true) Authentication auth) {
         if (trainingResourceBundle.isDraft()) {
-            return new ResponseEntity<>(draftTrainingResourceService.save(trainingResourceBundle), HttpStatus.CREATED);
+            return new ResponseEntity<>(draftTrainingResourceService.addDraft(trainingResourceBundle, auth), HttpStatus.CREATED);
         }
         return super.add(trainingResourceBundle, auth);
     }
