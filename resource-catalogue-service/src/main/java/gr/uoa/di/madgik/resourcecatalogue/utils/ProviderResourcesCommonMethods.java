@@ -89,7 +89,9 @@ public class ProviderResourcesCommonMethods {
     }
 
     public void checkCatalogueIdConsistency(Object o, String catalogueId) {
-        catalogueService.existsOrElseThrow(catalogueId);
+        if (!catalogueService.exists(catalogueId)) {
+            throw new ResourceNotFoundException(String.format("Catalogue with id '%s' does not exists.", catalogueId));
+        }
         if (o != null) {
             if (o instanceof ProviderBundle) {
                 if (((ProviderBundle) o).getPayload().getCatalogueId() == null || ((ProviderBundle) o).getPayload().getCatalogueId().equals("")) {

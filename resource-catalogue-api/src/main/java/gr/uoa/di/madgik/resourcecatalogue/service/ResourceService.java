@@ -94,6 +94,14 @@ public interface ResourceService<T> extends ResourceCRUDService<T, Authenticatio
     boolean exists(T t);
 
     /**
+     * Check if the resource with the provided id exists.
+     *
+     * @param id the id to search
+     * @return True/False
+     */
+    boolean exists(String id);
+
+    /**
      * Adds a list of resources.
      *
      * @param resources List of resources

@@ -103,15 +103,6 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
     }
 
     @Override
-    public void existsOrElseThrow(String id) {
-        CatalogueBundle catalogueBundle = get(id);
-        if (catalogueBundle == null) {
-            throw new ResourceNotFoundException(
-                    String.format("Could not find catalogue with id: %s", id));
-        }
-    }
-
-    @Override
     public Browsing<CatalogueBundle> getAll(FacetFilter ff, Authentication auth) {
         List<CatalogueBundle> userCatalogues = null;
         List<CatalogueBundle> retList = new ArrayList<>();

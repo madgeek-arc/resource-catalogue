@@ -136,7 +136,7 @@ public class DraftProviderManager extends ResourceManager<ProviderBundle> implem
     public ProviderBundle transformToNonDraft(ProviderBundle providerBundle, Authentication auth) {
         logger.trace("Attempting to transform the Draft Provider with id '{}' to Active", providerBundle.getId());
         providerManager.validate(providerBundle);
-        if (providerManager.exists(providerBundle)) {
+        if (providerManager.exists(providerBundle.getId())) {
             throw new ResourceAlreadyExistsException(String.format("Provider with id = '%s' already exists!", providerBundle.getId()));
         }
 

@@ -185,7 +185,12 @@ public abstract class ResourceManager<T extends Identifiable> extends AbstractGe
 
     @Override
     public boolean exists(T t) {
-        return t.getId() != null && whereID(t.getId(), false) != null;
+        return exists(t.getId());
+    }
+
+    @Override
+    public boolean exists(String id) {
+        return id != null && whereID(id, false) != null;
     }
 
     protected String serialize(T t) {

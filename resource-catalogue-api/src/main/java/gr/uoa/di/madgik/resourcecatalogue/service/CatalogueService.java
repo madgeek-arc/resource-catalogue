@@ -18,13 +18,6 @@ public interface CatalogueService extends ResourceService<CatalogueBundle> {
     CatalogueBundle get(String id, Authentication auth);
 
     /**
-     * Check the existence of a Catalogue
-     *
-     * @param id Catalogue ID
-     */
-    void existsOrElseThrow(String id);
-
-    /**
      * Add a new Catalogue
      *
      * @param catalogue      Catalogue to be added
