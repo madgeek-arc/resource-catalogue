@@ -70,7 +70,7 @@ public class DraftServiceManager extends ResourceManager<ServiceBundle> implemen
         List<ServiceBundle> resourceList = serviceBundleService.getAll(ff, auth).getResults();
         for (ServiceBundle existingResource : resourceList) {
             if (service.getService().getId().equals(existingResource.getService().getId()) && existingResource.getService().getCatalogueId().equals(catalogueId)) {
-                throw new ResourceAlreadyExistsException(String.format("Service with the specific id already exists on the [%s] Catalogue. Please refactor your 'abbreviation' field.", catalogueId));
+                throw new ResourceAlreadyExistsException(String.format("Service with the specific id already exists on the [%s] Catalogue.", catalogueId));
             }
         }
         logger.trace("Attempting to add a new Draft Service with id {}", service.getId());
@@ -90,14 +90,6 @@ public class DraftServiceManager extends ResourceManager<ServiceBundle> implemen
         super.add(service, auth);
 
         return service;
-    }
-
-    @CacheEvict(value = CACHE_PROVIDERS, allEntries = true)
-    public ResponseEntity<ServiceBundle> addCrud(ServiceBundle serviceBundle, Authentication auth) {
-        serviceBundle.setId(idCreator.generate(getResourceType()));
-        super.add(serviceBundle, auth);
-        logger.debug("Created a new Draft Service with id {}", serviceBundle.getId());
-        return new ResponseEntity<>(serviceBundle, HttpStatus.CREATED);
     }
 
     @Override
@@ -176,10 +168,6 @@ public class DraftServiceManager extends ResourceManager<ServiceBundle> implemen
         //TODO: Implement
         List<ServiceBundle> re = new ArrayList<>();
         return re;
-    }
-
-    public boolean hasAdminAcceptedTerms(String providerId, Authentication auth) {
-        return true;
     }
 
     private Resource getPendingResourceViaServiceId(String serviceId) {

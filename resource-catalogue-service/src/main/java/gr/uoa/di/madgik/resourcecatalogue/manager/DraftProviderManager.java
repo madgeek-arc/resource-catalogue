@@ -18,8 +18,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.annotation.Lazy;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
@@ -84,7 +82,7 @@ public class DraftProviderManager extends ResourceManager<ProviderBundle> implem
         List<ProviderBundle> providerList = providerManager.getAll(ff, auth).getResults();
         for (ProviderBundle existingProvider : providerList) {
             if (providerBundle.getProvider().getId().equals(existingProvider.getProvider().getId()) && existingProvider.getProvider().getCatalogueId().equals(catalogueId)) {
-                throw new ResourceAlreadyExistsException(String.format("Provider with the specific id already exists on the [%s] Catalogue. Please refactor your 'abbreviation' field.", catalogueId));
+                throw new ResourceAlreadyExistsException(String.format("Provider with the specific id already exists on the [%s] Catalogue.", catalogueId));
             }
         }
         logger.trace("Attempting to add a new Draft Provider: {}", providerBundle);
@@ -103,15 +101,6 @@ public class DraftProviderManager extends ResourceManager<ProviderBundle> implem
         return providerBundle;
     }
 
-    @CacheEvict(value = CACHE_PROVIDERS, allEntries = true)
-    public ResponseEntity<ProviderBundle> addCrud(ProviderBundle providerBundle, Authentication auth) {
-        providerBundle.setId(idCreator.generate(getResourceType()));
-        super.add(providerBundle, auth);
-        logger.debug("Created a new Draft Provider with id {}", providerBundle.getId());
-        return new ResponseEntity<>(providerBundle, HttpStatus.CREATED);
-    }
-
-
     @Override
     @CacheEvict(value = CACHE_PROVIDERS, allEntries = true)
     public ProviderBundle update(ProviderBundle providerBundle, Authentication auth) {
@@ -129,13 +118,11 @@ public class DraftProviderManager extends ResourceManager<ProviderBundle> implem
         return providerBundle;
     }
 
-
     @Override
     @CacheEvict(value = CACHE_PROVIDERS, allEntries = true)
     public void delete(ProviderBundle providerBundle) {
         super.delete(providerBundle);
     }
-
 
     @Override
     @CacheEvict(value = CACHE_PROVIDERS, allEntries = true)

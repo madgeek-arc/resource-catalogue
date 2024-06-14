@@ -23,7 +23,7 @@ public interface TrainingResourceService extends ResourceService<TrainingResourc
      * @param auth        Authentication
      * @return {@link   TrainingResourceBundle}
      */
-      TrainingResourceBundle add(  TrainingResourceBundle resource, String catalogueId, Authentication auth);
+    TrainingResourceBundle add(TrainingResourceBundle resource, String catalogueId, Authentication auth);
 
     /**
      * Update a Training Resource of the EOSC Catalogue.
@@ -34,7 +34,7 @@ public interface TrainingResourceService extends ResourceService<TrainingResourc
      * @return {@link   TrainingResourceBundle}
      * @throws ResourceNotFoundException The Resource was not found
      */
-      TrainingResourceBundle update(  TrainingResourceBundle resource, String comment, Authentication auth) throws ResourceNotFoundException;
+    TrainingResourceBundle update(TrainingResourceBundle resource, String comment, Authentication auth) throws ResourceNotFoundException;
 
     /**
      * Update a Training Resource of an external Catalogue, providing its Catalogue ID
@@ -46,7 +46,7 @@ public interface TrainingResourceService extends ResourceService<TrainingResourc
      * @return {@link   TrainingResourceBundle}
      * @throws ResourceNotFoundException The Resource was not found
      */
-      TrainingResourceBundle update(  TrainingResourceBundle resource, String catalogueId, String comment, Authentication auth)
+    TrainingResourceBundle update(TrainingResourceBundle resource, String catalogueId, String comment, Authentication auth)
             throws ResourceNotFoundException;
 
     /**
@@ -57,7 +57,7 @@ public interface TrainingResourceService extends ResourceService<TrainingResourc
      * @param auth        Authentication
      * @return {@link   TrainingResourceBundle}
      */
-      TrainingResourceBundle getCatalogueResource(String catalogueId, String resourceId, Authentication auth);
+    TrainingResourceBundle getCatalogueResource(String catalogueId, String resourceId, Authentication auth);
 
     /**
      * Returns the Training Resource with the specified ID
@@ -66,7 +66,7 @@ public interface TrainingResourceService extends ResourceService<TrainingResourc
      * @param catalogueId Catalogue ID
      * @return {@link   TrainingResourceBundle}
      */
-      TrainingResourceBundle get(String id, String catalogueId);
+    TrainingResourceBundle get(String id, String catalogueId);
 
     /**
      * Get Training Resource Bundles by a specific field.
@@ -76,7 +76,7 @@ public interface TrainingResourceService extends ResourceService<TrainingResourc
      * @return {@link Map}&lt;{@link String},{@link List}&lt;{@link   TrainingResourceBundle}&gt;&gt;
      * @throws NoSuchFieldException The field does not exist
      */
-    Map<String, List<  TrainingResourceBundle>> getBy(String field, Authentication auth) throws NoSuchFieldException;
+    Map<String, List<TrainingResourceBundle>> getBy(String field, Authentication auth) throws NoSuchFieldException;
 
     /**
      * Get Training Resources with the specified ids.
@@ -112,7 +112,7 @@ public interface TrainingResourceService extends ResourceService<TrainingResourc
      * @param auth       Authentication
      * @return {@link   TrainingResourceBundle}
      */
-      TrainingResourceBundle publish(String resourceId, Boolean active, Authentication auth);
+    TrainingResourceBundle publish(String resourceId, Boolean active, Authentication auth);
 
     /**
      * Return children vocabularies from parent vocabularies
@@ -131,7 +131,7 @@ public interface TrainingResourceService extends ResourceService<TrainingResourc
      * @param auth   Authentication
      * @return {@link Browsing}&lt;{@link   TrainingResourceBundle}&gt;
      */
-    Browsing<  TrainingResourceBundle> getAllForAdmin(FacetFilter filter, Authentication auth);
+    Browsing<TrainingResourceBundle> getAllForAdmin(FacetFilter filter, Authentication auth);
 
     /**
      * Audit a Training Resource
@@ -143,8 +143,8 @@ public interface TrainingResourceService extends ResourceService<TrainingResourc
      * @param auth        Authentication
      * @return {@link   TrainingResourceBundle}
      */
-      TrainingResourceBundle auditResource(String resourceId, String catalogueId, String comment, LoggingInfo.ActionType actionType,
-                    Authentication auth);
+    TrainingResourceBundle auditResource(String resourceId, String catalogueId, String comment, LoggingInfo.ActionType actionType,
+                                         Authentication auth);
 
     /**
      * Get a paging of random Training Resources
@@ -154,7 +154,7 @@ public interface TrainingResourceService extends ResourceService<TrainingResourc
      * @param auth             Authentication
      * @return {@link Paging}&lt;{@link   TrainingResourceBundle}&gt;
      */
-    Paging<  TrainingResourceBundle> getRandomResources(FacetFilter ff, String auditingInterval, Authentication auth);
+    Paging<TrainingResourceBundle> getRandomResources(FacetFilter ff, String auditingInterval, Authentication auth);
 
     /**
      * Get a list of Training Resource Bundles of a specific Provider of the EOSC Catalogue
@@ -163,7 +163,7 @@ public interface TrainingResourceService extends ResourceService<TrainingResourc
      * @param auth       Authentication
      * @return {@link List}&lt;{@link   TrainingResourceBundle}&gt;
      */
-    List<  TrainingResourceBundle> getResourceBundles(String providerId, Authentication auth);
+    List<TrainingResourceBundle> getResourceBundles(String providerId, Authentication auth);
 
     /**
      * Get a paging of Training Resource Bundles of a specific Provider of an external Catalogue
@@ -173,7 +173,7 @@ public interface TrainingResourceService extends ResourceService<TrainingResourc
      * @param auth        Authentication
      * @return {@link Paging}&lt;{@link   TrainingResourceBundle}&gt;
      */
-    Paging<  TrainingResourceBundle> getResourceBundles(String catalogueId, String providerId, Authentication auth);
+    Paging<TrainingResourceBundle> getResourceBundles(String catalogueId, String providerId, Authentication auth);
 
     /**
      * Get a list of Training Resources of a specific Provider of the EOSC Catalogue
@@ -199,7 +199,7 @@ public interface TrainingResourceService extends ResourceService<TrainingResourc
      * @param providerId Provider ID
      * @return {@link List}&lt;{@link   TrainingResourceBundle}&gt;
      */
-    List<  TrainingResourceBundle> getInactiveResources(String providerId);
+    List<TrainingResourceBundle> getInactiveResources(String providerId);
 
     /**
      * Send email notifications to all Providers with outdated Training Resources
@@ -227,7 +227,7 @@ public interface TrainingResourceService extends ResourceService<TrainingResourc
      * @param auth   Authentication
      * @return {@link   TrainingResourceBundle}
      */
-      TrainingResourceBundle verifyResource(String id, String status, Boolean active, Authentication auth);
+    TrainingResourceBundle verifyResource(String id, String status, Boolean active, Authentication auth);
 
     /**
      * Change the Provider of the specific Training Resource
@@ -238,7 +238,7 @@ public interface TrainingResourceService extends ResourceService<TrainingResourc
      * @param auth        Authentication
      * @return {@link   TrainingResourceBundle}
      */
-      TrainingResourceBundle changeProvider(String resourceId, String newProvider, String comment, Authentication auth);
+    TrainingResourceBundle changeProvider(String resourceId, String newProvider, String comment, Authentication auth);
 
     /**
      * Get a specific Training Resource of the EOSC Catalogue, given its ID, or return null
@@ -264,7 +264,7 @@ public interface TrainingResourceService extends ResourceService<TrainingResourc
      * @param auth     Authentication
      * @return {@link   TrainingResourceBundle}
      */
-      TrainingResourceBundle createPublicResource(  TrainingResourceBundle resource, Authentication auth);
+    TrainingResourceBundle createPublicResource(TrainingResourceBundle resource, Authentication auth);
 
     /**
      * Suspend the Training Resource given its ID

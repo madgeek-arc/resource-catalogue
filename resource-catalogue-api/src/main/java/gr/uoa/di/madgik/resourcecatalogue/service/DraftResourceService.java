@@ -5,21 +5,11 @@ import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Bundle;
 import gr.uoa.di.madgik.resourcecatalogue.exception.ResourceException;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 
 import java.util.List;
 
 public interface DraftResourceService<T extends Bundle> extends ResourceService<T> {
-
-    /**
-     * Transforms the resource to pending.
-     *
-     * @param t    Resource Bundle
-     * @param auth Authentication
-     * @return {@link T}
-     */
-    ResponseEntity<T> addCrud(T t, Authentication auth);
 
     /**
      * Transforms the resource to active.

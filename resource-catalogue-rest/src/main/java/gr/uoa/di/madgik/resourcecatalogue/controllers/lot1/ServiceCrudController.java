@@ -48,16 +48,6 @@ public class ServiceCrudController extends ResourceCrudController<ServiceBundle>
         serviceBundleService.addBulk(bundles, auth);
     }
 
-    @Override
-    @PostMapping()
-    public ResponseEntity<ServiceBundle> add(@RequestBody ServiceBundle serviceBundle,
-                                             @Parameter(hidden = true) Authentication auth) {
-        if (serviceBundle.isDraft()) {
-            return draftServiceService.addCrud(serviceBundle, auth);
-        }
-        return super.add(serviceBundle, auth);
-    }
-
     @Browse
     @GetMapping()
     public ResponseEntity<Paging<ServiceBundle>> getAll(@Parameter(hidden = true) @RequestParam Map<String, Object> allRequestParams,
