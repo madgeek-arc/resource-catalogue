@@ -173,10 +173,4 @@ public class HelpdeskManager extends ResourceManager<HelpdeskBundle> implements 
         publicHelpdeskManager.add(helpdeskBundle, auth);
         return helpdeskBundle;
     }
-
-    public void addBulk(List<HelpdeskBundle> helpdeskList, Authentication auth) {
-        for (HelpdeskBundle helpdeskBundle : helpdeskList) {
-            super.add(helpdeskBundle, auth);
-        }
-    }
 }

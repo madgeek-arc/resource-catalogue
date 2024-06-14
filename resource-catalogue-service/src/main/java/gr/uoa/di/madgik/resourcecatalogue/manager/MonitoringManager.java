@@ -256,10 +256,4 @@ public class MonitoringManager extends ResourceManager<MonitoringBundle> impleme
         publicMonitoringManager.add(monitoringBundle, auth);
         return monitoringBundle;
     }
-
-    public void addBulk(List<MonitoringBundle> monitoringList, Authentication auth) {
-        for (MonitoringBundle monitoringBundle : monitoringList) {
-            super.add(monitoringBundle, auth);
-        }
-    }
 }

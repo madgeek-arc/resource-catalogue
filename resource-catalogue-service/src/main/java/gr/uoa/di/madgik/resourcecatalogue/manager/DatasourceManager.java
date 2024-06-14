@@ -286,12 +286,6 @@ public class DatasourceManager extends ResourceManager<DatasourceBundle> impleme
         return found;
     }
 
-    public void addBulk(List<DatasourceBundle> datasourceList, Authentication auth) {
-        for (DatasourceBundle datasourceBundle : datasourceList) {
-            super.add(datasourceBundle, auth);
-        }
-    }
-
 //    public DatasourceBundle createPublicResource(DatasourceBundle datasourceBundle, Authentication auth){
 //        publicDatasourceManager.add(datasourceBundle, auth);
 //        return datasourceBundle;

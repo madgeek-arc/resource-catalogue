@@ -78,12 +78,4 @@ public interface MonitoringService extends ResourceService<MonitoringBundle> {
      * @return {@link List<MonitoringStatus>}
      */
     List<MonitoringStatus> createMonitoringStatusObject(JsonArray results);
-
-    /**
-     * Add a list of MonitoringBundles on the Resource Catalogue
-     *
-     * @param monitoringList List of MonitoringBundles
-     * @param auth           Authentication
-     */
-    void addBulk(List<MonitoringBundle> monitoringList, Authentication auth);
 }

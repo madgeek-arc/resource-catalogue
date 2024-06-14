@@ -257,12 +257,4 @@ public interface ProviderService extends ResourceService<ProviderBundle> {
      * @return {@link List}&lt;{@link MapValues}&lt;{@link ExtendedValue}&gt;&gt;
      */
     List<MapValues<ExtendedValue>> getAllResourcesUnderASpecificHLE(String hle, Authentication auth);
-
-    /**
-     * Add a list of ProviderBundles on the Resource Catalogue
-     *
-     * @param providerList List of ProviderBundles
-     * @param auth         Authentication
-     */
-    void addBulk(List<ProviderBundle> providerList, Authentication auth);
 }

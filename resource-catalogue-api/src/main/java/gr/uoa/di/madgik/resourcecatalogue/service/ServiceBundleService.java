@@ -305,12 +305,4 @@ public interface ServiceBundleService<T> extends ResourceService<T> {
      * @param auth        Authentication
      */
     void publishServiceRelatedResources(String serviceId, String catalogueId, Boolean active, Authentication auth);
-
-    /**
-     * Add a list of ServiceBundles on the Resource Catalogue
-     *
-     * @param serviceList List of ServiceBundles
-     * @param auth        Authentication
-     */
-    void addBulk(List<ServiceBundle> serviceList, Authentication auth);
 }

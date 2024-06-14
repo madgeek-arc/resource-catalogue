@@ -118,9 +118,7 @@ public class VocabularyManager extends ResourceManager<Vocabulary> implements Vo
     @Override
     @CacheEvict(value = {CACHE_VOCABULARIES, CACHE_VOCABULARY_MAP, CACHE_VOCABULARY_TREE}, allEntries = true)
     public void addBulk(List<Vocabulary> vocabularies, Authentication auth) {
-        for (Vocabulary vocabulary : vocabularies) {
-            add(vocabulary, auth);
-        }
+        super.addBulk(vocabularies, auth);
     }
 
     @Override
@@ -133,7 +131,7 @@ public class VocabularyManager extends ResourceManager<Vocabulary> implements Vo
 
     @Override
     @CacheEvict(value = {CACHE_VOCABULARIES, CACHE_VOCABULARY_MAP, CACHE_VOCABULARY_TREE}, allEntries = true)
-    public void deleteBulk(Authentication auth) {
+    public void deleteAll(Authentication auth) {
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(maxQuantity);
         List<Vocabulary> allVocs = getAll(ff, auth).getResults();

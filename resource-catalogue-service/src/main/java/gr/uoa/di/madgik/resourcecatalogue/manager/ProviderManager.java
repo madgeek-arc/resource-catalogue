@@ -3,6 +3,7 @@ package gr.uoa.di.madgik.resourcecatalogue.manager;
 import gr.uoa.di.madgik.registry.domain.*;
 import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.registry.service.ResourceCRUDService;
+import gr.uoa.di.madgik.registry.service.SearchService;
 import gr.uoa.di.madgik.registry.service.VersionService;
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
 import gr.uoa.di.madgik.resourcecatalogue.dto.ExtendedValue;
@@ -912,30 +913,25 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     }
 
     private void addApprovedProviderToHLEVocabulary(ProviderBundle providerBundle) {
-        Vocabulary newHostingLegalEntity = new Vocabulary();
-        newHostingLegalEntity.setId("provider_hosting_legal_entity-" + providerBundle.getProvider().getId());
-        newHostingLegalEntity.setName(providerBundle.getProvider().getName());
-        newHostingLegalEntity.setType(Vocabulary.Type.PROVIDER_HOSTING_LEGAL_ENTITY.getKey());
-        newHostingLegalEntity.setExtras(new HashMap<String, String>() {{
+        Vocabulary hle = new Vocabulary();
+        hle.setId("provider_hosting_legal_entity-" + providerBundle.getProvider().getId());
+        hle.setName(providerBundle.getProvider().getName());
+        hle.setType(Vocabulary.Type.PROVIDER_HOSTING_LEGAL_ENTITY.getKey());
+        hle.setExtras(new HashMap<>() {{
             put("catalogueId", providerBundle.getProvider().getCatalogueId());
         }});
-        logger.info(String.format("Creating a new Hosting Legal Entity Vocabulary with id: [%s] and name: [%s]",
-                newHostingLegalEntity.getId(), newHostingLegalEntity.getName()));
-        vocabularyService.add(newHostingLegalEntity, null);
+        logger.info("Creating a new Hosting Legal Entity Vocabulary with id: [{}] and name: [{}]",
+                hle.getId(), hle.getName());
+        vocabularyService.add(hle, null);
     }
 
-    // TODO: refactor
+    // TODO: thoroughly test if it works as expected
     private void checkAndAddProviderToHLEVocabulary(ProviderBundle providerBundle) {
-        List<Vocabulary> allHLE = vocabularyService.getByType(Vocabulary.Type.PROVIDER_HOSTING_LEGAL_ENTITY);
-        List<String> allHLEIDs = new ArrayList<>();
-        List<String> allHLENames = new ArrayList<>();
-        for (Vocabulary voc : allHLE) {
-            allHLEIDs.add(voc.getId());
-            allHLENames.add(voc.getName());
-        }
         if (providerBundle.getStatus().equals("approved provider") && providerBundle.getProvider().isLegalEntity()) {
-            if (!allHLEIDs.contains("provider_hosting_legal_entity-" + providerBundle.getProvider().getId()) &&
-                    !allHLENames.contains(providerBundle.getProvider().getName())) {
+            String hleId = "provider_hosting_legal_entity-" + providerBundle.getProvider().getId();
+            Vocabulary providerHle = vocabularyService.get(hleId);
+//            Vocabulary providerHle = vocabularyService.get(new SearchService.KeyValue("id", hleId), new SearchService.KeyValue("name", providerBundle.getProvider().getName()));
+            if (providerHle == null) {
                 addApprovedProviderToHLEVocabulary(providerBundle);
             }
         }
@@ -1080,11 +1076,5 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         }
         mapValues.setValues(valueList);
         mapValuesList.add(mapValues);
-    }
-
-    public void addBulk(List<ProviderBundle> providerList, Authentication auth) {
-        for (ProviderBundle providerBundle : providerList) {
-            super.add(providerBundle, auth);
-        }
     }
 }

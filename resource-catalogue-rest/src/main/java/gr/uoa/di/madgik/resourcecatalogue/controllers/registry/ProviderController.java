@@ -62,6 +62,9 @@ public class ProviderController {
     @Value("${catalogue.name:Resource Catalogue}")
     private String catalogueName;
 
+    @Value("${prefix.providers}")
+    private String pidPrefix;
+
     ProviderController(ProviderService providerService,
                        DraftResourceService<ProviderBundle> draftProviderService,
                        ServiceBundleService<ServiceBundle> serviceBundleService,
@@ -200,25 +203,33 @@ public class ProviderController {
         return ResponseEntity.ok(paging);
     }
 
+    @Deprecated
     @Operation(summary = "Get a list of services offered by a Provider.")
     @GetMapping(path = "services/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity<List<? extends Service>> getServices(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
                                                                @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix,
                                                                @Parameter(hidden = true) Authentication auth) {
-        String id = prefix + "/" + suffix;
-        return new ResponseEntity<>(serviceBundleService.getResources(id, auth), HttpStatus.OK);
+//        String id = pidPrefix + "/" + suffix;
+//        FacetFilter ff = new FacetFilter();
+//        ff.setResourceType("service");
+//        ff.addFilter("published", true);
+//        ff.addFilter("resource_organization", id);
+//        return new ResponseEntity<>(serviceBundleService.getResources(id, auth), HttpStatus.OK);
+        throw new UnsupportedOperationException("Method Removed: Contact administrators");
     }
 
+    @Deprecated
     @Browse
     @GetMapping(path = "byCatalogue/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isCatalogueAdmin(#auth,#id)")
     public ResponseEntity<Paging<ProviderBundle>> getProvidersByCatalogue(@Parameter(hidden = true) @RequestParam Map<String, Object> allRequestParams,
                                                                           @PathVariable String id,
                                                                           @Parameter(hidden = true) Authentication auth) {
-        FacetFilter ff = FacetFilterUtils.createFacetFilter(allRequestParams);
-        ff.addFilter("catalogue_id", id);
-        ff.addFilter("published", false);
-        return ResponseEntity.ok(providerService.getAll(ff, auth));
+//        FacetFilter ff = FacetFilterUtils.createFacetFilter(allRequestParams);
+//        ff.addFilter("catalogue_id", id);
+//        ff.addFilter("published", false);
+//        return ResponseEntity.ok(providerService.getAll(ff, auth));
+        throw new UnsupportedOperationException("Method Removed: Contact administrators");
     }
 
     // Get a list of Providers in which the given user is admin.

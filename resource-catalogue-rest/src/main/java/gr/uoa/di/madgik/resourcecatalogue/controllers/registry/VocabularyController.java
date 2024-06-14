@@ -116,14 +116,14 @@ public class VocabularyController extends ResourceController<Vocabulary> {
 
     @PutMapping(path = "/updateBulk", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public void updateBulk(@RequestBody List<Vocabulary> vocabularies, @Parameter(hidden = true) Authentication auth) {
+    public void updateBulk(@RequestBody List<Vocabulary> vocabularies, @Parameter(hidden = true) Authentication auth) throws ResourceNotFoundException {
         vocabularyService.updateBulk(vocabularies, auth);
     }
 
     @DeleteMapping(path = "/deleteBulk", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public void deleteBulk(@Parameter(hidden = true) Authentication auth) {
-        vocabularyService.deleteBulk(auth);
+        vocabularyService.deleteAll(auth);
     }
 
     @DeleteMapping(path = "/deleteByType/{type}", produces = {MediaType.APPLICATION_JSON_VALUE})

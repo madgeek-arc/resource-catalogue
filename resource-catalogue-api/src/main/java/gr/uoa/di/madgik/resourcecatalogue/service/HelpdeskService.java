@@ -43,12 +43,4 @@ public interface HelpdeskService extends ResourceService<HelpdeskBundle> {
      * @param auth           Authentication
      */
     void updateBundle(HelpdeskBundle helpdeskBundle, Authentication auth);
-
-    /**
-     * Add a list of HelpdeskBundles on the Resource Catalogue
-     *
-     * @param helpdeskList List of HelpdeskBundles
-     * @param auth         Authentication
-     */
-    void addBulk(List<HelpdeskBundle> helpdeskList, Authentication auth);
 }

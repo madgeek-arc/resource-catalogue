@@ -411,10 +411,4 @@ public class InteroperabilityRecordManager extends ResourceManager<Interoperabil
         commonMethods.suspendResource(interoperabilityRecordBundle, catalogueId, suspend, auth);
         return super.update(interoperabilityRecordBundle, auth);
     }
-
-    public void addBulk(List<InteroperabilityRecordBundle> interoperabilityRecordList, Authentication auth) {
-        for (InteroperabilityRecordBundle interoperabilityRecordBundle : interoperabilityRecordList) {
-            super.add(interoperabilityRecordBundle, auth);
-        }
-    }
 }

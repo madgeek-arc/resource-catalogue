@@ -109,12 +109,4 @@ public interface CatalogueService extends ResourceService<CatalogueBundle> {
      * @return {@link CatalogueBundle}
      */
     CatalogueBundle auditCatalogue(String id, String comment, LoggingInfo.ActionType actionType, Authentication auth);
-
-    /**
-     * Add a list of CatalogueBundles on the Resource Catalogue
-     *
-     * @param catalogueList List of CatalogueBundles
-     * @param auth          Authentication
-     */
-    void addBulk(List<CatalogueBundle> catalogueList, Authentication auth);
 }

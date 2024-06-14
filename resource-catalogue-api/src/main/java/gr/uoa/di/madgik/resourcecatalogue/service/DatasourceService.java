@@ -64,12 +64,4 @@ public interface DatasourceService extends ResourceService<DatasourceBundle> {
      * @return {@link Paging}&lt;{@link DatasourceBundle}&gt;
      */
     Paging<DatasourceBundle> getResourceBundles(String catalogueId, String serviceId, Authentication auth);
-
-    /**
-     * Add a list of DatasourceBundles on the Resource Catalogue
-     *
-     * @param datasourceList List of DatasourceBundles
-     * @param auth           Authentication
-     */
-    void addBulk(List<DatasourceBundle> datasourceList, Authentication auth);
 }

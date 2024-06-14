@@ -143,12 +143,4 @@ public interface InteroperabilityRecordService extends ResourceService<Interoper
      */
     InteroperabilityRecordBundle suspend(String interoperabilityRecordId, String catalogueId, boolean suspend,
                                          Authentication auth);
-
-    /**
-     * Add a list of InteroperabilityRecordBundles on the Resource Catalogue
-     *
-     * @param interoperabilityRecordList List of InteroperabilityRecordBundles
-     * @param auth                       Authentication
-     */
-    void addBulk(List<InteroperabilityRecordBundle> interoperabilityRecordList, Authentication auth);
 }

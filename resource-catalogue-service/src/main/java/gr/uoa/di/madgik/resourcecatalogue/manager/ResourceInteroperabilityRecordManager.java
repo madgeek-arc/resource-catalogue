@@ -187,10 +187,4 @@ public class ResourceInteroperabilityRecordManager extends ResourceManager<Resou
         publicResourceInteroperabilityRecordManager.add(resourceInteroperabilityRecordBundle, auth);
         return resourceInteroperabilityRecordBundle;
     }
-
-    public void addBulk(List<ResourceInteroperabilityRecordBundle> resourceInteroperabilityRecordList, Authentication auth) {
-        for (ResourceInteroperabilityRecordBundle resourceInteroperabilityRecordBundle : resourceInteroperabilityRecordList) {
-            super.add(resourceInteroperabilityRecordBundle, auth);
-        }
-    }
 }

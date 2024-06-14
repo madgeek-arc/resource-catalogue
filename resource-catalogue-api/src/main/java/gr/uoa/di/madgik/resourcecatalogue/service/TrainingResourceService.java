@@ -287,12 +287,4 @@ public interface TrainingResourceService extends ResourceService<TrainingResourc
      */
     void publishTrainingResourceRelatedResources(String id, String catalogueId, Boolean active,
                                                  Authentication auth);
-
-    /**
-     * Add a list of TrainingResourceBundles on the Resource Catalogue
-     *
-     * @param trainingResourceList List of TrainingResourceBundles
-     * @param auth                 Authentication
-     */
-    void addBulk(List<TrainingResourceBundle> trainingResourceList, Authentication auth);
 }

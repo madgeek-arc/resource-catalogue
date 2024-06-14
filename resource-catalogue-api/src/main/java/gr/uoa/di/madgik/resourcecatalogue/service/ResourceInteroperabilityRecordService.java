@@ -55,12 +55,4 @@ public interface ResourceInteroperabilityRecordService extends ResourceService<R
      * @return {@link ResourceInteroperabilityRecordBundle}
      */
     ResourceInteroperabilityRecordBundle getWithResourceId(String resourceId, String catalogueId);
-
-    /**
-     * Add a list of ResourceInteroperabilityRecordBundles on the Resource Catalogue
-     *
-     * @param resourceInteroperabilityRecordList List of ResourceInteroperabilityRecordBundles
-     * @param auth                               Authentication
-     */
-    void addBulk(List<ResourceInteroperabilityRecordBundle> resourceInteroperabilityRecordList, Authentication auth);
 }
