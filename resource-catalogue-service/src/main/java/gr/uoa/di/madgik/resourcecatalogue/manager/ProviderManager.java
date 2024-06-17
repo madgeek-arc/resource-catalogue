@@ -7,7 +7,6 @@ import gr.uoa.di.madgik.registry.service.VersionService;
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
 import gr.uoa.di.madgik.resourcecatalogue.dto.ExtendedValue;
 import gr.uoa.di.madgik.resourcecatalogue.dto.MapValues;
-import gr.uoa.di.madgik.resourcecatalogue.exception.ResourceAlreadyExistsException;
 import gr.uoa.di.madgik.resourcecatalogue.exception.ValidationException;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
 import gr.uoa.di.madgik.resourcecatalogue.utils.Auditable;
@@ -28,7 +27,6 @@ import org.springframework.security.authentication.InsufficientAuthenticationExc
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 
-import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 import java.time.Instant;
 import java.time.ZoneId;
@@ -40,7 +38,7 @@ import static gr.uoa.di.madgik.resourcecatalogue.utils.VocabularyValidationUtils
 import static gr.uoa.di.madgik.resourcecatalogue.utils.VocabularyValidationUtils.validateScientificDomains;
 
 @org.springframework.stereotype.Service("providerManager")
-public class ProviderManager extends DraftableResourceManager<ProviderBundle> implements ProviderService {
+public class ProviderManager extends ResourceManager<ProviderBundle> implements ProviderService {
 
     private static final Logger logger = LoggerFactory.getLogger(ProviderManager.class);
     private final ServiceBundleService<ServiceBundle> serviceBundleService;
@@ -100,14 +98,10 @@ public class ProviderManager extends DraftableResourceManager<ProviderBundle> im
         this.publicInteroperabilityRecordManager = publicInteroperabilityRecordManager;
     }
 
+
     @Override
     public String getResourceType() {
         return "provider";
-    }
-
-    @Override
-    public String getDraftResourceType() {
-        return "draft_provider";
     }
 
     @Override
@@ -1090,11 +1084,5 @@ public class ProviderManager extends DraftableResourceManager<ProviderBundle> im
         }
         mapValues.setValues(valueList);
         mapValuesList.add(mapValues);
-    }
-
-    @Override
-    public ProviderBundle transformToNonDraft(ProviderBundle bundle, Authentication auth) {
-        bundle.getProvider().setCatalogueId(catalogueId);
-        return super.transformToNonDraft(bundle, auth);
     }
 }

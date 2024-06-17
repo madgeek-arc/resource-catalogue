@@ -30,12 +30,15 @@ public class ServiceCrudController extends ResourceCrudController<ServiceBundle>
 
     private static final Logger logger = LogManager.getLogger(ServiceCrudController.class.getName());
     private final ServiceBundleService<ServiceBundle> serviceBundleService;
+    private final DraftResourceService<ServiceBundle> draftServiceService;
     private final GenericResourceService genericResourceService;
 
     ServiceCrudController(ServiceBundleService<ServiceBundle> serviceBundleService,
+                          DraftResourceService<ServiceBundle> draftServiceService,
                           GenericResourceService genericResourceService) {
         super(serviceBundleService);
         this.serviceBundleService = serviceBundleService;
+        this.draftServiceService = draftServiceService;
         this.genericResourceService = genericResourceService;
     }
 
@@ -50,7 +53,7 @@ public class ServiceCrudController extends ResourceCrudController<ServiceBundle>
     public ResponseEntity<ServiceBundle> add(@RequestBody ServiceBundle serviceBundle,
                                              @Parameter(hidden = true) Authentication auth) {
         if (serviceBundle.isDraft()) {
-            return new ResponseEntity<>(serviceBundleService.addDraft(serviceBundle, auth), HttpStatus.CREATED);
+            return new ResponseEntity<>(draftServiceService.save(serviceBundle), HttpStatus.CREATED);
         }
         return super.add(serviceBundle, auth);
     }

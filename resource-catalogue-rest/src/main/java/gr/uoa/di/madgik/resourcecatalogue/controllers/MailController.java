@@ -35,7 +35,11 @@ public class MailController {
     @Autowired
     ProviderService providerService;
     @Autowired
+    DraftResourceService<ProviderBundle> pendingProviderService;
+    @Autowired
     ServiceBundleService serviceBundleService;
+    @Autowired
+    DraftResourceService<ServiceBundle> pendingServiceService;
     @Autowired
     TrainingResourceService trainingResourceService;
     @Autowired
@@ -91,7 +95,7 @@ public class MailController {
     private void addEmailsFromProviders(Set<String> emails, FacetFilter facetFilter, Authentication adminAccess,
                                         Boolean includeProviderCatalogueContacts) {
         List<ProviderBundle> allProviders = providerService.getAll(facetFilter, adminAccess).getResults();
-        allProviders.addAll(providerService.getAllDrafts(facetFilter, adminAccess).getResults());
+        allProviders.addAll(pendingProviderService.getAll(facetFilter, adminAccess).getResults());
 
         for (ProviderBundle providerBundle : allProviders) {
             emails.addAll(providerBundle.getProvider().getUsers().stream().map(User::getEmail).collect(Collectors.toSet()));
@@ -115,7 +119,7 @@ public class MailController {
 
     private void addEmailsFromServices(Set<String> emails, FacetFilter facetFilter, Authentication adminAccess) {
         List<ServiceBundle> allServices = serviceBundleService.getAll(facetFilter, adminAccess).getResults();
-        allServices.addAll(serviceBundleService.getAllDrafts(facetFilter, adminAccess).getResults());
+        allServices.addAll(pendingServiceService.getAll(facetFilter, adminAccess).getResults());
         for (ServiceBundle serviceBundle : allServices) {
             emails.add(serviceBundle.getService().getMainContact().getEmail());
             emails.addAll(serviceBundle.getService().getPublicContacts().stream().map(ServicePublicContact::getEmail).collect(Collectors.toSet()));

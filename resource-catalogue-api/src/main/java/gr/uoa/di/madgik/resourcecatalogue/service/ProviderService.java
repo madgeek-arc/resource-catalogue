@@ -12,7 +12,7 @@ import org.springframework.security.core.Authentication;
 import java.net.URL;
 import java.util.List;
 
-public interface ProviderService extends ResourceService<ProviderBundle>, BundleOperations<ProviderBundle>, DraftResourceService<ProviderBundle> {
+public interface ProviderService extends ResourceService<ProviderBundle>, BundleOperations<ProviderBundle> {
 
     /**
      * Add a new Provider on the Project's Catalogue.

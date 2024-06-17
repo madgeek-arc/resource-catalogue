@@ -13,6 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.core.Authentication;
@@ -34,8 +35,10 @@ public class RegistrationMailService {
     private final MailService mailService;
     private final Configuration cfg;
     private final ProviderManager providerManager;
+    private final DraftProviderManager pendingProviderManager;
     private final ServiceBundleManager serviceBundleManager;
     private final TrainingResourceManager trainingResourceManager;
+    private final DraftServiceManager pendingServiceManager;
     private final SecurityService securityService;
 
     // Properties
@@ -56,15 +59,19 @@ public class RegistrationMailService {
     @Autowired
     public RegistrationMailService(MailService mailService, Configuration cfg,
                                    ProviderManager providerManager,
+                                   @Lazy DraftProviderManager pendingProviderManager,
                                    ServiceBundleManager serviceBundleManager,
                                    TrainingResourceManager trainingResourceManager,
+                                   DraftServiceManager pendingServiceManager,
                                    SecurityService securityService,
                                    ResourceCatalogueProperties properties) {
         this.mailService = mailService;
         this.cfg = cfg;
         this.providerManager = providerManager;
+        this.pendingProviderManager = pendingProviderManager;
         this.serviceBundleManager = serviceBundleManager;
         this.trainingResourceManager = trainingResourceManager;
+        this.pendingServiceManager = pendingServiceManager;
         this.securityService = securityService;
 
         // Init properties
@@ -439,9 +446,9 @@ public class RegistrationMailService {
         ff.setQuantity(maxQuantity);
         ff.addFilter("published", false);
         List<ProviderBundle> activeProviders = providerManager.getAll(ff, securityService.getAdminAccess()).getResults();
-        List<ProviderBundle> pendingProviders = providerManager.getAllDrafts(ff, securityService.getAdminAccess()).getResults();
+        List<ProviderBundle> pendingProviders = pendingProviderManager.getAll(ff, securityService.getAdminAccess()).getResults();
         List<ServiceBundle> activeServices = serviceBundleManager.getAll(ff, securityService.getAdminAccess()).getResults();
-        List<ServiceBundle> pendingServices = serviceBundleManager.getAllDrafts(ff, securityService.getAdminAccess()).getResults();
+        List<ServiceBundle> pendingServices = pendingServiceManager.getAll(ff, securityService.getAdminAccess()).getResults();
         List<ProviderBundle> allProviders = Stream.concat(activeProviders.stream(), pendingProviders.stream()).collect(Collectors.toList());
         List<ServiceBundle> allServices = Stream.concat(activeServices.stream(), pendingServices.stream()).collect(Collectors.toList());
         List<Bundle> allResources = Stream.concat(allProviders.stream(), allServices.stream()).collect(Collectors.toList());

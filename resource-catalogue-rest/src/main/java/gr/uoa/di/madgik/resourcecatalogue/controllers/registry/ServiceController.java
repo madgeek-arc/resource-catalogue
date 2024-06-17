@@ -46,6 +46,7 @@ public class ServiceController {
 
     private static final Logger logger = LogManager.getLogger(ServiceController.class);
     private final ServiceBundleService<ServiceBundle> serviceBundleService;
+    private final DraftResourceService<ServiceBundle> draftServiceService;
     private final ProviderService providerService;
     private final DataSource commonDataSource;
     private final GenericResourceService genericResourceService;
@@ -61,10 +62,12 @@ public class ServiceController {
     private String catalogueName;
 
     ServiceController(ServiceBundleService<ServiceBundle> service,
+                      DraftResourceService<ServiceBundle> draftServiceService,
                       ProviderService provider,
                       DataSource commonDataSource, GenericResourceService genericResourceService,
                       SecurityService securityService) {
         this.serviceBundleService = service;
+        this.draftServiceService = draftServiceService;
         this.providerService = provider;
         this.commonDataSource = commonDataSource;
         this.genericResourceService = genericResourceService;
@@ -502,80 +505,80 @@ public class ServiceController {
 
 
     // Drafts
-//    @GetMapping(path = "/draft/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE})
-//    public ResponseEntity<Service> getDraftService(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
-//                                                   @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix) {
-//        String id = prefix + "/" + suffix;
-//        return new ResponseEntity<>(draftServiceService.get(id).getService(), HttpStatus.OK);
-//    }
-//
-//    @GetMapping(path = "/draft/my", produces = {MediaType.APPLICATION_JSON_VALUE})
-//    public ResponseEntity<List<ServiceBundle>> getMyDraftServices(@Parameter(hidden = true) Authentication auth) {
-//        return new ResponseEntity<>(draftServiceService.getMy(auth), HttpStatus.OK);
-//    }
-//
-//    @Browse
-//    @GetMapping(path = "/draft/byProvider/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE})
-//    public ResponseEntity<Browsing<ServiceBundle>> getDraftServices(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
-//                                                                    @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix,
-//                                                                    @Parameter(hidden = true) @RequestParam Map<String, Object> allRequestParams,
-//                                                                    @Parameter(hidden = true) Authentication auth) {
-//        String id = String.join("/", prefix, suffix);
-//        FacetFilter ff = FacetFilterUtils.createFacetFilter(allRequestParams);
-//        ff.addFilter("resource_organisation", id);
-//        return new ResponseEntity<>(draftServiceService.getAll(FacetFilterUtils.createFacetFilter(allRequestParams), auth), HttpStatus.OK);
-//    }
-//
-//    @PostMapping(path = "/draft", produces = {MediaType.APPLICATION_JSON_VALUE})
-//    @PreAuthorize("hasRole('ROLE_USER')")
-//    public ResponseEntity<Service> addDraftService(@RequestBody Service service, @Parameter(hidden = true) Authentication auth) {
-//        ServiceBundle serviceBundle = draftServiceService.add(new ServiceBundle(service), auth);
-//        logger.info("User '{}' added the Draft Service with name '{}' and id '{}'", User.of(auth).getEmail(),
-//                service.getName(), service.getId());
-//        return new ResponseEntity<>(serviceBundle.getService(), HttpStatus.CREATED);
-//    }
-//
-//    @PutMapping(path = "/draft", produces = {MediaType.APPLICATION_JSON_VALUE})
-//    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth, #service)")
-//    public ResponseEntity<Service> updateDraftService(@RequestBody Service service, @Parameter(hidden = true) Authentication auth)
-//            throws ResourceNotFoundException {
-//        ServiceBundle serviceBundle = draftServiceService.get(service.getId());
-//        serviceBundle.setService(service);
-//        serviceBundle = draftServiceService.update(serviceBundle, auth);
-//        logger.info("User '{}' updated the Draft Service with name '{}' and id '{}'", User.of(auth).getEmail(),
-//                service.getName(), service.getId());
-//        return new ResponseEntity<>(serviceBundle.getService(), HttpStatus.OK);
-//    }
-//
-//    @DeleteMapping(path = "/draft/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE})
-//    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth, #prefix+'/'+#suffix)")
-//    public ResponseEntity<Service> deleteDraftService(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
-//                                                      @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix,
-//                                                      @Parameter(hidden = true) Authentication auth)
-//            throws ResourceNotFoundException {
-//        String id = prefix + "/" + suffix;
-//        ServiceBundle serviceBundle = draftServiceService.get(id);
-//        if (serviceBundle == null) {
-//            return new ResponseEntity<>(HttpStatus.GONE);
-//        }
-//        draftServiceService.delete(serviceBundle);
-//        logger.info("User '{}' deleted the Draft Service '{}'-'{}'", User.of(auth).getEmail(),
-//                id, serviceBundle.getService().getName());
-//        return new ResponseEntity<>(serviceBundle.getService(), HttpStatus.OK);
-//    }
-//
-//    @PutMapping(path = "draft/transform", produces = {MediaType.APPLICATION_JSON_VALUE})
-//    @PreAuthorize("hasRole('ROLE_USER')")
-//    public ResponseEntity<Service> transformService(@RequestBody Service service,
-//                                                    @Parameter(hidden = true) Authentication auth)
-//            throws ResourceNotFoundException {
-//        ServiceBundle serviceBundle = draftServiceService.get(service.getId());
-//        serviceBundle.setService(service);
-//
-//        serviceBundleService.validate(serviceBundle);
-//        draftServiceService.update(serviceBundle, auth);
-//        serviceBundle = draftServiceService.transformToNonDraft(serviceBundle.getId(), auth);
-//
-//        return new ResponseEntity<>(serviceBundle.getService(), HttpStatus.OK);
-//    }
+    @GetMapping(path = "/draft/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE})
+    public ResponseEntity<Service> getDraftService(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
+                                                   @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix) {
+        String id = prefix + "/" + suffix;
+        return new ResponseEntity<>(draftServiceService.get(id).getService(), HttpStatus.OK);
+    }
+
+    @GetMapping(path = "/draft/my", produces = {MediaType.APPLICATION_JSON_VALUE})
+    public ResponseEntity<List<ServiceBundle>> getMyDraftServices(@Parameter(hidden = true) Authentication auth) {
+        return new ResponseEntity<>(draftServiceService.getMy(auth), HttpStatus.OK);
+    }
+
+    @Browse
+    @GetMapping(path = "/draft/byProvider/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE})
+    public ResponseEntity<Browsing<ServiceBundle>> getDraftServices(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
+                                                                    @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix,
+                                                                    @Parameter(hidden = true) @RequestParam Map<String, Object> allRequestParams,
+                                                                    @Parameter(hidden = true) Authentication auth) {
+        String id = String.join("/", prefix, suffix);
+        FacetFilter ff = FacetFilterUtils.createFacetFilter(allRequestParams);
+        ff.addFilter("resource_organisation", id);
+        return new ResponseEntity<>(draftServiceService.getAll(FacetFilterUtils.createFacetFilter(allRequestParams), auth), HttpStatus.OK);
+    }
+
+    @PostMapping(path = "/draft", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PreAuthorize("hasRole('ROLE_USER')")
+    public ResponseEntity<Service> addDraftService(@RequestBody Service service, @Parameter(hidden = true) Authentication auth) {
+        ServiceBundle serviceBundle = draftServiceService.add(new ServiceBundle(service), auth);
+        logger.info("User '{}' added the Draft Service with name '{}' and id '{}'", User.of(auth).getEmail(),
+                service.getName(), service.getId());
+        return new ResponseEntity<>(serviceBundle.getService(), HttpStatus.CREATED);
+    }
+
+    @PutMapping(path = "/draft", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth, #service)")
+    public ResponseEntity<Service> updateDraftService(@RequestBody Service service, @Parameter(hidden = true) Authentication auth)
+            throws ResourceNotFoundException {
+        ServiceBundle serviceBundle = draftServiceService.get(service.getId());
+        serviceBundle.setService(service);
+        serviceBundle = draftServiceService.update(serviceBundle, auth);
+        logger.info("User '{}' updated the Draft Service with name '{}' and id '{}'", User.of(auth).getEmail(),
+                service.getName(), service.getId());
+        return new ResponseEntity<>(serviceBundle.getService(), HttpStatus.OK);
+    }
+
+    @DeleteMapping(path = "/draft/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth, #prefix+'/'+#suffix)")
+    public ResponseEntity<Service> deleteDraftService(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
+                                                      @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix,
+                                                      @Parameter(hidden = true) Authentication auth)
+            throws ResourceNotFoundException {
+        String id = prefix + "/" + suffix;
+        ServiceBundle serviceBundle = draftServiceService.get(id);
+        if (serviceBundle == null) {
+            return new ResponseEntity<>(HttpStatus.GONE);
+        }
+        draftServiceService.delete(serviceBundle);
+        logger.info("User '{}' deleted the Draft Service '{}'-'{}'", User.of(auth).getEmail(),
+                id, serviceBundle.getService().getName());
+        return new ResponseEntity<>(serviceBundle.getService(), HttpStatus.OK);
+    }
+
+    @PutMapping(path = "draft/transform", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PreAuthorize("hasRole('ROLE_USER')")
+    public ResponseEntity<Service> transformService(@RequestBody Service service,
+                                                    @Parameter(hidden = true) Authentication auth)
+            throws ResourceNotFoundException {
+        ServiceBundle serviceBundle = draftServiceService.get(service.getId());
+        serviceBundle.setService(service);
+
+        serviceBundleService.validate(serviceBundle);
+        draftServiceService.update(serviceBundle, auth);
+        serviceBundle = draftServiceService.transformToNonDraft(serviceBundle.getId(), auth);
+
+        return new ResponseEntity<>(serviceBundle.getService(), HttpStatus.OK);
+    }
 }

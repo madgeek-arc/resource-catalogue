@@ -7,6 +7,7 @@ import gr.uoa.di.madgik.resourcecatalogue.exception.ResourceException;
 import gr.uoa.di.madgik.resourcecatalogue.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.exception.ValidationException;
 import gr.uoa.di.madgik.resourcecatalogue.manager.CatalogueManager;
+import gr.uoa.di.madgik.resourcecatalogue.manager.DraftProviderManager;
 import gr.uoa.di.madgik.resourcecatalogue.manager.ProviderManager;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
@@ -25,8 +26,10 @@ public class OIDCSecurityService implements SecurityService {
 
     private final ProviderManager providerManager;
     private final CatalogueManager catalogueManager;
+    private final DraftProviderManager pendingProviderManager;
     private final ServiceBundleService<ServiceBundle> serviceBundleService;
     private final TrainingResourceService trainingResourceService;
+    private final DraftResourceService<ServiceBundle> pendingServiceManager;
     private final InteroperabilityRecordService interoperabilityRecordService;
     private final Authentication adminAccess = new AdminAuthentication();
 
@@ -36,12 +39,15 @@ public class OIDCSecurityService implements SecurityService {
     OIDCSecurityService(@Lazy ProviderManager providerManager, CatalogueManager catalogueManager,
                         @Lazy ServiceBundleService<ServiceBundle> serviceBundleService,
                         @Lazy TrainingResourceService trainingResourceService,
+                        @Lazy DraftProviderManager pendingProviderManager,
                         @Lazy DraftResourceService<ServiceBundle> pendingServiceManager,
                         @Lazy InteroperabilityRecordService interoperabilityRecordService) {
         this.providerManager = providerManager;
         this.catalogueManager = catalogueManager;
         this.serviceBundleService = serviceBundleService;
         this.trainingResourceService = trainingResourceService;
+        this.pendingProviderManager = pendingProviderManager;
+        this.pendingServiceManager = pendingServiceManager;
         this.interoperabilityRecordService = interoperabilityRecordService;
     }
 
@@ -113,7 +119,7 @@ public class OIDCSecurityService implements SecurityService {
             registeredProvider = providerManager.get(catalogueId, providerId, adminAccess);
         } catch (ResourceException | ResourceNotFoundException e) {
             try {
-                registeredProvider = providerManager.getDraft(providerId, adminAccess);
+                registeredProvider = pendingProviderManager.get(providerId);
             } catch (RuntimeException re) {
                 return false;
             }
@@ -258,7 +264,7 @@ public class OIDCSecurityService implements SecurityService {
                 interoperabilityRecordBundle = interoperabilityRecordService.getOrElseReturnNull(resourceId, catalogueId);
             }
             if (serviceBundle == null && trainingResourceBundle == null && interoperabilityRecordBundle == null) {
-                serviceBundle = serviceBundleService.getDraft(resourceId, adminAccess);
+                serviceBundle = pendingServiceManager.get(resourceId);
             }
         } catch (RuntimeException e) {
             return false;

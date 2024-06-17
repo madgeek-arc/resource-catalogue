@@ -96,11 +96,6 @@ public class ServiceBundleManager extends AbstractServiceBundleManager<ServiceBu
     }
 
     @Override
-    public String getDraftResourceType() {
-        return "draft_service";
-    }
-
-    @Override
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.providerCanAddResources(#auth, #serviceBundle.payload)")
     @CacheEvict(cacheNames = {CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)
     public ServiceBundle addResource(ServiceBundle serviceBundle, Authentication auth) {

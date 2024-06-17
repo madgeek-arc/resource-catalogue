@@ -1,6 +1,9 @@
 package gr.uoa.di.madgik.resourcecatalogue.manager;
 
-import gr.uoa.di.madgik.registry.domain.*;
+import gr.uoa.di.madgik.registry.domain.FacetFilter;
+import gr.uoa.di.madgik.registry.domain.Paging;
+import gr.uoa.di.madgik.registry.domain.Resource;
+import gr.uoa.di.madgik.registry.domain.ResourceType;
 import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.domain.LoggingInfo;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Metadata;
@@ -19,17 +22,15 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 
 import static gr.uoa.di.madgik.resourcecatalogue.config.Properties.Cache.*;
 
-@Deprecated(forRemoval = true)
 @Service("draftTrainingResourceManager")
 public class DraftTrainingResourceManager extends ResourceManager<TrainingResourceBundle> implements DraftResourceService<TrainingResourceBundle> {
 
-    private static final Logger logger = LoggerFactory.getLogger(DraftTrainingResourceManager.class);
+    private static final Logger logger = LoggerFactory.getLogger(DraftServiceManager.class);
 
     private final TrainingResourceService trainingResourceService;
     private final IdCreator idCreator;
@@ -123,48 +124,10 @@ public class DraftTrainingResourceManager extends ResourceManager<TrainingResour
     }
 
     @Override
-    public TrainingResourceBundle transformToDraft(TrainingResourceBundle trainingResourceBundle, Authentication auth) {
-        return null;
-    }
-
-    @Override
-    public TrainingResourceBundle transformToDraft(String id, Authentication auth) {
-        return null;
-    }
-
-    @Override
-    public String getDraftResourceType() {
-        return null;
-    }
-
-    @Override
-    public TrainingResourceBundle addDraft(TrainingResourceBundle trainingResourceBundle, Authentication authentication) {
-        return null;
-    }
-
-    @Override
-    public TrainingResourceBundle updateDraft(TrainingResourceBundle trainingResourceBundle, Authentication authentication) {
-        return null;
-    }
-
-    @Override
-    public void deleteDraft(String id, Authentication authentication) {
-
-    }
-
-    @Override
-    public TrainingResourceBundle getDraft(String id, Authentication authentication) {
-        return null;
-    }
-
-    @Override
-    public Browsing<TrainingResourceBundle> getAllDrafts(FacetFilter facetFilter, Authentication authentication) {
-        return null;
-    }
-
-    @Override
-    public List<TrainingResourceBundle> getMyDrafts(Authentication authentication) {
-        return null;
+    @CacheEvict(cacheNames = {CACHE_VISITS, CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)
+    public TrainingResourceBundle transformToNonDraft(String id, Authentication auth) {
+        TrainingResourceBundle trainingResourceBundle = this.get(id);
+        return transformToNonDraft(trainingResourceBundle, auth);
     }
 
     @Override

@@ -36,5 +36,4 @@ public class ProviderCrudController extends ResourceCrudController<ProviderBundl
     public void addBulk(@RequestBody List<ProviderBundle> bundles, @Parameter(hidden = true) Authentication auth) {
         providerService.addBulk(bundles, auth);
     }
-
 }

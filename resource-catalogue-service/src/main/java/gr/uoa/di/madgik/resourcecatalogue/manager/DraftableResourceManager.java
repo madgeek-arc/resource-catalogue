@@ -43,72 +43,6 @@ public abstract class DraftableResourceManager<T extends Bundle<?>> extends Reso
     }
 
     @Override
-    @Cacheable(value = CACHE_PROVIDERS)
-    public T getDraft(String id, Authentication authentication) {
-        T provider = genericResourceService.get(getDraftResourceType(), id);
-        if (provider == null) {
-            throw new gr.uoa.di.madgik.resourcecatalogue.exception.ResourceNotFoundException(
-                    String.format("Could not find draft provider with id: %s", id));
-        }
-        return provider;
-    }
-
-    @Override
-    public Browsing<T> getAllDrafts(FacetFilter facetFilter, Authentication authentication) {
-        return genericResourceService.getResults(facetFilter);
-    }
-
-    @Override
-    public List<T> getMyDrafts(Authentication auth) {
-        if (auth == null) {
-            return new ArrayList<>();
-        }
-        FacetFilter ff = new FacetFilter();
-        ff.setResourceType(getDraftResourceType());
-        ff.setQuantity(maxQuantity);
-        ff.addFilter("users", User.of(auth).getEmail());
-        ff.addOrderBy("name", "asc");
-        return (List) genericResourceService.getResults(ff).getResults();
-    }
-
-    @Override
-    @CacheEvict(value = CACHE_PROVIDERS, allEntries = true)
-    public T addDraft(T t, Authentication auth) {
-        t.setId(idCreator.generate(getDraftResourceType()));
-
-//        logger.trace("Attempting to add a new Draft Provider: {}", t);
-//        t.setMetadata(Metadata.updateMetadata(t.getMetadata(), User.of(auth).getFullName(), User.of(auth).getEmail()));
-//
-//        List<LoggingInfo> loggingInfoList = new ArrayList<>();
-//        LoggingInfo loggingInfo = commonMethods.createLoggingInfo(auth, LoggingInfo.Types.DRAFT.getKey(),
-//                LoggingInfo.ActionType.CREATED.getKey());
-//        loggingInfoList.add(loggingInfo);
-//        t.setLoggingInfo(loggingInfoList);
-
-        genericResourceService.add(getDraftResourceType(), t);
-
-        return t;
-    }
-
-    @Override
-    @CacheEvict(value = CACHE_PROVIDERS, allEntries = true)
-    public T updateDraft(T t, Authentication auth) {
-        logger.trace("Attempting to update the Draft Resource: {}", t);
-        try {
-            genericResourceService.update(getDraftResourceType(), t.getId(), t);
-        } catch (NoSuchFieldException | InvocationTargetException | NoSuchMethodException e) {
-            throw new RuntimeException(e);
-        }
-        return t;
-    }
-
-    @Override
-    @CacheEvict(value = CACHE_PROVIDERS, allEntries = true)
-    public void deleteDraft(String id, Authentication authentication) {
-
-    }
-
-    @Override
     public T transformToNonDraft(T t, Authentication auth) {
         logger.trace("Attempting to transform the Draft Provider with id '{}' to Active", t.getId());
         this.validate(t);
@@ -135,29 +69,9 @@ public abstract class DraftableResourceManager<T extends Bundle<?>> extends Reso
 //        t.setMetadata(Metadata.updateMetadata(t.getMetadata(), User.of(auth).getFullName(), User.of(auth).getEmail()));
 
         ResourceType providerResourceType = resourceTypeService.getResourceType("provider");
-        Resource resource = genericResourceService.searchResource(getDraftResourceType(), t.getId(), true);
-        resource.setResourceTypeName(getDraftResourceType());
+        Resource resource = genericResourceService.searchResource("getDraftResourceType()", t.getId(), true);
+        resource.setResourceTypeName("getDraftResourceType()");
         resourceService.changeResourceType(resource, providerResourceType);
-
-        return t;
-    }
-
-    @Override
-    public T transformToDraft(String id, Authentication auth) {
-        return transformToDraft(get(id), auth);
-    }
-
-    @Override
-    public T transformToDraft(T t, Authentication auth) {
-        logger.trace("Attempting to transform the Resource with id '{}' to Draft", t.getId());
-        if (genericResourceService.get(getDraftResourceType(), t.getId())) {
-            throw new ResourceAlreadyExistsException(String.format("Resource with id = '%s' already exists!", t.getId()));
-        }
-
-        ResourceType draftResourceType = resourceTypeService.getResourceType(getDraftResourceType());
-        Resource resource = genericResourceService.searchResource(getResourceType(), t.getId(), true);
-        resource.setResourceTypeName(getDraftResourceType());
-        resourceService.changeResourceType(resource, draftResourceType);
 
         return t;
     }

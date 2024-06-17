@@ -35,7 +35,6 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
 
 import javax.sql.DataSource;
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -407,19 +406,19 @@ public class TrainingResourceController {
     public ResponseEntity<TrainingResource> getDraftTrainingResource(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
                                                                      @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix) {
         String id = prefix + "/" + suffix;
-        return new ResponseEntity<>(draftTrainingResourceService.getDraft(id, null).getTrainingResource(), HttpStatus.OK);
+        return new ResponseEntity<>(draftTrainingResourceService.get(id).getTrainingResource(), HttpStatus.OK);
     }
 
     @GetMapping(path = "/draft/getMyDraftTrainingResources", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<List<TrainingResourceBundle>> getMyDraftTrainingResources(@Parameter(hidden = true) Authentication auth) {
-        return new ResponseEntity<>(draftTrainingResourceService.getMyDrafts(auth), HttpStatus.OK);
+        return new ResponseEntity<>(draftTrainingResourceService.getMy(auth), HttpStatus.OK);
     }
 
     @PostMapping(path = "/draft", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_USER')")
     public ResponseEntity<TrainingResource> addDraftTrainingResource(@RequestBody TrainingResource trainingResource,
                                                                      @Parameter(hidden = true) Authentication auth) {
-        TrainingResourceBundle trainingResourceBundle = draftTrainingResourceService.addDraft(new TrainingResourceBundle(trainingResource), auth);
+        TrainingResourceBundle trainingResourceBundle = draftTrainingResourceService.add(new TrainingResourceBundle(trainingResource), auth);
         logger.info("User '{}' added the Draft Training Resource with name '{}' and id '{}'", User.of(auth).getEmail(),
                 trainingResource.getTitle(), trainingResource.getId());
         return new ResponseEntity<>(trainingResourceBundle.getTrainingResource(), HttpStatus.CREATED);
@@ -429,10 +428,10 @@ public class TrainingResourceController {
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth, #trainingResource)")
     public ResponseEntity<TrainingResource> updateDraftTrainingResource(@RequestBody TrainingResource trainingResource,
                                                                         @Parameter(hidden = true) Authentication auth)
-            throws ResourceNotFoundException, NoSuchFieldException, InvocationTargetException, NoSuchMethodException {
-        TrainingResourceBundle trainingResourceBundle = draftTrainingResourceService.getDraft(trainingResource.getId(), auth);
+            throws ResourceNotFoundException {
+        TrainingResourceBundle trainingResourceBundle = draftTrainingResourceService.get(trainingResource.getId());
         trainingResourceBundle.setTrainingResource(trainingResource);
-        trainingResourceBundle = draftTrainingResourceService.updateDraft(trainingResourceBundle, auth);
+        trainingResourceBundle = draftTrainingResourceService.update(trainingResourceBundle, auth);
         logger.info("User '{}' updated the Draft Training Resource with name '{}' and id '{}'", User.of(auth).getEmail(),
                 trainingResource.getTitle(), trainingResource.getId());
         return new ResponseEntity<>(trainingResourceBundle.getTrainingResource(), HttpStatus.OK);
@@ -445,11 +444,11 @@ public class TrainingResourceController {
                                                                         @Parameter(hidden = true) Authentication auth)
             throws ResourceNotFoundException {
         String id = prefix + "/" + suffix;
-        TrainingResourceBundle trainingResourceBundle = draftTrainingResourceService.getDraft(id, auth);
+        TrainingResourceBundle trainingResourceBundle = draftTrainingResourceService.get(id);
         if (trainingResourceBundle == null) {
             return new ResponseEntity<>(HttpStatus.GONE);
         }
-        draftTrainingResourceService.deleteDraft(trainingResourceBundle.getId(), auth);
+        draftTrainingResourceService.delete(trainingResourceBundle);
         logger.info("User '{}' deleted the Draft Training Resource '{}'-'{}'", User.of(auth).getEmail(),
                 id, trainingResourceBundle.getTrainingResource().getTitle());
         return new ResponseEntity<>(trainingResourceBundle.getTrainingResource(), HttpStatus.OK);
@@ -459,13 +458,13 @@ public class TrainingResourceController {
     @PreAuthorize("hasRole('ROLE_USER')")
     public ResponseEntity<TrainingResource> transformToTrainingResource(@RequestBody TrainingResource trainingResource,
                                                                         @Parameter(hidden = true) Authentication auth)
-            throws ResourceNotFoundException, NoSuchFieldException, InvocationTargetException, NoSuchMethodException {
-        TrainingResourceBundle trainingResourceBundle = draftTrainingResourceService.getDraft(trainingResource.getId(), auth);
+            throws ResourceNotFoundException {
+        TrainingResourceBundle trainingResourceBundle = draftTrainingResourceService.get(trainingResource.getId());
         trainingResourceBundle.setTrainingResource(trainingResource);
 
         trainingResourceService.validate(trainingResourceBundle);
-        draftTrainingResourceService.updateDraft(trainingResourceBundle, auth);
-        trainingResourceBundle = draftTrainingResourceService.transformToNonDraft(trainingResourceBundle, auth);
+        draftTrainingResourceService.update(trainingResourceBundle, auth);
+        trainingResourceBundle = draftTrainingResourceService.transformToNonDraft(trainingResourceBundle.getId(), auth);
 
         return new ResponseEntity<>(trainingResourceBundle.getTrainingResource(), HttpStatus.OK);
     }

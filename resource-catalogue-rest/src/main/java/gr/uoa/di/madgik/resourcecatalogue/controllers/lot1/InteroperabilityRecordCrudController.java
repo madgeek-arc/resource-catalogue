@@ -48,7 +48,7 @@ public class InteroperabilityRecordCrudController extends ResourceCrudController
     public ResponseEntity<InteroperabilityRecordBundle> add(@RequestBody InteroperabilityRecordBundle interoperabilityRecordBundle,
                                                             @Parameter(hidden = true) Authentication auth) {
         if (interoperabilityRecordBundle.isDraft()) {
-            return new ResponseEntity<>(draftInteroperabilityRecordService.addDraft(interoperabilityRecordBundle, auth), HttpStatus.CREATED);
+            return new ResponseEntity<>(draftInteroperabilityRecordService.save(interoperabilityRecordBundle), HttpStatus.CREATED);
         }
         return super.add(interoperabilityRecordBundle, auth);
     }

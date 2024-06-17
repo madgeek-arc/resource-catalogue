@@ -1,6 +1,9 @@
 package gr.uoa.di.madgik.resourcecatalogue.manager;
 
-import gr.uoa.di.madgik.registry.domain.*;
+import gr.uoa.di.madgik.registry.domain.FacetFilter;
+import gr.uoa.di.madgik.registry.domain.Paging;
+import gr.uoa.di.madgik.registry.domain.Resource;
+import gr.uoa.di.madgik.registry.domain.ResourceType;
 import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.domain.LoggingInfo;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Metadata;
@@ -17,13 +20,11 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 
 import static gr.uoa.di.madgik.resourcecatalogue.config.Properties.Cache.*;
 
-@Deprecated(forRemoval = true)
 @Service("draftServiceManager")
 public class DraftServiceManager extends ResourceManager<ServiceBundle> implements DraftResourceService<ServiceBundle> {
 
@@ -113,48 +114,10 @@ public class DraftServiceManager extends ResourceManager<ServiceBundle> implemen
     }
 
     @Override
-    public ServiceBundle transformToDraft(ServiceBundle serviceBundle, Authentication auth) {
-        return null;
-    }
-
-    @Override
-    public ServiceBundle transformToDraft(String id, Authentication auth) {
-        return null;
-    }
-
-    @Override
-    public String getDraftResourceType() {
-        return null;
-    }
-
-    @Override
-    public ServiceBundle addDraft(ServiceBundle serviceBundle, Authentication authentication) {
-        return null;
-    }
-
-    @Override
-    public ServiceBundle updateDraft(ServiceBundle serviceBundle, Authentication authentication) {
-        return null;
-    }
-
-    @Override
-    public void deleteDraft(String id, Authentication authentication) {
-
-    }
-
-    @Override
-    public ServiceBundle getDraft(String id, Authentication authentication) {
-        return null;
-    }
-
-    @Override
-    public Browsing<ServiceBundle> getAllDrafts(FacetFilter facetFilter, Authentication authentication) {
-        return null;
-    }
-
-    @Override
-    public List<ServiceBundle> getMyDrafts(Authentication authentication) {
-        return null;
+    @CacheEvict(cacheNames = {CACHE_VISITS, CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)
+    public ServiceBundle transformToNonDraft(String serviceId, Authentication auth) {
+        ServiceBundle serviceBundle = this.get(serviceId);
+        return transformToNonDraft(serviceBundle, auth);
     }
 
     @Override

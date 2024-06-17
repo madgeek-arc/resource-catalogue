@@ -36,7 +36,7 @@ import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
 
-public abstract class AbstractServiceBundleManager<T extends ServiceBundle> extends DraftableResourceManager<T> implements ServiceBundleService<T> {
+public abstract class AbstractServiceBundleManager<T extends ServiceBundle> extends ResourceManager<T> implements ServiceBundleService<T> {
 
     private static final Logger logger = LoggerFactory.getLogger(AbstractServiceBundleManager.class);
 
