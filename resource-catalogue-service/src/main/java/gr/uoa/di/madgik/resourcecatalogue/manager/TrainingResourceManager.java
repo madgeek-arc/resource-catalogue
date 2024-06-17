@@ -39,7 +39,7 @@ import static gr.uoa.di.madgik.resourcecatalogue.utils.VocabularyValidationUtils
 import static java.util.stream.Collectors.toList;
 
 @org.springframework.stereotype.Service
-public class TrainingResourceManager extends DraftableResourceManager<TrainingResourceBundle> implements TrainingResourceService {
+public class TrainingResourceManager extends ResourceManager<TrainingResourceBundle> implements TrainingResourceService {
 
     private static final Logger logger = LoggerFactory.getLogger(ServiceBundleManager.class);
 
@@ -108,11 +108,6 @@ public class TrainingResourceManager extends DraftableResourceManager<TrainingRe
     @Override
     public String getResourceType() {
         return "training_resource";
-    }
-
-    @Override
-    public String getDraftResourceType() {
-        return "draft_training_resource";
     }
 
     @Override
@@ -963,27 +958,6 @@ public class TrainingResourceManager extends DraftableResourceManager<TrainingRe
             }
         }
         return super.update(trainingResourceBundle, auth);
-    }
-
-
-    // Drafts
-    @Override
-    public TrainingResourceBundle transformToNonDraft(TrainingResourceBundle bundle, Authentication auth) {
-        bundle.getTrainingResource().setCatalogueId(catalogueId);
-        if (providerService.get(bundle.getTrainingResource().getResourceOrganisation()).getTemplateStatus().equals("approved template")) {
-            bundle.setStatus(vocabularyService.get("approved resource").getId());
-            List<LoggingInfo> loggingInfoList = commonMethods.returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(bundle, auth);
-            //TODO: APPROVED will be registered before REGISTER
-            LoggingInfo loggingInfoApproved = commonMethods.createLoggingInfo(auth, LoggingInfo.Types.ONBOARD.getKey(),
-                    LoggingInfo.ActionType.APPROVED.getKey());
-            loggingInfoList.add(loggingInfoApproved);
-            bundle.setLoggingInfo(loggingInfoList);
-            bundle.setActive(true);
-        } else {
-            bundle.setStatus(vocabularyService.get("pending resource").getId());
-        }
-
-        return super.transformToNonDraft(bundle, auth);
     }
 
 }

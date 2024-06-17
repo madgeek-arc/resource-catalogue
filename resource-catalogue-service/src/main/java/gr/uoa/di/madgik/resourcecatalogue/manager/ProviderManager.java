@@ -7,6 +7,7 @@ import gr.uoa.di.madgik.registry.service.VersionService;
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
 import gr.uoa.di.madgik.resourcecatalogue.dto.ExtendedValue;
 import gr.uoa.di.madgik.resourcecatalogue.dto.MapValues;
+import gr.uoa.di.madgik.resourcecatalogue.exception.ResourceAlreadyExistsException;
 import gr.uoa.di.madgik.resourcecatalogue.exception.ValidationException;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
 import gr.uoa.di.madgik.resourcecatalogue.utils.Auditable;
@@ -27,6 +28,7 @@ import org.springframework.security.authentication.InsufficientAuthenticationExc
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 
+import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 import java.time.Instant;
 import java.time.ZoneId;
@@ -1090,15 +1092,9 @@ public class ProviderManager extends DraftableResourceManager<ProviderBundle> im
         mapValuesList.add(mapValues);
     }
 
-
-    // Drafts
     @Override
     public ProviderBundle transformToNonDraft(ProviderBundle bundle, Authentication auth) {
         bundle.getProvider().setCatalogueId(catalogueId);
-        bundle.setStatus(vocabularyService.get("pending provider").getId());
-        bundle.setTemplateStatus(vocabularyService.get("no template status").getId());
-        ProviderBundle ret = super.transformToNonDraft(bundle, auth);
-        registrationMailService.sendEmailsToNewlyAddedAdmins(bundle, null);
-        return ret;
+        return super.transformToNonDraft(bundle, auth);
     }
 }

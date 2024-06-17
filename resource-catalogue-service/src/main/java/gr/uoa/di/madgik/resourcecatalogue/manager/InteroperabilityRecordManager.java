@@ -28,7 +28,7 @@ import static gr.uoa.di.madgik.resourcecatalogue.config.Properties.Cache.CACHE_F
 import static gr.uoa.di.madgik.resourcecatalogue.config.Properties.Cache.CACHE_PROVIDERS;
 
 @org.springframework.stereotype.Service("interoperabilityRecordManager")
-public class InteroperabilityRecordManager extends DraftableResourceManager<InteroperabilityRecordBundle> implements InteroperabilityRecordService {
+public class InteroperabilityRecordManager extends ResourceManager<InteroperabilityRecordBundle> implements InteroperabilityRecordService {
 
     private static final Logger logger = LoggerFactory.getLogger(InteroperabilityRecordManager.class);
     private final ProviderService providerService;
@@ -62,11 +62,6 @@ public class InteroperabilityRecordManager extends DraftableResourceManager<Inte
     @Override
     public String getResourceType() {
         return "interoperability_record";
-    }
-
-    @Override
-    public String getDraftResourceType() {
-        return "draft_interoperability_record";
     }
 
     @Override
@@ -415,15 +410,5 @@ public class InteroperabilityRecordManager extends DraftableResourceManager<Inte
                 interoperabilityRecordBundle.getInteroperabilityRecord().getProviderId(), suspend, auth);
         commonMethods.suspendResource(interoperabilityRecordBundle, suspend, auth);
         return super.update(interoperabilityRecordBundle, auth);
-    }
-
-
-    // Drafts
-    @Override
-    public InteroperabilityRecordBundle transformToNonDraft(InteroperabilityRecordBundle bundle, Authentication auth) {
-        bundle.getInteroperabilityRecord().setCatalogueId(catalogueId);
-        bundle.setStatus(vocabularyService.get("pending interoperability record").getId());
-        InteroperabilityRecordBundle ret = super.transformToNonDraft(bundle, auth);
-        return ret;
     }
 }
