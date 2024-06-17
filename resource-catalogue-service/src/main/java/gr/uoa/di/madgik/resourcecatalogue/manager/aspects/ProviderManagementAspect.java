@@ -79,8 +79,8 @@ public class ProviderManagementAspect {
         updateServiceProviderStates(serviceBundle);
     }
 
-    //TODO: ADD PendingTrainingResourceManager execution
-    @AfterReturning(pointcut = "execution(* gr.uoa.di.madgik.resourcecatalogue.manager.TrainingResourceManager.add(..))" +
+    @AfterReturning(pointcut = "execution(* gr.uoa.di.madgik.resourcecatalogue.manager.DraftTrainingResourceManager.transformToNonDraft(..)) " +
+            "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.TrainingResourceManager.add(..))" +
             "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.TrainingResourceManager.update(..))",
             returning = "trainingResourceBundle")
     public void updateProviderState(final TrainingResourceBundle trainingResourceBundle) {
@@ -212,10 +212,10 @@ public class ProviderManagementAspect {
         }
     }
 
-    //TODO: ADD PendingTrainingResourceManager execution
     @Async
     @AfterReturning(pointcut = "execution(* gr.uoa.di.madgik.resourcecatalogue.manager.TrainingResourceManager.add(..))" +
             "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.TrainingResourceManager.verify(..))" +
+            "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.DraftTrainingResourceManager.transformToNonDraft(..))" +
             "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.TrainingResourceManager.changeProvider(..))",
             returning = "trainingResourceBundle")
     public void addResourceAsPublic(final TrainingResourceBundle trainingResourceBundle) {
