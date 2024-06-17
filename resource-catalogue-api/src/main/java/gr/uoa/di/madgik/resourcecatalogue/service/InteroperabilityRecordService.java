@@ -5,7 +5,8 @@ import gr.uoa.di.madgik.resourcecatalogue.domain.InteroperabilityRecordBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.LoggingInfo;
 import org.springframework.security.core.Authentication;
 
-public interface InteroperabilityRecordService extends ResourceService<InteroperabilityRecordBundle>, BundleOperations<InteroperabilityRecordBundle> {
+public interface InteroperabilityRecordService extends ResourceService<InteroperabilityRecordBundle>, BundleOperations<InteroperabilityRecordBundle>,
+        DraftResourceService<InteroperabilityRecordBundle> {
 
     /**
      * Add a new Interoperability Record on an existing Catalogue, providing the Catalogue's ID

@@ -70,7 +70,7 @@ public class ProviderManagementAspect {
         this.securityService = securityService;
     }
 
-    @AfterReturning(pointcut = "execution(* gr.uoa.di.madgik.resourcecatalogue.manager.DraftServiceManager.transformToNonDraft(..)) " +
+    @AfterReturning(pointcut = "execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ServiceBundleManager.transformToNonDraft(..)) " +
             "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ServiceBundleManager.addResource(..))" +
             "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ServiceBundleManager.updateResource(..))",
             returning = "serviceBundle")
@@ -79,8 +79,8 @@ public class ProviderManagementAspect {
         updateServiceProviderStates(serviceBundle);
     }
 
-    //TODO: ADD PendingTrainingResourceManager execution
-    @AfterReturning(pointcut = "execution(* gr.uoa.di.madgik.resourcecatalogue.manager.TrainingResourceManager.add(..))" +
+    @AfterReturning(pointcut = "execution(* gr.uoa.di.madgik.resourcecatalogue.manager.TrainingResourceManager.transformToNonDraft(..)) " +
+            "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.TrainingResourceManager.add(..))" +
             "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.TrainingResourceManager.update(..))",
             returning = "trainingResourceBundle")
     public void updateProviderState(final TrainingResourceBundle trainingResourceBundle) {
@@ -90,7 +90,7 @@ public class ProviderManagementAspect {
 
     @AfterReturning(pointcut = "execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ProviderManager.verify(..))" +
             "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ProviderManager.add(..))" +
-            "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.DraftProviderManager.transformToNonDraft(..))",
+            "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ProviderManager.transformToNonDraft(..))",
             returning = "providerBundle")
     public void providerRegistrationEmails(final ProviderBundle providerBundle) {
         logger.trace("Sending Registration emails");
@@ -199,7 +199,7 @@ public class ProviderManagementAspect {
     @Async
     @AfterReturning(pointcut = "execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ServiceBundleManager.addResource(..))" +
             "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ServiceBundleManager.verify(..))" +
-            "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.DraftServiceManager.transformToNonDraft(..))" +
+            "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ServiceBundleManager.transformToNonDraft(..))" +
             "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ServiceBundleManager.changeProvider(..))",
             returning = "serviceBundle")
     public void addResourceAsPublic(final ServiceBundle serviceBundle) {
@@ -212,10 +212,10 @@ public class ProviderManagementAspect {
         }
     }
 
-    //TODO: ADD PendingTrainingResourceManager execution
     @Async
     @AfterReturning(pointcut = "execution(* gr.uoa.di.madgik.resourcecatalogue.manager.TrainingResourceManager.add(..))" +
             "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.TrainingResourceManager.verify(..))" +
+            "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.TrainingResourceManager.transformToNonDraft(..))" +
             "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.TrainingResourceManager.changeProvider(..))",
             returning = "trainingResourceBundle")
     public void addResourceAsPublic(final TrainingResourceBundle trainingResourceBundle) {

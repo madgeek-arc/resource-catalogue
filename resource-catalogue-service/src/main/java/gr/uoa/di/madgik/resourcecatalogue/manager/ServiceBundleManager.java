@@ -743,4 +743,25 @@ public class ServiceBundleManager extends AbstractServiceBundleManager<ServiceBu
         }
         return super.update(serviceBundle, auth);
     }
+
+
+    // Drafts
+    @Override
+    public ServiceBundle transformToNonDraft(ServiceBundle bundle, Authentication auth) {
+        bundle.getService().setCatalogueId(catalogueId);
+        if (providerService.get(bundle.getService().getResourceOrganisation()).getTemplateStatus().equals("approved template")) {
+            bundle.setStatus(vocabularyService.get("approved resource").getId());
+            List<LoggingInfo> loggingInfoList = commonMethods.returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(bundle, auth);
+            //TODO: APPROVED will be registered before REGISTER
+            LoggingInfo loggingInfoApproved = commonMethods.createLoggingInfo(auth, LoggingInfo.Types.ONBOARD.getKey(),
+                    LoggingInfo.ActionType.APPROVED.getKey());
+            loggingInfoList.add(loggingInfoApproved);
+            bundle.setLoggingInfo(loggingInfoList);
+            bundle.setActive(true);
+        } else {
+            bundle.setStatus(vocabularyService.get("pending resource").getId());
+        }
+
+        return super.transformToNonDraft(bundle, auth);
+    }
 }

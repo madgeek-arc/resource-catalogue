@@ -52,6 +52,7 @@ public class ProviderController {
     private final SecurityService securityService;
     private final MigrationService migrationService;
     private final GenericResourceService genericResourceService;
+    private final VocabularyService vocabularyService;
 
     @Value("${catalogue.id}")
     private String catalogueId;
@@ -69,13 +70,15 @@ public class ProviderController {
                        ServiceBundleService<ServiceBundle> serviceBundleService,
                        TrainingResourceService trainingResourceService,
                        SecurityService securityService, MigrationService migrationService,
-                       GenericResourceService genericResourceService) {
+                       GenericResourceService genericResourceService,
+                       VocabularyService vocabularyService) {
         this.providerService = providerService;
         this.serviceBundleService = serviceBundleService;
         this.trainingResourceService = trainingResourceService;
         this.securityService = securityService;
         this.migrationService = migrationService;
         this.genericResourceService = genericResourceService;
+        this.vocabularyService = vocabularyService;
     }
 
     // Deletes the Provider with the given id.
@@ -520,6 +523,7 @@ public class ProviderController {
     @PostMapping(path = "/draft", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_USER')")
     public ResponseEntity<Provider> addDraftProvider(@RequestBody Provider provider, @Parameter(hidden = true) Authentication auth) {
+        provider.setCatalogueId(catalogueId);
         ProviderBundle providerBundle = providerService.addDraft(new ProviderBundle(provider), auth);
         logger.info("User '{}' added the Draft Provider with name '{}' and id '{}'", User.of(auth).getEmail(),
                 provider.getName(), provider.getId());
@@ -529,7 +533,8 @@ public class ProviderController {
     @PutMapping(path = "/draft", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isProviderAdmin(#auth,#provider.id,#provider.catalogueId)")
     public ResponseEntity<Provider> updateDraftProvider(@RequestBody Provider provider, @Parameter(hidden = true) Authentication auth)
-            throws ResourceNotFoundException, NoSuchFieldException, InvocationTargetException, NoSuchMethodException {
+            throws NoSuchFieldException, InvocationTargetException, NoSuchMethodException {
+        provider.setCatalogueId(catalogueId);
         ProviderBundle providerBundle = providerService.getDraft(provider.getId(), auth);
         providerBundle.setProvider(provider);
         providerBundle = providerService.updateDraft(providerBundle, auth);
@@ -542,8 +547,7 @@ public class ProviderController {
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isProviderAdmin(#auth, #prefix+'/'+#suffix)")
     public ResponseEntity<Provider> deleteDraftProvider(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
                                                         @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix,
-                                                        @Parameter(hidden = true) Authentication auth)
-            throws ResourceNotFoundException {
+                                                        @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
         ProviderBundle providerBundle = providerService.getDraft(id, auth);
         if (providerBundle == null) {
@@ -558,7 +562,7 @@ public class ProviderController {
     @PutMapping(path = "draft/transform", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_USER')")
     public ResponseEntity<Provider> transformToProvider(@RequestBody Provider provider, @Parameter(hidden = true) Authentication auth)
-            throws ResourceNotFoundException, NoSuchFieldException, InvocationTargetException, NoSuchMethodException {
+            throws NoSuchFieldException, InvocationTargetException, NoSuchMethodException {
         ProviderBundle providerBundle = providerService.getDraft(provider.getId(), auth);
         providerBundle.setProvider(provider);
 
