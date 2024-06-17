@@ -72,6 +72,12 @@ public abstract class ResourceManager<T extends Identifiable> extends AbstractGe
     }
 
     @Override
+    public final Browsing<T> getAll(FacetFilter filter) {
+        filter.setBrowseBy(getBrowseBy());
+        return getResults(filter);
+    }
+
+    @Override
     public Browsing<T> getAll(FacetFilter ff, Authentication auth) {
         ff.setBrowseBy(getBrowseBy());
         Browsing<T> browsing;

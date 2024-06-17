@@ -108,7 +108,7 @@ public abstract class ResourceCrudController<T extends Identifiable> {
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Paging<T>> getAll(@Parameter(hidden = true) @RequestParam Map<String, Object> allRequestParams, @Parameter(hidden = true) Authentication auth) {
         FacetFilter ff = FacetFilterUtils.createFacetFilter(allRequestParams);
-        return new ResponseEntity<>(service.getAll(ff, null), HttpStatus.OK);
+        return new ResponseEntity<>(service.getAll(ff), HttpStatus.OK);
     }
 
     @GetMapping(path = "ids", produces = MediaType.APPLICATION_JSON_VALUE)

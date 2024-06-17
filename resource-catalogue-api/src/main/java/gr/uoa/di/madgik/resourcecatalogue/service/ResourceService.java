@@ -1,5 +1,7 @@
 package gr.uoa.di.madgik.resourcecatalogue.service;
 
+import gr.uoa.di.madgik.registry.domain.Browsing;
+import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.domain.Resource;
 import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.registry.service.ResourceCRUDService;
@@ -10,6 +12,13 @@ import java.util.List;
 import java.util.Map;
 
 public interface ResourceService<T> extends ResourceCRUDService<T, Authentication> {
+
+    /**
+     *
+     * @param filter
+     * @return
+     */
+    Browsing<T> getAll(FacetFilter filter);
 
     /**
      * Creates ID for the given resource.
