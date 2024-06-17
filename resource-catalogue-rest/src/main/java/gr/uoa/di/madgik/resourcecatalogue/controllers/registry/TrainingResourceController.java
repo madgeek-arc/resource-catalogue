@@ -459,7 +459,7 @@ public class TrainingResourceController {
 
         trainingResourceService.validate(trainingResourceBundle);
         trainingResourceService.updateDraft(trainingResourceBundle, auth);
-        trainingResourceBundle = trainingResourceService.transformToNonDraft(trainingResourceBundle.getId(), auth);
+        trainingResourceBundle = trainingResourceService.transformToNonDraft(trainingResourceBundle, auth);
 
         return new ResponseEntity<>(trainingResourceBundle.getTrainingResource(), HttpStatus.OK);
     }

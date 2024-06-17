@@ -568,7 +568,7 @@ public class ProviderController {
 
         providerService.validate(providerBundle);
         providerService.updateDraft(providerBundle, auth);
-        providerBundle = providerService.transformToNonDraft(providerBundle.getId(), auth);
+        providerBundle = providerService.transformToNonDraft(providerBundle, auth);
 
         return new ResponseEntity<>(providerBundle.getProvider(), HttpStatus.OK);
     }

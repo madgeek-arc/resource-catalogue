@@ -28,7 +28,7 @@ public interface DraftResourceService<T extends Bundle<?>> {
      * @param authentication the authenticated user
      * @return
      */
-    T updateDraft(T t, Authentication authentication) throws NoSuchFieldException, InvocationTargetException, NoSuchMethodException;
+    T updateDraft(T t, Authentication authentication);
 
     /**
      * Deletes
@@ -70,15 +70,6 @@ public interface DraftResourceService<T extends Bundle<?>> {
      * @return {@link T}
      */
     T transformToNonDraft(T t, Authentication auth);
-
-    /**
-     * Transforms the resource with the specified id to active.
-     *
-     * @param id   resource ID
-     * @param auth Authentication
-     * @return {@link T}
-     */
-    T transformToNonDraft(String id, Authentication auth);
 
     /**
      * Transforms the resource to draft.

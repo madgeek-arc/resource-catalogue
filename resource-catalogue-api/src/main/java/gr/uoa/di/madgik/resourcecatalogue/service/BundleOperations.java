@@ -56,9 +56,7 @@ public interface BundleOperations<T extends Bundle<?>> {
      * @param auth    Authentication
      * @return {@link T}
      */
-    T suspend(String id, boolean suspend, Authentication auth);/* {
-        throw new UnsupportedOperationException("Not implemented");
-    }*/
+    T suspend(String id, boolean suspend, Authentication auth);
 
     /**
      * Audit the resource.
@@ -68,7 +66,5 @@ public interface BundleOperations<T extends Bundle<?>> {
      * @param auth       Authentication
      * @return {@link T}
      */
-    T audit(String id, String comment, LoggingInfo.ActionType actionType, Authentication auth);/* {
-        throw new UnsupportedOperationException("Not implemented");
-    }*/
+    T audit(String id, String comment, LoggingInfo.ActionType actionType, Authentication auth);
 }

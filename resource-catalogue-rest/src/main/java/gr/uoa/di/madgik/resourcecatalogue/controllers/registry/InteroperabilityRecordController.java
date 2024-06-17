@@ -377,7 +377,7 @@ public class InteroperabilityRecordController {
 
         interoperabilityRecordService.validate(interoperabilityRecordBundle);
         interoperabilityRecordService.updateDraft(interoperabilityRecordBundle, auth);
-        interoperabilityRecordBundle = interoperabilityRecordService.transformToNonDraft(interoperabilityRecordBundle.getId(), auth);
+        interoperabilityRecordBundle = interoperabilityRecordService.transformToNonDraft(interoperabilityRecordBundle, auth);
 
         return new ResponseEntity<>(interoperabilityRecordBundle.getInteroperabilityRecord(), HttpStatus.OK);
     }

@@ -559,14 +559,13 @@ public class ServiceController {
 
     @PutMapping(path = "draft/transform", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_USER')")
-    public ResponseEntity<Service> transformToService(@RequestBody Service service, @Parameter(hidden = true) Authentication auth)
-            throws NoSuchFieldException, InvocationTargetException, NoSuchMethodException {
+    public ResponseEntity<Service> transformToService(@RequestBody Service service, @Parameter(hidden = true) Authentication auth) {
         ServiceBundle serviceBundle = serviceBundleService.getDraft(service.getId(), auth);
         serviceBundle.setService(service);
 
         serviceBundleService.validate(serviceBundle);
         serviceBundleService.updateDraft(serviceBundle, auth);
-        serviceBundle = serviceBundleService.transformToNonDraft(serviceBundle.getId(), auth);
+        serviceBundle = serviceBundleService.transformToNonDraft(serviceBundle, auth);
 
         return new ResponseEntity<>(serviceBundle.getService(), HttpStatus.OK);
     }

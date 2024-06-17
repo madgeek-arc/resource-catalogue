@@ -5,15 +5,12 @@ import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.domain.Resource;
 import gr.uoa.di.madgik.registry.domain.ResourceType;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Bundle;
-import gr.uoa.di.madgik.resourcecatalogue.domain.LoggingInfo;
-import gr.uoa.di.madgik.resourcecatalogue.domain.Metadata;
 import gr.uoa.di.madgik.resourcecatalogue.domain.User;
 import gr.uoa.di.madgik.resourcecatalogue.exception.ResourceAlreadyExistsException;
 import gr.uoa.di.madgik.resourcecatalogue.service.DraftResourceService;
 import gr.uoa.di.madgik.resourcecatalogue.service.GenericResourceService;
 import gr.uoa.di.madgik.resourcecatalogue.service.IdCreator;
 import gr.uoa.di.madgik.resourcecatalogue.service.ResourceService;
-import gr.uoa.di.madgik.resourcecatalogue.utils.AuthenticationInfo;
 import gr.uoa.di.madgik.resourcecatalogue.utils.ProviderResourcesCommonMethods;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -62,6 +59,7 @@ public abstract class DraftableResourceManager<T extends Bundle<?>> extends Reso
             return new ArrayList<>();
         }
         FacetFilter ff = new FacetFilter();
+        ff.setResourceType(getDraftResourceType());
         ff.setQuantity(maxQuantity);
         ff.addFilter("users", User.of(auth).getEmail());
         ff.addOrderBy("name", "asc");
@@ -70,40 +68,25 @@ public abstract class DraftableResourceManager<T extends Bundle<?>> extends Reso
 
     @Override
     public T addDraft(T t, Authentication auth) {
-
         t.setId(idCreator.generate(getDraftResourceType()));
-        t.setActive(false);
-
-        logger.trace("Attempting to add a new Draft Resource: {}", t);
-        t.setMetadata(Metadata.updateMetadata(t.getMetadata(), User.of(auth).getFullName(), User.of(auth).getEmail()));
-
-        List<LoggingInfo> loggingInfoList = new ArrayList<>();
-        LoggingInfo loggingInfo = commonMethods.createLoggingInfo(auth, LoggingInfo.Types.DRAFT.getKey(),
-                LoggingInfo.ActionType.CREATED.getKey());
-        loggingInfoList.add(loggingInfo);
-        t.setLoggingInfo(loggingInfoList);
-
         genericResourceService.add(getDraftResourceType(), t);
         return t;
     }
 
     @Override
-    public T updateDraft(T t, Authentication auth) throws NoSuchFieldException, InvocationTargetException, NoSuchMethodException {
+    public T updateDraft(T t, Authentication auth) {
         logger.trace("Attempting to update the Draft Resource: {}", t);
-        t.setMetadata(Metadata.updateMetadata(t.getMetadata(), AuthenticationInfo.getFullName(auth), AuthenticationInfo.getEmail(auth)));
-        genericResourceService.update(getDraftResourceType(), t.getId(), t);
+        try {
+            genericResourceService.update(getDraftResourceType(), t.getId(), t);
+        } catch (NoSuchFieldException | InvocationTargetException | NoSuchMethodException e) {
+            throw new RuntimeException(e);
+        }
         return t;
     }
 
     @Override
     public void deleteDraft(String id, Authentication authentication) {
         genericResourceService.delete(getDraftResourceType(), id);
-    }
-
-    @Override
-    public T transformToNonDraft(String resourceId, Authentication auth) {
-        T t = getDraft(resourceId, auth);
-        return transformToNonDraft(t, auth);
     }
 
     @Override
@@ -114,34 +97,43 @@ public abstract class DraftableResourceManager<T extends Bundle<?>> extends Reso
             throw new ResourceAlreadyExistsException(String.format("Resource with id = '%s' already exists!", t.getId()));
         }
 
-        // update loggingInfo
-        List<LoggingInfo> loggingInfoList = commonMethods.returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(t, auth);
-        LoggingInfo loggingInfo = commonMethods.createLoggingInfo(auth, LoggingInfo.Types.ONBOARD.getKey(),
-                LoggingInfo.ActionType.REGISTERED.getKey());
-        loggingInfoList.add(loggingInfo);
-        t.setLoggingInfo(loggingInfoList);
+//        // update loggingInfo
+//        List<LoggingInfo> loggingInfoList = commonMethods.returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(t, auth);
+//        LoggingInfo loggingInfo = commonMethods.createLoggingInfo(auth, LoggingInfo.Types.ONBOARD.getKey(),
+//                LoggingInfo.ActionType.REGISTERED.getKey());
+//        loggingInfoList.add(loggingInfo);
+//        t.setLoggingInfo(loggingInfoList);
+//
+//        // latestOnboardInfo
+//        t.setLatestOnboardingInfo(loggingInfo);
+//
+//        t.setMetadata(Metadata.updateMetadata(t.getMetadata(), User.of(auth).getFullName(), User.of(auth).getEmail()));
 
-        // latestOnboardInfo
-        t.setLatestOnboardingInfo(loggingInfo);
-
-        t.setMetadata(Metadata.updateMetadata(t.getMetadata(), User.of(auth).getFullName(), User.of(auth).getEmail()));
-
-        ResourceType resourceType = resourceTypeService.getResourceType(getResourceType()); //TODO: see if it gets the correct resourceType
+        ResourceType resourceType = resourceTypeService.getResourceType(getResourceType());
         Resource resource = genericResourceService.searchResource(getDraftResourceType(), t.getId(), true);
         resource.setResourceTypeName(getDraftResourceType());
         resourceService.changeResourceType(resource, resourceType);
 
-        t = this.update(t, auth);
         return t;
     }
 
     @Override
     public T transformToDraft(String id, Authentication auth) {
-        return null;
+        return transformToDraft(get(id), auth);
     }
 
     @Override
     public T transformToDraft(T t, Authentication auth) {
-        return null;
+        logger.trace("Attempting to transform the Resource with id '{}' to Draft", t.getId());
+        if (genericResourceService.get(getDraftResourceType(), t.getId())) {
+            throw new ResourceAlreadyExistsException(String.format("Resource with id = '%s' already exists!", t.getId()));
+        }
+
+        ResourceType draftResourceType = resourceTypeService.getResourceType(getDraftResourceType());
+        Resource resource = genericResourceService.searchResource(getResourceType(), t.getId(), true);
+        resource.setResourceTypeName(getDraftResourceType());
+        resourceService.changeResourceType(resource, draftResourceType);
+
+        return t;
     }
 }
