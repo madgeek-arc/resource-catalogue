@@ -1,6 +1,5 @@
 package gr.uoa.di.madgik.resourcecatalogue.manager;
 
-import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.registry.domain.Resource;
 import gr.uoa.di.madgik.registry.domain.ResourceType;
@@ -9,7 +8,6 @@ import gr.uoa.di.madgik.resourcecatalogue.domain.LoggingInfo;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Metadata;
 import gr.uoa.di.madgik.resourcecatalogue.domain.ServiceBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.User;
-import gr.uoa.di.madgik.resourcecatalogue.exception.ResourceAlreadyExistsException;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
 import gr.uoa.di.madgik.resourcecatalogue.utils.ProviderResourcesCommonMethods;
 import org.slf4j.Logger;
@@ -58,108 +56,96 @@ public class DraftServiceManager extends ResourceManager<ServiceBundle> implemen
 
     @Override
     @CacheEvict(cacheNames = {CACHE_VISITS, CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)
-    public ServiceBundle add(ServiceBundle service, Authentication auth) {
+    public ServiceBundle add(ServiceBundle bundle, Authentication auth) {
 
-        service.setId(idCreator.generate(getResourceType()));
+        bundle.setId(idCreator.generate(getResourceType()));
 
-        // Check if there is a Resource with the specific id
-        FacetFilter ff = new FacetFilter();
-        ff.setQuantity(maxQuantity);
-        List<ServiceBundle> resourceList = serviceBundleService.getAll(ff, auth).getResults();
-        for (ServiceBundle existingResource : resourceList) {
-            if (service.getService().getId().equals(existingResource.getService().getId()) && existingResource.getService().getCatalogueId().equals(catalogueId)) {
-                throw new ResourceAlreadyExistsException(String.format("Service with the specific id already exists on the [%s] Catalogue.", catalogueId));
-            }
-        }
-        logger.trace("Attempting to add a new Draft Service with id {}", service.getId());
+        logger.trace("Attempting to add a new Draft Service with id {}", bundle.getId());
+        bundle.setMetadata(Metadata.updateMetadata(bundle.getMetadata(), User.of(auth).getFullName(), User.of(auth).getEmail()));
 
-        if (service.getMetadata() == null) {
-            service.setMetadata(Metadata.createMetadata(User.of(auth).getFullName()));
-        }
         List<LoggingInfo> loggingInfoList = new ArrayList<>();
         LoggingInfo loggingInfo = commonMethods.createLoggingInfo(auth, LoggingInfo.Types.DRAFT.getKey(),
                 LoggingInfo.ActionType.CREATED.getKey());
         loggingInfoList.add(loggingInfo);
-        service.setLoggingInfo(loggingInfoList);
+        bundle.setLoggingInfo(loggingInfoList);
 
-        service.getService().setCatalogueId(catalogueId);
-        service.setActive(false);
+        bundle.getService().setCatalogueId(catalogueId);
+        bundle.setActive(false);
 
-        super.add(service, auth);
+        super.add(bundle, auth);
 
-        return service;
+        return bundle;
     }
 
     @Override
     @CacheEvict(cacheNames = {CACHE_VISITS, CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)
-    public ServiceBundle update(ServiceBundle serviceBundle, Authentication auth) {
+    public ServiceBundle update(ServiceBundle bundle, Authentication auth) {
         // get existing resource
-        Resource existing = getPendingResourceViaServiceId(serviceBundle.getService().getId());
+        Resource existing = getDraftResource(bundle.getService().getId());
         // block catalogueId updates from Provider Admins
-        serviceBundle.getService().setCatalogueId(catalogueId);
-        logger.trace("Attempting to update the Draft Service with id {}", serviceBundle.getId());
-        serviceBundle.setMetadata(Metadata.updateMetadata(serviceBundle.getMetadata(), User.of(auth).getFullName()));
+        bundle.getService().setCatalogueId(catalogueId);
+        logger.trace("Attempting to update the Draft Service with id {}", bundle.getId());
+        bundle.setMetadata(Metadata.updateMetadata(bundle.getMetadata(), User.of(auth).getFullName()));
         // save existing resource with new payload
-        existing.setPayload(serialize(serviceBundle));
+        existing.setPayload(serialize(bundle));
         existing.setResourceType(resourceType);
         resourceService.updateResource(existing);
-        logger.debug("Updating Draft Service: {}", serviceBundle);
-        return serviceBundle;
+        logger.debug("Updating Draft Service: {}", bundle);
+        return bundle;
     }
 
     @Override
     @CacheEvict(value = CACHE_PROVIDERS, allEntries = true)
-    public void delete(ServiceBundle serviceBundle) {
-        super.delete(serviceBundle);
+    public void delete(ServiceBundle bundle) {
+        super.delete(bundle);
     }
 
     @Override
     @CacheEvict(cacheNames = {CACHE_VISITS, CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)
-    public ServiceBundle transformToNonDraft(String serviceId, Authentication auth) {
-        ServiceBundle serviceBundle = this.get(serviceId);
+    public ServiceBundle transformToNonDraft(String id, Authentication auth) {
+        ServiceBundle serviceBundle = this.get(id);
         return transformToNonDraft(serviceBundle, auth);
     }
 
     @Override
     @CacheEvict(cacheNames = {CACHE_VISITS, CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)
-    public ServiceBundle transformToNonDraft(ServiceBundle serviceBundle, Authentication auth) {
-        logger.trace("Attempting to transform the Draft Service with id {} to Active", serviceBundle.getId());
-        serviceBundleService.validate(serviceBundle);
+    public ServiceBundle transformToNonDraft(ServiceBundle bundle, Authentication auth) {
+        logger.trace("Attempting to transform the Draft Service with id {} to Service", bundle.getId());
+        serviceBundleService.validate(bundle);
 
         // update loggingInfo
-        List<LoggingInfo> loggingInfoList = commonMethods.returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(serviceBundle, auth);
+        List<LoggingInfo> loggingInfoList = commonMethods.returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(bundle, auth);
         LoggingInfo loggingInfo = commonMethods.createLoggingInfo(auth, LoggingInfo.Types.ONBOARD.getKey(),
                 LoggingInfo.ActionType.REGISTERED.getKey());
         loggingInfoList.add(loggingInfo);
 
         // set resource status according to Provider's templateStatus
-        if (providerService.get(serviceBundle.getService().getResourceOrganisation()).getTemplateStatus().equals("approved template")) {
-            serviceBundle.setStatus(vocabularyService.get("approved resource").getId());
+        if (providerService.get(bundle.getService().getResourceOrganisation()).getTemplateStatus().equals("approved template")) {
+            bundle.setStatus(vocabularyService.get("approved resource").getId());
             LoggingInfo loggingInfoApproved = commonMethods.createLoggingInfo(auth, LoggingInfo.Types.ONBOARD.getKey(),
                     LoggingInfo.ActionType.APPROVED.getKey());
             loggingInfoList.add(loggingInfoApproved);
-            serviceBundle.setActive(true);
+            bundle.setActive(true);
         } else {
-            serviceBundle.setStatus(vocabularyService.get("pending resource").getId());
+            bundle.setStatus(vocabularyService.get("pending resource").getId());
         }
-        serviceBundle.setLoggingInfo(loggingInfoList);
-        // latestOnboardingInfo
-        serviceBundle.setLatestOnboardingInfo(loggingInfoList.get(loggingInfoList.size() - 1));
+        bundle.setLoggingInfo(loggingInfoList);
+        bundle.setLatestOnboardingInfo(loggingInfoList.get(loggingInfoList.size() - 1));
 
-        serviceBundle.setMetadata(Metadata.updateMetadata(serviceBundle.getMetadata(), User.of(auth).getFullName(), User.of(auth).getEmail()));
+        bundle.setMetadata(Metadata.updateMetadata(bundle.getMetadata(), User.of(auth).getFullName(), User.of(auth).getEmail()));
 
-        ResourceType infraResourceType = resourceTypeService.getResourceType("service");
-        Resource resource = getPendingResourceViaServiceId(serviceBundle.getId());
+        ResourceType serviceResourceType = resourceTypeService.getResourceType("service");
+        Resource resource = getDraftResource(bundle.getId());
         resource.setResourceType(resourceType);
-        resourceService.changeResourceType(resource, infraResourceType);
+        resourceService.changeResourceType(resource, serviceResourceType);
 
         try {
-            serviceBundle = serviceBundleService.update(serviceBundle, auth);
+            bundle = serviceBundleService.update(bundle, auth);
         } catch (ResourceNotFoundException e) {
             logger.error(e.getMessage(), e);
         }
 
-        return serviceBundle;
+        return bundle;
     }
 
     public List<ServiceBundle> getMy(Authentication auth) {
@@ -168,10 +154,10 @@ public class DraftServiceManager extends ResourceManager<ServiceBundle> implemen
         return re;
     }
 
-    private Resource getPendingResourceViaServiceId(String serviceId) {
+    private Resource getDraftResource(String id) {
         Paging<Resource> resources;
         resources = searchService
-                .cqlQuery(String.format("resource_internal_id = \"%s\" AND catalogue_id = \"%s\"", serviceId, catalogueId),
+                .cqlQuery(String.format("resource_internal_id = \"%s\" AND catalogue_id = \"%s\"", id, catalogueId),
                         resourceType.getName());
         assert resources != null;
         return resources.getTotal() == 0 ? null : resources.getResults().get(0);

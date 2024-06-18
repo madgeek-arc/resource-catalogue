@@ -82,7 +82,6 @@ public class LoggingInfo {
         // Onboard
         REGISTERED("registered"),
         APPROVED("approved"),
-        VALIDATED("validated"), // deprecated (old onboarding)
         REJECTED("rejected"),
         // Update
         UPDATED("updated"),

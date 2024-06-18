@@ -9,14 +9,12 @@ import gr.uoa.di.madgik.resourcecatalogue.domain.LoggingInfo;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Metadata;
 import gr.uoa.di.madgik.resourcecatalogue.domain.ProviderBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.User;
-import gr.uoa.di.madgik.resourcecatalogue.exception.ResourceAlreadyExistsException;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
 import gr.uoa.di.madgik.resourcecatalogue.utils.ProviderResourcesCommonMethods;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
@@ -59,116 +57,91 @@ public class DraftProviderManager extends ResourceManager<ProviderBundle> implem
     }
 
     @Override
-    @Cacheable(value = CACHE_PROVIDERS)
-    public ProviderBundle get(String id) {
-        ProviderBundle provider = super.get(id);
-        if (provider == null) {
-            throw new gr.uoa.di.madgik.resourcecatalogue.exception.ResourceNotFoundException(
-                    String.format("Could not find draft provider with id: %s", id));
-        }
-        return provider;
-    }
-
-
-    @Override
     @CacheEvict(value = CACHE_PROVIDERS, allEntries = true)
-    public ProviderBundle add(ProviderBundle providerBundle, Authentication auth) {
+    public ProviderBundle add(ProviderBundle bundle, Authentication auth) {
 
-        providerBundle.setId(idCreator.generate(getResourceType()));
+        bundle.setId(idCreator.generate(getResourceType()));
 
-        // Check if there is a Provider with the specific id
-        FacetFilter ff = new FacetFilter();
-        ff.setQuantity(maxQuantity);
-        List<ProviderBundle> providerList = providerManager.getAll(ff, auth).getResults();
-        for (ProviderBundle existingProvider : providerList) {
-            if (providerBundle.getProvider().getId().equals(existingProvider.getProvider().getId()) && existingProvider.getProvider().getCatalogueId().equals(catalogueId)) {
-                throw new ResourceAlreadyExistsException(String.format("Provider with the specific id already exists on the [%s] Catalogue.", catalogueId));
-            }
-        }
-        logger.trace("Attempting to add a new Draft Provider: {}", providerBundle);
-        providerBundle.setMetadata(Metadata.updateMetadata(providerBundle.getMetadata(), User.of(auth).getFullName(), User.of(auth).getEmail()));
+        logger.trace("Attempting to add a new Draft Provider: {}", bundle);
+        bundle.setMetadata(Metadata.updateMetadata(bundle.getMetadata(), User.of(auth).getFullName(), User.of(auth).getEmail()));
 
         List<LoggingInfo> loggingInfoList = new ArrayList<>();
         LoggingInfo loggingInfo = commonMethods.createLoggingInfo(auth, LoggingInfo.Types.DRAFT.getKey(),
                 LoggingInfo.ActionType.CREATED.getKey());
         loggingInfoList.add(loggingInfo);
-        providerBundle.setLoggingInfo(loggingInfoList);
+        bundle.setLoggingInfo(loggingInfoList);
 
-        providerBundle.getProvider().setCatalogueId(catalogueId);
+        bundle.getProvider().setCatalogueId(catalogueId);
+        bundle.setActive(false);
 
-        super.add(providerBundle, auth);
+        super.add(bundle, auth);
 
-        return providerBundle;
+        return bundle;
     }
 
     @Override
     @CacheEvict(value = CACHE_PROVIDERS, allEntries = true)
-    public ProviderBundle update(ProviderBundle providerBundle, Authentication auth) {
+    public ProviderBundle update(ProviderBundle bundle, Authentication auth) {
         // get existing resource
-        Resource existing = getPendingResourceViaProviderId(providerBundle.getId());
+        Resource existing = getDraftResource(bundle.getId());
         // block catalogueId updates from Provider Admins
-        providerBundle.getProvider().setCatalogueId(catalogueId);
-        logger.trace("Attempting to update the Draft Provider: {}", providerBundle);
-        providerBundle.setMetadata(Metadata.updateMetadata(providerBundle.getMetadata(), User.of(auth).getFullName(), User.of(auth).getEmail()));
+        bundle.getProvider().setCatalogueId(catalogueId);
+        logger.trace("Attempting to update the Draft Provider: {}", bundle);
+        bundle.setMetadata(Metadata.updateMetadata(bundle.getMetadata(), User.of(auth).getFullName(), User.of(auth).getEmail()));
         // save existing resource with new payload
-        existing.setPayload(serialize(providerBundle));
+        existing.setPayload(serialize(bundle));
         existing.setResourceType(resourceType);
         resourceService.updateResource(existing);
-        logger.debug("Updating PendingProvider: {}", providerBundle);
-        return providerBundle;
+        logger.debug("Updating Draft Provider: {}", bundle);
+        return bundle;
     }
 
     @Override
     @CacheEvict(value = CACHE_PROVIDERS, allEntries = true)
-    public void delete(ProviderBundle providerBundle) {
-        super.delete(providerBundle);
+    public void delete(ProviderBundle bundle) {
+        super.delete(bundle);
     }
 
     @Override
     @CacheEvict(value = CACHE_PROVIDERS, allEntries = true)
-    public ProviderBundle transformToNonDraft(String providerId, Authentication auth) {
-        ProviderBundle providerBundle = get(providerId);
+    public ProviderBundle transformToNonDraft(String id, Authentication auth) {
+        ProviderBundle providerBundle = get(id);
         return transformToNonDraft(providerBundle, auth);
     }
 
     @Override
     @CacheEvict(value = CACHE_PROVIDERS, allEntries = true)
-    public ProviderBundle transformToNonDraft(ProviderBundle providerBundle, Authentication auth) {
-        logger.trace("Attempting to transform the Draft Provider with id '{}' to Active", providerBundle.getId());
-        providerManager.validate(providerBundle);
-        if (providerManager.exists(providerBundle.getId())) {
-            throw new ResourceAlreadyExistsException(String.format("Provider with id = '%s' already exists!", providerBundle.getId()));
-        }
+    public ProviderBundle transformToNonDraft(ProviderBundle bundle, Authentication auth) {
+        logger.trace("Attempting to transform the Draft Provider with id '{}' to Provider", bundle.getId());
+        providerManager.validate(bundle);
 
         // update loggingInfo
-        List<LoggingInfo> loggingInfoList = commonMethods.returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(providerBundle, auth);
+        List<LoggingInfo> loggingInfoList = commonMethods.returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(bundle, auth);
         LoggingInfo loggingInfo = commonMethods.createLoggingInfo(auth, LoggingInfo.Types.ONBOARD.getKey(),
                 LoggingInfo.ActionType.REGISTERED.getKey());
         loggingInfoList.add(loggingInfo);
-        providerBundle.setLoggingInfo(loggingInfoList);
-
-        // latestOnboardInfo
-        providerBundle.setLatestOnboardingInfo(loggingInfo);
+        bundle.setLoggingInfo(loggingInfoList);
+        bundle.setLatestOnboardingInfo(loggingInfo);
 
         // update providerStatus
-        providerBundle.setStatus(vocabularyService.get("pending provider").getId());
-        providerBundle.setTemplateStatus(vocabularyService.get("no template status").getId());
+        bundle.setStatus(vocabularyService.get("pending provider").getId());
+        bundle.setTemplateStatus(vocabularyService.get("no template status").getId());
 
-        providerBundle.setMetadata(Metadata.updateMetadata(providerBundle.getMetadata(), User.of(auth).getFullName(), User.of(auth).getEmail()));
+        bundle.setMetadata(Metadata.updateMetadata(bundle.getMetadata(), User.of(auth).getFullName(), User.of(auth).getEmail()));
 
         ResourceType providerResourceType = resourceTypeService.getResourceType("provider");
-        Resource resource = getPendingResourceViaProviderId(providerBundle.getId());
+        Resource resource = getDraftResource(bundle.getId());
         resource.setResourceType(resourceType);
         resourceService.changeResourceType(resource, providerResourceType);
 
         try {
-            providerBundle = providerManager.update(providerBundle, auth);
+            bundle = providerManager.update(bundle, auth);
         } catch (ResourceNotFoundException e) {
             e.printStackTrace();
         }
 
-        registrationMailService.sendEmailsToNewlyAddedAdmins(providerBundle, null);
-        return providerBundle;
+        registrationMailService.sendEmailsToNewlyAddedAdmins(bundle, null);
+        return bundle;
     }
 
     public List<ProviderBundle> getMy(Authentication auth) {
@@ -182,10 +155,10 @@ public class DraftProviderManager extends ResourceManager<ProviderBundle> implem
         return super.getAll(ff, auth).getResults();
     }
 
-    private Resource getPendingResourceViaProviderId(String providerId) {
+    private Resource getDraftResource(String id) {
         Paging<Resource> resources;
         resources = searchService
-                .cqlQuery(String.format("resource_internal_id = \"%s\" AND catalogue_id = \"%s\"", providerId, catalogueId),
+                .cqlQuery(String.format("resource_internal_id = \"%s\" AND catalogue_id = \"%s\"", id, catalogueId),
                         resourceType.getName());
         assert resources != null;
         return resources.getTotal() == 0 ? null : resources.getResults().get(0);

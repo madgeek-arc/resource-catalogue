@@ -1,6 +1,5 @@
 package gr.uoa.di.madgik.resourcecatalogue.manager;
 
-import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.registry.domain.Resource;
 import gr.uoa.di.madgik.registry.domain.ResourceType;
@@ -9,7 +8,6 @@ import gr.uoa.di.madgik.resourcecatalogue.domain.InteroperabilityRecordBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.LoggingInfo;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Metadata;
 import gr.uoa.di.madgik.resourcecatalogue.domain.User;
-import gr.uoa.di.madgik.resourcecatalogue.exception.ResourceAlreadyExistsException;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
 import gr.uoa.di.madgik.resourcecatalogue.utils.ProviderResourcesCommonMethods;
 import org.slf4j.Logger;
@@ -17,8 +15,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.context.annotation.Lazy;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
@@ -60,67 +56,48 @@ public class DraftInteroperabilityRecordManager extends ResourceManager<Interope
 
     @Override
     @CacheEvict(cacheNames = {CACHE_VISITS, CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)
-    public InteroperabilityRecordBundle add(InteroperabilityRecordBundle interoperabilityRecordBundle, Authentication auth) {
+    public InteroperabilityRecordBundle add(InteroperabilityRecordBundle bundle, Authentication auth) {
 
-        interoperabilityRecordBundle.setId(idCreator.generate(getResourceType()));
+        bundle.setId(idCreator.generate(getResourceType()));
 
-        // Check if there is a Resource with the specific id
-        FacetFilter ff = new FacetFilter();
-        ff.setQuantity(maxQuantity);
-        List<InteroperabilityRecordBundle> resourceList = interoperabilityRecordService.getAll(ff, auth).getResults();
-        for (InteroperabilityRecordBundle existingIR : resourceList) {
-            if (interoperabilityRecordBundle.getInteroperabilityRecord().getId().equals(existingIR.getInteroperabilityRecord().getId()) && existingIR.getInteroperabilityRecord().getCatalogueId().equals(catalogueId)) {
-                throw new ResourceAlreadyExistsException(String.format("Interoperability Record with the specific id already exists on the [%s] Catalogue", catalogueId));
-            }
-        }
-        logger.trace("Attempting to add a new Draft Interoperability Record with id {}", interoperabilityRecordBundle.getId());
+        logger.trace("Attempting to add a new Draft Interoperability Record with id {}", bundle.getId());
+        bundle.setMetadata(Metadata.updateMetadata(bundle.getMetadata(), User.of(auth).getFullName(), User.of(auth).getEmail()));
 
-        if (interoperabilityRecordBundle.getMetadata() == null) {
-            interoperabilityRecordBundle.setMetadata(Metadata.createMetadata(User.of(auth).getFullName()));
-        }
         List<LoggingInfo> loggingInfoList = new ArrayList<>();
         LoggingInfo loggingInfo = commonMethods.createLoggingInfo(auth, LoggingInfo.Types.DRAFT.getKey(),
                 LoggingInfo.ActionType.CREATED.getKey());
         loggingInfoList.add(loggingInfo);
-        interoperabilityRecordBundle.setLoggingInfo(loggingInfoList);
+        bundle.setLoggingInfo(loggingInfoList);
 
-        interoperabilityRecordBundle.getInteroperabilityRecord().setCatalogueId(catalogueId);
-        interoperabilityRecordBundle.setActive(false);
+        bundle.getInteroperabilityRecord().setCatalogueId(catalogueId);
+        bundle.setActive(false);
 
-        super.add(interoperabilityRecordBundle, auth);
+        super.add(bundle, auth);
 
-        return interoperabilityRecordBundle;
-    }
-
-    @CacheEvict(value = CACHE_PROVIDERS, allEntries = true)
-    public ResponseEntity<InteroperabilityRecordBundle> addCrud(InteroperabilityRecordBundle interoperabilityRecordBundle, Authentication auth) {
-        interoperabilityRecordBundle.setId(idCreator.generate(getResourceType()));
-        super.add(interoperabilityRecordBundle, auth);
-        logger.debug("Created a new Draft Interoperability Record with id {}", interoperabilityRecordBundle.getId());
-        return new ResponseEntity<>(interoperabilityRecordBundle, HttpStatus.CREATED);
+        return bundle;
     }
 
     @Override
     @CacheEvict(cacheNames = {CACHE_VISITS, CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)
-    public InteroperabilityRecordBundle update(InteroperabilityRecordBundle interoperabilityRecordBundle, Authentication auth) {
+    public InteroperabilityRecordBundle update(InteroperabilityRecordBundle bundle, Authentication auth) {
         // get existing resource
-        Resource existing = getPendingResourceViaInteroperabilityRecordId(interoperabilityRecordBundle.getInteroperabilityRecord().getId());
+        Resource existing = getDraftResource(bundle.getInteroperabilityRecord().getId());
         // block catalogueId updates from Provider Admins
-        interoperabilityRecordBundle.getInteroperabilityRecord().setCatalogueId(catalogueId);
-        logger.trace("Attempting to update the Draft Interoperability Record with id {}", interoperabilityRecordBundle.getId());
-        interoperabilityRecordBundle.setMetadata(Metadata.updateMetadata(interoperabilityRecordBundle.getMetadata(), User.of(auth).getFullName()));
+        bundle.getInteroperabilityRecord().setCatalogueId(catalogueId);
+        logger.trace("Attempting to update the Draft Interoperability Record with id {}", bundle.getId());
+        bundle.setMetadata(Metadata.updateMetadata(bundle.getMetadata(), User.of(auth).getFullName()));
         // save existing resource with new payload
-        existing.setPayload(serialize(interoperabilityRecordBundle));
+        existing.setPayload(serialize(bundle));
         existing.setResourceType(resourceType);
         resourceService.updateResource(existing);
-        logger.debug("Updating Draft Interoperability Record: {}", interoperabilityRecordBundle);
-        return interoperabilityRecordBundle;
+        logger.debug("Updating Draft Interoperability Record: {}", bundle);
+        return bundle;
     }
 
     @Override
     @CacheEvict(value = CACHE_PROVIDERS, allEntries = true)
-    public void delete(InteroperabilityRecordBundle interoperabilityRecordBundle) {
-        super.delete(interoperabilityRecordBundle);
+    public void delete(InteroperabilityRecordBundle bundle) {
+        super.delete(bundle);
     }
 
     @Override
@@ -132,35 +109,33 @@ public class DraftInteroperabilityRecordManager extends ResourceManager<Interope
 
     @Override
     @CacheEvict(cacheNames = {CACHE_VISITS, CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)
-    public InteroperabilityRecordBundle transformToNonDraft(InteroperabilityRecordBundle interoperabilityRecordBundle, Authentication auth) {
-        logger.trace("Attempting to transform the Draft Interoperability Record with id {} to Active", interoperabilityRecordBundle.getId());
-        interoperabilityRecordService.validate(interoperabilityRecordBundle);
+    public InteroperabilityRecordBundle transformToNonDraft(InteroperabilityRecordBundle bundle, Authentication auth) {
+        logger.trace("Attempting to transform the Draft Interoperability Record with id {} to Active", bundle.getId());
+        interoperabilityRecordService.validate(bundle);
 
         // update loggingInfo
-        List<LoggingInfo> loggingInfoList = commonMethods.returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(interoperabilityRecordBundle, auth);
+        List<LoggingInfo> loggingInfoList = commonMethods.returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(bundle, auth);
         LoggingInfo loggingInfo = commonMethods.createLoggingInfo(auth, LoggingInfo.Types.ONBOARD.getKey(),
                 LoggingInfo.ActionType.REGISTERED.getKey());
         loggingInfoList.add(loggingInfo);
-        interoperabilityRecordBundle.setLoggingInfo(loggingInfoList);
+        bundle.setLoggingInfo(loggingInfoList);
+        bundle.setLatestOnboardingInfo(loggingInfoList.get(loggingInfoList.size() - 1));
 
-        interoperabilityRecordBundle.setStatus("pending interoperability record");
-        // latestOnboardingInfo
-        interoperabilityRecordBundle.setLatestOnboardingInfo(loggingInfoList.get(loggingInfoList.size() - 1));
+        bundle.setStatus("pending interoperability record");
+        bundle.setMetadata(Metadata.updateMetadata(bundle.getMetadata(), User.of(auth).getFullName(), User.of(auth).getEmail()));
 
-        interoperabilityRecordBundle.setMetadata(Metadata.updateMetadata(interoperabilityRecordBundle.getMetadata(), User.of(auth).getFullName(), User.of(auth).getEmail()));
-
-        ResourceType infraResourceType = resourceTypeService.getResourceType("interoperability_record");
-        Resource resource = getPendingResourceViaInteroperabilityRecordId(interoperabilityRecordBundle.getId());
+        ResourceType guidelinesResourceType = resourceTypeService.getResourceType("interoperability_record");
+        Resource resource = getDraftResource(bundle.getId());
         resource.setResourceType(resourceType);
-        resourceService.changeResourceType(resource, infraResourceType);
+        resourceService.changeResourceType(resource, guidelinesResourceType);
 
         try {
-            interoperabilityRecordBundle = interoperabilityRecordService.update(interoperabilityRecordBundle, auth);
+            bundle = interoperabilityRecordService.update(bundle, auth);
         } catch (ResourceNotFoundException e) {
             logger.error(e.getMessage(), e);
         }
 
-        return interoperabilityRecordBundle;
+        return bundle;
     }
 
     public List<InteroperabilityRecordBundle> getMy(Authentication auth) {
@@ -169,7 +144,7 @@ public class DraftInteroperabilityRecordManager extends ResourceManager<Interope
         return re;
     }
 
-    private Resource getPendingResourceViaInteroperabilityRecordId(String id) {
+    private Resource getDraftResource(String id) {
         Paging<Resource> resources;
         resources = searchService
                 .cqlQuery(String.format("resource_internal_id = \"%s\" AND catalogue_id = \"%s\"", id, catalogueId),

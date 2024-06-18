@@ -1,6 +1,5 @@
 package gr.uoa.di.madgik.resourcecatalogue.manager;
 
-import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.registry.domain.Resource;
 import gr.uoa.di.madgik.registry.domain.ResourceType;
@@ -9,7 +8,6 @@ import gr.uoa.di.madgik.resourcecatalogue.domain.LoggingInfo;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Metadata;
 import gr.uoa.di.madgik.resourcecatalogue.domain.TrainingResourceBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.User;
-import gr.uoa.di.madgik.resourcecatalogue.exception.ResourceAlreadyExistsException;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
 import gr.uoa.di.madgik.resourcecatalogue.utils.ProviderResourcesCommonMethods;
 import org.slf4j.Logger;
@@ -17,8 +15,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.context.annotation.Lazy;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
@@ -60,67 +56,48 @@ public class DraftTrainingResourceManager extends ResourceManager<TrainingResour
 
     @Override
     @CacheEvict(cacheNames = {CACHE_VISITS, CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)
-    public TrainingResourceBundle add(TrainingResourceBundle trainingResourceBundle, Authentication auth) {
+    public TrainingResourceBundle add(TrainingResourceBundle bundle, Authentication auth) {
 
-        trainingResourceBundle.setId(idCreator.generate(getResourceType()));
+        bundle.setId(idCreator.generate(getResourceType()));
 
-        // Check if there is a Resource with the specific id
-        FacetFilter ff = new FacetFilter();
-        ff.setQuantity(maxQuantity);
-        List<TrainingResourceBundle> resourceList = trainingResourceService.getAll(ff, auth).getResults();
-        for (TrainingResourceBundle existingTR : resourceList) {
-            if (trainingResourceBundle.getTrainingResource().getId().equals(existingTR.getTrainingResource().getId()) && existingTR.getTrainingResource().getCatalogueId().equals(catalogueId)) {
-                throw new ResourceAlreadyExistsException(String.format("Training Resource with the specific id already exists on the [%s] Catalogue", catalogueId));
-            }
-        }
-        logger.trace("Attempting to add a new Draft Training Resource with id {}", trainingResourceBundle.getId());
+        logger.trace("Attempting to add a new Draft Training Resource with id {}", bundle.getId());
+        bundle.setMetadata(Metadata.updateMetadata(bundle.getMetadata(), User.of(auth).getFullName(), User.of(auth).getEmail()));
 
-        if (trainingResourceBundle.getMetadata() == null) {
-            trainingResourceBundle.setMetadata(Metadata.createMetadata(User.of(auth).getFullName()));
-        }
         List<LoggingInfo> loggingInfoList = new ArrayList<>();
         LoggingInfo loggingInfo = commonMethods.createLoggingInfo(auth, LoggingInfo.Types.DRAFT.getKey(),
                 LoggingInfo.ActionType.CREATED.getKey());
         loggingInfoList.add(loggingInfo);
-        trainingResourceBundle.setLoggingInfo(loggingInfoList);
+        bundle.setLoggingInfo(loggingInfoList);
 
-        trainingResourceBundle.getTrainingResource().setCatalogueId(catalogueId);
-        trainingResourceBundle.setActive(false);
+        bundle.getTrainingResource().setCatalogueId(catalogueId);
+        bundle.setActive(false);
 
-        super.add(trainingResourceBundle, auth);
+        super.add(bundle, auth);
 
-        return trainingResourceBundle;
-    }
-
-    @CacheEvict(value = CACHE_PROVIDERS, allEntries = true)
-    public ResponseEntity<TrainingResourceBundle> addCrud(TrainingResourceBundle trainingResourceBundle, Authentication auth) {
-        trainingResourceBundle.setId(idCreator.generate(getResourceType()));
-        super.add(trainingResourceBundle, auth);
-        logger.debug("Created a new Draft Training Resource with id {}", trainingResourceBundle.getId());
-        return new ResponseEntity<>(trainingResourceBundle, HttpStatus.CREATED);
+        return bundle;
     }
 
     @Override
     @CacheEvict(cacheNames = {CACHE_VISITS, CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)
-    public TrainingResourceBundle update(TrainingResourceBundle trainingResourceBundle, Authentication auth) {
+    public TrainingResourceBundle update(TrainingResourceBundle bundle, Authentication auth) {
         // get existing resource
-        Resource existing = getPendingResourceViaTrainingResourceId(trainingResourceBundle.getTrainingResource().getId());
+        Resource existing = getDraftResource(bundle.getTrainingResource().getId());
         // block catalogueId updates from Provider Admins
-        trainingResourceBundle.getTrainingResource().setCatalogueId(catalogueId);
-        logger.trace("Attempting to update the Draft Training Resource with id {}", trainingResourceBundle.getId());
-        trainingResourceBundle.setMetadata(Metadata.updateMetadata(trainingResourceBundle.getMetadata(), User.of(auth).getFullName()));
+        bundle.getTrainingResource().setCatalogueId(catalogueId);
+        logger.trace("Attempting to update the Draft Training Resource with id {}", bundle.getId());
+        bundle.setMetadata(Metadata.updateMetadata(bundle.getMetadata(), User.of(auth).getFullName()));
         // save existing resource with new payload
-        existing.setPayload(serialize(trainingResourceBundle));
+        existing.setPayload(serialize(bundle));
         existing.setResourceType(resourceType);
         resourceService.updateResource(existing);
-        logger.debug("Updating Draft Training Resource: {}", trainingResourceBundle);
-        return trainingResourceBundle;
+        logger.debug("Updating Draft Training Resource: {}", bundle);
+        return bundle;
     }
 
     @Override
     @CacheEvict(value = CACHE_PROVIDERS, allEntries = true)
-    public void delete(TrainingResourceBundle trainingResourceBundle) {
-        super.delete(trainingResourceBundle);
+    public void delete(TrainingResourceBundle bundle) {
+        super.delete(bundle);
     }
 
     @Override
@@ -132,44 +109,43 @@ public class DraftTrainingResourceManager extends ResourceManager<TrainingResour
 
     @Override
     @CacheEvict(cacheNames = {CACHE_VISITS, CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)
-    public TrainingResourceBundle transformToNonDraft(TrainingResourceBundle trainingResourceBundle, Authentication auth) {
-        logger.trace("Attempting to transform the Draft Training Resource with id {} to Active", trainingResourceBundle.getId());
-        trainingResourceService.validate(trainingResourceBundle);
+    public TrainingResourceBundle transformToNonDraft(TrainingResourceBundle bundle, Authentication auth) {
+        logger.trace("Attempting to transform the Draft Training Resource with id {} to Training Resource", bundle.getId());
+        trainingResourceService.validate(bundle);
 
         // update loggingInfo
-        List<LoggingInfo> loggingInfoList = commonMethods.returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(trainingResourceBundle, auth);
+        List<LoggingInfo> loggingInfoList = commonMethods.returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(bundle, auth);
         LoggingInfo loggingInfo = commonMethods.createLoggingInfo(auth, LoggingInfo.Types.ONBOARD.getKey(),
                 LoggingInfo.ActionType.REGISTERED.getKey());
         loggingInfoList.add(loggingInfo);
 
         // set resource status according to Provider's templateStatus
-        if (providerService.get(trainingResourceBundle.getTrainingResource().getResourceOrganisation()).getTemplateStatus().equals("approved template")) {
-            trainingResourceBundle.setStatus(vocabularyService.get("approved resource").getId());
+        if (providerService.get(bundle.getTrainingResource().getResourceOrganisation()).getTemplateStatus().equals("approved template")) {
+            bundle.setStatus(vocabularyService.get("approved resource").getId());
             LoggingInfo loggingInfoApproved = commonMethods.createLoggingInfo(auth, LoggingInfo.Types.ONBOARD.getKey(),
                     LoggingInfo.ActionType.APPROVED.getKey());
             loggingInfoList.add(loggingInfoApproved);
-            trainingResourceBundle.setActive(true);
+            bundle.setActive(true);
         } else {
-            trainingResourceBundle.setStatus(vocabularyService.get("pending resource").getId());
+            bundle.setStatus(vocabularyService.get("pending resource").getId());
         }
-        trainingResourceBundle.setLoggingInfo(loggingInfoList);
-        // latestOnboardingInfo
-        trainingResourceBundle.setLatestOnboardingInfo(loggingInfoList.get(loggingInfoList.size() - 1));
+        bundle.setLoggingInfo(loggingInfoList);
+        bundle.setLatestOnboardingInfo(loggingInfoList.get(loggingInfoList.size() - 1));
 
-        trainingResourceBundle.setMetadata(Metadata.updateMetadata(trainingResourceBundle.getMetadata(), User.of(auth).getFullName(), User.of(auth).getEmail()));
+        bundle.setMetadata(Metadata.updateMetadata(bundle.getMetadata(), User.of(auth).getFullName(), User.of(auth).getEmail()));
 
-        ResourceType infraResourceType = resourceTypeService.getResourceType("training_resource");
-        Resource resource = getPendingResourceViaTrainingResourceId(trainingResourceBundle.getId());
+        ResourceType trainingResourceType = resourceTypeService.getResourceType("training_resource");
+        Resource resource = getDraftResource(bundle.getId());
         resource.setResourceType(resourceType);
-        resourceService.changeResourceType(resource, infraResourceType);
+        resourceService.changeResourceType(resource, trainingResourceType);
 
         try {
-            trainingResourceBundle = trainingResourceService.update(trainingResourceBundle, auth);
+            bundle = trainingResourceService.update(bundle, auth);
         } catch (ResourceNotFoundException e) {
             logger.error(e.getMessage(), e);
         }
 
-        return trainingResourceBundle;
+        return bundle;
     }
 
     public List<TrainingResourceBundle> getMy(Authentication auth) {
@@ -178,7 +154,7 @@ public class DraftTrainingResourceManager extends ResourceManager<TrainingResour
         return re;
     }
 
-    private Resource getPendingResourceViaTrainingResourceId(String id) {
+    private Resource getDraftResource(String id) {
         Paging<Resource> resources;
         resources = searchService
                 .cqlQuery(String.format("resource_internal_id = \"%s\" AND catalogue_id = \"%s\"", id, catalogueId),

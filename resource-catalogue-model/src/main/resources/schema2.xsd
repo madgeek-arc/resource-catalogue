@@ -65,8 +65,6 @@
             
       <xs:enumeration value="APPROVED"/>
             
-      <xs:enumeration value="VALIDATED"/>
-            
       <xs:enumeration value="REJECTED"/>
             
       <xs:enumeration value="UPDATED"/>
