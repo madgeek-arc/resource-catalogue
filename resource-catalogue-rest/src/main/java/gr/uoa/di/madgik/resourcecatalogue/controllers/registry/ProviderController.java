@@ -218,18 +218,16 @@ public class ProviderController {
         throw new UnsupportedOperationException("Method Removed: Contact administrators");
     }
 
-    @Deprecated
     @Browse
     @GetMapping(path = "byCatalogue/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isCatalogueAdmin(#auth,#id)")
     public ResponseEntity<Paging<ProviderBundle>> getProvidersByCatalogue(@Parameter(hidden = true) @RequestParam Map<String, Object> allRequestParams,
                                                                           @PathVariable String id,
                                                                           @Parameter(hidden = true) Authentication auth) {
-//        FacetFilter ff = FacetFilterUtils.createFacetFilter(allRequestParams);
-//        ff.addFilter("catalogue_id", id);
-//        ff.addFilter("published", false);
-//        return ResponseEntity.ok(providerService.getAll(ff, auth));
-        throw new UnsupportedOperationException("Method Removed: Contact administrators");
+        FacetFilter ff = FacetFilterUtils.createFacetFilter(allRequestParams);
+        ff.addFilter("catalogue_id", id);
+        ff.addFilter("published", false);
+        return ResponseEntity.ok(providerService.getAll(ff, auth));
     }
 
     // Get a list of Providers in which the given user is admin.

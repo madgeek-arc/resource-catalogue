@@ -148,10 +148,10 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
     @Override
     public CatalogueBundle add(CatalogueBundle catalogue, Authentication auth) {
 
-        catalogue.setId(idCreator.generate(getResourceType()));
         logger.trace("Attempting to add a new Catalogue: {}", catalogue);
         addAuthenticatedUser(catalogue.getCatalogue(), auth);
         validate(catalogue);
+        catalogue.setId(idCreator.sanitizeString(catalogue.getCatalogue().getAbbreviation()));
         catalogue.setMetadata(Metadata.createMetadata(User.of(auth).getFullName(), User.of(auth).getEmail()));
         List<LoggingInfo> loggingInfoList = commonMethods.returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(catalogue, auth);
         catalogue.setLoggingInfo(loggingInfoList);
