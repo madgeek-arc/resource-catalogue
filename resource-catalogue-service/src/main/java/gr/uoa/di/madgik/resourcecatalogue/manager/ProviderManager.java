@@ -7,6 +7,7 @@ import gr.uoa.di.madgik.registry.service.VersionService;
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
 import gr.uoa.di.madgik.resourcecatalogue.dto.ExtendedValue;
 import gr.uoa.di.madgik.resourcecatalogue.dto.MapValues;
+import gr.uoa.di.madgik.resourcecatalogue.exception.ResourceException;
 import gr.uoa.di.madgik.resourcecatalogue.exception.ValidationException;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
 import gr.uoa.di.madgik.resourcecatalogue.utils.Auditable;
@@ -211,7 +212,8 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         logger.debug("Updating Provider: {} of Catalogue: {}", ret, ret.getProvider().getCatalogueId());
 
         // check if Provider has become a Legal Entity
-        checkAndAddProviderToHLEVocabulary(ret);
+        //TODO: do we need this?
+//        checkAndAddProviderToHLEVocabulary(ret);
 
         // Send emails to newly added or deleted Admins
         adminDifferences(ret, existingProvider);
@@ -462,7 +464,8 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
                         LoggingInfo.ActionType.APPROVED.getKey());
 
                 // add Provider's Name as a HLE Vocabulary
-                checkAndAddProviderToHLEVocabulary(existingProvider);
+                //TODO: do we need this?
+//                checkAndAddProviderToHLEVocabulary(existingProvider);
                 break;
             case "rejected provider":
                 existingProvider.setActive(false);
@@ -919,13 +922,13 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         vocabularyService.add(hle, null);
     }
 
-    // TODO: thoroughly test if it works as expected
     private void checkAndAddProviderToHLEVocabulary(ProviderBundle providerBundle) {
         if (providerBundle.getStatus().equals("approved provider") && providerBundle.getProvider().isLegalEntity()) {
+            //TODO: if we need this better save with Abbreviation instead of ID
             String hleId = "provider_hosting_legal_entity-" + providerBundle.getProvider().getId();
-            Vocabulary providerHle = vocabularyService.get(hleId);
-//            Vocabulary providerHle = vocabularyService.get(new SearchService.KeyValue("id", hleId), new SearchService.KeyValue("name", providerBundle.getProvider().getName()));
-            if (providerHle == null) {
+            try {
+                vocabularyService.get(hleId);
+            } catch (ResourceException e) {
                 addApprovedProviderToHLEVocabulary(providerBundle);
             }
         }
