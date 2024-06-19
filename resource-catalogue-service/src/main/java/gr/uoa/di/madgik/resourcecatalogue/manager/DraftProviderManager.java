@@ -61,6 +61,7 @@ public class DraftProviderManager extends ResourceManager<ProviderBundle> implem
     public ProviderBundle add(ProviderBundle bundle, Authentication auth) {
 
         bundle.setId(idCreator.generate(getResourceType()));
+        commonMethods.addAuthenticatedUser(bundle.getProvider(), auth);
 
         logger.trace("Attempting to add a new Draft Provider: {}", bundle);
         bundle.setMetadata(Metadata.updateMetadata(bundle.getMetadata(), User.of(auth).getFullName(), User.of(auth).getEmail()));

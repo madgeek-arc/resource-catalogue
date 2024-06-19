@@ -133,7 +133,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         provider.getProvider().setAlternativeIdentifiers(commonMethods.ensureResourceCataloguePidUniqueness(provider.getId(),
                 provider.getProvider().getAlternativeIdentifiers()));
 
-        addAuthenticatedUser(provider.getProvider(), auth);
+        commonMethods.addAuthenticatedUser(provider.getProvider(), auth);
         validate(provider);
         provider.setMetadata(Metadata.createMetadata(AuthenticationInfo.getFullName(auth), AuthenticationInfo.getEmail(auth)));
 
@@ -742,26 +742,6 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
             providerBundle.getProvider().setUsers(updatedUsers);
             update(providerBundle, authentication);
         }
-    }
-
-    private void addAuthenticatedUser(Provider provider, Authentication auth) {
-        List<User> users;
-        User authUser = null;
-        users = provider.getUsers();
-        try {
-            authUser = User.of(auth);
-        } catch (InsufficientAuthenticationException ignore) {
-        }
-        if (users == null) {
-            users = new ArrayList<>();
-        }
-        if (authUser != null) {
-            String authUserEmail = authUser.getEmail();
-            if (users.stream().noneMatch(u -> u.getEmail().equalsIgnoreCase(authUserEmail))) {
-                users.add(authUser);
-            }
-        }
-        provider.setUsers(users);
     }
 
     // For front-end use

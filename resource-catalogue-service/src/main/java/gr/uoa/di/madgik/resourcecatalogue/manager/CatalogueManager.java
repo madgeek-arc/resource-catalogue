@@ -149,7 +149,7 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
     public CatalogueBundle add(CatalogueBundle catalogue, Authentication auth) {
 
         logger.trace("Attempting to add a new Catalogue: {}", catalogue);
-        addAuthenticatedUser(catalogue.getCatalogue(), auth);
+        commonMethods.addAuthenticatedUser(catalogue.getCatalogue(), auth);
         validate(catalogue);
         catalogue.setId(idCreator.sanitizeString(catalogue.getCatalogue().getAbbreviation()));
         catalogue.setMetadata(Metadata.createMetadata(User.of(auth).getFullName(), User.of(auth).getEmail()));
@@ -290,34 +290,6 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
                 service.delete(resource);
             } catch (gr.uoa.di.madgik.registry.exception.ResourceNotFoundException e) {
                 logger.error(e.getMessage(), e);
-            }
-        }
-    }
-
-    private void addAuthenticatedUser(Object object, Authentication auth) {
-        if (object instanceof Catalogue) {
-            Catalogue catalogue = (Catalogue) object;
-            List<User> users;
-            User authUser = User.of(auth);
-            users = catalogue.getUsers();
-            if (users == null) {
-                users = new ArrayList<>();
-            }
-            if (users.stream().noneMatch(u -> u.getEmail().equalsIgnoreCase(authUser.getEmail()))) {
-                users.add(authUser);
-                catalogue.setUsers(users);
-            }
-        } else {
-            Provider provider = (Provider) object;
-            List<User> users;
-            User authUser = User.of(auth);
-            users = provider.getUsers();
-            if (users == null) {
-                users = new ArrayList<>();
-            }
-            if (users.stream().noneMatch(u -> u.getEmail().equalsIgnoreCase(authUser.getEmail()))) {
-                users.add(authUser);
-                provider.setUsers(users);
             }
         }
     }

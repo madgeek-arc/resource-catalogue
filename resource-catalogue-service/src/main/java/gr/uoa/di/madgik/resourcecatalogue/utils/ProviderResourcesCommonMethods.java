@@ -672,4 +672,20 @@ public class ProviderResourcesCommonMethods {
 
         return auditState;
     }
+
+    public void addAuthenticatedUser(Object object, Authentication auth) {
+        if (object instanceof Catalogue) {
+            Catalogue catalogue = (Catalogue) object;
+            User authUser = User.of(auth);
+            Set<User> users = catalogue.getUsers() == null ? new HashSet<>() : new HashSet<>(catalogue.getUsers());
+            users.add(authUser);
+            catalogue.setUsers(new ArrayList<>(users));
+        } else if (object instanceof Provider) {
+            Provider provider = (Provider) object;
+            User authUser = User.of(auth);
+            Set<User> users = provider.getUsers() == null ? new HashSet<>() : new HashSet<>(provider.getUsers());
+            users.add(authUser);
+            provider.setUsers(new ArrayList<>(users));
+        }
+    }
 }
