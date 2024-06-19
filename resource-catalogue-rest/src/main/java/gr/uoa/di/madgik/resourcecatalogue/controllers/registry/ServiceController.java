@@ -432,7 +432,7 @@ public class ServiceController {
     @Operation(summary = "Suspends a specific Service.")
     @PutMapping(path = "suspend", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
-    public ServiceBundle suspendService(@RequestParam String serviceId, @RequestParam String catalogueId, @RequestParam boolean suspend, @Parameter(hidden = true) Authentication auth) {
+    public ServiceBundle suspendService(@RequestParam String serviceId, @RequestParam boolean suspend, @Parameter(hidden = true) Authentication auth) {
         return serviceBundleService.suspend(serviceId, suspend, auth);
     }
 

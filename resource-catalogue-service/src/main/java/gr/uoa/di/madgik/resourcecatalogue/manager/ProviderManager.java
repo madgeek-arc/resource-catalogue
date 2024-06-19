@@ -41,6 +41,7 @@ import static gr.uoa.di.madgik.resourcecatalogue.utils.VocabularyValidationUtils
 public class ProviderManager extends ResourceManager<ProviderBundle> implements ProviderService {
 
     private static final Logger logger = LoggerFactory.getLogger(ProviderManager.class);
+    private final DraftResourceService<ProviderBundle> draftProviderService;
     private final ServiceBundleService<ServiceBundle> serviceBundleService;
     private final TrainingResourceService trainingResourceService;
     private final InteroperabilityRecordService interoperabilityRecordService;
@@ -64,7 +65,8 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     @Value("${catalogue.id}")
     private String catalogueId;
 
-    public ProviderManager(@Lazy ServiceBundleService<ServiceBundle> serviceBundleService,
+    public ProviderManager(@Lazy DraftResourceService<ProviderBundle> draftProviderService,
+                           @Lazy ServiceBundleService<ServiceBundle> serviceBundleService,
                            @Lazy SecurityService securityService, @Lazy FieldValidator fieldValidator,
                            @Lazy RegistrationMailService registrationMailService, IdCreator idCreator,
                            EventService eventService, VersionService versionService,
@@ -79,6 +81,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
                            @Lazy PublicTrainingResourceManager publicTrainingResourceManager,
                            @Lazy PublicInteroperabilityRecordManager publicInteroperabilityRecordManager) {
         super(ProviderBundle.class);
+        this.draftProviderService = draftProviderService;
         this.serviceBundleService = serviceBundleService;
         this.securityService = securityService;
         this.fieldValidator = fieldValidator;
@@ -771,8 +774,13 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         return true;
     }
 
-    public boolean hasAdminAcceptedTerms(String providerId, Authentication auth) {
-        ProviderBundle providerBundle = get(providerId, auth);
+    public boolean hasAdminAcceptedTerms(String providerId, boolean isDraft, Authentication auth) {
+        ProviderBundle providerBundle;
+        if (isDraft) {
+            providerBundle = draftProviderService.get(providerId);
+        } else {
+            providerBundle = get(providerId, auth);
+        }
         List<String> userList = new ArrayList<>();
         for (User user : providerBundle.getProvider().getUsers()) {
             userList.add(user.getEmail().toLowerCase());
@@ -790,8 +798,12 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         return true; // no modal
     }
 
-    public void adminAcceptedTerms(String providerId, Authentication auth) {
-        update(get(providerId), catalogueId, auth);
+    public void adminAcceptedTerms(String providerId, boolean isDraft, Authentication auth) {
+        try {
+            draftProviderService.update(draftProviderService.get(providerId), auth);
+        } catch (ResourceNotFoundException e) {
+            update(get(providerId), auth);
+        }
     }
 
     public void adminDifferences(ProviderBundle updatedProvider, ProviderBundle existingProvider) {

@@ -298,7 +298,7 @@ public class InteroperabilityRecordController {
     @Operation(summary = "Suspends a specific Interoperability Record.")
     @PutMapping(path = "suspend", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
-    public InteroperabilityRecordBundle suspendInteroperabilityRecord(@RequestParam String interoperabilityRecordId, @RequestParam String catalogueId, @RequestParam boolean suspend, @Parameter(hidden = true) Authentication auth) {
+    public InteroperabilityRecordBundle suspendInteroperabilityRecord(@RequestParam String interoperabilityRecordId, @RequestParam boolean suspend, @Parameter(hidden = true) Authentication auth) {
         return interoperabilityRecordService.suspend(interoperabilityRecordId, suspend, auth);
     }
 

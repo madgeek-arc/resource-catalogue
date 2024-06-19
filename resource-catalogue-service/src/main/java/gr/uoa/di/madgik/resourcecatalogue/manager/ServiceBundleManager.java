@@ -708,7 +708,7 @@ public class ServiceBundleManager extends AbstractServiceBundleManager<ServiceBu
             }
         }
         // suspend Service's extensions
-        HelpdeskBundle helpdeskBundle = helpdeskService.get(serviceId);
+        HelpdeskBundle helpdeskBundle = helpdeskService.get(serviceId, serviceBundle.getService().getCatalogueId());
         if (helpdeskBundle != null) {
             try {
                 commonMethods.suspendResource(helpdeskBundle, suspend, auth);
@@ -717,7 +717,7 @@ public class ServiceBundleManager extends AbstractServiceBundleManager<ServiceBu
                 throw new RuntimeException(e);
             }
         }
-        MonitoringBundle monitoringBundle = monitoringService.get(serviceId);
+        MonitoringBundle monitoringBundle = monitoringService.get(serviceId, serviceBundle.getService().getCatalogueId());
         if (monitoringBundle != null) {
             try {
                 commonMethods.suspendResource(monitoringBundle, suspend, auth);

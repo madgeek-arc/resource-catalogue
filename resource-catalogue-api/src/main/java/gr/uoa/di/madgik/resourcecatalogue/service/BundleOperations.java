@@ -31,10 +31,11 @@ public interface BundleOperations<T extends Bundle<?>> {
      * Has an Authenticated User accepted the Terms & Conditions
      *
      * @param id             resource ID
+     * @param isDraft        boolean
      * @param authentication Authentication
      * @return <code>True</code> if Authenticated User has accepted Terms; <code>False</code> otherwise.
      */
-    default boolean hasAdminAcceptedTerms(String id, Authentication authentication) {
+    default boolean hasAdminAcceptedTerms(String id, boolean isDraft, Authentication authentication) {
         return false;
     }
 
@@ -42,9 +43,10 @@ public interface BundleOperations<T extends Bundle<?>> {
      * Update a resource's list of Users that has accepted the Terms & Conditions
      *
      * @param id             resource ID
+     * @param isDraft        boolean
      * @param authentication Authentication
      */
-    default void adminAcceptedTerms(String id, Authentication authentication) {
+    default void adminAcceptedTerms(String id, boolean isDraft, Authentication authentication) {
         throw new UnsupportedOperationException("Not implemented");
     }
 

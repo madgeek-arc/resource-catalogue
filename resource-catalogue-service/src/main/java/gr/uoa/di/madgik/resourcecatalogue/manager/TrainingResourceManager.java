@@ -929,7 +929,7 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
                 trainingResourceBundle.getTrainingResource().getResourceOrganisation(), suspend, auth);
         commonMethods.suspendResource(trainingResourceBundle, suspend, auth);
         // suspend Service's extensions
-        HelpdeskBundle helpdeskBundle = helpdeskService.get(trainingResourceId);
+        HelpdeskBundle helpdeskBundle = helpdeskService.get(trainingResourceId, trainingResourceBundle.getTrainingResource().getCatalogueId());
         if (helpdeskBundle != null) {
             try {
                 commonMethods.suspendResource(helpdeskBundle, suspend, auth);
@@ -938,7 +938,7 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
                 throw new RuntimeException(e);
             }
         }
-        MonitoringBundle monitoringBundle = monitoringService.get(trainingResourceId);
+        MonitoringBundle monitoringBundle = monitoringService.get(trainingResourceId, trainingResourceBundle.getTrainingResource().getCatalogueId());
         if (monitoringBundle != null) {
             try {
                 commonMethods.suspendResource(monitoringBundle, suspend, auth);

@@ -344,13 +344,15 @@ public class ProviderController {
     }
 
     @GetMapping(path = "hasAdminAcceptedTerms", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    public boolean hasAdminAcceptedTerms(@RequestParam String providerId, @Parameter(hidden = true) Authentication authentication) {
-        return providerService.hasAdminAcceptedTerms(providerId, authentication);
+    public boolean hasAdminAcceptedTerms(@RequestParam String providerId, @RequestParam boolean isDraft,
+                                         @Parameter(hidden = true) Authentication authentication) {
+        return providerService.hasAdminAcceptedTerms(providerId, isDraft, authentication);
     }
 
     @PutMapping(path = "adminAcceptedTerms", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    public void adminAcceptedTerms(@RequestParam String providerId, @Parameter(hidden = true) Authentication authentication) {
-        providerService.adminAcceptedTerms(providerId, authentication);
+    public void adminAcceptedTerms(@RequestParam String providerId, @RequestParam boolean isDraft,
+                                   @Parameter(hidden = true) Authentication authentication) {
+        providerService.adminAcceptedTerms(providerId, isDraft, authentication);
     }
 
     @GetMapping(path = "validateUrl", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
@@ -480,7 +482,7 @@ public class ProviderController {
     @Operation(description = "Suspends a Provider and all its resources")
     @PutMapping(path = "suspend", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
-    public ProviderBundle suspendProvider(@RequestParam String providerId, @RequestParam String catalogueId, @RequestParam boolean suspend, @Parameter(hidden = true) Authentication auth) {
+    public ProviderBundle suspendProvider(@RequestParam String providerId, @RequestParam boolean suspend, @Parameter(hidden = true) Authentication auth) {
         return providerService.suspend(providerId, suspend, auth);
     }
 
