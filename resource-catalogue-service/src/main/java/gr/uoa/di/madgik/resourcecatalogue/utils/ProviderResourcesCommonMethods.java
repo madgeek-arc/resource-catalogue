@@ -14,6 +14,7 @@ import org.springframework.security.authentication.InsufficientAuthenticationExc
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
+import javax.net.ssl.*;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -22,6 +23,7 @@ import java.net.HttpURLConnection;
 import java.net.ProtocolException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.security.cert.X509Certificate;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -44,14 +46,12 @@ public class ProviderResourcesCommonMethods {
     private final VocabularyService vocabularyService;
     private final SecurityService securityService;
 
+    @Value("${pid.test}")
+    private boolean pidTest;
     @Value("${pid.username}")
     private String pidUsername;
-    @Value("${pid.key}")
-    private String pidKey;
     @Value("${pid.auth}")
     private String pidAuth;
-    @Value("${pid.prefix}")
-    private String pidPrefix;
     @Value("${prefix.services}")
     private String servicesPrefix;
     @Value("${prefix.tools}")
@@ -405,11 +405,18 @@ public class ProviderResourcesCommonMethods {
     }
 
     public void postPID(String pid) {
-        String pidPrefix = pid.split("/")[0];
-        String urlPath = determineUrlPathFromPidPrefix(pidPrefix);
+        String resourcePrefix = pid.split("/")[0];  //21.15120
+        String resourceSuffix = pid.split("/")[1];  //79NMDy
+        String url;
+        if (pidTest) {
+            disableSSLVerification();
+            url = pidApi + resourceSuffix;
+        } else {
+            url = pidApi + pid;
+        }
+        String urlPath = determineUrlPathFromPidPrefix(resourcePrefix);
         if (!urlPath.equals("no_path")) {
-            String url = pidApi + pid;
-            String payload = createPID(pid, pidPrefix, urlPath);
+            String payload = createPID(pid, urlPath);
             HttpURLConnection con;
             try {
                 con = (HttpURLConnection) new URL(url).openConnection();
@@ -437,7 +444,7 @@ public class ProviderResourcesCommonMethods {
                 while ((responseLine = br.readLine()) != null) {
                     response.append(responseLine.trim());
                 }
-                logger.info("Resource with ID [{}] has been posted with PID [{}]", pid, pid);
+                logger.info("Resource with ID [{}] has been posted with PID [{}] on [{}]", pid, pid, url);
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
@@ -479,7 +486,7 @@ public class ProviderResourcesCommonMethods {
         }
     }
 
-    private String createPID(String resourceId, String pidPrefix, String resourceTypePath) {
+    private String createPID(String resourceId, String resourceTypePath) {
         JSONObject data = new JSONObject();
         JSONArray values = new JSONArray();
         JSONObject hs_admin = new JSONObject();
@@ -488,12 +495,12 @@ public class ProviderResourcesCommonMethods {
         JSONObject id = new JSONObject();
         JSONObject marketplaceUrl = new JSONObject();
         hs_admin_data_value.put("index", 301);
-        hs_admin_data_value.put("handle", pidPrefix + "/" + pidUsername);
+        hs_admin_data_value.put("handle", pidUsername);
         hs_admin_data_value.put("permissions", "011111110011");
-        hs_admin_data_value.put("format", "admin");
+//        hs_admin_data_value.put("format", "admin");
         hs_admin_data.put("value", hs_admin_data_value);
         hs_admin_data.put("format", "admin");
-        hs_admin.put("index", 100);
+        hs_admin.put("index", 101);
         hs_admin.put("type", "HS_ADMIN");
         hs_admin.put("data", hs_admin_data);
         values.put(hs_admin);
@@ -512,6 +519,33 @@ public class ProviderResourcesCommonMethods {
         values.put(id);
         data.put("values", values);
         return data.toString();
+    }
+
+    //TODO: remove if we get another PID Service for our BETA machines
+    private static void disableSSLVerification() {
+        try {
+            TrustManager[] trustAllCerts = new TrustManager[]{
+                    new X509TrustManager() {
+                        public X509Certificate[] getAcceptedIssuers() {
+                            return null;
+                        }
+
+                        public void checkClientTrusted(X509Certificate[] certs, String authType) {
+                        }
+
+                        public void checkServerTrusted(X509Certificate[] certs, String authType) {
+                        }
+                    }
+            };
+
+            SSLContext sc = SSLContext.getInstance("SSL");
+            sc.init(null, trustAllCerts, new java.security.SecureRandom());
+            HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
+            HostnameVerifier allHostsValid = (hostname, session) -> true;
+            HttpsURLConnection.setDefaultHostnameVerifier(allHostsValid);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to disable SSL verification", e);
+        }
     }
 
     public void blockResourceDeletion(String status, boolean isPublished) {
