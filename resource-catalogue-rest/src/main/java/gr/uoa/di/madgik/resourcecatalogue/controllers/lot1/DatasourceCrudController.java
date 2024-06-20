@@ -45,7 +45,7 @@ public class DatasourceCrudController extends ResourceCrudController<DatasourceB
     }
 
     @Operation(summary = "Returns the Datasource of the given Service of the given Catalogue.")
-    @GetMapping(path = "/byService/{serviceId}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    @GetMapping(path = "/byService/{serviceId}", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<Datasource> getDatasourceByServiceId(@PathVariable("serviceId") String serviceId,
                                                                @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId,
                                                                @Parameter(hidden = true) Authentication auth) {
@@ -61,7 +61,7 @@ public class DatasourceCrudController extends ResourceCrudController<DatasourceB
     }
 
     // OpenAIRE related methods
-    @GetMapping(path = "/getOpenAIREDatasourceById")
+    @GetMapping(path = "/getOpenAIREDatasourceById", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<Datasource> getOpenAIREDatasourceById(@RequestParam String datasourceId) throws IOException {
         return ResponseEntity.ok(openAIREDatasourceService.get(datasourceId));
     }
@@ -72,7 +72,7 @@ public class DatasourceCrudController extends ResourceCrudController<DatasourceB
     }
 
     @Browse
-    @GetMapping(path = "/getAllOpenAIREDatasources")
+    @GetMapping(path = "/getAllOpenAIREDatasources", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<Paging<Datasource>> getAllOpenAIREDatasources(@Parameter(hidden = true) @RequestParam MultiValueMap<String, Object> allRequestParams) throws IOException {
         FacetFilter ff = FacetFilterUtils.createFacetFilter(allRequestParams);
         Map<Integer, List<Datasource>> datasourceMap = openAIREDatasourceService.getAll(ff);
@@ -85,12 +85,12 @@ public class DatasourceCrudController extends ResourceCrudController<DatasourceB
                 datasourcePaging.getTo(), datasourcePaging.getResults(), datasourcePaging.getFacets()));
     }
 
-    @GetMapping(path = "isMetricsValid/{id}")
+    @GetMapping(path = "isMetricsValid/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
     public OpenAIREMetrics getOpenaireMetrics(@PathVariable("id") String id) {
         return openAIREDatasourceService.getMetrics(id);
     }
 
-    @PostMapping(path = "/bulk")
+    @PostMapping(path = "/bulk", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public void addBulk(@RequestBody List<DatasourceBundle> bundles, @Parameter(hidden = true) Authentication auth) {
         datasourceService.addBulk(bundles, auth);
