@@ -14,6 +14,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -42,14 +43,14 @@ public class ServiceCrudController extends ResourceCrudController<ServiceBundle>
         this.genericResourceService = genericResourceService;
     }
 
-    @PostMapping(path = "/bulk")
+    @PostMapping(path = "/bulk", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public void addBulk(@RequestBody List<ServiceBundle> bundles, @Parameter(hidden = true) Authentication auth) {
         serviceBundleService.addBulk(bundles, auth);
     }
 
     @Override
-    @PostMapping()
+    @PostMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<ServiceBundle> add(@RequestBody ServiceBundle serviceBundle,
                                              @Parameter(hidden = true) Authentication auth) {
         if (serviceBundle.isDraft()) {
@@ -59,7 +60,7 @@ public class ServiceCrudController extends ResourceCrudController<ServiceBundle>
     }
 
     @Browse
-    @GetMapping()
+    @GetMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<Paging<ServiceBundle>> getAll(@Parameter(hidden = true) @RequestParam Map<String, Object> allRequestParams,
                                                         @Parameter(hidden = true) Authentication auth) {
         FacetFilter ff = FacetFilterUtils.createFacetFilter(allRequestParams);
