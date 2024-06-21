@@ -71,6 +71,7 @@ public class DraftTrainingResourceManager extends ResourceManager<TrainingResour
 
         bundle.getTrainingResource().setCatalogueId(catalogueId);
         bundle.setActive(false);
+        bundle.setDraft(true);
 
         super.add(bundle, auth);
 
@@ -133,6 +134,7 @@ public class DraftTrainingResourceManager extends ResourceManager<TrainingResour
         bundle.setLatestOnboardingInfo(loggingInfoList.get(loggingInfoList.size() - 1));
 
         bundle.setMetadata(Metadata.updateMetadata(bundle.getMetadata(), User.of(auth).getFullName(), User.of(auth).getEmail()));
+        bundle.setDraft(false);
 
         ResourceType trainingResourceType = resourceTypeService.getResourceType("training_resource");
         Resource resource = getDraftResource(bundle.getId());

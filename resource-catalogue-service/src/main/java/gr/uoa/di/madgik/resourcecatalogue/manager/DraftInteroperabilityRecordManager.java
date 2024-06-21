@@ -71,6 +71,7 @@ public class DraftInteroperabilityRecordManager extends ResourceManager<Interope
 
         bundle.getInteroperabilityRecord().setCatalogueId(catalogueId);
         bundle.setActive(false);
+        bundle.setDraft(true);
 
         super.add(bundle, auth);
 
@@ -123,6 +124,7 @@ public class DraftInteroperabilityRecordManager extends ResourceManager<Interope
 
         bundle.setStatus("pending interoperability record");
         bundle.setMetadata(Metadata.updateMetadata(bundle.getMetadata(), User.of(auth).getFullName(), User.of(auth).getEmail()));
+        bundle.setDraft(false);
 
         ResourceType guidelinesResourceType = resourceTypeService.getResourceType("interoperability_record");
         Resource resource = getDraftResource(bundle.getId());

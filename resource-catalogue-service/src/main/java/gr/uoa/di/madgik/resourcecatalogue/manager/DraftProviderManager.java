@@ -74,6 +74,7 @@ public class DraftProviderManager extends ResourceManager<ProviderBundle> implem
 
         bundle.getProvider().setCatalogueId(catalogueId);
         bundle.setActive(false);
+        bundle.setDraft(true);
 
         super.add(bundle, auth);
 
@@ -129,6 +130,7 @@ public class DraftProviderManager extends ResourceManager<ProviderBundle> implem
         bundle.setTemplateStatus(vocabularyService.get("no template status").getId());
 
         bundle.setMetadata(Metadata.updateMetadata(bundle.getMetadata(), User.of(auth).getFullName(), User.of(auth).getEmail()));
+        bundle.setDraft(false);
 
         ResourceType providerResourceType = resourceTypeService.getResourceType("provider");
         Resource resource = getDraftResource(bundle.getId());
