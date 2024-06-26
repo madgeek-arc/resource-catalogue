@@ -68,6 +68,22 @@
       "defaultValue": "false",
       "label": null,
       "multivalued": false,
+      "name": "active",
+      "path": "$.active",
+      "type": "java.lang.Boolean"
+    },
+    {
+      "defaultValue": "false",
+      "label": null,
+      "multivalued": false,
+      "name": "suspended",
+      "path": "$.suspended",
+      "type": "java.lang.Boolean"
+    },
+    {
+      "defaultValue": "false",
+      "label": null,
+      "multivalued": false,
       "name": "draft",
       "path": "$.draft",
       "type": "java.lang.Boolean"
