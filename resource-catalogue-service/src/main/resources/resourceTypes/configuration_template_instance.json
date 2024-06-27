@@ -1,105 +1,82 @@
 {
   "indexFields": [
     {
+      "label": null,
       "multivalued": false,
       "name": "resource_internal_id",
-      "path": "//*[local-name()='id']/text()",
-      "type": "java.lang.String",
-      "primaryKey": true
+      "path": "$.configurationTemplateInstance.id",
+      "primaryKey": true,
+      "type": "java.lang.String"
     },
     {
-      "multivalued": false,
-      "name": "configuration_template_instance_id",
-      "path": "//*[local-name()='id']/text()",
-      "type": "java.lang.String",
-      "primaryKey": true
-    },
-    {
+      "label": "Resource ID",
       "multivalued": false,
       "name": "resource_id",
-      "label": "Resource ID",
-      "path": "//*[local-name()='resourceId']/text()",
+      "path": "$.configurationTemplateInstance.resourceId",
       "type": "java.lang.String"
     },
     {
+      "label": "Configuration Template ID",
       "multivalued": false,
       "name": "configuration_template_id",
-      "label": "Configuration Template ID",
-      "path": "//*[local-name()='configurationTemplateId']/text()",
+      "path": "$.configurationTemplateInstance.configurationTemplateId",
       "type": "java.lang.String"
     },
     {
+      "label": "Configuration Template Payload",
       "multivalued": false,
       "name": "configuration_template_payload",
-      "label": "Configuration Template Payload",
-      "path": "//*[local-name()='configurationTemplateInstance']/*[local-name()='payload']/text()",
+      "path": "$.configurationTemplateInstance.payload",
       "type": "java.lang.String"
     },
     {
+      "label": null,
       "multivalued": false,
       "name": "registeredBy",
-      "path": "//*[local-name()='metadata']/*[local-name()='registeredBy']/text()",
+      "path": "$.metadata.registeredBy",
       "type": "java.lang.String"
     },
     {
+      "label": null,
       "multivalued": false,
       "name": "modifiedBy",
-      "path": "//*[local-name()='metadata']/*[local-name()='modifiedBy']/text()",
+      "path": "$.metadata.modifiedBy",
       "type": "java.lang.String"
     },
     {
+      "label": null,
       "multivalued": false,
       "name": "registeredAt",
-      "path": "//*[local-name()='metadata']/*[local-name()='registeredAt']/text()",
-      "type": "java.lang.String"
+      "path": "$.metadata.registeredAt",
+      "type": "java.util.Date"
     },
     {
+      "label": null,
       "multivalued": false,
       "name": "modifiedAt",
-      "path": "//*[local-name()='metadata']/*[local-name()='modifiedAt']/text()",
+      "path": "$.metadata.modifiedAt",
+      "type": "java.util.Date"
+    },
+    {
+      "label": null,
+      "multivalued": false,
+      "name": "originalId",
+      "path": "$.identifiers.originalId",
       "type": "java.lang.String"
     },
     {
+      "label": null,
       "multivalued": false,
       "name": "published",
-      "path": "//*[local-name()='metadata']/*[local-name()='published']/text()",
+      "path": "$.metadata.published",
       "type": "java.lang.Boolean"
     },
     {
-      "multivalued": false,
-      "name": "originalId",
-      "path": "//*[local-name()='identifiers']/*[local-name()='originalId']/text()",
-      "type": "java.lang.String"
-    },
-    {
-      "multivalued": false,
-      "name": "latestUpdateActionType",
-      "path": "//*[local-name()='latestUpdateInfo']/*[local-name()='actionType']/text()",
-      "type": "java.lang.String"
-    },
-    {
-      "multivalued": false,
-      "name": "latestUpdateDate",
-      "path": "//*[local-name()='latestUpdateInfo']/*[local-name()='date']/text()",
-      "type": "java.lang.String"
-    },
-    {
-      "multivalued": false,
-      "name": "latestUpdateType",
-      "path": "//*[local-name()='latestUpdateInfo']/*[local-name()='type']/text()",
-      "type": "java.lang.String"
-    },
-    {
-      "multivalued": false,
-      "name": "latestUpdateUserEmail",
-      "path": "//*[local-name()='latestUpdateInfo']/*[local-name()='userEmail']/text()",
-      "type": "java.lang.String"
-    },
-    {
+      "defaultValue": "false",
+      "label": null,
       "multivalued": false,
       "name": "active",
-      "defaultValue": false,
-      "path": "//*[local-name()='configurationTemplateBundle']/*[local-name()='active']/text()",
+      "path": "$.active",
       "type": "java.lang.Boolean"
     },
     {
@@ -121,10 +98,12 @@
   ],
   "indexMapperClass": "gr.uoa.di.madgik.registry.index.DefaultIndexMapper",
   "name": "configuration_template_instance",
-  "aliasGroup": "resourceTypes",
-  "payloadType": "xml",
+  "aliases": [
+    "resourceTypes"
+  ],
+  "payloadType": "json",
   "properties": {
     "class": "gr.uoa.di.madgik.resourcecatalogue.domain.ConfigurationTemplateInstance"
   },
-  "schemaUrl": "https://raw.githubusercontent.com/madgeek-arc/resource-catalogue/version/5/resource-catalogue-model/src/main/resources/schema1.xsd"
+  "schema": "{\n\t\"$schema\": \"https://json-schema.org/draft/2019-09/schema\"\n}"
 }
