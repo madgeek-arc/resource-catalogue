@@ -17,6 +17,9 @@ public class DatasourceBundle extends Bundle<Datasource> {
     @XmlElement
     private String originalOpenAIREId;
 
+    @XmlElement
+    private boolean softwareRepository;
+
     public DatasourceBundle() {
         // No arg constructor
     }
@@ -44,11 +47,19 @@ public class DatasourceBundle extends Bundle<Datasource> {
         this.setMetadata(null);
     }
 
+    public DatasourceBundle(String status, String originalOpenAIREId, boolean softwareRepository) {
+        this.status = status;
+        this.originalOpenAIREId = originalOpenAIREId;
+        this.softwareRepository = softwareRepository;
+        this.setMetadata(null);
+    }
+
     @Override
     public String toString() {
         return "DatasourceBundle{" +
                 "status='" + status + '\'' +
                 ", originalOpenAIREId='" + originalOpenAIREId + '\'' +
+                ", softwareRepository=" + softwareRepository +
                 '}';
     }
 
@@ -85,5 +96,13 @@ public class DatasourceBundle extends Bundle<Datasource> {
 
     public void setOriginalOpenAIREId(String originalOpenAIREId) {
         this.originalOpenAIREId = originalOpenAIREId;
+    }
+
+    public boolean isSoftwareRepository() {
+        return softwareRepository;
+    }
+
+    public void setSoftwareRepository(boolean softwareRepository) {
+        this.softwareRepository = softwareRepository;
     }
 }

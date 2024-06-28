@@ -2,10 +2,7 @@ package gr.uoa.di.madgik.resourcecatalogue.domain;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import gr.uoa.di.madgik.resourcecatalogue.annotation.EmailValidation;
-import gr.uoa.di.madgik.resourcecatalogue.annotation.FieldValidation;
-import gr.uoa.di.madgik.resourcecatalogue.annotation.GeoLocationVocValidation;
-import gr.uoa.di.madgik.resourcecatalogue.annotation.VocabularyValidation;
+import gr.uoa.di.madgik.resourcecatalogue.annotation.*;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import javax.xml.bind.annotation.XmlElement;
@@ -216,6 +213,15 @@ public class Service implements Identifiable {
     @VocabularyValidation(type = Vocabulary.Type.MARKETPLACE_LOCATION)
     private List<String> marketplaceLocations;
 
+    /**
+     * The tier of a service in the EOSC EU Node.
+     */
+    @XmlElement(required = true)
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
+    @FieldValidation
+    @ClassTierValidation //TODO: implement
+    private ServiceClassTier classTier;
+
 
     // Geographical and Language Availability Information
     /**
@@ -255,8 +261,8 @@ public class Service implements Identifiable {
     /**
      * Service's Main Contact/Resource Owner info.
      */
-    @XmlElement(required = true)
-    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
+    @XmlElement
+    @Schema
     @FieldValidation
     private ServiceMainContact mainContact;
 

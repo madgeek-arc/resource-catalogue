@@ -95,6 +95,8 @@
     
   <xs:element name="serviceCategory" type="tns:serviceCategory"/>
     
+  <xs:element name="serviceClassTier" type="tns:serviceClassTier"/>
+    
   <xs:element name="serviceMainContact" type="tns:serviceMainContact"/>
     
   <xs:element name="serviceProviderDomain" type="tns:serviceProviderDomain"/>
@@ -142,6 +144,8 @@
       <xs:element minOccurs="0" name="latestOnboardingInfo" type="tns:loggingInfo"/>
             
       <xs:element minOccurs="0" name="latestUpdateInfo" type="tns:loggingInfo"/>
+            
+      <xs:element name="legacy" type="xs:boolean"/>
             
       <xs:element maxOccurs="unbounded" minOccurs="0" ref="tns:loggingInfo"/>
             
@@ -916,6 +920,8 @@ Criteria for submitting content to the repository as well as product preparation
               <xs:documentation><![CDATA[Original OpenAIRE ID, if Datasource already exists in the OpenAIRE Catalogue]]></xs:documentation>
             </xs:annotation>
           </xs:element>
+                    
+          <xs:element name="softwareRepository" type="xs:boolean"/>
                     
           <xs:element minOccurs="0" name="status" type="xs:string"/>
                   
@@ -2200,6 +2206,12 @@ For embedded providers (2) - legal status of the hosting legal entity. It is als
               
       </xs:element>
             
+      <xs:element name="classTier" type="tns:serviceClassTier">
+        <xs:annotation>
+          <xs:documentation><![CDATA[The tier of a service in the EOSC EU Node.]]></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+            
       <xs:element name="description" type="xs:string">
         <xs:annotation>
           <xs:documentation><![CDATA[A high-level description in fairly non-technical terms of a) what the Resource does, functionality it provides and Resources it enables to access,
@@ -2337,7 +2349,7 @@ infrastructures.]]></xs:documentation>
         </xs:annotation>
       </xs:element>
             
-      <xs:element name="mainContact" type="tns:serviceMainContact">
+      <xs:element minOccurs="0" name="mainContact" type="tns:serviceMainContact">
         <xs:annotation>
           <xs:documentation><![CDATA[Service's Main Contact/Resource Owner info.]]></xs:documentation>
         </xs:annotation>
@@ -2725,6 +2737,20 @@ infrastructures.]]></xs:documentation>
           <xs:documentation><![CDATA[A named group of Resources that offer access to the same type of Resource or capabilities, within the defined Resource Category.]]></xs:documentation>
         </xs:annotation>
       </xs:element>
+          
+    </xs:sequence>
+      
+  </xs:complexType>
+    
+  <xs:complexType name="serviceClassTier">
+        
+    <xs:sequence>
+            
+      <xs:element name="accessPolicy" type="xs:string"/>
+            
+      <xs:element name="costModel" type="xs:string"/>
+            
+      <xs:element default="3" name="level" type="xs:int"/>
           
     </xs:sequence>
       
