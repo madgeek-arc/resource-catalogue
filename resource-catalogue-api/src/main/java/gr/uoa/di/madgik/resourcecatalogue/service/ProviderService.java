@@ -194,4 +194,23 @@ public interface ProviderService extends ResourceService<ProviderBundle>, Bundle
      * @return {@link List}&lt;{@link MapValues}&lt;{@link ExtendedValue}&gt;&gt;
      */
     List<MapValues<ExtendedValue>> getAllResourcesUnderASpecificHLE(String hle, Authentication auth);
+
+    /**
+     * Return true if Provider User Admin has accepted registration terms
+     *
+     * @param providerId Provider's ID
+     * @param isDraft    boolean value indicating if the Provider is Draft
+     * @param auth       Authentication
+     * @return True/False
+     */
+    boolean hasAdminAcceptedTerms(String providerId, boolean isDraft, Authentication auth);
+
+    /**
+     * Update the Provider's list of Users that have accepted the Provider's registration terms
+     *
+     * @param providerId Provider's ID
+     * @param isDraft    boolean value indicating if the Provider is Draft
+     * @param auth       Authentication
+     */
+    void adminAcceptedTerms(String providerId, boolean isDraft, Authentication auth);
 }

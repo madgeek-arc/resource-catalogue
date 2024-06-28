@@ -174,12 +174,12 @@ public class CatalogueController {
 
     @GetMapping(path = "hasAdminAcceptedTerms", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public boolean hasAdminAcceptedTerms(@RequestParam String catalogueId, @Parameter(hidden = true) Authentication authentication) {
-        return catalogueManager.hasAdminAcceptedTerms(catalogueId, false, authentication);
+        return catalogueManager.hasAdminAcceptedTerms(catalogueId, authentication);
     }
 
     @PutMapping(path = "adminAcceptedTerms", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public void adminAcceptedTerms(@RequestParam String catalogueId, @Parameter(hidden = true) Authentication authentication) {
-        catalogueManager.adminAcceptedTerms(catalogueId, false, authentication);
+        catalogueManager.adminAcceptedTerms(catalogueId, authentication);
     }
 
     @Parameter(hidden = true)

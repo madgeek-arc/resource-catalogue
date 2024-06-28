@@ -43,4 +43,21 @@ public interface CatalogueService extends ResourceService<CatalogueBundle>, Bund
      * @return {@link List}&lt;{@link CatalogueBundle}&gt;
      */
     List<CatalogueBundle> getMyCatalogues(Authentication authentication);
+
+    /**
+     * Return true if Provider User Admin has accepted registration terms
+     *
+     * @param providerId Provider's ID
+     * @param auth       Authentication
+     * @return True/False
+     */
+    boolean hasAdminAcceptedTerms(String providerId, Authentication auth);
+
+    /**
+     * Update the Provider's list of Users that have accepted the Provider's registration terms
+     *
+     * @param providerId Provider's ID
+     * @param auth       Authentication
+     */
+    void adminAcceptedTerms(String providerId, Authentication auth);
 }

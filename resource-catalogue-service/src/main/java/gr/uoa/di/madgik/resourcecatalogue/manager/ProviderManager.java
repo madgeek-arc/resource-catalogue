@@ -757,6 +757,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         return true;
     }
 
+    @Override
     public boolean hasAdminAcceptedTerms(String providerId, boolean isDraft, Authentication auth) {
         ProviderBundle providerBundle;
         if (isDraft) {
@@ -781,6 +782,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         return true; // no modal
     }
 
+    @Override
     public void adminAcceptedTerms(String providerId, boolean isDraft, Authentication auth) {
         try {
             draftProviderService.update(draftProviderService.get(providerId), auth);

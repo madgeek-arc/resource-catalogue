@@ -315,6 +315,7 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
         }
     }
 
+    @Override
     public boolean hasAdminAcceptedTerms(String catalogueId, Authentication auth) {
         CatalogueBundle catalogueBundle = get(catalogueId);
         List<String> userList = new ArrayList<>();
@@ -334,6 +335,7 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
         return true; // no modal
     }
 
+    @Override
     public void adminAcceptedTerms(String catalogueId, Authentication auth) {
         update(get(catalogueId), auth);
     }
