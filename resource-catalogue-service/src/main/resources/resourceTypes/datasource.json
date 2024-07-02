@@ -23,6 +23,13 @@
       "type": "java.lang.String"
     },
     {
+      "label": "Software Repository",
+      "multivalued": false,
+      "name": "softwareRepository",
+      "path": "$.softwareRepository",
+      "type": "java.lang.String"
+    },
+    {
       "label": null,
       "multivalued": false,
       "name": "registeredBy",
@@ -149,6 +156,14 @@
       "multivalued": false,
       "name": "draft",
       "path": "$.draft",
+      "type": "java.lang.Boolean"
+    },
+    {
+      "defaultValue": "false",
+      "label": null,
+      "multivalued": false,
+      "name": "legacy",
+      "path": "$.legacy",
       "type": "java.lang.Boolean"
     }
   ],

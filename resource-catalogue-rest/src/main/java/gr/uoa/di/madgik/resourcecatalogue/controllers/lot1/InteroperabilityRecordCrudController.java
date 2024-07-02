@@ -1,15 +1,12 @@
 package gr.uoa.di.madgik.resourcecatalogue.controllers.lot1;
 
 import gr.uoa.di.madgik.resourcecatalogue.domain.InteroperabilityRecordBundle;
-import gr.uoa.di.madgik.resourcecatalogue.service.DraftResourceService;
 import gr.uoa.di.madgik.resourcecatalogue.service.InteroperabilityRecordService;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.context.annotation.Profile;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -27,29 +24,15 @@ public class InteroperabilityRecordCrudController extends ResourceCrudController
 
     private static final Logger logger = LogManager.getLogger(InteroperabilityRecordCrudController.class);
     private final InteroperabilityRecordService interoperabilityRecordService;
-    private final DraftResourceService<InteroperabilityRecordBundle> draftInteroperabilityRecordService;
 
-
-    public InteroperabilityRecordCrudController(InteroperabilityRecordService interoperabilityRecordService,
-                                                DraftResourceService<InteroperabilityRecordBundle> draftInteroperabilityRecordService) {
+    public InteroperabilityRecordCrudController(InteroperabilityRecordService interoperabilityRecordService) {
         super(interoperabilityRecordService);
         this.interoperabilityRecordService = interoperabilityRecordService;
-        this.draftInteroperabilityRecordService = draftInteroperabilityRecordService;
     }
 
     @PostMapping(path = "/bulk")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public void addBulk(@RequestBody List<InteroperabilityRecordBundle> bundles, @Parameter(hidden = true) Authentication auth) {
         interoperabilityRecordService.addBulk(bundles, auth);
-    }
-
-    @Override
-    @PostMapping()
-    public ResponseEntity<InteroperabilityRecordBundle> add(@RequestBody InteroperabilityRecordBundle interoperabilityRecordBundle,
-                                                            @Parameter(hidden = true) Authentication auth) {
-        if (interoperabilityRecordBundle.isDraft()) {
-            return new ResponseEntity<>(draftInteroperabilityRecordService.save(interoperabilityRecordBundle), HttpStatus.CREATED);
-        }
-        return super.add(interoperabilityRecordBundle, auth);
     }
 }

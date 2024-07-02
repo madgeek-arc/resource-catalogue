@@ -137,6 +137,8 @@
             
       <xs:enumeration value="MARKETPLACE_LOCATIONS"/>
             
+      <xs:enumeration value="CLASS_TIER"/>
+            
       <xs:enumeration value="GEOGRAPHICAL_AVAILABILITIES"/>
             
       <xs:enumeration value="LANGUAGE_AVAILABILITIES"/>

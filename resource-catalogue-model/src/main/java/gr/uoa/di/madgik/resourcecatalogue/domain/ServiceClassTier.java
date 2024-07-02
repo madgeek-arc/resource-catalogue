@@ -15,11 +15,11 @@ public class ServiceClassTier {
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     private int level;
 
-    @XmlElement(required = true)
+    @XmlElement
     @Schema
     private String accessPolicy;
 
-    @XmlElement(required = true)
+    @XmlElement
     @Schema
     private String costModel;
 

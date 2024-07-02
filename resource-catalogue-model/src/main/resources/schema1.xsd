@@ -2746,9 +2746,9 @@ infrastructures.]]></xs:documentation>
         
     <xs:sequence>
             
-      <xs:element name="accessPolicy" type="xs:string"/>
+      <xs:element minOccurs="0" name="accessPolicy" type="xs:string"/>
             
-      <xs:element name="costModel" type="xs:string"/>
+      <xs:element minOccurs="0" name="costModel" type="xs:string"/>
             
       <xs:element default="3" name="level" type="xs:int"/>
           
