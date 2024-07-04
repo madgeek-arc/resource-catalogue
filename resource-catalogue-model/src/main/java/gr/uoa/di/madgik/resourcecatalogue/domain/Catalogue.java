@@ -171,8 +171,8 @@ public class Catalogue implements Identifiable {
     /**
      * Catalogue's main contact info.
      */
-    @XmlElement(required = true)
-    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
+    @XmlElement
+    @Schema
     @FieldValidation
     private ProviderMainContact mainContact;
 

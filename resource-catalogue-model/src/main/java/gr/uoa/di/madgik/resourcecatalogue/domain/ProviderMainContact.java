@@ -20,7 +20,7 @@ public class ProviderMainContact {
      * First Name of the Provider's main contact person/Provider manager.
      */
     @XmlElement(required = true)
-    @Schema
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     @FieldValidation
     private String firstName;
 
@@ -36,7 +36,7 @@ public class ProviderMainContact {
      * Email of the Provider's main contact person/Provider manager.
      */
     @XmlElement(required = true)
-    @Schema
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     @EmailValidation
     private String email;
 

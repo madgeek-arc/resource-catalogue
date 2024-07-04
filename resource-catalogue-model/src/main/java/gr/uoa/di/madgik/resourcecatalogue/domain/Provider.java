@@ -163,8 +163,8 @@ public class Provider implements Identifiable {
     /**
      * Provider's main contact info.
      */
-    @XmlElement(required = true)
-    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
+    @XmlElement
+    @Schema
     @FieldValidation
     private ProviderMainContact mainContact;
 
