@@ -19,6 +19,8 @@
     
   <xs:element name="configurationTemplateInstanceBundle" type="tns:configurationTemplateInstanceBundle"/>
     
+  <xs:element name="contactInfoTransfer" type="tns:contactInfoTransfer"/>
+    
   <xs:element name="creator" type="tns:creator"/>
     
   <xs:element name="creatorAffiliationInfo" type="tns:creatorAffiliationInfo"/>
@@ -336,7 +338,7 @@ It is also possible to select Not a legal entity.]]></xs:documentation>
         </xs:annotation>
       </xs:element>
             
-      <xs:element name="mainContact" type="tns:providerMainContact">
+      <xs:element minOccurs="0" name="mainContact" type="tns:providerMainContact">
         <xs:annotation>
           <xs:documentation><![CDATA[Catalogue's main contact info.]]></xs:documentation>
         </xs:annotation>
@@ -669,12 +671,38 @@ It is also possible to select Not a legal entity.]]></xs:documentation>
           <xs:element minOccurs="0" ref="tns:catalogue"/>
                     
           <xs:element minOccurs="0" name="status" type="xs:string"/>
+                    
+          <xs:element minOccurs="0" name="transferContactInformation">
+                        
+            <xs:complexType>
+                            
+              <xs:sequence>
+                                
+                <xs:element maxOccurs="unbounded" minOccurs="0" name="transferContactInformation" type="tns:contactInfoTransfer"/>
+                              
+              </xs:sequence>
+                          
+            </xs:complexType>
+                      
+          </xs:element>
                   
         </xs:sequence>
               
       </xs:extension>
           
     </xs:complexContent>
+      
+  </xs:complexType>
+    
+  <xs:complexType name="contactInfoTransfer">
+        
+    <xs:sequence>
+            
+      <xs:element default="false" name="acceptedTransfer" type="xs:boolean"/>
+            
+      <xs:element name="email" type="xs:string"/>
+          
+    </xs:sequence>
       
   </xs:complexType>
     
@@ -1746,7 +1774,7 @@ For embedded providers (2) - legal status of the hosting legal entity. It is als
         </xs:annotation>
       </xs:element>
             
-      <xs:element name="mainContact" type="tns:providerMainContact">
+      <xs:element minOccurs="0" name="mainContact" type="tns:providerMainContact">
         <xs:annotation>
           <xs:documentation><![CDATA[Provider's main contact info.]]></xs:documentation>
         </xs:annotation>
@@ -1987,6 +2015,20 @@ For embedded providers (2) - legal status of the hosting legal entity. It is als
           <xs:element minOccurs="0" name="status" type="xs:string"/>
                     
           <xs:element minOccurs="0" name="templateStatus" type="xs:string"/>
+                    
+          <xs:element minOccurs="0" name="transferContactInformation">
+                        
+            <xs:complexType>
+                            
+              <xs:sequence>
+                                
+                <xs:element maxOccurs="unbounded" minOccurs="0" name="transferContactInformation" type="tns:contactInfoTransfer"/>
+                              
+              </xs:sequence>
+                          
+            </xs:complexType>
+                      
+          </xs:element>
                   
         </xs:sequence>
               
@@ -2751,6 +2793,8 @@ infrastructures.]]></xs:documentation>
       <xs:element minOccurs="0" name="costModel" type="xs:string"/>
             
       <xs:element default="3" name="level" type="xs:int"/>
+            
+      <xs:element maxOccurs="unbounded" minOccurs="0" name="offerings" type="xs:string"/>
           
     </xs:sequence>
       
@@ -2938,7 +2982,7 @@ infrastructures.]]></xs:documentation>
         </xs:annotation>
       </xs:element>
             
-      <xs:element name="contact" type="tns:serviceMainContact">
+      <xs:element minOccurs="0" name="contact" type="tns:serviceMainContact">
         <xs:annotation>
           <xs:documentation><![CDATA[Training Resource's Main Contact Owner info.]]></xs:documentation>
         </xs:annotation>
