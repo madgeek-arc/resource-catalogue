@@ -223,8 +223,13 @@ public class ServiceBundleManager extends AbstractServiceBundleManager<ServiceBu
         }
 
         // ensure Resource Catalogue's PID uniqueness
-        serviceBundle.getService().setAlternativeIdentifiers(commonMethods.ensureResourceCataloguePidUniqueness(serviceBundle.getId(),
-                serviceBundle.getService().getAlternativeIdentifiers()));
+        if (ret.getService().getAlternativeIdentifiers() == null ||
+                ret.getService().getAlternativeIdentifiers().isEmpty()) {
+            commonMethods.createPIDAndCorrespondingAlternativeIdentifier(ret, getResourceType());
+        } else {
+            ret.getService().setAlternativeIdentifiers(commonMethods.ensureResourceCataloguePidUniqueness(ret.getId(),
+                    ret.getService().getAlternativeIdentifiers()));
+        }
 
         User user = User.of(auth);
 

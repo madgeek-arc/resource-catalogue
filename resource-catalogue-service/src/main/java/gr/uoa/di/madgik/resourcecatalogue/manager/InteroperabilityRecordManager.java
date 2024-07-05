@@ -150,9 +150,14 @@ public class InteroperabilityRecordManager extends ResourceManager<Interoperabil
         }
 
         // ensure Resource Catalogue's PID uniqueness
-        interoperabilityRecordBundle.getInteroperabilityRecord().setAlternativeIdentifiers(
-                commonMethods.ensureResourceCataloguePidUniqueness(ret.getId(),
-                        ret.getInteroperabilityRecord().getAlternativeIdentifiers()));
+        if (ret.getInteroperabilityRecord().getAlternativeIdentifiers() == null ||
+                ret.getInteroperabilityRecord().getAlternativeIdentifiers().isEmpty()) {
+            commonMethods.createPIDAndCorrespondingAlternativeIdentifier(ret, getResourceType());
+        } else {
+            ret.getInteroperabilityRecord().setAlternativeIdentifiers(
+                    commonMethods.ensureResourceCataloguePidUniqueness(ret.getId(),
+                            ret.getInteroperabilityRecord().getAlternativeIdentifiers()));
+        }
 
         validate(ret);
 

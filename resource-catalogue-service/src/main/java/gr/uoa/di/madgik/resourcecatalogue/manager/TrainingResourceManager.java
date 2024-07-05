@@ -220,9 +220,14 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
         commonMethods.checkRelatedResourceIDsConsistency(ret);
 
         // ensure Resource Catalogue's PID uniqueness
-        trainingResourceBundle.getTrainingResource().setAlternativeIdentifiers(
-                commonMethods.ensureResourceCataloguePidUniqueness(trainingResourceBundle.getId(),
-                        trainingResourceBundle.getTrainingResource().getAlternativeIdentifiers()));
+        if (ret.getTrainingResource().getAlternativeIdentifiers() == null ||
+                ret.getTrainingResource().getAlternativeIdentifiers().isEmpty()) {
+            commonMethods.createPIDAndCorrespondingAlternativeIdentifier(ret, getResourceType());
+        } else {
+            ret.getTrainingResource().setAlternativeIdentifiers(
+                    commonMethods.ensureResourceCataloguePidUniqueness(ret.getId(),
+                            ret.getTrainingResource().getAlternativeIdentifiers()));
+        }
 
         logger.trace("Attempting to update the Training Resource with id '{}' of the Catalogue '{}'", ret.getTrainingResource().getId(), ret.getTrainingResource().getCatalogueId());
         validateTrainingResource(ret);

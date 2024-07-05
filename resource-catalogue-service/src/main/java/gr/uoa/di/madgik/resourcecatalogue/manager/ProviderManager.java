@@ -177,8 +177,13 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         }
 
         // ensure Resource Catalogue's PID uniqueness
-        ret.getProvider().setAlternativeIdentifiers(commonMethods.ensureResourceCataloguePidUniqueness(ret.getId(),
-                ret.getProvider().getAlternativeIdentifiers()));
+        if (ret.getProvider().getAlternativeIdentifiers() == null ||
+                ret.getProvider().getAlternativeIdentifiers().isEmpty()) {
+            commonMethods.createPIDAndCorrespondingAlternativeIdentifier(ret, getResourceType());
+        } else {
+            ret.getProvider().setAlternativeIdentifiers(commonMethods.ensureResourceCataloguePidUniqueness(ret.getId(),
+                    ret.getProvider().getAlternativeIdentifiers()));
+        }
 
         // block Public Provider update
         if (ret.getMetadata().isPublished()) {
