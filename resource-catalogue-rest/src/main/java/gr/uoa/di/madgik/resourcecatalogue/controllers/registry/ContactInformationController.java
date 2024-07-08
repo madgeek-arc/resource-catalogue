@@ -29,7 +29,7 @@ public class ContactInformationController {
         return contactInformationService.getMy(authentication);
     }
 
-    @PutMapping(path = "updateContactInfoTransfer", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+//    @PutMapping(path = "updateContactInfoTransfer", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public void updateContactInfoTransfer(@RequestParam boolean acceptedTransfer, @Parameter(hidden = true) Authentication authentication) {
         contactInformationService.updateContactInfoTransfer(acceptedTransfer, authentication);
     }
