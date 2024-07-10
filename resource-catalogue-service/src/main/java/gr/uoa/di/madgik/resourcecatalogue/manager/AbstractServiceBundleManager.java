@@ -126,21 +126,6 @@ public abstract class AbstractServiceBundleManager<T extends ServiceBundle> exte
         return null;
     }
 
-    // TODO: REMOVE ME
-    //    @Override
-    public T get(String id) {
-        T resource = null;
-        try {
-            resource = get(id, catalogueId);
-        } catch (ResourceNotFoundException e) {
-            resource = checkIdExistenceInOtherCatalogues(id);
-            if (resource == null) {
-                throw e;
-            }
-        }
-        return resource;
-    }
-
     @Override
     public Browsing<T> getAll(FacetFilter filter, Authentication auth) {
         // if user is Unauthorized, return active/latest ONLY

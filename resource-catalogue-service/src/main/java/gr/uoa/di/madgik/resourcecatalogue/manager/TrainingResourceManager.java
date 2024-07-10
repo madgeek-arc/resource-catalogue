@@ -633,21 +633,6 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
         return deserialize(resource);
     }
 
-    // Needed for FieldValidation
-    @Override
-    public TrainingResourceBundle get(String id) {
-        TrainingResourceBundle resource = null;
-        try {
-            resource = get(id, catalogueId);
-        } catch (ResourceNotFoundException e) {
-            resource = checkIdExistenceInOtherCatalogues(id);
-            if (resource == null) {
-                throw e;
-            }
-        }
-        return resource;
-    }
-
     private TrainingResourceBundle checkIdExistenceInOtherCatalogues(String id) {
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(maxQuantity);
