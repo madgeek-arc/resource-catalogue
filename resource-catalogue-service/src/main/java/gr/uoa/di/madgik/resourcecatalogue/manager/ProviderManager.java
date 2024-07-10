@@ -109,12 +109,6 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     }
 
     @Override
-    public boolean exists(ProviderBundle providerBundle) {
-        return providerBundle.getId() != null &&
-                getResource(providerBundle.getProvider().getId(), providerBundle.getProvider().getCatalogueId()) != null;
-    }
-
-    @Override
     @CacheEvict(value = CACHE_PROVIDERS, allEntries = true)
     public ProviderBundle add(ProviderBundle provider, Authentication authentication) {
         return add(provider, null, authentication);

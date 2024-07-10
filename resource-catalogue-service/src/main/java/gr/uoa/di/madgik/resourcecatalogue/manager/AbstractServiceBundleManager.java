@@ -286,11 +286,6 @@ public abstract class AbstractServiceBundleManager<T extends ServiceBundle> exte
         return parserPool.deserialize(resource, typeParameterClass);
     }
 
-    public boolean exists(T serviceBundle) {
-        return serviceBundle.getId() != null &&
-                getResource(serviceBundle.getService().getId(), serviceBundle.getService().getCatalogueId()) != null;
-    }
-
     public Resource getResource(String id, String catalogueId) {
         Paging<Resource> resources;
         resources = searchService
