@@ -1,19 +1,15 @@
 package gr.uoa.di.madgik.resourcecatalogue.controllers.registry;
 
-import com.google.gson.Gson;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.domain.Paging;
-import gr.uoa.di.madgik.resourcecatalogue.domain.ProviderBundle;
-import gr.uoa.di.madgik.resourcecatalogue.domain.ServiceBundle;
-import gr.uoa.di.madgik.resourcecatalogue.domain.User;
+import gr.uoa.di.madgik.resourcecatalogue.domain.*;
 import gr.uoa.di.madgik.resourcecatalogue.service.ProviderService;
 import gr.uoa.di.madgik.resourcecatalogue.service.ServiceBundleService;
+import gr.uoa.di.madgik.resourcecatalogue.service.VocabularyService;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.json.CDL;
-import org.json.JSONArray;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
@@ -27,6 +23,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletResponse;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 @Profile("beyond")
@@ -38,14 +36,16 @@ public class CSVController {
     private static Logger logger = LogManager.getLogger(CSVController.class);
     private final ServiceBundleService serviceBundleService;
     private final ProviderService providerService;
+    private final VocabularyService vocabularyService;
 
     @Value("${elastic.index.max_result_window:10000}")
     private int maxQuantity;
 
     @Autowired
-    CSVController(ServiceBundleService service, ProviderService provider) {
+    CSVController(ServiceBundleService service, ProviderService provider, VocabularyService vocabulary) {
         this.serviceBundleService = service;
         this.providerService = provider;
+        this.vocabularyService = vocabulary;
     }
 
     // Downloads a csv file with Provider entries
@@ -74,6 +74,18 @@ public class CSVController {
         return ResponseEntity.ok(csvData);
     }
 
+    // Downloads a csv file with Provider entries
+    @GetMapping(path = "vocabularies", produces = {MediaType.APPLICATION_OCTET_STREAM_VALUE})
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
+    public ResponseEntity<String> vocabulariesToCSV(@Parameter(hidden = true) Authentication auth,
+                                                    HttpServletResponse response) {
+        Paging<Vocabulary> vocabularies = vocabularyService.getAll(createFacetFilter(null), auth);
+        String csvData = listVocabulariesToCSV(vocabularies.getResults());
+        response.setHeader("Content-disposition", "attachment; filename=" + "vocabularies.csv");
+        logger.info("User {} downloaded Vocabularies CSV list", User.of(auth).getEmail());
+        return ResponseEntity.ok(csvData);
+    }
+
     private FacetFilter createFacetFilter(Boolean published) {
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(maxQuantity);
@@ -83,53 +95,67 @@ public class CSVController {
         return ff;
     }
 
-    private static String listToCSV(List<?> list) {
-        String json = new Gson().toJson(list);
-        JSONArray results = new JSONArray(json);
-        return CDL.toString(results);
-    }
-
     private static String listProvidersToCSV(List<ProviderBundle> list) {
-        String resultCsv = listToCSV(list);
-        String[] rows = resultCsv.split("\n");
-        String[] header = rows[0].split(",");
-        rows[0] = "id;abbreviation;name;" + String.join(";", header);
-        for (int i = 1; i < rows.length; i++) {
-            rows[i] = replaceDelimiters(rows[i], ',', ';');
-            rows[i] = String.format("%s;%s;%s;%s", list.get(i - 1).getId(), list.get(i - 1).getProvider().getAbbreviation(),
-                    list.get(i - 1).getProvider().getName(), rows[i]);
+        List<Provider> providers = new ArrayList<>();
+        for (ProviderBundle providerBundle : list) {
+            providers.add(providerBundle.getProvider());
         }
-        return String.join("\n", rows);
+        providers.sort(Comparator.comparing(Provider::getId));
+
+        StringBuilder csv = new StringBuilder();
+        csv.append("id,name\n"); // CSV header
+
+        for (Provider provider : providers) {
+            csv.append(formatCSVField(provider.getId())).append(",");
+            csv.append(formatCSVField(provider.getName())).append("\n");
+        }
+
+        return csv.toString();
     }
 
     private static String listServicesToCSV(List<ServiceBundle> list) {
-        String resultCsv = listToCSV(list);
-        String[] rows = resultCsv.split("\n");
-        String[] header = rows[0].split(",");
-        rows[0] = "id;name;" + String.join(";", header);
-        for (int i = 1; i < rows.length; i++) {
-            rows[i] = replaceDelimiters(rows[i], ',', ';');
-            rows[i] = String.format("%s;%s;%s", list.get(i - 1).getId(), list.get(i - 1).getService().getName(), rows[i]);
+        List<Service> services = new ArrayList<>();
+        for (ServiceBundle serviceBundle : list) {
+            services.add(serviceBundle.getService());
         }
-        return String.join("\n", rows);
+        services.sort(Comparator.comparing(Service::getId));
+
+        StringBuilder csv = new StringBuilder();
+        csv.append("id,name\n"); // CSV header
+
+        for (Service service : services) {
+            csv.append(formatCSVField(service.getId())).append(",");
+            csv.append(formatCSVField(service.getName())).append("\n");
+        }
+
+        return csv.toString();
     }
 
-    private static String replaceDelimiters(String row, char delimiter, char newDelimiter) {
-        char[] rowInChars = row.toCharArray();
+    private static String listVocabulariesToCSV(List<Vocabulary> list) {
+        list.sort(Comparator.comparing(Vocabulary::getId));
 
-        // when encountering "{ treat it as a field opening and do not replace symbols as delimiters
-        // instead wait for the closing counterpart }" and after that replace all delimiters found.
-        boolean openedField = false;
-        for (int i = 1; i < row.length(); i++) {
-            if (!openedField && rowInChars[i - 1] == '"' && rowInChars[i] == '{') {
-                openedField = true;
-            } else if (openedField && rowInChars[i - 1] == '}' && rowInChars[i] == '"') {
-                openedField = false;
-            } else if (!openedField && rowInChars[i] == delimiter) {
-                rowInChars[i] = newDelimiter;
-            }
+        StringBuilder csv = new StringBuilder();
+        csv.append("id,name,description,parentId,type,extras\n"); // CSV header
+
+        for (Vocabulary vocabulary : list) {
+            csv.append(formatCSVField(vocabulary.getId())).append(",");
+            csv.append(formatCSVField(vocabulary.getName())).append(",");
+            csv.append(formatCSVField(vocabulary.getDescription())).append(",");
+            csv.append(formatCSVField(vocabulary.getParentId())).append(",");
+
+            csv.append(formatCSVField(vocabulary.getType())).append("\n");
         }
 
-        return new String(rowInChars);
+        return csv.toString();
+    }
+
+    private static String formatCSVField(String field) {
+        if (field == null) return "";
+        if (field.contains(",")) {
+            // If the field contains commas, enclose it in double quotes
+            return "\"" + field + "\"";
+        } else {
+            return field;
+        }
     }
 }
