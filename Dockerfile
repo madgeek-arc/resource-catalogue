@@ -17,13 +17,12 @@ RUN if [ -z "$profile" ] ; then mvn package -U ; else mvn package -U -P $profile
 ### Create Docker Image ###
 FROM openjdk:21
 
-WORKDIR /beyond
-COPY --from=maven /tmp/resource-catalogue-service/target/*.jar /beyond/resource-catalogue.jar
-# COPY application.yml /etc/intelcomp/application.yml
+WORKDIR /app
+COPY --from=maven /tmp/resource-catalogue-service/target/*.jar /app/resource-catalogue.jar
 
-RUN groupadd -g 10001 eosc && \
-       useradd -u 10000 -g eosc eosc \
-       && chown -R eosc:eosc /beyond
+RUN groupadd -g 10001 catalogue && \
+       useradd -u 10000 -g catalogue catalogue \
+       && chown -R catalogue:catalogue /app
 
-USER eosc
-ENTRYPOINT ["java", "-jar", "/beyond/resource-catalogue.jar"]
+USER catalogue
+ENTRYPOINT ["java", "-jar", "/app/resource-catalogue.jar"]
