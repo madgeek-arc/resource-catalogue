@@ -3,7 +3,6 @@
     <Properties>
         <Property name="baseDir">logs</Property>
         <Property name="app">resource-catalogue</Property>
-        <Property name="syncBaseDir">syncLogs</Property>
 
         <Property name="LOG_TRANSACTION">
             %style{%notEmpty{transaction_id=%X{transaction_id}, remote_ip=%X{remote_ip}\n}}{magenta}
@@ -36,22 +35,6 @@
                 </Delete>
             </DefaultRolloverStrategy>
         </RollingFile>
-        <RollingFile name="SyncRollingFile" fileName="${syncBaseDir}/sync.log"
-                     filePattern="${syncBaseDir}/$${date:yyyy-MM}/sync-%d{yyyy-MM-dd_HH:mm:ss}.log.gz">
-            <PatternLayout
-                    pattern="${sys:LOG_PATTERN}"/>
-            <Policies>
-                <OnStartupTriggeringPolicy/>
-                <CronTriggeringPolicy schedule="0 0 0 1 * ?"/>
-                <SizeBasedTriggeringPolicy size="20 MB"/>
-            </Policies>
-            <DefaultRolloverStrategy>
-                <Delete basePath="${syncBaseDir}" maxDepth="2">
-                    <IfFileName glob="*/sync-*.log.gz"/>
-                    <IfLastModified age="180d"/>
-                </Delete>
-            </DefaultRolloverStrategy>
-        </RollingFile>
     </Appenders>
     <Loggers>
         <Root level="info">
@@ -63,9 +46,6 @@
         </Logger>
         <Logger name="org.springframework" level="warn">
             <AppenderRef ref="Console"/>
-        </Logger>
-        <Logger name="gr.uoa.di.madgik.service.SynchronizerService" level="info">
-            <AppenderRef ref="SyncRollingFile"/>
         </Logger>
     </Loggers>
 </Configuration>
