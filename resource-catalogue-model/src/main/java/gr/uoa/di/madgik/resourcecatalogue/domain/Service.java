@@ -57,7 +57,7 @@ public class Service implements Identifiable {
      */
     @XmlElementWrapper(name = "resourceProviders")
     @XmlElement(name = "resourceProvider")
-    @Schema($vocabulary = "Vocabulary")
+    @Schema
     @FieldValidation(nullable = true, containsId = true, idClass = Provider.class)
     private List<String> resourceProviders;
 
