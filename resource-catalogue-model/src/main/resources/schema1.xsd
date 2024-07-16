@@ -2248,7 +2248,7 @@ For embedded providers (2) - legal status of the hosting legal entity. It is als
               
       </xs:element>
             
-      <xs:element name="classTier" type="tns:serviceClassTier">
+      <xs:element minOccurs="0" name="classTier" type="tns:serviceClassTier">
         <xs:annotation>
           <xs:documentation><![CDATA[The tier of a service in the EOSC EU Node.]]></xs:documentation>
         </xs:annotation>

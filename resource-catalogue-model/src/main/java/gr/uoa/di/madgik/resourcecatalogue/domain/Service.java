@@ -216,9 +216,9 @@ public class Service implements Identifiable {
     /**
      * The tier of a service in the EOSC EU Node.
      */
-    @XmlElement(required = true)
-    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
-    @FieldValidation
+    @XmlElement
+    @Schema
+    @FieldValidation(nullable = true)
     @ClassTierValidation
     private ServiceClassTier classTier;
 
