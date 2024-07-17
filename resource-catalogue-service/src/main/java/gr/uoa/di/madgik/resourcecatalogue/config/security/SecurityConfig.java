@@ -5,6 +5,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -49,20 +50,32 @@ public class SecurityConfig {
         this.authoritiesMapper = authoritiesMapper;
     }
 
+    @Profile("no-auth")
+    @Bean
+    public SecurityFilterChain filterChainNoAuth(HttpSecurity http) throws Exception {
+        http
+                .authorizeRequests(authorizeRequests ->
+                        authorizeRequests.anyRequest().permitAll()
+                )
+                .cors(AbstractHttpConfigurer::disable)
+                .csrf(AbstractHttpConfigurer::disable);
+        return http.build();
+    }
+
+    @Profile("!no-auth")
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
                 .authorizeRequests(authorizeRequests ->
                         authorizeRequests
                                 .regexMatchers("/resourcesync/.*").permitAll()
-                                .regexMatchers("/restore/", "/resources.*", "/resourceType.*", "/search.*").hasAnyAuthority("ROLE_ADMIN")
+                                .regexMatchers("/dump/.*", "/restore/", "/resources.*", "/resourceType.*", "/search.*").hasAnyAuthority("ROLE_ADMIN")
 
                                 .anyRequest().permitAll()
                 )
 
                 .oauth2Login(oauth2login ->
                         oauth2login
-                                .loginProcessingUrl("/openid_connect_login")
                                 .successHandler(authSuccessHandler))
 
                 .oauth2ResourceServer((oauth2) -> oauth2
