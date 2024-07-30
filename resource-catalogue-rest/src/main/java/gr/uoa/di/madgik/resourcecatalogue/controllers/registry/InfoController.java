@@ -1,13 +1,11 @@
 package gr.uoa.di.madgik.resourcecatalogue.controllers.registry;
 
 
-import gr.uoa.di.madgik.registry.domain.Facet;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
-import gr.uoa.di.madgik.registry.domain.Paging;
-import gr.uoa.di.madgik.resourcecatalogue.domain.ServiceBundle;
 import gr.uoa.di.madgik.resourcecatalogue.service.ProviderService;
+import gr.uoa.di.madgik.resourcecatalogue.service.SecurityService;
 import gr.uoa.di.madgik.resourcecatalogue.service.ServiceBundleService;
-import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.context.annotation.Profile;
 import org.springframework.http.MediaType;
@@ -23,33 +21,30 @@ import java.util.Map;
 @Profile("beyond")
 @RestController
 @RequestMapping("info")
-@Tag(name = "info", description = "Total number of Providers and Services in the Resource Catalogue")
+@Tag(name = "info", description = "Information about various resources in the Catalogue")
 public class InfoController {
 
     private final ServiceBundleService serviceBundleService;
     private final ProviderService providerService;
+    private final SecurityService securityService;
 
-    InfoController(ServiceBundleService service, ProviderService provider) {
+    InfoController(ServiceBundleService service, ProviderService provider, SecurityService securityService) {
         this.serviceBundleService = service;
         this.providerService = provider;
+        this.securityService = securityService;
     }
 
-    // Get Info about #SPs, #Services etc.
-    @GetMapping(path = "all", produces = {MediaType.APPLICATION_JSON_VALUE})
-    public ResponseEntity<Map<Object, Object>> getAllServicesNumbers(@Parameter(hidden = true) Authentication authentication) {
-        Map<Object, Object> servicesInfo = new HashMap<>();
+    @Operation(summary = "Get the total number of active Providers and Services registered in the Catalogue")
+    @GetMapping(path = "numberOfProvidersAndServices", produces = {MediaType.APPLICATION_JSON_VALUE})
+    public ResponseEntity<Map<Object, Integer>> numberOfProvidersAndServices() {
+        Map<Object, Integer> numberOfResources = new HashMap<>();
         FacetFilter ff = new FacetFilter();
         ff.addFilter("active", true);
-        servicesInfo.put("providers", (long) providerService.getAll(ff, authentication).getTotal());
-        Paging<ServiceBundle> serviceBundles = serviceBundleService.getAll(ff, null);
-        servicesInfo.put("services", (long) serviceBundles.getTotal());
-        for (Facet f : serviceBundles.getFacets()) {
-            if (f.getField().equals("resourceType")) {
-                continue;
-            }
-            servicesInfo.putIfAbsent(f.getField(), (long) f.getValues().size());
-        }
-        return ResponseEntity.ok(servicesInfo);
+        ff.addFilter("published", false);
+        Authentication authentication = securityService.getAdminAccess();
+        numberOfResources.put("providers", providerService.getAll(ff, authentication).getTotal());
+        numberOfResources.put("services", serviceBundleService.getAll(ff, authentication).getTotal());
+        return ResponseEntity.ok(numberOfResources);
     }
 
 }
