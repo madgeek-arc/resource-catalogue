@@ -34,7 +34,7 @@ import java.util.List;
 @Profile("beyond")
 @RestController
 @RequestMapping("exportToCSV")
-@Tag(name = "csv", description = "Download Providers and/or Services to CSV")
+@Tag(name = "csv", description = "Export information related to various Catalogue resources to CSV")
 public class CSVController {
 
     private static Logger logger = LogManager.getLogger(CSVController.class);
