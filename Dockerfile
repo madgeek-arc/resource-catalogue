@@ -15,7 +15,7 @@ RUN if [ -z "$profile" ] ; then mvn package -U ; else mvn package -U -P $profile
 
 
 ### Create Docker Image ###
-FROM openjdk:21
+FROM openjdk:21-jdk-slim
 
 WORKDIR /app
 COPY --from=maven /tmp/resource-catalogue-service/target/*.jar /app/resource-catalogue.jar
