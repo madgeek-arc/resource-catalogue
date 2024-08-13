@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration monitorInterval="30" status="INFO">
+    <Properties>
+        <Property name="baseDir">logs</Property>
+        <Property name="app">resource-catalogue</Property>
+
+        <Property name="LOG_TRANSACTION">
+            %style{%notEmpty{transaction_id=%X{transaction_id}, remote_ip=%X{remote_ip}\n}}{magenta}
+        </Property>
+        <Property name="LOG_USER">
+            %style{%notEmpty{user_info=%X{user_info}\n}}{yellow}
+        </Property>
+        <Property name="LOG_PATTERN">
+            %d{yyyy-MM-dd HH:mm:ss.SSS} %highlight{%-5level} [%t] %style{%C}{bright,blue}: %m%n%throwable${sys:LOG_TRANSACTION}${sys:LOG_USER}
+        </Property>
+    </Properties>
+    <Appenders>
+        <Console name="Console" target="SYSTEM_OUT">
+            <PatternLayout
+                    pattern="${sys:LOG_PATTERN}"/>
+        </Console>
+        <RollingFile name="RollingFile" fileName="${baseDir}/${app}.log"
+                     filePattern="${baseDir}/$${date:yyyy-MM}/${app}-%d{yyyy-MM-dd_HH:mm:ss}.log.gz">
+            <PatternLayout
+                    pattern="${sys:LOG_PATTERN}"/>
+            <Policies>
+                <OnStartupTriggeringPolicy/>
+                <CronTriggeringPolicy schedule="0 0 0 1 * ?"/>
+                <SizeBasedTriggeringPolicy size="20 MB"/>
+            </Policies>
+            <DefaultRolloverStrategy>
+                <Delete basePath="${baseDir}" maxDepth="2">
+                    <IfFileName glob="*/${app}-*.log.gz"/>
+                    <IfLastModified age="180d"/>
+                </Delete>
+            </DefaultRolloverStrategy>
+        </RollingFile>
+    </Appenders>
+    <Loggers>
+        <Root level="info">
+            <AppenderRef ref="Console"/>
+            <AppenderRef ref="RollingFile"/>
+        </Root>
+        <Logger name="org.elasticsearch.client" level="warn">
+            <AppenderRef ref="Console"/>
+        </Logger>
+        <Logger name="org.springframework" level="warn">
+            <AppenderRef ref="Console"/>
+        </Logger>
+    </Loggers>
+</Configuration>

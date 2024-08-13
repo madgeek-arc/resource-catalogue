@@ -1,28 +1,39 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <groupId>eu.einfracentral</groupId>
-    <artifactId>eic</artifactId>
-    <version>4.1.3-SNAPSHOT</version>
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <!--        <version>3.2.4</version>-->
+        <version>2.7.17</version>
+        <relativePath/> <!-- lookup parent from repository -->
+    </parent>
+    <groupId>gr.uoa.di.madgik</groupId>
+    <artifactId>resource-catalogue</artifactId>
+    <version>5.0.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <modules>
         <module>
-            eic-registry-model
+            resource-catalogue-model
         </module>
         <module>
-            eic-registry-api
+            resource-catalogue-api
         </module>
         <module>
-            eic-registry-rest
+            resource-catalogue-rest
         </module>
         <module>
-            eic-registry
+            resource-catalogue-service
         </module>
         <module>
-            matomo-data-parser
+            matomo
         </module>
         <module>
-            recdb
+            resource-catalogue-elastic
+        </module>
+        <module>
+            resource-catalogue-jms
         </module>
     </modules>
 
@@ -34,21 +45,19 @@
     </licenses>
 
     <properties>
+        <java.version>21</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <logging.version>2.17.2</logging.version>
+        <logging.version>2.23.1</logging.version>
         <jackson.version.core>2.14.0</jackson.version.core>
-        <registry-core.version>2.7.3</registry-core.version>
+        <registry-core.version>3.0.0</registry-core.version>
         <springfox.version>2.7.0</springfox.version>
         <javax.mail-version>1.4.3</javax.mail-version>
-        <javax.servlet-api.version>3.1.0</javax.servlet-api.version>
         <jaxb-api.version>2.3.1</jaxb-api.version>
-        <junit.version>4.13.1</junit.version>
-        <spring.version>5.3.20</spring.version>
         <jaxb2-maven-plugin.version>2.5.0</jaxb2-maven-plugin.version>
-        <maven-compiler-plugin.version>3.8.1</maven-compiler-plugin.version>
+        <maven-compiler-plugin.version>3.11.0</maven-compiler-plugin.version>
         <maven-dependency-plugin.version>3.1.0</maven-dependency-plugin.version>
         <maven-source-plugin.version>3.1.0</maven-source-plugin.version>
-        <maven-surefire-plugin.version>2.22.2</maven-surefire-plugin.version>
+        <maven-surefire-plugin.version>3.0.0</maven-surefire-plugin.version>
         <typescript-generator-maven-plugin.version>2.16.538</typescript-generator-maven-plugin.version>
         <spring-security-config.version>5.5.7</spring-security-config.version>
         <org.apache.commons.version>3.9</org.apache.commons.version>
@@ -57,37 +66,72 @@
     <dependencyManagement>
         <dependencies>
             <dependency>
-                <groupId>eu.einfracentral</groupId>
-                <artifactId>eic-registry</artifactId>
+                <groupId>org.springframework.batch</groupId>
+                <artifactId>spring-batch-core</artifactId>
+                <version>4.2.3.RELEASE</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework.batch</groupId>
+                <artifactId>spring-batch-infrastructure</artifactId>
+                <version>4.2.3.RELEASE</version>
+            </dependency>
+            <dependency>
+                <groupId>gr.uoa.di.madgik</groupId>
+                <artifactId>resource-catalogue-service</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>eu.einfracentral</groupId>
-                <artifactId>eic-registry-model</artifactId>
+                <groupId>gr.uoa.di.madgik</groupId>
+                <artifactId>resource-catalogue-model</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>eu.einfracentral</groupId>
-                <artifactId>eic-registry-api</artifactId>
+                <groupId>gr.uoa.di.madgik</groupId>
+                <artifactId>resource-catalogue-api</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>eu.einfracentral</groupId>
-                <artifactId>eic-registry-rest</artifactId>
+                <groupId>gr.uoa.di.madgik</groupId>
+                <artifactId>resource-catalogue-rest</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>eu.openminted</groupId>
+                <groupId>gr.uoa.di.madgik</groupId>
+                <artifactId>resource-catalogue-elastic</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>gr.uoa.di.madgik</groupId>
+                <artifactId>resource-catalogue-jms</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>gr.uoa.di.madgik</groupId>
+                <artifactId>resource-catalogue-matomo</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>gr.uoa.di.madgik</groupId>
                 <artifactId>registry-core-api</artifactId>
                 <version>${registry-core.version}</version>
             </dependency>
             <dependency>
-                <groupId>eu.openminted</groupId>
+                <groupId>gr.uoa.di.madgik</groupId>
+                <artifactId>registry-core-elasticsearch</artifactId>
+                <version>${registry-core.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>gr.uoa.di.madgik</groupId>
+                <artifactId>registry-core-jms</artifactId>
+                <version>${registry-core.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>gr.uoa.di.madgik</groupId>
                 <artifactId>registry-core-rest</artifactId>
                 <version>${registry-core.version}</version>
             </dependency>
             <dependency>
-                <groupId>eu.openminted</groupId>
+                <groupId>gr.uoa.di.madgik</groupId>
                 <artifactId>registry-core-helper</artifactId>
                 <version>${registry-core.version}</version>
             </dependency>
@@ -115,39 +159,19 @@
             </dependency>
             <dependency>
                 <groupId>org.apache.logging.log4j</groupId>
-                <artifactId>log4j-slf4j-impl</artifactId>
+                <artifactId>log4j-slf4j2-impl</artifactId>
                 <version>${logging.version}</version>
             </dependency>
+
             <dependency>
                 <groupId>org.codehaus.jackson</groupId>
                 <artifactId>jackson-mapper-asl</artifactId>
                 <version>1.9.13</version>
             </dependency>
             <dependency>
-                <groupId>io.springfox</groupId>
-                <artifactId>springfox-core</artifactId>
-                <version>${springfox.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>net.bytebuddy</groupId>
-                        <artifactId>byte-buddy</artifactId>
-                    </exclusion>
-                </exclusions>
-            </dependency>
-            <dependency>
-                <groupId>io.swagger</groupId>
-                <artifactId>swagger-annotations</artifactId>
-                <version>1.5.23</version>
-            </dependency>
-            <dependency>
-                <groupId>io.springfox</groupId>
-                <artifactId>springfox-swagger-ui</artifactId>
-                <version>${springfox.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>io.springfox</groupId>
-                <artifactId>springfox-swagger2</artifactId>
-                <version>${springfox.version}</version>
+                <groupId>org.springdoc</groupId>
+                <artifactId>springdoc-openapi-ui</artifactId>
+                <version>1.8.0</version>
             </dependency>
             <dependency>
                 <groupId>com.sun.mail</groupId>
@@ -180,68 +204,68 @@
                 <artifactId>jaxb-api</artifactId>
                 <version>${jaxb-api.version}</version>
             </dependency>
-            <dependency>
-                <groupId>junit</groupId>
-                <artifactId>junit</artifactId>
-                <version>${junit.version}</version>
-                <scope>test</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.springframework</groupId>
-                <artifactId>spring-test</artifactId>
-                <version>${spring.version}</version>
-                <scope>test</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.springframework</groupId>
-                <artifactId>spring-core</artifactId>
-                <version>${spring.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.springframework</groupId>
-                <artifactId>spring-beans</artifactId>
-                <version>${spring.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.springframework</groupId>
-                <artifactId>spring-context</artifactId>
-                <version>${spring.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.springframework</groupId>
-                <artifactId>spring-context-support</artifactId>
-                <version>${spring.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.springframework</groupId>
-                <artifactId>spring-aop</artifactId>
-                <version>${spring.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.springframework</groupId>
-                <artifactId>spring-web</artifactId>
-                <version>${spring.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.springframework</groupId>
-                <artifactId>spring-webmvc</artifactId>
-                <version>${spring.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.springframework.security</groupId>
-                <artifactId>spring-security-core</artifactId>
-                <version>${spring-security-config.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.springframework.security</groupId>
-                <artifactId>spring-security-config</artifactId>
-                <version>${spring-security-config.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.springframework.security</groupId>
-                <artifactId>spring-security-web</artifactId>
-                <version>${spring-security-config.version}</version>
-            </dependency>
+            <!--            <dependency>-->
+            <!--                <groupId>junit</groupId>-->
+            <!--                <artifactId>junit</artifactId>-->
+            <!--                <version>${junit.version}</version>-->
+            <!--                <scope>test</scope>-->
+            <!--            </dependency>-->
+            <!--            <dependency>-->
+            <!--                <groupId>org.springframework</groupId>-->
+            <!--                <artifactId>spring-test</artifactId>-->
+            <!--                <version>${spring.version}</version>-->
+            <!--                <scope>test</scope>-->
+            <!--            </dependency>-->
+            <!--            <dependency>-->
+            <!--                <groupId>org.springframework</groupId>-->
+            <!--                <artifactId>spring-core</artifactId>-->
+            <!--                <version>${spring.version}</version>-->
+            <!--            </dependency>-->
+            <!--            <dependency>-->
+            <!--                <groupId>org.springframework</groupId>-->
+            <!--                <artifactId>spring-beans</artifactId>-->
+            <!--                <version>${spring.version}</version>-->
+            <!--            </dependency>-->
+            <!--            <dependency>-->
+            <!--                <groupId>org.springframework</groupId>-->
+            <!--                <artifactId>spring-context</artifactId>-->
+            <!--                <version>${spring.version}</version>-->
+            <!--            </dependency>-->
+            <!--            <dependency>-->
+            <!--                <groupId>org.springframework</groupId>-->
+            <!--                <artifactId>spring-context-support</artifactId>-->
+            <!--                <version>${spring.version}</version>-->
+            <!--            </dependency>-->
+            <!--            <dependency>-->
+            <!--                <groupId>org.springframework</groupId>-->
+            <!--                <artifactId>spring-aop</artifactId>-->
+            <!--                <version>${spring.version}</version>-->
+            <!--            </dependency>-->
+            <!--            <dependency>-->
+            <!--                <groupId>org.springframework</groupId>-->
+            <!--                <artifactId>spring-web</artifactId>-->
+            <!--                <version>${spring.version}</version>-->
+            <!--            </dependency>-->
+            <!--            <dependency>-->
+            <!--                <groupId>org.springframework</groupId>-->
+            <!--                <artifactId>spring-webmvc</artifactId>-->
+            <!--                <version>${spring.version}</version>-->
+            <!--            </dependency>-->
+            <!--            <dependency>-->
+            <!--                <groupId>org.springframework.security</groupId>-->
+            <!--                <artifactId>spring-security-core</artifactId>-->
+            <!--                <version>${spring-security-config.version}</version>-->
+            <!--            </dependency>-->
+            <!--            <dependency>-->
+            <!--                <groupId>org.springframework.security</groupId>-->
+            <!--                <artifactId>spring-security-config</artifactId>-->
+            <!--                <version>${spring-security-config.version}</version>-->
+            <!--            </dependency>-->
+            <!--            <dependency>-->
+            <!--                <groupId>org.springframework.security</groupId>-->
+            <!--                <artifactId>spring-security-web</artifactId>-->
+            <!--                <version>${spring-security-config.version}</version>-->
+            <!--            </dependency>-->
             <dependency>
                 <groupId>org.aspectj</groupId>
                 <artifactId>aspectjrt</artifactId>
@@ -258,47 +282,37 @@
                 <version>1.2</version>
             </dependency>
             <dependency>
-                <groupId>org.mitre</groupId>
-                <artifactId>openid-connect-client</artifactId>
-                <version>1.3.3</version>
-            </dependency>
-            <dependency>
-                <groupId>org.mitre</groupId>
-                <artifactId>openid-connect-common</artifactId>
-                <version>1.3.3</version>
-            </dependency>
-            <dependency>
                 <groupId>com.nimbusds</groupId>
                 <artifactId>nimbus-jose-jwt</artifactId>
-                <version>7.9</version>
+                <version>9.23</version>
             </dependency>
 
             <!-- Override registry-core dependencies versions-->
-            <dependency>
-                <groupId>org.springframework</groupId>
-                <artifactId>spring-tx</artifactId>
-                <version>${spring.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.springframework</groupId>
-                <artifactId>spring-jms</artifactId>
-                <version>${spring.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.springframework</groupId>
-                <artifactId>spring-orm</artifactId>
-                <version>${spring.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.springframework</groupId>
-                <artifactId>spring-jdbc</artifactId>
-                <version>${spring.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.springframework</groupId>
-                <artifactId>spring-batch-core</artifactId>
-                <version>${spring.version}</version>
-            </dependency>
+            <!--            <dependency>-->
+            <!--                <groupId>org.springframework</groupId>-->
+            <!--                <artifactId>spring-tx</artifactId>-->
+            <!--                <version>${spring.version}</version>-->
+            <!--            </dependency>-->
+            <!--            <dependency>-->
+            <!--                <groupId>org.springframework</groupId>-->
+            <!--                <artifactId>spring-jms</artifactId>-->
+            <!--                <version>${spring.version}</version>-->
+            <!--            </dependency>-->
+            <!--            <dependency>-->
+            <!--                <groupId>org.springframework</groupId>-->
+            <!--                <artifactId>spring-orm</artifactId>-->
+            <!--                <version>${spring.version}</version>-->
+            <!--            </dependency>-->
+            <!--            <dependency>-->
+            <!--                <groupId>org.springframework</groupId>-->
+            <!--                <artifactId>spring-jdbc</artifactId>-->
+            <!--                <version>${spring.version}</version>-->
+            <!--            </dependency>-->
+            <!--            <dependency>-->
+            <!--                <groupId>org.springframework</groupId>-->
+            <!--                <artifactId>spring-batch-core</artifactId>-->
+            <!--                <version>${spring.version}</version>-->
+            <!--            </dependency>-->
             <dependency>
                 <groupId>com.googlecode.json-simple</groupId>
                 <artifactId>json-simple</artifactId>
@@ -357,41 +371,14 @@
     <build>
         <pluginManagement>
             <plugins>
+
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-release-plugin</artifactId>
-                    <version>3.0.0-M4</version>
-                </plugin>
-                <plugin>
-                    <groupId>org.codehaus.mojo</groupId>
-                    <artifactId>jaxb2-maven-plugin</artifactId>
-                    <version>${jaxb2-maven-plugin.version}</version>
-                    <executions>
-                        <execution>
-                            <id>schemagen</id>
-                            <goals>
-                                <goal>schemagen</goal>
-                            </goals>
-                        </execution>
-                    </executions>
-                    <configuration>
-                        <!-- The package of your generated sources -->
-                        <packageName>eu.einfracentral.domain</packageName>
-                        <outputDirectory>${basedir}/src/main/resources</outputDirectory>
-                        <!--<outputDirectory>eic-registry-model/src/main/resources</outputDirectory>-->
-                    </configuration>
+                    <version>3.0.1</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-compiler-plugin</artifactId>
-                    <version>${maven-compiler-plugin.version}</version>
-                    <configuration>
-                        <compilerArgument>-Xlint:all</compilerArgument>
-                        <source>1.8</source>
-                        <target>1.8</target>
-                    </configuration>
-                </plugin>
-                <plugin>
                     <artifactId>maven-dependency-plugin</artifactId>
                     <version>${maven-dependency-plugin.version}</version>
                     <executions>
@@ -411,19 +398,6 @@
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-source-plugin</artifactId>
-                    <version>${maven-source-plugin.version}</version>
-                    <executions>
-                        <execution>
-                            <id>attach-sources</id>
-                            <goals>
-                                <goal>jar</goal>
-                            </goals>
-                        </execution>
-                    </executions>
-                </plugin>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-surefire-plugin</artifactId>
                     <version>${maven-surefire-plugin.version}</version>
                     <configuration>
@@ -431,27 +405,13 @@
                         <argLine>-Dfile.encoding=UTF-8</argLine>
                     </configuration>
                 </plugin>
-                <plugin>
-                    <groupId>external.atlassian.jgitflow</groupId>
-                    <artifactId>jgitflow-maven-plugin</artifactId>
-                    <version>1.0-m5.1</version>
-                    <configuration>
-                        <flowInitContext>
-                            <versionTagPrefix>v</versionTagPrefix>
-                            <!-- <masterBranchName>master</masterBranchName> -->
-                            <developBranchName>develop</developBranchName>
-                            <!-- <featureBranchPrefix>feature-</featureBranchPrefix>
-                            <releaseBranchPrefix>release-</releaseBranchPrefix>
-                            <hotfixBranchPrefix>hotfix-</hotfixBranchPrefix> -->
-                        </flowInitContext>
-                        <username>USERNAME_FOR_A_GIT_USER</username>
-                        <password>PASSWORD_FOR_A_GIT_USER</password>
-                        <noDeploy>true</noDeploy>
-                        <squash>true</squash>
-                    </configuration>
-                </plugin>
             </plugins>
         </pluginManagement>
-        <finalName>eic</finalName>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-release-plugin</artifactId>
+            </plugin>
+        </plugins>
     </build>
 </project>

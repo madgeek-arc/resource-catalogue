@@ -1,4 +1,5 @@
 # Resource Catalogue #
+
 ###### What is this project about?
 
 - - -
@@ -15,24 +16,31 @@
 * PostgreSQL 9.5 or greater
 
 #### Clone
+
 `git clone https://github.com/madgeek-arc/resource-catalogue.git`
 
 #### Build
+
 `mvn clean package`
 
 #### PostgreSQL - Create DB
+
 ```sql
 CREATE USER <user> WITH PASSWORD 'your-password'; -- or use an existing user
 
 CREATE DATABASE db WITH OWNER <user>;
 ```
+
 1. Log in to the created db using: `sudo -u postgres psql  db`
 2. Execute the following command: `CREATE EXTENSION tablefunc;`
 
 #### Deploy
+
 1. Ensure that PostgreSQL, ActiveMQ and Elasticsearch are up and running.
 
-2. Create a file named `registry.properties` inside the /lib folder of your Tomcat installation and populate it with the [Application Properties Example](#Application-Properties-Example) (or edit the `application.properties` file of the project before you [Build](#Build) it).
+2. Create a file named `registry.properties` inside the /lib folder of your Tomcat installation and populate it with
+   the [Application Properties Example](#Application-Properties-Example) (or edit the `application.properties` file of
+   the project before you [Build](#Build) it).
 
 3. Deploy the webapp on Tomcat.
 
@@ -41,14 +49,15 @@ CREATE DATABASE db WITH OWNER <user>;
 - - -
 
 ###### Add resourceTypes (only the first time you deploy the project)
+
 1. Navigate to eic/eic-registry/src/main/resources/resourceTypes
 
 2. Execute `bash loadResourceTypes.sh localhost` (replace localhost with your host)
 
 - - -
 
-
 ###### Application Properties Example
+
 ```properties
 ##########################
 ## Mandatory Properties ##
