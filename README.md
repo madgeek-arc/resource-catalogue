@@ -62,10 +62,11 @@ CREATE DATABASE db WITH OWNER <user>;
 ##########################
 ## Mandatory Properties ##
 ##########################
+
 fqdn=localhost
 platform.root=http://${fqdn}/
 registry.host=http://${fqdn}:8080/eic-registry/
-
+swagger.url=${platform.root}
 
 ## DB Properties ##
 jdbc.url=jdbc:postgresql://${fqdn}:5432/db
@@ -81,56 +82,91 @@ elasticsearch.cluster=<clusterName>
 jms.host=tcp://${fqdn}:61616
 jms.prefix=<local>
 
-## eic Login Properties ##
-webapp.homepage=http://localhost:3000
-webapp.oidc.login.redirectUris=http://localhost:8080/eic-registry/openid_connect_login
-
 ## Openid Connect Properties ##
 oidc.issuer=
 oidc.authorization=
 oidc.token=
+oidc.jwk=
 oidc.userinfo=
 oidc.revocation=
-oidc.jwk=
-
+oidc.logout=
 oidc.clientId=
 oidc.clientSecret=
-oidc.scopes=openid, profile, email
+oidc.scopes=openid,profile,email
+
+## Project Properties ##
+project.admins=admin1@email.com, admin2@email.com
+project.admins.epot=epot1@email.com, epot2@email.com
+project.debug=true/false
+project.name=My Catalogue
+project.catalogue.name=my_catalogue
+project.registration.email=no-reply@my-catalogue.org
+project.helpdesk.email=helpdesk@email.com
+project.helpdesk.cc=helpdesk_cc@email.com
+project.monitoring.email=monitoring@email.com
+
+## Mail Properties ##
+mail.smtp.auth=true/false
+mail.smtp.host=
+mail.smtp.port=
+mail.smtp.protocol=
+mail.smtp.ssl.enable=true/false
+mail.smtp.from=
+mail.smtp.user=
+mail.smtp.password=
+emails.send=true/false
+emails.send.admin.notifications=true/false
+emails.send.provider.notifications=true/false
 
 
 #########################
 ## Optional Properties ##
 #########################
 
-## Project Properties ##
-project.admins=test@email.com, test2@email.com
-project.debug=false
-project.name=My Catalogue
-project.registration.email=no-reply@my-catalogue.org
+## Login Properties ##
+session.expiration.hours=
+webapp.homepage=http://localhost:3000
+webapp.oidc.login.redirectUris=http://localhost:8080/eic-registry/openid_connect_login
 
-## sync ##
+## Argo GRNET Monitoring Status ##
+argo.grnet.monitoring.service.types=
+argo.grnet.monitoring.availability=
+argo.grnet.monitoring.status=
+argo.grnet.monitoring.token=
+
+## InternalToPublicConsistency ##
+resource.consistency.enable=true/false
+resource.consistency.email=email1@email.com
+resource.consistency.cc=email1_cc@email.com
+
+## Sync ##
+sync.enable=true/false
 sync.host=
 sync.token.filepath=
-
-## Mail Properties ##
-mail.smtp.auth=
-mail.smtp.host=
-mail.smtp.user=
-mail.smtp.password=
-mail.smtp.port=
-mail.smtp.protocol=
-mail.smtp.ssl.enable=
-
-## Enable/Disable Emails ##
-emails.send=false
-emails.send.notifications=false
-
 
 ## Matomo Properties ##
 matomoHost=
 matomoToken=
 matomoSiteId=
 matomoAuthorizationHeader=
+apitracking.matomo.site=
+apitracking.matomo.host=
+
+## Auditing interval (in months) ##
+auditing.interval=
+
+## Openaire Datasources Manager ##
+openaire.dsm.api=
+openaire.ds.metrics=
+openaire.ds.metrics.validated=
+
+## PIDS ##
+pid.username=
+pid.key=
+pid.auth=
+pid.prefix=
+pid.api=
+marketplace.url=
 ```
 
 - - -

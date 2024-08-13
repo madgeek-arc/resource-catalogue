@@ -35,7 +35,7 @@ public class ResourceExtrasController {
 
     @Operation(summary = "Update a specific Service's EOSC Interoperability Framework Guidelines given its ID")
     @PutMapping(path = "/update/eoscIFGuidelines", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<ServiceBundle> updateEOSCIFGuidelines(@RequestParam String serviceId, @RequestParam String catalogueId,
                                                                 @RequestBody List<EOSCIFGuidelines> eoscIFGuidelines,
                                                                 @Parameter(hidden = true) Authentication auth) {
