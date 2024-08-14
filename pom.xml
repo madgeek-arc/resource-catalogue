@@ -49,7 +49,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <logging.version>2.23.1</logging.version>
         <jackson.version.core>2.14.0</jackson.version.core>
-        <registry-core.version>3.0.0</registry-core.version>
+        <registry-core.version>3.1.0-SNAPSHOT</registry-core.version>
         <springfox.version>2.7.0</springfox.version>
         <javax.mail-version>1.4.3</javax.mail-version>
         <jaxb-api.version>2.3.1</jaxb-api.version>
