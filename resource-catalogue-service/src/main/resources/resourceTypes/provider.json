@@ -345,10 +345,5 @@
   "properties": {
     "class": "gr.uoa.di.madgik.resourcecatalogue.domain.ProviderBundle"
   },
-<<<<<<< HEAD:resource-catalogue-service/src/main/resources/resourceTypes/provider.json
   "schema": "{\n\t\"$schema\": \"https://json-schema.org/draft/2019-09/schema\"\n}"
 }
-=======
-  "schemaUrl": "https://raw.githubusercontent.com/madgeek-arc/resource-catalogue/master/eic-registry-model/src/main/resources/schema1.xsd"
-}
->>>>>>> master:eic-registry/src/main/resources/resourceTypes/provider.json
