@@ -103,6 +103,17 @@ public abstract class ResourceCrudController<T extends Identifiable> {
         return new ResponseEntity<>(resource, HttpStatus.OK);
     }
 
+    @Hidden
+    @DeleteMapping(path = "{id}/**", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<T> deleteByPid(@PathVariable("id") @Parameter(allowReserved = true) String id,
+                                         @Parameter(hidden = true) Authentication authentication,
+                                         HttpServletRequest request) throws ResourceNotFoundException {
+        T resource = service.get(extractPid(id, request));
+        service.delete(resource);
+        logger.debug("Deleted {} with id {}", resource.getClass().getSimpleName(), resource.getId());
+        return new ResponseEntity<>(resource, HttpStatus.OK);
+    }
+
     // Filter a list of Resources based on a set of filters.
     @Browse
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
