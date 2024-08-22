@@ -57,7 +57,7 @@ public class DraftProviderManager extends ResourceManager<ProviderBundle> implem
     }
 
     @Override
-    @CacheEvict(value = CACHE_PROVIDERS, allEntries = true)
+    // @CacheEvict(value = CACHE_PROVIDERS, allEntries = true)
     public ProviderBundle add(ProviderBundle bundle, Authentication auth) {
 
         bundle.setId(idCreator.generate(getResourceType()));
@@ -82,7 +82,7 @@ public class DraftProviderManager extends ResourceManager<ProviderBundle> implem
     }
 
     @Override
-    @CacheEvict(value = CACHE_PROVIDERS, allEntries = true)
+    // @CacheEvict(value = CACHE_PROVIDERS, allEntries = true)
     public ProviderBundle update(ProviderBundle bundle, Authentication auth) {
         // get existing resource
         Resource existing = getDraftResource(bundle.getId());
@@ -99,20 +99,20 @@ public class DraftProviderManager extends ResourceManager<ProviderBundle> implem
     }
 
     @Override
-    @CacheEvict(value = CACHE_PROVIDERS, allEntries = true)
+    // @CacheEvict(value = CACHE_PROVIDERS, allEntries = true)
     public void delete(ProviderBundle bundle) {
         super.delete(bundle);
     }
 
     @Override
-    @CacheEvict(value = CACHE_PROVIDERS, allEntries = true)
+    // @CacheEvict(value = CACHE_PROVIDERS, allEntries = true)
     public ProviderBundle transformToNonDraft(String id, Authentication auth) {
         ProviderBundle providerBundle = get(id);
         return transformToNonDraft(providerBundle, auth);
     }
 
     @Override
-    @CacheEvict(value = CACHE_PROVIDERS, allEntries = true)
+    // @CacheEvict(value = CACHE_PROVIDERS, allEntries = true)
     public ProviderBundle transformToNonDraft(ProviderBundle bundle, Authentication auth) {
         logger.trace("Attempting to transform the Draft Provider with id '{}' to Provider", bundle.getId());
         providerManager.validate(bundle);

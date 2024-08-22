@@ -81,7 +81,7 @@ public class DefaultStatisticsManager implements StatisticsService {
     }
 
     @Override
-    @Cacheable(cacheNames = CACHE_VISITS, key = "#id+#by.getKey()")
+    // @Cacheable(cacheNames = CACHE_VISITS, key = "#id+#by.getKey()")
     public Map<String, Integer> visits(String id, Interval by) {
         throw new UnsupportedOperationException("Method has been removed");
     }

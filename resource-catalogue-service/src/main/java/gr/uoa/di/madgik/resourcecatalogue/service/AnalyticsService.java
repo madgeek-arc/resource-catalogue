@@ -71,7 +71,7 @@ public class AnalyticsService implements Analytics {
         Objects.requireNonNull(cache).put(CACHE_VISITS, visits);
     }
 
-    @Cacheable(value = CACHE_VISITS)
+    // @Cacheable(value = CACHE_VISITS)
     @Override
     public Map<String, Integer> getAllServiceVisits() {
         return getServiceVisits();

@@ -348,7 +348,7 @@ public class ProviderManagementAspect {
      * @param serviceBundle
      */
     @Async
-    @CacheEvict(value = CACHE_PROVIDERS, allEntries = true)
+    // @CacheEvict(value = CACHE_PROVIDERS, allEntries = true)
     public void updateServiceProviderStates(ServiceBundle serviceBundle) {
         if (serviceBundle.getService().getCatalogueId().equals(catalogueId)) {
             try {
@@ -365,7 +365,7 @@ public class ProviderManagementAspect {
     }
 
     @Async
-    @CacheEvict(value = CACHE_PROVIDERS, allEntries = true)
+    // @CacheEvict(value = CACHE_PROVIDERS, allEntries = true)
     public void updateTrainingResourceProviderStates(TrainingResourceBundle trainingResourceBundle) {
         if (trainingResourceBundle.getTrainingResource().getCatalogueId().equals(catalogueId)) {
             try {

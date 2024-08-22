@@ -55,7 +55,7 @@ public class DraftTrainingResourceManager extends ResourceManager<TrainingResour
     }
 
     @Override
-    @CacheEvict(cacheNames = {CACHE_VISITS, CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)
+    // @CacheEvict(cacheNames = {CACHE_VISITS, CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)
     public TrainingResourceBundle add(TrainingResourceBundle bundle, Authentication auth) {
 
         bundle.setId(idCreator.generate(getResourceType()));
@@ -79,7 +79,7 @@ public class DraftTrainingResourceManager extends ResourceManager<TrainingResour
     }
 
     @Override
-    @CacheEvict(cacheNames = {CACHE_VISITS, CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)
+    // @CacheEvict(cacheNames = {CACHE_VISITS, CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)
     public TrainingResourceBundle update(TrainingResourceBundle bundle, Authentication auth) {
         // get existing resource
         Resource existing = getDraftResource(bundle.getTrainingResource().getId());
@@ -96,20 +96,20 @@ public class DraftTrainingResourceManager extends ResourceManager<TrainingResour
     }
 
     @Override
-    @CacheEvict(value = CACHE_PROVIDERS, allEntries = true)
+    // @CacheEvict(value = CACHE_PROVIDERS, allEntries = true)
     public void delete(TrainingResourceBundle bundle) {
         super.delete(bundle);
     }
 
     @Override
-    @CacheEvict(cacheNames = {CACHE_VISITS, CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)
+    // @CacheEvict(cacheNames = {CACHE_VISITS, CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)
     public TrainingResourceBundle transformToNonDraft(String id, Authentication auth) {
         TrainingResourceBundle trainingResourceBundle = this.get(id);
         return transformToNonDraft(trainingResourceBundle, auth);
     }
 
     @Override
-    @CacheEvict(cacheNames = {CACHE_VISITS, CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)
+    // @CacheEvict(cacheNames = {CACHE_VISITS, CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)
     public TrainingResourceBundle transformToNonDraft(TrainingResourceBundle bundle, Authentication auth) {
         logger.trace("Attempting to transform the Draft Training Resource with id {} to Training Resource", bundle.getId());
         trainingResourceService.validate(bundle);

@@ -182,7 +182,7 @@ public class ElasticStatisticsManager implements StatisticsService {
     }
 
     @Override
-    @Cacheable(cacheNames = CACHE_VISITS, key = "#id+#by.getKey()")
+    // @Cacheable(cacheNames = CACHE_VISITS, key = "#id+#by.getKey()")
     public Map<String, Integer> visits(String id, Interval by) {
         List<? extends Histogram.Bucket> buckets = histogram(id, Event.UserActionType.VISIT.getKey(), by).getBuckets();
         final long[] totalDocCounts = new long[buckets.size()];
