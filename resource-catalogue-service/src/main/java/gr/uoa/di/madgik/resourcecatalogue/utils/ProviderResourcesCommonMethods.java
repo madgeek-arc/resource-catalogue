@@ -48,24 +48,65 @@ public class ProviderResourcesCommonMethods {
 
     @Value("${pid.test}")
     private boolean pidTest;
-    @Value("${pid.username}")
-    private String pidUsername;
-    @Value("${pid.auth}")
-    private String pidAuth;
-    @Value("${prefix.services}")
-    private String servicesPrefix;
-    @Value("${prefix.tools}")
-    private String toolsPrefix;
-    @Value("${prefix.trainings}")
-    private String trainingsPrefix;
+    @Value("${pid.test.user}")
+    private String testUser;
+    @Value("${pid.test.endpoint}")
+    private String testEndpoint;
+    @Value("${pid.test.auth}")
+    private String testAuth;
+
+    @Value("${pid.user.prefix}")
+    private String userPrefix;
+    @Value("${pid.user.suffix}")
+    private String userSuffix;
+
+    @Value("${pid.endpoint.base}")
+    private String baseEndpoint;
+    @Value("${pid.endpoint.providers}")
+    private String providersEndpoint;
+    @Value("${pid.endpoint.services}")
+    private String servicesEndpoint;
+    @Value("${pid.endpoint.trainings}")
+    private String trainingsEndpoint;
+    @Value("${pid.endpoint.guidelines}")
+    private String guidelinesEndpoint;
+    @Value("${pid.endpoint.tools}")
+    private String toolsEndpoint;
+    @Value("${marketplace.endpoint}")
+    private String marketplaceEndpoint;
+
+    @Value("${pid.cert.providers}")
+    private String providersCert;
+    @Value("${pid.cert.services}")
+    private String servicesCert;
+    @Value("${pid.cert.trainings}")
+    private String trainingsCert;
+    @Value("${pid.cert.guidelines}")
+    private String guidelinesCert;
+    @Value("${pid.cert.tools}")
+    private String toolsCert;
+
+    @Value("${pid.key.providers}")
+    private String providersKey;
+    @Value("${pid.key.services}")
+    private String servicesKey;
+    @Value("${pid.key.trainings}")
+    private String trainingsKey;
+    @Value("${pid.key.guidelines}")
+    private String guidelinesKey;
+    @Value("${pid.key.tools}")
+    private String toolsKey;
+
     @Value("${prefix.providers}")
     private String providersPrefix;
+    @Value("${prefix.services}")
+    private String servicesPrefix;
+    @Value("${prefix.trainings}")
+    private String trainingsPrefix;
     @Value("${prefix.guidelines}")
     private String guidelinesPrefix;
-    @Value("${pid.api}")
-    private String pidApi;
-    @Value("${marketplace.url}")
-    private String marketplaceUrl;
+    @Value("${prefix.tools}")
+    private String toolsPrefix;
 
     public ProviderResourcesCommonMethods(@Lazy CatalogueService catalogueService,
                                           @Lazy ProviderService providerService,
@@ -410,9 +451,9 @@ public class ProviderResourcesCommonMethods {
         String url;
         if (pidTest) {
             disableSSLVerification();
-            url = pidApi + resourceSuffix;
+            url = testEndpoint + resourceSuffix;
         } else {
-            url = pidApi + pid;
+            url = baseEndpoint + pid;
         }
         String urlPath = determineUrlPathFromPidPrefix(resourcePrefix);
         if (!urlPath.equals("no_path")) {
@@ -429,7 +470,7 @@ public class ProviderResourcesCommonMethods {
                 throw new RuntimeException(e);
             }
             con.setRequestProperty("Content-Type", "application/json");
-            con.setRequestProperty("Authorization", pidAuth);
+            con.setRequestProperty("Authorization", testUser);
             con.setDoOutput(true);
             try (OutputStream os = con.getOutputStream()) {
                 byte[] input = payload.getBytes(StandardCharsets.UTF_8);
@@ -495,7 +536,7 @@ public class ProviderResourcesCommonMethods {
         JSONObject id = new JSONObject();
         JSONObject marketplaceUrl = new JSONObject();
         hs_admin_data_value.put("index", 301);
-        hs_admin_data_value.put("handle", pidUsername);
+        hs_admin_data_value.put("handle", testUser);
         hs_admin_data_value.put("permissions", "011111110011");
 //        hs_admin_data_value.put("format", "admin");
         hs_admin_data.put("value", hs_admin_data_value);
@@ -506,7 +547,7 @@ public class ProviderResourcesCommonMethods {
         values.put(hs_admin);
         marketplaceUrl.put("index", 1);
         marketplaceUrl.put("type", "url");
-        String url = this.marketplaceUrl;
+        String url = this.marketplaceEndpoint;
         //TODO: Refactor this according to new endpoints
         if (resourceTypePath.equals("trainings/") || resourceTypePath.equals("guidelines/")) {
             url = url.replace("marketplace", "search.marketplace");
