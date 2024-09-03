@@ -21,8 +21,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.CacheManager;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.security.core.Authentication;
@@ -124,7 +122,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         provider.setId(idCreator.generate(getResourceType()));
 
         // register and ensure Resource Catalogue's PID uniqueness
-        commonMethods.createPIDAndCorrespondingAlternativeIdentifier(provider, getResourceType());
+        commonMethods.determineResourceAndCreateAlternativeIdentifierForPID(provider, getResourceType());
         provider.getProvider().setAlternativeIdentifiers(commonMethods.ensureResourceCataloguePidUniqueness(provider.getId(),
                 provider.getProvider().getAlternativeIdentifiers()));
 
@@ -173,7 +171,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         // ensure Resource Catalogue's PID uniqueness
         if (ret.getProvider().getAlternativeIdentifiers() == null ||
                 ret.getProvider().getAlternativeIdentifiers().isEmpty()) {
-            commonMethods.createPIDAndCorrespondingAlternativeIdentifier(ret, getResourceType());
+            commonMethods.determineResourceAndCreateAlternativeIdentifierForPID(ret, getResourceType());
         } else {
             ret.getProvider().setAlternativeIdentifiers(commonMethods.ensureResourceCataloguePidUniqueness(ret.getId(),
                     ret.getProvider().getAlternativeIdentifiers()));
