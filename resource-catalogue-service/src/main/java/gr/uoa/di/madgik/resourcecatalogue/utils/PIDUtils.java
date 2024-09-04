@@ -33,11 +33,6 @@ public class PIDUtils {
     private String certPath;
     private String keyPath;
 
-    @Value("${truststore.path}")
-    private String truststorePath;
-    @Value("${truststore.pass}")
-    private String truststorePass;
-
     @Value("${pid.test}")
     private boolean pidTest;
     @Value("${pid.test.user}")
@@ -52,8 +47,6 @@ public class PIDUtils {
     @Value("${pid.user.suffix}")
     private String userSuffix;
 
-    @Value("${pid.endpoint.base}")
-    private String baseEndpoint;
     @Value("${pid.endpoint.providers}")
     private String providersEndpoint;
     @Value("${pid.endpoint.services}")
@@ -162,8 +155,13 @@ public class PIDUtils {
         JSONObject id_data = new JSONObject();
         JSONObject marketplaceUrl = new JSONObject();
         JSONObject marketplaceUrl_data = new JSONObject();
-        hs_admin_data_value.put("handle", pid.split("/")[0] + userSuffix);
-        hs_admin_data_value.put("index", userPrefix.split(":")[0]);
+        if (pidTest) {
+            hs_admin_data_value.put("handle", testUser);
+            hs_admin_data_value.put("index", 301);
+        } else {
+            hs_admin_data_value.put("handle", pid.split("/")[0] + userSuffix);
+            hs_admin_data_value.put("index", userPrefix.split(":")[0]);
+        }
         hs_admin_data_value.put("permissions", "011111110011");
         hs_admin_data.put("format", "admin");
         hs_admin_data.put("value", hs_admin_data_value);
@@ -177,6 +175,7 @@ public class PIDUtils {
         id.put("type", "id");
         id.put("data", id_data);
         values.put(id);
+        //TODO: Enable when we have final MP endpoints (which projects?)
         if (marketplaceEnabled) {
             String url = marketplaceEndpoint + determineMarketplaceEndpoint(pid.split("/")[0]);
             marketplaceUrl_data.put("format", "string");
@@ -221,10 +220,8 @@ public class PIDUtils {
 
     private void configureSSL(HttpURLConnection con) {
         try {
-            // Load the private key from the PEM file
+            // Load keys
             PrivateKey privateKey = loadPrivateKey(keyPath);
-
-            // Load the certificate from the PEM file
             X509Certificate certificate = loadCertificate(certPath);
 
             // Create a KeyStore to hold the private key and certificate
@@ -236,15 +233,9 @@ public class PIDUtils {
             KeyManagerFactory keyManagerFactory = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
             keyManagerFactory.init(keyStore, null);
 
-            // Load the custom trust store
-            KeyStore trustStore = KeyStore.getInstance("JKS");
-            try (InputStream trustStoreStream = new FileInputStream(truststorePath)) {
-                trustStore.load(trustStoreStream, truststorePass.toCharArray());
-            }
-
-            // Initialize TrustManagerFactory with the default CA certificates (system default trust store)
+            // Initialize TrustManagerFactory with the default CA certificates
             TrustManagerFactory trustManagerFactory = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
-            trustManagerFactory.init(trustStore); // Initializes with the default trust store
+            trustManagerFactory.init((KeyStore) null);
 
             // Create SSL context with key and trust managers
             SSLContext sslContext = SSLContext.getInstance("TLS");
@@ -299,8 +290,10 @@ public class PIDUtils {
                         public X509Certificate[] getAcceptedIssuers() {
                             return null;
                         }
+
                         public void checkClientTrusted(X509Certificate[] certs, String authType) {
                         }
+
                         public void checkServerTrusted(X509Certificate[] certs, String authType) {
                         }
                     }
