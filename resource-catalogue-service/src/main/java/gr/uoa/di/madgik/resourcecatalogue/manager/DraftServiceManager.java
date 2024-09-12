@@ -52,7 +52,6 @@ public class DraftServiceManager extends ResourceManager<ServiceBundle> implemen
     }
 
     @Override
-    // @(cacheNames = {CACHE_VISITS, CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)
     public ServiceBundle add(ServiceBundle bundle, Authentication auth) {
 
         bundle.setId(idCreator.generate(getResourceType()));
@@ -76,7 +75,6 @@ public class DraftServiceManager extends ResourceManager<ServiceBundle> implemen
     }
 
     @Override
-    // @(cacheNames = {CACHE_VISITS, CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)
     public ServiceBundle update(ServiceBundle bundle, Authentication auth) {
         // get existing resource
         Resource existing = getDraftResource(bundle.getService().getId());
@@ -98,14 +96,12 @@ public class DraftServiceManager extends ResourceManager<ServiceBundle> implemen
     }
 
     @Override
-    // @(cacheNames = {CACHE_VISITS, CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)
     public ServiceBundle transformToNonDraft(String id, Authentication auth) {
         ServiceBundle serviceBundle = this.get(id);
         return transformToNonDraft(serviceBundle, auth);
     }
 
     @Override
-    // @(cacheNames = {CACHE_VISITS, CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)
     public ServiceBundle transformToNonDraft(ServiceBundle bundle, Authentication auth) {
         logger.trace("Attempting to transform the Draft Service with id {} to Service", bundle.getId());
         serviceBundleService.validate(bundle);

@@ -141,7 +141,6 @@ public abstract class AbstractServiceBundleManager<T extends ServiceBundle> exte
     }
 
     @Override
-    // @(cacheNames = {Cache.CACHE_VISITS, Cache.CACHE_PROVIDERS, Cache.CACHE_FEATURED}, allEntries = true)
     public T add(T serviceBundle, Authentication auth) {
         logger.trace("Attempting to add a new Resource: {}", serviceBundle);
         // if Resource version is empty set it null
@@ -167,7 +166,6 @@ public abstract class AbstractServiceBundleManager<T extends ServiceBundle> exte
     }
 
     @Override
-    // @(cacheNames = {Cache.CACHE_VISITS, Cache.CACHE_PROVIDERS, Cache.CACHE_FEATURED}, allEntries = true)
     public T update(T serviceBundle, Authentication auth) {
         logger.trace("Attempting to update the Resource: {}", serviceBundle);
         // if Resource version is empty set it null
@@ -192,7 +190,6 @@ public abstract class AbstractServiceBundleManager<T extends ServiceBundle> exte
     }
 
     @Override
-    // @(cacheNames = {Cache.CACHE_VISITS, Cache.CACHE_PROVIDERS, Cache.CACHE_FEATURED}, allEntries = true)
     public void delete(T serviceBundle) {
         logger.trace("User is attempting to delete the Resource: {}", serviceBundle);
         if (serviceBundle == null || serviceBundle.getService().getId() == null) {

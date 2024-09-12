@@ -52,7 +52,6 @@ public class DraftInteroperabilityRecordManager extends ResourceManager<Interope
     }
 
     @Override
-    // @(cacheNames = {CACHE_VISITS, CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)
     public InteroperabilityRecordBundle add(InteroperabilityRecordBundle bundle, Authentication auth) {
 
         bundle.setId(idCreator.generate(getResourceType()));
@@ -76,7 +75,6 @@ public class DraftInteroperabilityRecordManager extends ResourceManager<Interope
     }
 
     @Override
-    // @(cacheNames = {CACHE_VISITS, CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)
     public InteroperabilityRecordBundle update(InteroperabilityRecordBundle bundle, Authentication auth) {
         // get existing resource
         Resource existing = getDraftResource(bundle.getInteroperabilityRecord().getId());
@@ -98,14 +96,12 @@ public class DraftInteroperabilityRecordManager extends ResourceManager<Interope
     }
 
     @Override
-    // @(cacheNames = {CACHE_VISITS, CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)
     public InteroperabilityRecordBundle transformToNonDraft(String id, Authentication auth) {
         InteroperabilityRecordBundle interoperabilityRecordBundle = this.get(id);
         return transformToNonDraft(interoperabilityRecordBundle, auth);
     }
 
     @Override
-    // @(cacheNames = {CACHE_VISITS, CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)
     public InteroperabilityRecordBundle transformToNonDraft(InteroperabilityRecordBundle bundle, Authentication auth) {
         logger.trace("Attempting to transform the Draft Interoperability Record with id {} to Active", bundle.getId());
         interoperabilityRecordService.validate(bundle);
