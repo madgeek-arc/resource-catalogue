@@ -17,10 +17,8 @@ import gr.uoa.di.madgik.resourcecatalogue.utils.ProviderResourcesCommonMethods;
 import gr.uoa.di.madgik.resourcecatalogue.validators.FieldValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.cache.CacheManager;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.security.core.Authentication;
@@ -32,7 +30,6 @@ import java.time.ZoneId;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static gr.uoa.di.madgik.resourcecatalogue.config.Properties.Cache.CACHE_PROVIDERS;
 import static gr.uoa.di.madgik.resourcecatalogue.utils.VocabularyValidationUtils.validateMerilScientificDomains;
 import static gr.uoa.di.madgik.resourcecatalogue.utils.VocabularyValidationUtils.validateScientificDomains;
 
@@ -58,8 +55,6 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     private final CatalogueService catalogueService;
     private final SynchronizerService<Provider> synchronizerService;
     private final ProviderResourcesCommonMethods commonMethods;
-    @Autowired
-    CacheManager cacheManager;
 
     @Value("${catalogue.id}")
     private String catalogueId;
@@ -699,8 +694,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     }
 
     @Override
-    // @CacheEvict(value = {CACHE_PROVIDERS, CACHE_SERVICE_EVENTS, CACHE_EVENTS}, allEntries = true)
-    public void deleteUserInfo(Authentication authentication) {
+        public void deleteUserInfo(Authentication authentication) {
         logger.trace("Attempting to delete User Info '{}'", authentication);
         User authenticatedUser = User.of(authentication);
         List<Event> allUserEvents = new ArrayList<>();
@@ -809,8 +803,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     }
 
     @Override
-    // @CacheEvict(value = CACHE_PROVIDERS, allEntries = true)
-    public ProviderBundle audit(String providerId, String comment, LoggingInfo.ActionType actionType, Authentication auth) {
+        public ProviderBundle audit(String providerId, String comment, LoggingInfo.ActionType actionType, Authentication auth) {
         ProviderBundle provider = get(providerId);
         Resource existingResource = getResource(provider.getId(), provider.getProvider().getCatalogueId());
         ProviderBundle existingProvider = deserialize(existingResource);
@@ -953,8 +946,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
 
 
     @Override
-    // @CacheEvict(value = CACHE_PROVIDERS, allEntries = true)
-    public ProviderBundle suspend(String providerId, boolean suspend, Authentication auth) {
+        public ProviderBundle suspend(String providerId, boolean suspend, Authentication auth) {
         ProviderBundle providerBundle = get(providerId, auth);
         Resource existingResource = getResource(providerBundle.getId(), providerBundle.getProvider().getCatalogueId());
         ProviderBundle existingProvider = deserialize(existingResource);
@@ -965,7 +957,6 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         existingResource.setPayload(serialize(existingProvider));
         existingResource.setResourceType(resourceType);
         resourceService.updateResource(existingResource);
-        Objects.requireNonNull(cacheManager.getCache(CACHE_PROVIDERS)).clear();
 
         // Suspend Provider's resources
         List<ServiceBundle> services = serviceBundleService.getResourceBundles(catalogueId, providerId, auth).getResults();

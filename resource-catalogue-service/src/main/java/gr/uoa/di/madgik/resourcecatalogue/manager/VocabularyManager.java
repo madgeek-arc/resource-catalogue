@@ -75,14 +75,12 @@ public class VocabularyManager extends ResourceManager<Vocabulary> implements Vo
     }
 
     @Override
-    // @Cacheable(value = CACHE_VOCABULARIES)
-    public Browsing<Vocabulary> getAll(FacetFilter ff, Authentication auth) {
+        public Browsing<Vocabulary> getAll(FacetFilter ff, Authentication auth) {
         return super.getAll(ff, auth);
     }
 
     @Override
-    // @Cacheable(value = CACHE_VOCABULARIES)
-    public Map<Vocabulary.Type, List<Vocabulary>> getAllVocabulariesByType() {
+        public Map<Vocabulary.Type, List<Vocabulary>> getAllVocabulariesByType() {
         Map<Vocabulary.Type, List<Vocabulary>> allVocabularies = new HashMap<>();
         for (Vocabulary.Type type : Vocabulary.Type.values()) {
             allVocabularies.put(type, getByType(type));
@@ -91,8 +89,7 @@ public class VocabularyManager extends ResourceManager<Vocabulary> implements Vo
     }
 
     @Override
-    // @Cacheable(value = CACHE_VOCABULARIES)
-    public List<Vocabulary> getByType(Vocabulary.Type type) {
+        public List<Vocabulary> getByType(Vocabulary.Type type) {
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(maxQuantity);
         ff.addFilter("type", type.getKey());
@@ -101,8 +98,7 @@ public class VocabularyManager extends ResourceManager<Vocabulary> implements Vo
     }
 
     @Override
-    // @Cacheable(value = CACHE_VOCABULARY_MAP)
-    public Map<String, Vocabulary> getVocabulariesMap() {
+        public Map<String, Vocabulary> getVocabulariesMap() {
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(maxQuantity);
         return getAll(ff, null)
@@ -112,22 +108,19 @@ public class VocabularyManager extends ResourceManager<Vocabulary> implements Vo
     }
 
     @Override
-    // @CacheEvict(value = {CACHE_VOCABULARIES, CACHE_VOCABULARY_MAP, CACHE_VOCABULARY_TREE}, allEntries = true)
-    public void addBulk(List<Vocabulary> vocabularies, Authentication auth) {
+        public void addBulk(List<Vocabulary> vocabularies, Authentication auth) {
         super.addBulk(vocabularies, auth);
     }
 
     @Override
-    // @CacheEvict(value = {CACHE_VOCABULARIES, CACHE_VOCABULARY_MAP, CACHE_VOCABULARY_TREE}, allEntries = true)
-    public void updateBulk(List<Vocabulary> vocabularies, Authentication auth) {
+        public void updateBulk(List<Vocabulary> vocabularies, Authentication auth) {
         for (Vocabulary vocabulary : vocabularies) {
             update(vocabulary, auth);
         }
     }
 
     @Override
-    // @CacheEvict(value = {CACHE_VOCABULARIES, CACHE_VOCABULARY_MAP, CACHE_VOCABULARY_TREE}, allEntries = true)
-    public void deleteAll(Authentication auth) {
+        public void deleteAll(Authentication auth) {
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(maxQuantity);
         List<Vocabulary> allVocs = getAll(ff, auth).getResults();
@@ -137,8 +130,7 @@ public class VocabularyManager extends ResourceManager<Vocabulary> implements Vo
     }
 
     @Override
-    // @Cacheable(value = CACHE_VOCABULARY_TREE)
-    public VocabularyTree getVocabulariesTree(Vocabulary.Type type) { // TODO: refactor method
+        public VocabularyTree getVocabulariesTree(Vocabulary.Type type) { // TODO: refactor method
         VocabularyTree root = new VocabularyTree();
         root.setVocabulary(null);
         Map<String, List<Vocabulary>> vocabularies = getBy("parent_id");
@@ -177,8 +169,7 @@ public class VocabularyManager extends ResourceManager<Vocabulary> implements Vo
     }
 
     @Override
-    // @CacheEvict(value = {CACHE_VOCABULARIES, CACHE_VOCABULARY_MAP, CACHE_VOCABULARY_TREE}, allEntries = true)
-    public Vocabulary add(Vocabulary vocabulary, Authentication auth) {
+        public Vocabulary add(Vocabulary vocabulary, Authentication auth) {
         if (vocabulary.getId() == null || "".equals(vocabulary.getId())) {
             String id = vocabulary.getName().toLowerCase();
             id = id.replace(" ", "_");
@@ -201,8 +192,7 @@ public class VocabularyManager extends ResourceManager<Vocabulary> implements Vo
     }
 
     @Override
-    // @CacheEvict(value = {CACHE_VOCABULARIES, CACHE_VOCABULARY_MAP, CACHE_VOCABULARY_TREE}, allEntries = true)
-    public Vocabulary update(Vocabulary vocabulary, Authentication auth) {
+        public Vocabulary update(Vocabulary vocabulary, Authentication auth) {
         Resource existing = whereID(vocabulary.getId(), true);
         String serialized = serialize(vocabulary);
         serialized = serialized.replace(":tns", "");

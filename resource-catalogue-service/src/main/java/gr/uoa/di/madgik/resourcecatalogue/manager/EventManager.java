@@ -70,7 +70,6 @@ public class EventManager extends ResourceManager<Event> implements EventService
     }
 
     @Override
-    // @(value = {CACHE_EVENTS, CACHE_SERVICE_EVENTS}, allEntries = true)
     public Event add(Event event, Authentication auth) {
         event.setId(UUID.randomUUID().toString());
         event.setInstant(System.currentTimeMillis());
@@ -85,8 +84,7 @@ public class EventManager extends ResourceManager<Event> implements EventService
     }
 
     @Override
-    // @(value = {CACHE_EVENTS, CACHE_SERVICE_EVENTS}, allEntries = true)
-    public Event update(Event event, Authentication auth) {
+        public Event update(Event event, Authentication auth) {
         event.setInstant(System.currentTimeMillis());
         Event ret = super.update(event, auth);
         logger.debug("Updating Event: {}", event);
@@ -205,8 +203,7 @@ public class EventManager extends ResourceManager<Event> implements EventService
         }
     }
 
-    // @(value = {CACHE_EVENTS, CACHE_SERVICE_EVENTS}, allEntries = true)
-    public Event setVisit(String serviceId, Float value) throws ResourceNotFoundException {
+        public Event setVisit(String serviceId, Float value) throws ResourceNotFoundException {
         if (!serviceBundleService.exists(new SearchService.KeyValue("resource_internal_id", serviceId))) {
             throw new ResourceNotFoundException("service", serviceId);
         }
@@ -220,8 +217,7 @@ public class EventManager extends ResourceManager<Event> implements EventService
         return event;
     }
 
-    // @(value = {CACHE_EVENTS, CACHE_SERVICE_EVENTS}, allEntries = true)
-    public Event setAddToProject(String serviceId, Float value) throws ResourceNotFoundException {
+        public Event setAddToProject(String serviceId, Float value) throws ResourceNotFoundException {
         if (!serviceBundleService.exists(new SearchService.KeyValue("resource_internal_id", serviceId))) {
             throw new ResourceNotFoundException("service", serviceId);
         }
@@ -235,8 +231,7 @@ public class EventManager extends ResourceManager<Event> implements EventService
         return event;
     }
 
-    // @(value = {CACHE_EVENTS, CACHE_SERVICE_EVENTS}, allEntries = true)
-    public Event setOrder(String serviceId, Float value) throws ResourceNotFoundException {
+        public Event setOrder(String serviceId, Float value) throws ResourceNotFoundException {
         if (!serviceBundleService.exists(new SearchService.KeyValue("resource_internal_id", serviceId))) {
             throw new ResourceNotFoundException("service", serviceId);
         }
@@ -250,8 +245,7 @@ public class EventManager extends ResourceManager<Event> implements EventService
         return event;
     }
 
-    // @(value = {CACHE_EVENTS, CACHE_SERVICE_EVENTS}, allEntries = true)
-    public Event setScheduledFavourite(String serviceId, Float value) throws ResourceNotFoundException {
+        public Event setScheduledFavourite(String serviceId, Float value) throws ResourceNotFoundException {
         if (!serviceBundleService.exists(new SearchService.KeyValue("resource_internal_id", serviceId))) {
             throw new ResourceNotFoundException("service", serviceId);
         }
@@ -265,8 +259,7 @@ public class EventManager extends ResourceManager<Event> implements EventService
         return event;
     }
 
-    // @(value = {CACHE_EVENTS, CACHE_SERVICE_EVENTS}, allEntries = true)
-    public Event setScheduledRating(String serviceId, Float value) throws ResourceNotFoundException {
+        public Event setScheduledRating(String serviceId, Float value) throws ResourceNotFoundException {
         if (!serviceBundleService.exists(new SearchService.KeyValue("resource_internal_id", serviceId))) {
             throw new ResourceNotFoundException("service", serviceId);
         }

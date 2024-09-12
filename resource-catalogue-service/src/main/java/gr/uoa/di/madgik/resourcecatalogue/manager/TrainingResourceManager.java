@@ -107,14 +107,12 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
     }
 
     @Override
-    // @CacheEvict(cacheNames = {CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)
-    public TrainingResourceBundle add(TrainingResourceBundle trainingResourceBundle, Authentication auth) {
+        public TrainingResourceBundle add(TrainingResourceBundle trainingResourceBundle, Authentication auth) {
         return add(trainingResourceBundle, null, auth);
     }
 
     @Override
-    // @CacheEvict(cacheNames = {CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)
-    public TrainingResourceBundle add(TrainingResourceBundle trainingResourceBundle, String catalogueId, Authentication auth) {
+        public TrainingResourceBundle add(TrainingResourceBundle trainingResourceBundle, String catalogueId, Authentication auth) {
         if (catalogueId == null || catalogueId.equals("")) { // add catalogue provider
             trainingResourceBundle.getTrainingResource().setCatalogueId(this.catalogueId);
         } else { // add provider from external catalogue
@@ -329,8 +327,7 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
         synchronizerService.syncDelete(trainingResourceBundle.getTrainingResource());
     }
 
-    // @CacheEvict(cacheNames = {CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)
-    public TrainingResourceBundle verify(String id, String status, Boolean active, Authentication auth) {
+        public TrainingResourceBundle verify(String id, String status, Boolean active, Authentication auth) {
         Vocabulary statusVocabulary = vocabularyService.getOrElseThrow(status);
         if (!statusVocabulary.getType().equals("Resource state")) {
             throw new ValidationException(String.format("Vocabulary %s does not consist a Resource State!", status));
@@ -906,8 +903,7 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
     }
 
     @Override
-    // @CacheEvict(cacheNames = {CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)
-    public TrainingResourceBundle suspend(String trainingResourceId, boolean suspend, Authentication auth) {
+        public TrainingResourceBundle suspend(String trainingResourceId, boolean suspend, Authentication auth) {
         TrainingResourceBundle trainingResourceBundle = get(trainingResourceId);
         commonMethods.suspensionValidation(trainingResourceBundle, trainingResourceBundle.getTrainingResource().getCatalogueId(),
                 trainingResourceBundle.getTrainingResource().getResourceOrganisation(), suspend, auth);
