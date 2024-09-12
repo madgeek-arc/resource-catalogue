@@ -14,7 +14,7 @@ import org.springframework.context.annotation.Primary;
 import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 
-import static gr.uoa.di.madgik.resourcecatalogue.config.Properties.Cache.*;
+import static gr.uoa.di.madgik.resourcecatalogue.config.Properties.Cache.CACHE_VISITS;
 
 @Configuration
 @EnableCaching

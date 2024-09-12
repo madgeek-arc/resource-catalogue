@@ -345,7 +345,7 @@ public class ProviderManagementAspect {
      * @param serviceBundle
      */
     @Async
-        public void updateServiceProviderStates(ServiceBundle serviceBundle) {
+    public void updateServiceProviderStates(ServiceBundle serviceBundle) {
         if (serviceBundle.getService().getCatalogueId().equals(catalogueId)) {
             try {
                 ProviderBundle providerBundle = providerService.get(serviceBundle.getService().getResourceOrganisation(), null);
@@ -361,7 +361,7 @@ public class ProviderManagementAspect {
     }
 
     @Async
-        public void updateTrainingResourceProviderStates(TrainingResourceBundle trainingResourceBundle) {
+    public void updateTrainingResourceProviderStates(TrainingResourceBundle trainingResourceBundle) {
         if (trainingResourceBundle.getTrainingResource().getCatalogueId().equals(catalogueId)) {
             try {
                 ProviderBundle providerBundle = providerService.get(trainingResourceBundle.getTrainingResource().getResourceOrganisation(), null);

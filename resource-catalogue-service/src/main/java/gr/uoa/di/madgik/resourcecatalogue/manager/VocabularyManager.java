@@ -75,12 +75,12 @@ public class VocabularyManager extends ResourceManager<Vocabulary> implements Vo
     }
 
     @Override
-        public Browsing<Vocabulary> getAll(FacetFilter ff, Authentication auth) {
+    public Browsing<Vocabulary> getAll(FacetFilter ff, Authentication auth) {
         return super.getAll(ff, auth);
     }
 
     @Override
-        public Map<Vocabulary.Type, List<Vocabulary>> getAllVocabulariesByType() {
+    public Map<Vocabulary.Type, List<Vocabulary>> getAllVocabulariesByType() {
         Map<Vocabulary.Type, List<Vocabulary>> allVocabularies = new HashMap<>();
         for (Vocabulary.Type type : Vocabulary.Type.values()) {
             allVocabularies.put(type, getByType(type));
@@ -89,7 +89,7 @@ public class VocabularyManager extends ResourceManager<Vocabulary> implements Vo
     }
 
     @Override
-        public List<Vocabulary> getByType(Vocabulary.Type type) {
+    public List<Vocabulary> getByType(Vocabulary.Type type) {
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(maxQuantity);
         ff.addFilter("type", type.getKey());
@@ -98,7 +98,7 @@ public class VocabularyManager extends ResourceManager<Vocabulary> implements Vo
     }
 
     @Override
-        public Map<String, Vocabulary> getVocabulariesMap() {
+    public Map<String, Vocabulary> getVocabulariesMap() {
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(maxQuantity);
         return getAll(ff, null)
@@ -108,19 +108,19 @@ public class VocabularyManager extends ResourceManager<Vocabulary> implements Vo
     }
 
     @Override
-        public void addBulk(List<Vocabulary> vocabularies, Authentication auth) {
+    public void addBulk(List<Vocabulary> vocabularies, Authentication auth) {
         super.addBulk(vocabularies, auth);
     }
 
     @Override
-        public void updateBulk(List<Vocabulary> vocabularies, Authentication auth) {
+    public void updateBulk(List<Vocabulary> vocabularies, Authentication auth) {
         for (Vocabulary vocabulary : vocabularies) {
             update(vocabulary, auth);
         }
     }
 
     @Override
-        public void deleteAll(Authentication auth) {
+    public void deleteAll(Authentication auth) {
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(maxQuantity);
         List<Vocabulary> allVocs = getAll(ff, auth).getResults();
@@ -130,7 +130,7 @@ public class VocabularyManager extends ResourceManager<Vocabulary> implements Vo
     }
 
     @Override
-        public VocabularyTree getVocabulariesTree(Vocabulary.Type type) { // TODO: refactor method
+    public VocabularyTree getVocabulariesTree(Vocabulary.Type type) { // TODO: refactor method
         VocabularyTree root = new VocabularyTree();
         root.setVocabulary(null);
         Map<String, List<Vocabulary>> vocabularies = getBy("parent_id");
@@ -169,7 +169,7 @@ public class VocabularyManager extends ResourceManager<Vocabulary> implements Vo
     }
 
     @Override
-        public Vocabulary add(Vocabulary vocabulary, Authentication auth) {
+    public Vocabulary add(Vocabulary vocabulary, Authentication auth) {
         if (vocabulary.getId() == null || "".equals(vocabulary.getId())) {
             String id = vocabulary.getName().toLowerCase();
             id = id.replace(" ", "_");
@@ -192,7 +192,7 @@ public class VocabularyManager extends ResourceManager<Vocabulary> implements Vo
     }
 
     @Override
-        public Vocabulary update(Vocabulary vocabulary, Authentication auth) {
+    public Vocabulary update(Vocabulary vocabulary, Authentication auth) {
         Resource existing = whereID(vocabulary.getId(), true);
         String serialized = serialize(vocabulary);
         serialized = serialized.replace(":tns", "");

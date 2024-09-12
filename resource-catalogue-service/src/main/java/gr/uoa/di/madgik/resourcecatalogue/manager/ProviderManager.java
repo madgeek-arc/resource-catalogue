@@ -694,7 +694,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     }
 
     @Override
-        public void deleteUserInfo(Authentication authentication) {
+    public void deleteUserInfo(Authentication authentication) {
         logger.trace("Attempting to delete User Info '{}'", authentication);
         User authenticatedUser = User.of(authentication);
         List<Event> allUserEvents = new ArrayList<>();
@@ -803,7 +803,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     }
 
     @Override
-        public ProviderBundle audit(String providerId, String comment, LoggingInfo.ActionType actionType, Authentication auth) {
+    public ProviderBundle audit(String providerId, String comment, LoggingInfo.ActionType actionType, Authentication auth) {
         ProviderBundle provider = get(providerId);
         Resource existingResource = getResource(provider.getId(), provider.getProvider().getCatalogueId());
         ProviderBundle existingProvider = deserialize(existingResource);
@@ -946,7 +946,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
 
 
     @Override
-        public ProviderBundle suspend(String providerId, boolean suspend, Authentication auth) {
+    public ProviderBundle suspend(String providerId, boolean suspend, Authentication auth) {
         ProviderBundle providerBundle = get(providerId, auth);
         Resource existingResource = getResource(providerBundle.getId(), providerBundle.getProvider().getCatalogueId());
         ProviderBundle existingProvider = deserialize(existingResource);
