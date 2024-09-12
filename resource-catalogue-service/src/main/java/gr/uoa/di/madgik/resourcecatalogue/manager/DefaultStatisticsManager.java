@@ -19,7 +19,6 @@ import org.joda.time.DateTime;
 import org.postgresql.jdbc.PgArray;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
@@ -31,8 +30,6 @@ import javax.sql.DataSource;
 import java.sql.SQLException;
 import java.util.*;
 import java.util.stream.Collectors;
-
-import static gr.uoa.di.madgik.resourcecatalogue.config.Properties.Cache.CACHE_VISITS;
 
 @Component
 @Order(Ordered.LOWEST_PRECEDENCE)
@@ -81,7 +78,6 @@ public class DefaultStatisticsManager implements StatisticsService {
     }
 
     @Override
-    @Cacheable(cacheNames = CACHE_VISITS, key = "#id+#by.getKey()")
     public Map<String, Integer> visits(String id, Interval by) {
         throw new UnsupportedOperationException("Method has been removed");
     }

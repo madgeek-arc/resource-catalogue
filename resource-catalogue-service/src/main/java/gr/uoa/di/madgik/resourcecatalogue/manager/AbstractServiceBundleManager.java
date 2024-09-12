@@ -5,7 +5,6 @@ import gr.uoa.di.madgik.registry.domain.index.IndexField;
 import gr.uoa.di.madgik.registry.service.ParserService;
 import gr.uoa.di.madgik.registry.service.SearchService;
 import gr.uoa.di.madgik.registry.service.ServiceException;
-import gr.uoa.di.madgik.resourcecatalogue.config.Properties.Cache;
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
 import gr.uoa.di.madgik.resourcecatalogue.exception.ResourceAlreadyExistsException;
 import gr.uoa.di.madgik.resourcecatalogue.exception.ResourceNotFoundException;
@@ -21,7 +20,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.validation.Validator;
@@ -143,7 +141,6 @@ public abstract class AbstractServiceBundleManager<T extends ServiceBundle> exte
     }
 
     @Override
-    @CacheEvict(cacheNames = {Cache.CACHE_VISITS, Cache.CACHE_PROVIDERS, Cache.CACHE_FEATURED}, allEntries = true)
     public T add(T serviceBundle, Authentication auth) {
         logger.trace("Attempting to add a new Resource: {}", serviceBundle);
         // if Resource version is empty set it null
@@ -169,7 +166,6 @@ public abstract class AbstractServiceBundleManager<T extends ServiceBundle> exte
     }
 
     @Override
-    @CacheEvict(cacheNames = {Cache.CACHE_VISITS, Cache.CACHE_PROVIDERS, Cache.CACHE_FEATURED}, allEntries = true)
     public T update(T serviceBundle, Authentication auth) {
         logger.trace("Attempting to update the Resource: {}", serviceBundle);
         // if Resource version is empty set it null
@@ -194,7 +190,6 @@ public abstract class AbstractServiceBundleManager<T extends ServiceBundle> exte
     }
 
     @Override
-    @CacheEvict(cacheNames = {Cache.CACHE_VISITS, Cache.CACHE_PROVIDERS, Cache.CACHE_FEATURED}, allEntries = true)
     public void delete(T serviceBundle) {
         logger.trace("User is attempting to delete the Resource: {}", serviceBundle);
         if (serviceBundle == null || serviceBundle.getService().getId() == null) {

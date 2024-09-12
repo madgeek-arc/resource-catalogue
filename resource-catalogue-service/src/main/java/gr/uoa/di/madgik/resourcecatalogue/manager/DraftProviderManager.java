@@ -14,15 +14,12 @@ import gr.uoa.di.madgik.resourcecatalogue.utils.ProviderResourcesCommonMethods;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import static gr.uoa.di.madgik.resourcecatalogue.config.Properties.Cache.CACHE_PROVIDERS;
 
 @Service("draftProviderManager")
 public class DraftProviderManager extends ResourceManager<ProviderBundle> implements DraftResourceService<ProviderBundle> {
@@ -57,7 +54,6 @@ public class DraftProviderManager extends ResourceManager<ProviderBundle> implem
     }
 
     @Override
-    @CacheEvict(value = CACHE_PROVIDERS, allEntries = true)
     public ProviderBundle add(ProviderBundle bundle, Authentication auth) {
 
         bundle.setId(idCreator.generate(getResourceType()));
@@ -82,7 +78,6 @@ public class DraftProviderManager extends ResourceManager<ProviderBundle> implem
     }
 
     @Override
-    @CacheEvict(value = CACHE_PROVIDERS, allEntries = true)
     public ProviderBundle update(ProviderBundle bundle, Authentication auth) {
         // get existing resource
         Resource existing = getDraftResource(bundle.getId());
@@ -99,20 +94,17 @@ public class DraftProviderManager extends ResourceManager<ProviderBundle> implem
     }
 
     @Override
-    @CacheEvict(value = CACHE_PROVIDERS, allEntries = true)
     public void delete(ProviderBundle bundle) {
         super.delete(bundle);
     }
 
     @Override
-    @CacheEvict(value = CACHE_PROVIDERS, allEntries = true)
     public ProviderBundle transformToNonDraft(String id, Authentication auth) {
         ProviderBundle providerBundle = get(id);
         return transformToNonDraft(providerBundle, auth);
     }
 
     @Override
-    @CacheEvict(value = CACHE_PROVIDERS, allEntries = true)
     public ProviderBundle transformToNonDraft(ProviderBundle bundle, Authentication auth) {
         logger.trace("Attempting to transform the Draft Provider with id '{}' to Provider", bundle.getId());
         providerManager.validate(bundle);

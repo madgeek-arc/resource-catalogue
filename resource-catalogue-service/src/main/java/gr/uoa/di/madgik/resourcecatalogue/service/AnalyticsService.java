@@ -9,7 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.*;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -71,7 +70,7 @@ public class AnalyticsService implements Analytics {
         Objects.requireNonNull(cache).put(CACHE_VISITS, visits);
     }
 
-    @Cacheable(value = CACHE_VISITS)
+
     @Override
     public Map<String, Integer> getAllServiceVisits() {
         return getServiceVisits();

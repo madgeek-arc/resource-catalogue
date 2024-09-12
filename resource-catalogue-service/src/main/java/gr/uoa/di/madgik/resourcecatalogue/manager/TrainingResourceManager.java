@@ -21,10 +21,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 
 import javax.validation.constraints.NotNull;
@@ -33,8 +31,6 @@ import java.time.ZoneId;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static gr.uoa.di.madgik.resourcecatalogue.config.Properties.Cache.CACHE_FEATURED;
-import static gr.uoa.di.madgik.resourcecatalogue.config.Properties.Cache.CACHE_PROVIDERS;
 import static gr.uoa.di.madgik.resourcecatalogue.utils.VocabularyValidationUtils.validateScientificDomains;
 import static java.util.stream.Collectors.toList;
 
@@ -111,13 +107,11 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
     }
 
     @Override
-    @CacheEvict(cacheNames = {CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)
     public TrainingResourceBundle add(TrainingResourceBundle trainingResourceBundle, Authentication auth) {
         return add(trainingResourceBundle, null, auth);
     }
 
     @Override
-    @CacheEvict(cacheNames = {CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)
     public TrainingResourceBundle add(TrainingResourceBundle trainingResourceBundle, String catalogueId, Authentication auth) {
         if (catalogueId == null || catalogueId.equals("")) { // add catalogue provider
             trainingResourceBundle.getTrainingResource().setCatalogueId(this.catalogueId);
@@ -333,7 +327,6 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
         synchronizerService.syncDelete(trainingResourceBundle.getTrainingResource());
     }
 
-    @CacheEvict(cacheNames = {CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)
     public TrainingResourceBundle verify(String id, String status, Boolean active, Authentication auth) {
         Vocabulary statusVocabulary = vocabularyService.getOrElseThrow(status);
         if (!statusVocabulary.getType().equals("Resource state")) {
@@ -910,7 +903,6 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
     }
 
     @Override
-    @CacheEvict(cacheNames = {CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)
     public TrainingResourceBundle suspend(String trainingResourceId, boolean suspend, Authentication auth) {
         TrainingResourceBundle trainingResourceBundle = get(trainingResourceId);
         commonMethods.suspensionValidation(trainingResourceBundle, trainingResourceBundle.getTrainingResource().getCatalogueId(),

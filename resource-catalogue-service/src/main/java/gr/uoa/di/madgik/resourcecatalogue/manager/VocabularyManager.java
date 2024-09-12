@@ -13,8 +13,6 @@ import gr.uoa.di.madgik.resourcecatalogue.service.SecurityService;
 import gr.uoa.di.madgik.resourcecatalogue.service.VocabularyService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpStatus;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -23,8 +21,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.*;
 import java.util.stream.Collectors;
-
-import static gr.uoa.di.madgik.resourcecatalogue.config.Properties.Cache.*;
 
 @Service
 public class VocabularyManager extends ResourceManager<Vocabulary> implements VocabularyService {
@@ -79,13 +75,11 @@ public class VocabularyManager extends ResourceManager<Vocabulary> implements Vo
     }
 
     @Override
-    @Cacheable(value = CACHE_VOCABULARIES)
     public Browsing<Vocabulary> getAll(FacetFilter ff, Authentication auth) {
         return super.getAll(ff, auth);
     }
 
     @Override
-    @Cacheable(value = CACHE_VOCABULARIES)
     public Map<Vocabulary.Type, List<Vocabulary>> getAllVocabulariesByType() {
         Map<Vocabulary.Type, List<Vocabulary>> allVocabularies = new HashMap<>();
         for (Vocabulary.Type type : Vocabulary.Type.values()) {
@@ -95,7 +89,6 @@ public class VocabularyManager extends ResourceManager<Vocabulary> implements Vo
     }
 
     @Override
-    @Cacheable(value = CACHE_VOCABULARIES)
     public List<Vocabulary> getByType(Vocabulary.Type type) {
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(maxQuantity);
@@ -105,7 +98,6 @@ public class VocabularyManager extends ResourceManager<Vocabulary> implements Vo
     }
 
     @Override
-    @Cacheable(value = CACHE_VOCABULARY_MAP)
     public Map<String, Vocabulary> getVocabulariesMap() {
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(maxQuantity);
@@ -116,13 +108,11 @@ public class VocabularyManager extends ResourceManager<Vocabulary> implements Vo
     }
 
     @Override
-    @CacheEvict(value = {CACHE_VOCABULARIES, CACHE_VOCABULARY_MAP, CACHE_VOCABULARY_TREE}, allEntries = true)
     public void addBulk(List<Vocabulary> vocabularies, Authentication auth) {
         super.addBulk(vocabularies, auth);
     }
 
     @Override
-    @CacheEvict(value = {CACHE_VOCABULARIES, CACHE_VOCABULARY_MAP, CACHE_VOCABULARY_TREE}, allEntries = true)
     public void updateBulk(List<Vocabulary> vocabularies, Authentication auth) {
         for (Vocabulary vocabulary : vocabularies) {
             update(vocabulary, auth);
@@ -130,7 +120,6 @@ public class VocabularyManager extends ResourceManager<Vocabulary> implements Vo
     }
 
     @Override
-    @CacheEvict(value = {CACHE_VOCABULARIES, CACHE_VOCABULARY_MAP, CACHE_VOCABULARY_TREE}, allEntries = true)
     public void deleteAll(Authentication auth) {
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(maxQuantity);
@@ -141,7 +130,6 @@ public class VocabularyManager extends ResourceManager<Vocabulary> implements Vo
     }
 
     @Override
-    @Cacheable(value = CACHE_VOCABULARY_TREE)
     public VocabularyTree getVocabulariesTree(Vocabulary.Type type) { // TODO: refactor method
         VocabularyTree root = new VocabularyTree();
         root.setVocabulary(null);
@@ -181,7 +169,6 @@ public class VocabularyManager extends ResourceManager<Vocabulary> implements Vo
     }
 
     @Override
-    @CacheEvict(value = {CACHE_VOCABULARIES, CACHE_VOCABULARY_MAP, CACHE_VOCABULARY_TREE}, allEntries = true)
     public Vocabulary add(Vocabulary vocabulary, Authentication auth) {
         if (vocabulary.getId() == null || "".equals(vocabulary.getId())) {
             String id = vocabulary.getName().toLowerCase();
@@ -205,7 +192,6 @@ public class VocabularyManager extends ResourceManager<Vocabulary> implements Vo
     }
 
     @Override
-    @CacheEvict(value = {CACHE_VOCABULARIES, CACHE_VOCABULARY_MAP, CACHE_VOCABULARY_TREE}, allEntries = true)
     public Vocabulary update(Vocabulary vocabulary, Authentication auth) {
         Resource existing = whereID(vocabulary.getId(), true);
         String serialized = serialize(vocabulary);

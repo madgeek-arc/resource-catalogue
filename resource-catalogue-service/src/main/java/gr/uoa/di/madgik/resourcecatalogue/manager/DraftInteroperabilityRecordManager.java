@@ -13,15 +13,12 @@ import gr.uoa.di.madgik.resourcecatalogue.utils.ProviderResourcesCommonMethods;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import static gr.uoa.di.madgik.resourcecatalogue.config.Properties.Cache.*;
 
 @Service("draftInteroperabilityRecordManager")
 public class DraftInteroperabilityRecordManager extends ResourceManager<InteroperabilityRecordBundle> implements DraftResourceService<InteroperabilityRecordBundle> {
@@ -55,7 +52,6 @@ public class DraftInteroperabilityRecordManager extends ResourceManager<Interope
     }
 
     @Override
-    @CacheEvict(cacheNames = {CACHE_VISITS, CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)
     public InteroperabilityRecordBundle add(InteroperabilityRecordBundle bundle, Authentication auth) {
 
         bundle.setId(idCreator.generate(getResourceType()));
@@ -79,7 +75,6 @@ public class DraftInteroperabilityRecordManager extends ResourceManager<Interope
     }
 
     @Override
-    @CacheEvict(cacheNames = {CACHE_VISITS, CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)
     public InteroperabilityRecordBundle update(InteroperabilityRecordBundle bundle, Authentication auth) {
         // get existing resource
         Resource existing = getDraftResource(bundle.getInteroperabilityRecord().getId());
@@ -96,20 +91,17 @@ public class DraftInteroperabilityRecordManager extends ResourceManager<Interope
     }
 
     @Override
-    @CacheEvict(value = CACHE_PROVIDERS, allEntries = true)
     public void delete(InteroperabilityRecordBundle bundle) {
         super.delete(bundle);
     }
 
     @Override
-    @CacheEvict(cacheNames = {CACHE_VISITS, CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)
     public InteroperabilityRecordBundle transformToNonDraft(String id, Authentication auth) {
         InteroperabilityRecordBundle interoperabilityRecordBundle = this.get(id);
         return transformToNonDraft(interoperabilityRecordBundle, auth);
     }
 
     @Override
-    @CacheEvict(cacheNames = {CACHE_VISITS, CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)
     public InteroperabilityRecordBundle transformToNonDraft(InteroperabilityRecordBundle bundle, Authentication auth) {
         logger.trace("Attempting to transform the Draft Interoperability Record with id {} to Active", bundle.getId());
         interoperabilityRecordService.validate(bundle);

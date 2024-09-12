@@ -33,7 +33,6 @@ import org.elasticsearch.search.aggregations.bucket.terms.Terms;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.joda.time.DateTime;
 import org.postgresql.jdbc.PgArray;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.annotation.Primary;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
@@ -47,8 +46,6 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.util.*;
 import java.util.stream.Collectors;
-
-import static gr.uoa.di.madgik.resourcecatalogue.config.Properties.Cache.CACHE_VISITS;
 
 @Component
 @Primary
@@ -182,7 +179,6 @@ public class ElasticStatisticsManager implements StatisticsService {
     }
 
     @Override
-    @Cacheable(cacheNames = CACHE_VISITS, key = "#id+#by.getKey()")
     public Map<String, Integer> visits(String id, Interval by) {
         List<? extends Histogram.Bucket> buckets = histogram(id, Event.UserActionType.VISIT.getKey(), by).getBuckets();
         final long[] totalDocCounts = new long[buckets.size()];

@@ -13,15 +13,12 @@ import gr.uoa.di.madgik.resourcecatalogue.utils.ProviderResourcesCommonMethods;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import static gr.uoa.di.madgik.resourcecatalogue.config.Properties.Cache.*;
 
 @Service("draftServiceManager")
 public class DraftServiceManager extends ResourceManager<ServiceBundle> implements DraftResourceService<ServiceBundle> {
@@ -55,7 +52,6 @@ public class DraftServiceManager extends ResourceManager<ServiceBundle> implemen
     }
 
     @Override
-    @CacheEvict(cacheNames = {CACHE_VISITS, CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)
     public ServiceBundle add(ServiceBundle bundle, Authentication auth) {
 
         bundle.setId(idCreator.generate(getResourceType()));
@@ -79,7 +75,6 @@ public class DraftServiceManager extends ResourceManager<ServiceBundle> implemen
     }
 
     @Override
-    @CacheEvict(cacheNames = {CACHE_VISITS, CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)
     public ServiceBundle update(ServiceBundle bundle, Authentication auth) {
         // get existing resource
         Resource existing = getDraftResource(bundle.getService().getId());
@@ -96,20 +91,17 @@ public class DraftServiceManager extends ResourceManager<ServiceBundle> implemen
     }
 
     @Override
-    @CacheEvict(value = CACHE_PROVIDERS, allEntries = true)
     public void delete(ServiceBundle bundle) {
         super.delete(bundle);
     }
 
     @Override
-    @CacheEvict(cacheNames = {CACHE_VISITS, CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)
     public ServiceBundle transformToNonDraft(String id, Authentication auth) {
         ServiceBundle serviceBundle = this.get(id);
         return transformToNonDraft(serviceBundle, auth);
     }
 
     @Override
-    @CacheEvict(cacheNames = {CACHE_VISITS, CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)
     public ServiceBundle transformToNonDraft(ServiceBundle bundle, Authentication auth) {
         logger.trace("Attempting to transform the Draft Service with id {} to Service", bundle.getId());
         serviceBundleService.validate(bundle);

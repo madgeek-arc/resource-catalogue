@@ -16,19 +16,14 @@ import gr.uoa.di.madgik.resourcecatalogue.utils.ProviderResourcesCommonMethods;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
-
-import static gr.uoa.di.madgik.resourcecatalogue.config.Properties.Cache.CACHE_FEATURED;
-import static gr.uoa.di.madgik.resourcecatalogue.config.Properties.Cache.CACHE_PROVIDERS;
 
 @org.springframework.stereotype.Service
 public class ServiceBundleManager extends AbstractServiceBundleManager<ServiceBundle> implements ServiceBundleService<ServiceBundle> {
@@ -96,13 +91,11 @@ public class ServiceBundleManager extends AbstractServiceBundleManager<ServiceBu
     }
 
     @Override
-    @CacheEvict(cacheNames = {CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)
     public ServiceBundle addResource(ServiceBundle serviceBundle, Authentication auth) {
         return addResource(serviceBundle, null, auth);
     }
 
     @Override
-    @CacheEvict(cacheNames = {CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)
     public ServiceBundle addResource(ServiceBundle serviceBundle, String catalogueId, Authentication auth) {
         if (catalogueId == null || catalogueId.equals("")) { // add catalogue provider
             serviceBundle.getService().setCatalogueId(this.catalogueId);
@@ -174,13 +167,11 @@ public class ServiceBundleManager extends AbstractServiceBundleManager<ServiceBu
     }
 
     @Override
-    @CacheEvict(cacheNames = {CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)
     public ServiceBundle updateResource(ServiceBundle serviceBundle, String comment, Authentication auth) {
         return updateResource(serviceBundle, serviceBundle.getService().getCatalogueId(), comment, auth);
     }
 
     @Override
-    @CacheEvict(cacheNames = {CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)
     public ServiceBundle updateResource(ServiceBundle serviceBundle, String catalogueId, String comment, Authentication auth) {
 
         ServiceBundle ret = ObjectUtils.clone(serviceBundle);
@@ -340,7 +331,6 @@ public class ServiceBundleManager extends AbstractServiceBundleManager<ServiceBu
         super.delete(serviceBundle);
     }
 
-    @CacheEvict(cacheNames = {CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)
     public ServiceBundle verify(String id, String status, Boolean active, Authentication auth) {
         Vocabulary statusVocabulary = vocabularyService.getOrElseThrow(status);
         if (!statusVocabulary.getType().equals("Resource state")) {
@@ -692,7 +682,6 @@ public class ServiceBundleManager extends AbstractServiceBundleManager<ServiceBu
     }
 
     @Override
-    @CacheEvict(cacheNames = {CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)
     public ServiceBundle suspend(String serviceId, boolean suspend, Authentication auth) {
         ServiceBundle serviceBundle = get(serviceId);
         commonMethods.suspensionValidation(serviceBundle, serviceBundle.getService().getCatalogueId(),

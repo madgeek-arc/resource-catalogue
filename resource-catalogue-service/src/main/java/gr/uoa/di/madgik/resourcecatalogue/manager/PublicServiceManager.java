@@ -99,7 +99,9 @@ public class PublicServiceManager extends AbstractPublicResourceManager<ServiceB
             logger.info("Service with id {} does not have a PID registered under its AlternativeIdentifiers.",
                     serviceBundle.getId());
         } else {
-            commonMethods.postPID(pid);
+            //TODO: enable when we have PID configuration properties for Beyond
+            logger.info("PID POST disabled");
+//            commonMethods.postPID(pid);
         }
         ServiceBundle ret;
         logger.info(String.format("Service [%s] is being published with id [%s]", lowerLevelResourceId, serviceBundle.getId()));

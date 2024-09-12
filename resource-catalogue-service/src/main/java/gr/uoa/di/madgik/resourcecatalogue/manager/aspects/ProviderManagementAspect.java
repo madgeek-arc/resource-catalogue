@@ -14,12 +14,9 @@ import org.aspectj.lang.annotation.Aspect;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.context.annotation.Profile;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
-
-import static gr.uoa.di.madgik.resourcecatalogue.config.Properties.Cache.CACHE_PROVIDERS;
 
 @Profile("beyond")
 @Aspect
@@ -348,7 +345,6 @@ public class ProviderManagementAspect {
      * @param serviceBundle
      */
     @Async
-    @CacheEvict(value = CACHE_PROVIDERS, allEntries = true)
     public void updateServiceProviderStates(ServiceBundle serviceBundle) {
         if (serviceBundle.getService().getCatalogueId().equals(catalogueId)) {
             try {
@@ -365,7 +361,6 @@ public class ProviderManagementAspect {
     }
 
     @Async
-    @CacheEvict(value = CACHE_PROVIDERS, allEntries = true)
     public void updateTrainingResourceProviderStates(TrainingResourceBundle trainingResourceBundle) {
         if (trainingResourceBundle.getTrainingResource().getCatalogueId().equals(catalogueId)) {
             try {
