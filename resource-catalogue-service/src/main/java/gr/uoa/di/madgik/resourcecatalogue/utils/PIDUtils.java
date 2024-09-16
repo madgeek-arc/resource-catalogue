@@ -1,28 +1,32 @@
 package gr.uoa.di.madgik.resourcecatalogue.utils;
 
+import org.apache.http.conn.ssl.NoopHostnameVerifier;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.ssl.SSLContextBuilder;
+import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
+import org.bouncycastle.openssl.PEMKeyPair;
+import org.bouncycastle.openssl.PEMParser;
+import org.bouncycastle.openssl.jcajce.JcaPEMKeyConverter;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.*;
+import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.RestTemplate;
 
-import javax.net.ssl.*;
-import java.io.*;
-import java.net.HttpURLConnection;
-import java.net.ProtocolException;
-import java.net.URL;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.security.KeyFactory;
+import javax.net.ssl.SSLContext;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileReader;
+import java.security.KeyPair;
 import java.security.KeyStore;
 import java.security.PrivateKey;
-import java.security.cert.Certificate;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
-import java.security.spec.PKCS8EncodedKeySpec;
-import java.util.Base64;
 
 @Component
 public class PIDUtils {
@@ -97,27 +101,26 @@ public class PIDUtils {
     private String toolsPrefix;
 
     public void postPID(String pid) {
-        setConfigurationSettings(pid);
+        RestTemplate restTemplate = setConfigurationSettings(pid);
         String payload = createPID(pid);
-        HttpURLConnection con = getHttpURLConnection(payload, endpoint);
-        try (BufferedReader br = new BufferedReader(new InputStreamReader(con.getInputStream(), StandardCharsets.UTF_8))) {
-            StringBuilder response = new StringBuilder();
-            String responseLine;
-            while ((responseLine = br.readLine()) != null) {
-                response.append(responseLine.trim());
-            }
+        HttpHeaders headers = createHeaders();
+
+        HttpEntity<String> request = new HttpEntity<>(payload, headers);
+        try {
+            restTemplate.exchange(endpoint, HttpMethod.PUT, request, String.class);
             logger.info("Resource with ID [{}] has been posted with PID [{}] on [{}]", pid, pid, endpoint);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+        } catch (Exception e) {
+            throw new RuntimeException("Error during PID post request", e);
         }
     }
 
-    private void setConfigurationSettings(String pid) {
+    private RestTemplate setConfigurationSettings(String pid) {
         String prefix = pid.split("/")[0];
         String suffix = pid.split("/")[1];
+        RestTemplate restTemplate;
         if (pidTest) {
-            disableSSLVerification();
             endpoint = testEndpoint + suffix;
+            restTemplate = RestTemplateTrustManager.createRestTemplateWithDisabledSSL();
         } else {
             if (prefix.equals(providersPrefix)) {
                 endpoint = providersEndpoint + pid;
@@ -142,6 +145,57 @@ public class PIDUtils {
             } else {
                 throw new RuntimeException("Unknown prefix: " + prefix);
             }
+            restTemplate = createSslRestTemplate(certPath, keyPath);
+        }
+        return restTemplate;
+    }
+
+    public RestTemplate createSslRestTemplate(String certPath, String keyPath) {
+        try {
+            // Load certificate
+            CertificateFactory certificateFactory = CertificateFactory.getInstance("X.509");
+            X509Certificate certificate;
+            try (FileReader certReader = new FileReader(certPath)) {
+                certificate = (X509Certificate) certificateFactory.generateCertificate(new FileInputStream(new File(certPath)));
+            }
+
+            // Load private key
+            PrivateKey privateKey;
+            try (PEMParser pemParser = new PEMParser(new FileReader(keyPath))) {
+                Object object = pemParser.readObject();
+                JcaPEMKeyConverter converter = new JcaPEMKeyConverter();
+                if (object instanceof PEMKeyPair) {
+                    KeyPair keyPair = converter.getKeyPair((PEMKeyPair) object);
+                    privateKey = keyPair.getPrivate();
+                } else if (object instanceof PrivateKeyInfo) {
+                    privateKey = converter.getPrivateKey((PrivateKeyInfo) object);
+                } else {
+                    throw new RuntimeException("Unexpected PEM content");
+                }
+            }
+
+            // Build the KeyStore with the loaded private key and certificate
+            KeyStore keyStore = KeyStore.getInstance("JKS");
+            keyStore.load(null, null);
+            char[] emptyPassword = new char[0];
+            keyStore.setKeyEntry("client", privateKey, emptyPassword, new X509Certificate[]{certificate});
+
+            // Build the SSL context with the key store
+            SSLContext sslContext = SSLContextBuilder.create()
+                    .loadKeyMaterial(keyStore, emptyPassword)
+                    .build();
+
+            // Create HttpClient with the custom SSL context
+            CloseableHttpClient httpClient = HttpClients.custom()
+                    .setSSLContext(sslContext)
+                    .setSSLHostnameVerifier(NoopHostnameVerifier.INSTANCE)
+                    .build();
+
+            // Set the HttpClient on the RestTemplate
+            return new RestTemplate(new HttpComponentsClientHttpRequestFactory(httpClient));
+
+        } catch (Exception e) {
+            throw new RuntimeException("Error configuring RestTemplate with PEM files", e);
         }
     }
 
@@ -189,83 +243,15 @@ public class PIDUtils {
         return data.toString();
     }
 
-    private HttpURLConnection getHttpURLConnection(String payload, String endpoint) {
-        HttpURLConnection con;
-        try {
-            con = (HttpURLConnection) new URL(endpoint).openConnection();
-        } catch (IOException e) {
-            throw new RuntimeException("Error configuring the HTTP connection", e);
-        }
-        try {
-            con.setRequestMethod("PUT");
-        } catch (ProtocolException e) {
-            throw new RuntimeException("Error configuring the HTTP connection's protocol", e);
-        }
+    private HttpHeaders createHeaders() {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
         if (pidTest) {
-            con.setRequestProperty("Authorization", testAuth);
+            headers.set("Authorization", testAuth);
         } else {
-            con.setRequestProperty("Authorization", "Handle clientCert=\"true\"");
-            configureSSL(con);
+            headers.set("Authorization", "Handle clientCert=\"true\"");
         }
-        con.setRequestProperty("Content-Type", "application/json");
-        con.setDoOutput(true);
-        try (OutputStream os = con.getOutputStream()) {
-            byte[] input = payload.getBytes(StandardCharsets.UTF_8);
-            os.write(input, 0, input.length);
-        } catch (IOException e) {
-            throw new RuntimeException("Error configuring connection's output stream", e);
-        }
-        return con;
-    }
-
-    private void configureSSL(HttpURLConnection con) {
-        try {
-            // Load keys
-            PrivateKey privateKey = loadPrivateKey(keyPath);
-            X509Certificate certificate = loadCertificate(certPath);
-
-            // Create a KeyStore to hold the private key and certificate
-            KeyStore keyStore = KeyStore.getInstance(KeyStore.getDefaultType());
-            keyStore.load(null, null);
-            keyStore.setKeyEntry("client", privateKey, null, new Certificate[]{certificate});
-
-            // Initialize KeyManagerFactory with the KeyStore containing client certificates
-            KeyManagerFactory keyManagerFactory = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
-            keyManagerFactory.init(keyStore, null);
-
-            // Initialize TrustManagerFactory with the default CA certificates
-            TrustManagerFactory trustManagerFactory = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
-            trustManagerFactory.init((KeyStore) null);
-
-            // Create SSL context with key and trust managers
-            SSLContext sslContext = SSLContext.getInstance("TLS");
-            sslContext.init(keyManagerFactory.getKeyManagers(), trustManagerFactory.getTrustManagers(), new java.security.SecureRandom());
-
-            // Set the SSLSocketFactory on the HttpsURLConnection
-            ((HttpsURLConnection) con).setSSLSocketFactory(sslContext.getSocketFactory());
-
-        } catch (Exception e) {
-            throw new RuntimeException("Error configuring SSL context", e);
-        }
-    }
-
-    private PrivateKey loadPrivateKey(String filePath) throws Exception {
-        String privateKeyPem = new String(Files.readAllBytes(Paths.get(filePath)));
-        privateKeyPem = privateKeyPem.replace("-----BEGIN PRIVATE KEY-----", "")
-                .replace("-----END PRIVATE KEY-----", "")
-                .replaceAll("\\s", "");
-
-        byte[] keyBytes = Base64.getDecoder().decode(privateKeyPem);
-        PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(keyBytes);
-        KeyFactory keyFactory = KeyFactory.getInstance("RSA");
-        return keyFactory.generatePrivate(keySpec);
-    }
-
-    private X509Certificate loadCertificate(String filePath) throws Exception {
-        try (InputStream inStream = new FileInputStream(filePath)) {
-            CertificateFactory cf = CertificateFactory.getInstance("X.509");
-            return (X509Certificate) cf.generateCertificate(inStream);
-        }
+        return headers;
     }
 
     //TODO: Update with new URL paths
@@ -280,31 +266,6 @@ public class PIDUtils {
             return "guidelines/";
         } else {
             return "tools/";
-        }
-    }
-
-    private static void disableSSLVerification() {
-        try {
-            TrustManager[] trustAllCerts = new TrustManager[]{
-                    new X509TrustManager() {
-                        public X509Certificate[] getAcceptedIssuers() {
-                            return null;
-                        }
-
-                        public void checkClientTrusted(X509Certificate[] certs, String authType) {
-                        }
-
-                        public void checkServerTrusted(X509Certificate[] certs, String authType) {
-                        }
-                    }
-            };
-            SSLContext sc = SSLContext.getInstance("SSL");
-            sc.init(null, trustAllCerts, new java.security.SecureRandom());
-            HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
-            HostnameVerifier allHostsValid = (hostname, session) -> true;
-            HttpsURLConnection.setDefaultHostnameVerifier(allHostsValid);
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to disable SSL verification", e);
         }
     }
 
