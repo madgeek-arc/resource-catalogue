@@ -290,7 +290,7 @@
             
       <xs:element name="endOfLife" type="xs:string">
         <xs:annotation>
-          <xs:documentation><![CDATA[In terms of sustainability, what is the expected life of the catalogue]]></xs:documentation>
+          <xs:documentation><![CDATA[In terms of sustainability, what is the expected life of the Catalogue.]]></xs:documentation>
         </xs:annotation>
       </xs:element>
             
@@ -346,7 +346,7 @@ It is also possible to select Not a legal entity.]]></xs:documentation>
             
       <xs:element minOccurs="0" name="multimedia">
         <xs:annotation>
-          <xs:documentation><![CDATA[Link to video, slideshow, photos, screenshots with details of the Provider.]]></xs:documentation>
+          <xs:documentation><![CDATA[Link to video, slideshow, photos, screenshots with details of the Catalogue.]]></xs:documentation>
         </xs:annotation>
                 
         <xs:complexType>
@@ -494,31 +494,31 @@ It is also possible to select Not a legal entity.]]></xs:documentation>
             
       <xs:element name="city" type="xs:string">
         <xs:annotation>
-          <xs:documentation><![CDATA[City of incorporation or Physical location of the Provider or its coordinating centre in the case of distributed, virtual, and mobile providers.]]></xs:documentation>
+          <xs:documentation><![CDATA[City of incorporation or Physical location of the resource or its coordinating centre in the case of distributed, virtual, and mobile resources.]]></xs:documentation>
         </xs:annotation>
       </xs:element>
             
       <xs:element name="country" type="xs:string">
         <xs:annotation>
-          <xs:documentation><![CDATA[Country of incorporation or Physical location of the Provider or its coordinating centre in the case of distributed, virtual, and mobile providers.]]></xs:documentation>
+          <xs:documentation><![CDATA[Country of incorporation or Physical location of the resource or its coordinating centre in the case of distributed, virtual, and mobile resources.]]></xs:documentation>
         </xs:annotation>
       </xs:element>
             
       <xs:element name="postalCode" type="xs:string">
         <xs:annotation>
-          <xs:documentation><![CDATA[Postal code of incorporation or Physical location of the Provider or its coordinating centre in the case of distributed, virtual, and mobile providers.]]></xs:documentation>
+          <xs:documentation><![CDATA[Postal code of incorporation or Physical location of the resource or its coordinating centre in the case of distributed, virtual, and mobile resources.]]></xs:documentation>
         </xs:annotation>
       </xs:element>
             
       <xs:element minOccurs="0" name="region" type="xs:string">
         <xs:annotation>
-          <xs:documentation><![CDATA[Region of incorporation or Physical location of the Provider or its coordinating centre in the case of distributed, virtual, and mobile providers.]]></xs:documentation>
+          <xs:documentation><![CDATA[Region of incorporation or Physical location of the resource or its coordinating centre in the case of distributed, virtual, and mobile resources.]]></xs:documentation>
         </xs:annotation>
       </xs:element>
             
       <xs:element name="streetNameAndNumber" type="xs:string">
         <xs:annotation>
-          <xs:documentation><![CDATA[Street and Number of incorporation or Physical location of the Provider or its coordinating centre in the case of distributed, virtual, and mobile providers.]]></xs:documentation>
+          <xs:documentation><![CDATA[Street and Number of incorporation or Physical location of the resource or its coordinating centre in the case of distributed, virtual, and mobile resources.]]></xs:documentation>
         </xs:annotation>
       </xs:element>
           
@@ -532,31 +532,31 @@ It is also possible to select Not a legal entity.]]></xs:documentation>
             
       <xs:element name="email" type="xs:string">
         <xs:annotation>
-          <xs:documentation><![CDATA[Email of the Provider's main contact person/Provider manager.]]></xs:documentation>
+          <xs:documentation><![CDATA[Email of the resource's main contact person/manager.]]></xs:documentation>
         </xs:annotation>
       </xs:element>
             
       <xs:element name="firstName" type="xs:string">
         <xs:annotation>
-          <xs:documentation><![CDATA[First Name of the Provider's main contact person/Provider manager.]]></xs:documentation>
+          <xs:documentation><![CDATA[First Name of the Provider's main contact person/manager.]]></xs:documentation>
         </xs:annotation>
       </xs:element>
             
       <xs:element minOccurs="0" name="lastName" type="xs:string">
         <xs:annotation>
-          <xs:documentation><![CDATA[Last Name of the Provider's main contact person/Provider manager.]]></xs:documentation>
+          <xs:documentation><![CDATA[Last Name of the resource's main contact person/manager.]]></xs:documentation>
         </xs:annotation>
       </xs:element>
             
       <xs:element minOccurs="0" name="phone" type="xs:string">
         <xs:annotation>
-          <xs:documentation><![CDATA[Phone of the Provider's main contact person/Provider manager.]]></xs:documentation>
+          <xs:documentation><![CDATA[Phone of the resource's main contact person/manager.]]></xs:documentation>
         </xs:annotation>
       </xs:element>
             
       <xs:element minOccurs="0" name="position" type="xs:string">
         <xs:annotation>
-          <xs:documentation><![CDATA[Position of the Provider's main contact person/Provider manager.]]></xs:documentation>
+          <xs:documentation><![CDATA[Position of the resource's main contact person/manager.]]></xs:documentation>
         </xs:annotation>
       </xs:element>
           
@@ -576,7 +576,7 @@ It is also possible to select Not a legal entity.]]></xs:documentation>
             
       <xs:element name="multimediaURL" type="xs:anyURI">
         <xs:annotation>
-          <xs:documentation><![CDATA[Link to video, slideshow, photos, screenshots with details of the Provider.]]></xs:documentation>
+          <xs:documentation><![CDATA[Link to video, slideshow, photos, screenshots with details of the resource.]]></xs:documentation>
         </xs:annotation>
       </xs:element>
           
@@ -590,31 +590,31 @@ It is also possible to select Not a legal entity.]]></xs:documentation>
             
       <xs:element name="email" type="xs:string">
         <xs:annotation>
-          <xs:documentation><![CDATA[Email of the Provider's main contact person/Provider manager.]]></xs:documentation>
+          <xs:documentation><![CDATA[Email of the resource's public contact person/manager.]]></xs:documentation>
         </xs:annotation>
       </xs:element>
             
       <xs:element minOccurs="0" name="firstName" type="xs:string">
         <xs:annotation>
-          <xs:documentation><![CDATA[First Name of the Provider's main contact person/Provider manager.]]></xs:documentation>
+          <xs:documentation><![CDATA[First Name of the resource's public contact person/manager.]]></xs:documentation>
         </xs:annotation>
       </xs:element>
             
       <xs:element minOccurs="0" name="lastName" type="xs:string">
         <xs:annotation>
-          <xs:documentation><![CDATA[Last Name of the Provider's main contact person/Provider manager.]]></xs:documentation>
+          <xs:documentation><![CDATA[Last Name of the resource's public contact person/manager.]]></xs:documentation>
         </xs:annotation>
       </xs:element>
             
       <xs:element minOccurs="0" name="phone" type="xs:string">
         <xs:annotation>
-          <xs:documentation><![CDATA[Phone of the Provider's main contact person/Provider manager.]]></xs:documentation>
+          <xs:documentation><![CDATA[Phone of the resource's public contact person/manager.]]></xs:documentation>
         </xs:annotation>
       </xs:element>
             
       <xs:element minOccurs="0" name="position" type="xs:string">
         <xs:annotation>
-          <xs:documentation><![CDATA[Position of the Provider's main contact person/Provider manager.]]></xs:documentation>
+          <xs:documentation><![CDATA[Position of the resource's public contact person/manager.]]></xs:documentation>
         </xs:annotation>
       </xs:element>
           
@@ -628,13 +628,13 @@ It is also possible to select Not a legal entity.]]></xs:documentation>
             
       <xs:element name="scientificDomain" type="xs:string">
         <xs:annotation>
-          <xs:documentation><![CDATA[The branch of science, scientific discipline that is related to the Resource.]]></xs:documentation>
+          <xs:documentation><![CDATA[The branch of science, scientific discipline that is related to the resource.]]></xs:documentation>
         </xs:annotation>
       </xs:element>
             
       <xs:element name="scientificSubdomain" type="xs:string">
         <xs:annotation>
-          <xs:documentation><![CDATA[The subbranch of science, scientific sub-discipline that is related to the Resource.]]></xs:documentation>
+          <xs:documentation><![CDATA[The sub-branch of science, scientific sub-discipline that is related to the resource.]]></xs:documentation>
         </xs:annotation>
       </xs:element>
           
