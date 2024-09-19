@@ -14,7 +14,7 @@ import java.util.Objects;
 public class MultimediaPair {
 
     /**
-     * Link to video, slideshow, photos, screenshots with details of the Provider.
+     * Link to video, slideshow, photos, screenshots with details of the resource.
      */
     @XmlElement(required = true)
     @Schema
