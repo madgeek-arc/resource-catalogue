@@ -18,6 +18,9 @@
             resource-catalogue-model
         </module>
         <module>
+            resource-catalogue-model-lot1
+        </module>
+        <module>
             resource-catalogue-api
         </module>
         <module>
@@ -78,11 +81,6 @@
             <dependency>
                 <groupId>gr.uoa.di.madgik</groupId>
                 <artifactId>resource-catalogue-service</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>gr.uoa.di.madgik</groupId>
-                <artifactId>resource-catalogue-model</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>

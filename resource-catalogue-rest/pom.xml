@@ -23,10 +23,6 @@
         </dependency>
         <dependency>
             <groupId>gr.uoa.di.madgik</groupId>
-            <artifactId>resource-catalogue-model</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>gr.uoa.di.madgik</groupId>
             <artifactId>registry-core-api</artifactId>
         </dependency>
         <dependency>
