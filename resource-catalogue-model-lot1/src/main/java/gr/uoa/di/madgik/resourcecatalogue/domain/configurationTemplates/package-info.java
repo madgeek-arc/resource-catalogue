@@ -9,4 +9,4 @@
 @XmlAccessorType(XmlAccessType.FIELD)
 package gr.uoa.di.madgik.resourcecatalogue.domain.configurationTemplates;
 
-import javax.xml.bind.annotation.*;
+import jakarta.xml.bind.annotation.*;

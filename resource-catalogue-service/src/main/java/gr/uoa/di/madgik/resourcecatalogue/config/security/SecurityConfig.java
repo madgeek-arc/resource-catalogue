@@ -66,10 +66,10 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-                .authorizeRequests(authorizeRequests ->
+                .authorizeHttpRequests(authorizeRequests ->
                         authorizeRequests
-                                .regexMatchers("/resourcesync/.*").permitAll()
-                                .regexMatchers("/dump/.*", "/restore/", "/resources.*", "/resourceType.*", "/search.*").hasAnyAuthority("ROLE_ADMIN")
+                                .requestMatchers("/resourcesync/.*").permitAll()
+                                .requestMatchers("/dump/.*", "/restore/", "/resources.*", "/resourceType.*", "/search.*").hasAnyAuthority("ROLE_ADMIN")
 
                                 .anyRequest().permitAll()
                 )
@@ -78,9 +78,10 @@ public class SecurityConfig {
                         oauth2login
                                 .successHandler(authSuccessHandler))
 
-                .oauth2ResourceServer((oauth2) -> oauth2
-                        .jwt()
-                        .jwtAuthenticationConverter(authenticationConverter())
+                .oauth2ResourceServer(oauth2 -> oauth2
+                        .jwt(jwt -> jwt
+                            .jwtAuthenticationConverter(authenticationConverter())
+                        )
                 )
 
                 .logout(logout ->

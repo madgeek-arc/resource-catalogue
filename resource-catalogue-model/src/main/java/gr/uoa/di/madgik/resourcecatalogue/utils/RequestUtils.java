@@ -1,6 +1,6 @@
 package gr.uoa.di.madgik.resourcecatalogue.utils;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 
 public class RequestUtils {
 

@@ -1,6 +1,6 @@
 package gr.uoa.di.madgik.resourcecatalogue.domain;
 
-import javax.xml.bind.annotation.XmlTransient;
+import jakarta.xml.bind.annotation.XmlTransient;
 
 @XmlTransient
 public class ResourceHistory extends Metadata {

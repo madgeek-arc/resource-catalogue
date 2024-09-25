@@ -2,8 +2,8 @@
 //
 //import org.junit.Test;
 //
-//import javax.xml.bind.JAXBContext;
-//import javax.xml.bind.JAXBException;
+//import jakarta.xml.bind.JAXBContext;
+//import jakarta.xml.bind.JAXBException;
 //import java.io.StringReader;
 //import java.io.StringWriter;
 //

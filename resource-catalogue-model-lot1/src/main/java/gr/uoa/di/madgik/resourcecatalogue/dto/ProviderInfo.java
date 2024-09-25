@@ -2,7 +2,7 @@ package gr.uoa.di.madgik.resourcecatalogue.dto;
 
 import gr.uoa.di.madgik.resourcecatalogue.domain.Provider;
 
-import javax.xml.bind.annotation.XmlTransient;
+import jakarta.xml.bind.annotation.XmlTransient;
 
 @XmlTransient
 public class ProviderInfo {

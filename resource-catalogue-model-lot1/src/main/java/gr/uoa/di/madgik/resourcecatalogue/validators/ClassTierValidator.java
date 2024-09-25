@@ -3,8 +3,8 @@ package gr.uoa.di.madgik.resourcecatalogue.validators;
 import gr.uoa.di.madgik.resourcecatalogue.annotation.ClassTierValidation;
 import gr.uoa.di.madgik.resourcecatalogue.domain.ServiceClassTier;
 
-import javax.validation.ConstraintValidator;
-import javax.validation.ConstraintValidatorContext;
+import jakarta.validation.ConstraintValidator;
+import jakarta.validation.ConstraintValidatorContext;
 
 public class ClassTierValidator implements ConstraintValidator<ClassTierValidation, ServiceClassTier> {
 

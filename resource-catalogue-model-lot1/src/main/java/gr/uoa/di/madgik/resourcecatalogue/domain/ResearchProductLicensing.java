@@ -3,7 +3,7 @@ package gr.uoa.di.madgik.resourcecatalogue.domain;
 import io.swagger.v3.oas.annotations.media.Schema;
 import gr.uoa.di.madgik.resourcecatalogue.annotation.FieldValidation;
 
-import javax.xml.bind.annotation.XmlElement;
+import jakarta.xml.bind.annotation.XmlElement;
 import java.net.URL;
 import java.util.Objects;
 

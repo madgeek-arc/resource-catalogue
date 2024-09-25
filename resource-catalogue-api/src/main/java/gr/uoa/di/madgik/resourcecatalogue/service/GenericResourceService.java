@@ -3,7 +3,7 @@ package gr.uoa.di.madgik.resourcecatalogue.service;
 import gr.uoa.di.madgik.registry.domain.*;
 import gr.uoa.di.madgik.registry.service.SearchService;
 
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotNull;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.Map;

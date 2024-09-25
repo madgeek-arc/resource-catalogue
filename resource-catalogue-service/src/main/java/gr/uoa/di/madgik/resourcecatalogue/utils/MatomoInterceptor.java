@@ -3,8 +3,8 @@ package gr.uoa.di.madgik.resourcecatalogue.utils;
 import org.matomo.java.tracking.MatomoRequest;
 import org.matomo.java.tracking.MatomoTracker;
 import org.matomo.java.tracking.TrackerConfiguration;
-import org.matomo.java.tracking.servlet.JavaxHttpServletWrapper;
 import org.matomo.java.tracking.servlet.ServletMatomoRequest;
+import org.matomo.java.tracking.servlet.JakartaHttpServletWrapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -12,9 +12,9 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.AsyncHandlerInterceptor;
 
-import javax.annotation.PostConstruct;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.annotation.PostConstruct;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import java.net.URI;
 
 @Component
@@ -50,7 +50,7 @@ public class MatomoInterceptor implements AsyncHandlerInterceptor {
                 logger.debug("Referer is null. That probably means that the call did not come from the portal. Logging!");
 
                 MatomoRequest matomoRequest = ServletMatomoRequest.fromServletRequest(
-                                JavaxHttpServletWrapper.fromHttpServletRequest((javax.servlet.http.HttpServletRequest) request))
+                                JakartaHttpServletWrapper.fromHttpServletRequest(request))
                         .siteId(siteId)
                         .actionUrl(request.getRequestURL().toString())
                         .build();

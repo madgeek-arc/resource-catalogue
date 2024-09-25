@@ -1,10 +1,11 @@
 package gr.uoa.di.madgik.resourcecatalogue.dto;
 
-import org.springframework.http.HttpStatus;
 import gr.uoa.di.madgik.resourcecatalogue.logging.LogTransactionsFilter;
 import gr.uoa.di.madgik.resourcecatalogue.utils.RequestUtils;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.http.HttpStatusCode;
+
 import java.util.Date;
 
 /**
@@ -44,7 +45,7 @@ public class ServerError {
         this.message = message;
     }
 
-    public ServerError(HttpStatus status, String transactionId, String url, String message) {
+    public ServerError(HttpStatusCode status, String transactionId, String url, String message) {
         timestamp = new Date();
         this.status = status.value();
         this.transactionId = transactionId;
@@ -60,7 +61,7 @@ public class ServerError {
         this.message = message;
     }
 
-    public ServerError(HttpStatus status, HttpServletRequest req, Exception exception) {
+    public ServerError(HttpStatusCode status, HttpServletRequest req, Exception exception) {
         timestamp = new Date();
         this.status = status.value();
         this.transactionId = LogTransactionsFilter.getTransactionId();
@@ -68,7 +69,7 @@ public class ServerError {
         this.message = exception.getMessage();
     }
 
-    public ServerError(HttpStatus status, String transactionId, HttpServletRequest req, Exception exception) {
+    public ServerError(HttpStatusCode status, String transactionId, HttpServletRequest req, Exception exception) {
         timestamp = new Date();
         this.status = status.value();
         this.transactionId = transactionId;

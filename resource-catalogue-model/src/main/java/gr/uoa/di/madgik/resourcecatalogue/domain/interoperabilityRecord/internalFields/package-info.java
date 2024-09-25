@@ -9,4 +9,4 @@
 @XmlAccessorType(XmlAccessType.FIELD)
 package gr.uoa.di.madgik.resourcecatalogue.domain.interoperabilityRecord.internalFields;
 
-import javax.xml.bind.annotation.*;
+import jakarta.xml.bind.annotation.*;

@@ -6,10 +6,10 @@ import org.slf4j.MDC;
 import org.slf4j.spi.MDCAdapter;
 import org.springframework.web.filter.GenericFilterBean;
 
-import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.ServletResponse;
 import java.io.IOException;
 
 public abstract class AbstractLogContextFilter extends GenericFilterBean {

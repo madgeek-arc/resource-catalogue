@@ -24,18 +24,6 @@ public class WebMvcConfig implements WebMvcConfigurer {
         registry.addMapping("/**").allowedMethods("*").allowedOrigins("*");
     }
 
-    // TODO: check how to exclude fields from classes only for http
-//    @Bean
-//    public MappingJackson2HttpMessageConverter mappingJackson2HttpMessageConverter() {
-//        MappingJackson2HttpMessageConverter jsonConverter = new MappingJackson2HttpMessageConverter();
-//        ObjectMapper objectMapper = new ObjectMapper();
-//        objectMapper.setSerializationInclusion(JsonInclude.Include.USE_DEFAULTS);
-//        objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-//        jsonConverter.setObjectMapper(objectMapper);
-//        return jsonConverter;
-//    }
-
-
     @Autowired
     MatomoInterceptor matomoInterceptor;
 

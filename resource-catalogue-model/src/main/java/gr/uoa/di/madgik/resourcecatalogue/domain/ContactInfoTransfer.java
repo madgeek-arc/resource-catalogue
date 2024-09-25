@@ -2,8 +2,8 @@ package gr.uoa.di.madgik.resourcecatalogue.domain;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
+import jakarta.xml.bind.annotation.XmlElement;
+import jakarta.xml.bind.annotation.XmlRootElement;
 import java.util.Objects;
 
 @XmlRootElement(namespace = "http://einfracentral.eu")

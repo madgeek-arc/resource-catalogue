@@ -39,7 +39,7 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
 
-import javax.validation.Valid;
+import jakarta.validation.Valid;
 import java.time.OffsetDateTime;
 import java.util.HashMap;
 import java.util.List;
