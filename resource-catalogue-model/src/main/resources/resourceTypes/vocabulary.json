@@ -1,0 +1,44 @@
+{
+  "aliasGroup": "resourceTypes",
+  "indexFields": [
+    {
+      "label": null,
+      "multivalued": false,
+      "name": "resource_internal_id",
+      "path": "$.id",
+      "primaryKey": true,
+      "type": "java.lang.String"
+    },
+    {
+      "label": "Vocabulary Name",
+      "multivalued": false,
+      "name": "name",
+      "path": "$.name",
+      "type": "java.lang.String"
+    },
+    {
+      "label": "Vocabulary Type",
+      "multivalued": false,
+      "name": "type",
+      "path": "$.type",
+      "type": "java.lang.String"
+    },
+    {
+      "label": null,
+      "multivalued": false,
+      "name": "parent_id",
+      "path": "$.parentId",
+      "type": "java.lang.String"
+    }
+  ],
+  "indexMapperClass": "gr.uoa.di.madgik.registry.index.DefaultIndexMapper",
+  "aliases": [
+    "resourceTypes"
+  ],
+  "name": "vocabulary",
+  "payloadType": "json",
+  "properties": {
+    "class": "gr.uoa.di.madgik.resourcecatalogue.domain.Vocabulary"
+  },
+  "schema": "{\n\t\"$schema\": \"https://json-schema.org/draft/2019-09/schema\"\n}"
+}

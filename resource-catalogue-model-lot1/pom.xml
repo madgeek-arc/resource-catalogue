@@ -91,7 +91,7 @@
                     <sources>
                         <source>${basedir}/src/main/java/gr/uoa/di/madgik/resourcecatalogue/domain</source>
                     </sources>
-                    <outputDirectory>${basedir}/src/main/resources</outputDirectory>
+                    <outputDirectory>${basedir}/src/main/resources/schemas</outputDirectory>
                 </configuration>
             </plugin>
         </plugins>
