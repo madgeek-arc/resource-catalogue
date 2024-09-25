@@ -171,8 +171,8 @@ public class Catalogue implements Identifiable {
     /**
      * Catalogue's main contact info.
      */
-    @XmlElement
-    @Schema
+    @XmlElement(required = true)
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     @FieldValidation
     private ProviderMainContact mainContact;
 
@@ -180,8 +180,8 @@ public class Catalogue implements Identifiable {
      * List of the Catalogue's public contacts info.
      */
     @XmlElementWrapper(name = "publicContacts")
-    @XmlElement(name = "publicContact")
-    @Schema
+    @XmlElement(name = "publicContact", required = true)
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     @FieldValidation
     private List<ProviderPublicContact> publicContacts;
 

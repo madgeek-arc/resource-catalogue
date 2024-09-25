@@ -147,8 +147,6 @@
             
       <xs:element minOccurs="0" name="latestUpdateInfo" type="tns:loggingInfo"/>
             
-      <xs:element name="legacy" type="xs:boolean"/>
-            
       <xs:element maxOccurs="unbounded" minOccurs="0" ref="tns:loggingInfo"/>
             
       <xs:element minOccurs="0" ref="tns:metadata"/>
@@ -338,7 +336,7 @@ It is also possible to select Not a legal entity.]]></xs:documentation>
         </xs:annotation>
       </xs:element>
             
-      <xs:element minOccurs="0" name="mainContact" type="tns:providerMainContact">
+      <xs:element name="mainContact" type="tns:providerMainContact">
         <xs:annotation>
           <xs:documentation><![CDATA[Catalogue's main contact info.]]></xs:documentation>
         </xs:annotation>
@@ -410,7 +408,7 @@ It is also possible to select Not a legal entity.]]></xs:documentation>
                     
           <xs:sequence>
                         
-            <xs:element maxOccurs="unbounded" minOccurs="0" name="publicContact" type="tns:providerPublicContact"/>
+            <xs:element maxOccurs="unbounded" name="publicContact" type="tns:providerPublicContact"/>
                       
           </xs:sequence>
                   
@@ -948,8 +946,6 @@ Criteria for submitting content to the repository as well as product preparation
               <xs:documentation><![CDATA[Original OpenAIRE ID, if Datasource already exists in the OpenAIRE Catalogue]]></xs:documentation>
             </xs:annotation>
           </xs:element>
-                    
-          <xs:element name="softwareRepository" type="xs:boolean"/>
                     
           <xs:element minOccurs="0" name="status" type="xs:string"/>
                   
@@ -1774,7 +1770,7 @@ For embedded providers (2) - legal status of the hosting legal entity. It is als
         </xs:annotation>
       </xs:element>
             
-      <xs:element minOccurs="0" name="mainContact" type="tns:providerMainContact">
+      <xs:element name="mainContact" type="tns:providerMainContact">
         <xs:annotation>
           <xs:documentation><![CDATA[Provider's main contact info.]]></xs:documentation>
         </xs:annotation>
@@ -1880,7 +1876,7 @@ For embedded providers (2) - legal status of the hosting legal entity. It is als
                     
           <xs:sequence>
                         
-            <xs:element maxOccurs="unbounded" minOccurs="0" name="publicContact" type="tns:providerPublicContact"/>
+            <xs:element maxOccurs="unbounded" name="publicContact" type="tns:providerPublicContact"/>
                       
           </xs:sequence>
                   
@@ -2248,12 +2244,6 @@ For embedded providers (2) - legal status of the hosting legal entity. It is als
               
       </xs:element>
             
-      <xs:element minOccurs="0" name="classTier" type="tns:serviceClassTier">
-        <xs:annotation>
-          <xs:documentation><![CDATA[The tier of a service in the EOSC EU Node.]]></xs:documentation>
-        </xs:annotation>
-      </xs:element>
-            
       <xs:element name="description" type="xs:string">
         <xs:annotation>
           <xs:documentation><![CDATA[A high-level description in fairly non-technical terms of a) what the Resource does, functionality it provides and Resources it enables to access,
@@ -2391,7 +2381,7 @@ infrastructures.]]></xs:documentation>
         </xs:annotation>
       </xs:element>
             
-      <xs:element minOccurs="0" name="mainContact" type="tns:serviceMainContact">
+      <xs:element name="mainContact" type="tns:serviceMainContact">
         <xs:annotation>
           <xs:documentation><![CDATA[Service's Main Contact/Resource Owner info.]]></xs:documentation>
         </xs:annotation>
@@ -2499,7 +2489,7 @@ infrastructures.]]></xs:documentation>
                     
           <xs:sequence>
                         
-            <xs:element maxOccurs="unbounded" minOccurs="0" name="publicContact" type="tns:servicePublicContact"/>
+            <xs:element maxOccurs="unbounded" name="publicContact" type="tns:servicePublicContact"/>
                       
           </xs:sequence>
                   
@@ -2784,22 +2774,6 @@ infrastructures.]]></xs:documentation>
       
   </xs:complexType>
     
-  <xs:complexType name="serviceClassTier">
-        
-    <xs:sequence>
-            
-      <xs:element minOccurs="0" name="accessPolicy" type="xs:string"/>
-            
-      <xs:element minOccurs="0" name="costModel" type="xs:string"/>
-            
-      <xs:element default="3" name="level" type="xs:int"/>
-            
-      <xs:element maxOccurs="unbounded" minOccurs="0" name="offerings" type="xs:string"/>
-          
-    </xs:sequence>
-      
-  </xs:complexType>
-    
   <xs:complexType name="serviceMainContact">
         
     <xs:sequence>
@@ -2932,6 +2906,22 @@ infrastructures.]]></xs:documentation>
       
   </xs:complexType>
     
+  <xs:complexType name="serviceClassTier">
+        
+    <xs:sequence>
+            
+      <xs:element minOccurs="0" name="accessPolicy" type="xs:string"/>
+            
+      <xs:element minOccurs="0" name="costModel" type="xs:string"/>
+            
+      <xs:element default="3" name="level" type="xs:int"/>
+            
+      <xs:element maxOccurs="unbounded" minOccurs="0" name="offerings" type="xs:string"/>
+          
+    </xs:sequence>
+      
+  </xs:complexType>
+    
   <xs:complexType name="trainingResource">
         
     <xs:sequence>
@@ -2982,7 +2972,7 @@ infrastructures.]]></xs:documentation>
         </xs:annotation>
       </xs:element>
             
-      <xs:element minOccurs="0" name="contact" type="tns:serviceMainContact">
+      <xs:element name="contact" type="tns:serviceMainContact">
         <xs:annotation>
           <xs:documentation><![CDATA[Training Resource's Main Contact Owner info.]]></xs:documentation>
         </xs:annotation>
