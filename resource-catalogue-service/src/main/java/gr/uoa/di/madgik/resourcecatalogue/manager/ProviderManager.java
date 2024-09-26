@@ -889,6 +889,18 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         return provider;
     }
 
+    private void checkAndAddProviderToHLEVocabulary(ProviderBundle providerBundle) {
+        if (providerBundle.getStatus().equals("approved provider") && providerBundle.getProvider().isLegalEntity()) {
+            //TODO: if we need this better save with Abbreviation instead of ID
+            String hleId = "provider_hosting_legal_entity-" + providerBundle.getProvider().getId();
+            try {
+                vocabularyService.get(hleId);
+            } catch (ResourceException e) {
+                addApprovedProviderToHLEVocabulary(providerBundle);
+            }
+        }
+    }
+
     private void addApprovedProviderToHLEVocabulary(ProviderBundle providerBundle) {
         Vocabulary hle = new Vocabulary();
         hle.setId("provider_hosting_legal_entity-" + providerBundle.getProvider().getId());
@@ -900,18 +912,6 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         logger.info("Creating a new Hosting Legal Entity Vocabulary with id: [{}] and name: [{}]",
                 hle.getId(), hle.getName());
         vocabularyService.add(hle, null);
-    }
-
-    private void checkAndAddProviderToHLEVocabulary(ProviderBundle providerBundle) {
-        if (providerBundle.getStatus().equals("approved provider") && providerBundle.getProvider().isLegalEntity()) {
-            //TODO: if we need this better save with Abbreviation instead of ID
-            String hleId = "provider_hosting_legal_entity-" + providerBundle.getProvider().getId();
-            try {
-                vocabularyService.get(hleId);
-            } catch (ResourceException e) {
-                addApprovedProviderToHLEVocabulary(providerBundle);
-            }
-        }
     }
 
     @Override
