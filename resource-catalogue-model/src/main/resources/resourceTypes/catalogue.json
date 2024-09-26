@@ -1,0 +1,256 @@
+{
+  "indexFields": [
+    {
+      "label": null,
+      "multivalued": false,
+      "name": "resource_internal_id",
+      "path": "$.catalogue.id",
+      "primaryKey": true,
+      "type": "java.lang.String"
+    },
+    {
+      "label": "Catalogue Name",
+      "multivalued": false,
+      "name": "name",
+      "path": "$.catalogue.name",
+      "type": "java.lang.String"
+    },
+    {
+      "label": "Abbreviation",
+      "multivalued": false,
+      "name": "abbreviation",
+      "path": "$.catalogue.abbreviation",
+      "type": "java.lang.String"
+    },
+    {
+      "label": "Legal Entity",
+      "multivalued": false,
+      "name": "legal_entity",
+      "path": "$.catalogue.legalEntity",
+      "type": "java.lang.Boolean"
+    },
+    {
+      "label": "Legal Status",
+      "multivalued": false,
+      "name": "legal_status",
+      "path": "$.catalogue.legalStatus",
+      "type": "java.lang.String"
+    },
+    {
+      "label": "Hosting Legal Entity",
+      "multivalued": false,
+      "name": "hosting_legal_entity",
+      "path": "$.catalogue.hostingLegalEntity",
+      "type": "java.lang.String"
+    },
+    {
+      "label": "Scientific Domain",
+      "multivalued": true,
+      "name": "scientific_domains",
+      "path": "$.catalogue.scientificDomains[*]",
+      "type": "java.lang.String"
+    },
+    {
+      "label": "Scientific Subdomain",
+      "multivalued": true,
+      "name": "scientific_subdomains",
+      "path": "$.catalogue.scientificDomains[*].scientificSubdomain",
+      "type": "java.lang.String"
+    },
+    {
+      "label": "Tag",
+      "multivalued": true,
+      "name": "tags",
+      "path": "$.catalogue.tags[*]",
+      "type": "java.lang.String"
+    },
+    {
+      "label": "Affiliation",
+      "multivalued": true,
+      "name": "affiliations",
+      "path": "$.catalogue.affiliations[*]",
+      "type": "java.lang.String"
+    },
+    {
+      "label": "Network",
+      "multivalued": true,
+      "name": "networks",
+      "path": "$.catalogue.networks[*]",
+      "type": "java.lang.String"
+    },
+    {
+      "label": null,
+      "multivalued": true,
+      "name": "users",
+      "path": "$.catalogue.users[*].email",
+      "type": "java.lang.String"
+    },
+    {
+      "label": null,
+      "multivalued": false,
+      "name": "registeredBy",
+      "path": "$.metadata.registeredBy",
+      "type": "java.lang.String"
+    },
+    {
+      "label": null,
+      "multivalued": false,
+      "name": "modifiedBy",
+      "path": "$.metadata.modifiedBy",
+      "type": "java.lang.String"
+    },
+    {
+      "label": null,
+      "multivalued": false,
+      "name": "registeredAt",
+      "path": "$.metadata.registeredAt",
+      "type": "java.lang.String"
+    },
+    {
+      "label": null,
+      "multivalued": false,
+      "name": "modifiedAt",
+      "path": "$.metadata.modifiedAt",
+      "type": "java.lang.String"
+    },
+    {
+      "label": null,
+      "multivalued": false,
+      "name": "originalId",
+      "path": "$.identifiers.originalId",
+      "type": "java.lang.String"
+    },
+    {
+      "label": null,
+      "multivalued": false,
+      "name": "latestAuditActionType",
+      "path": "$.latestAuditInfo.actionType",
+      "type": "java.lang.String"
+    },
+    {
+      "label": null,
+      "multivalued": false,
+      "name": "latestAuditDate",
+      "path": "$.latestAuditInfo.date",
+      "type": "java.lang.String"
+    },
+    {
+      "label": null,
+      "multivalued": false,
+      "name": "latestAuditType",
+      "path": "$.latestAuditInfo.type",
+      "type": "java.lang.String"
+    },
+    {
+      "label": null,
+      "multivalued": false,
+      "name": "latestAuditUserEmail",
+      "path": "$.latestAuditInfo.userEmail",
+      "type": "java.lang.String"
+    },
+    {
+      "label": null,
+      "multivalued": false,
+      "name": "latestUpdateActionType",
+      "path": "$.latestUpdateInfo.actionType",
+      "type": "java.lang.String"
+    },
+    {
+      "label": null,
+      "multivalued": false,
+      "name": "latestUpdateDate",
+      "path": "$.latestUpdateInfo.date",
+      "type": "java.lang.String"
+    },
+    {
+      "label": null,
+      "multivalued": false,
+      "name": "latestUpdateType",
+      "path": "$.latestUpdateInfo.type",
+      "type": "java.lang.String"
+    },
+    {
+      "label": null,
+      "multivalued": false,
+      "name": "latestUpdateUserEmail",
+      "path": "$.latestUpdateInfo.userEmail",
+      "type": "java.lang.String"
+    },
+    {
+      "label": null,
+      "multivalued": false,
+      "name": "latestOnboardingActionType",
+      "path": "$.latestOnboardingInfo.actionType",
+      "type": "java.lang.String"
+    },
+    {
+      "label": null,
+      "multivalued": false,
+      "name": "latestOnboardingDate",
+      "path": "$.latestOnboardingInfo.date",
+      "type": "java.lang.String"
+    },
+    {
+      "label": null,
+      "multivalued": false,
+      "name": "latestOnboardingType",
+      "path": "$.latestOnboardingInfo.type",
+      "type": "java.lang.String"
+    },
+    {
+      "label": null,
+      "multivalued": false,
+      "name": "latestOnboardingUserEmail",
+      "path": "$.latestOnboardingInfo.userEmail",
+      "type": "java.lang.String"
+    },
+    {
+      "defaultValue": "false",
+      "label": null,
+      "multivalued": false,
+      "name": "active",
+      "path": "$.active",
+      "type": "java.lang.Boolean"
+    },
+    {
+      "defaultValue": "false",
+      "label": null,
+      "multivalued": false,
+      "name": "suspended",
+      "path": "$.suspended",
+      "type": "java.lang.Boolean"
+    },
+    {
+      "label": null,
+      "multivalued": false,
+      "name": "status",
+      "path": "$.status",
+      "type": "java.lang.String"
+    },
+    {
+      "defaultValue": "false",
+      "label": null,
+      "multivalued": false,
+      "name": "draft",
+      "path": "$.draft",
+      "type": "java.lang.Boolean"
+    },
+    {
+      "label": null,
+      "multivalued": false,
+      "name": "audit_state",
+      "path": "$.auditState",
+      "type": "java.lang.String"
+    }
+  ],
+  "indexMapperClass": "gr.uoa.di.madgik.registry.index.DefaultIndexMapper",
+  "aliases": [
+    "resourceTypes"
+  ],
+  "name": "catalogue",
+  "payloadType": "json",
+  "properties": {
+    "class": "gr.uoa.di.madgik.resourcecatalogue.domain.CatalogueBundle"
+  },
+  "schema": "{\n\t\"$schema\": \"https://json-schema.org/draft/2019-09/schema\"\n}"
+}

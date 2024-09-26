@@ -1,0 +1,352 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" version="1.0">
+    
+  <xs:complexType abstract="true" name="xmlAdapter">
+        
+    <xs:sequence/>
+      
+  </xs:complexType>
+    
+  <xs:simpleType name="userActionType">
+        
+    <xs:restriction base="xs:string">
+            
+      <xs:enumeration value="FAVOURITE"/>
+            
+      <xs:enumeration value="RATING"/>
+            
+      <xs:enumeration value="VISIT"/>
+            
+      <xs:enumeration value="ORDER"/>
+            
+      <xs:enumeration value="ADD_TO_PROJECT"/>
+          
+    </xs:restriction>
+      
+  </xs:simpleType>
+    
+  <xs:simpleType name="helpdeskType">
+        
+    <xs:restriction base="xs:string">
+            
+      <xs:enumeration value="FULL_INTEGRATION"/>
+            
+      <xs:enumeration value="TICKET_REDIRECTION"/>
+            
+      <xs:enumeration value="DIRECT_USAGE"/>
+          
+    </xs:restriction>
+      
+  </xs:simpleType>
+    
+  <xs:simpleType name="types">
+        
+    <xs:restriction base="xs:string">
+            
+      <xs:enumeration value="ONBOARD"/>
+            
+      <xs:enumeration value="UPDATE"/>
+            
+      <xs:enumeration value="AUDIT"/>
+            
+      <xs:enumeration value="DRAFT"/>
+            
+      <xs:enumeration value="MOVE"/>
+          
+    </xs:restriction>
+      
+  </xs:simpleType>
+    
+  <xs:simpleType name="actionType">
+        
+    <xs:restriction base="xs:string">
+            
+      <xs:enumeration value="REGISTERED"/>
+            
+      <xs:enumeration value="APPROVED"/>
+            
+      <xs:enumeration value="REJECTED"/>
+            
+      <xs:enumeration value="UPDATED"/>
+            
+      <xs:enumeration value="UPDATED_VERSION"/>
+            
+      <xs:enumeration value="ACTIVATED"/>
+            
+      <xs:enumeration value="DEACTIVATED"/>
+            
+      <xs:enumeration value="SUSPENDED"/>
+            
+      <xs:enumeration value="UNSUSPENDED"/>
+            
+      <xs:enumeration value="VALID"/>
+            
+      <xs:enumeration value="INVALID"/>
+            
+      <xs:enumeration value="CREATED"/>
+            
+      <xs:enumeration value="MOVED"/>
+          
+    </xs:restriction>
+      
+  </xs:simpleType>
+    
+  <xs:simpleType name="field">
+        
+    <xs:restriction base="xs:string">
+            
+      <xs:enumeration value="ID"/>
+            
+      <xs:enumeration value="ABBREVIATION"/>
+            
+      <xs:enumeration value="NAME"/>
+            
+      <xs:enumeration value="RESOURCE_ORGANISATION"/>
+            
+      <xs:enumeration value="RESOURCE_PROVIDERS"/>
+            
+      <xs:enumeration value="WEBPAGE"/>
+            
+      <xs:enumeration value="ALTERNATIVE_IDENTIFIERS"/>
+            
+      <xs:enumeration value="DESCRIPTION"/>
+            
+      <xs:enumeration value="TAGLINE"/>
+            
+      <xs:enumeration value="LOGO"/>
+            
+      <xs:enumeration value="MULTIMEDIA"/>
+            
+      <xs:enumeration value="USE_CASES"/>
+            
+      <xs:enumeration value="SCIENTIFIC_DOMAINS"/>
+            
+      <xs:enumeration value="CATEGORIES"/>
+            
+      <xs:enumeration value="TARGET_USERS"/>
+            
+      <xs:enumeration value="ACCESS_TYPES"/>
+            
+      <xs:enumeration value="ACCESS_MODES"/>
+            
+      <xs:enumeration value="TAGS"/>
+            
+      <xs:enumeration value="HORIZONTAL_SERVICE"/>
+            
+      <xs:enumeration value="SERVICE_CATEGORIES"/>
+            
+      <xs:enumeration value="MARKETPLACE_LOCATIONS"/>
+            
+      <xs:enumeration value="GEOGRAPHICAL_AVAILABILITIES"/>
+            
+      <xs:enumeration value="LANGUAGE_AVAILABILITIES"/>
+            
+      <xs:enumeration value="RESOURCE_GEOGRAPHIC_LOCATIONS"/>
+            
+      <xs:enumeration value="MAIN_CONTACT"/>
+            
+      <xs:enumeration value="PUBLIC_CONTACTS"/>
+            
+      <xs:enumeration value="HELPDESK_EMAIL"/>
+            
+      <xs:enumeration value="SECURITY_CONTACT_EMAILS"/>
+            
+      <xs:enumeration value="TRL"/>
+            
+      <xs:enumeration value="LIFE_CYCLE_STATUS"/>
+            
+      <xs:enumeration value="CERTIFICATIONS"/>
+            
+      <xs:enumeration value="STANDARDS"/>
+            
+      <xs:enumeration value="OPEN_SOURCE_TECHNOLOGIES"/>
+            
+      <xs:enumeration value="VERSION"/>
+            
+      <xs:enumeration value="LAST_UPDATE"/>
+            
+      <xs:enumeration value="CHANGE_LOG"/>
+            
+      <xs:enumeration value="REQUIRED_RESOURCES"/>
+            
+      <xs:enumeration value="RELATED_RESOURCES"/>
+            
+      <xs:enumeration value="RELATED_PLATFORMS"/>
+            
+      <xs:enumeration value="CATALOGUE_ID"/>
+            
+      <xs:enumeration value="FUNDING_BODY"/>
+            
+      <xs:enumeration value="FUNDING_PROGRAMS"/>
+            
+      <xs:enumeration value="GRANT_PROJECT_NAMES"/>
+            
+      <xs:enumeration value="HELPDESK_PAGE"/>
+            
+      <xs:enumeration value="USER_MANUAL"/>
+            
+      <xs:enumeration value="TERMS_OF_USE"/>
+            
+      <xs:enumeration value="PRIVACY_POLICY"/>
+            
+      <xs:enumeration value="ACCESS_POLICY"/>
+            
+      <xs:enumeration value="RESOURCE_LEVEL"/>
+            
+      <xs:enumeration value="TRAINING_INFORMATION"/>
+            
+      <xs:enumeration value="STATUS_MONITORING"/>
+            
+      <xs:enumeration value="MAINTENANCE"/>
+            
+      <xs:enumeration value="ORDER_TYPE"/>
+            
+      <xs:enumeration value="ORDER"/>
+            
+      <xs:enumeration value="PAYMENT_MODEL"/>
+            
+      <xs:enumeration value="PRICING"/>
+          
+    </xs:restriction>
+      
+  </xs:simpleType>
+    
+  <xs:simpleType name="type">
+        
+    <xs:restriction base="xs:string">
+            
+      <xs:enumeration value="PROVIDER_AREA_OF_ACTIVITY"/>
+            
+      <xs:enumeration value="PROVIDER_ESFRI_TYPE"/>
+            
+      <xs:enumeration value="PROVIDER_ESFRI_DOMAIN"/>
+            
+      <xs:enumeration value="PROVIDER_HOSTING_LEGAL_ENTITY"/>
+            
+      <xs:enumeration value="PROVIDER_LEGAL_STATUS"/>
+            
+      <xs:enumeration value="PROVIDER_LIFE_CYCLE_STATUS"/>
+            
+      <xs:enumeration value="PROVIDER_NETWORK"/>
+            
+      <xs:enumeration value="PROVIDER_SOCIETAL_GRAND_CHALLENGE"/>
+            
+      <xs:enumeration value="PROVIDER_STRUCTURE_TYPE"/>
+            
+      <xs:enumeration value="PROVIDER_MERIL_SCIENTIFIC_DOMAIN"/>
+            
+      <xs:enumeration value="PROVIDER_MERIL_SCIENTIFIC_SUBDOMAIN"/>
+            
+      <xs:enumeration value="SUPERCATEGORY"/>
+            
+      <xs:enumeration value="CATEGORY"/>
+            
+      <xs:enumeration value="SUBCATEGORY"/>
+            
+      <xs:enumeration value="LANGUAGE"/>
+            
+      <xs:enumeration value="GEOGRAPHIC_LOCATION"/>
+            
+      <xs:enumeration value="REGION"/>
+            
+      <xs:enumeration value="COUNTRY"/>
+            
+      <xs:enumeration value="TRL"/>
+            
+      <xs:enumeration value="SCIENTIFIC_DOMAIN"/>
+            
+      <xs:enumeration value="SCIENTIFIC_SUBDOMAIN"/>
+            
+      <xs:enumeration value="TARGET_USER"/>
+            
+      <xs:enumeration value="ACCESS_TYPE"/>
+            
+      <xs:enumeration value="ACCESS_MODE"/>
+            
+      <xs:enumeration value="ORDER_TYPE"/>
+            
+      <xs:enumeration value="FUNDING_BODY"/>
+            
+      <xs:enumeration value="FUNDING_PROGRAM"/>
+            
+      <xs:enumeration value="LIFE_CYCLE_STATUS"/>
+            
+      <xs:enumeration value="RELATED_PLATFORM"/>
+            
+      <xs:enumeration value="SERVICE_CATEGORY"/>
+            
+      <xs:enumeration value="MARKETPLACE_LOCATION"/>
+            
+      <xs:enumeration value="CATALOGUE_STATE"/>
+            
+      <xs:enumeration value="PROVIDER_STATE"/>
+            
+      <xs:enumeration value="RESOURCE_STATE"/>
+            
+      <xs:enumeration value="DATASOURCE_STATE"/>
+            
+      <xs:enumeration value="TEMPLATE_STATE"/>
+            
+      <xs:enumeration value="INTEROPERABILITY_RECORD_STATE"/>
+            
+      <xs:enumeration value="DS_RESEARCH_ENTITY_TYPE"/>
+            
+      <xs:enumeration value="DS_PERSISTENT_IDENTITY_SCHEME"/>
+            
+      <xs:enumeration value="DS_JURISDICTION"/>
+            
+      <xs:enumeration value="DS_CLASSIFICATION"/>
+            
+      <xs:enumeration value="DS_COAR_ACCESS_RIGHTS_1_0"/>
+            
+      <xs:enumeration value="TR_URL_TYPE"/>
+            
+      <xs:enumeration value="TR_ACCESS_RIGHT"/>
+            
+      <xs:enumeration value="TR_DCMI_TYPE"/>
+            
+      <xs:enumeration value="TR_EXPERTISE_LEVEL"/>
+            
+      <xs:enumeration value="TR_CONTENT_RESOURCE_TYPE"/>
+            
+      <xs:enumeration value="TR_QUALIFICATION"/>
+            
+      <xs:enumeration value="MONITORING_MONITORED_BY"/>
+            
+      <xs:enumeration value="SEMANTIC_RELATIONSHIP"/>
+            
+      <xs:enumeration value="RESEARCH_CATEGORY"/>
+            
+      <xs:enumeration value="IR_IDENTIFIER_TYPE"/>
+            
+      <xs:enumeration value="IR_NAME_TYPE"/>
+            
+      <xs:enumeration value="IR_RESOURCE_TYPE_GENERAL"/>
+            
+      <xs:enumeration value="IR_STATUS"/>
+            
+      <xs:enumeration value="IR_EOSC_GUIDELINE_TYPE"/>
+            
+      <xs:enumeration value="CT_PROTOCOL"/>
+            
+      <xs:enumeration value="CT_COMPATIBILITY"/>
+          
+    </xs:restriction>
+      
+  </xs:simpleType>
+    
+  <xs:simpleType name="status">
+        
+    <xs:restriction base="xs:string">
+            
+      <xs:enumeration value="PENDING"/>
+            
+      <xs:enumeration value="APPROVED"/>
+            
+      <xs:enumeration value="REJECTED"/>
+          
+    </xs:restriction>
+      
+  </xs:simpleType>
+  
+</xs:schema>

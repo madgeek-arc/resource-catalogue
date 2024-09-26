@@ -14,7 +14,7 @@ import org.springframework.context.annotation.Primary;
 import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 
-import static gr.uoa.di.madgik.resourcecatalogue.config.Properties.Cache.*;
+import static gr.uoa.di.madgik.resourcecatalogue.config.Properties.Cache.CACHE_VISITS;
 
 @Configuration
 @EnableCaching
@@ -30,20 +30,6 @@ public class CacheConfig {
 
                 new ConcurrentMapCache(CACHE_VISITS,
                         CacheBuilder.newBuilder().expireAfterWrite(10, TimeUnit.MINUTES).maximumSize(2000).build().asMap(), false),
-                new ConcurrentMapCache(CACHE_FEATURED,
-                        CacheBuilder.newBuilder().expireAfterWrite(1, TimeUnit.HOURS).maximumSize(5).build().asMap(), false),
-                new ConcurrentMapCache(CACHE_PROVIDERS,
-                        CacheBuilder.newBuilder().expireAfterWrite(12, TimeUnit.HOURS).maximumSize(10).build().asMap(), false),
-                new ConcurrentMapCache(CACHE_EVENTS,
-                        CacheBuilder.newBuilder().expireAfterWrite(1, TimeUnit.HOURS).maximumSize(1000).build().asMap(), false),
-                new ConcurrentMapCache(CACHE_SERVICE_EVENTS,
-                        CacheBuilder.newBuilder().expireAfterWrite(12, TimeUnit.HOURS).maximumSize(1000).build().asMap(), false),
-                new ConcurrentMapCache(CACHE_VOCABULARIES,
-                        CacheBuilder.newBuilder().expireAfterWrite(12, TimeUnit.HOURS).maximumSize(50).build().asMap(), false),
-                new ConcurrentMapCache(CACHE_VOCABULARY_MAP,
-                        CacheBuilder.newBuilder().expireAfterWrite(12, TimeUnit.HOURS).maximumSize(50).build().asMap(), false),
-                new ConcurrentMapCache(CACHE_VOCABULARY_TREE,
-                        CacheBuilder.newBuilder().expireAfterWrite(12, TimeUnit.HOURS).maximumSize(50).build().asMap(), false),
 
                 // NEEDED FOR registry-core
                 new ConcurrentMapCache("resourceTypes"),

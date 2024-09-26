@@ -23,11 +23,31 @@
         <url>https://github.com/madgeek-arc/resource-catalogue.git</url>
         <tag>HEAD</tag>
     </scm>
+
+    <profiles>
+        <profile>
+            <id>eosc</id>
+            <dependencies>
+                <dependency>
+                    <groupId>gr.uoa.di.madgik</groupId>
+                    <artifactId>resource-catalogue-model</artifactId>
+                    <version>5.0.0-SNAPSHOT</version>
+                </dependency>
+        </dependencies>
+        </profile>
+        <profile>
+            <id>lot1</id>
+            <dependencies>
+                <dependency>
+                    <groupId>gr.uoa.di.madgik</groupId>
+                    <artifactId>resource-catalogue-model-lot1</artifactId>
+                    <version>1.0.0-SNAPSHOT</version>
+                </dependency>
+            </dependencies>
+        </profile>
+    </profiles>
+
     <dependencies>
-        <dependency>
-            <groupId>gr.uoa.di.madgik</groupId>
-            <artifactId>resource-catalogue-model</artifactId>
-        </dependency>
         <dependency>
             <groupId>gr.uoa.di.madgik</groupId>
             <artifactId>registry-core-api</artifactId>
@@ -54,6 +74,32 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>cz.habarta.typescript-generator</groupId>
+                <artifactId>typescript-generator-maven-plugin</artifactId>
+                <version>${typescript-generator-maven-plugin.version}</version>
+                <executions>
+                    <execution>
+                        <id>generate</id>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <phase>process-classes</phase>
+                    </execution>
+                </executions>
+                <configuration>
+                    <jsonLibrary>jackson2</jsonLibrary>
+                    <classPatterns>
+                        <pattern>gr.uoa.di.madgik.resourcecatalogue.domain.**</pattern>
+                        <pattern>gr.uoa.di.madgik.dto.**</pattern>
+                    </classPatterns>
+                    <outputFile>target/model.ts</outputFile>
+                    <outputKind>module</outputKind>
+                    <outputFileType>implementationFile</outputFileType>
+                    <mapEnum>asEnum</mapEnum>
+                    <mapClasses>asClasses</mapClasses>
+                </configuration>
             </plugin>
         </plugins>
     </build>

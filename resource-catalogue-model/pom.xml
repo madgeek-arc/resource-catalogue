@@ -91,33 +91,7 @@
                     <sources>
                         <source>${basedir}/src/main/java/gr/uoa/di/madgik/resourcecatalogue/domain</source>
                     </sources>
-                    <outputDirectory>${basedir}/src/main/resources</outputDirectory>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>cz.habarta.typescript-generator</groupId>
-                <artifactId>typescript-generator-maven-plugin</artifactId>
-                <version>${typescript-generator-maven-plugin.version}</version>
-                <executions>
-                    <execution>
-                        <id>generate</id>
-                        <goals>
-                            <goal>generate</goal>
-                        </goals>
-                        <phase>process-classes</phase>
-                    </execution>
-                </executions>
-                <configuration>
-                    <jsonLibrary>jackson2</jsonLibrary>
-                    <classPatterns>
-                        <pattern>gr.uoa.di.madgik.resourcecatalogue.domain.**</pattern>
-                        <pattern>gr.uoa.di.madgik.dto.**</pattern>
-                    </classPatterns>
-                    <outputFile>target/model.ts</outputFile>
-                    <outputKind>module</outputKind>
-                    <outputFileType>implementationFile</outputFileType>
-                    <mapEnum>asEnum</mapEnum>
-                    <mapClasses>asClasses</mapClasses>
+                    <outputDirectory>${basedir}/src/main/resources/schemas</outputDirectory>
                 </configuration>
             </plugin>
         </plugins>

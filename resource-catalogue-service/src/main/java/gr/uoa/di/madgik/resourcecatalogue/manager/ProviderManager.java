@@ -17,10 +17,8 @@ import gr.uoa.di.madgik.resourcecatalogue.utils.ProviderResourcesCommonMethods;
 import gr.uoa.di.madgik.resourcecatalogue.validators.FieldValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.cache.CacheManager;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.security.core.Authentication;
@@ -32,7 +30,6 @@ import java.time.ZoneId;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static gr.uoa.di.madgik.resourcecatalogue.config.Properties.Cache.*;
 import static gr.uoa.di.madgik.resourcecatalogue.utils.VocabularyValidationUtils.validateMerilScientificDomains;
 import static gr.uoa.di.madgik.resourcecatalogue.utils.VocabularyValidationUtils.validateScientificDomains;
 
@@ -58,8 +55,6 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     private final CatalogueService catalogueService;
     private final SynchronizerService<Provider> synchronizerService;
     private final ProviderResourcesCommonMethods commonMethods;
-    @Autowired
-    CacheManager cacheManager;
 
     @Value("${catalogue.id}")
     private String catalogueId;
@@ -107,13 +102,11 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     }
 
     @Override
-    // @CacheEvict(value = CACHE_PROVIDERS, allEntries = true)
     public ProviderBundle add(ProviderBundle provider, Authentication authentication) {
         return add(provider, null, authentication);
     }
 
     @Override
-    // @CacheEvict(value = CACHE_PROVIDERS, allEntries = true)
     public ProviderBundle add(ProviderBundle provider, String catalogueId, Authentication auth) {
         logger.trace("Attempting to add a new Provider: {} on Catalogue: {}", provider, catalogueId);
 
@@ -142,13 +135,11 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     }
 
     @Override
-    // @CacheEvict(value = CACHE_PROVIDERS, allEntries = true)
     public ProviderBundle update(ProviderBundle provider, String comment, Authentication auth) {
         return update(provider, provider.getProvider().getCatalogueId(), comment, auth);
     }
 
     @Override
-    // @CacheEvict(value = CACHE_PROVIDERS, allEntries = true)
     public ProviderBundle update(ProviderBundle providerBundle, String catalogueId, String comment, Authentication auth) {
         logger.trace("Attempting to update the Provider with id '{}' of the Catalogue '{}'", providerBundle, providerBundle.getProvider().getCatalogueId());
 
@@ -243,7 +234,6 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         return deserialize(resource);
     }
 
-    // @Cacheable(value = CACHE_PROVIDERS, key = "#catalogueId+#providerId+(#auth!=null?#auth:'')")
     public ProviderBundle get(String catalogueId, String providerId, Authentication auth) {
         ProviderBundle providerBundle = getWithCatalogue(providerId, catalogueId);
         CatalogueBundle catalogueBundle = catalogueService.get(catalogueId);
@@ -270,7 +260,6 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     }
 
     @Override
-    // @Cacheable(value = CACHE_PROVIDERS, key = "#id+(#auth!=null?#auth:'')")
     public ProviderBundle get(String id, Authentication auth) {
         ProviderBundle providerBundle = get(id);
         if (auth != null && auth.isAuthenticated()) {
@@ -335,7 +324,6 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     }
 
     @Override
-    // @Cacheable(value = CACHE_PROVIDERS, key = "#ff.hashCode()+(#auth!=null?#auth.hashCode():0)")
     public Browsing<ProviderBundle> getAll(FacetFilter ff, Authentication auth) {
         List<ProviderBundle> retList = new ArrayList<>();
 
@@ -370,7 +358,6 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     }
 
     @Override
-    // @CacheEvict(value = CACHE_PROVIDERS, allEntries = true)
     public void delete(ProviderBundle provider) {
         String catalogueId = provider.getProvider().getCatalogueId();
         // block Public Provider update
@@ -436,7 +423,6 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     }
 
     @Override
-    // @CacheEvict(value = CACHE_PROVIDERS, allEntries = true)
     public ProviderBundle verify(String id, String status, Boolean active, Authentication auth) {
         Vocabulary statusVocabulary = vocabularyService.getOrElseThrow(status);
         if (!statusVocabulary.getType().equals("Provider state")) {
@@ -487,7 +473,6 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     }
 
     @Override
-    // @CacheEvict(value = CACHE_PROVIDERS, allEntries = true)
     public ProviderBundle publish(String id, Boolean active, Authentication auth) {
         ProviderBundle provider = get(id);
         Resource existingResource = getResource(provider.getId(), provider.getProvider().getCatalogueId());
@@ -529,7 +514,6 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     }
 
     @Override
-    // @Cacheable(value = CACHE_PROVIDERS, key = "#email+(#auth!=null?#auth:'')")
     public List<ProviderBundle> getServiceProviders(String email, Authentication auth) {
         List<ProviderBundle> providers;
         if (auth == null) {
@@ -562,7 +546,6 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     }
 
     @Override
-    // @Cacheable(value = CACHE_PROVIDERS, key = "(#auth!=null?#auth:'')")
     public Browsing<ProviderBundle> getMy(FacetFilter ff, Authentication auth) {
         if (auth == null) {
             throw new InsufficientAuthenticationException("Please log in.");
@@ -710,7 +693,6 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     }
 
     @Override
-    // @CacheEvict(value = {CACHE_PROVIDERS, CACHE_SERVICE_EVENTS, CACHE_EVENTS}, allEntries = true)
     public void deleteUserInfo(Authentication authentication) {
         logger.trace("Attempting to delete User Info '{}'", authentication);
         User authenticatedUser = User.of(authentication);
@@ -820,7 +802,6 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     }
 
     @Override
-    // @CacheEvict(value = CACHE_PROVIDERS, allEntries = true)
     public ProviderBundle audit(String providerId, String comment, LoggingInfo.ActionType actionType, Authentication auth) {
         ProviderBundle provider = get(providerId);
         Resource existingResource = getResource(provider.getId(), provider.getProvider().getCatalogueId());
@@ -964,7 +945,6 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
 
 
     @Override
-    // @CacheEvict(value = CACHE_PROVIDERS, allEntries = true)
     public ProviderBundle suspend(String providerId, boolean suspend, Authentication auth) {
         ProviderBundle providerBundle = get(providerId, auth);
         Resource existingResource = getResource(providerBundle.getId(), providerBundle.getProvider().getCatalogueId());
@@ -976,7 +956,6 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         existingResource.setPayload(serialize(existingProvider));
         existingResource.setResourceType(resourceType);
         resourceService.updateResource(existingResource);
-        Objects.requireNonNull(cacheManager.getCache(CACHE_PROVIDERS)).clear();
 
         // Suspend Provider's resources
         List<ServiceBundle> services = serviceBundleService.getResourceBundles(catalogueId, providerId, auth).getResults();

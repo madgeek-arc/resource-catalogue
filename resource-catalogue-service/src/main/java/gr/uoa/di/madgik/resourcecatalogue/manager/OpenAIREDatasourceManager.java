@@ -108,7 +108,6 @@ public class OpenAIREDatasourceManager implements OpenAIREDatasourceService {
     }
 
     @Override
-
     public Datasource get(String id) {
         FacetFilter ff = new FacetFilter();
         ff.addFilter("id", id);

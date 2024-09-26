@@ -91,13 +91,11 @@ public class ServiceBundleManager extends AbstractServiceBundleManager<ServiceBu
     }
 
     @Override
-    // @CacheEvict(cacheNames = {CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)
     public ServiceBundle addResource(ServiceBundle serviceBundle, Authentication auth) {
         return addResource(serviceBundle, null, auth);
     }
 
     @Override
-    // @CacheEvict(cacheNames = {CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)
     public ServiceBundle addResource(ServiceBundle serviceBundle, String catalogueId, Authentication auth) {
         if (catalogueId == null || catalogueId.equals("")) { // add catalogue provider
             serviceBundle.getService().setCatalogueId(this.catalogueId);
@@ -169,13 +167,11 @@ public class ServiceBundleManager extends AbstractServiceBundleManager<ServiceBu
     }
 
     @Override
-    // @CacheEvict(cacheNames = {CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)
     public ServiceBundle updateResource(ServiceBundle serviceBundle, String comment, Authentication auth) {
         return updateResource(serviceBundle, serviceBundle.getService().getCatalogueId(), comment, auth);
     }
 
     @Override
-    // @CacheEvict(cacheNames = {CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)
     public ServiceBundle updateResource(ServiceBundle serviceBundle, String catalogueId, String comment, Authentication auth) {
 
         ServiceBundle ret = ObjectUtils.clone(serviceBundle);
@@ -335,7 +331,6 @@ public class ServiceBundleManager extends AbstractServiceBundleManager<ServiceBu
         super.delete(serviceBundle);
     }
 
-    // @CacheEvict(cacheNames = {CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)
     public ServiceBundle verify(String id, String status, Boolean active, Authentication auth) {
         Vocabulary statusVocabulary = vocabularyService.getOrElseThrow(status);
         if (!statusVocabulary.getType().equals("Resource state")) {
@@ -687,7 +682,6 @@ public class ServiceBundleManager extends AbstractServiceBundleManager<ServiceBu
     }
 
     @Override
-    // @CacheEvict(cacheNames = {CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)
     public ServiceBundle suspend(String serviceId, boolean suspend, Authentication auth) {
         ServiceBundle serviceBundle = get(serviceId);
         commonMethods.suspensionValidation(serviceBundle, serviceBundle.getService().getCatalogueId(),

@@ -1,0 +1,32 @@
+{
+  "indexFields": [
+    {
+      "multivalued": false,
+      "name": "resource_internal_id",
+      "path": "//*[local-name()='id']/text()",
+      "type": "java.lang.String",
+      "primaryKey": true
+    },
+    {
+      "multivalued": false,
+      "name": "provider_request_id",
+      "path": "//*[local-name()='id']/text()",
+      "type": "java.lang.String",
+      "primaryKey": true
+    },
+    {
+      "multivalued": false,
+      "name": "provider_id",
+      "path": "//*[local-name()='providerId']/text()",
+      "type": "java.lang.String"
+    }
+  ],
+  "indexMapperClass": "gr.uoa.di.madgik.registry.index.DefaultIndexMapper",
+  "name": "provider_request",
+  "aliasGroup": "resourceTypes",
+  "payloadType": "xml",
+  "properties": {
+    "class": "gr.uoa.di.madgik.resourcecatalogue.domain.ProviderRequest"
+  },
+  "schemaUrl": "https://raw.githubusercontent.com/madgeek-arc/resource-catalogue/version/5/resource-catalogue-model/src/main/resources/schemas/schema1.xsd"
+}

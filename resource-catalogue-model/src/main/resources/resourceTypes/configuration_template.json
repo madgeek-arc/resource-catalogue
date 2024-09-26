@@ -1,0 +1,102 @@
+{
+  "indexFields": [
+    {
+      "label": null,
+      "multivalued": false,
+      "name": "resource_internal_id",
+      "path": "$.configurationTemplate.id",
+      "primaryKey": true,
+      "type": "java.lang.String"
+    },
+    {
+      "label": "Interoperability Record ID",
+      "multivalued": false,
+      "name": "interoperability_record_id",
+      "path": "$.configurationTemplate.interoperabilityRecordId",
+      "type": "java.lang.String"
+    },
+    {
+      "label": "Name",
+      "multivalued": false,
+      "name": "name",
+      "path": "$.configurationTemplate.name",
+      "type": "java.lang.String"
+    },
+    {
+      "label": null,
+      "multivalued": false,
+      "name": "registeredBy",
+      "path": "$.metadata.registeredBy",
+      "type": "java.lang.String"
+    },
+    {
+      "label": null,
+      "multivalued": false,
+      "name": "modifiedBy",
+      "path": "$.metadata.modifiedBy",
+      "type": "java.lang.String"
+    },
+    {
+      "label": null,
+      "multivalued": false,
+      "name": "registeredAt",
+      "path": "$.metadata.registeredAt",
+      "type": "java.util.Date"
+    },
+    {
+      "label": null,
+      "multivalued": false,
+      "name": "modifiedAt",
+      "path": "$.metadata.modifiedAt",
+      "type": "java.util.Date"
+    },
+    {
+      "label": null,
+      "multivalued": false,
+      "name": "originalId",
+      "path": "$.identifiers.originalId",
+      "type": "java.lang.String"
+    },
+    {
+      "label": null,
+      "multivalued": false,
+      "name": "published",
+      "path": "$.metadata.published",
+      "type": "java.lang.Boolean"
+    },
+    {
+      "defaultValue": "false",
+      "label": null,
+      "multivalued": false,
+      "name": "active",
+      "path": "$.active",
+      "type": "java.lang.Boolean"
+    },
+    {
+      "defaultValue": "false",
+      "label": null,
+      "multivalued": false,
+      "name": "suspended",
+      "path": "$.suspended",
+      "type": "java.lang.Boolean"
+    },
+    {
+      "defaultValue": "false",
+      "label": null,
+      "multivalued": false,
+      "name": "draft",
+      "path": "$.draft",
+      "type": "java.lang.Boolean"
+    }
+  ],
+  "indexMapperClass": "gr.uoa.di.madgik.registry.index.DefaultIndexMapper",
+  "name": "configuration_template",
+  "aliases": [
+    "resourceTypes"
+  ],
+  "payloadType": "json",
+  "properties": {
+    "class": "gr.uoa.di.madgik.resourcecatalogue.domain.ConfigurationTemplate"
+  },
+  "schema": "{\n\t\"$schema\": \"https://json-schema.org/draft/2019-09/schema\"\n}"
+}

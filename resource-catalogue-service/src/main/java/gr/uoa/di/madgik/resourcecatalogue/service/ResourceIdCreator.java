@@ -23,7 +23,7 @@ public class ResourceIdCreator implements IdCreator {
     private String providersPrefix;
     @Value("${prefix.guidelines}")
     private String guidelinesPrefix;
-//    @Value("${prefix.catalogues}")
+    //    @Value("${prefix.catalogues}")
 //    private String cataloguesPrefix;
     @Value("${prefix.configurationTemplates}")
     private String configurationTemplatesPrefix;

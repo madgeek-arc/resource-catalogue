@@ -466,10 +466,11 @@ public class CatalogueController {
 
     @Operation(description = "Creates a new Datasource for the specific Catalogue.")
     @PostMapping(path = "{catalogueId}/datasource", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') " +
-            "or @securityService.isResourceProviderAdmin(#auth, #datasource.serviceId, #datasource.catalogueId)")
-    public ResponseEntity<Datasource> addCatalogueDatasource(@RequestBody Datasource datasource,
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth, #datasource.serviceId, #datasource.catalogueId)")
+    public ResponseEntity<Datasource> addCatalogueDatasource(@PathVariable("catalogueId") String catalogueId,
+                                                             @RequestBody Datasource datasource,
                                                              @Parameter(hidden = true) Authentication auth) {
+        // TODO: use or remove catalogueId
         DatasourceBundle ret = this.datasourceService.add(new DatasourceBundle(datasource), auth);
         logger.info("Added the Datasource with id '{}' in the Catalogue '{}'",
                 datasource.getId(), datasource.getCatalogueId());
@@ -480,9 +481,11 @@ public class CatalogueController {
     @PutMapping(path = "{catalogueId}/datasource", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') " +
             "or @securityService.isResourceProviderAdmin(#auth, #datasource.serviceId, #datasource.catalogueId)")
-    public ResponseEntity<Datasource> updateCatalogueDatasource(@RequestBody Datasource datasource,
+    public ResponseEntity<Datasource> updateCatalogueDatasource(@PathVariable("catalogueId") String catalogueId,
+                                                                @RequestBody Datasource datasource,
                                                                 @RequestParam(required = false) String comment,
                                                                 @Parameter(hidden = true) Authentication auth) {
+        // TODO: use or remove catalogueId
         DatasourceBundle ret = this.datasourceService.update(new DatasourceBundle(datasource), comment, auth);
         logger.info("Updated the Datasource with id '{} of the Catalogue '{}'",
                 datasource.getId(), datasource.getCatalogueId());

@@ -60,13 +60,11 @@ public class InteroperabilityRecordManager extends ResourceManager<Interoperabil
     }
 
     @Override
-    // @CacheEvict(cacheNames = {CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)
     public InteroperabilityRecordBundle add(InteroperabilityRecordBundle interoperabilityRecordBundle, Authentication auth) {
         return add(interoperabilityRecordBundle, null, auth);
     }
 
     @Override
-    // @CacheEvict(cacheNames = {CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)
     public InteroperabilityRecordBundle add(InteroperabilityRecordBundle interoperabilityRecordBundle, String catalogueId, Authentication auth) {
         if (catalogueId == null || catalogueId.equals("")) { // add catalogue provider
             interoperabilityRecordBundle.getInteroperabilityRecord().setCatalogueId(this.catalogueId);
@@ -112,13 +110,11 @@ public class InteroperabilityRecordManager extends ResourceManager<Interoperabil
     }
 
     @Override
-    // @CacheEvict(cacheNames = {CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)
     public InteroperabilityRecordBundle update(InteroperabilityRecordBundle interoperabilityRecordBundle, Authentication auth) {
         return update(interoperabilityRecordBundle, interoperabilityRecordBundle.getInteroperabilityRecord().getCatalogueId(), auth);
     }
 
     @Override
-    // @CacheEvict(cacheNames = {CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)
     public InteroperabilityRecordBundle update(InteroperabilityRecordBundle interoperabilityRecordBundle, String catalogueId, Authentication auth) {
         logger.trace("Attempting to update the Interoperability Record with id '{}'", interoperabilityRecordBundle.getId());
 
@@ -215,7 +211,7 @@ public class InteroperabilityRecordManager extends ResourceManager<Interoperabil
         super.delete(interoperabilityRecordBundle);
     }
 
-    // @CacheEvict(cacheNames = {CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)
+
     public InteroperabilityRecordBundle verify(String id, String status, Boolean active, Authentication auth) {
         Vocabulary statusVocabulary = vocabularyService.getOrElseThrow(status);
         if (!statusVocabulary.getType().equals("Interoperability Record state")) {
@@ -399,7 +395,7 @@ public class InteroperabilityRecordManager extends ResourceManager<Interoperabil
         return interoperabilityRecordBundle;
     }
 
-    // @CacheEvict(cacheNames = {CACHE_PROVIDERS, CACHE_FEATURED}, allEntries = true)
+
     public InteroperabilityRecordBundle suspend(String interoperabilityRecordId, boolean suspend, Authentication auth) {
         InteroperabilityRecordBundle interoperabilityRecordBundle = get(interoperabilityRecordId);
         commonMethods.suspensionValidation(interoperabilityRecordBundle, interoperabilityRecordBundle.getInteroperabilityRecord().getCatalogueId(),
