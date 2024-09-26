@@ -13,10 +13,8 @@ import java.util.Objects;
 @XmlRootElement(namespace = "http://einfracentral.eu")
 public class ProviderLocation {
 
-
-    // Provider's Location Information
     /**
-     * Street and Number of incorporation or Physical location of the Provider or its coordinating centre in the case of distributed, virtual, and mobile providers.
+     * Street and Number of incorporation or Physical location of the resource or its coordinating centre in the case of distributed, virtual, and mobile resources.
      */
     @XmlElement(required = true)
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
@@ -24,7 +22,7 @@ public class ProviderLocation {
     private String streetNameAndNumber;
 
     /**
-     * Postal code of incorporation or Physical location of the Provider or its coordinating centre in the case of distributed, virtual, and mobile providers.
+     * Postal code of incorporation or Physical location of the resource or its coordinating centre in the case of distributed, virtual, and mobile resources.
      */
     @XmlElement(required = true)
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
@@ -32,7 +30,7 @@ public class ProviderLocation {
     private String postalCode;
 
     /**
-     * City of incorporation or Physical location of the Provider or its coordinating centre in the case of distributed, virtual, and mobile providers.
+     * City of incorporation or Physical location of the resource or its coordinating centre in the case of distributed, virtual, and mobile resources.
      */
     @XmlElement(required = true)
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
@@ -40,7 +38,7 @@ public class ProviderLocation {
     private String city;
 
     /**
-     * Region of incorporation or Physical location of the Provider or its coordinating centre in the case of distributed, virtual, and mobile providers.
+     * Region of incorporation or Physical location of the resource or its coordinating centre in the case of distributed, virtual, and mobile resources.
      */
     @XmlElement
     @Schema
@@ -48,7 +46,7 @@ public class ProviderLocation {
     private String region;
 
     /**
-     * Country of incorporation or Physical location of the Provider or its coordinating centre in the case of distributed, virtual, and mobile providers.
+     * Country of incorporation or Physical location of the resource or its coordinating centre in the case of distributed, virtual, and mobile resources.
      */
     @XmlElement(required = true)
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED)

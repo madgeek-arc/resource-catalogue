@@ -115,7 +115,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         provider.setId(idCreator.generate(getResourceType()));
 
         // register and ensure Resource Catalogue's PID uniqueness
-        commonMethods.createPIDAndCorrespondingAlternativeIdentifier(provider, getResourceType());
+        commonMethods.determineResourceAndCreateAlternativeIdentifierForPID(provider, getResourceType());
         provider.getProvider().setAlternativeIdentifiers(commonMethods.ensureResourceCataloguePidUniqueness(provider.getId(),
                 provider.getProvider().getAlternativeIdentifiers()));
 
@@ -162,7 +162,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         // ensure Resource Catalogue's PID uniqueness
         if (ret.getProvider().getAlternativeIdentifiers() == null ||
                 ret.getProvider().getAlternativeIdentifiers().isEmpty()) {
-            commonMethods.createPIDAndCorrespondingAlternativeIdentifier(ret, getResourceType());
+            commonMethods.determineResourceAndCreateAlternativeIdentifierForPID(ret, getResourceType());
         } else {
             ret.getProvider().setAlternativeIdentifiers(commonMethods.ensureResourceCataloguePidUniqueness(ret.getId(),
                     ret.getProvider().getAlternativeIdentifiers()));
@@ -233,7 +233,6 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         }
         return deserialize(resource);
     }
-
 
     public ProviderBundle get(String catalogueId, String providerId, Authentication auth) {
         ProviderBundle providerBundle = getWithCatalogue(providerId, catalogueId);

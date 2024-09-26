@@ -122,7 +122,7 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
         trainingResourceBundle.setId(idCreator.generate(getResourceType()));
 
         // register and ensure Resource Catalogue's PID uniqueness
-        commonMethods.createPIDAndCorrespondingAlternativeIdentifier(trainingResourceBundle, getResourceType());
+        commonMethods.determineResourceAndCreateAlternativeIdentifierForPID(trainingResourceBundle, getResourceType());
         trainingResourceBundle.getTrainingResource().setAlternativeIdentifiers(
                 commonMethods.ensureResourceCataloguePidUniqueness(trainingResourceBundle.getId(),
                         trainingResourceBundle.getTrainingResource().getAlternativeIdentifiers()));
@@ -214,7 +214,7 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
         // ensure Resource Catalogue's PID uniqueness
         if (ret.getTrainingResource().getAlternativeIdentifiers() == null ||
                 ret.getTrainingResource().getAlternativeIdentifiers().isEmpty()) {
-            commonMethods.createPIDAndCorrespondingAlternativeIdentifier(ret, getResourceType());
+            commonMethods.determineResourceAndCreateAlternativeIdentifierForPID(ret, getResourceType());
         } else {
             ret.getTrainingResource().setAlternativeIdentifiers(
                     commonMethods.ensureResourceCataloguePidUniqueness(ret.getId(),

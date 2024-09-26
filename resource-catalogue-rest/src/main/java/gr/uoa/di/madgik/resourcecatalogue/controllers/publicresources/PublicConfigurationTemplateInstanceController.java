@@ -51,7 +51,7 @@ public class PublicConfigurationTemplateInstanceController {
     public ResponseEntity<?> getPublicConfigurationTemplateInstance(@PathVariable("id") String id) {
         ConfigurationTemplateInstanceBundle configurationTemplateInstanceBundle = configurationTemplateInstanceService.get(id);
         if (configurationTemplateInstanceBundle.getMetadata().isPublished()) {
-            ConfigurationTemplateInstanceDto ret = configurationTemplateInstanceService.createConfigurationTemplateInstanceDto(configurationTemplateInstanceBundle.getConfigurationTemplateInstance());
+            ConfigurationTemplateInstanceDto ret = configurationTemplateInstanceService.createCTIDto(configurationTemplateInstanceBundle.getConfigurationTemplateInstance());
             return new ResponseEntity<>(ret, HttpStatus.OK);
         }
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(gson.toJson("You cannot view the specific Configuration Template Instance."));
@@ -89,7 +89,7 @@ public class PublicConfigurationTemplateInstanceController {
         List<ConfigurationTemplateInstanceDto> configurationTemplateInstanceList = new LinkedList<>();
         Paging<ConfigurationTemplateInstanceBundle> configurationTemplateInstanceBundlePaging = configurationTemplateInstanceService.getAll(ff, auth);
         for (ConfigurationTemplateInstanceBundle configurationTemplateInstanceBundle : configurationTemplateInstanceBundlePaging.getResults()) {
-            configurationTemplateInstanceList.add(configurationTemplateInstanceService.createConfigurationTemplateInstanceDto(configurationTemplateInstanceBundle.getConfigurationTemplateInstance()));
+            configurationTemplateInstanceList.add(configurationTemplateInstanceService.createCTIDto(configurationTemplateInstanceBundle.getConfigurationTemplateInstance()));
         }
         Paging<ConfigurationTemplateInstanceDto> configurationTemplateInstancePaging = new Paging<>(configurationTemplateInstanceBundlePaging.getTotal(), configurationTemplateInstanceBundlePaging.getFrom(),
                 configurationTemplateInstanceBundlePaging.getTo(), configurationTemplateInstanceList, configurationTemplateInstanceBundlePaging.getFacets());

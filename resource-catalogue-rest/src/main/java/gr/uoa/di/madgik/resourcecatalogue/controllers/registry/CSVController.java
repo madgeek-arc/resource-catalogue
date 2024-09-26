@@ -10,6 +10,7 @@ import gr.uoa.di.madgik.resourcecatalogue.service.ProviderService;
 import gr.uoa.di.madgik.resourcecatalogue.service.ServiceBundleService;
 import gr.uoa.di.madgik.resourcecatalogue.service.VocabularyService;
 import gr.uoa.di.madgik.resourcecatalogue.utils.CSVService;
+import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -31,6 +32,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.List;
 
+@Hidden
 @Profile("beyond")
 @RestController
 @RequestMapping("exportToCSV")
@@ -54,7 +56,8 @@ public class CSVController {
         this.csvService = csvService;
     }
 
-    @Operation(summary = "Downloads a csv file with Provider entries")
+    @Hidden
+    @Operation(summary = "Downloads a csv file with Provider entries.")
     @GetMapping(path = "providers", produces = {MediaType.APPLICATION_OCTET_STREAM_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     public ResponseEntity<String> providersToCSV(@RequestParam(required = false) Boolean published,
@@ -67,7 +70,8 @@ public class CSVController {
         return ResponseEntity.ok(csvData);
     }
 
-    @Operation(summary = "Downloads a csv file with Service entries")
+    @Hidden
+    @Operation(summary = "Downloads a csv file with Service entries.")
     @GetMapping(path = "services", produces = {MediaType.APPLICATION_OCTET_STREAM_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     public ResponseEntity<String> servicesToCSV(@RequestParam(required = false) Boolean published,
@@ -80,7 +84,8 @@ public class CSVController {
         return ResponseEntity.ok(csvData);
     }
 
-    @Operation(summary = "Downloads a csv file with Vocabulary entries")
+    @Hidden
+    @Operation(summary = "Downloads a csv file with Vocabulary entries.")
     @GetMapping(path = "vocabularies", produces = {MediaType.APPLICATION_OCTET_STREAM_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     public ResponseEntity<String> vocabulariesToCSV(@Parameter(hidden = true) Authentication auth,
@@ -92,7 +97,8 @@ public class CSVController {
         return ResponseEntity.ok(csvData);
     }
 
-    @Operation(summary = "Downloads a csv file with the number of approved services per provider and country, before a specific date")
+    @Hidden
+    @Operation(summary = "Downloads a csv file with the number of approved services per provider and country, before a specific date.")
     @GetMapping(path = "approvedServicesByProviderAndCountry", produces = {MediaType.APPLICATION_OCTET_STREAM_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     public void numberOfServicesPerProviderCountryToCSV(@Parameter(description = "Before date (format yyyy-MM-dd)", example = "2023-01-01")
@@ -103,10 +109,6 @@ public class CSVController {
         List<ProviderBundle> providers = providerService.getAll(createFacetFilter(false), auth).getResults();
         List<ServiceBundle> services = serviceBundleService.getAll(createFacetFilter(false), auth).getResults();
         csvService.computeApprovedServicesBeforeTimestampAndGenerateCSV(timestamp, providers, services, response);
-
-//        for (Map.Entry<String, Integer> entry : providerToServiceCountApprovedBeforeTimestamp.entrySet()) {
-//            logger.info(providerIdToName.get(entry.getKey()) + " : " + providerIdToCountry.get(entry.getKey()) + " : " + entry.getValue());
-//        }
     }
 
     private FacetFilter createFacetFilter(Boolean published) {

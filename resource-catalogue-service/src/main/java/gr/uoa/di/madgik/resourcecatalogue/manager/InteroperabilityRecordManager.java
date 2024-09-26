@@ -74,7 +74,7 @@ public class InteroperabilityRecordManager extends ResourceManager<Interoperabil
         interoperabilityRecordBundle.setId(idCreator.generate(getResourceType()));
 
         // register and ensure Resource Catalogue's PID uniqueness
-        commonMethods.createPIDAndCorrespondingAlternativeIdentifier(interoperabilityRecordBundle, getResourceType());
+        commonMethods.determineResourceAndCreateAlternativeIdentifierForPID(interoperabilityRecordBundle, getResourceType());
         interoperabilityRecordBundle.getInteroperabilityRecord().setAlternativeIdentifiers(
                 commonMethods.ensureResourceCataloguePidUniqueness(interoperabilityRecordBundle.getId(),
                         interoperabilityRecordBundle.getInteroperabilityRecord().getAlternativeIdentifiers()));
@@ -139,7 +139,7 @@ public class InteroperabilityRecordManager extends ResourceManager<Interoperabil
         // ensure Resource Catalogue's PID uniqueness
         if (ret.getInteroperabilityRecord().getAlternativeIdentifiers() == null ||
                 ret.getInteroperabilityRecord().getAlternativeIdentifiers().isEmpty()) {
-            commonMethods.createPIDAndCorrespondingAlternativeIdentifier(ret, getResourceType());
+            commonMethods.determineResourceAndCreateAlternativeIdentifierForPID(ret, getResourceType());
         } else {
             ret.getInteroperabilityRecord().setAlternativeIdentifiers(
                     commonMethods.ensureResourceCataloguePidUniqueness(ret.getId(),

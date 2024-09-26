@@ -3,6 +3,8 @@ package gr.uoa.di.madgik.resourcecatalogue.controllers.registry;
 import gr.uoa.di.madgik.resourcecatalogue.domain.configurationTemplates.ConfigurationTemplate;
 import gr.uoa.di.madgik.resourcecatalogue.domain.configurationTemplates.ConfigurationTemplateBundle;
 import gr.uoa.di.madgik.resourcecatalogue.service.ConfigurationTemplateService;
+import io.swagger.v3.oas.annotations.Hidden;
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.apache.logging.log4j.LogManager;
@@ -18,9 +20,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 
+@Hidden
 @RestController
 @RequestMapping("configurationTemplate")
-@Tag(name = "configuration template")
+@Tag(name = "configuration template", description = "Operations about Configuration Templates")
 public class ConfigurationTemplateController {
 
     private static final Logger logger = LogManager.getLogger(ConfigurationTemplateController.class);
@@ -30,12 +33,14 @@ public class ConfigurationTemplateController {
         this.configurationTemplateService = configurationTemplateService;
     }
 
-    //    @Operation(summary = "Create a new ConfigurationTemplate.")
+    @Hidden
+    @Operation(summary = "Create a new ConfigurationTemplate.")
     @PostMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<ConfigurationTemplate> addConfigurationTemplate(@RequestBody ConfigurationTemplate configurationTemplate,
                                                                           @Parameter(hidden = true) Authentication auth) {
-        ConfigurationTemplateBundle configurationTemplateBundle = configurationTemplateService.addConfigurationTemplate(new ConfigurationTemplateBundle(configurationTemplate), auth);
+        ConfigurationTemplateBundle configurationTemplateBundle = configurationTemplateService.addConfigurationTemplate(
+                new ConfigurationTemplateBundle(configurationTemplate), auth);
         logger.info("Added the Configuration Template Instance with id '{}'", configurationTemplate.getId());
         return new ResponseEntity<>(configurationTemplateBundle.getConfigurationTemplate(), HttpStatus.CREATED);
     }

@@ -5,23 +5,23 @@ import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Bundle;
 import gr.uoa.di.madgik.resourcecatalogue.service.GenericResourceService;
 import gr.uoa.di.madgik.resourcecatalogue.service.PIDService;
-import gr.uoa.di.madgik.resourcecatalogue.utils.ProviderResourcesCommonMethods;
+import gr.uoa.di.madgik.resourcecatalogue.utils.PIDUtils;
 
 @org.springframework.stereotype.Service("pidManager")
 public class PIDManager implements PIDService {
 
-    private final ProviderResourcesCommonMethods commonMethods;
+    private final PIDUtils pidUtils;
     private final GenericResourceService genericResourceService;
 
-    public PIDManager(ProviderResourcesCommonMethods commonMethods,
+    public PIDManager(PIDUtils pidUtils,
                       GenericResourceService genericResourceService) {
-        this.commonMethods = commonMethods;
+        this.pidUtils = pidUtils;
         this.genericResourceService = genericResourceService;
     }
 
     public Bundle<?> get(String prefix, String suffix) {
         String pid = prefix + "/" + suffix;
-        String resourceType = commonMethods.determineResourceTypeFromPidPrefix(prefix);
+        String resourceType = pidUtils.determineResourceTypeFromPidPrefix(prefix);
         if (!resourceType.equals("no_resource_type")) {
             FacetFilter ff = new FacetFilter();
             ff.setQuantity(10000);
@@ -36,6 +36,6 @@ public class PIDManager implements PIDService {
     }
 
     public void register(String pid) {
-        commonMethods.postPID(pid);
+        pidUtils.postPID(pid);
     }
 }

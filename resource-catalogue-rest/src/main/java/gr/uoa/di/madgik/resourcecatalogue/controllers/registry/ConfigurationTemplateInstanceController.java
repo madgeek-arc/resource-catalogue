@@ -9,6 +9,7 @@ import gr.uoa.di.madgik.resourcecatalogue.domain.configurationTemplates.Configur
 import gr.uoa.di.madgik.resourcecatalogue.domain.configurationTemplates.ConfigurationTemplateInstanceDto;
 import gr.uoa.di.madgik.resourcecatalogue.service.ConfigurationTemplateInstanceService;
 import gr.uoa.di.madgik.resourcecatalogue.utils.FacetFilterUtils;
+import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -30,132 +31,156 @@ import java.util.Map;
 @Profile("beyond")
 @RestController
 @RequestMapping("configurationTemplateInstance")
-@Tag(name = "configuration template instance")
+@Tag(name = "configuration template instance", description = "Operations about Configuration Template Instances")
 public class ConfigurationTemplateInstanceController {
 
     private static final Logger logger = LogManager.getLogger(ConfigurationTemplateInstanceController.class);
-    private final ConfigurationTemplateInstanceService configurationTemplateInstanceService;
+    private final ConfigurationTemplateInstanceService ctiService;
 
-    public ConfigurationTemplateInstanceController(ConfigurationTemplateInstanceService configurationTemplateInstanceService) {
-        this.configurationTemplateInstanceService = configurationTemplateInstanceService;
+    public ConfigurationTemplateInstanceController(ConfigurationTemplateInstanceService ctiService) {
+        this.ctiService = ctiService;
     }
 
-    @Operation(summary = "Returns the ConfigurationTemplateInstance with the given id.")
+    @Operation(summary = "Returns the Configuration Template Instance with the given id.")
     @GetMapping(path = "{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    public ResponseEntity<ConfigurationTemplateInstanceDto> getConfigurationTemplateInstance(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
-                                                                                             @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix) {
+    public ResponseEntity<ConfigurationTemplateInstanceDto> getCTI(@Parameter(description = "The left part of the ID before the '/'")
+                                                                   @PathVariable("prefix") String prefix,
+                                                                   @Parameter(description = "The right part of the ID after the '/'")
+                                                                   @PathVariable("suffix") String suffix) {
         String id = prefix + "/" + suffix;
-        ConfigurationTemplateInstance configurationTemplateInstance = configurationTemplateInstanceService.get(id).getConfigurationTemplateInstance();
-        ConfigurationTemplateInstanceDto ret = configurationTemplateInstanceService.createConfigurationTemplateInstanceDto(configurationTemplateInstance);
+        ConfigurationTemplateInstance configurationTemplateInstance = ctiService.get(id).getConfigurationTemplateInstance();
+        ConfigurationTemplateInstanceDto ret = ctiService.createCTIDto(configurationTemplateInstance);
         return new ResponseEntity<>(ret, HttpStatus.OK);
     }
 
-    @Operation(summary = "Filter a list of ConfigurationTemplateInstances based on a set of filters or get a list of all ConfigurationTemplateInstances in the Catalogue.")
     @Browse
+    @Operation(summary = "Get a list of all Configuration Template Instances in the Portal.")
     @GetMapping(path = "all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    public ResponseEntity<Paging<ConfigurationTemplateInstanceDto>> getAllConfigurationTemplateInstances(@Parameter(hidden = true) @RequestParam Map<String, Object> allRequestParams,
-                                                                                                         @Parameter(hidden = true) Authentication auth) {
-        FacetFilter ff = FacetFilterUtils.createFacetFilter(allRequestParams);
+    public ResponseEntity<Paging<ConfigurationTemplateInstanceDto>> getAllCTI(@Parameter(hidden = true)
+                                                                              @RequestParam Map<String, Object> params,
+                                                                              @Parameter(hidden = true) Authentication auth) {
+        FacetFilter ff = FacetFilterUtils.createFacetFilter(params);
         ff.addFilter("published", false);
         List<ConfigurationTemplateInstanceDto> configurationTemplateInstanceList = new LinkedList<>();
-        Paging<ConfigurationTemplateInstanceBundle> configurationTemplateInstanceBundlePaging = configurationTemplateInstanceService.getAll(ff, auth);
+        Paging<ConfigurationTemplateInstanceBundle> configurationTemplateInstanceBundlePaging = ctiService.getAll(ff, auth);
         for (ConfigurationTemplateInstanceBundle configurationTemplateInstanceBundle : configurationTemplateInstanceBundlePaging.getResults()) {
-            configurationTemplateInstanceList.add(configurationTemplateInstanceService.createConfigurationTemplateInstanceDto(configurationTemplateInstanceBundle.getConfigurationTemplateInstance()));
+            configurationTemplateInstanceList.add(ctiService.createCTIDto(
+                    configurationTemplateInstanceBundle.getConfigurationTemplateInstance()));
         }
-        Paging<ConfigurationTemplateInstanceDto> configurationTemplateInstancePaging = new Paging<>(configurationTemplateInstanceBundlePaging.getTotal(), configurationTemplateInstanceBundlePaging.getFrom(),
-                configurationTemplateInstanceBundlePaging.getTo(), configurationTemplateInstanceList, configurationTemplateInstanceBundlePaging.getFacets());
+        Paging<ConfigurationTemplateInstanceDto> configurationTemplateInstancePaging =
+                new Paging<>(configurationTemplateInstanceBundlePaging.getTotal(), configurationTemplateInstanceBundlePaging.getFrom(),
+                        configurationTemplateInstanceBundlePaging.getTo(), configurationTemplateInstanceList,
+                        configurationTemplateInstanceBundlePaging.getFacets());
         return new ResponseEntity<>(configurationTemplateInstancePaging, HttpStatus.OK);
     }
 
-    @Operation(summary = "Returns a List of ConfigurationTemplateInstance associated with the given 'resourceId'")
+    @Operation(summary = "Returns a list of all Configuration Template Instances associated with the given 'resourceId'.")
     @GetMapping(path = "getAllByResourceId/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    public ResponseEntity<List<ConfigurationTemplateInstanceDto>> getConfigurationTemplateInstancesByResourceId(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
-                                                                                                                @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix) {
+    public ResponseEntity<List<ConfigurationTemplateInstanceDto>> getCTIByResourceId(@Parameter(description = "The left part of the ID before the '/'")
+                                                                                     @PathVariable("prefix") String prefix,
+                                                                                     @Parameter(description = "The right part of the ID after the '/'")
+                                                                                     @PathVariable("suffix") String suffix) {
         String id = prefix + "/" + suffix;
-        List<ConfigurationTemplateInstance> configurationTemplateInstances = configurationTemplateInstanceService.getConfigurationTemplateInstancesByResourceId(id);
+        List<ConfigurationTemplateInstance> configurationTemplateInstances = ctiService.getCTIByResourceId(id);
         List<ConfigurationTemplateInstanceDto> ret = new ArrayList<>();
         for (ConfigurationTemplateInstance configurationTemplateInstance : configurationTemplateInstances) {
-            ret.add(configurationTemplateInstanceService.createConfigurationTemplateInstanceDto(configurationTemplateInstance));
+            ret.add(ctiService.createCTIDto(configurationTemplateInstance));
         }
         return new ResponseEntity<>(ret, HttpStatus.OK);
     }
 
-    //    @Operation(summary = "Returns a List of ConfigurationTemplateInstance associated with the given 'configurationTemplateId'")
+    @Operation(summary = "Returns a list of all Configuration Template Instances associated with the given 'configurationTemplateId'.")
     @GetMapping(path = "getAllByConfigurationTemplateId/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    public ResponseEntity<List<ConfigurationTemplateInstanceDto>> getConfigurationTemplateInstancesByConfigurationTemplateId(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
-                                                                                                                             @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix) {
+    public ResponseEntity<List<ConfigurationTemplateInstanceDto>> getCTIByConfigurationTemplateId(@Parameter(description = "The left part of the ID before the '/'")
+                                                                                                  @PathVariable("prefix") String prefix,
+                                                                                                  @Parameter(description = "The right part of the ID after the '/'")
+                                                                                                  @PathVariable("suffix") String suffix) {
         String id = prefix + "/" + suffix;
-        List<ConfigurationTemplateInstance> configurationTemplateInstances = configurationTemplateInstanceService.getConfigurationTemplateInstancesByConfigurationTemplateId(id);
+        List<ConfigurationTemplateInstance> configurationTemplateInstances = ctiService.getCTIByConfigurationTemplateId(id);
         List<ConfigurationTemplateInstanceDto> ret = new ArrayList<>();
         for (ConfigurationTemplateInstance configurationTemplateInstance : configurationTemplateInstances) {
-            ret.add(configurationTemplateInstanceService.createConfigurationTemplateInstanceDto(configurationTemplateInstance));
+            ret.add(ctiService.createCTIDto(configurationTemplateInstance));
         }
         return new ResponseEntity<>(ret, HttpStatus.OK);
     }
 
-    //    @Operation(summary = "Create a new ConfigurationTemplateInstance.")
+    @Hidden
+    @Operation(summary = "Create a new Configuration Template Instance.")
     @PostMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public ResponseEntity<ConfigurationTemplateInstance> addConfigurationTemplateInstance(@RequestBody ConfigurationTemplateInstance configurationTemplateInstance,
-                                                                                          @Parameter(hidden = true) Authentication auth) {
-        ConfigurationTemplateInstanceBundle configurationTemplateInstanceBundle = configurationTemplateInstanceService.add(new ConfigurationTemplateInstanceBundle(configurationTemplateInstance), auth);
+    public ResponseEntity<ConfigurationTemplateInstance> addCTI(@RequestBody ConfigurationTemplateInstance configurationTemplateInstance,
+                                                                @Parameter(hidden = true) Authentication auth) {
+        ConfigurationTemplateInstanceBundle configurationTemplateInstanceBundle =
+                ctiService.add(new ConfigurationTemplateInstanceBundle(configurationTemplateInstance), auth);
         logger.info("Added the Configuration Template Instance with id '{}'", configurationTemplateInstance.getId());
         return new ResponseEntity<>(configurationTemplateInstanceBundle.getConfigurationTemplateInstance(), HttpStatus.CREATED);
     }
 
-    //    @Operation(summary = "Add a List of ConfigurationTemplateInstances.")
-    @PostMapping(path = "addAll", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @Hidden
+    @Operation(description = "Add a bulk list of Configuration Template Instances.")
+    @PostMapping(path = "addBulk", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public ResponseEntity<List<ConfigurationTemplateInstance>> addConfigurationTemplateInstances(@RequestBody List<ConfigurationTemplateInstance> configurationTemplateInstances,
-                                                                                                 @Parameter(hidden = true) Authentication auth) {
+    public ResponseEntity<List<ConfigurationTemplateInstance>> addBulk(@RequestBody List<ConfigurationTemplateInstance> configurationTemplateInstances,
+                                                                       @Parameter(hidden = true) Authentication auth) {
         for (ConfigurationTemplateInstance configurationTemplateInstance : configurationTemplateInstances) {
-            configurationTemplateInstanceService.add(new ConfigurationTemplateInstanceBundle(configurationTemplateInstance), auth);
+            ctiService.add(new ConfigurationTemplateInstanceBundle(configurationTemplateInstance), auth);
             logger.info("Added the Configuration Template Instance with id '{}'", configurationTemplateInstance.getId());
         }
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    //    @Operation(summary = "Updates the ConfigurationTemplateInstance with the given id.")
+    @Hidden
+    @Operation(summary = "Updates the Configuration Template Instance with the given id.")
     @PutMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public ResponseEntity<ConfigurationTemplateInstance> updateConfigurationTemplateInstance(@RequestBody ConfigurationTemplateInstance configurationTemplateInstance,
-                                                                                             @Parameter(hidden = true) Authentication auth) throws ResourceNotFoundException {
-        ConfigurationTemplateInstanceBundle configurationTemplateInstanceBundle = configurationTemplateInstanceService.get(configurationTemplateInstance.getId());
+    public ResponseEntity<ConfigurationTemplateInstance> updateCTI(@RequestBody ConfigurationTemplateInstance configurationTemplateInstance,
+                                                                   @Parameter(hidden = true) Authentication auth) throws ResourceNotFoundException {
+        ConfigurationTemplateInstanceBundle configurationTemplateInstanceBundle = ctiService.get(configurationTemplateInstance.getId());
         configurationTemplateInstanceBundle.setConfigurationTemplateInstance(configurationTemplateInstance);
-        configurationTemplateInstanceBundle = configurationTemplateInstanceService.update(configurationTemplateInstanceBundle, auth);
+        configurationTemplateInstanceBundle = ctiService.update(configurationTemplateInstanceBundle, auth);
         logger.info("Updated the Configuration Template Instance with id '{}'", configurationTemplateInstanceBundle.getId());
         return new ResponseEntity<>(configurationTemplateInstanceBundle.getConfigurationTemplateInstance(), HttpStatus.OK);
     }
 
-    //    @DeleteMapping(path = "{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @Hidden
+    @Operation(summary = "Delete the Configuration Template Instance with the given id.")
+    @DeleteMapping(path = "{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public ResponseEntity<ConfigurationTemplateInstance> deleteConfigurationTemplateInstance(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
-                                                                                             @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix,
-                                                                                             @Parameter(hidden = true) Authentication auth) throws ResourceNotFoundException {
+    public ResponseEntity<ConfigurationTemplateInstance> deleteCTI(@Parameter(description = "The left part of the ID before the '/'")
+                                                                   @PathVariable("prefix") String prefix,
+                                                                   @Parameter(description = "The right part of the ID after the '/'")
+                                                                   @PathVariable("suffix") String suffix) throws ResourceNotFoundException {
         String id = prefix + "/" + suffix;
-        ConfigurationTemplateInstanceBundle configurationTemplateInstanceBundle = configurationTemplateInstanceService.get(id);
+        ConfigurationTemplateInstanceBundle configurationTemplateInstanceBundle = ctiService.get(id);
         if (configurationTemplateInstanceBundle == null) {
             return new ResponseEntity<>(HttpStatus.GONE);
         }
         logger.info("Deleting Configuration Template Instance: {}", configurationTemplateInstanceBundle.getConfigurationTemplateInstance().getId());
-        configurationTemplateInstanceService.delete(configurationTemplateInstanceBundle);
+        ctiService.delete(configurationTemplateInstanceBundle);
         logger.info("Deleted the Configuration Template Instance with id '{}'",
                 configurationTemplateInstanceBundle.getConfigurationTemplateInstance().getId());
         return new ResponseEntity<>(configurationTemplateInstanceBundle.getConfigurationTemplateInstance(), HttpStatus.OK);
     }
 
+    @Hidden
+    @Operation(summary = "Returns the Configuration Template Instance Bundle with the given id.")
     @GetMapping(path = "getBundle/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public ResponseEntity<ConfigurationTemplateInstanceBundle> getBundle(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
-                                                                         @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix) {
+    public ResponseEntity<ConfigurationTemplateInstanceBundle> getBundle(@Parameter(description = "The left part of the ID before the '/'")
+                                                                         @PathVariable("prefix") String prefix,
+                                                                         @Parameter(description = "The right part of the ID after the '/'")
+                                                                         @PathVariable("suffix") String suffix) {
         String id = prefix + "/" + suffix;
-        return new ResponseEntity<>(configurationTemplateInstanceService.get(id), HttpStatus.OK);
+        return new ResponseEntity<>(ctiService.get(id), HttpStatus.OK);
     }
 
-    //    @PutMapping(path = "updateBundle", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @Hidden
+    @Operation(summary = "Updates the Configuration Template Instance Bundle with the given id.")
+    @PutMapping(path = "updateBundle", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public ResponseEntity<ConfigurationTemplateInstanceBundle> updateBundle(@RequestBody ConfigurationTemplateInstanceBundle configurationTemplateInstanceBundle, @Parameter(hidden = true) Authentication authentication) throws ResourceNotFoundException {
-        ResponseEntity<ConfigurationTemplateInstanceBundle> ret = new ResponseEntity<>(configurationTemplateInstanceService.update(configurationTemplateInstanceBundle, authentication), HttpStatus.OK);
+    public ResponseEntity<ConfigurationTemplateInstanceBundle> updateBundle(@RequestBody ConfigurationTemplateInstanceBundle configurationTemplateInstanceBundle,
+                                                                            @Parameter(hidden = true) Authentication auth) throws ResourceNotFoundException {
+        ResponseEntity<ConfigurationTemplateInstanceBundle> ret = new ResponseEntity<>(ctiService.update(configurationTemplateInstanceBundle, auth), HttpStatus.OK);
         logger.info("Updated ConfigurationTemplateInstanceBundle with id: {}", configurationTemplateInstanceBundle.getConfigurationTemplateInstance().getId());
         return ret;
     }

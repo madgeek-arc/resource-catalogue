@@ -5,11 +5,13 @@ import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.resourcecatalogue.service.ProviderService;
 import gr.uoa.di.madgik.resourcecatalogue.service.SecurityService;
 import gr.uoa.di.madgik.resourcecatalogue.service.ServiceBundleService;
+import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.context.annotation.Profile;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -18,6 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.HashMap;
 import java.util.Map;
 
+@Hidden
 @Profile("beyond")
 @RestController
 @RequestMapping("info")
@@ -34,8 +37,10 @@ public class InfoController {
         this.securityService = securityService;
     }
 
-    @Operation(summary = "Get the total number of active Providers and Services registered in the Catalogue")
+    @Hidden
+    @Operation(summary = "Get the total number of active Providers and Services registered in the Catalogue.")
     @GetMapping(path = "numberOfProvidersAndServices", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     public ResponseEntity<Map<Object, Integer>> numberOfProvidersAndServices() {
         Map<Object, Integer> numberOfResources = new HashMap<>();
         FacetFilter ff = new FacetFilter();
