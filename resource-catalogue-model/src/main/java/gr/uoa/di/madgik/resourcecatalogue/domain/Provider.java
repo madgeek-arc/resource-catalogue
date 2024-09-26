@@ -171,8 +171,8 @@ public class Provider implements Identifiable {
     /**
      * List of the Provider's public contacts info.
      */
-    @XmlElementWrapper(name = "publicContacts")
-    @XmlElement(name = "publicContact", required = true)
+    @XmlElementWrapper(name = "publicContacts", required = true)
+    @XmlElement(name = "publicContact")
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     @FieldValidation
     private List<ProviderPublicContact> publicContacts;
