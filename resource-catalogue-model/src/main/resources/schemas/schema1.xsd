@@ -97,8 +97,6 @@
     
   <xs:element name="serviceCategory" type="tns:serviceCategory"/>
     
-  <xs:element name="serviceClassTier" type="tns:serviceClassTier"/>
-    
   <xs:element name="serviceMainContact" type="tns:serviceMainContact"/>
     
   <xs:element name="serviceProviderDomain" type="tns:serviceProviderDomain"/>
@@ -399,7 +397,7 @@ It is also possible to select Not a legal entity.]]></xs:documentation>
               
       </xs:element>
             
-      <xs:element minOccurs="0" name="publicContacts">
+      <xs:element name="publicContacts">
         <xs:annotation>
           <xs:documentation><![CDATA[List of the Catalogue's public contacts info.]]></xs:documentation>
         </xs:annotation>
@@ -408,7 +406,7 @@ It is also possible to select Not a legal entity.]]></xs:documentation>
                     
           <xs:sequence>
                         
-            <xs:element maxOccurs="unbounded" name="publicContact" type="tns:providerPublicContact"/>
+            <xs:element maxOccurs="unbounded" minOccurs="0" name="publicContact" type="tns:providerPublicContact"/>
                       
           </xs:sequence>
                   
@@ -1867,7 +1865,7 @@ For embedded providers (2) - legal status of the hosting legal entity. It is als
               
       </xs:element>
             
-      <xs:element minOccurs="0" name="publicContacts">
+      <xs:element name="publicContacts">
         <xs:annotation>
           <xs:documentation><![CDATA[List of the Provider's public contacts info.]]></xs:documentation>
         </xs:annotation>
@@ -1876,7 +1874,7 @@ For embedded providers (2) - legal status of the hosting legal entity. It is als
                     
           <xs:sequence>
                         
-            <xs:element maxOccurs="unbounded" name="publicContact" type="tns:providerPublicContact"/>
+            <xs:element maxOccurs="unbounded" minOccurs="0" name="publicContact" type="tns:providerPublicContact"/>
                       
           </xs:sequence>
                   
@@ -2480,7 +2478,7 @@ infrastructures.]]></xs:documentation>
         </xs:annotation>
       </xs:element>
             
-      <xs:element minOccurs="0" name="publicContacts">
+      <xs:element name="publicContacts">
         <xs:annotation>
           <xs:documentation><![CDATA[List of the Service's Public Contacts info.]]></xs:documentation>
         </xs:annotation>
@@ -2489,7 +2487,7 @@ infrastructures.]]></xs:documentation>
                     
           <xs:sequence>
                         
-            <xs:element maxOccurs="unbounded" name="publicContact" type="tns:servicePublicContact"/>
+            <xs:element maxOccurs="unbounded" minOccurs="0" name="publicContact" type="tns:servicePublicContact"/>
                       
           </xs:sequence>
                   
@@ -2903,22 +2901,6 @@ infrastructures.]]></xs:documentation>
       </xs:extension>
           
     </xs:complexContent>
-      
-  </xs:complexType>
-    
-  <xs:complexType name="serviceClassTier">
-        
-    <xs:sequence>
-            
-      <xs:element minOccurs="0" name="accessPolicy" type="xs:string"/>
-            
-      <xs:element minOccurs="0" name="costModel" type="xs:string"/>
-            
-      <xs:element default="3" name="level" type="xs:int"/>
-            
-      <xs:element maxOccurs="unbounded" minOccurs="0" name="offerings" type="xs:string"/>
-          
-    </xs:sequence>
       
   </xs:complexType>
     
