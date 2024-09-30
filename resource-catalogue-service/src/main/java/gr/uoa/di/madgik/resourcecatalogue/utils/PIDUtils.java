@@ -13,7 +13,10 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.*;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
@@ -34,9 +37,12 @@ public class PIDUtils {
     private static final Logger logger = LoggerFactory.getLogger(PIDUtils.class);
 
     private String endpoint;
+    private String user;
+    private String userIndex;
     private String certPath;
     private String keyPath;
 
+    // test
     @Value("${pid.test}")
     private boolean pidTest;
     @Value("${pid.test.user}")
@@ -46,59 +52,81 @@ public class PIDUtils {
     @Value("${pid.test.auth}")
     private String testAuth;
 
-    @Value("${pid.user.prefix}")
-    private String userPrefix;
-    @Value("${pid.user.suffix}")
-    private String userSuffix;
-
-    @Value("${pid.endpoint.providers}")
-    private String providersEndpoint;
-    @Value("${pid.endpoint.services}")
-    private String servicesEndpoint;
-    @Value("${pid.endpoint.trainings}")
-    private String trainingsEndpoint;
-    @Value("${pid.endpoint.guidelines}")
-    private String guidelinesEndpoint;
-    @Value("${pid.endpoint.tools}")
-    private String toolsEndpoint;
-
-    @Value("${marketplace.endpoint.enabled}")
-    private boolean marketplaceEnabled;
+    // MP
     @Value("${marketplace.endpoint}")
     private String marketplaceEndpoint;
+    @Value("${marketplace.endpoint.enabled}")
+    private boolean marketplaceEnabled;
 
-    @Value("${pid.cert.providers}")
-    private String providersCert;
-    @Value("${pid.cert.services}")
-    private String servicesCert;
-    @Value("${pid.cert.trainings}")
-    private String trainingsCert;
-    @Value("${pid.cert.guidelines}")
-    private String guidelinesCert;
-    @Value("${pid.cert.tools}")
-    private String toolsCert;
-
-    @Value("${pid.key.providers}")
-    private String providersKey;
-    @Value("${pid.key.services}")
-    private String servicesKey;
-    @Value("${pid.key.trainings}")
-    private String trainingsKey;
-    @Value("${pid.key.guidelines}")
-    private String guidelinesKey;
-    @Value("${pid.key.tools}")
-    private String toolsKey;
-
-    @Value("${prefix.providers}")
+    // providers
+    @Value("${pid.providers.base-url}")
+    private String providersEndpoint;
+    @Value("${pid.providers.prefix}")
     private String providersPrefix;
-    @Value("${prefix.services}")
+    @Value("${pid.providers.auth.user}")
+    private String providersUser;
+    @Value("${pid.providers.auth.user.index}")
+    private String providersUserIndex;
+    @Value("${pid.providers.auth.client-cert}")
+    private String providersCert;
+    @Value("${pid.providers.auth.client-key}")
+    private String providersKey;
+
+    // services
+    @Value("${pid.services.base-url}")
+    private String servicesEndpoint;
+    @Value("${pid.services.prefix}")
     private String servicesPrefix;
-    @Value("${prefix.trainings}")
+    @Value("${pid.services.auth.user}")
+    private String servicesUser;
+    @Value("${pid.services.auth.user.index}")
+    private String servicesUserIndex;
+    @Value("${pid.services.auth.client-cert}")
+    private String servicesCert;
+    @Value("${pid.services.auth.client-key}")
+    private String servicesKey;
+
+    // trainings
+    @Value("${pid.trainings.base-url}")
+    private String trainingsEndpoint;
+    @Value("${pid.trainings.prefix}")
     private String trainingsPrefix;
-    @Value("${prefix.guidelines}")
+    @Value("${pid.trainings.auth.user}")
+    private String trainingsUser;
+    @Value("${pid.trainings.auth.user.index}")
+    private String trainingsUserIndex;
+    @Value("${pid.trainings.auth.client-cert}")
+    private String trainingsCert;
+    @Value("${pid.trainings.auth.client-key}")
+    private String trainingsKey;
+
+    // guidelines
+    @Value("${pid.interoperability-frameworks.base-url}")
+    private String guidelinesEndpoint;
+    @Value("${pid.interoperability-frameworks.prefix}")
     private String guidelinesPrefix;
-    @Value("${prefix.tools}")
+    @Value("${pid.interoperability-frameworks.auth.user}")
+    private String guidelinesUser;
+    @Value("${pid.interoperability-frameworks.auth.user.index}")
+    private String guidelinesUserIndex;
+    @Value("${pid.interoperability-frameworks.auth.client-cert}")
+    private String guidelinesCert;
+    @Value("${pid.interoperability-frameworks.auth.client-key}")
+    private String guidelinesKey;
+
+    // tools
+    @Value("${pid.tools.base-url}")
+    private String toolsEndpoint;
+    @Value("${pid.tools.prefix}")
     private String toolsPrefix;
+    @Value("${pid.tools.auth.user}")
+    private String toolsUser;
+    @Value("${pid.tools.auth.user.index}")
+    private String toolsUserIndex;
+    @Value("${pid.tools.auth.client-cert}")
+    private String toolsCert;
+    @Value("${pid.tools.auth.client-key}")
+    private String toolsKey;
 
     public void postPID(String pid) {
         RestTemplate restTemplate = setConfigurationSettings(pid);
@@ -123,23 +151,33 @@ public class PIDUtils {
             restTemplate = RestTemplateTrustManager.createRestTemplateWithDisabledSSL();
         } else {
             if (prefix.equals(providersPrefix)) {
-                endpoint = providersEndpoint + pid;
+                endpoint = providersEndpoint + "api/handles/" + pid;
+                user = providersUser;
+                userIndex = providersUserIndex;
                 certPath = providersCert;
                 keyPath = providersKey;
             } else if (prefix.equals(servicesPrefix)) {
-                endpoint = servicesEndpoint + pid;
+                endpoint = servicesEndpoint + "api/handles/" + pid;
+                user = servicesUser;
+                userIndex = servicesUserIndex;
                 certPath = servicesCert;
                 keyPath = servicesKey;
             } else if (prefix.equals(trainingsPrefix)) {
-                endpoint = trainingsEndpoint + pid;
+                endpoint = trainingsEndpoint + "api/handles/" + pid;
+                user = trainingsUser;
+                userIndex = trainingsUserIndex;
                 certPath = trainingsCert;
                 keyPath = trainingsKey;
             } else if (prefix.equals(guidelinesPrefix)) {
-                endpoint = guidelinesEndpoint + pid;
+                endpoint = guidelinesEndpoint + "api/handles/" + pid;
+                user = guidelinesUser;
+                userIndex = guidelinesUserIndex;
                 certPath = guidelinesCert;
                 keyPath = guidelinesKey;
             } else if (prefix.equals(toolsPrefix)) {
-                endpoint = toolsEndpoint + pid;
+                endpoint = toolsEndpoint + "api/handles/" + pid;
+                user = toolsUser;
+                userIndex = toolsUserIndex;
                 certPath = toolsCert;
                 keyPath = toolsKey;
             } else {
@@ -213,8 +251,8 @@ public class PIDUtils {
             hs_admin_data_value.put("handle", testUser);
             hs_admin_data_value.put("index", 301);
         } else {
-            hs_admin_data_value.put("handle", pid.split("/")[0] + userSuffix);
-            hs_admin_data_value.put("index", userPrefix.split(":")[0]);
+            hs_admin_data_value.put("handle", user);
+            hs_admin_data_value.put("index", userIndex);
         }
         hs_admin_data_value.put("permissions", "011111110011");
         hs_admin_data.put("format", "admin");
@@ -225,8 +263,8 @@ public class PIDUtils {
         values.put(hs_admin);
         id_data.put("format", "string");
         id_data.put("value", pid);
-        id.put("index", 1);
-        id.put("type", "id");
+        id.put("index", 12345);
+        id.put("type", "testing update");
         id.put("data", id_data);
         values.put(id);
         //TODO: Enable when we have final MP endpoints (which projects?)
