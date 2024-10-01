@@ -200,8 +200,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         logger.debug("Updating Provider: {} of Catalogue: {}", ret, ret.getProvider().getCatalogueId());
 
         // check if Provider has become a Legal Entity
-        //TODO: do we need this?
-//        checkAndAddProviderToHLEVocabulary(ret);
+        checkAndAddProviderToHLEVocabulary(ret);
 
         // Send emails to newly added or deleted Admins
         adminDifferences(ret, existingProvider);
@@ -447,8 +446,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
                         LoggingInfo.ActionType.APPROVED.getKey());
 
                 // add Provider's Name as a HLE Vocabulary
-                //TODO: do we need this?
-//                checkAndAddProviderToHLEVocabulary(existingProvider);
+                checkAndAddProviderToHLEVocabulary(existingProvider);
                 break;
             case "rejected provider":
                 existingProvider.setActive(false);
@@ -891,11 +889,12 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
 
     private void checkAndAddProviderToHLEVocabulary(ProviderBundle providerBundle) {
         if (providerBundle.getStatus().equals("approved provider") && providerBundle.getProvider().isLegalEntity()) {
-            //TODO: if we need this better save with Abbreviation instead of ID
-            String hleId = "provider_hosting_legal_entity-" + providerBundle.getProvider().getId();
-            try {
-                vocabularyService.get(hleId);
-            } catch (ResourceException e) {
+            List<String> allHLENames = vocabularyService.getByType(Vocabulary.Type.PROVIDER_HOSTING_LEGAL_ENTITY)
+                    .stream().map(Vocabulary::getName).toList();
+            for (String hle : allHLENames) {
+                logger.info(hle);
+            }
+            if (!allHLENames.contains(providerBundle.getProvider().getName())) {
                 addApprovedProviderToHLEVocabulary(providerBundle);
             }
         }
