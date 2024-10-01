@@ -903,7 +903,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
 
     private void addApprovedProviderToHLEVocabulary(ProviderBundle providerBundle) {
         Vocabulary hle = new Vocabulary();
-        hle.setId("provider_hosting_legal_entity-" + providerBundle.getProvider().getId());
+        hle.setId("provider_hosting_legal_entity-" + idCreator.sanitizeString(providerBundle.getProvider().getName()));
         hle.setName(providerBundle.getProvider().getName());
         hle.setType(Vocabulary.Type.PROVIDER_HOSTING_LEGAL_ENTITY.getKey());
         hle.setExtras(new HashMap<>() {{
