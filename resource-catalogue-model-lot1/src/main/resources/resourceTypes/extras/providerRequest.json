@@ -22,8 +22,10 @@
     }
   ],
   "indexMapperClass": "gr.uoa.di.madgik.registry.index.DefaultIndexMapper",
+  "aliases": [
+    "resourceTypes"
+  ],
   "name": "provider_request",
-  "aliasGroup": "resourceTypes",
   "payloadType": "xml",
   "properties": {
     "class": "gr.uoa.di.madgik.resourcecatalogue.domain.ProviderRequest"

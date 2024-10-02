@@ -11,6 +11,9 @@ import org.springframework.stereotype.Service;
 @Service
 public class ResourceIdCreator implements IdCreator {
 
+    @Value("${pid.test}")
+    private boolean pidTest;
+
     private final SearchService searchService;
 
     @Value("${pid.services.prefix}")
@@ -80,7 +83,11 @@ public class ResourceIdCreator implements IdCreator {
 
     public boolean searchIdExists(String id, String resourceType) {
         FacetFilter ff = new FacetFilter();
-        ff.setResourceType(resourceType);
+        if (pidTest) {
+            ff.setResourceType("resourceTypes");
+        } else {
+            ff.setResourceType(resourceType);
+        }
         ff.addFilter("resource_internal_id", id);
         Paging<?> resources = searchService.search(ff);
         return resources.getTotal() > 0;
