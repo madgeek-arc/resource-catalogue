@@ -47,8 +47,10 @@ public class PublicConfigurationTemplateInstanceController {
     }
 
     @Operation(description = "Returns the Public Configuration Template Instance with the given id.")
-    @GetMapping(path = "public/configurationTemplateInstance/{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    public ResponseEntity<?> getPublicConfigurationTemplateInstance(@PathVariable("id") String id) {
+    @GetMapping(path = "public/configurationTemplateInstance/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    public ResponseEntity<?> getPublicConfigurationTemplateInstance(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
+                                                                    @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix) {
+        String id = prefix + "/" + suffix;
         ConfigurationTemplateInstanceBundle configurationTemplateInstanceBundle = configurationTemplateInstanceService.get(id);
         if (configurationTemplateInstanceBundle.getMetadata().isPublished()) {
             ConfigurationTemplateInstanceDto ret = configurationTemplateInstanceService.createCTIDto(configurationTemplateInstanceBundle.getConfigurationTemplateInstance());
@@ -57,10 +59,12 @@ public class PublicConfigurationTemplateInstanceController {
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(gson.toJson("You cannot view the specific Configuration Template Instance."));
     }
 
-    @GetMapping(path = "public/configurationTemplateInstance/bundle/{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    @GetMapping(path = "public/configurationTemplateInstance/bundle/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
-    public ResponseEntity<?> getPublicConfigurationTemplateInstanceBundle(@PathVariable("id") String id,
+    public ResponseEntity<?> getPublicConfigurationTemplateInstanceBundle(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
+                                                                          @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix,
                                                                           @Parameter(hidden = true) Authentication auth) {
+        String id = prefix + "/" + suffix;
         ConfigurationTemplateInstanceBundle configurationTemplateInstanceBundle = configurationTemplateInstanceService.get(id);
         if (auth != null && auth.isAuthenticated()) {
             User user = User.of(auth);
