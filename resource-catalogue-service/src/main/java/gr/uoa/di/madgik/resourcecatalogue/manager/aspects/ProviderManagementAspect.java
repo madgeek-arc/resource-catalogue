@@ -7,6 +7,7 @@ import gr.uoa.di.madgik.resourcecatalogue.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.manager.*;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
 import gr.uoa.di.madgik.resourcecatalogue.utils.ObjectUtils;
+import gr.uoa.di.madgik.resourcecatalogue.utils.PublicResourceUtils;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.After;
 import org.aspectj.lang.annotation.AfterReturning;
@@ -37,6 +38,7 @@ public class ProviderManagementAspect {
     private final RegistrationMailService registrationMailService;
     private final SecurityService securityService;
     private final PublicResourceInteroperabilityRecordManager publicResourceInteroperabilityRecordManager;
+    private final PublicResourceUtils publicResourceUtils;
 
     @Value("${catalogue.id}")
     private String catalogueId;
@@ -52,7 +54,8 @@ public class ProviderManagementAspect {
                                     PublicResourceInteroperabilityRecordManager publicResourceInteroperabilityRecordManager,
                                     PublicConfigurationTemplateImplementationManager publicConfigurationTemplateImplementationManager,
                                     RegistrationMailService registrationMailService,
-                                    SecurityService securityService) {
+                                    SecurityService securityService,
+                                    PublicResourceUtils publicResourceUtils) {
         this.providerService = providerService;
         this.serviceBundleService = serviceBundleService;
         this.trainingResourceService = trainingResourceService;
@@ -65,6 +68,7 @@ public class ProviderManagementAspect {
         this.publicConfigurationTemplateImplementationManager = publicConfigurationTemplateImplementationManager;
         this.registrationMailService = registrationMailService;
         this.securityService = securityService;
+        this.publicResourceUtils = publicResourceUtils;
     }
 
     @AfterReturning(pointcut = "execution(* gr.uoa.di.madgik.resourcecatalogue.manager.DraftServiceManager.transformToNonDraft(..)) " +
@@ -127,7 +131,8 @@ public class ProviderManagementAspect {
     public void addProviderAsPublic(final ProviderBundle providerBundle) {
         if (providerBundle.getStatus().equals("approved provider") && providerBundle.isActive()) {
             try {
-                publicProviderManager.get(String.format("%s.%s", providerBundle.getProvider().getCatalogueId(), providerBundle.getId()));
+                publicProviderManager.get(publicResourceUtils.createPublicResourceId(providerBundle.getProvider().getId(),
+                        providerBundle.getProvider().getCatalogueId()));
             } catch (ResourceException | ResourceNotFoundException e) {
                 publicProviderManager.add(ObjectUtils.clone(providerBundle), null);
             }
@@ -178,11 +183,13 @@ public class ProviderManagementAspect {
     }
 
     private void checkIfPublicProviderExistsOrElseThrow(ProviderBundle providerBundle) {
+        String publicId = publicResourceUtils.createPublicResourceId(providerBundle.getProvider().getId(),
+                providerBundle.getProvider().getCatalogueId());
         try {
-            publicProviderManager.get(String.format("%s.%s", providerBundle.getProvider().getCatalogueId(), providerBundle.getId()));
+            publicProviderManager.get(publicId);
         } catch (ResourceException | ResourceNotFoundException e) {
-            throw new ResourceNotFoundException(String.format("Provider with id [%s.%s] is not yet published or does not exist",
-                    providerBundle.getProvider().getCatalogueId(), providerBundle.getId()));
+            throw new ResourceNotFoundException(String.format("Provider with id [%s] is not yet published or does not exist",
+                    publicId));
         }
     }
 
@@ -202,7 +209,8 @@ public class ProviderManagementAspect {
     public void addResourceAsPublic(final ServiceBundle serviceBundle) {
         if (serviceBundle.getStatus().equals("approved resource") && serviceBundle.isActive()) {
             try {
-                publicServiceManager.get(String.format("%s.%s", serviceBundle.getService().getCatalogueId(), serviceBundle.getId()));
+                publicServiceManager.get(publicResourceUtils.createPublicResourceId(serviceBundle.getService().getId(),
+                        serviceBundle.getService().getCatalogueId()));
             } catch (ResourceException | ResourceNotFoundException e) {
                 publicServiceManager.add(ObjectUtils.clone(serviceBundle), null);
             }
@@ -218,7 +226,8 @@ public class ProviderManagementAspect {
     public void addResourceAsPublic(final TrainingResourceBundle trainingResourceBundle) {
         if (trainingResourceBundle.getStatus().equals("approved resource") && trainingResourceBundle.isActive()) {
             try {
-                publicTrainingResourceManager.get(String.format("%s.%s", trainingResourceBundle.getTrainingResource().getCatalogueId(), trainingResourceBundle.getId()));
+                publicTrainingResourceManager.get(publicResourceUtils.createPublicResourceId(trainingResourceBundle.getTrainingResource().getId(),
+                        trainingResourceBundle.getTrainingResource().getCatalogueId()));
             } catch (ResourceException | ResourceNotFoundException e) {
                 publicTrainingResourceManager.add(ObjectUtils.clone(trainingResourceBundle), null);
             }
@@ -232,7 +241,8 @@ public class ProviderManagementAspect {
     public void addResourceAsPublic(final InteroperabilityRecordBundle interoperabilityRecordBundle) {
         if (interoperabilityRecordBundle.getStatus().equals("approved interoperability record") && interoperabilityRecordBundle.isActive()) {
             try {
-                publicInteroperabilityRecordManager.get(String.format("%s.%s", interoperabilityRecordBundle.getInteroperabilityRecord().getCatalogueId(), interoperabilityRecordBundle.getId()));
+                publicInteroperabilityRecordManager.get(publicResourceUtils.createPublicResourceId(interoperabilityRecordBundle.getInteroperabilityRecord().getId(),
+                        interoperabilityRecordBundle.getInteroperabilityRecord().getCatalogueId()));
             } catch (ResourceException | ResourceNotFoundException e) {
                 publicInteroperabilityRecordManager.add(ObjectUtils.clone(interoperabilityRecordBundle), null);
             }
@@ -383,7 +393,8 @@ public class ProviderManagementAspect {
     public void addDatasourceAsPublic(final DatasourceBundle datasourceBundle) {
         if (datasourceBundle.getStatus().equals("approved datasource") && datasourceBundle.isActive()) {
             try {
-                publicDatasourceManager.get(String.format("%s.%s", datasourceBundle.getDatasource().getCatalogueId(), datasourceBundle.getId()));
+                publicDatasourceManager.get(publicResourceUtils.createPublicResourceId(datasourceBundle.getDatasource().getId(),
+                        datasourceBundle.getDatasource().getCatalogueId()));
             } catch (ResourceException | ResourceNotFoundException e) {
                 publicDatasourceManager.add(ObjectUtils.clone(datasourceBundle), null);
             }
@@ -425,9 +436,9 @@ public class ProviderManagementAspect {
     public void addResourceInteroperabilityRecordAsPublic(final ResourceInteroperabilityRecordBundle resourceInteroperabilityRecordBundle) {
         // TODO: check Resource states (publish if only approved/active)
         try {
-            publicResourceInteroperabilityRecordManager.get(String.format("%s.%s",
-                    resourceInteroperabilityRecordBundle.getResourceInteroperabilityRecord().getCatalogueId(),
-                    resourceInteroperabilityRecordBundle.getId()));
+            publicResourceInteroperabilityRecordManager.get(publicResourceUtils.createPublicResourceId(
+                    resourceInteroperabilityRecordBundle.getResourceInteroperabilityRecord().getId(),
+                    resourceInteroperabilityRecordBundle.getResourceInteroperabilityRecord().getCatalogueId()));
         } catch (ResourceException | ResourceNotFoundException e) {
             publicResourceInteroperabilityRecordManager.add(ObjectUtils.clone(resourceInteroperabilityRecordBundle), null);
         }

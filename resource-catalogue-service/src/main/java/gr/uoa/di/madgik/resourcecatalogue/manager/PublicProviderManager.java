@@ -12,6 +12,7 @@ import gr.uoa.di.madgik.resourcecatalogue.service.SecurityService;
 import gr.uoa.di.madgik.resourcecatalogue.utils.FacetLabelService;
 import gr.uoa.di.madgik.resourcecatalogue.utils.JmsService;
 import gr.uoa.di.madgik.resourcecatalogue.utils.ProviderResourcesCommonMethods;
+import gr.uoa.di.madgik.resourcecatalogue.utils.PublicResourceUtils;
 import org.apache.commons.beanutils.BeanUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,15 +32,18 @@ public class PublicProviderManager extends ResourceManager<ProviderBundle> imple
     private final SecurityService securityService;
     private final ProviderResourcesCommonMethods commonMethods;
     private final FacetLabelService facetLabelService;
+    private final PublicResourceUtils publicResourceUtils;
 
     public PublicProviderManager(JmsService jmsService, SecurityService securityService,
                                  ProviderResourcesCommonMethods commonMethods,
-                                 FacetLabelService facetLabelService) {
+                                 FacetLabelService facetLabelService,
+                                 PublicResourceUtils publicResourceUtils) {
         super(ProviderBundle.class);
         this.jmsService = jmsService;
         this.securityService = securityService;
         this.commonMethods = commonMethods;
         this.facetLabelService = facetLabelService;
+        this.publicResourceUtils = publicResourceUtils;
     }
 
     @Override
@@ -77,7 +81,8 @@ public class PublicProviderManager extends ResourceManager<ProviderBundle> imple
     public ProviderBundle add(ProviderBundle providerBundle, Authentication authentication) {
         String lowerLevelProviderId = providerBundle.getId();
         Identifiers.createOriginalId(providerBundle);
-        providerBundle.setId(String.format("%s.%s", providerBundle.getProvider().getCatalogueId(), providerBundle.getId()));
+        providerBundle.setId(publicResourceUtils.createPublicResourceId(providerBundle.getProvider().getId(),
+                providerBundle.getProvider().getCatalogueId()));
         commonMethods.restrictPrefixRepetitionOnPublicResources(providerBundle.getId(), providerBundle.getProvider().getCatalogueId());
         providerBundle.getMetadata().setPublished(true);
         // POST PID
@@ -105,8 +110,10 @@ public class PublicProviderManager extends ResourceManager<ProviderBundle> imple
 
     @Override
     public ProviderBundle update(ProviderBundle providerBundle, Authentication authentication) {
-        ProviderBundle published = super.get(String.format("%s.%s", providerBundle.getProvider().getCatalogueId(), providerBundle.getId()));
-        ProviderBundle ret = super.get(String.format("%s.%s", providerBundle.getProvider().getCatalogueId(), providerBundle.getId()));
+        ProviderBundle published = super.get(publicResourceUtils.createPublicResourceId(providerBundle.getProvider().getId(),
+                providerBundle.getProvider().getCatalogueId()));
+        ProviderBundle ret = super.get(publicResourceUtils.createPublicResourceId(providerBundle.getProvider().getId(),
+                providerBundle.getProvider().getCatalogueId()));
         try {
             BeanUtils.copyProperties(ret, providerBundle);
         } catch (IllegalAccessException | InvocationTargetException e) {
