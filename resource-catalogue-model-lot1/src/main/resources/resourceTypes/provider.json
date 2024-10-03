@@ -47,7 +47,7 @@
       "label": "Alternative Identifier Value",
       "multivalued": true,
       "name": "alternative_identifiers_values",
-      "path": "$.service.alternativeIdentifiers[*].value",
+      "path": "$.provider.alternativeIdentifiers[*].value",
       "type": "java.lang.String"
     },
     {
