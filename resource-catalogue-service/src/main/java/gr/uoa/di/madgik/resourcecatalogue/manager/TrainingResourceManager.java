@@ -662,7 +662,7 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
         TrainingResourceBundle trainingResourceBundle;
         try {
             trainingResourceBundle = get(id);
-        } catch (ResourceNotFoundException e) {
+        } catch (ResourceException | ResourceNotFoundException e) {
             return null;
         }
         return trainingResourceBundle;
@@ -673,7 +673,7 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
         TrainingResourceBundle trainingResourceBundle;
         try {
             trainingResourceBundle = get(id, catalogueId);
-        } catch (ResourceNotFoundException e) {
+        } catch (ResourceException | ResourceNotFoundException e) {
             return null;
         }
         return trainingResourceBundle;

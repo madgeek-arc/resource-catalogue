@@ -7,6 +7,7 @@ import gr.uoa.di.madgik.registry.service.SearchService;
 import gr.uoa.di.madgik.registry.service.ServiceException;
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
 import gr.uoa.di.madgik.resourcecatalogue.exception.ResourceAlreadyExistsException;
+import gr.uoa.di.madgik.resourcecatalogue.exception.ResourceException;
 import gr.uoa.di.madgik.resourcecatalogue.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.exception.ValidationException;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
@@ -518,7 +519,7 @@ public abstract class AbstractServiceBundleManager<T extends ServiceBundle> exte
         T serviceBundle;
         try {
             serviceBundle = get(id);
-        } catch (ResourceNotFoundException e) {
+        } catch (ResourceException | ResourceNotFoundException e) {
             return null;
         }
         return serviceBundle;
@@ -528,7 +529,7 @@ public abstract class AbstractServiceBundleManager<T extends ServiceBundle> exte
         T serviceBundle;
         try {
             serviceBundle = get(id, catalogueId);
-        } catch (ResourceNotFoundException e) {
+        } catch (ResourceException | ResourceNotFoundException e) {
             return null;
         }
         return serviceBundle;

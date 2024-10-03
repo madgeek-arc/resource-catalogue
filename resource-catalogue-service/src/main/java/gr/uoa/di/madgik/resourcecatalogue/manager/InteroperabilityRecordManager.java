@@ -316,7 +316,7 @@ public class InteroperabilityRecordManager extends ResourceManager<Interoperabil
         InteroperabilityRecordBundle interoperabilityRecordBundle;
         try {
             interoperabilityRecordBundle = get(id, catalogueId);
-        } catch (ResourceNotFoundException e) {
+        } catch (ResourceException | ResourceNotFoundException e) {
             return null;
         }
         return interoperabilityRecordBundle;
