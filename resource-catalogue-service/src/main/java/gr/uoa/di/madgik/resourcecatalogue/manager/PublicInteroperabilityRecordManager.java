@@ -11,6 +11,7 @@ import gr.uoa.di.madgik.resourcecatalogue.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.service.SecurityService;
 import gr.uoa.di.madgik.resourcecatalogue.utils.JmsService;
 import gr.uoa.di.madgik.resourcecatalogue.utils.ProviderResourcesCommonMethods;
+import gr.uoa.di.madgik.resourcecatalogue.utils.PublicResourceUtils;
 import org.apache.commons.beanutils.BeanUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,21 +25,24 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service("publicInteroperabilityRecordManager")
-public class PublicInteroperabilityRecordManager extends ResourceManager<InteroperabilityRecordBundle>
+public class PublicInteroperabilityRecordManager extends AbstractPublicResourceManager<InteroperabilityRecordBundle>
         implements ResourceCRUDService<InteroperabilityRecordBundle, Authentication> {
 
     private static final Logger logger = LoggerFactory.getLogger(PublicInteroperabilityRecordManager.class);
     private final JmsService jmsService;
     private final SecurityService securityService;
     private final ProviderResourcesCommonMethods commonMethods;
+    private final PublicResourceUtils publicResourceUtils;
 
     @Autowired
     public PublicInteroperabilityRecordManager(JmsService jmsService, SecurityService securityService,
-                                               ProviderResourcesCommonMethods commonMethods) {
+                                               ProviderResourcesCommonMethods commonMethods,
+                                               PublicResourceUtils publicResourceUtils) {
         super(InteroperabilityRecordBundle.class);
         this.jmsService = jmsService;
         this.securityService = securityService;
         this.commonMethods = commonMethods;
+        this.publicResourceUtils = publicResourceUtils;
     }
 
     @Override
@@ -61,7 +65,8 @@ public class PublicInteroperabilityRecordManager extends ResourceManager<Interop
         Browsing<InteroperabilityRecordBundle> interoperabilityRecordBundleBrowsing = super.getAll(facetFilter, authentication);
         for (InteroperabilityRecordBundle interoperabilityRecordBundle : interoperabilityRecordBundleBrowsing.getResults()) {
             if (securityService.isResourceProviderAdmin(authentication, interoperabilityRecordBundle.getId(),
-                    interoperabilityRecordBundle.getInteroperabilityRecord().getCatalogueId()) && interoperabilityRecordBundle.getMetadata().isPublished()) {
+                    interoperabilityRecordBundle.getInteroperabilityRecord().getCatalogueId())
+                    && interoperabilityRecordBundle.getMetadata().isPublished()) {
                 interoperabilityRecordBundleList.add(interoperabilityRecordBundle);
             }
         }
@@ -73,13 +78,14 @@ public class PublicInteroperabilityRecordManager extends ResourceManager<Interop
     public InteroperabilityRecordBundle add(InteroperabilityRecordBundle interoperabilityRecordBundle, Authentication authentication) {
         String lowerLevelResourceId = interoperabilityRecordBundle.getId();
         Identifiers.createOriginalId(interoperabilityRecordBundle);
-        interoperabilityRecordBundle.setId(String.format("%s.%s", interoperabilityRecordBundle.getInteroperabilityRecord().getCatalogueId(), interoperabilityRecordBundle.getId()));
-        commonMethods.restrictPrefixRepetitionOnPublicResources(interoperabilityRecordBundle.getId(), interoperabilityRecordBundle.getInteroperabilityRecord().getCatalogueId());
+        interoperabilityRecordBundle.setId(publicResourceUtils.createPublicResourceId(
+                interoperabilityRecordBundle.getInteroperabilityRecord().getId(),
+                interoperabilityRecordBundle.getInteroperabilityRecord().getCatalogueId()));
+        commonMethods.restrictPrefixRepetitionOnPublicResources(interoperabilityRecordBundle.getId(),
+                interoperabilityRecordBundle.getInteroperabilityRecord().getCatalogueId());
 
-        // set providerId to Public
-        interoperabilityRecordBundle.getInteroperabilityRecord().setProviderId(String.format("%s.%s",
-                interoperabilityRecordBundle.getInteroperabilityRecord().getCatalogueId(),
-                interoperabilityRecordBundle.getInteroperabilityRecord().getProviderId()));
+        // sets public id to providerId
+        updateInteroperabilityRecordIdsToPublic(interoperabilityRecordBundle);
 
         interoperabilityRecordBundle.getMetadata().setPublished(true);
         // POST PID
@@ -99,7 +105,8 @@ public class PublicInteroperabilityRecordManager extends ResourceManager<Interop
 //            commonMethods.postPID(pid);
         }
         InteroperabilityRecordBundle ret;
-        logger.info(String.format("Interoperability Record [%s] is being published with id [%s]", lowerLevelResourceId, interoperabilityRecordBundle.getId()));
+        logger.info(String.format("Interoperability Record [%s] is being published with id [%s]", lowerLevelResourceId,
+                interoperabilityRecordBundle.getId()));
         ret = super.add(interoperabilityRecordBundle, null);
         jmsService.convertAndSendTopic("interoperability_record.create", interoperabilityRecordBundle);
         return ret;
@@ -107,20 +114,22 @@ public class PublicInteroperabilityRecordManager extends ResourceManager<Interop
 
     @Override
     public InteroperabilityRecordBundle update(InteroperabilityRecordBundle interoperabilityRecordBundle, Authentication authentication) {
-        InteroperabilityRecordBundle published = super.get(String.format("%s.%s", interoperabilityRecordBundle.getInteroperabilityRecord().getCatalogueId(), interoperabilityRecordBundle.getId()));
-        InteroperabilityRecordBundle ret = super.get(String.format("%s.%s", interoperabilityRecordBundle.getInteroperabilityRecord().getCatalogueId(), interoperabilityRecordBundle.getId()));
+        InteroperabilityRecordBundle published = super.get(publicResourceUtils.createPublicResourceId(
+                interoperabilityRecordBundle.getInteroperabilityRecord().getId(),
+                interoperabilityRecordBundle.getInteroperabilityRecord().getCatalogueId()));
+        InteroperabilityRecordBundle ret = super.get(publicResourceUtils.createPublicResourceId(
+                interoperabilityRecordBundle.getInteroperabilityRecord().getId(),
+                interoperabilityRecordBundle.getInteroperabilityRecord().getCatalogueId()));
         try {
             BeanUtils.copyProperties(ret, interoperabilityRecordBundle);
         } catch (IllegalAccessException | InvocationTargetException e) {
             e.printStackTrace();
         }
 
-        // set providerId to Public
-        ret.getInteroperabilityRecord().setProviderId(published.getInteroperabilityRecord().getProviderId());
+        // sets public id to providerId
+        updateInteroperabilityRecordIdsToPublic(interoperabilityRecordBundle);
 
-        ret.getInteroperabilityRecord().setAlternativeIdentifiers(commonMethods.updateAlternativeIdentifiers(
-                interoperabilityRecordBundle.getInteroperabilityRecord().getAlternativeIdentifiers(),
-                published.getInteroperabilityRecord().getAlternativeIdentifiers()));
+        ret.getInteroperabilityRecord().setAlternativeIdentifiers(published.getInteroperabilityRecord().getAlternativeIdentifiers());
         ret.setIdentifiers(published.getIdentifiers());
         ret.setId(published.getId());
         ret.getMetadata().setPublished(true);
@@ -133,7 +142,9 @@ public class PublicInteroperabilityRecordManager extends ResourceManager<Interop
     @Override
     public void delete(InteroperabilityRecordBundle interoperabilityRecordBundle) {
         try {
-            InteroperabilityRecordBundle publicInteroperabilityRecordBundle = get(String.format("%s.%s", interoperabilityRecordBundle.getInteroperabilityRecord().getCatalogueId(), interoperabilityRecordBundle.getId()));
+            InteroperabilityRecordBundle publicInteroperabilityRecordBundle = get(publicResourceUtils.createPublicResourceId(
+                    interoperabilityRecordBundle.getInteroperabilityRecord().getId(),
+                    interoperabilityRecordBundle.getInteroperabilityRecord().getCatalogueId()));
             logger.info(String.format("Deleting public Interoperability Record with id [%s]", publicInteroperabilityRecordBundle.getId()));
             super.delete(publicInteroperabilityRecordBundle);
             jmsService.convertAndSendTopic("interoperability_record.delete", publicInteroperabilityRecordBundle);

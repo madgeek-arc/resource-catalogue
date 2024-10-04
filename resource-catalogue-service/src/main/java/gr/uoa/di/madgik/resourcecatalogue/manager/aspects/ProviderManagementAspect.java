@@ -34,7 +34,7 @@ public class ProviderManagementAspect {
     private final PublicDatasourceManager publicDatasourceManager;
     private final PublicTrainingResourceManager publicTrainingResourceManager;
     private final PublicInteroperabilityRecordManager publicInteroperabilityRecordManager;
-    private final PublicConfigurationTemplateImplementationManager publicConfigurationTemplateImplementationManager;
+    private final PublicConfigurationTemplateInstanceManager publicConfigurationTemplateInstanceManager;
     private final RegistrationMailService registrationMailService;
     private final SecurityService securityService;
     private final PublicResourceInteroperabilityRecordManager publicResourceInteroperabilityRecordManager;
@@ -52,7 +52,7 @@ public class ProviderManagementAspect {
                                     PublicTrainingResourceManager publicTrainingResourceManager,
                                     PublicInteroperabilityRecordManager publicInteroperabilityRecordManager,
                                     PublicResourceInteroperabilityRecordManager publicResourceInteroperabilityRecordManager,
-                                    PublicConfigurationTemplateImplementationManager publicConfigurationTemplateImplementationManager,
+                                    PublicConfigurationTemplateInstanceManager publicConfigurationTemplateInstanceManager,
                                     RegistrationMailService registrationMailService,
                                     SecurityService securityService,
                                     PublicResourceUtils publicResourceUtils) {
@@ -65,7 +65,7 @@ public class ProviderManagementAspect {
         this.publicTrainingResourceManager = publicTrainingResourceManager;
         this.publicInteroperabilityRecordManager = publicInteroperabilityRecordManager;
         this.publicResourceInteroperabilityRecordManager = publicResourceInteroperabilityRecordManager;
-        this.publicConfigurationTemplateImplementationManager = publicConfigurationTemplateImplementationManager;
+        this.publicConfigurationTemplateInstanceManager = publicConfigurationTemplateInstanceManager;
         this.registrationMailService = registrationMailService;
         this.securityService = securityService;
         this.publicResourceUtils = publicResourceUtils;
@@ -468,9 +468,12 @@ public class ProviderManagementAspect {
             returning = "configurationTemplateInstanceBundle")
     public void addConfigurationTemplateInstanceAsPublic(final ConfigurationTemplateInstanceBundle configurationTemplateInstanceBundle) {
         try {
-            publicConfigurationTemplateImplementationManager.get(String.format("%s.%s", catalogueId, configurationTemplateInstanceBundle.getId()));
+            //TODO: Refactor if CTIs can belong to a different from the Project's Catalogue
+            publicConfigurationTemplateInstanceManager.get(publicResourceUtils.createPublicResourceId(
+                    configurationTemplateInstanceBundle.getConfigurationTemplateInstance().getId(),
+                    catalogueId));
         } catch (ResourceException | ResourceNotFoundException e) {
-            publicConfigurationTemplateImplementationManager.add(ObjectUtils.clone(configurationTemplateInstanceBundle), null);
+            publicConfigurationTemplateInstanceManager.add(ObjectUtils.clone(configurationTemplateInstanceBundle), null);
         }
     }
 
@@ -480,7 +483,7 @@ public class ProviderManagementAspect {
     public void updatePublicConfigurationTemplateInstance(ConfigurationTemplateInstanceBundle configurationTemplateInstanceBundle, ConfigurationTemplateInstanceBundle ret) {
         try {
             if (!ret.equals(configurationTemplateInstanceBundle)) {
-                publicConfigurationTemplateImplementationManager.update(ObjectUtils.clone(ret), null);
+                publicConfigurationTemplateInstanceManager.update(ObjectUtils.clone(ret), null);
             }
         } catch (ResourceException | ResourceNotFoundException ignore) {
         }
@@ -490,6 +493,6 @@ public class ProviderManagementAspect {
     @After("execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ConfigurationTemplateInstanceManager.delete(..))")
     public void deletePublicConfigurationTemplateInstance(JoinPoint joinPoint) {
         ConfigurationTemplateInstanceBundle configurationTemplateInstanceBundle = (ConfigurationTemplateInstanceBundle) joinPoint.getArgs()[0];
-        publicConfigurationTemplateImplementationManager.delete(configurationTemplateInstanceBundle);
+        publicConfigurationTemplateInstanceManager.delete(configurationTemplateInstanceBundle);
     }
 }

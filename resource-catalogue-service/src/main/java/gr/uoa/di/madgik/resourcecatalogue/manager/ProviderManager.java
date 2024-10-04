@@ -7,7 +7,6 @@ import gr.uoa.di.madgik.registry.service.VersionService;
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
 import gr.uoa.di.madgik.resourcecatalogue.dto.ExtendedValue;
 import gr.uoa.di.madgik.resourcecatalogue.dto.MapValues;
-import gr.uoa.di.madgik.resourcecatalogue.exception.ResourceException;
 import gr.uoa.di.madgik.resourcecatalogue.exception.ValidationException;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
 import gr.uoa.di.madgik.resourcecatalogue.utils.Auditable;
@@ -117,6 +116,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         // register and ensure Resource Catalogue's PID uniqueness
         commonMethods.determineResourceAndCreateAlternativeIdentifierForPID(provider, getResourceType());
         provider.getProvider().setAlternativeIdentifiers(commonMethods.ensureResourceCataloguePidUniqueness(provider.getId(),
+                provider.getProvider().getCatalogueId(),
                 provider.getProvider().getAlternativeIdentifiers()));
 
         commonMethods.addAuthenticatedUser(provider.getProvider(), auth);
@@ -165,6 +165,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
             commonMethods.determineResourceAndCreateAlternativeIdentifierForPID(ret, getResourceType());
         } else {
             ret.getProvider().setAlternativeIdentifiers(commonMethods.ensureResourceCataloguePidUniqueness(ret.getId(),
+                    ret.getProvider().getCatalogueId(),
                     ret.getProvider().getAlternativeIdentifiers()));
         }
 

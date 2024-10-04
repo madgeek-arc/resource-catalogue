@@ -10,6 +10,7 @@ import gr.uoa.di.madgik.resourcecatalogue.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.service.SecurityService;
 import gr.uoa.di.madgik.resourcecatalogue.utils.JmsService;
 import gr.uoa.di.madgik.resourcecatalogue.utils.ProviderResourcesCommonMethods;
+import gr.uoa.di.madgik.resourcecatalogue.utils.PublicResourceUtils;
 import org.apache.commons.beanutils.BeanUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,14 +30,17 @@ public class PublicHelpdeskManager extends AbstractPublicResourceManager<Helpdes
     private final JmsService jmsService;
     private final SecurityService securityService;
     private final ProviderResourcesCommonMethods commonMethods;
+    private final PublicResourceUtils publicResourceUtils;
 
     @Autowired
     public PublicHelpdeskManager(JmsService jmsService, SecurityService securityService,
-                                 ProviderResourcesCommonMethods commonMethods) {
+                                 ProviderResourcesCommonMethods commonMethods,
+                                 PublicResourceUtils publicResourceUtils) {
         super(HelpdeskBundle.class);
         this.jmsService = jmsService;
         this.securityService = securityService;
         this.commonMethods = commonMethods;
+        this.publicResourceUtils = publicResourceUtils;
     }
 
     @Override
@@ -81,7 +85,8 @@ public class PublicHelpdeskManager extends AbstractPublicResourceManager<Helpdes
     public HelpdeskBundle add(HelpdeskBundle helpdeskBundle, Authentication authentication) {
         String lowerLevelResourceId = helpdeskBundle.getId();
         Identifiers.createOriginalId(helpdeskBundle);
-        helpdeskBundle.setId(String.format("%s.%s", helpdeskBundle.getCatalogueId(), helpdeskBundle.getId()));
+        helpdeskBundle.setId(publicResourceUtils.createPublicResourceId(helpdeskBundle.getHelpdesk().getId(),
+                helpdeskBundle.getCatalogueId()));
         commonMethods.restrictPrefixRepetitionOnPublicResources(helpdeskBundle.getId(), helpdeskBundle.getCatalogueId());
 
         // sets public id to serviceId
@@ -97,8 +102,10 @@ public class PublicHelpdeskManager extends AbstractPublicResourceManager<Helpdes
 
     @Override
     public HelpdeskBundle update(HelpdeskBundle helpdeskBundle, Authentication authentication) {
-        HelpdeskBundle published = super.get(String.format("%s.%s", helpdeskBundle.getCatalogueId(), helpdeskBundle.getId()));
-        HelpdeskBundle ret = super.get(String.format("%s.%s", helpdeskBundle.getCatalogueId(), helpdeskBundle.getId()));
+        HelpdeskBundle published = super.get(publicResourceUtils.createPublicResourceId(helpdeskBundle.getHelpdesk().getId(),
+                helpdeskBundle.getCatalogueId()));
+        HelpdeskBundle ret = super.get(publicResourceUtils.createPublicResourceId(helpdeskBundle.getHelpdesk().getId(),
+                helpdeskBundle.getCatalogueId()));
         try {
             BeanUtils.copyProperties(ret, helpdeskBundle);
         } catch (IllegalAccessException | InvocationTargetException e) {
@@ -120,7 +127,8 @@ public class PublicHelpdeskManager extends AbstractPublicResourceManager<Helpdes
     @Override
     public void delete(HelpdeskBundle helpdeskBundle) {
         try {
-            HelpdeskBundle publicHelpdeskBundle = get(String.format("%s.%s", helpdeskBundle.getCatalogueId(), helpdeskBundle.getId()));
+            HelpdeskBundle publicHelpdeskBundle = get(publicResourceUtils.createPublicResourceId(helpdeskBundle.getHelpdesk().getId(),
+                    helpdeskBundle.getCatalogueId()));
             logger.info(String.format("Deleting public Helpdesk with id [%s]", publicHelpdeskBundle.getId()));
             super.delete(publicHelpdeskBundle);
             jmsService.convertAndSendTopic("helpdesk.delete", publicHelpdeskBundle);

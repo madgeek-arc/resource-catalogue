@@ -33,6 +33,7 @@ public class ProviderResourcesCommonMethods {
     private final GenericResourceService genericResourceService;
     private final VocabularyService vocabularyService;
     private final SecurityService securityService;
+    private final PublicResourceUtils publicResourceUtils;
 
     public ProviderResourcesCommonMethods(@Lazy CatalogueService catalogueService,
                                           @Lazy ProviderService providerService,
@@ -43,7 +44,8 @@ public class ProviderResourcesCommonMethods {
                                                   resourceInteroperabilityRecordService,
                                           @Lazy GenericResourceService genericResourceService,
                                           @Lazy VocabularyService vocabularyService,
-                                          @Lazy SecurityService securityService) {
+                                          @Lazy SecurityService securityService,
+                                          PublicResourceUtils publicResourceUtils) {
         this.catalogueService = catalogueService;
         this.providerService = providerService;
         this.datasourceService = datasourceService;
@@ -53,6 +55,7 @@ public class ProviderResourcesCommonMethods {
         this.genericResourceService = genericResourceService;
         this.vocabularyService = vocabularyService;
         this.securityService = securityService;
+        this.publicResourceUtils = publicResourceUtils;
     }
 
     public void checkCatalogueIdConsistency(Object o, String catalogueId) {
@@ -318,7 +321,8 @@ public class ProviderResourcesCommonMethods {
             case "provider":
                 ProviderBundle providerBundle = (ProviderBundle) bundle;
                 existingAlternativeIdentifiers = providerBundle.getProvider().getAlternativeIdentifiers();
-                alternativeIdentifier = createAlternativeIdentifierForPID(providerBundle);
+                alternativeIdentifier = createAlternativeIdentifierForPID(providerBundle.getProvider().getId(),
+                        providerBundle.getProvider().getCatalogueId());
                 if (existingAlternativeIdentifiers != null && !existingAlternativeIdentifiers.isEmpty()) {
                     existingAlternativeIdentifiers.add(alternativeIdentifier);
                 } else {
@@ -329,7 +333,8 @@ public class ProviderResourcesCommonMethods {
             case "service":
                 ServiceBundle serviceBundle = (ServiceBundle) bundle;
                 existingAlternativeIdentifiers = serviceBundle.getService().getAlternativeIdentifiers();
-                alternativeIdentifier = createAlternativeIdentifierForPID(serviceBundle);
+                alternativeIdentifier = createAlternativeIdentifierForPID(serviceBundle.getService().getId(),
+                        serviceBundle.getService().getCatalogueId());
                 if (existingAlternativeIdentifiers != null && !existingAlternativeIdentifiers.isEmpty()) {
                     existingAlternativeIdentifiers.add(alternativeIdentifier);
                 } else {
@@ -340,7 +345,8 @@ public class ProviderResourcesCommonMethods {
             case "training_resource":
                 TrainingResourceBundle trainingResourceBundle = (TrainingResourceBundle) bundle;
                 existingAlternativeIdentifiers = trainingResourceBundle.getTrainingResource().getAlternativeIdentifiers();
-                alternativeIdentifier = createAlternativeIdentifierForPID(trainingResourceBundle);
+                alternativeIdentifier = createAlternativeIdentifierForPID(trainingResourceBundle.getTrainingResource().getId(),
+                        trainingResourceBundle.getTrainingResource().getCatalogueId());
                 if (existingAlternativeIdentifiers != null && !existingAlternativeIdentifiers.isEmpty()) {
                     existingAlternativeIdentifiers.add(alternativeIdentifier);
                 } else {
@@ -351,7 +357,8 @@ public class ProviderResourcesCommonMethods {
             case "interoperability_record":
                 InteroperabilityRecordBundle interoperabilityRecordBundle = (InteroperabilityRecordBundle) bundle;
                 existingAlternativeIdentifiers = interoperabilityRecordBundle.getInteroperabilityRecord().getAlternativeIdentifiers();
-                alternativeIdentifier = createAlternativeIdentifierForPID(interoperabilityRecordBundle);
+                alternativeIdentifier = createAlternativeIdentifierForPID(interoperabilityRecordBundle.getInteroperabilityRecord().getId(),
+                        interoperabilityRecordBundle.getInteroperabilityRecord().getCatalogueId());
                 if (existingAlternativeIdentifiers != null && !existingAlternativeIdentifiers.isEmpty()) {
                     existingAlternativeIdentifiers.add(alternativeIdentifier);
                 } else {
@@ -364,10 +371,11 @@ public class ProviderResourcesCommonMethods {
         }
     }
 
-    private AlternativeIdentifier createAlternativeIdentifierForPID(Bundle<?> bundle) {
+    private AlternativeIdentifier createAlternativeIdentifierForPID(String id, String catalogueId) {
+        String pid = publicResourceUtils.createPublicResourceId(id, catalogueId);
         AlternativeIdentifier alternativeIdentifier = new AlternativeIdentifier();
         alternativeIdentifier.setType("EOSC PID");
-        alternativeIdentifier.setValue(bundle.getId());
+        alternativeIdentifier.setValue(pid);
         return alternativeIdentifier;
     }
 
@@ -378,24 +386,6 @@ public class ProviderResourcesCommonMethods {
         if (isPublished) {
             throw new ValidationException("You cannot directly delete a Public Resource");
         }
-    }
-
-    public List<AlternativeIdentifier> updateAlternativeIdentifiers(List<AlternativeIdentifier> lowerLevelAI, List<AlternativeIdentifier> publicLevelAI) {
-        List<AlternativeIdentifier> mergedAlternativeIdentifiers = new ArrayList<>();
-        if (lowerLevelAI != null && !lowerLevelAI.isEmpty()) {
-            mergedAlternativeIdentifiers.addAll(lowerLevelAI);
-        }
-        if (publicLevelAI != null && !publicLevelAI.isEmpty()) {
-            for (AlternativeIdentifier alternativeIdentifier : publicLevelAI) {
-                if (alternativeIdentifier.getType().equals("EOSC PID")) {
-                    mergedAlternativeIdentifiers.add(alternativeIdentifier);
-                    break;
-                }
-            }
-        }
-        // remove duplicates && convert to list
-        Set<AlternativeIdentifier> uniqueIdentifiers = new HashSet<>(mergedAlternativeIdentifiers);
-        return new ArrayList<>(uniqueIdentifiers);
     }
 
     public void deleteResourceRelatedServiceSubprofiles(String serviceId, String catalogueId) {
@@ -465,13 +455,16 @@ public class ProviderResourcesCommonMethods {
         }
     }
 
-    public List<AlternativeIdentifier> ensureResourceCataloguePidUniqueness(String id, List<AlternativeIdentifier> alternativeIdentifiers) {
-        // Removes duplicates and ensures that EOSC PID has the appropriate value
+    public List<AlternativeIdentifier> ensureResourceCataloguePidUniqueness(String id, String catalogueId,
+                                                                            List<AlternativeIdentifier> alternativeIdentifiers) {
+        String pid = publicResourceUtils.createPublicResourceId(id, catalogueId);
+        // removes duplicates and ensures that EOSC PID has the appropriate value
         List<AlternativeIdentifier> uniqueIdentifiers = removeDuplicates(alternativeIdentifiers);
+        // if PID alternative identifier has been falsely updated, set it back to its original value
         if (!uniqueIdentifiers.isEmpty()) {
             for (AlternativeIdentifier uniqueIdentifier : uniqueIdentifiers) {
                 if (uniqueIdentifier.getType().equalsIgnoreCase("EOSC PID")) {
-                    uniqueIdentifier.setValue(id);
+                    uniqueIdentifier.setValue(pid);
                 }
             }
         }

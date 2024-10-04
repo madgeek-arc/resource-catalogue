@@ -12,6 +12,7 @@ import gr.uoa.di.madgik.resourcecatalogue.service.SecurityService;
 import gr.uoa.di.madgik.resourcecatalogue.utils.FacetLabelService;
 import gr.uoa.di.madgik.resourcecatalogue.utils.JmsService;
 import gr.uoa.di.madgik.resourcecatalogue.utils.ProviderResourcesCommonMethods;
+import gr.uoa.di.madgik.resourcecatalogue.utils.PublicResourceUtils;
 import org.apache.commons.beanutils.BeanUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,16 +33,19 @@ public class PublicTrainingResourceManager extends AbstractPublicResourceManager
     private final SecurityService securityService;
     private ProviderResourcesCommonMethods commonMethods;
     private final FacetLabelService facetLabelService;
+    private final PublicResourceUtils publicResourceUtils;
 
     @Autowired
     public PublicTrainingResourceManager(JmsService jmsService, SecurityService securityService,
                                          ProviderResourcesCommonMethods commonMethods,
-                                         FacetLabelService facetLabelService) {
+                                         FacetLabelService facetLabelService,
+                                         PublicResourceUtils publicResourceUtils) {
         super(TrainingResourceBundle.class);
         this.jmsService = jmsService;
         this.securityService = securityService;
         this.commonMethods = commonMethods;
         this.facetLabelService = facetLabelService;
+        this.publicResourceUtils = publicResourceUtils;
     }
 
     @Override
@@ -80,8 +84,10 @@ public class PublicTrainingResourceManager extends AbstractPublicResourceManager
     public TrainingResourceBundle add(TrainingResourceBundle trainingResourceBundle, Authentication authentication) {
         String lowerLevelResourceId = trainingResourceBundle.getId();
         Identifiers.createOriginalId(trainingResourceBundle);
-        trainingResourceBundle.setId(String.format("%s.%s", trainingResourceBundle.getTrainingResource().getCatalogueId(), trainingResourceBundle.getId()));
-        commonMethods.restrictPrefixRepetitionOnPublicResources(trainingResourceBundle.getId(), trainingResourceBundle.getTrainingResource().getCatalogueId());
+        trainingResourceBundle.setId(publicResourceUtils.createPublicResourceId(trainingResourceBundle.getTrainingResource().getId(),
+                trainingResourceBundle.getTrainingResource().getCatalogueId()));
+        commonMethods.restrictPrefixRepetitionOnPublicResources(trainingResourceBundle.getId(),
+                trainingResourceBundle.getTrainingResource().getCatalogueId());
 
         // sets public ids to resource organisation, resource providers and EOSC related services
         updateTrainingResourceIdsToPublic(trainingResourceBundle);
@@ -112,8 +118,11 @@ public class PublicTrainingResourceManager extends AbstractPublicResourceManager
 
     @Override
     public TrainingResourceBundle update(TrainingResourceBundle trainingResourceBundle, Authentication authentication) {
-        TrainingResourceBundle published = super.get(String.format("%s.%s", trainingResourceBundle.getTrainingResource().getCatalogueId(), trainingResourceBundle.getId()));
-        TrainingResourceBundle ret = super.get(String.format("%s.%s", trainingResourceBundle.getTrainingResource().getCatalogueId(), trainingResourceBundle.getId()));
+        TrainingResourceBundle published = super.get(publicResourceUtils.createPublicResourceId(
+                trainingResourceBundle.getTrainingResource().getId(),
+                trainingResourceBundle.getTrainingResource().getCatalogueId()));
+        TrainingResourceBundle ret = super.get(publicResourceUtils.createPublicResourceId(trainingResourceBundle.getTrainingResource().getId(),
+                trainingResourceBundle.getTrainingResource().getCatalogueId()));
         try {
             BeanUtils.copyProperties(ret, trainingResourceBundle);
         } catch (IllegalAccessException | InvocationTargetException e) {
@@ -123,9 +132,7 @@ public class PublicTrainingResourceManager extends AbstractPublicResourceManager
         // sets public ids to resource organisation, resource providers and EOSC related services
         updateTrainingResourceIdsToPublic(ret);
 
-        ret.getTrainingResource().setAlternativeIdentifiers(commonMethods.updateAlternativeIdentifiers(
-                trainingResourceBundle.getTrainingResource().getAlternativeIdentifiers(),
-                published.getTrainingResource().getAlternativeIdentifiers()));
+        ret.getTrainingResource().setAlternativeIdentifiers(published.getTrainingResource().getAlternativeIdentifiers());
         ret.setIdentifiers(published.getIdentifiers());
         ret.setId(published.getId());
         ret.getMetadata().setPublished(true);
@@ -138,7 +145,9 @@ public class PublicTrainingResourceManager extends AbstractPublicResourceManager
     @Override
     public void delete(TrainingResourceBundle trainingResourceBundle) {
         try {
-            TrainingResourceBundle publicTrainingResourceBundle = get(String.format("%s.%s", trainingResourceBundle.getTrainingResource().getCatalogueId(), trainingResourceBundle.getId()));
+            TrainingResourceBundle publicTrainingResourceBundle = get(publicResourceUtils.createPublicResourceId(
+                    trainingResourceBundle.getTrainingResource().getId(),
+                    trainingResourceBundle.getTrainingResource().getCatalogueId()));
             logger.info(String.format("Deleting public Training Resource with id [%s]", publicTrainingResourceBundle.getId()));
             super.delete(publicTrainingResourceBundle);
             jmsService.convertAndSendTopic("training_resource.delete", publicTrainingResourceBundle);

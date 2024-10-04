@@ -69,7 +69,8 @@ public class PublicProviderManager extends ResourceManager<ProviderBundle> imple
         List<ProviderBundle> providerList = new ArrayList<>();
         Browsing<ProviderBundle> providerBundleBrowsing = super.getAll(facetFilter, authentication);
         for (ProviderBundle providerBundle : providerBundleBrowsing.getResults()) {
-            if (securityService.isProviderAdmin(authentication, providerBundle.getId(), providerBundle.getProvider().getCatalogueId()) && providerBundle.getMetadata().isPublished()) {
+            if (securityService.isProviderAdmin(authentication, providerBundle.getId(),
+                    providerBundle.getProvider().getCatalogueId()) && providerBundle.getMetadata().isPublished()) {
                 providerList.add(providerBundle);
             }
         }
@@ -120,9 +121,7 @@ public class PublicProviderManager extends ResourceManager<ProviderBundle> imple
             e.printStackTrace();
         }
 
-        ret.getProvider().setAlternativeIdentifiers(commonMethods.updateAlternativeIdentifiers(
-                providerBundle.getProvider().getAlternativeIdentifiers(),
-                published.getProvider().getAlternativeIdentifiers()));
+        ret.getProvider().setAlternativeIdentifiers(published.getProvider().getAlternativeIdentifiers());
         ret.setIdentifiers(published.getIdentifiers());
         ret.setId(published.getId());
         ret.getMetadata().setPublished(true);
@@ -135,7 +134,9 @@ public class PublicProviderManager extends ResourceManager<ProviderBundle> imple
     @Override
     public void delete(ProviderBundle providerBundle) {
         try {
-            ProviderBundle publicProviderBundle = get(String.format("%s.%s", providerBundle.getProvider().getCatalogueId(), providerBundle.getId()));
+            ProviderBundle publicProviderBundle = get(publicResourceUtils.createPublicResourceId(
+                    providerBundle.getProvider().getId(),
+                    providerBundle.getProvider().getCatalogueId()));
             logger.info(String.format("Deleting public Provider with id [%s]", publicProviderBundle.getId()));
             super.delete(publicProviderBundle);
             jmsService.convertAndSendTopic("provider.delete", publicProviderBundle);
