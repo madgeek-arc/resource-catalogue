@@ -26,7 +26,6 @@
         <module>resource-catalogue-api</module>
         <module>resource-catalogue-rest</module>
         <module>resource-catalogue-service</module>
-        <module>resource-catalogue-client</module>
         <module>matomo</module>
         <module>resource-catalogue-elastic</module>
         <module>resource-catalogue-jms</module>
