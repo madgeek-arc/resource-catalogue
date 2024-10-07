@@ -78,15 +78,6 @@ public class GenericManager implements GenericResourceService {
                     browseSet.retainAll(entry.getValue());
                 }
             }
-            if (rt.getAliasGroup() != null) {
-                if (aliasGroupBrowse.get(rt.getAliasGroup()) == null) {
-                    aliasGroupBrowse.put(rt.getAliasGroup(), new TreeSet<>(browseSet));
-                    aliasGroupLabels.put(rt.getAliasGroup(), new TreeMap<>(labels));
-                } else {
-                    aliasGroupBrowse.get(rt.getAliasGroup()).retainAll(browseSet);
-                    aliasGroupLabels.get(rt.getAliasGroup()).keySet().retainAll(labels.keySet());
-                }
-            }
             if (rt.getAliases() != null) {
                 for (String alias : rt.getAliases()) {
                     if (aliasGroupBrowse.get(alias) == null) {
