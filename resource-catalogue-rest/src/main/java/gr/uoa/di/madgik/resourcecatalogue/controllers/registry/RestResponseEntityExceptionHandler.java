@@ -7,6 +7,7 @@ import gr.uoa.di.madgik.resourcecatalogue.exception.ResourceNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.annotation.Order;
+import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -21,6 +22,7 @@ import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 import javax.servlet.http.HttpServletRequest;
+import java.sql.SQLException;
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -67,6 +69,10 @@ public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionH
             logger.info(ex.getMessage());
             logger.debug(ex.getMessage(), ex);
             status = HttpStatus.NOT_FOUND;
+        } else if (ex instanceof SQLException || ex instanceof DataAccessException) {
+            logger.error(ex.getMessage(), ex);
+            status = HttpStatus.UNPROCESSABLE_ENTITY;
+            return ResponseEntity.status(status).body(new ServerError(status, req, "Could not process request"));
         } else {
             logger.error(ex.getMessage(), ex);
         }
