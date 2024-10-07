@@ -12,6 +12,7 @@ import gr.uoa.di.madgik.resourcecatalogue.service.SecurityService;
 import gr.uoa.di.madgik.resourcecatalogue.utils.FacetLabelService;
 import gr.uoa.di.madgik.resourcecatalogue.utils.JmsService;
 import gr.uoa.di.madgik.resourcecatalogue.utils.ProviderResourcesCommonMethods;
+import gr.uoa.di.madgik.resourcecatalogue.utils.PublicResourceUtils;
 import org.apache.commons.beanutils.BeanUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,17 +33,20 @@ public class PublicServiceManager extends AbstractPublicResourceManager<ServiceB
     private final SecurityService securityService;
     private final ProviderResourcesCommonMethods commonMethods;
     private final FacetLabelService facetLabelService;
+    private final PublicResourceUtils publicResourceUtils;
 
     @Autowired
     public PublicServiceManager(JmsService jmsService,
                                 SecurityService securityService,
                                 ProviderResourcesCommonMethods commonMethods,
-                                FacetLabelService facetLabelService) {
+                                FacetLabelService facetLabelService,
+                                PublicResourceUtils publicResourceUtils) {
         super(ServiceBundle.class);
         this.jmsService = jmsService;
         this.securityService = securityService;
         this.commonMethods = commonMethods;
         this.facetLabelService = facetLabelService;
+        this.publicResourceUtils = publicResourceUtils;
     }
 
     @Override
@@ -68,7 +72,8 @@ public class PublicServiceManager extends AbstractPublicResourceManager<ServiceB
         List<ServiceBundle> serviceBundleList = new ArrayList<>();
         Browsing<ServiceBundle> serviceBundleBrowsing = super.getAll(facetFilter, authentication);
         for (ServiceBundle serviceBundle : serviceBundleBrowsing.getResults()) {
-            if (securityService.isResourceProviderAdmin(authentication, serviceBundle.getId(), serviceBundle.getService().getCatalogueId()) && serviceBundle.getMetadata().isPublished()) {
+            if (securityService.isResourceProviderAdmin(authentication, serviceBundle.getId(),
+                    serviceBundle.getService().getCatalogueId()) && serviceBundle.getMetadata().isPublished()) {
                 serviceBundleList.add(serviceBundle);
             }
         }
@@ -80,7 +85,8 @@ public class PublicServiceManager extends AbstractPublicResourceManager<ServiceB
     public ServiceBundle add(ServiceBundle serviceBundle, Authentication authentication) {
         String lowerLevelResourceId = serviceBundle.getId();
         Identifiers.createOriginalId(serviceBundle);
-        serviceBundle.setId(String.format("%s.%s", serviceBundle.getService().getCatalogueId(), serviceBundle.getId()));
+        serviceBundle.setId(publicResourceUtils.createPublicResourceId(serviceBundle.getService().getId(),
+                serviceBundle.getService().getCatalogueId()));
         commonMethods.restrictPrefixRepetitionOnPublicResources(serviceBundle.getId(), serviceBundle.getService().getCatalogueId());
 
         // sets public ids to resource organisation, resource providers and related/required resources
@@ -112,8 +118,10 @@ public class PublicServiceManager extends AbstractPublicResourceManager<ServiceB
 
     @Override
     public ServiceBundle update(ServiceBundle serviceBundle, Authentication authentication) {
-        ServiceBundle published = super.get(String.format("%s.%s", serviceBundle.getService().getCatalogueId(), serviceBundle.getId()));
-        ServiceBundle ret = super.get(String.format("%s.%s", serviceBundle.getService().getCatalogueId(), serviceBundle.getId()));
+        ServiceBundle published = super.get(publicResourceUtils.createPublicResourceId(serviceBundle.getService().getId(),
+                serviceBundle.getService().getCatalogueId()));
+        ServiceBundle ret = super.get(publicResourceUtils.createPublicResourceId(serviceBundle.getService().getId(),
+                serviceBundle.getService().getCatalogueId()));
         try {
             BeanUtils.copyProperties(ret, serviceBundle);
         } catch (IllegalAccessException | InvocationTargetException e) {
@@ -123,9 +131,7 @@ public class PublicServiceManager extends AbstractPublicResourceManager<ServiceB
         // sets public ids to resource organisation, resource providers and related/required resources
         updateServiceIdsToPublic(ret);
 
-        ret.getService().setAlternativeIdentifiers(commonMethods.updateAlternativeIdentifiers(
-                serviceBundle.getService().getAlternativeIdentifiers(),
-                published.getService().getAlternativeIdentifiers()));
+        ret.getService().setAlternativeIdentifiers(published.getService().getAlternativeIdentifiers());
         ret.setIdentifiers(published.getIdentifiers());
         ret.setId(published.getId());
         ret.getMetadata().setPublished(true);
@@ -138,7 +144,9 @@ public class PublicServiceManager extends AbstractPublicResourceManager<ServiceB
     @Override
     public void delete(ServiceBundle serviceBundle) {
         try {
-            ServiceBundle publicServiceBundle = get(String.format("%s.%s", serviceBundle.getService().getCatalogueId(), serviceBundle.getId()));
+            ServiceBundle publicServiceBundle = get(publicResourceUtils.createPublicResourceId(
+                    serviceBundle.getService().getId(),
+                    serviceBundle.getService().getCatalogueId()));
             logger.info(String.format("Deleting public Service with id [%s]", publicServiceBundle.getId()));
             super.delete(publicServiceBundle);
             jmsService.convertAndSendTopic("service.delete", publicServiceBundle);
