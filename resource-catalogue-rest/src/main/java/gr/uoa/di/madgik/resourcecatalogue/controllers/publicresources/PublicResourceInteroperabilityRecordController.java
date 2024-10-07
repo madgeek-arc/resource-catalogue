@@ -56,8 +56,10 @@ public class PublicResourceInteroperabilityRecordController {
     }
 
     @Operation(summary = "Returns the Public Resource Interoperability Record with the given id.")
-    @GetMapping(path = "public/resourceInteroperabilityRecord/{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    public ResponseEntity<?> getPublicResourceInteroperabilityRecord(@PathVariable("id") String id) {
+    @GetMapping(path = "public/resourceInteroperabilityRecord/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    public ResponseEntity<?> getPublicResourceInteroperabilityRecord(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
+                                                                     @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix) {
+        String id = prefix + "/" + suffix;
         ResourceInteroperabilityRecordBundle resourceInteroperabilityRecordBundle = resourceInteroperabilityRecordService.get(id);
         if (resourceInteroperabilityRecordBundle.getMetadata().isPublished() && resourceInteroperabilityRecordBundle.isActive()) {
             return new ResponseEntity<>(resourceInteroperabilityRecordBundle.getResourceInteroperabilityRecord(), HttpStatus.OK);
@@ -65,10 +67,12 @@ public class PublicResourceInteroperabilityRecordController {
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(gson.toJson("You cannot view the specific Resource Interoperability Record."));
     }
 
-    @GetMapping(path = "public/resourceInteroperabilityRecord/bundle/{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth, #id)")
-    public ResponseEntity<?> getPublicResourceInteroperabilityRecordBundle(@PathVariable("id") String id,
+    @GetMapping(path = "public/resourceInteroperabilityRecord/bundle/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth, #prefix+'/'+#suffix)")
+    public ResponseEntity<?> getPublicResourceInteroperabilityRecordBundle(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
+                                                                           @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix,
                                                                            @Parameter(hidden = true) Authentication auth) {
+        String id = prefix + "/" + suffix;
         ResourceInteroperabilityRecordBundle resourceInteroperabilityRecordBundle = resourceInteroperabilityRecordService.get(id);
         if (auth != null && auth.isAuthenticated()) {
             User user = User.of(auth);

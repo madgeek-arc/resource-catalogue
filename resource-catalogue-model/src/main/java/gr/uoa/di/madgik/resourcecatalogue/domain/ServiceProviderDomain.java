@@ -13,10 +13,8 @@ import java.util.Objects;
 @XmlRootElement(namespace = "http://einfracentral.eu")
 public class ServiceProviderDomain {
 
-
-    // Provider's Location Information
     /**
-     * The branch of science, scientific discipline that is related to the Resource.
+     * The branch of science, scientific discipline that is related to the resource.
      */
     @XmlElement(required = true)
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
@@ -25,7 +23,7 @@ public class ServiceProviderDomain {
     private String scientificDomain;
 
     /**
-     * The subbranch of science, scientific sub-discipline that is related to the Resource.
+     * The sub-branch of science, scientific sub-discipline that is related to the resource.
      */
     @XmlElement(required = true)
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED)

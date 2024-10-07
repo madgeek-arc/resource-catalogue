@@ -122,9 +122,10 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
         trainingResourceBundle.setId(idCreator.generate(getResourceType()));
 
         // register and ensure Resource Catalogue's PID uniqueness
-        commonMethods.createPIDAndCorrespondingAlternativeIdentifier(trainingResourceBundle, getResourceType());
+        commonMethods.determineResourceAndCreateAlternativeIdentifierForPID(trainingResourceBundle, getResourceType());
         trainingResourceBundle.getTrainingResource().setAlternativeIdentifiers(
                 commonMethods.ensureResourceCataloguePidUniqueness(trainingResourceBundle.getId(),
+                        trainingResourceBundle.getTrainingResource().getCatalogueId(),
                         trainingResourceBundle.getTrainingResource().getAlternativeIdentifiers()));
 
         ProviderBundle providerBundle = providerService.get(trainingResourceBundle.getTrainingResource().getResourceOrganisation(), auth);
@@ -214,10 +215,11 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
         // ensure Resource Catalogue's PID uniqueness
         if (ret.getTrainingResource().getAlternativeIdentifiers() == null ||
                 ret.getTrainingResource().getAlternativeIdentifiers().isEmpty()) {
-            commonMethods.createPIDAndCorrespondingAlternativeIdentifier(ret, getResourceType());
+            commonMethods.determineResourceAndCreateAlternativeIdentifierForPID(ret, getResourceType());
         } else {
             ret.getTrainingResource().setAlternativeIdentifiers(
                     commonMethods.ensureResourceCataloguePidUniqueness(ret.getId(),
+                            ret.getTrainingResource().getCatalogueId(),
                             ret.getTrainingResource().getAlternativeIdentifiers()));
         }
 
@@ -662,7 +664,7 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
         TrainingResourceBundle trainingResourceBundle;
         try {
             trainingResourceBundle = get(id);
-        } catch (ResourceNotFoundException e) {
+        } catch (ResourceException | ResourceNotFoundException e) {
             return null;
         }
         return trainingResourceBundle;
@@ -673,7 +675,7 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
         TrainingResourceBundle trainingResourceBundle;
         try {
             trainingResourceBundle = get(id, catalogueId);
-        } catch (ResourceNotFoundException e) {
+        } catch (ResourceException | ResourceNotFoundException e) {
             return null;
         }
         return trainingResourceBundle;

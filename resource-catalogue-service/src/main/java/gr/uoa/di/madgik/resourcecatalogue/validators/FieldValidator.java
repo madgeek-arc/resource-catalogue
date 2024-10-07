@@ -7,17 +7,19 @@ import gr.uoa.di.madgik.resourcecatalogue.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.exception.ValidationException;
 import gr.uoa.di.madgik.resourcecatalogue.manager.ProviderManager;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
+import gr.uoa.di.madgik.resourcecatalogue.utils.RestTemplateTrustManager;
 import org.apache.commons.validator.routines.EmailValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpStatusCodeException;
+import org.springframework.web.client.RestTemplate;
 
-import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
-import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.*;
 import java.util.regex.Pattern;
@@ -251,36 +253,27 @@ public class FieldValidator {
     }
 
     public void validateUrl(Field field, URL urlForValidation) {
-        HttpsTrustManager.allowAllSSL();
-        HttpURLConnection huc;
-        int statusCode = 0;
+        RestTemplate restTemplate = RestTemplateTrustManager.createRestTemplateWithDisabledSSL();
 
         try {
-            // replace spaces with %20
             if (urlForValidation.toString().contains(" ")) {
                 urlForValidation = new URL(urlForValidation.toString().replaceAll("\\s", "%20"));
             }
 
-            // open connection and get response code
-            huc = (HttpURLConnection) urlForValidation.openConnection();
-            assert huc != null;
-            huc.setRequestMethod("HEAD");
-            huc.setConnectTimeout(5000);
-            statusCode = huc.getResponseCode();
-        } catch (java.net.SocketTimeoutException e) {
-            throw new ValidationException("URI provided is not valid, or takes too long to load. Found in field " + field.getName());
-        } catch (IOException e) {
-            logger.trace(e.getMessage());
-        }
+            SimpleClientHttpRequestFactory requestFactory = new SimpleClientHttpRequestFactory();
+            requestFactory.setConnectTimeout(5000);
+            requestFactory.setReadTimeout(5000);
+            restTemplate.setRequestFactory(requestFactory);
 
-//        if (statusCode != 200 && statusCode != 301 && statusCode != 302 && statusCode != 308
-//                && statusCode != 403 && statusCode != 405 && statusCode != 503) {
-//            if (field == null) {
-//                throw new ValidationException(String.format("The URL '%s' you provided is not valid.", urlForValidation));
-//            } else {
-//                throw new ValidationException(String.format("The URL '%s' you provided is not valid. Found in field '%s'", urlForValidation, field.getName()));
-//            }
-//        }
+            restTemplate.headForHeaders(urlForValidation.toURI());
+
+        } catch (HttpStatusCodeException e) {
+            logger.trace(e.getMessage());
+            throw e;
+        } catch (Exception e) {
+            logger.trace(e.getMessage());
+            throw new ValidationException("Failed to validate URL: " + urlForValidation);
+        }
     }
 
     // TODO: find a better way to get resources by id

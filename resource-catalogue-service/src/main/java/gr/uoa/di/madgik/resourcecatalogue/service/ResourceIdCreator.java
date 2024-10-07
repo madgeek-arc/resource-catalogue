@@ -11,33 +11,35 @@ import org.springframework.stereotype.Service;
 @Service
 public class ResourceIdCreator implements IdCreator {
 
+    @Value("${pid.test}")
+    private boolean pidTest;
+
     private final SearchService searchService;
 
-    @Value("${prefix.services}")
+    @Value("${pid.services.prefix}")
     private String servicesPrefix;
-    @Value("${prefix.tools}")
+    @Value("${pid.tools.prefix}")
     private String toolsPrefix;
-    @Value("${prefix.trainings}")
+    @Value("${pid.trainings.prefix}")
     private String trainingsPrefix;
-    @Value("${prefix.providers}")
+    @Value("${pid.providers.prefix}")
     private String providersPrefix;
-    @Value("${prefix.guidelines}")
+    @Value("${pid.interoperability-frameworks.prefix}")
     private String guidelinesPrefix;
-    //    @Value("${prefix.catalogues}")
-//    private String cataloguesPrefix;
-    @Value("${prefix.configurationTemplates}")
+
+    @Value("${configuration-templates.prefix}")
     private String configurationTemplatesPrefix;
-    @Value("${prefix.configurationTemplateInstances}")
+    @Value("${configuration-template-instances.prefix}")
     private String configurationTemplateInstancesPrefix;
-    @Value("${prefix.datasources}")
+    @Value("${datasources.prefix}")
     private String datasourcesPrefix;
-    @Value("${prefix.helpdesks}")
+    @Value("${helpdesks.prefix}")
     private String helpdesksPrefix;
-    @Value("${prefix.monitorings}")
+    @Value("${monitorings.prefix}")
     private String monitoringsPrefix;
-    @Value("${prefix.resourceInteroperabilityRecords}")
+    @Value("${resource-interoperability-records.prefix}")
     private String resourceInteroperabilityRecordsPrefix;
-    @Value("${prefix.vocabularyCurations}")
+    @Value("${vocabulary-curations.prefix}")
     private String vocabularyCurationsPrefix;
 
     public ResourceIdCreator(SearchService searchService) {
@@ -81,7 +83,11 @@ public class ResourceIdCreator implements IdCreator {
 
     public boolean searchIdExists(String id, String resourceType) {
         FacetFilter ff = new FacetFilter();
-        ff.setResourceType(resourceType);
+        if (pidTest) {
+            ff.setResourceType("resourceTypes");
+        } else {
+            ff.setResourceType(resourceType);
+        }
         ff.addFilter("resource_internal_id", id);
         Paging<?> resources = searchService.search(ff);
         return resources.getTotal() > 0;

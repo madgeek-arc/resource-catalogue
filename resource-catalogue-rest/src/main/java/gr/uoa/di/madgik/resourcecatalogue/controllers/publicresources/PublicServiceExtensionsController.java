@@ -57,8 +57,11 @@ public class PublicServiceExtensionsController {
 
     //SECTION: HELPDESK
     @Operation(description = "Returns the Public Helpdesk with the given id.")
-    @GetMapping(path = "public/helpdesk/{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    public ResponseEntity<?> getPublicHelpdesk(@PathVariable("id") String id, @Parameter(hidden = true) Authentication auth) {
+    @GetMapping(path = "public/helpdesk/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    public ResponseEntity<?> getPublicHelpdesk(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
+                                               @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix,
+                                               @Parameter(hidden = true) Authentication auth) {
+        String id = prefix + "/" + suffix;
         HelpdeskBundle helpdeskBundle = helpdeskService.get(id);
         if (auth != null && auth.isAuthenticated()) {
             User user = User.of(auth);
@@ -77,9 +80,12 @@ public class PublicServiceExtensionsController {
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(gson.toJson("You cannot view the specific Helpdesk."));
     }
 
-    @GetMapping(path = "public/helpdesk/helpdeskBundle/{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    @GetMapping(path = "public/helpdesk/helpdeskBundle/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
-    public ResponseEntity<?> getPublicHelpdeskBundle(@PathVariable("id") String id, @Parameter(hidden = true) Authentication auth) {
+    public ResponseEntity<?> getPublicHelpdeskBundle(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
+                                                     @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix,
+                                                     @Parameter(hidden = true) Authentication auth) {
+        String id = prefix + "/" + suffix;
         HelpdeskBundle helpdeskBundle = helpdeskService.get(id);
         if (auth != null && auth.isAuthenticated()) {
             User user = User.of(auth);
@@ -134,8 +140,11 @@ public class PublicServiceExtensionsController {
 
     //SECTION: MONITORING
     @Operation(description = "Returns the Public Monitoring with the given id.")
-    @GetMapping(path = "public/monitoring/{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    public ResponseEntity<?> getPublicMonitoring(@PathVariable("id") String id, @Parameter(hidden = true) Authentication auth) {
+    @GetMapping(path = "public/monitoring/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    public ResponseEntity<?> getPublicMonitoring(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
+                                                 @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix,
+                                                 @Parameter(hidden = true) Authentication auth) {
+        String id = prefix + "/" + suffix;
         MonitoringBundle monitoringBundle = monitoringService.get(id);
         if (auth != null && auth.isAuthenticated()) {
             User user = User.of(auth);
@@ -154,9 +163,12 @@ public class PublicServiceExtensionsController {
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(gson.toJson("You cannot view the specific Monitoring."));
     }
 
-    @GetMapping(path = "public/monitoring/monitoringBundle/{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    @GetMapping(path = "public/monitoring/monitoringBundle/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
-    public ResponseEntity<?> getPublicMonitoringBundle(@PathVariable("id") String id, @Parameter(hidden = true) Authentication auth) {
+    public ResponseEntity<?> getPublicMonitoringBundle(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
+                                                       @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix,
+                                                       @Parameter(hidden = true) Authentication auth) {
+        String id = prefix + "/" + suffix;
         MonitoringBundle monitoringBundle = monitoringService.get(id);
         if (auth != null && auth.isAuthenticated()) {
             User user = User.of(auth);

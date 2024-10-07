@@ -54,22 +54,26 @@ public class PublicServiceController {
     }
 
     @Operation(description = "Returns the Public Service with the given id.")
-    @GetMapping(path = "public/service/{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    @PreAuthorize("@securityService.resourceIsActive(#id, #catalogueId) or hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth, #id)")
-    public ResponseEntity<?> getPublicService(@PathVariable("id") String id,
+    @GetMapping(path = "public/service/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    @PreAuthorize("@securityService.resourceIsActive(#prefix+'/'+#suffix, #catalogueId) or hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth, #prefix+'/'+#suffix)")
+    public ResponseEntity<?> getPublicService(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
+                                              @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix,
                                               @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId,
                                               @Parameter(hidden = true) Authentication auth) {
+        String id = prefix + "/" + suffix;
         return serviceBundleService.get(id, catalogueId).getMetadata().isPublished() ?
                 new ResponseEntity(serviceBundleService.get(id, catalogueId).getService(), HttpStatus.OK) :
                 new ResponseEntity(gson.toJson("The specific Service does not consist a Public entity"), HttpStatus.NOT_FOUND);
     }
 
     //    @Operation(description = "Returns the Public ServiceBundle with the given id.")
-    @GetMapping(path = "public/service/infraService/{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth, #id, #catalogueId)")
-    public ResponseEntity<?> getPublicServiceBundle(@PathVariable("id") String id,
+    @GetMapping(path = "public/service/infraService/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth, #prefix+'/'+#suffix, #catalogueId)")
+    public ResponseEntity<?> getPublicServiceBundle(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
+                                                    @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix,
                                                     @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId,
                                                     @Parameter(hidden = true) Authentication auth) {
+        String id = prefix + "/" + suffix;
         return serviceBundleService.get(id, catalogueId).getMetadata().isPublished() ?
                 new ResponseEntity(serviceBundleService.get(id, catalogueId), HttpStatus.OK) :
                 new ResponseEntity(gson.toJson("The specific Service does not consist a Public entity"), HttpStatus.NOT_FOUND);

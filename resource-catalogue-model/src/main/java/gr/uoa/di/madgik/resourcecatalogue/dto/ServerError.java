@@ -2,9 +2,10 @@ package gr.uoa.di.madgik.resourcecatalogue.dto;
 
 import gr.uoa.di.madgik.resourcecatalogue.logging.LogTransactionsFilter;
 import gr.uoa.di.madgik.resourcecatalogue.utils.RequestUtils;
-import org.springframework.http.HttpStatusCode;
 
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.http.HttpStatusCode;
+
 import java.util.Date;
 
 /**
@@ -57,6 +58,14 @@ public class ServerError {
         this.status = status;
         this.transactionId = transactionId;
         this.url = url;
+        this.message = message;
+    }
+
+    public ServerError(HttpStatusCode status, HttpServletRequest req, String message) {
+        timestamp = new Date();
+        this.status = status.value();
+        this.transactionId = LogTransactionsFilter.getTransactionId();
+        this.url = RequestUtils.getUrlWithParams(req);
         this.message = message;
     }
 

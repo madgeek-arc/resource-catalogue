@@ -7,7 +7,6 @@ import gr.uoa.di.madgik.registry.service.VersionService;
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
 import gr.uoa.di.madgik.resourcecatalogue.dto.ExtendedValue;
 import gr.uoa.di.madgik.resourcecatalogue.dto.MapValues;
-import gr.uoa.di.madgik.resourcecatalogue.exception.ResourceException;
 import gr.uoa.di.madgik.resourcecatalogue.exception.ValidationException;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
 import gr.uoa.di.madgik.resourcecatalogue.utils.Auditable;
@@ -115,8 +114,9 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         provider.setId(idCreator.generate(getResourceType()));
 
         // register and ensure Resource Catalogue's PID uniqueness
-        commonMethods.createPIDAndCorrespondingAlternativeIdentifier(provider, getResourceType());
+        commonMethods.determineResourceAndCreateAlternativeIdentifierForPID(provider, getResourceType());
         provider.getProvider().setAlternativeIdentifiers(commonMethods.ensureResourceCataloguePidUniqueness(provider.getId(),
+                provider.getProvider().getCatalogueId(),
                 provider.getProvider().getAlternativeIdentifiers()));
 
         commonMethods.addAuthenticatedUser(provider.getProvider(), auth);
@@ -162,9 +162,10 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         // ensure Resource Catalogue's PID uniqueness
         if (ret.getProvider().getAlternativeIdentifiers() == null ||
                 ret.getProvider().getAlternativeIdentifiers().isEmpty()) {
-            commonMethods.createPIDAndCorrespondingAlternativeIdentifier(ret, getResourceType());
+            commonMethods.determineResourceAndCreateAlternativeIdentifierForPID(ret, getResourceType());
         } else {
             ret.getProvider().setAlternativeIdentifiers(commonMethods.ensureResourceCataloguePidUniqueness(ret.getId(),
+                    ret.getProvider().getCatalogueId(),
                     ret.getProvider().getAlternativeIdentifiers()));
         }
 
@@ -200,8 +201,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         logger.debug("Updating Provider: {} of Catalogue: {}", ret, ret.getProvider().getCatalogueId());
 
         // check if Provider has become a Legal Entity
-        //TODO: do we need this?
-//        checkAndAddProviderToHLEVocabulary(ret);
+        checkAndAddProviderToHLEVocabulary(ret);
 
         // Send emails to newly added or deleted Admins
         adminDifferences(ret, existingProvider);
@@ -233,7 +233,6 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         }
         return deserialize(resource);
     }
-
 
     public ProviderBundle get(String catalogueId, String providerId, Authentication auth) {
         ProviderBundle providerBundle = getWithCatalogue(providerId, catalogueId);
@@ -448,8 +447,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
                         LoggingInfo.ActionType.APPROVED.getKey());
 
                 // add Provider's Name as a HLE Vocabulary
-                //TODO: do we need this?
-//                checkAndAddProviderToHLEVocabulary(existingProvider);
+                checkAndAddProviderToHLEVocabulary(existingProvider);
                 break;
             case "rejected provider":
                 existingProvider.setActive(false);
@@ -890,9 +888,22 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         return provider;
     }
 
+    private void checkAndAddProviderToHLEVocabulary(ProviderBundle providerBundle) {
+        if (providerBundle.getStatus().equals("approved provider") && providerBundle.getProvider().isLegalEntity()) {
+            List<String> allHLENames = vocabularyService.getByType(Vocabulary.Type.PROVIDER_HOSTING_LEGAL_ENTITY)
+                    .stream().map(Vocabulary::getName).toList();
+            for (String hle : allHLENames) {
+                logger.info(hle);
+            }
+            if (!allHLENames.contains(providerBundle.getProvider().getName())) {
+                addApprovedProviderToHLEVocabulary(providerBundle);
+            }
+        }
+    }
+
     private void addApprovedProviderToHLEVocabulary(ProviderBundle providerBundle) {
         Vocabulary hle = new Vocabulary();
-        hle.setId("provider_hosting_legal_entity-" + providerBundle.getProvider().getId());
+        hle.setId("provider_hosting_legal_entity-" + idCreator.sanitizeString(providerBundle.getProvider().getName()));
         hle.setName(providerBundle.getProvider().getName());
         hle.setType(Vocabulary.Type.PROVIDER_HOSTING_LEGAL_ENTITY.getKey());
         hle.setExtras(new HashMap<>() {{
@@ -901,18 +912,6 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         logger.info("Creating a new Hosting Legal Entity Vocabulary with id: [{}] and name: [{}]",
                 hle.getId(), hle.getName());
         vocabularyService.add(hle, null);
-    }
-
-    private void checkAndAddProviderToHLEVocabulary(ProviderBundle providerBundle) {
-        if (providerBundle.getStatus().equals("approved provider") && providerBundle.getProvider().isLegalEntity()) {
-            //TODO: if we need this better save with Abbreviation instead of ID
-            String hleId = "provider_hosting_legal_entity-" + providerBundle.getProvider().getId();
-            try {
-                vocabularyService.get(hleId);
-            } catch (ResourceException e) {
-                addApprovedProviderToHLEVocabulary(providerBundle);
-            }
-        }
     }
 
     @Override

@@ -14,10 +14,8 @@ import java.util.Objects;
 @XmlRootElement(namespace = "http://einfracentral.eu")
 public class ProviderPublicContact {
 
-
-    // Contact Basic Information
     /**
-     * First Name of the Provider's main contact person/Provider manager.
+     * First Name of the resource's public contact person/manager.
      */
     @XmlElement
     @Schema
@@ -25,7 +23,7 @@ public class ProviderPublicContact {
     private String firstName;
 
     /**
-     * Last Name of the Provider's main contact person/Provider manager.
+     * Last Name of the resource's public contact person/manager.
      */
     @XmlElement
     @Schema
@@ -33,7 +31,7 @@ public class ProviderPublicContact {
     private String lastName;
 
     /**
-     * Email of the Provider's main contact person/Provider manager.
+     * Email of the resource's public contact person/manager.
      */
     @XmlElement(required = true)
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
@@ -41,7 +39,7 @@ public class ProviderPublicContact {
     private String email;
 
     /**
-     * Phone of the Provider's main contact person/Provider manager.
+     * Phone of the resource's public contact person/manager.
      */
     @XmlElement
     @Schema
@@ -49,7 +47,7 @@ public class ProviderPublicContact {
     private String phone;
 
     /**
-     * Position of the Provider's main contact person/Provider manager.
+     * Position of the resource's public contact person/manager.
      */
     @XmlElement
     @Schema

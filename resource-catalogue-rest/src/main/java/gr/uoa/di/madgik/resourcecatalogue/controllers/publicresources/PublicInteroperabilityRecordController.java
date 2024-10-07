@@ -61,9 +61,11 @@ public class PublicInteroperabilityRecordController {
     }
 
     @Operation(description = "Returns the Public Interoperability Record with the given id.")
-    @GetMapping(path = "public/interoperabilityRecord/{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    public ResponseEntity<?> getPublicInteroperabilityRecord(@PathVariable("id") String id,
+    @GetMapping(path = "public/interoperabilityRecord/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    public ResponseEntity<?> getPublicInteroperabilityRecord(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
+                                                             @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix,
                                                              @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId) {
+        String id = prefix + "/" + suffix;
         InteroperabilityRecordBundle interoperabilityRecordBundle = interoperabilityRecordService.get(id, catalogueId);
         if (interoperabilityRecordBundle.getMetadata().isPublished() && interoperabilityRecordBundle.isActive()
                 && interoperabilityRecordBundle.getStatus().equals("approved interoperability record")) {
@@ -72,11 +74,13 @@ public class PublicInteroperabilityRecordController {
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(gson.toJson("You cannot view the specific Interoperability Record."));
     }
 
-    @GetMapping(path = "public/interoperabilityRecord/bundle/{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth, #id, #catalogueId)")
-    public ResponseEntity<?> getPublicInteroperabilityRecordBundle(@PathVariable("id") String id,
+    @GetMapping(path = "public/interoperabilityRecord/bundle/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth, #prefix+'/'+#suffix, #catalogueId)")
+    public ResponseEntity<?> getPublicInteroperabilityRecordBundle(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
+                                                                   @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix,
                                                                    @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId,
                                                                    @Parameter(hidden = true) Authentication auth) {
+        String id = prefix + "/" + suffix;
         InteroperabilityRecordBundle interoperabilityRecordBundle = interoperabilityRecordService.get(id, catalogueId);
         if (auth != null && auth.isAuthenticated()) {
             User user = User.of(auth);
@@ -125,8 +129,10 @@ public class PublicInteroperabilityRecordController {
     }
 
     @Operation(description = "Returns the Public Related Resources of a specific Interoperability Record given its id.")
-    @GetMapping(path = "public/interoperabilityRecord/relatedResources/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
-    public List<String> getAllInteroperabilityRecordRelatedResources(@PathVariable String id) {
+    @GetMapping(path = "public/interoperabilityRecord/relatedResources/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE})
+    public List<String> getAllInteroperabilityRecordRelatedResources(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
+                                                                     @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix) {
+        String id = prefix + "/" + suffix;
         List<String> allInteroperabilityRecordRelatedResources = new ArrayList<>();
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(10000);

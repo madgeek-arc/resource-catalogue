@@ -4,8 +4,6 @@ import gr.uoa.di.madgik.resourcecatalogue.domain.*;
 import gr.uoa.di.madgik.resourcecatalogue.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.exception.ValidationException;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
-import org.json.JSONArray;
-import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -14,16 +12,6 @@ import org.springframework.security.authentication.InsufficientAuthenticationExc
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
-import javax.net.ssl.*;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.net.HttpURLConnection;
-import java.net.ProtocolException;
-import java.net.URL;
-import java.nio.charset.StandardCharsets;
-import java.security.cert.X509Certificate;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -45,27 +33,7 @@ public class ProviderResourcesCommonMethods {
     private final GenericResourceService genericResourceService;
     private final VocabularyService vocabularyService;
     private final SecurityService securityService;
-
-    @Value("${pid.test}")
-    private boolean pidTest;
-    @Value("${pid.username}")
-    private String pidUsername;
-    @Value("${pid.auth}")
-    private String pidAuth;
-    @Value("${prefix.services}")
-    private String servicesPrefix;
-    @Value("${prefix.tools}")
-    private String toolsPrefix;
-    @Value("${prefix.trainings}")
-    private String trainingsPrefix;
-    @Value("${prefix.providers}")
-    private String providersPrefix;
-    @Value("${prefix.guidelines}")
-    private String guidelinesPrefix;
-    @Value("${pid.api}")
-    private String pidApi;
-    @Value("${marketplace.url}")
-    private String marketplaceUrl;
+    private final PublicResourceUtils publicResourceUtils;
 
     public ProviderResourcesCommonMethods(@Lazy CatalogueService catalogueService,
                                           @Lazy ProviderService providerService,
@@ -76,7 +44,8 @@ public class ProviderResourcesCommonMethods {
                                                   resourceInteroperabilityRecordService,
                                           @Lazy GenericResourceService genericResourceService,
                                           @Lazy VocabularyService vocabularyService,
-                                          @Lazy SecurityService securityService) {
+                                          @Lazy SecurityService securityService,
+                                          PublicResourceUtils publicResourceUtils) {
         this.catalogueService = catalogueService;
         this.providerService = providerService;
         this.datasourceService = datasourceService;
@@ -86,6 +55,7 @@ public class ProviderResourcesCommonMethods {
         this.genericResourceService = genericResourceService;
         this.vocabularyService = vocabularyService;
         this.securityService = securityService;
+        this.publicResourceUtils = publicResourceUtils;
     }
 
     public void checkCatalogueIdConsistency(Object o, String catalogueId) {
@@ -343,7 +313,7 @@ public class ProviderResourcesCommonMethods {
         return loggingInfoList;
     }
 
-    public void createPIDAndCorrespondingAlternativeIdentifier(Bundle<?> bundle, String resourceType) {
+    public void determineResourceAndCreateAlternativeIdentifierForPID(Bundle<?> bundle, String resourceType) {
         AlternativeIdentifier alternativeIdentifier;
         List<AlternativeIdentifier> alternativeIdentifiers = new ArrayList<>();
         List<AlternativeIdentifier> existingAlternativeIdentifiers;
@@ -351,7 +321,8 @@ public class ProviderResourcesCommonMethods {
             case "provider":
                 ProviderBundle providerBundle = (ProviderBundle) bundle;
                 existingAlternativeIdentifiers = providerBundle.getProvider().getAlternativeIdentifiers();
-                alternativeIdentifier = createAlternativeIdentifierForPID(providerBundle);
+                alternativeIdentifier = createAlternativeIdentifierForPID(providerBundle.getProvider().getId(),
+                        providerBundle.getProvider().getCatalogueId());
                 if (existingAlternativeIdentifiers != null && !existingAlternativeIdentifiers.isEmpty()) {
                     existingAlternativeIdentifiers.add(alternativeIdentifier);
                 } else {
@@ -362,7 +333,8 @@ public class ProviderResourcesCommonMethods {
             case "service":
                 ServiceBundle serviceBundle = (ServiceBundle) bundle;
                 existingAlternativeIdentifiers = serviceBundle.getService().getAlternativeIdentifiers();
-                alternativeIdentifier = createAlternativeIdentifierForPID(serviceBundle);
+                alternativeIdentifier = createAlternativeIdentifierForPID(serviceBundle.getService().getId(),
+                        serviceBundle.getService().getCatalogueId());
                 if (existingAlternativeIdentifiers != null && !existingAlternativeIdentifiers.isEmpty()) {
                     existingAlternativeIdentifiers.add(alternativeIdentifier);
                 } else {
@@ -373,7 +345,8 @@ public class ProviderResourcesCommonMethods {
             case "training_resource":
                 TrainingResourceBundle trainingResourceBundle = (TrainingResourceBundle) bundle;
                 existingAlternativeIdentifiers = trainingResourceBundle.getTrainingResource().getAlternativeIdentifiers();
-                alternativeIdentifier = createAlternativeIdentifierForPID(trainingResourceBundle);
+                alternativeIdentifier = createAlternativeIdentifierForPID(trainingResourceBundle.getTrainingResource().getId(),
+                        trainingResourceBundle.getTrainingResource().getCatalogueId());
                 if (existingAlternativeIdentifiers != null && !existingAlternativeIdentifiers.isEmpty()) {
                     existingAlternativeIdentifiers.add(alternativeIdentifier);
                 } else {
@@ -384,7 +357,8 @@ public class ProviderResourcesCommonMethods {
             case "interoperability_record":
                 InteroperabilityRecordBundle interoperabilityRecordBundle = (InteroperabilityRecordBundle) bundle;
                 existingAlternativeIdentifiers = interoperabilityRecordBundle.getInteroperabilityRecord().getAlternativeIdentifiers();
-                alternativeIdentifier = createAlternativeIdentifierForPID(interoperabilityRecordBundle);
+                alternativeIdentifier = createAlternativeIdentifierForPID(interoperabilityRecordBundle.getInteroperabilityRecord().getId(),
+                        interoperabilityRecordBundle.getInteroperabilityRecord().getCatalogueId());
                 if (existingAlternativeIdentifiers != null && !existingAlternativeIdentifiers.isEmpty()) {
                     existingAlternativeIdentifiers.add(alternativeIdentifier);
                 } else {
@@ -397,155 +371,12 @@ public class ProviderResourcesCommonMethods {
         }
     }
 
-    private AlternativeIdentifier createAlternativeIdentifierForPID(Bundle<?> bundle) {
+    private AlternativeIdentifier createAlternativeIdentifierForPID(String id, String catalogueId) {
+        String pid = publicResourceUtils.createPublicResourceId(id, catalogueId);
         AlternativeIdentifier alternativeIdentifier = new AlternativeIdentifier();
         alternativeIdentifier.setType("EOSC PID");
-        alternativeIdentifier.setValue(bundle.getId());
+        alternativeIdentifier.setValue(pid);
         return alternativeIdentifier;
-    }
-
-    public void postPID(String pid) {
-        String resourcePrefix = pid.split("/")[0];  //21.15120
-        String resourceSuffix = pid.split("/")[1];  //79NMDy
-        String url;
-        if (pidTest) {
-            disableSSLVerification();
-            url = pidApi + resourceSuffix;
-        } else {
-            url = pidApi + pid;
-        }
-        String urlPath = determineUrlPathFromPidPrefix(resourcePrefix);
-        if (!urlPath.equals("no_path")) {
-            String payload = createPID(pid, urlPath);
-            HttpURLConnection con;
-            try {
-                con = (HttpURLConnection) new URL(url).openConnection();
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-            try {
-                con.setRequestMethod("PUT");
-            } catch (ProtocolException e) {
-                throw new RuntimeException(e);
-            }
-            con.setRequestProperty("Content-Type", "application/json");
-            con.setRequestProperty("Authorization", pidAuth);
-            con.setDoOutput(true);
-            try (OutputStream os = con.getOutputStream()) {
-                byte[] input = payload.getBytes(StandardCharsets.UTF_8);
-                os.write(input, 0, input.length);
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-            try (BufferedReader br = new BufferedReader(
-                    new InputStreamReader(con.getInputStream(), StandardCharsets.UTF_8))) {
-                StringBuilder response = new StringBuilder();
-                String responseLine;
-                while ((responseLine = br.readLine()) != null) {
-                    response.append(responseLine.trim());
-                }
-                logger.info("Resource with ID [{}] has been posted with PID [{}] on [{}]", pid, pid, url);
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-        } else {
-            logger.info("Could not register/update PID for resource {}, because url path is wrong", pid);
-        }
-    }
-
-    public String determineResourceTypeFromPidPrefix(String prefix) {
-        if (prefix.equals(servicesPrefix)) {
-            return "service";
-        } else if (prefix.equals(toolsPrefix)) {
-            return "tool";
-        } else if (prefix.equals(trainingsPrefix)) {
-            return "training_resource";
-        } else if (prefix.equals(providersPrefix)) {
-            return "provider";
-        } else if (prefix.equals(guidelinesPrefix)) {
-            return "interoperability_record";
-        } else {
-            return "no_resource_type";
-        }
-    }
-
-    //TODO: Update with new URL paths
-    public String determineUrlPathFromPidPrefix(String prefix) {
-        if (prefix.equals(servicesPrefix)) {
-            return "services/";
-        } else if (prefix.equals(toolsPrefix)) {
-            return "tools/";
-        } else if (prefix.equals(trainingsPrefix)) {
-            return "trainings/";
-        } else if (prefix.equals(providersPrefix)) {
-            return "providers/";
-        } else if (prefix.equals(guidelinesPrefix)) {
-            return "guidelines/";
-        } else {
-            return "no_path";
-        }
-    }
-
-    private String createPID(String resourceId, String resourceTypePath) {
-        JSONObject data = new JSONObject();
-        JSONArray values = new JSONArray();
-        JSONObject hs_admin = new JSONObject();
-        JSONObject hs_admin_data = new JSONObject();
-        JSONObject hs_admin_data_value = new JSONObject();
-        JSONObject id = new JSONObject();
-        JSONObject marketplaceUrl = new JSONObject();
-        hs_admin_data_value.put("index", 301);
-        hs_admin_data_value.put("handle", pidUsername);
-        hs_admin_data_value.put("permissions", "011111110011");
-//        hs_admin_data_value.put("format", "admin");
-        hs_admin_data.put("value", hs_admin_data_value);
-        hs_admin_data.put("format", "admin");
-        hs_admin.put("index", 101);
-        hs_admin.put("type", "HS_ADMIN");
-        hs_admin.put("data", hs_admin_data);
-        values.put(hs_admin);
-        marketplaceUrl.put("index", 1);
-        marketplaceUrl.put("type", "url");
-        String url = this.marketplaceUrl;
-        //TODO: Refactor this according to new endpoints
-        if (resourceTypePath.equals("trainings/") || resourceTypePath.equals("guidelines/")) {
-            url = url.replace("marketplace", "search.marketplace");
-        }
-        marketplaceUrl.put("data", url + resourceTypePath + resourceId);
-        values.put(marketplaceUrl);
-        id.put("index", 2);
-        id.put("type", "id");
-        id.put("data", resourceId);
-        values.put(id);
-        data.put("values", values);
-        return data.toString();
-    }
-
-    //TODO: remove if we get another PID Service for our BETA machines
-    private static void disableSSLVerification() {
-        try {
-            TrustManager[] trustAllCerts = new TrustManager[]{
-                    new X509TrustManager() {
-                        public X509Certificate[] getAcceptedIssuers() {
-                            return null;
-                        }
-
-                        public void checkClientTrusted(X509Certificate[] certs, String authType) {
-                        }
-
-                        public void checkServerTrusted(X509Certificate[] certs, String authType) {
-                        }
-                    }
-            };
-
-            SSLContext sc = SSLContext.getInstance("SSL");
-            sc.init(null, trustAllCerts, new java.security.SecureRandom());
-            HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
-            HostnameVerifier allHostsValid = (hostname, session) -> true;
-            HttpsURLConnection.setDefaultHostnameVerifier(allHostsValid);
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to disable SSL verification", e);
-        }
     }
 
     public void blockResourceDeletion(String status, boolean isPublished) {
@@ -555,24 +386,6 @@ public class ProviderResourcesCommonMethods {
         if (isPublished) {
             throw new ValidationException("You cannot directly delete a Public Resource");
         }
-    }
-
-    public List<AlternativeIdentifier> updateAlternativeIdentifiers(List<AlternativeIdentifier> lowerLevelAI, List<AlternativeIdentifier> publicLevelAI) {
-        List<AlternativeIdentifier> mergedAlternativeIdentifiers = new ArrayList<>();
-        if (lowerLevelAI != null && !lowerLevelAI.isEmpty()) {
-            mergedAlternativeIdentifiers.addAll(lowerLevelAI);
-        }
-        if (publicLevelAI != null && !publicLevelAI.isEmpty()) {
-            for (AlternativeIdentifier alternativeIdentifier : publicLevelAI) {
-                if (alternativeIdentifier.getType().equals("EOSC PID")) {
-                    mergedAlternativeIdentifiers.add(alternativeIdentifier);
-                    break;
-                }
-            }
-        }
-        // remove duplicates && convert to list
-        Set<AlternativeIdentifier> uniqueIdentifiers = new HashSet<>(mergedAlternativeIdentifiers);
-        return new ArrayList<>(uniqueIdentifiers);
     }
 
     public void deleteResourceRelatedServiceSubprofiles(String serviceId, String catalogueId) {
@@ -642,13 +455,16 @@ public class ProviderResourcesCommonMethods {
         }
     }
 
-    public List<AlternativeIdentifier> ensureResourceCataloguePidUniqueness(String id, List<AlternativeIdentifier> alternativeIdentifiers) {
-        // Removes duplicates and ensures that EOSC PID has the appropriate value
+    public List<AlternativeIdentifier> ensureResourceCataloguePidUniqueness(String id, String catalogueId,
+                                                                            List<AlternativeIdentifier> alternativeIdentifiers) {
+        String pid = publicResourceUtils.createPublicResourceId(id, catalogueId);
+        // removes duplicates and ensures that EOSC PID has the appropriate value
         List<AlternativeIdentifier> uniqueIdentifiers = removeDuplicates(alternativeIdentifiers);
+        // if PID alternative identifier has been falsely updated, set it back to its original value
         if (!uniqueIdentifiers.isEmpty()) {
             for (AlternativeIdentifier uniqueIdentifier : uniqueIdentifiers) {
                 if (uniqueIdentifier.getType().equalsIgnoreCase("EOSC PID")) {
-                    uniqueIdentifier.setValue(id);
+                    uniqueIdentifier.setValue(pid);
                 }
             }
         }

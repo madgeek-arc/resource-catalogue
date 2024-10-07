@@ -260,8 +260,8 @@ public class Service implements Identifiable {
     /**
      * List of the Service's Public Contacts info.
      */
-    @XmlElementWrapper(name = "publicContacts")
-    @XmlElement(name = "publicContact", required = true)
+    @XmlElementWrapper(name = "publicContacts", required = true)
+    @XmlElement(name = "publicContact")
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     @FieldValidation
     private List<ServicePublicContact> publicContacts;

@@ -146,7 +146,7 @@ public class ConfigurationTemplateInstanceManager extends ResourceManager<Config
 
     }
 
-    public List<ConfigurationTemplateInstance> getConfigurationTemplateInstancesByResourceId(String resourceId) {
+    public List<ConfigurationTemplateInstance> getCTIByResourceId(String resourceId) {
         List<ConfigurationTemplateInstance> ret = new ArrayList<>();
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(10000);
@@ -159,7 +159,7 @@ public class ConfigurationTemplateInstanceManager extends ResourceManager<Config
         return ret;
     }
 
-    public List<ConfigurationTemplateInstance> getConfigurationTemplateInstancesByConfigurationTemplateId(String configurationTemplateId) {
+    public List<ConfigurationTemplateInstance> getCTIByConfigurationTemplateId(String configurationTemplateId) {
         List<ConfigurationTemplateInstance> ret = new ArrayList<>();
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(10000);
@@ -211,7 +211,7 @@ public class ConfigurationTemplateInstanceManager extends ResourceManager<Config
         return ff;
     }
 
-    public ConfigurationTemplateInstanceDto createConfigurationTemplateInstanceDto(ConfigurationTemplateInstance configurationTemplateInstance) {
+    public ConfigurationTemplateInstanceDto createCTIDto(ConfigurationTemplateInstance configurationTemplateInstance) {
         ConfigurationTemplateInstanceDto ret = new ConfigurationTemplateInstanceDto();
         ret.setId(configurationTemplateInstance.getId());
         ret.setConfigurationTemplateId(configurationTemplateInstance.getConfigurationTemplateId());

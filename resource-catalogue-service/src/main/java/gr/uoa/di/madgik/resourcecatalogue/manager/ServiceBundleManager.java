@@ -121,8 +121,9 @@ public class ServiceBundleManager extends AbstractServiceBundleManager<ServiceBu
         serviceBundle.setId(idCreator.generate(getResourceType()));
 
         // register and ensure Resource Catalogue's PID uniqueness
-        commonMethods.createPIDAndCorrespondingAlternativeIdentifier(serviceBundle, getResourceType());
+        commonMethods.determineResourceAndCreateAlternativeIdentifierForPID(serviceBundle, getResourceType());
         serviceBundle.getService().setAlternativeIdentifiers(commonMethods.ensureResourceCataloguePidUniqueness(serviceBundle.getId(),
+                serviceBundle.getService().getCatalogueId(),
                 serviceBundle.getService().getAlternativeIdentifiers()));
 
         validate(serviceBundle);
@@ -212,9 +213,10 @@ public class ServiceBundleManager extends AbstractServiceBundleManager<ServiceBu
         // ensure Resource Catalogue's PID uniqueness
         if (ret.getService().getAlternativeIdentifiers() == null ||
                 ret.getService().getAlternativeIdentifiers().isEmpty()) {
-            commonMethods.createPIDAndCorrespondingAlternativeIdentifier(ret, getResourceType());
+            commonMethods.determineResourceAndCreateAlternativeIdentifierForPID(ret, getResourceType());
         } else {
             ret.getService().setAlternativeIdentifiers(commonMethods.ensureResourceCataloguePidUniqueness(ret.getId(),
+                    ret.getService().getCatalogueId(),
                     ret.getService().getAlternativeIdentifiers()));
         }
 

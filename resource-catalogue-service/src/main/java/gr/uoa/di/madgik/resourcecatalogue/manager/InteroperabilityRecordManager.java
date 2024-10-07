@@ -74,9 +74,10 @@ public class InteroperabilityRecordManager extends ResourceManager<Interoperabil
         interoperabilityRecordBundle.setId(idCreator.generate(getResourceType()));
 
         // register and ensure Resource Catalogue's PID uniqueness
-        commonMethods.createPIDAndCorrespondingAlternativeIdentifier(interoperabilityRecordBundle, getResourceType());
+        commonMethods.determineResourceAndCreateAlternativeIdentifierForPID(interoperabilityRecordBundle, getResourceType());
         interoperabilityRecordBundle.getInteroperabilityRecord().setAlternativeIdentifiers(
                 commonMethods.ensureResourceCataloguePidUniqueness(interoperabilityRecordBundle.getId(),
+                        interoperabilityRecordBundle.getInteroperabilityRecord().getCatalogueId(),
                         interoperabilityRecordBundle.getInteroperabilityRecord().getAlternativeIdentifiers()));
 
         ProviderBundle providerBundle = providerService.get(interoperabilityRecordBundle.getInteroperabilityRecord().getCatalogueId(), interoperabilityRecordBundle.getInteroperabilityRecord().getProviderId(), auth);
@@ -139,10 +140,11 @@ public class InteroperabilityRecordManager extends ResourceManager<Interoperabil
         // ensure Resource Catalogue's PID uniqueness
         if (ret.getInteroperabilityRecord().getAlternativeIdentifiers() == null ||
                 ret.getInteroperabilityRecord().getAlternativeIdentifiers().isEmpty()) {
-            commonMethods.createPIDAndCorrespondingAlternativeIdentifier(ret, getResourceType());
+            commonMethods.determineResourceAndCreateAlternativeIdentifierForPID(ret, getResourceType());
         } else {
             ret.getInteroperabilityRecord().setAlternativeIdentifiers(
                     commonMethods.ensureResourceCataloguePidUniqueness(ret.getId(),
+                            ret.getInteroperabilityRecord().getCatalogueId(),
                             ret.getInteroperabilityRecord().getAlternativeIdentifiers()));
         }
 
@@ -316,7 +318,7 @@ public class InteroperabilityRecordManager extends ResourceManager<Interoperabil
         InteroperabilityRecordBundle interoperabilityRecordBundle;
         try {
             interoperabilityRecordBundle = get(id, catalogueId);
-        } catch (ResourceNotFoundException e) {
+        } catch (ResourceException | ResourceNotFoundException e) {
             return null;
         }
         return interoperabilityRecordBundle;

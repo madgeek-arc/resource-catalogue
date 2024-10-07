@@ -9,6 +9,7 @@ import gr.uoa.di.madgik.resourcecatalogue.manager.PublicHelpdeskManager;
 import gr.uoa.di.madgik.resourcecatalogue.manager.PublicMonitoringManager;
 import gr.uoa.di.madgik.resourcecatalogue.utils.JmsService;
 import gr.uoa.di.madgik.resourcecatalogue.utils.ObjectUtils;
+import gr.uoa.di.madgik.resourcecatalogue.utils.PublicResourceUtils;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.After;
 import org.aspectj.lang.annotation.AfterReturning;
@@ -27,12 +28,15 @@ public class JMSManagementAspect {
     private final JmsService jmsService;
     private final PublicHelpdeskManager publicHelpdeskManager;
     private final PublicMonitoringManager publicMonitoringManager;
+    private final PublicResourceUtils publicResourceUtils;
 
     public JMSManagementAspect(JmsService jmsService, @Lazy PublicHelpdeskManager publicHelpdeskManager,
-                               @Lazy PublicMonitoringManager publicMonitoringManager) {
+                               @Lazy PublicMonitoringManager publicMonitoringManager,
+                               PublicResourceUtils publicResourceUtils) {
         this.jmsService = jmsService;
         this.publicHelpdeskManager = publicHelpdeskManager;
         this.publicMonitoringManager = publicMonitoringManager;
+        this.publicResourceUtils = publicResourceUtils;
     }
 
     @Async
@@ -68,7 +72,8 @@ public class JMSManagementAspect {
             returning = "helpdeskBundle")
     public void addHelpdeskAsPublic(final HelpdeskBundle helpdeskBundle) {
         try {
-            publicHelpdeskManager.get(String.format("%s.%s", helpdeskBundle.getCatalogueId(), helpdeskBundle.getId()));
+            publicHelpdeskManager.get(publicResourceUtils.createPublicResourceId(helpdeskBundle.getHelpdesk().getId(),
+                    helpdeskBundle.getCatalogueId()));
         } catch (ResourceException | ResourceNotFoundException e) {
             publicHelpdeskManager.add(ObjectUtils.clone(helpdeskBundle), null);
         }
@@ -98,7 +103,8 @@ public class JMSManagementAspect {
             returning = "monitoringBundle")
     public void addMonitoringAsPublic(final MonitoringBundle monitoringBundle) {
         try {
-            publicMonitoringManager.get(String.format("%s.%s", monitoringBundle.getCatalogueId(), monitoringBundle.getId()));
+            publicMonitoringManager.get(publicResourceUtils.createPublicResourceId(monitoringBundle.getMonitoring().getId(),
+                    monitoringBundle.getCatalogueId()));
         } catch (ResourceException | ResourceNotFoundException e) {
             publicMonitoringManager.add(ObjectUtils.clone(monitoringBundle), null);
         }

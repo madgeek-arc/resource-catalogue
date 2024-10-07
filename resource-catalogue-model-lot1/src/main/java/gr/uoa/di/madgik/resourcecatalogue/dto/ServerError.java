@@ -61,6 +61,14 @@ public class ServerError {
         this.message = message;
     }
 
+    public ServerError(HttpStatusCode status, HttpServletRequest req, String message) {
+        timestamp = new Date();
+        this.status = status.value();
+        this.transactionId = LogTransactionsFilter.getTransactionId();
+        this.url = RequestUtils.getUrlWithParams(req);
+        this.message = message;
+    }
+
     public ServerError(HttpStatusCode status, HttpServletRequest req, Exception exception) {
         timestamp = new Date();
         this.status = status.value();

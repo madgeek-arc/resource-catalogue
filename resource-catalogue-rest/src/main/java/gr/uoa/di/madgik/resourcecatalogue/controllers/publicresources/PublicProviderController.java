@@ -57,9 +57,11 @@ public class PublicProviderController {
     }
 
     @Operation(description = "Returns the Public Provider with the given id.")
-    @GetMapping(path = "public/provider/{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    public ResponseEntity<?> getPublicProvider(@PathVariable("id") String id,
+    @GetMapping(path = "public/provider/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    public ResponseEntity<?> getPublicProvider(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
+                                               @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix,
                                                @Parameter(hidden = true) Authentication auth) {
+        String id = prefix + "/" + suffix;
         ProviderBundle providerBundle = providerService.get(id, auth);
         if (auth != null && auth.isAuthenticated()) {
             User user = User.of(auth);
@@ -80,10 +82,12 @@ public class PublicProviderController {
     }
 
     //    @Operation(description = "Returns the Public Provider bundle with the given id.")
-    @GetMapping(path = "public/provider/bundle/{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isProviderAdmin(#auth, #id, #catalogueId)")
-    public ResponseEntity<?> getPublicProviderBundle(@PathVariable("id") String id,
+    @GetMapping(path = "public/provider/bundle/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isProviderAdmin(#auth, #prefix+'/'+#suffix)")
+    public ResponseEntity<?> getPublicProviderBundle(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
+                                                     @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix,
                                                      @Parameter(hidden = true) Authentication auth) {
+        String id = prefix + "/" + suffix;
         ProviderBundle providerBundle = providerService.get(id, auth);
         if (auth != null && auth.isAuthenticated()) {
             User user = User.of(auth);
