@@ -7,7 +7,6 @@ import gr.uoa.di.madgik.registry.service.*;
 import gr.uoa.di.madgik.resourcecatalogue.exception.ResourceException;
 import gr.uoa.di.madgik.resourcecatalogue.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.service.GenericResourceService;
-import gr.uoa.di.madgik.resourcecatalogue.utils.DefaultFacetLabelService;
 import gr.uoa.di.madgik.resourcecatalogue.utils.FacetLabelService;
 import gr.uoa.di.madgik.resourcecatalogue.utils.LoggingUtils;
 import gr.uoa.di.madgik.resourcecatalogue.utils.ReflectUtils;
@@ -41,7 +40,7 @@ public class GenericManager implements GenericResourceService {
                              ResourceService resourceService,
                              ResourceTypeService resourceTypeService,
                              ParserService parserPool,
-                             DefaultFacetLabelService facetLabelService) {
+                             FacetLabelService facetLabelService) {
         this.searchService = searchService;
         this.resourceService = resourceService;
         this.resourceTypeService = resourceTypeService;
