@@ -29,7 +29,7 @@ public class SwaggerConfig {
     public boolean isLocalhost;
 
     @Bean
-    public OpenAPI springShopOpenAPI() {
+    public OpenAPI openAPI() {
         OpenAPI openAPI = new OpenAPI()
                 .info(new Info().title(projectName + " API")
                         .description("A single platform for providers to onboard their organization, register and manage their resources.")
