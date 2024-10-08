@@ -24,14 +24,11 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
-import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
 
-import javax.sql.DataSource;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -48,7 +45,6 @@ public class ServiceController {
     private final ServiceBundleService<ServiceBundle> serviceBundleService;
     private final DraftResourceService<ServiceBundle> draftServiceService;
     private final ProviderService providerService;
-    private final DataSource commonDataSource;
     private final GenericResourceService genericResourceService;
     private final SecurityService securityService;
 
@@ -64,12 +60,11 @@ public class ServiceController {
     ServiceController(ServiceBundleService<ServiceBundle> service,
                       DraftResourceService<ServiceBundle> draftServiceService,
                       ProviderService provider,
-                      DataSource commonDataSource, GenericResourceService genericResourceService,
+                      GenericResourceService genericResourceService,
                       SecurityService securityService) {
         this.serviceBundleService = service;
         this.draftServiceService = draftServiceService;
         this.providerService = provider;
-        this.commonDataSource = commonDataSource;
         this.genericResourceService = genericResourceService;
         this.securityService = securityService;
     }
@@ -158,24 +153,6 @@ public class ServiceController {
         ff.addFilter("status", "approved resource");
         Paging<Service> paging = genericResourceService.getResults(ff).map(r -> ((ServiceBundle) r).getPayload());
         return ResponseEntity.ok(paging);
-    }
-
-    @GetMapping(path = "/childrenFromParent", produces = {MediaType.APPLICATION_JSON_VALUE})
-    public List<String> getChildrenFromParent(@RequestParam String type, @RequestParam String parent) {
-        NamedParameterJdbcTemplate namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(commonDataSource);
-        MapSqlParameterSource in = new MapSqlParameterSource();
-        String query = "";
-        switch (type) {
-            case "SUPERCATEGORY":
-            case "CATEGORY":
-                query = "SELECT subcategories FROM service_view";
-                break;
-            case "SCIENTIFIC_DOMAIN":
-                query = "SELECT scientific_subdomains FROM service_view";
-                break;
-        }
-        List<Map<String, Object>> rec = namedParameterJdbcTemplate.queryForList(query, in);
-        return serviceBundleService.getChildrenFromParent(type, parent, rec);
     }
 
     @Operation(summary = "Get a list of Resources based on a set of ids.")

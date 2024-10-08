@@ -51,7 +51,6 @@ public class TrainingResourceController {
     private final TrainingResourceService trainingResourceService;
     private final DraftResourceService<TrainingResourceBundle> draftTrainingResourceService;
     private final ProviderService providerService;
-    private final DataSource commonDataSource;
     private final GenericResourceService genericResourceService;
 
     @Value("${auditing.interval:6}")
@@ -66,11 +65,10 @@ public class TrainingResourceController {
     TrainingResourceController(TrainingResourceService trainingResourceService,
                                DraftResourceService<TrainingResourceBundle> draftTrainingResourceService,
                                ProviderService providerService,
-                               DataSource commonDataSource, GenericResourceService genericResourceService) {
+                               GenericResourceService genericResourceService) {
         this.trainingResourceService = trainingResourceService;
         this.draftTrainingResourceService = draftTrainingResourceService;
         this.providerService = providerService;
-        this.commonDataSource = commonDataSource;
         this.genericResourceService = genericResourceService;
     }
 
@@ -168,18 +166,6 @@ public class TrainingResourceController {
         ff.addFilter("status", "approved resource");
         Paging<TrainingResource> paging = genericResourceService.getResults(ff).map(r -> ((TrainingResourceBundle) r).getPayload());
         return ResponseEntity.ok(paging);
-    }
-
-    @GetMapping(path = "/childrenFromParent", produces = {MediaType.APPLICATION_JSON_VALUE})
-    public List<String> getChildrenFromParent(@RequestParam String type, @RequestParam String parent, @Parameter(hidden = true) Authentication auth) {
-        NamedParameterJdbcTemplate namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(commonDataSource);
-        MapSqlParameterSource in = new MapSqlParameterSource();
-        String query = "";
-        if ("SCIENTIFIC_DOMAIN".equals(type)) {
-            query = "SELECT scientific_subdomains FROM service_view";
-        }
-        List<Map<String, Object>> rec = namedParameterJdbcTemplate.queryForList(query, in);
-        return trainingResourceService.getChildrenFromParent(type, parent, rec);
     }
 
     @Operation(summary = "Get a list of Training Resources based on a set of ids.")
