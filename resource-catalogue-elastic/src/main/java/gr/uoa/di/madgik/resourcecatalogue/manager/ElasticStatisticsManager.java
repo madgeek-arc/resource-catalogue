@@ -61,7 +61,6 @@ public class ElasticStatisticsManager implements StatisticsService {
     private final ParserService parserService;
     private final ServiceBundleService<ServiceBundle> serviceBundleManager;
     private final VocabularyService vocabularyService;
-    private final DataSource dataSource;
 
     @org.springframework.beans.factory.annotation.Value("${elastic.index.max_result_window:10000}")
     private int maxQuantity;
@@ -69,8 +68,8 @@ public class ElasticStatisticsManager implements StatisticsService {
     ElasticStatisticsManager(RestHighLevelClient client, Analytics analyticsService,
                              ProviderService providerService,
                              SearchService searchService, ParserService parserService,
-                             ServiceBundleService<ServiceBundle> serviceBundleManager, VocabularyService vocabularyService,
-                             DataSource dataSource) {
+                             ServiceBundleService<ServiceBundle> serviceBundleManager,
+                             VocabularyService vocabularyService) {
         this.client = client;
         this.analyticsService = analyticsService;
         this.providerService = providerService;
@@ -78,7 +77,6 @@ public class ElasticStatisticsManager implements StatisticsService {
         this.parserService = parserService;
         this.serviceBundleManager = serviceBundleManager;
         this.vocabularyService = vocabularyService;
-        this.dataSource = dataSource;
     }
 
     private ParsedDateHistogram histogram(String id, String eventType, Interval by) {
@@ -317,142 +315,17 @@ public class ElasticStatisticsManager implements StatisticsService {
 
     @Override
     public List<PlaceCount> servicesPerPlace(String providerId) {
-        NamedParameterJdbcTemplate namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(dataSource);
-        MapSqlParameterSource in = new MapSqlParameterSource();
-
-        in.addValue("resource_organisation", providerId);
-        String query = "SELECT unnest(geographical_availabilities) AS geographical_availability, count(unnest(geographical_availabilities)) AS count FROM service_view WHERE active = true ";
-
-        if (providerId != null) {
-            query += " AND :resource_organisation=resource_organisation";
-        }
-        query += " GROUP BY unnest(geographical_availabilities);";
-
-        List<Map<String, Object>> records = namedParameterJdbcTemplate.queryForList(query, in);
-        Map<String, Integer> mapCounts = new HashMap<>();
-        List<PlaceCount> placeCounts = new ArrayList<>();
-
-        for (Map<String, Object> record : records) {
-            if (record.get("geographical_availability").toString().equalsIgnoreCase("EU")) {
-                for (String geographical_availability : vocabularyService.getRegion("EU")) {
-                    int count = Integer.parseInt(record.get("count").toString());
-                    if (mapCounts.containsKey(geographical_availability)) {
-                        count += mapCounts.get(geographical_availability);
-                    }
-                    mapCounts.put(geographical_availability, count);
-                }
-            } else if (record.get("geographical_availability").toString().equalsIgnoreCase("WW")) {
-                for (String geographical_availability : vocabularyService.getRegion("WW")) {
-                    int count = Integer.parseInt(record.get("count").toString());
-                    if (mapCounts.containsKey(geographical_availability)) {
-                        count += mapCounts.get(geographical_availability);
-                    }
-                    mapCounts.put(geographical_availability, count);
-                }
-            } else {
-                mapCounts.put(record.get("geographical_availability").toString(), Integer.parseInt(record.get("count").toString()));
-            }
-        }
-
-        for (Map.Entry<String, Integer> entry : mapCounts.entrySet()) {
-            placeCounts.add(new PlaceCount(entry.getKey(), entry.getValue()));
-        }
-
-        return placeCounts;
+        throw new UnsupportedOperationException("Not implemented");
     }
 
     @Override
     public List<Value> servicesByPlace(String providerId, String place) {
-        NamedParameterJdbcTemplate namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(dataSource);
-        MapSqlParameterSource in = new MapSqlParameterSource();
-
-        in.addValue("resource_organisation", providerId);
-        in.addValue("geographical_availabilities", place);
-        String query = "SELECT resource_internal_id, name FROM service_view WHERE active=true ";
-
-        if (providerId != null) {
-            query += " AND :resource_organisation=resource_organisation";
-        }
-
-        if (place != null) {
-            Set<String> geographical_availabilities = new HashSet<>(Arrays.asList(vocabularyService.getRegion("EU")));
-
-            if (!place.equalsIgnoreCase("WW")) {
-                query += " AND ( :geographical_availabilities=ANY(geographical_availabilities) ";
-
-                // if Place belongs to EU then search for EU as well
-                if (geographical_availabilities.contains(place) || place.equalsIgnoreCase("EU")) {
-                    query += " OR 'EU'=ANY(geographical_availabilities) ";
-                }
-                // always search for WW (because every Place belongs to WW)
-                query += " OR 'WW'=ANY(geographical_availabilities) )";
-            }
-        }
-
-        List<Map<String, Object>> records = namedParameterJdbcTemplate.queryForList(query, in);
-        List<Value> placeServices;
-
-        placeServices = records
-                .stream()
-                .map(record -> new Value(record.get("resource_internal_id").toString(), record.get("name").toString()))
-                .collect(Collectors.toList());
-        return placeServices;
+        throw new UnsupportedOperationException("Not implemented");
     }
 
     @Override
     public List<MapValues> mapServicesToGeographicalAvailability(String providerId) {
-        Map<String, Set<Value>> placeServices = new HashMap<>();
-        String[] world = vocabularyService.getRegion("WW");
-        String[] eu = vocabularyService.getRegion("EU");
-        for (String place : world) {
-            placeServices.put(place, new HashSet<>());
-        }
-        placeServices.put("OT", new HashSet<>());
-        placeServices.put("EL", new HashSet<>());
-        placeServices.put("UK", new HashSet<>());
-
-        NamedParameterJdbcTemplate namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(dataSource);
-        MapSqlParameterSource in = new MapSqlParameterSource();
-        in.addValue("resource_organisation", providerId);
-
-        String query = "SELECT resource_internal_id, name, geographical_availabilities FROM service_view WHERE active=true ";
-        if (providerId != null) {
-            query += " AND :resource_organisation=resource_organisation";
-        }
-
-        List<Map<String, Object>> records = namedParameterJdbcTemplate.queryForList(query, in);
-
-        try {
-            for (Map<String, Object> entry : records) {
-                Value value = new Value();
-                value.setId(entry.get("resource_internal_id").toString());
-                value.setName(entry.get("name").toString());
-                PgArray pgArray = ((PgArray) entry.get("geographical_availabilities"));
-
-                for (String place : ((String[]) pgArray.getArray())) {
-                    String[] expandedPlaces;
-                    if (place.equalsIgnoreCase("WW")) {
-                        expandedPlaces = world;
-                    } else if (place.equalsIgnoreCase("EU")) {
-                        expandedPlaces = eu;
-                    } else {
-                        expandedPlaces = new String[]{place};
-                    }
-                    for (String p : expandedPlaces) {
-                        if (placeServices.get(p) == null) {
-                            continue;
-                        }
-                        Set<Value> values = placeServices.get(p);
-                        values.add(value);
-                        placeServices.put(p, values);
-                    }
-                }
-            }
-        } catch (SQLException throwables) {
-            logger.error(throwables);
-        }
-
-        return toListMapValues(placeServices);
+        throw new UnsupportedOperationException("Not implemented");
     }
 
     @Override
@@ -489,51 +362,7 @@ public class ElasticStatisticsManager implements StatisticsService {
 
     @Override
     public List<MapValues> mapServicesToVocabulary(String providerId, Vocabulary vocabulary) {
-        Map<String, Set<Value>> vocabularyServices = new HashMap<>();
-
-        NamedParameterJdbcTemplate namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(dataSource);
-        MapSqlParameterSource in = new MapSqlParameterSource();
-        in.addValue("resource_organisation", providerId);
-
-        String query = "SELECT resource_internal_id, name, " + vocabulary.getKey()
-                + " FROM service_view WHERE active=true ";
-        if (providerId != null) {
-            query += " AND :resource_organisation=resource_organisation";
-        }
-
-        List<Map<String, Object>> records = namedParameterJdbcTemplate.queryForList(query, in);
-
-        try {
-            for (Map<String, Object> entry : records) {
-                Value value = new Value();
-                value.setId(entry.get("resource_internal_id").toString());
-                value.setName(entry.get("name").toString());
-
-                // TODO: refactor this code and Vocabulary enum
-                String[] vocabularyValues;
-                if (vocabulary != Vocabulary.ORDER_TYPE) { // because order type is not multivalued
-                    PgArray pgArray = ((PgArray) entry.get(vocabulary.getKey()));
-                    vocabularyValues = ((String[]) pgArray.getArray());
-                } else {
-                    vocabularyValues = new String[]{((String) entry.get(vocabulary.getKey()))};
-                }
-
-                for (String voc : vocabularyValues) {
-                    Set<Value> values;
-                    if (vocabularyServices.containsKey(voc)) {
-                        values = vocabularyServices.get(voc);
-                    } else {
-                        values = new HashSet<>();
-                    }
-                    values.add(value);
-                    vocabularyServices.put(voc, values);
-                }
-            }
-        } catch (SQLException throwables) {
-            logger.error(throwables);
-        }
-
-        return toListMapValues(vocabularyServices);
+        throw new UnsupportedOperationException("Not implemented");
     }
 
     private Map<String, Set<String>> providerCountriesMap() {
