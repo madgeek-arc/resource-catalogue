@@ -15,7 +15,6 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Component
-//@PropertySource({"classpath:application.properties", "classpath:registry.properties"})
 public class SimpleMailService implements MailService {
 
     private static final Logger logger = LoggerFactory.getLogger(SimpleMailService.class);
@@ -34,21 +33,23 @@ public class SimpleMailService implements MailService {
 
     @PostConstruct
     private void postConstruct() {
-        Properties sessionProps = new Properties();
-        sessionProps.setProperty("mail.transport.protocol", properties.getMailer().getProtocol());
-        sessionProps.setProperty("mail.smtp.auth", String.valueOf(properties.getMailer().isAuth()));
-        sessionProps.setProperty("mail.smtp.host", properties.getMailer().getHost());
-        sessionProps.setProperty("mail.smtp.password", properties.getMailer().getPassword());
-        sessionProps.setProperty("mail.smtp.port", String.valueOf(properties.getMailer().getPort()));
-        sessionProps.setProperty("mail.smtp.ssl.enable", String.valueOf(properties.getMailer().isSsl()));
-        sessionProps.setProperty("mail.smtp.user", properties.getMailer().getUsername());
-        sessionProps.setProperty("mail.smtp.from", properties.getMailer().getFrom());
-        session = Session.getInstance(sessionProps, new Authenticator() {
-            @Override
-            protected PasswordAuthentication getPasswordAuthentication() {
-                return new PasswordAuthentication(properties.getMailer().getUsername(), properties.getMailer().getPassword());
-            }
-        });
+        if (enableEmails) {
+            Properties sessionProps = new Properties();
+            sessionProps.setProperty("mail.transport.protocol", properties.getMailer().getProtocol());
+            sessionProps.setProperty("mail.smtp.auth", String.valueOf(properties.getMailer().isAuth()));
+            sessionProps.setProperty("mail.smtp.host", properties.getMailer().getHost());
+            sessionProps.setProperty("mail.smtp.password", properties.getMailer().getPassword());
+            sessionProps.setProperty("mail.smtp.port", String.valueOf(properties.getMailer().getPort()));
+            sessionProps.setProperty("mail.smtp.ssl.enable", String.valueOf(properties.getMailer().isSsl()));
+            sessionProps.setProperty("mail.smtp.user", properties.getMailer().getUsername());
+            sessionProps.setProperty("mail.smtp.from", properties.getMailer().getFrom());
+            session = Session.getInstance(sessionProps, new Authenticator() {
+                @Override
+                protected PasswordAuthentication getPasswordAuthentication() {
+                    return new PasswordAuthentication(properties.getMailer().getUsername(), properties.getMailer().getPassword());
+                }
+            });
+        }
     }
 
     @Async

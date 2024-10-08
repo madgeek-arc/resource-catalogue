@@ -16,7 +16,7 @@ public class ResourceCatalogueProperties {
     private String id;
     private String name;
     private EmailProperties emailProperties = new EmailProperties();
-    private MailerProperties mailer;
+    private MailerProperties mailer = new MailerProperties();
 
     public ResourceCatalogueProperties() {
     }

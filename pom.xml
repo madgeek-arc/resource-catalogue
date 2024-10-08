@@ -45,13 +45,12 @@
         <maven-source-plugin.version>3.1.0</maven-source-plugin.version>
         <maven-surefire-plugin.version>3.0.0</maven-surefire-plugin.version>
         <typescript-generator-maven-plugin.version>2.16.538</typescript-generator-maven-plugin.version>
-        <!--        <spring-security-config.version>6.3.3</spring-security-config.version>-->
         <org.apache.commons.version>3.15.0</org.apache.commons.version>
     </properties>
 
     <profiles>
         <profile>
-            <id>eosc</id>
+            <id>beyond</id>
             <activation>
                 <activeByDefault>true</activeByDefault>
             </activation>
@@ -106,6 +105,16 @@
             <dependency>
                 <groupId>gr.uoa.di.madgik</groupId>
                 <artifactId>registry-core-api</artifactId>
+                <version>${registry-core.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>gr.uoa.di.madgik</groupId>
+                <artifactId>registry-core-client</artifactId>
+                <version>${registry-core.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>gr.uoa.di.madgik</groupId>
+                <artifactId>registry-core-service</artifactId>
                 <version>${registry-core.version}</version>
             </dependency>
             <dependency>
