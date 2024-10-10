@@ -2,13 +2,11 @@ package gr.uoa.di.madgik.resourcecatalogue.domain;
 
 import gr.uoa.di.madgik.resourcecatalogue.annotation.FieldValidation;
 import io.swagger.v3.oas.annotations.media.Schema;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
-import java.util.Date;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 @XmlType
 @XmlRootElement(namespace = "http://einfracentral.eu")
@@ -32,9 +30,9 @@ public class VocabularyEntryRequest {
     private String providerId;
 
     @XmlElement(required = true)
-    @Schema
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED, example = "2020-01-01")
     @FieldValidation
-    private Date dateOfRequest;
+    private String dateOfRequest;
 
     @XmlElement(required = true)
     @Schema
@@ -45,7 +43,7 @@ public class VocabularyEntryRequest {
     public VocabularyEntryRequest() {
     }
 
-    public VocabularyEntryRequest(String userId, String resourceId, String providerId, Date dateOfRequest, String resourceType) {
+    public VocabularyEntryRequest(String userId, String resourceId, String providerId, String dateOfRequest, String resourceType) {
         this.userId = userId;
         this.resourceId = resourceId;
         this.providerId = providerId;
@@ -88,11 +86,11 @@ public class VocabularyEntryRequest {
         this.providerId = providerId;
     }
 
-    public Date getDateOfRequest() {
+    public String getDateOfRequest() {
         return dateOfRequest;
     }
 
-    public void setDateOfRequest(Date dateOfRequest) {
+    public void setDateOfRequest(String dateOfRequest) {
         this.dateOfRequest = dateOfRequest;
     }
 

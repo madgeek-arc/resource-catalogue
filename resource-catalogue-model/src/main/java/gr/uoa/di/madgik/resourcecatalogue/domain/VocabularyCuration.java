@@ -2,15 +2,14 @@ package gr.uoa.di.madgik.resourcecatalogue.domain;
 
 import gr.uoa.di.madgik.resourcecatalogue.annotation.FieldValidation;
 import io.swagger.v3.oas.annotations.media.Schema;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlElementWrapper;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 
 @XmlType
@@ -58,7 +57,7 @@ public class VocabularyCuration implements Identifiable {
     @XmlElement
     @Schema
     @FieldValidation(nullable = true)
-    private Date resolutionDate;
+    private String resolutionDate;
 
     @XmlElement
     @Schema
@@ -180,11 +179,11 @@ public class VocabularyCuration implements Identifiable {
         this.rejectionReason = rejectionReason;
     }
 
-    public Date getResolutionDate() {
+    public String getResolutionDate() {
         return resolutionDate;
     }
 
-    public void setResolutionDate(Date resolutionDate) {
+    public void setResolutionDate(String resolutionDate) {
         this.resolutionDate = resolutionDate;
     }
 

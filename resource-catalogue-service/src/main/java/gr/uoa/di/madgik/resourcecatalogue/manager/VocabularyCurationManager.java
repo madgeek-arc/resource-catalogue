@@ -10,7 +10,7 @@ import gr.uoa.di.madgik.resourcecatalogue.exception.ResourceAlreadyExistsExcepti
 import gr.uoa.di.madgik.resourcecatalogue.exception.ValidationException;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
 import gr.uoa.di.madgik.resourcecatalogue.utils.FacetLabelService;
-import org.apache.commons.lang3.time.DateUtils;
+import jakarta.validation.constraints.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,8 +19,10 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
-import jakarta.validation.constraints.NotNull;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 
@@ -80,7 +82,7 @@ public class VocabularyCurationManager extends ResourceManager<VocabularyCuratio
         vocabularyCuration.setResolutionDate(null);
         vocabularyCuration.setResolutionUser(null);
         for (VocabularyEntryRequest vocEntryRequest : vocabularyCuration.getVocabularyEntryRequests()) {
-            vocEntryRequest.setDateOfRequest(DateUtils.truncate(new Date(), Calendar.DAY_OF_MONTH));
+            vocEntryRequest.setDateOfRequest(String.valueOf(System.currentTimeMillis()));
             vocEntryRequest.setUserId(user.getEmail());
         }
         // if vocabularyCuration doesn't exist
@@ -254,7 +256,7 @@ public class VocabularyCurationManager extends ResourceManager<VocabularyCuratio
 
     public void approveOrRejectVocabularyCuration(VocabularyCuration vocabularyCuration, boolean approved, String rejectionReason, Authentication authentication) {
         vocabularyCuration.setResolutionUser(User.of(authentication).getEmail());
-        vocabularyCuration.setResolutionDate(DateUtils.truncate(new Date(), Calendar.DAY_OF_MONTH));
+        vocabularyCuration.setResolutionDate(String.valueOf(System.currentTimeMillis()));
         logger.info("Updating VocabularyRequest " + vocabularyCuration.getEntryValueName());
         if (approved) {
             vocabularyCuration.setStatus(VocabularyCuration.Status.APPROVED.getKey());

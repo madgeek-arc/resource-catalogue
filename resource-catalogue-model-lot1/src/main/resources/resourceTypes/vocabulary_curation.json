@@ -34,7 +34,7 @@
       "multivalued": true,
       "name": "date_of_request",
       "path": "$.vocabularyEntryRequests[*].dateOfRequest",
-      "type": "java.util.Date"
+      "type": "java.lang.String"
     },
     {
       "label": "Resource Type",
@@ -76,7 +76,7 @@
       "multivalued": false,
       "name": "resolution_date",
       "path": "$.resolutionDate",
-      "type": "java.util.Date"
+      "type": "java.lang.String"
     },
     {
       "label": "Resolution User",
