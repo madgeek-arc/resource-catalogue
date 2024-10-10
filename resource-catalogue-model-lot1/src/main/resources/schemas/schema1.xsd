@@ -2260,7 +2260,7 @@ that is the used scheme (e.g., Web Address URL, DOI, ARK, etc.).]]></xs:document
             
       <xs:element minOccurs="0" name="rejectionReason" type="xs:string"/>
             
-      <xs:element minOccurs="0" name="resolutionDate" type="xs:dateTime"/>
+      <xs:element minOccurs="0" name="resolutionDate" type="xs:string"/>
             
       <xs:element minOccurs="0" name="resolutionUser" type="xs:string"/>
             
@@ -2278,7 +2278,7 @@ that is the used scheme (e.g., Web Address URL, DOI, ARK, etc.).]]></xs:document
         
     <xs:sequence>
             
-      <xs:element minOccurs="0" name="dateOfRequest" type="xs:dateTime"/>
+      <xs:element minOccurs="0" name="dateOfRequest" type="xs:string"/>
             
       <xs:element minOccurs="0" name="providerId" type="xs:string"/>
             
