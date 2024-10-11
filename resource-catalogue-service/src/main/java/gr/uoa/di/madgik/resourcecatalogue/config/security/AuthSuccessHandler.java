@@ -33,7 +33,6 @@ public class AuthSuccessHandler implements AuthenticationSuccessHandler {
     private final ResourceCatalogueProperties catalogueProperties;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    @Autowired
     public AuthSuccessHandler(ResourceCatalogueProperties catalogueProperties) {
         this.catalogueProperties = catalogueProperties;
     }

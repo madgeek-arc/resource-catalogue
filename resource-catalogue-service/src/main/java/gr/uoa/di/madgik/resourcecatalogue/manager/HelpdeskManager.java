@@ -32,7 +32,6 @@ public class HelpdeskManager extends ResourceManager<HelpdeskBundle> implements 
     private final ProviderResourcesCommonMethods commonMethods;
     private final IdCreator idCreator;
 
-    @Autowired
     public HelpdeskManager(ServiceBundleService serviceBundleService,
                            TrainingResourceService trainingResourceService,
                            PublicHelpdeskManager publicHelpdeskManager,

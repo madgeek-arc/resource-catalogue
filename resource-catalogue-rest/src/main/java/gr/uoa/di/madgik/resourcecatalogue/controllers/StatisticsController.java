@@ -24,7 +24,6 @@ public class StatisticsController {
 
     private final StatisticsService statisticsService;
 
-    @Autowired
     StatisticsController(StatisticsService statisticsService) {
         this.statisticsService = statisticsService;
     }

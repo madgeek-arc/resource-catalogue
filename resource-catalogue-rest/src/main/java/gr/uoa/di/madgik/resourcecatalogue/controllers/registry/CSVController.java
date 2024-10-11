@@ -48,7 +48,6 @@ public class CSVController {
     @Value("${elastic.index.max_result_window:10000}")
     private int maxQuantity;
 
-    @Autowired
     CSVController(ServiceBundleService service, ProviderService provider, VocabularyService vocabulary, CSVService csvService) {
         this.serviceBundleService = service;
         this.providerService = provider;

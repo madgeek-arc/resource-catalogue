@@ -41,7 +41,6 @@ public abstract class AbstractSyncService<T extends Identifiable> implements Syn
 
     protected abstract String getController();
 
-    @Autowired
     public AbstractSyncService(@Value("${sync.host:}") String host, @Value("${sync.token.filepath:}") String filename, @Value("${sync.enable}") boolean enabled) {
         this.host = host;
         this.filename = filename;

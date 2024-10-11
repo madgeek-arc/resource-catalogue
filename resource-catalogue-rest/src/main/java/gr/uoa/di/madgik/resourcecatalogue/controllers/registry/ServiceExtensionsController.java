@@ -73,7 +73,6 @@ public class ServiceExtensionsController {
         binder.addValidators(new MonitoringValidator());
     }
 
-    @Autowired
     ServiceExtensionsController(HelpdeskService helpdeskService,
                                 MonitoringService monitoringService,
                                 ServiceBundleService serviceBundleService,

@@ -34,7 +34,6 @@ public class PublicInteroperabilityRecordManager extends AbstractPublicResourceM
     private final ProviderResourcesCommonMethods commonMethods;
     private final PublicResourceUtils publicResourceUtils;
 
-    @Autowired
     public PublicInteroperabilityRecordManager(JmsService jmsService, SecurityService securityService,
                                                ProviderResourcesCommonMethods commonMethods,
                                                PublicResourceUtils publicResourceUtils) {

@@ -24,7 +24,6 @@ public class ResourceTemplateBundleController {
     private final ServiceBundleService serviceBundleService;
     private final TrainingResourceService trainingResourceService;
 
-    @Autowired
     public ResourceTemplateBundleController(ServiceBundleService serviceBundleService,
                                             TrainingResourceService trainingResourceService) {
         this.serviceBundleService = serviceBundleService;

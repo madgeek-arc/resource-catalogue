@@ -31,7 +31,6 @@ public class PublicResourceInteroperabilityRecordManager extends AbstractPublicR
     private final SecurityService securityService;
     private final PublicResourceUtils publicResourceUtils;
 
-    @Autowired
     public PublicResourceInteroperabilityRecordManager(JmsService jmsService, SecurityService securityService,
                                                        PublicResourceUtils publicResourceUtils) {
         super(ResourceInteroperabilityRecordBundle.class);

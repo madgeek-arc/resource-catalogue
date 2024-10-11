@@ -32,7 +32,6 @@ public class PublicDatasourceManager extends AbstractPublicResourceManager<Datas
     private final ProviderResourcesCommonMethods commonMethods;
     private final PublicResourceUtils publicResourceUtils;
 
-    @Autowired
     public PublicDatasourceManager(JmsService jmsService, SecurityService securityService,
                                    ProviderResourcesCommonMethods commonMethods,
                                    PublicResourceUtils publicResourceUtils) {

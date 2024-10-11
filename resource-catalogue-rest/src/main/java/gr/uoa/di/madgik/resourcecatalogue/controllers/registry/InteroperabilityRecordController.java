@@ -44,7 +44,6 @@ public class InteroperabilityRecordController {
     private final GenericResourceService genericResourceService;
     private final SecurityService securityService;
 
-    @Autowired
     public InteroperabilityRecordController(InteroperabilityRecordService interoperabilityRecordService,
                                             DraftResourceService<InteroperabilityRecordBundle> draftInteroperabilityRecordService,
                                             ResourceInteroperabilityRecordService resourceInteroperabilityRecordService,

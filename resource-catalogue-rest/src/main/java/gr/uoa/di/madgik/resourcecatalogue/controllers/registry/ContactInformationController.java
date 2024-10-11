@@ -25,7 +25,6 @@ public class ContactInformationController {
 
     private final ContactInformationService contactInformationService;
 
-    @Autowired
     public ContactInformationController(ContactInformationService contactInformationService) {
         this.contactInformationService = contactInformationService;
     }

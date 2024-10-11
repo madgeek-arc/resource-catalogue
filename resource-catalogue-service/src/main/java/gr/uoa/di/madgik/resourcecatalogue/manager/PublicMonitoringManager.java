@@ -32,7 +32,6 @@ public class PublicMonitoringManager extends AbstractPublicResourceManager<Monit
     private final ProviderResourcesCommonMethods commonMethods;
     private final PublicResourceUtils publicResourceUtils;
 
-    @Autowired
     public PublicMonitoringManager(JmsService jmsService, SecurityService securityService,
                                    ProviderResourcesCommonMethods commonMethods,
                                    PublicResourceUtils publicResourceUtils) {

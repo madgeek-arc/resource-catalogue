@@ -35,7 +35,6 @@ public class PublicServiceManager extends AbstractPublicResourceManager<ServiceB
     private final FacetLabelService facetLabelService;
     private final PublicResourceUtils publicResourceUtils;
 
-    @Autowired
     public PublicServiceManager(JmsService jmsService,
                                 SecurityService securityService,
                                 ProviderResourcesCommonMethods commonMethods,

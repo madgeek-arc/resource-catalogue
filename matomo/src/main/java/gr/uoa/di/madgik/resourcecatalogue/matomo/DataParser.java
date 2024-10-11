@@ -46,7 +46,6 @@ public class DataParser {
     @Value("${matomoSiteId:1}")
     private String matomoSiteId;
 
-    @Autowired
     DataParser(EventService eventService) {
         this.eventService = eventService;
     }

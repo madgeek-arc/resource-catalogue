@@ -32,7 +32,6 @@ public class PublicHelpdeskManager extends AbstractPublicResourceManager<Helpdes
     private final ProviderResourcesCommonMethods commonMethods;
     private final PublicResourceUtils publicResourceUtils;
 
-    @Autowired
     public PublicHelpdeskManager(JmsService jmsService, SecurityService securityService,
                                  ProviderResourcesCommonMethods commonMethods,
                                  PublicResourceUtils publicResourceUtils) {

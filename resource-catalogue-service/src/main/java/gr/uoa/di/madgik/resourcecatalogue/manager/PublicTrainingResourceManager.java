@@ -35,7 +35,6 @@ public class PublicTrainingResourceManager extends AbstractPublicResourceManager
     private final FacetLabelService facetLabelService;
     private final PublicResourceUtils publicResourceUtils;
 
-    @Autowired
     public PublicTrainingResourceManager(JmsService jmsService, SecurityService securityService,
                                          ProviderResourcesCommonMethods commonMethods,
                                          FacetLabelService facetLabelService,

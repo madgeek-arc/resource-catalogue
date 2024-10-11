@@ -29,7 +29,6 @@ public class EventManager extends ResourceManager<Event> implements EventService
     private final ParserService parserService;
     private final ServiceBundleService serviceBundleService;
 
-    @Autowired
     public EventManager(ParserService parserService,
                         @Lazy ServiceBundleService serviceBundleService) {
         super(Event.class);

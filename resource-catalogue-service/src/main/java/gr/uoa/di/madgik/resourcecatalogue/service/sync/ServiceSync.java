@@ -7,7 +7,6 @@ import org.springframework.stereotype.Service;
 @Service
 public class ServiceSync extends AbstractSyncService<gr.uoa.di.madgik.resourcecatalogue.domain.Service> {
 
-    @Autowired
     public ServiceSync(@Value("${sync.host:}") String host, @Value("${sync.token.filepath:}") String filename, @Value("${sync.enable}") boolean enabled) {
         super(host, filename, enabled);
     }

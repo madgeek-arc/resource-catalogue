@@ -27,7 +27,6 @@ public class PublicController {
 
     private final GenericResourceService genericResourceService;
 
-    @Autowired
     PublicController(GenericResourceService genericResourceService) {
         this.genericResourceService = genericResourceService;
     }

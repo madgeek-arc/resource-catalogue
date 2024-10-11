@@ -56,7 +56,6 @@ public class RegistrationMailService {
     private int maxQuantity;
 
 
-    @Autowired
     public RegistrationMailService(MailService mailService, Configuration cfg,
                                    ProviderManager providerManager,
                                    @Lazy DraftProviderManager pendingProviderManager,

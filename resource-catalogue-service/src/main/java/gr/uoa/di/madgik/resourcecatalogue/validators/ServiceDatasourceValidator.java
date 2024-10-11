@@ -23,7 +23,6 @@ public class ServiceDatasourceValidator implements Validator {
     private final ServiceBundleService serviceBundleService;
     private final String catalogueName;
 
-    @Autowired
     public ServiceDatasourceValidator(@Value("${catalogue.id}") String catalogueName,
                                       @Lazy ServiceBundleService serviceBundleService) {
         this.catalogueName = catalogueName;

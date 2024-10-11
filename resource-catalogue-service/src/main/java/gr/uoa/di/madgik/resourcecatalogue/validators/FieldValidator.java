@@ -42,7 +42,6 @@ public class FieldValidator {
 
     private Deque<String> validationLocation;
 
-    @Autowired
     public FieldValidator(VocabularyService vocabularyService,
                           ProviderManager providerService,
                           @Lazy ServiceBundleService serviceBundleService,

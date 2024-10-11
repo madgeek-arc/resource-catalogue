@@ -31,7 +31,6 @@ public class VocabularyController extends ResourceController<Vocabulary> {
     private static final Logger logger = LogManager.getLogger(VocabularyController.class);
     private final VocabularyService vocabularyService;
 
-    @Autowired
     VocabularyController(VocabularyService vocabularyService) {
         super(vocabularyService);
         this.vocabularyService = vocabularyService;
