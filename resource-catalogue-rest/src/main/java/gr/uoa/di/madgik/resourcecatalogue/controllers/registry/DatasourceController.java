@@ -86,7 +86,7 @@ public class DatasourceController {
     @Parameter(name = "suspended", description = "Suspended", content = @Content(schema = @Schema(type = "boolean", defaultValue = "false")))
     @GetMapping(path = "/all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity<Paging<Datasource>> getAllDatasources(@Parameter(hidden = true) @RequestParam MultiValueMap<String, Object> allRequestParams) {
-        FacetFilter ff = FacetFilterUtils.createFacetFilter(allRequestParams);
+        FacetFilter ff = FacetFilter.from(allRequestParams);
         ff.setResourceType("datasource");
         ff.addFilter("published", false);
         ff.addFilter("active", true);
@@ -101,7 +101,7 @@ public class DatasourceController {
     @GetMapping(path = "adminPage/all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     public ResponseEntity<Paging<DatasourceBundle>> getAllDatasourcesForAdminPage(@Parameter(hidden = true) @RequestParam MultiValueMap<String, Object> allRequestParams) {
-        FacetFilter ff = FacetFilterUtils.createFacetFilter(allRequestParams);
+        FacetFilter ff = FacetFilter.from(allRequestParams);
         ff.setResourceType("datasource");
         ff.addFilter("published", false);
         Paging<DatasourceBundle> paging = genericResourceService.getResults(ff);
@@ -204,7 +204,7 @@ public class DatasourceController {
     @Browse
     @GetMapping(path = "/getAllOpenAIREDatasources", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<Paging<Datasource>> getAllOpenAIREDatasources(@Parameter(hidden = true) @RequestParam MultiValueMap<String, Object> allRequestParams) throws IOException {
-        FacetFilter ff = FacetFilterUtils.createFacetFilter(allRequestParams);
+        FacetFilter ff = FacetFilter.from(allRequestParams);
         Map<Integer, List<Datasource>> datasourceMap = openAIREDatasourceService.getAll(ff);
         Paging<Datasource> datasourcePaging = new Paging<>();
         datasourcePaging.setTotal(datasourceMap.keySet().iterator().next());

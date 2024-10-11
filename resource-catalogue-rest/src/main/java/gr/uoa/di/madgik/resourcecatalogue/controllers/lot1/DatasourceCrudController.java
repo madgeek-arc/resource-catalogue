@@ -74,7 +74,7 @@ public class DatasourceCrudController extends ResourceCrudController<DatasourceB
     @Browse
     @GetMapping(path = "/getAllOpenAIREDatasources", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<Paging<Datasource>> getAllOpenAIREDatasources(@Parameter(hidden = true) @RequestParam MultiValueMap<String, Object> allRequestParams) throws IOException {
-        FacetFilter ff = FacetFilterUtils.createFacetFilter(allRequestParams);
+        FacetFilter ff = FacetFilter.from(allRequestParams);
         Map<Integer, List<Datasource>> datasourceMap = openAIREDatasourceService.getAll(ff);
         Paging<Datasource> datasourcePaging = new Paging<>();
         datasourcePaging.setTotal(datasourceMap.keySet().iterator().next());

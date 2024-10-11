@@ -146,7 +146,7 @@ public class ServiceController {
     @Parameter(name = "suspended", description = "Suspended", content = @Content(schema = @Schema(type = "boolean", defaultValue = "false")))
     @GetMapping(path = "all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity<Paging<Service>> getAllServices(@Parameter(hidden = true) @RequestParam MultiValueMap<String, Object> allRequestParams) {
-        FacetFilter ff = FacetFilterUtils.createFacetFilter(allRequestParams);
+        FacetFilter ff = FacetFilter.from(allRequestParams);
         ff.setResourceType("service");
         ff.addFilter("published", false);
         ff.addFilter("active", true);
@@ -193,7 +193,7 @@ public class ServiceController {
                                                                        @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId,
                                                                        @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
-        FacetFilter ff = FacetFilterUtils.createFacetFilter(allRequestParams);
+        FacetFilter ff = FacetFilter.from(allRequestParams);
         ff.setResourceType("service");
         ff.addFilter("published", false);
         ff.addFilter("catalogue_id", catalogueId);
@@ -208,7 +208,7 @@ public class ServiceController {
     public ResponseEntity<Paging<ServiceBundle>> getServicesByCatalogue(@Parameter(hidden = true) @RequestParam MultiValueMap<String, Object> allRequestParams,
                                                                         @PathVariable String id,
                                                                         @Parameter(hidden = true) Authentication auth) {
-        FacetFilter ff = FacetFilterUtils.createFacetFilter(allRequestParams);
+        FacetFilter ff = FacetFilter.from(allRequestParams);
         ff.addFilter("catalogue_id", id);
         ff.addFilter("published", false);
         return ResponseEntity.ok(serviceBundleService.getAll(ff, auth));
@@ -219,7 +219,7 @@ public class ServiceController {
     @BrowseCatalogue
     @GetMapping(path = "inactive/all", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<Paging<Service>> getInactiveServices(@Parameter(hidden = true) @RequestParam MultiValueMap<String, Object> allRequestParams) {
-        FacetFilter ff = FacetFilterUtils.createFacetFilter(allRequestParams);
+        FacetFilter ff = FacetFilter.from(allRequestParams);
         ff.setResourceType("service");
         ff.addFilter("published", false);
         ff.addFilter("active", false);
@@ -260,7 +260,7 @@ public class ServiceController {
     @GetMapping(path = "adminPage/all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     public ResponseEntity<Paging<ServiceBundle>> getAllServicesForAdminPage(@Parameter(hidden = true) @RequestParam MultiValueMap<String, Object> allRequestParams) {
-        FacetFilter ff = FacetFilterUtils.createFacetFilter(allRequestParams);
+        FacetFilter ff = FacetFilter.from(allRequestParams);
         ff.setResourceType("service");
         ff.addFilter("published", false);
         Paging<ServiceBundle> paging = genericResourceService.getResults(ff);
@@ -386,7 +386,7 @@ public class ServiceController {
                                                         @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId,
                                                         @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
-        FacetFilter ff = FacetFilterUtils.createFacetFilter(allRequestParams);
+        FacetFilter ff = FacetFilter.from(allRequestParams);
         ff.setResourceType("service");
         ff.addFilter("published", false);
         ff.addFilter("catalogue_id", catalogueId);

@@ -191,7 +191,7 @@ public class CatalogueController {
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     public ResponseEntity<Paging<CatalogueBundle>> getAllCatalogueBundles(@Parameter(hidden = true)
                                                                           @RequestParam MultiValueMap<String, Object> params) {
-        FacetFilter ff = FacetFilterUtils.createFacetFilter(params);
+        FacetFilter ff = FacetFilter.from(params);
         ff.setResourceType("catalogue");
         Paging<CatalogueBundle> paging = genericResourceService.getResults(ff);
         return ResponseEntity.ok(paging);

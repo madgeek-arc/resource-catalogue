@@ -73,7 +73,7 @@ public class ResourceInteroperabilityRecordController {
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     public ResponseEntity<Paging<ResourceInteroperabilityRecordBundle>> getAllResourceInteroperabilityRecordBundles(
             @Parameter(hidden = true) @RequestParam MultiValueMap<String, Object> allRequestParams) {
-        FacetFilter ff = FacetFilterUtils.createFacetFilter(allRequestParams);
+        FacetFilter ff = FacetFilter.from(allRequestParams);
         ff.setResourceType("resource_interoperability_record");
         ff.addFilter("published", false);
         Paging<ResourceInteroperabilityRecordBundle> paging = genericResourceService.getResults(ff);

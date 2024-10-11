@@ -104,29 +104,6 @@ public class FacetFilterUtils {
 
     public static FacetFilter createMultiFacetFilter(Map<String, List<Object>> params) {
         MultiValueMap<String, Object> requestParams = new LinkedMultiValueMap<>(params);
-        return createFacetFilter(requestParams);
-    }
-
-    public static FacetFilter createFacetFilter(MultiValueMap<String, Object> params) {
-        logger.debug("Request params: {}", params);
-        FacetFilter ff = new FacetFilter();
-        ff.setKeyword(params.get("query") != null ? (String) params.remove("query").get(0) : "");
-        ff.setFrom(params.get("from") != null ? Integer.parseInt((String) params.remove("from").get(0)) : 0);
-        ff.setQuantity(params.get("quantity") != null ? Integer.parseInt((String) params.remove("quantity").get(0)) : 10);
-        Map<String, Object> sort = new HashMap<>();
-        Map<String, Object> order = new HashMap<>();
-        String orderDirection = params.get("order") != null ? (String) params.remove("order").get(0) : "asc";
-        String orderField = params.get("orderField") != null ? (String) params.remove("orderField").get(0) : null;
-        if (orderField != null) {
-            order.put("order", orderDirection);
-            sort.put(orderField, order);
-            ff.setOrderBy(sort);
-        }
-        if (!params.isEmpty()) {
-            for (Map.Entry<String, List<Object>> filter : params.entrySet()) {
-                ff.addFilter(filter.getKey(), filter.getValue());
-            }
-        }
-        return ff;
+        return FacetFilter.from(requestParams);
     }
 }

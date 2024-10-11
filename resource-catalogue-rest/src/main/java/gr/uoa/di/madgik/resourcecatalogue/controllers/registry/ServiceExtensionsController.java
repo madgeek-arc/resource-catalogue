@@ -138,7 +138,7 @@ public class ServiceExtensionsController {
     @GetMapping(path = "/helpdesk/bundle/all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     public ResponseEntity<Paging<HelpdeskBundle>> getAllHelpdeskBundles(@Parameter(hidden = true) @RequestParam MultiValueMap<String, Object> allRequestParams) {
-        FacetFilter ff = FacetFilterUtils.createFacetFilter(allRequestParams);
+        FacetFilter ff = FacetFilter.from(allRequestParams);
         ff.setResourceType("helpdesk");
         ff.addFilter("published", false);
         Paging<HelpdeskBundle> paging = genericResourceService.getResults(ff);
@@ -291,7 +291,7 @@ public class ServiceExtensionsController {
     @GetMapping(path = "/monitoring/bundle/all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     public ResponseEntity<Paging<MonitoringBundle>> getAllMonitoringBundles(@Parameter(hidden = true) @RequestParam MultiValueMap<String, Object> allRequestParams) {
-        FacetFilter ff = FacetFilterUtils.createFacetFilter(allRequestParams);
+        FacetFilter ff = FacetFilter.from(allRequestParams);
         ff.setResourceType("monitoring");
         ff.addFilter("published", false);
         Paging<MonitoringBundle> paging = genericResourceService.getResults(ff);

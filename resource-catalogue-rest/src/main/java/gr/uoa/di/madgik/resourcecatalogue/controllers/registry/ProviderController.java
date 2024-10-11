@@ -167,7 +167,7 @@ public class ProviderController {
     @Parameter(name = "suspended", description = "Suspended", content = @Content(schema = @Schema(type = "boolean", defaultValue = "false")))
     @GetMapping(path = "all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity<Paging<Provider>> getAll(@Parameter(hidden = true) @RequestParam MultiValueMap<String, Object> allRequestParams) {
-        FacetFilter ff = FacetFilterUtils.createFacetFilter(allRequestParams);
+        FacetFilter ff = FacetFilter.from(allRequestParams);
         ff.setResourceType("provider");
         ff.addFilter("published", false);
         ff.addFilter("active", true);
@@ -196,7 +196,7 @@ public class ProviderController {
     @GetMapping(path = "bundle/all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     public ResponseEntity<Paging<ProviderBundle>> getAllProviderBundles(@Parameter(hidden = true) @RequestParam MultiValueMap<String, Object> allRequestParams) {
-        FacetFilter ff = FacetFilterUtils.createFacetFilter(allRequestParams);
+        FacetFilter ff = FacetFilter.from(allRequestParams);
         ff.setResourceType("provider");
         ff.addFilter("published", false);
         Paging<ProviderBundle> paging = genericResourceService.getResults(ff);
@@ -275,7 +275,7 @@ public class ProviderController {
         allRequestParams.add("resource_organisation", id);
         allRequestParams.add("status", "rejected resource");
         allRequestParams.add("published", false);
-        FacetFilter ff = FacetFilterUtils.createFacetFilter(allRequestParams);
+        FacetFilter ff = FacetFilter.from(allRequestParams);
         return ResponseEntity.ok(providerService.getRejectedResources(ff, resourceType, auth));
     }
 

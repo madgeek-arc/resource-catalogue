@@ -134,7 +134,7 @@ public class InteroperabilityRecordController {
     @GetMapping(path = "bundle/all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     public ResponseEntity<Paging<InteroperabilityRecordBundle>> getAllBundles(@Parameter(hidden = true) @RequestParam MultiValueMap<String, Object> allRequestParams) {
-        FacetFilter ff = FacetFilterUtils.createFacetFilter(allRequestParams);
+        FacetFilter ff = FacetFilter.from(allRequestParams);
         ff.setResourceType("interoperability_record");
         ff.addFilter("published", false);
         Paging<InteroperabilityRecordBundle> paging = genericResourceService.getResults(ff);
@@ -181,7 +181,7 @@ public class InteroperabilityRecordController {
                                                                                                      @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId,
                                                                                                      @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
-        FacetFilter ff = FacetFilterUtils.createFacetFilter(allRequestParams);
+        FacetFilter ff = FacetFilter.from(allRequestParams);
         ff.setResourceType("interoperability_record");
         ff.addFilter("published", false);
         ff.addFilter("catalogue_id", catalogueId);

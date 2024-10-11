@@ -6,7 +6,7 @@ import org.springframework.boot.autoconfigure.batch.BatchAutoConfiguration;
 import org.springframework.boot.autoconfigure.flyway.FlywayAutoConfiguration;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 
-@SpringBootApplication(exclude = {DataSourceAutoConfiguration.class, FlywayAutoConfiguration.class})
+@SpringBootApplication(exclude = {DataSourceAutoConfiguration.class})
 public class ResourceCatalogueApplication {
 
     public static void main(String[] args) {

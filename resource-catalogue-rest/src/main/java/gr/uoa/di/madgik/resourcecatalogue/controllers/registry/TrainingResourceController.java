@@ -159,7 +159,7 @@ public class TrainingResourceController {
     @Parameter(name = "suspended", description = "Suspended", content = @Content(schema = @Schema(type = "boolean", defaultValue = "false")))
     @GetMapping(path = "all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity<Paging<TrainingResource>> getAllTrainingResources(@Parameter(hidden = true) @RequestParam MultiValueMap<String, Object> allRequestParams) {
-        FacetFilter ff = FacetFilterUtils.createFacetFilter(allRequestParams);
+        FacetFilter ff = FacetFilter.from(allRequestParams);
         ff.setResourceType("training_resource");
         ff.addFilter("published", false);
         ff.addFilter("active", true);
@@ -205,7 +205,7 @@ public class TrainingResourceController {
                                                                                          @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId,
                                                                                          @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
-        FacetFilter ff = FacetFilterUtils.createFacetFilter(allRequestParams);
+        FacetFilter ff = FacetFilter.from(allRequestParams);
         ff.setResourceType("training_resource");
         ff.addFilter("published", false);
         ff.addFilter("catalogue_id", catalogueId);
@@ -220,7 +220,7 @@ public class TrainingResourceController {
     public ResponseEntity<Paging<TrainingResourceBundle>> getTrainingResourcesByCatalogue(@Parameter(hidden = true) @RequestParam MultiValueMap<String, Object> allRequestParams,
                                                                                           @PathVariable String id,
                                                                                           @Parameter(hidden = true) Authentication auth) {
-        FacetFilter ff = FacetFilterUtils.createFacetFilter(allRequestParams);
+        FacetFilter ff = FacetFilter.from(allRequestParams);
         ff.addFilter("catalogue_id", id);
         ff.addFilter("published", false);
         return ResponseEntity.ok(trainingResourceService.getAll(ff, auth));
@@ -230,7 +230,7 @@ public class TrainingResourceController {
     @Browse
     @GetMapping(path = "inactive/all", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<Paging<TrainingResource>> getInactiveTrainingResources(@Parameter(hidden = true) @RequestParam MultiValueMap<String, Object> allRequestParams, @Parameter(hidden = true) Authentication auth) throws ResourceNotFoundException {
-        FacetFilter ff = FacetFilterUtils.createFacetFilter(allRequestParams);
+        FacetFilter ff = FacetFilter.from(allRequestParams);
         ff.addFilter("active", false);
         Paging<TrainingResourceBundle> trainingResourceBundles = trainingResourceService.getAll(ff, auth);
         List<TrainingResource> trainingResources = trainingResourceBundles.getResults().stream().map(TrainingResourceBundle::getTrainingResource).collect(Collectors.toList());
@@ -273,7 +273,7 @@ public class TrainingResourceController {
     @GetMapping(path = "adminPage/all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     public ResponseEntity<Paging<TrainingResourceBundle>> getAllTrainingResourcesForAdminPage(@Parameter(hidden = true) @RequestParam MultiValueMap<String, Object> allRequestParams) {
-        FacetFilter ff = FacetFilterUtils.createFacetFilter(allRequestParams);
+        FacetFilter ff = FacetFilter.from(allRequestParams);
         ff.setResourceType("training_resource");
         ff.addFilter("published", false);
         Paging<TrainingResourceBundle> paging = genericResourceService.getResults(ff);
@@ -342,7 +342,7 @@ public class TrainingResourceController {
                                                                              @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix,
                                                                              @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
-        FacetFilter ff = FacetFilterUtils.createFacetFilter(allRequestParams);
+        FacetFilter ff = FacetFilter.from(allRequestParams);
         ff.addFilter("resource_providers", id);
         return ResponseEntity.ok(trainingResourceService.getAll(ff, null));
     }
