@@ -21,6 +21,11 @@ import org.springframework.stereotype.Service;
 import jakarta.validation.constraints.NotNull;
 import java.util.*;
 
+// TODO: REFACTOR
+//  1) Replace user.stream().filter/search? with facet filter  email=x
+//  2) Ensure already saved emails (and the emails that will be saved from now on) are in lowercase, and perform search with email in lowercase
+//  3) Use facet filter to set status/published/active
+//  4) userIsResourceProviderAdmin() -> getMyProviders and then search for w/e
 @Service("securityService")
 public class OIDCSecurityService implements SecurityService {
 

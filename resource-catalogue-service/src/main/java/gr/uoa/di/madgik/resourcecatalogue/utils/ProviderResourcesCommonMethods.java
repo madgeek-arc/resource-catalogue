@@ -563,6 +563,7 @@ public class ProviderResourcesCommonMethods {
         }
     }
 
+    //TODO: implement with filters like getMy() on AbstractServiceBundleManager
     public Browsing<?> getMyResources(String resourceType, boolean draft, boolean published, Authentication auth) {
         if (auth == null) {
             throw new InsufficientAuthenticationException("Please log in.");

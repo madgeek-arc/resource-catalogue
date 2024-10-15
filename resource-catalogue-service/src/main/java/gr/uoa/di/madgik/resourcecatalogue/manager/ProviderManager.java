@@ -557,7 +557,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         if (!ff.getFilter().containsKey("published")) {
             ff.addFilter("published", false);
         }
-        ff.addFilter("users", user.getEmail());
+        ff.addFilter("users", user.getEmail().toLowerCase());
         ff.addOrderBy("name", "asc");
         return super.getAll(ff, auth);
     }

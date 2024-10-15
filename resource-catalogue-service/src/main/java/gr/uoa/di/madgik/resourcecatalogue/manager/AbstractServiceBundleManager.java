@@ -68,6 +68,9 @@ public abstract class AbstractServiceBundleManager<T extends ServiceBundle> exte
     @Autowired
     private ProviderResourcesCommonMethods commonMethods;
 
+    @Autowired
+    private ProviderManager providerManager;
+
     @PostConstruct
     void initLabels() {
         resourceType = resourceTypeService.getResourceType(getResourceType());
@@ -137,7 +140,11 @@ public abstract class AbstractServiceBundleManager<T extends ServiceBundle> exte
 
     @Override
     public Browsing<T> getMy(FacetFilter filter, Authentication auth) {
-        throw new UnsupportedOperationException("Not yet Implemented");
+        List<ProviderBundle> providers = providerManager.getMy(filter, auth).getResults();
+        FacetFilter f = new FacetFilter();
+        f.addFilter("resource_organisation", providers.stream().map(ProviderBundle::getId).toList());
+        f.setResourceType(getResourceType());
+        return this.getAll(f, auth);
     }
 
     @Override
