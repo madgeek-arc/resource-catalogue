@@ -8,7 +8,6 @@ import gr.uoa.di.madgik.resourcecatalogue.domain.configurationTemplates.Configur
 import gr.uoa.di.madgik.resourcecatalogue.domain.configurationTemplates.ConfigurationTemplateInstanceBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.configurationTemplates.ConfigurationTemplateInstanceDto;
 import gr.uoa.di.madgik.resourcecatalogue.service.ConfigurationTemplateInstanceService;
-import gr.uoa.di.madgik.resourcecatalogue.utils.FacetFilterUtils;
 import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -21,12 +20,12 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 
 @Profile("beyond")
 @RestController
@@ -57,9 +56,9 @@ public class ConfigurationTemplateInstanceController {
     @Operation(summary = "Get a list of all Configuration Template Instances in the Portal.")
     @GetMapping(path = "all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity<Paging<ConfigurationTemplateInstanceDto>> getAllCTI(@Parameter(hidden = true)
-                                                                              @RequestParam Map<String, Object> params,
+                                                                              @RequestParam MultiValueMap<String, Object> params,
                                                                               @Parameter(hidden = true) Authentication auth) {
-        FacetFilter ff = FacetFilterUtils.createFacetFilter(params);
+        FacetFilter ff = FacetFilter.from(params);
         ff.addFilter("published", false);
         List<ConfigurationTemplateInstanceDto> configurationTemplateInstanceList = new LinkedList<>();
         Paging<ConfigurationTemplateInstanceBundle> configurationTemplateInstanceBundlePaging = ctiService.getAll(ff, auth);

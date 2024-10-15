@@ -12,7 +12,6 @@ import gr.uoa.di.madgik.resourcecatalogue.service.GenericResourceService;
 import gr.uoa.di.madgik.resourcecatalogue.service.ProviderService;
 import gr.uoa.di.madgik.resourcecatalogue.service.ResourceService;
 import gr.uoa.di.madgik.resourcecatalogue.service.SecurityService;
-import gr.uoa.di.madgik.resourcecatalogue.utils.FacetFilterUtils;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -27,10 +26,10 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Map;
 
 @Profile("beyond")
 @RestController
@@ -112,8 +111,8 @@ public class PublicProviderController {
     @BrowseCatalogue
     @Parameter(name = "suspended", description = "Suspended", content = @Content(schema = @Schema(type = "boolean", defaultValue = "false")))
     @GetMapping(path = "public/provider/all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    public ResponseEntity<Paging<Provider>> getAllPublicProviders(@Parameter(hidden = true) @RequestParam Map<String, Object> allRequestParams) {
-        FacetFilter ff = FacetFilterUtils.createFacetFilter(allRequestParams);
+    public ResponseEntity<Paging<Provider>> getAllPublicProviders(@Parameter(hidden = true) @RequestParam MultiValueMap<String, Object> allRequestParams) {
+        FacetFilter ff = FacetFilter.from(allRequestParams);
         ff.setResourceType("provider");
         ff.addFilter("published", true);
         ff.addFilter("active", true);
@@ -127,8 +126,8 @@ public class PublicProviderController {
     @Parameter(name = "suspended", description = "Suspended", content = @Content(schema = @Schema(type = "boolean", defaultValue = "false")))
     @GetMapping(path = "public/provider/bundle/all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
-    public ResponseEntity<Paging<ProviderBundle>> getAllPublicProviderBundles(@Parameter(hidden = true) @RequestParam Map<String, Object> allRequestParams) {
-        FacetFilter ff = FacetFilterUtils.createFacetFilter(allRequestParams);
+    public ResponseEntity<Paging<ProviderBundle>> getAllPublicProviderBundles(@Parameter(hidden = true) @RequestParam MultiValueMap<String, Object> allRequestParams) {
+        FacetFilter ff = FacetFilter.from(allRequestParams);
         ff.setResourceType("provider");
         ff.addFilter("published", true);
         Paging<ProviderBundle> paging = genericResourceService.getResults(ff);

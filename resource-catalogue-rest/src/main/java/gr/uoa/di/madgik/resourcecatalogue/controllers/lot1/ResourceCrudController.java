@@ -7,7 +7,6 @@ import gr.uoa.di.madgik.resourcecatalogue.annotations.Browse;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Identifiable;
 import gr.uoa.di.madgik.resourcecatalogue.exception.ResourceAlreadyExistsException;
 import gr.uoa.di.madgik.resourcecatalogue.service.ResourceService;
-import gr.uoa.di.madgik.resourcecatalogue.utils.FacetFilterUtils;
 import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Parameter;
 import org.apache.logging.log4j.LogManager;
@@ -17,6 +16,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.util.AntPathMatcher;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.HandlerMapping;
 
@@ -117,8 +117,8 @@ public abstract class ResourceCrudController<T extends Identifiable> {
     // Filter a list of Resources based on a set of filters.
     @Browse
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Paging<T>> getAll(@Parameter(hidden = true) @RequestParam Map<String, Object> allRequestParams, @Parameter(hidden = true) Authentication auth) {
-        FacetFilter ff = FacetFilterUtils.createFacetFilter(allRequestParams);
+    public ResponseEntity<Paging<T>> getAll(@Parameter(hidden = true) @RequestParam MultiValueMap<String, Object> allRequestParams, @Parameter(hidden = true) Authentication auth) {
+        FacetFilter ff = FacetFilter.from(allRequestParams);
         return new ResponseEntity<>(service.getAll(ff), HttpStatus.OK);
     }
 

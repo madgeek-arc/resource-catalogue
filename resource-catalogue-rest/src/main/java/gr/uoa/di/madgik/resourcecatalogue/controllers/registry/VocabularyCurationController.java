@@ -6,7 +6,6 @@ import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.annotations.Browse;
 import gr.uoa.di.madgik.resourcecatalogue.domain.VocabularyCuration;
 import gr.uoa.di.madgik.resourcecatalogue.service.VocabularyCurationService;
-import gr.uoa.di.madgik.resourcecatalogue.utils.FacetFilterUtils;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.apache.logging.log4j.LogManager;

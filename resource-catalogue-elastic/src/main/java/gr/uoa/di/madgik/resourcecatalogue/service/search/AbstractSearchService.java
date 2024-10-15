@@ -3,7 +3,6 @@ package gr.uoa.di.madgik.resourcecatalogue.service.search;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.elasticsearch.service.ElasticSearchService;
 import gr.uoa.di.madgik.registry.service.SearchService;
-import gr.uoa.di.madgik.resourcecatalogue.utils.FacetFilterUtils;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.DisMaxQueryBuilder;
@@ -14,6 +13,9 @@ import java.util.stream.Collectors;
 import static org.elasticsearch.index.query.QueryBuilders.*;
 
 public abstract class AbstractSearchService extends ElasticSearchService implements SearchService {
+
+    public static final String SEARCH_FIELDS = "searchFields";
+    public static final String SEARCHABLE_AREA = "searchableArea";
 
     public AbstractSearchService(RestHighLevelClient client) {
         super(client);
@@ -34,13 +36,13 @@ public abstract class AbstractSearchService extends ElasticSearchService impleme
         BoolQueryBuilder qBuilder = new BoolQueryBuilder();
 
         // retrieve filters from FacetFilter object
-        Map<String, List<Object>> allFilters = FacetFilterUtils.getFacetFilterFilters(filter);
+        Map<String, List<Object>> allFilters = filter.getFilterLists();
 
-        List<Object> searchFields = allFilters.remove(FacetFilterUtils.SEARCH_FIELDS);
+        List<Object> searchFields = allFilters.remove(SEARCH_FIELDS);
         if (searchFields == null || searchFields.isEmpty()) {
             searchFields = Arrays.asList("resource_internal_id", "name", "title");
             // TODO: enable when searchable_area is configurable
-            // searchFields = Collections.singletonList(FacetFilterUtils.SEARCHABLE_AREA);
+            // searchFields = Collections.singletonList(SEARCHABLE_AREA);
         }
 
         if (filter.getKeyword() != null && !filter.getKeyword().equals("")) {

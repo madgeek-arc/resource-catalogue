@@ -11,7 +11,6 @@ import gr.uoa.di.madgik.resourcecatalogue.dto.MapValues;
 import gr.uoa.di.madgik.resourcecatalogue.exception.ResourceException;
 import gr.uoa.di.madgik.resourcecatalogue.exception.ValidationException;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
-import gr.uoa.di.madgik.resourcecatalogue.utils.FacetFilterUtils;
 import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -35,7 +34,6 @@ import org.springframework.web.bind.annotation.*;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 @Profile("beyond")
@@ -221,10 +219,10 @@ public class ProviderController {
     @Browse
     @GetMapping(path = "byCatalogue/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isCatalogueAdmin(#auth,#id)")
-    public ResponseEntity<Paging<ProviderBundle>> getProvidersByCatalogue(@Parameter(hidden = true) @RequestParam Map<String, Object> allRequestParams,
+    public ResponseEntity<Paging<ProviderBundle>> getProvidersByCatalogue(@Parameter(hidden = true) @RequestParam MultiValueMap<String, Object> allRequestParams,
                                                                           @PathVariable String id,
                                                                           @Parameter(hidden = true) Authentication auth) {
-        FacetFilter ff = FacetFilterUtils.createFacetFilter(allRequestParams);
+        FacetFilter ff = FacetFilter.from(allRequestParams);
         ff.addFilter("catalogue_id", id);
         ff.addFilter("published", false);
         return ResponseEntity.ok(providerService.getAll(ff, auth));
@@ -398,8 +396,8 @@ public class ProviderController {
     })
     @GetMapping(path = "randomProviders", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
-    public ResponseEntity<Paging<ProviderBundle>> getRandomProviders(@Parameter(hidden = true) @RequestParam Map<String, Object> allRequestParams, @Parameter(hidden = true) Authentication auth) {
-        FacetFilter ff = FacetFilterUtils.createFacetFilter(allRequestParams);
+    public ResponseEntity<Paging<ProviderBundle>> getRandomProviders(@Parameter(hidden = true) @RequestParam MultiValueMap<String, Object> allRequestParams, @Parameter(hidden = true) Authentication auth) {
+        FacetFilter ff = FacetFilter.from(allRequestParams);
         ff.addFilter("status", "approved provider");
         ff.addFilter("published", false);
         Paging<ProviderBundle> providerBundlePaging = providerService.getRandomProviders(ff, auditingInterval, auth);

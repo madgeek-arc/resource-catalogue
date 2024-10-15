@@ -9,7 +9,6 @@ import gr.uoa.di.madgik.resourcecatalogue.domain.configurationTemplates.Configur
 import gr.uoa.di.madgik.resourcecatalogue.domain.configurationTemplates.ConfigurationTemplateInstanceDto;
 import gr.uoa.di.madgik.resourcecatalogue.service.ConfigurationTemplateInstanceService;
 import gr.uoa.di.madgik.resourcecatalogue.service.SecurityService;
-import gr.uoa.di.madgik.resourcecatalogue.utils.FacetFilterUtils;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -21,11 +20,11 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 
 @Profile("beyond")
 @RestController
@@ -85,10 +84,10 @@ public class PublicConfigurationTemplateInstanceController {
     @Operation(description = "Filter a list of Public Configuration Template Instances based on a set of filters or get a list of all Public Configuration Template Instances in the Catalogue.")
     @Browse
     @GetMapping(path = "public/configurationTemplateInstance/all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    public ResponseEntity<Paging<ConfigurationTemplateInstanceDto>> getAllPublicConfigurationTemplateInstances(@Parameter(hidden = true) @RequestParam Map<String, Object> allRequestParams,
+    public ResponseEntity<Paging<ConfigurationTemplateInstanceDto>> getAllPublicConfigurationTemplateInstances(@Parameter(hidden = true) @RequestParam MultiValueMap<String, Object> allRequestParams,
                                                                                                                @Parameter(hidden = true) Authentication auth) {
 
-        FacetFilter ff = FacetFilterUtils.createFacetFilter(allRequestParams);
+        FacetFilter ff = FacetFilter.from(allRequestParams);
         ff.addFilter("published", true);
         List<ConfigurationTemplateInstanceDto> configurationTemplateInstanceList = new LinkedList<>();
         Paging<ConfigurationTemplateInstanceBundle> configurationTemplateInstanceBundlePaging = configurationTemplateInstanceService.getAll(ff, auth);
@@ -103,9 +102,9 @@ public class PublicConfigurationTemplateInstanceController {
     @Browse
     @GetMapping(path = "public/configurationTemplateInstance/bundle/all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
-    public ResponseEntity<Paging<ConfigurationTemplateInstanceBundle>> getAllPublicConfigurationTemplateInstanceBundles(@Parameter(hidden = true) @RequestParam Map<String, Object> allRequestParams,
+    public ResponseEntity<Paging<ConfigurationTemplateInstanceBundle>> getAllPublicConfigurationTemplateInstanceBundles(@Parameter(hidden = true) @RequestParam MultiValueMap<String, Object> allRequestParams,
                                                                                                                         @Parameter(hidden = true) Authentication auth) {
-        FacetFilter ff = FacetFilterUtils.createFacetFilter(allRequestParams);
+        FacetFilter ff = FacetFilter.from(allRequestParams);
         ff.addFilter("published", true);
         Paging<ConfigurationTemplateInstanceBundle> configurationTemplateInstanceBundlePaging = configurationTemplateInstanceService.getAll(ff, auth);
         List<ConfigurationTemplateInstanceBundle> configurationTemplateInstanceBundleList = new LinkedList<>(configurationTemplateInstanceBundlePaging.getResults());

@@ -17,7 +17,6 @@ import gr.uoa.di.madgik.resourcecatalogue.service.HelpdeskService;
 import gr.uoa.di.madgik.resourcecatalogue.service.MonitoringService;
 import gr.uoa.di.madgik.resourcecatalogue.service.ServiceBundleService;
 import gr.uoa.di.madgik.resourcecatalogue.utils.CreateArgoGrnetHttpRequest;
-import gr.uoa.di.madgik.resourcecatalogue.utils.FacetFilterUtils;
 import gr.uoa.di.madgik.resourcecatalogue.validators.HelpdeskValidator;
 import gr.uoa.di.madgik.resourcecatalogue.validators.MonitoringValidator;
 import io.swagger.v3.oas.annotations.Hidden;
@@ -27,7 +26,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.json.JSONObject;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpStatus;
@@ -125,8 +123,8 @@ public class ServiceExtensionsController {
     @Browse
     @BrowseCatalogue
     @GetMapping(path = "/helpdesk/all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    public ResponseEntity<Paging<Helpdesk>> getAllHelpdesks(@Parameter(hidden = true) @RequestParam Map<String, Object> allRequestParams) {
-        FacetFilter ff = FacetFilterUtils.createFacetFilter(allRequestParams);
+    public ResponseEntity<Paging<Helpdesk>> getAllHelpdesks(@Parameter(hidden = true) @RequestParam MultiValueMap<String, Object> allRequestParams) {
+        FacetFilter ff = FacetFilter.from(allRequestParams);
         ff.setResourceType("helpdesk");
         ff.addFilter("published", false);
         Paging<Helpdesk> paging = genericResourceService.getResults(ff).map(r -> ((HelpdeskBundle) r).getPayload());
@@ -278,8 +276,8 @@ public class ServiceExtensionsController {
     @Operation(summary = "Filter a list of Monitorings based on a set of filters or get a list of all Monitorings in the Catalogue.")
     @Browse
     @GetMapping(path = "monitoring/all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    public ResponseEntity<Paging<Monitoring>> getAllMonitorings(@Parameter(hidden = true) @RequestParam Map<String, Object> allRequestParams) {
-        FacetFilter ff = FacetFilterUtils.createFacetFilter(allRequestParams);
+    public ResponseEntity<Paging<Monitoring>> getAllMonitorings(@Parameter(hidden = true) @RequestParam MultiValueMap<String, Object> allRequestParams) {
+        FacetFilter ff = FacetFilter.from(allRequestParams);
         ff.setResourceType("monitoring");
         ff.addFilter("published", false);
         Paging<Monitoring> paging = genericResourceService.getResults(ff).map(r -> ((MonitoringBundle) r).getPayload());

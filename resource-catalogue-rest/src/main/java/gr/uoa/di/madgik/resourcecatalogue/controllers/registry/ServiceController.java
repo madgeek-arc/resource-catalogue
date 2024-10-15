@@ -9,7 +9,6 @@ import gr.uoa.di.madgik.resourcecatalogue.annotations.BrowseCatalogue;
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
 import gr.uoa.di.madgik.resourcecatalogue.exception.ValidationException;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
-import gr.uoa.di.madgik.resourcecatalogue.utils.FacetFilterUtils;
 import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -286,9 +285,9 @@ public class ServiceController {
     })
     @GetMapping(path = "randomResources", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
-    public ResponseEntity<Paging<ServiceBundle>> getRandomResources(@Parameter(hidden = true) @RequestParam Map<String, Object> allRequestParams,
+    public ResponseEntity<Paging<ServiceBundle>> getRandomResources(@Parameter(hidden = true) @RequestParam MultiValueMap<String, Object> allRequestParams,
                                                                     @Parameter(hidden = true) Authentication auth) {
-        FacetFilter ff = FacetFilterUtils.createFacetFilter(allRequestParams);
+        FacetFilter ff = FacetFilter.from(allRequestParams);
         ff.setResourceType("service");
         ff.addFilter("status", "approved resource");
         ff.addFilter("published", false);
@@ -470,8 +469,8 @@ public class ServiceController {
     @BrowseCatalogue
     @GetMapping(path = "/bundle/all", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
-    public ResponseEntity<Paging<ServiceBundle>> getAllBundles(@Parameter(hidden = true) @RequestParam Map<String, Object> allRequestParams) {
-        FacetFilter ff = FacetFilterUtils.createFacetFilter(allRequestParams);
+    public ResponseEntity<Paging<ServiceBundle>> getAllBundles(@Parameter(hidden = true) @RequestParam MultiValueMap<String, Object> allRequestParams) {
+        FacetFilter ff = FacetFilter.from(allRequestParams);
         ff.setResourceType("service");
         ff.addFilter("published", false);
         Paging<ServiceBundle> paging = genericResourceService.getResults(ff);
@@ -496,12 +495,12 @@ public class ServiceController {
     @GetMapping(path = "/draft/byProvider/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<Browsing<ServiceBundle>> getDraftServices(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
                                                                     @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix,
-                                                                    @Parameter(hidden = true) @RequestParam Map<String, Object> allRequestParams,
+                                                                    @Parameter(hidden = true) @RequestParam MultiValueMap<String, Object> allRequestParams,
                                                                     @Parameter(hidden = true) Authentication auth) {
         String id = String.join("/", prefix, suffix);
-        FacetFilter ff = FacetFilterUtils.createFacetFilter(allRequestParams);
+        FacetFilter ff = FacetFilter.from(allRequestParams);
         ff.addFilter("resource_organisation", id);
-        return new ResponseEntity<>(draftServiceService.getAll(FacetFilterUtils.createFacetFilter(allRequestParams), auth), HttpStatus.OK);
+        return new ResponseEntity<>(draftServiceService.getAll(FacetFilter.from(allRequestParams), auth), HttpStatus.OK);
     }
 
     @PostMapping(path = "/draft", produces = {MediaType.APPLICATION_JSON_VALUE})

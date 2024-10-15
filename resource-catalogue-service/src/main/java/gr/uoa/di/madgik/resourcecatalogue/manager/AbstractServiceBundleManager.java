@@ -11,7 +11,6 @@ import gr.uoa.di.madgik.resourcecatalogue.exception.ResourceException;
 import gr.uoa.di.madgik.resourcecatalogue.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.exception.ValidationException;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
-import gr.uoa.di.madgik.resourcecatalogue.utils.FacetFilterUtils;
 import gr.uoa.di.madgik.resourcecatalogue.utils.FacetLabelService;
 import gr.uoa.di.madgik.resourcecatalogue.utils.ProviderResourcesCommonMethods;
 import gr.uoa.di.madgik.resourcecatalogue.utils.TextUtils;
@@ -355,7 +354,7 @@ public abstract class AbstractServiceBundleManager<T extends ServiceBundle> exte
     public List<Facet> createCorrectFacets(List<Facet> serviceFacets, FacetFilter ff) {
         ff.setQuantity(0);
 
-        Map<String, List<Object>> allFilters = FacetFilterUtils.getFacetFilterFilters(ff);
+        Map<String, List<Object>> allFilters = ff.getFilterLists();
 
         List<String> reverseOrderedKeys = new LinkedList<>(allFilters.keySet());
         Collections.reverse(reverseOrderedKeys);
@@ -369,7 +368,7 @@ public abstract class AbstractServiceBundleManager<T extends ServiceBundle> exte
             }
             someFilters.remove(filterKey);
 
-            FacetFilter facetFilter = FacetFilterUtils.createMultiFacetFilter(someFilters);
+            FacetFilter facetFilter = FacetFilter.from(someFilters);
             facetFilter.setResourceType(getResourceType());
             facetFilter.setBrowseBy(Collections.singletonList(filterKey));
             List<Facet> facetsCategory = convertToBrowsingEIC(searchService.search(facetFilter)).getFacets();

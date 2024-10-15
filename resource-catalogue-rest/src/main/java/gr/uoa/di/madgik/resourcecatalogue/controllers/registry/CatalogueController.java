@@ -7,7 +7,6 @@ import gr.uoa.di.madgik.resourcecatalogue.annotations.Browse;
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
 import gr.uoa.di.madgik.resourcecatalogue.exception.ValidationException;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
-import gr.uoa.di.madgik.resourcecatalogue.utils.FacetFilterUtils;
 import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -28,7 +27,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 
 @Profile("beyond")
 @RestController
@@ -128,9 +126,9 @@ public class CatalogueController {
     @Parameter(name = "suspended", description = "Suspended", content = @Content(schema = @Schema(type = "boolean", defaultValue = "false")))
     @GetMapping(path = "all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity<Paging<Catalogue>> getAllCatalogues(@Parameter(hidden = true)
-                                                              @RequestParam Map<String, Object> params,
+                                                              @RequestParam MultiValueMap<String, Object> params,
                                                               @Parameter(hidden = true) Authentication auth) {
-        FacetFilter ff = FacetFilterUtils.createFacetFilter(params);
+        FacetFilter ff = FacetFilter.from(params);
         List<Catalogue> catalogueList = new LinkedList<>();
         Paging<CatalogueBundle> catalogueBundlePaging = catalogueManager.getAll(ff, auth);
         for (CatalogueBundle catalogueBundle : catalogueBundlePaging.getResults()) {
@@ -289,9 +287,9 @@ public class CatalogueController {
     @Parameter(name = "suspended", description = "Suspended", content = @Content(schema = @Schema(type = "boolean", defaultValue = "false")))
     @GetMapping(path = "{catalogueId}/provider/all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity<Paging<Provider>> getAllCatalogueProviders(@Parameter(hidden = true)
-                                                                     @RequestParam Map<String, Object> params,
+                                                                     @RequestParam MultiValueMap<String, Object> params,
                                                                      @PathVariable("catalogueId") String catalogueId) {
-        FacetFilter ff = FacetFilterUtils.createFacetFilter(params);
+        FacetFilter ff = FacetFilter.from(params);
         ff.setResourceType("provider");
         ff.addFilter("published", false);
         ff.addFilter("status", "approved provider");
@@ -418,9 +416,9 @@ public class CatalogueController {
                                                                @PathVariable("prefix") String prefix,
                                                                @Parameter(description = "The right part of the ID after the '/'")
                                                                @PathVariable("suffix") String suffix,
-                                                               @Parameter(hidden = true) @RequestParam Map<String, Object> params) {
+                                                               @Parameter(hidden = true) @RequestParam MultiValueMap<String, Object> params) {
         String providerId = prefix + "/" + suffix;
-        FacetFilter ff = FacetFilterUtils.createFacetFilter(params);
+        FacetFilter ff = FacetFilter.from(params);
         ff.setResourceType("service");
         ff.addFilter("published", false);
         ff.addFilter("catalogue_id", catalogueId);
@@ -558,9 +556,9 @@ public class CatalogueController {
                                                                                  @PathVariable("prefix") String prefix,
                                                                                  @Parameter(description = "The right part of the ID after the '/'")
                                                                                  @PathVariable("suffix") String suffix,
-                                                                                 @Parameter(hidden = true) @RequestParam Map<String, Object> params) {
+                                                                                 @Parameter(hidden = true) @RequestParam MultiValueMap<String, Object> params) {
         String providerId = prefix + "/" + suffix;
-        FacetFilter ff = FacetFilterUtils.createFacetFilter(params);
+        FacetFilter ff = FacetFilter.from(params);
         ff.setResourceType("training_resource");
         ff.addFilter("published", false);
         ff.addFilter("catalogue_id", catalogueId);
@@ -634,9 +632,9 @@ public class CatalogueController {
                                                                                              @PathVariable("prefix") String prefix,
                                                                                              @Parameter(description = "The right part of the ID after the '/'")
                                                                                              @PathVariable("suffix") String suffix,
-                                                                                             @Parameter(hidden = true) @RequestParam Map<String, Object> params) {
+                                                                                             @Parameter(hidden = true) @RequestParam MultiValueMap<String, Object> params) {
         String providerId = prefix + "/" + suffix;
-        FacetFilter ff = FacetFilterUtils.createFacetFilter(params);
+        FacetFilter ff = FacetFilter.from(params);
         ff.setResourceType("interoperability_record");
         ff.addFilter("published", false);
         ff.addFilter("catalogue_id", catalogueId);

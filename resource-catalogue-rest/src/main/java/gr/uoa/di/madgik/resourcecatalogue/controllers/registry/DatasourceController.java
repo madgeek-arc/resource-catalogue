@@ -11,7 +11,6 @@ import gr.uoa.di.madgik.resourcecatalogue.dto.OpenAIREMetrics;
 import gr.uoa.di.madgik.resourcecatalogue.service.DatasourceService;
 import gr.uoa.di.madgik.resourcecatalogue.service.GenericResourceService;
 import gr.uoa.di.madgik.resourcecatalogue.service.OpenAIREDatasourceService;
-import gr.uoa.di.madgik.resourcecatalogue.utils.FacetFilterUtils;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
