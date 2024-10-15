@@ -513,7 +513,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     }
 
     @Override
-    public List<ProviderBundle> getServiceProviders(String email, Authentication auth) {
+    public List<ProviderBundle> getUserProviders(String email, Authentication auth) {
         List<ProviderBundle> providers;
         if (auth == null) {
             throw new InsufficientAuthenticationException("Please log in.");

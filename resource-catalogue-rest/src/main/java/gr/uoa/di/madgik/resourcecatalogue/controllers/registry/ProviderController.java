@@ -229,9 +229,9 @@ public class ProviderController {
     }
 
     // Get a list of Providers in which the given user is admin.
-    @GetMapping(path = "getServiceProviders", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    public ResponseEntity<List<Provider>> getServiceProviders(@RequestParam("email") String email, @Parameter(hidden = true) Authentication auth) {
-        List<Provider> providers = providerService.getServiceProviders(email, auth)
+    @GetMapping(path = "getUserProviders", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    public ResponseEntity<List<Provider>> getUserProviders(@RequestParam("email") String email, @Parameter(hidden = true) Authentication auth) {
+        List<Provider> providers = providerService.getUserProviders(email, auth)
                 .stream()
                 .map(ProviderBundle::getProvider)
                 .collect(Collectors.toList());
@@ -239,8 +239,8 @@ public class ProviderController {
     }
 
     // Get a list of Providers in which you are admin.
-    @GetMapping(path = "getMyServiceProviders", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    public ResponseEntity<List<ProviderBundle>> getMyServiceProviders(@Parameter(hidden = true) Authentication auth) {
+    @GetMapping(path = "getMyProviders", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    public ResponseEntity<List<ProviderBundle>> getMyProviders(@Parameter(hidden = true) Authentication auth) {
         return new ResponseEntity<>(providerService.getMy(null, auth).getResults(), HttpStatus.OK);
     }
 

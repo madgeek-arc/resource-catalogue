@@ -1,5 +1,7 @@
 package gr.uoa.di.madgik.resourcecatalogue.utils;
 
+import gr.uoa.di.madgik.registry.domain.Browsing;
+import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
 import gr.uoa.di.madgik.resourcecatalogue.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.exception.ValidationException;
@@ -26,7 +28,14 @@ public class ProviderResourcesCommonMethods {
 
     private final CatalogueService catalogueService;
     private final ProviderService providerService;
+    private final DraftResourceService<ProviderBundle> draftProviderService;
+    private final ServiceBundleService serviceBundleService;
+    private final DraftResourceService<ServiceBundle> draftServiceService;
     private final DatasourceService datasourceService;
+    private final TrainingResourceService trainingResourceService;
+    private final DraftResourceService<TrainingResourceBundle> draftTrainingResourceService;
+    private final InteroperabilityRecordService interoperabilityRecordService;
+    private final DraftResourceService<InteroperabilityRecordBundle> draftInteroperabilityRecordService;
     private final HelpdeskService helpdeskService;
     private final MonitoringService monitoringService;
     private final ResourceInteroperabilityRecordService resourceInteroperabilityRecordService;
@@ -37,7 +46,15 @@ public class ProviderResourcesCommonMethods {
 
     public ProviderResourcesCommonMethods(@Lazy CatalogueService catalogueService,
                                           @Lazy ProviderService providerService,
+                                          @Lazy DraftResourceService<ProviderBundle> draftProviderService,
+                                          @Lazy ServiceBundleService serviceBundleService,
+                                          @Lazy DraftResourceService<ServiceBundle> draftServiceService,
                                           @Lazy DatasourceService datasourceService,
+                                          @Lazy TrainingResourceService trainingResourceService,
+                                          @Lazy DraftResourceService<TrainingResourceBundle> draftTrainingResourceService,
+                                          @Lazy InteroperabilityRecordService interoperabilityRecordService,
+                                          @Lazy DraftResourceService<InteroperabilityRecordBundle>
+                                                  draftInteroperabilityRecordService,
                                           @Lazy HelpdeskService helpdeskService,
                                           @Lazy MonitoringService monitoringService,
                                           @Lazy ResourceInteroperabilityRecordService
@@ -48,7 +65,14 @@ public class ProviderResourcesCommonMethods {
                                           PublicResourceUtils publicResourceUtils) {
         this.catalogueService = catalogueService;
         this.providerService = providerService;
+        this.draftProviderService = draftProviderService;
+        this.serviceBundleService = serviceBundleService;
+        this.draftServiceService = draftServiceService;
         this.datasourceService = datasourceService;
+        this.trainingResourceService = trainingResourceService;
+        this.draftTrainingResourceService = draftTrainingResourceService;
+        this.interoperabilityRecordService = interoperabilityRecordService;
+        this.draftInteroperabilityRecordService = draftInteroperabilityRecordService;
         this.helpdeskService = helpdeskService;
         this.monitoringService = monitoringService;
         this.resourceInteroperabilityRecordService = resourceInteroperabilityRecordService;
@@ -537,5 +561,130 @@ public class ProviderResourcesCommonMethods {
             users.add(authUser);
             provider.setUsers(new ArrayList<>(users));
         }
+    }
+
+    public Browsing<?> getMyResources(String resourceType, boolean draft, boolean published, Authentication auth) {
+        if (auth == null) {
+            throw new InsufficientAuthenticationException("Please log in.");
+        }
+        if (draft && published) {
+            throw new ValidationException("A draft resource cannot be published");
+        }
+
+        FacetFilter ff = new FacetFilter();
+        ff.setResourceType(resourceType);
+        ff.setQuantity(maxQuantity);
+        switch (resourceType) {
+            case "provider":
+                return getFilteredProviderBundles(ff, draft, published, auth);
+            case "service":
+                return getFilteredServiceBundles(ff, draft, published, auth);
+            case "training_resource":
+                return getFilteredTrainingResources(ff, draft, published, auth);
+            case "interoperability_record":
+                return getFilteredInteroperabilityRecords(ff, draft, published, auth);
+            default:
+                throw new ValidationException("Unsupported resource type: " + resourceType);
+        }
+    }
+
+    private Browsing<ProviderBundle> getFilteredProviderBundles(FacetFilter ff,
+                                                                boolean draft,
+                                                                boolean published,
+                                                                Authentication auth) {
+        List<ProviderBundle> providerBundles = new ArrayList<>();
+        Browsing<ProviderBundle> providerBundleBrowsing = draft
+                ? draftProviderService.getAll(ff, auth)
+                : providerService.getAll(ff, auth);
+
+        for (ProviderBundle providerBundle : providerBundleBrowsing.getResults()) {
+            boolean isAdmin = securityService.isProviderAdmin(auth, providerBundle.getId(),
+                    providerBundle.getProvider().getCatalogueId());
+            if (isAdmin) {
+                boolean shouldAddBundle = draft ||
+                        (published && providerBundle.getMetadata().isPublished()) ||
+                        (!published && !providerBundle.getMetadata().isPublished());
+                if (shouldAddBundle) {
+                    providerBundles.add(providerBundle);
+                }
+            }
+        }
+        return new Browsing<>(providerBundleBrowsing.getTotal(), providerBundleBrowsing.getFrom(),
+                providerBundleBrowsing.getTo(), providerBundles, providerBundleBrowsing.getFacets());
+    }
+
+    private Browsing<ServiceBundle> getFilteredServiceBundles(FacetFilter ff,
+                                                              boolean draft,
+                                                              boolean published,
+                                                              Authentication auth) {
+        List<ServiceBundle> serviceBundles = new ArrayList<>();
+        Browsing<ServiceBundle> serviceBundleBrowsing = draft
+                ? draftServiceService.getAll(ff, auth)
+                : serviceBundleService.getAll(ff, auth);
+
+        for (ServiceBundle serviceBundle : serviceBundleBrowsing.getResults()) {
+            boolean isAdmin = securityService.isProviderAdmin(auth, serviceBundle.getId(),
+                    serviceBundle.getService().getCatalogueId());
+            if (isAdmin) {
+                boolean shouldAddBundle = draft ||
+                        (published && serviceBundle.getMetadata().isPublished()) ||
+                        (!published && !serviceBundle.getMetadata().isPublished());
+                if (shouldAddBundle) {
+                    serviceBundles.add(serviceBundle);
+                }
+            }
+        }
+        return new Browsing<>(serviceBundleBrowsing.getTotal(), serviceBundleBrowsing.getFrom(),
+                serviceBundleBrowsing.getTo(), serviceBundles, serviceBundleBrowsing.getFacets());
+    }
+
+    private Browsing<TrainingResourceBundle> getFilteredTrainingResources(FacetFilter ff,
+                                                                          boolean draft,
+                                                                          boolean published,
+                                                                          Authentication auth) {
+        List<TrainingResourceBundle> trainingResourceBundles = new ArrayList<>();
+        Browsing<TrainingResourceBundle> trainingResourceBundleBrowsing = draft
+                ? draftTrainingResourceService.getAll(ff, auth)
+                : trainingResourceService.getAll(ff, auth);
+
+        for (TrainingResourceBundle trainingResourceBundle : trainingResourceBundleBrowsing.getResults()) {
+            boolean isAdmin = securityService.isProviderAdmin(auth, trainingResourceBundle.getId(),
+                    trainingResourceBundle.getTrainingResource().getCatalogueId());
+            if (isAdmin) {
+                boolean shouldAddBundle = draft ||
+                        (published && trainingResourceBundle.getMetadata().isPublished()) ||
+                        (!published && !trainingResourceBundle.getMetadata().isPublished());
+                if (shouldAddBundle) {
+                    trainingResourceBundles.add(trainingResourceBundle);
+                }
+            }
+        }
+        return new Browsing<>(trainingResourceBundleBrowsing.getTotal(), trainingResourceBundleBrowsing.getFrom(),
+                trainingResourceBundleBrowsing.getTo(), trainingResourceBundles, trainingResourceBundleBrowsing.getFacets());
+    }
+
+    private Browsing<InteroperabilityRecordBundle> getFilteredInteroperabilityRecords(FacetFilter ff,
+                                                                                      boolean draft,
+                                                                                      boolean published,
+                                                                                      Authentication auth) {
+        List<InteroperabilityRecordBundle> interoperabilityRecordBundles = new ArrayList<>();
+        Browsing<InteroperabilityRecordBundle> interoperabilityRecordBundleBrowsing = draft
+                ? draftInteroperabilityRecordService.getAll(ff, auth)
+                : interoperabilityRecordService.getAll(ff, auth);
+
+        for (InteroperabilityRecordBundle interoperabilityRecordBundle : interoperabilityRecordBundleBrowsing.getResults()) {
+            boolean isAdmin = securityService.isProviderAdmin(auth, interoperabilityRecordBundle.getId(),
+                    interoperabilityRecordBundle.getInteroperabilityRecord().getCatalogueId());
+            if (isAdmin) {
+                boolean shouldAddBundle = draft ||
+                        (published && interoperabilityRecordBundle.getMetadata().isPublished()) ||
+                        (!published && !interoperabilityRecordBundle.getMetadata().isPublished());
+                if (shouldAddBundle) {
+                    interoperabilityRecordBundles.add(interoperabilityRecordBundle);
+                }
+            }
+        }
+        return new Browsing<>(interoperabilityRecordBundleBrowsing.getTotal(), interoperabilityRecordBundleBrowsing.getFrom(),
+                interoperabilityRecordBundleBrowsing.getTo(), interoperabilityRecordBundles, interoperabilityRecordBundleBrowsing.getFacets());
     }
 }

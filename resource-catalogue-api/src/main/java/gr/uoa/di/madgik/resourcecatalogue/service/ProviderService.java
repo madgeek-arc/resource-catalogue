@@ -69,7 +69,7 @@ public interface ProviderService extends ResourceService<ProviderBundle>, Bundle
      * @param authentication Authentication
      * @return {@link List}&lt;{@link ProviderBundle}&gt;
      */
-    List<ProviderBundle> getServiceProviders(String email, Authentication authentication);
+    List<ProviderBundle> getUserProviders(String email, Authentication authentication);
 
     /**
      * Validates a specific URL regarding the ability to open a connection
