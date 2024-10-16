@@ -138,6 +138,11 @@ public class InteroperabilityRecordController {
         return ResponseEntity.ok(paging);
     }
 
+    @GetMapping(path = "getMyInteroperabilityRecords", produces = {MediaType.APPLICATION_JSON_VALUE})
+    public ResponseEntity<List<InteroperabilityRecordBundle>> getMyInteroperabilityRecords(@Parameter(hidden = true) Authentication auth) {
+        return new ResponseEntity<>(interoperabilityRecordService.getMy(null, auth).getResults(), HttpStatus.OK);
+    }
+
     @PatchMapping(path = "verify/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     public ResponseEntity<InteroperabilityRecordBundle> verify(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
@@ -314,7 +319,7 @@ public class InteroperabilityRecordController {
 
     @GetMapping(path = "/draft/getMyDraftInteroperabilityRecords", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<List<InteroperabilityRecordBundle>> getMyDraftInteroperabilityRecords(@Parameter(hidden = true) Authentication auth) {
-        return new ResponseEntity<>(draftInteroperabilityRecordService.getMy(auth), HttpStatus.OK);
+        return new ResponseEntity<>(draftInteroperabilityRecordService.getMy(null, auth).getResults(), HttpStatus.OK);
     }
 
     @PostMapping(path = "/draft", produces = {MediaType.APPLICATION_JSON_VALUE})

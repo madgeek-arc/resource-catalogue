@@ -1,9 +1,6 @@
 package gr.uoa.di.madgik.resourcecatalogue.manager;
 
-import gr.uoa.di.madgik.registry.domain.FacetFilter;
-import gr.uoa.di.madgik.registry.domain.Paging;
-import gr.uoa.di.madgik.registry.domain.Resource;
-import gr.uoa.di.madgik.registry.domain.ResourceType;
+import gr.uoa.di.madgik.registry.domain.*;
 import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.domain.LoggingInfo;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Metadata;
@@ -15,6 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
@@ -139,15 +137,22 @@ public class DraftProviderManager extends ResourceManager<ProviderBundle> implem
         return bundle;
     }
 
-    public List<ProviderBundle> getMy(Authentication auth) {
+    @Override
+    public Browsing<ProviderBundle> getMy(FacetFilter ff, Authentication auth) {
         if (auth == null) {
-            return new ArrayList<>();
+            throw new InsufficientAuthenticationException("Please log in.");
         }
-        FacetFilter ff = new FacetFilter();
-        ff.setQuantity(maxQuantity);
-        ff.addFilter("users", User.of(auth).getEmail());
+        User user = User.of(auth);
+        if (ff == null) {
+            ff = new FacetFilter();
+            ff.setQuantity(maxQuantity);
+        }
+        if (!ff.getFilter().containsKey("published")) {
+            ff.addFilter("published", false);
+        }
+        ff.addFilter("users", user.getEmail().toLowerCase());
         ff.addOrderBy("name", "asc");
-        return super.getAll(ff, auth).getResults();
+        return super.getAll(ff, auth);
     }
 
     private Resource getDraftResource(String id) {

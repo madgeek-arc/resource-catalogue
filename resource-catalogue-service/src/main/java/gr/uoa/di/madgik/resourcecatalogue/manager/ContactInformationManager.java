@@ -37,7 +37,7 @@ public class ContactInformationManager implements ContactInformationService {
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(1000);
         ff.addFilter("published", false);
-        List<CatalogueBundle> catalogueList = catalogueService.getMyCatalogues(authentication);
+        List<CatalogueBundle> catalogueList = catalogueService.getMy(null, authentication).getResults();
         if (catalogueList != null && !catalogueList.isEmpty()) {
             for (CatalogueBundle catalogueBundle : catalogueList) {
                 myResources.add(catalogueBundle.getId());
@@ -84,7 +84,7 @@ public class ContactInformationManager implements ContactInformationService {
         ff.setQuantity(1000);
         ff.addFilter("published", false);
         ContactInfoTransfer contactInfoTransfer = createContactInfoTransfer(acceptedTransfer, email);
-        List<CatalogueBundle> catalogueList = catalogueService.getMyCatalogues(auth);
+        List<CatalogueBundle> catalogueList = catalogueService.getMy(null, auth).getResults();
         List<ProviderBundle> providerList = providerService.getMy(ff, auth).getResults();
         updateCatalogueContactInfoTransfer(contactInfoTransfer, catalogueList);
         updateProviderContactInfoTransfer(contactInfoTransfer, providerList);

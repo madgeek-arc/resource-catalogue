@@ -16,6 +16,7 @@ import gr.uoa.di.madgik.resourcecatalogue.utils.FacetLabelService;
 import gr.uoa.di.madgik.resourcecatalogue.utils.ObjectUtils;
 import gr.uoa.di.madgik.resourcecatalogue.utils.ProviderResourcesCommonMethods;
 import gr.uoa.di.madgik.resourcecatalogue.validators.FieldValidator;
+import jakarta.validation.constraints.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,7 +26,6 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 
-import jakarta.validation.constraints.NotNull;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.util.*;
@@ -63,6 +63,8 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
     @Autowired
     @Qualifier("trainingResourceSync")
     private final SynchronizerService<TrainingResource> synchronizerService;
+    @Autowired
+    private ProviderManager providerManager;
 
     @Value("${catalogue.id}")
     private String catalogueId;
@@ -288,6 +290,16 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
         }
 
         return ret;
+    }
+
+    @Override
+    public Browsing<TrainingResourceBundle> getMy(FacetFilter filter, Authentication auth) {
+        List<ProviderBundle> providers = providerManager.getMy(filter, auth).getResults();
+        FacetFilter ff = new FacetFilter();
+        ff.addFilter("resource_organisation", providers.stream().map(ProviderBundle::getId).toList());
+        ff.setResourceType(getResourceType());
+        ff.setQuantity(1000);
+        return this.getAll(ff, auth);
     }
 
     @Override

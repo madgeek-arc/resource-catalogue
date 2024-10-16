@@ -125,7 +125,7 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
             catalogues.setResults(retList);
             catalogues.setTotal(retList.size());
             catalogues.setTo(retList.size());
-            userCatalogues = getMyCatalogues(auth);
+            userCatalogues = getMy(null, auth).getResults();
             if (userCatalogues != null) {
                 // replace user providers having null users with complete provider entries
                 userCatalogues.forEach(x -> {
@@ -260,22 +260,18 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
     }
 
     @Override
-    public List<CatalogueBundle> getMyCatalogues(Authentication auth) {
+    public Browsing<CatalogueBundle> getMy(FacetFilter ff, Authentication auth) {
         if (auth == null) {
             throw new InsufficientAuthenticationException("Please log in.");
         }
         User user = User.of(auth);
-        FacetFilter ff = new FacetFilter();
-        ff.setQuantity(maxQuantity);
+        if (ff == null) {
+            ff = new FacetFilter();
+            ff.setQuantity(maxQuantity);
+        }
+        ff.addFilter("users", user.getEmail().toLowerCase());
         ff.addOrderBy("name", "asc");
-        return super.getAll(ff, auth).getResults()
-                .stream().map(p -> {
-                    if (securityService.userIsCatalogueAdmin(user, p.getId())) {
-                        return p;
-                    } else return null;
-                })
-                .filter(Objects::nonNull)
-                .collect(Collectors.toList());
+        return super.getAll(ff, auth);
     }
 
     private <T, I extends ResourceCRUDService<T, Authentication>> void deleteCatalogueResources(String id, I service, Authentication auth) {

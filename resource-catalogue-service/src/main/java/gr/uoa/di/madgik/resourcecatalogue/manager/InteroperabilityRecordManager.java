@@ -14,6 +14,7 @@ import gr.uoa.di.madgik.resourcecatalogue.utils.ObjectUtils;
 import gr.uoa.di.madgik.resourcecatalogue.utils.ProviderResourcesCommonMethods;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
@@ -34,6 +35,8 @@ public class InteroperabilityRecordManager extends ResourceManager<Interoperabil
     private final CatalogueService catalogueService;
     private final RegistrationMailService registrationMailService;
     private final ProviderResourcesCommonMethods commonMethods;
+    @Autowired
+    private ProviderManager providerManager;
 
     @Value("${catalogue.id}")
     private String catalogueId;
@@ -291,6 +294,16 @@ public class InteroperabilityRecordManager extends ResourceManager<Interoperabil
     public boolean validateInteroperabilityRecord(InteroperabilityRecordBundle interoperabilityRecordBundle) {
         validate(interoperabilityRecordBundle);
         return true;
+    }
+
+    @Override
+    public Browsing<InteroperabilityRecordBundle> getMy(FacetFilter filter, Authentication auth) {
+        List<ProviderBundle> providers = providerManager.getMy(filter, auth).getResults();
+        FacetFilter ff = new FacetFilter();
+        ff.addFilter("provider_id", providers.stream().map(ProviderBundle::getId).toList());
+        ff.setResourceType(getResourceType());
+        ff.setQuantity(1000);
+        return this.getAll(ff, auth);
     }
 
     // TODO: refactor

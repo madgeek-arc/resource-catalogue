@@ -154,6 +154,11 @@ public class ServiceController {
         return ResponseEntity.ok(paging);
     }
 
+    @GetMapping(path = "getMyServices", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    public ResponseEntity<List<ServiceBundle>> getMyServices(@Parameter(hidden = true) Authentication auth) {
+        return new ResponseEntity<>(serviceBundleService.getMy(null, auth).getResults(), HttpStatus.OK);
+    }
+
     @Operation(summary = "Get a list of Resources based on a set of ids.")
     @GetMapping(path = "ids", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<List<Service>> getSomeServices(@RequestParam("ids") String[] ids, @Parameter(hidden = true) Authentication auth) {
@@ -486,9 +491,9 @@ public class ServiceController {
         return new ResponseEntity<>(draftServiceService.get(id).getService(), HttpStatus.OK);
     }
 
-    @GetMapping(path = "/draft/my", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @GetMapping(path = "/draft/getMyDraftServices", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<List<ServiceBundle>> getMyDraftServices(@Parameter(hidden = true) Authentication auth) {
-        return new ResponseEntity<>(draftServiceService.getMy(auth), HttpStatus.OK);
+        return new ResponseEntity<>(draftServiceService.getMy(null, auth).getResults(), HttpStatus.OK);
     }
 
     @Browse
@@ -500,7 +505,7 @@ public class ServiceController {
         String id = String.join("/", prefix, suffix);
         FacetFilter ff = FacetFilter.from(allRequestParams);
         ff.addFilter("resource_organisation", id);
-        return new ResponseEntity<>(draftServiceService.getAll(FacetFilter.from(allRequestParams), auth), HttpStatus.OK);
+        return new ResponseEntity<>(draftServiceService.getAll(ff, auth), HttpStatus.OK);
     }
 
     @PostMapping(path = "/draft", produces = {MediaType.APPLICATION_JSON_VALUE})

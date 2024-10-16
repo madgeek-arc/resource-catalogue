@@ -15,6 +15,8 @@ import gr.uoa.di.madgik.resourcecatalogue.utils.FacetLabelService;
 import gr.uoa.di.madgik.resourcecatalogue.utils.ProviderResourcesCommonMethods;
 import gr.uoa.di.madgik.resourcecatalogue.utils.TextUtils;
 import gr.uoa.di.madgik.resourcecatalogue.validators.FieldValidator;
+import jakarta.annotation.PostConstruct;
+import jakarta.validation.constraints.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,8 +26,6 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.validation.Validator;
 
-import jakarta.annotation.PostConstruct;
-import jakarta.validation.constraints.NotNull;
 import java.lang.reflect.Field;
 import java.time.Instant;
 import java.time.ZoneId;
@@ -67,7 +67,6 @@ public abstract class AbstractServiceBundleManager<T extends ServiceBundle> exte
     private GenericResourceService genericResourceService;
     @Autowired
     private ProviderResourcesCommonMethods commonMethods;
-
     @Autowired
     private ProviderManager providerManager;
 
@@ -141,10 +140,11 @@ public abstract class AbstractServiceBundleManager<T extends ServiceBundle> exte
     @Override
     public Browsing<T> getMy(FacetFilter filter, Authentication auth) {
         List<ProviderBundle> providers = providerManager.getMy(filter, auth).getResults();
-        FacetFilter f = new FacetFilter();
-        f.addFilter("resource_organisation", providers.stream().map(ProviderBundle::getId).toList());
-        f.setResourceType(getResourceType());
-        return this.getAll(f, auth);
+        FacetFilter ff = new FacetFilter();
+        ff.addFilter("resource_organisation", providers.stream().map(ProviderBundle::getId).toList());
+        ff.setResourceType(getResourceType());
+        ff.setQuantity(1000);
+        return this.getAll(ff, auth);
     }
 
     @Override

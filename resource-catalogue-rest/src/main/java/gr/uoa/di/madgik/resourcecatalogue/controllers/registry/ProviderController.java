@@ -514,7 +514,7 @@ public class ProviderController {
 
     @GetMapping(path = "/draft/getMyDraftProviders", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<List<ProviderBundle>> getMyDraftProviders(@Parameter(hidden = true) Authentication auth) {
-        return new ResponseEntity<>(draftProviderService.getMy(auth), HttpStatus.OK);
+        return new ResponseEntity<>(draftProviderService.getMy(null, auth).getResults(), HttpStatus.OK);
     }
 
     @PostMapping(path = "/draft", produces = {MediaType.APPLICATION_JSON_VALUE})

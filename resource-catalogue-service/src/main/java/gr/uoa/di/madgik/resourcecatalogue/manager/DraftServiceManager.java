@@ -1,17 +1,13 @@
 package gr.uoa.di.madgik.resourcecatalogue.manager;
 
-import gr.uoa.di.madgik.registry.domain.Paging;
-import gr.uoa.di.madgik.registry.domain.Resource;
-import gr.uoa.di.madgik.registry.domain.ResourceType;
+import gr.uoa.di.madgik.registry.domain.*;
 import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
-import gr.uoa.di.madgik.resourcecatalogue.domain.LoggingInfo;
-import gr.uoa.di.madgik.resourcecatalogue.domain.Metadata;
-import gr.uoa.di.madgik.resourcecatalogue.domain.ServiceBundle;
-import gr.uoa.di.madgik.resourcecatalogue.domain.User;
+import gr.uoa.di.madgik.resourcecatalogue.domain.*;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
 import gr.uoa.di.madgik.resourcecatalogue.utils.ProviderResourcesCommonMethods;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.core.Authentication;
@@ -33,6 +29,8 @@ public class DraftServiceManager extends ResourceManager<ServiceBundle> implemen
 
     @Value("${catalogue.id}")
     private String catalogueId;
+    @Autowired
+    private ProviderManager providerManager;
 
     public DraftServiceManager(ServiceBundleService<ServiceBundle> serviceBundleService,
                                IdCreator idCreator, @Lazy VocabularyService vocabularyService,
@@ -142,10 +140,14 @@ public class DraftServiceManager extends ResourceManager<ServiceBundle> implemen
         return bundle;
     }
 
-    public List<ServiceBundle> getMy(Authentication auth) {
-        //TODO: Implement
-        List<ServiceBundle> re = new ArrayList<>();
-        return re;
+    @Override
+    public Browsing<ServiceBundle> getMy(FacetFilter filter, Authentication auth) {
+        List<ProviderBundle> providers = providerManager.getMy(filter, auth).getResults();
+        FacetFilter ff = new FacetFilter();
+        ff.addFilter("resource_organisation", providers.stream().map(ProviderBundle::getId).toList());
+        ff.setResourceType(getResourceType());
+        ff.setQuantity(1000);
+        return this.getAll(ff, auth);
     }
 
     private Resource getDraftResource(String id) {

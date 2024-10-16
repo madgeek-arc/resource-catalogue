@@ -170,6 +170,11 @@ public class TrainingResourceController {
         return ResponseEntity.ok(trainingResourceService.getByIds(auth, ids));
     }
 
+    @GetMapping(path = "getMyTrainingResources", produces = {MediaType.APPLICATION_JSON_VALUE})
+    public ResponseEntity<List<TrainingResourceBundle>> getMyTrainingResources(@Parameter(hidden = true) Authentication auth) {
+        return new ResponseEntity<>(trainingResourceService.getMy(null, auth).getResults(), HttpStatus.OK);
+    }
+
     @Operation(summary = "Get all Training Resources in the catalogue organized by an attribute, e.g. get Training Resources organized in categories.")
     @GetMapping(path = "by/{field}", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<Map<String, List<TrainingResource>>> getTrainingResourcesBy(@PathVariable(value = "field") Service.Field field, @Parameter(hidden = true) Authentication auth) throws NoSuchFieldException {
@@ -393,7 +398,7 @@ public class TrainingResourceController {
 
     @GetMapping(path = "/draft/getMyDraftTrainingResources", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<List<TrainingResourceBundle>> getMyDraftTrainingResources(@Parameter(hidden = true) Authentication auth) {
-        return new ResponseEntity<>(draftTrainingResourceService.getMy(auth), HttpStatus.OK);
+        return new ResponseEntity<>(draftTrainingResourceService.getMy(null, auth).getResults(), HttpStatus.OK);
     }
 
     @PostMapping(path = "/draft", produces = {MediaType.APPLICATION_JSON_VALUE})

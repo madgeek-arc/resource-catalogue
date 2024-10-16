@@ -151,7 +151,7 @@ public class CatalogueController {
     @Operation(summary = "Returns a list of Catalogues where user is admin.")
     @GetMapping(path = "getMyCatalogues", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity<List<CatalogueBundle>> getMyCatalogues(@Parameter(hidden = true) Authentication auth) {
-        return new ResponseEntity<>(catalogueManager.getMyCatalogues(auth), HttpStatus.OK);
+        return new ResponseEntity<>(catalogueManager.getMy(null, auth).getResults(), HttpStatus.OK);
     }
 
     @Hidden
