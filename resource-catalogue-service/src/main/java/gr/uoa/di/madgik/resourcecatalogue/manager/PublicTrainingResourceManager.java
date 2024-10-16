@@ -62,24 +62,6 @@ public class PublicTrainingResourceManager extends AbstractPublicResourceManager
     }
 
     @Override
-    public Browsing<TrainingResourceBundle> getMy(FacetFilter facetFilter, Authentication authentication) {
-        if (authentication == null) {
-            throw new InsufficientAuthenticationException("Please log in.");
-        }
-
-        List<TrainingResourceBundle> trainingResourceBundleList = new ArrayList<>();
-        Browsing<TrainingResourceBundle> trainingResourceBundleBrowsing = super.getAll(facetFilter, authentication);
-        for (TrainingResourceBundle trainingResourceBundle : trainingResourceBundleBrowsing.getResults()) {
-            if (securityService.isResourceProviderAdmin(authentication, trainingResourceBundle.getId(),
-                    trainingResourceBundle.getTrainingResource().getCatalogueId()) && trainingResourceBundle.getMetadata().isPublished()) {
-                trainingResourceBundleList.add(trainingResourceBundle);
-            }
-        }
-        return new Browsing<>(trainingResourceBundleBrowsing.getTotal(), trainingResourceBundleBrowsing.getFrom(),
-                trainingResourceBundleBrowsing.getTo(), trainingResourceBundleList, trainingResourceBundleBrowsing.getFacets());
-    }
-
-    @Override
     public TrainingResourceBundle add(TrainingResourceBundle trainingResourceBundle, Authentication authentication) {
         String lowerLevelResourceId = trainingResourceBundle.getId();
         Identifiers.createOriginalId(trainingResourceBundle);

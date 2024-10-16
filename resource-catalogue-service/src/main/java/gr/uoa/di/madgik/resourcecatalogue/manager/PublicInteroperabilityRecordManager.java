@@ -55,25 +55,6 @@ public class PublicInteroperabilityRecordManager extends AbstractPublicResourceM
     }
 
     @Override
-    public Browsing<InteroperabilityRecordBundle> getMy(FacetFilter facetFilter, Authentication authentication) {
-        if (authentication == null) {
-            throw new InsufficientAuthenticationException("Please log in.");
-        }
-
-        List<InteroperabilityRecordBundle> interoperabilityRecordBundleList = new ArrayList<>();
-        Browsing<InteroperabilityRecordBundle> interoperabilityRecordBundleBrowsing = super.getAll(facetFilter, authentication);
-        for (InteroperabilityRecordBundle interoperabilityRecordBundle : interoperabilityRecordBundleBrowsing.getResults()) {
-            if (securityService.isResourceProviderAdmin(authentication, interoperabilityRecordBundle.getId(),
-                    interoperabilityRecordBundle.getInteroperabilityRecord().getCatalogueId())
-                    && interoperabilityRecordBundle.getMetadata().isPublished()) {
-                interoperabilityRecordBundleList.add(interoperabilityRecordBundle);
-            }
-        }
-        return new Browsing<>(interoperabilityRecordBundleBrowsing.getTotal(), interoperabilityRecordBundleBrowsing.getFrom(),
-                interoperabilityRecordBundleBrowsing.getTo(), interoperabilityRecordBundleList, interoperabilityRecordBundleBrowsing.getFacets());
-    }
-
-    @Override
     public InteroperabilityRecordBundle add(InteroperabilityRecordBundle interoperabilityRecordBundle, Authentication authentication) {
         String lowerLevelResourceId = interoperabilityRecordBundle.getId();
         Identifiers.createOriginalId(interoperabilityRecordBundle);

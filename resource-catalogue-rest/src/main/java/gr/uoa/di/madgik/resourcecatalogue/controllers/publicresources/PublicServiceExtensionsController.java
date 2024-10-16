@@ -127,15 +127,6 @@ public class PublicServiceExtensionsController {
         return ResponseEntity.ok(paging);
     }
 
-    @GetMapping(path = "public/helpdesk/my", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    public ResponseEntity<List<HelpdeskBundle>> getMyPublicHelpdesks(@Parameter(hidden = true) Authentication auth) {
-        FacetFilter ff = new FacetFilter();
-        ff.setQuantity(10000);
-        ff.addFilter("published", true);
-        ff.addOrderBy("name", "asc");
-        return new ResponseEntity<>(publicHelpdeskManager.getMy(ff, auth).getResults(), HttpStatus.OK);
-    }
-
 
     //SECTION: MONITORING
     @Operation(description = "Returns the Public Monitoring with the given id.")
@@ -207,14 +198,5 @@ public class PublicServiceExtensionsController {
         ff.addFilter("published", true);
         Paging<MonitoringBundle> paging = genericResourceService.getResults(ff);
         return ResponseEntity.ok(paging);
-    }
-
-    @GetMapping(path = "public/monitoring/my", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    public ResponseEntity<List<MonitoringBundle>> getMyPublicMonitorings(@Parameter(hidden = true) Authentication auth) {
-        FacetFilter ff = new FacetFilter();
-        ff.setQuantity(10000);
-        ff.addFilter("published", true);
-        ff.addOrderBy("name", "asc");
-        return new ResponseEntity<>(publicMonitoringManager.getMy(ff, auth).getResults(), HttpStatus.OK);
     }
 }

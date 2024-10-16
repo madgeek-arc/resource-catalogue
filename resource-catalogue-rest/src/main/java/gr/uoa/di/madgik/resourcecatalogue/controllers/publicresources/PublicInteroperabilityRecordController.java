@@ -144,13 +144,4 @@ public class PublicInteroperabilityRecordController {
         }
         return allInteroperabilityRecordRelatedResources;
     }
-
-    @GetMapping(path = "public/interoperabilityRecord/my", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    public ResponseEntity<List<InteroperabilityRecordBundle>> getMyPublicInteroperabilityRecords(@Parameter(hidden = true) Authentication auth) {
-        FacetFilter ff = new FacetFilter();
-        ff.setQuantity(10000);
-        ff.addFilter("published", true);
-        ff.addOrderBy("title", "asc");
-        return new ResponseEntity<>(publicInteroperabilityRecordManager.getMy(ff, auth).getResults(), HttpStatus.OK);
-    }
 }

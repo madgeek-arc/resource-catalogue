@@ -238,10 +238,11 @@ public class ProviderController {
         return new ResponseEntity<>(providers, HttpStatus.OK);
     }
 
-    // Get a list of Providers in which you are admin.
     @GetMapping(path = "getMyProviders", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity<List<ProviderBundle>> getMyProviders(@Parameter(hidden = true) Authentication auth) {
-        return new ResponseEntity<>(providerService.getMy(null, auth).getResults(), HttpStatus.OK);
+        FacetFilter ff = new FacetFilter();
+        ff.setQuantity(1000);
+        return new ResponseEntity<>(providerService.getMy(ff, auth).getResults(), HttpStatus.OK);
     }
 
     // Get inactive Services of the given Provider.
@@ -514,7 +515,9 @@ public class ProviderController {
 
     @GetMapping(path = "/draft/getMyDraftProviders", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<List<ProviderBundle>> getMyDraftProviders(@Parameter(hidden = true) Authentication auth) {
-        return new ResponseEntity<>(draftProviderService.getMy(null, auth).getResults(), HttpStatus.OK);
+        FacetFilter ff = new FacetFilter();
+        ff.setQuantity(1000);
+        return new ResponseEntity<>(draftProviderService.getMy(ff, auth).getResults(), HttpStatus.OK);
     }
 
     @PostMapping(path = "/draft", produces = {MediaType.APPLICATION_JSON_VALUE})

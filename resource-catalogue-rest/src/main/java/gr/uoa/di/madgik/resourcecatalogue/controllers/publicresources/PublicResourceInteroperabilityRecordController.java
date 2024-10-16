@@ -113,14 +113,4 @@ public class PublicResourceInteroperabilityRecordController {
         Paging<ResourceInteroperabilityRecordBundle> paging = genericResourceService.getResults(ff);
         return ResponseEntity.ok(paging);
     }
-
-    @GetMapping(path = "public/resourceInteroperabilityRecord/my", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    public ResponseEntity<List<ResourceInteroperabilityRecordBundle>> getMyPublicResourceInteroperabilityRecords(@Parameter(hidden = true) Authentication auth) {
-        FacetFilter ff = new FacetFilter();
-        ff.setQuantity(10000);
-        ff.addFilter("published", true);
-        ff.addOrderBy("title", "asc");
-        return new ResponseEntity<>(publicResourceInteroperabilityRecordManager.getMy(ff, auth).getResults(), HttpStatus.OK);
-    }
-
 }

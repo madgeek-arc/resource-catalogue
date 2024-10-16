@@ -133,13 +133,4 @@ public class PublicProviderController {
         Paging<ProviderBundle> paging = genericResourceService.getResults(ff);
         return ResponseEntity.ok(paging);
     }
-
-    @GetMapping(path = "public/provider/my", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    public ResponseEntity<List<ProviderBundle>> getMyPublicProviders(@Parameter(hidden = true) Authentication auth) {
-        FacetFilter ff = new FacetFilter();
-        ff.setQuantity(10000);
-        ff.addFilter("published", true);
-        ff.addOrderBy("name", "asc");
-        return new ResponseEntity<>(publicProviderManager.getMy(ff, auth).getResults(), HttpStatus.OK);
-    }
 }

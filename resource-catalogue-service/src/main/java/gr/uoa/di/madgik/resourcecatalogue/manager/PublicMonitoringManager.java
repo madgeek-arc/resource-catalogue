@@ -52,24 +52,6 @@ public class PublicMonitoringManager extends AbstractPublicResourceManager<Monit
         return super.getAll(facetFilter, authentication);
     }
 
-    @Override
-    public Browsing<MonitoringBundle> getMy(FacetFilter facetFilter, Authentication authentication) {
-        if (authentication == null) {
-            throw new InsufficientAuthenticationException("Please log in.");
-        }
-
-        List<MonitoringBundle> monitoringBundleList = new ArrayList<>();
-        Browsing<MonitoringBundle> monitoringBundleBrowsing = super.getAll(facetFilter, authentication);
-        for (MonitoringBundle monitoringBundle : monitoringBundleBrowsing.getResults()) {
-            if (securityService.isResourceProviderAdmin(authentication, monitoringBundle.getMonitoring().getServiceId(), monitoringBundle.getCatalogueId())
-                    && monitoringBundle.getMetadata().isPublished()) {
-                monitoringBundleList.add(monitoringBundle);
-            }
-        }
-        return new Browsing<>(monitoringBundleBrowsing.getTotal(), monitoringBundleBrowsing.getFrom(),
-                monitoringBundleBrowsing.getTo(), monitoringBundleList, monitoringBundleBrowsing.getFacets());
-    }
-
     public MonitoringBundle getOrElseReturnNull(String id) {
         MonitoringBundle monitoringBundle;
         try {

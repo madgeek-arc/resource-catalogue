@@ -6,6 +6,7 @@ import gr.uoa.di.madgik.registry.service.ResourceCRUDService;
 import gr.uoa.di.madgik.resourcecatalogue.domain.AlternativeIdentifier;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Identifiers;
 import gr.uoa.di.madgik.resourcecatalogue.domain.ProviderBundle;
+import gr.uoa.di.madgik.resourcecatalogue.domain.User;
 import gr.uoa.di.madgik.resourcecatalogue.exception.ResourceException;
 import gr.uoa.di.madgik.resourcecatalogue.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.service.SecurityService;
@@ -58,24 +59,6 @@ public class PublicProviderManager extends ResourceManager<ProviderBundle> imple
             browsing.setFacets(facetLabelService.generateLabels(browsing.getFacets()));
         }
         return browsing;
-    }
-
-    @Override
-    public Browsing<ProviderBundle> getMy(FacetFilter facetFilter, Authentication authentication) {
-        if (authentication == null) {
-            throw new InsufficientAuthenticationException("Please log in.");
-        }
-
-        List<ProviderBundle> providerList = new ArrayList<>();
-        Browsing<ProviderBundle> providerBundleBrowsing = super.getAll(facetFilter, authentication);
-        for (ProviderBundle providerBundle : providerBundleBrowsing.getResults()) {
-            if (securityService.isProviderAdmin(authentication, providerBundle.getId(),
-                    providerBundle.getProvider().getCatalogueId()) && providerBundle.getMetadata().isPublished()) {
-                providerList.add(providerBundle);
-            }
-        }
-        return new Browsing<>(providerBundleBrowsing.getTotal(), providerBundleBrowsing.getFrom(),
-                providerBundleBrowsing.getTo(), providerList, providerBundleBrowsing.getFacets());
     }
 
     @Override

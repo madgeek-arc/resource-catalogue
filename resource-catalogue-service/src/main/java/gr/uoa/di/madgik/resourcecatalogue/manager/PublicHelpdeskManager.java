@@ -52,24 +52,6 @@ public class PublicHelpdeskManager extends AbstractPublicResourceManager<Helpdes
         return super.getAll(facetFilter, authentication);
     }
 
-    @Override
-    public Browsing<HelpdeskBundle> getMy(FacetFilter facetFilter, Authentication authentication) {
-        if (authentication == null) {
-            throw new InsufficientAuthenticationException("Please log in.");
-        }
-
-        List<HelpdeskBundle> helpdeskBundleList = new ArrayList<>();
-        Browsing<HelpdeskBundle> helpdeskBundleBrowsing = super.getAll(facetFilter, authentication);
-        for (HelpdeskBundle helpdeskBundle : helpdeskBundleBrowsing.getResults()) {
-            if (securityService.isResourceProviderAdmin(authentication, helpdeskBundle.getHelpdesk().getServiceId(), helpdeskBundle.getCatalogueId())
-                    && helpdeskBundle.getMetadata().isPublished()) {
-                helpdeskBundleList.add(helpdeskBundle);
-            }
-        }
-        return new Browsing<>(helpdeskBundleBrowsing.getTotal(), helpdeskBundleBrowsing.getFrom(),
-                helpdeskBundleBrowsing.getTo(), helpdeskBundleList, helpdeskBundleBrowsing.getFacets());
-    }
-
     public HelpdeskBundle getOrElseReturnNull(String id) {
         HelpdeskBundle helpdeskBundle;
         try {
