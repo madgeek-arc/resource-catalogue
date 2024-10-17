@@ -18,6 +18,6 @@ public class PublicResourceUtils {
         String[] parts = id.split("/");
         String prefix = parts[0];
         String suffix = parts[1];
-        return prefix + '/' + catalogueId + '.' + suffix;
+        return prefix + "/" + catalogueId + "." + suffix;
     }
 }

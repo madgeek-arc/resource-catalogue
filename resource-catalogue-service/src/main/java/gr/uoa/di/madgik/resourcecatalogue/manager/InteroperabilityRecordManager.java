@@ -327,10 +327,10 @@ public class InteroperabilityRecordManager extends ResourceManager<Interoperabil
         return null;
     }
 
-    public InteroperabilityRecordBundle getOrElseReturnNull(String id, String catalogueId) {
+    public InteroperabilityRecordBundle getOrElseReturnNull(String id) {
         InteroperabilityRecordBundle interoperabilityRecordBundle;
         try {
-            interoperabilityRecordBundle = get(id, catalogueId);
+            interoperabilityRecordBundle = get(id);
         } catch (ResourceException | ResourceNotFoundException e) {
             return null;
         }
@@ -372,7 +372,7 @@ public class InteroperabilityRecordManager extends ResourceManager<Interoperabil
         if (auth != null && auth.isAuthenticated()) {
             User user = User.of(auth);
             if (securityService.hasRole(auth, "ROLE_ADMIN") || securityService.hasRole(auth, "ROLE_EPOT") ||
-                    securityService.userIsResourceProviderAdmin(user, interoperabilityRecordId, catalogueId)) {
+                    securityService.userIsResourceProviderAdmin(user, interoperabilityRecordId)) {
                 return interoperabilityRecordBundle;
             }
         }

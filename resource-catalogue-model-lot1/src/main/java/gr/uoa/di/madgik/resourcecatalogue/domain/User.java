@@ -77,6 +77,8 @@ public class User implements Identifiable {
             user.email = principal.getAttribute("email");
             user.name = principal.getAttribute("given_name");
             user.surname = principal.getAttribute("family_name");
+        } else if (auth instanceof AdminAuthentication) {
+            logger.trace("internal admin access");
         } else if (auth.isAuthenticated()) {
             logger.warn("Authenticated User has missing information: {}", auth);
             return null;

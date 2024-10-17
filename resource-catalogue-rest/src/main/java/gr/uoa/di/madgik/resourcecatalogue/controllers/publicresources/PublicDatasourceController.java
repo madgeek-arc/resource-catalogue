@@ -65,8 +65,7 @@ public class PublicDatasourceController {
         if (auth != null && auth.isAuthenticated()) {
             User user = User.of(auth);
             if (securityService.hasRole(auth, "ROLE_ADMIN") || securityService.hasRole(auth, "ROLE_EPOT")
-                    || securityService.userIsResourceProviderAdmin(user, datasourceBundle.getDatasource().getServiceId(),
-                    datasourceBundle.getDatasource().getCatalogueId())) {
+                    || securityService.userIsResourceProviderAdmin(user, datasourceBundle.getDatasource().getServiceId())) {
                 if (datasourceBundle.getMetadata().isPublished()) {
                     return new ResponseEntity<>(datasourceBundle.getDatasource(), HttpStatus.OK);
                 } else {
@@ -91,8 +90,7 @@ public class PublicDatasourceController {
         if (auth != null && auth.isAuthenticated()) {
             User user = User.of(auth);
             if (securityService.hasRole(auth, "ROLE_ADMIN") || securityService.hasRole(auth, "ROLE_EPOT")
-                    || securityService.userIsResourceProviderAdmin(user, datasourceBundle.getDatasource().getServiceId(),
-                    datasourceBundle.getDatasource().getCatalogueId())) {
+                    || securityService.userIsResourceProviderAdmin(user, datasourceBundle.getDatasource().getServiceId())) {
                 if (datasourceBundle.getMetadata().isPublished()) {
                     return new ResponseEntity<>(datasourceBundle, HttpStatus.OK);
                 } else {

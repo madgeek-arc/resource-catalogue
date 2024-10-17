@@ -11,7 +11,6 @@ import gr.uoa.di.madgik.resourcecatalogue.exception.ValidationException;
 import gr.uoa.di.madgik.resourcecatalogue.manager.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.scheduling.annotation.Async;
@@ -35,10 +34,10 @@ public class RegistrationMailService {
     private final MailService mailService;
     private final Configuration cfg;
     private final ProviderManager providerManager;
-    private final DraftProviderManager pendingProviderManager;
+    private final DraftProviderManager draftProviderManager;
     private final ServiceBundleManager serviceBundleManager;
     private final TrainingResourceManager trainingResourceManager;
-    private final DraftServiceManager pendingServiceManager;
+    private final DraftServiceManager draftServiceManager;
     private final SecurityService securityService;
 
     // Properties
@@ -58,19 +57,19 @@ public class RegistrationMailService {
 
     public RegistrationMailService(MailService mailService, Configuration cfg,
                                    ProviderManager providerManager,
-                                   @Lazy DraftProviderManager pendingProviderManager,
+                                   @Lazy DraftProviderManager draftProviderManager,
                                    ServiceBundleManager serviceBundleManager,
                                    TrainingResourceManager trainingResourceManager,
-                                   DraftServiceManager pendingServiceManager,
+                                   DraftServiceManager draftServiceManager,
                                    SecurityService securityService,
                                    ResourceCatalogueProperties properties) {
         this.mailService = mailService;
         this.cfg = cfg;
         this.providerManager = providerManager;
-        this.pendingProviderManager = pendingProviderManager;
+        this.draftProviderManager = draftProviderManager;
         this.serviceBundleManager = serviceBundleManager;
         this.trainingResourceManager = trainingResourceManager;
-        this.pendingServiceManager = pendingServiceManager;
+        this.draftServiceManager = draftServiceManager;
         this.securityService = securityService;
 
         // Init properties
@@ -294,9 +293,9 @@ public class RegistrationMailService {
         ProviderBundle providerBundle;
         ServiceBundle serviceBundle;
         TrainingResourceBundle trainingResourceBundle = null;
-        serviceBundle = serviceBundleManager.getOrElseReturnNull(resourceId, catalogueId);
+        serviceBundle = serviceBundleManager.getOrElseReturnNull(resourceId);
         if (serviceBundle == null) {
-            trainingResourceBundle = trainingResourceManager.getOrElseReturnNull(resourceId, catalogueId);
+            trainingResourceBundle = trainingResourceManager.getOrElseReturnNull(resourceId);
             providerBundle = providerManager.get(trainingResourceBundle.getTrainingResource().getResourceOrganisation());
         } else {
             providerBundle = providerManager.get(serviceBundle.getService().getResourceOrganisation());
@@ -445,11 +444,11 @@ public class RegistrationMailService {
         ff.setQuantity(maxQuantity);
         ff.addFilter("published", false);
         List<ProviderBundle> activeProviders = providerManager.getAll(ff, securityService.getAdminAccess()).getResults();
-        List<ProviderBundle> pendingProviders = pendingProviderManager.getAll(ff, securityService.getAdminAccess()).getResults();
+        List<ProviderBundle> draftProviders = draftProviderManager.getAll(ff, securityService.getAdminAccess()).getResults();
         List<ServiceBundle> activeServices = serviceBundleManager.getAll(ff, securityService.getAdminAccess()).getResults();
-        List<ServiceBundle> pendingServices = pendingServiceManager.getAll(ff, securityService.getAdminAccess()).getResults();
-        List<ProviderBundle> allProviders = Stream.concat(activeProviders.stream(), pendingProviders.stream()).collect(Collectors.toList());
-        List<ServiceBundle> allServices = Stream.concat(activeServices.stream(), pendingServices.stream()).collect(Collectors.toList());
+        List<ServiceBundle> draftServices = draftServiceManager.getAll(ff, securityService.getAdminAccess()).getResults();
+        List<ProviderBundle> allProviders = Stream.concat(activeProviders.stream(), draftProviders.stream()).collect(Collectors.toList());
+        List<ServiceBundle> allServices = Stream.concat(activeServices.stream(), draftServices.stream()).collect(Collectors.toList());
         List<Bundle> allResources = Stream.concat(allProviders.stream(), allServices.stream()).collect(Collectors.toList());
 
         // New & Updated Providers, Resources

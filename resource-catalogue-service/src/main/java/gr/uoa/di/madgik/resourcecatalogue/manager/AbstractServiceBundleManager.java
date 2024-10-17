@@ -531,15 +531,15 @@ public abstract class AbstractServiceBundleManager<T extends ServiceBundle> exte
         return serviceBundle;
     }
 
-    public T getOrElseReturnNull(String id, String catalogueId) {
-        T serviceBundle;
-        try {
-            serviceBundle = get(id, catalogueId);
-        } catch (ResourceException | ResourceNotFoundException e) {
-            return null;
-        }
-        return serviceBundle;
-    }
+//    public T getOrElseReturnNull(String id, String catalogueId) {
+//        T serviceBundle;
+//        try {
+//            serviceBundle = get(id, catalogueId);
+//        } catch (ResourceException | ResourceNotFoundException e) {
+//            return null;
+//        }
+//        return serviceBundle;
+//    }
 
     @Override
     public List<T> getInactiveResources(String providerId) {

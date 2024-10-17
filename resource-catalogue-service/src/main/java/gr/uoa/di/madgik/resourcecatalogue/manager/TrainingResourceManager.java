@@ -11,10 +11,7 @@ import gr.uoa.di.madgik.resourcecatalogue.exception.ResourceException;
 import gr.uoa.di.madgik.resourcecatalogue.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.exception.ValidationException;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
-import gr.uoa.di.madgik.resourcecatalogue.utils.Auditable;
-import gr.uoa.di.madgik.resourcecatalogue.utils.FacetLabelService;
-import gr.uoa.di.madgik.resourcecatalogue.utils.ObjectUtils;
-import gr.uoa.di.madgik.resourcecatalogue.utils.ProviderResourcesCommonMethods;
+import gr.uoa.di.madgik.resourcecatalogue.utils.*;
 import gr.uoa.di.madgik.resourcecatalogue.validators.FieldValidator;
 import jakarta.validation.constraints.NotNull;
 import org.slf4j.Logger;
@@ -54,6 +51,7 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
     private final MigrationService migrationService;
     private final ProviderResourcesCommonMethods commonMethods;
     private final GenericManager genericManager;
+    private final PublicResourceUtils publicResourceUtils;
     @Autowired
     private FacetLabelService facetLabelService;
     @Autowired
@@ -83,7 +81,8 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
                                    SynchronizerService<TrainingResource> synchronizerService,
                                    ProviderResourcesCommonMethods commonMethods,
                                    GenericManager genericManager,
-                                   @Lazy MigrationService migrationService) {
+                                   @Lazy MigrationService migrationService,
+                                   @Lazy PublicResourceUtils publicResourceUtils) {
         super(TrainingResourceBundle.class);
         this.providerService = providerService;
         this.idCreator = idCreator;
@@ -101,6 +100,7 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
         this.commonMethods = commonMethods;
         this.genericManager = genericManager;
         this.migrationService = migrationService;
+        this.publicResourceUtils = publicResourceUtils;
     }
 
     @Override
@@ -320,7 +320,7 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
         if (auth != null && auth.isAuthenticated()) {
             User user = User.of(auth);
             if (securityService.hasRole(auth, "ROLE_ADMIN") || securityService.hasRole(auth, "ROLE_EPOT") ||
-                    securityService.userIsResourceProviderAdmin(user, trainingResourceId, catalogueId)) {
+                    securityService.userIsResourceProviderAdmin(user, trainingResourceId)) {
                 return trainingResourceBundle;
             }
         }
@@ -472,6 +472,9 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
     }
 
     private void publishServiceExtensions(Bundle<?> bundle, boolean active, Authentication auth) {
+        String prefix = bundle.getId().split("/")[0];
+        String suffix = bundle.getId().split("/")[1];
+
         List<LoggingInfo> loggingInfoList = commonMethods.createActivationLoggingInfo(bundle, active, auth);
 
         // update Bundle's fields
@@ -486,8 +489,8 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
                         ((HelpdeskBundle) bundle).getCatalogueId(), bundle.isActive());
                 helpdeskService.updateBundle((HelpdeskBundle) bundle, auth);
                 HelpdeskBundle publicHelpdeskBundle =
-                        publicHelpdeskManager.getOrElseReturnNull(((HelpdeskBundle) bundle).getCatalogueId() +
-                                "." + bundle.getId());
+                        publicHelpdeskManager.getOrElseReturnNull(publicResourceUtils.createPublicResourceId(
+                                bundle.getId(), ((HelpdeskBundle) bundle).getCatalogueId()));
                 if (publicHelpdeskBundle != null) {
                     publicHelpdeskManager.update((HelpdeskBundle) bundle, auth);
                 }
@@ -503,8 +506,8 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
                         ((MonitoringBundle) bundle).getCatalogueId(), bundle.isActive());
                 monitoringService.updateBundle((MonitoringBundle) bundle, auth);
                 MonitoringBundle publicMonitoringBundle =
-                        publicMonitoringManager.getOrElseReturnNull(((MonitoringBundle) bundle).getCatalogueId() +
-                                "." + bundle.getId());
+                        publicMonitoringManager.getOrElseReturnNull(publicResourceUtils.createPublicResourceId(
+                                bundle.getId(), ((MonitoringBundle) bundle).getCatalogueId()));
                 if (publicMonitoringBundle != null) {
                     publicMonitoringManager.update((MonitoringBundle) bundle, auth);
                 }
@@ -570,7 +573,7 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
             User user = User.of(auth);
             // if user is ADMIN/EPOT or Provider Admin on the specific Provider, return its Training Resources
             if (securityService.hasRole(auth, "ROLE_ADMIN") || securityService.hasRole(auth, "ROLE_EPOT") ||
-                    securityService.userIsProviderAdmin(user, providerBundle)) {
+                    securityService.userIsProviderAdmin(user, providerId)) {
                 return this.getAll(ff, auth).getResults().stream().map(TrainingResourceBundle::getTrainingResource).collect(Collectors.toList());
             }
         }
@@ -682,16 +685,16 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
         return trainingResourceBundle;
     }
 
-    @Override
-    public TrainingResourceBundle getOrElseReturnNull(String id, String catalogueId) {
-        TrainingResourceBundle trainingResourceBundle;
-        try {
-            trainingResourceBundle = get(id, catalogueId);
-        } catch (ResourceException | ResourceNotFoundException e) {
-            return null;
-        }
-        return trainingResourceBundle;
-    }
+//    @Override
+//    public TrainingResourceBundle getOrElseReturnNull(String id, String catalogueId) {
+//        TrainingResourceBundle trainingResourceBundle;
+//        try {
+//            trainingResourceBundle = get(id, catalogueId);
+//        } catch (ResourceException | ResourceNotFoundException e) {
+//            return null;
+//        }
+//        return trainingResourceBundle;
+//    }
 
     @Override
     public List<String> getChildrenFromParent(String type, String parent, List<Map<String, Object>> rec) {

@@ -59,6 +59,7 @@ public class PublicTrainingResourceController {
 
     @Operation(summary = "Returns the Public Training Resource with the given id.")
     @GetMapping(path = "public/trainingResource/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    @PreAuthorize("@securityService.trainingResourceIsActive(#prefix+'/'+#suffix) or hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth, #prefix+'/'+#suffix)")
     public ResponseEntity<?> getPublicTrainingResource(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
                                                        @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix,
                                                        @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId,
@@ -68,7 +69,7 @@ public class PublicTrainingResourceController {
         if (auth != null && auth.isAuthenticated()) {
             User user = User.of(auth);
             if (securityService.hasRole(auth, "ROLE_ADMIN") || securityService.hasRole(auth, "ROLE_EPOT")
-                    || securityService.userIsResourceProviderAdmin(user, id, trainingResourceBundle.getTrainingResource().getCatalogueId())) {
+                    || securityService.userIsResourceProviderAdmin(user, id)) {
                 if (trainingResourceBundle.getMetadata().isPublished()) {
                     return new ResponseEntity<>(trainingResourceBundle.getTrainingResource(), HttpStatus.OK);
                 } else {
@@ -84,7 +85,7 @@ public class PublicTrainingResourceController {
     }
 
     @GetMapping(path = "public/trainingResource/trainingResourceBundle/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth, #prefix+'/'+#suffix, #catalogueId)")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth, #prefix+'/'+#suffix)")
     public ResponseEntity<?> getPublicTrainingResourceBundle(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
                                                              @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix,
                                                              @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId,
@@ -94,7 +95,7 @@ public class PublicTrainingResourceController {
         if (auth != null && auth.isAuthenticated()) {
             User user = User.of(auth);
             if (securityService.hasRole(auth, "ROLE_ADMIN") || securityService.hasRole(auth, "ROLE_EPOT")
-                    || securityService.userIsResourceProviderAdmin(user, id, trainingResourceBundle.getTrainingResource().getCatalogueId())) {
+                    || securityService.userIsResourceProviderAdmin(user, id)) {
                 if (trainingResourceBundle.getMetadata().isPublished()) {
                     return new ResponseEntity<>(trainingResourceBundle, HttpStatus.OK);
                 } else {

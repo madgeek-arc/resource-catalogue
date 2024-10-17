@@ -13,6 +13,7 @@ import gr.uoa.di.madgik.resourcecatalogue.service.*;
 import gr.uoa.di.madgik.resourcecatalogue.utils.Auditable;
 import gr.uoa.di.madgik.resourcecatalogue.utils.ObjectUtils;
 import gr.uoa.di.madgik.resourcecatalogue.utils.ProviderResourcesCommonMethods;
+import gr.uoa.di.madgik.resourcecatalogue.utils.PublicResourceUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -46,6 +47,7 @@ public class ServiceBundleManager extends AbstractServiceBundleManager<ServiceBu
     private final PublicDatasourceManager publicDatasourceManager;
     private final ResourceInteroperabilityRecordService resourceInteroperabilityRecordService;
     private final ProviderResourcesCommonMethods commonMethods;
+    private final PublicResourceUtils publicResourceUtils;
 
     @Value("${catalogue.id}")
     private String catalogueId;
@@ -65,7 +67,8 @@ public class ServiceBundleManager extends AbstractServiceBundleManager<ServiceBu
                                 @Lazy PublicDatasourceManager publicDatasourceManager,
                                 @Lazy ResourceInteroperabilityRecordService
                                         resourceInteroperabilityRecordService,
-                                ProviderResourcesCommonMethods commonMethods) {
+                                ProviderResourcesCommonMethods commonMethods,
+                                @Lazy PublicResourceUtils publicResourceUtils) {
         super(ServiceBundle.class);
         this.providerService = providerService; // for providers
         this.idCreator = idCreator;
@@ -83,6 +86,7 @@ public class ServiceBundleManager extends AbstractServiceBundleManager<ServiceBu
         this.publicDatasourceManager = publicDatasourceManager;
         this.resourceInteroperabilityRecordService = resourceInteroperabilityRecordService;
         this.commonMethods = commonMethods;
+        this.publicResourceUtils = publicResourceUtils;
     }
 
     @Override
@@ -312,7 +316,7 @@ public class ServiceBundleManager extends AbstractServiceBundleManager<ServiceBu
             //TODO: userIsCatalogueAdmin -> transactionRollback error
             // if user is ADMIN/EPOT or Catalogue/Provider Admin on the specific Provider, return everything
             if (securityService.hasRole(auth, "ROLE_ADMIN") || securityService.hasRole(auth, "ROLE_EPOT") ||
-                    securityService.userIsResourceProviderAdmin(user, serviceId, catalogueId)) {
+                    securityService.userIsResourceProviderAdmin(user, serviceId)) {
                 return serviceBundle;
             }
         }
@@ -462,8 +466,8 @@ public class ServiceBundleManager extends AbstractServiceBundleManager<ServiceBu
                         ((HelpdeskBundle) bundle).getCatalogueId(), bundle.isActive());
                 helpdeskService.updateBundle((HelpdeskBundle) bundle, auth);
                 HelpdeskBundle publicHelpdeskBundle =
-                        publicHelpdeskManager.getOrElseReturnNull(((HelpdeskBundle) bundle).getCatalogueId() +
-                                "." + bundle.getId());
+                        publicHelpdeskManager.getOrElseReturnNull(publicResourceUtils.createPublicResourceId(
+                                bundle.getId(), ((HelpdeskBundle) bundle).getCatalogueId()));
                 if (publicHelpdeskBundle != null) {
                     publicHelpdeskManager.update((HelpdeskBundle) bundle, auth);
                 }
@@ -479,8 +483,8 @@ public class ServiceBundleManager extends AbstractServiceBundleManager<ServiceBu
                         ((MonitoringBundle) bundle).getCatalogueId(), bundle.isActive());
                 monitoringService.updateBundle((MonitoringBundle) bundle, auth);
                 MonitoringBundle publicMonitoringBundle =
-                        publicMonitoringManager.getOrElseReturnNull(((MonitoringBundle) bundle).getCatalogueId() +
-                                "." + bundle.getId());
+                        publicMonitoringManager.getOrElseReturnNull(publicResourceUtils.createPublicResourceId(
+                                bundle.getId(), ((MonitoringBundle) bundle).getCatalogueId()));
                 if (publicMonitoringBundle != null) {
                     publicMonitoringManager.update((MonitoringBundle) bundle, auth);
                 }
@@ -496,8 +500,8 @@ public class ServiceBundleManager extends AbstractServiceBundleManager<ServiceBu
                         ((DatasourceBundle) bundle).getDatasource().getCatalogueId(), bundle.isActive());
                 datasourceService.updateBundle((DatasourceBundle) bundle, auth);
                 DatasourceBundle publicDatasourceBundle =
-                        publicDatasourceManager.getOrElseReturnNull(((DatasourceBundle) bundle).getDatasource().getCatalogueId()
-                                + "." + bundle.getId());
+                        publicDatasourceManager.getOrElseReturnNull(publicResourceUtils.createPublicResourceId(
+                                bundle.getId(), ((DatasourceBundle) bundle).getDatasource().getCatalogueId()));
                 if (publicDatasourceBundle != null) {
                     publicDatasourceManager.update((DatasourceBundle) bundle, auth);
                 }
@@ -563,7 +567,7 @@ public class ServiceBundleManager extends AbstractServiceBundleManager<ServiceBu
             User user = User.of(auth);
             // if user is ADMIN/EPOT or Provider Admin on the specific Provider, return its Services
             if (securityService.hasRole(auth, "ROLE_ADMIN") || securityService.hasRole(auth, "ROLE_EPOT") ||
-                    securityService.userIsProviderAdmin(user, providerBundle)) {
+                    securityService.userIsProviderAdmin(user, providerId)) {
                 return this.getAll(ff, auth).getResults().stream().map(ServiceBundle::getService).collect(Collectors.toList());
             }
         }

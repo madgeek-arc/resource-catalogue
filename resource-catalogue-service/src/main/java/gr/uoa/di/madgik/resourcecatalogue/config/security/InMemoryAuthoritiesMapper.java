@@ -33,7 +33,7 @@ public class InMemoryAuthoritiesMapper implements AuthoritiesMapper {
     private final ProviderService providerService;
 
     private final CatalogueService catalogueService;
-    private final DraftResourceService<ProviderBundle> pendingProviderService;
+    private final DraftResourceService<ProviderBundle> draftProviderService;
     private final SecurityService securityService;
     private final ResourceCatalogueProperties catalogueProperties;
 
@@ -43,12 +43,12 @@ public class InMemoryAuthoritiesMapper implements AuthoritiesMapper {
                                      ResourceCatalogueProperties catalogueProperties,
                                      ProviderService manager,
                                      CatalogueService catalogueService,
-                                     DraftResourceService<ProviderBundle> pendingProviderService,
+                                     DraftResourceService<ProviderBundle> draftProviderService,
                                      SecurityService securityService) {
         this.catalogueProperties = catalogueProperties;
         this.providerService = manager;
         this.catalogueService = catalogueService;
-        this.pendingProviderService = pendingProviderService;
+        this.draftProviderService = draftProviderService;
         this.securityService = securityService;
         this.maxQuantity = maxQuantity;
         if (catalogueProperties.getAdmins().isEmpty()) {
@@ -112,7 +112,7 @@ public class InMemoryAuthoritiesMapper implements AuthoritiesMapper {
         }
 
         try {
-            providers.addAll(pendingProviderService.getAll(ff, securityService.getAdminAccess()).getResults());
+            providers.addAll(draftProviderService.getAll(ff, securityService.getAdminAccess()).getResults());
         } catch (Exception e) {
             logger.warn("There are no Draft Provider entries in DB");
         }

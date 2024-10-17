@@ -7,6 +7,7 @@ import gr.uoa.di.madgik.resourcecatalogue.domain.*;
 import gr.uoa.di.madgik.resourcecatalogue.service.MigrationService;
 import gr.uoa.di.madgik.resourcecatalogue.service.SecurityService;
 import gr.uoa.di.madgik.resourcecatalogue.utils.JmsService;
+import gr.uoa.di.madgik.resourcecatalogue.utils.PublicResourceUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -34,6 +35,7 @@ public class MigrationManager implements MigrationService {
     private final MonitoringManager monitoringManager;
     private final JmsService jmsService;
     private final SecurityService securityService;
+    private final PublicResourceUtils publicResourceUtils;
 
     @Value("${catalogue.id}")
     private String catalogueId;
@@ -48,7 +50,8 @@ public class MigrationManager implements MigrationService {
                             ResourceInteroperabilityRecordManager resourceInteroperabilityRecordManager,
                             PublicResourceInteroperabilityRecordManager publicResourceInteroperabilityRecordManager,
                             HelpdeskManager helpdeskManager, MonitoringManager monitoringManager,
-                            JmsService jmsService, SecurityService securityService) {
+                            JmsService jmsService, SecurityService securityService,
+                            PublicResourceUtils publicResourceUtils) {
         this.serviceBundleManager = serviceBundleManager;
         this.publicServiceManager = publicServiceManager;
         this.trainingResourceManager = trainingResourceManager;
@@ -63,6 +66,7 @@ public class MigrationManager implements MigrationService {
         this.monitoringManager = monitoringManager;
         this.jmsService = jmsService;
         this.securityService = securityService;
+        this.publicResourceUtils = publicResourceUtils;
     }
 
     public ProviderBundle changeProviderCatalogue(String providerId, String catalogueId, String newCatalogueId, Authentication authentication) {
@@ -79,9 +83,10 @@ public class MigrationManager implements MigrationService {
 
         // Public Provider
         try {
-            ProviderBundle publicProviderBundle = providerService.get(catalogueId, catalogueId + "." + providerId, authentication);
+            ProviderBundle publicProviderBundle = providerService.get(catalogueId,
+                    publicResourceUtils.createPublicResourceId(providerId, catalogueId), authentication);
             String oldPublicId = publicProviderBundle.getProvider().getId();
-            publicProviderBundle.getProvider().setId(newCatalogueId + "." + providerId);
+            publicProviderBundle.getProvider().setId(publicResourceUtils.createPublicResourceId(providerId, newCatalogueId));
             publicProviderBundle.getProvider().setCatalogueId(newCatalogueId);
 
             Resource publicResource = providerService.getResource(oldPublicId, catalogueId);

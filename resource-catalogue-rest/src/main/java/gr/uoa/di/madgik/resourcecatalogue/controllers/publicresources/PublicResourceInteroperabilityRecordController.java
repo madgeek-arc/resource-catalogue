@@ -76,7 +76,7 @@ public class PublicResourceInteroperabilityRecordController {
         if (auth != null && auth.isAuthenticated()) {
             User user = User.of(auth);
             if (securityService.hasRole(auth, "ROLE_ADMIN") || securityService.hasRole(auth, "ROLE_EPOT")
-                    || securityService.userIsResourceProviderAdmin(user, id, resourceInteroperabilityRecordBundle.getResourceInteroperabilityRecord().getCatalogueId())) {
+                    || securityService.userIsResourceProviderAdmin(user, id)) {
                 if (resourceInteroperabilityRecordBundle.getMetadata().isPublished()) {
                     return new ResponseEntity<>(resourceInteroperabilityRecordBundle, HttpStatus.OK);
                 } else {

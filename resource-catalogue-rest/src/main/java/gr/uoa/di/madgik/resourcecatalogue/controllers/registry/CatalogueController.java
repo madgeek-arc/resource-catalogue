@@ -95,7 +95,7 @@ public class CatalogueController {
 
     @Operation(summary = "Updates a specific Catalogue.")
     @PutMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isCatalogueAdmin(#auth,#catalogue.id)")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isProviderAdmin(#auth,#catalogue.id)")
     public ResponseEntity<Catalogue> updateCatalogue(@RequestBody Catalogue catalogue,
                                                      @RequestParam(required = false) String comment,
                                                      @Parameter(hidden = true) Authentication auth) {
@@ -142,7 +142,7 @@ public class CatalogueController {
     @Hidden
     @Operation(summary = "Returns the Catalogue Bundle with the given id.")
     @GetMapping(path = "bundle/{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isCatalogueAdmin(#auth, #id)")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isProviderAdmin(#auth, #id)")
     public ResponseEntity<CatalogueBundle> getCatalogueBundle(@PathVariable("id") String id,
                                                               @Parameter(hidden = true) Authentication auth) {
         return new ResponseEntity<>(catalogueManager.get(id, auth), HttpStatus.OK);
@@ -326,7 +326,7 @@ public class CatalogueController {
 
     @Operation(description = "Updates the Provider of the specific Catalogue.")
     @PutMapping(path = "{catalogueId}/provider", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isProviderAdmin(#auth,#provider.id, #provider.catalogueId)")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isProviderAdmin(#auth,#provider.id)")
     public ResponseEntity<Provider> updateCatalogueProvider(@RequestBody Provider provider,
                                                             @PathVariable String catalogueId,
                                                             @RequestParam(required = false) String comment,
@@ -358,7 +358,7 @@ public class CatalogueController {
 
     @Operation(description = "Deletes the Provider of the specific Catalogue with the given id.")
     @DeleteMapping(path = "{catalogueId}/provider/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isCatalogueAdmin(#auth, #catalogueId)")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isProviderAdmin(#auth, #catalogueId)")
     public ResponseEntity<Provider> deleteCatalogueProvider(@PathVariable("catalogueId") String catalogueId,
                                                             @Parameter(description = "The left part of the ID before the '/'")
                                                             @PathVariable("prefix") String prefix,
@@ -401,7 +401,7 @@ public class CatalogueController {
 
     @Operation(description = "Updates the Service of the specific Catalogue.")
     @PutMapping(path = "{catalogueId}/service", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth,#service)")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth,#service.id)")
     public ResponseEntity<Service> updateCatalogueService(@RequestBody Service service, @PathVariable String catalogueId,
                                                           @RequestParam(required = false) String comment,
                                                           @Parameter(hidden = true) Authentication auth) throws ResourceNotFoundException {
@@ -431,7 +431,7 @@ public class CatalogueController {
 
     @Operation(description = "Deletes the Service of the specific Catalogue with the given id.")
     @DeleteMapping(path = "{catalogueId}/service/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isCatalogueAdmin(#auth, #catalogueId)")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isProviderAdmin(#auth, #catalogueId)")
     public ResponseEntity<Service> deleteCatalogueService(@PathVariable("catalogueId") String catalogueId,
                                                           @Parameter(description = "The left part of the ID before the '/'")
                                                           @PathVariable("prefix") String prefix,
@@ -466,7 +466,7 @@ public class CatalogueController {
 
     @Operation(description = "Creates a new Datasource for the specific Catalogue.")
     @PostMapping(path = "{catalogueId}/datasource", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth, #datasource.serviceId, #datasource.catalogueId)")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth, #datasource.serviceId)")
     public ResponseEntity<Datasource> addCatalogueDatasource(@PathVariable("catalogueId") String catalogueId,
                                                              @RequestBody Datasource datasource,
                                                              @Parameter(hidden = true) Authentication auth) {
@@ -480,7 +480,7 @@ public class CatalogueController {
     @Operation(description = "Updates the Datasource of the specific Catalogue.")
     @PutMapping(path = "{catalogueId}/datasource", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') " +
-            "or @securityService.isResourceProviderAdmin(#auth, #datasource.serviceId, #datasource.catalogueId)")
+            "or @securityService.isResourceProviderAdmin(#auth, #datasource.serviceId)")
     public ResponseEntity<Datasource> updateCatalogueDatasource(@PathVariable("catalogueId") String catalogueId,
                                                                 @RequestBody Datasource datasource,
                                                                 @RequestParam(required = false) String comment,
@@ -494,7 +494,7 @@ public class CatalogueController {
 
     @Operation(description = "Deletes the Datasource of the specific Catalogue with the given id.")
     @DeleteMapping(path = "{catalogueId}/datasource/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isCatalogueAdmin(#auth, #catalogueId)")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isProviderAdmin(#auth, #catalogueId)")
     public ResponseEntity<Datasource> deleteCatalogueDatasource(@PathVariable("catalogueId") String catalogueId,
                                                                 @Parameter(description = "The left part of the ID before the '/'")
                                                                 @PathVariable("prefix") String prefix,
@@ -539,7 +539,7 @@ public class CatalogueController {
 
     @Operation(description = "Updates the Training Resource of the specific Catalogue.")
     @PutMapping(path = "{catalogueId}/trainingResource", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth,#trainingResource)")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth,#trainingResource.id)")
     public ResponseEntity<TrainingResource> updateCatalogueTrainingResource(@RequestBody TrainingResource trainingResource,
                                                                             @PathVariable String catalogueId,
                                                                             @RequestParam(required = false) String comment,
@@ -571,7 +571,7 @@ public class CatalogueController {
 
     @Operation(description = "Deletes the Training Resource of the specific Catalogue with the given id.")
     @DeleteMapping(path = "{catalogueId}/trainingResource/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isCatalogueAdmin(#auth, #catalogueId)")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isProviderAdmin(#auth, #catalogueId)")
     public ResponseEntity<TrainingResource> deleteCatalogueTrainingResource(@PathVariable("catalogueId") String catalogueId,
                                                                             @Parameter(description = "The left part of the ID before the '/'")
                                                                             @PathVariable("prefix") String prefix,
@@ -605,7 +605,7 @@ public class CatalogueController {
 
     @Operation(description = "Creates a new Interoperability Record for the specific Catalogue.")
     @PostMapping(path = "{catalogueId}/interoperabilityRecord", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth, #interoperabilityRecord)")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.providerCanAddResources(#auth, #interoperabilityRecord)")
     public ResponseEntity<InteroperabilityRecord> addCatalogueInteroperabilityRecord(@RequestBody InteroperabilityRecord interoperabilityRecord,
                                                                                      @PathVariable String catalogueId,
                                                                                      @Parameter(hidden = true) Authentication auth) {
@@ -617,7 +617,7 @@ public class CatalogueController {
 
     @Operation(description = "Updates the Interoperability Record of the specific Catalogue.")
     @PutMapping(path = "{catalogueId}/interoperabilityRecord", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth,#interoperabilityRecord)")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth,#interoperabilityRecord.id)")
     public ResponseEntity<InteroperabilityRecord> updateCatalogueInteroperabilityRecord(@RequestBody InteroperabilityRecord interoperabilityRecord,
                                                                                         @PathVariable String catalogueId,
                                                                                         @Parameter(hidden = true) Authentication auth) {
@@ -647,7 +647,7 @@ public class CatalogueController {
 
     @Operation(description = "Deletes the Interoperability Record of the specific Catalogue with the given id.")
     @DeleteMapping(path = "{catalogueId}/interoperabilityRecord/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or @securityService.isCatalogueAdmin(#auth, #catalogueId)")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or @securityService.isProviderAdmin(#auth, #catalogueId)")
     public ResponseEntity<InteroperabilityRecord> deleteCatalogueInteroperabilityRecord(@PathVariable("catalogueId") String catalogueId,
                                                                                         @Parameter(description = "The left part of the ID before the '/'")
                                                                                         @PathVariable("prefix") String prefix,

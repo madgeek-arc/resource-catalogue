@@ -65,7 +65,7 @@ public class PublicProviderController {
         if (auth != null && auth.isAuthenticated()) {
             User user = User.of(auth);
             if (securityService.hasRole(auth, "ROLE_ADMIN") || securityService.hasRole(auth, "ROLE_EPOT")
-                    || securityService.userIsProviderAdmin(user, providerBundle)) {
+                    || securityService.userIsProviderAdmin(user, id)) {
                 if (providerBundle.getMetadata().isPublished()) {
                     return new ResponseEntity<>(providerBundle.getProvider(), HttpStatus.OK);
                 } else {
@@ -91,7 +91,7 @@ public class PublicProviderController {
         if (auth != null && auth.isAuthenticated()) {
             User user = User.of(auth);
             if (securityService.hasRole(auth, "ROLE_ADMIN") || securityService.hasRole(auth, "ROLE_EPOT")
-                    || securityService.userIsProviderAdmin(user, providerBundle)) {
+                    || securityService.userIsProviderAdmin(user, id)) {
                 if (providerBundle.getMetadata().isPublished()) {
                     return new ResponseEntity<>(providerBundle, HttpStatus.OK);
                 } else {

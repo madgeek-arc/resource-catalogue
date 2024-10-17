@@ -204,14 +204,14 @@ public interface TrainingResourceService extends ResourceService<TrainingResourc
      */
     TrainingResourceBundle getOrElseReturnNull(String id);
 
-    /**
-     * Get a specific Training Resource of an external Catalogue, given its ID, or return null
-     *
-     * @param id          Training Resource ID
-     * @param catalogueId Catalogue ID
-     * @return {@link TrainingResourceBundle}
-     */
-    TrainingResourceBundle getOrElseReturnNull(String id, String catalogueId);
+//    /**
+//     * Get a specific Training Resource of an external Catalogue, given its ID, or return null
+//     *
+//     * @param id          Training Resource ID
+//     * @param catalogueId Catalogue ID
+//     * @return {@link TrainingResourceBundle}
+//     */
+//    TrainingResourceBundle getOrElseReturnNull(String id, String catalogueId);
 
     /**
      * Create a Public Training Resource
