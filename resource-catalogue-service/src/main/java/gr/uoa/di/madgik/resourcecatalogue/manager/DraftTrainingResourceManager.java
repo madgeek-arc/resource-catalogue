@@ -55,7 +55,7 @@ public class DraftTrainingResourceManager extends ResourceManager<TrainingResour
         bundle.setId(idCreator.generate(getResourceType()));
 
         logger.trace("Attempting to add a new Draft Training Resource with id {}", bundle.getId());
-        bundle.setMetadata(Metadata.updateMetadata(bundle.getMetadata(), User.of(auth).getFullName(), User.of(auth).getEmail()));
+        bundle.setMetadata(Metadata.updateMetadata(bundle.getMetadata(), User.of(auth).getFullName(), User.of(auth).getEmail().toLowerCase()));
 
         List<LoggingInfo> loggingInfoList = new ArrayList<>();
         LoggingInfo loggingInfo = commonMethods.createLoggingInfo(auth, LoggingInfo.Types.DRAFT.getKey(),
@@ -123,7 +123,7 @@ public class DraftTrainingResourceManager extends ResourceManager<TrainingResour
         bundle.setLoggingInfo(loggingInfoList);
         bundle.setLatestOnboardingInfo(loggingInfoList.get(loggingInfoList.size() - 1));
 
-        bundle.setMetadata(Metadata.updateMetadata(bundle.getMetadata(), User.of(auth).getFullName(), User.of(auth).getEmail()));
+        bundle.setMetadata(Metadata.updateMetadata(bundle.getMetadata(), User.of(auth).getFullName(), User.of(auth).getEmail().toLowerCase()));
         bundle.setDraft(false);
 
         ResourceType trainingResourceType = resourceTypeService.getResourceType("training_resource");

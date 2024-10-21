@@ -68,7 +68,7 @@ public class ConfigurationTemplateInstanceManager extends ResourceManager<Config
         configurationTemplateInstanceBundle.setId(idCreator.generate(getResourceType()));
         logger.trace("Attempting to add a new ConfigurationTemplateInstance: {}", configurationTemplateInstanceBundle);
 
-        configurationTemplateInstanceBundle.setMetadata(Metadata.createMetadata(User.of(auth).getFullName(), User.of(auth).getEmail()));
+        configurationTemplateInstanceBundle.setMetadata(Metadata.createMetadata(User.of(auth).getFullName(), User.of(auth).getEmail().toLowerCase()));
         List<LoggingInfo> loggingInfoList = commonMethods.returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(configurationTemplateInstanceBundle, auth);
         configurationTemplateInstanceBundle.setLoggingInfo(loggingInfoList);
         configurationTemplateInstanceBundle.setLatestOnboardingInfo(loggingInfoList.get(0));
@@ -102,7 +102,7 @@ public class ConfigurationTemplateInstanceManager extends ResourceManager<Config
 
         validate(ret);
 
-        ret.setMetadata(Metadata.updateMetadata(ret.getMetadata(), User.of(auth).getFullName(), User.of(auth).getEmail()));
+        ret.setMetadata(Metadata.updateMetadata(ret.getMetadata(), User.of(auth).getFullName(), User.of(auth).getEmail().toLowerCase()));
         List<LoggingInfo> loggingInfoList = commonMethods.returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(existingCTI, auth);
         LoggingInfo loggingInfo = commonMethods.createLoggingInfo(auth, LoggingInfo.Types.UPDATE.getKey(),
                 LoggingInfo.ActionType.UPDATED.getKey());

@@ -311,7 +311,7 @@ public class ProviderController {
                                                     @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
         ProviderBundle provider = providerService.publish(id, active, auth);
-        logger.info("User '{}-{}' attempts to save Provider with id '{}' as '{}'", User.of(auth).getFullName(), User.of(auth).getEmail(), id, active);
+        logger.info("User '{}-{}' attempts to save Provider with id '{}' as '{}'", User.of(auth).getFullName(), User.of(auth).getEmail().toLowerCase(), id, active);
         return new ResponseEntity<>(provider, HttpStatus.OK);
     }
 
@@ -337,7 +337,7 @@ public class ProviderController {
             metadata.setModifiedAt(String.valueOf(System.currentTimeMillis()));
             serviceBundleService.update(service, auth);
             logger.info("User '{}' published(updated) all Services of the Provider with name '{}'",
-                    User.of(auth).getEmail(), provider.getProvider().getName());
+                    User.of(auth).getEmail().toLowerCase(), provider.getProvider().getName());
         }
         return new ResponseEntity<>(services, HttpStatus.OK);
     }

@@ -131,7 +131,7 @@ public class LoggingInfo {
         ret.setDate(String.valueOf(System.currentTimeMillis()));
         ret.setType(type);
         ret.setActionType(actionType);
-        ret.setUserEmail(user.getEmail());
+        ret.setUserEmail(user.getEmail().toLowerCase());
         ret.setUserFullName(user.getFullName());
         ret.setUserRole(userRole);
         ret.setComment(comment);
@@ -216,7 +216,7 @@ public class LoggingInfo {
     }
 
     public void setUserEmail(String userEmail) {
-        this.userEmail = userEmail;
+        this.userEmail = userEmail.toLowerCase();
     }
 
     public String getUserFullName() {

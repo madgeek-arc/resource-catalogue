@@ -55,7 +55,7 @@ public class DraftInteroperabilityRecordManager extends ResourceManager<Interope
         bundle.setId(idCreator.generate(getResourceType()));
 
         logger.trace("Attempting to add a new Draft Interoperability Record with id {}", bundle.getId());
-        bundle.setMetadata(Metadata.updateMetadata(bundle.getMetadata(), User.of(auth).getFullName(), User.of(auth).getEmail()));
+        bundle.setMetadata(Metadata.updateMetadata(bundle.getMetadata(), User.of(auth).getFullName(), User.of(auth).getEmail().toLowerCase()));
 
         List<LoggingInfo> loggingInfoList = new ArrayList<>();
         LoggingInfo loggingInfo = commonMethods.createLoggingInfo(auth, LoggingInfo.Types.DRAFT.getKey(),
@@ -113,7 +113,7 @@ public class DraftInteroperabilityRecordManager extends ResourceManager<Interope
         bundle.setLatestOnboardingInfo(loggingInfoList.get(loggingInfoList.size() - 1));
 
         bundle.setStatus("pending interoperability record");
-        bundle.setMetadata(Metadata.updateMetadata(bundle.getMetadata(), User.of(auth).getFullName(), User.of(auth).getEmail()));
+        bundle.setMetadata(Metadata.updateMetadata(bundle.getMetadata(), User.of(auth).getFullName(), User.of(auth).getEmail().toLowerCase()));
         bundle.setDraft(false);
 
         ResourceType guidelinesResourceType = resourceTypeService.getResourceType("interoperability_record");

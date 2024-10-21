@@ -211,7 +211,7 @@ public class ServiceExtensionsController {
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<HelpdeskBundle> createPublicHelpdesk(@RequestBody HelpdeskBundle helpdeskBundle, @Parameter(hidden = true) Authentication auth) {
         logger.info("User '{}-{}' attempts to create a Public Helpdesk from Helpdesk '{}' of the '{}' Catalogue", User.of(auth).getFullName(),
-                User.of(auth).getEmail(), helpdeskBundle.getId(), helpdeskBundle.getCatalogueId());
+                User.of(auth).getEmail().toLowerCase(), helpdeskBundle.getId(), helpdeskBundle.getCatalogueId());
         return ResponseEntity.ok(helpdeskService.createPublicResource(helpdeskBundle, auth));
     }
 
@@ -460,7 +460,7 @@ public class ServiceExtensionsController {
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<MonitoringBundle> createPublicMonitoring(@RequestBody MonitoringBundle monitoringBundle, @Parameter(hidden = true) Authentication auth) {
         logger.info("User '{}-{}' attempts to create a Public Monitoring from Monitoring '{}' of the '{}' Catalogue", User.of(auth).getFullName(),
-                User.of(auth).getEmail(), monitoringBundle.getId(), monitoringBundle.getCatalogueId());
+                User.of(auth).getEmail().toLowerCase(), monitoringBundle.getId(), monitoringBundle.getCatalogueId());
         return ResponseEntity.ok(monitoringService.createPublicResource(monitoringBundle, auth));
     }
 

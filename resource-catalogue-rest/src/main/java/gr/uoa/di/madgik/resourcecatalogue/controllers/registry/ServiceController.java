@@ -105,7 +105,7 @@ public class ServiceController {
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.providerCanAddResources(#auth, #service)")
     public ResponseEntity<Service> addService(@RequestBody Service service, @Parameter(hidden = true) Authentication auth) {
         ServiceBundle ret = this.serviceBundleService.addResource(new ServiceBundle(service), auth);
-        logger.info("User '{}' created a new Resource with name '{}' and id '{}'", User.of(auth).getEmail(), service.getName(), service.getId());
+        logger.info("User '{}' created a new Resource with name '{}' and id '{}'", User.of(auth).getEmail().toLowerCase(), service.getName(), service.getId());
         return new ResponseEntity<>(ret.getService(), HttpStatus.CREATED);
     }
 
@@ -239,7 +239,7 @@ public class ServiceController {
                                                    @RequestParam Boolean active,
                                                    @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
-        logger.info("User '{}-{}' attempts to save Resource with id '{}' as '{}'", User.of(auth).getFullName(), User.of(auth).getEmail(), id, active);
+        logger.info("User '{}-{}' attempts to save Resource with id '{}' as '{}'", User.of(auth).getFullName(), User.of(auth).getEmail().toLowerCase(), id, active);
         return ResponseEntity.ok(serviceBundleService.publish(id, active, auth));
     }
 
@@ -406,7 +406,7 @@ public class ServiceController {
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<ServiceBundle> createPublicService(@RequestBody ServiceBundle serviceBundle, @Parameter(hidden = true) Authentication auth) {
         logger.info("User '{}-{}' attempts to create a Public Service from Service '{}'-'{}' of the '{}' Catalogue", User.of(auth).getFullName(),
-                User.of(auth).getEmail(), serviceBundle.getId(), serviceBundle.getService().getName(), serviceBundle.getService().getCatalogueId());
+                User.of(auth).getEmail().toLowerCase(), serviceBundle.getId(), serviceBundle.getService().getName(), serviceBundle.getService().getCatalogueId());
         return ResponseEntity.ok(serviceBundleService.createPublicResource(serviceBundle, auth));
     }
 
@@ -512,7 +512,7 @@ public class ServiceController {
     @PreAuthorize("hasRole('ROLE_USER')")
     public ResponseEntity<Service> addDraftService(@RequestBody Service service, @Parameter(hidden = true) Authentication auth) {
         ServiceBundle serviceBundle = draftServiceService.add(new ServiceBundle(service), auth);
-        logger.info("User '{}' added the Draft Service with name '{}' and id '{}'", User.of(auth).getEmail(),
+        logger.info("User '{}' added the Draft Service with name '{}' and id '{}'", User.of(auth).getEmail().toLowerCase(),
                 service.getName(), service.getId());
         return new ResponseEntity<>(serviceBundle.getService(), HttpStatus.CREATED);
     }
@@ -524,7 +524,7 @@ public class ServiceController {
         ServiceBundle serviceBundle = draftServiceService.get(service.getId());
         serviceBundle.setService(service);
         serviceBundle = draftServiceService.update(serviceBundle, auth);
-        logger.info("User '{}' updated the Draft Service with name '{}' and id '{}'", User.of(auth).getEmail(),
+        logger.info("User '{}' updated the Draft Service with name '{}' and id '{}'", User.of(auth).getEmail().toLowerCase(),
                 service.getName(), service.getId());
         return new ResponseEntity<>(serviceBundle.getService(), HttpStatus.OK);
     }
@@ -541,7 +541,7 @@ public class ServiceController {
             return new ResponseEntity<>(HttpStatus.GONE);
         }
         draftServiceService.delete(serviceBundle);
-        logger.info("User '{}' deleted the Draft Service '{}'-'{}'", User.of(auth).getEmail(),
+        logger.info("User '{}' deleted the Draft Service '{}'-'{}'", User.of(auth).getEmail().toLowerCase(),
                 id, serviceBundle.getService().getName());
         return new ResponseEntity<>(serviceBundle.getService(), HttpStatus.OK);
     }

@@ -399,7 +399,7 @@ public class InteroperabilityRecordManager extends ResourceManager<Interoperabil
                 interoperabilityRecordBundle.getInteroperabilityRecord().getTitle(), provider.getProvider().getUsers());
 
         logger.info("User '{}-{}' audited Interoperability Record '{}'-'{}' with [actionType: {}]",
-                User.of(auth).getFullName(), User.of(auth).getEmail(),
+                User.of(auth).getFullName(), User.of(auth).getEmail().toLowerCase(),
                 interoperabilityRecordBundle.getInteroperabilityRecord().getId(),
                 interoperabilityRecordBundle.getInteroperabilityRecord().getTitle(), actionType);
         return super.update(interoperabilityRecordBundle, auth);

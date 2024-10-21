@@ -536,7 +536,7 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
                 trainingResource.getTrainingResource().getTitle(), provider.getProvider().getUsers());
 
         logger.info("User '{}-{}' audited Training Resource '{}'-'{}' with [actionType: {}]",
-                User.of(auth).getFullName(), User.of(auth).getEmail(),
+                User.of(auth).getFullName(), User.of(auth).getEmail().toLowerCase(),
                 trainingResource.getTrainingResource().getId(), trainingResource.getTrainingResource().getTitle(), actionType);
         return super.update(trainingResource, auth);
     }

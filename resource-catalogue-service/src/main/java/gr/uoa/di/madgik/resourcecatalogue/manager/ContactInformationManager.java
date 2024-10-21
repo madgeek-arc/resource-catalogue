@@ -31,7 +31,7 @@ public class ContactInformationManager implements ContactInformationService {
     }
 
     public List<String> getMy(Authentication authentication) {
-        String email = User.of(authentication).getEmail();
+        String email = User.of(authentication).getEmail().toLowerCase();
         List<String> myResources = new ArrayList<>();
         List<String> resourcesUserHasAnsweredFor = new ArrayList<>();
         FacetFilter ff = new FacetFilter();
@@ -44,7 +44,7 @@ public class ContactInformationManager implements ContactInformationService {
                 List<ContactInfoTransfer> catalogueContactInfoTransferList = catalogueBundle.getTransferContactInformation();
                 if (catalogueContactInfoTransferList != null && !catalogueContactInfoTransferList.isEmpty()) {
                     for (ContactInfoTransfer contactInfoTransfer : catalogueContactInfoTransferList) {
-                        if (contactInfoTransfer.getEmail().equals(email)) {
+                        if (contactInfoTransfer.getEmail().equalsIgnoreCase(email)) {
                             resourcesUserHasAnsweredFor.add(catalogueBundle.getId());
                             break;
                         }
@@ -59,7 +59,7 @@ public class ContactInformationManager implements ContactInformationService {
                 List<ContactInfoTransfer> providerContactInfoTransferList = providerBundle.getTransferContactInformation();
                 if (providerContactInfoTransferList != null && !providerContactInfoTransferList.isEmpty()) {
                     for (ContactInfoTransfer contactInfoTransfer : providerContactInfoTransferList) {
-                        if (contactInfoTransfer.getEmail().equals(email)) {
+                        if (contactInfoTransfer.getEmail().equalsIgnoreCase(email)) {
                             resourcesUserHasAnsweredFor.add(providerBundle.getId());
                             break;
                         }
@@ -79,7 +79,7 @@ public class ContactInformationManager implements ContactInformationService {
     }
 
     public void updateContactInfoTransfer(boolean acceptedTransfer, Authentication auth) {
-        String email = User.of(auth).getEmail();
+        String email = User.of(auth).getEmail().toLowerCase();
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(1000);
         ff.addFilter("published", false);
@@ -94,7 +94,7 @@ public class ContactInformationManager implements ContactInformationService {
 
     private ContactInfoTransfer createContactInfoTransfer(boolean acceptedTransfer, String email) {
         ContactInfoTransfer contactInfoTransfer = new ContactInfoTransfer();
-        contactInfoTransfer.setEmail(email);
+        contactInfoTransfer.setEmail(email.toLowerCase());
         contactInfoTransfer.setAcceptedTransfer(acceptedTransfer);
         return contactInfoTransfer;
     }
@@ -135,7 +135,7 @@ public class ContactInformationManager implements ContactInformationService {
                                                 List<ContactInfoTransfer> existingTransferList) {
         boolean found = false;
         for (ContactInfoTransfer cit : existingTransferList) {
-            if (cit.getEmail().equals(contactInfoTransfer.getEmail())) {
+            if (cit.getEmail().equalsIgnoreCase(contactInfoTransfer.getEmail())) {
                 cit.setAcceptedTransfer(contactInfoTransfer.getAcceptedTransfer());
                 found = true;
                 break;

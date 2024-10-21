@@ -98,10 +98,10 @@ public class MailController {
         allProviders.addAll(draftProviderService.getAll(facetFilter, adminAccess).getResults());
 
         for (ProviderBundle providerBundle : allProviders) {
-            emails.addAll(providerBundle.getProvider().getUsers().stream().map(User::getEmail).collect(Collectors.toSet()));
+            emails.addAll(providerBundle.getProvider().getUsers().stream().map(User::getEmail).map(String::toLowerCase).collect(Collectors.toSet()));
             if (includeProviderCatalogueContacts != null && includeProviderCatalogueContacts) {
-                emails.add(providerBundle.getProvider().getMainContact().getEmail());
-                emails.addAll(providerBundle.getProvider().getPublicContacts().stream().map(ProviderPublicContact::getEmail).collect(Collectors.toSet()));
+                emails.add(providerBundle.getProvider().getMainContact().getEmail().toLowerCase());
+                emails.addAll(providerBundle.getProvider().getPublicContacts().stream().map(ProviderPublicContact::getEmail).map(String::toLowerCase).collect(Collectors.toSet()));
             }
         }
     }
@@ -109,10 +109,10 @@ public class MailController {
     private void addEmailsFromCatalogues(Set<String> emails, FacetFilter facetFilter, Authentication adminAccess, boolean includeContacts) {
         List<CatalogueBundle> allCatalogues = catalogueService.getAll(facetFilter, adminAccess).getResults();
         for (CatalogueBundle catalogueBundle : allCatalogues) {
-            emails.addAll(catalogueBundle.getCatalogue().getUsers().stream().map(User::getEmail).collect(Collectors.toSet()));
+            emails.addAll(catalogueBundle.getCatalogue().getUsers().stream().map(User::getEmail).map(String::toLowerCase).collect(Collectors.toSet()));
             if (includeContacts) {
                 emails.add(catalogueBundle.getCatalogue().getMainContact().getEmail());
-                emails.addAll(catalogueBundle.getCatalogue().getPublicContacts().stream().map(ProviderPublicContact::getEmail).collect(Collectors.toSet()));
+                emails.addAll(catalogueBundle.getCatalogue().getPublicContacts().stream().map(ProviderPublicContact::getEmail).map(String::toLowerCase).collect(Collectors.toSet()));
             }
         }
     }
@@ -122,7 +122,7 @@ public class MailController {
         allServices.addAll(draftServiceService.getAll(facetFilter, adminAccess).getResults());
         for (ServiceBundle serviceBundle : allServices) {
             emails.add(serviceBundle.getService().getMainContact().getEmail());
-            emails.addAll(serviceBundle.getService().getPublicContacts().stream().map(ServicePublicContact::getEmail).collect(Collectors.toSet()));
+            emails.addAll(serviceBundle.getService().getPublicContacts().stream().map(ServicePublicContact::getEmail).map(String::toLowerCase).collect(Collectors.toSet()));
         }
     }
 

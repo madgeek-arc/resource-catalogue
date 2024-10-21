@@ -136,7 +136,7 @@ public class RegistrationMailService {
             if (loggingInfo.getActionType().equals(LoggingInfo.ActionType.REGISTERED.getKey())) {
                 User user = new User();
                 if (loggingInfo.getUserEmail() != null && !loggingInfo.getUserEmail().equals("")) {
-                    user.setEmail(loggingInfo.getUserEmail());
+                    user.setEmail(loggingInfo.getUserEmail().toLowerCase());
                 } else {
                     user.setEmail("no email provided");
                 }
@@ -176,8 +176,8 @@ public class RegistrationMailService {
                 root.put("user", user);
                 temp.process(root, out);
                 providerMail = out.getBuffer().toString();
-                mailService.sendMail(user.getEmail(), providerSubject, providerMail);
-                logger.info("\nRecipient: {}\nTitle: {}\nMail body: \n{}", user.getEmail(), providerSubject, providerMail);
+                mailService.sendMail(user.getEmail().toLowerCase(), providerSubject, providerMail);
+                logger.info("\nRecipient: {}\nTitle: {}\nMail body: \n{}", user.getEmail().toLowerCase(), providerSubject, providerMail);
             }
 
             out.close();
@@ -214,7 +214,7 @@ public class RegistrationMailService {
             if (loggingInfo.getActionType().equals(LoggingInfo.ActionType.REGISTERED.getKey())) {
                 User user = new User();
                 if (loggingInfo.getUserEmail() != null && !loggingInfo.getUserEmail().equals("")) {
-                    user.setEmail(loggingInfo.getUserEmail());
+                    user.setEmail(loggingInfo.getUserEmail().toLowerCase());
                 }
                 if (loggingInfo.getUserFullName() != null && !loggingInfo.getUserFullName().equals("")) {
                     String[] parts = loggingInfo.getUserFullName().split(" ");
@@ -249,8 +249,8 @@ public class RegistrationMailService {
                 root.put("user", user);
                 temp.process(root, out);
                 catalogueMail = out.getBuffer().toString();
-                mailService.sendMail(user.getEmail(), catalogueSubject, catalogueMail);
-                logger.info("\nRecipient: {}\nTitle: {}\nMail body: \n{}", user.getEmail(), catalogueSubject, catalogueMail);
+                mailService.sendMail(user.getEmail().toLowerCase(), catalogueSubject, catalogueMail);
+                logger.info("\nRecipient: {}\nTitle: {}\nMail body: \n{}", user.getEmail().toLowerCase(), catalogueSubject, catalogueMail);
             }
 
             out.close();
@@ -282,7 +282,7 @@ public class RegistrationMailService {
                 for (User user : providerBundle.getProvider().getUsers()) {
                     root.put("user", user);
                     String userRole = "provider";
-                    sendMailsFromTemplate("providerOnboarding.ftl", root, subject, user.getEmail(), userRole);
+                    sendMailsFromTemplate("providerOnboarding.ftl", root, subject, user.getEmail().toLowerCase(), userRole);
                 }
             }
         }
@@ -310,14 +310,14 @@ public class RegistrationMailService {
             for (User user : providerBundle.getProvider().getUsers()) {
                 root.put("user", user);
                 String userRole = "provider";
-                sendMailsFromTemplate("providerOutdatedResources.ftl", root, subject, user.getEmail(), userRole);
+                sendMailsFromTemplate("providerOutdatedResources.ftl", root, subject, user.getEmail().toLowerCase(), userRole);
             }
         } else {
             root.put("trainingResourceBundle", trainingResourceBundle);
             for (User user : providerBundle.getProvider().getUsers()) {
                 root.put("user", user);
                 String userRole = "provider";
-                sendMailsFromTemplate("providerOutdatedTrainingResources.ftl", root, subject, user.getEmail(), userRole);
+                sendMailsFromTemplate("providerOutdatedTrainingResources.ftl", root, subject, user.getEmail().toLowerCase(), userRole);
             }
         }
     }
@@ -341,20 +341,20 @@ public class RegistrationMailService {
         // emails to old Provider's Users
         for (User user : oldProvider.getProvider().getUsers()) {
             root.put("user", user);
-            sendMailsFromTemplate("resourceMovedOldProvider.ftl", root, subject, user.getEmail(), userRole);
+            sendMailsFromTemplate("resourceMovedOldProvider.ftl", root, subject, user.getEmail().toLowerCase(), userRole);
         }
 //        root.remove("user");
 
         // emails to new Provider's Users
         for (User user : newProvider.getProvider().getUsers()) {
             root.put("user", user);
-            sendMailsFromTemplate("resourceMovedNewProvider.ftl", root, subject, user.getEmail(), userRole);
+            sendMailsFromTemplate("resourceMovedNewProvider.ftl", root, subject, user.getEmail().toLowerCase(), userRole);
         }
 
         // emails to Admins
         userRole = "admin";
         root.put("adminFullName", User.of(auth).getFullName());
-        root.put("adminEmail", User.of(auth).getEmail());
+        root.put("adminEmail", User.of(auth).getEmail().toLowerCase());
         root.put("adminRole", securityService.getRoleName(auth));
         sendMailsFromTemplate("resourceMovedEPOT.ftl", root, subject, registrationEmail, userRole);
     }
@@ -378,20 +378,20 @@ public class RegistrationMailService {
         // emails to old Provider's Users
         for (User user : oldProvider.getProvider().getUsers()) {
             root.put("user", user);
-            sendMailsFromTemplate("trainingResourceMovedOldProvider.ftl", root, subject, user.getEmail(), userRole);
+            sendMailsFromTemplate("trainingResourceMovedOldProvider.ftl", root, subject, user.getEmail().toLowerCase(), userRole);
         }
 //        root.remove("user");
 
         // emails to new Provider's Users
         for (User user : newProvider.getProvider().getUsers()) {
             root.put("user", user);
-            sendMailsFromTemplate("trainingResourceMovedNewProvider.ftl", root, subject, user.getEmail(), userRole);
+            sendMailsFromTemplate("trainingResourceMovedNewProvider.ftl", root, subject, user.getEmail().toLowerCase(), userRole);
         }
 
         // emails to Admins
         userRole = "admin";
         root.put("adminFullName", User.of(auth).getFullName());
-        root.put("adminEmail", User.of(auth).getEmail());
+        root.put("adminEmail", User.of(auth).getEmail().toLowerCase());
         root.put("adminRole", securityService.getRoleName(auth));
         sendMailsFromTemplate("trainingResourceMovedEPOT.ftl", root, subject, registrationEmail, userRole);
     }
@@ -804,14 +804,14 @@ public class RegistrationMailService {
             for (User user : providerBundle.getProvider().getUsers()) {
                 root.put("user", user);
                 String userRole = "provider";
-                sendMailsFromTemplate("providerAdminAdded.ftl", root, subject, user.getEmail(), userRole);
+                sendMailsFromTemplate("providerAdminAdded.ftl", root, subject, user.getEmail().toLowerCase(), userRole);
             }
         } else {
             for (User user : providerBundle.getProvider().getUsers()) {
                 if (admins.contains(user.getEmail())) {
                     root.put("user", user);
                     String userRole = "provider";
-                    sendMailsFromTemplate("providerAdminAdded.ftl", root, subject, user.getEmail(), userRole);
+                    sendMailsFromTemplate("providerAdminAdded.ftl", root, subject, user.getEmail().toLowerCase(), userRole);
                 }
             }
         }
@@ -825,10 +825,10 @@ public class RegistrationMailService {
         String subject = String.format("[%s Portal] Your email has been deleted from the Administration Team of the Provider '%s'", catalogueName, providerBundle.getProvider().getName());
 
         for (User user : providerBundle.getProvider().getUsers()) {
-            if (admins.contains(user.getEmail())) {
+            if (admins.contains(user.getEmail().toLowerCase())) {
                 root.put("user", user);
                 String userRole = "provider";
-                sendMailsFromTemplate("providerAdminDeleted.ftl", root, subject, user.getEmail(), userRole);
+                sendMailsFromTemplate("providerAdminDeleted.ftl", root, subject, user.getEmail().toLowerCase(), userRole);
             }
         }
     }
@@ -844,14 +844,14 @@ public class RegistrationMailService {
             for (User user : catalogueBundle.getCatalogue().getUsers()) {
                 root.put("user", user);
                 String userRole = "provider";
-                sendMailsFromTemplate("catalogueAdminAdded.ftl", root, subject, user.getEmail(), userRole);
+                sendMailsFromTemplate("catalogueAdminAdded.ftl", root, subject, user.getEmail().toLowerCase(), userRole);
             }
         } else {
             for (User user : catalogueBundle.getCatalogue().getUsers()) {
-                if (admins.contains(user.getEmail())) {
+                if (admins.contains(user.getEmail().toLowerCase())) {
                     root.put("user", user);
                     String userRole = "provider";
-                    sendMailsFromTemplate("catalogueAdminAdded.ftl", root, subject, user.getEmail(), userRole);
+                    sendMailsFromTemplate("catalogueAdminAdded.ftl", root, subject, user.getEmail().toLowerCase(), userRole);
                 }
             }
         }
@@ -865,10 +865,10 @@ public class RegistrationMailService {
         String subject = String.format("[%s Portal] Your email has been deleted from the Administration Team of the Catalogue '%s'", catalogueName, catalogueBundle.getCatalogue().getName());
 
         for (User user : catalogueBundle.getCatalogue().getUsers()) {
-            if (admins.contains(user.getEmail())) {
+            if (admins.contains(user.getEmail().toLowerCase())) {
                 root.put("user", user);
                 String userRole = "provider";
-                sendMailsFromTemplate("catalogueAdminDeleted.ftl", root, subject, user.getEmail(), userRole);
+                sendMailsFromTemplate("catalogueAdminDeleted.ftl", root, subject, user.getEmail().toLowerCase(), userRole);
             }
         }
     }
@@ -892,7 +892,7 @@ public class RegistrationMailService {
         for (User user : provider.getProvider().getUsers()) {
             root.put("user", user);
             String userRole = "provider";
-            sendMailsFromTemplate("providerDeletion.ftl", root, subject, user.getEmail(), userRole);
+            sendMailsFromTemplate("providerDeletion.ftl", root, subject, user.getEmail().toLowerCase(), userRole);
         }
     }
 
@@ -945,7 +945,7 @@ public class RegistrationMailService {
         for (User user : users) {
             root.put("user", user);
             String userRole = "provider";
-            sendMailsFromTemplate("bundleAudit.ftl", root, subject, user.getEmail(), userRole);
+            sendMailsFromTemplate("bundleAudit.ftl", root, subject, user.getEmail().toLowerCase(), userRole);
         }
     }
 
@@ -1071,7 +1071,7 @@ public class RegistrationMailService {
         String subjectForProviderAdmins = getProviderAdminsSubjectForInteroperabilityRecordOnboarding(interoperabilityRecordBundle);
         for (User user : providerAdmins) {
             root.put("user", user);
-            sendMailsFromTemplate("interoperabilityRecordOnboardingForProviderAdmins.ftl", root, subjectForProviderAdmins, user.getEmail(), "provider");
+            sendMailsFromTemplate("interoperabilityRecordOnboardingForProviderAdmins.ftl", root, subjectForProviderAdmins, user.getEmail().toLowerCase(), "provider");
         }
     }
 

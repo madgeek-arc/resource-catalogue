@@ -500,7 +500,7 @@ public abstract class AbstractServiceBundleManager<T extends ServiceBundle> exte
         validate(bundle);
         update(bundle, auth);
         logger.info("User '{}'-'{}' updated field eoscIFGuidelines of the Resource '{}'",
-                User.of(auth).getFullName(), User.of(auth).getEmail(), resourceId);
+                User.of(auth).getFullName(), User.of(auth).getEmail().toLowerCase(), resourceId);
         return bundle;
     }
 

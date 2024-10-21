@@ -530,7 +530,7 @@ public class ServiceBundleManager extends AbstractServiceBundleManager<ServiceBu
                 service.getService().getName(), provider.getProvider().getUsers());
 
         logger.info("User '{}-{}' audited Service '{}'-'{}' with [actionType: {}]",
-                User.of(auth).getFullName(), User.of(auth).getEmail(),
+                User.of(auth).getFullName(), User.of(auth).getEmail().toLowerCase(),
                 service.getService().getId(), service.getService().getName(), actionType);
         return super.update(service, auth);
     }
