@@ -10,18 +10,15 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.oauth2.core.oidc.OidcUserInfo;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 
 // TODO: REFACTOR
 //  1) Replace user.stream().filter/search? with facet filter  email=x
-//  2) Ensure already saved emails (and the emails that will be saved from now on) are in lowercase, and perform search with email in lowercase
-//  3) Use facet filter to set status/published/active
-//  4) userIsResourceProviderAdmin() -> getMyProviders and then search for w/e
+//  2) Use facet filter to set status/published/active (in methods everywhere in general)
 @Service("securityService")
 public class OIDCSecurityService implements SecurityService {
 
@@ -67,6 +64,7 @@ public class OIDCSecurityService implements SecurityService {
         this.draftInteroperabilityRecordService = draftInteroperabilityRecordService;
     }
 
+    @Override
     public Authentication getAdminAccess() {
         return adminAccess;
     }
@@ -111,6 +109,7 @@ public class OIDCSecurityService implements SecurityService {
                 .orElse(false);
     }
 
+    @Override
     public boolean userIsProviderAdmin(User user, @NotNull String id) {
         boolean isProvider = isProvider(id);
         List<User> users = isProvider ? getProviderUsers(id) : getCatalogueUsers(id);
@@ -239,22 +238,25 @@ public class OIDCSecurityService implements SecurityService {
         return id.startsWith(trainingsPrefix);
     }
 
+    @Override
     public boolean providerCanAddResources(Authentication auth, gr.uoa.di.madgik.resourcecatalogue.domain.Service service) {
         String providerId = service.getResourceOrganisation();
         ProviderBundle provider = providerService.get(providerId, auth);
         return providerCanAddResources(auth, provider, service.getId());
     }
 
-    public boolean providerCanAddResources(Authentication auth, TrainingResource trainingResource) {
+    @Override
+    public boolean providerCanAddResources(Authentication auth, gr.uoa.di.madgik.resourcecatalogue.domain.TrainingResource trainingResource) {
         String providerId = trainingResource.getResourceOrganisation();
         ProviderBundle provider = providerService.get(providerId, auth);
         return providerCanAddResources(auth, provider, trainingResource.getId());
     }
 
-    public boolean providerCanAddResources(Authentication auth, InteroperabilityRecord interoperabilityRecord) {
+    @Override
+    public boolean providerCanAddResources(Authentication auth, gr.uoa.di.madgik.resourcecatalogue.domain.InteroperabilityRecord interoperabilityRecord) {
         String providerId = interoperabilityRecord.getProviderId();
         ProviderBundle provider = providerService.get(providerId, auth);
-        return provider.isActive() && provider.getStatus().equals("approved provider"); //TODO: replace with providerIsActiveAndUserIsAdmin
+        return providerIsActiveAndUserIsAdmin(auth, interoperabilityRecord.getId()) && provider.getStatus().equals("approved provider");
     }
 
     private boolean providerCanAddResources(Authentication auth, ProviderBundle provider, String resourceId) {
@@ -299,18 +301,21 @@ public class OIDCSecurityService implements SecurityService {
         return false;
     }
 
-    public boolean serviceIsActive(String resourceId) {
-        ServiceBundle serviceBundle = serviceBundleService.get(resourceId);
+    @Override
+    public boolean serviceIsActive(String id) {
+        ServiceBundle serviceBundle = serviceBundleService.get(id);
         return serviceBundle.isActive();
     }
 
-    public boolean trainingResourceIsActive(String resourceId) {
-        TrainingResourceBundle trainingResourceBundle = trainingResourceService.get(resourceId);
+    @Override
+    public boolean trainingResourceIsActive(String id) {
+        TrainingResourceBundle trainingResourceBundle = trainingResourceService.get(id);
         return trainingResourceBundle.isActive();
     }
 
-    public boolean guidelineIsActive(String resourceId) {
-        InteroperabilityRecordBundle interoperabilityRecordBundle = interoperabilityRecordService.get(resourceId);
+    @Override
+    public boolean guidelineIsActive(String id) {
+        InteroperabilityRecordBundle interoperabilityRecordBundle = interoperabilityRecordService.get(id);
         return interoperabilityRecordBundle.isActive();
     }
     //endregion
