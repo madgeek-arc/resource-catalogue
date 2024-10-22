@@ -290,7 +290,7 @@ public class ServiceBundleManager extends AbstractServiceBundleManager<ServiceBu
             Long latestAudit = Long.parseLong(ret.getLatestAuditInfo().getDate());
             Long latestUpdate = Long.parseLong(ret.getLatestUpdateInfo().getDate());
             if (latestAudit < latestUpdate && ret.getLatestAuditInfo().getActionType().equals(LoggingInfo.ActionType.INVALID.getKey())) {
-                registrationMailService.notifyPortalAdminsForInvalidResourceUpdate(ret);
+                registrationMailService.notifyPortalAdminsForInvalidServiceUpdate(ret);
             }
         }
 
@@ -615,7 +615,7 @@ public class ServiceBundleManager extends AbstractServiceBundleManager<ServiceBu
         String providerId = providerService.get(get(resourceId).getService().getResourceOrganisation()).getId();
         String providerName = providerService.get(get(resourceId).getService().getResourceOrganisation()).getProvider().getName();
         logger.info(String.format("Mailing provider [%s]-[%s] for outdated Resources", providerId, providerName));
-        registrationMailService.sendEmailNotificationsToProvidersWithOutdatedResources(resourceId);
+        registrationMailService.sendEmailNotificationsToProviderAdminsWithOutdatedResources(resourceId);
     }
 
     public ServiceBundle changeProvider(String resourceId, String newProviderId, String comment, Authentication auth) {
@@ -677,7 +677,7 @@ public class ServiceBundleManager extends AbstractServiceBundleManager<ServiceBu
         migrationService.updateRelatedToTheIdFieldsOfOtherResourcesOfThePortal(resourceId, resourceId); //TODO: SEE IF IT WORKS AS INTENDED AND REMOVE
 
         // emails to EPOT, old and new Provider
-        registrationMailService.sendEmailsForMovedResources(oldProvider, newProvider, serviceBundle, auth);
+        registrationMailService.sendEmailsForMovedServices(oldProvider, newProvider, serviceBundle, auth);
 
         return serviceBundle;
     }

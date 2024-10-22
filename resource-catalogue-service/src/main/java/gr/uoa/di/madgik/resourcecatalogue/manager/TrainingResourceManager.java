@@ -623,7 +623,7 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
         String providerId = providerService.get(get(resourceId).getTrainingResource().getResourceOrganisation()).getId();
         String providerName = providerService.get(get(resourceId).getTrainingResource().getResourceOrganisation()).getProvider().getName();
         logger.info(String.format("Mailing provider [%s]-[%s] for outdated Training Resources", providerId, providerName));
-        registrationMailService.sendEmailNotificationsToProvidersWithOutdatedResources(resourceId);
+        registrationMailService.sendEmailNotificationsToProviderAdminsWithOutdatedResources(resourceId);
     }
 
     @Override

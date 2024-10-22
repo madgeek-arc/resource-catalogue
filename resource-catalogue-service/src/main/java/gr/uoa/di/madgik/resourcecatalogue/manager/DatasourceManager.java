@@ -95,7 +95,7 @@ public class DatasourceManager extends ResourceManager<DatasourceBundle> impleme
             datasourceBundle.setActive(false);
             datasourceBundle.setStatus(vocabularyService.get("pending datasource").getId());
             datasourceBundle.setLatestOnboardingInfo(datasourceBundle.getLoggingInfo().get(0));
-            registrationMailService.sendEmailsForDatasourceExtension(datasourceBundle, "post");
+            registrationMailService.sendEmailsForDatasourceExtensionToPortalAdmins(datasourceBundle, "post");
         } else {
             datasourceBundle.setActive(true);
             datasourceBundle.setStatus(vocabularyService.get("approved datasource").getId());
@@ -155,7 +155,7 @@ public class DatasourceManager extends ResourceManager<DatasourceBundle> impleme
         resourceService.updateResource(existingResource);
         logger.debug("Updating Datasource: {}", ret);
 
-        registrationMailService.sendEmailsForDatasourceExtension(ret, "put");
+        registrationMailService.sendEmailsForDatasourceExtensionToPortalAdmins(ret, "put");
         return ret;
     }
 

@@ -96,7 +96,7 @@ public class ProviderManagementAspect {
     public void providerRegistrationEmails(final ProviderBundle providerBundle) {
         logger.trace("Sending Registration emails");
         if (!providerBundle.getMetadata().isPublished() && providerBundle.getProvider().getCatalogueId().equals(catalogueId)) {
-            registrationMailService.sendProviderMails(providerBundle, "providerManager");
+            registrationMailService.sendOnboardingEmailsToProviderAdmins(providerBundle, "providerManager");
         }
     }
 
@@ -105,7 +105,7 @@ public class ProviderManagementAspect {
             returning = "catalogueBundle")
     public void catalogueRegistrationEmails(final CatalogueBundle catalogueBundle) {
         logger.trace("Sending Registration emails");
-        registrationMailService.sendCatalogueMails(catalogueBundle);
+        registrationMailService.sendOnboardingEmailsToCatalogueAdmins(catalogueBundle);
     }
 
     @AfterReturning(pointcut = "execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ServiceBundleManager.verify(..))",
@@ -113,7 +113,7 @@ public class ProviderManagementAspect {
     public void providerRegistrationEmails(final ServiceBundle serviceBundle) {
         ProviderBundle providerBundle = providerService.get(serviceBundle.getService().getResourceOrganisation());
         logger.trace("Sending Registration emails");
-        registrationMailService.sendProviderMails(providerBundle, "serviceBundleManager");
+        registrationMailService.sendOnboardingEmailsToProviderAdmins(providerBundle, "serviceBundleManager");
     }
 
     @AfterReturning(pointcut = "execution(* gr.uoa.di.madgik.resourcecatalogue.manager.TrainingResourceManager.verify(..))",
@@ -121,7 +121,7 @@ public class ProviderManagementAspect {
     public void providerRegistrationEmails(final TrainingResourceBundle trainingResourceBundle) {
         ProviderBundle providerBundle = providerService.get(trainingResourceBundle.getTrainingResource().getResourceOrganisation());
         logger.trace("Sending Registration emails");
-        registrationMailService.sendProviderMails(providerBundle, "trainingResourceManager");
+        registrationMailService.sendOnboardingEmailsToProviderAdmins(providerBundle, "trainingResourceManager");
     }
 
     @Async

@@ -133,7 +133,7 @@ public class DraftProviderManager extends ResourceManager<ProviderBundle> implem
             e.printStackTrace();
         }
 
-        registrationMailService.sendEmailsToNewlyAddedAdmins(bundle, null);
+        registrationMailService.sendEmailsToNewlyAddedProviderAdmins(bundle, null);
         return bundle;
     }
 

@@ -127,7 +127,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         ret = super.add(provider, null);
         logger.debug("Adding Provider: {} of Catalogue: {}", provider, catalogueId);
 
-        registrationMailService.sendEmailsToNewlyAddedAdmins(provider, null);
+        registrationMailService.sendEmailsToNewlyAddedProviderAdmins(provider, null);
 
         synchronizerService.syncAdd(provider.getProvider());
 
@@ -402,7 +402,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         logger.debug("Deleting Resource {}", provider);
 
         // TODO: move to aspect
-        registrationMailService.notifyProviderAdmins(provider);
+        registrationMailService.notifyProviderAdminsForProviderDeletion(provider);
 
         synchronizerService.syncDelete(provider.getProvider());
 
@@ -781,12 +781,12 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         List<String> adminsAdded = new ArrayList<>(newAdmins);
         adminsAdded.removeAll(existingAdmins);
         if (!adminsAdded.isEmpty()) {
-            registrationMailService.sendEmailsToNewlyAddedAdmins(updatedProvider, adminsAdded);
+            registrationMailService.sendEmailsToNewlyAddedProviderAdmins(updatedProvider, adminsAdded);
         }
         List<String> adminsDeleted = new ArrayList<>(existingAdmins);
         adminsDeleted.removeAll(newAdmins);
         if (!adminsDeleted.isEmpty()) {
-            registrationMailService.sendEmailsToNewlyDeletedAdmins(existingProvider, adminsDeleted);
+            registrationMailService.sendEmailsToNewlyDeletedProviderAdmins(existingProvider, adminsDeleted);
         }
     }
 

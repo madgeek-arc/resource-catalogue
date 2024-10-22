@@ -108,7 +108,7 @@ public class InteroperabilityRecordManager extends ResourceManager<Interoperabil
         logger.trace("Attempting to add a new Interoperability Record: {}", interoperabilityRecordBundle.getInteroperabilityRecord());
         logger.info("Adding Interoperability Record: {}", interoperabilityRecordBundle.getInteroperabilityRecord());
         super.add(interoperabilityRecordBundle, auth);
-        registrationMailService.sendEmailsForInteroperabilityRecordOnboarding(interoperabilityRecordBundle, User.of(auth));
+        registrationMailService.sendInteroperabilityRecordOnboardingEmailsToPortalAdmins(interoperabilityRecordBundle, User.of(auth));
 
         return interoperabilityRecordBundle;
     }
@@ -259,7 +259,7 @@ public class InteroperabilityRecordManager extends ResourceManager<Interoperabil
         }
 
         logger.info("Verifying Interoperability Record: {}", interoperabilityRecordBundle);
-        registrationMailService.sendEmailsForInteroperabilityRecordOnboarding(interoperabilityRecordBundle, User.of(auth));
+        registrationMailService.sendInteroperabilityRecordOnboardingEmailsToPortalAdmins(interoperabilityRecordBundle, User.of(auth));
         return super.update(interoperabilityRecordBundle, auth);
     }
 
@@ -287,7 +287,7 @@ public class InteroperabilityRecordManager extends ResourceManager<Interoperabil
         interoperabilityRecordBundle.setLatestAuditInfo(commonMethods.setLatestLoggingInfo(loggingInfoList, LoggingInfo.Types.AUDIT.getKey()));
 
 
-        update(interoperabilityRecordBundle, auth);
+        super.update(interoperabilityRecordBundle, auth);
         return interoperabilityRecordBundle;
     }
 
