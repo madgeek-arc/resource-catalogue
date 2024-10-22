@@ -1,10 +1,7 @@
 package gr.uoa.di.madgik.resourcecatalogue.manager;
 
-import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
 import gr.uoa.di.madgik.resourcecatalogue.domain.configurationTemplates.ConfigurationTemplateInstanceBundle;
-import gr.uoa.di.madgik.resourcecatalogue.service.CatalogueService;
-import gr.uoa.di.madgik.resourcecatalogue.service.SecurityService;
 import gr.uoa.di.madgik.resourcecatalogue.utils.PublicResourceUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -17,10 +14,6 @@ import java.util.Set;
 public abstract class AbstractPublicResourceManager<T extends Identifiable> extends ResourceManager<T> {
 
     @Autowired
-    private SecurityService securityService;
-    @Autowired
-    private CatalogueService catalogueService;
-    @Autowired
     private PublicResourceUtils publicResourceUtils;
 
     @Value("${catalogue.id}")
@@ -31,7 +24,6 @@ public abstract class AbstractPublicResourceManager<T extends Identifiable> exte
     }
 
     protected void updateServiceIdsToPublic(ServiceBundle serviceBundle) {
-        List<String> allCatalogueIds = getAllCatalogueIds();
         // Resource Organisation
         serviceBundle.getService().setResourceOrganisation(publicResourceUtils.createPublicResourceId(
                 serviceBundle.getService().getResourceOrganisation(), serviceBundle.getService().getCatalogueId()));
@@ -40,22 +32,19 @@ public abstract class AbstractPublicResourceManager<T extends Identifiable> exte
         serviceBundle.getService().setResourceProviders(
                 appendCatalogueId(
                         serviceBundle.getService().getResourceProviders(),
-                        serviceBundle.getService().getCatalogueId(),
-                        allCatalogueIds));
+                        serviceBundle.getService().getCatalogueId()));
 
         // Related Resources
         serviceBundle.getService().setRelatedResources(
                 appendCatalogueId(
                         serviceBundle.getService().getRelatedResources(),
-                        serviceBundle.getService().getCatalogueId(),
-                        allCatalogueIds));
+                        serviceBundle.getService().getCatalogueId()));
 
         // Required Resources
         serviceBundle.getService().setRequiredResources(
                 appendCatalogueId(
                         serviceBundle.getService().getRequiredResources(),
-                        serviceBundle.getService().getCatalogueId(),
-                        allCatalogueIds));
+                        serviceBundle.getService().getCatalogueId()));
     }
 
     protected void updateDatasourceIdsToPublic(DatasourceBundle datasourceBundle) {
@@ -77,7 +66,6 @@ public abstract class AbstractPublicResourceManager<T extends Identifiable> exte
     }
 
     protected void updateTrainingResourceIdsToPublic(TrainingResourceBundle trainingResourceBundle) {
-        List<String> allCatalogueIds = getAllCatalogueIds();
         // Resource Organisation
         trainingResourceBundle.getTrainingResource().setResourceOrganisation(publicResourceUtils.createPublicResourceId(
                 trainingResourceBundle.getTrainingResource().getResourceOrganisation(),
@@ -87,15 +75,13 @@ public abstract class AbstractPublicResourceManager<T extends Identifiable> exte
         trainingResourceBundle.getTrainingResource().setResourceProviders(
                 appendCatalogueId(
                         trainingResourceBundle.getTrainingResource().getResourceProviders(),
-                        trainingResourceBundle.getTrainingResource().getCatalogueId(),
-                        allCatalogueIds));
+                        trainingResourceBundle.getTrainingResource().getCatalogueId()));
 
         // EOSC Related Services
         trainingResourceBundle.getTrainingResource().setEoscRelatedServices(
                 appendCatalogueId(
                         trainingResourceBundle.getTrainingResource().getEoscRelatedServices(),
-                        trainingResourceBundle.getTrainingResource().getCatalogueId(),
-                        allCatalogueIds));
+                        trainingResourceBundle.getTrainingResource().getCatalogueId()));
     }
 
     protected void updateInteroperabilityRecordIdsToPublic(InteroperabilityRecordBundle interoperabilityRecordBundle) {
@@ -106,7 +92,6 @@ public abstract class AbstractPublicResourceManager<T extends Identifiable> exte
     }
 
     protected void updateResourceInteroperabilityRecordIdsToPublic(ResourceInteroperabilityRecordBundle resourceInteroperabilityRecordBundle) {
-        List<String> allCatalogueIds = getAllCatalogueIds();
         // resourceId
         resourceInteroperabilityRecordBundle.getResourceInteroperabilityRecord().setResourceId(publicResourceUtils.createPublicResourceId(
                 resourceInteroperabilityRecordBundle.getResourceInteroperabilityRecord().getResourceId(),
@@ -115,8 +100,7 @@ public abstract class AbstractPublicResourceManager<T extends Identifiable> exte
         resourceInteroperabilityRecordBundle.getResourceInteroperabilityRecord().setInteroperabilityRecordIds(
                 appendCatalogueId(
                         resourceInteroperabilityRecordBundle.getResourceInteroperabilityRecord().getInteroperabilityRecordIds(),
-                        resourceInteroperabilityRecordBundle.getResourceInteroperabilityRecord().getCatalogueId(),
-                        allCatalogueIds));
+                        resourceInteroperabilityRecordBundle.getResourceInteroperabilityRecord().getCatalogueId()));
     }
 
     //TODO: Refactor if CTIs can belong to a different from the Project's Catalogue
@@ -130,45 +114,16 @@ public abstract class AbstractPublicResourceManager<T extends Identifiable> exte
 //                configurationTemplateInstanceBundle.getConfigurationTemplateInstance().getConfigurationTemplateId(), catalogueId));
     }
 
-    protected List<String> appendCatalogueId(List<String> items, String catalogueId, List<String> allCatalogueIds) {
+    protected List<String> appendCatalogueId(List<String> items, String catalogueId) {
         Set<String> transformed = new HashSet<>();
         if (items != null && !items.isEmpty()) {
             for (String item : items) {
                 if (!item.equals("")) {
-                    //TODO: test if we need checkIfItemContainsAnyOfTheCatalogueIds()
-                    boolean result = checkIfItemContainsAnyOfTheCatalogueIds(item, allCatalogueIds);
-                    if (!result) {
-                        item = publicResourceUtils.createPublicResourceId(item, catalogueId);
-                    }
+                    item = publicResourceUtils.createPublicResourceId(item, catalogueId);
                     transformed.add(item);
                 }
             }
         }
         return new ArrayList<>(transformed);
-    }
-
-    protected List<String> getAllCatalogueIds() {
-        List<String> catalogueIds = new ArrayList<>();
-        FacetFilter ff = new FacetFilter();
-        ff.setQuantity(1000);
-        ff.addFilter("status", "approved catalogue");
-        ff.addFilter("active", "true");
-        List<CatalogueBundle> allCatalogues = catalogueService.getAll(ff, securityService.getAdminAccess()).getResults();
-        for (CatalogueBundle catalogueBundle : allCatalogues) {
-            catalogueIds.add(catalogueBundle.getId());
-        }
-        return catalogueIds;
-    }
-
-    protected boolean checkIfItemContainsAnyOfTheCatalogueIds(String item, List<String> allCatalogueIds) {
-        boolean containsCatalogueId = false;
-        String[] parts = item.split("\\.");
-        for (String catalogueId : allCatalogueIds) {
-            if (parts[0].equals(catalogueId)) {
-                containsCatalogueId = true;
-                break;
-            }
-        }
-        return containsCatalogueId;
     }
 }
