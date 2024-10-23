@@ -119,6 +119,11 @@
             </dependency>
             <dependency>
                 <groupId>gr.uoa.di.madgik</groupId>
+                <artifactId>registry-starter-service</artifactId>
+                <version>${registry-core.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>gr.uoa.di.madgik</groupId>
                 <artifactId>registry-starter-elasticsearch</artifactId>
                 <version>${registry-core.version}</version>
             </dependency>
