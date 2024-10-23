@@ -126,10 +126,10 @@
             <groupId>gr.uoa.di.madgik</groupId>
             <artifactId>registry-starter-service</artifactId>
         </dependency>
-<!--        <dependency>-->
-<!--            <groupId>gr.uoa.di.madgik</groupId>-->
-<!--            <artifactId>registry-core-rest</artifactId>-->
-<!--        </dependency>-->
+        <dependency>
+            <groupId>gr.uoa.di.madgik</groupId>
+            <artifactId>registry-core-rest</artifactId>
+        </dependency>
         <dependency>
             <groupId>gr.uoa.di.madgik</groupId>
             <artifactId>registry-core-helper</artifactId>
