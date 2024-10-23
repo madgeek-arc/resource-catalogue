@@ -794,7 +794,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     public void requestProviderDeletion(String providerId, Authentication auth) {
         ProviderBundle provider = get(providerId);
         for (User user : provider.getProvider().getUsers()) {
-            if (user.getEmail().equalsIgnoreCase(User.of(auth).getEmail())) {
+            if (user.getEmail().equalsIgnoreCase(User.of(auth).getEmail().toLowerCase())) {
                 registrationMailService.informPortalAdminsForProviderDeletion(provider, User.of(auth));
             }
         }
@@ -819,7 +819,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
                 existingProvider.getProvider().getName(), existingProvider.getProvider().getUsers());
 
         logger.info("User '{}-{}' audited Provider '{}'-'{}' with [actionType: {}]",
-                User.of(auth).getFullName(), User.of(auth).getEmail(),
+                User.of(auth).getFullName(), User.of(auth).getEmail().toLowerCase(),
                 existingProvider.getProvider().getId(), existingProvider.getProvider().getName(), actionType);
 
         existingResource.setPayload(serialize(existingProvider));

@@ -474,7 +474,7 @@ public class ProviderController {
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<ProviderBundle> createPublicProvider(@RequestBody ProviderBundle providerBundle, @Parameter(hidden = true) Authentication auth) {
         logger.info("User '{}-{}' attempts to create a Public Provider from Provider '{}'-'{}' of the '{}' Catalogue", User.of(auth).getFullName(),
-                User.of(auth).getEmail(), providerBundle.getId(), providerBundle.getProvider().getName(), providerBundle.getProvider().getCatalogueId());
+                User.of(auth).getEmail().toLowerCase(), providerBundle.getId(), providerBundle.getProvider().getName(), providerBundle.getProvider().getCatalogueId());
         return ResponseEntity.ok(providerService.createPublicProvider(providerBundle, auth));
     }
 
@@ -524,7 +524,7 @@ public class ProviderController {
     @PreAuthorize("hasRole('ROLE_USER')")
     public ResponseEntity<Provider> addDraftProvider(@RequestBody Provider provider, @Parameter(hidden = true) Authentication auth) {
         ProviderBundle providerBundle = draftProviderService.add(new ProviderBundle(provider), auth);
-        logger.info("User '{}' added the Draft Provider with name '{}' and id '{}'", User.of(auth).getEmail(),
+        logger.info("User '{}' added the Draft Provider with name '{}' and id '{}'", User.of(auth).getEmail().toLowerCase(),
                 provider.getName(), provider.getId());
         return new ResponseEntity<>(providerBundle.getProvider(), HttpStatus.CREATED);
     }
@@ -536,7 +536,7 @@ public class ProviderController {
         ProviderBundle providerBundle = draftProviderService.get(provider.getId());
         providerBundle.setProvider(provider);
         providerBundle = draftProviderService.update(providerBundle, auth);
-        logger.info("User '{}' updated the Draft Provider with name '{}' and id '{}'", User.of(auth).getEmail(),
+        logger.info("User '{}' updated the Draft Provider with name '{}' and id '{}'", User.of(auth).getEmail().toLowerCase(),
                 provider.getName(), provider.getId());
         return new ResponseEntity<>(providerBundle.getProvider(), HttpStatus.OK);
     }
@@ -553,7 +553,7 @@ public class ProviderController {
             return new ResponseEntity<>(HttpStatus.GONE);
         }
         draftProviderService.delete(providerBundle);
-        logger.info("User '{}' deleted the Draft Provider '{}'-'{}'", User.of(auth).getEmail(),
+        logger.info("User '{}' deleted the Draft Provider '{}'-'{}'", User.of(auth).getEmail().toLowerCase(),
                 id, providerBundle.getProvider().getName());
         return new ResponseEntity<>(providerBundle.getProvider(), HttpStatus.OK);
     }

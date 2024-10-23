@@ -406,7 +406,7 @@ public class TrainingResourceController {
     public ResponseEntity<TrainingResource> addDraftTrainingResource(@RequestBody TrainingResource trainingResource,
                                                                      @Parameter(hidden = true) Authentication auth) {
         TrainingResourceBundle trainingResourceBundle = draftTrainingResourceService.add(new TrainingResourceBundle(trainingResource), auth);
-        logger.info("User '{}' added the Draft Training Resource with name '{}' and id '{}'", User.of(auth).getEmail(),
+        logger.info("User '{}' added the Draft Training Resource with name '{}' and id '{}'", User.of(auth).getEmail().toLowerCase(),
                 trainingResource.getTitle(), trainingResource.getId());
         return new ResponseEntity<>(trainingResourceBundle.getTrainingResource(), HttpStatus.CREATED);
     }
@@ -419,7 +419,7 @@ public class TrainingResourceController {
         TrainingResourceBundle trainingResourceBundle = draftTrainingResourceService.get(trainingResource.getId());
         trainingResourceBundle.setTrainingResource(trainingResource);
         trainingResourceBundle = draftTrainingResourceService.update(trainingResourceBundle, auth);
-        logger.info("User '{}' updated the Draft Training Resource with name '{}' and id '{}'", User.of(auth).getEmail(),
+        logger.info("User '{}' updated the Draft Training Resource with name '{}' and id '{}'", User.of(auth).getEmail().toLowerCase(),
                 trainingResource.getTitle(), trainingResource.getId());
         return new ResponseEntity<>(trainingResourceBundle.getTrainingResource(), HttpStatus.OK);
     }
@@ -436,7 +436,7 @@ public class TrainingResourceController {
             return new ResponseEntity<>(HttpStatus.GONE);
         }
         draftTrainingResourceService.delete(trainingResourceBundle);
-        logger.info("User '{}' deleted the Draft Training Resource '{}'-'{}'", User.of(auth).getEmail(),
+        logger.info("User '{}' deleted the Draft Training Resource '{}'-'{}'", User.of(auth).getEmail().toLowerCase(),
                 id, trainingResourceBundle.getTrainingResource().getTitle());
         return new ResponseEntity<>(trainingResourceBundle.getTrainingResource(), HttpStatus.OK);
     }
