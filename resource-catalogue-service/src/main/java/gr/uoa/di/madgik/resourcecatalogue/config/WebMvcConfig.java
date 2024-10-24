@@ -11,10 +11,6 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 
 @Configuration
-@ComponentScan({
-        "gr.uoa.di.madgik.registry.controllers",
-        "gr.uoa.di.madgik.resourcecatalogue.controllers",
-        "gr.uoa.di.madgik.resourcecatalogue.recdb.controllers"})
 //@EnableWebMvc
 @EnableAspectJAutoProxy
 public class WebMvcConfig implements WebMvcConfigurer {

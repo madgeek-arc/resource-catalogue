@@ -109,7 +109,7 @@
             </dependency>
             <dependency>
                 <groupId>gr.uoa.di.madgik</groupId>
-                <artifactId>registry-core-client</artifactId>
+                <artifactId>registry-starter-client</artifactId>
                 <version>${registry-core.version}</version>
             </dependency>
             <dependency>
