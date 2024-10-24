@@ -82,15 +82,18 @@ public class VocabularyManager extends ResourceManager<Vocabulary> implements Vo
     @Override
     public Map<Vocabulary.Type, List<Vocabulary>> getAllVocabulariesByType() {
         Map<Vocabulary.Type, List<Vocabulary>> allVocabularies = new HashMap<>();
-        for (Vocabulary.Type type : Vocabulary.Type.values()) {
-            allVocabularies.put(type, getByType(type));
-        }
+        FacetFilter ff = new FacetFilter();
+        ff.setResourceType(getResourceType());
+        ff.setQuantity(maxQuantity);
+        Browsing<Vocabulary> allVocs = getAll(ff);
+        allVocabularies = allVocs.getResults().parallelStream().filter(Objects::nonNull).collect(Collectors.groupingBy(value -> Vocabulary.Type.fromString(value.getType())));
         return allVocabularies;
     }
 
     @Override
     public List<Vocabulary> getByType(Vocabulary.Type type) {
         FacetFilter ff = new FacetFilter();
+        ff.setResourceType(getResourceType());
         ff.setQuantity(maxQuantity);
         ff.addFilter("type", type.getKey());
         List<Vocabulary> vocList = getAll(ff, null).getResults();
