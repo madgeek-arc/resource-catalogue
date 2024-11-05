@@ -26,8 +26,6 @@ public class DraftTrainingResourceManager extends ResourceManager<TrainingResour
     private final VocabularyService vocabularyService;
     private final ProviderService providerService;
     private final ProviderResourcesCommonMethods commonMethods;
-    @Autowired
-    private ProviderManager providerManager;
 
     @Value("${catalogue.id}")
     private String catalogueId;
@@ -142,7 +140,7 @@ public class DraftTrainingResourceManager extends ResourceManager<TrainingResour
 
     @Override
     public Browsing<TrainingResourceBundle> getMy(FacetFilter filter, Authentication auth) {
-        List<ProviderBundle> providers = providerManager.getMy(filter, auth).getResults();
+        List<ProviderBundle> providers = providerService.getMy(filter, auth).getResults();
         FacetFilter ff = new FacetFilter();
         ff.addFilter("resource_organisation", providers.stream().map(ProviderBundle::getId).toList());
         ff.setResourceType(getResourceType());

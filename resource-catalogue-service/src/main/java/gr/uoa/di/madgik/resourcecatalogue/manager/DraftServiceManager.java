@@ -29,8 +29,6 @@ public class DraftServiceManager extends ResourceManager<ServiceBundle> implemen
 
     @Value("${catalogue.id}")
     private String catalogueId;
-    @Autowired
-    private ProviderManager providerManager;
 
     public DraftServiceManager(ServiceBundleService<ServiceBundle> serviceBundleService,
                                IdCreator idCreator, @Lazy VocabularyService vocabularyService,
@@ -142,7 +140,7 @@ public class DraftServiceManager extends ResourceManager<ServiceBundle> implemen
 
     @Override
     public Browsing<ServiceBundle> getMy(FacetFilter filter, Authentication auth) {
-        List<ProviderBundle> providers = providerManager.getMy(filter, auth).getResults();
+        List<ProviderBundle> providers = providerService.getMy(filter, auth).getResults();
         FacetFilter ff = new FacetFilter();
         ff.addFilter("resource_organisation", providers.stream().map(ProviderBundle::getId).toList());
         ff.setResourceType(getResourceType());

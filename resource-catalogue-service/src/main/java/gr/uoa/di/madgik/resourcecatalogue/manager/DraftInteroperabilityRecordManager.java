@@ -29,8 +29,6 @@ public class DraftInteroperabilityRecordManager extends ResourceManager<Interope
 
     @Value("${catalogue.id}")
     private String catalogueId;
-    @Autowired
-    private ProviderManager providerManager;
 
     public DraftInteroperabilityRecordManager(InteroperabilityRecordService interoperabilityRecordService,
                                               IdCreator idCreator, @Lazy VocabularyService vocabularyService,
@@ -132,7 +130,7 @@ public class DraftInteroperabilityRecordManager extends ResourceManager<Interope
 
     @Override
     public Browsing<InteroperabilityRecordBundle> getMy(FacetFilter filter, Authentication auth) {
-        List<ProviderBundle> providers = providerManager.getMy(filter, auth).getResults();
+        List<ProviderBundle> providers = providerService.getMy(filter, auth).getResults();
         FacetFilter ff = new FacetFilter();
         ff.addFilter("provider_id", providers.stream().map(ProviderBundle::getId).toList());
         ff.setResourceType(getResourceType());

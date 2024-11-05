@@ -131,7 +131,7 @@ public class LoggingInfo {
         ret.setDate(String.valueOf(System.currentTimeMillis()));
         ret.setType(type);
         ret.setActionType(actionType);
-        ret.setUserEmail(user.getEmail().toLowerCase());
+        ret.setUserEmail(user.getEmail());
         ret.setUserFullName(user.getFullName());
         ret.setUserRole(userRole);
         ret.setComment(comment);

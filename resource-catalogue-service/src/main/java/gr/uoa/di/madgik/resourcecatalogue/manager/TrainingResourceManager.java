@@ -61,8 +61,6 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
     @Autowired
     @Qualifier("trainingResourceSync")
     private final SynchronizerService<TrainingResource> synchronizerService;
-    @Autowired
-    private ProviderManager providerManager;
 
     @Value("${catalogue.id}")
     private String catalogueId;
@@ -294,7 +292,7 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
 
     @Override
     public Browsing<TrainingResourceBundle> getMy(FacetFilter filter, Authentication auth) {
-        List<ProviderBundle> providers = providerManager.getMy(filter, auth).getResults();
+        List<ProviderBundle> providers = providerService.getMy(filter, auth).getResults();
         FacetFilter ff = new FacetFilter();
         ff.addFilter("resource_organisation", providers.stream().map(ProviderBundle::getId).toList());
         ff.setResourceType(getResourceType());
@@ -472,8 +470,6 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
     }
 
     private void publishServiceExtensions(Bundle<?> bundle, boolean active, Authentication auth) {
-        String prefix = bundle.getId().split("/")[0];
-        String suffix = bundle.getId().split("/")[1];
 
         List<LoggingInfo> loggingInfoList = commonMethods.createActivationLoggingInfo(bundle, active, auth);
 
@@ -684,17 +680,6 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
         }
         return trainingResourceBundle;
     }
-
-//    @Override
-//    public TrainingResourceBundle getOrElseReturnNull(String id, String catalogueId) {
-//        TrainingResourceBundle trainingResourceBundle;
-//        try {
-//            trainingResourceBundle = get(id, catalogueId);
-//        } catch (ResourceException | ResourceNotFoundException e) {
-//            return null;
-//        }
-//        return trainingResourceBundle;
-//    }
 
     @Override
     public List<String> getChildrenFromParent(String type, String parent, List<Map<String, Object>> rec) {

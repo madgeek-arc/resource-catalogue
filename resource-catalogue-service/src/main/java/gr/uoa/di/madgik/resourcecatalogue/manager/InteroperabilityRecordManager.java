@@ -35,8 +35,6 @@ public class InteroperabilityRecordManager extends ResourceManager<Interoperabil
     private final CatalogueService catalogueService;
     private final RegistrationMailService registrationMailService;
     private final ProviderResourcesCommonMethods commonMethods;
-    @Autowired
-    private ProviderManager providerManager;
 
     @Value("${catalogue.id}")
     private String catalogueId;
@@ -45,7 +43,8 @@ public class InteroperabilityRecordManager extends ResourceManager<Interoperabil
                                          SecurityService securityService, VocabularyService vocabularyService,
                                          PublicInteroperabilityRecordManager publicInteroperabilityRecordManager,
                                          CatalogueService catalogueService,
-                                         RegistrationMailService registrationMailService, ProviderResourcesCommonMethods commonMethods) {
+                                         RegistrationMailService registrationMailService,
+                                         ProviderResourcesCommonMethods commonMethods) {
         super(InteroperabilityRecordBundle.class);
         this.providerService = providerService;
         this.idCreator = idCreator;
@@ -298,7 +297,7 @@ public class InteroperabilityRecordManager extends ResourceManager<Interoperabil
 
     @Override
     public Browsing<InteroperabilityRecordBundle> getMy(FacetFilter filter, Authentication auth) {
-        List<ProviderBundle> providers = providerManager.getMy(filter, auth).getResults();
+        List<ProviderBundle> providers = providerService.getMy(filter, auth).getResults();
         FacetFilter ff = new FacetFilter();
         ff.addFilter("provider_id", providers.stream().map(ProviderBundle::getId).toList());
         ff.setResourceType(getResourceType());

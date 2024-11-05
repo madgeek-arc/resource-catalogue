@@ -256,9 +256,9 @@ public class ProviderResourcesCommonMethods {
             // latestOnboardingInfo
             bundle.setLatestUpdateInfo(loggingInfo);
 
-            String[] parts = bundle.getPayload().getClass().getName().split("\\.");
             logger.info(String.format("User [%s] set 'suspended' of %s [%s] to [%s]",
-                    User.of(auth).getEmail().toLowerCase(), parts[6], bundle.getId(), suspend));
+                    User.of(auth).getEmail().toLowerCase(), bundle.getPayload().getClass().getSimpleName(),
+                    bundle.getId(), suspend));
         }
     }
 
