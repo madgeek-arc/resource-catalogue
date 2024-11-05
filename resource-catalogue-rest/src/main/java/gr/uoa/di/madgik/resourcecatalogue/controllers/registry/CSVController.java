@@ -65,7 +65,7 @@ public class CSVController {
         Paging<ProviderBundle> providers = providerService.getAll(createFacetFilter(published), auth);
         String csvData = csvService.listProvidersToCSV(providers.getResults());
         response.setHeader("Content-disposition", "attachment; filename=" + "providers.csv");
-        logger.info("User {} downloaded Providers CSV list", User.of(auth).getEmail());
+        logger.info("User {} downloaded Providers CSV list", User.of(auth).getEmail().toLowerCase());
         return ResponseEntity.ok(csvData);
     }
 
@@ -79,7 +79,7 @@ public class CSVController {
         Paging<ServiceBundle> serviceBundles = serviceBundleService.getAll(createFacetFilter(published), auth);
         String csvData = csvService.listServicesToCSV(serviceBundles.getResults());
         response.setHeader("Content-disposition", "attachment; filename=" + "services.csv");
-        logger.info("User {} downloaded Services CSV list", User.of(auth).getEmail());
+        logger.info("User {} downloaded Services CSV list", User.of(auth).getEmail().toLowerCase());
         return ResponseEntity.ok(csvData);
     }
 
@@ -92,7 +92,7 @@ public class CSVController {
         Paging<Vocabulary> vocabularies = vocabularyService.getAll(createFacetFilter(null), auth);
         String csvData = csvService.listVocabulariesToCSV(vocabularies.getResults());
         response.setHeader("Content-disposition", "attachment; filename=" + "vocabularies.csv");
-        logger.info("User {} downloaded Vocabularies CSV list", User.of(auth).getEmail());
+        logger.info("User {} downloaded Vocabularies CSV list", User.of(auth).getEmail().toLowerCase());
         return ResponseEntity.ok(csvData);
     }
 

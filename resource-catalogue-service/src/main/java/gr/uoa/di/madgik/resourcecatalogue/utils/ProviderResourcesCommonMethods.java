@@ -26,7 +26,14 @@ public class ProviderResourcesCommonMethods {
 
     private final CatalogueService catalogueService;
     private final ProviderService providerService;
+    private final DraftResourceService<ProviderBundle> draftProviderService;
+    private final ServiceBundleService serviceBundleService;
+    private final DraftResourceService<ServiceBundle> draftServiceService;
     private final DatasourceService datasourceService;
+    private final TrainingResourceService trainingResourceService;
+    private final DraftResourceService<TrainingResourceBundle> draftTrainingResourceService;
+    private final InteroperabilityRecordService interoperabilityRecordService;
+    private final DraftResourceService<InteroperabilityRecordBundle> draftInteroperabilityRecordService;
     private final HelpdeskService helpdeskService;
     private final MonitoringService monitoringService;
     private final ResourceInteroperabilityRecordService resourceInteroperabilityRecordService;
@@ -37,7 +44,15 @@ public class ProviderResourcesCommonMethods {
 
     public ProviderResourcesCommonMethods(@Lazy CatalogueService catalogueService,
                                           @Lazy ProviderService providerService,
+                                          @Lazy DraftResourceService<ProviderBundle> draftProviderService,
+                                          @Lazy ServiceBundleService serviceBundleService,
+                                          @Lazy DraftResourceService<ServiceBundle> draftServiceService,
                                           @Lazy DatasourceService datasourceService,
+                                          @Lazy TrainingResourceService trainingResourceService,
+                                          @Lazy DraftResourceService<TrainingResourceBundle> draftTrainingResourceService,
+                                          @Lazy InteroperabilityRecordService interoperabilityRecordService,
+                                          @Lazy DraftResourceService<InteroperabilityRecordBundle>
+                                                  draftInteroperabilityRecordService,
                                           @Lazy HelpdeskService helpdeskService,
                                           @Lazy MonitoringService monitoringService,
                                           @Lazy ResourceInteroperabilityRecordService
@@ -48,7 +63,14 @@ public class ProviderResourcesCommonMethods {
                                           PublicResourceUtils publicResourceUtils) {
         this.catalogueService = catalogueService;
         this.providerService = providerService;
+        this.draftProviderService = draftProviderService;
+        this.serviceBundleService = serviceBundleService;
+        this.draftServiceService = draftServiceService;
         this.datasourceService = datasourceService;
+        this.trainingResourceService = trainingResourceService;
+        this.draftTrainingResourceService = draftTrainingResourceService;
+        this.interoperabilityRecordService = interoperabilityRecordService;
+        this.draftInteroperabilityRecordService = draftInteroperabilityRecordService;
         this.helpdeskService = helpdeskService;
         this.monitoringService = monitoringService;
         this.resourceInteroperabilityRecordService = resourceInteroperabilityRecordService;
@@ -234,9 +256,9 @@ public class ProviderResourcesCommonMethods {
             // latestOnboardingInfo
             bundle.setLatestUpdateInfo(loggingInfo);
 
-            String[] parts = bundle.getPayload().getClass().getName().split("\\.");
             logger.info(String.format("User [%s] set 'suspended' of %s [%s] to [%s]",
-                    User.of(auth).getEmail(), parts[3], bundle.getId(), suspend));
+                    User.of(auth).getEmail().toLowerCase(), bundle.getPayload().getClass().getSimpleName(),
+                    bundle.getId(), suspend));
         }
     }
 

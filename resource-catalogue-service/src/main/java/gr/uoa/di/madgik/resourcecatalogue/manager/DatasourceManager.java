@@ -79,7 +79,7 @@ public class DatasourceManager extends ResourceManager<DatasourceBundle> impleme
 
         this.validate(datasourceBundle);
 
-        datasourceBundle.setMetadata(Metadata.createMetadata(User.of(auth).getFullName(), User.of(auth).getEmail()));
+        datasourceBundle.setMetadata(Metadata.createMetadata(User.of(auth).getFullName(), User.of(auth).getEmail().toLowerCase()));
         List<LoggingInfo> loggingInfoList = commonMethods.returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(datasourceBundle, auth);
         datasourceBundle.setLoggingInfo(loggingInfoList);
         differentiateInternalFromExternalCatalogueAddition(datasourceBundle);
@@ -95,7 +95,7 @@ public class DatasourceManager extends ResourceManager<DatasourceBundle> impleme
             datasourceBundle.setActive(false);
             datasourceBundle.setStatus(vocabularyService.get("pending datasource").getId());
             datasourceBundle.setLatestOnboardingInfo(datasourceBundle.getLoggingInfo().get(0));
-            registrationMailService.sendEmailsForDatasourceExtension(datasourceBundle, "post");
+            registrationMailService.sendEmailsForDatasourceExtensionToPortalAdmins(datasourceBundle, "post");
         } else {
             datasourceBundle.setActive(true);
             datasourceBundle.setStatus(vocabularyService.get("approved datasource").getId());
@@ -119,7 +119,7 @@ public class DatasourceManager extends ResourceManager<DatasourceBundle> impleme
         }
 
         super.validate(ret);
-        ret.setMetadata(Metadata.updateMetadata(ret.getMetadata(), User.of(auth).getFullName(), User.of(auth).getEmail()));
+        ret.setMetadata(Metadata.updateMetadata(ret.getMetadata(), User.of(auth).getFullName(), User.of(auth).getEmail().toLowerCase()));
         List<LoggingInfo> loggingInfoList = commonMethods.returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(ret, auth);
         LoggingInfo loggingInfo = commonMethods.createLoggingInfo(auth, LoggingInfo.Types.UPDATE.getKey(),
                 LoggingInfo.ActionType.UPDATED.getKey(), comment);
@@ -155,7 +155,7 @@ public class DatasourceManager extends ResourceManager<DatasourceBundle> impleme
         resourceService.updateResource(existingResource);
         logger.debug("Updating Datasource: {}", ret);
 
-        registrationMailService.sendEmailsForDatasourceExtension(ret, "put");
+        registrationMailService.sendEmailsForDatasourceExtensionToPortalAdmins(ret, "put");
         return ret;
     }
 

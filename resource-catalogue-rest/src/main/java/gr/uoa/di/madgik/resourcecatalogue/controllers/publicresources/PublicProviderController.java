@@ -65,7 +65,7 @@ public class PublicProviderController {
         if (auth != null && auth.isAuthenticated()) {
             User user = User.of(auth);
             if (securityService.hasRole(auth, "ROLE_ADMIN") || securityService.hasRole(auth, "ROLE_EPOT")
-                    || securityService.userIsProviderAdmin(user, providerBundle)) {
+                    || securityService.userIsProviderAdmin(user, id)) {
                 if (providerBundle.getMetadata().isPublished()) {
                     return new ResponseEntity<>(providerBundle.getProvider(), HttpStatus.OK);
                 } else {
@@ -91,7 +91,7 @@ public class PublicProviderController {
         if (auth != null && auth.isAuthenticated()) {
             User user = User.of(auth);
             if (securityService.hasRole(auth, "ROLE_ADMIN") || securityService.hasRole(auth, "ROLE_EPOT")
-                    || securityService.userIsProviderAdmin(user, providerBundle)) {
+                    || securityService.userIsProviderAdmin(user, id)) {
                 if (providerBundle.getMetadata().isPublished()) {
                     return new ResponseEntity<>(providerBundle, HttpStatus.OK);
                 } else {
@@ -132,14 +132,5 @@ public class PublicProviderController {
         ff.addFilter("published", true);
         Paging<ProviderBundle> paging = genericResourceService.getResults(ff);
         return ResponseEntity.ok(paging);
-    }
-
-    @GetMapping(path = "public/provider/my", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    public ResponseEntity<List<ProviderBundle>> getMyPublicProviders(@Parameter(hidden = true) Authentication auth) {
-        FacetFilter ff = new FacetFilter();
-        ff.setQuantity(10000);
-        ff.addFilter("published", true);
-        ff.addOrderBy("name", "asc");
-        return new ResponseEntity<>(publicProviderManager.getMy(ff, auth).getResults(), HttpStatus.OK);
     }
 }

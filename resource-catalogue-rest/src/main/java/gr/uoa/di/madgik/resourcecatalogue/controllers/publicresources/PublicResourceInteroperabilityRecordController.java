@@ -76,7 +76,7 @@ public class PublicResourceInteroperabilityRecordController {
         if (auth != null && auth.isAuthenticated()) {
             User user = User.of(auth);
             if (securityService.hasRole(auth, "ROLE_ADMIN") || securityService.hasRole(auth, "ROLE_EPOT")
-                    || securityService.userIsResourceProviderAdmin(user, id, resourceInteroperabilityRecordBundle.getResourceInteroperabilityRecord().getCatalogueId())) {
+                    || securityService.userIsResourceProviderAdmin(user, id)) {
                 if (resourceInteroperabilityRecordBundle.getMetadata().isPublished()) {
                     return new ResponseEntity<>(resourceInteroperabilityRecordBundle, HttpStatus.OK);
                 } else {
@@ -113,14 +113,4 @@ public class PublicResourceInteroperabilityRecordController {
         Paging<ResourceInteroperabilityRecordBundle> paging = genericResourceService.getResults(ff);
         return ResponseEntity.ok(paging);
     }
-
-    @GetMapping(path = "public/resourceInteroperabilityRecord/my", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    public ResponseEntity<List<ResourceInteroperabilityRecordBundle>> getMyPublicResourceInteroperabilityRecords(@Parameter(hidden = true) Authentication auth) {
-        FacetFilter ff = new FacetFilter();
-        ff.setQuantity(10000);
-        ff.addFilter("published", true);
-        ff.addOrderBy("title", "asc");
-        return new ResponseEntity<>(publicResourceInteroperabilityRecordManager.getMy(ff, auth).getResults(), HttpStatus.OK);
-    }
-
 }

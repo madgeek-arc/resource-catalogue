@@ -37,14 +37,6 @@ public interface CatalogueService extends ResourceService<CatalogueBundle>, Bund
     CatalogueBundle update(CatalogueBundle catalogue, String comment, Authentication auth);
 
     /**
-     * Return a List of Catalogue a User has access in
-     *
-     * @param authentication Authentication
-     * @return {@link List}&lt;{@link CatalogueBundle}&gt;
-     */
-    List<CatalogueBundle> getMyCatalogues(Authentication authentication);
-
-    /**
      * Return true if Provider User Admin has accepted registration terms
      *
      * @param providerId Provider's ID

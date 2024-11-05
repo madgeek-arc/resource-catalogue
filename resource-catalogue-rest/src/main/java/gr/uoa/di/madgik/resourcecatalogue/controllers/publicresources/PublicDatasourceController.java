@@ -65,8 +65,7 @@ public class PublicDatasourceController {
         if (auth != null && auth.isAuthenticated()) {
             User user = User.of(auth);
             if (securityService.hasRole(auth, "ROLE_ADMIN") || securityService.hasRole(auth, "ROLE_EPOT")
-                    || securityService.userIsResourceProviderAdmin(user, datasourceBundle.getDatasource().getServiceId(),
-                    datasourceBundle.getDatasource().getCatalogueId())) {
+                    || securityService.userIsResourceProviderAdmin(user, datasourceBundle.getDatasource().getServiceId())) {
                 if (datasourceBundle.getMetadata().isPublished()) {
                     return new ResponseEntity<>(datasourceBundle.getDatasource(), HttpStatus.OK);
                 } else {
@@ -91,8 +90,7 @@ public class PublicDatasourceController {
         if (auth != null && auth.isAuthenticated()) {
             User user = User.of(auth);
             if (securityService.hasRole(auth, "ROLE_ADMIN") || securityService.hasRole(auth, "ROLE_EPOT")
-                    || securityService.userIsResourceProviderAdmin(user, datasourceBundle.getDatasource().getServiceId(),
-                    datasourceBundle.getDatasource().getCatalogueId())) {
+                    || securityService.userIsResourceProviderAdmin(user, datasourceBundle.getDatasource().getServiceId())) {
                 if (datasourceBundle.getMetadata().isPublished()) {
                     return new ResponseEntity<>(datasourceBundle, HttpStatus.OK);
                 } else {
@@ -133,14 +131,4 @@ public class PublicDatasourceController {
         Paging<DatasourceBundle> paging = genericResourceService.getResults(ff);
         return ResponseEntity.ok(paging);
     }
-
-    @GetMapping(path = "public/datasource/my", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    public ResponseEntity<List<DatasourceBundle>> getMyPublicDatasources(@Parameter(hidden = true) Authentication auth) {
-        FacetFilter ff = new FacetFilter();
-        ff.setQuantity(10000);
-        ff.addFilter("published", true);
-        ff.addOrderBy("name", "asc");
-        return new ResponseEntity<>(publicDatasourceManager.getMy(ff, auth).getResults(), HttpStatus.OK);
-    }
-
 }

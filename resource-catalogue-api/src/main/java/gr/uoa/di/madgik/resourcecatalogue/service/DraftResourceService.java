@@ -3,8 +3,6 @@ package gr.uoa.di.madgik.resourcecatalogue.service;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Bundle;
 import org.springframework.security.core.Authentication;
 
-import java.util.List;
-
 public interface DraftResourceService<T extends Bundle> extends ResourceService<T> {
 
     /**
@@ -24,12 +22,4 @@ public interface DraftResourceService<T extends Bundle> extends ResourceService<
      * @return {@link T}
      */
     T transformToNonDraft(String id, Authentication auth);
-
-    /**
-     * Get a List of all Pending resources for a specific authenticated User
-     *
-     * @param authentication Authentication
-     * @return {@link List}&lt;{@link T}&gt;
-     */
-    List<T> getMy(Authentication authentication);
 }

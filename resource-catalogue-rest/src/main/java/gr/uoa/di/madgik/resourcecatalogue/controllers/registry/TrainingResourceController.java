@@ -91,7 +91,7 @@ public class TrainingResourceController {
 
     @Operation(summary = "Get the most current version of a specific Training Resource, providing the Resource id.")
     @GetMapping(path = "{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    @PreAuthorize("@securityService.trainingResourceIsActive(#prefix+'/'+#suffix, #catalogueId) or hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth, #prefix+'/'+#suffix)")
+    @PreAuthorize("@securityService.trainingResourceIsActive(#prefix+'/'+#suffix) or hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth, #prefix+'/'+#suffix)")
     public ResponseEntity<TrainingResource> getTrainingResource(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
                                                                 @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix,
                                                                 @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId,
@@ -114,12 +114,12 @@ public class TrainingResourceController {
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.providerCanAddResources(#auth, #trainingResource)")
     public ResponseEntity<TrainingResource> addTrainingResource(@RequestBody TrainingResource trainingResource, @Parameter(hidden = true) Authentication auth) {
         TrainingResourceBundle ret = this.trainingResourceService.add(new TrainingResourceBundle(trainingResource), auth);
-        logger.info("User '{}' created a new Training Resource with title '{}' and id '{}'", User.of(auth).getEmail(), trainingResource.getTitle(), trainingResource.getId());
+        logger.info("User '{}' created a new Training Resource with title '{}' and id '{}'", User.of(auth).getEmail().toLowerCase(), trainingResource.getTitle(), trainingResource.getId());
         return new ResponseEntity<>(ret.getTrainingResource(), HttpStatus.CREATED);
     }
 
     @Operation(summary = "Updates the TrainingResource assigned the given id with the given TrainingResource, keeping a version of revisions.")
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth,#trainingResource)")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth,#trainingResource.id)")
     @PutMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<TrainingResource> updateTrainingResource(@RequestBody TrainingResource trainingResource, @RequestParam(required = false) String comment, @Parameter(hidden = true) Authentication auth) throws ResourceNotFoundException {
         TrainingResourceBundle ret = this.trainingResourceService.update(new TrainingResourceBundle(trainingResource), comment, auth);
@@ -170,6 +170,11 @@ public class TrainingResourceController {
         return ResponseEntity.ok(trainingResourceService.getByIds(auth, ids));
     }
 
+    @GetMapping(path = "getMyTrainingResources", produces = {MediaType.APPLICATION_JSON_VALUE})
+    public ResponseEntity<List<TrainingResourceBundle>> getMyTrainingResources(@Parameter(hidden = true) Authentication auth) {
+        return new ResponseEntity<>(trainingResourceService.getMy(null, auth).getResults(), HttpStatus.OK);
+    }
+
     @Operation(summary = "Get all Training Resources in the catalogue organized by an attribute, e.g. get Training Resources organized in categories.")
     @GetMapping(path = "by/{field}", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<Map<String, List<TrainingResource>>> getTrainingResourcesBy(@PathVariable(value = "field") Service.Field field, @Parameter(hidden = true) Authentication auth) throws NoSuchFieldException {
@@ -194,7 +199,7 @@ public class TrainingResourceController {
 
     @Browse
     @GetMapping(path = "byProvider/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isProviderAdmin(#auth,#prefix+'/'+#suffix,#catalogueId)")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isProviderAdmin(#auth,#prefix+'/'+#suffix)")
     public ResponseEntity<Paging<TrainingResourceBundle>> getTrainingResourcesByProvider(@Parameter(hidden = true) @RequestParam MultiValueMap<String, Object> allRequestParams,
                                                                                          @Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
                                                                                          @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix,
@@ -212,7 +217,7 @@ public class TrainingResourceController {
 
     @Browse
     @GetMapping(path = "byCatalogue/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isCatalogueAdmin(#auth,#id)")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isProviderAdmin(#auth,#id)")
     public ResponseEntity<Paging<TrainingResourceBundle>> getTrainingResourcesByCatalogue(@Parameter(hidden = true) @RequestParam MultiValueMap<String, Object> allRequestParams,
                                                                                           @PathVariable String id,
                                                                                           @Parameter(hidden = true) Authentication auth) {
@@ -244,7 +249,7 @@ public class TrainingResourceController {
                                                             @RequestParam Boolean active,
                                                             @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
-        logger.info("User '{}-{}' attempts to save Training Resource with id '{}' as '{}'", User.of(auth).getFullName(), User.of(auth).getEmail(), id, active);
+        logger.info("User '{}-{}' attempts to save Training Resource with id '{}' as '{}'", User.of(auth).getFullName(), User.of(auth).getEmail().toLowerCase(), id, active);
         return ResponseEntity.ok(trainingResourceService.publish(id, active, auth));
     }
 
@@ -349,7 +354,7 @@ public class TrainingResourceController {
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<TrainingResourceBundle> createPublicTrainingResource(@RequestBody TrainingResourceBundle trainingResourceBundle, @Parameter(hidden = true) Authentication auth) {
         logger.info("User '{}-{}' attempts to create a Public Training Resource from Training Resource '{}'-'{}' of the '{}' Catalogue", User.of(auth).getFullName(),
-                User.of(auth).getEmail(), trainingResourceBundle.getId(), trainingResourceBundle.getTrainingResource().getTitle(), trainingResourceBundle.getTrainingResource().getCatalogueId());
+                User.of(auth).getEmail().toLowerCase(), trainingResourceBundle.getId(), trainingResourceBundle.getTrainingResource().getTitle(), trainingResourceBundle.getTrainingResource().getCatalogueId());
         return ResponseEntity.ok(trainingResourceService.createPublicResource(trainingResourceBundle, auth));
     }
 
@@ -393,7 +398,7 @@ public class TrainingResourceController {
 
     @GetMapping(path = "/draft/getMyDraftTrainingResources", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<List<TrainingResourceBundle>> getMyDraftTrainingResources(@Parameter(hidden = true) Authentication auth) {
-        return new ResponseEntity<>(draftTrainingResourceService.getMy(auth), HttpStatus.OK);
+        return new ResponseEntity<>(draftTrainingResourceService.getMy(null, auth).getResults(), HttpStatus.OK);
     }
 
     @PostMapping(path = "/draft", produces = {MediaType.APPLICATION_JSON_VALUE})
@@ -401,20 +406,20 @@ public class TrainingResourceController {
     public ResponseEntity<TrainingResource> addDraftTrainingResource(@RequestBody TrainingResource trainingResource,
                                                                      @Parameter(hidden = true) Authentication auth) {
         TrainingResourceBundle trainingResourceBundle = draftTrainingResourceService.add(new TrainingResourceBundle(trainingResource), auth);
-        logger.info("User '{}' added the Draft Training Resource with name '{}' and id '{}'", User.of(auth).getEmail(),
+        logger.info("User '{}' added the Draft Training Resource with name '{}' and id '{}'", User.of(auth).getEmail().toLowerCase(),
                 trainingResource.getTitle(), trainingResource.getId());
         return new ResponseEntity<>(trainingResourceBundle.getTrainingResource(), HttpStatus.CREATED);
     }
 
     @PutMapping(path = "/draft", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth, #trainingResource)")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth, #trainingResource.id)")
     public ResponseEntity<TrainingResource> updateDraftTrainingResource(@RequestBody TrainingResource trainingResource,
                                                                         @Parameter(hidden = true) Authentication auth)
             throws ResourceNotFoundException {
         TrainingResourceBundle trainingResourceBundle = draftTrainingResourceService.get(trainingResource.getId());
         trainingResourceBundle.setTrainingResource(trainingResource);
         trainingResourceBundle = draftTrainingResourceService.update(trainingResourceBundle, auth);
-        logger.info("User '{}' updated the Draft Training Resource with name '{}' and id '{}'", User.of(auth).getEmail(),
+        logger.info("User '{}' updated the Draft Training Resource with name '{}' and id '{}'", User.of(auth).getEmail().toLowerCase(),
                 trainingResource.getTitle(), trainingResource.getId());
         return new ResponseEntity<>(trainingResourceBundle.getTrainingResource(), HttpStatus.OK);
     }
@@ -431,7 +436,7 @@ public class TrainingResourceController {
             return new ResponseEntity<>(HttpStatus.GONE);
         }
         draftTrainingResourceService.delete(trainingResourceBundle);
-        logger.info("User '{}' deleted the Draft Training Resource '{}'-'{}'", User.of(auth).getEmail(),
+        logger.info("User '{}' deleted the Draft Training Resource '{}'-'{}'", User.of(auth).getEmail().toLowerCase(),
                 id, trainingResourceBundle.getTrainingResource().getTitle());
         return new ResponseEntity<>(trainingResourceBundle.getTrainingResource(), HttpStatus.OK);
     }

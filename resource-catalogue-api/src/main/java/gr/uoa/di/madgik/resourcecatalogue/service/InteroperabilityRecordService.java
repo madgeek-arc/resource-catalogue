@@ -42,10 +42,9 @@ public interface InteroperabilityRecordService extends ResourceService<Interoper
      * Get a specific Interoperability Record of an external Catalogue, given its ID, or return null
      *
      * @param id          Interoperability Record ID
-     * @param catalogueId Catalogue ID
      * @return {@link InteroperabilityRecordBundle}
      */
-    InteroperabilityRecordBundle getOrElseReturnNull(String id, String catalogueId);
+    InteroperabilityRecordBundle getOrElseReturnNull(String id);
 
     /**
      * Validates the given Interoperability Record Bundle.

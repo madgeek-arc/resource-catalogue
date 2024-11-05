@@ -109,12 +109,10 @@ public class ServiceExtensionsController {
         String serviceId = prefix + "/" + suffix;
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(1000);
+        ff.addFilter("service_id", serviceId);
         List<HelpdeskBundle> allHelpdesks = helpdeskService.getAll(ff, auth).getResults();
-        for (HelpdeskBundle helpdesk : allHelpdesks) {
-            if (helpdesk.getCatalogueId().equals(catalogueId) && (helpdesk.getHelpdesk().getServiceId().equals(serviceId)
-                    || (catalogueId + '.' + helpdesk.getHelpdesk().getServiceId()).equals(serviceId))) {
-                return new ResponseEntity<>(helpdesk.getHelpdesk(), HttpStatus.OK);
-            }
+        if (!allHelpdesks.isEmpty()) {
+            return new ResponseEntity<>(allHelpdesks.getFirst().getHelpdesk(), HttpStatus.OK);
         }
         return new ResponseEntity<>(null, HttpStatus.OK);
     }
@@ -145,7 +143,7 @@ public class ServiceExtensionsController {
 
     @Operation(summary = "Creates a new Helpdesk.")
     @PostMapping(path = "/helpdesk", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth, #helpdesk.serviceId, #catalogueId)")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth, #helpdesk.serviceId)")
     public ResponseEntity<Helpdesk> addHelpdesk(@Valid @RequestBody Helpdesk helpdesk,
                                                 @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId,
                                                 @RequestParam String resourceType,
@@ -189,7 +187,7 @@ public class ServiceExtensionsController {
     // Deletes the Helpdesk of the specific Service of the specific Catalogue.
     @Operation(summary = "Deletes the Helpdesk of the specific Service of the specific Catalogue.")
     @DeleteMapping(path = "/helpdesk/{catalogueId}/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth, #prefix+'/'+#suffix, #catalogueId)")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth, #prefix+'/'+#suffix)")
     public ResponseEntity<Helpdesk> deleteHelpdesk(@PathVariable("catalogueId") String catalogueId,
                                                    @Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
                                                    @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix,
@@ -213,7 +211,7 @@ public class ServiceExtensionsController {
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<HelpdeskBundle> createPublicHelpdesk(@RequestBody HelpdeskBundle helpdeskBundle, @Parameter(hidden = true) Authentication auth) {
         logger.info("User '{}-{}' attempts to create a Public Helpdesk from Helpdesk '{}' of the '{}' Catalogue", User.of(auth).getFullName(),
-                User.of(auth).getEmail(), helpdeskBundle.getId(), helpdeskBundle.getCatalogueId());
+                User.of(auth).getEmail().toLowerCase(), helpdeskBundle.getId(), helpdeskBundle.getCatalogueId());
         return ResponseEntity.ok(helpdeskService.createPublicResource(helpdeskBundle, auth));
     }
 
@@ -263,12 +261,10 @@ public class ServiceExtensionsController {
         String serviceId = prefix + "/" + suffix;
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(1000);
+        ff.addFilter("service_id", serviceId);
         List<MonitoringBundle> allMonitorings = monitoringService.getAll(ff, auth).getResults();
-        for (MonitoringBundle monitoring : allMonitorings) {
-            if (monitoring.getCatalogueId().equals(catalogueId) && (monitoring.getMonitoring().getServiceId().equals(serviceId)
-                    || (catalogueId + '.' + monitoring.getMonitoring().getServiceId()).equals(serviceId))) {
-                return new ResponseEntity<>(monitoring.getMonitoring(), HttpStatus.OK);
-            }
+        if (!allMonitorings.isEmpty()) {
+            return new ResponseEntity<>(allMonitorings.getFirst().getMonitoring(), HttpStatus.OK);
         }
         return new ResponseEntity<>(null, HttpStatus.OK);
     }
@@ -304,7 +300,7 @@ public class ServiceExtensionsController {
 
     @Operation(summary = "Creates a new Monitoring.")
     @PostMapping(path = "/monitoring", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth, #monitoring.serviceId, #catalogueId)")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth, #monitoring.serviceId)")
     public ResponseEntity<Monitoring> addMonitoring(@Valid @RequestBody Monitoring monitoring,
                                                     @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId,
                                                     @RequestParam String resourceType,
@@ -348,7 +344,7 @@ public class ServiceExtensionsController {
     // Deletes the Monitoring of the specific Service of the specific Catalogue.
     @Operation(summary = "Deletes the Monitoring of the specific Service of the specific Catalogue.")
     @DeleteMapping(path = "/monitoring/{catalogueId}/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth, #prefix+'/'+#suffix, #catalogueId)")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth, #prefix+'/'+#suffix)")
     public ResponseEntity<Monitoring> deleteMonitoring(@PathVariable("catalogueId") String catalogueId,
                                                        @Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
                                                        @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix,
@@ -464,7 +460,7 @@ public class ServiceExtensionsController {
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<MonitoringBundle> createPublicMonitoring(@RequestBody MonitoringBundle monitoringBundle, @Parameter(hidden = true) Authentication auth) {
         logger.info("User '{}-{}' attempts to create a Public Monitoring from Monitoring '{}' of the '{}' Catalogue", User.of(auth).getFullName(),
-                User.of(auth).getEmail(), monitoringBundle.getId(), monitoringBundle.getCatalogueId());
+                User.of(auth).getEmail().toLowerCase(), monitoringBundle.getId(), monitoringBundle.getCatalogueId());
         return ResponseEntity.ok(monitoringService.createPublicResource(monitoringBundle, auth));
     }
 

@@ -11,7 +11,6 @@ import gr.uoa.di.madgik.resourcecatalogue.exception.ValidationException;
 import gr.uoa.di.madgik.resourcecatalogue.manager.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.scheduling.annotation.Async;
@@ -28,6 +27,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+//TODO: refactor this mess
 @Component
 public class RegistrationMailService {
 
@@ -35,10 +35,10 @@ public class RegistrationMailService {
     private final MailService mailService;
     private final Configuration cfg;
     private final ProviderManager providerManager;
-    private final DraftProviderManager pendingProviderManager;
+    private final DraftProviderManager draftProviderManager;
     private final ServiceBundleManager serviceBundleManager;
     private final TrainingResourceManager trainingResourceManager;
-    private final DraftServiceManager pendingServiceManager;
+    private final DraftServiceManager draftServiceManager;
     private final SecurityService securityService;
 
     // Properties
@@ -58,19 +58,19 @@ public class RegistrationMailService {
 
     public RegistrationMailService(MailService mailService, Configuration cfg,
                                    ProviderManager providerManager,
-                                   @Lazy DraftProviderManager pendingProviderManager,
+                                   @Lazy DraftProviderManager draftProviderManager,
                                    ServiceBundleManager serviceBundleManager,
                                    TrainingResourceManager trainingResourceManager,
-                                   DraftServiceManager pendingServiceManager,
+                                   DraftServiceManager draftServiceManager,
                                    SecurityService securityService,
                                    ResourceCatalogueProperties properties) {
         this.mailService = mailService;
         this.cfg = cfg;
         this.providerManager = providerManager;
-        this.pendingProviderManager = pendingProviderManager;
+        this.draftProviderManager = draftProviderManager;
         this.serviceBundleManager = serviceBundleManager;
         this.trainingResourceManager = trainingResourceManager;
-        this.pendingServiceManager = pendingServiceManager;
+        this.draftServiceManager = draftServiceManager;
         this.securityService = securityService;
 
         // Init properties
@@ -86,7 +86,7 @@ public class RegistrationMailService {
     }
 
     @Async
-    public void sendProviderMails(ProviderBundle providerBundle, String afterReturningFrom) {
+    public void sendOnboardingEmailsToProviderAdmins(ProviderBundle providerBundle, String afterReturningFrom) {
         Map<String, Object> root = getRootTemplate();
         StringWriter out = new StringWriter();
         String providerMail;
@@ -123,11 +123,11 @@ public class RegistrationMailService {
         }
 
         if (serviceTemplate != null) {
-            providerSubject = getProviderSubject(providerBundle, serviceTemplate, serviceTemplate.getName());
-            regTeamSubject = getRegTeamSubject(providerBundle, serviceTemplate, serviceTemplate.getId(), serviceTemplate.getName());
+            providerSubject = getProviderAdminsSubject(providerBundle, serviceTemplate, serviceTemplate.getName());
+            regTeamSubject = getOnboardingTeamSubject(providerBundle, serviceTemplate, serviceTemplate.getId(), serviceTemplate.getName());
         } else {
-            providerSubject = getProviderSubject(providerBundle, trainingResourceTemplate, trainingResourceTemplate.getTitle());
-            regTeamSubject = getRegTeamSubject(providerBundle, trainingResourceTemplate, trainingResourceTemplate.getId(), trainingResourceTemplate.getTitle());
+            providerSubject = getProviderAdminsSubject(providerBundle, trainingResourceTemplate, trainingResourceTemplate.getTitle());
+            regTeamSubject = getOnboardingTeamSubject(providerBundle, trainingResourceTemplate, trainingResourceTemplate.getId(), trainingResourceTemplate.getTitle());
         }
 
         root.put("providerBundle", providerBundle);
@@ -137,7 +137,7 @@ public class RegistrationMailService {
             if (loggingInfo.getActionType().equals(LoggingInfo.ActionType.REGISTERED.getKey())) {
                 User user = new User();
                 if (loggingInfo.getUserEmail() != null && !loggingInfo.getUserEmail().equals("")) {
-                    user.setEmail(loggingInfo.getUserEmail());
+                    user.setEmail(loggingInfo.getUserEmail().toLowerCase());
                 } else {
                     user.setEmail("no email provided");
                 }
@@ -177,8 +177,8 @@ public class RegistrationMailService {
                 root.put("user", user);
                 temp.process(root, out);
                 providerMail = out.getBuffer().toString();
-                mailService.sendMail(user.getEmail(), providerSubject, providerMail);
-                logger.info("\nRecipient: {}\nTitle: {}\nMail body: \n{}", user.getEmail(), providerSubject, providerMail);
+                mailService.sendMail(user.getEmail().toLowerCase(), providerSubject, providerMail);
+                logger.info("\nRecipient: {}\nTitle: {}\nMail body: \n{}", user.getEmail().toLowerCase(), providerSubject, providerMail);
             }
 
             out.close();
@@ -192,7 +192,7 @@ public class RegistrationMailService {
     }
 
     @Async
-    public void sendCatalogueMails(CatalogueBundle catalogueBundle) {
+    public void sendOnboardingEmailsToCatalogueAdmins(CatalogueBundle catalogueBundle) {
         Map<String, Object> root = getRootTemplate();
         StringWriter out = new StringWriter();
         String catalogueMail;
@@ -205,8 +205,8 @@ public class RegistrationMailService {
             throw new ResourceNotFoundException("Catalogue is null");
         }
 
-        catalogueSubject = getCatalogueSubject(catalogueBundle);
-        regTeamSubject = getRegTeamCatalogueSubject(catalogueBundle);
+        catalogueSubject = getCatalogueAdminsSubject(catalogueBundle);
+        regTeamSubject = getOnboardingTeamSubject(catalogueBundle);
 
         root.put("catalogueBundle", catalogueBundle);
         root.put("registrationEmail", registrationEmail);
@@ -215,7 +215,7 @@ public class RegistrationMailService {
             if (loggingInfo.getActionType().equals(LoggingInfo.ActionType.REGISTERED.getKey())) {
                 User user = new User();
                 if (loggingInfo.getUserEmail() != null && !loggingInfo.getUserEmail().equals("")) {
-                    user.setEmail(loggingInfo.getUserEmail());
+                    user.setEmail(loggingInfo.getUserEmail().toLowerCase());
                 }
                 if (loggingInfo.getUserFullName() != null && !loggingInfo.getUserFullName().equals("")) {
                     String[] parts = loggingInfo.getUserFullName().split(" ");
@@ -250,8 +250,8 @@ public class RegistrationMailService {
                 root.put("user", user);
                 temp.process(root, out);
                 catalogueMail = out.getBuffer().toString();
-                mailService.sendMail(user.getEmail(), catalogueSubject, catalogueMail);
-                logger.info("\nRecipient: {}\nTitle: {}\nMail body: \n{}", user.getEmail(), catalogueSubject, catalogueMail);
+                mailService.sendMail(user.getEmail().toLowerCase(), catalogueSubject, catalogueMail);
+                logger.info("\nRecipient: {}\nTitle: {}\nMail body: \n{}", user.getEmail().toLowerCase(), catalogueSubject, catalogueMail);
             }
 
             out.close();
@@ -265,7 +265,7 @@ public class RegistrationMailService {
     }
 
     @Scheduled(cron = "0 0 12 ? * 2/7") // At 12:00:00pm, every 7 days starting on Monday, every month
-    public void sendEmailNotificationsToProviders() {
+    public void sendOnboardingEmailNotificationsToProviderAdmins() {
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(maxQuantity);
         ff.addFilter("published", false);
@@ -283,20 +283,20 @@ public class RegistrationMailService {
                 for (User user : providerBundle.getProvider().getUsers()) {
                     root.put("user", user);
                     String userRole = "provider";
-                    sendMailsFromTemplate("providerOnboarding.ftl", root, subject, user.getEmail(), userRole);
+                    sendMailsFromTemplate("providerOnboarding.ftl", root, subject, user.getEmail().toLowerCase(), userRole);
                 }
             }
         }
     }
 
-    public void sendEmailNotificationsToProvidersWithOutdatedResources(String resourceId) {
+    public void sendEmailNotificationsToProviderAdminsWithOutdatedResources(String resourceId) {
         Map<String, Object> root = getRootTemplate();
         ProviderBundle providerBundle;
         ServiceBundle serviceBundle;
         TrainingResourceBundle trainingResourceBundle = null;
-        serviceBundle = serviceBundleManager.getOrElseReturnNull(resourceId, catalogueId);
+        serviceBundle = serviceBundleManager.getOrElseReturnNull(resourceId);
         if (serviceBundle == null) {
-            trainingResourceBundle = trainingResourceManager.getOrElseReturnNull(resourceId, catalogueId);
+            trainingResourceBundle = trainingResourceManager.getOrElseReturnNull(resourceId);
             providerBundle = providerManager.get(trainingResourceBundle.getTrainingResource().getResourceOrganisation());
         } else {
             providerBundle = providerManager.get(serviceBundle.getService().getResourceOrganisation());
@@ -311,19 +311,19 @@ public class RegistrationMailService {
             for (User user : providerBundle.getProvider().getUsers()) {
                 root.put("user", user);
                 String userRole = "provider";
-                sendMailsFromTemplate("providerOutdatedResources.ftl", root, subject, user.getEmail(), userRole);
+                sendMailsFromTemplate("providerOutdatedResources.ftl", root, subject, user.getEmail().toLowerCase(), userRole);
             }
         } else {
             root.put("trainingResourceBundle", trainingResourceBundle);
             for (User user : providerBundle.getProvider().getUsers()) {
                 root.put("user", user);
                 String userRole = "provider";
-                sendMailsFromTemplate("providerOutdatedTrainingResources.ftl", root, subject, user.getEmail(), userRole);
+                sendMailsFromTemplate("providerOutdatedTrainingResources.ftl", root, subject, user.getEmail().toLowerCase(), userRole);
             }
         }
     }
 
-    public void sendEmailsForMovedResources(ProviderBundle oldProvider, ProviderBundle newProvider, ServiceBundle serviceBundle, Authentication auth) {
+    public void sendEmailsForMovedServices(ProviderBundle oldProvider, ProviderBundle newProvider, ServiceBundle serviceBundle, Authentication auth) {
         Map<String, Object> root = getRootTemplate();
         if (oldProvider.getProvider().getUsers() == null || oldProvider.getProvider().getUsers().isEmpty()) {
             throw new ValidationException(String.format("Provider [%s]-[%s] has no Users", oldProvider.getId(), oldProvider.getProvider().getName()));
@@ -342,20 +342,20 @@ public class RegistrationMailService {
         // emails to old Provider's Users
         for (User user : oldProvider.getProvider().getUsers()) {
             root.put("user", user);
-            sendMailsFromTemplate("resourceMovedOldProvider.ftl", root, subject, user.getEmail(), userRole);
+            sendMailsFromTemplate("resourceMovedOldProvider.ftl", root, subject, user.getEmail().toLowerCase(), userRole);
         }
 //        root.remove("user");
 
         // emails to new Provider's Users
         for (User user : newProvider.getProvider().getUsers()) {
             root.put("user", user);
-            sendMailsFromTemplate("resourceMovedNewProvider.ftl", root, subject, user.getEmail(), userRole);
+            sendMailsFromTemplate("resourceMovedNewProvider.ftl", root, subject, user.getEmail().toLowerCase(), userRole);
         }
 
         // emails to Admins
         userRole = "admin";
         root.put("adminFullName", User.of(auth).getFullName());
-        root.put("adminEmail", User.of(auth).getEmail());
+        root.put("adminEmail", User.of(auth).getEmail().toLowerCase());
         root.put("adminRole", securityService.getRoleName(auth));
         sendMailsFromTemplate("resourceMovedEPOT.ftl", root, subject, registrationEmail, userRole);
     }
@@ -379,26 +379,26 @@ public class RegistrationMailService {
         // emails to old Provider's Users
         for (User user : oldProvider.getProvider().getUsers()) {
             root.put("user", user);
-            sendMailsFromTemplate("trainingResourceMovedOldProvider.ftl", root, subject, user.getEmail(), userRole);
+            sendMailsFromTemplate("trainingResourceMovedOldProvider.ftl", root, subject, user.getEmail().toLowerCase(), userRole);
         }
 //        root.remove("user");
 
         // emails to new Provider's Users
         for (User user : newProvider.getProvider().getUsers()) {
             root.put("user", user);
-            sendMailsFromTemplate("trainingResourceMovedNewProvider.ftl", root, subject, user.getEmail(), userRole);
+            sendMailsFromTemplate("trainingResourceMovedNewProvider.ftl", root, subject, user.getEmail().toLowerCase(), userRole);
         }
 
         // emails to Admins
         userRole = "admin";
         root.put("adminFullName", User.of(auth).getFullName());
-        root.put("adminEmail", User.of(auth).getEmail());
+        root.put("adminEmail", User.of(auth).getEmail().toLowerCase());
         root.put("adminRole", securityService.getRoleName(auth));
         sendMailsFromTemplate("trainingResourceMovedEPOT.ftl", root, subject, registrationEmail, userRole);
     }
 
     @Scheduled(cron = "0 0 12 ? * 2/2") // At 12:00:00pm, every 2 days starting on Monday, every month
-    public void sendEmailNotificationsToAdmins() {
+    public void sendOnboardingEmailNotificationsToPortalAdmins() {
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(maxQuantity);
         ff.addFilter("published", false);
@@ -426,6 +426,7 @@ public class RegistrationMailService {
         }
     }
 
+    //TODO: especially refactor THIS mess
     @Scheduled(cron = "0 0 12 ? * *") // At 12:00:00pm every day
 //    @Scheduled(fixedDelay = 1000)
     public void dailyNotificationsToAdmins() {
@@ -445,11 +446,11 @@ public class RegistrationMailService {
         ff.setQuantity(maxQuantity);
         ff.addFilter("published", false);
         List<ProviderBundle> activeProviders = providerManager.getAll(ff, securityService.getAdminAccess()).getResults();
-        List<ProviderBundle> pendingProviders = pendingProviderManager.getAll(ff, securityService.getAdminAccess()).getResults();
+        List<ProviderBundle> draftProviders = draftProviderManager.getAll(ff, securityService.getAdminAccess()).getResults();
         List<ServiceBundle> activeServices = serviceBundleManager.getAll(ff, securityService.getAdminAccess()).getResults();
-        List<ServiceBundle> pendingServices = pendingServiceManager.getAll(ff, securityService.getAdminAccess()).getResults();
-        List<ProviderBundle> allProviders = Stream.concat(activeProviders.stream(), pendingProviders.stream()).collect(Collectors.toList());
-        List<ServiceBundle> allServices = Stream.concat(activeServices.stream(), pendingServices.stream()).collect(Collectors.toList());
+        List<ServiceBundle> draftServices = draftServiceManager.getAll(ff, securityService.getAdminAccess()).getResults();
+        List<ProviderBundle> allProviders = Stream.concat(activeProviders.stream(), draftProviders.stream()).collect(Collectors.toList());
+        List<ServiceBundle> allServices = Stream.concat(activeServices.stream(), draftServices.stream()).collect(Collectors.toList());
         List<Bundle> allResources = Stream.concat(allProviders.stream(), allServices.stream()).collect(Collectors.toList());
 
         // New & Updated Providers, Resources
@@ -600,7 +601,7 @@ public class RegistrationMailService {
         }
     }
 
-    private String getProviderSubject(ProviderBundle providerBundle, Object serviceTemplate, String name) {
+    private String getProviderAdminsSubject(ProviderBundle providerBundle, Object serviceTemplate, String name) {
         if (providerBundle == null || providerBundle.getProvider() == null) {
             logger.error("Provider is null");
             return String.format("[%s]", catalogueName);
@@ -664,7 +665,7 @@ public class RegistrationMailService {
         return subject;
     }
 
-    private String getCatalogueSubject(CatalogueBundle catalogueBundle) {
+    private String getCatalogueAdminsSubject(CatalogueBundle catalogueBundle) {
         if (catalogueBundle == null || catalogueBundle.getCatalogue() == null) {
             logger.error("Catalogue is null");
             return String.format("[%s]", catalogueName);
@@ -696,7 +697,7 @@ public class RegistrationMailService {
     }
 
 
-    private String getRegTeamSubject(ProviderBundle providerBundle, Object serviceTemplate, String resourceId, String name) {
+    private String getOnboardingTeamSubject(ProviderBundle providerBundle, Object serviceTemplate, String resourceId, String name) {
         if (providerBundle == null || providerBundle.getProvider() == null) {
             logger.error("Provider is null");
             return String.format("[%s]", catalogueName);
@@ -761,7 +762,7 @@ public class RegistrationMailService {
         return subject;
     }
 
-    private String getRegTeamCatalogueSubject(CatalogueBundle catalogueBundle) {
+    private String getOnboardingTeamSubject(CatalogueBundle catalogueBundle) {
         if (catalogueBundle == null || catalogueBundle.getCatalogue() == null) {
             logger.error("Catalogue is null");
             return String.format("[%s]", catalogueName);
@@ -794,7 +795,7 @@ public class RegistrationMailService {
         return subject;
     }
 
-    public void sendEmailsToNewlyAddedAdmins(ProviderBundle providerBundle, List<String> admins) {
+    public void sendEmailsToNewlyAddedProviderAdmins(ProviderBundle providerBundle, List<String> admins) {
 
         Map<String, Object> root = getRootTemplate();
         root.put("providerBundle", providerBundle);
@@ -805,20 +806,20 @@ public class RegistrationMailService {
             for (User user : providerBundle.getProvider().getUsers()) {
                 root.put("user", user);
                 String userRole = "provider";
-                sendMailsFromTemplate("providerAdminAdded.ftl", root, subject, user.getEmail(), userRole);
+                sendMailsFromTemplate("providerAdminAdded.ftl", root, subject, user.getEmail().toLowerCase(), userRole);
             }
         } else {
             for (User user : providerBundle.getProvider().getUsers()) {
                 if (admins.contains(user.getEmail())) {
                     root.put("user", user);
                     String userRole = "provider";
-                    sendMailsFromTemplate("providerAdminAdded.ftl", root, subject, user.getEmail(), userRole);
+                    sendMailsFromTemplate("providerAdminAdded.ftl", root, subject, user.getEmail().toLowerCase(), userRole);
                 }
             }
         }
     }
 
-    public void sendEmailsToNewlyDeletedAdmins(ProviderBundle providerBundle, List<String> admins) {
+    public void sendEmailsToNewlyDeletedProviderAdmins(ProviderBundle providerBundle, List<String> admins) {
 
         Map<String, Object> root = getRootTemplate();
         root.put("providerBundle", providerBundle);
@@ -826,10 +827,10 @@ public class RegistrationMailService {
         String subject = String.format("[%s Portal] Your email has been deleted from the Administration Team of the Provider '%s'", catalogueName, providerBundle.getProvider().getName());
 
         for (User user : providerBundle.getProvider().getUsers()) {
-            if (admins.contains(user.getEmail())) {
+            if (admins.contains(user.getEmail().toLowerCase())) {
                 root.put("user", user);
                 String userRole = "provider";
-                sendMailsFromTemplate("providerAdminDeleted.ftl", root, subject, user.getEmail(), userRole);
+                sendMailsFromTemplate("providerAdminDeleted.ftl", root, subject, user.getEmail().toLowerCase(), userRole);
             }
         }
     }
@@ -845,14 +846,14 @@ public class RegistrationMailService {
             for (User user : catalogueBundle.getCatalogue().getUsers()) {
                 root.put("user", user);
                 String userRole = "provider";
-                sendMailsFromTemplate("catalogueAdminAdded.ftl", root, subject, user.getEmail(), userRole);
+                sendMailsFromTemplate("catalogueAdminAdded.ftl", root, subject, user.getEmail().toLowerCase(), userRole);
             }
         } else {
             for (User user : catalogueBundle.getCatalogue().getUsers()) {
-                if (admins.contains(user.getEmail())) {
+                if (admins.contains(user.getEmail().toLowerCase())) {
                     root.put("user", user);
                     String userRole = "provider";
-                    sendMailsFromTemplate("catalogueAdminAdded.ftl", root, subject, user.getEmail(), userRole);
+                    sendMailsFromTemplate("catalogueAdminAdded.ftl", root, subject, user.getEmail().toLowerCase(), userRole);
                 }
             }
         }
@@ -866,10 +867,10 @@ public class RegistrationMailService {
         String subject = String.format("[%s Portal] Your email has been deleted from the Administration Team of the Catalogue '%s'", catalogueName, catalogueBundle.getCatalogue().getName());
 
         for (User user : catalogueBundle.getCatalogue().getUsers()) {
-            if (admins.contains(user.getEmail())) {
+            if (admins.contains(user.getEmail().toLowerCase())) {
                 root.put("user", user);
                 String userRole = "provider";
-                sendMailsFromTemplate("catalogueAdminDeleted.ftl", root, subject, user.getEmail(), userRole);
+                sendMailsFromTemplate("catalogueAdminDeleted.ftl", root, subject, user.getEmail().toLowerCase(), userRole);
             }
         }
     }
@@ -884,7 +885,7 @@ public class RegistrationMailService {
         sendMailsFromTemplate("providerDeletionRequest.ftl", root, subject, registrationEmail, userRole);
     }
 
-    public void notifyProviderAdmins(ProviderBundle provider) {
+    public void notifyProviderAdminsForProviderDeletion(ProviderBundle provider) {
         Map<String, Object> root = getRootTemplate();
         root.put("providerBundle", provider);
 
@@ -893,7 +894,7 @@ public class RegistrationMailService {
         for (User user : provider.getProvider().getUsers()) {
             root.put("user", user);
             String userRole = "provider";
-            sendMailsFromTemplate("providerDeletion.ftl", root, subject, user.getEmail(), userRole);
+            sendMailsFromTemplate("providerDeletion.ftl", root, subject, user.getEmail().toLowerCase(), userRole);
         }
     }
 
@@ -946,7 +947,7 @@ public class RegistrationMailService {
         for (User user : users) {
             root.put("user", user);
             String userRole = "provider";
-            sendMailsFromTemplate("bundleAudit.ftl", root, subject, user.getEmail(), userRole);
+            sendMailsFromTemplate("bundleAudit.ftl", root, subject, user.getEmail().toLowerCase(), userRole);
         }
     }
 
@@ -972,7 +973,7 @@ public class RegistrationMailService {
         sendMailsFromTemplate("invalidCatalogueUpdate.ftl", root, subject, registrationEmail, userRole);
     }
 
-    public void notifyPortalAdminsForInvalidResourceUpdate(ServiceBundle serviceBundle) {
+    public void notifyPortalAdminsForInvalidServiceUpdate(ServiceBundle serviceBundle) {
 
         Map<String, Object> root = getRootTemplate();
         root.put("serviceBundle", serviceBundle);
@@ -994,7 +995,7 @@ public class RegistrationMailService {
         sendMailsFromTemplate("invalidTrainingResourceUpdate.ftl", root, subject, registrationEmail, userRole);
     }
 
-    public void sendEmailsForDatasourceExtension(DatasourceBundle datasourceBundle, String action) {
+    public void sendEmailsForDatasourceExtensionToPortalAdmins(DatasourceBundle datasourceBundle, String action) {
         Map<String, Object> root = getRootTemplate();
         root.put("datasourceBundle", datasourceBundle);
         root.put("action", action);
@@ -1010,7 +1011,7 @@ public class RegistrationMailService {
         sendMailsFromTemplate("serviceExtensionsDatasource.ftl", root, subject, registrationEmail, userRole);
     }
 
-    public void sendEmailsForHelpdeskExtension(HelpdeskBundle helpdeskBundle, String resourceType, String action) {
+    public void sendEmailsForHelpdeskExtensionToPortalAdmins(HelpdeskBundle helpdeskBundle, String resourceType, String action) {
         String resourceName = getResourceNameFromResourceType(resourceType);
         Map<String, Object> root = getRootTemplate();
         root.put("helpdeskBundle", helpdeskBundle);
@@ -1028,7 +1029,7 @@ public class RegistrationMailService {
         sendMailsFromTemplate("serviceExtensionsHelpdesk.ftl", root, subject, helpdeskEmail, Collections.singletonList(helpdeskCC), userRole);
     }
 
-    public void sendEmailsForMonitoringExtension(MonitoringBundle monitoringBundle, String resourceType, String action) {
+    public void sendEmailsForMonitoringExtensionToPortalAdmins(MonitoringBundle monitoringBundle, String resourceType, String action) {
         String resourceName = getResourceNameFromResourceType(resourceType);
         Map<String, Object> root = getRootTemplate();
         root.put("monitoringBundle", monitoringBundle);
@@ -1057,7 +1058,7 @@ public class RegistrationMailService {
         }
     }
 
-    public void sendEmailsForInteroperabilityRecordOnboarding(InteroperabilityRecordBundle interoperabilityRecordBundle, User registrant) {
+    public void sendInteroperabilityRecordOnboardingEmailsToPortalAdmins(InteroperabilityRecordBundle interoperabilityRecordBundle, User registrant) {
         ProviderBundle providerBundle = providerManager.get(interoperabilityRecordBundle.getInteroperabilityRecord().getCatalogueId(), interoperabilityRecordBundle.getInteroperabilityRecord().getProviderId(), securityService.getAdminAccess());
         List<User> providerAdmins = providerBundle.getProvider().getUsers();
 
@@ -1072,7 +1073,7 @@ public class RegistrationMailService {
         String subjectForProviderAdmins = getProviderAdminsSubjectForInteroperabilityRecordOnboarding(interoperabilityRecordBundle);
         for (User user : providerAdmins) {
             root.put("user", user);
-            sendMailsFromTemplate("interoperabilityRecordOnboardingForProviderAdmins.ftl", root, subjectForProviderAdmins, user.getEmail(), "provider");
+            sendMailsFromTemplate("interoperabilityRecordOnboardingForProviderAdmins.ftl", root, subjectForProviderAdmins, user.getEmail().toLowerCase(), "provider");
         }
     }
 

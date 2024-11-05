@@ -1,190 +1,112 @@
 package gr.uoa.di.madgik.resourcecatalogue.service;
 
-import gr.uoa.di.madgik.resourcecatalogue.domain.ProviderBundle;
+import gr.uoa.di.madgik.resourcecatalogue.domain.InteroperabilityRecord;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Service;
-import gr.uoa.di.madgik.resourcecatalogue.domain.ServiceBundle;
+import gr.uoa.di.madgik.resourcecatalogue.domain.TrainingResource;
 import gr.uoa.di.madgik.resourcecatalogue.domain.User;
-import org.springframework.security.core.Authentication;
-
 import jakarta.validation.constraints.NotNull;
+import org.springframework.security.core.Authentication;
 
 public interface SecurityService {
 
     /**
-     * @return
+     * @return Admin Authentication
      */
     Authentication getAdminAccess();
 
     /**
-     * @param authentication
-     * @return
+     * @param authentication authentication
+     * @return role name
      */
     String getRoleName(Authentication authentication);
 
     /**
-     * @param auth
-     * @param role
-     * @return
+     * @param auth authentication
+     * @param role from the predefined roles
+     * @return False if authentication is null, True otherwise
      */
     boolean hasRole(Authentication auth, String role);
 
     /**
-     * @param auth
-     * @param providerId
-     * @return
+     * @param auth       Authentication
+     * @param providerId Provider id
+     * @return True if the authenticated user is a Provider Admin
      */
     boolean isProviderAdmin(Authentication auth, @NotNull String providerId);
 
     /**
-     * @param auth
-     * @param providerId
-     * @param catalogueId
-     * @return
-     */
-    boolean isProviderAdmin(Authentication auth, @NotNull String providerId, @NotNull String catalogueId);
-
-    /**
-     * @param auth
-     * @param providerId
-     * @param noThrow
-     * @return
+     * @param auth       Authentication
+     * @param providerId Provider id
+     * @param noThrow    False to throw error, True to not throw error
+     * @return TTrue if the authenticated user is a Provider Admin
      */
     boolean isProviderAdmin(Authentication auth, @NotNull String providerId, boolean noThrow);
 
     /**
-     * @param auth
-     * @param providerId
-     * @param catalogueId
-     * @param noThrow
-     * @return
+     * @param user User
+     * @param id   Provider or Catalogue id
+     * @return True if the authenticated user is a Provider Admin
      */
-    boolean isProviderAdmin(Authentication auth, @NotNull String providerId, @NotNull String catalogueId, boolean noThrow);
+    boolean userIsProviderAdmin(@NotNull User user, @NotNull String id);
 
     /**
-     * @param auth
-     * @param catalogueId
-     * @return
-     */
-    boolean isCatalogueAdmin(Authentication auth, @NotNull String catalogueId);
-
-    /**
-     * @param auth
-     * @param catalogueId
-     * @param noThrow
-     * @return
-     */
-    boolean isCatalogueAdmin(Authentication auth, @NotNull String catalogueId, boolean noThrow);
-
-    /**
-     * @param auth
-     * @param resourceId
-     * @return
+     * @param auth       Authentication
+     * @param resourceId resource id
+     * @return True if the authenticated user is a Provider Admin for the provider where the resource is registered.
      */
     boolean isResourceProviderAdmin(Authentication auth, String resourceId);
 
     /**
-     * @param auth
-     * @param resourceId
-     * @param catalogueId
-     * @return
+     * @param user       User
+     * @param resourceId resource id
+     * @return True if the authenticated user is a Provider Admin for the provider where the resource is registered.
      */
-    boolean isResourceProviderAdmin(Authentication auth, String resourceId, String catalogueId);
+    boolean userIsResourceProviderAdmin(User user, String resourceId);
 
     /**
-     * @param auth
-     * @param serviceBundle
-     * @param noThrow
-     * @return
+     * @param auth    Authentication
+     * @param service Service
+     * @return True if provider where the service is registered is active and approved
      */
-    boolean isResourceProviderAdmin(Authentication auth, ServiceBundle serviceBundle, boolean noThrow);
+    boolean providerCanAddResources(Authentication auth, Service service);
 
     /**
-     * @param auth
-     * @param service
-     * @param <T>
-     * @return
+     * @param auth             Authentication
+     * @param trainingResource Training Resource
+     * @return True if provider where the training resource is registered is active and approved
      */
-    <T extends Service> boolean isResourceProviderAdmin(Authentication auth, T service);
+    boolean providerCanAddResources(Authentication auth, TrainingResource trainingResource);
 
     /**
-     * @param user
-     * @param providerId
-     * @param catalogueId
-     * @return
+     * @param auth                   Authentication
+     * @param interoperabilityRecord Interoperability Record
+     * @return True if provider where the interoperability record is registered is active and approved
      */
-    boolean userIsProviderAdmin(@NotNull User user, @NotNull String providerId, @NotNull String catalogueId);
+    boolean providerCanAddResources(Authentication auth, InteroperabilityRecord interoperabilityRecord);
 
     /**
-     * @param user
-     * @param providerBundle
-     * @return
-     */
-    boolean userIsProviderAdmin(@NotNull User user, @NotNull ProviderBundle providerBundle);
-
-    /**
-     * @param user
-     * @param catalogueId
-     * @return
-     */
-    boolean userIsCatalogueAdmin(@NotNull User user, @NotNull String catalogueId);
-
-    /**
-     * @param user
-     * @param resourceId
-     * @param catalogueId
-     * @return
-     */
-    boolean userIsResourceProviderAdmin(User user, String resourceId, String catalogueId);
-
-    /**
-     * @param auth
-     * @param resourceId
-     * @param catalogueId
-     * @return
-     */
-    boolean providerCanAddResources(Authentication auth, String resourceId, String catalogueId);
-
-    /**
-     * @param auth
-     * @param serviceBundle
-     * @return
-     */
-    boolean providerCanAddResources(Authentication auth, ServiceBundle serviceBundle);
-
-    /**
-     * @param auth
-     * @param service
-     * @param <T>
-     * @return
-     */
-    <T extends Service> boolean providerCanAddResources(Authentication auth, T service);
-
-    /**
-     * @param auth
-     * @param resourceId
-     * @return
+     * @param auth       Authentication
+     * @param resourceId resource id
+     * @return True if the authenticated user is a Provider Admin for the provider where the resource is registered
+     * and provider is active
      */
     boolean providerIsActiveAndUserIsAdmin(Authentication auth, String resourceId);
 
     /**
-     * @param auth
-     * @param resourceId
-     * @param catalogueId
-     * @return
+     * @param id service id
+     * @return True if service is active
      */
-    boolean providerIsActiveAndUserIsAdmin(Authentication auth, String resourceId, String catalogueId);
+    boolean serviceIsActive(String id);
 
     /**
-     * @param resourceId
-     * @param catalogueId
-     * @return
+     * @param id training resource id
+     * @return True if training resource is active
      */
-    boolean resourceIsActive(String resourceId, String catalogueId);
+    boolean trainingResourceIsActive(String id);
 
     /**
-     * @param resourceId
-     * @param catalogueId
-     * @return
+     * @param id interoperability record id
+     * @return True if interoperability record (guideline) is active
      */
-    boolean trainingResourceIsActive(String resourceId, String catalogueId);
+    boolean guidelineIsActive(String id);
 }

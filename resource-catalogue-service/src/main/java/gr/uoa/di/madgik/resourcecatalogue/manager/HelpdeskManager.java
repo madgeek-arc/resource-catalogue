@@ -14,7 +14,6 @@ import gr.uoa.di.madgik.resourcecatalogue.utils.ProviderResourcesCommonMethods;
 import gr.uoa.di.madgik.resourcecatalogue.utils.ResourceValidationUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.core.Authentication;
 
@@ -83,7 +82,7 @@ public class HelpdeskManager extends ResourceManager<HelpdeskBundle> implements 
         helpdesk.setId(idCreator.generate(getResourceType()));
         logger.trace("Attempting to add a new Helpdesk: {}", helpdesk);
 
-        helpdesk.setMetadata(Metadata.createMetadata(User.of(auth).getFullName(), User.of(auth).getEmail()));
+        helpdesk.setMetadata(Metadata.createMetadata(User.of(auth).getFullName(), User.of(auth).getEmail().toLowerCase()));
         List<LoggingInfo> loggingInfoList = commonMethods.returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(helpdesk, auth);
         helpdesk.setLoggingInfo(loggingInfoList);
         helpdesk.setActive(true);
@@ -93,7 +92,7 @@ public class HelpdeskManager extends ResourceManager<HelpdeskBundle> implements 
         super.add(helpdesk, null);
         logger.debug("Adding Helpdesk: {}", helpdesk);
 
-        registrationMailService.sendEmailsForHelpdeskExtension(helpdesk, resourceType, "post");
+        registrationMailService.sendEmailsForHelpdeskExtensionToPortalAdmins(helpdesk, resourceType, "post");
 
         return helpdesk;
     }
@@ -117,7 +116,7 @@ public class HelpdeskManager extends ResourceManager<HelpdeskBundle> implements 
         }
 
         validate(ret);
-        ret.setMetadata(Metadata.updateMetadata(ret.getMetadata(), User.of(auth).getFullName(), User.of(auth).getEmail()));
+        ret.setMetadata(Metadata.updateMetadata(ret.getMetadata(), User.of(auth).getFullName(), User.of(auth).getEmail().toLowerCase()));
         List<LoggingInfo> loggingInfoList = commonMethods.returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(ret, auth);
         LoggingInfo loggingInfo = commonMethods.createLoggingInfo(auth, LoggingInfo.Types.UPDATE.getKey(),
                 LoggingInfo.ActionType.UPDATED.getKey());
@@ -141,7 +140,7 @@ public class HelpdeskManager extends ResourceManager<HelpdeskBundle> implements 
         resourceService.updateResource(existingResource);
         logger.debug("Updating Helpdesk: {}", ret);
 
-        registrationMailService.sendEmailsForHelpdeskExtension(ret, "Resource", "put");
+        registrationMailService.sendEmailsForHelpdeskExtensionToPortalAdmins(ret, "Resource", "put");
 
         return ret;
     }

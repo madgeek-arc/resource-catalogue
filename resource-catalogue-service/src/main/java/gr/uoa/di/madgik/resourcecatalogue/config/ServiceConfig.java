@@ -27,13 +27,6 @@ import jakarta.xml.bind.JAXBException;
 import java.util.Random;
 
 @Configuration
-@ComponentScan(value = {
-        "gr.uoa.di.madgik.registry",
-        "gr.uoa.di.madgik.resourcecatalogue.manager",
-        "gr.uoa.di.madgik.resourcecatalogue.utils",
-        "gr.uoa.di.madgik.resourcecatalogue.validators",
-        "gr.uoa.di.madgik.resourcecatalogue.service",
-        "gr.uoa.di.madgik.resourcecatalogue.matomo"})
 @EnableSpringHttpSession
 @EnableAspectJAutoProxy
 @EnableAsync

@@ -42,6 +42,7 @@ public class InternalToPublicConsistency {
     private final SecurityService securityService;
     private final Configuration cfg;
     private final MailService mailService;
+    private final PublicResourceUtils publicResourceUtils;
 
 
     @Value("${catalogue.name:Resource Catalogue}")
@@ -62,7 +63,8 @@ public class InternalToPublicConsistency {
                                        PublicTrainingResourceManager publicTrainingResourceManager,
                                        PublicInteroperabilityRecordManager publicInteroperabilityRecordManager,
                                        PublicResourceInteroperabilityRecordManager publicResourceInteroperabilityRecordManager,
-                                       SecurityService securityService, Configuration cfg, MailService mailService) {
+                                       SecurityService securityService, Configuration cfg, MailService mailService,
+                                       PublicResourceUtils publicResourceUtils) {
         this.providerService = providerService;
         this.serviceBundleService = serviceBundleService;
         this.trainingResourceService = trainingResourceService;
@@ -76,8 +78,10 @@ public class InternalToPublicConsistency {
         this.securityService = securityService;
         this.cfg = cfg;
         this.mailService = mailService;
+        this.publicResourceUtils = publicResourceUtils;
     }
 
+    //TODO: Add all resource types which get published
     @Scheduled(cron = "0 0 0 * * *") // At midnight every day
 //    @Scheduled(initialDelay = 0, fixedRate = 6000) // every 2 min
     protected void logInternalToPublicResourceConsistency() {
@@ -86,13 +90,12 @@ public class InternalToPublicConsistency {
         List<TrainingResourceBundle> allInternalApprovedTR = trainingResourceService.getAll(createFacetFilter("approved resource"), securityService.getAdminAccess()).getResults();
         List<InteroperabilityRecordBundle> allInternalApprovedIR = interoperabilityRecordService.getAll(createFacetFilter("approved interoperability record"), securityService.getAdminAccess()).getResults();
         List<ResourceInteroperabilityRecordBundle> allInternalApprovedRIR = resourceInteroperabilityRecordService.getAll(createFacetFilter(null), securityService.getAdminAccess()).getResults();
-        //TODO: add Configuration Template
         List<String> logs = new ArrayList<>();
 
         // check consistency for Providers
         for (ProviderBundle providerBundle : allInternalApprovedProviders) {
             String providerId = providerBundle.getId();
-            String publicProviderId = providerBundle.getProvider().getCatalogueId() + "." + providerId;
+            String publicProviderId = publicResourceUtils.createPublicResourceId(providerId, providerBundle.getProvider().getCatalogueId());
             // try and get its Public instance
             try {
                 publicProviderManager.get(publicProviderId);
@@ -105,7 +108,7 @@ public class InternalToPublicConsistency {
         // check consistency for Services
         for (ServiceBundle serviceBundle : allInternalApprovedServices) {
             String serviceId = serviceBundle.getId();
-            String publicServiceId = serviceBundle.getService().getCatalogueId() + "." + serviceId;
+            String publicServiceId = publicResourceUtils.createPublicResourceId(serviceId, serviceBundle.getService().getCatalogueId());
             // try and get its Public instance
             try {
                 publicServiceManager.get(publicServiceId);
@@ -118,7 +121,8 @@ public class InternalToPublicConsistency {
         // check consistency for Training Resources
         for (TrainingResourceBundle trainingResourceBundle : allInternalApprovedTR) {
             String trainingResourceId = trainingResourceBundle.getId();
-            String publicTrainingResourceId = trainingResourceBundle.getTrainingResource().getCatalogueId() + "." + trainingResourceId;
+            String publicTrainingResourceId = publicResourceUtils.createPublicResourceId(trainingResourceId,
+                    trainingResourceBundle.getTrainingResource().getCatalogueId());
             // try and get its Public instance
             try {
                 publicTrainingResourceManager.get(publicTrainingResourceId);
@@ -131,7 +135,8 @@ public class InternalToPublicConsistency {
         // check consistency for Interoperability Records
         for (InteroperabilityRecordBundle interoperabilityRecordBundle : allInternalApprovedIR) {
             String interoperabilityRecordId = interoperabilityRecordBundle.getId();
-            String publicInteroperabilityRecordId = interoperabilityRecordBundle.getInteroperabilityRecord().getCatalogueId() + "." + interoperabilityRecordId;
+            String publicInteroperabilityRecordId = publicResourceUtils.createPublicResourceId(interoperabilityRecordId,
+                    interoperabilityRecordBundle.getInteroperabilityRecord().getCatalogueId());
             // try and get its Public instance
             try {
                 publicInteroperabilityRecordManager.get(publicInteroperabilityRecordId);

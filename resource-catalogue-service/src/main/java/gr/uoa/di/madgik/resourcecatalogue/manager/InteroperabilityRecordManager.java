@@ -14,6 +14,7 @@ import gr.uoa.di.madgik.resourcecatalogue.utils.ObjectUtils;
 import gr.uoa.di.madgik.resourcecatalogue.utils.ProviderResourcesCommonMethods;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
@@ -42,7 +43,8 @@ public class InteroperabilityRecordManager extends ResourceManager<Interoperabil
                                          SecurityService securityService, VocabularyService vocabularyService,
                                          PublicInteroperabilityRecordManager publicInteroperabilityRecordManager,
                                          CatalogueService catalogueService,
-                                         RegistrationMailService registrationMailService, ProviderResourcesCommonMethods commonMethods) {
+                                         RegistrationMailService registrationMailService,
+                                         ProviderResourcesCommonMethods commonMethods) {
         super(InteroperabilityRecordBundle.class);
         this.providerService = providerService;
         this.idCreator = idCreator;
@@ -105,7 +107,7 @@ public class InteroperabilityRecordManager extends ResourceManager<Interoperabil
         logger.trace("Attempting to add a new Interoperability Record: {}", interoperabilityRecordBundle.getInteroperabilityRecord());
         logger.info("Adding Interoperability Record: {}", interoperabilityRecordBundle.getInteroperabilityRecord());
         super.add(interoperabilityRecordBundle, auth);
-        registrationMailService.sendEmailsForInteroperabilityRecordOnboarding(interoperabilityRecordBundle, User.of(auth));
+        registrationMailService.sendInteroperabilityRecordOnboardingEmailsToPortalAdmins(interoperabilityRecordBundle, User.of(auth));
 
         return interoperabilityRecordBundle;
     }
@@ -256,7 +258,7 @@ public class InteroperabilityRecordManager extends ResourceManager<Interoperabil
         }
 
         logger.info("Verifying Interoperability Record: {}", interoperabilityRecordBundle);
-        registrationMailService.sendEmailsForInteroperabilityRecordOnboarding(interoperabilityRecordBundle, User.of(auth));
+        registrationMailService.sendInteroperabilityRecordOnboardingEmailsToPortalAdmins(interoperabilityRecordBundle, User.of(auth));
         return super.update(interoperabilityRecordBundle, auth);
     }
 
@@ -284,13 +286,23 @@ public class InteroperabilityRecordManager extends ResourceManager<Interoperabil
         interoperabilityRecordBundle.setLatestAuditInfo(commonMethods.setLatestLoggingInfo(loggingInfoList, LoggingInfo.Types.AUDIT.getKey()));
 
 
-        update(interoperabilityRecordBundle, auth);
+        super.update(interoperabilityRecordBundle, auth);
         return interoperabilityRecordBundle;
     }
 
     public boolean validateInteroperabilityRecord(InteroperabilityRecordBundle interoperabilityRecordBundle) {
         validate(interoperabilityRecordBundle);
         return true;
+    }
+
+    @Override
+    public Browsing<InteroperabilityRecordBundle> getMy(FacetFilter filter, Authentication auth) {
+        List<ProviderBundle> providers = providerService.getMy(filter, auth).getResults();
+        FacetFilter ff = new FacetFilter();
+        ff.addFilter("provider_id", providers.stream().map(ProviderBundle::getId).toList());
+        ff.setResourceType(getResourceType());
+        ff.setQuantity(1000);
+        return this.getAll(ff, auth);
     }
 
     // TODO: refactor
@@ -314,10 +326,10 @@ public class InteroperabilityRecordManager extends ResourceManager<Interoperabil
         return null;
     }
 
-    public InteroperabilityRecordBundle getOrElseReturnNull(String id, String catalogueId) {
+    public InteroperabilityRecordBundle getOrElseReturnNull(String id) {
         InteroperabilityRecordBundle interoperabilityRecordBundle;
         try {
-            interoperabilityRecordBundle = get(id, catalogueId);
+            interoperabilityRecordBundle = get(id);
         } catch (ResourceException | ResourceNotFoundException e) {
             return null;
         }
@@ -359,7 +371,7 @@ public class InteroperabilityRecordManager extends ResourceManager<Interoperabil
         if (auth != null && auth.isAuthenticated()) {
             User user = User.of(auth);
             if (securityService.hasRole(auth, "ROLE_ADMIN") || securityService.hasRole(auth, "ROLE_EPOT") ||
-                    securityService.userIsResourceProviderAdmin(user, interoperabilityRecordId, catalogueId)) {
+                    securityService.userIsResourceProviderAdmin(user, interoperabilityRecordId)) {
                 return interoperabilityRecordBundle;
             }
         }
@@ -386,7 +398,7 @@ public class InteroperabilityRecordManager extends ResourceManager<Interoperabil
                 interoperabilityRecordBundle.getInteroperabilityRecord().getTitle(), provider.getProvider().getUsers());
 
         logger.info("User '{}-{}' audited Interoperability Record '{}'-'{}' with [actionType: {}]",
-                User.of(auth).getFullName(), User.of(auth).getEmail(),
+                User.of(auth).getFullName(), User.of(auth).getEmail().toLowerCase(),
                 interoperabilityRecordBundle.getInteroperabilityRecord().getId(),
                 interoperabilityRecordBundle.getInteroperabilityRecord().getTitle(), actionType);
         return super.update(interoperabilityRecordBundle, auth);

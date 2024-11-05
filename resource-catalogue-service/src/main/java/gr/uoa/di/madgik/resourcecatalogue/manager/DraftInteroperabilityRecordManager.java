@@ -1,17 +1,13 @@
 package gr.uoa.di.madgik.resourcecatalogue.manager;
 
-import gr.uoa.di.madgik.registry.domain.Paging;
-import gr.uoa.di.madgik.registry.domain.Resource;
-import gr.uoa.di.madgik.registry.domain.ResourceType;
+import gr.uoa.di.madgik.registry.domain.*;
 import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
-import gr.uoa.di.madgik.resourcecatalogue.domain.InteroperabilityRecordBundle;
-import gr.uoa.di.madgik.resourcecatalogue.domain.LoggingInfo;
-import gr.uoa.di.madgik.resourcecatalogue.domain.Metadata;
-import gr.uoa.di.madgik.resourcecatalogue.domain.User;
+import gr.uoa.di.madgik.resourcecatalogue.domain.*;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
 import gr.uoa.di.madgik.resourcecatalogue.utils.ProviderResourcesCommonMethods;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.core.Authentication;
@@ -57,7 +53,7 @@ public class DraftInteroperabilityRecordManager extends ResourceManager<Interope
         bundle.setId(idCreator.generate(getResourceType()));
 
         logger.trace("Attempting to add a new Draft Interoperability Record with id {}", bundle.getId());
-        bundle.setMetadata(Metadata.updateMetadata(bundle.getMetadata(), User.of(auth).getFullName(), User.of(auth).getEmail()));
+        bundle.setMetadata(Metadata.updateMetadata(bundle.getMetadata(), User.of(auth).getFullName(), User.of(auth).getEmail().toLowerCase()));
 
         List<LoggingInfo> loggingInfoList = new ArrayList<>();
         LoggingInfo loggingInfo = commonMethods.createLoggingInfo(auth, LoggingInfo.Types.DRAFT.getKey(),
@@ -115,7 +111,7 @@ public class DraftInteroperabilityRecordManager extends ResourceManager<Interope
         bundle.setLatestOnboardingInfo(loggingInfoList.get(loggingInfoList.size() - 1));
 
         bundle.setStatus("pending interoperability record");
-        bundle.setMetadata(Metadata.updateMetadata(bundle.getMetadata(), User.of(auth).getFullName(), User.of(auth).getEmail()));
+        bundle.setMetadata(Metadata.updateMetadata(bundle.getMetadata(), User.of(auth).getFullName(), User.of(auth).getEmail().toLowerCase()));
         bundle.setDraft(false);
 
         ResourceType guidelinesResourceType = resourceTypeService.getResourceType("interoperability_record");
@@ -132,10 +128,14 @@ public class DraftInteroperabilityRecordManager extends ResourceManager<Interope
         return bundle;
     }
 
-    public List<InteroperabilityRecordBundle> getMy(Authentication auth) {
-        //TODO: Implement
-        List<InteroperabilityRecordBundle> re = new ArrayList<>();
-        return re;
+    @Override
+    public Browsing<InteroperabilityRecordBundle> getMy(FacetFilter filter, Authentication auth) {
+        List<ProviderBundle> providers = providerService.getMy(filter, auth).getResults();
+        FacetFilter ff = new FacetFilter();
+        ff.addFilter("provider_id", providers.stream().map(ProviderBundle::getId).toList());
+        ff.setResourceType(getResourceType());
+        ff.setQuantity(1000);
+        return this.getAll(ff, auth);
     }
 
     private Resource getDraftResource(String id) {

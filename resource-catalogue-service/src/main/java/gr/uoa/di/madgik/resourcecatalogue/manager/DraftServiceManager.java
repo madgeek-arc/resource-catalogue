@@ -1,17 +1,13 @@
 package gr.uoa.di.madgik.resourcecatalogue.manager;
 
-import gr.uoa.di.madgik.registry.domain.Paging;
-import gr.uoa.di.madgik.registry.domain.Resource;
-import gr.uoa.di.madgik.registry.domain.ResourceType;
+import gr.uoa.di.madgik.registry.domain.*;
 import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
-import gr.uoa.di.madgik.resourcecatalogue.domain.LoggingInfo;
-import gr.uoa.di.madgik.resourcecatalogue.domain.Metadata;
-import gr.uoa.di.madgik.resourcecatalogue.domain.ServiceBundle;
-import gr.uoa.di.madgik.resourcecatalogue.domain.User;
+import gr.uoa.di.madgik.resourcecatalogue.domain.*;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
 import gr.uoa.di.madgik.resourcecatalogue.utils.ProviderResourcesCommonMethods;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.core.Authentication;
@@ -57,7 +53,7 @@ public class DraftServiceManager extends ResourceManager<ServiceBundle> implemen
         bundle.setId(idCreator.generate(getResourceType()));
 
         logger.trace("Attempting to add a new Draft Service with id {}", bundle.getId());
-        bundle.setMetadata(Metadata.updateMetadata(bundle.getMetadata(), User.of(auth).getFullName(), User.of(auth).getEmail()));
+        bundle.setMetadata(Metadata.updateMetadata(bundle.getMetadata(), User.of(auth).getFullName(), User.of(auth).getEmail().toLowerCase()));
 
         List<LoggingInfo> loggingInfoList = new ArrayList<>();
         LoggingInfo loggingInfo = commonMethods.createLoggingInfo(auth, LoggingInfo.Types.DRAFT.getKey(),
@@ -125,7 +121,7 @@ public class DraftServiceManager extends ResourceManager<ServiceBundle> implemen
         bundle.setLoggingInfo(loggingInfoList);
         bundle.setLatestOnboardingInfo(loggingInfoList.get(loggingInfoList.size() - 1));
 
-        bundle.setMetadata(Metadata.updateMetadata(bundle.getMetadata(), User.of(auth).getFullName(), User.of(auth).getEmail()));
+        bundle.setMetadata(Metadata.updateMetadata(bundle.getMetadata(), User.of(auth).getFullName(), User.of(auth).getEmail().toLowerCase()));
         bundle.setDraft(false);
 
         ResourceType serviceResourceType = resourceTypeService.getResourceType("service");
@@ -142,10 +138,14 @@ public class DraftServiceManager extends ResourceManager<ServiceBundle> implemen
         return bundle;
     }
 
-    public List<ServiceBundle> getMy(Authentication auth) {
-        //TODO: Implement
-        List<ServiceBundle> re = new ArrayList<>();
-        return re;
+    @Override
+    public Browsing<ServiceBundle> getMy(FacetFilter filter, Authentication auth) {
+        List<ProviderBundle> providers = providerService.getMy(filter, auth).getResults();
+        FacetFilter ff = new FacetFilter();
+        ff.addFilter("resource_organisation", providers.stream().map(ProviderBundle::getId).toList());
+        ff.setResourceType(getResourceType());
+        ff.setQuantity(1000);
+        return this.getAll(ff, auth);
     }
 
     private Resource getDraftResource(String id) {

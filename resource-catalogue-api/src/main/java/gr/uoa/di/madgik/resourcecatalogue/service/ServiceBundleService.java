@@ -233,15 +233,6 @@ public interface ServiceBundleService<T extends Bundle<?>> extends ResourceServi
     ServiceBundle getOrElseReturnNull(String id);
 
     /**
-     * Get a specific Service of an external Catalogue, given its ID, or return null
-     *
-     * @param id          Service ID
-     * @param catalogueId Catalogue ID
-     * @return {@link ServiceBundle}
-     */
-    ServiceBundle getOrElseReturnNull(String id, String catalogueId);
-
-    /**
      * Create a Public Service
      *
      * @param resource Service

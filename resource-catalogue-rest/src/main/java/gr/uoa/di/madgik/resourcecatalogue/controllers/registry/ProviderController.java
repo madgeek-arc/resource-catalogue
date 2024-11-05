@@ -134,7 +134,7 @@ public class ProviderController {
     //    @Override
     @Operation(summary = "Updates the Provider assigned the given id with the given Provider, keeping a version of revisions.")
     @PutMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isProviderAdmin(#auth,#provider.id,#provider.catalogueId)")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isProviderAdmin(#auth,#provider.id)")
     public ResponseEntity<Provider> update(@RequestBody Provider provider,
                                            @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId,
                                            @RequestParam(required = false) String comment,
@@ -175,7 +175,7 @@ public class ProviderController {
     }
 
     @GetMapping(path = "bundle/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isProviderAdmin(#auth, #prefix+'/'+#suffix, #catalogueId)")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isProviderAdmin(#auth, #prefix+'/'+#suffix)")
     public ResponseEntity<ProviderBundle> getProviderBundle(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
                                                             @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix,
                                                             @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId,
@@ -218,7 +218,7 @@ public class ProviderController {
 
     @Browse
     @GetMapping(path = "byCatalogue/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isCatalogueAdmin(#auth,#id)")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isProviderAdmin(#auth,#id)")
     public ResponseEntity<Paging<ProviderBundle>> getProvidersByCatalogue(@Parameter(hidden = true) @RequestParam MultiValueMap<String, Object> allRequestParams,
                                                                           @PathVariable String id,
                                                                           @Parameter(hidden = true) Authentication auth) {
@@ -229,19 +229,20 @@ public class ProviderController {
     }
 
     // Get a list of Providers in which the given user is admin.
-    @GetMapping(path = "getServiceProviders", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    public ResponseEntity<List<Provider>> getServiceProviders(@RequestParam("email") String email, @Parameter(hidden = true) Authentication auth) {
-        List<Provider> providers = providerService.getServiceProviders(email, auth)
+    @GetMapping(path = "getUserProviders", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    public ResponseEntity<List<Provider>> getUserProviders(@RequestParam("email") String email, @Parameter(hidden = true) Authentication auth) {
+        List<Provider> providers = providerService.getUserProviders(email, auth)
                 .stream()
                 .map(ProviderBundle::getProvider)
                 .collect(Collectors.toList());
         return new ResponseEntity<>(providers, HttpStatus.OK);
     }
 
-    // Get a list of Providers in which you are admin.
-    @GetMapping(path = "getMyServiceProviders", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    public ResponseEntity<List<ProviderBundle>> getMyServiceProviders(@Parameter(hidden = true) Authentication auth) {
-        return new ResponseEntity<>(providerService.getMy(null, auth).getResults(), HttpStatus.OK);
+    @GetMapping(path = "getMyProviders", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    public ResponseEntity<List<ProviderBundle>> getMyProviders(@Parameter(hidden = true) Authentication auth) {
+        FacetFilter ff = new FacetFilter();
+        ff.setQuantity(1000);
+        return new ResponseEntity<>(providerService.getMy(ff, auth).getResults(), HttpStatus.OK);
     }
 
     // Get inactive Services of the given Provider.
@@ -304,13 +305,13 @@ public class ProviderController {
     // Activate/Deactivate a Provider.
     @PatchMapping(path = "publish/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.providerIsActiveAndUserIsAdmin(#auth, #prefix+'/'+#suffix)")
-    public ResponseEntity<ProviderBundle> publish(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
-                                                  @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix,
-                                                  @RequestParam(required = false) Boolean active,
-                                                  @Parameter(hidden = true) Authentication auth) {
+    public ResponseEntity<ProviderBundle> setActive(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
+                                                    @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix,
+                                                    @RequestParam(required = false) Boolean active,
+                                                    @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
         ProviderBundle provider = providerService.publish(id, active, auth);
-        logger.info("User '{}-{}' attempts to save Provider with id '{}' as '{}'", User.of(auth).getFullName(), User.of(auth).getEmail(), id, active);
+        logger.info("User '{}-{}' attempts to save Provider with id '{}' as '{}'", User.of(auth).getFullName(), User.of(auth).getEmail().toLowerCase(), id, active);
         return new ResponseEntity<>(provider, HttpStatus.OK);
     }
 
@@ -336,7 +337,7 @@ public class ProviderController {
             metadata.setModifiedAt(String.valueOf(System.currentTimeMillis()));
             serviceBundleService.update(service, auth);
             logger.info("User '{}' published(updated) all Services of the Provider with name '{}'",
-                    User.of(auth).getEmail(), provider.getProvider().getName());
+                    User.of(auth).getEmail().toLowerCase(), provider.getProvider().getName());
         }
         return new ResponseEntity<>(services, HttpStatus.OK);
     }
@@ -473,7 +474,7 @@ public class ProviderController {
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<ProviderBundle> createPublicProvider(@RequestBody ProviderBundle providerBundle, @Parameter(hidden = true) Authentication auth) {
         logger.info("User '{}-{}' attempts to create a Public Provider from Provider '{}'-'{}' of the '{}' Catalogue", User.of(auth).getFullName(),
-                User.of(auth).getEmail(), providerBundle.getId(), providerBundle.getProvider().getName(), providerBundle.getProvider().getCatalogueId());
+                User.of(auth).getEmail().toLowerCase(), providerBundle.getId(), providerBundle.getProvider().getName(), providerBundle.getProvider().getCatalogueId());
         return ResponseEntity.ok(providerService.createPublicProvider(providerBundle, auth));
     }
 
@@ -514,26 +515,28 @@ public class ProviderController {
 
     @GetMapping(path = "/draft/getMyDraftProviders", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<List<ProviderBundle>> getMyDraftProviders(@Parameter(hidden = true) Authentication auth) {
-        return new ResponseEntity<>(draftProviderService.getMy(auth), HttpStatus.OK);
+        FacetFilter ff = new FacetFilter();
+        ff.setQuantity(1000);
+        return new ResponseEntity<>(draftProviderService.getMy(ff, auth).getResults(), HttpStatus.OK);
     }
 
     @PostMapping(path = "/draft", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_USER')")
     public ResponseEntity<Provider> addDraftProvider(@RequestBody Provider provider, @Parameter(hidden = true) Authentication auth) {
         ProviderBundle providerBundle = draftProviderService.add(new ProviderBundle(provider), auth);
-        logger.info("User '{}' added the Draft Provider with name '{}' and id '{}'", User.of(auth).getEmail(),
+        logger.info("User '{}' added the Draft Provider with name '{}' and id '{}'", User.of(auth).getEmail().toLowerCase(),
                 provider.getName(), provider.getId());
         return new ResponseEntity<>(providerBundle.getProvider(), HttpStatus.CREATED);
     }
 
     @PutMapping(path = "/draft", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isProviderAdmin(#auth,#provider.id,#provider.catalogueId)")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isProviderAdmin(#auth,#provider.id)")
     public ResponseEntity<Provider> updateDraftProvider(@RequestBody Provider provider, @Parameter(hidden = true) Authentication auth)
             throws ResourceNotFoundException {
         ProviderBundle providerBundle = draftProviderService.get(provider.getId());
         providerBundle.setProvider(provider);
         providerBundle = draftProviderService.update(providerBundle, auth);
-        logger.info("User '{}' updated the Draft Provider with name '{}' and id '{}'", User.of(auth).getEmail(),
+        logger.info("User '{}' updated the Draft Provider with name '{}' and id '{}'", User.of(auth).getEmail().toLowerCase(),
                 provider.getName(), provider.getId());
         return new ResponseEntity<>(providerBundle.getProvider(), HttpStatus.OK);
     }
@@ -550,7 +553,7 @@ public class ProviderController {
             return new ResponseEntity<>(HttpStatus.GONE);
         }
         draftProviderService.delete(providerBundle);
-        logger.info("User '{}' deleted the Draft Provider '{}'-'{}'", User.of(auth).getEmail(),
+        logger.info("User '{}' deleted the Draft Provider '{}'-'{}'", User.of(auth).getEmail().toLowerCase(),
                 id, providerBundle.getProvider().getName());
         return new ResponseEntity<>(providerBundle.getProvider(), HttpStatus.OK);
     }

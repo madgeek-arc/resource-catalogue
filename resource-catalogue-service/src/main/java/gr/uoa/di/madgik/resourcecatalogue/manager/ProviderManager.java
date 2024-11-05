@@ -121,13 +121,13 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
 
         commonMethods.addAuthenticatedUser(provider.getProvider(), auth);
         validate(provider);
-        provider.setMetadata(Metadata.createMetadata(AuthenticationInfo.getFullName(auth), AuthenticationInfo.getEmail(auth)));
+        provider.setMetadata(Metadata.createMetadata(AuthenticationInfo.getFullName(auth), AuthenticationInfo.getEmail(auth).toLowerCase()));
 
         ProviderBundle ret;
         ret = super.add(provider, null);
         logger.debug("Adding Provider: {} of Catalogue: {}", provider, catalogueId);
 
-        registrationMailService.sendEmailsToNewlyAddedAdmins(provider, null);
+        registrationMailService.sendEmailsToNewlyAddedProviderAdmins(provider, null);
 
         synchronizerService.syncAdd(provider.getProvider());
 
@@ -175,7 +175,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         }
 
         validate(ret);
-        ret.setMetadata(Metadata.updateMetadata(ret.getMetadata(), User.of(auth).getFullName(), User.of(auth).getEmail()));
+        ret.setMetadata(Metadata.updateMetadata(ret.getMetadata(), User.of(auth).getFullName(), User.of(auth).getEmail().toLowerCase()));
         List<LoggingInfo> loggingInfoList = commonMethods.returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(ret, auth);
         LoggingInfo loggingInfo = commonMethods.createLoggingInfo(auth, LoggingInfo.Types.UPDATE.getKey(),
                 LoggingInfo.ActionType.UPDATED.getKey(), comment);
@@ -248,7 +248,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
             User user = User.of(auth);
             // if user is ADMIN/EPOT or Provider Admin on the specific Provider, return everything
             if (securityService.hasRole(auth, "ROLE_ADMIN") || securityService.hasRole(auth, "ROLE_EPOT") ||
-                    securityService.userIsProviderAdmin(user, providerBundle)) {
+                    securityService.userIsProviderAdmin(user, providerId)) {
                 return providerBundle;
             }
         }
@@ -266,7 +266,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
             User user = User.of(auth);
             // if user is ADMIN/EPOT or Provider Admin on the specific Provider, return everything
             if (securityService.hasRole(auth, "ROLE_ADMIN") || securityService.hasRole(auth, "ROLE_EPOT") ||
-                    securityService.userIsProviderAdmin(user, providerBundle)) {
+                    securityService.userIsProviderAdmin(user, id)) {
                 return providerBundle;
             }
         }
@@ -338,7 +338,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
             Browsing<ProviderBundle> providers = super.getAll(ff, auth);
             for (ProviderBundle providerBundle : providers.getResults()) {
                 if (providerBundle.getStatus().equals(vocabularyService.get("approved provider").getId()) ||
-                        securityService.userIsProviderAdmin(user, providerBundle)) {
+                        securityService.userIsProviderAdmin(user, providerBundle.getId())) {
                     retList.add(providerBundle);
                 }
             }
@@ -402,7 +402,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         logger.debug("Deleting Resource {}", provider);
 
         // TODO: move to aspect
-        registrationMailService.notifyProviderAdmins(provider);
+        registrationMailService.notifyProviderAdminsForProviderDeletion(provider);
 
         synchronizerService.syncDelete(provider.getProvider());
 
@@ -513,7 +513,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     }
 
     @Override
-    public List<ProviderBundle> getServiceProviders(String email, Authentication auth) {
+    public List<ProviderBundle> getUserProviders(String email, Authentication auth) {
         List<ProviderBundle> providers;
         if (auth == null) {
             throw new InsufficientAuthenticationException("Please log in.");
@@ -557,7 +557,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         if (!ff.getFilter().containsKey("published")) {
             ff.addFilter("published", false);
         }
-        ff.addFilter("users", user.getEmail());
+        ff.addFilter("users", user.getEmail().toLowerCase());
         ff.addOrderBy("name", "asc");
         return super.getAll(ff, auth);
     }
@@ -781,12 +781,12 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         List<String> adminsAdded = new ArrayList<>(newAdmins);
         adminsAdded.removeAll(existingAdmins);
         if (!adminsAdded.isEmpty()) {
-            registrationMailService.sendEmailsToNewlyAddedAdmins(updatedProvider, adminsAdded);
+            registrationMailService.sendEmailsToNewlyAddedProviderAdmins(updatedProvider, adminsAdded);
         }
         List<String> adminsDeleted = new ArrayList<>(existingAdmins);
         adminsDeleted.removeAll(newAdmins);
         if (!adminsDeleted.isEmpty()) {
-            registrationMailService.sendEmailsToNewlyDeletedAdmins(existingProvider, adminsDeleted);
+            registrationMailService.sendEmailsToNewlyDeletedProviderAdmins(existingProvider, adminsDeleted);
         }
     }
 
@@ -794,7 +794,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     public void requestProviderDeletion(String providerId, Authentication auth) {
         ProviderBundle provider = get(providerId);
         for (User user : provider.getProvider().getUsers()) {
-            if (user.getEmail().equalsIgnoreCase(User.of(auth).getEmail())) {
+            if (user.getEmail().equalsIgnoreCase(User.of(auth).getEmail().toLowerCase())) {
                 registrationMailService.informPortalAdminsForProviderDeletion(provider, User.of(auth));
             }
         }
@@ -819,7 +819,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
                 existingProvider.getProvider().getName(), existingProvider.getProvider().getUsers());
 
         logger.info("User '{}-{}' audited Provider '{}'-'{}' with [actionType: {}]",
-                User.of(auth).getFullName(), User.of(auth).getEmail(),
+                User.of(auth).getFullName(), User.of(auth).getEmail().toLowerCase(),
                 existingProvider.getProvider().getId(), existingProvider.getProvider().getName(), actionType);
 
         existingResource.setPayload(serialize(existingProvider));

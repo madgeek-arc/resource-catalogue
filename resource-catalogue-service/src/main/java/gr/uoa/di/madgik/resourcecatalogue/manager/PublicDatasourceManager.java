@@ -52,24 +52,6 @@ public class PublicDatasourceManager extends AbstractPublicResourceManager<Datas
         return super.getAll(facetFilter, authentication);
     }
 
-    @Override
-    public Browsing<DatasourceBundle> getMy(FacetFilter facetFilter, Authentication authentication) {
-        if (authentication == null) {
-            throw new InsufficientAuthenticationException("Please log in.");
-        }
-
-        List<DatasourceBundle> datasourceBundleList = new ArrayList<>();
-        Browsing<DatasourceBundle> datasourceBundleBrowsing = super.getAll(facetFilter, authentication);
-        for (DatasourceBundle datasourceBundle : datasourceBundleBrowsing.getResults()) {
-            if (securityService.isResourceProviderAdmin(authentication, datasourceBundle.getDatasource().getServiceId(),
-                    datasourceBundle.getDatasource().getCatalogueId()) && datasourceBundle.getMetadata().isPublished()) {
-                datasourceBundleList.add(datasourceBundle);
-            }
-        }
-        return new Browsing<>(datasourceBundleBrowsing.getTotal(), datasourceBundleBrowsing.getFrom(),
-                datasourceBundleBrowsing.getTo(), datasourceBundleList, datasourceBundleBrowsing.getFacets());
-    }
-
     public DatasourceBundle getOrElseReturnNull(String id) {
         DatasourceBundle datasourceBundle;
         try {

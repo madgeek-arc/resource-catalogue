@@ -88,10 +88,9 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
     public CatalogueBundle get(String id, Authentication auth) {
         CatalogueBundle catalogueBundle = get(id);
         if (auth != null && auth.isAuthenticated()) {
-            User user = User.of(auth);
             // if user is ADMIN/EPOT or Catalogue Admin on the specific Catalogue, return everything
             if (securityService.hasRole(auth, "ROLE_ADMIN") || securityService.hasRole(auth, "ROLE_EPOT") ||
-                    securityService.userIsCatalogueAdmin(user, id)) {
+                    securityService.isProviderAdmin(auth, id)) {
                 return catalogueBundle;
             }
         }
@@ -118,14 +117,14 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
             Browsing<CatalogueBundle> catalogues = super.getAll(ff, auth);
             for (CatalogueBundle catalogueBundle : catalogues.getResults()) {
                 if (catalogueBundle.getStatus().equals(vocabularyService.get("approved catalogue").getId()) ||
-                        securityService.userIsCatalogueAdmin(user, catalogueBundle.getId())) {
+                        securityService.isProviderAdmin(auth, catalogueBundle.getId())) {
                     retList.add(catalogueBundle);
                 }
             }
             catalogues.setResults(retList);
             catalogues.setTotal(retList.size());
             catalogues.setTo(retList.size());
-            userCatalogues = getMyCatalogues(auth);
+            userCatalogues = getMy(null, auth).getResults();
             if (userCatalogues != null) {
                 // replace user providers having null users with complete provider entries
                 userCatalogues.forEach(x -> {
@@ -152,7 +151,7 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
         commonMethods.addAuthenticatedUser(catalogue.getCatalogue(), auth);
         validate(catalogue);
         catalogue.setId(idCreator.sanitizeString(catalogue.getCatalogue().getAbbreviation()));
-        catalogue.setMetadata(Metadata.createMetadata(User.of(auth).getFullName(), User.of(auth).getEmail()));
+        catalogue.setMetadata(Metadata.createMetadata(User.of(auth).getFullName(), User.of(auth).getEmail().toLowerCase()));
         List<LoggingInfo> loggingInfoList = commonMethods.returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(catalogue, auth);
         catalogue.setLoggingInfo(loggingInfoList);
         catalogue.setActive(false);
@@ -183,7 +182,7 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
         }
 
         validate(ret);
-        ret.setMetadata(Metadata.updateMetadata(ret.getMetadata(), User.of(auth).getFullName(), User.of(auth).getEmail()));
+        ret.setMetadata(Metadata.updateMetadata(ret.getMetadata(), User.of(auth).getFullName(), User.of(auth).getEmail().toLowerCase()));
         List<LoggingInfo> loggingInfoList = commonMethods.returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(ret, auth);
         LoggingInfo loggingInfo = commonMethods.createLoggingInfo(auth, LoggingInfo.Types.UPDATE.getKey(),
                 LoggingInfo.ActionType.UPDATED.getKey(), comment);
@@ -260,22 +259,18 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
     }
 
     @Override
-    public List<CatalogueBundle> getMyCatalogues(Authentication auth) {
+    public Browsing<CatalogueBundle> getMy(FacetFilter ff, Authentication auth) {
         if (auth == null) {
             throw new InsufficientAuthenticationException("Please log in.");
         }
         User user = User.of(auth);
-        FacetFilter ff = new FacetFilter();
-        ff.setQuantity(maxQuantity);
+        if (ff == null) {
+            ff = new FacetFilter();
+            ff.setQuantity(maxQuantity);
+        }
+        ff.addFilter("users", user.getEmail().toLowerCase());
         ff.addOrderBy("name", "asc");
-        return super.getAll(ff, auth).getResults()
-                .stream().map(p -> {
-                    if (securityService.userIsCatalogueAdmin(user, p.getId())) {
-                        return p;
-                    } else return null;
-                })
-                .filter(Objects::nonNull)
-                .collect(Collectors.toList());
+        return super.getAll(ff, auth);
     }
 
     private <T, I extends ResourceCRUDService<T, Authentication>> void deleteCatalogueResources(String id, I service, Authentication auth) {
@@ -439,7 +434,7 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
             catalogue.setAuditState(Auditable.INVALID_AND_NOT_UPDATED);
         }
         logger.info("User '{}-{}' audited Catalogue '{}'-'{}' with [actionType: {}]",
-                User.of(auth).getFullName(), User.of(auth).getEmail(),
+                User.of(auth).getFullName(), User.of(auth).getEmail().toLowerCase(),
                 catalogue.getCatalogue().getId(), catalogue.getCatalogue().getName(), actionType);
         return super.update(catalogue, auth);
     }

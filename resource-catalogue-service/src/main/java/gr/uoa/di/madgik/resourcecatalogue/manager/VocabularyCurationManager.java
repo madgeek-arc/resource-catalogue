@@ -83,7 +83,7 @@ public class VocabularyCurationManager extends ResourceManager<VocabularyCuratio
         vocabularyCuration.setResolutionUser(null);
         for (VocabularyEntryRequest vocEntryRequest : vocabularyCuration.getVocabularyEntryRequests()) {
             vocEntryRequest.setDateOfRequest(String.valueOf(System.currentTimeMillis()));
-            vocEntryRequest.setUserId(user.getEmail());
+            vocEntryRequest.setUserId(user.getEmail().toLowerCase());
         }
         // if vocabularyCuration doesn't exist
         validate(vocabularyCuration, resourceType, auth);
@@ -255,7 +255,7 @@ public class VocabularyCurationManager extends ResourceManager<VocabularyCuratio
     }
 
     public void approveOrRejectVocabularyCuration(VocabularyCuration vocabularyCuration, boolean approved, String rejectionReason, Authentication authentication) {
-        vocabularyCuration.setResolutionUser(User.of(authentication).getEmail());
+        vocabularyCuration.setResolutionUser(User.of(authentication).getEmail().toLowerCase());
         vocabularyCuration.setResolutionDate(String.valueOf(System.currentTimeMillis()));
         logger.info("Updating VocabularyRequest " + vocabularyCuration.getEntryValueName());
         if (approved) {
@@ -284,7 +284,7 @@ public class VocabularyCurationManager extends ResourceManager<VocabularyCuratio
             String parentFormed = vocabularyCuration.getParent().replaceAll(" ", "_").toLowerCase();
             vocabulary.setParentId(parentFormed);
         }
-        logger.info("User " + User.of(authentication).getEmail() + " is adding a new Vocabulary by resolving the vocabulary request " + vocabularyCuration.getId());
+        logger.info("User " + User.of(authentication).getEmail().toLowerCase() + " is adding a new Vocabulary by resolving the vocabulary request " + vocabularyCuration.getId());
         vocabularyService.add(vocabulary, authentication);
     }
 

@@ -15,6 +15,8 @@ import gr.uoa.di.madgik.resourcecatalogue.utils.FacetLabelService;
 import gr.uoa.di.madgik.resourcecatalogue.utils.ProviderResourcesCommonMethods;
 import gr.uoa.di.madgik.resourcecatalogue.utils.TextUtils;
 import gr.uoa.di.madgik.resourcecatalogue.validators.FieldValidator;
+import jakarta.annotation.PostConstruct;
+import jakarta.validation.constraints.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,8 +26,6 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.validation.Validator;
 
-import jakarta.annotation.PostConstruct;
-import jakarta.validation.constraints.NotNull;
 import java.lang.reflect.Field;
 import java.time.Instant;
 import java.time.ZoneId;
@@ -67,6 +67,8 @@ public abstract class AbstractServiceBundleManager<T extends ServiceBundle> exte
     private GenericResourceService genericResourceService;
     @Autowired
     private ProviderResourcesCommonMethods commonMethods;
+    @Autowired
+    private ProviderManager providerManager;
 
     @PostConstruct
     void initLabels() {
@@ -137,7 +139,12 @@ public abstract class AbstractServiceBundleManager<T extends ServiceBundle> exte
 
     @Override
     public Browsing<T> getMy(FacetFilter filter, Authentication auth) {
-        throw new UnsupportedOperationException("Not yet Implemented");
+        List<ProviderBundle> providers = providerManager.getMy(filter, auth).getResults();
+        FacetFilter ff = new FacetFilter();
+        ff.addFilter("resource_organisation", providers.stream().map(ProviderBundle::getId).toList());
+        ff.setResourceType(getResourceType());
+        ff.setQuantity(1000);
+        return this.getAll(ff, auth);
     }
 
     @Override
@@ -493,7 +500,7 @@ public abstract class AbstractServiceBundleManager<T extends ServiceBundle> exte
         validate(bundle);
         update(bundle, auth);
         logger.info("User '{}'-'{}' updated field eoscIFGuidelines of the Resource '{}'",
-                User.of(auth).getFullName(), User.of(auth).getEmail(), resourceId);
+                User.of(auth).getFullName(), User.of(auth).getEmail().toLowerCase(), resourceId);
         return bundle;
     }
 
@@ -518,16 +525,6 @@ public abstract class AbstractServiceBundleManager<T extends ServiceBundle> exte
         T serviceBundle;
         try {
             serviceBundle = get(id);
-        } catch (ResourceException | ResourceNotFoundException e) {
-            return null;
-        }
-        return serviceBundle;
-    }
-
-    public T getOrElseReturnNull(String id, String catalogueId) {
-        T serviceBundle;
-        try {
-            serviceBundle = get(id, catalogueId);
         } catch (ResourceException | ResourceNotFoundException e) {
             return null;
         }

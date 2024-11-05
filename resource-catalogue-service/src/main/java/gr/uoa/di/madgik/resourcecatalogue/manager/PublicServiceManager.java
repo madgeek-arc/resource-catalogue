@@ -63,24 +63,6 @@ public class PublicServiceManager extends AbstractPublicResourceManager<ServiceB
     }
 
     @Override
-    public Browsing<ServiceBundle> getMy(FacetFilter facetFilter, Authentication authentication) {
-        if (authentication == null) {
-            throw new InsufficientAuthenticationException("Please log in.");
-        }
-
-        List<ServiceBundle> serviceBundleList = new ArrayList<>();
-        Browsing<ServiceBundle> serviceBundleBrowsing = super.getAll(facetFilter, authentication);
-        for (ServiceBundle serviceBundle : serviceBundleBrowsing.getResults()) {
-            if (securityService.isResourceProviderAdmin(authentication, serviceBundle.getId(),
-                    serviceBundle.getService().getCatalogueId()) && serviceBundle.getMetadata().isPublished()) {
-                serviceBundleList.add(serviceBundle);
-            }
-        }
-        return new Browsing<>(serviceBundleBrowsing.getTotal(), serviceBundleBrowsing.getFrom(),
-                serviceBundleBrowsing.getTo(), serviceBundleList, serviceBundleBrowsing.getFacets());
-    }
-
-    @Override
     public ServiceBundle add(ServiceBundle serviceBundle, Authentication authentication) {
         String lowerLevelResourceId = serviceBundle.getId();
         Identifiers.createOriginalId(serviceBundle);

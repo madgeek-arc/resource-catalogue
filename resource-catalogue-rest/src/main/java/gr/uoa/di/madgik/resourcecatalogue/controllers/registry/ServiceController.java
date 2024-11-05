@@ -91,7 +91,7 @@ public class ServiceController {
 
     @Operation(summary = "Get the most current version of a specific Resource, providing the Resource id.")
     @GetMapping(path = "{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    @PreAuthorize("@securityService.resourceIsActive(#prefix+'/'+#suffix, #catalogueId) or hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth, #prefix+'/'+#suffix)")
+    @PreAuthorize("@securityService.serviceIsActive(#prefix+'/'+#suffix) or hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth, #prefix+'/'+#suffix)")
     public ResponseEntity<?> getService(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
                                         @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix,
                                         @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId,
@@ -105,12 +105,12 @@ public class ServiceController {
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.providerCanAddResources(#auth, #service)")
     public ResponseEntity<Service> addService(@RequestBody Service service, @Parameter(hidden = true) Authentication auth) {
         ServiceBundle ret = this.serviceBundleService.addResource(new ServiceBundle(service), auth);
-        logger.info("User '{}' created a new Resource with name '{}' and id '{}'", User.of(auth).getEmail(), service.getName(), service.getId());
+        logger.info("User '{}' created a new Resource with name '{}' and id '{}'", User.of(auth).getEmail().toLowerCase(), service.getName(), service.getId());
         return new ResponseEntity<>(ret.getService(), HttpStatus.CREATED);
     }
 
     @Operation(summary = "Updates the Resource assigned the given id with the given Resource, keeping a version of revisions.")
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth,#service)")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth,#service.id)")
     @PutMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<Service> updateService(@RequestBody Service service, @RequestParam(required = false) String comment, @Parameter(hidden = true) Authentication auth) throws ResourceNotFoundException {
         ServiceBundle ret = this.serviceBundleService.updateResource(new ServiceBundle(service), comment, auth);
@@ -154,6 +154,11 @@ public class ServiceController {
         return ResponseEntity.ok(paging);
     }
 
+    @GetMapping(path = "getMyServices", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    public ResponseEntity<List<ServiceBundle>> getMyServices(@Parameter(hidden = true) Authentication auth) {
+        return new ResponseEntity<>(serviceBundleService.getMy(null, auth).getResults(), HttpStatus.OK);
+    }
+
     @Operation(summary = "Get a list of Resources based on a set of ids.")
     @GetMapping(path = "ids", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<List<Service>> getSomeServices(@RequestParam("ids") String[] ids, @Parameter(hidden = true) Authentication auth) {
@@ -185,7 +190,7 @@ public class ServiceController {
 
     @Browse
     @GetMapping(path = "byProvider/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isProviderAdmin(#auth,#prefix+'/'+#suffix,#catalogueId)")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isProviderAdmin(#auth,#prefix+'/'+#suffix)")
     public ResponseEntity<Paging<ServiceBundle>> getServicesByProvider(@Parameter(hidden = true) @RequestParam MultiValueMap<String, Object> allRequestParams,
                                                                        @Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
                                                                        @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix,
@@ -203,7 +208,7 @@ public class ServiceController {
 
     @Browse
     @GetMapping(path = "byCatalogue/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isCatalogueAdmin(#auth,#prefix+'/'+#suffix)")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isProviderAdmin(#auth,#id)")
     public ResponseEntity<Paging<ServiceBundle>> getServicesByCatalogue(@Parameter(hidden = true) @RequestParam MultiValueMap<String, Object> allRequestParams,
                                                                         @PathVariable String id,
                                                                         @Parameter(hidden = true) Authentication auth) {
@@ -234,7 +239,7 @@ public class ServiceController {
                                                    @RequestParam Boolean active,
                                                    @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
-        logger.info("User '{}-{}' attempts to save Resource with id '{}' as '{}'", User.of(auth).getFullName(), User.of(auth).getEmail(), id, active);
+        logger.info("User '{}-{}' attempts to save Resource with id '{}' as '{}'", User.of(auth).getFullName(), User.of(auth).getEmail().toLowerCase(), id, active);
         return ResponseEntity.ok(serviceBundleService.publish(id, active, auth));
     }
 
@@ -401,7 +406,7 @@ public class ServiceController {
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<ServiceBundle> createPublicService(@RequestBody ServiceBundle serviceBundle, @Parameter(hidden = true) Authentication auth) {
         logger.info("User '{}-{}' attempts to create a Public Service from Service '{}'-'{}' of the '{}' Catalogue", User.of(auth).getFullName(),
-                User.of(auth).getEmail(), serviceBundle.getId(), serviceBundle.getService().getName(), serviceBundle.getService().getCatalogueId());
+                User.of(auth).getEmail().toLowerCase(), serviceBundle.getId(), serviceBundle.getService().getName(), serviceBundle.getService().getCatalogueId());
         return ResponseEntity.ok(serviceBundleService.createPublicResource(serviceBundle, auth));
     }
 
@@ -486,9 +491,9 @@ public class ServiceController {
         return new ResponseEntity<>(draftServiceService.get(id).getService(), HttpStatus.OK);
     }
 
-    @GetMapping(path = "/draft/my", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @GetMapping(path = "/draft/getMyDraftServices", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<List<ServiceBundle>> getMyDraftServices(@Parameter(hidden = true) Authentication auth) {
-        return new ResponseEntity<>(draftServiceService.getMy(auth), HttpStatus.OK);
+        return new ResponseEntity<>(draftServiceService.getMy(null, auth).getResults(), HttpStatus.OK);
     }
 
     @Browse
@@ -500,26 +505,26 @@ public class ServiceController {
         String id = String.join("/", prefix, suffix);
         FacetFilter ff = FacetFilter.from(allRequestParams);
         ff.addFilter("resource_organisation", id);
-        return new ResponseEntity<>(draftServiceService.getAll(FacetFilter.from(allRequestParams), auth), HttpStatus.OK);
+        return new ResponseEntity<>(draftServiceService.getAll(ff, auth), HttpStatus.OK);
     }
 
     @PostMapping(path = "/draft", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_USER')")
     public ResponseEntity<Service> addDraftService(@RequestBody Service service, @Parameter(hidden = true) Authentication auth) {
         ServiceBundle serviceBundle = draftServiceService.add(new ServiceBundle(service), auth);
-        logger.info("User '{}' added the Draft Service with name '{}' and id '{}'", User.of(auth).getEmail(),
+        logger.info("User '{}' added the Draft Service with name '{}' and id '{}'", User.of(auth).getEmail().toLowerCase(),
                 service.getName(), service.getId());
         return new ResponseEntity<>(serviceBundle.getService(), HttpStatus.CREATED);
     }
 
     @PutMapping(path = "/draft", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth, #service)")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth, #service.id)")
     public ResponseEntity<Service> updateDraftService(@RequestBody Service service, @Parameter(hidden = true) Authentication auth)
             throws ResourceNotFoundException {
         ServiceBundle serviceBundle = draftServiceService.get(service.getId());
         serviceBundle.setService(service);
         serviceBundle = draftServiceService.update(serviceBundle, auth);
-        logger.info("User '{}' updated the Draft Service with name '{}' and id '{}'", User.of(auth).getEmail(),
+        logger.info("User '{}' updated the Draft Service with name '{}' and id '{}'", User.of(auth).getEmail().toLowerCase(),
                 service.getName(), service.getId());
         return new ResponseEntity<>(serviceBundle.getService(), HttpStatus.OK);
     }
@@ -536,7 +541,7 @@ public class ServiceController {
             return new ResponseEntity<>(HttpStatus.GONE);
         }
         draftServiceService.delete(serviceBundle);
-        logger.info("User '{}' deleted the Draft Service '{}'-'{}'", User.of(auth).getEmail(),
+        logger.info("User '{}' deleted the Draft Service '{}'-'{}'", User.of(auth).getEmail().toLowerCase(),
                 id, serviceBundle.getService().getName());
         return new ResponseEntity<>(serviceBundle.getService(), HttpStatus.OK);
     }

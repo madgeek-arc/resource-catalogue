@@ -50,13 +50,13 @@ public abstract class DraftableResourceManager<T extends Bundle<?>> extends Reso
 //        // latestOnboardInfo
 //        t.setLatestOnboardingInfo(loggingInfo);
 //
-//        t.setMetadata(Metadata.updateMetadata(t.getMetadata(), User.of(auth).getFullName(), User.of(auth).getEmail()));
+//        t.setMetadata(Metadata.updateMetadata(t.getMetadata(), User.of(auth).getFullName(), User.of(auth).getEmail().toLowerCase()));
 //
 //
 //        // latestOnboardInfo
 //        t.setLatestOnboardingInfo(loggingInfo);
 //
-//        t.setMetadata(Metadata.updateMetadata(t.getMetadata(), User.of(auth).getFullName(), User.of(auth).getEmail()));
+//        t.setMetadata(Metadata.updateMetadata(t.getMetadata(), User.of(auth).getFullName(), User.of(auth).getEmail().toLowerCase()));
 
         ResourceType providerResourceType = resourceTypeService.getResourceType("provider");
         Resource resource = genericResourceService.searchResource("getDraftResourceType()", t.getId(), true);

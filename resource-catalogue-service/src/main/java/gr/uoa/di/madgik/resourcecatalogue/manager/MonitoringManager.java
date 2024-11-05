@@ -101,7 +101,7 @@ public class MonitoringManager extends ResourceManager<MonitoringBundle> impleme
         monitoring.setId(idCreator.generate(getResourceType()));
         logger.trace("Attempting to add a new Monitoring: {}", monitoring);
 
-        monitoring.setMetadata(Metadata.createMetadata(User.of(auth).getFullName(), User.of(auth).getEmail()));
+        monitoring.setMetadata(Metadata.createMetadata(User.of(auth).getFullName(), User.of(auth).getEmail().toLowerCase()));
         List<LoggingInfo> loggingInfoList = commonMethods.returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(monitoring, auth);
         monitoring.setLoggingInfo(loggingInfoList);
         monitoring.setActive(true);
@@ -114,7 +114,7 @@ public class MonitoringManager extends ResourceManager<MonitoringBundle> impleme
         ret = super.add(monitoring, null);
         logger.debug("Adding Monitoring: {}", monitoring);
 
-        registrationMailService.sendEmailsForMonitoringExtension(monitoring, resourceType, "post");
+        registrationMailService.sendEmailsForMonitoringExtensionToPortalAdmins(monitoring, resourceType, "post");
 
         return ret;
     }
@@ -132,7 +132,7 @@ public class MonitoringManager extends ResourceManager<MonitoringBundle> impleme
         }
 
         validate(ret);
-        ret.setMetadata(Metadata.updateMetadata(ret.getMetadata(), User.of(auth).getFullName(), User.of(auth).getEmail()));
+        ret.setMetadata(Metadata.updateMetadata(ret.getMetadata(), User.of(auth).getFullName(), User.of(auth).getEmail().toLowerCase()));
         List<LoggingInfo> loggingInfoList = commonMethods.returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(ret, auth);
         LoggingInfo loggingInfo = commonMethods.createLoggingInfo(auth, LoggingInfo.Types.UPDATE.getKey(),
                 LoggingInfo.ActionType.UPDATED.getKey());
@@ -159,7 +159,7 @@ public class MonitoringManager extends ResourceManager<MonitoringBundle> impleme
         resourceService.updateResource(existingResource);
         logger.debug("Updating Monitoring: {}", ret);
 
-        registrationMailService.sendEmailsForMonitoringExtension(ret, "Resource", "put");
+        registrationMailService.sendEmailsForMonitoringExtensionToPortalAdmins(ret, "Resource", "put");
 
         return ret;
     }

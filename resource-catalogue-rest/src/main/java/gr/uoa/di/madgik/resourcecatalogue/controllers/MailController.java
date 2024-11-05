@@ -35,11 +35,11 @@ public class MailController {
     @Autowired
     ProviderService providerService;
     @Autowired
-    DraftResourceService<ProviderBundle> pendingProviderService;
+    DraftResourceService<ProviderBundle> draftProviderService;
     @Autowired
     ServiceBundleService serviceBundleService;
     @Autowired
-    DraftResourceService<ServiceBundle> pendingServiceService;
+    DraftResourceService<ServiceBundle> draftServiceService;
     @Autowired
     TrainingResourceService trainingResourceService;
     @Autowired
@@ -95,13 +95,13 @@ public class MailController {
     private void addEmailsFromProviders(Set<String> emails, FacetFilter facetFilter, Authentication adminAccess,
                                         Boolean includeProviderCatalogueContacts) {
         List<ProviderBundle> allProviders = providerService.getAll(facetFilter, adminAccess).getResults();
-        allProviders.addAll(pendingProviderService.getAll(facetFilter, adminAccess).getResults());
+        allProviders.addAll(draftProviderService.getAll(facetFilter, adminAccess).getResults());
 
         for (ProviderBundle providerBundle : allProviders) {
-            emails.addAll(providerBundle.getProvider().getUsers().stream().map(User::getEmail).collect(Collectors.toSet()));
+            emails.addAll(providerBundle.getProvider().getUsers().stream().map(User::getEmail).map(String::toLowerCase).collect(Collectors.toSet()));
             if (includeProviderCatalogueContacts != null && includeProviderCatalogueContacts) {
-                emails.add(providerBundle.getProvider().getMainContact().getEmail());
-                emails.addAll(providerBundle.getProvider().getPublicContacts().stream().map(ProviderPublicContact::getEmail).collect(Collectors.toSet()));
+                emails.add(providerBundle.getProvider().getMainContact().getEmail().toLowerCase());
+                emails.addAll(providerBundle.getProvider().getPublicContacts().stream().map(ProviderPublicContact::getEmail).map(String::toLowerCase).collect(Collectors.toSet()));
             }
         }
     }
@@ -109,20 +109,20 @@ public class MailController {
     private void addEmailsFromCatalogues(Set<String> emails, FacetFilter facetFilter, Authentication adminAccess, boolean includeContacts) {
         List<CatalogueBundle> allCatalogues = catalogueService.getAll(facetFilter, adminAccess).getResults();
         for (CatalogueBundle catalogueBundle : allCatalogues) {
-            emails.addAll(catalogueBundle.getCatalogue().getUsers().stream().map(User::getEmail).collect(Collectors.toSet()));
+            emails.addAll(catalogueBundle.getCatalogue().getUsers().stream().map(User::getEmail).map(String::toLowerCase).collect(Collectors.toSet()));
             if (includeContacts) {
                 emails.add(catalogueBundle.getCatalogue().getMainContact().getEmail());
-                emails.addAll(catalogueBundle.getCatalogue().getPublicContacts().stream().map(ProviderPublicContact::getEmail).collect(Collectors.toSet()));
+                emails.addAll(catalogueBundle.getCatalogue().getPublicContacts().stream().map(ProviderPublicContact::getEmail).map(String::toLowerCase).collect(Collectors.toSet()));
             }
         }
     }
 
     private void addEmailsFromServices(Set<String> emails, FacetFilter facetFilter, Authentication adminAccess) {
         List<ServiceBundle> allServices = serviceBundleService.getAll(facetFilter, adminAccess).getResults();
-        allServices.addAll(pendingServiceService.getAll(facetFilter, adminAccess).getResults());
+        allServices.addAll(draftServiceService.getAll(facetFilter, adminAccess).getResults());
         for (ServiceBundle serviceBundle : allServices) {
             emails.add(serviceBundle.getService().getMainContact().getEmail());
-            emails.addAll(serviceBundle.getService().getPublicContacts().stream().map(ServicePublicContact::getEmail).collect(Collectors.toSet()));
+            emails.addAll(serviceBundle.getService().getPublicContacts().stream().map(ServicePublicContact::getEmail).map(String::toLowerCase).collect(Collectors.toSet()));
         }
     }
 

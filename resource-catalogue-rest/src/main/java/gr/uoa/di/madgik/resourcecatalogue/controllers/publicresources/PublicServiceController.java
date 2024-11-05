@@ -54,7 +54,7 @@ public class PublicServiceController {
 
     @Operation(description = "Returns the Public Service with the given id.")
     @GetMapping(path = "public/service/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    @PreAuthorize("@securityService.resourceIsActive(#prefix+'/'+#suffix, #catalogueId) or hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth, #prefix+'/'+#suffix)")
+    @PreAuthorize("@securityService.serviceIsActive(#prefix+'/'+#suffix) or hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth, #prefix+'/'+#suffix)")
     public ResponseEntity<?> getPublicService(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
                                               @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix,
                                               @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId,
@@ -67,7 +67,7 @@ public class PublicServiceController {
 
     //    @Operation(description = "Returns the Public ServiceBundle with the given id.")
     @GetMapping(path = "public/service/infraService/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth, #prefix+'/'+#suffix, #catalogueId)")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth, #prefix+'/'+#suffix)")
     public ResponseEntity<?> getPublicServiceBundle(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
                                                     @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix,
                                                     @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId,
@@ -104,28 +104,5 @@ public class PublicServiceController {
         ff.addFilter("published", true);
         Paging<ServiceBundle> paging = genericResourceService.getResults(ff);
         return ResponseEntity.ok(paging);
-    }
-
-    @GetMapping(path = "public/service/my", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    public ResponseEntity<List<Object>> getMyPublicServices(@Parameter(hidden = true) Authentication auth) {
-        FacetFilter ff = new FacetFilter();
-        ff.setQuantity(10000);
-        ff.addFilter("published", true);
-        ff.setResourceType("service");
-        ff.addOrderBy("name", "asc");
-        if (auth == null) {
-            throw new InsufficientAuthenticationException("Please log in.");
-        }
-        List<Object> resourceBundleList = new ArrayList<>();
-        Paging<?> paging = genericResourceService.getResults(ff);
-        for (Object o : paging.getResults()) {
-            if (o instanceof ServiceBundle) {
-                if (securityService.isResourceProviderAdmin(auth, ((ServiceBundle) o).getId(), ((ServiceBundle) o).getService().getCatalogueId()) && ((ServiceBundle) o).getMetadata().isPublished()) {
-                    resourceBundleList.add(o);
-                }
-            }
-        }
-        Browsing<Object> browsing = new Browsing<>(paging.getTotal(), paging.getFrom(), paging.getTo(), resourceBundleList, paging.getFacets());
-        return new ResponseEntity<>(browsing.getResults(), HttpStatus.OK);
     }
 }

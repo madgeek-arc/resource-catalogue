@@ -65,7 +65,7 @@ public class PublicServiceExtensionsController {
         if (auth != null && auth.isAuthenticated()) {
             User user = User.of(auth);
             if (securityService.hasRole(auth, "ROLE_ADMIN") || securityService.hasRole(auth, "ROLE_EPOT")
-                    || securityService.userIsResourceProviderAdmin(user, helpdeskBundle.getHelpdesk().getServiceId(), helpdeskBundle.getCatalogueId())) {
+                    || securityService.userIsResourceProviderAdmin(user, helpdeskBundle.getHelpdesk().getServiceId())) {
                 if (helpdeskBundle.getMetadata().isPublished()) {
                     return new ResponseEntity<>(helpdeskBundle.getHelpdesk(), HttpStatus.OK);
                 } else {
@@ -89,7 +89,7 @@ public class PublicServiceExtensionsController {
         if (auth != null && auth.isAuthenticated()) {
             User user = User.of(auth);
             if (securityService.hasRole(auth, "ROLE_ADMIN") || securityService.hasRole(auth, "ROLE_EPOT")
-                    || securityService.userIsResourceProviderAdmin(user, helpdeskBundle.getHelpdesk().getServiceId(), helpdeskBundle.getCatalogueId())) {
+                    || securityService.userIsResourceProviderAdmin(user, helpdeskBundle.getHelpdesk().getServiceId())) {
                 if (helpdeskBundle.getMetadata().isPublished()) {
                     return new ResponseEntity<>(helpdeskBundle, HttpStatus.OK);
                 } else {
@@ -127,15 +127,6 @@ public class PublicServiceExtensionsController {
         return ResponseEntity.ok(paging);
     }
 
-    @GetMapping(path = "public/helpdesk/my", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    public ResponseEntity<List<HelpdeskBundle>> getMyPublicHelpdesks(@Parameter(hidden = true) Authentication auth) {
-        FacetFilter ff = new FacetFilter();
-        ff.setQuantity(10000);
-        ff.addFilter("published", true);
-        ff.addOrderBy("name", "asc");
-        return new ResponseEntity<>(publicHelpdeskManager.getMy(ff, auth).getResults(), HttpStatus.OK);
-    }
-
 
     //SECTION: MONITORING
     @Operation(description = "Returns the Public Monitoring with the given id.")
@@ -148,7 +139,7 @@ public class PublicServiceExtensionsController {
         if (auth != null && auth.isAuthenticated()) {
             User user = User.of(auth);
             if (securityService.hasRole(auth, "ROLE_ADMIN") || securityService.hasRole(auth, "ROLE_EPOT")
-                    || securityService.userIsResourceProviderAdmin(user, monitoringBundle.getMonitoring().getServiceId(), monitoringBundle.getCatalogueId())) {
+                    || securityService.userIsResourceProviderAdmin(user, monitoringBundle.getMonitoring().getServiceId())) {
                 if (monitoringBundle.getMetadata().isPublished()) {
                     return new ResponseEntity<>(monitoringBundle.getMonitoring(), HttpStatus.OK);
                 } else {
@@ -172,7 +163,7 @@ public class PublicServiceExtensionsController {
         if (auth != null && auth.isAuthenticated()) {
             User user = User.of(auth);
             if (securityService.hasRole(auth, "ROLE_ADMIN") || securityService.hasRole(auth, "ROLE_EPOT")
-                    || securityService.userIsResourceProviderAdmin(user, monitoringBundle.getMonitoring().getServiceId(), monitoringBundle.getCatalogueId())) {
+                    || securityService.userIsResourceProviderAdmin(user, monitoringBundle.getMonitoring().getServiceId())) {
                 if (monitoringBundle.getMetadata().isPublished()) {
                     return new ResponseEntity<>(monitoringBundle, HttpStatus.OK);
                 } else {
@@ -207,14 +198,5 @@ public class PublicServiceExtensionsController {
         ff.addFilter("published", true);
         Paging<MonitoringBundle> paging = genericResourceService.getResults(ff);
         return ResponseEntity.ok(paging);
-    }
-
-    @GetMapping(path = "public/monitoring/my", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    public ResponseEntity<List<MonitoringBundle>> getMyPublicMonitorings(@Parameter(hidden = true) Authentication auth) {
-        FacetFilter ff = new FacetFilter();
-        ff.setQuantity(10000);
-        ff.addFilter("published", true);
-        ff.addOrderBy("name", "asc");
-        return new ResponseEntity<>(publicMonitoringManager.getMy(ff, auth).getResults(), HttpStatus.OK);
     }
 }
