@@ -1,3 +1,6 @@
+![Build Status](https://builds.madgik.di.uoa.gr/buildStatus/icon?job=release-eosc)
+
+
 # Resource Catalogue #
 
 ###### What is this project about?
