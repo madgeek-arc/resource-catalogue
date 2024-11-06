@@ -2,10 +2,8 @@ package gr.uoa.di.madgik.resourcecatalogue.config.security;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.nimbusds.jose.util.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.oauth2.core.oidc.user.OidcUser;
@@ -19,6 +17,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.time.Instant;
+import java.util.Base64;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -47,7 +46,7 @@ public class AuthSuccessHandler implements AuthenticationSuccessHandler {
         int expireSec = createCookieMaxAge(authentication);
 
         String userInfo = createUserInfoJson(authentication);
-        Cookie cookie = new Cookie("info", Base64.encode(userInfo).toString());
+        Cookie cookie = new Cookie("info", new String(Base64.getEncoder().encode(userInfo.getBytes())));
         cookie.setMaxAge(expireSec);
         cookie.setPath("/");
 //        cookie.setSecure(true);
