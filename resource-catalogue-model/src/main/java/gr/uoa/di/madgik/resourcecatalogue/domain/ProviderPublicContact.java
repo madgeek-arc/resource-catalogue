@@ -4,10 +4,10 @@ import gr.uoa.di.madgik.resourcecatalogue.annotation.EmailValidation;
 import gr.uoa.di.madgik.resourcecatalogue.annotation.FieldValidation;
 import gr.uoa.di.madgik.resourcecatalogue.annotation.PhoneValidation;
 import io.swagger.v3.oas.annotations.media.Schema;
-
 import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
+
 import java.util.Objects;
 
 @XmlType
@@ -110,7 +110,7 @@ public class ProviderPublicContact {
     }
 
     public void setEmail(String email) {
-        this.email = email.toLowerCase();
+        this.email = email != null ? email.toLowerCase() : null;
     }
 
     public String getPhone() {

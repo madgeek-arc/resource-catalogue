@@ -114,7 +114,7 @@ public class User implements Identifiable {
     }
 
     public void setEmail(String email) {
-        this.email = email.toLowerCase();
+        this.email = email != null ? email.toLowerCase() : null;
     }
 
     public String getName() {
