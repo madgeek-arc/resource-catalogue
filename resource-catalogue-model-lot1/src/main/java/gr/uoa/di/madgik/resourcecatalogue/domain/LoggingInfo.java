@@ -216,7 +216,7 @@ public class LoggingInfo {
     }
 
     public void setUserEmail(String userEmail) {
-        this.userEmail = userEmail.toLowerCase();
+        this.userEmail = userEmail != null ? userEmail.toLowerCase() : null;
     }
 
     public String getUserFullName() {
