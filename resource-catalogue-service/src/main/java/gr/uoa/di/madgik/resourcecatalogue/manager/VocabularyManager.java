@@ -15,7 +15,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpStatus;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
@@ -86,7 +85,19 @@ public class VocabularyManager extends ResourceManager<Vocabulary> implements Vo
         ff.setResourceType(getResourceType());
         ff.setQuantity(maxQuantity);
         Browsing<Vocabulary> allVocs = getAll(ff);
-        allVocabularies = allVocs.getResults().parallelStream().filter(Objects::nonNull).collect(Collectors.groupingBy(value -> Vocabulary.Type.fromString(value.getType())));
+        allVocabularies = allVocs.getResults()
+                .parallelStream()
+                .filter(Objects::nonNull)
+                .collect(Collectors
+                        .groupingBy(value -> Vocabulary.Type.fromString(value.getType()),
+                                Collectors.collectingAndThen(
+                                        Collectors.toList(),
+                                        list -> list.stream()
+                                                .sorted(Comparator.comparing(Vocabulary::getName))
+                                                .collect(Collectors.toList())
+                                )
+                        )
+                );
         return allVocabularies;
     }
 
@@ -97,7 +108,7 @@ public class VocabularyManager extends ResourceManager<Vocabulary> implements Vo
         ff.setQuantity(maxQuantity);
         ff.addFilter("type", type.getKey());
         List<Vocabulary> vocList = getAll(ff, null).getResults();
-        return vocList.stream().sorted(Comparator.comparing(Vocabulary::getId)).collect(Collectors.toList());
+        return vocList.stream().sorted(Comparator.comparing(Vocabulary::getName)).collect(Collectors.toList());
     }
 
     @Override
