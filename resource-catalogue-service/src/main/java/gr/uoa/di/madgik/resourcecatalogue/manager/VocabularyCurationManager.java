@@ -19,10 +19,7 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 
@@ -90,7 +87,7 @@ public class VocabularyCurationManager extends ResourceManager<VocabularyCuratio
         if (vocabularyCuration.getVocabularyEntryRequests().size() == 1) {
             super.add(vocabularyCuration, auth);
             logger.info("Adding Vocabulary Curation: {}", vocabularyCuration);
-            registrationMailService.sendVocabularyCurationEmails(vocabularyCuration, user.getName());
+            registrationMailService.sendEmailsForVocabularyCurationCreation(vocabularyCuration, Objects.requireNonNull(user).getName());
             // if vocabularyCuration already exists in "pending"
         } else {
             update(vocabularyCuration, auth);
@@ -261,11 +258,11 @@ public class VocabularyCurationManager extends ResourceManager<VocabularyCuratio
         if (approved) {
             vocabularyCuration.setStatus(VocabularyCuration.Status.APPROVED.getKey());
             createNewVocabulary(vocabularyCuration, authentication);
-            registrationMailService.approveOrRejectVocabularyCurationEmails(vocabularyCuration);
+            registrationMailService.sendEmailsForVocabularyCurationResolve(vocabularyCuration);
         } else {
             vocabularyCuration.setStatus(VocabularyCuration.Status.REJECTED.getKey());
             vocabularyCuration.setRejectionReason(rejectionReason);
-            registrationMailService.approveOrRejectVocabularyCurationEmails(vocabularyCuration);
+            registrationMailService.sendEmailsForVocabularyCurationResolve(vocabularyCuration);
         }
         update(vocabularyCuration, authentication);
     }

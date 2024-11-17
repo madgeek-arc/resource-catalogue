@@ -528,8 +528,7 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
         }
 
         // send notification emails to Provider Admins
-        registrationMailService.notifyProviderAdminsForBundleAuditing(trainingResource, "Training Resource",
-                trainingResource.getTrainingResource().getTitle(), provider.getProvider().getUsers());
+        registrationMailService.notifyProviderAdminsForBundleAuditing(trainingResource, provider.getProvider().getUsers());
 
         logger.info("User '{}-{}' audited Training Resource '{}'-'{}' with [actionType: {}]",
                 User.of(auth).getFullName(), User.of(auth).getEmail().toLowerCase(),
@@ -616,10 +615,11 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
 
     @Override
     public void sendEmailNotificationsToProvidersWithOutdatedResources(String resourceId, Authentication auth) {
-        String providerId = providerService.get(get(resourceId).getTrainingResource().getResourceOrganisation()).getId();
-        String providerName = providerService.get(get(resourceId).getTrainingResource().getResourceOrganisation()).getProvider().getName();
-        logger.info(String.format("Mailing provider [%s]-[%s] for outdated Training Resources", providerId, providerName));
-        registrationMailService.sendEmailNotificationsToProviderAdminsWithOutdatedResources(resourceId);
+        TrainingResourceBundle trainingResourceBundle = get(resourceId);
+        ProviderBundle providerBundle = providerService.get(trainingResourceBundle.getTrainingResource().getResourceOrganisation());
+        logger.info(String.format("Mailing provider [%s]-[%s] for outdated Training Resources", providerBundle.getId(),
+                providerBundle.getProvider().getName()));
+        registrationMailService.sendEmailNotificationsToProviderAdminsWithOutdatedResources(trainingResourceBundle, providerBundle);
     }
 
     @Override
@@ -899,7 +899,7 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
         migrationService.updateRelatedToTheIdFieldsOfOtherResourcesOfThePortal(resourceId, trainingResourceBundle.getId());
 
         // emails to EPOT, old and new Provider
-        registrationMailService.sendEmailsForMovedTrainingResources(oldProvider, newProvider, trainingResourceBundle, auth);
+        registrationMailService.sendEmailsForMovedResources(oldProvider, newProvider, trainingResourceBundle, auth);
 
         return trainingResourceBundle;
     }

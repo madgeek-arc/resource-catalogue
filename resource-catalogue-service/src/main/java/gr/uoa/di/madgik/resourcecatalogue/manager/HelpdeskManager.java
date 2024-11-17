@@ -92,7 +92,7 @@ public class HelpdeskManager extends ResourceManager<HelpdeskBundle> implements 
         super.add(helpdesk, null);
         logger.debug("Adding Helpdesk: {}", helpdesk);
 
-        registrationMailService.sendEmailsForHelpdeskExtensionToPortalAdmins(helpdesk, resourceType, "post");
+        registrationMailService.sendEmailsForHelpdeskExtensionToPortalAdmins(helpdesk, "post");
 
         return helpdesk;
     }
@@ -140,7 +140,7 @@ public class HelpdeskManager extends ResourceManager<HelpdeskBundle> implements 
         resourceService.updateResource(existingResource);
         logger.debug("Updating Helpdesk: {}", ret);
 
-        registrationMailService.sendEmailsForHelpdeskExtensionToPortalAdmins(ret, "Resource", "put");
+        registrationMailService.sendEmailsForHelpdeskExtensionToPortalAdmins(ret, "put");
 
         return ret;
     }

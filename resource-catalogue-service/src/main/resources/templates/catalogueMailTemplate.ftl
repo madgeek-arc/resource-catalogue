@@ -1,7 +1,7 @@
 <p>Dear ${user.fullName},</p>
 <p>
-    <#if catalogueBundle.status == "pending catalogue">
-        You have applied for registering [${catalogueBundle.catalogue.name}] - ([${catalogueBundle.catalogue.id}]) as a
+    <#if bundle.status == "pending catalogue">
+        You have applied for registering [${bundle.catalogue.name}] - ([${bundle.catalogue.id}]) as a
         new ${project} Catalogue in the ${project} Portal.
         <br>
         Your application will be reviewed and you will be notified on its approval or rejection, as well as for any
@@ -9,21 +9,21 @@
         <br>
         Thank you for your interest in becoming a member of the ${project} Portal.
     </#if>
-    <#if catalogueBundle.status == "approved catalogue">
-        <#if catalogueBundle.active == true>
-            You have applied for registering [${catalogueBundle.catalogue.name}] - ([${catalogueBundle.catalogue.id}])
+    <#if bundle.status == "approved catalogue">
+        <#if bundle.active == true>
+            You have applied for registering [${bundle.catalogue.name}] - ([${bundle.catalogue.id}])
             as a new ${project} Catalogue in the ${project} Portal.
             <br>
             Your application has been approved.
         <#else>
-            Your Catalogue [${catalogueBundle.catalogue.name}] - ([${catalogueBundle.catalogue.id}]) has been set to
+            Your Catalogue [${bundle.catalogue.name}] - ([${bundle.catalogue.id}]) has been set to
             inactive.
             <br>
             For any further clarifications please contact ${registrationEmail}.
         </#if>
     </#if>
-    <#if catalogueBundle.status == "rejected catalogue">
-        You have applied for registering [${catalogueBundle.catalogue.name}] - ([${catalogueBundle.catalogue.id}]) as a
+    <#if bundle.status == "rejected catalogue">
+        You have applied for registering [${bundle.catalogue.name}] - ([${bundle.catalogue.id}]) as a
         new ${project} Catalogue in the ${project} Portal.
         <br>
         Your application has been rejected, as your catalogue does not comply with the Rules of Participation of

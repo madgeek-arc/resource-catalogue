@@ -815,8 +815,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         }
 
         // send notification emails to Provider Admins
-        registrationMailService.notifyProviderAdminsForBundleAuditing(existingProvider, "Provider",
-                existingProvider.getProvider().getName(), existingProvider.getProvider().getUsers());
+        registrationMailService.notifyProviderAdminsForBundleAuditing(existingProvider, existingProvider.getProvider().getUsers());
 
         logger.info("User '{}-{}' audited Provider '{}'-'{}' with [actionType: {}]",
                 User.of(auth).getFullName(), User.of(auth).getEmail().toLowerCase(),

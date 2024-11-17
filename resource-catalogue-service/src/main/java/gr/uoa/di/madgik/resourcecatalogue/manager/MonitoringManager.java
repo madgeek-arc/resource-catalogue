@@ -114,7 +114,7 @@ public class MonitoringManager extends ResourceManager<MonitoringBundle> impleme
         ret = super.add(monitoring, null);
         logger.debug("Adding Monitoring: {}", monitoring);
 
-        registrationMailService.sendEmailsForMonitoringExtensionToPortalAdmins(monitoring, resourceType, "post");
+        registrationMailService.sendEmailsForMonitoringExtensionToPortalAdmins(monitoring, "post");
 
         return ret;
     }
@@ -159,7 +159,7 @@ public class MonitoringManager extends ResourceManager<MonitoringBundle> impleme
         resourceService.updateResource(existingResource);
         logger.debug("Updating Monitoring: {}", ret);
 
-        registrationMailService.sendEmailsForMonitoringExtensionToPortalAdmins(ret, "Resource", "put");
+        registrationMailService.sendEmailsForMonitoringExtensionToPortalAdmins(ret, "put");
 
         return ret;
     }

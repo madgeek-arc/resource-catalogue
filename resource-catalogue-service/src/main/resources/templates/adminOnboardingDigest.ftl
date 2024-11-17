@@ -1,17 +1,17 @@
 <p>There are Providers and Templates waiting to be approved.</p>
 <p>
-    <#if iaProviders?? && iaProviders?size &gt; 0>
+    <#if providersWaitingForInitialApproval?? && providersWaitingForInitialApproval?size &gt; 0>
         Providers waiting for Initial Approval:
         <br>
-        <#list iaProviders as provider>
+        <#list providersWaitingForInitialApproval as provider>
             <br>
             ${provider}
         </#list>
     </#if>
-    <#if stProviders?? && stProviders?size &gt; 0>
+    <#if providersWaitingForTemplateApproval?? && providersWaitingForTemplateApproval?size &gt; 0>
         Providers waiting for Template Approval:
         <br>
-        <#list stProviders as provider>
+        <#list providersWaitingForTemplateApproval as provider>
             <br>
             ${provider}
         </#list>

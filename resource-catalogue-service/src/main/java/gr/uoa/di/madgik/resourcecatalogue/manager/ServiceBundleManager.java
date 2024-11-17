@@ -526,8 +526,7 @@ public class ServiceBundleManager extends AbstractServiceBundleManager<ServiceBu
         }
 
         // send notification emails to Provider Admins
-        registrationMailService.notifyProviderAdminsForBundleAuditing(service, "Service",
-                service.getService().getName(), provider.getProvider().getUsers());
+        registrationMailService.notifyProviderAdminsForBundleAuditing(service, provider.getProvider().getUsers());
 
         logger.info("User '{}-{}' audited Service '{}'-'{}' with [actionType: {}]",
                 User.of(auth).getFullName(), User.of(auth).getEmail().toLowerCase(),
@@ -612,10 +611,11 @@ public class ServiceBundleManager extends AbstractServiceBundleManager<ServiceBu
     }
 
     public void sendEmailNotificationsToProvidersWithOutdatedResources(String resourceId, Authentication auth) {
-        String providerId = providerService.get(get(resourceId).getService().getResourceOrganisation()).getId();
-        String providerName = providerService.get(get(resourceId).getService().getResourceOrganisation()).getProvider().getName();
-        logger.info(String.format("Mailing provider [%s]-[%s] for outdated Resources", providerId, providerName));
-        registrationMailService.sendEmailNotificationsToProviderAdminsWithOutdatedResources(resourceId);
+        ServiceBundle serviceBundle = get(resourceId);
+        ProviderBundle providerBundle = providerService.get(serviceBundle.getService().getResourceOrganisation());
+        logger.info(String.format("Mailing provider [%s]-[%s] for outdated Resources", providerBundle.getId(),
+                providerBundle.getProvider().getName()));
+        registrationMailService.sendEmailNotificationsToProviderAdminsWithOutdatedResources(serviceBundle, providerBundle);
     }
 
     public ServiceBundle changeProvider(String resourceId, String newProviderId, String comment, Authentication auth) {
@@ -677,7 +677,7 @@ public class ServiceBundleManager extends AbstractServiceBundleManager<ServiceBu
         migrationService.updateRelatedToTheIdFieldsOfOtherResourcesOfThePortal(resourceId, resourceId); //TODO: SEE IF IT WORKS AS INTENDED AND REMOVE
 
         // emails to EPOT, old and new Provider
-        registrationMailService.sendEmailsForMovedServices(oldProvider, newProvider, serviceBundle, auth);
+        registrationMailService.sendEmailsForMovedResources(oldProvider, newProvider, serviceBundle, auth);
 
         return serviceBundle;
     }

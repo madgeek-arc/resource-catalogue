@@ -1,18 +1,18 @@
 <p>Dear ${user.fullName},</p>
 <p>
-    <#if providerBundle.templateStatus == "no template status">
-        <#if providerBundle.status == "pending provider">
-            You have applied for registering [${providerBundle.provider.name}] - ([${providerBundle.provider.id}]) as a
-            new ${project} provider in the ${project} Portal.
+    <#if bundle.templateStatus == "no template status">
+        <#if bundle.status == "pending provider">
+            You have applied for registering [${bundle.provider.name}] - ([${bundle.provider.id}]) as a
+            new ${project} Provider in the ${project} Portal.
             <br>
             Your application will be reviewed and you will be notified on its approval or rejection, as well as for any
             further steps you can follow for registering successfully your organization and its services.
             <br>
             Thank you for your interest in becoming a member of the ${project} Portal.
         </#if>
-        <#if providerBundle.status == "approved provider">
-            <#if providerBundle.active == true>
-                You have applied for registering [${providerBundle.provider.name}] - ([${providerBundle.provider.id}])
+        <#if bundle.status == "approved provider">
+            <#if bundle.active == true>
+                You have applied for registering [${bundle.provider.name}] - ([${bundle.provider.id}])
                 as a new ${project} Provider in the ${project} Portal.
                 <br>
                 Your application has been approved and you may proceed with providing one of your Resources
@@ -26,14 +26,14 @@
                 <br>
                 For any clarifications, please contact us at ${registrationEmail}.
             <#else>
-                Your Resource Provider [${providerBundle.provider.name}] - ([${providerBundle.provider.id}]) has been
+                Your Resource Provider [${bundle.provider.name}] - ([${bundle.provider.id}]) has been
                 set to inactive.
                 <br>
                 For any further clarifications please contact ${registrationEmail}.
             </#if>
         </#if>
-        <#if providerBundle.status == "rejected provider">
-            You have applied for registering [${providerBundle.provider.name}] - ([${providerBundle.provider.id}]) as a
+        <#if bundle.status == "rejected provider">
+            You have applied for registering [${bundle.provider.name}] - ([${bundle.provider.id}]) as a
             new ${project} Provider in the ${project} Portal.
             <br>
             Your application has been rejected, as your organization does not comply with the Rules of Participation
@@ -47,8 +47,8 @@
             Thank you for your interest in becoming a member of the ${project} Portal.
         </#if>
     <#else>
-        <#if providerBundle.templateStatus == "pending template">
-            You have applied for registering [${resourceName}] - [${resourceId}] as a new Resource in the
+        <#if bundle.templateStatus == "pending template">
+            You have applied for registering [${resourceBundleName}] - [${resourceBundleId}] as a new Resource in the
             ${project} Portal.
             <br>
             The Resource description will be reviewed and you will be notified on its approval or rejection, as well as
@@ -56,28 +56,28 @@
             <br>
             Thank you for your interest in becoming a member of the ${project} Portal.
         </#if>
-        <#if providerBundle.templateStatus == "approved template">
-            You have applied for registering [${resourceName}] - [${resourceId}] as a new Resource in the
+        <#if bundle.templateStatus == "approved template">
+            You have applied for registering [${resourceBundleName}] - [${resourceBundleId}] as a new Resource in the
             ${project} Portal.
             <br>
             Your application has been approved and the Resource has been successfully listed in the ${project} Portal.
             <br>
             You can view the published Resource here
-            ${endpoint}/dashboard/${project?lower_case}/${providerBundle.provider.id}/${resourceType}-dashboard/${resourceId}/stats.
+            ${endpoint}/dashboard/${project?lower_case}/${bundle.provider.id}/${resourceType}-dashboard/${resourceBundleId}/stats.
             <br>
             [Attached you may find a Resource Description Recommendations Report to further improve your
             Resource description.]
             <br>
             You may now proceed with registering more Resources for
-            [${providerBundle.provider.name}] - ([${providerBundle.provider.id}]). You can register all other Resources
+            [${bundle.provider.name}] - ([${bundle.provider.id}]). You can register all other Resources
             either manually (via the same web interface) or via the ${project} Portal API ${endpoint}/developers.
             <br>
             For any clarifications, please contact us at ${registrationEmail}.
             <br>
             Thank you for your interest in becoming a member of the ${project} Portal.
         </#if>
-        <#if providerBundle.templateStatus == "rejected template">
-            You have applied for registering [${resourceName}] - [${resourceId}] as a new Resource in the
+        <#if bundle.templateStatus == "rejected template">
+            You have applied for registering [${resourceBundleName}] - [${resourceBundleId}] as a new Resource in the
             ${project} Portal.
             <br>
             Your application has been rejected, as your Resource description does not comply with the Rules of
