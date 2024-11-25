@@ -882,7 +882,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         }
 
         provider.setAuditState(Auditable.NOT_AUDITED);
-        provider.setLatestOnboardingInfo(loggingInfoList.get(loggingInfoList.size() - 1));
+        provider.setLatestOnboardingInfo(loggingInfoList.getLast());
 
         return provider;
     }
