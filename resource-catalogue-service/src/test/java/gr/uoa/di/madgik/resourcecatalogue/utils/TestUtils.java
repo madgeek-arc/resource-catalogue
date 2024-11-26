@@ -50,7 +50,7 @@ public class TestUtils {
 
     private static ProviderMainContact createMainContact() {
         ProviderMainContact contact = new ProviderMainContact();
-        contact.setFirstName("Test First Name");
+        contact.setFirstName("Joe");
         contact.setEmail("main@email.com");
         return contact;
     }

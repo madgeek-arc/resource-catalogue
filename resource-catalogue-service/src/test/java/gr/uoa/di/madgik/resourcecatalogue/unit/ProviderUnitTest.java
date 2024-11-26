@@ -21,6 +21,17 @@ public class ProviderUnitTest {
     @Mock
     private ProviderService providerService;
 
+    /**
+     * Test to verify the successful addition of a valid provider using the {@code add} method.
+     * <p>
+     * This test ensures that:
+     * <ul>
+     *   <li>The returned {@link ProviderBundle} is not null.</li>
+     *   <li>The returned {@link ProviderBundle} matches the expected output.</li>
+     *   <li>The provider's name is correctly set to "Test Provider".</li>
+     *   <li>The {@code add} method of the {@link ProviderService} is invoked exactly once with the correct arguments.</li>
+     * </ul>
+     */
     @Test
     public void addProviderSuccess() {
         ProviderBundle inputProviderBundle = createValidProviderBundle();

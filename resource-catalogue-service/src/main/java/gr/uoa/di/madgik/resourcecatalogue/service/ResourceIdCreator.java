@@ -65,7 +65,6 @@ public class ResourceIdCreator implements IdCreator {
             case "provider", "draft_provider" -> providersPrefix;
             case "interoperability_record", "draft_interoperability_record" -> guidelinesPrefix;
             // non PID related
-//            case "catalogue" -> cataloguesPrefix; //TODO: what we do with catalogue IDs
             case "configuration_template" -> configurationTemplatesPrefix;
             case "configuration_template_instance" -> configurationTemplateInstancesPrefix;
             case "datasource" -> datasourcesPrefix;
