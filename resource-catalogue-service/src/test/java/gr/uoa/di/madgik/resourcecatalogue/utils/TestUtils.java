@@ -44,7 +44,7 @@ public class TestUtils {
         location.setStreetNameAndNumber("Test Street Name 1");
         location.setPostalCode("12345");
         location.setCity("Test City");
-        location.setCountry("GR");
+        location.setCountry("EL");
         return location;
     }
 
@@ -66,7 +66,11 @@ public class TestUtils {
     private static List<User> createUsers() {
         User user1 = new User();
         User user2 = new User();
+        user1.setName("Joe");
+        user1.setSurname("Do");
         user1.setEmail("user1@email.com");
+        user2.setName("Nick");
+        user2.setSurname("Does");
         user2.setEmail("user2@email.com");
         return List.of(user1, user2);
     }

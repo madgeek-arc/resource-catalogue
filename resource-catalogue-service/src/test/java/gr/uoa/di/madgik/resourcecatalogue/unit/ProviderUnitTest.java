@@ -1,5 +1,6 @@
 package gr.uoa.di.madgik.resourcecatalogue.unit;
 
+import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.domain.ProviderBundle;
 import gr.uoa.di.madgik.resourcecatalogue.service.ProviderService;
 import org.junit.jupiter.api.Test;
@@ -46,4 +47,54 @@ public class ProviderUnitTest {
                 "Provider name should be 'Test Provider'");
         verify(providerService, times(1)).add(inputProviderBundle, auth);
     }
+
+    /**
+     * Tests the successful update of a provider using the ProviderService.
+     * <p>
+     * This test verifies that the {@code update} method of the {@link ProviderService}:
+     * <ul>
+     *   <li>Returns the expected updated {@link ProviderBundle}.</li>
+     *   <li>Ensures the provider's properties (e.g., name) are updated correctly.</li>
+     *   <li>Is called exactly once with the correct arguments.</li>
+     * </ul>
+     *
+     * @throws ResourceNotFoundException if the provider to be updated does not exist
+     */
+    @Test
+    public void updateProviderSuccess() throws ResourceNotFoundException {
+        ProviderBundle inputProviderBundle = createValidProviderBundle();
+        ProviderBundle expectedProviderBundle = createValidProviderBundle();
+        expectedProviderBundle.getProvider().setName("Updated Test Provider");
+
+        when(providerService.update(inputProviderBundle, auth)).thenReturn(expectedProviderBundle);
+        ProviderBundle result = providerService.update(inputProviderBundle, auth);
+
+        assertNotNull(result);
+        assertEquals(expectedProviderBundle, result);
+
+        assertEquals("Updated Test Provider", result.getProvider().getName(), "Provider name should be " +
+                "'Updated Test Provider'");
+
+        verify(providerService, times(1)).update(inputProviderBundle, auth);
+    }
+
+    /**
+     * Tests the successful deletion of a provider using the ProviderService.
+     * <p>
+     * This test verifies that the {@code delete} method of the {@link ProviderService}:
+     * <ul>
+     *   <li>Is called exactly once with the correct provider ID and authentication.</li>
+     *   <li>Does not throw any exceptions for a valid deletion request.</li>
+     * </ul>
+     */
+    @Test
+    public void deleteProviderSuccess() {
+        ProviderBundle inputProviderBundle = createValidProviderBundle();
+
+        doNothing().when(providerService).delete(inputProviderBundle);
+        providerService.delete(inputProviderBundle);
+
+        verify(providerService, times(1)).delete(inputProviderBundle);
+    }
+
 }

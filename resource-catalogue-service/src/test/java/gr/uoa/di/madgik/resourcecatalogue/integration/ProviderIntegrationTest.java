@@ -5,10 +5,12 @@ import gr.uoa.di.madgik.resourcecatalogue.domain.ProviderBundle;
 import gr.uoa.di.madgik.resourcecatalogue.exception.ValidationException;
 import gr.uoa.di.madgik.resourcecatalogue.service.ProviderService;
 import gr.uoa.di.madgik.resourcecatalogue.service.SecurityService;
+import gr.uoa.di.madgik.resourcecatalogue.utils.ProviderResourcesCommonMethods;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.security.authentication.InsufficientAuthenticationException;
 
 import static gr.uoa.di.madgik.resourcecatalogue.utils.TestUtils.createValidProviderBundle;
@@ -21,6 +23,10 @@ public class ProviderIntegrationTest {
     private ProviderService providerService;
     @Autowired
     private SecurityService securityService;
+    @SpyBean
+    private ProviderResourcesCommonMethods commonMethods;
+
+    private static String providerId;
 
     /**
      * Test to verify that adding a provider fails when authentication is not provided.
@@ -86,4 +92,46 @@ public class ProviderIntegrationTest {
         Assertions.assertEquals("Vocabulary with ID '" + invalidCountryValue + "' does not exist. " +
                 "Found in field 'country'", exception.getMessage());
     }
+
+
+    //TODO: fix me
+//    @Test
+//    @Order(1)
+//    void addProviderSucceeds() {
+//        ProviderBundle providerBundle = createValidProviderBundle();
+//        Metadata metadata = new Metadata();
+//        Metadata dummyMetadata = Mockito.spy(metadata);
+//
+//        doNothing().when(commonMethods).addAuthenticatedUser(any(), any());
+//        when(Metadata.createMetadata(any(), any())).thenReturn(dummyMetadata);
+//        providerService.add(providerBundle, securityService.getAdminAccess());
+//
+//        ProviderBundle retrievedProvider = providerService.get(providerBundle.getId(), securityService.getAdminAccess());
+//        assertNotNull(retrievedProvider, "Provider should be found in the database.");
+//        assertEquals(providerBundle.getProvider().getName(), retrievedProvider.getProvider().getName(),
+//                "Provider name should match the expected value.");
+//    }
+
+//    @Test
+//    @Order(2)
+//    void updateProviderSucceeds() throws ResourceNotFoundException {
+//        ProviderBundle providerBundle = createValidProviderBundle();
+//        providerService.add(providerBundle, securityService.getAdminAccess());
+//
+//        providerBundle.getProvider().setName("Updated Test Provider");
+//        providerService.update(providerBundle, securityService.getAdminAccess());
+//
+//        ProviderBundle updatedProvider = providerService.get(providerBundle.getId(), securityService.getAdminAccess());
+//        assertNotNull(updatedProvider, "Updated provider should exist in the database.");
+//        assertEquals("Updated Test Provider", updatedProvider.getProvider().getName());
+//    }
+
+//    @Test
+//    @Order(3)
+//    void deleteProviderSucceeds() {
+//        ProviderBundle providerBundle = providerService.get(providerBundle.getId(), securityService.getAdminAccess());
+//        providerService.delete(providerBundle.getId(), securityService.getAdminAccess());
+//        ProviderBundle deletedProvider = providerRepository.findById(providerBundle.getId()).orElse(null);
+//        assertNull(deletedProvider, "Provider should be deleted from the database.");
+//    }
 }
