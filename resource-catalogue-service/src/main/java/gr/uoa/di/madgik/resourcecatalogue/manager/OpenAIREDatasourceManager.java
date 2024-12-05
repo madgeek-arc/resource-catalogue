@@ -30,17 +30,12 @@ public class OpenAIREDatasourceManager implements OpenAIREDatasourceService {
 
     private static final Logger logger = LoggerFactory.getLogger(OpenAIREDatasourceManager.class);
 
-    private final String openaireAPI;
-    private final String openaireMetricsValidated;
-    private final String openaireMetrics;
-
-    public OpenAIREDatasourceManager(@Value("${openaire.dsm.api}") String openaireAPI,
-                                     @Value("${openaire.ds.metrics.validated}") String openaireMetricsValidated,
-                                     @Value("${openaire.ds.metrics}") String openaireMetrics) {
-        this.openaireAPI = openaireAPI;
-        this.openaireMetricsValidated = openaireMetricsValidated;
-        this.openaireMetrics = openaireMetrics;
-    }
+    @Value("${openaire.dsm.api:}")
+    private String openaireAPI;
+    @Value("${openaire.ds.metrics.validated:}")
+    private String openaireMetricsValidated;
+    @Value("${openaire.ds.metrics:}")
+    private String openaireMetrics;
 
     private String[] getOpenAIREDatasourcesAsJSON(FacetFilter ff) {
         String[] pagination = createPagination(ff);

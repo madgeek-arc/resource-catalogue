@@ -53,11 +53,11 @@ public class ServiceExtensionsController {
     private final HelpdeskService helpdeskService;
     private final MonitoringService monitoringService;
     private final ServiceBundleService serviceBundleService;
-    @Value("${argo.grnet.monitoring.availability}")
+    @Value("${argo.grnet.monitoring.availability:}")
     private String monitoringAvailability;
-    @Value("${argo.grnet.monitoring.status}")
+    @Value("${argo.grnet.monitoring.status:}")
     private String monitoringStatus;
-    @Value("${argo.grnet.monitoring.token}")
+    @Value("${argo.grnet.monitoring.token:}")
     private String monitoringToken;
     private final GenericResourceService genericResourceService;
 

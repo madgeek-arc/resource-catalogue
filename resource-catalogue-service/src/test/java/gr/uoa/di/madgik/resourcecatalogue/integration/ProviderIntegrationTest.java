@@ -1,6 +1,5 @@
 package gr.uoa.di.madgik.resourcecatalogue.integration;
 
-import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Metadata;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Provider;
@@ -11,15 +10,15 @@ import gr.uoa.di.madgik.resourcecatalogue.service.ProviderService;
 import gr.uoa.di.madgik.resourcecatalogue.service.SecurityService;
 import gr.uoa.di.madgik.resourcecatalogue.utils.AuthenticationInfo;
 import gr.uoa.di.madgik.resourcecatalogue.utils.ProviderResourcesCommonMethods;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Order;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.security.authentication.InsufficientAuthenticationException;
-
-import java.util.List;
 
 import static gr.uoa.di.madgik.resourcecatalogue.utils.TestUtils.createValidProviderBundle;
 import static org.junit.jupiter.api.Assertions.*;
@@ -27,11 +26,8 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mockStatic;
 
-//TODO: find a way to load application context only once
-@SpringBootTest
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
-public class ProviderIntegrationTest {
+public class ProviderIntegrationTest extends BaseIntegrationTest {
 
     @Autowired
     private ProviderService providerService;
@@ -41,17 +37,17 @@ public class ProviderIntegrationTest {
     private ProviderResourcesCommonMethods commonMethods;
     private static String providerId;
 
-    @AfterAll
-    void cleanup() {
-        FacetFilter ff = new FacetFilter();
-        ff.setQuantity(100);
-        ff.setResourceType("provider");
-        ff.addFilter("abbreviation", "Test Abbreviation");
-        List<ProviderBundle> providerBundles = providerService.getAll(ff, securityService.getAdminAccess()).getResults();
-        for (ProviderBundle providerBundle : providerBundles) {
-            providerService.delete(providerBundle);
-        }
-    }
+//    @AfterAll
+//    void cleanup() {
+//        FacetFilter ff = new FacetFilter();
+//        ff.setQuantity(100);
+//        ff.setResourceType("provider");
+//        ff.addFilter("abbreviation", "Test Abbreviation");
+//        List<ProviderBundle> providerBundles = providerService.getAll(ff, securityService.getAdminAccess()).getResults();
+//        for (ProviderBundle providerBundle : providerBundles) {
+//            providerService.delete(providerBundle);
+//        }
+//    }
 
     /**
      * Test to verify that adding a provider fails when authentication is not provided.

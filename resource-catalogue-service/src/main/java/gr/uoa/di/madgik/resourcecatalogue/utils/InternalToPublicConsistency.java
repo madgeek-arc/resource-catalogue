@@ -47,11 +47,11 @@ public class InternalToPublicConsistency {
 
     @Value("${catalogue.name:Resource Catalogue}")
     private String catalogueName;
-    @Value("${resource.consistency.enable}")
+    @Value("${resource.consistency.enable:false}")
     private boolean enableConsistencyEmails;
-    @Value("${resource.consistency.email}")
+    @Value("${resource.consistency.email:}")
     private String consistencyEmail;
-    @Value("${resource.consistency.cc}")
+    @Value("${resource.consistency.cc:}")
     private String consistencyCC;
 
     public InternalToPublicConsistency(ProviderService providerService,

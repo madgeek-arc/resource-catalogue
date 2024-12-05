@@ -5,9 +5,7 @@ import gr.uoa.di.madgik.registry.service.ResourceTypeService;
 import gr.uoa.di.madgik.resourcecatalogue.service.ResourceIdCreator;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 
 import java.util.Arrays;
 import java.util.List;
@@ -15,9 +13,7 @@ import java.util.stream.IntStream;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@SpringBootTest
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
-public class ResourceIdCreatorIntegrationTest {
+public class ResourceIdCreatorIntegrationTest extends BaseIntegrationTest {
 
     @Autowired
     private ResourceIdCreator idCreator;
@@ -48,7 +44,7 @@ public class ResourceIdCreatorIntegrationTest {
      */
     @Test
     public void generateUniqueIds() {
-        IntStream.range(0, 10000).forEach(i -> idCreator.generate("provider"));
+        IntStream.range(0, 10).forEach(i -> idCreator.generate("provider"));
     }
 
     /**

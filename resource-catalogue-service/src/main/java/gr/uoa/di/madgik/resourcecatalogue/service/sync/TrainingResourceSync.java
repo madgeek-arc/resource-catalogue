@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 public class TrainingResourceSync extends AbstractSyncService<TrainingResource> {
 
     @Autowired
-    public TrainingResourceSync(@Value("${sync.host:}") String host, @Value("${sync.token.filepath:}") String filename, @Value("${sync.enable}") boolean enabled) {
+    public TrainingResourceSync(@Value("${sync.host:}") String host, @Value("${sync.token.filepath:}") String filename, @Value("${sync.enable:false}") boolean enabled) {
         super(host, filename, enabled);
     }
 

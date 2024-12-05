@@ -36,9 +36,9 @@ public class MonitoringManager extends ResourceManager<MonitoringBundle> impleme
     private final RegistrationMailService registrationMailService;
     private final ProviderResourcesCommonMethods commonMethods;
 
-    @Value("${argo.grnet.monitoring.token}")
+    @Value("${argo.grnet.monitoring.token:}")
     private String monitoringToken;
-    @Value("${argo.grnet.monitoring.service.types}")
+    @Value("${argo.grnet.monitoring.service.types:}")
     private String monitoringServiceTypes;
 
     private final IdCreator idCreator;

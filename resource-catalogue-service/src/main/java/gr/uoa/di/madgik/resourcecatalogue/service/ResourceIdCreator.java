@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class ResourceIdCreator implements IdCreator {
 
-    @Value("${pid.test}")
+    @Value("${pid.test:false}")
     private boolean pidTest;
 
     private final SearchService searchService;

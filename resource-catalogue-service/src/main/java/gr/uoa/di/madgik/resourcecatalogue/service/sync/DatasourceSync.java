@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class DatasourceSync extends AbstractSyncService<Datasource> {
 
-    public DatasourceSync(@Value("${sync.host:}") String host, @Value("${sync.token.filepath:}") String filename, @Value("${sync.enable}") boolean enabled) {
+    public DatasourceSync(@Value("${sync.host:}") String host, @Value("${sync.token.filepath:}") String filename, @Value("${sync.enable:false}") boolean enabled) {
         super(host, filename, enabled);
     }
 
