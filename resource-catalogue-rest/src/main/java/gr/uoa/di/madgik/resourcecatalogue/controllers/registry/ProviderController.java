@@ -60,9 +60,6 @@ public class ProviderController {
     @Value("${catalogue.name:Resource Catalogue}")
     private String catalogueName;
 
-    @Value("${pid.providers.prefix}")
-    private String pidPrefix;
-
     ProviderController(ProviderService providerService,
                        DraftResourceService<ProviderBundle> draftProviderService,
                        ServiceBundleService<ServiceBundle> serviceBundleService,
@@ -207,12 +204,6 @@ public class ProviderController {
     public ResponseEntity<List<? extends Service>> getServices(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
                                                                @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix,
                                                                @Parameter(hidden = true) Authentication auth) {
-//        String id = pidPrefix + "/" + suffix;
-//        FacetFilter ff = new FacetFilter();
-//        ff.setResourceType("service");
-//        ff.addFilter("published", true);
-//        ff.addFilter("resource_organization", id);
-//        return new ResponseEntity<>(serviceBundleService.getResources(id, auth), HttpStatus.OK);
         throw new UnsupportedOperationException("Method Removed: Contact administrators");
     }
 

@@ -6,16 +6,15 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.i18n.phonenumbers.NumberParseException;
 import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.service.EventService;
+import jakarta.annotation.PostConstruct;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
-import jakarta.annotation.PostConstruct;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -37,13 +36,13 @@ public class DataParser {
     private HttpHeaders headers;
     private final EventService eventService;
 
-    @Value("${matomoHost:localhost}")
+    @Value("${matomo.host:localhost}")
     private String matomoHost;
 
-    @Value("${matomoToken:}")
+    @Value("${matomo.token:}")
     private String matomoToken;
 
-    @Value("${matomoSiteId:1}")
+    @Value("${matomo.site-id:1}")
     private String matomoSiteId;
 
     DataParser(EventService eventService) {

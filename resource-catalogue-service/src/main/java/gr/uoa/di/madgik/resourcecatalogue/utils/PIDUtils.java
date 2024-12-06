@@ -81,7 +81,7 @@ public class PIDUtils {
     // providers
     @Value("${pid.providers.base-url:}")
     private String providersEndpoint;
-    @Value("${pid.providers.prefix}")
+    @Value("${prefix.providers}")
     private String providersPrefix;
     @Value("${pid.providers.auth.user:}")
     private String providersUser;
@@ -97,7 +97,7 @@ public class PIDUtils {
     // services
     @Value("${pid.services.base-url:}")
     private String servicesEndpoint;
-    @Value("${pid.services.prefix}")
+    @Value("${prefix.services}")
     private String servicesPrefix;
     @Value("${pid.services.auth.user:}")
     private String servicesUser;
@@ -113,7 +113,7 @@ public class PIDUtils {
     // trainings
     @Value("${pid.trainings.base-url:}")
     private String trainingsEndpoint;
-    @Value("${pid.trainings.prefix}")
+    @Value("${prefix.trainings}")
     private String trainingsPrefix;
     @Value("${pid.trainings.auth.user:}")
     private String trainingsUser;
@@ -129,7 +129,7 @@ public class PIDUtils {
     // guidelines
     @Value("${pid.interoperability-frameworks.base-url:}")
     private String guidelinesEndpoint;
-    @Value("${pid.interoperability-frameworks.prefix}")
+    @Value("${prefix.interoperability-frameworks}")
     private String guidelinesPrefix;
     @Value("${pid.interoperability-frameworks.auth.user:}")
     private String guidelinesUser;
@@ -145,7 +145,7 @@ public class PIDUtils {
     // tools
     @Value("${pid.tools.base-url:}")
     private String toolsEndpoint;
-    @Value("${pid.tools.prefix}")
+    @Value("${prefix.tools}")
     private String toolsPrefix;
     @Value("${pid.tools.auth.user:}")
     private String toolsUser;

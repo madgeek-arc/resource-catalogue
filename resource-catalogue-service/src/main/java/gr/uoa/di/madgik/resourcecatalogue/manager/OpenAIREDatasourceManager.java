@@ -30,7 +30,7 @@ public class OpenAIREDatasourceManager implements OpenAIREDatasourceService {
 
     private static final Logger logger = LoggerFactory.getLogger(OpenAIREDatasourceManager.class);
 
-    @Value("${openaire.dsm.api:}")
+    @Value("${openaire.ds.api:}")
     private String openaireAPI;
     @Value("${openaire.ds.metrics.validated:}")
     private String openaireMetricsValidated;

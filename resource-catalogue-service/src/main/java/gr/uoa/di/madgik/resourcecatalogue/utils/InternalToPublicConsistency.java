@@ -47,11 +47,11 @@ public class InternalToPublicConsistency {
 
     @Value("${catalogue.name:Resource Catalogue}")
     private String catalogueName;
-    @Value("${resource.consistency.enable:false}")
+    @Value("${catalogue.email-properties.resource-consistency.enabled:false}")
     private boolean enableConsistencyEmails;
-    @Value("${resource.consistency.email:}")
-    private String consistencyEmail;
-    @Value("${resource.consistency.cc:}")
+    @Value("${catalogue.email-properties.resource-consistency.to:}")
+    private String consistencyTo;
+    @Value("${catalogue.email-properties.resource-consistency.cc:}")
     private String consistencyCC;
 
     public InternalToPublicConsistency(ProviderService providerService,
@@ -186,9 +186,9 @@ public class InternalToPublicConsistency {
             String teamMail = out.getBuffer().toString();
             String subject = String.format("[%s Portal] Internal to Public Resource Consistency Logs", catalogueName);
             if (enableConsistencyEmails) {
-                mailService.sendMail(Collections.singletonList(consistencyEmail), null, Collections.singletonList(consistencyCC), subject, teamMail);
+                mailService.sendMail(Collections.singletonList(consistencyTo), null, Collections.singletonList(consistencyCC), subject, teamMail);
             }
-            logger.info("\nRecipient: {}\nCC: {}\nTitle: {}\nMail body: \n{}", consistencyEmail, consistencyCC, subject, teamMail);
+            logger.info("\nRecipient: {}\nCC: {}\nTitle: {}\nMail body: \n{}", consistencyTo, consistencyCC, subject, teamMail);
             out.close();
         } catch (IOException e) {
             logger.error("Error finding mail template", e);
