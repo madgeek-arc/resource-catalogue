@@ -1,12 +1,20 @@
 package gr.uoa.di.madgik.resourcecatalogue.config.security;
 
+import gr.uoa.di.madgik.resourcecatalogue.config.dynamicproperties.PropertyChangeEvent;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.mail.MailProperties;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.context.event.EventListener;
 
+import java.util.Arrays;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @ConfigurationProperties(prefix = "catalogue")
 public class ResourceCatalogueProperties {
+
+    private static final Logger logger = LoggerFactory.getLogger(ResourceCatalogueProperties.class);
 
     private Set<String> admins;
     private Set<String> onboardingTeam;
@@ -18,7 +26,22 @@ public class ResourceCatalogueProperties {
     private EmailProperties emailProperties = new EmailProperties();
     private MailerProperties mailer = new MailerProperties();
 
+
     public ResourceCatalogueProperties() {
+    }
+
+    //TODO: enable specific or all property changes and reloads
+    @EventListener
+    public void onPropertyChange(PropertyChangeEvent event) {
+        if ("CATALOGUE_ADMINS".equals(event.getPropertyName())) {
+            String newAdmins = event.getNewValue();
+            if (newAdmins != null) {
+                setAdmins(Arrays.stream(newAdmins.split(","))
+                        .map(String::trim)
+                        .collect(Collectors.toSet()));
+                logger.info("Admins updated to: {}", this.admins);
+            }
+        }
     }
 
     public Set<String> getAdmins() {
