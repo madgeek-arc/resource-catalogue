@@ -1,10 +1,15 @@
 package gr.uoa.di.madgik.resourcecatalogue.config.dynamicproperties;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.IOException;
 import java.nio.file.*;
 import java.util.Properties;
 
 public class PropertiesWatcher {
+
+    private static final Logger logger = LoggerFactory.getLogger(PropertiesWatcher.class);
 
     private final Path secretPropertiesPath;
 
@@ -27,8 +32,7 @@ public class PropertiesWatcher {
                     }
                     key.reset();
                 } catch (Exception e) {
-                    //TODO: log it
-                    e.printStackTrace();
+                    logger.warn("An unexpected error occurred in the file watcher thread.", e);
                 }
             }
         }).start();
