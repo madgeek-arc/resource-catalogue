@@ -9,7 +9,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.core.Authentication;
 
-import static gr.uoa.di.madgik.resourcecatalogue.utils.TestUtils.createValidProviderBundle;
+import static gr.uoa.di.madgik.resourcecatalogue.utils.TestUtils.createProviderBundle;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.*;
@@ -35,8 +35,8 @@ public class ProviderUnitTest {
      */
     @Test
     public void addProviderSuccess() {
-        ProviderBundle inputProviderBundle = createValidProviderBundle();
-        ProviderBundle expectedProviderBundle = createValidProviderBundle();
+        ProviderBundle inputProviderBundle = createProviderBundle();
+        ProviderBundle expectedProviderBundle = createProviderBundle();
 
         when(providerService.add(inputProviderBundle, auth)).thenReturn(expectedProviderBundle);
         ProviderBundle result = providerService.add(inputProviderBundle, auth);
@@ -62,8 +62,8 @@ public class ProviderUnitTest {
      */
     @Test
     public void updateProviderSuccess() throws ResourceNotFoundException {
-        ProviderBundle inputProviderBundle = createValidProviderBundle();
-        ProviderBundle expectedProviderBundle = createValidProviderBundle();
+        ProviderBundle inputProviderBundle = createProviderBundle();
+        ProviderBundle expectedProviderBundle = createProviderBundle();
         expectedProviderBundle.getProvider().setName("Updated Test Provider");
 
         when(providerService.update(inputProviderBundle, auth)).thenReturn(expectedProviderBundle);
@@ -89,7 +89,7 @@ public class ProviderUnitTest {
      */
     @Test
     public void deleteProviderSuccess() {
-        ProviderBundle inputProviderBundle = createValidProviderBundle();
+        ProviderBundle inputProviderBundle = createProviderBundle();
 
         doNothing().when(providerService).delete(inputProviderBundle);
         providerService.delete(inputProviderBundle);

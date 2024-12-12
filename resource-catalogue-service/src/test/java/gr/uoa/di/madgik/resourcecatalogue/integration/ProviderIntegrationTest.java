@@ -1,5 +1,6 @@
 package gr.uoa.di.madgik.resourcecatalogue.integration;
 
+import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Metadata;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Provider;
@@ -10,17 +11,16 @@ import gr.uoa.di.madgik.resourcecatalogue.service.ProviderService;
 import gr.uoa.di.madgik.resourcecatalogue.service.SecurityService;
 import gr.uoa.di.madgik.resourcecatalogue.utils.AuthenticationInfo;
 import gr.uoa.di.madgik.resourcecatalogue.utils.ProviderResourcesCommonMethods;
-import org.junit.jupiter.api.MethodOrderer;
-import org.junit.jupiter.api.Order;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestMethodOrder;
+import org.junit.jupiter.api.*;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.security.authentication.InsufficientAuthenticationException;
 
-import static gr.uoa.di.madgik.resourcecatalogue.utils.TestUtils.createValidProviderBundle;
+import java.util.List;
+
+import static gr.uoa.di.madgik.resourcecatalogue.utils.TestUtils.createProviderBundle;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
@@ -37,17 +37,17 @@ public class ProviderIntegrationTest extends BaseIntegrationTest {
     private ProviderResourcesCommonMethods commonMethods;
     private static String providerId;
 
-//    @AfterAll
-//    void cleanup() {
-//        FacetFilter ff = new FacetFilter();
-//        ff.setQuantity(100);
-//        ff.setResourceType("provider");
-//        ff.addFilter("abbreviation", "Test Abbreviation");
-//        List<ProviderBundle> providerBundles = providerService.getAll(ff, securityService.getAdminAccess()).getResults();
-//        for (ProviderBundle providerBundle : providerBundles) {
-//            providerService.delete(providerBundle);
-//        }
-//    }
+    @AfterAll
+    void cleanup() {
+        FacetFilter ff = new FacetFilter();
+        ff.setQuantity(100);
+        ff.setResourceType("provider");
+        ff.addFilter("abbreviation", "Test Abbreviation");
+        List<ProviderBundle> providerBundles = providerService.getAll(ff, securityService.getAdminAccess()).getResults();
+        for (ProviderBundle providerBundle : providerBundles) {
+            providerService.delete(providerBundle);
+        }
+    }
 
     /**
      * Test to verify that adding a provider fails when authentication is not provided.
@@ -103,7 +103,7 @@ public class ProviderIntegrationTest extends BaseIntegrationTest {
     @Test
     void addProviderFailsOnVocabularyValidation() {
         String invalidCountryValue = "Asgard";
-        ProviderBundle inputProviderBundle = createValidProviderBundle();
+        ProviderBundle inputProviderBundle = createProviderBundle();
         inputProviderBundle.getProvider().getLocation().setCountry(invalidCountryValue);
 
         ValidationException exception = assertThrows(ValidationException.class, () -> {
@@ -114,12 +114,56 @@ public class ProviderIntegrationTest extends BaseIntegrationTest {
                 "Found in field 'country'", exception.getMessage());
     }
 
+    /**
+     * Tests that the portal's business logic assigns a new ID to a provider
+     * when it is added, even if the user explicitly sets an initial ID.
+     * <p>
+     * This ensures that the portal maintains control over the unique
+     * identification of providers, preventing conflicts or invalid IDs
+     * set by users.
+     * </p>
+     * <p>
+     * The test performs the following steps:
+     * <ul>
+     *   <li>Sets an initial ID for a ProviderBundle instance.</li>
+     *   <li>Mocks dependencies to simulate metadata creation and user authentication.</li>
+     *   <li>Calls the {@code add} method on the {@code providerService} to add the provider.</li>
+     *   <li>Retrieves the provider using the service and verifies that the initial ID has been
+     *       replaced by a new ID assigned by the portal's business logic.</li>
+     * </ul>
+     * </p>
+     *
+     * <p>An assertion ensures that the initial ID is not retained in the retrieved ProviderBundle.</p>
+     */
+    @Test
+    void addProviderEnsureIdIsAssignedByThePortal() {
+        providerId = "@my-ID>!?";
+        Metadata metadata = new Metadata();
+        Metadata dummyMetadata = Mockito.spy(metadata);
+        ProviderBundle providerBundle = createProviderBundle();
+        providerBundle.getProvider().setId(providerId);
+
+        doNothing().when(commonMethods).addAuthenticatedUser(any(), any());
+        try (MockedStatic<Metadata> mockedMetadata = mockStatic(Metadata.class);
+             MockedStatic<AuthenticationInfo> mockedAuthInfo = mockStatic(AuthenticationInfo.class)) {
+            mockedMetadata.when(() -> Metadata.createMetadata(any(), any())).thenReturn(dummyMetadata);
+            mockedAuthInfo.when(() -> AuthenticationInfo.getFullName(any())).thenReturn("Registrant");
+            mockedAuthInfo.when(() -> AuthenticationInfo.getEmail(any())).thenReturn("registrant@email.com");
+
+            providerService.add(providerBundle, securityService.getAdminAccess());
+
+            ProviderBundle retrievedProvider = providerService.get(providerBundle.getId(), securityService.getAdminAccess());
+            assertNotEquals(providerId, retrievedProvider.getProvider().getId(),
+                    "The ID should have been overwritten by the portal's business logic");
+        }
+    }
+
     @Test
     @Order(1)
     void addProviderSucceeds() {
-        ProviderBundle providerBundle = createValidProviderBundle();
         Metadata metadata = new Metadata();
         Metadata dummyMetadata = Mockito.spy(metadata);
+        ProviderBundle providerBundle = createProviderBundle();
 
         doNothing().when(commonMethods).addAuthenticatedUser(any(), any());
         try (MockedStatic<Metadata> mockedMetadata = mockStatic(Metadata.class);
