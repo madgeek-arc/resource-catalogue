@@ -76,7 +76,7 @@ public class TestUtils {
         location.setStreetNameAndNumber("Test Street Name 1");
         location.setPostalCode("12345");
         location.setCity("Test City");
-        location.setCountry("EL");
+        location.setCountry("AD");
         return location;
     }
 

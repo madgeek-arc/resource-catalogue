@@ -13,7 +13,7 @@ import java.util.stream.IntStream;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class ResourceIdCreatorIntegrationTest extends BaseIntegrationTest {
+class ResourceIdCreatorIntegrationTest extends BaseIntegrationTest {
 
     @Autowired
     private ResourceIdCreator idCreator;
@@ -78,8 +78,9 @@ public class ResourceIdCreatorIntegrationTest extends BaseIntegrationTest {
      * This test is critical for ensuring that the ID creation logic gracefully handles edge cases
      * such as empty or invalid input.
      */
-    @Test
+    @Test()
     public void generateWithEmptyResourceType() {
+//        assertThrows(ServiceException.class, () -> idCreator.generate(""));
         String id = idCreator.generate("");
 
         assertNotNull(id);
