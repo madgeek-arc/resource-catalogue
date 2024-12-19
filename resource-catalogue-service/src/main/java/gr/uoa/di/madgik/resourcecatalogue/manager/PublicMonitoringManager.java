@@ -43,7 +43,7 @@ public class PublicMonitoringManager extends AbstractPublicResourceManager<Monit
     }
 
     @Override
-    public String getResourceType() {
+    public String getResourceTypeName() {
         return "monitoring";
     }
 

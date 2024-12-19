@@ -90,7 +90,7 @@ public class ServiceBundleManager extends AbstractServiceBundleManager<ServiceBu
     }
 
     @Override
-    public String getResourceType() {
+    public String getResourceTypeName() {
         return "service";
     }
 
@@ -122,10 +122,10 @@ public class ServiceBundleManager extends AbstractServiceBundleManager<ServiceBu
             throw new ValidationException(String.format("The Provider with id %s has already registered a Resource Template.", providerBundle.getId()));
         }
 
-        serviceBundle.setId(idCreator.generate(getResourceType()));
+        serviceBundle.setId(idCreator.generate(getResourceTypeName()));
 
         // register and ensure Resource Catalogue's PID uniqueness
-        commonMethods.determineResourceAndCreateAlternativeIdentifierForPID(serviceBundle, getResourceType());
+        commonMethods.determineResourceAndCreateAlternativeIdentifierForPID(serviceBundle, getResourceTypeName());
         serviceBundle.getService().setAlternativeIdentifiers(commonMethods.ensureResourceCataloguePidUniqueness(serviceBundle.getId(),
                 serviceBundle.getService().getCatalogueId(),
                 serviceBundle.getService().getAlternativeIdentifiers()));
@@ -217,7 +217,7 @@ public class ServiceBundleManager extends AbstractServiceBundleManager<ServiceBu
         // ensure Resource Catalogue's PID uniqueness
         if (ret.getService().getAlternativeIdentifiers() == null ||
                 ret.getService().getAlternativeIdentifiers().isEmpty()) {
-            commonMethods.determineResourceAndCreateAlternativeIdentifierForPID(ret, getResourceType());
+            commonMethods.determineResourceAndCreateAlternativeIdentifierForPID(ret, getResourceTypeName());
         } else {
             ret.getService().setAlternativeIdentifiers(commonMethods.ensureResourceCataloguePidUniqueness(ret.getId(),
                     ret.getService().getCatalogueId(),

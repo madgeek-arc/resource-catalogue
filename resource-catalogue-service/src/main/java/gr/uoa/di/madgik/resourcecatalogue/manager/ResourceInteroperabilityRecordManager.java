@@ -49,7 +49,7 @@ public class ResourceInteroperabilityRecordManager extends ResourceManager<Resou
     }
 
     @Override
-    public String getResourceType() {
+    public String getResourceTypeName() {
         return "resource_interoperability_record";
     }
 
@@ -82,7 +82,7 @@ public class ResourceInteroperabilityRecordManager extends ResourceManager<Resou
         validate(bundle, resourceType);
         commonMethods.checkRelatedResourceIDsConsistency(bundle);
 
-        bundle.setId(idCreator.generate(getResourceType()));
+        bundle.setId(idCreator.generate(getResourceTypeName()));
         logger.trace("Attempting to add a new ResourceInteroperabilityRecord: {}", bundle);
 
         bundle.setMetadata(Metadata.createMetadata(User.of(auth).getFullName(), User.of(auth).getEmail().toLowerCase()));
@@ -149,7 +149,7 @@ public class ResourceInteroperabilityRecordManager extends ResourceManager<Resou
         ret.setLatestAuditInfo(commonMethods.setLatestLoggingInfo(loggingInfoList, LoggingInfo.Types.AUDIT.getKey()));
 
         existingResource.setPayload(serialize(ret));
-        existingResource.setResourceType(resourceType);
+        existingResource.setResourceType(getResourceType());
 
         // block user from updating resourceId
         if (!ret.getResourceInteroperabilityRecord().getResourceId().equals(existingInteroperabilityRecord.getResourceInteroperabilityRecord().getResourceId())

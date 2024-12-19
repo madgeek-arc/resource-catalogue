@@ -14,7 +14,6 @@ import gr.uoa.di.madgik.resourcecatalogue.utils.ObjectUtils;
 import gr.uoa.di.madgik.resourcecatalogue.utils.ProviderResourcesCommonMethods;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
@@ -57,7 +56,7 @@ public class InteroperabilityRecordManager extends ResourceManager<Interoperabil
     }
 
     @Override
-    public String getResourceType() {
+    public String getResourceTypeName() {
         return "interoperability_record";
     }
 
@@ -73,10 +72,10 @@ public class InteroperabilityRecordManager extends ResourceManager<Interoperabil
         } else { // external catalogue
             commonMethods.checkCatalogueIdConsistency(interoperabilityRecordBundle, catalogueId);
         }
-        interoperabilityRecordBundle.setId(idCreator.generate(getResourceType()));
+        interoperabilityRecordBundle.setId(idCreator.generate(getResourceTypeName()));
 
         // register and ensure Resource Catalogue's PID uniqueness
-        commonMethods.determineResourceAndCreateAlternativeIdentifierForPID(interoperabilityRecordBundle, getResourceType());
+        commonMethods.determineResourceAndCreateAlternativeIdentifierForPID(interoperabilityRecordBundle, getResourceTypeName());
         interoperabilityRecordBundle.getInteroperabilityRecord().setAlternativeIdentifiers(
                 commonMethods.ensureResourceCataloguePidUniqueness(interoperabilityRecordBundle.getId(),
                         interoperabilityRecordBundle.getInteroperabilityRecord().getCatalogueId(),
@@ -142,7 +141,7 @@ public class InteroperabilityRecordManager extends ResourceManager<Interoperabil
         // ensure Resource Catalogue's PID uniqueness
         if (ret.getInteroperabilityRecord().getAlternativeIdentifiers() == null ||
                 ret.getInteroperabilityRecord().getAlternativeIdentifiers().isEmpty()) {
-            commonMethods.determineResourceAndCreateAlternativeIdentifierForPID(ret, getResourceType());
+            commonMethods.determineResourceAndCreateAlternativeIdentifierForPID(ret, getResourceTypeName());
         } else {
             ret.getInteroperabilityRecord().setAlternativeIdentifiers(
                     commonMethods.ensureResourceCataloguePidUniqueness(ret.getId(),
@@ -198,7 +197,7 @@ public class InteroperabilityRecordManager extends ResourceManager<Interoperabil
                             ret.getInteroperabilityRecord().getId()));
         }
         existing.setPayload(serialize(ret));
-        existing.setResourceType(resourceType);
+        existing.setResourceType(getResourceType());
 
         resourceService.updateResource(existing);
         logger.debug("Updating Interoperability Record: {}", ret);
@@ -300,7 +299,7 @@ public class InteroperabilityRecordManager extends ResourceManager<Interoperabil
         List<ProviderBundle> providers = providerService.getMy(filter, auth).getResults();
         FacetFilter ff = new FacetFilter();
         ff.addFilter("provider_id", providers.stream().map(ProviderBundle::getId).toList());
-        ff.setResourceType(getResourceType());
+        ff.setResourceType(getResourceTypeName());
         ff.setQuantity(1000);
         return this.getAll(ff, auth);
     }

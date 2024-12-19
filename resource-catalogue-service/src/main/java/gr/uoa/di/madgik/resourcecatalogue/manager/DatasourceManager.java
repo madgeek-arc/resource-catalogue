@@ -53,7 +53,7 @@ public class DatasourceManager extends ResourceManager<DatasourceBundle> impleme
     }
 
     @Override
-    public String getResourceType() {
+    public String getResourceTypeName() {
         return "datasource";
     }
 
@@ -74,7 +74,7 @@ public class DatasourceManager extends ResourceManager<DatasourceBundle> impleme
         if (datasourceBundle.getId() != null && !datasourceBundle.getId().equals("")) {
             checkOpenAIREIDExistence(datasourceBundle);
         }
-        datasourceBundle.setId(idCreator.generate(getResourceType()));
+        datasourceBundle.setId(idCreator.generate(getResourceTypeName()));
         logger.trace("Attempting to add a new Datasource: {}", datasourceBundle);
 
         this.validate(datasourceBundle);
@@ -150,7 +150,7 @@ public class DatasourceManager extends ResourceManager<DatasourceBundle> impleme
         }
 
         existingResource.setPayload(serialize(ret));
-        existingResource.setResourceType(resourceType);
+        existingResource.setResourceType(getResourceType());
 
         resourceService.updateResource(existingResource);
         logger.debug("Updating Datasource: {}", ret);
@@ -170,7 +170,7 @@ public class DatasourceManager extends ResourceManager<DatasourceBundle> impleme
         }
 
         existing.setPayload(serialize(datasourceBundle));
-        existing.setResourceType(resourceType);
+        existing.setResourceType(getResourceType());
 
         resourceService.updateResource(existing);
     }

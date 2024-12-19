@@ -43,7 +43,7 @@ public class PublicConfigurationTemplateInstanceManager extends AbstractPublicRe
     }
 
     @Override
-    public String getResourceType() {
+    public String getResourceTypeName() {
         return "configuration_template_instance";
     }
 

@@ -62,7 +62,7 @@ public class MonitoringManager extends ResourceManager<MonitoringBundle> impleme
     }
 
     @Override
-    public String getResourceType() {
+    public String getResourceTypeName() {
         return "monitoring";
     }
 
@@ -98,7 +98,7 @@ public class MonitoringManager extends ResourceManager<MonitoringBundle> impleme
     public MonitoringBundle add(MonitoringBundle monitoring, String resourceType, Authentication auth) {
         validate(monitoring, resourceType);
 
-        monitoring.setId(idCreator.generate(getResourceType()));
+        monitoring.setId(idCreator.generate(getResourceTypeName()));
         logger.trace("Attempting to add a new Monitoring: {}", monitoring);
 
         monitoring.setMetadata(Metadata.createMetadata(User.of(auth).getFullName(), User.of(auth).getEmail().toLowerCase()));
@@ -149,7 +149,7 @@ public class MonitoringManager extends ResourceManager<MonitoringBundle> impleme
 
         ret.setActive(existingMonitoring.isActive());
         existingResource.setPayload(serialize(ret));
-        existingResource.setResourceType(resourceType);
+        existingResource.setResourceType(getResourceType());
 
         // block user from updating serviceId
         if (!ret.getMonitoring().getServiceId().equals(existingMonitoring.getMonitoring().getServiceId()) && !securityService.hasRole(auth, "ROLE_ADMIN")) {
@@ -175,7 +175,7 @@ public class MonitoringManager extends ResourceManager<MonitoringBundle> impleme
         }
 
         existing.setPayload(serialize(monitoringBundle));
-        existing.setResourceType(resourceType);
+        existing.setResourceType(getResourceType());
 
         resourceService.updateResource(existing);
     }

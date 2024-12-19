@@ -70,7 +70,7 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
     }
 
     @Override
-    public String getResourceType() {
+    public String getResourceTypeName() {
         return "catalogue";
     }
 
@@ -197,7 +197,7 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
         ret.setSuspended(existingCatalogue.isSuspended());
         ret.setAuditState(commonMethods.determineAuditState(ret.getLoggingInfo()));
         existingResource.setPayload(serialize(ret));
-        existingResource.setResourceType(resourceType);
+        existingResource.setResourceType(getResourceType());
         resourceService.updateResource(existingResource);
         logger.debug("Updating Catalogue: {}", ret);
 

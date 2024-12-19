@@ -7,7 +7,6 @@ import gr.uoa.di.madgik.resourcecatalogue.service.*;
 import gr.uoa.di.madgik.resourcecatalogue.utils.ProviderResourcesCommonMethods;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.core.Authentication;
@@ -43,14 +42,14 @@ public class DraftInteroperabilityRecordManager extends ResourceManager<Interope
     }
 
     @Override
-    public String getResourceType() {
+    public String getResourceTypeName() {
         return "draft_interoperability_record";
     }
 
     @Override
     public InteroperabilityRecordBundle add(InteroperabilityRecordBundle bundle, Authentication auth) {
 
-        bundle.setId(idCreator.generate(getResourceType()));
+        bundle.setId(idCreator.generate(getResourceTypeName()));
 
         logger.trace("Attempting to add a new Draft Interoperability Record with id {}", bundle.getId());
         bundle.setMetadata(Metadata.updateMetadata(bundle.getMetadata(), User.of(auth).getFullName(), User.of(auth).getEmail().toLowerCase()));
@@ -80,7 +79,7 @@ public class DraftInteroperabilityRecordManager extends ResourceManager<Interope
         bundle.setMetadata(Metadata.updateMetadata(bundle.getMetadata(), User.of(auth).getFullName()));
         // save existing resource with new payload
         existing.setPayload(serialize(bundle));
-        existing.setResourceType(resourceType);
+        existing.setResourceType(getResourceType());
         resourceService.updateResource(existing);
         logger.debug("Updating Draft Interoperability Record: {}", bundle);
         return bundle;
@@ -116,7 +115,7 @@ public class DraftInteroperabilityRecordManager extends ResourceManager<Interope
 
         ResourceType guidelinesResourceType = resourceTypeService.getResourceType("interoperability_record");
         Resource resource = getDraftResource(bundle.getId());
-        resource.setResourceType(resourceType);
+        resource.setResourceType(getResourceType());
         resourceService.changeResourceType(resource, guidelinesResourceType);
 
         try {
@@ -133,7 +132,7 @@ public class DraftInteroperabilityRecordManager extends ResourceManager<Interope
         List<ProviderBundle> providers = providerService.getMy(filter, auth).getResults();
         FacetFilter ff = new FacetFilter();
         ff.addFilter("provider_id", providers.stream().map(ProviderBundle::getId).toList());
-        ff.setResourceType(getResourceType());
+        ff.setResourceType(getResourceTypeName());
         ff.setQuantity(1000);
         return this.getAll(ff, auth);
     }
@@ -142,7 +141,7 @@ public class DraftInteroperabilityRecordManager extends ResourceManager<Interope
         Paging<Resource> resources;
         resources = searchService
                 .cqlQuery(String.format("resource_internal_id = \"%s\" AND catalogue_id = \"%s\"", id, catalogueId),
-                        resourceType.getName());
+                        getResourceTypeName());
         assert resources != null;
         return resources.getTotal() == 0 ? null : resources.getResults().get(0);
     }

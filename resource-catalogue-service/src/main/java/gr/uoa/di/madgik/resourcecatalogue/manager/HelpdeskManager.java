@@ -49,7 +49,7 @@ public class HelpdeskManager extends ResourceManager<HelpdeskBundle> implements 
     }
 
     @Override
-    public String getResourceType() {
+    public String getResourceTypeName() {
         return "helpdesk";
     }
 
@@ -79,7 +79,7 @@ public class HelpdeskManager extends ResourceManager<HelpdeskBundle> implements 
     public HelpdeskBundle add(HelpdeskBundle helpdesk, String resourceType, Authentication auth) {
         validate(helpdesk, resourceType);
 
-        helpdesk.setId(idCreator.generate(getResourceType()));
+        helpdesk.setId(idCreator.generate(getResourceTypeName()));
         logger.trace("Attempting to add a new Helpdesk: {}", helpdesk);
 
         helpdesk.setMetadata(Metadata.createMetadata(User.of(auth).getFullName(), User.of(auth).getEmail().toLowerCase()));
@@ -130,7 +130,7 @@ public class HelpdeskManager extends ResourceManager<HelpdeskBundle> implements 
 
         ret.setActive(existingHelpdesk.isActive());
         existingResource.setPayload(serialize(ret));
-        existingResource.setResourceType(resourceType);
+        existingResource.setResourceType(getResourceType());
 
         // block user from updating serviceId
         if (!ret.getHelpdesk().getServiceId().equals(existingHelpdesk.getHelpdesk().getServiceId()) && !securityService.hasRole(auth, "ROLE_ADMIN")) {
@@ -156,7 +156,7 @@ public class HelpdeskManager extends ResourceManager<HelpdeskBundle> implements 
         }
 
         existing.setPayload(serialize(helpdeskBundle));
-        existing.setResourceType(resourceType);
+        existing.setResourceType(getResourceType());
 
         resourceService.updateResource(existing);
     }

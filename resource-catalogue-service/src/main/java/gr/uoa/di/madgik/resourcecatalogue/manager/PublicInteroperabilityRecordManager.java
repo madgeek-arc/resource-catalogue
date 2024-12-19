@@ -45,7 +45,7 @@ public class PublicInteroperabilityRecordManager extends AbstractPublicResourceM
     }
 
     @Override
-    public String getResourceType() {
+    public String getResourceTypeName() {
         return "interoperability_record";
     }
 

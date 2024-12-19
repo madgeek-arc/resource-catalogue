@@ -48,7 +48,7 @@ public class PublicProviderManager extends ResourceManager<ProviderBundle> imple
     }
 
     @Override
-    public String getResourceType() {
+    public String getResourceTypeName() {
         return "provider";
     }
 

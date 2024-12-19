@@ -47,14 +47,14 @@ public class DraftProviderManager extends ResourceManager<ProviderBundle> implem
 
 
     @Override
-    public String getResourceType() {
+    public String getResourceTypeName() {
         return "draft_provider";
     }
 
     @Override
     public ProviderBundle add(ProviderBundle bundle, Authentication auth) {
 
-        bundle.setId(idCreator.generate(getResourceType()));
+        bundle.setId(idCreator.generate(getResourceTypeName()));
         commonMethods.addAuthenticatedUser(bundle.getProvider(), auth);
 
         logger.trace("Attempting to add a new Draft Provider: {}", bundle);
@@ -85,7 +85,7 @@ public class DraftProviderManager extends ResourceManager<ProviderBundle> implem
         bundle.setMetadata(Metadata.updateMetadata(bundle.getMetadata(), User.of(auth).getFullName(), User.of(auth).getEmail().toLowerCase()));
         // save existing resource with new payload
         existing.setPayload(serialize(bundle));
-        existing.setResourceType(resourceType);
+        existing.setResourceType(getResourceType());
         resourceService.updateResource(existing);
         logger.debug("Updating Draft Provider: {}", bundle);
         return bundle;
@@ -124,7 +124,7 @@ public class DraftProviderManager extends ResourceManager<ProviderBundle> implem
 
         ResourceType providerResourceType = resourceTypeService.getResourceType("provider");
         Resource resource = getDraftResource(bundle.getId());
-        resource.setResourceType(resourceType);
+        resource.setResourceType(getResourceType());
         resourceService.changeResourceType(resource, providerResourceType);
 
         try {
@@ -159,7 +159,7 @@ public class DraftProviderManager extends ResourceManager<ProviderBundle> implem
         Paging<Resource> resources;
         resources = searchService
                 .cqlQuery(String.format("resource_internal_id = \"%s\" AND catalogue_id = \"%s\"", id, catalogueId),
-                        resourceType.getName());
+                        getResourceTypeName());
         assert resources != null;
         return resources.getTotal() == 0 ? null : resources.getResults().get(0);
     }

@@ -102,7 +102,7 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
     }
 
     @Override
-    public String getResourceType() {
+    public String getResourceTypeName() {
         return "training_resource";
     }
 
@@ -119,10 +119,10 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
             commonMethods.checkCatalogueIdConsistency(trainingResourceBundle, catalogueId);
         }
         commonMethods.checkRelatedResourceIDsConsistency(trainingResourceBundle);
-        trainingResourceBundle.setId(idCreator.generate(getResourceType()));
+        trainingResourceBundle.setId(idCreator.generate(getResourceTypeName()));
 
         // register and ensure Resource Catalogue's PID uniqueness
-        commonMethods.determineResourceAndCreateAlternativeIdentifierForPID(trainingResourceBundle, getResourceType());
+        commonMethods.determineResourceAndCreateAlternativeIdentifierForPID(trainingResourceBundle, getResourceTypeName());
         trainingResourceBundle.getTrainingResource().setAlternativeIdentifiers(
                 commonMethods.ensureResourceCataloguePidUniqueness(trainingResourceBundle.getId(),
                         trainingResourceBundle.getTrainingResource().getCatalogueId(),
@@ -215,7 +215,7 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
         // ensure Resource Catalogue's PID uniqueness
         if (ret.getTrainingResource().getAlternativeIdentifiers() == null ||
                 ret.getTrainingResource().getAlternativeIdentifiers().isEmpty()) {
-            commonMethods.determineResourceAndCreateAlternativeIdentifierForPID(ret, getResourceType());
+            commonMethods.determineResourceAndCreateAlternativeIdentifierForPID(ret, getResourceTypeName());
         } else {
             ret.getTrainingResource().setAlternativeIdentifiers(
                     commonMethods.ensureResourceCataloguePidUniqueness(ret.getId(),
@@ -295,7 +295,7 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
         List<ProviderBundle> providers = providerService.getMy(filter, auth).getResults();
         FacetFilter ff = new FacetFilter();
         ff.addFilter("resource_organisation", providers.stream().map(ProviderBundle::getId).toList());
-        ff.setResourceType(getResourceType());
+        ff.setResourceType(getResourceTypeName());
         ff.setQuantity(1000);
         return this.getAll(ff, auth);
     }
@@ -663,7 +663,7 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
         Paging<Resource> resources;
         resources = searchService
                 .cqlQuery(String.format("resource_internal_id = \"%s\"  AND catalogue_id = \"%s\"", id, catalogueId),
-                        resourceType.getName(), maxQuantity, 0, "modifiedAt", "DESC");
+                        getResourceTypeName(), maxQuantity, 0, "modifiedAt", "DESC");
         if (resources != null) {
             return resources.getResults();
         }
@@ -737,16 +737,16 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
             }
         }
 
-        ff.setBrowseBy(genericManager.getBrowseBy(getResourceType()));
-        ff.setResourceType(getResourceType());
+        ff.setBrowseBy(genericManager.getBrowseBy(getResourceTypeName()));
+        ff.setResourceType(getResourceTypeName());
 
         return getMatchingResources(ff);
     }
 
     @Override
     public Browsing<TrainingResourceBundle> getAllForAdmin(FacetFilter filter, Authentication auth) {
-        filter.setBrowseBy(genericManager.getBrowseBy(getResourceType()));
-        filter.setResourceType(getResourceType());
+        filter.setBrowseBy(genericManager.getBrowseBy(getResourceTypeName()));
+        filter.setResourceType(getResourceTypeName());
         return getMatchingResources(filter);
     }
 
@@ -764,7 +764,7 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
     @Override
     protected Browsing<TrainingResourceBundle> getResults(FacetFilter filter) {
         Browsing<TrainingResourceBundle> browsing;
-        filter.setResourceType(getResourceType());
+        filter.setResourceType(getResourceTypeName());
         browsing = convertToBrowsingEIC(searchService.search(filter));
 
         return browsing;
@@ -775,7 +775,7 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
                 .stream()
                 .map(res -> parserPool.deserialize(res, typeParameterClass))
                 .collect(Collectors.toList());
-        return new Browsing<>(paging, results, genericManager.getLabels(getResourceType()));
+        return new Browsing<>(paging, results, genericManager.getLabels(getResourceTypeName()));
     }
 
     @Override

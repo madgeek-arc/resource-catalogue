@@ -54,7 +54,7 @@ public class ConfigurationTemplateInstanceManager extends ResourceManager<Config
     }
 
     @Override
-    public String getResourceType() {
+    public String getResourceTypeName() {
         return "configuration_template_instance";
     }
 
@@ -65,7 +65,7 @@ public class ConfigurationTemplateInstanceManager extends ResourceManager<Config
         validate(configurationTemplateInstanceBundle);
         checkResourceIdAndConfigurationTemplateIdConsistency(configurationTemplateInstanceBundle, auth);
 
-        configurationTemplateInstanceBundle.setId(idCreator.generate(getResourceType()));
+        configurationTemplateInstanceBundle.setId(idCreator.generate(getResourceTypeName()));
         logger.trace("Attempting to add a new ConfigurationTemplateInstance: {}", configurationTemplateInstanceBundle);
 
         configurationTemplateInstanceBundle.setMetadata(Metadata.createMetadata(User.of(auth).getFullName(), User.of(auth).getEmail().toLowerCase()));
@@ -114,7 +114,7 @@ public class ConfigurationTemplateInstanceManager extends ResourceManager<Config
         ret.setLatestUpdateInfo(loggingInfo);
 
         existingResource.setPayload(serialize(ret));
-        existingResource.setResourceType(resourceType);
+        existingResource.setResourceType(getResourceType());
 
         // block user from updating resourceId
         if (!ret.getConfigurationTemplateInstance().getResourceId().equals(existingCTI.getConfigurationTemplateInstance().getResourceId())

@@ -39,7 +39,7 @@ public class VocabularyManager extends ResourceManager<Vocabulary> implements Vo
     }
 
     @Override
-    public String getResourceType() {
+    public String getResourceTypeName() {
         return "vocabulary";
     }
 
@@ -82,7 +82,7 @@ public class VocabularyManager extends ResourceManager<Vocabulary> implements Vo
     public Map<Vocabulary.Type, List<Vocabulary>> getAllVocabulariesByType() {
         Map<Vocabulary.Type, List<Vocabulary>> allVocabularies = new HashMap<>();
         FacetFilter ff = new FacetFilter();
-        ff.setResourceType(getResourceType());
+        ff.setResourceType(getResourceTypeName());
         ff.setQuantity(maxQuantity);
         Browsing<Vocabulary> allVocs = getAll(ff);
         allVocabularies = allVocs.getResults()
@@ -104,7 +104,7 @@ public class VocabularyManager extends ResourceManager<Vocabulary> implements Vo
     @Override
     public List<Vocabulary> getByType(Vocabulary.Type type) {
         FacetFilter ff = new FacetFilter();
-        ff.setResourceType(getResourceType());
+        ff.setResourceType(getResourceTypeName());
         ff.setQuantity(maxQuantity);
         ff.addFilter("type", type.getKey());
         List<Vocabulary> vocList = getAll(ff, null).getResults();
@@ -194,12 +194,12 @@ public class VocabularyManager extends ResourceManager<Vocabulary> implements Vo
             vocabulary.setId(id);
         }
         if (exists(vocabulary)) {
-            throw new ResourceAlreadyExistsException(String.format("%s already exists!%n%s", resourceType.getName(), vocabulary));
+            throw new ResourceAlreadyExistsException(String.format("%s already exists!%n%s", getResourceTypeName(), vocabulary));
         }
         String serialized = serialize(vocabulary);
         Resource created = new Resource();
         created.setPayload(serialized);
-        created.setResourceType(resourceType);
+        created.setResourceType(getResourceType());
         resourceService.addResource(created);
         logger.debug("Adding Vocabulary {}", vocabulary);
         return vocabulary;
@@ -212,7 +212,7 @@ public class VocabularyManager extends ResourceManager<Vocabulary> implements Vo
         serialized = serialized.replace(":tns", "");
         serialized = serialized.replace("tns:", "");
         existing.setPayload(serialized);
-        existing.setResourceType(resourceType);
+        existing.setResourceType(getResourceType());
         resourceService.updateResource(existing);
         logger.debug("Updating Vocabulary {}", vocabulary);
         return vocabulary;

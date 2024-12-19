@@ -96,7 +96,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
 
 
     @Override
-    public String getResourceType() {
+    public String getResourceTypeName() {
         return "provider";
     }
 
@@ -111,10 +111,10 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
 
         provider = onboard(provider, catalogueId, auth);
 
-        provider.setId(idCreator.generate(getResourceType()));
+        provider.setId(idCreator.generate(getResourceTypeName()));
 
         // register and ensure Resource Catalogue's PID uniqueness
-        commonMethods.determineResourceAndCreateAlternativeIdentifierForPID(provider, getResourceType());
+        commonMethods.determineResourceAndCreateAlternativeIdentifierForPID(provider, getResourceTypeName());
         provider.getProvider().setAlternativeIdentifiers(commonMethods.ensureResourceCataloguePidUniqueness(provider.getId(),
                 provider.getProvider().getCatalogueId(),
                 provider.getProvider().getAlternativeIdentifiers()));
@@ -162,7 +162,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         // ensure Resource Catalogue's PID uniqueness
         if (ret.getProvider().getAlternativeIdentifiers() == null ||
                 ret.getProvider().getAlternativeIdentifiers().isEmpty()) {
-            commonMethods.determineResourceAndCreateAlternativeIdentifierForPID(ret, getResourceType());
+            commonMethods.determineResourceAndCreateAlternativeIdentifierForPID(ret, getResourceTypeName());
         } else {
             ret.getProvider().setAlternativeIdentifiers(commonMethods.ensureResourceCataloguePidUniqueness(ret.getId(),
                     ret.getProvider().getCatalogueId(),
@@ -196,7 +196,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         ret.setSuspended(existingProvider.isSuspended());
         ret.setAuditState(commonMethods.determineAuditState(ret.getLoggingInfo()));
         existingResource.setPayload(serialize(ret));
-        existingResource.setResourceType(resourceType);
+        existingResource.setResourceType(getResourceType());
         resourceService.updateResource(existingResource);
         logger.debug("Updating Provider: {} of Catalogue: {}", ret, ret.getProvider().getCatalogueId());
 
@@ -418,7 +418,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         }
         logger.info("Deleting Provider: {}", existingProvider);
         existingResource.setPayload(serialize(existingProvider));
-        existingResource.setResourceType(resourceType);
+        existingResource.setResourceType(getResourceType());
         resourceService.deleteResource(existingResource.getId());
     }
 
@@ -466,7 +466,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
 
         logger.info("Verifying Provider: {}", existingProvider);
         existingResource.setPayload(serialize(existingProvider));
-        existingResource.setResourceType(resourceType);
+        existingResource.setResourceType(getResourceType());
         resourceService.updateResource(existingResource);
         return existingProvider;
     }
@@ -507,7 +507,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         existingProvider.setLatestAuditInfo(commonMethods.setLatestLoggingInfo(loggingInfoList, LoggingInfo.Types.AUDIT.getKey()));
 
         existingResource.setPayload(serialize(existingProvider));
-        existingResource.setResourceType(resourceType);
+        existingResource.setResourceType(getResourceType());
         resourceService.updateResource(existingResource);
         return existingProvider;
     }
@@ -822,7 +822,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
                 existingProvider.getProvider().getId(), existingProvider.getProvider().getName(), actionType);
 
         existingResource.setPayload(serialize(existingProvider));
-        existingResource.setResourceType(resourceType);
+        existingResource.setResourceType(getResourceType());
         resourceService.updateResource(existingResource);
         return existingProvider;
     }
@@ -953,7 +953,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         // Suspend Provider
         commonMethods.suspendResource(existingProvider, suspend, auth);
         existingResource.setPayload(serialize(existingProvider));
-        existingResource.setResourceType(resourceType);
+        existingResource.setResourceType(getResourceType());
         resourceService.updateResource(existingResource);
 
         // Suspend Provider's resources
