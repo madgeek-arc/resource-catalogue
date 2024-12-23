@@ -9,6 +9,13 @@ import java.util.List;
 
 public class TestUtils {
 
+    public static CatalogueBundle createCatalogueBundle() {
+        CatalogueBundle bundle = new CatalogueBundle();
+        bundle.setCatalogue(createCatalogue());
+        //TODO: populate according to test needs
+        return bundle;
+    }
+
     public static ProviderBundle createProviderBundle() {
         ProviderBundle bundle = new ProviderBundle();
         bundle.setProvider(createProvider());
@@ -21,6 +28,25 @@ public class TestUtils {
         bundle.setService(createService());
         //TODO: populate according to test needs
         return bundle;
+    }
+
+    public static Catalogue createCatalogue() {
+        Catalogue catalogue = new Catalogue();
+        catalogue.setAbbreviation("EOSC");
+        catalogue.setName("EOSC");
+        catalogue.setWebsite(createURL());
+        catalogue.setLegalEntity(false);
+        catalogue.setInclusionCriteria(createURL());
+        catalogue.setValidationProcess(createURL());
+        catalogue.setEndOfLife("Test End Of Life");
+        catalogue.setDescription("Test Description");
+        catalogue.setScope("Test Scope");
+        catalogue.setLogo(createURL());
+        catalogue.setLocation(createProviderLocation());
+        catalogue.setMainContact(createProviderMainContact());
+        catalogue.setPublicContacts(createProviderPublicContacts());
+        catalogue.setUsers(createUsers());
+        return catalogue;
     }
 
     public static Provider createProvider() {

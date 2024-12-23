@@ -7,6 +7,7 @@ import gr.uoa.di.madgik.resourcecatalogue.domain.Metadata;
 import gr.uoa.di.madgik.resourcecatalogue.domain.ProviderBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.User;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
+import gr.uoa.di.madgik.resourcecatalogue.utils.AuthenticationInfo;
 import gr.uoa.di.madgik.resourcecatalogue.utils.ProviderResourcesCommonMethods;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -58,7 +59,7 @@ public class DraftProviderManager extends ResourceManager<ProviderBundle> implem
         commonMethods.addAuthenticatedUser(bundle.getProvider(), auth);
 
         logger.trace("Attempting to add a new Draft Provider: {}", bundle);
-        bundle.setMetadata(Metadata.updateMetadata(bundle.getMetadata(), User.of(auth).getFullName(), User.of(auth).getEmail().toLowerCase()));
+        bundle.setMetadata(Metadata.updateMetadata(bundle.getMetadata(), AuthenticationInfo.getFullName(auth), AuthenticationInfo.getEmail(auth).toLowerCase()));
 
         List<LoggingInfo> loggingInfoList = new ArrayList<>();
         LoggingInfo loggingInfo = commonMethods.createLoggingInfo(auth, LoggingInfo.Types.DRAFT.getKey(),
@@ -82,7 +83,7 @@ public class DraftProviderManager extends ResourceManager<ProviderBundle> implem
         // block catalogueId updates from Provider Admins
         bundle.getProvider().setCatalogueId(catalogueId);
         logger.trace("Attempting to update the Draft Provider: {}", bundle);
-        bundle.setMetadata(Metadata.updateMetadata(bundle.getMetadata(), User.of(auth).getFullName(), User.of(auth).getEmail().toLowerCase()));
+        bundle.setMetadata(Metadata.updateMetadata(bundle.getMetadata(), AuthenticationInfo.getFullName(auth), AuthenticationInfo.getEmail(auth).toLowerCase()));
         // save existing resource with new payload
         existing.setPayload(serialize(bundle));
         existing.setResourceType(getResourceType());
@@ -119,7 +120,7 @@ public class DraftProviderManager extends ResourceManager<ProviderBundle> implem
         bundle.setStatus(vocabularyService.get("pending provider").getId());
         bundle.setTemplateStatus(vocabularyService.get("no template status").getId());
 
-        bundle.setMetadata(Metadata.updateMetadata(bundle.getMetadata(), User.of(auth).getFullName(), User.of(auth).getEmail().toLowerCase()));
+        bundle.setMetadata(Metadata.updateMetadata(bundle.getMetadata(), AuthenticationInfo.getFullName(auth), AuthenticationInfo.getEmail(auth).toLowerCase()));
         bundle.setDraft(false);
 
         ResourceType providerResourceType = resourceTypeService.getResourceType("provider");

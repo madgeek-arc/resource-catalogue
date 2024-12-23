@@ -150,7 +150,7 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
 
         // create new Metadata if not exists
         if (trainingResourceBundle.getMetadata() == null) {
-            trainingResourceBundle.setMetadata(Metadata.createMetadata(User.of(auth).getFullName()));
+            trainingResourceBundle.setMetadata(Metadata.createMetadata(AuthenticationInfo.getFullName(auth)));
         }
 
         List<LoggingInfo> loggingInfoList = commonMethods.returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(trainingResourceBundle, auth);
@@ -233,10 +233,8 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
             throw new ValidationException("You cannot directly update a Public Training Resource");
         }
 
-        User user = User.of(auth);
-
         // update existing TrainingResource Metadata, Identifiers, MigrationStatus
-        ret.setMetadata(Metadata.updateMetadata(existingTrainingResource.getMetadata(), user.getFullName()));
+        ret.setMetadata(Metadata.updateMetadata(existingTrainingResource.getMetadata(), AuthenticationInfo.getFullName(auth)));
         ret.setMigrationStatus(existingTrainingResource.getMigrationStatus());
 
         List<LoggingInfo> loggingInfoList = commonMethods.returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(existingTrainingResource, auth);
@@ -531,7 +529,7 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
         registrationMailService.notifyProviderAdminsForBundleAuditing(trainingResource, provider.getProvider().getUsers());
 
         logger.info("User '{}-{}' audited Training Resource '{}'-'{}' with [actionType: {}]",
-                User.of(auth).getFullName(), User.of(auth).getEmail().toLowerCase(),
+                AuthenticationInfo.getFullName(auth), AuthenticationInfo.getEmail(auth).toLowerCase(),
                 trainingResource.getTrainingResource().getId(), trainingResource.getTrainingResource().getTitle(), actionType);
         return super.update(trainingResource, auth);
     }

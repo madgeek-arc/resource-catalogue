@@ -11,6 +11,7 @@ import gr.uoa.di.madgik.resourcecatalogue.exception.ResourceException;
 import gr.uoa.di.madgik.resourcecatalogue.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.exception.ValidationException;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
+import gr.uoa.di.madgik.resourcecatalogue.utils.AuthenticationInfo;
 import gr.uoa.di.madgik.resourcecatalogue.utils.FacetLabelService;
 import gr.uoa.di.madgik.resourcecatalogue.utils.ProviderResourcesCommonMethods;
 import gr.uoa.di.madgik.resourcecatalogue.utils.TextUtils;
@@ -495,7 +496,7 @@ public abstract class AbstractServiceBundleManager<T extends ServiceBundle> exte
         validate(bundle);
         update(bundle, auth);
         logger.info("User '{}'-'{}' updated field eoscIFGuidelines of the Resource '{}'",
-                User.of(auth).getFullName(), User.of(auth).getEmail().toLowerCase(), resourceId);
+                AuthenticationInfo.getFullName(auth), AuthenticationInfo.getEmail(auth).toLowerCase(), resourceId);
         return bundle;
     }
 

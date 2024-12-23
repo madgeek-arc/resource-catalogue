@@ -1,38 +1,134 @@
 package gr.uoa.di.madgik.resourcecatalogue.integration;
 
+import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
-import gr.uoa.di.madgik.resourcecatalogue.domain.Metadata;
-import gr.uoa.di.madgik.resourcecatalogue.domain.Provider;
-import gr.uoa.di.madgik.resourcecatalogue.domain.ProviderBundle;
+import gr.uoa.di.madgik.resourcecatalogue.domain.*;
 import gr.uoa.di.madgik.resourcecatalogue.exception.ResourceException;
 import gr.uoa.di.madgik.resourcecatalogue.exception.ValidationException;
+import gr.uoa.di.madgik.resourcecatalogue.service.CatalogueService;
 import gr.uoa.di.madgik.resourcecatalogue.service.ProviderService;
 import gr.uoa.di.madgik.resourcecatalogue.service.SecurityService;
+import gr.uoa.di.madgik.resourcecatalogue.service.ServiceBundleService;
 import gr.uoa.di.madgik.resourcecatalogue.utils.AuthenticationInfo;
 import gr.uoa.di.madgik.resourcecatalogue.utils.ProviderResourcesCommonMethods;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.security.authentication.InsufficientAuthenticationException;
 
+import java.util.List;
+
+import static gr.uoa.di.madgik.resourcecatalogue.utils.TestUtils.createCatalogueBundle;
 import static gr.uoa.di.madgik.resourcecatalogue.utils.TestUtils.createProviderBundle;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.*;
 
 class ProviderIntegrationTest extends BaseIntegrationTest {
 
     @Autowired
     private ProviderService providerService;
     @Autowired
+    private CatalogueService catalogueService;
+    @Autowired
     private SecurityService securityService;
     @SpyBean
     private ProviderResourcesCommonMethods commonMethods;
+    @Mock
+    private ServiceBundleService<ServiceBundle> serviceBundleService;
     private static String providerId;
+
+
+    //TODO: javadoc where missing
+
+    @Test
+    @Order(1)
+    void addEOSCCatalogue() throws IllegalAccessException {
+        Metadata metadata = new Metadata();
+        Metadata dummyMetadata = Mockito.spy(metadata);
+        CatalogueBundle catalogueBundle = createCatalogueBundle();
+
+        doNothing().when(commonMethods).addAuthenticatedUser(any(), any());
+        try (MockedStatic<Metadata> mockedMetadata = mockStatic(Metadata.class);
+             MockedStatic<AuthenticationInfo> mockedAuthInfo = mockStatic(AuthenticationInfo.class)) {
+            mockedMetadata.when(() -> Metadata.createMetadata(any(), any())).thenReturn(dummyMetadata);
+            mockedAuthInfo.when(() -> AuthenticationInfo.getFullName(any())).thenReturn("Registrant");
+            mockedAuthInfo.when(() -> AuthenticationInfo.getEmail(any())).thenReturn("registrant@email.com");
+
+            catalogueService.add(catalogueBundle, securityService.getAdminAccess());
+
+            CatalogueBundle retrievedCatalogue = catalogueService.get(catalogueBundle.getId(), securityService.getAdminAccess());
+            assertNotNull(retrievedCatalogue, "Catalogue should be found in the database.");
+            assertEquals(catalogueBundle.getId(), retrievedCatalogue.getId(),
+                    "Catalogue ID should match the expected value.");
+        }
+    }
+
+    @Test
+    @Order(2)
+    void addProviderSucceeds() {
+        Metadata metadata = new Metadata();
+        Metadata dummyMetadata = Mockito.spy(metadata);
+        ProviderBundle providerBundle = createProviderBundle();
+
+        doNothing().when(commonMethods).addAuthenticatedUser(any(), any());
+        try (MockedStatic<Metadata> mockedMetadata = mockStatic(Metadata.class);
+             MockedStatic<AuthenticationInfo> mockedAuthInfo = mockStatic(AuthenticationInfo.class)) {
+            mockedMetadata.when(() -> Metadata.createMetadata(any(), any())).thenReturn(dummyMetadata);
+            mockedAuthInfo.when(() -> AuthenticationInfo.getFullName(any())).thenReturn("Registrant");
+            mockedAuthInfo.when(() -> AuthenticationInfo.getEmail(any())).thenReturn("registrant@email.com");
+
+            providerService.add(providerBundle, securityService.getAdminAccess());
+
+            ProviderBundle retrievedProvider = providerService.get(providerBundle.getId(), securityService.getAdminAccess());
+            assertNotNull(retrievedProvider, "Provider should be found in the database.");
+            assertEquals(providerBundle.getId(), retrievedProvider.getId(),
+                    "Provider ID should match the expected value.");
+
+            providerId = providerBundle.getId();
+        }
+    }
+
+    @Test
+    @Order(3)
+    void updateProviderSucceeds() throws ResourceNotFoundException {
+        ProviderBundle providerBundle = providerService.get(providerId, securityService.getAdminAccess());
+        assertEquals("Test Provider", providerBundle.getProvider().getName(),
+                "The provider's initial name should match the expected value.");
+
+        providerBundle.getProvider().setName("Updated Test Provider");
+        providerService.update(providerBundle, securityService.getAdminAccess());
+
+        ProviderBundle updatedProvider = providerService.get(providerId, securityService.getAdminAccess());
+        assertNotNull(updatedProvider, "Updated provider should exist in the database.");
+        assertEquals("Updated Test Provider", updatedProvider.getProvider().getName(),
+                "The updated provider name should match the new value.");
+    }
+
+    //TODO: Remake whole class to OnboardingIntegration, add a Service and fix this
+    @Test
+    @Order(4)
+    void deleteProviderSucceeds() throws InterruptedException {
+        ProviderBundle providerBundle = providerService.get(providerId, securityService.getAdminAccess());
+        assertNotNull(providerBundle, "Provider should exist before deletion.");
+
+        List mockedList = mock(List.class);
+        Paging mockedPaging = mock(Paging.class);
+        when(mockedPaging.getResults()).thenReturn(mockedList);
+        when(serviceBundleService.getResourceBundles(any(), any(), any())).thenReturn(mockedPaging);
+
+
+        providerService.delete(providerBundle);
+        Thread.sleep(1000); //TODO: find a better way to clear cache
+        ResourceException thrownException = assertThrows(ResourceException.class,
+                () -> providerService.get(providerId, securityService.getAdminAccess()));
+        assertEquals("provider does not exist!", thrownException.getMessage(),
+                "The exception message should indicate that the resource does not exist.");
+    }
 
     /**
      * Test to verify that adding a provider fails when authentication is not provided.
@@ -141,60 +237,5 @@ class ProviderIntegrationTest extends BaseIntegrationTest {
             assertNotEquals(providerId, retrievedProvider.getProvider().getId(),
                     "The ID should have been overwritten by the portal's business logic");
         }
-    }
-
-    @Test
-    @Order(1)
-    void addProviderSucceeds() {
-        Metadata metadata = new Metadata();
-        Metadata dummyMetadata = Mockito.spy(metadata);
-        ProviderBundle providerBundle = createProviderBundle();
-
-        doNothing().when(commonMethods).addAuthenticatedUser(any(), any());
-        try (MockedStatic<Metadata> mockedMetadata = mockStatic(Metadata.class);
-             MockedStatic<AuthenticationInfo> mockedAuthInfo = mockStatic(AuthenticationInfo.class)) {
-            mockedMetadata.when(() -> Metadata.createMetadata(any(), any())).thenReturn(dummyMetadata);
-            mockedAuthInfo.when(() -> AuthenticationInfo.getFullName(any())).thenReturn("Registrant");
-            mockedAuthInfo.when(() -> AuthenticationInfo.getEmail(any())).thenReturn("registrant@email.com");
-
-            providerService.add(providerBundle, securityService.getAdminAccess());
-
-            ProviderBundle retrievedProvider = providerService.get(providerBundle.getId(), securityService.getAdminAccess());
-            assertNotNull(retrievedProvider, "Provider should be found in the database.");
-            assertEquals(providerBundle.getId(), retrievedProvider.getId(),
-                    "Provider name should match the expected value.");
-
-            providerId = providerBundle.getId();
-        }
-    }
-
-    @Test
-    @Order(2)
-    void updateProviderSucceeds() throws ResourceNotFoundException {
-        ProviderBundle providerBundle = providerService.get(providerId, securityService.getAdminAccess());
-        assertEquals("Test Provider", providerBundle.getProvider().getName(),
-                "The provider's initial name should match the expected value.");
-
-        providerBundle.getProvider().setName("Updated Test Provider");
-        providerService.update(providerBundle, securityService.getAdminAccess());
-
-        ProviderBundle updatedProvider = providerService.get(providerId, securityService.getAdminAccess());
-        assertNotNull(updatedProvider, "Updated provider should exist in the database.");
-        assertEquals("Updated Test Provider", updatedProvider.getProvider().getName(),
-                "The updated provider name should match the new value.");
-    }
-
-    @Test
-    @Order(3)
-    void deleteProviderSucceeds() throws InterruptedException {
-        ProviderBundle providerBundle = providerService.get(providerId, securityService.getAdminAccess());
-        assertNotNull(providerBundle, "Provider should exist before deletion.");
-
-        providerService.delete(providerBundle);
-        Thread.sleep(1000); //TODO: find a better way to clear cache
-        ResourceException thrownException = assertThrows(ResourceException.class,
-                () -> providerService.get(providerId, securityService.getAdminAccess()));
-        assertEquals("provider does not exist!", thrownException.getMessage(),
-                "The exception message should indicate that the resource does not exist.");
     }
 }

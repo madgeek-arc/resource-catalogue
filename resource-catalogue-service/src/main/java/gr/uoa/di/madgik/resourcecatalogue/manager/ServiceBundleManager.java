@@ -10,10 +10,7 @@ import gr.uoa.di.madgik.resourcecatalogue.exception.ResourceException;
 import gr.uoa.di.madgik.resourcecatalogue.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.exception.ValidationException;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
-import gr.uoa.di.madgik.resourcecatalogue.utils.Auditable;
-import gr.uoa.di.madgik.resourcecatalogue.utils.ObjectUtils;
-import gr.uoa.di.madgik.resourcecatalogue.utils.ProviderResourcesCommonMethods;
-import gr.uoa.di.madgik.resourcecatalogue.utils.PublicResourceUtils;
+import gr.uoa.di.madgik.resourcecatalogue.utils.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -139,7 +136,7 @@ public class ServiceBundleManager extends AbstractServiceBundleManager<ServiceBu
 
         // create new Metadata if not exists
         if (serviceBundle.getMetadata() == null) {
-            serviceBundle.setMetadata(Metadata.createMetadata(User.of(auth).getFullName()));
+            serviceBundle.setMetadata(Metadata.createMetadata(AuthenticationInfo.getFullName(auth)));
         }
 
         List<LoggingInfo> loggingInfoList = commonMethods.returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(serviceBundle, auth);
@@ -224,10 +221,8 @@ public class ServiceBundleManager extends AbstractServiceBundleManager<ServiceBu
                     ret.getService().getAlternativeIdentifiers()));
         }
 
-        User user = User.of(auth);
-
         // update existing service Metadata, ResourceExtras, Identifiers, MigrationStatus
-        ret.setMetadata(Metadata.updateMetadata(existingService.getMetadata(), user.getFullName()));
+        ret.setMetadata(Metadata.updateMetadata(existingService.getMetadata(), AuthenticationInfo.getFullName(auth)));
         ret.setResourceExtras(existingService.getResourceExtras());
 //        ret.setIdentifiers(existingService.getIdentifiers());
         ret.setMigrationStatus(existingService.getMigrationStatus());
@@ -529,7 +524,7 @@ public class ServiceBundleManager extends AbstractServiceBundleManager<ServiceBu
         registrationMailService.notifyProviderAdminsForBundleAuditing(service, provider.getProvider().getUsers());
 
         logger.info("User '{}-{}' audited Service '{}'-'{}' with [actionType: {}]",
-                User.of(auth).getFullName(), User.of(auth).getEmail().toLowerCase(),
+                AuthenticationInfo.getFullName(auth), AuthenticationInfo.getEmail(auth).toLowerCase(),
                 service.getService().getId(), service.getService().getName(), actionType);
         return super.update(service, auth);
     }
