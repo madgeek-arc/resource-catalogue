@@ -366,36 +366,45 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         }
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         logger.trace("User is attempting to delete the Provider with id '{}'", provider.getId());
-        List<ServiceBundle> services = serviceBundleService.getResourceBundles(catalogueId, provider.getId(), authentication).getResults();
-        services.forEach(s -> {
-            if (!s.getMetadata().isPublished()) {
-                try {
-                    serviceBundleService.delete(s);
-                } catch (ResourceNotFoundException e) {
-                    logger.error(String.format("Error deleting Service with ID [%s]", s.getId()));
+        List<ServiceBundle> services =
+                serviceBundleService.getResourceBundles(catalogueId, provider.getId(), authentication).getResults();
+        if (services != null && !services.isEmpty()) {
+            services.forEach(s -> {
+                if (!s.getMetadata().isPublished()) {
+                    try {
+                        serviceBundleService.delete(s);
+                    } catch (ResourceNotFoundException e) {
+                        logger.error(String.format("Error deleting Service with ID [%s]", s.getId()));
+                    }
                 }
-            }
-        });
-        List<TrainingResourceBundle> trainingResources = trainingResourceService.getResourceBundles(catalogueId, provider.getId(), authentication).getResults();
-        trainingResources.forEach(s -> {
-            if (!s.getMetadata().isPublished()) {
-                try {
-                    trainingResourceService.delete(s);
-                } catch (ResourceNotFoundException e) {
-                    logger.error(String.format("Error deleting Training Resource with ID [%s]", s.getId()));
+            });
+        }
+        List<TrainingResourceBundle> trainingResources =
+                trainingResourceService.getResourceBundles(catalogueId, provider.getId(), authentication).getResults();
+        if (trainingResources != null && !trainingResources.isEmpty()) {
+            trainingResources.forEach(s -> {
+                if (!s.getMetadata().isPublished()) {
+                    try {
+                        trainingResourceService.delete(s);
+                    } catch (ResourceNotFoundException e) {
+                        logger.error(String.format("Error deleting Training Resource with ID [%s]", s.getId()));
+                    }
                 }
-            }
-        });
-        List<InteroperabilityRecordBundle> interoperabilityRecords = interoperabilityRecordService.getInteroperabilityRecordBundles(catalogueId, provider.getId(), authentication).getResults();
-        interoperabilityRecords.forEach(s -> {
-            if (!s.getMetadata().isPublished()) {
-                try {
-                    interoperabilityRecordService.delete(s);
-                } catch (ResourceNotFoundException e) {
-                    logger.error(String.format("Error deleting Interoperability Record with ID [%s]", s.getId()));
+            });
+        }
+        List<InteroperabilityRecordBundle> interoperabilityRecords =
+                interoperabilityRecordService.getInteroperabilityRecordBundles(catalogueId, provider.getId(), authentication).getResults();
+        if (interoperabilityRecords != null && !interoperabilityRecords.isEmpty()) {
+            interoperabilityRecords.forEach(s -> {
+                if (!s.getMetadata().isPublished()) {
+                    try {
+                        interoperabilityRecordService.delete(s);
+                    } catch (ResourceNotFoundException e) {
+                        logger.error(String.format("Error deleting Interoperability Record with ID [%s]", s.getId()));
+                    }
                 }
-            }
-        });
+            });
+        }
         logger.debug("Deleting Provider: {} and all his Resources", provider);
 
         deleteBundle(provider);

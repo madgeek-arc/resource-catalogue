@@ -50,8 +50,10 @@ public class ResourceIdCreator implements IdCreator {
     public String generate(String resourceType) {
         String prefix = createPrefix(resourceType);
         String id = prefix + "/" + randomGenerator();
-        while (searchIdExists(id, resourceType)) {
-            id = prefix + "/" + randomGenerator();
+        if (!prefix.equals("non")) {
+            while (searchIdExists(id, resourceType)) {
+                id = prefix + "/" + randomGenerator();
+            }
         }
         return id;
     }

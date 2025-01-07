@@ -109,7 +109,6 @@ class ProviderIntegrationTest extends BaseIntegrationTest {
                 "The updated provider name should match the new value.");
     }
 
-    //TODO: Remake whole class to OnboardingIntegration, add a Service and fix this
     @Test
     @Order(4)
     void deleteProviderSucceeds() throws InterruptedException {
