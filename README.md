@@ -1,29 +1,37 @@
-# Resource Catalogue #
+<div align="center">
+  <img src='https://eosc.eu/wp-content/uploads/2024/02/EOSC-Beyond-logo.png'></img>
+</div>
 
-###### What is this project about?
+# Resource Catalogue [v5.0.0]
+
+[![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
+[![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-2.1-4baaaa.svg)](CODE_OF_CONDUCT.md)
 
 - - -
 
+## Description
+
+
+
 ## Local deployment:
 
-#### Requirements:
+### Requirements:
 
-* Java 8
+* Java 21
 * Maven
-* Tomcat 8.5
 * ActiveMQ 5.14.0
-* Elasticsearch 7.4.2
+* Elasticsearch 7.17.x
 * PostgreSQL 9.5 or greater
 
-#### Clone
+### Clone
 
 `git clone https://github.com/madgeek-arc/resource-catalogue.git`
 
-#### Build
+### Build
 
 `mvn clean package`
 
-#### PostgreSQL - Create DB
+### PostgreSQL - Create DB
 
 ```sql
 CREATE USER <user> WITH PASSWORD 'your-password'; -- or use an existing user
@@ -34,7 +42,7 @@ CREATE DATABASE db WITH OWNER <user>;
 1. Log in to the created db using: `sudo -u postgres psql  db`
 2. Execute the following command: `CREATE EXTENSION tablefunc;`
 
-#### Deploy
+### Deploy
 
 1. Ensure that PostgreSQL, ActiveMQ and Elasticsearch are up and running.
 
