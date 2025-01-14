@@ -2,7 +2,7 @@
   <img src='https://eosc.eu/wp-content/uploads/2024/02/EOSC-Beyond-logo.png'></img>
 </div>
 
-# Resource Catalogue [v5.0.0]
+# Resource Catalogue
 
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
 [![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-2.1-4baaaa.svg)](CODE_OF_CONDUCT.md)
@@ -12,8 +12,11 @@
 ## Description
 The Resource Catalogue is a Java-based platform designed to manage and organize a diverse range of resources. 
 It provides a comprehensive collection of research services developed collaboratively by various research communities 
-and IT service providers. The project operates under the EOSC Beyond initiative, which aims to promote Open Science 
+and IT service providers. 
+
+The project operates under the EOSC Beyond initiative, which aims to promote Open Science 
 and foster innovation within the framework of the European Open Science Cloud (EOSC).
+EOSC Beyond overall objective is to advance Open Science and innovation in research in the context of the European Open Science Cloud (EOSC) by providing new EOSC Core capabilities allowing scientific applications to find, compose and access multiple Open Science resources and offer them as integrated capabilities to researchers.
 
 ---
 
@@ -24,23 +27,17 @@ Follow these steps to set up a development environment for Resource Catalogue:
 ### Prerequisites:
 
 * Java 21
-* Maven
-* ActiveMQ 5.14.0
+* Maven 3.9+
+* ActiveMQ 5.x.x
 * Elasticsearch 7.17.x
-* PostgreSQL 9.5 or greater
+* PostgreSQL 9.5+
 
 ### Installation
 
 1. **Create Database and necessary extension**
    ```sql
    USER <user> WITH PASSWORD 'your-password'; -- or use an existing user
-   CREATE DATABASE db WITH OWNER <user>;
-   ```
-   ```bash
-   sudo -u postgres psql db
-   ```
-   ```sql
-   CREATE EXTENSION tablefunc;
+   CREATE DATABASE <db> WITH OWNER <user>;
    ```
 2. **Clone the repository**:
    ```bash
@@ -48,16 +45,19 @@ Follow these steps to set up a development environment for Resource Catalogue:
    ```
 3. **Create a file named `secret.properties` and populate it to resolve `application.properties` placeholders.
    You can view an example at [Secret Properties Example](#Secret-Properties-Example).**
-4. **Build**
+4. **Build and Package**  
+   To build the project and package the code into an executable .jar file with an embedded Tomcat server:
+   1. _Navigate_ to the project directory
+   2. _Execute_ the following Maven command
    ```bash
-   cd resource-catalogue
-   mvn clean package -Dspring.config.additional-location=file:/path/to/secret.properties -P beyond
+   mvn clean package
    ```
 
-### Deployment
-
-1. Ensure that PostgreSQL, ActiveMQ and Elasticsearch services are up and running.
-2. Deploy.
+5. **Run**  
+   ```bash
+   java -jar resource-catalogue-service/target/resource-catalogue-service-X.X.X-SNAPSHOT.jar \
+   --spring.config.additional-location=file:/path/to/secret.properties
+   ```
 
 ---
 
@@ -92,13 +92,7 @@ for a full list of contributors.
 
 ## Acknowledgements
 
-- **Java**: The programming language used for building the application.
-- **Maven**: Dependency management and build automation tool.
-- **ActiveMQ**: Message broker facilitating asynchronous communication.
-- **Elasticsearch**: Search and analytics engine powering our search functionality.
-- **PostgreSQL**: Relational database management system for data storage.
-- **Spring Boot**: Java framework used for programming standalone, production-grade Spring-based applications.
-- Special thanks to all contributors, testers and the open-source community for their invaluable support and resources.
+Special thanks to all contributors, testers and the open-source community for their invaluable support and resources.
 
 ---
 
