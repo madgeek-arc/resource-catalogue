@@ -10,14 +10,14 @@ import gr.uoa.di.madgik.resourcecatalogue.service.GenericResourceService;
 import gr.uoa.di.madgik.resourcecatalogue.utils.FacetLabelService;
 import gr.uoa.di.madgik.resourcecatalogue.utils.LoggingUtils;
 import gr.uoa.di.madgik.resourcecatalogue.utils.ReflectUtils;
+import jakarta.annotation.PostConstruct;
+import jakarta.validation.constraints.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
-import jakarta.annotation.PostConstruct;
-import jakarta.validation.constraints.NotNull;
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -178,6 +178,9 @@ public class GenericManager implements GenericResourceService {
     @Override
     public <T> Browsing<T> getResults(FacetFilter filter) {
         Set<String> browseBy = new HashSet<>(filter.getBrowseBy());
+        if (browseByMap.isEmpty()) {
+            initResourceTypesBrowseFields();
+        }
         browseBy.addAll(browseByMap.get(filter.getResourceType()));
         filter.setBrowseBy(new ArrayList<>(browseBy));
         Browsing<T> browsing;

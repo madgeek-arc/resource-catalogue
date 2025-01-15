@@ -1,172 +1,103 @@
-# Resource Catalogue #
+<div align="center">
+  <img src='https://eosc.eu/wp-content/uploads/2024/02/EOSC-Beyond-logo.png'></img>
+</div>
 
-###### What is this project about?
+# Resource Catalogue
 
-- - -
+[![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
+[![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-2.1-4baaaa.svg)](CODE_OF_CONDUCT.md)
 
-## Local deployment:
+---
 
-#### Requirements:
+## Description
+The Resource Catalogue is a Java-based platform designed to manage and organize a diverse range of resources. 
+It provides a comprehensive collection of research services developed collaboratively by various research communities 
+and IT service providers. 
 
-* Java 8
-* Maven
-* Tomcat 8.5
-* ActiveMQ 5.14.0
-* Elasticsearch 7.4.2
-* PostgreSQL 9.5 or greater
+The project operates under the EOSC Beyond initiative, which aims to promote Open Science 
+and foster innovation within the framework of the European Open Science Cloud (EOSC).
+EOSC Beyond overall objective is to advance Open Science and innovation in research in the context of the European Open Science Cloud (EOSC) by providing new EOSC Core capabilities allowing scientific applications to find, compose and access multiple Open Science resources and offer them as integrated capabilities to researchers.
 
-#### Clone
+---
 
-`git clone https://github.com/madgeek-arc/resource-catalogue.git`
+## Getting Started:
 
-#### Build
+Follow these steps to set up a development environment for Resource Catalogue:
 
-`mvn clean package`
+### Prerequisites:
 
-#### PostgreSQL - Create DB
+* Java 21
+* Maven 3.9+
+* ActiveMQ 5.x.x
+* Elasticsearch 7.17.x
+* PostgreSQL 9.5+
 
-```sql
-CREATE USER <user> WITH PASSWORD 'your-password'; -- or use an existing user
+### Installation
 
-CREATE DATABASE db WITH OWNER <user>;
+1. **Create Database and necessary extension**
+   ```sql
+   USER <user> WITH PASSWORD 'your-password'; -- or use an existing user
+   CREATE DATABASE <db> WITH OWNER <user>;
+   ```
+2. **Clone the repository**:
+   ```bash
+   git clone https://github.com/madgeek-arc/resource-catalogue.git
+   ```
+3. **Create a file named `secret.properties` and populate it to resolve `application.properties` placeholders.
+   You can view an example at [Secret Properties Example](#Secret-Properties-Example).**
+4. **Build and Package**  
+   To build the project and package the code into an executable .jar file with an embedded Tomcat server:
+   1. _Navigate_ to the project directory
+   2. _Execute_ the following Maven command
+   ```bash
+   mvn clean package
+   ```
+
+5. **Run**  
+   ```bash
+   java -jar resource-catalogue-service/target/resource-catalogue-service-X.X.X-SNAPSHOT.jar \
+   --spring.config.additional-location=file:/path/to/secret.properties
+   ```
+
+---
+
+## Test execution:
+```bash
+  mvn clean verify -Dspring.config.additional-location=file:/path/to/secret.properties
 ```
+Test results will be displayed in the terminal.
 
-1. Log in to the created db using: `sudo -u postgres psql  db`
-2. Execute the following command: `CREATE EXTENSION tablefunc;`
+---
 
-#### Deploy
+## Documentation Links
+For extensive and detailed documentation, please refer to
+[Resource Catalogue Documentation](https://github.com/madgeek-arc/resource-catalogue-docs).
 
-1. Ensure that PostgreSQL, ActiveMQ and Elasticsearch are up and running.
+---
 
-2. Create a file named `registry.properties` inside the /lib folder of your Tomcat installation and populate it with
-   the [Application Properties Example](#Application-Properties-Example) (or edit the `application.properties` file of
-   the project before you [Build](#Build) it).
+## Versioning:
+This project adheres to [Semantic Versioning](https://semver.org/). For the available versions, see the 
+[tags](https://github.com/madgeek-arc/resource-catalogue/tags).
 
-3. Deploy the webapp on Tomcat.
+---
 
-4. *Before you begin using it for the __first time__, you must [add the resourceTypes](#Add-resourceTypes).*
+## Authors
+- **Konstantinos Spyrou** - Development - [GitHub](https://github.com/spyroukostas)
+- **Michael Zouros** - Development - [GitHub](https://github.com/mzouros)
 
-- - -
+See the [contributors list](https://github.com/madgeek-arc/resource-catalogue/graphs/contributors) 
+for a full list of contributors.
 
-###### Add resourceTypes (only the first time you deploy the project)
+---
 
-1. Navigate to eic/eic-registry/src/main/resources/resourceTypes
+## Acknowledgements
 
-2. Execute `bash loadResourceTypes.sh localhost` (replace localhost with your host)
+Special thanks to all contributors, testers and the open-source community for their invaluable support and resources.
 
-- - -
+---
 
-###### Application Properties Example
+##### Secret Properties Example
 
 ```properties
-##########################
-## Mandatory Properties ##
-##########################
-
-fqdn=localhost
-platform.root=http://${fqdn}/
-registry.host=http://${fqdn}:8080/eic-registry/
-swagger.url=${platform.root}
-
-## DB Properties ##
-jdbc.url=jdbc:postgresql://${fqdn}:5432/db
-jdbc.username=<user>
-jdbc.password=<your-password>
-
-## Elasticsearch Properties ##
-elasticsearch.url=${fqdn}
-elasticsearch.port=9300
-elasticsearch.cluster=<clusterName>
-
-## JMS Properties ##
-jms.host=tcp://${fqdn}:61616
-jms.prefix=<local>
-
-## Openid Connect Properties ##
-oidc.issuer=
-oidc.authorization=
-oidc.token=
-oidc.jwk=
-oidc.userinfo=
-oidc.revocation=
-oidc.logout=
-oidc.clientId=
-oidc.clientSecret=
-oidc.scopes=openid,profile,email
-
-## Project Properties ##
-project.admins=admin1@email.com, admin2@email.com
-project.admins.epot=epot1@email.com, epot2@email.com
-project.debug=true/false
-project.name=My Catalogue
-project.catalogue.name=my_catalogue
-project.registration.email=no-reply@my-catalogue.org
-project.helpdesk.email=helpdesk@email.com
-project.helpdesk.cc=helpdesk_cc@email.com
-project.monitoring.email=monitoring@email.com
-
-## Mail Properties ##
-mail.smtp.auth=true/false
-mail.smtp.host=
-mail.smtp.port=
-mail.smtp.protocol=
-mail.smtp.ssl.enable=true/false
-mail.smtp.from=
-mail.smtp.user=
-mail.smtp.password=
-emails.send=true/false
-emails.send.admin.notifications=true/false
-emails.send.provider.notifications=true/false
-
-
-#########################
-## Optional Properties ##
-#########################
-
-## Login Properties ##
-session.expiration.hours=
-webapp.homepage=http://localhost:3000
-webapp.oidc.login.redirectUris=http://localhost:8080/eic-registry/openid_connect_login
-
-## Argo GRNET Monitoring Status ##
-argo.grnet.monitoring.service.types=
-argo.grnet.monitoring.availability=
-argo.grnet.monitoring.status=
-argo.grnet.monitoring.token=
-
-## InternalToPublicConsistency ##
-resource.consistency.enable=true/false
-resource.consistency.email=email1@email.com
-resource.consistency.cc=email1_cc@email.com
-
-## Sync ##
-sync.enable=true/false
-sync.host=
-sync.token.filepath=
-
-## Matomo Properties ##
-matomoHost=
-matomoToken=
-matomoSiteId=
-matomoAuthorizationHeader=
-apitracking.matomo.site=
-apitracking.matomo.host=
-
-## Auditing interval (in months) ##
-auditing.interval=
-
-## Openaire Datasources Manager ##
-openaire.dsm.api=
-openaire.ds.metrics=
-openaire.ds.metrics.validated=
-
-## PIDS ##
-pid.username=
-pid.key=
-pid.auth=
-pid.prefix=
-pid.api=
-marketplace.url=
+TBD
 ```
-
-- - -

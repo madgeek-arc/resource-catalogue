@@ -12,6 +12,7 @@ import gr.uoa.di.madgik.resourcecatalogue.domain.configurationTemplates.Configur
 import gr.uoa.di.madgik.resourcecatalogue.domain.configurationTemplates.ConfigurationTemplateInstanceDto;
 import gr.uoa.di.madgik.resourcecatalogue.exception.ValidationException;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
+import gr.uoa.di.madgik.resourcecatalogue.utils.AuthenticationInfo;
 import gr.uoa.di.madgik.resourcecatalogue.utils.ObjectUtils;
 import gr.uoa.di.madgik.resourcecatalogue.utils.ProviderResourcesCommonMethods;
 import org.json.simple.JSONObject;
@@ -54,7 +55,7 @@ public class ConfigurationTemplateInstanceManager extends ResourceManager<Config
     }
 
     @Override
-    public String getResourceType() {
+    public String getResourceTypeName() {
         return "configuration_template_instance";
     }
 
@@ -65,10 +66,10 @@ public class ConfigurationTemplateInstanceManager extends ResourceManager<Config
         validate(configurationTemplateInstanceBundle);
         checkResourceIdAndConfigurationTemplateIdConsistency(configurationTemplateInstanceBundle, auth);
 
-        configurationTemplateInstanceBundle.setId(idCreator.generate(getResourceType()));
+        configurationTemplateInstanceBundle.setId(idCreator.generate(getResourceTypeName()));
         logger.trace("Attempting to add a new ConfigurationTemplateInstance: {}", configurationTemplateInstanceBundle);
 
-        configurationTemplateInstanceBundle.setMetadata(Metadata.createMetadata(User.of(auth).getFullName(), User.of(auth).getEmail().toLowerCase()));
+        configurationTemplateInstanceBundle.setMetadata(Metadata.createMetadata(AuthenticationInfo.getFullName(auth), AuthenticationInfo.getEmail(auth).toLowerCase()));
         List<LoggingInfo> loggingInfoList = commonMethods.returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(configurationTemplateInstanceBundle, auth);
         configurationTemplateInstanceBundle.setLoggingInfo(loggingInfoList);
         configurationTemplateInstanceBundle.setLatestOnboardingInfo(loggingInfoList.get(0));
@@ -102,7 +103,7 @@ public class ConfigurationTemplateInstanceManager extends ResourceManager<Config
 
         validate(ret);
 
-        ret.setMetadata(Metadata.updateMetadata(ret.getMetadata(), User.of(auth).getFullName(), User.of(auth).getEmail().toLowerCase()));
+        ret.setMetadata(Metadata.updateMetadata(ret.getMetadata(), AuthenticationInfo.getFullName(auth), AuthenticationInfo.getEmail(auth).toLowerCase()));
         List<LoggingInfo> loggingInfoList = commonMethods.returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(existingCTI, auth);
         LoggingInfo loggingInfo = commonMethods.createLoggingInfo(auth, LoggingInfo.Types.UPDATE.getKey(),
                 LoggingInfo.ActionType.UPDATED.getKey());
@@ -114,7 +115,7 @@ public class ConfigurationTemplateInstanceManager extends ResourceManager<Config
         ret.setLatestUpdateInfo(loggingInfo);
 
         existingResource.setPayload(serialize(ret));
-        existingResource.setResourceType(resourceType);
+        existingResource.setResourceType(getResourceType());
 
         // block user from updating resourceId
         if (!ret.getConfigurationTemplateInstance().getResourceId().equals(existingCTI.getConfigurationTemplateInstance().getResourceId())

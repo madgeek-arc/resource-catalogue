@@ -11,35 +11,35 @@ import org.springframework.stereotype.Service;
 @Service
 public class ResourceIdCreator implements IdCreator {
 
-    @Value("${pid.test}")
+    @Value("${pid.test:false}")
     private boolean pidTest;
 
     private final SearchService searchService;
 
-    @Value("${pid.services.prefix}")
+    @Value("${prefix.services}")
     private String servicesPrefix;
-    @Value("${pid.tools.prefix}")
+    @Value("${prefix.tools}")
     private String toolsPrefix;
-    @Value("${pid.trainings.prefix}")
+    @Value("${prefix.trainings}")
     private String trainingsPrefix;
-    @Value("${pid.providers.prefix}")
+    @Value("${prefix.providers}")
     private String providersPrefix;
-    @Value("${pid.interoperability-frameworks.prefix}")
+    @Value("${prefix.interoperability-frameworks}")
     private String guidelinesPrefix;
 
-    @Value("${configuration-templates.prefix}")
+    @Value("${prefix.configuration-templates}")
     private String configurationTemplatesPrefix;
-    @Value("${configuration-template-instances.prefix}")
+    @Value("${prefix.configuration-template-instances}")
     private String configurationTemplateInstancesPrefix;
-    @Value("${datasources.prefix}")
+    @Value("${prefix.datasources}")
     private String datasourcesPrefix;
-    @Value("${helpdesks.prefix}")
+    @Value("${prefix.helpdesks}")
     private String helpdesksPrefix;
-    @Value("${monitorings.prefix}")
+    @Value("${prefix.monitorings}")
     private String monitoringsPrefix;
-    @Value("${resource-interoperability-records.prefix}")
+    @Value("${prefix.resource-interoperability-records}")
     private String resourceInteroperabilityRecordsPrefix;
-    @Value("${vocabulary-curations.prefix}")
+    @Value("${prefix.vocabulary-curations}")
     private String vocabularyCurationsPrefix;
 
     public ResourceIdCreator(SearchService searchService) {
@@ -50,8 +50,10 @@ public class ResourceIdCreator implements IdCreator {
     public String generate(String resourceType) {
         String prefix = createPrefix(resourceType);
         String id = prefix + "/" + randomGenerator();
-        while (searchIdExists(id, resourceType)) {
-            id = prefix + "/" + randomGenerator();
+        if (!prefix.equals("non")) {
+            while (searchIdExists(id, resourceType)) {
+                id = prefix + "/" + randomGenerator();
+            }
         }
         return id;
     }

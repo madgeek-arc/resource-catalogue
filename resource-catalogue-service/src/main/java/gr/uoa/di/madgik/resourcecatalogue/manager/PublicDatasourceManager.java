@@ -43,7 +43,7 @@ public class PublicDatasourceManager extends AbstractPublicResourceManager<Datas
     }
 
     @Override
-    public String getResourceType() {
+    public String getResourceTypeName() {
         return "datasource";
     }
 

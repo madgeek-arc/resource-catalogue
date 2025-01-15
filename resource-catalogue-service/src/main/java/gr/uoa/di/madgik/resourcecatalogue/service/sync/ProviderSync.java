@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class ProviderSync extends AbstractSyncService<Provider> {
 
-    public ProviderSync(@Value("${sync.host:}") String host, @Value("${sync.token.filepath:}") String filename, @Value("${sync.enable}") boolean enabled) {
+    public ProviderSync(@Value("${sync.host:}") String host, @Value("${sync.token.filepath:}") String filename, @Value("${sync.enable:false}") boolean enabled) {
         super(host, filename, enabled);
     }
 

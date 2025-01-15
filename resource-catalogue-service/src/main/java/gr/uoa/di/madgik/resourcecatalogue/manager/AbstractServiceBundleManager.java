@@ -11,6 +11,7 @@ import gr.uoa.di.madgik.resourcecatalogue.exception.ResourceException;
 import gr.uoa.di.madgik.resourcecatalogue.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.exception.ValidationException;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
+import gr.uoa.di.madgik.resourcecatalogue.utils.AuthenticationInfo;
 import gr.uoa.di.madgik.resourcecatalogue.utils.FacetLabelService;
 import gr.uoa.di.madgik.resourcecatalogue.utils.ProviderResourcesCommonMethods;
 import gr.uoa.di.madgik.resourcecatalogue.utils.TextUtils;
@@ -72,12 +73,12 @@ public abstract class AbstractServiceBundleManager<T extends ServiceBundle> exte
 
     @PostConstruct
     void initLabels() {
-        resourceType = resourceTypeService.getResourceType(getResourceType());
+        ResourceType resourceType = resourceTypeService.getResourceType(getResourceTypeName());
         Set<String> browseSet = new HashSet<>();
         Map<String, Set<String>> sets = new HashMap<>();
         labels = new HashMap<>();
         labels.put("resourceType", "Resource Type");
-        for (IndexField f : resourceTypeService.getResourceTypeIndexFields(getResourceType())) {
+        for (IndexField f : resourceTypeService.getResourceTypeIndexFields(getResourceTypeName())) {
             sets.putIfAbsent(f.getResourceType().getName(), new HashSet<>());
             labels.put(f.getName(), f.getLabel());
             if (f.getLabel() != null) {
@@ -97,12 +98,7 @@ public abstract class AbstractServiceBundleManager<T extends ServiceBundle> exte
         browseBy.addAll(browseSet);
         browseBy.add("resourceType");
         java.util.Collections.sort(browseBy);
-        logger.info("Generated generic service for '{}'[{}]", getResourceType(), getClass().getSimpleName());
-    }
-
-    @Override
-    public String getResourceType() {
-        return resourceType.getName();
+        logger.info("Generated generic service for '{}'[{}]", getResourceTypeName(), getClass().getSimpleName());
     }
 
     //    @Override
@@ -132,7 +128,7 @@ public abstract class AbstractServiceBundleManager<T extends ServiceBundle> exte
         updateFacetFilterConsideringTheAuthorization(filter, auth);
 
         filter.setBrowseBy(browseBy);
-        filter.setResourceType(getResourceType());
+        filter.setResourceType(getResourceTypeName());
 
         return getMatchingResources(filter);
     }
@@ -142,7 +138,7 @@ public abstract class AbstractServiceBundleManager<T extends ServiceBundle> exte
         List<ProviderBundle> providers = providerManager.getMy(filter, auth).getResults();
         FacetFilter ff = new FacetFilter();
         ff.addFilter("resource_organisation", providers.stream().map(ProviderBundle::getId).toList());
-        ff.setResourceType(getResourceType());
+        ff.setResourceType(getResourceTypeName());
         ff.setQuantity(1000);
         return this.getAll(ff, auth);
     }
@@ -161,10 +157,10 @@ public abstract class AbstractServiceBundleManager<T extends ServiceBundle> exte
         prettifyServiceTextFields(serviceBundle, ",");
 
         String serialized;
-        serialized = parserPool.serialize(serviceBundle, ParserService.ParserServiceTypes.fromString(resourceType.getPayloadType()));
+        serialized = parserPool.serialize(serviceBundle, ParserService.ParserServiceTypes.fromString(getResourceType().getPayloadType()));
         Resource created = new Resource();
         created.setPayload(serialized);
-        created.setResourceType(resourceType);
+        created.setResourceType(getResourceType());
 
         resourceService.addResource(created);
         synchronizerService.syncAdd(serviceBundle.getPayload());
@@ -188,7 +184,7 @@ public abstract class AbstractServiceBundleManager<T extends ServiceBundle> exte
 
         prettifyServiceTextFields(serviceBundle, ",");
         existing.setPayload(serialize(serviceBundle));
-        existing.setResourceType(resourceType);
+        existing.setResourceType(getResourceType());
 
         resourceService.updateResource(existing);
         synchronizerService.syncUpdate(serviceBundle.getPayload());
@@ -276,7 +272,7 @@ public abstract class AbstractServiceBundleManager<T extends ServiceBundle> exte
     @Override
     public boolean exists(SearchService.KeyValue... ids) {
         Resource resource;
-        resource = this.searchService.searchFields(getResourceType(), ids);
+        resource = this.searchService.searchFields(getResourceTypeName(), ids);
         return resource != null;
     }
 
@@ -292,7 +288,7 @@ public abstract class AbstractServiceBundleManager<T extends ServiceBundle> exte
         Paging<Resource> resources;
         resources = searchService
                 .cqlQuery(String.format("resource_internal_id = \"%s\"  AND catalogue_id = \"%s\"", id, catalogueId),
-                        resourceType.getName(), maxQuantity, 0, "modifiedAt", "DESC");
+                        getResourceTypeName(), maxQuantity, 0, "modifiedAt", "DESC");
         if (resources.getTotal() > 0) {
             return resources.getResults().get(0);
         }
@@ -304,7 +300,7 @@ public abstract class AbstractServiceBundleManager<T extends ServiceBundle> exte
         Paging<Resource> resources;
         resources = searchService
                 .cqlQuery(String.format("resource_internal_id = \"%s\"  AND catalogue_id = \"%s\"", id, catalogueId),
-                        resourceType.getName(), maxQuantity, 0, "modifiedAt", "DESC");
+                        getResourceTypeName(), maxQuantity, 0, "modifiedAt", "DESC");
         if (resources != null) {
             return resources.getResults();
         }
@@ -351,7 +347,7 @@ public abstract class AbstractServiceBundleManager<T extends ServiceBundle> exte
     @Override
     protected Browsing<T> getResults(FacetFilter filter) {
         Browsing<T> browsing;
-        filter.setResourceType(getResourceType());
+        filter.setResourceType(getResourceTypeName());
         browsing = convertToBrowsingEIC(searchService.search(filter));
 
         browsing.setFacets(createCorrectFacets(browsing.getFacets(), filter));
@@ -376,7 +372,7 @@ public abstract class AbstractServiceBundleManager<T extends ServiceBundle> exte
             someFilters.remove(filterKey);
 
             FacetFilter facetFilter = FacetFilter.from(someFilters);
-            facetFilter.setResourceType(getResourceType());
+            facetFilter.setResourceType(getResourceTypeName());
             facetFilter.setBrowseBy(Collections.singletonList(filterKey));
             List<Facet> facetsCategory = convertToBrowsingEIC(searchService.search(facetFilter)).getFacets();
 
@@ -451,7 +447,7 @@ public abstract class AbstractServiceBundleManager<T extends ServiceBundle> exte
 
     public Browsing<T> getAllForAdmin(FacetFilter filter, Authentication auth) {
         filter.setBrowseBy(browseBy);
-        filter.setResourceType(getResourceType());
+        filter.setResourceType(getResourceTypeName());
         return getMatchingResources(filter);
     }
 
@@ -500,7 +496,7 @@ public abstract class AbstractServiceBundleManager<T extends ServiceBundle> exte
         validate(bundle);
         update(bundle, auth);
         logger.info("User '{}'-'{}' updated field eoscIFGuidelines of the Resource '{}'",
-                User.of(auth).getFullName(), User.of(auth).getEmail().toLowerCase(), resourceId);
+                AuthenticationInfo.getFullName(auth), AuthenticationInfo.getEmail(auth).toLowerCase(), resourceId);
         return bundle;
     }
 

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,7 +16,6 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
-import jakarta.annotation.PostConstruct;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -35,16 +35,16 @@ public class AnalyticsService implements Analytics {
     private RestTemplate restTemplate;
     private HttpHeaders headers;
 
-    @Value("${matomoHost:localhost}")
+    @Value("${matomo.host:localhost}")
     private String matomoHost;
 
-    @Value("${matomoToken:}")
+    @Value("${matomo.token:}")
     private String matomoToken;
 
-    @Value("${matomoSiteId:1}")
+    @Value("${matomo.site-id:1}")
     private String matomoSiteId;
 
-    @Value("${matomoAuthorizationHeader:}")
+    @Value("${matomo.authorization.header:}")
     private String authorizationHeader;
 
     @Autowired

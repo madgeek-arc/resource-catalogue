@@ -48,7 +48,7 @@ public class PublicTrainingResourceManager extends AbstractPublicResourceManager
     }
 
     @Override
-    public String getResourceType() {
+    public String getResourceTypeName() {
         return "training_resource";
     }
 

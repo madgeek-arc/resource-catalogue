@@ -63,99 +63,99 @@ public class PIDUtils {
     private static final Logger logger = LoggerFactory.getLogger(PIDUtils.class);
 
     // test
-    @Value("${pid.test}")
+    @Value("${pid.test:false}")
     private boolean pidTest;
-    @Value("${pid.test.user}")
+    @Value("${pid.test.user:}")
     private String testUser;
-    @Value("${pid.test.endpoint}")
+    @Value("${pid.test.endpoint:}")
     private String testEndpoint;
-    @Value("${pid.test.auth}")
+    @Value("${pid.test.auth:}")
     private String testAuth;
 
     // MP
-    @Value("${marketplace.endpoint}")
+    @Value("${marketplace.endpoint:}")
     private String marketplaceEndpoint;
-    @Value("${marketplace.endpoint.enabled}")
+    @Value("${marketplace.endpoint.enabled:false}")
     private boolean marketplaceEnabled;
 
     // providers
-    @Value("${pid.providers.base-url}")
+    @Value("${pid.providers.base-url:}")
     private String providersEndpoint;
-    @Value("${pid.providers.prefix}")
+    @Value("${prefix.providers}")
     private String providersPrefix;
-    @Value("${pid.providers.auth.user}")
+    @Value("${pid.providers.auth.user:}")
     private String providersUser;
-    @Value("${pid.providers.auth.user.index}")
+    @Value("${pid.providers.auth.user.index:}")
     private String providersUserIndex;
-    @Value("${pid.providers.auth.client-cert}")
+    @Value("${pid.providers.auth.client-cert:}")
     private String providersCert;
-    @Value("${pid.providers.auth.client-key}")
+    @Value("${pid.providers.auth.client-key:}")
     private String providersKey;
-    @Value("${pid.providers.auth.password}")
+    @Value("${pid.providers.auth.password:}")
     private String providersAuth;
 
     // services
-    @Value("${pid.services.base-url}")
+    @Value("${pid.services.base-url:}")
     private String servicesEndpoint;
-    @Value("${pid.services.prefix}")
+    @Value("${prefix.services}")
     private String servicesPrefix;
-    @Value("${pid.services.auth.user}")
+    @Value("${pid.services.auth.user:}")
     private String servicesUser;
-    @Value("${pid.services.auth.user.index}")
+    @Value("${pid.services.auth.user.index:}")
     private String servicesUserIndex;
-    @Value("${pid.services.auth.client-cert}")
+    @Value("${pid.services.auth.client-cert:}")
     private String servicesCert;
-    @Value("${pid.services.auth.client-key}")
+    @Value("${pid.services.auth.client-key:}")
     private String servicesKey;
-    @Value("${pid.services.auth.password}")
+    @Value("${pid.services.auth.password:}")
     private String servicesAuth;
 
     // trainings
-    @Value("${pid.trainings.base-url}")
+    @Value("${pid.trainings.base-url:}")
     private String trainingsEndpoint;
-    @Value("${pid.trainings.prefix}")
+    @Value("${prefix.trainings}")
     private String trainingsPrefix;
-    @Value("${pid.trainings.auth.user}")
+    @Value("${pid.trainings.auth.user:}")
     private String trainingsUser;
-    @Value("${pid.trainings.auth.user.index}")
+    @Value("${pid.trainings.auth.user.index:}")
     private String trainingsUserIndex;
-    @Value("${pid.trainings.auth.client-cert}")
+    @Value("${pid.trainings.auth.client-cert:}")
     private String trainingsCert;
-    @Value("${pid.trainings.auth.client-key}")
+    @Value("${pid.trainings.auth.client-key:}")
     private String trainingsKey;
-    @Value("${pid.trainings.auth.password}")
+    @Value("${pid.trainings.auth.password:}")
     private String trainingsAuth;
 
     // guidelines
-    @Value("${pid.interoperability-frameworks.base-url}")
+    @Value("${pid.interoperability-frameworks.base-url:}")
     private String guidelinesEndpoint;
-    @Value("${pid.interoperability-frameworks.prefix}")
+    @Value("${prefix.interoperability-frameworks}")
     private String guidelinesPrefix;
-    @Value("${pid.interoperability-frameworks.auth.user}")
+    @Value("${pid.interoperability-frameworks.auth.user:}")
     private String guidelinesUser;
-    @Value("${pid.interoperability-frameworks.auth.user.index}")
+    @Value("${pid.interoperability-frameworks.auth.user.index:}")
     private String guidelinesUserIndex;
-    @Value("${pid.interoperability-frameworks.auth.client-cert}")
+    @Value("${pid.interoperability-frameworks.auth.client-cert:}")
     private String guidelinesCert;
-    @Value("${pid.interoperability-frameworks.auth.client-key}")
+    @Value("${pid.interoperability-frameworks.auth.client-key:}")
     private String guidelinesKey;
-    @Value("${pid.interoperability-frameworks.auth.password}")
+    @Value("${pid.interoperability-frameworks.auth.password:}")
     private String guidelinesAuth;
 
     // tools
-    @Value("${pid.tools.base-url}")
+    @Value("${pid.tools.base-url:}")
     private String toolsEndpoint;
-    @Value("${pid.tools.prefix}")
+    @Value("${prefix.tools}")
     private String toolsPrefix;
-    @Value("${pid.tools.auth.user}")
+    @Value("${pid.tools.auth.user:}")
     private String toolsUser;
-    @Value("${pid.tools.auth.user.index}")
+    @Value("${pid.tools.auth.user.index:}")
     private String toolsUserIndex;
-    @Value("${pid.tools.auth.client-cert}")
+    @Value("${pid.tools.auth.client-cert:}")
     private String toolsCert;
-    @Value("${pid.tools.auth.client-key}")
+    @Value("${pid.tools.auth.client-key:}")
     private String toolsKey;
-    @Value("${pid.tools.auth.password}")
+    @Value("${pid.tools.auth.password:}")
     private String toolsAuth;
 
     public void postPID(String pid) {

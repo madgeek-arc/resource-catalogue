@@ -96,7 +96,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
 
 
     @Override
-    public String getResourceType() {
+    public String getResourceTypeName() {
         return "provider";
     }
 
@@ -111,10 +111,10 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
 
         provider = onboard(provider, catalogueId, auth);
 
-        provider.setId(idCreator.generate(getResourceType()));
+        provider.setId(idCreator.generate(getResourceTypeName()));
 
         // register and ensure Resource Catalogue's PID uniqueness
-        commonMethods.determineResourceAndCreateAlternativeIdentifierForPID(provider, getResourceType());
+        commonMethods.determineResourceAndCreateAlternativeIdentifierForPID(provider, getResourceTypeName());
         provider.getProvider().setAlternativeIdentifiers(commonMethods.ensureResourceCataloguePidUniqueness(provider.getId(),
                 provider.getProvider().getCatalogueId(),
                 provider.getProvider().getAlternativeIdentifiers()));
@@ -162,7 +162,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         // ensure Resource Catalogue's PID uniqueness
         if (ret.getProvider().getAlternativeIdentifiers() == null ||
                 ret.getProvider().getAlternativeIdentifiers().isEmpty()) {
-            commonMethods.determineResourceAndCreateAlternativeIdentifierForPID(ret, getResourceType());
+            commonMethods.determineResourceAndCreateAlternativeIdentifierForPID(ret, getResourceTypeName());
         } else {
             ret.getProvider().setAlternativeIdentifiers(commonMethods.ensureResourceCataloguePidUniqueness(ret.getId(),
                     ret.getProvider().getCatalogueId(),
@@ -175,7 +175,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         }
 
         validate(ret);
-        ret.setMetadata(Metadata.updateMetadata(ret.getMetadata(), User.of(auth).getFullName(), User.of(auth).getEmail().toLowerCase()));
+        ret.setMetadata(Metadata.updateMetadata(ret.getMetadata(), AuthenticationInfo.getFullName(auth), AuthenticationInfo.getEmail(auth).toLowerCase()));
         List<LoggingInfo> loggingInfoList = commonMethods.returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(ret, auth);
         LoggingInfo loggingInfo = commonMethods.createLoggingInfo(auth, LoggingInfo.Types.UPDATE.getKey(),
                 LoggingInfo.ActionType.UPDATED.getKey(), comment);
@@ -196,7 +196,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         ret.setSuspended(existingProvider.isSuspended());
         ret.setAuditState(commonMethods.determineAuditState(ret.getLoggingInfo()));
         existingResource.setPayload(serialize(ret));
-        existingResource.setResourceType(resourceType);
+        existingResource.setResourceType(getResourceType());
         resourceService.updateResource(existingResource);
         logger.debug("Updating Provider: {} of Catalogue: {}", ret, ret.getProvider().getCatalogueId());
 
@@ -366,36 +366,45 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         }
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         logger.trace("User is attempting to delete the Provider with id '{}'", provider.getId());
-        List<ServiceBundle> services = serviceBundleService.getResourceBundles(catalogueId, provider.getId(), authentication).getResults();
-        services.forEach(s -> {
-            if (!s.getMetadata().isPublished()) {
-                try {
-                    serviceBundleService.delete(s);
-                } catch (ResourceNotFoundException e) {
-                    logger.error(String.format("Error deleting Service with ID [%s]", s.getId()));
+        List<ServiceBundle> services =
+                serviceBundleService.getResourceBundles(catalogueId, provider.getId(), authentication).getResults();
+        if (services != null && !services.isEmpty()) {
+            services.forEach(s -> {
+                if (!s.getMetadata().isPublished()) {
+                    try {
+                        serviceBundleService.delete(s);
+                    } catch (ResourceNotFoundException e) {
+                        logger.error(String.format("Error deleting Service with ID [%s]", s.getId()));
+                    }
                 }
-            }
-        });
-        List<TrainingResourceBundle> trainingResources = trainingResourceService.getResourceBundles(catalogueId, provider.getId(), authentication).getResults();
-        trainingResources.forEach(s -> {
-            if (!s.getMetadata().isPublished()) {
-                try {
-                    trainingResourceService.delete(s);
-                } catch (ResourceNotFoundException e) {
-                    logger.error(String.format("Error deleting Training Resource with ID [%s]", s.getId()));
+            });
+        }
+        List<TrainingResourceBundle> trainingResources =
+                trainingResourceService.getResourceBundles(catalogueId, provider.getId(), authentication).getResults();
+        if (trainingResources != null && !trainingResources.isEmpty()) {
+            trainingResources.forEach(s -> {
+                if (!s.getMetadata().isPublished()) {
+                    try {
+                        trainingResourceService.delete(s);
+                    } catch (ResourceNotFoundException e) {
+                        logger.error(String.format("Error deleting Training Resource with ID [%s]", s.getId()));
+                    }
                 }
-            }
-        });
-        List<InteroperabilityRecordBundle> interoperabilityRecords = interoperabilityRecordService.getInteroperabilityRecordBundles(catalogueId, provider.getId(), authentication).getResults();
-        interoperabilityRecords.forEach(s -> {
-            if (!s.getMetadata().isPublished()) {
-                try {
-                    interoperabilityRecordService.delete(s);
-                } catch (ResourceNotFoundException e) {
-                    logger.error(String.format("Error deleting Interoperability Record with ID [%s]", s.getId()));
+            });
+        }
+        List<InteroperabilityRecordBundle> interoperabilityRecords =
+                interoperabilityRecordService.getInteroperabilityRecordBundles(catalogueId, provider.getId(), authentication).getResults();
+        if (interoperabilityRecords != null && !interoperabilityRecords.isEmpty()) {
+            interoperabilityRecords.forEach(s -> {
+                if (!s.getMetadata().isPublished()) {
+                    try {
+                        interoperabilityRecordService.delete(s);
+                    } catch (ResourceNotFoundException e) {
+                        logger.error(String.format("Error deleting Interoperability Record with ID [%s]", s.getId()));
+                    }
                 }
-            }
-        });
+            });
+        }
         logger.debug("Deleting Provider: {} and all his Resources", provider);
 
         deleteBundle(provider);
@@ -418,7 +427,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         }
         logger.info("Deleting Provider: {}", existingProvider);
         existingResource.setPayload(serialize(existingProvider));
-        existingResource.setResourceType(resourceType);
+        existingResource.setResourceType(getResourceType());
         resourceService.deleteResource(existingResource.getId());
     }
 
@@ -466,7 +475,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
 
         logger.info("Verifying Provider: {}", existingProvider);
         existingResource.setPayload(serialize(existingProvider));
-        existingResource.setResourceType(resourceType);
+        existingResource.setResourceType(getResourceType());
         resourceService.updateResource(existingResource);
         return existingProvider;
     }
@@ -507,7 +516,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         existingProvider.setLatestAuditInfo(commonMethods.setLatestLoggingInfo(loggingInfoList, LoggingInfo.Types.AUDIT.getKey()));
 
         existingResource.setPayload(serialize(existingProvider));
-        existingResource.setResourceType(resourceType);
+        existingResource.setResourceType(getResourceType());
         resourceService.updateResource(existingResource);
         return existingProvider;
     }
@@ -818,11 +827,11 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         registrationMailService.notifyProviderAdminsForBundleAuditing(existingProvider, existingProvider.getProvider().getUsers());
 
         logger.info("User '{}-{}' audited Provider '{}'-'{}' with [actionType: {}]",
-                User.of(auth).getFullName(), User.of(auth).getEmail().toLowerCase(),
+                AuthenticationInfo.getFullName(auth), AuthenticationInfo.getEmail(auth).toLowerCase(),
                 existingProvider.getProvider().getId(), existingProvider.getProvider().getName(), actionType);
 
         existingResource.setPayload(serialize(existingProvider));
-        existingResource.setResourceType(resourceType);
+        existingResource.setResourceType(getResourceType());
         resourceService.updateResource(existingResource);
         return existingProvider;
     }
@@ -953,7 +962,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         // Suspend Provider
         commonMethods.suspendResource(existingProvider, suspend, auth);
         existingResource.setPayload(serialize(existingProvider));
-        existingResource.setResourceType(resourceType);
+        existingResource.setResourceType(getResourceType());
         resourceService.updateResource(existingResource);
 
         // Suspend Provider's resources

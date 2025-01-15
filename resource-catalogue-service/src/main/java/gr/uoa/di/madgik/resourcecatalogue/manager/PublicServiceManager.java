@@ -49,7 +49,7 @@ public class PublicServiceManager extends AbstractPublicResourceManager<ServiceB
     }
 
     @Override
-    public String getResourceType() {
+    public String getResourceTypeName() {
         return "service";
     }
 

@@ -57,11 +57,11 @@ public class RegistrationMailService {
     @Value("${elastic.index.max_result_window:10000}")
     private int maxQuantity;
 
-    @Value("${pid.providers.prefix}")
+    @Value("${prefix.providers}")
     private String providersPrefix;
-    @Value("${pid.services.prefix}")
+    @Value("${prefix.services}")
     private String servicesPrefix;
-    @Value("${pid.trainings.prefix}")
+    @Value("${prefix.trainings}")
     private String trainingsPrefix;
 
     public RegistrationMailService(MailService mailService, Configuration cfg,

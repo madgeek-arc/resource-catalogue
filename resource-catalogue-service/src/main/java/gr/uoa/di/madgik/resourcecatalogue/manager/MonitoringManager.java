@@ -9,10 +9,7 @@ import gr.uoa.di.madgik.resourcecatalogue.dto.ServiceType;
 import gr.uoa.di.madgik.resourcecatalogue.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.exception.ValidationException;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
-import gr.uoa.di.madgik.resourcecatalogue.utils.CreateArgoGrnetHttpRequest;
-import gr.uoa.di.madgik.resourcecatalogue.utils.ObjectUtils;
-import gr.uoa.di.madgik.resourcecatalogue.utils.ProviderResourcesCommonMethods;
-import gr.uoa.di.madgik.resourcecatalogue.utils.ResourceValidationUtils;
+import gr.uoa.di.madgik.resourcecatalogue.utils.*;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -36,9 +33,9 @@ public class MonitoringManager extends ResourceManager<MonitoringBundle> impleme
     private final RegistrationMailService registrationMailService;
     private final ProviderResourcesCommonMethods commonMethods;
 
-    @Value("${argo.grnet.monitoring.token}")
+    @Value("${argo.grnet.monitoring.token:}")
     private String monitoringToken;
-    @Value("${argo.grnet.monitoring.service.types}")
+    @Value("${argo.grnet.monitoring.service.types:}")
     private String monitoringServiceTypes;
 
     private final IdCreator idCreator;
@@ -62,7 +59,7 @@ public class MonitoringManager extends ResourceManager<MonitoringBundle> impleme
     }
 
     @Override
-    public String getResourceType() {
+    public String getResourceTypeName() {
         return "monitoring";
     }
 
@@ -98,10 +95,10 @@ public class MonitoringManager extends ResourceManager<MonitoringBundle> impleme
     public MonitoringBundle add(MonitoringBundle monitoring, String resourceType, Authentication auth) {
         validate(monitoring, resourceType);
 
-        monitoring.setId(idCreator.generate(getResourceType()));
+        monitoring.setId(idCreator.generate(getResourceTypeName()));
         logger.trace("Attempting to add a new Monitoring: {}", monitoring);
 
-        monitoring.setMetadata(Metadata.createMetadata(User.of(auth).getFullName(), User.of(auth).getEmail().toLowerCase()));
+        monitoring.setMetadata(Metadata.createMetadata(AuthenticationInfo.getFullName(auth), AuthenticationInfo.getEmail(auth).toLowerCase()));
         List<LoggingInfo> loggingInfoList = commonMethods.returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(monitoring, auth);
         monitoring.setLoggingInfo(loggingInfoList);
         monitoring.setActive(true);
@@ -132,7 +129,7 @@ public class MonitoringManager extends ResourceManager<MonitoringBundle> impleme
         }
 
         validate(ret);
-        ret.setMetadata(Metadata.updateMetadata(ret.getMetadata(), User.of(auth).getFullName(), User.of(auth).getEmail().toLowerCase()));
+        ret.setMetadata(Metadata.updateMetadata(ret.getMetadata(), AuthenticationInfo.getFullName(auth), AuthenticationInfo.getEmail(auth).toLowerCase()));
         List<LoggingInfo> loggingInfoList = commonMethods.returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(ret, auth);
         LoggingInfo loggingInfo = commonMethods.createLoggingInfo(auth, LoggingInfo.Types.UPDATE.getKey(),
                 LoggingInfo.ActionType.UPDATED.getKey());
@@ -149,7 +146,7 @@ public class MonitoringManager extends ResourceManager<MonitoringBundle> impleme
 
         ret.setActive(existingMonitoring.isActive());
         existingResource.setPayload(serialize(ret));
-        existingResource.setResourceType(resourceType);
+        existingResource.setResourceType(getResourceType());
 
         // block user from updating serviceId
         if (!ret.getMonitoring().getServiceId().equals(existingMonitoring.getMonitoring().getServiceId()) && !securityService.hasRole(auth, "ROLE_ADMIN")) {
@@ -175,7 +172,7 @@ public class MonitoringManager extends ResourceManager<MonitoringBundle> impleme
         }
 
         existing.setPayload(serialize(monitoringBundle));
-        existing.setResourceType(resourceType);
+        existing.setResourceType(getResourceType());
 
         resourceService.updateResource(existing);
     }

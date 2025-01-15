@@ -43,7 +43,7 @@ public class PublicHelpdeskManager extends AbstractPublicResourceManager<Helpdes
     }
 
     @Override
-    public String getResourceType() {
+    public String getResourceTypeName() {
         return "helpdesk";
     }
 

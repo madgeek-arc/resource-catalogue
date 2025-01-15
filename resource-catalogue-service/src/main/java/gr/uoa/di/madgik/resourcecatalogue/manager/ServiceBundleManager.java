@@ -10,10 +10,7 @@ import gr.uoa.di.madgik.resourcecatalogue.exception.ResourceException;
 import gr.uoa.di.madgik.resourcecatalogue.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.exception.ValidationException;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
-import gr.uoa.di.madgik.resourcecatalogue.utils.Auditable;
-import gr.uoa.di.madgik.resourcecatalogue.utils.ObjectUtils;
-import gr.uoa.di.madgik.resourcecatalogue.utils.ProviderResourcesCommonMethods;
-import gr.uoa.di.madgik.resourcecatalogue.utils.PublicResourceUtils;
+import gr.uoa.di.madgik.resourcecatalogue.utils.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -90,7 +87,7 @@ public class ServiceBundleManager extends AbstractServiceBundleManager<ServiceBu
     }
 
     @Override
-    public String getResourceType() {
+    public String getResourceTypeName() {
         return "service";
     }
 
@@ -122,10 +119,10 @@ public class ServiceBundleManager extends AbstractServiceBundleManager<ServiceBu
             throw new ValidationException(String.format("The Provider with id %s has already registered a Resource Template.", providerBundle.getId()));
         }
 
-        serviceBundle.setId(idCreator.generate(getResourceType()));
+        serviceBundle.setId(idCreator.generate(getResourceTypeName()));
 
         // register and ensure Resource Catalogue's PID uniqueness
-        commonMethods.determineResourceAndCreateAlternativeIdentifierForPID(serviceBundle, getResourceType());
+        commonMethods.determineResourceAndCreateAlternativeIdentifierForPID(serviceBundle, getResourceTypeName());
         serviceBundle.getService().setAlternativeIdentifiers(commonMethods.ensureResourceCataloguePidUniqueness(serviceBundle.getId(),
                 serviceBundle.getService().getCatalogueId(),
                 serviceBundle.getService().getAlternativeIdentifiers()));
@@ -139,7 +136,7 @@ public class ServiceBundleManager extends AbstractServiceBundleManager<ServiceBu
 
         // create new Metadata if not exists
         if (serviceBundle.getMetadata() == null) {
-            serviceBundle.setMetadata(Metadata.createMetadata(User.of(auth).getFullName()));
+            serviceBundle.setMetadata(Metadata.createMetadata(AuthenticationInfo.getFullName(auth)));
         }
 
         List<LoggingInfo> loggingInfoList = commonMethods.returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(serviceBundle, auth);
@@ -217,17 +214,15 @@ public class ServiceBundleManager extends AbstractServiceBundleManager<ServiceBu
         // ensure Resource Catalogue's PID uniqueness
         if (ret.getService().getAlternativeIdentifiers() == null ||
                 ret.getService().getAlternativeIdentifiers().isEmpty()) {
-            commonMethods.determineResourceAndCreateAlternativeIdentifierForPID(ret, getResourceType());
+            commonMethods.determineResourceAndCreateAlternativeIdentifierForPID(ret, getResourceTypeName());
         } else {
             ret.getService().setAlternativeIdentifiers(commonMethods.ensureResourceCataloguePidUniqueness(ret.getId(),
                     ret.getService().getCatalogueId(),
                     ret.getService().getAlternativeIdentifiers()));
         }
 
-        User user = User.of(auth);
-
         // update existing service Metadata, ResourceExtras, Identifiers, MigrationStatus
-        ret.setMetadata(Metadata.updateMetadata(existingService.getMetadata(), user.getFullName()));
+        ret.setMetadata(Metadata.updateMetadata(existingService.getMetadata(), AuthenticationInfo.getFullName(auth)));
         ret.setResourceExtras(existingService.getResourceExtras());
 //        ret.setIdentifiers(existingService.getIdentifiers());
         ret.setMigrationStatus(existingService.getMigrationStatus());
@@ -529,7 +524,7 @@ public class ServiceBundleManager extends AbstractServiceBundleManager<ServiceBu
         registrationMailService.notifyProviderAdminsForBundleAuditing(service, provider.getProvider().getUsers());
 
         logger.info("User '{}-{}' audited Service '{}'-'{}' with [actionType: {}]",
-                User.of(auth).getFullName(), User.of(auth).getEmail().toLowerCase(),
+                AuthenticationInfo.getFullName(auth), AuthenticationInfo.getEmail(auth).toLowerCase(),
                 service.getService().getId(), service.getService().getName(), actionType);
         return super.update(service, auth);
     }

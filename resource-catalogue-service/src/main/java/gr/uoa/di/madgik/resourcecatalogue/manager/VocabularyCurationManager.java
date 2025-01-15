@@ -65,14 +65,14 @@ public class VocabularyCurationManager extends ResourceManager<VocabularyCuratio
     }
 
     @Override
-    public String getResourceType() {
+    public String getResourceTypeName() {
         return "vocabulary_curation";
     }
 
     @Override
     public VocabularyCuration add(VocabularyCuration vocabularyCuration, String resourceType, Authentication auth) {
         User user = User.of(auth);
-        vocabularyCuration.setId(idCreator.generate(getResourceType()));
+        vocabularyCuration.setId(idCreator.generate(getResourceTypeName()));
         // set status, dateOfRequest, userId
         vocabularyCuration.setStatus(VocabularyCuration.Status.PENDING.getKey());
         vocabularyCuration.setRejectionReason(null);
@@ -295,7 +295,7 @@ public class VocabularyCurationManager extends ResourceManager<VocabularyCuratio
     @Override
     protected Browsing<VocabularyCuration> getResults(FacetFilter filter) {
         Browsing<VocabularyCuration> browsing;
-        filter.setResourceType(getResourceType());
+        filter.setResourceType(getResourceTypeName());
         browsing = convertToBrowsingEIC(searchService.search(filter));
 
         browsing.setFacets(abstractServiceBundleManager.createCorrectFacets(browsing.getFacets(), filter));
@@ -307,7 +307,7 @@ public class VocabularyCurationManager extends ResourceManager<VocabularyCuratio
                 .stream()
                 .map(res -> parserPool.deserialize(res, typeParameterClass))
                 .collect(Collectors.toList());
-        return new Browsing<>(paging, results, genericManager.getLabels(getResourceType()));
+        return new Browsing<>(paging, results, genericManager.getLabels(getResourceTypeName()));
     }
 
 }

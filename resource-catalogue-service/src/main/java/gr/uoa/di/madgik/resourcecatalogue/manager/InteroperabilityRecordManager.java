@@ -10,11 +10,11 @@ import gr.uoa.di.madgik.resourcecatalogue.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.exception.ValidationException;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
 import gr.uoa.di.madgik.resourcecatalogue.utils.Auditable;
+import gr.uoa.di.madgik.resourcecatalogue.utils.AuthenticationInfo;
 import gr.uoa.di.madgik.resourcecatalogue.utils.ObjectUtils;
 import gr.uoa.di.madgik.resourcecatalogue.utils.ProviderResourcesCommonMethods;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
@@ -57,7 +57,7 @@ public class InteroperabilityRecordManager extends ResourceManager<Interoperabil
     }
 
     @Override
-    public String getResourceType() {
+    public String getResourceTypeName() {
         return "interoperability_record";
     }
 
@@ -73,10 +73,10 @@ public class InteroperabilityRecordManager extends ResourceManager<Interoperabil
         } else { // external catalogue
             commonMethods.checkCatalogueIdConsistency(interoperabilityRecordBundle, catalogueId);
         }
-        interoperabilityRecordBundle.setId(idCreator.generate(getResourceType()));
+        interoperabilityRecordBundle.setId(idCreator.generate(getResourceTypeName()));
 
         // register and ensure Resource Catalogue's PID uniqueness
-        commonMethods.determineResourceAndCreateAlternativeIdentifierForPID(interoperabilityRecordBundle, getResourceType());
+        commonMethods.determineResourceAndCreateAlternativeIdentifierForPID(interoperabilityRecordBundle, getResourceTypeName());
         interoperabilityRecordBundle.getInteroperabilityRecord().setAlternativeIdentifiers(
                 commonMethods.ensureResourceCataloguePidUniqueness(interoperabilityRecordBundle.getId(),
                         interoperabilityRecordBundle.getInteroperabilityRecord().getCatalogueId(),
@@ -94,7 +94,7 @@ public class InteroperabilityRecordManager extends ResourceManager<Interoperabil
         interoperabilityRecordBundle.setStatus("pending interoperability record");
         // metadata
         if (interoperabilityRecordBundle.getMetadata() == null) {
-            interoperabilityRecordBundle.setMetadata(Metadata.createMetadata(User.of(auth).getFullName()));
+            interoperabilityRecordBundle.setMetadata(Metadata.createMetadata(AuthenticationInfo.getFullName(auth)));
         }
         // loggingInfo
         List<LoggingInfo> loggingInfoList = commonMethods.returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(interoperabilityRecordBundle, auth);
@@ -142,7 +142,7 @@ public class InteroperabilityRecordManager extends ResourceManager<Interoperabil
         // ensure Resource Catalogue's PID uniqueness
         if (ret.getInteroperabilityRecord().getAlternativeIdentifiers() == null ||
                 ret.getInteroperabilityRecord().getAlternativeIdentifiers().isEmpty()) {
-            commonMethods.determineResourceAndCreateAlternativeIdentifierForPID(ret, getResourceType());
+            commonMethods.determineResourceAndCreateAlternativeIdentifierForPID(ret, getResourceTypeName());
         } else {
             ret.getInteroperabilityRecord().setAlternativeIdentifiers(
                     commonMethods.ensureResourceCataloguePidUniqueness(ret.getId(),
@@ -157,9 +157,8 @@ public class InteroperabilityRecordManager extends ResourceManager<Interoperabil
             throw new ValidationException("You cannot directly update a Public Interoperability Record");
         }
 
-        User user = User.of(auth);
         // update existing InteroperabilityRecord Metadata, MigrationStatus
-        ret.setMetadata(Metadata.updateMetadata(existingInteroperabilityRecord.getMetadata(), user.getFullName()));
+        ret.setMetadata(Metadata.updateMetadata(existingInteroperabilityRecord.getMetadata(), AuthenticationInfo.getFullName(auth)));
         ret.setMigrationStatus(existingInteroperabilityRecord.getMigrationStatus());
 
         List<LoggingInfo> loggingInfoList = commonMethods.returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(existingInteroperabilityRecord, auth);
@@ -198,7 +197,7 @@ public class InteroperabilityRecordManager extends ResourceManager<Interoperabil
                             ret.getInteroperabilityRecord().getId()));
         }
         existing.setPayload(serialize(ret));
-        existing.setResourceType(resourceType);
+        existing.setResourceType(getResourceType());
 
         resourceService.updateResource(existing);
         logger.debug("Updating Interoperability Record: {}", ret);
@@ -300,7 +299,7 @@ public class InteroperabilityRecordManager extends ResourceManager<Interoperabil
         List<ProviderBundle> providers = providerService.getMy(filter, auth).getResults();
         FacetFilter ff = new FacetFilter();
         ff.addFilter("provider_id", providers.stream().map(ProviderBundle::getId).toList());
-        ff.setResourceType(getResourceType());
+        ff.setResourceType(getResourceTypeName());
         ff.setQuantity(1000);
         return this.getAll(ff, auth);
     }
@@ -397,7 +396,7 @@ public class InteroperabilityRecordManager extends ResourceManager<Interoperabil
         registrationMailService.notifyProviderAdminsForBundleAuditing(interoperabilityRecordBundle, provider.getProvider().getUsers());
 
         logger.info("User '{}-{}' audited Interoperability Record '{}'-'{}' with [actionType: {}]",
-                User.of(auth).getFullName(), User.of(auth).getEmail().toLowerCase(),
+                AuthenticationInfo.getFullName(auth), AuthenticationInfo.getEmail(auth).toLowerCase(),
                 interoperabilityRecordBundle.getInteroperabilityRecord().getId(),
                 interoperabilityRecordBundle.getInteroperabilityRecord().getTitle(), actionType);
         return super.update(interoperabilityRecordBundle, auth);

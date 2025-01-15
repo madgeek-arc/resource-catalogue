@@ -17,13 +17,13 @@ public class ConfigurationTemplateManager extends ResourceManager<ConfigurationT
     }
 
     @Override
-    public String getResourceType() {
+    public String getResourceTypeName() {
         return "configuration_template";
     }
 
     public ConfigurationTemplateBundle addConfigurationTemplate(ConfigurationTemplateBundle configurationTemplateBundle,
                                                                 Authentication auth) {
-        configurationTemplateBundle.setId(idCreator.generate(getResourceType()));
+        configurationTemplateBundle.setId(idCreator.generate(getResourceTypeName()));
         validate(configurationTemplateBundle);
         super.add(configurationTemplateBundle, auth);
         return configurationTemplateBundle;

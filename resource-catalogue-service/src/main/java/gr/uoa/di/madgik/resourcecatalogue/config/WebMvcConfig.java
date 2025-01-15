@@ -2,17 +2,13 @@ package gr.uoa.di.madgik.resourcecatalogue.config;
 
 import gr.uoa.di.madgik.resourcecatalogue.utils.MatomoInterceptor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 
 @Configuration
-//@EnableWebMvc
-@EnableAspectJAutoProxy
 public class WebMvcConfig implements WebMvcConfigurer {
 
     @Override

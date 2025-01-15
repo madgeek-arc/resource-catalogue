@@ -126,6 +126,7 @@ public class LoggingInfo {
 
     public static LoggingInfo createLoggingInfoEntry(Authentication auth, String userRole, String type, String actionType,
                                                      String comment) {
+        validateLoggingInfoEnums(type, actionType);
         LoggingInfo ret = new LoggingInfo();
         User user = User.of(auth);
         ret.setDate(String.valueOf(System.currentTimeMillis()));
@@ -136,6 +137,32 @@ public class LoggingInfo {
         ret.setUserRole(userRole);
         ret.setComment(comment);
         return ret;
+    }
+
+    private static void validateLoggingInfoEnums(String type, String actionType) {
+        if (type == null || actionType == null) {
+            throw new IllegalArgumentException("LoggingInfo Type and ActionType cannot be null");
+        }
+        validateLoggingInfoType(type);
+        validateLoggingInfoActionType(actionType);
+    }
+
+    private static void validateLoggingInfoType(String type) {
+        boolean isTypeValid = Arrays.stream(Types.values())
+                .map(Types::getKey)
+                .anyMatch(type::equals);
+        if (!isTypeValid) {
+            throw new IllegalArgumentException("Invalid type: " + type);
+        }
+    }
+
+    private static void validateLoggingInfoActionType(String actionType) {
+        boolean isActionTypeValid = Arrays.stream(ActionType.values())
+                .map(ActionType::getKey)
+                .anyMatch(actionType::equals);
+        if (!isActionTypeValid) {
+            throw new IllegalArgumentException("Invalid action type: " + actionType);
+        }
     }
 
     public static LoggingInfo systemUpdateLoggingInfo(String actionType) {

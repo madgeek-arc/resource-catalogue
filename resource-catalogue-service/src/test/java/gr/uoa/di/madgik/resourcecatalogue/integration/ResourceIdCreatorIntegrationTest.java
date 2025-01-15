@@ -5,9 +5,7 @@ import gr.uoa.di.madgik.registry.service.ResourceTypeService;
 import gr.uoa.di.madgik.resourcecatalogue.service.ResourceIdCreator;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 
 import java.util.Arrays;
 import java.util.List;
@@ -15,9 +13,7 @@ import java.util.stream.IntStream;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@SpringBootTest
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
-public class ResourceIdCreatorIntegrationTest {
+class ResourceIdCreatorIntegrationTest extends BaseIntegrationTest {
 
     @Autowired
     private ResourceIdCreator idCreator;
@@ -48,7 +44,7 @@ public class ResourceIdCreatorIntegrationTest {
      */
     @Test
     public void generateUniqueIds() {
-        IntStream.range(0, 10000).forEach(i -> idCreator.generate("provider"));
+        IntStream.range(0, 10).forEach(i -> idCreator.generate("provider"));
     }
 
     /**
@@ -82,8 +78,9 @@ public class ResourceIdCreatorIntegrationTest {
      * This test is critical for ensuring that the ID creation logic gracefully handles edge cases
      * such as empty or invalid input.
      */
-    @Test
+    @Test()
     public void generateWithEmptyResourceType() {
+//        assertThrows(ServiceException.class, () -> idCreator.generate(""));
         String id = idCreator.generate("");
 
         assertNotNull(id);

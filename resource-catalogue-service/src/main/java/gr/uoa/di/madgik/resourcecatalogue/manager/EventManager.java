@@ -12,7 +12,6 @@ import gr.uoa.di.madgik.resourcecatalogue.service.ServiceBundleService;
 import gr.uoa.di.madgik.resourcecatalogue.utils.AuthenticationInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.core.Authentication;
@@ -54,7 +53,7 @@ public class EventManager extends ResourceManager<Event> implements EventService
     }
 
     @Override
-    public String getResourceType() {
+    public String getResourceTypeName() {
         return "event";
     }
 
@@ -93,7 +92,7 @@ public class EventManager extends ResourceManager<Event> implements EventService
     @Override
     public List<Event> getEvents(String eventType) {
         Paging<Resource> eventResources = searchService
-                .cqlQuery(String.format("type=\"%s\"", eventType), getResourceType(),
+                .cqlQuery(String.format("type=\"%s\"", eventType), getResourceTypeName(),
                         maxQuantity, 0, "creation_date", "DESC");
         return pagingToList(eventResources);
     }
@@ -105,7 +104,7 @@ public class EventManager extends ResourceManager<Event> implements EventService
         }
         Paging<Resource> eventResources = searchService.cqlQuery(
                 String.format("type=\"%s\" AND service=\"%s\" AND event_user=\"%s\"",
-                        eventType, serviceId, AuthenticationInfo.getSub(authentication)), getResourceType(),
+                        eventType, serviceId, AuthenticationInfo.getSub(authentication)), getResourceTypeName(),
                 maxQuantity, 0, "creation_date", "DESC");
         return pagingToList(eventResources);
     }
@@ -113,7 +112,7 @@ public class EventManager extends ResourceManager<Event> implements EventService
     @Override
     public List<Event> getServiceEvents(String eventType, String serviceId) {
         Paging<Resource> eventResources = searchService.cqlQuery(String.format("type=\"%s\" AND service=\"%s\"",
-                eventType, serviceId), getResourceType(), maxQuantity, 0, "creation_date", "DESC");
+                eventType, serviceId), getResourceTypeName(), maxQuantity, 0, "creation_date", "DESC");
         return pagingToList(eventResources);
     }
 
@@ -123,7 +122,7 @@ public class EventManager extends ResourceManager<Event> implements EventService
             return new ArrayList<>();
         }
         Paging<Resource> eventResources = searchService.cqlQuery(String.format("type=\"%s\" AND event_user=\"%s\"",
-                        eventType, AuthenticationInfo.getSub(authentication)), getResourceType(),
+                        eventType, AuthenticationInfo.getSub(authentication)), getResourceTypeName(),
                 maxQuantity, 0, "creation_date", "DESC");
         return pagingToList(eventResources);
     }

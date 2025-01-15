@@ -40,7 +40,7 @@ public class PublicResourceInteroperabilityRecordManager extends AbstractPublicR
     }
 
     @Override
-    public String getResourceType() {
+    public String getResourceTypeName() {
         return "resource_interoperability_record";
     }
 
