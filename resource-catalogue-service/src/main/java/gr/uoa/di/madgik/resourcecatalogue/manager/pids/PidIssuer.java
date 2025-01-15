@@ -1,9 +1,6 @@
-package gr.uoa.di.madgik.resourcecatalogue.utils;
+package gr.uoa.di.madgik.resourcecatalogue.manager.pids;
 
-import org.apache.hc.client5.http.auth.AuthScope;
-import org.apache.hc.client5.http.auth.Credentials;
-import org.apache.hc.client5.http.auth.UsernamePasswordCredentials;
-import org.apache.hc.client5.http.impl.auth.BasicCredentialsProvider;
+import gr.uoa.di.madgik.resourcecatalogue.utils.RestTemplateTrustManager;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.client5.http.impl.classic.HttpClients;
 import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManager;
@@ -27,6 +24,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
 
 import javax.net.ssl.SSLContext;
@@ -40,37 +38,15 @@ import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 
 @Component
-public class PIDUtils {
+public class PidIssuer {
 
-    private static class PidConfig {
-        String endpoint;
-        String user;
-        String userIndex;
-        String certPath;
-        String keyPath;
-        String auth;
+    private static final Logger logger = LoggerFactory.getLogger(PidIssuer.class);
 
-        PidConfig(String endpoint, String user, String userIndex, String certPath, String keyPath, String auth) {
-            this.endpoint = endpoint;
-            this.user = user;
-            this.userIndex = userIndex;
-            this.certPath = certPath;
-            this.keyPath = keyPath;
-            this.auth = auth;
-        }
+    private final PidProperties pidProperties;
+
+    public PidIssuer(PidProperties pidProperties) {
+        this.pidProperties = pidProperties;
     }
-
-    private static final Logger logger = LoggerFactory.getLogger(PIDUtils.class);
-
-    // test
-    @Value("${pid.test:false}")
-    private boolean pidTest;
-    @Value("${pid.test.user:}")
-    private String testUser;
-    @Value("${pid.test.endpoint:}")
-    private String testEndpoint;
-    @Value("${pid.test.auth:}")
-    private String testAuth;
 
     // MP
     @Value("${marketplace.endpoint:}")
@@ -79,162 +55,52 @@ public class PIDUtils {
     private boolean marketplaceEnabled;
 
     // providers
-    @Value("${pid.providers.base-url:}")
-    private String providersEndpoint;
     @Value("${prefix.providers}")
     private String providersPrefix;
-    @Value("${pid.providers.auth.user:}")
-    private String providersUser;
-    @Value("${pid.providers.auth.user.index:}")
-    private String providersUserIndex;
-    @Value("${pid.providers.auth.client-cert:}")
-    private String providersCert;
-    @Value("${pid.providers.auth.client-key:}")
-    private String providersKey;
-    @Value("${pid.providers.auth.password:}")
-    private String providersAuth;
 
     // services
-    @Value("${pid.services.base-url:}")
-    private String servicesEndpoint;
     @Value("${prefix.services}")
     private String servicesPrefix;
-    @Value("${pid.services.auth.user:}")
-    private String servicesUser;
-    @Value("${pid.services.auth.user.index:}")
-    private String servicesUserIndex;
-    @Value("${pid.services.auth.client-cert:}")
-    private String servicesCert;
-    @Value("${pid.services.auth.client-key:}")
-    private String servicesKey;
-    @Value("${pid.services.auth.password:}")
-    private String servicesAuth;
 
     // trainings
-    @Value("${pid.trainings.base-url:}")
-    private String trainingsEndpoint;
     @Value("${prefix.trainings}")
     private String trainingsPrefix;
-    @Value("${pid.trainings.auth.user:}")
-    private String trainingsUser;
-    @Value("${pid.trainings.auth.user.index:}")
-    private String trainingsUserIndex;
-    @Value("${pid.trainings.auth.client-cert:}")
-    private String trainingsCert;
-    @Value("${pid.trainings.auth.client-key:}")
-    private String trainingsKey;
-    @Value("${pid.trainings.auth.password:}")
-    private String trainingsAuth;
 
     // guidelines
-    @Value("${pid.interoperability-frameworks.base-url:}")
-    private String guidelinesEndpoint;
     @Value("${prefix.interoperability-frameworks}")
     private String guidelinesPrefix;
-    @Value("${pid.interoperability-frameworks.auth.user:}")
-    private String guidelinesUser;
-    @Value("${pid.interoperability-frameworks.auth.user.index:}")
-    private String guidelinesUserIndex;
-    @Value("${pid.interoperability-frameworks.auth.client-cert:}")
-    private String guidelinesCert;
-    @Value("${pid.interoperability-frameworks.auth.client-key:}")
-    private String guidelinesKey;
-    @Value("${pid.interoperability-frameworks.auth.password:}")
-    private String guidelinesAuth;
 
     // tools
-    @Value("${pid.tools.base-url:}")
-    private String toolsEndpoint;
     @Value("${prefix.tools}")
     private String toolsPrefix;
-    @Value("${pid.tools.auth.user:}")
-    private String toolsUser;
-    @Value("${pid.tools.auth.user.index:}")
-    private String toolsUserIndex;
-    @Value("${pid.tools.auth.client-cert:}")
-    private String toolsCert;
-    @Value("${pid.tools.auth.client-key:}")
-    private String toolsKey;
-    @Value("${pid.tools.auth.password:}")
-    private String toolsAuth;
+
+
 
     public void postPID(String pid) {
         String prefix = pid.split("/")[0];
-        String suffix = pid.split("/")[1];
-        PidConfig config = getPidConfiguration(prefix);
-        RestTemplate restTemplate = setConfigurationSettings(suffix, config);
+        PidIssuerConfig config = pidProperties.getIssuerConfigurationByResource(prefix);
+        RestTemplate restTemplate = createRestTemplate(config);
         String payload = createPID(pid, config);
         HttpHeaders headers = createHeaders(config);
 
         HttpEntity<String> request = new HttpEntity<>(payload, headers);
         try {
-            restTemplate.exchange(config.endpoint, HttpMethod.PUT, request, String.class);
-            logger.info("Resource with ID [{}] has been posted with PID [{}] on [{}]", pid, pid, config.endpoint);
+            restTemplate.exchange(config.getUrl(), HttpMethod.PUT, request, String.class);
+            logger.info("Resource with ID [{}] has been posted with PID [{}] on [{}]", pid, pid, config.getUrl());
         } catch (Exception e) {
             throw new RuntimeException("Error during PID post request", e);
         }
     }
 
-    private PidConfig getPidConfiguration(String prefix) {
-        if (prefix.equals(providersPrefix)) {
-            return new PidConfig(
-                    providersEndpoint + "api/handles/",
-                    providersUser,
-                    providersUserIndex,
-                    providersCert,
-                    providersKey,
-                    providersAuth
-            );
-        } else if (prefix.equals(servicesPrefix)) {
-            return new PidConfig(
-                    servicesEndpoint + "api/handles/",
-                    servicesUser,
-                    servicesUserIndex,
-                    servicesCert,
-                    servicesKey,
-                    servicesAuth
-            );
-        } else if (prefix.equals(trainingsPrefix)) {
-            return new PidConfig(
-                    trainingsEndpoint + "api/handles/",
-                    trainingsUser,
-                    trainingsUserIndex,
-                    trainingsCert,
-                    trainingsKey,
-                    trainingsAuth
-            );
-        } else if (prefix.equals(guidelinesPrefix)) {
-            return new PidConfig(
-                    guidelinesEndpoint + "api/handles/",
-                    guidelinesUser,
-                    guidelinesUserIndex,
-                    guidelinesCert,
-                    guidelinesKey,
-                    guidelinesAuth
-            );
-        } else if (prefix.equals(toolsPrefix)) {
-            return new PidConfig(
-                    toolsEndpoint + "api/handles/",
-                    toolsUser,
-                    toolsUserIndex,
-                    toolsCert,
-                    toolsKey,
-                    toolsAuth
-            );
-        }
-        throw new IllegalArgumentException("Unknown prefix: " + prefix);
-    }
-
-    private RestTemplate setConfigurationSettings(String suffix, PidConfig config) {
+    private RestTemplate createRestTemplate(PidIssuerConfig config) {
         RestTemplate restTemplate;
-        if (pidTest) {
-            config.endpoint = testEndpoint + suffix;
+        if (!config.getUrl().startsWith("https")) {
+//            config.setBaseUrl(testEndpoint + suffix);
             restTemplate = RestTemplateTrustManager.createRestTemplateWithDisabledSSL();
+        } else if (config.getAuth() != null) {
+            restTemplate = createSslRestTemplate(config.getAuth().getClientCert(), config.getAuth().getClientKey());
         } else {
-            restTemplate = (config.certPath != null && !config.certPath.isEmpty()
-                    && config.keyPath != null && !config.keyPath.isEmpty())
-                    ? createSslRestTemplate(config.certPath, config.keyPath)
-                    : createBasicAuthRestTemplate(config.user, config.auth);
+            restTemplate = new RestTemplate();
         }
         return restTemplate;
     }
@@ -298,22 +164,22 @@ public class PIDUtils {
         }
     }
 
-    private RestTemplate createBasicAuthRestTemplate(String username, String password) {
-        // Set up credentials provider
-        BasicCredentialsProvider credentialsProvider = new BasicCredentialsProvider();
-        Credentials credentials = new UsernamePasswordCredentials(username, password.toCharArray());
-        credentialsProvider.setCredentials(new AuthScope(null, -1), credentials);
+//    private RestTemplate createBasicAuthRestTemplate(String username, String password) {
+//        // Set up credentials provider
+//        BasicCredentialsProvider credentialsProvider = new BasicCredentialsProvider();
+//        Credentials credentials = new UsernamePasswordCredentials(username, password.toCharArray());
+//        credentialsProvider.setCredentials(new AuthScope(null, -1), credentials);
+//
+//        // Build HttpClient with Basic Auth
+//        CloseableHttpClient httpClient = HttpClients.custom()
+//                .setDefaultCredentialsProvider(credentialsProvider)
+//                .build();
+//
+//        // Create RestTemplate with HttpComponentsClientHttpRequestFactory
+//        return new RestTemplate(new HttpComponentsClientHttpRequestFactory(httpClient));
+//    }
 
-        // Build HttpClient with Basic Auth
-        CloseableHttpClient httpClient = HttpClients.custom()
-                .setDefaultCredentialsProvider(credentialsProvider)
-                .build();
-
-        // Create RestTemplate with HttpComponentsClientHttpRequestFactory
-        return new RestTemplate(new HttpComponentsClientHttpRequestFactory(httpClient));
-    }
-
-    private String createPID(String pid, PidConfig config) {
+    private String createPID(String pid, PidIssuerConfig config) {
         JSONObject data = new JSONObject();
         JSONArray values = new JSONArray();
         JSONObject hs_admin = new JSONObject();
@@ -323,13 +189,9 @@ public class PIDUtils {
         JSONObject id_data = new JSONObject();
         JSONObject marketplaceUrl = new JSONObject();
         JSONObject marketplaceUrl_data = new JSONObject();
-        if (pidTest) {
-            hs_admin_data_value.put("handle", testUser);
-            hs_admin_data_value.put("index", 301);
-        } else {
-            hs_admin_data_value.put("handle", config.user);
-            hs_admin_data_value.put("index", config.userIndex);
-        }
+
+        hs_admin_data_value.put("handle", config.getUser());
+        hs_admin_data_value.put("index", config.getUserIndex());
         hs_admin_data_value.put("permissions", "011111110011");
         hs_admin_data.put("format", "admin");
         hs_admin_data.put("value", hs_admin_data_value);
@@ -357,24 +219,20 @@ public class PIDUtils {
         return data.toString();
     }
 
-    private HttpHeaders createHeaders(PidConfig config) {
+    private HttpHeaders createHeaders(PidIssuerConfig config) {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        if (pidTest) {
-            headers.set("Authorization", testAuth);
-        } else {
-            if (config.certPath != null && !config.certPath.isEmpty()
-                    && config.keyPath != null && !config.keyPath.isEmpty()) {
-                headers.set("Authorization", "Handle clientCert=\"true\"");
-            } else {
-                headers.set("Authorization", createBasicAuth(config));
-            }
+        if (config.getAuth() != null) {
+            headers.set("Authorization", "Handle clientCert=\"true\"");
+        } else if (StringUtils.hasText(config.getPassword())) {
+            headers.set("Authorization", createBasicAuth(config.getUser(), config.getPassword()));
         }
+
         return headers;
     }
 
-    private String createBasicAuth(PidConfig config) {
-        String auth = config.user + ":" + config.auth;
+    private String createBasicAuth(String username, String password) {
+        String auth = username + ":" + password;
         byte[] encodedAuth = Base64.encodeBase64(auth.getBytes());
         return "Basic " + new String(encodedAuth);
     }
