@@ -4,7 +4,7 @@ import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
-import gr.uoa.di.madgik.resourcecatalogue.config.security.ResourceCatalogueProperties;
+import gr.uoa.di.madgik.resourcecatalogue.config.properties.CatalogueProperties;
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
 import gr.uoa.di.madgik.resourcecatalogue.manager.*;
 import org.slf4j.Logger;
@@ -65,7 +65,7 @@ public class RegistrationMailService {
     private String trainingsPrefix;
 
     public RegistrationMailService(MailService mailService, Configuration cfg,
-                                   SecurityService securityService, ResourceCatalogueProperties properties,
+                                   SecurityService securityService, CatalogueProperties properties,
                                    @Lazy ProviderManager providerManager,
                                    @Lazy ServiceBundleManager serviceBundleManager,
                                    @Lazy TrainingResourceManager trainingResourceManager,
@@ -89,12 +89,12 @@ public class RegistrationMailService {
         // Init properties
         this.homepage = properties.getHomepage();
         catalogueName = properties.getName();
-        this.registrationEmail = properties.getEmailProperties().getRegistrationEmails().getTo();
-        this.helpdeskEmail = properties.getEmailProperties().getHelpdeskEmails().getTo();
-        this.helpdeskCC = properties.getEmailProperties().getHelpdeskEmails().getCc();
-        this.monitoringEmail = properties.getEmailProperties().getMonitoringEmails().getTo();
-        this.enableAdminNotifications = properties.getEmailProperties().isAdminNotifications();
-        this.enableProviderNotifications = properties.getEmailProperties().isProviderNotifications();
+        this.registrationEmail = properties.getEmails().getRegistrationEmails().getTo();
+        this.helpdeskEmail = properties.getEmails().getHelpdeskEmails().getTo();
+        this.helpdeskCC = properties.getEmails().getHelpdeskEmails().getCc();
+        this.monitoringEmail = properties.getEmails().getMonitoringEmails().getTo();
+        this.enableAdminNotifications = properties.getEmails().isAdminNotifications();
+        this.enableProviderNotifications = properties.getEmails().isProviderNotifications();
     }
 
     // sendEmailsFromTemplate

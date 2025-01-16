@@ -2,6 +2,7 @@ package gr.uoa.di.madgik.resourcecatalogue.config.security;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import gr.uoa.di.madgik.resourcecatalogue.config.properties.CatalogueProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.core.Authentication;
@@ -29,10 +30,10 @@ public class AuthSuccessHandler implements AuthenticationSuccessHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(AuthSuccessHandler.class);
 
-    private final ResourceCatalogueProperties catalogueProperties;
+    private final CatalogueProperties catalogueProperties;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    public AuthSuccessHandler(ResourceCatalogueProperties catalogueProperties) {
+    public AuthSuccessHandler(CatalogueProperties catalogueProperties) {
         this.catalogueProperties = catalogueProperties;
     }
 

@@ -1,5 +1,7 @@
 package gr.uoa.di.madgik.resourcecatalogue.manager.pids;
 
+import gr.uoa.di.madgik.resourcecatalogue.config.properties.ResourceProperties;
+import gr.uoa.di.madgik.resourcecatalogue.config.properties.CatalogueProperties;
 import gr.uoa.di.madgik.resourcecatalogue.utils.RestTemplateTrustManager;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.client5.http.impl.classic.HttpClients;
@@ -17,7 +19,6 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -42,45 +43,18 @@ public class PidIssuer {
 
     private static final Logger logger = LoggerFactory.getLogger(PidIssuer.class);
 
-    private final PidProperties pidProperties;
+    private final CatalogueProperties properties;
 
-    public PidIssuer(PidProperties pidProperties) {
-        this.pidProperties = pidProperties;
+    public PidIssuer(CatalogueProperties properties) {
+        this.properties = properties;
     }
-
-    // MP
-    @Value("${marketplace.endpoint:}")
-    private String marketplaceEndpoint;
-    @Value("${marketplace.endpoint.enabled:false}")
-    private boolean marketplaceEnabled;
-
-    // providers
-    @Value("${prefix.providers}")
-    private String providersPrefix;
-
-    // services
-    @Value("${prefix.services}")
-    private String servicesPrefix;
-
-    // trainings
-    @Value("${prefix.trainings}")
-    private String trainingsPrefix;
-
-    // guidelines
-    @Value("${prefix.interoperability-frameworks}")
-    private String guidelinesPrefix;
-
-    // tools
-    @Value("${prefix.tools}")
-    private String toolsPrefix;
-
-
 
     public void postPID(String pid) {
         String prefix = pid.split("/")[0];
-        PidIssuerConfig config = pidProperties.getIssuerConfigurationByResource(prefix);
+        ResourceProperties resourceProperties = properties.getResourcePropertiesFromPrefix(prefix);
+        PidIssuerConfig config = resourceProperties.getPidIssuer();
         RestTemplate restTemplate = createRestTemplate(config);
-        String payload = createPID(pid, config);
+        String payload = createPID(pid, config, resourceProperties.getMarketplaceEndpoint());
         HttpHeaders headers = createHeaders(config);
 
         HttpEntity<String> request = new HttpEntity<>(payload, headers);
@@ -95,7 +69,6 @@ public class PidIssuer {
     private RestTemplate createRestTemplate(PidIssuerConfig config) {
         RestTemplate restTemplate;
         if (!config.getUrl().startsWith("https")) {
-//            config.setBaseUrl(testEndpoint + suffix);
             restTemplate = RestTemplateTrustManager.createRestTemplateWithDisabledSSL();
         } else if (config.getAuth() != null) {
             restTemplate = createSslRestTemplate(config.getAuth().getClientCert(), config.getAuth().getClientKey());
@@ -119,11 +92,11 @@ public class PidIssuer {
             try (PEMParser pemParser = new PEMParser(new FileReader(keyPath))) {
                 Object object = pemParser.readObject();
                 JcaPEMKeyConverter converter = new JcaPEMKeyConverter();
-                if (object instanceof PEMKeyPair) {
-                    KeyPair keyPair = converter.getKeyPair((PEMKeyPair) object);
+                if (object instanceof PEMKeyPair pemKeyPair) {
+                    KeyPair keyPair = converter.getKeyPair(pemKeyPair);
                     privateKey = keyPair.getPrivate();
-                } else if (object instanceof PrivateKeyInfo) {
-                    privateKey = converter.getPrivateKey((PrivateKeyInfo) object);
+                } else if (object instanceof PrivateKeyInfo privateKeyInfo) {
+                    privateKey = converter.getPrivateKey(privateKeyInfo);
                 } else {
                     throw new RuntimeException("Unexpected PEM content");
                 }
@@ -164,22 +137,7 @@ public class PidIssuer {
         }
     }
 
-//    private RestTemplate createBasicAuthRestTemplate(String username, String password) {
-//        // Set up credentials provider
-//        BasicCredentialsProvider credentialsProvider = new BasicCredentialsProvider();
-//        Credentials credentials = new UsernamePasswordCredentials(username, password.toCharArray());
-//        credentialsProvider.setCredentials(new AuthScope(null, -1), credentials);
-//
-//        // Build HttpClient with Basic Auth
-//        CloseableHttpClient httpClient = HttpClients.custom()
-//                .setDefaultCredentialsProvider(credentialsProvider)
-//                .build();
-//
-//        // Create RestTemplate with HttpComponentsClientHttpRequestFactory
-//        return new RestTemplate(new HttpComponentsClientHttpRequestFactory(httpClient));
-//    }
-
-    private String createPID(String pid, PidIssuerConfig config) {
+    private String createPID(String pid, PidIssuerConfig config, String marketplaceEndpoint) {
         JSONObject data = new JSONObject();
         JSONArray values = new JSONArray();
         JSONObject hs_admin = new JSONObject();
@@ -205,11 +163,9 @@ public class PidIssuer {
         id.put("type", "id");
         id.put("data", id_data);
         values.put(id);
-        //TODO: Enable when we have final MP endpoints (which projects?)
-        if (marketplaceEnabled) {
-            String url = marketplaceEndpoint + determineMarketplaceEndpoint(pid.split("/")[0]);
+        if (StringUtils.hasText(marketplaceEndpoint)) {
             marketplaceUrl_data.put("format", "string");
-            marketplaceUrl_data.put("value", url + pid);
+            marketplaceUrl_data.put("value", marketplaceEndpoint + pid);
             marketplaceUrl.put("index", 2);
             marketplaceUrl.put("type", "url");
             marketplaceUrl.put("data", marketplaceUrl_data);
@@ -235,36 +191,5 @@ public class PidIssuer {
         String auth = username + ":" + password;
         byte[] encodedAuth = Base64.encodeBase64(auth.getBytes());
         return "Basic " + new String(encodedAuth);
-    }
-
-    //TODO: Update with new URL paths
-    public String determineMarketplaceEndpoint(String prefix) {
-        if (prefix.equals(providersPrefix)) {
-            return "providers/";
-        } else if (prefix.equals(servicesPrefix)) {
-            return "services/";
-        } else if (prefix.equals(trainingsPrefix)) {
-            return "trainings/";
-        } else if (prefix.equals(guidelinesPrefix)) {
-            return "guidelines/";
-        } else {
-            return "tools/";
-        }
-    }
-
-    public String determineResourceTypeFromPidPrefix(String prefix) {
-        if (prefix.equals(servicesPrefix)) {
-            return "service";
-        } else if (prefix.equals(toolsPrefix)) {
-            return "tool";
-        } else if (prefix.equals(trainingsPrefix)) {
-            return "training_resource";
-        } else if (prefix.equals(providersPrefix)) {
-            return "provider";
-        } else if (prefix.equals(guidelinesPrefix)) {
-            return "interoperability_record";
-        } else {
-            return "no_resource_type";
-        }
     }
 }

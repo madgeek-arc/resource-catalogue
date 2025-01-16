@@ -1,6 +1,6 @@
 package gr.uoa.di.madgik.resourcecatalogue.service;
 
-import gr.uoa.di.madgik.resourcecatalogue.config.security.ResourceCatalogueProperties;
+import gr.uoa.di.madgik.resourcecatalogue.config.properties.CatalogueProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Async;
@@ -23,12 +23,12 @@ public class SimpleMailService implements MailService {
     private final boolean enableEmails;
     private final String from;
 
-    private final ResourceCatalogueProperties properties;
+    private final CatalogueProperties properties;
 
-    public SimpleMailService(ResourceCatalogueProperties properties) {
+    public SimpleMailService(CatalogueProperties properties) {
         this.properties = properties;
         this.from = properties.getMailer().getFrom();
-        this.enableEmails = properties.getEmailProperties().isEmailsEnabled();
+        this.enableEmails = properties.getEmails().isEnabled();
     }
 
     @PostConstruct

@@ -2,6 +2,7 @@ package gr.uoa.di.madgik.resourcecatalogue.config.security;
 
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.service.ServiceException;
+import gr.uoa.di.madgik.resourcecatalogue.config.properties.CatalogueProperties;
 import gr.uoa.di.madgik.resourcecatalogue.domain.CatalogueBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.ProviderBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.User;
@@ -35,12 +36,12 @@ public class InMemoryAuthoritiesMapper implements AuthoritiesMapper {
     private final CatalogueService catalogueService;
     private final DraftResourceService<ProviderBundle> draftProviderService;
     private final SecurityService securityService;
-    private final ResourceCatalogueProperties catalogueProperties;
+    private final CatalogueProperties catalogueProperties;
 
     private final ReentrantLock lock = new ReentrantLock();
 
     public InMemoryAuthoritiesMapper(@Value("${elastic.index.max_result_window:10000}") int maxQuantity,
-                                     ResourceCatalogueProperties catalogueProperties,
+                                     CatalogueProperties catalogueProperties,
                                      ProviderService manager,
                                      CatalogueService catalogueService,
                                      DraftResourceService<ProviderBundle> draftProviderService,

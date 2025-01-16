@@ -1,5 +1,6 @@
 package gr.uoa.di.madgik.resourcecatalogue.config.security;
 
+import gr.uoa.di.madgik.resourcecatalogue.config.properties.CatalogueProperties;
 import gr.uoa.di.madgik.resourcecatalogue.service.AuthoritiesMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,18 +36,18 @@ public class SecurityConfig {
     private final AuthenticationSuccessHandler authSuccessHandler;
     private final ClientRegistrationRepository clientRegistrationRepository;
     private final UserInfoService userInfoService;
-    private final ResourceCatalogueProperties resourceCatalogueProperties;
+    private final CatalogueProperties catalogueProperties;
     private final AuthoritiesMapper authoritiesMapper;
 
     public SecurityConfig(AuthenticationSuccessHandler authSuccessHandler,
                           ClientRegistrationRepository clientRegistrationRepository,
                           UserInfoService userInfoService,
-                          ResourceCatalogueProperties resourceCatalogueProperties,
+                          CatalogueProperties catalogueProperties,
                           AuthoritiesMapper authoritiesMapper) {
         this.authSuccessHandler = authSuccessHandler;
         this.clientRegistrationRepository = clientRegistrationRepository;
         this.userInfoService = userInfoService;
-        this.resourceCatalogueProperties = resourceCatalogueProperties;
+        this.catalogueProperties = catalogueProperties;
         this.authoritiesMapper = authoritiesMapper;
     }
 
@@ -101,7 +102,7 @@ public class SecurityConfig {
                 new OidcClientInitiatedLogoutSuccessHandler(
                         this.clientRegistrationRepository);
 
-        oidcLogoutSuccessHandler.setPostLogoutRedirectUri(resourceCatalogueProperties.getLogoutRedirect());
+        oidcLogoutSuccessHandler.setPostLogoutRedirectUri(catalogueProperties.getLogoutRedirect());
 
         return oidcLogoutSuccessHandler;
     }
@@ -123,16 +124,16 @@ public class SecurityConfig {
                     OidcIdToken idToken = oidcUserAuthority.getIdToken();
                     OidcUserInfo userInfo = oidcUserAuthority.getUserInfo();
 
-                    if (idToken != null && resourceCatalogueProperties.getAdmins().contains(idToken.getClaims().get("email"))) {
+                    if (idToken != null && catalogueProperties.getAdmins().contains(idToken.getClaims().get("email"))) {
                         sub = idToken.getClaimAsString("sub");
                         email = idToken.getClaimAsString("email");
-                    } else if (userInfo != null && resourceCatalogueProperties.getAdmins().contains(userInfo.getEmail())) {
+                    } else if (userInfo != null && catalogueProperties.getAdmins().contains(userInfo.getEmail())) {
                         sub = userInfo.getSubject();
                         email = userInfo.getEmail();
                     } else {
                         if (((OidcUserAuthority) authority).getAttributes() != null
                                 && ((OidcUserAuthority) authority).getAttributes().containsKey("email")
-                                && (resourceCatalogueProperties.getAdmins().contains(((OidcUserAuthority) authority).getAttributes().get("email")))) {
+                                && (catalogueProperties.getAdmins().contains(((OidcUserAuthority) authority).getAttributes().get("email")))) {
                             sub = ((OidcUserAuthority) authority).getAttributes().get("sub").toString();
                             email = ((OidcUserAuthority) authority).getAttributes().get("email").toString();
                         }
@@ -148,7 +149,7 @@ public class SecurityConfig {
                     OAuth2UserAuthority oauth2UserAuthority = (OAuth2UserAuthority) authority;
                     Map<String, Object> userAttributes = oauth2UserAuthority.getAttributes();
 
-                    if (userAttributes != null && resourceCatalogueProperties.getAdmins().contains(userAttributes.get("email"))) {
+                    if (userAttributes != null && catalogueProperties.getAdmins().contains(userAttributes.get("email"))) {
                         sub = userAttributes.get("sub").toString();
                         email = userAttributes.get("email").toString();
                     }
