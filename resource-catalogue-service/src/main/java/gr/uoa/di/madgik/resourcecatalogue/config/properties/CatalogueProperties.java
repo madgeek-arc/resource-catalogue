@@ -6,15 +6,15 @@ import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.boot.autoconfigure.mail.MailProperties;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.context.properties.NestedConfigurationProperty;
 import org.springframework.context.event.EventListener;
 import org.springframework.validation.annotation.Validated;
 
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 
@@ -24,30 +24,68 @@ public class CatalogueProperties {
 
     private static final Logger logger = LoggerFactory.getLogger(CatalogueProperties.class);
 
-    @NotNull
-    @NotEmpty
-    private Set<String> admins;
-    private Set<String> onboardingTeam;
-    private String homepage;
-
-    @NotNull
-    @NotEmpty
-    private String loginRedirect;
-
-    @NotNull
-    @NotEmpty
-    private String logoutRedirect;
-
+    /**
+     * Catalogue ID.
+     */
     @NotNull
     @NotEmpty
     private String id;
 
+    /**
+     * Catalogue name.
+     */
     @NotNull
     @NotEmpty
     private String name;
+
+    /**
+     * Catalogue Admins.
+     */
+    @NotNull
+    @NotEmpty
+    private Set<String> admins;
+
+    /**
+     * Catalogue Onboarding Team.
+     */
+    private Set<String> onboardingTeam;
+
+    /**
+     * Catalogue homepage.
+     */
+    private String homepage;
+
+    /**
+     * Catalogue login redirect uri.
+     */
+    @NotNull
+    @NotEmpty
+    private String loginRedirect;
+
+    /**
+     * Catalogue logout redirect uri.
+     */
+    @NotNull
+    @NotEmpty
+    private String logoutRedirect;
+
+    /**
+     * Catalogue resources properties
+     */
+    private Map<ResourceTypes, ResourceProperties> resources = Arrays.stream(ResourceTypes.values())
+            .collect(Collectors.toMap(Function.identity(), p -> new ResourceProperties()));
+
+    /**
+     * Catalogue email properties
+     */
+    @NestedConfigurationProperty
     private EmailProperties emails = new EmailProperties();
+
+    /**
+     * Catalogue mailer configuration properties
+     */
+    @NestedConfigurationProperty
     private MailerProperties mailer = new MailerProperties();
-    private Map<ResourceTypes, ResourceProperties> resources = new HashMap<>();
 
 
     public CatalogueProperties() {

@@ -4,6 +4,7 @@ import org.springframework.boot.autoconfigure.mail.MailProperties;
 
 
 public class MailerProperties extends MailProperties {
+
     private String from;
     private boolean auth = true;
     private boolean ssl = true;

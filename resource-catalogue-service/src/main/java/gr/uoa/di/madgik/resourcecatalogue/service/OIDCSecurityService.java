@@ -33,14 +33,12 @@ public class OIDCSecurityService implements SecurityService {
     private final DraftResourceService<InteroperabilityRecordBundle> draftInteroperabilityRecordService;
     private final Authentication adminAccess = new AdminAuthentication();
 
-    @Value("${prefix.providers}")
+    @Value("${catalogue.resources.provider.id-prefix}")
     private String providersPrefix;
-    @Value("${prefix.services}")
+    @Value("${catalogue.resources.service.id-prefix}")
     private String servicesPrefix;
-    @Value("${prefix.trainings}")
+    @Value("${catalogue.resources.training_resource.id-prefix}")
     private String trainingsPrefix;
-    @Value("${prefix.interoperability-frameworks}")
-    private String guidelinesPrefix;
     @Value("${elastic.index.max_result_window:10000}")
     protected int maxQuantity;
 

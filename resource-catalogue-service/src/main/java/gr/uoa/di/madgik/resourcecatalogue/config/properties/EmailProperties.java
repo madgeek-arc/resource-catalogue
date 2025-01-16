@@ -20,9 +20,15 @@ public class EmailProperties {
      */
     boolean providerNotifications = false;
 
+    /**
+     * Enables sending resource consistency notifications.
+     */
+    boolean resourceConsistencyNotifications = false;
+
     EmailRecipients registrationEmails = new EmailRecipients();
     EmailRecipients helpdeskEmails = new EmailRecipients();
     EmailRecipients monitoringEmails = new EmailRecipients();
+    EmailRecipients resourceConsistencyEmails = new EmailRecipients();
 
     public EmailProperties() {
 
@@ -54,6 +60,15 @@ public class EmailProperties {
         return this;
     }
 
+    public boolean isResourceConsistencyNotifications() {
+        return resourceConsistencyNotifications;
+    }
+
+    public EmailProperties setResourceConsistencyNotifications(boolean resourceConsistencyNotifications) {
+        this.resourceConsistencyNotifications = resourceConsistencyNotifications;
+        return this;
+    }
+
     public EmailRecipients getRegistrationEmails() {
         return registrationEmails;
     }
@@ -78,6 +93,15 @@ public class EmailProperties {
 
     public EmailProperties setMonitoringEmails(EmailRecipients monitoringEmails) {
         this.monitoringEmails = monitoringEmails;
+        return this;
+    }
+
+    public EmailRecipients getResourceConsistencyEmails() {
+        return resourceConsistencyEmails;
+    }
+
+    public EmailProperties setResourceConsistencyEmails(EmailRecipients resourceConsistencyEmails) {
+        this.resourceConsistencyEmails = resourceConsistencyEmails;
         return this;
     }
 

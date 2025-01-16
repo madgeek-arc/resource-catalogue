@@ -3,6 +3,7 @@ package gr.uoa.di.madgik.resourcecatalogue.config.properties;
 import gr.uoa.di.madgik.resourcecatalogue.manager.pids.PidIssuerConfig;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
+import org.springframework.boot.context.properties.NestedConfigurationProperty;
 import org.springframework.validation.annotation.Validated;
 
 
@@ -14,13 +15,17 @@ public class ResourceProperties {
      */
     @NotNull
     @NotEmpty
-    private String idPrefix;
+    private String idPrefix = "resource";
 
+    /**
+     * Marketplace endpoint (optional).
+     */
     private String marketplaceEndpoint;
 
     /**
-     * The PID Issuer properties.
+     * The PID Issuer properties (optional).
      */
+    @NestedConfigurationProperty
     private PidIssuerConfig pidIssuer;
 
     public ResourceProperties() {

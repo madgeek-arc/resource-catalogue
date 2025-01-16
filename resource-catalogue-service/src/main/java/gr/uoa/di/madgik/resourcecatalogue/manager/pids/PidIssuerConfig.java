@@ -6,28 +6,28 @@ import jakarta.validation.constraints.NotNull;
 public class PidIssuerConfig {
 
     /**
-     *  The PID Issuer url.
+     * The PID Issuer url.
      */
     @NotNull
     @NotEmpty
     private String url;
 
     /**
-     *  The PID Issuer username.
+     * The PID Issuer username.
      */
     @NotNull
     @NotEmpty
     private String user;
 
     /**
-     *  The PID Issuer user index.
+     * The PID Issuer user index.
      */
     @NotNull
     @NotEmpty
     private String userIndex;
 
     /**
-     *  The PID Issuer user password (optional - otherwise fill in cert).
+     * The PID Issuer user password (optional - otherwise fill in cert).
      */
     private String password;
 
@@ -81,12 +81,14 @@ public class PidIssuerConfig {
 
     public static class IssuerCertificateAuthenticationConfig {
 
-        @NotNull
-        @NotEmpty
+        /**
+         * Client key.
+         */
         private String clientKey;
 
-        @NotNull
-        @NotEmpty
+        /**
+         * Client certificate.
+         */
         private String clientCert;
 
         public IssuerCertificateAuthenticationConfig() {
