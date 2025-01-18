@@ -57,15 +57,12 @@ public class RegistrationMailService {
     @Value("${elastic.index.max_result_window:10000}")
     private int maxQuantity;
 
-    @Value("${prefix.providers}")
-    private String providersPrefix;
-    @Value("${prefix.services}")
-    private String servicesPrefix;
-    @Value("${prefix.trainings}")
-    private String trainingsPrefix;
+    private final String providersPrefix;
+    private final String servicesPrefix;
+    private final String trainingsPrefix;
 
     public RegistrationMailService(MailService mailService, Configuration cfg,
-                                   SecurityService securityService, CatalogueProperties properties,
+                                   SecurityService securityService,
                                    @Lazy ProviderManager providerManager,
                                    @Lazy ServiceBundleManager serviceBundleManager,
                                    @Lazy TrainingResourceManager trainingResourceManager,
@@ -73,7 +70,8 @@ public class RegistrationMailService {
                                    @Lazy DraftProviderManager draftProviderManager,
                                    @Lazy DraftServiceManager draftServiceManager,
                                    @Lazy DraftTrainingResourceManager draftTrainingResourceManager,
-                                   @Lazy DraftInteroperabilityRecordManager draftInteroperabilityRecordManager) {
+                                   @Lazy DraftInteroperabilityRecordManager draftInteroperabilityRecordManager,
+                                   CatalogueProperties properties) {
         this.mailService = mailService;
         this.cfg = cfg;
         this.securityService = securityService;
@@ -95,6 +93,10 @@ public class RegistrationMailService {
         this.monitoringEmail = properties.getEmails().getMonitoringEmails().getTo();
         this.enableAdminNotifications = properties.getEmails().isAdminNotifications();
         this.enableProviderNotifications = properties.getEmails().isProviderNotifications();
+
+        this.providersPrefix = properties.getResources().get(ResourceTypes.PROVIDER).getIdPrefix();
+        this.servicesPrefix = properties.getResources().get(ResourceTypes.SERVICE).getIdPrefix();
+        this.trainingsPrefix = properties.getResources().get(ResourceTypes.TRAINING_RESOURCE).getIdPrefix();
     }
 
     // sendEmailsFromTemplate
