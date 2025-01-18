@@ -1,7 +1,6 @@
 package gr.uoa.di.madgik.resourcecatalogue.domain;
 
 public enum ResourceTypes {
-    CATALOGUE,
     CONFIGURATION_TEMPLATE,
     CONFIGURATION_TEMPLATE_INSTANCE,
     DATASOURCE,
@@ -13,7 +12,6 @@ public enum ResourceTypes {
     SERVICE,
     TOOL,
     TRAINING_RESOURCE,
-    VOCABULARY,
     VOCABULARY_CURATION;
 
     @Override

@@ -15,7 +15,7 @@ public class ResourceProperties {
      */
     @NotNull
     @NotEmpty
-    private String idPrefix = "resource";
+    private String idPrefix;
 
     /**
      * Marketplace endpoint (optional).
