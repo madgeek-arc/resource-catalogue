@@ -11,22 +11,22 @@ public class PropertiesWatcher {
 
     private static final Logger logger = LoggerFactory.getLogger(PropertiesWatcher.class);
 
-    private final Path secretPropertiesPath;
+    private final Path dynamicPropertiesPath;
 
     public PropertiesWatcher(String filePath) {
-        this.secretPropertiesPath = Paths.get(filePath);
+        this.dynamicPropertiesPath = Paths.get(filePath);
     }
 
     public void watchFile(Runnable onFileChange) throws IOException {
         WatchService watchService = FileSystems.getDefault().newWatchService();
-        secretPropertiesPath.getParent().register(watchService, StandardWatchEventKinds.ENTRY_MODIFY);
+        dynamicPropertiesPath.getParent().register(watchService, StandardWatchEventKinds.ENTRY_MODIFY);
 
         new Thread(() -> {
             while (true) {
                 try {
                     WatchKey key = watchService.take();
                     for (WatchEvent<?> event : key.pollEvents()) {
-                        if (event.context().toString().equals(secretPropertiesPath.getFileName().toString())) {
+                        if (event.context().toString().equals(dynamicPropertiesPath.getFileName().toString())) {
                             onFileChange.run();
                         }
                     }
@@ -40,7 +40,7 @@ public class PropertiesWatcher {
 
     public Properties loadProperties() throws IOException {
         Properties properties = new Properties();
-        try (var input = Files.newInputStream(secretPropertiesPath)) {
+        try (var input = Files.newInputStream(dynamicPropertiesPath)) {
             properties.load(input);
         }
         return properties;
