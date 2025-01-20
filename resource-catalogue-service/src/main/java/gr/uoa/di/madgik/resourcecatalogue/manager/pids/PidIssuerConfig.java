@@ -84,12 +84,22 @@ public class PidIssuerConfig {
         /**
          * Client key.
          */
+        @NotNull
+        @NotEmpty
         private String clientKey;
 
         /**
          * Client certificate.
          */
+        @NotNull
+        @NotEmpty
         private String clientCert;
+
+        /**
+         * Whether the ssl certificate is self-signed (default: false)
+         */
+        @NotNull
+        private Boolean selfSignedCert = false;
 
         public IssuerCertificateAuthenticationConfig() {
         }
@@ -109,6 +119,13 @@ public class PidIssuerConfig {
         public void setClientCert(String clientCert) {
             this.clientCert = clientCert;
         }
+
+        public boolean isSelfSignedCert() {
+            return selfSignedCert;
+        }
+
+        public void setSelfSignedCert(boolean selfSignedCert) {
+            this.selfSignedCert = selfSignedCert;
+        }
     }
 }
-

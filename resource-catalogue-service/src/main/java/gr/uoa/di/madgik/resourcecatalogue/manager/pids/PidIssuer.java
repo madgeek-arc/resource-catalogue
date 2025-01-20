@@ -1,7 +1,7 @@
 package gr.uoa.di.madgik.resourcecatalogue.manager.pids;
 
-import gr.uoa.di.madgik.resourcecatalogue.config.properties.ResourceProperties;
 import gr.uoa.di.madgik.resourcecatalogue.config.properties.CatalogueProperties;
+import gr.uoa.di.madgik.resourcecatalogue.config.properties.ResourceProperties;
 import gr.uoa.di.madgik.resourcecatalogue.utils.RestTemplateTrustManager;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.client5.http.impl.classic.HttpClients;
@@ -19,10 +19,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.MediaType;
+import org.springframework.http.*;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
@@ -32,6 +29,7 @@ import javax.net.ssl.SSLContext;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileReader;
+import java.net.URI;
 import java.security.KeyPair;
 import java.security.KeyStore;
 import java.security.PrivateKey;
@@ -57,34 +55,34 @@ public class PidIssuer {
         String payload = createPID(pid, config, resourceProperties.getMarketplaceEndpoint());
         HttpHeaders headers = createHeaders(config);
 
-        HttpEntity<String> request = new HttpEntity<>(payload, headers);
-        try {
-            restTemplate.exchange(config.getUrl(), HttpMethod.PUT, request, String.class);
-            logger.info("Resource with ID [{}] has been posted with PID [{}] on [{}]", pid, pid, config.getUrl());
-        } catch (Exception e) {
-            throw new RuntimeException("Error during PID post request", e);
-        }
+        exchange(payload, headers, config, pid, restTemplate);
     }
 
+    //TODO: revision certs VS basic auth VS testing basic auth
     private RestTemplate createRestTemplate(PidIssuerConfig config) {
         RestTemplate restTemplate;
-        if (!config.getUrl().startsWith("https")) {
-            restTemplate = RestTemplateTrustManager.createRestTemplateWithDisabledSSL();
-        } else if (config.getAuth() != null) {
-            restTemplate = createSslRestTemplate(config.getAuth().getClientCert(), config.getAuth().getClientKey());
+        if (config.getAuth() != null) {
+            if (config.getAuth().isSelfSignedCert()) {
+                restTemplate = RestTemplateTrustManager.createRestTemplateWithDisabledSSL();
+            } else {
+                restTemplate = createCertBasedRestTemplate(
+                        config.getAuth().getClientCert(),
+                        config.getAuth().getClientKey());
+            }
         } else {
             restTemplate = new RestTemplate();
         }
         return restTemplate;
     }
 
-    public RestTemplate createSslRestTemplate(String certPath, String keyPath) {
+    public RestTemplate createCertBasedRestTemplate(String certPath, String keyPath) {
         try {
             // Load certificate
             CertificateFactory certificateFactory = CertificateFactory.getInstance("X.509");
             X509Certificate certificate;
             try (FileReader certReader = new FileReader(certPath)) {
-                certificate = (X509Certificate) certificateFactory.generateCertificate(new FileInputStream(new File(certPath)));
+                certificate = (X509Certificate) certificateFactory
+                        .generateCertificate(new FileInputStream(new File(certPath)));
             }
 
             // Load private key
@@ -178,18 +176,45 @@ public class PidIssuer {
     private HttpHeaders createHeaders(PidIssuerConfig config) {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        if (config.getAuth() != null) {
+        if (config.getAuth() != null &&
+                !config.getAuth().getClientKey().isBlank() &&
+                !config.getAuth().getClientCert().isBlank()) {
             headers.set("Authorization", "Handle clientCert=\"true\"");
         } else if (StringUtils.hasText(config.getPassword())) {
-            headers.set("Authorization", createBasicAuth(config.getUser(), config.getPassword()));
+            headers.set("Authorization",
+                    createBasicAuth(config.getUser(), config.getUserIndex(), config.getPassword())
+            );
         }
 
         return headers;
     }
 
-    private String createBasicAuth(String username, String password) {
+    private String createBasicAuth(String user, String userIndex, String password) {
+        String username = userIndex + "%3A" + user;
         String auth = username + ":" + password;
         byte[] encodedAuth = Base64.encodeBase64(auth.getBytes());
         return "Basic " + new String(encodedAuth);
+    }
+
+    private void exchange(String payload, HttpHeaders headers, PidIssuerConfig config, String pid,
+                          RestTemplate restTemplate) {
+        HttpEntity<String> request = new HttpEntity<>(payload, headers);
+        try {
+            URI uri = URI.create(String.join("/", config.getUrl(), pid));
+            ResponseEntity<?> response = restTemplate.exchange(uri, HttpMethod.PUT, request, String.class);
+            logInfo(response, pid, config.getUrl());
+        } catch (Exception e) {
+            throw new RuntimeException("Error during PID post request", e);
+        }
+    }
+
+    private void logInfo(ResponseEntity<?> response, String pid, String endpoint) {
+        if (response.getStatusCode() == HttpStatus.CREATED) {
+            logger.info("Resource with ID [{}] has been posted on [{}]", pid, endpoint);
+        } else if (response.getStatusCode() == HttpStatus.OK) {
+            logger.info("Resource with ID [{}] has been updated on [{}]", pid, endpoint);
+        } else {
+            logger.error("Resource with ID [{}] could not be posted/updated : [{}]", pid, response.getBody());
+        }
     }
 }

@@ -9,6 +9,7 @@ catalogue:
         user-index:
         password:
         auth:
+          self-signed-cert:
           client-key:
           client-cert:
     service:
@@ -19,6 +20,7 @@ catalogue:
         user-index:
         password:
         auth:
+          self-signed-cert:
           client-key:
           client-cert:
     training-resource:
@@ -29,6 +31,7 @@ catalogue:
         user-index:
         password:
         auth:
+          self-signed-cert:
           client-key:
           client-cert:
     interoperability-record:
@@ -39,6 +42,7 @@ catalogue:
         user-index:
         password:
         auth:
+          self-signed-cert:
           client-key:
           client-cert:
     tool:
@@ -49,5 +53,6 @@ catalogue:
         user-index:
         password:
         auth:
+          self-signed-cert:
           client-key:
           client-cert:
