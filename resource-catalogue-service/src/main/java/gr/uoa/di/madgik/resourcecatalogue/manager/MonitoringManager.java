@@ -1,13 +1,13 @@
 package gr.uoa.di.madgik.resourcecatalogue.manager;
 
 import com.google.gson.JsonArray;
+import gr.athenarc.catalogue.exception.ResourceNotFoundException;
+import gr.athenarc.catalogue.exception.ValidationException;
 import gr.uoa.di.madgik.registry.domain.Resource;
 import gr.uoa.di.madgik.registry.service.SearchService;
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
 import gr.uoa.di.madgik.resourcecatalogue.dto.MonitoringStatus;
 import gr.uoa.di.madgik.resourcecatalogue.dto.ServiceType;
-import gr.uoa.di.madgik.resourcecatalogue.exception.ResourceNotFoundException;
-import gr.uoa.di.madgik.resourcecatalogue.exception.ValidationException;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
 import gr.uoa.di.madgik.resourcecatalogue.utils.*;
 import org.json.JSONArray;

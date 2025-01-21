@@ -134,6 +134,10 @@
             <groupId>gr.uoa.di.madgik</groupId>
             <artifactId>registry-core-helper</artifactId>
         </dependency>
+        <dependency>
+            <groupId>gr.athenarc</groupId>
+            <artifactId>catalogue</artifactId>
+        </dependency>
 
 
         <dependency>

@@ -55,6 +55,11 @@
             <groupId>jakarta.servlet</groupId>
             <artifactId>jakarta.servlet-api</artifactId>
         </dependency>
+        <dependency>
+            <groupId>gr.athenarc</groupId>
+            <artifactId>catalogue</artifactId>
+            <scope>compile</scope>
+        </dependency>
     </dependencies>
 
     <build>

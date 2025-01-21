@@ -1,9 +1,9 @@
 package gr.uoa.di.madgik.resourcecatalogue.validators;
 
+import gr.uoa.di.madgik.resourcecatalogue.domain.Monitoring;
 import org.springframework.validation.Errors;
 import org.springframework.validation.ValidationUtils;
 import org.springframework.validation.Validator;
-import gr.uoa.di.madgik.resourcecatalogue.domain.Monitoring;
 
 public class MonitoringValidator implements Validator {
 

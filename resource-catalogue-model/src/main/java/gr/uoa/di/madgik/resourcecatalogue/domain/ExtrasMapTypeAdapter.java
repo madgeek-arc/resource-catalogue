@@ -1,6 +1,7 @@
 package gr.uoa.di.madgik.resourcecatalogue.domain;
 
 import jakarta.xml.bind.annotation.adapters.XmlAdapter;
+
 import java.util.HashMap;
 import java.util.Map;
 

@@ -3,8 +3,6 @@ package gr.uoa.di.madgik.resourcecatalogue.service;
 import gr.uoa.di.madgik.resourcecatalogue.domain.CatalogueBundle;
 import org.springframework.security.core.Authentication;
 
-import java.util.List;
-
 public interface CatalogueService extends ResourceService<CatalogueBundle>, BundleOperations<CatalogueBundle> {
 
     /**
