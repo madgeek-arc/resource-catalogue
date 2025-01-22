@@ -1,5 +1,6 @@
 package gr.uoa.di.madgik.resourcecatalogue.logging;
 
+import gr.athenarc.catalogue.config.logging.LogTransactionsFilter;
 import gr.uoa.di.madgik.resourcecatalogue.domain.User;
 import jakarta.servlet.ServletRequest;
 import jakarta.servlet.ServletResponse;
@@ -15,7 +16,7 @@ import org.springframework.util.StringUtils;
 import java.util.UUID;
 
 @Component
-public class LogUserFilter extends gr.athenarc.catalogue.config.logging.LogTransactionsFilter {
+public class LogUserFilter extends LogTransactionsFilter {
 
     private static final String TRANSACTION_ID = "transaction_id";
     private static final String USER_INFO = "user_info";
