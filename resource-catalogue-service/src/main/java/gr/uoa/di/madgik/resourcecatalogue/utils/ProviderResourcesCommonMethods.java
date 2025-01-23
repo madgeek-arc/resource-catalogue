@@ -1,7 +1,7 @@
 package gr.uoa.di.madgik.resourcecatalogue.utils;
 
-import gr.athenarc.catalogue.exception.ResourceNotFoundException;
 import gr.athenarc.catalogue.exception.ValidationException;
+import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
 import org.slf4j.Logger;

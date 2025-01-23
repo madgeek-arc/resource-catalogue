@@ -3,10 +3,9 @@ package gr.uoa.di.madgik.resourcecatalogue.controllers.registry;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
-import gr.athenarc.catalogue.exception.ResourceException;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.domain.Paging;
-import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
+import gr.uoa.di.madgik.registry.exception.ResourceException;
 import gr.uoa.di.madgik.resourcecatalogue.annotations.Browse;
 import gr.uoa.di.madgik.resourcecatalogue.annotations.BrowseCatalogue;
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
@@ -158,7 +157,7 @@ public class ServiceExtensionsController {
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<Helpdesk> updateHelpdesk(@Valid @RequestBody Helpdesk helpdesk,
                                                    @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId,
-                                                   @Parameter(hidden = true) Authentication auth) throws ResourceNotFoundException {
+                                                   @Parameter(hidden = true) Authentication auth) {
         HelpdeskBundle helpdeskBundle = helpdeskService.get(helpdesk.getId());
         helpdeskBundle.setHelpdesk(helpdesk);
         helpdeskBundle = helpdeskService.update(helpdeskBundle, auth);
@@ -171,7 +170,7 @@ public class ServiceExtensionsController {
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     public ResponseEntity<Helpdesk> deleteHelpdeskById(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
                                                        @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix,
-                                                       @Parameter(hidden = true) Authentication auth) throws ResourceNotFoundException {
+                                                       @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
         HelpdeskBundle helpdeskBundle = helpdeskService.get(id);
         if (helpdeskBundle == null) {
@@ -191,7 +190,7 @@ public class ServiceExtensionsController {
     public ResponseEntity<Helpdesk> deleteHelpdesk(@PathVariable("catalogueId") String catalogueId,
                                                    @Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
                                                    @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix,
-                                                   @Parameter(hidden = true) Authentication auth) throws ResourceNotFoundException {
+                                                   @Parameter(hidden = true) Authentication auth) {
         Helpdesk helpdesk = getHelpdeskByServiceId(prefix, suffix, catalogueId, auth).getBody();
         assert helpdesk != null;
         HelpdeskBundle helpdeskBundle = helpdeskService.get(helpdesk.getId());
@@ -315,7 +314,7 @@ public class ServiceExtensionsController {
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<Monitoring> updateMonitoring(@Valid @RequestBody Monitoring monitoring,
                                                        @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId,
-                                                       @Parameter(hidden = true) Authentication auth) throws ResourceNotFoundException {
+                                                       @Parameter(hidden = true) Authentication auth) {
         MonitoringBundle monitoringBundle = monitoringService.get(monitoring.getId());
         monitoringBundle.setMonitoring(monitoring);
         monitoringBundle = monitoringService.update(monitoringBundle, auth);
@@ -328,7 +327,7 @@ public class ServiceExtensionsController {
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     public ResponseEntity<Monitoring> deleteMonitoringById(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
                                                            @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix,
-                                                           @Parameter(hidden = true) Authentication auth) throws ResourceNotFoundException {
+                                                           @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
         MonitoringBundle monitoringBundle = monitoringService.get(id);
         if (monitoringBundle == null) {
@@ -348,7 +347,7 @@ public class ServiceExtensionsController {
     public ResponseEntity<Monitoring> deleteMonitoring(@PathVariable("catalogueId") String catalogueId,
                                                        @Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
                                                        @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix,
-                                                       @Parameter(hidden = true) Authentication auth) throws ResourceNotFoundException {
+                                                       @Parameter(hidden = true) Authentication auth) {
         Monitoring monitoring = getMonitoringByServiceId(prefix, suffix, catalogueId, auth).getBody();
         assert monitoring != null;
         MonitoringBundle monitoringBundle = monitoringService.get(monitoring.getId());

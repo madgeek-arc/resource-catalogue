@@ -33,7 +33,7 @@ public interface TrainingResourceService extends ResourceService<TrainingResourc
      * @return {@link   TrainingResourceBundle}
      * @throws ResourceNotFoundException The Resource was not found
      */
-    TrainingResourceBundle update(TrainingResourceBundle resource, String comment, Authentication auth) throws ResourceNotFoundException;
+    TrainingResourceBundle update(TrainingResourceBundle resource, String comment, Authentication auth);
 
     /**
      * Update a Training Resource of an external Catalogue, providing its Catalogue ID
@@ -46,7 +46,7 @@ public interface TrainingResourceService extends ResourceService<TrainingResourc
      * @throws ResourceNotFoundException The Resource was not found
      */
     TrainingResourceBundle update(TrainingResourceBundle resource, String catalogueId, String comment, Authentication auth)
-            throws ResourceNotFoundException;
+           ;
 
     /**
      * Get a Training Resource of a specific Catalogue
