@@ -3,7 +3,6 @@ package gr.uoa.di.madgik.resourcecatalogue.service;
 import gr.uoa.di.madgik.registry.domain.Browsing;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.domain.Resource;
-import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.registry.service.ResourceCRUDService;
 import gr.uoa.di.madgik.registry.service.SearchService;
 import org.springframework.security.core.Authentication;
@@ -125,7 +124,7 @@ public interface ResourceService<T> extends ResourceCRUDService<T, Authenticatio
      * @param resources List of Vocabularies to be updated
      * @param auth      Authentication
      */
-    default void updateBulk(List<T> resources, Authentication auth) throws ResourceNotFoundException {
+    default void updateBulk(List<T> resources, Authentication auth) {
         for (T resource : resources) {
             this.update(resource, auth);
         }

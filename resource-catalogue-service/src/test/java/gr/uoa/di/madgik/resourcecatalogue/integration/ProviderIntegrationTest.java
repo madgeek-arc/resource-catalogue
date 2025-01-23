@@ -2,9 +2,8 @@ package gr.uoa.di.madgik.resourcecatalogue.integration;
 
 import gr.athenarc.catalogue.exception.ValidationException;
 import gr.uoa.di.madgik.registry.domain.Paging;
-import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
+import gr.uoa.di.madgik.registry.exception.ResourceException;
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
-import gr.uoa.di.madgik.resourcecatalogue.exception.ResourceException;
 import gr.uoa.di.madgik.resourcecatalogue.service.CatalogueService;
 import gr.uoa.di.madgik.resourcecatalogue.service.ProviderService;
 import gr.uoa.di.madgik.resourcecatalogue.service.SecurityService;
@@ -95,7 +94,7 @@ class ProviderIntegrationTest extends BaseIntegrationTest {
 
     @Test
     @Order(3)
-    void updateProviderSucceeds() throws ResourceNotFoundException {
+    void updateProviderSucceeds() {
         ProviderBundle providerBundle = providerService.get(providerId, securityService.getAdminAccess());
         assertEquals("Test Provider", providerBundle.getProvider().getName(),
                 "The provider's initial name should match the expected value.");

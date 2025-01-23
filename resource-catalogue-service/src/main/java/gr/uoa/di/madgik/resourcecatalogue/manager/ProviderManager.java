@@ -229,7 +229,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     private ProviderBundle getWithCatalogue(String id, String catalogueId) {
         Resource resource = getResource(id, catalogueId);
         if (resource == null) {
-            throw new gr.athenarc.catalogue.exception.ResourceNotFoundException(String.format("Could not find provider with id: %s and catalogueId: %s", id, catalogueId));
+            throw new gr.uoa.di.madgik.registry.exception.ResourceNotFoundException(String.format("Could not find provider with id: %s and catalogueId: %s", id, catalogueId));
         }
         return deserialize(resource);
     }
@@ -238,7 +238,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         ProviderBundle providerBundle = getWithCatalogue(providerId, catalogueId);
         CatalogueBundle catalogueBundle = catalogueService.get(catalogueId);
         if (catalogueBundle == null) {
-            throw new gr.athenarc.catalogue.exception.ResourceNotFoundException(
+            throw new gr.uoa.di.madgik.registry.exception.ResourceNotFoundException(
                     String.format("Could not find catalogue with id: %s", catalogueId));
         }
         if (!providerBundle.getProvider().getCatalogueId().equals(catalogueId)) {

@@ -1,7 +1,6 @@
 package gr.uoa.di.madgik.resourcecatalogue.service;
 
 import com.google.i18n.phonenumbers.NumberParseException;
-import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Event;
 import org.springframework.security.core.Authentication;
 
@@ -78,7 +77,7 @@ public interface EventService extends ResourceService<Event> {
      * @param value
      * @return
      */
-    Event setVisit(String serviceId, Float value) throws ResourceNotFoundException, NumberParseException;
+    Event setVisit(String serviceId, Float value) throws NumberParseException;
 
     /**
      * Set an AddToProject Event on a Service.
@@ -87,7 +86,7 @@ public interface EventService extends ResourceService<Event> {
      * @param value
      * @return
      */
-    Event setAddToProject(String serviceId, Float value) throws ResourceNotFoundException, NumberParseException;
+    Event setAddToProject(String serviceId, Float value) throws NumberParseException;
 
     /**
      * Set an Order Event on a Service.
@@ -96,7 +95,7 @@ public interface EventService extends ResourceService<Event> {
      * @param value
      * @return
      */
-    Event setOrder(String serviceId, Float value) throws ResourceNotFoundException, NumberParseException;
+    Event setOrder(String serviceId, Float value) throws NumberParseException;
 
     /**
      * Set a scheduled Rating on a Service.
@@ -105,7 +104,7 @@ public interface EventService extends ResourceService<Event> {
      * @param value
      * @return
      */
-    Event setScheduledRating(String serviceId, Float value) throws ResourceNotFoundException, NumberParseException;
+    Event setScheduledRating(String serviceId, Float value) throws NumberParseException;
 
     /**
      * Get an aggregate of Visits on a specific Service.
