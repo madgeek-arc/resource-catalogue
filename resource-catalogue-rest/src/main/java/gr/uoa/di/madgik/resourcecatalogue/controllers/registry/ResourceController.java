@@ -2,7 +2,6 @@ package gr.uoa.di.madgik.resourcecatalogue.controllers.registry;
 
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.domain.Paging;
-import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.annotations.Browse;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Identifiable;
 import gr.uoa.di.madgik.resourcecatalogue.service.ResourceService;
@@ -42,7 +41,7 @@ public abstract class ResourceController<T extends Identifiable> {
     }
 
     @PutMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
-    public ResponseEntity<T> update(@RequestBody T t, @Parameter(hidden = true) Authentication auth) throws ResourceNotFoundException {
+    public ResponseEntity<T> update(@RequestBody T t, @Parameter(hidden = true) Authentication auth) {
         ResponseEntity<T> ret = new ResponseEntity<>(service.update(t, auth), HttpStatus.OK);
         logger.debug("Updated {} with id {}", t.getClass().getSimpleName(), t.getId());
         return ret;
@@ -56,7 +55,7 @@ public abstract class ResourceController<T extends Identifiable> {
     }
 
     @DeleteMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
-    public ResponseEntity<T> delete(@RequestBody T t, @Parameter(hidden = true) Authentication auth) throws ResourceNotFoundException {
+    public ResponseEntity<T> delete(@RequestBody T t, @Parameter(hidden = true) Authentication auth) {
         service.delete(t);
         logger.debug("Deleted {} with id {}", t.getClass().getSimpleName(), t.getId());
         return new ResponseEntity<>(t, HttpStatus.OK);

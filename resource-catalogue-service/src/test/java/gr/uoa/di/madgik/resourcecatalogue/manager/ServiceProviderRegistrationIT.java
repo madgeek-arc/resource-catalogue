@@ -53,7 +53,7 @@ public class ServiceProviderRegistrationIT {
     //TODO: Refactor IT with new model
 
     @Test
-    public void addUpdateAndDeleteProvider() throws ResourceNotFoundException, MalformedURLException {
+    public void addUpdateAndDeleteProvider() throws MalformedURLException {
         String providerId = "wp6";
         ProviderBundle provider;
         ServiceBundle serviceBundle;

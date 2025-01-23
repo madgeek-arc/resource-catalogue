@@ -4,7 +4,6 @@ import gr.athenarc.catalogue.exception.ValidationException;
 import gr.uoa.di.madgik.registry.domain.Browsing;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.domain.Paging;
-import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.annotations.Browse;
 import gr.uoa.di.madgik.resourcecatalogue.annotations.BrowseCatalogue;
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
@@ -73,7 +72,7 @@ public class ServiceController {
     public ResponseEntity<ServiceBundle> delete(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
                                                 @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix,
                                                 @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId,
-                                                @Parameter(hidden = true) Authentication auth) throws ResourceNotFoundException {
+                                                @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
         ServiceBundle service;
         service = serviceBundleService.get(id, catalogueId);
@@ -112,7 +111,7 @@ public class ServiceController {
     @Operation(summary = "Updates the Resource assigned the given id with the given Resource, keeping a version of revisions.")
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth,#service.id)")
     @PutMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
-    public ResponseEntity<Service> updateService(@RequestBody Service service, @RequestParam(required = false) String comment, @Parameter(hidden = true) Authentication auth) throws ResourceNotFoundException {
+    public ResponseEntity<Service> updateService(@RequestBody Service service, @RequestParam(required = false) String comment, @Parameter(hidden = true) Authentication auth) {
         ServiceBundle ret = this.serviceBundleService.updateResource(new ServiceBundle(service), comment, auth);
         logger.info("Updated Resource with name '{}' and id '{}'", service.getName(), service.getId());
         return new ResponseEntity<>(ret.getService(), HttpStatus.OK);
@@ -430,7 +429,7 @@ public class ServiceController {
     public ResponseEntity<ServiceBundle> deleteBundle(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
                                                       @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix,
                                                       @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId,
-                                                      @Parameter(hidden = true) Authentication authentication) throws ResourceNotFoundException {
+                                                      @Parameter(hidden = true) Authentication authentication) {
         String id = prefix + "/" + suffix;
         ServiceBundle service;
         service = serviceBundleService.get(id, catalogueId);
@@ -464,7 +463,7 @@ public class ServiceController {
 
     @PutMapping(path = {"/bundle"}, produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public ResponseEntity<ServiceBundle> updateBundle(@RequestBody ServiceBundle service, @Parameter(hidden = true) Authentication authentication) throws ResourceNotFoundException {
+    public ResponseEntity<ServiceBundle> updateBundle(@RequestBody ServiceBundle service, @Parameter(hidden = true) Authentication authentication) {
         ResponseEntity<ServiceBundle> ret = new ResponseEntity<>(serviceBundleService.update(service, authentication), HttpStatus.OK);
         logger.info("User '{}' updated ServiceBundle '{}' with id: {}", authentication, service.getService().getName(), service.getService().getId());
         return ret;
@@ -520,7 +519,7 @@ public class ServiceController {
     @PutMapping(path = "/draft", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth, #service.id)")
     public ResponseEntity<Service> updateDraftService(@RequestBody Service service, @Parameter(hidden = true) Authentication auth)
-            throws ResourceNotFoundException {
+            {
         ServiceBundle serviceBundle = draftServiceService.get(service.getId());
         serviceBundle.setService(service);
         serviceBundle = draftServiceService.update(serviceBundle, auth);
@@ -534,7 +533,7 @@ public class ServiceController {
     public ResponseEntity<Service> deleteDraftService(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
                                                       @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix,
                                                       @Parameter(hidden = true) Authentication auth)
-            throws ResourceNotFoundException {
+            {
         String id = prefix + "/" + suffix;
         ServiceBundle serviceBundle = draftServiceService.get(id);
         if (serviceBundle == null) {
@@ -550,7 +549,7 @@ public class ServiceController {
     @PreAuthorize("hasRole('ROLE_USER')")
     public ResponseEntity<Service> transformService(@RequestBody Service service,
                                                     @Parameter(hidden = true) Authentication auth)
-            throws ResourceNotFoundException {
+            {
         ServiceBundle serviceBundle = draftServiceService.get(service.getId());
         serviceBundle.setService(service);
 

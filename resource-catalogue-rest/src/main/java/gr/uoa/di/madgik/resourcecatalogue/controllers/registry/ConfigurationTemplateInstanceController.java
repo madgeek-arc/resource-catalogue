@@ -2,7 +2,6 @@ package gr.uoa.di.madgik.resourcecatalogue.controllers.registry;
 
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.domain.Paging;
-import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.annotations.Browse;
 import gr.uoa.di.madgik.resourcecatalogue.domain.configurationTemplates.ConfigurationTemplateInstance;
 import gr.uoa.di.madgik.resourcecatalogue.domain.configurationTemplates.ConfigurationTemplateInstanceBundle;
@@ -133,7 +132,7 @@ public class ConfigurationTemplateInstanceController {
     @PutMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<ConfigurationTemplateInstance> updateCTI(@RequestBody ConfigurationTemplateInstance configurationTemplateInstance,
-                                                                   @Parameter(hidden = true) Authentication auth) throws ResourceNotFoundException {
+                                                                   @Parameter(hidden = true) Authentication auth) {
         ConfigurationTemplateInstanceBundle configurationTemplateInstanceBundle = ctiService.get(configurationTemplateInstance.getId());
         configurationTemplateInstanceBundle.setConfigurationTemplateInstance(configurationTemplateInstance);
         configurationTemplateInstanceBundle = ctiService.update(configurationTemplateInstanceBundle, auth);
@@ -148,7 +147,7 @@ public class ConfigurationTemplateInstanceController {
     public ResponseEntity<ConfigurationTemplateInstance> deleteCTI(@Parameter(description = "The left part of the ID before the '/'")
                                                                    @PathVariable("prefix") String prefix,
                                                                    @Parameter(description = "The right part of the ID after the '/'")
-                                                                   @PathVariable("suffix") String suffix) throws ResourceNotFoundException {
+                                                                   @PathVariable("suffix") String suffix) {
         String id = prefix + "/" + suffix;
         ConfigurationTemplateInstanceBundle configurationTemplateInstanceBundle = ctiService.get(id);
         if (configurationTemplateInstanceBundle == null) {
@@ -178,7 +177,7 @@ public class ConfigurationTemplateInstanceController {
     @PutMapping(path = "updateBundle", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<ConfigurationTemplateInstanceBundle> updateBundle(@RequestBody ConfigurationTemplateInstanceBundle configurationTemplateInstanceBundle,
-                                                                            @Parameter(hidden = true) Authentication auth) throws ResourceNotFoundException {
+                                                                            @Parameter(hidden = true) Authentication auth) {
         ResponseEntity<ConfigurationTemplateInstanceBundle> ret = new ResponseEntity<>(ctiService.update(configurationTemplateInstanceBundle, auth), HttpStatus.OK);
         logger.info("Updated ConfigurationTemplateInstanceBundle with id: {}", configurationTemplateInstanceBundle.getConfigurationTemplateInstance().getId());
         return ret;

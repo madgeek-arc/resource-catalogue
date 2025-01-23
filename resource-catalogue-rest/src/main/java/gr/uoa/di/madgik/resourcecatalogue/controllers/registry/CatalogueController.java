@@ -3,7 +3,6 @@ package gr.uoa.di.madgik.resourcecatalogue.controllers.registry;
 import gr.athenarc.catalogue.exception.ValidationException;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.domain.Paging;
-import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.annotations.Browse;
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
@@ -114,7 +113,7 @@ public class CatalogueController {
     @PutMapping(path = "/bundle", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<CatalogueBundle> updateCatalogueBundle(@RequestBody CatalogueBundle catalogue,
-                                                                 @Parameter(hidden = true) Authentication auth) throws ResourceNotFoundException {
+                                                                 @Parameter(hidden = true) Authentication auth) {
         CatalogueBundle catalogueBundle = catalogueManager.update(catalogue, auth);
         logger.info("Updated the Catalogue with name '{}' and id '{}'",
                 catalogueBundle.getCatalogue().getName(), catalogue.getId());
@@ -217,7 +216,7 @@ public class CatalogueController {
 //    @DeleteMapping(path = "delete/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     public ResponseEntity<Catalogue> deleteCatalogue(@PathVariable("id") String id,
-                                                     @Parameter(hidden = true) Authentication auth) throws ResourceNotFoundException {
+                                                     @Parameter(hidden = true) Authentication auth) {
         CatalogueBundle catalogueBundle = catalogueManager.get(id, auth);
         if (catalogueBundle == null) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -404,7 +403,7 @@ public class CatalogueController {
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth,#service.id)")
     public ResponseEntity<Service> updateCatalogueService(@RequestBody Service service, @PathVariable String catalogueId,
                                                           @RequestParam(required = false) String comment,
-                                                          @Parameter(hidden = true) Authentication auth) throws ResourceNotFoundException {
+                                                          @Parameter(hidden = true) Authentication auth) {
         ServiceBundle ret = this.serviceBundleService.updateResource(new ServiceBundle(service), catalogueId, comment, auth);
         logger.info("Updated the Service with name '{}' and id '{} of the Catalogue '{}'",
                 service.getName(), service.getId(), catalogueId);
@@ -437,7 +436,7 @@ public class CatalogueController {
                                                           @PathVariable("prefix") String prefix,
                                                           @Parameter(description = "The right part of the ID after the '/'")
                                                           @PathVariable("suffix") String suffix,
-                                                          @Parameter(hidden = true) Authentication auth) throws ResourceNotFoundException {
+                                                          @Parameter(hidden = true) Authentication auth) {
         String serviceId = prefix + "/" + suffix;
         ServiceBundle serviceBundle = serviceBundleService.get(serviceId, catalogueId);
         if (serviceBundle == null) {
@@ -500,7 +499,7 @@ public class CatalogueController {
                                                                 @PathVariable("prefix") String prefix,
                                                                 @Parameter(description = "The right part of the ID after the '/'")
                                                                 @PathVariable("suffix") String suffix,
-                                                                @Parameter(hidden = true) Authentication auth) throws ResourceNotFoundException {
+                                                                @Parameter(hidden = true) Authentication auth) {
         String serviceId = prefix + "/" + suffix;
         DatasourceBundle datasourceBundle = datasourceService.get(serviceId, catalogueId);
         if (datasourceBundle == null) {
@@ -543,7 +542,7 @@ public class CatalogueController {
     public ResponseEntity<TrainingResource> updateCatalogueTrainingResource(@RequestBody TrainingResource trainingResource,
                                                                             @PathVariable String catalogueId,
                                                                             @RequestParam(required = false) String comment,
-                                                                            @Parameter(hidden = true) Authentication auth) throws ResourceNotFoundException {
+                                                                            @Parameter(hidden = true) Authentication auth) {
         TrainingResourceBundle ret = this.trainingResourceService.update(
                 new TrainingResourceBundle(trainingResource), catalogueId, comment, auth);
         logger.info("Updated the Training Resource with title '{}' and id '{} of the Catalogue '{}'",
@@ -577,7 +576,7 @@ public class CatalogueController {
                                                                             @PathVariable("prefix") String prefix,
                                                                             @Parameter(description = "The right part of the ID after the '/'")
                                                                             @PathVariable("suffix") String suffix,
-                                                                            @Parameter(hidden = true) Authentication auth) throws ResourceNotFoundException {
+                                                                            @Parameter(hidden = true) Authentication auth) {
         String trainingResourceId = prefix + "/" + suffix;
         TrainingResourceBundle trainingResourceBundle = trainingResourceService.get(trainingResourceId, catalogueId);
         if (trainingResourceBundle == null) {
@@ -653,7 +652,7 @@ public class CatalogueController {
                                                                                         @PathVariable("prefix") String prefix,
                                                                                         @Parameter(description = "The right part of the ID after the '/'")
                                                                                         @PathVariable("suffix") String suffix,
-                                                                                        @Parameter(hidden = true) Authentication auth) throws ResourceNotFoundException {
+                                                                                        @Parameter(hidden = true) Authentication auth) {
         String interoperabilityRecordId = prefix + "/" + suffix;
         InteroperabilityRecordBundle interoperabilityRecordBundle = interoperabilityRecordService.get(interoperabilityRecordId, catalogueId);
         if (interoperabilityRecordBundle == null) {

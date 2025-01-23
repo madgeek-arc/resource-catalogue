@@ -61,7 +61,7 @@ public class ServiceUnitTest {
      * @throws ResourceNotFoundException if the service to be updated does not exist
      */
     @Test
-    public void updateServiceSuccess() throws ResourceNotFoundException {
+    public void updateServiceSuccess() {
         ServiceBundle inputServiceBundle = createServiceBundle();
         ServiceBundle expectedServiceBundle = createServiceBundle();
         expectedServiceBundle.getService().setName("Updated Test Service");
@@ -90,7 +90,7 @@ public class ServiceUnitTest {
      * @throws ResourceNotFoundException if the service to be deleted does not exist
      */
     @Test
-    public void deleteServiceSuccess() throws ResourceNotFoundException {
+    public void deleteServiceSuccess() {
         ServiceBundle inputServiceBundle = createServiceBundle();
 
         doNothing().when(serviceBundleService).delete(inputServiceBundle);

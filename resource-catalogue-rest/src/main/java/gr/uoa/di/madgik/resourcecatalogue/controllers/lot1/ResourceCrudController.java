@@ -1,8 +1,8 @@
 package gr.uoa.di.madgik.resourcecatalogue.controllers.lot1;
 
-import gr.athenarc.catalogue.exception.ResourceAlreadyExistsException;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.domain.Paging;
+import gr.uoa.di.madgik.registry.exception.ResourceAlreadyExistsException;
 import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.annotations.Browse;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Identifiable;
@@ -80,7 +80,7 @@ public abstract class ResourceCrudController<T extends Identifiable> {
 
     @PutMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<T> update(@RequestBody T t,
-                                    @Parameter(hidden = true) Authentication auth) throws ResourceNotFoundException {
+                                    @Parameter(hidden = true) Authentication auth) {
         if (!service.exists(t))
             throw new ResourceNotFoundException();
         ResponseEntity<T> ret = new ResponseEntity<>(service.save(t), HttpStatus.OK);
@@ -96,7 +96,7 @@ public abstract class ResourceCrudController<T extends Identifiable> {
     }
 
     @DeleteMapping(path = "{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<T> delete(@PathVariable String id, @Parameter(hidden = true) Authentication auth) throws ResourceNotFoundException {
+    public ResponseEntity<T> delete(@PathVariable String id, @Parameter(hidden = true) Authentication auth) {
         T resource = service.get(id);
         service.delete(resource);
         logger.debug("Deleted {} with id {}", resource.getClass().getSimpleName(), resource.getId());
@@ -107,7 +107,7 @@ public abstract class ResourceCrudController<T extends Identifiable> {
     @DeleteMapping(path = "{id}/**", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<T> deleteByPid(@PathVariable("id") @Parameter(allowReserved = true) String id,
                                          @Parameter(hidden = true) Authentication authentication,
-                                         HttpServletRequest request) throws ResourceNotFoundException {
+                                         HttpServletRequest request) {
         T resource = service.get(extractPid(id, request));
         service.delete(resource);
         logger.debug("Deleted {} with id {}", resource.getClass().getSimpleName(), resource.getId());

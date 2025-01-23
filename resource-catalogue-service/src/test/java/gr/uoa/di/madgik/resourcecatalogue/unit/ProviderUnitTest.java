@@ -61,7 +61,7 @@ public class ProviderUnitTest {
      * @throws ResourceNotFoundException if the provider to be updated does not exist
      */
     @Test
-    public void updateProviderSuccess() throws ResourceNotFoundException {
+    public void updateProviderSuccess() {
         ProviderBundle inputProviderBundle = createProviderBundle();
         ProviderBundle expectedProviderBundle = createProviderBundle();
         expectedProviderBundle.getProvider().setName("Updated Test Provider");

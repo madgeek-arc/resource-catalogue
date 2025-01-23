@@ -2,7 +2,6 @@ package gr.uoa.di.madgik.resourcecatalogue.controllers.registry;
 
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.domain.Paging;
-import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.annotations.Browse;
 import gr.uoa.di.madgik.resourcecatalogue.annotations.BrowseCatalogue;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Datasource;
@@ -122,7 +121,7 @@ public class DatasourceController {
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth, #datasource.serviceId)")
     public ResponseEntity<Datasource> updateHDatasource(@Valid @RequestBody Datasource datasource,
                                                         @RequestParam(required = false) String comment,
-                                                        @Parameter(hidden = true) Authentication auth) throws ResourceNotFoundException {
+                                                        @Parameter(hidden = true) Authentication auth) {
         DatasourceBundle datasourceBundle = datasourceService.get(datasource.getId());
         datasourceBundle.setDatasource(datasource);
         datasourceBundle = datasourceService.update(datasourceBundle, comment, auth);
@@ -134,7 +133,7 @@ public class DatasourceController {
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     public ResponseEntity<Datasource> deleteDatasourceById(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
                                                            @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix,
-                                                           @Parameter(hidden = true) Authentication auth) throws ResourceNotFoundException {
+                                                           @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
         DatasourceBundle datasourceBundle = datasourceService.get(id);
         if (datasourceBundle == null) {
@@ -156,7 +155,7 @@ public class DatasourceController {
     public ResponseEntity<Datasource> deleteDatasource(@PathVariable("catalogueId") String catalogueId,
                                                        @Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
                                                        @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix,
-                                                       @Parameter(hidden = true) Authentication auth) throws ResourceNotFoundException {
+                                                       @Parameter(hidden = true) Authentication auth) {
         Datasource datasource = getDatasourceByServiceId(prefix, suffix, catalogueId, auth).getBody();
         assert datasource != null;
         DatasourceBundle datasourceBundle = datasourceService.get(datasource.getId());
