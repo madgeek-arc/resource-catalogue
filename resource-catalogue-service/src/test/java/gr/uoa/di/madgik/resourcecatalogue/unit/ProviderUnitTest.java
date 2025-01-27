@@ -72,8 +72,8 @@ public class ProviderUnitTest {
         assertNotNull(result);
         assertEquals(expectedProviderBundle, result);
 
-        assertEquals("Updated Test Provider", result.getProvider().getName(), "Provider name should be " +
-                "'Updated Test Provider'");
+        assertEquals("Updated Test Provider", result.getProvider().getName(), "Provider name should " +
+                "be 'Updated Test Provider'");
 
         verify(providerService, times(1)).update(inputProviderBundle, auth);
     }

@@ -17,14 +17,23 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-class ProviderResourcesCommonMethodIntegrationTest extends BaseIntegrationTest {
+class LoggingInfoIntegrationTest extends BaseIntegrationTest {
 
     @Autowired
     private ProviderResourcesCommonMethods commonMethods;
     @Autowired
     private SecurityService securityService;
 
-    // returnLoggingInfoListAndCreateRegistrationInfoIfEmpty()
+    /**
+     * Test method to verify that when a provider's logging info is null,
+     * a new logging info entry is created.
+     * <p>
+     * The test asserts that:
+     * <ul>
+     *   <li>A non-null list of logging info is returned.</li>
+     *   <li>The list contains one entry with the correct type and action type.</li>
+     * </ul>
+     */
     @Test
     public void testNullLoggingInfo_CreatesNewLoggingInfo() {
         // Arrange
@@ -45,6 +54,16 @@ class ProviderResourcesCommonMethodIntegrationTest extends BaseIntegrationTest {
         assertEquals(LoggingInfo.ActionType.REGISTERED.getKey(), loggingInfo.getActionType());
     }
 
+    /**
+     * Test method to verify that when a provider's logging info is an empty list,
+     * a new logging info entry is created.
+     * <p>
+     * The test asserts that:
+     * <ul>
+     *   <li>A non-null list of logging info is returned.</li>
+     *   <li>The list contains one entry with the correct type and action type.</li>
+     * </ul>
+     */
     @Test
     public void testEmptyLoggingInfo_CreatesNewLoggingInfo() {
         // Arrange
@@ -65,6 +84,15 @@ class ProviderResourcesCommonMethodIntegrationTest extends BaseIntegrationTest {
         assertEquals(LoggingInfo.ActionType.REGISTERED.getKey(), loggingInfo.getActionType());
     }
 
+    /**
+     * Test method to verify that when a provider's logging info is non-empty,
+     * the existing list of logging info is returned unchanged.
+     * <p>
+     * The test asserts that:
+     * <ul>
+     *   <li>The returned logging info list matches the existing list.</li>
+     * </ul>
+     */
     @Test
     public void testNonEmptyLoggingInfo_ReturnsExistingList() {
         // Arrange
@@ -83,6 +111,16 @@ class ProviderResourcesCommonMethodIntegrationTest extends BaseIntegrationTest {
                 "When loggingInfo is non-empty, the method should return the existing list");
     }
 
+    /**
+     * Test method to verify that when authentication is null,
+     * an {@link InsufficientAuthenticationException} is thrown.
+     * <p>
+     * The test asserts that:
+     * <ul>
+     *   <li>The exception is thrown as expected.</li>
+     *   <li>The exception message matches the expected value.</li>
+     * </ul>
+     */
     @Test
     public void testNullAuthentication_ThrowsInsufficientAuthenticationException() {
         // Arrange
@@ -100,7 +138,16 @@ class ProviderResourcesCommonMethodIntegrationTest extends BaseIntegrationTest {
                 "Exception message should match the expected message");
     }
 
-    // createLoggingInfo()
+    /**
+     * Test method to verify that {@code createLoggingInfo} correctly creates a logging info entry
+     * when valid inputs are provided.
+     * <p>
+     * The test asserts that:
+     * <ul>
+     *   <li>The returned logging info is not null.</li>
+     *   <li>The logging info contains the correct type, action type, and user role.</li>
+     * </ul>
+     */
     @Test
     public void testCreateLoggingInfo_ValidInput_ReturnsCorrectLoggingInfo() {
         // Arrange
@@ -117,6 +164,16 @@ class ProviderResourcesCommonMethodIntegrationTest extends BaseIntegrationTest {
         assertEquals("admin", result.getUserRole(), "User role should match");
     }
 
+    /**
+     * Test method to verify that {@code createLoggingInfo} throws an
+     * {@link InsufficientAuthenticationException} when the authentication is null.
+     * <p>
+     * The test asserts that:
+     * <ul>
+     *   <li>The exception is thrown as expected.</li>
+     *   <li>The exception message matches the expected value.</li>
+     * </ul>
+     */
     @Test
     public void testCreateLoggingInfo_NullAuthentication_ThrowsException() {
         // Act & Assert
@@ -131,6 +188,22 @@ class ProviderResourcesCommonMethodIntegrationTest extends BaseIntegrationTest {
                 "Exception message should match the expected message");
     }
 
+    /**
+     * Test method to verify that {@code createLoggingInfo} throws an
+     * {@link IllegalArgumentException} when the type or action type is invalid.
+     * <p>
+     * The test includes cases for:
+     * <ul>
+     *   <li>Null type</li>
+     *   <li>Empty action type</li>
+     *   <li>Nonexistent action type</li>
+     * </ul>
+     * The test asserts that:
+     * <ul>
+     *   <li>Exceptions are thrown as expected for invalid inputs.</li>
+     *   <li>The exception messages match the expected values.</li>
+     * </ul>
+     */
     @Test
     public void testCreateLoggingInfo_NullOrEmptyOrNonexistentTypeOrActionType() {
         // Arrange
@@ -158,7 +231,8 @@ class ProviderResourcesCommonMethodIntegrationTest extends BaseIntegrationTest {
         // test nonexistent actionType
         IllegalArgumentException exception3 = assertThrows(
                 IllegalArgumentException.class,
-                () -> commonMethods.createLoggingInfo(auth, LoggingInfo.Types.UPDATE.getKey(), "testActionType"),
+                () -> commonMethods.createLoggingInfo(auth, LoggingInfo.Types.UPDATE.getKey(),
+                        "testActionType"),
                 "Expected IllegalArgumentException to be thrown"
         );
         assertEquals("Invalid action type: testActionType", exception3.getMessage(),

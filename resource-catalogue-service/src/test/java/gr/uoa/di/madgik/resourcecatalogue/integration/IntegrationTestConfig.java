@@ -38,6 +38,4 @@ class IntegrationTestConfig {
         registry.add("registry.elasticsearch.username", () -> "elastic");
         registry.add("registry.elasticsearch.password", () -> "password");
     }
-
-
 }

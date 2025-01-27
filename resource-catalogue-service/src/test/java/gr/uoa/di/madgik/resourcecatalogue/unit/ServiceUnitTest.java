@@ -35,17 +35,17 @@ public class ServiceUnitTest {
      */
     @Test
     public void addServiceSuccess() {
-        ServiceBundle inpuServiceBundle = createServiceBundle();
+        ServiceBundle inputServiceBundle = createServiceBundle();
         ServiceBundle expectedServiceBundle = createServiceBundle();
 
-        when(serviceBundleService.add(inpuServiceBundle, auth)).thenReturn(expectedServiceBundle);
-        ServiceBundle result = serviceBundleService.add(inpuServiceBundle, auth);
+        when(serviceBundleService.add(inputServiceBundle, auth)).thenReturn(expectedServiceBundle);
+        ServiceBundle result = serviceBundleService.add(inputServiceBundle, auth);
 
         assertNotNull(result);
         assertEquals(expectedServiceBundle, result);
         assertEquals("Test Service", result.getService().getName(),
                 "Service name should be 'Test Service'");
-        verify(serviceBundleService, times(1)).add(inpuServiceBundle, auth);
+        verify(serviceBundleService, times(1)).add(inputServiceBundle, auth);
     }
 
     /**
