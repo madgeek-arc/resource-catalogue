@@ -43,7 +43,7 @@ public interface ServiceBundleService<T extends Bundle<?>> extends ResourceServi
      * @return {@link T}
      * @throws ResourceNotFoundException
      */
-    T updateResource(T resource, String comment, Authentication auth) throws ResourceNotFoundException;
+    T updateResource(T resource, String comment, Authentication auth);
 
     /**
      * Method to update a resource.
@@ -56,7 +56,7 @@ public interface ServiceBundleService<T extends Bundle<?>> extends ResourceServi
      * @throws ResourceNotFoundException
      */
     T updateResource(T resource, String catalogueId, String comment, Authentication auth)
-            throws ResourceNotFoundException;
+           ;
 
     /**
      * @param catalogueId Catalogue ID

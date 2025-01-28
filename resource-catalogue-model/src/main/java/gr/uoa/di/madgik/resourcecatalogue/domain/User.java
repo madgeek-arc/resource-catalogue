@@ -2,6 +2,9 @@ package gr.uoa.di.madgik.resourcecatalogue.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import gr.uoa.di.madgik.resourcecatalogue.annotation.FieldValidation;
+import jakarta.xml.bind.annotation.XmlElement;
+import jakarta.xml.bind.annotation.XmlRootElement;
+import jakarta.xml.bind.annotation.XmlType;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.security.authentication.InsufficientAuthenticationException;
@@ -12,9 +15,6 @@ import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 
-import jakarta.xml.bind.annotation.XmlElement;
-import jakarta.xml.bind.annotation.XmlRootElement;
-import jakarta.xml.bind.annotation.XmlType;
 import java.util.Objects;
 
 @XmlType

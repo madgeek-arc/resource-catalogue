@@ -1,11 +1,11 @@
 package gr.uoa.di.madgik.resourcecatalogue.validators;
 
+import gr.uoa.di.madgik.resourcecatalogue.domain.Helpdesk;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.validation.Errors;
 import org.springframework.validation.ValidationUtils;
 import org.springframework.validation.Validator;
-import gr.uoa.di.madgik.resourcecatalogue.domain.Helpdesk;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;

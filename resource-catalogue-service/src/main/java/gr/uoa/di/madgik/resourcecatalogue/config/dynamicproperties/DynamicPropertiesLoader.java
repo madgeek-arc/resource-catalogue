@@ -20,8 +20,8 @@ public class DynamicPropertiesLoader {
 
     private static final Logger logger = LoggerFactory.getLogger(DynamicPropertiesLoader.class);
 
-    @Value("${secret.properties.path}")
-    private String secretPath;
+    @Value("${dynamic.properties.path}")
+    private String path;
 
     @Autowired
     private ConfigurableEnvironment environment;
@@ -33,19 +33,21 @@ public class DynamicPropertiesLoader {
 
     @PostConstruct
     public void init() throws IOException {
-        String secretFilePath = secretPath;
-        this.watcher = new PropertiesWatcher(secretFilePath);
-        reloadSecretProperties();
+        if (!path.isBlank()) {
+            String filePath = path;
+            this.watcher = new PropertiesWatcher(filePath);
+            reloadDynamicProperties();
 
-        // Watch for changes
-        watcher.watchFile(this::reloadSecretProperties);
+            // Watch for changes
+            watcher.watchFile(this::reloadDynamicProperties);
+        }
     }
 
-    private void reloadSecretProperties() {
+    private void reloadDynamicProperties() {
         try {
-            Properties secretProperties = watcher.loadProperties();
+            Properties dynamicProperties = watcher.loadProperties();
 
-            Map<String, String> currentProperties = secretProperties.entrySet()
+            Map<String, String> currentProperties = dynamicProperties.entrySet()
                     .stream()
                     .collect(Collectors.toMap(
                             e -> String.valueOf(e.getKey()),

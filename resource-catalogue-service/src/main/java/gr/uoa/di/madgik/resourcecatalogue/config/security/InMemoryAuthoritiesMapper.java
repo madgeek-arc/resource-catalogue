@@ -2,10 +2,12 @@ package gr.uoa.di.madgik.resourcecatalogue.config.security;
 
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.service.ServiceException;
+import gr.uoa.di.madgik.resourcecatalogue.config.properties.CatalogueProperties;
 import gr.uoa.di.madgik.resourcecatalogue.domain.CatalogueBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.ProviderBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.User;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
+import jakarta.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -14,7 +16,6 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Component;
 
-import jakarta.annotation.PostConstruct;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
@@ -35,12 +36,12 @@ public class InMemoryAuthoritiesMapper implements AuthoritiesMapper {
     private final CatalogueService catalogueService;
     private final DraftResourceService<ProviderBundle> draftProviderService;
     private final SecurityService securityService;
-    private final ResourceCatalogueProperties catalogueProperties;
+    private final CatalogueProperties catalogueProperties;
 
     private final ReentrantLock lock = new ReentrantLock();
 
     public InMemoryAuthoritiesMapper(@Value("${elastic.index.max_result_window:10000}") int maxQuantity,
-                                     ResourceCatalogueProperties catalogueProperties,
+                                     CatalogueProperties catalogueProperties,
                                      ProviderService manager,
                                      CatalogueService catalogueService,
                                      DraftResourceService<ProviderBundle> draftProviderService,

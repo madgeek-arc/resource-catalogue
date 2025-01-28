@@ -61,7 +61,7 @@ public class ProviderUnitTest {
      * @throws ResourceNotFoundException if the provider to be updated does not exist
      */
     @Test
-    public void updateProviderSuccess() throws ResourceNotFoundException {
+    public void updateProviderSuccess() {
         ProviderBundle inputProviderBundle = createProviderBundle();
         ProviderBundle expectedProviderBundle = createProviderBundle();
         expectedProviderBundle.getProvider().setName("Updated Test Provider");
@@ -72,8 +72,8 @@ public class ProviderUnitTest {
         assertNotNull(result);
         assertEquals(expectedProviderBundle, result);
 
-        assertEquals("Updated Test Provider", result.getProvider().getName(), "Provider name should be " +
-                "'Updated Test Provider'");
+        assertEquals("Updated Test Provider", result.getProvider().getName(), "Provider name should " +
+                "be 'Updated Test Provider'");
 
         verify(providerService, times(1)).update(inputProviderBundle, auth);
     }

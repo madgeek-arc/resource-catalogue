@@ -515,6 +515,14 @@
     "extras": {}
   },
   {
+    "id": "target_user-funders",
+    "name": "Funders",
+    "description": "Individual or organization financing a part or all of a project's cost as a grant, investment, or loan.",
+    "parentId": null,
+    "type": "Target user",
+    "extras": {}
+  },
+  {
     "id": "tr_access_right-open_access",
     "name": "Open Access",
     "description": "Open access refers to a resource that is immediately and permanently online, and free for all on the Web, without financial and technical barriers.",

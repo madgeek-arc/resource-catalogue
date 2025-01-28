@@ -5,6 +5,8 @@ import gr.uoa.di.madgik.resourcecatalogue.domain.*;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
+import java.time.LocalDate;
+import java.util.Date;
 import java.util.List;
 
 public class TestUtils {
@@ -26,6 +28,13 @@ public class TestUtils {
     public static ServiceBundle createServiceBundle() {
         ServiceBundle bundle = new ServiceBundle();
         bundle.setService(createService());
+        //TODO: populate according to test needs
+        return bundle;
+    }
+
+    public static TrainingResourceBundle createTrainingResourceBundle() {
+        TrainingResourceBundle bundle = new TrainingResourceBundle();
+        bundle.setTrainingResource(createTrainingResource());
         //TODO: populate according to test needs
         return bundle;
     }
@@ -87,6 +96,25 @@ public class TestUtils {
         service.setPrivacyPolicy(createURL());
         service.setOrderType("order_type-fully_open_access");
         return service;
+    }
+
+    public static TrainingResource createTrainingResource() {
+        TrainingResource trainingResource = new TrainingResource();
+        trainingResource.setTitle("Test Training Resource");
+        trainingResource.setResourceOrganisation("11.1111/abc123");
+        trainingResource.setAuthors(List.of("Joe Doe", "Foo Bar"));
+        trainingResource.setUrl(createURL());
+        trainingResource.setLicense("Test License");
+        trainingResource.setAccessRights("tr_access_right-open_access");
+        trainingResource.setVersionDate(new Date(1674858000000L));
+        trainingResource.setTargetGroups(List.of("target_user-businesses", "target_user-funders"));
+        trainingResource.setLearningOutcomes(List.of("outcome1", "outcome2"));
+        trainingResource.setExpertiseLevel("tr_expertise_level-advanced");
+        trainingResource.setLanguages(List.of("en", "es"));
+        trainingResource.setGeographicalAvailabilities(List.of("AD", "AE"));
+        trainingResource.setScientificDomains(createScientificDomains());
+        trainingResource.setContact(createServiceMainContact());
+        return trainingResource;
     }
 
     private static URL createURL() {

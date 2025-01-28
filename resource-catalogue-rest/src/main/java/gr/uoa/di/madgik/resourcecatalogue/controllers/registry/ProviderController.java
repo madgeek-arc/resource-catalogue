@@ -1,15 +1,14 @@
 package gr.uoa.di.madgik.resourcecatalogue.controllers.registry;
 
+import gr.athenarc.catalogue.exception.ValidationException;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.domain.Paging;
-import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
+import gr.uoa.di.madgik.registry.exception.ResourceException;
 import gr.uoa.di.madgik.resourcecatalogue.annotations.Browse;
 import gr.uoa.di.madgik.resourcecatalogue.annotations.BrowseCatalogue;
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
 import gr.uoa.di.madgik.resourcecatalogue.dto.ExtendedValue;
 import gr.uoa.di.madgik.resourcecatalogue.dto.MapValues;
-import gr.uoa.di.madgik.resourcecatalogue.exception.ResourceException;
-import gr.uoa.di.madgik.resourcecatalogue.exception.ValidationException;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
 import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
@@ -135,7 +134,7 @@ public class ProviderController {
     public ResponseEntity<Provider> update(@RequestBody Provider provider,
                                            @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId,
                                            @RequestParam(required = false) String comment,
-                                           @Parameter(hidden = true) Authentication auth) throws ResourceNotFoundException {
+                                           @Parameter(hidden = true) Authentication auth) {
         ProviderBundle providerBundle = providerService.get(catalogueId, provider.getId(), auth);
         providerBundle.setProvider(provider);
         if (comment == null || comment.equals("")) {
@@ -149,7 +148,7 @@ public class ProviderController {
 
     @PutMapping(path = "/bundle", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public ResponseEntity<ProviderBundle> updateBundle(@RequestBody ProviderBundle provider, @Parameter(hidden = true) Authentication auth) throws ResourceNotFoundException {
+    public ResponseEntity<ProviderBundle> updateBundle(@RequestBody ProviderBundle provider, @Parameter(hidden = true) Authentication auth) {
         ProviderBundle providerBundle = providerService.update(provider, auth);
         logger.info("Updated the Provider with name '{}' and id '{}'", providerBundle.getProvider().getName(), provider.getId());
         return new ResponseEntity<>(providerBundle, HttpStatus.OK);
@@ -310,7 +309,7 @@ public class ProviderController {
     @PatchMapping(path = "publishServices", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     public ResponseEntity<List<ServiceBundle>> publishServices(@RequestParam String id, @RequestParam Boolean active,
-                                                               @Parameter(hidden = true) Authentication auth) throws ResourceNotFoundException {
+                                                               @Parameter(hidden = true) Authentication auth) {
         ProviderBundle provider = providerService.get(catalogueId, id, auth);
         if (provider == null) {
             throw new ResourceException("Provider with id '" + id + "' does not exist.", HttpStatus.NOT_FOUND);
@@ -523,7 +522,7 @@ public class ProviderController {
     @PutMapping(path = "/draft", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isProviderAdmin(#auth,#provider.id)")
     public ResponseEntity<Provider> updateDraftProvider(@RequestBody Provider provider, @Parameter(hidden = true) Authentication auth)
-            throws ResourceNotFoundException {
+            {
         ProviderBundle providerBundle = draftProviderService.get(provider.getId());
         providerBundle.setProvider(provider);
         providerBundle = draftProviderService.update(providerBundle, auth);
@@ -537,7 +536,7 @@ public class ProviderController {
     public ResponseEntity<Provider> deleteDraftProvider(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
                                                         @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix,
                                                         @Parameter(hidden = true) Authentication auth)
-            throws ResourceNotFoundException {
+            {
         String id = prefix + "/" + suffix;
         ProviderBundle providerBundle = draftProviderService.get(id);
         if (providerBundle == null) {
@@ -552,7 +551,7 @@ public class ProviderController {
     @PutMapping(path = "draft/transform", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_USER')")
     public ResponseEntity<Provider> transformToProvider(@RequestBody Provider provider, @Parameter(hidden = true) Authentication auth)
-            throws ResourceNotFoundException {
+            {
         ProviderBundle providerBundle = draftProviderService.get(provider.getId());
         providerBundle.setProvider(provider);
 

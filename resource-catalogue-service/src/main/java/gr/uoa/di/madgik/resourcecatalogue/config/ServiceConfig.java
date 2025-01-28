@@ -1,6 +1,6 @@
 package gr.uoa.di.madgik.resourcecatalogue.config;
 
-import gr.uoa.di.madgik.resourcecatalogue.config.security.ResourceCatalogueProperties;
+import gr.uoa.di.madgik.resourcecatalogue.config.properties.CatalogueProperties;
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
 import gr.uoa.di.madgik.resourcecatalogue.domain.configurationTemplates.ConfigurationTemplate;
 import gr.uoa.di.madgik.resourcecatalogue.domain.configurationTemplates.ConfigurationTemplateBundle;
@@ -24,7 +24,7 @@ import java.util.Random;
 @EnableSpringHttpSession
 @EnableAspectJAutoProxy
 @EnableAsync
-@EnableConfigurationProperties(ResourceCatalogueProperties.class)
+@EnableConfigurationProperties(CatalogueProperties.class)
 public class ServiceConfig {
 
     @Bean

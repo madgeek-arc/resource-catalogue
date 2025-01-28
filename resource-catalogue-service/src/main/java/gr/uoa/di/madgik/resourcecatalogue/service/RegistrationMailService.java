@@ -4,7 +4,7 @@ import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
-import gr.uoa.di.madgik.resourcecatalogue.config.security.ResourceCatalogueProperties;
+import gr.uoa.di.madgik.resourcecatalogue.config.properties.CatalogueProperties;
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
 import gr.uoa.di.madgik.resourcecatalogue.manager.*;
 import org.slf4j.Logger;
@@ -57,15 +57,12 @@ public class RegistrationMailService {
     @Value("${elastic.index.max_result_window:10000}")
     private int maxQuantity;
 
-    @Value("${prefix.providers}")
-    private String providersPrefix;
-    @Value("${prefix.services}")
-    private String servicesPrefix;
-    @Value("${prefix.trainings}")
-    private String trainingsPrefix;
+    private final String providersPrefix;
+    private final String servicesPrefix;
+    private final String trainingsPrefix;
 
     public RegistrationMailService(MailService mailService, Configuration cfg,
-                                   SecurityService securityService, ResourceCatalogueProperties properties,
+                                   SecurityService securityService,
                                    @Lazy ProviderManager providerManager,
                                    @Lazy ServiceBundleManager serviceBundleManager,
                                    @Lazy TrainingResourceManager trainingResourceManager,
@@ -73,7 +70,8 @@ public class RegistrationMailService {
                                    @Lazy DraftProviderManager draftProviderManager,
                                    @Lazy DraftServiceManager draftServiceManager,
                                    @Lazy DraftTrainingResourceManager draftTrainingResourceManager,
-                                   @Lazy DraftInteroperabilityRecordManager draftInteroperabilityRecordManager) {
+                                   @Lazy DraftInteroperabilityRecordManager draftInteroperabilityRecordManager,
+                                   CatalogueProperties properties) {
         this.mailService = mailService;
         this.cfg = cfg;
         this.securityService = securityService;
@@ -89,12 +87,16 @@ public class RegistrationMailService {
         // Init properties
         this.homepage = properties.getHomepage();
         catalogueName = properties.getName();
-        this.registrationEmail = properties.getEmailProperties().getRegistrationEmails().getTo();
-        this.helpdeskEmail = properties.getEmailProperties().getHelpdeskEmails().getTo();
-        this.helpdeskCC = properties.getEmailProperties().getHelpdeskEmails().getCc();
-        this.monitoringEmail = properties.getEmailProperties().getMonitoringEmails().getTo();
-        this.enableAdminNotifications = properties.getEmailProperties().isAdminNotifications();
-        this.enableProviderNotifications = properties.getEmailProperties().isProviderNotifications();
+        this.registrationEmail = properties.getEmails().getRegistrationEmails().getTo();
+        this.helpdeskEmail = properties.getEmails().getHelpdeskEmails().getTo();
+        this.helpdeskCC = properties.getEmails().getHelpdeskEmails().getCc();
+        this.monitoringEmail = properties.getEmails().getMonitoringEmails().getTo();
+        this.enableAdminNotifications = properties.getEmails().isAdminNotifications();
+        this.enableProviderNotifications = properties.getEmails().isProviderNotifications();
+
+        this.providersPrefix = properties.getResources().get(ResourceTypes.PROVIDER).getIdPrefix();
+        this.servicesPrefix = properties.getResources().get(ResourceTypes.SERVICE).getIdPrefix();
+        this.trainingsPrefix = properties.getResources().get(ResourceTypes.TRAINING_RESOURCE).getIdPrefix();
     }
 
     // sendEmailsFromTemplate

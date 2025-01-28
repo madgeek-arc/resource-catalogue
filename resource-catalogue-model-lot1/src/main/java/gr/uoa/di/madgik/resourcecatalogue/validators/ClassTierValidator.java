@@ -2,7 +2,6 @@ package gr.uoa.di.madgik.resourcecatalogue.validators;
 
 import gr.uoa.di.madgik.resourcecatalogue.annotation.ClassTierValidation;
 import gr.uoa.di.madgik.resourcecatalogue.domain.ServiceClassTier;
-
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 

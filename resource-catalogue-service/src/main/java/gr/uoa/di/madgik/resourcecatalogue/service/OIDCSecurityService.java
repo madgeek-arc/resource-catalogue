@@ -1,10 +1,11 @@
 package gr.uoa.di.madgik.resourcecatalogue.service;
 
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
+import gr.uoa.di.madgik.registry.exception.ResourceException;
+import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.registry.service.ServiceException;
+import gr.uoa.di.madgik.resourcecatalogue.config.properties.CatalogueProperties;
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
-import gr.uoa.di.madgik.resourcecatalogue.exception.ResourceException;
-import gr.uoa.di.madgik.resourcecatalogue.exception.ResourceNotFoundException;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
@@ -33,14 +34,9 @@ public class OIDCSecurityService implements SecurityService {
     private final DraftResourceService<InteroperabilityRecordBundle> draftInteroperabilityRecordService;
     private final Authentication adminAccess = new AdminAuthentication();
 
-    @Value("${prefix.providers}")
-    private String providersPrefix;
-    @Value("${prefix.services}")
-    private String servicesPrefix;
-    @Value("${prefix.trainings}")
-    private String trainingsPrefix;
-    @Value("${prefix.interoperability-frameworks}")
-    private String guidelinesPrefix;
+    private final String providersPrefix;
+    private final String servicesPrefix;
+    private final String trainingsPrefix;
     @Value("${elastic.index.max_result_window:10000}")
     protected int maxQuantity;
 
@@ -52,7 +48,8 @@ public class OIDCSecurityService implements SecurityService {
                                @Lazy DraftResourceService<ProviderBundle> draftProviderService,
                                @Lazy DraftResourceService<ServiceBundle> draftServiceService,
                                @Lazy DraftResourceService<TrainingResourceBundle> draftTrainingResourceService,
-                               @Lazy DraftResourceService<InteroperabilityRecordBundle> draftInteroperabilityRecordService) {
+                               @Lazy DraftResourceService<InteroperabilityRecordBundle> draftInteroperabilityRecordService,
+                               CatalogueProperties properties) {
         this.catalogueService = catalogueService;
         this.providerService = providerService;
         this.serviceBundleService = serviceBundleService;
@@ -62,6 +59,9 @@ public class OIDCSecurityService implements SecurityService {
         this.draftServiceService = draftServiceService;
         this.draftTrainingResourceService = draftTrainingResourceService;
         this.draftInteroperabilityRecordService = draftInteroperabilityRecordService;
+        this.providersPrefix = properties.getResources().get(ResourceTypes.PROVIDER).getIdPrefix();
+        this.servicesPrefix = properties.getResources().get(ResourceTypes.SERVICE).getIdPrefix();
+        this.trainingsPrefix = properties.getResources().get(ResourceTypes.TRAINING_RESOURCE).getIdPrefix();
     }
 
     @Override

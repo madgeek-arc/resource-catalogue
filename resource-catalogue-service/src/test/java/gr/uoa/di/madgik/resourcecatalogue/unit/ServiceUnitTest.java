@@ -35,17 +35,17 @@ public class ServiceUnitTest {
      */
     @Test
     public void addServiceSuccess() {
-        ServiceBundle inpuServiceBundle = createServiceBundle();
+        ServiceBundle inputServiceBundle = createServiceBundle();
         ServiceBundle expectedServiceBundle = createServiceBundle();
 
-        when(serviceBundleService.add(inpuServiceBundle, auth)).thenReturn(expectedServiceBundle);
-        ServiceBundle result = serviceBundleService.add(inpuServiceBundle, auth);
+        when(serviceBundleService.add(inputServiceBundle, auth)).thenReturn(expectedServiceBundle);
+        ServiceBundle result = serviceBundleService.add(inputServiceBundle, auth);
 
         assertNotNull(result);
         assertEquals(expectedServiceBundle, result);
         assertEquals("Test Service", result.getService().getName(),
                 "Service name should be 'Test Service'");
-        verify(serviceBundleService, times(1)).add(inpuServiceBundle, auth);
+        verify(serviceBundleService, times(1)).add(inputServiceBundle, auth);
     }
 
     /**
@@ -61,7 +61,7 @@ public class ServiceUnitTest {
      * @throws ResourceNotFoundException if the service to be updated does not exist
      */
     @Test
-    public void updateServiceSuccess() throws ResourceNotFoundException {
+    public void updateServiceSuccess() {
         ServiceBundle inputServiceBundle = createServiceBundle();
         ServiceBundle expectedServiceBundle = createServiceBundle();
         expectedServiceBundle.getService().setName("Updated Test Service");
@@ -90,7 +90,7 @@ public class ServiceUnitTest {
      * @throws ResourceNotFoundException if the service to be deleted does not exist
      */
     @Test
-    public void deleteServiceSuccess() throws ResourceNotFoundException {
+    public void deleteServiceSuccess() {
         ServiceBundle inputServiceBundle = createServiceBundle();
 
         doNothing().when(serviceBundleService).delete(inputServiceBundle);

@@ -2,8 +2,8 @@ package gr.uoa.di.madgik.resourcecatalogue.annotation;
 
 import gr.uoa.di.madgik.resourcecatalogue.domain.Service;
 import gr.uoa.di.madgik.resourcecatalogue.validators.ClassTierValidator;
-
 import jakarta.validation.Constraint;
+
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;

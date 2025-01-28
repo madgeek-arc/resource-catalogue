@@ -7,7 +7,6 @@ import gr.uoa.di.madgik.resourcecatalogue.domain.*;
 import gr.uoa.di.madgik.resourcecatalogue.service.ProviderService;
 import gr.uoa.di.madgik.resourcecatalogue.service.SecurityService;
 import gr.uoa.di.madgik.resourcecatalogue.service.ServiceBundleService;
-import gr.uoa.di.madgik.resourcecatalogue.service.VocabularyService;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -54,7 +53,7 @@ public class ServiceProviderRegistrationIT {
     //TODO: Refactor IT with new model
 
     @Test
-    public void addUpdateAndDeleteProvider() throws ResourceNotFoundException, MalformedURLException {
+    public void addUpdateAndDeleteProvider() throws MalformedURLException {
         String providerId = "wp6";
         ProviderBundle provider;
         ServiceBundle serviceBundle;

@@ -25,7 +25,8 @@ class ResourceIdCreatorIntegrationTest extends BaseIntegrationTest {
 
     @BeforeAll
     public void setUp() {
-        excludedResourceTypes = Arrays.asList("catalogue", "event", "vocabulary", "tool");
+        excludedResourceTypes = Arrays.asList("catalogue", "event", "vocabulary", "tool", "model", "ui_field_display",
+                "ui_field_form");
         resourceTypes = resourceTypeService.getAllResourceType()
                 .stream()
                 .map(ResourceType::getName)

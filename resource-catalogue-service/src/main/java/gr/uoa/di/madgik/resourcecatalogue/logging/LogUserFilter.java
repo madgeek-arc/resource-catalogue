@@ -1,23 +1,22 @@
 package gr.uoa.di.madgik.resourcecatalogue.logging;
 
+import gr.athenarc.catalogue.config.logging.LogTransactionsFilter;
 import gr.uoa.di.madgik.resourcecatalogue.domain.User;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.ServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.MDC;
 import org.slf4j.spi.MDCAdapter;
-import org.springframework.core.annotation.Order;
 import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
-import jakarta.servlet.ServletRequest;
-import jakarta.servlet.ServletResponse;
-import jakarta.servlet.http.HttpServletRequest;
 import java.util.UUID;
 
 @Component
-@Order(0)
-public class LogTransactionsFilter extends AbstractLogContextFilter {
+public class LogUserFilter extends LogTransactionsFilter {
 
     private static final String TRANSACTION_ID = "transaction_id";
     private static final String USER_INFO = "user_info";

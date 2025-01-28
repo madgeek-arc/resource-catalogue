@@ -1,10 +1,9 @@
 package gr.uoa.di.madgik.resourcecatalogue.integration;
 
+import gr.athenarc.catalogue.exception.ValidationException;
 import gr.uoa.di.madgik.registry.domain.Paging;
-import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
+import gr.uoa.di.madgik.registry.exception.ResourceException;
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
-import gr.uoa.di.madgik.resourcecatalogue.exception.ResourceException;
-import gr.uoa.di.madgik.resourcecatalogue.exception.ValidationException;
 import gr.uoa.di.madgik.resourcecatalogue.service.CatalogueService;
 import gr.uoa.di.madgik.resourcecatalogue.service.ProviderService;
 import gr.uoa.di.madgik.resourcecatalogue.service.SecurityService;
@@ -42,12 +41,22 @@ class ProviderIntegrationTest extends BaseIntegrationTest {
     private ServiceBundleService<ServiceBundle> serviceBundleService;
     private static String providerId;
 
-
-    //TODO: javadoc where missing
-
+    /**
+     * Test method for adding the EOSC catalogue to the database.
+     * <p>
+     * This test verifies the functionality of the {@code catalogueService.add} method by:
+     * <ul>
+     *   <li>Creating and setting up mock objects for metadata and authentication information.</li>
+     *   <li>Injecting authenticated user details and mocking the behavior of static methods.</li>
+     *   <li>Adding a {@link CatalogueBundle} to the database and retrieving it to ensure correctness.</li>
+     * </ul>
+     * The test asserts that the catalogue is successfully added to the database and that the retrieved
+     * catalogue matches the expected ID.
+     * </p>
+     */
     @Test
     @Order(1)
-    void addEOSCCatalogue() throws IllegalAccessException {
+    void addEOSCCatalogue() {
         Metadata metadata = new Metadata();
         Metadata dummyMetadata = Mockito.spy(metadata);
         CatalogueBundle catalogueBundle = createCatalogueBundle();
@@ -61,13 +70,27 @@ class ProviderIntegrationTest extends BaseIntegrationTest {
 
             catalogueService.add(catalogueBundle, securityService.getAdminAccess());
 
-            CatalogueBundle retrievedCatalogue = catalogueService.get(catalogueBundle.getId(), securityService.getAdminAccess());
+            CatalogueBundle retrievedCatalogue = catalogueService.get(catalogueBundle.getId(),
+                    securityService.getAdminAccess());
             assertNotNull(retrievedCatalogue, "Catalogue should be found in the database.");
             assertEquals(catalogueBundle.getId(), retrievedCatalogue.getId(),
                     "Catalogue ID should match the expected value.");
         }
     }
 
+    /**
+     * Test method for adding a provider to the database.
+     * <p>
+     * This test verifies the functionality of the {@code providerService.add} method by:
+     * <ul>
+     *   <li>Creating and setting up mock objects for metadata and authentication information.</li>
+     *   <li>Injecting authenticated user details and mocking the behavior of static methods.</li>
+     *   <li>Adding a {@link ProviderBundle} to the database and retrieving it to ensure correctness.</li>
+     * </ul>
+     * The test asserts that the provider is successfully added to the database and that the retrieved
+     * provider matches the expected ID. The test also stores the provider ID for further use.
+     * </p>
+     */
     @Test
     @Order(2)
     void addProviderSucceeds() {
@@ -84,7 +107,8 @@ class ProviderIntegrationTest extends BaseIntegrationTest {
 
             providerService.add(providerBundle, securityService.getAdminAccess());
 
-            ProviderBundle retrievedProvider = providerService.get(providerBundle.getId(), securityService.getAdminAccess());
+            ProviderBundle retrievedProvider = providerService.get(providerBundle.getId(),
+                    securityService.getAdminAccess());
             assertNotNull(retrievedProvider, "Provider should be found in the database.");
             assertEquals(providerBundle.getId(), retrievedProvider.getId(),
                     "Provider ID should match the expected value.");
@@ -93,9 +117,24 @@ class ProviderIntegrationTest extends BaseIntegrationTest {
         }
     }
 
+    /**
+     * Test method for updating an existing provider in the database.
+     * <p>
+     * This test verifies the functionality of the {@code providerService.update} method by:
+     * <ul>
+     *   <li>Retrieving an existing {@link ProviderBundle} by its ID and asserting its initial state.</li>
+     *   <li>Modifying the provider's name and updating the provider in the database.</li>
+     *   <li>Retrieving the updated provider to ensure that the changes were successfully persisted.</li>
+     * </ul>
+     * The test asserts that:
+     * <ul>
+     *   <li>The provider exists in the database after the update.</li>
+     *   <li>The provider's updated name matches the expected value.</li>
+     * </ul>
+     */
     @Test
     @Order(3)
-    void updateProviderSucceeds() throws ResourceNotFoundException {
+    void updateProviderSucceeds() {
         ProviderBundle providerBundle = providerService.get(providerId, securityService.getAdminAccess());
         assertEquals("Test Provider", providerBundle.getProvider().getName(),
                 "The provider's initial name should match the expected value.");
@@ -109,6 +148,28 @@ class ProviderIntegrationTest extends BaseIntegrationTest {
                 "The updated provider name should match the new value.");
     }
 
+    /**
+     * Test method for deleting a provider from the database.
+     * <p>
+     * This test verifies the functionality of the {@code providerService.delete} method by:
+     * <ul>
+     *   <li>Retrieving an existing {@link ProviderBundle} by its ID and asserting its presence.</li>
+     *   <li>Mocking related dependencies such as the {@code serviceBundleService.getResourceBundles} method.</li>
+     *   <li>Deleting the provider from the database and verifying that it no longer exists.</li>
+     * </ul>
+     * The test asserts that:
+     * <ul>
+     *   <li>The provider exists before deletion.</li>
+     *   <li>After deletion, attempting to retrieve the provider throws a {@link ResourceException} with an appropriate
+     *   message.</li>
+     * </ul>
+     * <p>
+     * Note: The test includes a {@code Thread.sleep} call to address cache clearance, which should be replaced with a
+     * better solution in the future.
+     * </p>
+     *
+     * @throws InterruptedException if the thread sleep operation is interrupted.
+     */
     @Test
     @Order(4)
     void deleteProviderSucceeds() throws InterruptedException {
@@ -232,7 +293,8 @@ class ProviderIntegrationTest extends BaseIntegrationTest {
 
             providerService.add(providerBundle, securityService.getAdminAccess());
 
-            ProviderBundle retrievedProvider = providerService.get(providerBundle.getId(), securityService.getAdminAccess());
+            ProviderBundle retrievedProvider = providerService.get(providerBundle.getId(),
+                    securityService.getAdminAccess());
             assertNotEquals(providerId, retrievedProvider.getProvider().getId(),
                     "The ID should have been overwritten by the portal's business logic");
         }

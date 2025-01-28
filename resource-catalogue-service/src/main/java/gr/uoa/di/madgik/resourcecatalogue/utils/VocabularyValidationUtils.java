@@ -1,9 +1,9 @@
 package gr.uoa.di.madgik.resourcecatalogue.utils;
 
+import gr.athenarc.catalogue.exception.ValidationException;
 import gr.uoa.di.madgik.resourcecatalogue.domain.ProviderMerilDomain;
 import gr.uoa.di.madgik.resourcecatalogue.domain.ServiceCategory;
 import gr.uoa.di.madgik.resourcecatalogue.domain.ServiceProviderDomain;
-import gr.uoa.di.madgik.resourcecatalogue.exception.ValidationException;
 
 import java.util.List;
 

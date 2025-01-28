@@ -1,7 +1,6 @@
 package gr.uoa.di.madgik.resourcecatalogue.dto;
 
 import gr.uoa.di.madgik.resourcecatalogue.domain.Vocabulary;
-
 import jakarta.xml.bind.annotation.XmlTransient;
 
 @XmlTransient
