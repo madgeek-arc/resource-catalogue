@@ -1,7 +1,7 @@
 package gr.uoa.di.madgik.resourcecatalogue.manager;
 
 import com.google.gson.JsonArray;
-import gr.athenarc.catalogue.exception.ValidationException;
+import gr.uoa.di.madgik.catalogue.exception.ValidationException;
 import gr.uoa.di.madgik.registry.domain.Resource;
 import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.registry.service.SearchService;

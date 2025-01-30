@@ -1,6 +1,6 @@
 package gr.uoa.di.madgik.resourcecatalogue.controllers.registry;
 
-import gr.athenarc.catalogue.exception.ValidationException;
+import gr.uoa.di.madgik.catalogue.exception.ValidationException;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.registry.exception.ResourceException;

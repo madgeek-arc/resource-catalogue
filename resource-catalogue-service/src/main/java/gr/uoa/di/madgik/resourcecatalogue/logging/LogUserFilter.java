@@ -1,6 +1,6 @@
 package gr.uoa.di.madgik.resourcecatalogue.logging;
 
-import gr.athenarc.catalogue.config.logging.LogTransactionsFilter;
+import gr.uoa.di.madgik.catalogue.config.logging.LogTransactionsFilter;
 import gr.uoa.di.madgik.resourcecatalogue.domain.User;
 import jakarta.servlet.ServletRequest;
 import jakarta.servlet.ServletResponse;

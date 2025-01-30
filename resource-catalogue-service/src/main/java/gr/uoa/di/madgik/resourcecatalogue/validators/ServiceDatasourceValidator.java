@@ -1,6 +1,6 @@
 package gr.uoa.di.madgik.resourcecatalogue.validators;
 
-import gr.athenarc.catalogue.exception.ValidationException;
+import gr.uoa.di.madgik.catalogue.exception.ValidationException;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Service;
 import gr.uoa.di.madgik.resourcecatalogue.domain.ServiceBundle;
 import gr.uoa.di.madgik.resourcecatalogue.service.ServiceBundleService;

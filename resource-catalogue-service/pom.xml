@@ -65,7 +65,7 @@
                                             <includes>resourceTypes/**</includes>
                                         </artifactItem>
                                         <artifactItem>
-                                            <groupId>gr.athenarc</groupId>
+                                            <groupId>gr.uoa.di.madgik</groupId>
                                             <artifactId>catalogue</artifactId>
                                             <outputDirectory>${project.build.outputDirectory}</outputDirectory>
                                             <includes>resourceTypes/**</includes>
@@ -112,7 +112,7 @@
                                             <includes>resourceTypes/**</includes>
                                         </artifactItem>
                                         <artifactItem>
-                                            <groupId>gr.athenarc</groupId>
+                                            <groupId>gr.uoa.di.madgik</groupId>
                                             <artifactId>catalogue</artifactId>
                                             <outputDirectory>${project.build.outputDirectory}</outputDirectory>
                                             <includes>resourceTypes/**</includes>
@@ -206,7 +206,7 @@
             <artifactId>registry-core-helper</artifactId>
         </dependency>
         <dependency>
-            <groupId>gr.athenarc</groupId>
+            <groupId>gr.uoa.di.madgik</groupId>
             <artifactId>catalogue</artifactId>
         </dependency>
 

@@ -1,6 +1,6 @@
 package gr.uoa.di.madgik.resourcecatalogue.integration;
 
-import gr.athenarc.catalogue.exception.ValidationException;
+import gr.uoa.di.madgik.catalogue.exception.ValidationException;
 import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.registry.exception.ResourceException;
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
