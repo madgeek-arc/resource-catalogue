@@ -35,6 +35,7 @@ import java.security.KeyStore;
 import java.security.PrivateKey;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
+import java.util.List;
 
 @Component
 public class PidIssuer {
@@ -52,7 +53,7 @@ public class PidIssuer {
         ResourceProperties resourceProperties = properties.getResourcePropertiesFromPrefix(prefix);
         PidIssuerConfig config = resourceProperties.getPidIssuer();
         RestTemplate restTemplate = createRestTemplate(config);
-        String payload = createPID(pid, config, resourceProperties.getMarketplaceEndpoint());
+        String payload = createPID(pid, config, resourceProperties.getResolveEndpoints());
         HttpHeaders headers = createHeaders(config);
 
         exchange(payload, headers, config, pid, restTemplate);
@@ -135,7 +136,7 @@ public class PidIssuer {
         }
     }
 
-    private String createPID(String pid, PidIssuerConfig config, String marketplaceEndpoint) {
+    private String createPID(String pid, PidIssuerConfig config, List<String> resolveEndpoints) {
         JSONObject data = new JSONObject();
         JSONArray values = new JSONArray();
         JSONObject hs_admin = new JSONObject();
@@ -143,8 +144,6 @@ public class PidIssuer {
         JSONObject hs_admin_data_value = new JSONObject();
         JSONObject id = new JSONObject();
         JSONObject id_data = new JSONObject();
-        JSONObject marketplaceUrl = new JSONObject();
-        JSONObject marketplaceUrl_data = new JSONObject();
 
         hs_admin_data_value.put("handle", config.getUser());
         hs_admin_data_value.put("index", config.getUserIndex());
@@ -161,13 +160,19 @@ public class PidIssuer {
         id.put("type", "id");
         id.put("data", id_data);
         values.put(id);
-        if (StringUtils.hasText(marketplaceEndpoint)) {
-            marketplaceUrl_data.put("format", "string");
-            marketplaceUrl_data.put("value", marketplaceEndpoint + pid);
-            marketplaceUrl.put("index", 2);
-            marketplaceUrl.put("type", "url");
-            marketplaceUrl.put("data", marketplaceUrl_data);
-            values.put(marketplaceUrl);
+        if (resolveEndpoints != null && !resolveEndpoints.isEmpty()) {
+            int index = 2;
+            for (String endpoint : resolveEndpoints) {
+                JSONObject resolveUrls = new JSONObject();
+                JSONObject resolveUrl_data = new JSONObject();
+                resolveUrl_data.put("format", "string");
+                resolveUrl_data.put("value", String.join("/", endpoint, pid));
+                resolveUrls.put("index", index);
+                resolveUrls.put("type", "url");
+                resolveUrls.put("data", resolveUrl_data);
+                values.put(resolveUrls);
+                index++;
+            }
         }
         data.put("values", values);
         return data.toString();

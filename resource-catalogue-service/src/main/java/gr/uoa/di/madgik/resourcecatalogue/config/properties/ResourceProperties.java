@@ -6,6 +6,8 @@ import jakarta.validation.constraints.NotNull;
 import org.springframework.boot.context.properties.NestedConfigurationProperty;
 import org.springframework.validation.annotation.Validated;
 
+import java.util.List;
+
 
 @Validated
 public class ResourceProperties {
@@ -18,9 +20,9 @@ public class ResourceProperties {
     private String idPrefix;
 
     /**
-     * Marketplace endpoint (optional).
+     * Endpoints in which the PID will resolve to (optional).
      */
-    private String marketplaceEndpoint;
+    private List<String> resolveEndpoints;
 
     /**
      * The PID Issuer properties (optional).
@@ -39,12 +41,12 @@ public class ResourceProperties {
         this.idPrefix = idPrefix;
     }
 
-    public String getMarketplaceEndpoint() {
-        return marketplaceEndpoint;
+    public List<String> getResolveEndpoints() {
+        return resolveEndpoints;
     }
 
-    public void setMarketplaceEndpoint(String marketplaceEndpoint) {
-        this.marketplaceEndpoint = marketplaceEndpoint;
+    public void setResolveEndpoints(List<String> resolveEndpoints) {
+        this.resolveEndpoints = resolveEndpoints;
     }
 
     public PidIssuerConfig getPidIssuer() {

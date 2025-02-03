@@ -2,7 +2,7 @@
 catalogue:
   resources:
     provider:
-      marketplace-endpoint:
+      resolve-endpoints:
       pid-issuer:
         url:
         user:
@@ -13,7 +13,7 @@ catalogue:
           client-key:
           client-cert:
     service:
-      marketplace-endpoint:
+      resolve-endpoints:
       pid-issuer:
         url:
         user:
@@ -24,7 +24,7 @@ catalogue:
           client-key:
           client-cert:
     training-resource:
-      marketplace-endpoint:
+      resolve-endpoints:
       pid-issuer:
         url:
         user:
@@ -35,7 +35,7 @@ catalogue:
           client-key:
           client-cert:
     interoperability-record:
-      marketplace-endpoint:
+      resolve-endpoints:
       pid-issuer:
         url:
         user:
@@ -46,7 +46,7 @@ catalogue:
           client-key:
           client-cert:
     tool:
-      marketplace-endpoint:
+      resolve-endpoints:
       pid-issuer:
         url:
         user:
