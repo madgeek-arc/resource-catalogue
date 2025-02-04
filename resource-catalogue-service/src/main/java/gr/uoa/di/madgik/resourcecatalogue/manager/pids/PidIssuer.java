@@ -48,18 +48,22 @@ public class PidIssuer {
         this.properties = properties;
     }
 
-    public void postPID(String pid) {
+    public void postPID(String pid, List<String> customResolveEndpoints) {
         String prefix = pid.split("/")[0];
         ResourceProperties resourceProperties = properties.getResourcePropertiesFromPrefix(prefix);
         PidIssuerConfig config = resourceProperties.getPidIssuer();
         RestTemplate restTemplate = createRestTemplate(config);
-        String payload = createPID(pid, config, resourceProperties.getResolveEndpoints());
+        String payload;
+        if (customResolveEndpoints != null && !customResolveEndpoints.isEmpty()) {
+            payload = createPID(pid, config, customResolveEndpoints);
+        } else {
+            payload = createPID(pid, config, resourceProperties.getResolveEndpoints());
+        }
         HttpHeaders headers = createHeaders(config);
 
         exchange(payload, headers, config, pid, restTemplate);
     }
 
-    //TODO: revision certs VS basic auth VS testing basic auth
     private RestTemplate createRestTemplate(PidIssuerConfig config) {
         RestTemplate restTemplate;
         if (config.getAuth() != null) {
@@ -157,7 +161,7 @@ public class PidIssuer {
         id_data.put("format", "string");
         id_data.put("value", pid);
         id.put("index", 1);
-        id.put("type", "id");
+        id.put("type", "ID");
         id.put("data", id_data);
         values.put(id);
         if (resolveEndpoints != null && !resolveEndpoints.isEmpty()) {
@@ -168,7 +172,7 @@ public class PidIssuer {
                 resolveUrl_data.put("format", "string");
                 resolveUrl_data.put("value", String.join("/", endpoint, pid));
                 resolveUrls.put("index", index);
-                resolveUrls.put("type", "url");
+                resolveUrls.put("type", "URL");
                 resolveUrls.put("data", resolveUrl_data);
                 values.put(resolveUrls);
                 index++;

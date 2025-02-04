@@ -2,6 +2,8 @@ package gr.uoa.di.madgik.resourcecatalogue.service;
 
 import gr.uoa.di.madgik.resourcecatalogue.domain.Bundle;
 
+import java.util.List;
+
 public interface PIDService {
 
     /**
@@ -16,7 +18,8 @@ public interface PIDService {
     /**
      * Registers a PID on a specific resource
      *
-     * @param pid PID
+     * @param pid       PID
+     * @param endpoints List of endpoints in which the specific resource resolves (optional)
      */
-    void register(String pid);
+    void register(String pid, List<String> endpoints);
 }

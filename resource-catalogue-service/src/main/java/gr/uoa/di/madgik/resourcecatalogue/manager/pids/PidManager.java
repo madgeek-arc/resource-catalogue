@@ -8,6 +8,8 @@ import gr.uoa.di.madgik.resourcecatalogue.service.GenericResourceService;
 import gr.uoa.di.madgik.resourcecatalogue.service.PIDService;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 
 @Service
 public class PidManager implements PIDService {
@@ -41,8 +43,7 @@ public class PidManager implements PIDService {
         return null;
     }
 
-    @Override
-    public void register(String pid) {
-        pidIssuer.postPID(pid);
+    public void register(String pid, List<String> endpoints) {
+        pidIssuer.postPID(pid, endpoints);
     }
 }

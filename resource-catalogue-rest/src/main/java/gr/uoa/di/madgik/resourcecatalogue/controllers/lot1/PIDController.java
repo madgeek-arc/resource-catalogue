@@ -11,6 +11,8 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @Profile("crud")
 @RestController
 @RequestMapping("pids")
@@ -37,11 +39,14 @@ public class PIDController {
     @Operation(summary = "Register a resource on the PID service")
     @PostMapping(path = "{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity<?> register(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
-                                      @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix) {
+                                      @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix,
+                                      @Parameter(description = "A list of resolve endpoints") @RequestParam(value = "resolveEndpoints", required = false) List<String> resolveEndpoints) {
         Bundle<?> bundle = pidService.get(prefix, suffix);
         if (bundle != null) {
-            pidService.register(bundle.getId());
+            pidService.register(bundle.getId(), resolveEndpoints);
+            return new ResponseEntity<>(null, HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
         }
-        return new ResponseEntity<>(null, HttpStatus.OK);
     }
 }
