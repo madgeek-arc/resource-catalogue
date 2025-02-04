@@ -73,7 +73,7 @@ Test results will be displayed in the terminal.
 
 ## Documentation Links
 For extensive and detailed documentation, please refer to
-[Resource Catalogue Documentation](https://github.com/madgeek-arc/resource-catalogue-docs).
+[Resource Catalogue Documentation](https://madgeek-arc.github.io/resource-catalogue-docs/).
 
 ---
 
