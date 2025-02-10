@@ -2,8 +2,8 @@ package gr.uoa.di.madgik.resourcecatalogue.service;
 
 import com.google.gson.JsonArray;
 import gr.uoa.di.madgik.resourcecatalogue.domain.MonitoringBundle;
+import gr.uoa.di.madgik.resourcecatalogue.domain.Vocabulary;
 import gr.uoa.di.madgik.resourcecatalogue.dto.MonitoringStatus;
-import gr.uoa.di.madgik.resourcecatalogue.dto.ServiceType;
 import org.springframework.security.core.Authentication;
 
 import java.util.List;
@@ -23,9 +23,9 @@ public interface MonitoringService extends ResourceService<MonitoringBundle> {
     /**
      * Returns all the available Service Types
      *
-     * @return {@link List<ServiceType>}
+     * @return {@link List<Vocabulary>}
      */
-    List<ServiceType> getAvailableServiceTypes();
+    List<Vocabulary> getAvailableServiceTypes();
 
     /**
      * Retrieve {@link MonitoringBundle} for a catalogue specific resource.
