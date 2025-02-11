@@ -55,9 +55,9 @@ public class PidIssuer {
         RestTemplate restTemplate = createRestTemplate(config);
         String payload;
         if (customResolveEndpoints != null && !customResolveEndpoints.isEmpty()) {
-            payload = createPID(pid, config, customResolveEndpoints);
+            payload = createPID(pid, config, customResolveEndpoints, true);
         } else {
-            payload = createPID(pid, config, resourceProperties.getResolveEndpoints());
+            payload = createPID(pid, config, resourceProperties.getResolveEndpoints(), false);
         }
         HttpHeaders headers = createHeaders(config);
 
@@ -140,7 +140,7 @@ public class PidIssuer {
         }
     }
 
-    private String createPID(String pid, PidIssuerConfig config, List<String> resolveEndpoints) {
+    private String createPID(String pid, PidIssuerConfig config, List<String> resolveEndpoints, boolean isCustom) {
         JSONObject data = new JSONObject();
         JSONArray values = new JSONArray();
         JSONObject hs_admin = new JSONObject();
@@ -170,7 +170,11 @@ public class PidIssuer {
                 JSONObject resolveUrls = new JSONObject();
                 JSONObject resolveUrl_data = new JSONObject();
                 resolveUrl_data.put("format", "string");
-                resolveUrl_data.put("value", String.join("/", endpoint, pid));
+                if (isCustom) {
+                    resolveUrl_data.put("value", endpoint);
+                } else {
+                    resolveUrl_data.put("value", String.join("/", endpoint, pid));
+                }
                 resolveUrls.put("index", index);
                 resolveUrls.put("type", "URL");
                 resolveUrls.put("data", resolveUrl_data);
