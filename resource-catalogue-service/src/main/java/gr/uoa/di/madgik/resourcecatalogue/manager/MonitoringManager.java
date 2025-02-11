@@ -3,6 +3,7 @@ package gr.uoa.di.madgik.resourcecatalogue.manager;
 import com.google.gson.JsonArray;
 import gr.uoa.di.madgik.catalogue.exception.ValidationException;
 import gr.uoa.di.madgik.registry.domain.Resource;
+import gr.uoa.di.madgik.registry.exception.ResourceAlreadyExistsException;
 import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.registry.service.SearchService;
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
@@ -71,8 +72,9 @@ public class MonitoringManager extends ResourceManager<MonitoringBundle> impleme
 
         MonitoringBundle existingMonitoring = get(resourceId, catalogueId);
         if (existingMonitoring != null) {
-            throw new ValidationException(String.format("Resource [%s] of the Catalogue [%s] has already a Monitoring " +
-                    "registered, with id: [%s]", resourceId, catalogueId, existingMonitoring.getId()));
+            throw new ResourceAlreadyExistsException(
+                    String.format("Resource [%s] of the Catalogue [%s] has already a Monitoring " +
+                            "registered, with id: [%s]", resourceId, catalogueId, existingMonitoring.getId()));
         }
 
         // check if Resource exists and if User belongs to Resource's Provider Admins
@@ -226,13 +228,13 @@ public class MonitoringManager extends ResourceManager<MonitoringBundle> impleme
 
     public void serviceTypeValidation(Monitoring monitoring) {
         List<Vocabulary> serviceTypeList = getAvailableServiceTypes();
-        List<String> serviceTypeNames = new ArrayList<>();
+        List<String> serviceTypeIds = new ArrayList<>();
         for (Vocabulary type : serviceTypeList) {
-            serviceTypeNames.add(type.getName());
+            serviceTypeIds.add(type.getId());
         }
         for (MonitoringGroup monitoringGroup : monitoring.getMonitoringGroups()) {
             String serviceType = monitoringGroup.getServiceType();
-            if (!serviceTypeNames.contains(serviceType)) {
+            if (!serviceTypeIds.contains(serviceType)) {
                 throw new ValidationException(String.format("The serviceType you provided is wrong. " +
                         "Available serviceTypes are: '%s'", serviceTypeList));
             }
