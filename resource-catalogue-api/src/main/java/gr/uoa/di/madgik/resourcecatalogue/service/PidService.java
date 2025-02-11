@@ -4,7 +4,7 @@ import gr.uoa.di.madgik.resourcecatalogue.domain.Bundle;
 
 import java.util.List;
 
-public interface PIDService {
+public interface PidService {
 
     /**
      * Get a Resource via its PID

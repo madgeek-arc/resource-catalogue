@@ -1,7 +1,7 @@
 package gr.uoa.di.madgik.resourcecatalogue.controllers.lot1;
 
 import gr.uoa.di.madgik.resourcecatalogue.domain.Bundle;
-import gr.uoa.di.madgik.resourcecatalogue.service.PIDService;
+import gr.uoa.di.madgik.resourcecatalogue.service.PidService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -17,11 +17,11 @@ import java.util.List;
 @RestController
 @RequestMapping("pids")
 @Tag(name = "pids", description = "PID related operations")
-public class PIDController {
+public class PidController {
 
-    private final PIDService pidService;
+    private final PidService pidService;
 
-    public PIDController(PIDService pidService) {
+    public PidController(PidService pidService) {
         this.pidService = pidService;
     }
 

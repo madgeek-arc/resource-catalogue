@@ -5,14 +5,14 @@ import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.resourcecatalogue.config.properties.CatalogueProperties;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Bundle;
 import gr.uoa.di.madgik.resourcecatalogue.service.GenericResourceService;
-import gr.uoa.di.madgik.resourcecatalogue.service.PIDService;
+import gr.uoa.di.madgik.resourcecatalogue.service.PidService;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 
 @Service
-public class PidManager implements PIDService {
+public class PidManager implements PidService {
 
     private final PidIssuer pidIssuer;
     private final GenericResourceService genericResourceService;
