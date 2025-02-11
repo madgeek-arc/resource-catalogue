@@ -61,6 +61,14 @@
     "extras": {}
   },
   {
+    "id": "ds_classification-aggregators",
+    "name": "Aggregators",
+    "description": "",
+    "parentId": null,
+    "type": "Classification",
+    "extras": {}
+  },
+  {
     "id": "ds_coar_access_rights_1_0-embargoed_access",
     "name": "Embargoed Access",
     "description": "Embargoed access refers to a resource that is metadata only access until released for open access on a certain date.",
@@ -87,6 +95,14 @@
   {
     "id": "ds_research_entity_type-research_data",
     "name": "Research Data",
+    "description": "",
+    "parentId": null,
+    "type": "Research entity type",
+    "extras": {}
+  },
+  {
+    "id": "ds_research_entity_type-research_software",
+    "name": "Research Software",
     "description": "",
     "parentId": null,
     "type": "Research entity type",
