@@ -5,6 +5,7 @@ import gr.uoa.di.madgik.registry.domain.Browsing;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.registry.domain.Resource;
+import gr.uoa.di.madgik.registry.exception.ResourceAlreadyExistsException;
 import gr.uoa.di.madgik.registry.exception.ResourceException;
 import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.registry.service.SearchService;
@@ -21,6 +22,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.security.core.Authentication;
 
 import java.time.Instant;
@@ -130,16 +132,18 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
 
         ProviderBundle providerBundle = providerService.get(trainingResourceBundle.getTrainingResource().getResourceOrganisation(), auth);
         if (providerBundle == null) {
-            throw new ValidationException(String.format("Provider with id '%s' and catalogueId '%s' does not exist", trainingResourceBundle.getTrainingResource().getResourceOrganisation(), trainingResourceBundle.getTrainingResource().getCatalogueId()));
+            throw new ResourceNotFoundException(String.format("Provider with id '%s' and catalogueId '%s' does not exist",
+                    trainingResourceBundle.getTrainingResource().getResourceOrganisation(), trainingResourceBundle.getTrainingResource().getCatalogueId()));
         }
         // check if Provider is approved
         if (!providerBundle.getStatus().equals("approved provider")) {
-            throw new ValidationException(String.format("The Provider '%s' you provided as a Resource Organisation is not yet approved",
-                    trainingResourceBundle.getTrainingResource().getResourceOrganisation()));
+            throw new ResourceException(String.format("The Provider '%s' you provided as a Resource Organisation is not yet approved",
+                    trainingResourceBundle.getTrainingResource().getResourceOrganisation()), HttpStatus.CONFLICT);
         }
         // check Provider's templateStatus
         if (providerBundle.getTemplateStatus().equals("pending template")) {
-            throw new ValidationException(String.format("The Provider with id %s has already registered a Resource Template.", providerBundle.getId()));
+            throw new ResourceAlreadyExistsException(String.format("The Provider with id %s has already registered a Resource Template.",
+                    providerBundle.getId()));
         }
         validateTrainingResource(trainingResourceBundle);
 
@@ -230,7 +234,7 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
 
         // block Public Training Resource update
         if (existingTrainingResource.getMetadata().isPublished()) {
-            throw new ValidationException("You cannot directly update a Public Training Resource");
+            throw new ResourceException("You cannot directly update a Public Training Resource", HttpStatus.CONFLICT);
         }
 
         // update existing TrainingResource Metadata, Identifiers, MigrationStatus
@@ -267,7 +271,7 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
         // block catalogueId updates from Provider Admins
         if (!securityService.hasRole(auth, "ROLE_ADMIN")) {
             if (!existingTrainingResource.getTrainingResource().getCatalogueId().equals(ret.getTrainingResource().getCatalogueId())) {
-                throw new ValidationException("You cannot change catalogueId");
+                throw new ResourceException("You cannot change catalogueId", HttpStatus.CONFLICT);
             }
         }
 
@@ -311,7 +315,8 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
                     String.format("Could not find Catalogue with id: %s", catalogueId));
         }
         if (!trainingResourceBundle.getTrainingResource().getCatalogueId().equals(catalogueId)) {
-            throw new ValidationException(String.format("Training Resource with id [%s] does not belong to the catalogue with id [%s]", trainingResourceId, catalogueId));
+            throw new ResourceException(String.format("Training Resource with id [%s] does not belong to the catalogue with id [%s]",
+                    trainingResourceId, catalogueId), HttpStatus.CONFLICT);
         }
         if (auth != null && auth.isAuthenticated()) {
             User user = User.of(auth);
@@ -324,7 +329,7 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
         if (trainingResourceBundle.getStatus().equals(vocabularyService.get("approved resource").getId())) {
             return trainingResourceBundle;
         }
-        throw new ValidationException("You cannot view the specific Training Resource");
+        throw new InsufficientAuthenticationException("You cannot view the specific Training Resource");
     }
 
     @Override
@@ -421,7 +426,8 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
 
         if ((trainingResourceBundle.getStatus().equals(vocabularyService.get("pending resource").getId()) ||
                 trainingResourceBundle.getStatus().equals(vocabularyService.get("rejected resource").getId())) && !trainingResourceBundle.isActive()) {
-            throw new ValidationException(String.format("You cannot activate this Training Resource, because it's Inactive with status = [%s]", trainingResourceBundle.getStatus()));
+            throw new ResourceException(String.format("You cannot activate this Training Resource, because it's Inactive with status = [%s]",
+                    trainingResourceBundle.getStatus()), HttpStatus.CONFLICT);
         }
 
         ProviderBundle providerBundle = providerService.get(trainingResourceBundle.getTrainingResource().getResourceOrganisation(), auth);
@@ -574,7 +580,7 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
         if (providerBundle.getStatus().equals(vocabularyService.get("approved provider").getId())) {
             return this.getAll(ff, null).getResults().stream().map(TrainingResourceBundle::getTrainingResource).collect(Collectors.toList());
         }
-        throw new ValidationException("You cannot view the Training Resources of the specific Provider");
+        throw new InsufficientAuthenticationException("You cannot view the Training Resources of the specific Provider");
     }
 
     @Override

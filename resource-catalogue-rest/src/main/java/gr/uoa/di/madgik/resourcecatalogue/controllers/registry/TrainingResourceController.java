@@ -1,9 +1,9 @@
 package gr.uoa.di.madgik.resourcecatalogue.controllers.registry;
 
-import gr.uoa.di.madgik.catalogue.exception.ValidationException;
 import gr.uoa.di.madgik.registry.domain.Browsing;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.domain.Paging;
+import gr.uoa.di.madgik.registry.exception.ResourceException;
 import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.annotations.Browse;
 import gr.uoa.di.madgik.resourcecatalogue.annotations.BrowseCatalogue;
@@ -80,7 +80,8 @@ public class TrainingResourceController {
 
         // Block users of deleting Services of another Catalogue
         if (!trainingResourceBundle.getTrainingResource().getCatalogueId().equals(this.catalogueId)) {
-            throw new ValidationException(String.format("You cannot delete a Training Resource of a non [%s] Catalogue.", catalogueName));
+            throw new ResourceException(String.format("You cannot delete a Training Resource of a non [%s] Catalogue.", catalogueName),
+                    HttpStatus.CONFLICT);
         }
         //TODO: Maybe return Provider's template status to 'no template status' if this was its only TR
         trainingResourceService.delete(trainingResourceBundle);
@@ -414,8 +415,7 @@ public class TrainingResourceController {
     @PutMapping(path = "/draft", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth, #trainingResource.id)")
     public ResponseEntity<TrainingResource> updateDraftTrainingResource(@RequestBody TrainingResource trainingResource,
-                                                                        @Parameter(hidden = true) Authentication auth)
-            {
+                                                                        @Parameter(hidden = true) Authentication auth) {
         TrainingResourceBundle trainingResourceBundle = draftTrainingResourceService.get(trainingResource.getId());
         trainingResourceBundle.setTrainingResource(trainingResource);
         trainingResourceBundle = draftTrainingResourceService.update(trainingResourceBundle, auth);
@@ -428,8 +428,7 @@ public class TrainingResourceController {
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth, #prefix+'/'+#suffix)")
     public ResponseEntity<TrainingResource> deleteDraftTrainingResource(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
                                                                         @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix,
-                                                                        @Parameter(hidden = true) Authentication auth)
-            {
+                                                                        @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
         TrainingResourceBundle trainingResourceBundle = draftTrainingResourceService.get(id);
         if (trainingResourceBundle == null) {
@@ -444,8 +443,7 @@ public class TrainingResourceController {
     @PutMapping(path = "draft/transform", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_USER')")
     public ResponseEntity<TrainingResource> transformToTrainingResource(@RequestBody TrainingResource trainingResource,
-                                                                        @Parameter(hidden = true) Authentication auth)
-            {
+                                                                        @Parameter(hidden = true) Authentication auth) {
         TrainingResourceBundle trainingResourceBundle = draftTrainingResourceService.get(trainingResource.getId());
         trainingResourceBundle.setTrainingResource(trainingResource);
 

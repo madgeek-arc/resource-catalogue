@@ -5,6 +5,7 @@ import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.domain.Resource;
 import gr.uoa.di.madgik.registry.exception.ResourceAlreadyExistsException;
 import gr.uoa.di.madgik.registry.exception.ResourceException;
+import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.domain.ProviderBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Vocabulary;
 import gr.uoa.di.madgik.resourcecatalogue.dto.VocabularyTree;
@@ -14,7 +15,6 @@ import gr.uoa.di.madgik.resourcecatalogue.service.VocabularyService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Lazy;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
@@ -49,7 +49,7 @@ public class VocabularyManager extends ResourceManager<Vocabulary> implements Vo
         try {
             vocabulary = get(id);
         } catch (ResourceException e) {
-            throw new ResourceException(String.format("Vocabulary with id '%s' does not exist!", id), HttpStatus.NOT_FOUND);
+            throw new ResourceNotFoundException(String.format("Vocabulary with id '%s' does not exist!", id));
         }
         return vocabulary;
     }

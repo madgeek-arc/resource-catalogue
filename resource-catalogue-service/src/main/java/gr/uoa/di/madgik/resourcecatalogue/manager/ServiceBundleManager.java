@@ -5,9 +5,9 @@ import gr.uoa.di.madgik.registry.domain.Browsing;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.registry.domain.Resource;
+import gr.uoa.di.madgik.registry.exception.ResourceAlreadyExistsException;
 import gr.uoa.di.madgik.registry.exception.ResourceException;
 import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
-import gr.uoa.di.madgik.registry.service.ServiceException;
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
 import gr.uoa.di.madgik.resourcecatalogue.utils.*;
@@ -16,6 +16,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.security.core.Authentication;
 
 import java.util.ArrayList;
@@ -107,16 +108,16 @@ public class ServiceBundleManager extends AbstractServiceBundleManager<ServiceBu
 
         ProviderBundle providerBundle = providerService.get(serviceBundle.getService().getResourceOrganisation(), auth);
         if (providerBundle == null) {
-            throw new ValidationException(String.format("Provider with id '%s' and catalogueId '%s' does not exist", serviceBundle.getService().getResourceOrganisation(), serviceBundle.getService().getCatalogueId()));
+            throw new ResourceNotFoundException(String.format("Provider with id '%s' and catalogueId '%s' does not exist", serviceBundle.getService().getResourceOrganisation(), serviceBundle.getService().getCatalogueId()));
         }
         // check if Provider is approved
         if (!providerBundle.getStatus().equals("approved provider")) {
-            throw new ValidationException(String.format("The Provider '%s' you provided as a Resource Organisation is not yet approved",
-                    serviceBundle.getService().getResourceOrganisation()));
+            throw new ResourceException(String.format("The Provider '%s' you provided as a Resource Organisation is not yet approved",
+                    serviceBundle.getService().getResourceOrganisation()), HttpStatus.CONFLICT);
         }
         // check Provider's templateStatus
         if (providerBundle.getTemplateStatus().equals("pending template")) {
-            throw new ValidationException(String.format("The Provider with id %s has already registered a Resource Template.", providerBundle.getId()));
+            throw new ResourceAlreadyExistsException(String.format("The Provider with id %s has already registered a Resource Template.", providerBundle.getId()));
         }
 
         serviceBundle.setId(idCreator.generate(getResourceTypeName()));
@@ -208,7 +209,7 @@ public class ServiceBundleManager extends AbstractServiceBundleManager<ServiceBu
 
         // block Public Service update
         if (existingService.getMetadata().isPublished()) {
-            throw new ValidationException("You cannot directly update a Public Service");
+            throw new ResourceException("You cannot directly update a Public Service", HttpStatus.CONFLICT);
         }
 
         // ensure Resource Catalogue's PID uniqueness
@@ -267,13 +268,14 @@ public class ServiceBundleManager extends AbstractServiceBundleManager<ServiceBu
         // if a user updates a service with version to a service with null version then while searching for the service
         // you get a "Service already exists" error.
         if (existingService.getService().getVersion() != null && ret.getService().getVersion() == null) {
-            throw new ServiceException("You cannot update a Service registered with version to a Service with null version");
+            throw new ResourceException("You cannot update a Service registered with version to a Service with null version",
+                    HttpStatus.CONFLICT);
         }
 
         // block catalogueId updates from Provider Admins
         if (!securityService.hasRole(auth, "ROLE_ADMIN")) {
             if (!existingService.getService().getCatalogueId().equals(ret.getService().getCatalogueId())) {
-                throw new ValidationException("You cannot change catalogueId");
+                throw new ResourceException("You cannot change catalogueId", HttpStatus.CONFLICT);
             }
         }
 
@@ -304,7 +306,8 @@ public class ServiceBundleManager extends AbstractServiceBundleManager<ServiceBu
                     String.format("Could not find Catalogue with id: %s", catalogueId));
         }
         if (!serviceBundle.getService().getCatalogueId().equals(catalogueId)) {
-            throw new ValidationException(String.format("Service with id [%s] does not belong to the catalogue with id [%s]", serviceId, catalogueId));
+            throw new ResourceException(String.format("Service with id [%s] does not belong to the catalogue with id [%s]",
+                    serviceId, catalogueId), HttpStatus.CONFLICT);
         }
         if (auth != null && auth.isAuthenticated()) {
             User user = User.of(auth);
@@ -319,7 +322,7 @@ public class ServiceBundleManager extends AbstractServiceBundleManager<ServiceBu
         if (serviceBundle.getStatus().equals(vocabularyService.get("approved resource").getId())) {
             return serviceBundle;
         }
-        throw new ValidationException("You cannot view the specific Service");
+        throw new InsufficientAuthenticationException("You cannot view the specific Service");
     }
 
     @Override
@@ -569,7 +572,7 @@ public class ServiceBundleManager extends AbstractServiceBundleManager<ServiceBu
         if (providerBundle.getStatus().equals(vocabularyService.get("approved provider").getId())) {
             return this.getAll(ff, null).getResults().stream().map(ServiceBundle::getService).collect(Collectors.toList());
         }
-        throw new ValidationException("You cannot view the Services of the specific Provider");
+        throw new InsufficientAuthenticationException("You cannot view the Services of the specific Provider");
     }
 
     // for sendProviderMails on RegistrationMailService AND StatisticsManager

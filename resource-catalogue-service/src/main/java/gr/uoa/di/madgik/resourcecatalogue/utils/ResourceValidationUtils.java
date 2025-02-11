@@ -1,12 +1,14 @@
 package gr.uoa.di.madgik.resourcecatalogue.utils;
 
 import gr.uoa.di.madgik.catalogue.exception.ValidationException;
+import gr.uoa.di.madgik.registry.exception.ResourceException;
 import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.domain.ServiceBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.TrainingResourceBundle;
 import gr.uoa.di.madgik.resourcecatalogue.service.ServiceBundleService;
 import gr.uoa.di.madgik.resourcecatalogue.service.TrainingResourceService;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.http.HttpStatus;
 
 public class ResourceValidationUtils {
 
@@ -23,11 +25,13 @@ public class ResourceValidationUtils {
                 throw new ValidationException(String.format("Please provide a %s ID with no catalogue prefix.", resourceType));
             }
         } catch (ResourceNotFoundException e) {
-            throw new ValidationException(String.format("There is no %s with id '%s' in the '%s' Catalogue", resourceType, resourceId, catalogueId));
+            throw new ResourceNotFoundException(String.format("There is no %s with id '%s' in the '%s' Catalogue",
+                    resourceType, resourceId, catalogueId));
         }
         // check if Service is Active + Approved
         if (!resourceBundle.isActive() || !resourceBundle.getStatus().equals("approved resource")) {
-            throw new ValidationException(String.format("%s with ID '%s' is not Approved and/or Active", resourceType, resourceId));
+            throw new ResourceException(String.format("%s with ID '%s' is not Approved and/or Active",
+                    resourceType, resourceId), HttpStatus.CONFLICT);
         }
     }
 
@@ -44,11 +48,13 @@ public class ResourceValidationUtils {
                 throw new ValidationException(String.format("Please provide a %s ID with no catalogue prefix.", resourceType));
             }
         } catch (ResourceNotFoundException e) {
-            throw new ValidationException(String.format("There is no %s with id '%s' in the '%s' Catalogue", resourceType, resourceId, catalogueId));
+            throw new ResourceNotFoundException(String.format("There is no %s with id '%s' in the '%s' Catalogue",
+                    resourceType, resourceId, catalogueId));
         }
         // check if TR is Active + Approved
         if (!trainingResourceBundle.isActive() || !trainingResourceBundle.getStatus().equals("approved resource")) {
-            throw new ValidationException(String.format("%s with ID '%s' is not Approved and/or Active", resourceType, resourceId));
+            throw new ResourceException(String.format("%s with ID '%s' is not Approved and/or Active",
+                    resourceType, resourceId), HttpStatus.CONFLICT);
         }
     }
 

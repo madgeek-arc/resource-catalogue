@@ -1,9 +1,9 @@
 package gr.uoa.di.madgik.resourcecatalogue.controllers.registry;
 
-import gr.uoa.di.madgik.catalogue.exception.ValidationException;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.registry.exception.ResourceException;
+import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.annotations.Browse;
 import gr.uoa.di.madgik.resourcecatalogue.annotations.BrowseCatalogue;
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
@@ -88,7 +88,8 @@ public class ProviderController {
         }
         // Block users of deleting Providers of another Catalogue
         if (!provider.getProvider().getCatalogueId().equals(this.catalogueId)) {
-            throw new ValidationException(String.format("You cannot delete a Provider of a non [%s] Catalogue.", catalogueName));
+            throw new ResourceException(String.format("You cannot delete a Provider of a non [%s] Catalogue.", catalogueName),
+                    HttpStatus.CONFLICT);
         }
         logger.info("Deleting provider: {} of the catalogue: {}", provider.getProvider().getName(), provider.getProvider().getCatalogueId());
 
@@ -312,7 +313,7 @@ public class ProviderController {
                                                                @Parameter(hidden = true) Authentication auth) {
         ProviderBundle provider = providerService.get(catalogueId, id, auth);
         if (provider == null) {
-            throw new ResourceException("Provider with id '" + id + "' does not exist.", HttpStatus.NOT_FOUND);
+            throw new ResourceNotFoundException("Provider with id '" + id + "' does not exist.");
         }
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(1000);
@@ -521,8 +522,7 @@ public class ProviderController {
 
     @PutMapping(path = "/draft", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isProviderAdmin(#auth,#provider.id)")
-    public ResponseEntity<Provider> updateDraftProvider(@RequestBody Provider provider, @Parameter(hidden = true) Authentication auth)
-            {
+    public ResponseEntity<Provider> updateDraftProvider(@RequestBody Provider provider, @Parameter(hidden = true) Authentication auth) {
         ProviderBundle providerBundle = draftProviderService.get(provider.getId());
         providerBundle.setProvider(provider);
         providerBundle = draftProviderService.update(providerBundle, auth);
@@ -535,8 +535,7 @@ public class ProviderController {
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isProviderAdmin(#auth, #prefix+'/'+#suffix)")
     public ResponseEntity<Provider> deleteDraftProvider(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
                                                         @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix,
-                                                        @Parameter(hidden = true) Authentication auth)
-            {
+                                                        @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
         ProviderBundle providerBundle = draftProviderService.get(id);
         if (providerBundle == null) {
@@ -550,8 +549,7 @@ public class ProviderController {
 
     @PutMapping(path = "draft/transform", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_USER')")
-    public ResponseEntity<Provider> transformToProvider(@RequestBody Provider provider, @Parameter(hidden = true) Authentication auth)
-            {
+    public ResponseEntity<Provider> transformToProvider(@RequestBody Provider provider, @Parameter(hidden = true) Authentication auth) {
         ProviderBundle providerBundle = draftProviderService.get(provider.getId());
         providerBundle.setProvider(provider);
 

@@ -1,6 +1,7 @@
 package gr.uoa.di.madgik.resourcecatalogue.utils;
 
 import gr.uoa.di.madgik.catalogue.exception.ValidationException;
+import gr.uoa.di.madgik.registry.exception.ResourceException;
 import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
@@ -8,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
@@ -264,18 +266,20 @@ public class ProviderResourcesCommonMethods {
 
     public void suspensionValidation(Bundle<?> bundle, String catalogueId, String providerId, boolean suspend, Authentication auth) {
         if (bundle.getMetadata().isPublished()) {
-            throw new ValidationException("You cannot directly suspend a Public resource");
+            throw new ResourceException("You cannot directly suspend a Public resource", HttpStatus.CONFLICT);
         }
 
         CatalogueBundle catalogueBundle = catalogueService.get(catalogueId, auth);
         if (bundle instanceof ProviderBundle) {
             if (catalogueBundle.isSuspended() && !suspend) {
-                throw new ValidationException("You cannot unsuspend a Provider when its Catalogue is suspended");
+                throw new ResourceException("You cannot unsuspend a Provider when its Catalogue is suspended",
+                        HttpStatus.CONFLICT);
             }
         } else {
             ProviderBundle providerBundle = providerService.get(providerId, auth);
             if ((catalogueBundle.isSuspended() || providerBundle.isSuspended()) && !suspend) {
-                throw new ValidationException("You cannot unsuspend a Resource when its Provider and/or Catalogue are suspended");
+                throw new ResourceException("You cannot unsuspend a Resource when its Provider and/or Catalogue are suspended",
+                        HttpStatus.CONFLICT);
             }
         }
     }
@@ -403,10 +407,10 @@ public class ProviderResourcesCommonMethods {
 
     public void blockResourceDeletion(String status, boolean isPublished) {
         if (status.equals(vocabularyService.get("pending resource").getId())) {
-            throw new ValidationException("You cannot delete a Template that is under review");
+            throw new ResourceException("You cannot delete a Template that is under review", HttpStatus.CONFLICT);
         }
         if (isPublished) {
-            throw new ValidationException("You cannot directly delete a Public Resource");
+            throw new ResourceException("You cannot directly delete a Public Resource", HttpStatus.CONFLICT);
         }
     }
 
@@ -473,7 +477,7 @@ public class ProviderResourcesCommonMethods {
             count++;
         }
         if (count > 1) {
-            throw new ValidationException("Resource with ID [%s] cannot have a Public registry" + id);
+            throw new ResourceException("Resource with ID [%s] cannot have a Public registry" + id, HttpStatus.CONFLICT);
         }
     }
 

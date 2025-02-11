@@ -3,6 +3,7 @@ package gr.uoa.di.madgik.resourcecatalogue.controllers.registry;
 import gr.uoa.di.madgik.catalogue.exception.ValidationException;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.domain.Paging;
+import gr.uoa.di.madgik.registry.exception.ResourceException;
 import gr.uoa.di.madgik.resourcecatalogue.annotations.Browse;
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
@@ -234,7 +235,8 @@ public class CatalogueController {
     public CatalogueBundle suspendCatalogue(@RequestParam String catalogueId, @RequestParam boolean suspend,
                                             @Parameter(hidden = true) Authentication auth) {
         if (catalogueId.equalsIgnoreCase(this.catalogueId)) {
-            throw new ValidationException(String.format("You cannot suspend the [%s] Catalogue", this.catalogueId));
+            throw new ResourceException(String.format("You cannot suspend the [%s] Catalogue", this.catalogueId),
+                    HttpStatus.CONFLICT);
         }
         return catalogueManager.suspend(catalogueId, suspend, auth);
     }
@@ -277,8 +279,8 @@ public class CatalogueController {
             if (provider.getCatalogueId().equals(catalogueId)) {
                 return new ResponseEntity<>(provider, HttpStatus.OK);
             } else {
-                throw new ValidationException(String.format("The Provider [%s] you requested does not belong to the specific Catalogue [%s]",
-                        providerId, catalogueId));
+                throw new ResourceException(String.format("The Provider [%s] you requested does not belong to the specific Catalogue [%s]",
+                        providerId, catalogueId), HttpStatus.CONFLICT);
             }
         }
     }

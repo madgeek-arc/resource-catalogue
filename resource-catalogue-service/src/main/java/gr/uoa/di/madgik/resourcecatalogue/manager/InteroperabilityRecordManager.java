@@ -7,6 +7,7 @@ import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.registry.domain.Resource;
 import gr.uoa.di.madgik.registry.exception.ResourceException;
 import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
+import gr.uoa.di.madgik.registry.service.ServiceException;
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
 import gr.uoa.di.madgik.resourcecatalogue.utils.Auditable;
@@ -17,6 +18,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.security.core.Authentication;
 
 import java.util.ArrayList;
@@ -85,8 +87,8 @@ public class InteroperabilityRecordManager extends ResourceManager<Interoperabil
         ProviderBundle providerBundle = providerService.get(interoperabilityRecordBundle.getInteroperabilityRecord().getCatalogueId(), interoperabilityRecordBundle.getInteroperabilityRecord().getProviderId(), auth);
         // check if Provider is approved
         if (!providerBundle.getStatus().equals("approved provider")) {
-            throw new ValidationException(String.format("The Provider ID '%s' you provided is not yet approved",
-                    interoperabilityRecordBundle.getInteroperabilityRecord().getProviderId()));
+            throw new ResourceException(String.format("The Provider ID '%s' you provided is not yet approved",
+                    interoperabilityRecordBundle.getInteroperabilityRecord().getProviderId()), HttpStatus.CONFLICT);
         }
         validate(interoperabilityRecordBundle);
 
@@ -365,7 +367,8 @@ public class InteroperabilityRecordManager extends ResourceManager<Interoperabil
                     String.format("Could not find Catalogue with id: %s", catalogueId));
         }
         if (!interoperabilityRecordBundle.getInteroperabilityRecord().getCatalogueId().equals(catalogueId)) {
-            throw new ValidationException(String.format("Interoperability Record with id [%s] does not belong to the catalogue with id [%s]", interoperabilityRecordId, catalogueId));
+            throw new ResourceException(String.format("Interoperability Record with id [%s] does not belong to the catalogue with id [%s]",
+                    interoperabilityRecordId, catalogueId), HttpStatus.CONFLICT);
         }
         if (auth != null && auth.isAuthenticated()) {
             User user = User.of(auth);
@@ -378,7 +381,7 @@ public class InteroperabilityRecordManager extends ResourceManager<Interoperabil
         if (interoperabilityRecordBundle.getStatus().equals(vocabularyService.get("approved interoperability record").getId())) {
             return interoperabilityRecordBundle;
         }
-        throw new ValidationException("You cannot view the specific Interoperability Record");
+        throw new InsufficientAuthenticationException("You cannot view the specific Interoperability Record");
     }
 
     public InteroperabilityRecordBundle audit(String id, String comment, LoggingInfo.ActionType actionType, Authentication auth) {

@@ -4,6 +4,7 @@ import gr.uoa.di.madgik.catalogue.exception.ValidationException;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.registry.domain.Resource;
+import gr.uoa.di.madgik.registry.exception.ResourceException;
 import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.registry.service.SearchService;
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
@@ -16,6 +17,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 
 import java.util.Comparator;
@@ -265,7 +267,8 @@ public class DatasourceManager extends ResourceManager<DatasourceBundle> impleme
         if (datasource != null) {
             datasourceBundle.setOriginalOpenAIREId(datasourceBundle.getId());
         } else {
-            throw new ValidationException(String.format("The ID [%s] you provided does not belong to an OpenAIRE Datasource", datasourceBundle.getId()));
+            throw new ResourceException(String.format("The ID [%s] you provided does not belong to an OpenAIRE Datasource",
+                    datasourceBundle.getId()), HttpStatus.CONFLICT);
         }
     }
 
