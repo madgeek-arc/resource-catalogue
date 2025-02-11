@@ -970,6 +970,7 @@ public class RegistrationMailService {
                     emailBasicInfo.setSubject(String.format("[%s Portal] The Resource [%s] has updated its Monitoring " +
                             "Extension", catalogueName, associatedResource));
                 }
+                emailBasicInfo.getRoot().put("action", action);
                 break;
             case "interoperabilityRecordOnboardingForPortalAdmins.ftl":
                 emailBasicInfo.setSubject(String.format("[%s Portal] Provider [%s]-[%s] has created a new Interoperability " +
