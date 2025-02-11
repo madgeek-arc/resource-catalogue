@@ -5,7 +5,6 @@ import gr.uoa.di.madgik.resourcecatalogue.domain.*;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
-import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
 
@@ -14,28 +13,30 @@ public class TestUtils {
     public static CatalogueBundle createCatalogueBundle() {
         CatalogueBundle bundle = new CatalogueBundle();
         bundle.setCatalogue(createCatalogue());
-        //TODO: populate according to test needs
         return bundle;
     }
 
     public static ProviderBundle createProviderBundle() {
         ProviderBundle bundle = new ProviderBundle();
         bundle.setProvider(createProvider());
-        //TODO: populate according to test needs
         return bundle;
     }
 
     public static ServiceBundle createServiceBundle() {
         ServiceBundle bundle = new ServiceBundle();
         bundle.setService(createService());
-        //TODO: populate according to test needs
+        return bundle;
+    }
+
+    public static DatasourceBundle createDatasourceBundle() {
+        DatasourceBundle bundle = new DatasourceBundle();
+        bundle.setDatasource(createDatasource());
         return bundle;
     }
 
     public static TrainingResourceBundle createTrainingResourceBundle() {
         TrainingResourceBundle bundle = new TrainingResourceBundle();
         bundle.setTrainingResource(createTrainingResource());
-        //TODO: populate according to test needs
         return bundle;
     }
 
@@ -96,6 +97,18 @@ public class TestUtils {
         service.setPrivacyPolicy(createURL());
         service.setOrderType("order_type-fully_open_access");
         return service;
+    }
+
+    public static Datasource createDatasource() {
+        Datasource datasource = new Datasource();
+        datasource.setServiceId("dat/abc123");
+        datasource.setCatalogueId("eosc");
+        datasource.setJurisdiction("ds_jurisdiction-global");
+        datasource.setDatasourceClassification("ds_classification-repository");
+        datasource.setResearchEntityTypes(List.of("ds_research_entity_type-research_data",
+                "ds_research_entity_type-research_software"));
+        datasource.setThematic(false);
+        return datasource;
     }
 
     public static TrainingResource createTrainingResource() {

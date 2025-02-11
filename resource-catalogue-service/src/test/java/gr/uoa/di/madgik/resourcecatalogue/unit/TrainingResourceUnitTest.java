@@ -75,7 +75,7 @@ public class TrainingResourceUnitTest {
         assertEquals(expectedTrainingResourceBundle, result);
 
         assertEquals("Updated Test Training Resource", result.getTrainingResource().getTitle(),
-                "Training Resource name should be 'Updated Test Training Resource'");
+                "Training Resource title should be 'Updated Test Training Resource'");
 
         verify(trainingResourceService, times(1)).update(inputTrainingResourceBundle, auth);
     }
