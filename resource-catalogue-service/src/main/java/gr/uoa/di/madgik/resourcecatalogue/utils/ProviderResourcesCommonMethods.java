@@ -477,7 +477,8 @@ public class ProviderResourcesCommonMethods {
             count++;
         }
         if (count > 1) {
-            throw new ResourceException("Resource with ID [%s] cannot have a Public registry" + id, HttpStatus.CONFLICT);
+            throw new ResourceException(String.format("Resource with ID %s cannot have a Public registry", id),
+                    HttpStatus.CONFLICT);
         }
     }
 

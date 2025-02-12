@@ -5,7 +5,6 @@ import gr.uoa.di.madgik.registry.domain.Browsing;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.registry.domain.Resource;
-import gr.uoa.di.madgik.registry.exception.ResourceAlreadyExistsException;
 import gr.uoa.di.madgik.registry.exception.ResourceException;
 import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.registry.service.SearchService;
@@ -142,8 +141,8 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
         }
         // check Provider's templateStatus
         if (providerBundle.getTemplateStatus().equals("pending template")) {
-            throw new ResourceAlreadyExistsException(String.format("The Provider with id %s has already registered a Resource Template.",
-                    providerBundle.getId()));
+            throw new ResourceException(String.format("The Provider with id %s has already registered a Resource Template.",
+                    providerBundle.getId()), HttpStatus.CONFLICT);
         }
         validateTrainingResource(trainingResourceBundle);
 
