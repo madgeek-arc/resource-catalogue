@@ -10,7 +10,6 @@ import gr.uoa.di.madgik.resourcecatalogue.annotations.Browse;
 import gr.uoa.di.madgik.resourcecatalogue.annotations.BrowseCatalogue;
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
 import gr.uoa.di.madgik.resourcecatalogue.dto.MonitoringStatus;
-import gr.uoa.di.madgik.resourcecatalogue.dto.ServiceType;
 import gr.uoa.di.madgik.resourcecatalogue.service.GenericResourceService;
 import gr.uoa.di.madgik.resourcecatalogue.service.HelpdeskService;
 import gr.uoa.di.madgik.resourcecatalogue.service.MonitoringService;
@@ -293,7 +292,7 @@ public class ServiceExtensionsController {
 
     @Operation(summary = "Returns all the available Monitoring serviceTypes")
     @GetMapping(path = "/monitoring/serviceTypes", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    public ResponseEntity<List<ServiceType>> getAvailableServiceTypes() {
+    public ResponseEntity<List<Vocabulary>> getAvailableServiceTypes() {
         return new ResponseEntity<>(monitoringService.getAvailableServiceTypes(), HttpStatus.OK);
     }
 

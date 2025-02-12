@@ -2,6 +2,7 @@ package gr.uoa.di.madgik.resourcecatalogue.manager;
 
 import gr.uoa.di.madgik.catalogue.exception.ValidationException;
 import gr.uoa.di.madgik.registry.domain.*;
+import gr.uoa.di.madgik.registry.exception.ResourceException;
 import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.registry.service.ResourceCRUDService;
 import gr.uoa.di.madgik.registry.service.VersionService;
@@ -19,6 +20,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -242,7 +244,8 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
                     String.format("Could not find catalogue with id: %s", catalogueId));
         }
         if (!providerBundle.getProvider().getCatalogueId().equals(catalogueId)) {
-            throw new ValidationException(String.format("Provider with id [%s] does not belong to the catalogue with id [%s]", providerId, catalogueId));
+            throw new ResourceException(String.format("Provider with id [%s] does not belong to the catalogue with id [%s]",
+                    providerId, catalogueId), HttpStatus.CONFLICT);
         }
         if (auth != null && auth.isAuthenticated()) {
             User user = User.of(auth);
@@ -256,7 +259,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         if (providerBundle.getStatus().equals(vocabularyService.get("approved provider").getId())) {
             return providerBundle;
         }
-        throw new ValidationException("You cannot view the specific Provider");
+        throw new InsufficientAuthenticationException("You cannot view the specific Provider");
     }
 
     @Override
@@ -274,7 +277,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         if (providerBundle.getStatus().equals(vocabularyService.get("approved provider").getId())) {
             return providerBundle;
         }
-        throw new ValidationException("You cannot view the specific Provider");
+        throw new InsufficientAuthenticationException("You cannot view the specific Provider");
     }
 
     @Override

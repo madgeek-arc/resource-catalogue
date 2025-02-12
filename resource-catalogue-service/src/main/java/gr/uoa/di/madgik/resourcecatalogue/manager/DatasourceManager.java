@@ -265,7 +265,8 @@ public class DatasourceManager extends ResourceManager<DatasourceBundle> impleme
         if (datasource != null) {
             datasourceBundle.setOriginalOpenAIREId(datasourceBundle.getId());
         } else {
-            throw new ValidationException(String.format("The ID [%s] you provided does not belong to an OpenAIRE Datasource", datasourceBundle.getId()));
+            throw new ResourceNotFoundException(String.format("The ID [%s] you provided does not belong to an OpenAIRE" +
+                    " Datasource", datasourceBundle.getId()));
         }
     }
 

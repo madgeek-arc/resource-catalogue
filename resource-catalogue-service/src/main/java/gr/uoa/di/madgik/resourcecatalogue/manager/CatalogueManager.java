@@ -4,6 +4,7 @@ import gr.uoa.di.madgik.catalogue.exception.ValidationException;
 import gr.uoa.di.madgik.registry.domain.Browsing;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.domain.Resource;
+import gr.uoa.di.madgik.registry.exception.ResourceException;
 import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.registry.service.ResourceCRUDService;
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
@@ -17,6 +18,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
@@ -97,7 +99,7 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
         if (catalogueBundle.getStatus().equals(vocabularyService.get("approved catalogue").getId())) {
             return catalogueBundle;
         }
-        throw new ValidationException("You cannot view the specific Catalogue");
+        throw new InsufficientAuthenticationException("You cannot view the specific Catalogue");
     }
 
     @Override
@@ -237,7 +239,8 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
 
         // Block accidental deletion of main Catalogue
         if (id.equals(catalogueId)) {
-            throw new ValidationException(String.format("You cannot delete [%s] Catalogue.", catalogueId));
+            throw new ResourceException(String.format("You cannot delete [%s] Catalogue.", catalogueId),
+                    HttpStatus.FORBIDDEN);
         }
 
         // Delete Catalogue along with all its related Resources
@@ -379,7 +382,8 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
         CatalogueBundle catalogue = get(id);
         if ((catalogue.getStatus().equals(vocabularyService.get("pending catalogue").getId()) ||
                 catalogue.getStatus().equals(vocabularyService.get("rejected catalogue").getId())) && !catalogue.isActive()) {
-            throw new ValidationException(String.format("You cannot activate this Catalogue, because it's Inactive with status = [%s]", catalogue.getStatus()));
+            throw new ResourceException(String.format("You cannot activate this Catalogue, because it's Inactive with status = [%s]",
+                    catalogue.getStatus()), HttpStatus.CONFLICT);
         }
         List<LoggingInfo> loggingInfoList = commonMethods.returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(catalogue, auth);
         LoggingInfo loggingInfo;

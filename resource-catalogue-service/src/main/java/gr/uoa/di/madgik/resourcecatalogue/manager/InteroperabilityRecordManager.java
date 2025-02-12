@@ -85,8 +85,8 @@ public class InteroperabilityRecordManager extends ResourceManager<Interoperabil
         ProviderBundle providerBundle = providerService.get(interoperabilityRecordBundle.getInteroperabilityRecord().getCatalogueId(), interoperabilityRecordBundle.getInteroperabilityRecord().getProviderId(), auth);
         // check if Provider is approved
         if (!providerBundle.getStatus().equals("approved provider")) {
-            throw new ValidationException(String.format("The Provider ID '%s' you provided is not yet approved",
-                    interoperabilityRecordBundle.getInteroperabilityRecord().getProviderId()));
+            throw new ResourceException(String.format("The Provider ID '%s' you provided is not yet approved",
+                    interoperabilityRecordBundle.getInteroperabilityRecord().getProviderId()), HttpStatus.CONFLICT);
         }
         validate(interoperabilityRecordBundle);
 
@@ -351,34 +351,6 @@ public class InteroperabilityRecordManager extends ResourceManager<Interoperabil
         ff.setQuantity(maxQuantity);
         ff.addOrderBy("title", "asc");
         return this.getAll(ff, auth);
-    }
-
-    public InteroperabilityRecordBundle getCatalogueInteroperabilityRecord(String catalogueId, String interoperabilityRecordId, Authentication auth) {
-        InteroperabilityRecordBundle interoperabilityRecordBundle = get(interoperabilityRecordId, catalogueId);
-        CatalogueBundle catalogueBundle = catalogueService.get(catalogueId);
-        if (interoperabilityRecordBundle == null) {
-            throw new ResourceNotFoundException(
-                    String.format("Could not find InteroperabilityRecord with id: %s", interoperabilityRecordId));
-        }
-        if (catalogueBundle == null) {
-            throw new ResourceNotFoundException(
-                    String.format("Could not find Catalogue with id: %s", catalogueId));
-        }
-        if (!interoperabilityRecordBundle.getInteroperabilityRecord().getCatalogueId().equals(catalogueId)) {
-            throw new ValidationException(String.format("Interoperability Record with id [%s] does not belong to the catalogue with id [%s]", interoperabilityRecordId, catalogueId));
-        }
-        if (auth != null && auth.isAuthenticated()) {
-            User user = User.of(auth);
-            if (securityService.hasRole(auth, "ROLE_ADMIN") || securityService.hasRole(auth, "ROLE_EPOT") ||
-                    securityService.userIsResourceProviderAdmin(user, interoperabilityRecordId)) {
-                return interoperabilityRecordBundle;
-            }
-        }
-        // else return the Interoperability Record ONLY if it is active
-        if (interoperabilityRecordBundle.getStatus().equals(vocabularyService.get("approved interoperability record").getId())) {
-            return interoperabilityRecordBundle;
-        }
-        throw new ValidationException("You cannot view the specific Interoperability Record");
     }
 
     public InteroperabilityRecordBundle audit(String id, String comment, LoggingInfo.ActionType actionType, Authentication auth) {

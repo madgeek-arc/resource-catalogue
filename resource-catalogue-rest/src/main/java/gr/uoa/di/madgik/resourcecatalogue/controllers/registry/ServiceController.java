@@ -1,9 +1,9 @@
 package gr.uoa.di.madgik.resourcecatalogue.controllers.registry;
 
-import gr.uoa.di.madgik.catalogue.exception.ValidationException;
 import gr.uoa.di.madgik.registry.domain.Browsing;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.domain.Paging;
+import gr.uoa.di.madgik.registry.exception.ResourceException;
 import gr.uoa.di.madgik.resourcecatalogue.annotations.Browse;
 import gr.uoa.di.madgik.resourcecatalogue.annotations.BrowseCatalogue;
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
@@ -22,6 +22,7 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.util.MultiValueMap;
@@ -79,7 +80,8 @@ public class ServiceController {
 
         // Block users of deleting Services of another Catalogue
         if (!service.getService().getCatalogueId().equals(this.catalogueId)) {
-            throw new ValidationException(String.format("You cannot delete a Service of a non [%s] Catalogue.", catalogueName));
+            throw new ResourceException(String.format("You cannot delete a Service of a non [%s] Catalogue.", catalogueName),
+                    HttpStatus.FORBIDDEN);
         }
         //TODO: Maybe return Provider's template status to 'no template status' if this was its only Service
         serviceBundleService.delete(service);
@@ -518,8 +520,7 @@ public class ServiceController {
 
     @PutMapping(path = "/draft", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth, #service.id)")
-    public ResponseEntity<Service> updateDraftService(@RequestBody Service service, @Parameter(hidden = true) Authentication auth)
-            {
+    public ResponseEntity<Service> updateDraftService(@RequestBody Service service, @Parameter(hidden = true) Authentication auth) {
         ServiceBundle serviceBundle = draftServiceService.get(service.getId());
         serviceBundle.setService(service);
         serviceBundle = draftServiceService.update(serviceBundle, auth);
@@ -532,8 +533,7 @@ public class ServiceController {
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth, #prefix+'/'+#suffix)")
     public ResponseEntity<Service> deleteDraftService(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
                                                       @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix,
-                                                      @Parameter(hidden = true) Authentication auth)
-            {
+                                                      @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
         ServiceBundle serviceBundle = draftServiceService.get(id);
         if (serviceBundle == null) {
@@ -548,8 +548,7 @@ public class ServiceController {
     @PutMapping(path = "draft/transform", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_USER')")
     public ResponseEntity<Service> transformService(@RequestBody Service service,
-                                                    @Parameter(hidden = true) Authentication auth)
-            {
+                                                    @Parameter(hidden = true) Authentication auth) {
         ServiceBundle serviceBundle = draftServiceService.get(service.getId());
         serviceBundle.setService(service);
 
