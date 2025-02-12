@@ -81,7 +81,7 @@ public class TrainingResourceController {
         // Block users of deleting Services of another Catalogue
         if (!trainingResourceBundle.getTrainingResource().getCatalogueId().equals(this.catalogueId)) {
             throw new ResourceException(String.format("You cannot delete a Training Resource of a non [%s] Catalogue.", catalogueName),
-                    HttpStatus.CONFLICT);
+                    HttpStatus.FORBIDDEN);
         }
         //TODO: Maybe return Provider's template status to 'no template status' if this was its only TR
         trainingResourceService.delete(trainingResourceBundle);

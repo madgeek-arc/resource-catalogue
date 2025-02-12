@@ -22,6 +22,7 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.util.MultiValueMap;
@@ -80,7 +81,7 @@ public class ServiceController {
         // Block users of deleting Services of another Catalogue
         if (!service.getService().getCatalogueId().equals(this.catalogueId)) {
             throw new ResourceException(String.format("You cannot delete a Service of a non [%s] Catalogue.", catalogueName),
-                    HttpStatus.CONFLICT);
+                    HttpStatus.FORBIDDEN);
         }
         //TODO: Maybe return Provider's template status to 'no template status' if this was its only Service
         serviceBundleService.delete(service);

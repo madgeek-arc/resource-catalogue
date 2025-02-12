@@ -89,7 +89,7 @@ public class ProviderController {
         // Block users of deleting Providers of another Catalogue
         if (!provider.getProvider().getCatalogueId().equals(this.catalogueId)) {
             throw new ResourceException(String.format("You cannot delete a Provider of a non [%s] Catalogue.", catalogueName),
-                    HttpStatus.CONFLICT);
+                    HttpStatus.FORBIDDEN);
         }
         logger.info("Deleting provider: {} of the catalogue: {}", provider.getProvider().getName(), provider.getProvider().getCatalogueId());
 

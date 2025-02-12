@@ -240,7 +240,7 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
         // Block accidental deletion of main Catalogue
         if (id.equals(catalogueId)) {
             throw new ResourceException(String.format("You cannot delete [%s] Catalogue.", catalogueId),
-                    HttpStatus.CONFLICT);
+                    HttpStatus.FORBIDDEN);
         }
 
         // Delete Catalogue along with all its related Resources

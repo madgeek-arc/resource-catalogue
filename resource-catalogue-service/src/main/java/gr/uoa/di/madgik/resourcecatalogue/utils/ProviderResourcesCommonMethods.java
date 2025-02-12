@@ -407,10 +407,10 @@ public class ProviderResourcesCommonMethods {
 
     public void blockResourceDeletion(String status, boolean isPublished) {
         if (status.equals(vocabularyService.get("pending resource").getId())) {
-            throw new ResourceException("You cannot delete a Template that is under review", HttpStatus.CONFLICT);
+            throw new ResourceException("You cannot delete a Template that is under review", HttpStatus.FORBIDDEN);
         }
         if (isPublished) {
-            throw new ResourceException("You cannot directly delete a Public Resource", HttpStatus.CONFLICT);
+            throw new ResourceException("You cannot directly delete a Public Resource", HttpStatus.FORBIDDEN);
         }
     }
 
