@@ -266,7 +266,7 @@ public class ProviderResourcesCommonMethods {
 
     public void suspensionValidation(Bundle<?> bundle, String catalogueId, String providerId, boolean suspend, Authentication auth) {
         if (bundle.getMetadata().isPublished()) {
-            throw new ResourceException("You cannot directly suspend a Public resource", HttpStatus.CONFLICT);
+            throw new ResourceException("You cannot directly suspend a Public resource", HttpStatus.FORBIDDEN);
         }
 
         CatalogueBundle catalogueBundle = catalogueService.get(catalogueId, auth);

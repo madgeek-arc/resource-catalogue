@@ -234,7 +234,7 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
 
         // block Public Training Resource update
         if (existingTrainingResource.getMetadata().isPublished()) {
-            throw new ResourceException("You cannot directly update a Public Training Resource", HttpStatus.CONFLICT);
+            throw new ResourceException("You cannot directly update a Public Training Resource", HttpStatus.FORBIDDEN);
         }
 
         // update existing TrainingResource Metadata, Identifiers, MigrationStatus
@@ -271,7 +271,7 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
         // block catalogueId updates from Provider Admins
         if (!securityService.hasRole(auth, "ROLE_ADMIN")) {
             if (!existingTrainingResource.getTrainingResource().getCatalogueId().equals(ret.getTrainingResource().getCatalogueId())) {
-                throw new ResourceException("You cannot change catalogueId", HttpStatus.CONFLICT);
+                throw new ResourceException("You cannot change catalogueId", HttpStatus.FORBIDDEN);
             }
         }
 
@@ -315,8 +315,8 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
                     String.format("Could not find Catalogue with id: %s", catalogueId));
         }
         if (!trainingResourceBundle.getTrainingResource().getCatalogueId().equals(catalogueId)) {
-            throw new ResourceException(String.format("Training Resource with id [%s] does not belong to the catalogue with id [%s]",
-                    trainingResourceId, catalogueId), HttpStatus.CONFLICT);
+            throw new ResourceNotFoundException(String.format("Training Resource with id [%s] does not belong to the" +
+                    " catalogue with id [%s]", trainingResourceId, catalogueId));
         }
         if (auth != null && auth.isAuthenticated()) {
             User user = User.of(auth);

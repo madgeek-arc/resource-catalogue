@@ -209,7 +209,7 @@ public class ServiceBundleManager extends AbstractServiceBundleManager<ServiceBu
 
         // block Public Service update
         if (existingService.getMetadata().isPublished()) {
-            throw new ResourceException("You cannot directly update a Public Service", HttpStatus.CONFLICT);
+            throw new ResourceException("You cannot directly update a Public Service", HttpStatus.FORBIDDEN);
         }
 
         // ensure Resource Catalogue's PID uniqueness
@@ -275,7 +275,7 @@ public class ServiceBundleManager extends AbstractServiceBundleManager<ServiceBu
         // block catalogueId updates from Provider Admins
         if (!securityService.hasRole(auth, "ROLE_ADMIN")) {
             if (!existingService.getService().getCatalogueId().equals(ret.getService().getCatalogueId())) {
-                throw new ResourceException("You cannot change catalogueId", HttpStatus.CONFLICT);
+                throw new ResourceException("You cannot change catalogueId", HttpStatus.FORBIDDEN);
             }
         }
 
@@ -306,8 +306,8 @@ public class ServiceBundleManager extends AbstractServiceBundleManager<ServiceBu
                     String.format("Could not find Catalogue with id: %s", catalogueId));
         }
         if (!serviceBundle.getService().getCatalogueId().equals(catalogueId)) {
-            throw new ResourceException(String.format("Service with id [%s] does not belong to the catalogue with id [%s]",
-                    serviceId, catalogueId), HttpStatus.CONFLICT);
+            throw new ResourceNotFoundException(String.format("Service with id [%s] does not belong to the catalogue" +
+                    " with id [%s]", serviceId, catalogueId));
         }
         if (auth != null && auth.isAuthenticated()) {
             User user = User.of(auth);
