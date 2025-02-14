@@ -69,9 +69,9 @@ public class SecurityConfig {
         http
                 .authorizeHttpRequests(authorizeRequests ->
                         authorizeRequests
-                                .requestMatchers("/resourcesync/.*").permitAll()
-                                .requestMatchers("/dump/.*", "/restore/", "/resources.*", "/resourceType.*", "/search.*").hasAnyAuthority("ROLE_ADMIN")
-
+                                .requestMatchers("/resourcesync/**").permitAll()
+                                .requestMatchers("/dump/", "/restore/", "/resources/**", "/resourceType/**",
+                                        "/search/**").hasAuthority("ROLE_ADMIN")
                                 .anyRequest().permitAll()
                 )
 
@@ -182,7 +182,8 @@ public class SecurityConfig {
             Map<String, Object> claims = new HashMap<>(jwt.getClaims());
             claims.putAll(info);
             Collection<GrantedAuthority> authorities = authoritiesMapper.getAuthorities(email);
-            Jwt token = new Jwt(jwt.getTokenValue(), jwt.getIssuedAt(), jwt.getExpiresAt(), jwt.getHeaders(), Collections.unmodifiableMap(claims));
+            Jwt token = new Jwt(jwt.getTokenValue(), jwt.getIssuedAt(), jwt.getExpiresAt(), jwt.getHeaders(),
+                    Collections.unmodifiableMap(claims));
 
             return new JwtAuthenticationToken(token, authorities);
         }
