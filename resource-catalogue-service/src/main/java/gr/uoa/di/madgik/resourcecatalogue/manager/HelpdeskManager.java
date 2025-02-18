@@ -4,9 +4,7 @@ import gr.uoa.di.madgik.catalogue.exception.ValidationException;
 import gr.uoa.di.madgik.registry.domain.Resource;
 import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.registry.service.SearchService;
-import gr.uoa.di.madgik.resourcecatalogue.domain.HelpdeskBundle;
-import gr.uoa.di.madgik.resourcecatalogue.domain.LoggingInfo;
-import gr.uoa.di.madgik.resourcecatalogue.domain.Metadata;
+import gr.uoa.di.madgik.resourcecatalogue.domain.*;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
 import gr.uoa.di.madgik.resourcecatalogue.utils.AuthenticationInfo;
 import gr.uoa.di.madgik.resourcecatalogue.utils.ObjectUtils;
@@ -18,12 +16,13 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.security.core.Authentication;
 
 import java.util.List;
+import java.util.Objects;
 
 @org.springframework.stereotype.Service("helpdeskManager")
 public class HelpdeskManager extends ResourceManager<HelpdeskBundle> implements HelpdeskService {
 
     private static final Logger logger = LoggerFactory.getLogger(HelpdeskManager.class);
-    private final ServiceBundleService serviceBundleService;
+    private final ServiceBundleService<ServiceBundle> serviceBundleService;
     private final TrainingResourceService trainingResourceService;
     private final PublicHelpdeskManager publicHelpdeskManager;
     private final SecurityService securityService;
@@ -31,7 +30,7 @@ public class HelpdeskManager extends ResourceManager<HelpdeskBundle> implements 
     private final ProviderResourcesCommonMethods commonMethods;
     private final IdCreator idCreator;
 
-    public HelpdeskManager(ServiceBundleService serviceBundleService,
+    public HelpdeskManager(ServiceBundleService<ServiceBundle> serviceBundleService,
                            TrainingResourceService trainingResourceService,
                            PublicHelpdeskManager publicHelpdeskManager,
                            @Lazy SecurityService securityService,
@@ -87,10 +86,10 @@ public class HelpdeskManager extends ResourceManager<HelpdeskBundle> implements 
         helpdesk.setLoggingInfo(loggingInfoList);
         helpdesk.setActive(true);
         // latestOnboardingInfo
-        helpdesk.setLatestOnboardingInfo(loggingInfoList.get(0));
+        helpdesk.setLatestOnboardingInfo(loggingInfoList.getFirst());
 
         super.add(helpdesk, null);
-        logger.debug("Adding Helpdesk: {}", helpdesk);
+        logger.info("Added Helpdesk with id '{}'", helpdesk.getId());
 
         registrationMailService.sendEmailsForHelpdeskExtensionToPortalAdmins(helpdesk, "post");
 
@@ -138,7 +137,7 @@ public class HelpdeskManager extends ResourceManager<HelpdeskBundle> implements 
         }
 
         resourceService.updateResource(existingResource);
-        logger.debug("Updating Helpdesk: {}", ret);
+        logger.info("Updated Helpdesk with id '{}'", ret.getId());
 
         registrationMailService.sendEmailsForHelpdeskExtensionToPortalAdmins(ret, "put");
 
@@ -164,10 +163,15 @@ public class HelpdeskManager extends ResourceManager<HelpdeskBundle> implements 
     @Override
     public void delete(HelpdeskBundle helpdesk) {
         super.delete(helpdesk);
-        logger.debug("Deleting Helpdesk: {}", helpdesk);
+        logger.info("Deleted Helpdesk with id '{}' of the Catalogue '{}'",
+                helpdesk.getHelpdesk().getId(), helpdesk.getCatalogueId());
     }
 
     public HelpdeskBundle createPublicResource(HelpdeskBundle helpdeskBundle, Authentication auth) {
+        logger.info("User '{}-{}' attempts to create a Public Helpdesk from Helpdesk '{}' of the '{}' Catalogue",
+                Objects.requireNonNull(User.of(auth)).getFullName(),
+                Objects.requireNonNull(User.of(auth)).getEmail().toLowerCase(),
+                helpdeskBundle.getId(), helpdeskBundle.getCatalogueId());
         publicHelpdeskManager.add(helpdeskBundle, auth);
         return helpdeskBundle;
     }

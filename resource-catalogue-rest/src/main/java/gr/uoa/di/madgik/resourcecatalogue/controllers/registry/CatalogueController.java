@@ -101,7 +101,7 @@ public class CatalogueController {
                                                      @Parameter(hidden = true) Authentication auth) {
         CatalogueBundle catalogueBundle = catalogueManager.get(catalogue.getId(), auth);
         catalogueBundle.setCatalogue(catalogue);
-        if (comment == null || comment.equals("")) {
+        if (comment == null || comment.isEmpty()) {
             comment = "no comment";
         }
         catalogueBundle = catalogueManager.update(catalogueBundle, comment, auth);
@@ -334,7 +334,7 @@ public class CatalogueController {
                                                             @Parameter(hidden = true) Authentication auth) {
         ProviderBundle providerBundle = providerManager.get(catalogueId, provider.getId(), auth);
         providerBundle.setProvider(provider);
-        if (comment == null || comment.equals("")) {
+        if (comment == null || comment.isEmpty()) {
             comment = "no comment";
         }
         providerBundle = providerManager.update(providerBundle, comment, auth);

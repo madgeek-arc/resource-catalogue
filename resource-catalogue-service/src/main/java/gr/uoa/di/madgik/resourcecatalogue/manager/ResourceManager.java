@@ -179,7 +179,7 @@ public abstract class ResourceManager<T extends Identifiable> extends AbstractGe
 
     @Override
     public T validate(T t) {
-        logger.debug("Validating Resource '{}' using FieldValidator", t);
+        logger.debug("Validating Resource {} using FieldValidator", t);
         try {
             fieldValidator.validate(t);
         } catch (IllegalAccessException e) {

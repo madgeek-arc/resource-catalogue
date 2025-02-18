@@ -106,12 +106,12 @@ public abstract class AbstractSyncService<T extends Identifiable> implements Syn
         boolean retryKey = true;
         if (active) {
             HttpEntity<T> request = new HttpEntity<>(t, createHeaders());
-            logger.info("Posting resource with id: {} - Host: {}", t.getId(), host);
+            logger.info("Posting resource with id: '{}' - Host: [{}]", t.getId(), host);
             try {
                 URI uri = new URI(host + controller).normalize();
                 ResponseEntity<?> re = restTemplate.exchange(uri.normalize(), HttpMethod.POST, request, t.getClass());
                 if (re.getStatusCode() != HttpStatus.CREATED) {
-                    logger.error("Adding {} with id '{}' from host '{}' returned code '{}'\nResponse body:\n{}",
+                    logger.error("Adding {} with id '{}' from host [{}] returned code '{}'\nResponse body:\n{}",
                             t.getClass(), t.getId(), host, re.getStatusCodeValue(), re.getBody());
                 } else {
                     retryKey = false;
@@ -119,7 +119,7 @@ public abstract class AbstractSyncService<T extends Identifiable> implements Syn
             } catch (URISyntaxException e) {
                 logger.error("could not create URI for host: {}", host, e);
             } catch (HttpServerErrorException e) {
-                logger.error("Failed to post {} with id {} to host {}\nMessage: {}",
+                logger.error("Failed to post {} with id '{}' to host {}\nMessage: {}",
                         t.getClass(), t.getId(), host, e.getResponseBodyAsString());
             } catch (RuntimeException re) {
                 logger.error("syncAdd failed, check if token has expired!\n{}: {}", t.getClass(), t, re);
@@ -139,12 +139,12 @@ public abstract class AbstractSyncService<T extends Identifiable> implements Syn
         boolean retryKey = true;
         if (active) {
             HttpEntity<T> request = new HttpEntity<>(t, createHeaders());
-            logger.info("Updating {} with id: {} - Host: {}", t.getClass(), t.getId(), host);
+            logger.info("Updating {} with id: '{}' - Host: [{}]", t.getClass(), t.getId(), host);
             try {
                 URI uri = new URI(host + controller).normalize();
                 ResponseEntity<?> re = restTemplate.exchange(uri.normalize().toString(), HttpMethod.PUT, request, t.getClass());
                 if (re.getStatusCode() != HttpStatus.OK) {
-                    logger.error("Updating {} with id '{}' from host '{}' returned code '{}'\nResponse body:\n{}",
+                    logger.error("Updating {} with id '{}' from host [{}] returned code '{}'\nResponse body:\n{}",
                             t.getClass(), t.getId(), host, re.getStatusCodeValue(), re.getBody());
                 } else {
                     retryKey = false;
@@ -152,7 +152,7 @@ public abstract class AbstractSyncService<T extends Identifiable> implements Syn
             } catch (URISyntaxException e) {
                 logger.error("could not create URI for host: {}", host, e);
             } catch (HttpServerErrorException e) {
-                logger.error("Failed to update {} with id {} to host {}\nMessage: {}",
+                logger.error("Failed to update {} with id '{}' to host {}\nMessage: {}",
                         t.getClass(), t.getId(), host, e.getResponseBodyAsString());
             } catch (RuntimeException re) {
                 logger.error("syncUpdate failed, check if token has expired!\n{}: {}", t.getClass(), t, re);
@@ -172,12 +172,12 @@ public abstract class AbstractSyncService<T extends Identifiable> implements Syn
         boolean retryKey = true;
         if (active) {
             HttpEntity<T> request = new HttpEntity<>(createHeaders());
-            logger.info("Deleting {} with id: {} - Host: {}", t.getClass(), t.getId(), host);
+            logger.info("Deleting {} with id: '{}' - Host: [{}]", t.getClass(), t.getId(), host);
             try {
                 URI uri = new URI(String.format("%s/%s/%s", host, controller, t.getId())).normalize();
                 ResponseEntity<?> re = restTemplate.exchange(uri.toString(), HttpMethod.DELETE, request, Void.class);
                 if (re.getStatusCode() != HttpStatus.NO_CONTENT) {
-                    logger.error("Deleting {} with id '{}' from host '{}' returned code '{}'\nResponse body:\n{}",
+                    logger.error("Deleting {} with id '{}' from host [{}] returned code '{}'\nResponse body:\n{}",
                             t.getClass(), t.getId(), host, re.getStatusCodeValue(), re.getBody());
                 } else {
                     retryKey = false;
@@ -185,7 +185,7 @@ public abstract class AbstractSyncService<T extends Identifiable> implements Syn
             } catch (URISyntaxException e) {
                 logger.error("could not create URI for host: {}", host, e);
             } catch (HttpServerErrorException e) {
-                logger.error("Failed to delete {} with id {} to host {}\nMessage: {}",
+                logger.error("Failed to delete {} with id '{}' to host {}\nMessage: {}",
                         t.getClass(), t.getId(), host, e.getResponseBodyAsString());
             } catch (RuntimeException re) {
                 logger.error("syncDelete failed, check if token has expired!\n{}: {}", t.getClass(), t, re);
@@ -207,7 +207,7 @@ public abstract class AbstractSyncService<T extends Identifiable> implements Syn
         if (active) {
             HttpEntity<T> request = new HttpEntity<>(t, createHeaders());
             URI uri;
-            logger.info("Verifying resource with id: {} - Host: {}", t.getId(), host);
+            logger.info("Verifying resource with id: '{}' - Host: [{}]", t.getId(), host);
             try {
                 if (t instanceof Provider) {
                     uri = new URI(host + controller + "/verifyProvider/" + t.getId() + "?active=true&status=approved%20provider").normalize();
@@ -230,7 +230,7 @@ public abstract class AbstractSyncService<T extends Identifiable> implements Syn
             } catch (URISyntaxException e) {
                 logger.error("could not create URI for host: {}", host, e);
             } catch (HttpServerErrorException e) {
-                logger.error("Failed to patch {} with id {} to host {}\nMessage: {}",
+                logger.error("Failed to patch {} with id '{}' to host {}\nMessage: {}",
                         t.getClass(), t.getId(), host, e.getResponseBodyAsString());
             } catch (RuntimeException re) {
                 logger.error("syncVerify failed, check if token has expired!\n{}: {}", t.getClass(), t, re);

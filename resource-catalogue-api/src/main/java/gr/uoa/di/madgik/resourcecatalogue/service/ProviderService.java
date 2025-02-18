@@ -9,7 +9,6 @@ import gr.uoa.di.madgik.resourcecatalogue.dto.ExtendedValue;
 import gr.uoa.di.madgik.resourcecatalogue.dto.MapValues;
 import org.springframework.security.core.Authentication;
 
-import java.net.URL;
 import java.util.List;
 
 public interface ProviderService extends ResourceService<ProviderBundle>, BundleOperations<ProviderBundle> {
@@ -70,15 +69,6 @@ public interface ProviderService extends ResourceService<ProviderBundle>, Bundle
      * @return {@link List}&lt;{@link ProviderBundle}&gt;
      */
     List<ProviderBundle> getUserProviders(String email, Authentication authentication);
-
-    /**
-     * Validates a specific URL regarding the ability to open a connection
-     *
-     * @param urlForValidation URL to be validated
-     * @return True/False
-     * @deprecated Validates a specific URL regarding the response's status code
-     */
-    boolean validateUrl(URL urlForValidation) throws Throwable;
 
     /**
      * After a Provider's update, calculate if the list of Admins has changed

@@ -91,7 +91,7 @@ public class GenericManager implements GenericResourceService {
 
             labelsMap.put(rt.getName(), labels);
             browseByMap.put(rt.getName(), new ArrayList<>(browseSet));
-            logger.debug("Generating browse fields for [{}]", rt.getName());
+            logger.debug("Generating browse fields for '{}'", rt.getName());
         }
         for (String alias : aliasGroupBrowse.keySet()) {
             browseByMap.put(alias, aliasGroupBrowse.get(alias).stream().sorted().collect(Collectors.toList()));
@@ -291,8 +291,7 @@ public class GenericManager implements GenericResourceService {
 
     // facets are pre-sorted by 'count' field
     public void sortFacets(List<Facet> facets, String field) {
-        for (Iterator<Facet> iter = facets.listIterator(); iter.hasNext(); ) {
-            Facet facet = iter.next();
+        for (Facet facet : facets) {
             if (facet.getField().equals("catalogue_id") || facet.getField().equals(field)) {
                 try {
                     facet.getValues().sort(Comparator.comparing(gr.uoa.di.madgik.registry.domain.Value::getLabel, String.CASE_INSENSITIVE_ORDER));

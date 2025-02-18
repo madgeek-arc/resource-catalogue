@@ -8,7 +8,6 @@ import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.DisMaxQueryBuilder;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static org.elasticsearch.index.query.QueryBuilders.*;
 
@@ -45,12 +44,12 @@ public abstract class AbstractSearchService extends ElasticSearchService impleme
             // searchFields = Collections.singletonList(SEARCHABLE_AREA);
         }
 
-        if (filter.getKeyword() != null && !filter.getKeyword().equals("")) {
+        if (filter.getKeyword() != null && !filter.getKeyword().isEmpty()) {
             String keyword = filter.getKeyword();
             List<String> phrases = new ArrayList<>();
 
             // find quoted terms and keep them as is
-            List<String> parts = Arrays.stream(keyword.split("\"")).collect(Collectors.toList());
+            List<String> parts = Arrays.stream(keyword.split("\"")).toList();
             if (parts.size() > 1 && parts.size() % 2 == 1) {
                 for (int i = 0; i < parts.size(); i++) {
                     if (i % 2 == 1) {

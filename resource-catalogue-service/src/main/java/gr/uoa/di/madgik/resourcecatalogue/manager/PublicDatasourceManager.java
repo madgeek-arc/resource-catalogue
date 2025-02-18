@@ -7,7 +7,6 @@ import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.registry.service.ResourceCRUDService;
 import gr.uoa.di.madgik.resourcecatalogue.domain.DatasourceBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Identifiers;
-import gr.uoa.di.madgik.resourcecatalogue.service.SecurityService;
 import gr.uoa.di.madgik.resourcecatalogue.utils.JmsService;
 import gr.uoa.di.madgik.resourcecatalogue.utils.ProviderResourcesCommonMethods;
 import gr.uoa.di.madgik.resourcecatalogue.utils.PublicResourceUtils;
@@ -24,16 +23,14 @@ public class PublicDatasourceManager extends AbstractPublicResourceManager<Datas
 
     private static final Logger logger = LoggerFactory.getLogger(PublicDatasourceManager.class);
     private final JmsService jmsService;
-    private final SecurityService securityService;
     private final ProviderResourcesCommonMethods commonMethods;
     private final PublicResourceUtils publicResourceUtils;
 
-    public PublicDatasourceManager(JmsService jmsService, SecurityService securityService,
+    public PublicDatasourceManager(JmsService jmsService,
                                    ProviderResourcesCommonMethods commonMethods,
                                    PublicResourceUtils publicResourceUtils) {
         super(DatasourceBundle.class);
         this.jmsService = jmsService;
-        this.securityService = securityService;
         this.commonMethods = commonMethods;
         this.publicResourceUtils = publicResourceUtils;
     }
@@ -71,7 +68,7 @@ public class PublicDatasourceManager extends AbstractPublicResourceManager<Datas
 
         datasourceBundle.getMetadata().setPublished(true);
         DatasourceBundle ret;
-        logger.info(String.format("Datasource [%s] is being published with id [%s]", lowerLevelResourceId, datasourceBundle.getId()));
+        logger.info("Datasource '{}' is being published with id '{}'", lowerLevelResourceId, datasourceBundle.getId());
         ret = super.add(datasourceBundle, null);
         jmsService.convertAndSendTopic("datasource.create", datasourceBundle);
         return ret;
@@ -86,7 +83,7 @@ public class PublicDatasourceManager extends AbstractPublicResourceManager<Datas
         try {
             BeanUtils.copyProperties(ret, datasourceBundle);
         } catch (IllegalAccessException | InvocationTargetException e) {
-            e.printStackTrace();
+            logger.info("Could not copy properties.");
         }
 
         // sets public ids to providerId, serviceId
@@ -95,7 +92,7 @@ public class PublicDatasourceManager extends AbstractPublicResourceManager<Datas
         ret.setIdentifiers(published.getIdentifiers());
         ret.setId(published.getId());
         ret.getMetadata().setPublished(true);
-        logger.info(String.format("Updating public Datasource with id [%s]", ret.getId()));
+        logger.info("Updating public Datasource with id '{}'", ret.getId());
         ret = super.update(ret, null);
         jmsService.convertAndSendTopic("datasource.update", ret);
         return ret;
@@ -107,7 +104,7 @@ public class PublicDatasourceManager extends AbstractPublicResourceManager<Datas
             DatasourceBundle publicDatasourceBundle = get(publicResourceUtils.createPublicResourceId(
                     datasourceBundle.getDatasource().getId(),
                     datasourceBundle.getDatasource().getCatalogueId()));
-            logger.info(String.format("Deleting public Datasource with id [%s]", publicDatasourceBundle.getId()));
+            logger.info("Deleting public Datasource with id '{}'", publicDatasourceBundle.getId());
             super.delete(publicDatasourceBundle);
             jmsService.convertAndSendTopic("datasource.delete", publicDatasourceBundle);
         } catch (ResourceException | ResourceNotFoundException ignore) {

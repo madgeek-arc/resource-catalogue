@@ -50,7 +50,7 @@ public class ServiceExtensionsController {
     private static final Logger logger = LogManager.getLogger(ServiceExtensionsController.class);
     private final HelpdeskService helpdeskService;
     private final MonitoringService monitoringService;
-    private final ServiceBundleService serviceBundleService;
+    private final ServiceBundleService<ServiceBundle> serviceBundleService;
     @Value("${argo.grnet.monitoring.availability:}")
     private String monitoringAvailability;
     @Value("${argo.grnet.monitoring.status:}")
@@ -71,7 +71,7 @@ public class ServiceExtensionsController {
 
     ServiceExtensionsController(HelpdeskService helpdeskService,
                                 MonitoringService monitoringService,
-                                ServiceBundleService serviceBundleService,
+                                ServiceBundleService<ServiceBundle> serviceBundleService,
                                 GenericResourceService genericResourceService) {
         this.helpdeskService = helpdeskService;
         this.monitoringService = monitoringService;
@@ -147,7 +147,6 @@ public class ServiceExtensionsController {
                                                 @RequestParam String resourceType,
                                                 @Parameter(hidden = true) Authentication auth) {
         HelpdeskBundle helpdeskBundle = helpdeskService.add(new HelpdeskBundle(helpdesk, catalogueId), resourceType, auth);
-        logger.info("Added the Helpdesk with id '{}'", helpdesk.getId());
         return new ResponseEntity<>(helpdeskBundle.getHelpdesk(), HttpStatus.CREATED);
     }
 
@@ -160,7 +159,6 @@ public class ServiceExtensionsController {
         HelpdeskBundle helpdeskBundle = helpdeskService.get(helpdesk.getId());
         helpdeskBundle.setHelpdesk(helpdesk);
         helpdeskBundle = helpdeskService.update(helpdeskBundle, auth);
-        logger.info("Updated the Helpdesk with id '{}'", helpdesk.getId());
         return new ResponseEntity<>(helpdeskBundle.getHelpdesk(), HttpStatus.OK);
     }
 
@@ -175,10 +173,7 @@ public class ServiceExtensionsController {
         if (helpdeskBundle == null) {
             return new ResponseEntity<>(HttpStatus.GONE);
         }
-        logger.info("Deleting Helpdesk: {} of the Catalogue: {}", helpdeskBundle.getHelpdesk().getId(), helpdeskBundle.getCatalogueId());
-        // delete Helpdesk
         helpdeskService.delete(helpdeskBundle);
-        logger.info("Deleted the Helpdesk with id '{}' of the Catalogue '{}'", helpdeskBundle.getHelpdesk().getId(), helpdeskBundle.getCatalogueId());
         return new ResponseEntity<>(helpdeskBundle.getHelpdesk(), HttpStatus.OK);
     }
 
@@ -196,10 +191,7 @@ public class ServiceExtensionsController {
         if (helpdeskBundle == null) {
             return new ResponseEntity<>(HttpStatus.GONE);
         }
-        logger.info("Deleting Helpdesk: {} of the Catalogue: {}", helpdeskBundle.getHelpdesk().getId(), helpdeskBundle.getCatalogueId());
-        // delete Helpdesk
         helpdeskService.delete(helpdeskBundle);
-        logger.info("Deleted the Helpdesk with id '{}' of the Catalogue '{}'", helpdeskBundle.getHelpdesk().getId(), helpdeskBundle.getCatalogueId());
         return new ResponseEntity<>(helpdeskBundle.getHelpdesk(), HttpStatus.OK);
     }
 
@@ -208,8 +200,6 @@ public class ServiceExtensionsController {
     @PostMapping(path = "createPublicHelpdesk", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<HelpdeskBundle> createPublicHelpdesk(@RequestBody HelpdeskBundle helpdeskBundle, @Parameter(hidden = true) Authentication auth) {
-        logger.info("User '{}-{}' attempts to create a Public Helpdesk from Helpdesk '{}' of the '{}' Catalogue", User.of(auth).getFullName(),
-                User.of(auth).getEmail().toLowerCase(), helpdeskBundle.getId(), helpdeskBundle.getCatalogueId());
         return ResponseEntity.ok(helpdeskService.createPublicResource(helpdeskBundle, auth));
     }
 
@@ -225,7 +215,7 @@ public class ServiceExtensionsController {
             try {
                 helpdeskService.createPublicResource(helpdeskBundle, auth);
             } catch (ResourceException e) {
-                logger.info("Helpdesk with ID {} is already registered as Public", helpdeskBundle.getId());
+                logger.info("Helpdesk with ID '{}' is already registered as Public", helpdeskBundle.getId());
             }
         }
     }
@@ -304,7 +294,6 @@ public class ServiceExtensionsController {
                                                     @RequestParam String resourceType,
                                                     @Parameter(hidden = true) Authentication auth) {
         MonitoringBundle monitoringBundle = monitoringService.add(new MonitoringBundle(monitoring, catalogueId), resourceType, auth);
-        logger.info("Added the Monitoring with id '{}'", monitoring.getId());
         return new ResponseEntity<>(monitoringBundle.getMonitoring(), HttpStatus.CREATED);
     }
 
@@ -317,7 +306,6 @@ public class ServiceExtensionsController {
         MonitoringBundle monitoringBundle = monitoringService.get(monitoring.getId());
         monitoringBundle.setMonitoring(monitoring);
         monitoringBundle = monitoringService.update(monitoringBundle, auth);
-        logger.info("Updated the Monitoring with id '{}'", monitoring.getId());
         return new ResponseEntity<>(monitoringBundle.getMonitoring(), HttpStatus.OK);
     }
 
@@ -332,10 +320,7 @@ public class ServiceExtensionsController {
         if (monitoringBundle == null) {
             return new ResponseEntity<>(HttpStatus.GONE);
         }
-        logger.info("Deleting Monitoring: {} of the Catalogue: {}", monitoringBundle.getMonitoring().getId(), monitoringBundle.getCatalogueId());
-        // delete Monitoring
         monitoringService.delete(monitoringBundle);
-        logger.info("Deleted the Monitoring with id '{}' of the Catalogue '{}'", monitoringBundle.getMonitoring().getId(), monitoringBundle.getCatalogueId());
         return new ResponseEntity<>(monitoringBundle.getMonitoring(), HttpStatus.OK);
     }
 
@@ -353,10 +338,7 @@ public class ServiceExtensionsController {
         if (monitoringBundle == null) {
             return new ResponseEntity<>(HttpStatus.GONE);
         }
-        logger.info("Deleting Monitoring: {} of the Catalogue: {}", monitoringBundle.getMonitoring().getId(), monitoringBundle.getCatalogueId());
-        // delete Monitoring
         monitoringService.delete(monitoringBundle);
-        logger.info("Deleted the Monitoring with id '{}' of the Catalogue '{}'", monitoringBundle.getMonitoring().getId(), monitoringBundle.getCatalogueId());
         return new ResponseEntity<>(monitoringBundle.getMonitoring(), HttpStatus.OK);
     }
 
@@ -446,7 +428,7 @@ public class ServiceExtensionsController {
 
     private String getServiceMonitoringStatusValue(String serviceId) {
         try {
-            return getMonitoringStatus(serviceId.split("/")[0], serviceId.split("/")[1], false).get(0).getValue();
+            return getMonitoringStatus(serviceId.split("/")[0], serviceId.split("/")[1], false).getFirst().getValue();
         } catch (NullPointerException e) {
             return "";
         }
@@ -457,8 +439,6 @@ public class ServiceExtensionsController {
     @PostMapping(path = "createPublicMonitoring", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<MonitoringBundle> createPublicMonitoring(@RequestBody MonitoringBundle monitoringBundle, @Parameter(hidden = true) Authentication auth) {
-        logger.info("User '{}-{}' attempts to create a Public Monitoring from Monitoring '{}' of the '{}' Catalogue", User.of(auth).getFullName(),
-                User.of(auth).getEmail().toLowerCase(), monitoringBundle.getId(), monitoringBundle.getCatalogueId());
         return ResponseEntity.ok(monitoringService.createPublicResource(monitoringBundle, auth));
     }
 
@@ -474,7 +454,7 @@ public class ServiceExtensionsController {
             try {
                 monitoringService.createPublicResource(monitoringBundle, auth);
             } catch (ResourceException e) {
-                logger.info("Monitoring with ID {} is already registered as Public", monitoringBundle.getId());
+                logger.info("Monitoring with ID '{}' is already registered as Public", monitoringBundle.getId());
             }
         }
     }

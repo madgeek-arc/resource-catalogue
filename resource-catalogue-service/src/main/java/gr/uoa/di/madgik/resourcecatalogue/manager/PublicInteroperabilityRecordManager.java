@@ -8,7 +8,6 @@ import gr.uoa.di.madgik.registry.service.ResourceCRUDService;
 import gr.uoa.di.madgik.resourcecatalogue.domain.AlternativeIdentifier;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Identifiers;
 import gr.uoa.di.madgik.resourcecatalogue.domain.InteroperabilityRecordBundle;
-import gr.uoa.di.madgik.resourcecatalogue.service.SecurityService;
 import gr.uoa.di.madgik.resourcecatalogue.utils.JmsService;
 import gr.uoa.di.madgik.resourcecatalogue.utils.ProviderResourcesCommonMethods;
 import gr.uoa.di.madgik.resourcecatalogue.utils.PublicResourceUtils;
@@ -26,16 +25,14 @@ public class PublicInteroperabilityRecordManager extends AbstractPublicResourceM
 
     private static final Logger logger = LoggerFactory.getLogger(PublicInteroperabilityRecordManager.class);
     private final JmsService jmsService;
-    private final SecurityService securityService;
     private final ProviderResourcesCommonMethods commonMethods;
     private final PublicResourceUtils publicResourceUtils;
 
-    public PublicInteroperabilityRecordManager(JmsService jmsService, SecurityService securityService,
+    public PublicInteroperabilityRecordManager(JmsService jmsService,
                                                ProviderResourcesCommonMethods commonMethods,
                                                PublicResourceUtils publicResourceUtils) {
         super(InteroperabilityRecordBundle.class);
         this.jmsService = jmsService;
-        this.securityService = securityService;
         this.commonMethods = commonMethods;
         this.publicResourceUtils = publicResourceUtils;
     }
@@ -73,7 +70,7 @@ public class PublicInteroperabilityRecordManager extends AbstractPublicResourceM
             }
         }
         if (pid.equalsIgnoreCase("no_pid")) {
-            logger.info("Interoperability Record with id {} does not have a PID registered under its AlternativeIdentifiers.",
+            logger.info("Interoperability Record with id '{}' does not have a PID registered under its AlternativeIdentifiers.",
                     interoperabilityRecordBundle.getId());
         } else {
             //TODO: enable when we have PID configuration properties for Beyond
@@ -81,8 +78,7 @@ public class PublicInteroperabilityRecordManager extends AbstractPublicResourceM
 //            commonMethods.postPID(pid);
         }
         InteroperabilityRecordBundle ret;
-        logger.info(String.format("Interoperability Record [%s] is being published with id [%s]", lowerLevelResourceId,
-                interoperabilityRecordBundle.getId()));
+        logger.info("Interoperability Record '{}' is being published with id '{}'", lowerLevelResourceId, interoperabilityRecordBundle.getId());
         ret = super.add(interoperabilityRecordBundle, null);
         jmsService.convertAndSendTopic("interoperability_record.create", interoperabilityRecordBundle);
         return ret;
@@ -99,7 +95,7 @@ public class PublicInteroperabilityRecordManager extends AbstractPublicResourceM
         try {
             BeanUtils.copyProperties(ret, interoperabilityRecordBundle);
         } catch (IllegalAccessException | InvocationTargetException e) {
-            e.printStackTrace();
+            logger.info("Could not copy properties.");
         }
 
         // sets public id to providerId
@@ -109,7 +105,7 @@ public class PublicInteroperabilityRecordManager extends AbstractPublicResourceM
         ret.setIdentifiers(published.getIdentifiers());
         ret.setId(published.getId());
         ret.getMetadata().setPublished(true);
-        logger.info(String.format("Updating public Interoperability Record with id [%s]", ret.getId()));
+        logger.info("Updating public Interoperability Record with id '{}'", ret.getId());
         ret = super.update(ret, null);
         jmsService.convertAndSendTopic("interoperability_record.update", ret);
         return ret;
@@ -121,7 +117,7 @@ public class PublicInteroperabilityRecordManager extends AbstractPublicResourceM
             InteroperabilityRecordBundle publicInteroperabilityRecordBundle = get(publicResourceUtils.createPublicResourceId(
                     interoperabilityRecordBundle.getInteroperabilityRecord().getId(),
                     interoperabilityRecordBundle.getInteroperabilityRecord().getCatalogueId()));
-            logger.info(String.format("Deleting public Interoperability Record with id [%s]", publicInteroperabilityRecordBundle.getId()));
+            logger.info("Deleting public Interoperability Record with id '{}'", publicInteroperabilityRecordBundle.getId());
             super.delete(publicInteroperabilityRecordBundle);
             jmsService.convertAndSendTopic("interoperability_record.delete", publicInteroperabilityRecordBundle);
         } catch (ResourceException | ResourceNotFoundException ignore) {

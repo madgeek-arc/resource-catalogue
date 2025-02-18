@@ -12,7 +12,6 @@ import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Component
 public class SimpleMailService implements MailService {
@@ -145,10 +144,10 @@ public class SimpleMailService implements MailService {
         List<String> addrTo = new ArrayList<>();
         List<String> addrCc = new ArrayList<>();
         if (to != null) {
-            addrTo.addAll(Arrays.stream(to.split(",")).filter(Objects::nonNull).collect(Collectors.toList()));
+            addrTo.addAll(Arrays.stream(to.split(",")).filter(obj -> true).toList());
         }
         if (cc != null) {
-            addrTo.addAll(Arrays.stream(cc.split(",")).filter(Objects::nonNull).collect(Collectors.toList()));
+            addrTo.addAll(Arrays.stream(cc.split(",")).filter(obj -> true).toList());
         }
         sendMail(addrTo, addrCc, subject, text);
     }
@@ -160,9 +159,9 @@ public class SimpleMailService implements MailService {
 
     private InternetAddress[] createAddresses(List<String> emailAddresses) {
         List<InternetAddress> addresses = new ArrayList<>();
-        for (int i = 0; i < emailAddresses.size(); i++) {
+        for (String emailAddress : emailAddresses) {
             try {
-                addresses.add(new InternetAddress(emailAddresses.get(i)));
+                addresses.add(new InternetAddress(emailAddress));
             } catch (AddressException e) {
                 logger.warn(e.getMessage());
             }

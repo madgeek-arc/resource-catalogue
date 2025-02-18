@@ -27,7 +27,7 @@ public class InternalToPublicConsistency {
     private static final Logger logger = LoggerFactory.getLogger(InternalToPublicConsistency.class);
 
     private final ProviderService providerService;
-    private final ServiceBundleService serviceBundleService;
+    private final ServiceBundleService<ServiceBundle> serviceBundleService;
     private final TrainingResourceService trainingResourceService;
     private final InteroperabilityRecordService interoperabilityRecordService;
     private final ResourceInteroperabilityRecordService resourceInteroperabilityRecordService;
@@ -55,7 +55,7 @@ public class InternalToPublicConsistency {
     private String consistencyCC;
 
     public InternalToPublicConsistency(ProviderService providerService,
-                                       ServiceBundleService serviceBundleService,
+                                       ServiceBundleService<ServiceBundle> serviceBundleService,
                                        TrainingResourceService trainingResourceService,
                                        InteroperabilityRecordService interoperabilityRecordService,
                                        ResourceInteroperabilityRecordService resourceInteroperabilityRecordService,

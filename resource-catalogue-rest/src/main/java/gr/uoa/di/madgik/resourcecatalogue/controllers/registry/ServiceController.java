@@ -7,7 +7,10 @@ import gr.uoa.di.madgik.registry.exception.ResourceException;
 import gr.uoa.di.madgik.resourcecatalogue.annotations.Browse;
 import gr.uoa.di.madgik.resourcecatalogue.annotations.BrowseCatalogue;
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
-import gr.uoa.di.madgik.resourcecatalogue.service.*;
+import gr.uoa.di.madgik.resourcecatalogue.service.DraftResourceService;
+import gr.uoa.di.madgik.resourcecatalogue.service.GenericResourceService;
+import gr.uoa.di.madgik.resourcecatalogue.service.ProviderService;
+import gr.uoa.di.madgik.resourcecatalogue.service.ServiceBundleService;
 import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -22,7 +25,6 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.util.MultiValueMap;
@@ -45,7 +47,6 @@ public class ServiceController {
     private final DraftResourceService<ServiceBundle> draftServiceService;
     private final ProviderService providerService;
     private final GenericResourceService genericResourceService;
-    private final SecurityService securityService;
 
     @Value("${auditing.interval:6}")
     private String auditingInterval;
@@ -59,13 +60,11 @@ public class ServiceController {
     ServiceController(ServiceBundleService<ServiceBundle> service,
                       DraftResourceService<ServiceBundle> draftServiceService,
                       ProviderService provider,
-                      GenericResourceService genericResourceService,
-                      SecurityService securityService) {
+                      GenericResourceService genericResourceService) {
         this.serviceBundleService = service;
         this.draftServiceService = draftServiceService;
         this.providerService = provider;
         this.genericResourceService = genericResourceService;
-        this.securityService = securityService;
     }
 
     @DeleteMapping(path = "{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE})
@@ -132,10 +131,9 @@ public class ServiceController {
         return new ResponseEntity<>(resource, HttpStatus.OK);
     }
 
-    @Operation(summary = "Validates the Resource without actually changing the repository.")
+    @Operation(summary = "Validates the Service without actually changing the repository.")
     @PostMapping(path = "validate", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<Void> validate(@RequestBody Service service) {
-        logger.info("Validated Resource with name '{}' and id '{}'", service.getName(), service.getId());
         serviceBundleService.validate(new ServiceBundle(service));
         return new ResponseEntity<>(HttpStatus.OK);
     }
@@ -252,7 +250,7 @@ public class ServiceController {
         List<Service> serviceTemplates = new ArrayList<>();
         for (ProviderBundle provider : pendingProviders) {
             if (provider.getTemplateStatus().equals("pending template")) {
-                serviceTemplates.addAll(serviceBundleService.getInactiveResources(provider.getId()).stream().map(ServiceBundle::getService).collect(Collectors.toList()));
+                serviceTemplates.addAll(serviceBundleService.getInactiveResources(provider.getId()).stream().map(ServiceBundle::getService).toList());
             }
         }
         Browsing<Service> services = new Browsing<>(serviceTemplates.size(), 0, serviceTemplates.size(), serviceTemplates, null);
@@ -311,7 +309,7 @@ public class ServiceController {
         return ResponseEntity.ok(loggingInfoHistory);
     }
 
-    // Send emails to Providers whose Resources are outdated
+    // Send emails to Providers with outdated Resources
     @GetMapping(path = {"sendEmailForOutdatedResource/{prefix}/{suffix}"}, produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     public void sendEmailNotificationsToProvidersWithOutdatedResources(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
@@ -338,25 +336,25 @@ public class ServiceController {
                 .getResultsWithoutFacets(createFacetFilter(catalogueId, false, "service")).getResults()
                 .stream().map(serviceBundle -> (ServiceBundle) serviceBundle)
                 .map(c -> new gr.uoa.di.madgik.resourcecatalogue.dto.Value(c.getId(), c.getService().getResourceOrganisation() + " - " + c.getService().getName()))
-                .collect(Collectors.toList());
+                .toList();
         List<gr.uoa.di.madgik.resourcecatalogue.dto.Value> catalogueRelatedTrainingResources = genericResourceService
                 .getResultsWithoutFacets(createFacetFilter(catalogueId, false, "training_resource")).getResults()
                 .stream().map(trainingResourceBundle -> (TrainingResourceBundle) trainingResourceBundle)
                 .map(c -> new gr.uoa.di.madgik.resourcecatalogue.dto.Value(c.getId(), c.getTrainingResource().getResourceOrganisation() + " - " + c.getTrainingResource().getTitle()))
-                .collect(Collectors.toList());
+                .toList();
         // fetch non-catalogueId related public Resources
         List<gr.uoa.di.madgik.resourcecatalogue.dto.Value> publicServices = genericResourceService
                 .getResultsWithoutFacets(createFacetFilter(catalogueId, true, "service")).getResults()
                 .stream().map(serviceBundle -> (ServiceBundle) serviceBundle)
                 .filter(c -> !c.getService().getCatalogueId().equals(catalogueId))
                 .map(c -> new gr.uoa.di.madgik.resourcecatalogue.dto.Value(c.getId(), c.getService().getResourceOrganisation() + " - " + c.getService().getName()))
-                .collect(Collectors.toList());
+                .toList();
         List<gr.uoa.di.madgik.resourcecatalogue.dto.Value> publicTrainingResources = genericResourceService
                 .getResultsWithoutFacets(createFacetFilter(catalogueId, true, "training_resource")).getResults()
                 .stream().map(trainingResourceBundle -> (TrainingResourceBundle) trainingResourceBundle)
                 .filter(c -> !c.getTrainingResource().getCatalogueId().equals(catalogueId))
                 .map(c -> new gr.uoa.di.madgik.resourcecatalogue.dto.Value(c.getId(), c.getTrainingResource().getResourceOrganisation() + " - " + c.getTrainingResource().getTitle()))
-                .collect(Collectors.toList());
+                .toList();
 
         allResources.addAll(catalogueRelatedServices);
         allResources.addAll(catalogueRelatedTrainingResources);
@@ -458,8 +456,8 @@ public class ServiceController {
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<ServiceBundle> addBundle(@RequestBody ServiceBundle service, Authentication authentication) {
         ResponseEntity<ServiceBundle> ret = new ResponseEntity<>(serviceBundleService.add(service, authentication), HttpStatus.OK);
-        logger.info("User '{}' added ServiceBundle '{}' with id: {} and version: {}", authentication, service.getService().getName(), service.getService().getId(), service.getService().getVersion());
-        logger.info(" Service Organisation: {}", service.getService().getResourceOrganisation());
+        logger.info("User '{}' added ServiceBundle {} with id: '{}' and version: '{}'",
+                authentication, service.getService().getName(), service.getService().getId(), service.getService().getVersion());
         return ret;
     }
 
@@ -467,7 +465,8 @@ public class ServiceController {
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<ServiceBundle> updateBundle(@RequestBody ServiceBundle service, @Parameter(hidden = true) Authentication authentication) {
         ResponseEntity<ServiceBundle> ret = new ResponseEntity<>(serviceBundleService.update(service, authentication), HttpStatus.OK);
-        logger.info("User '{}' updated ServiceBundle '{}' with id: {}", authentication, service.getService().getName(), service.getService().getId());
+        logger.info("User '{}' updated ServiceBundle {} with id: '{}'",
+                authentication, service.getService().getName(), service.getService().getId());
         return ret;
     }
 

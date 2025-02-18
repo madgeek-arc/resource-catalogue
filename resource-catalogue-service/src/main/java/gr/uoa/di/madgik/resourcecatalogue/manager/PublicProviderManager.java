@@ -8,7 +8,6 @@ import gr.uoa.di.madgik.registry.service.ResourceCRUDService;
 import gr.uoa.di.madgik.resourcecatalogue.domain.AlternativeIdentifier;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Identifiers;
 import gr.uoa.di.madgik.resourcecatalogue.domain.ProviderBundle;
-import gr.uoa.di.madgik.resourcecatalogue.service.SecurityService;
 import gr.uoa.di.madgik.resourcecatalogue.utils.FacetLabelService;
 import gr.uoa.di.madgik.resourcecatalogue.utils.JmsService;
 import gr.uoa.di.madgik.resourcecatalogue.utils.ProviderResourcesCommonMethods;
@@ -26,18 +25,16 @@ public class PublicProviderManager extends ResourceManager<ProviderBundle> imple
 
     private static final Logger logger = LoggerFactory.getLogger(PublicProviderManager.class);
     private final JmsService jmsService;
-    private final SecurityService securityService;
     private final ProviderResourcesCommonMethods commonMethods;
     private final FacetLabelService facetLabelService;
     private final PublicResourceUtils publicResourceUtils;
 
-    public PublicProviderManager(JmsService jmsService, SecurityService securityService,
+    public PublicProviderManager(JmsService jmsService,
                                  ProviderResourcesCommonMethods commonMethods,
                                  FacetLabelService facetLabelService,
                                  PublicResourceUtils publicResourceUtils) {
         super(ProviderBundle.class);
         this.jmsService = jmsService;
-        this.securityService = securityService;
         this.commonMethods = commonMethods;
         this.facetLabelService = facetLabelService;
         this.publicResourceUtils = publicResourceUtils;
@@ -74,7 +71,7 @@ public class PublicProviderManager extends ResourceManager<ProviderBundle> imple
             }
         }
         if (pid.equalsIgnoreCase("no_pid")) {
-            logger.info("Provider with id {} does not have a PID registered under its AlternativeIdentifiers.",
+            logger.info("Provider with id '{}' does not have a PID registered under its AlternativeIdentifiers.",
                     providerBundle.getId());
         } else {
             //TODO: enable when we have PID configuration properties for Beyond
@@ -82,7 +79,7 @@ public class PublicProviderManager extends ResourceManager<ProviderBundle> imple
 //            commonMethods.postPID(pid);
         }
         ProviderBundle ret;
-        logger.info(String.format("Provider [%s] is being published with id [%s]", lowerLevelProviderId, providerBundle.getId()));
+        logger.info("Provider '{}' is being published with id '{}'", lowerLevelProviderId, providerBundle.getId());
         ret = super.add(providerBundle, null);
         jmsService.convertAndSendTopic("provider.create", providerBundle);
         return ret;
@@ -97,14 +94,14 @@ public class PublicProviderManager extends ResourceManager<ProviderBundle> imple
         try {
             BeanUtils.copyProperties(ret, providerBundle);
         } catch (IllegalAccessException | InvocationTargetException e) {
-            e.printStackTrace();
+            logger.info("Could not copy properties.");
         }
 
         ret.getProvider().setAlternativeIdentifiers(published.getProvider().getAlternativeIdentifiers());
         ret.setIdentifiers(published.getIdentifiers());
         ret.setId(published.getId());
         ret.getMetadata().setPublished(true);
-        logger.info(String.format("Updating public Provider with id [%s]", ret.getId()));
+        logger.info("Updating public Provider with id '{}'", ret.getId());
         ret = super.update(ret, null);
         jmsService.convertAndSendTopic("provider.update", ret);
         return ret;
@@ -116,7 +113,7 @@ public class PublicProviderManager extends ResourceManager<ProviderBundle> imple
             ProviderBundle publicProviderBundle = get(publicResourceUtils.createPublicResourceId(
                     providerBundle.getProvider().getId(),
                     providerBundle.getProvider().getCatalogueId()));
-            logger.info(String.format("Deleting public Provider with id [%s]", publicProviderBundle.getId()));
+            logger.info("Deleting public Provider with id '{}'", publicProviderBundle.getId());
             super.delete(publicProviderBundle);
             jmsService.convertAndSendTopic("provider.delete", publicProviderBundle);
         } catch (ResourceException | ResourceNotFoundException ignore) {

@@ -144,10 +144,9 @@ public class TrainingResourceController {
 
     @Operation(summary = "Validates the Training Resource without actually changing the repository.")
     @PostMapping(path = "validate", produces = {MediaType.APPLICATION_JSON_VALUE})
-    public ResponseEntity<Boolean> validate(@RequestBody TrainingResource trainingResource) {
-        ResponseEntity<Boolean> ret = ResponseEntity.ok(trainingResourceService.validateTrainingResource(new TrainingResourceBundle(trainingResource)));
-        logger.info("Validated Training Resource with title '{}' and id '{}'", trainingResource.getTitle(), trainingResource.getId());
-        return ret;
+    public ResponseEntity<Void> validate(@RequestBody TrainingResource trainingResource) {
+        trainingResourceService.validate(new TrainingResourceBundle(trainingResource));
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @Operation(summary = "Filter a list of Training Resources based on a set of filters or get a list of all Training Resources in the Catalogue.")
@@ -262,7 +261,8 @@ public class TrainingResourceController {
         List<TrainingResource> serviceTemplates = new ArrayList<>();
         for (ProviderBundle provider : pendingProviders) {
             if (provider.getTemplateStatus().equals("pending template")) {
-                serviceTemplates.addAll(trainingResourceService.getInactiveResources(provider.getId()).stream().map(TrainingResourceBundle::getTrainingResource).collect(Collectors.toList()));
+                serviceTemplates.addAll(trainingResourceService.getInactiveResources(
+                        provider.getId()).stream().map(TrainingResourceBundle::getTrainingResource).toList());
             }
         }
         Browsing<TrainingResource> trainingResources = new Browsing<>(serviceTemplates.size(), 0, serviceTemplates.size(), serviceTemplates, null);
@@ -363,7 +363,7 @@ public class TrainingResourceController {
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<TrainingResourceBundle> add(@RequestBody TrainingResourceBundle trainingResourceBundle, Authentication authentication) {
         ResponseEntity<TrainingResourceBundle> ret = new ResponseEntity<>(trainingResourceService.add(trainingResourceBundle, authentication), HttpStatus.OK);
-        logger.info("Added TrainingResourceBundle '{}' with id: {}", trainingResourceBundle.getTrainingResource().getTitle(), trainingResourceBundle.getTrainingResource().getId());
+        logger.info("Added TrainingResourceBundle {} with id: '{}'", trainingResourceBundle.getTrainingResource().getTitle(), trainingResourceBundle.getTrainingResource().getId());
         return ret;
     }
 
@@ -371,7 +371,7 @@ public class TrainingResourceController {
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<TrainingResourceBundle> update(@RequestBody TrainingResourceBundle trainingResourceBundle, @Parameter(hidden = true) Authentication authentication) {
         ResponseEntity<TrainingResourceBundle> ret = new ResponseEntity<>(trainingResourceService.update(trainingResourceBundle, authentication), HttpStatus.OK);
-        logger.info("Updated TrainingResourceBundle '{}' with id: {}", trainingResourceBundle.getTrainingResource().getTitle(), trainingResourceBundle.getTrainingResource().getId());
+        logger.info("Updated TrainingResourceBundle {} with id: '{}'", trainingResourceBundle.getTrainingResource().getTitle(), trainingResourceBundle.getTrainingResource().getId());
         return ret;
     }
 

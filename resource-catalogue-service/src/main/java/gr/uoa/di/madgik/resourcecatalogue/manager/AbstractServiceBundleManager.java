@@ -110,18 +110,6 @@ public abstract class AbstractServiceBundleManager<T extends ServiceBundle> exte
         return deserialize(resource);
     }
 
-    // TODO: REMOVE ME
-    private T checkIdExistenceInOtherCatalogues(String id) {
-        FacetFilter ff = new FacetFilter();
-        ff.setQuantity(maxQuantity);
-        ff.addFilter("resource_internal_id", id);
-        List<T> allResources = getAll(ff, null).getResults();
-        if (allResources.size() > 0) {
-            return allResources.get(0);
-        }
-        return null;
-    }
-
     @Override
     public Browsing<T> getAll(FacetFilter filter, Authentication auth) {
         // if user is Unauthorized, return active/latest ONLY
@@ -204,18 +192,10 @@ public abstract class AbstractServiceBundleManager<T extends ServiceBundle> exte
 
     @Override
     public T validate(T serviceBundle) {
-        Service service = serviceBundle.getService();
-        //If we want to reject bad vocab ids instead of silently accept, here's where we do it
-        logger.debug("Validating Resource with id: {}", service.getId());
-
-        try {
-            fieldValidator.validate(serviceBundle);
-        } catch (IllegalAccessException e) {
-            logger.error("", e);
-        }
+        logger.debug("Validating Service with id: '{}'", serviceBundle.getId());
         serviceValidator.validate(serviceBundle, null);
 
-        return serviceBundle;
+        return super.validate(serviceBundle);
     }
 
     @Override
@@ -290,7 +270,7 @@ public abstract class AbstractServiceBundleManager<T extends ServiceBundle> exte
                 .cqlQuery(String.format("resource_internal_id = \"%s\"  AND catalogue_id = \"%s\"", id, catalogueId),
                         getResourceTypeName(), maxQuantity, 0, "modifiedAt", "DESC");
         if (resources.getTotal() > 0) {
-            return resources.getResults().get(0);
+            return resources.getResults().getFirst();
         }
         return null;
     }
@@ -470,8 +450,8 @@ public abstract class AbstractServiceBundleManager<T extends ServiceBundle> exte
             }
         }
         Collections.shuffle(servicesToBeAudited);
-        for (int i = servicesToBeAudited.size() - 1; i > ff.getQuantity() - 1; i--) {
-            servicesToBeAudited.remove(i);
+        if (servicesToBeAudited.size() > ff.getQuantity()) {
+            servicesToBeAudited.subList(ff.getQuantity(), servicesToBeAudited.size()).clear();
         }
         return new Browsing<>(servicesToBeAudited.size(), 0, servicesToBeAudited.size(), servicesToBeAudited, serviceBrowsing.getFacets());
     }

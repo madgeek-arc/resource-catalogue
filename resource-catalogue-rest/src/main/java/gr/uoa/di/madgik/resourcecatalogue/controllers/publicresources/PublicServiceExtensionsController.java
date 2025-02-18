@@ -6,13 +6,15 @@ import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.resourcecatalogue.annotations.Browse;
 import gr.uoa.di.madgik.resourcecatalogue.annotations.BrowseCatalogue;
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
-import gr.uoa.di.madgik.resourcecatalogue.service.*;
+import gr.uoa.di.madgik.resourcecatalogue.service.GenericResourceService;
+import gr.uoa.di.madgik.resourcecatalogue.service.HelpdeskService;
+import gr.uoa.di.madgik.resourcecatalogue.service.MonitoringService;
+import gr.uoa.di.madgik.resourcecatalogue.service.SecurityService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -33,22 +35,16 @@ public class PublicServiceExtensionsController {
 
     private final SecurityService securityService;
     private final HelpdeskService helpdeskService;
-    private final ResourceService<HelpdeskBundle> publicHelpdeskManager;
     private final MonitoringService monitoringService;
-    private final ResourceService<MonitoringBundle> publicMonitoringManager;
     private final GenericResourceService genericResourceService;
 
     public PublicServiceExtensionsController(SecurityService securityService,
                                              HelpdeskService helpdeskService,
                                              MonitoringService monitoringService,
-                                             @Qualifier("publicHelpdeskManager") ResourceService<HelpdeskBundle> publicHelpdeskManager,
-                                             @Qualifier("publicMonitoringManager") ResourceService<MonitoringBundle> publicMonitoringManager,
                                              GenericResourceService genericResourceService) {
         this.securityService = securityService;
         this.helpdeskService = helpdeskService;
         this.monitoringService = monitoringService;
-        this.publicHelpdeskManager = publicHelpdeskManager;
-        this.publicMonitoringManager = publicMonitoringManager;
         this.genericResourceService = genericResourceService;
     }
 

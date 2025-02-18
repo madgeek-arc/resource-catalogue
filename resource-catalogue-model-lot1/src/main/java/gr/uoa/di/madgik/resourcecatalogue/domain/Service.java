@@ -644,7 +644,7 @@ public class Service implements Identifiable {
     private boolean stringListIsEmpty(List<String> list) {
         if (list == null || list.isEmpty()) {
             return true;
-        } else return list.size() == 1 && "".equals(list.get(0));
+        } else return list.size() == 1 && "".equals(list.getFirst());
     }
 
     public enum Field {

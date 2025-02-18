@@ -131,7 +131,7 @@ public class DraftProviderManager extends ResourceManager<ProviderBundle> implem
         try {
             bundle = providerManager.update(bundle, auth);
         } catch (ResourceNotFoundException e) {
-            e.printStackTrace();
+            logger.info("Provider with id '{}' does not exist", bundle.getId());
         }
 
         registrationMailService.sendEmailsToNewlyAddedProviderAdmins(bundle, null);
@@ -162,6 +162,6 @@ public class DraftProviderManager extends ResourceManager<ProviderBundle> implem
                 .cqlQuery(String.format("resource_internal_id = \"%s\" AND catalogue_id = \"%s\"", id, catalogueId),
                         getResourceTypeName());
         assert resources != null;
-        return resources.getTotal() == 0 ? null : resources.getResults().get(0);
+        return resources.getTotal() == 0 ? null : resources.getResults().getFirst();
     }
 }

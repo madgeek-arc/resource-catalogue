@@ -7,7 +7,6 @@ import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.registry.service.ResourceCRUDService;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Identifiers;
 import gr.uoa.di.madgik.resourcecatalogue.domain.ResourceInteroperabilityRecordBundle;
-import gr.uoa.di.madgik.resourcecatalogue.service.SecurityService;
 import gr.uoa.di.madgik.resourcecatalogue.utils.JmsService;
 import gr.uoa.di.madgik.resourcecatalogue.utils.PublicResourceUtils;
 import org.apache.commons.beanutils.BeanUtils;
@@ -24,14 +23,12 @@ public class PublicResourceInteroperabilityRecordManager extends AbstractPublicR
 
     private static final Logger logger = LoggerFactory.getLogger(PublicResourceInteroperabilityRecordManager.class);
     private final JmsService jmsService;
-    private final SecurityService securityService;
     private final PublicResourceUtils publicResourceUtils;
 
-    public PublicResourceInteroperabilityRecordManager(JmsService jmsService, SecurityService securityService,
+    public PublicResourceInteroperabilityRecordManager(JmsService jmsService,
                                                        PublicResourceUtils publicResourceUtils) {
         super(ResourceInteroperabilityRecordBundle.class);
         this.jmsService = jmsService;
-        this.securityService = securityService;
         this.publicResourceUtils = publicResourceUtils;
     }
 
@@ -58,7 +55,7 @@ public class PublicResourceInteroperabilityRecordManager extends AbstractPublicR
 
         resourceInteroperabilityRecordBundle.getMetadata().setPublished(true);
         ResourceInteroperabilityRecordBundle ret;
-        logger.info(String.format("ResourceInteroperabilityRecordBundle [%s] is being published with id [%s]", lowerLevelResourceId, resourceInteroperabilityRecordBundle.getId()));
+        logger.info("ResourceInteroperabilityRecordBundle '{}' is being published with id '{}'", lowerLevelResourceId, resourceInteroperabilityRecordBundle.getId());
         ret = super.add(resourceInteroperabilityRecordBundle, null);
         jmsService.convertAndSendTopic("resource_interoperability_record.create", resourceInteroperabilityRecordBundle);
         return ret;
@@ -75,7 +72,7 @@ public class PublicResourceInteroperabilityRecordManager extends AbstractPublicR
         try {
             BeanUtils.copyProperties(ret, resourceInteroperabilityRecordBundle);
         } catch (IllegalAccessException | InvocationTargetException e) {
-            e.printStackTrace();
+            logger.info("Could not copy properties.");
         }
 
         // sets public ids to resourceId and interoperabilityRecordIds
@@ -84,7 +81,7 @@ public class PublicResourceInteroperabilityRecordManager extends AbstractPublicR
         ret.setIdentifiers(published.getIdentifiers());
         ret.setId(published.getId());
         ret.getMetadata().setPublished(true);
-        logger.info(String.format("Updating public ResourceInteroperabilityRecordBundle with id [%s]", ret.getId()));
+        logger.info("Updating public ResourceInteroperabilityRecordBundle with id '{}'", ret.getId());
         ret = super.update(ret, null);
         jmsService.convertAndSendTopic("resource_interoperability_record.update", ret);
         return ret;
@@ -96,7 +93,7 @@ public class PublicResourceInteroperabilityRecordManager extends AbstractPublicR
             ResourceInteroperabilityRecordBundle publicResourceInteroperabilityRecordBundle = get(publicResourceUtils.createPublicResourceId(
                     resourceInteroperabilityRecordBundle.getResourceInteroperabilityRecord().getId(),
                     resourceInteroperabilityRecordBundle.getResourceInteroperabilityRecord().getCatalogueId()));
-            logger.info(String.format("Deleting public ResourceInteroperabilityRecordBundle with id [%s]", publicResourceInteroperabilityRecordBundle.getId()));
+            logger.info("Deleting public ResourceInteroperabilityRecordBundle with id '{}'", publicResourceInteroperabilityRecordBundle.getId());
             super.delete(publicResourceInteroperabilityRecordBundle);
             jmsService.convertAndSendTopic("resource_interoperability_record.delete", publicResourceInteroperabilityRecordBundle);
         } catch (ResourceException | ResourceNotFoundException ignore) {

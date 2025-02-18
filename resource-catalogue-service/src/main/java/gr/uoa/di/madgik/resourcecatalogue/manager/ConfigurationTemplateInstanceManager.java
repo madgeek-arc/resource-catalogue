@@ -71,7 +71,7 @@ public class ConfigurationTemplateInstanceManager extends ResourceManager<Config
         configurationTemplateInstanceBundle.setMetadata(Metadata.createMetadata(AuthenticationInfo.getFullName(auth), AuthenticationInfo.getEmail(auth).toLowerCase()));
         List<LoggingInfo> loggingInfoList = commonMethods.returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(configurationTemplateInstanceBundle, auth);
         configurationTemplateInstanceBundle.setLoggingInfo(loggingInfoList);
-        configurationTemplateInstanceBundle.setLatestOnboardingInfo(loggingInfoList.get(0));
+        configurationTemplateInstanceBundle.setLatestOnboardingInfo(loggingInfoList.getFirst());
 
         // active
         configurationTemplateInstanceBundle.setActive(true);
@@ -85,7 +85,8 @@ public class ConfigurationTemplateInstanceManager extends ResourceManager<Config
 
     @Override
     public ConfigurationTemplateInstanceBundle update(ConfigurationTemplateInstanceBundle configurationTemplateInstanceBundle, Authentication auth) {
-        logger.trace("Attempting to update the ConfigurationTemplateInstance with id '{}'", configurationTemplateInstanceBundle.getId());
+        logger.trace("Attempting to update the ConfigurationTemplateInstance with id '{}'",
+                configurationTemplateInstanceBundle.getId());
 
         ConfigurationTemplateInstanceBundle ret = ObjectUtils.clone(configurationTemplateInstanceBundle);
         Resource existingResource = whereID(ret.getId(), true);

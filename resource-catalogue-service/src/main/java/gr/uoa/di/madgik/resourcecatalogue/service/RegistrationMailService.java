@@ -49,7 +49,6 @@ public class RegistrationMailService {
     private final String catalogueName;
     private final String homepage;
     private final String helpdeskEmail;
-    private final String helpdeskCC;
     private final String monitoringEmail;
     private final boolean enableAdminNotifications;
     private final boolean enableProviderNotifications;
@@ -89,7 +88,6 @@ public class RegistrationMailService {
         catalogueName = properties.getName();
         this.registrationEmail = properties.getEmails().getRegistrationEmails().getTo();
         this.helpdeskEmail = properties.getEmails().getHelpdeskEmails().getTo();
-        this.helpdeskCC = properties.getEmails().getHelpdeskEmails().getCc();
         this.monitoringEmail = properties.getEmails().getMonitoringEmails().getTo();
         this.enableAdminNotifications = properties.getEmails().isAdminNotifications();
         this.enableProviderNotifications = properties.getEmails().isProviderNotifications();
@@ -186,8 +184,6 @@ public class RegistrationMailService {
 
         Bundle<?> template;
         switch (afterReturningFrom) {
-            case "providerManager":
-                break;
             case "serviceBundleManager":
                 template = serviceBundleManager.getResourceBundles(providerBundle.getId(),
                         securityService.getAdminAccess()).getFirst();
@@ -200,6 +196,7 @@ public class RegistrationMailService {
                 updateRootAccordingToResourceType(template, emailBasicInfoUser);
                 emailBasicInfoUser.updateRoot("resourceType", "training-resource");
                 break;
+            case "providerManager":
             default:
                 break;
         }

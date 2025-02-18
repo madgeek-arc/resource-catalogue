@@ -19,6 +19,7 @@ import org.springframework.web.client.RestTemplate;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
+import java.net.URI;
 import java.net.URL;
 import java.util.*;
 import java.util.regex.Pattern;
@@ -31,7 +32,7 @@ public class FieldValidator {
 
     private final VocabularyService vocabularyService;
     private final ProviderManager providerService;
-    private final ServiceBundleService serviceBundleService;
+    private final ServiceBundleService<ServiceBundle> serviceBundleService;
     private final TrainingResourceService trainingResourceService;
     private final CatalogueService catalogueService;
     private final InteroperabilityRecordService interoperabilityRecordService;
@@ -43,7 +44,7 @@ public class FieldValidator {
 
     public FieldValidator(VocabularyService vocabularyService,
                           ProviderManager providerService,
-                          @Lazy ServiceBundleService serviceBundleService,
+                          @Lazy ServiceBundleService<ServiceBundle> serviceBundleService,
                           @Lazy TrainingResourceService trainingResourceService,
                           @Lazy CatalogueService catalogueService,
                           @Lazy InteroperabilityRecordService interoperabilityRecordService) {
@@ -119,7 +120,7 @@ public class FieldValidator {
         // check if FieldValidation annotation exists
         Annotation vocabularyValidation = field.getAnnotation(VocabularyValidation.class);
         Annotation geoLocationVocValidation = field.getAnnotation(GeoLocationVocValidation.class);
-        Annotation annotation = field.getAnnotation(FieldValidation.class);
+        FieldValidation annotation = field.getAnnotation(FieldValidation.class);
         if (vocabularyValidation != null && annotation == null) {
             annotation = vocabularyValidation.annotationType().getAnnotation(FieldValidation.class);
         }
@@ -128,7 +129,7 @@ public class FieldValidator {
             annotation = geoLocationVocValidation.annotationType().getAnnotation(FieldValidation.class);
         }
 
-        validateField(field, o, (FieldValidation) annotation);
+        validateField(field, o, annotation);
     }
 
     private void validatePhone(Field field, Object o, PhoneValidation annotation) throws IllegalAccessException {
@@ -241,7 +242,7 @@ public class FieldValidator {
             if (URL.class.equals(clazz)) {
                 URL url = (URL) o;
                 validateUrl(field, url);
-            } else if (ArrayList.class.equals(clazz) && !((ArrayList) o).isEmpty() && URL.class.equals(((ArrayList) o).get(0).getClass())) {
+            } else if (ArrayList.class.equals(clazz) && !((ArrayList) o).isEmpty() && URL.class.equals(((ArrayList) o).getFirst().getClass())) {
                 for (int i = 0; i < ((ArrayList) o).size(); i++) {
                     URL url = (URL) ((ArrayList) o).get(i);
                     validateUrl(field, url);
@@ -255,7 +256,8 @@ public class FieldValidator {
 
         try {
             if (urlForValidation.toString().contains(" ")) {
-                urlForValidation = new URL(urlForValidation.toString().replaceAll("\\s", "%20"));
+                urlForValidation = URI.create(urlForValidation.toString()
+                        .replaceAll("\\s", "%20")).toURL();
             }
 
             SimpleClientHttpRequestFactory requestFactory = new SimpleClientHttpRequestFactory();

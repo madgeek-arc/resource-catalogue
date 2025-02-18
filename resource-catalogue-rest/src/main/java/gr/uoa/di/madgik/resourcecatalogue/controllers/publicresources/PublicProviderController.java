@@ -10,7 +10,6 @@ import gr.uoa.di.madgik.resourcecatalogue.domain.ProviderBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.User;
 import gr.uoa.di.madgik.resourcecatalogue.service.GenericResourceService;
 import gr.uoa.di.madgik.resourcecatalogue.service.ProviderService;
-import gr.uoa.di.madgik.resourcecatalogue.service.ResourceService;
 import gr.uoa.di.madgik.resourcecatalogue.service.SecurityService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -19,7 +18,6 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -40,16 +38,13 @@ public class PublicProviderController {
 
     private final SecurityService securityService;
     private final ProviderService providerService;
-    private final ResourceService<ProviderBundle> publicProviderManager;
     private final GenericResourceService genericResourceService;
 
     public PublicProviderController(SecurityService securityService,
                                     ProviderService providerService,
-                                    @Qualifier("publicProviderManager") ResourceService<ProviderBundle> publicProviderManager,
                                     GenericResourceService genericResourceService) {
         this.securityService = securityService;
         this.providerService = providerService;
-        this.publicProviderManager = publicProviderManager;
         this.genericResourceService = genericResourceService;
     }
 

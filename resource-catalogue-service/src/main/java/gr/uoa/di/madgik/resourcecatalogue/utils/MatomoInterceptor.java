@@ -32,7 +32,7 @@ public class MatomoInterceptor implements AsyncHandlerInterceptor {
 
     @PostConstruct
     public void init() {
-        if (matomoUrl != null && !"".equals(matomoUrl)) {
+        if (matomoUrl != null && !matomoUrl.isEmpty()) {
             this.matomoTracker = new MatomoTracker(TrackerConfiguration.builder().apiEndpoint(URI.create(matomoUrl)).build());
             if (siteId == null) {
                 logger.warn("'apitracking.matomo.site' is undefined. Using default value 1");

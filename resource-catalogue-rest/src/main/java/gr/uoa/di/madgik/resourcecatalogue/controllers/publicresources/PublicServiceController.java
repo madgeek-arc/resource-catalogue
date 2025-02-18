@@ -8,7 +8,6 @@ import gr.uoa.di.madgik.resourcecatalogue.annotations.BrowseCatalogue;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Service;
 import gr.uoa.di.madgik.resourcecatalogue.domain.ServiceBundle;
 import gr.uoa.di.madgik.resourcecatalogue.service.GenericResourceService;
-import gr.uoa.di.madgik.resourcecatalogue.service.SecurityService;
 import gr.uoa.di.madgik.resourcecatalogue.service.ServiceBundleService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -35,14 +34,11 @@ public class PublicServiceController {
     private static final Logger logger = LogManager.getLogger(PublicServiceController.class);
     private static final Gson gson = new Gson();
 
-    private final SecurityService securityService;
     private final GenericResourceService genericResourceService;
     private final ServiceBundleService<ServiceBundle> serviceBundleService;
 
-    public PublicServiceController(SecurityService securityService,
-                                   GenericResourceService genericResourceService,
+    public PublicServiceController(GenericResourceService genericResourceService,
                                    ServiceBundleService<ServiceBundle> serviceBundleService) {
-        this.securityService = securityService;
         this.genericResourceService = genericResourceService;
         this.serviceBundleService = serviceBundleService;
     }

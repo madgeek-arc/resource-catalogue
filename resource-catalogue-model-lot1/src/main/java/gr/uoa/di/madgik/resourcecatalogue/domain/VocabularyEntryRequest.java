@@ -12,7 +12,7 @@ import org.apache.logging.log4j.Logger;
 @XmlRootElement(namespace = "http://einfracentral.eu")
 public class VocabularyEntryRequest {
 
-    private static final Logger logger = LogManager.getLogger(User.class);
+    private static final Logger logger = LogManager.getLogger(VocabularyEntryRequest.class);
 
     @XmlElement(required = true)
     @Schema

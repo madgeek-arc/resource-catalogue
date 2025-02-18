@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class NoopJmsService implements JmsService {
 
-    private static final Logger logger = LoggerFactory.getLogger(gr.uoa.di.madgik.resourcecatalogue.utils.JmsService.class);
+    private static final Logger logger = LoggerFactory.getLogger(NoopJmsService.class);
 
     public NoopJmsService() {
     }

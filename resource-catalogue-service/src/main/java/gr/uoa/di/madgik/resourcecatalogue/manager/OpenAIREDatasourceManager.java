@@ -79,7 +79,7 @@ public class OpenAIREDatasourceManager implements OpenAIREDatasourceService {
                 data = "{  \"id\": \"" + ff.getFilter().get("id") + "\"}";
             }
         }
-        if (ff.getKeyword() != null && !ff.getKeyword().equals("")) {
+        if (ff.getKeyword() != null && !ff.getKeyword().isEmpty()) {
             data = "{  \"officialname\": \"" + ff.getKeyword() + "\"}";
         }
         return new String[]{Integer.toString(page), Integer.toString(quantity), ordering, data};
@@ -194,7 +194,7 @@ public class OpenAIREDatasourceManager implements OpenAIREDatasourceService {
     }
 
     public String getOpenAIREDatasourceIdByEOSCDatasourceId(String id) {
-        // API call from Italians
+        //TODO: waiting for new API call
         return "opendoar____::1106";
     }
 

@@ -38,8 +38,8 @@ import java.util.List;
 @Tag(name = "csv", description = "Export information related to various Catalogue resources to CSV")
 public class CSVController {
 
-    private static Logger logger = LogManager.getLogger(CSVController.class);
-    private final ServiceBundleService serviceBundleService;
+    private static final Logger logger = LogManager.getLogger(CSVController.class);
+    private final ServiceBundleService<ServiceBundle> serviceBundleService;
     private final ProviderService providerService;
     private final VocabularyService vocabularyService;
     private final CSVService csvService;
@@ -47,7 +47,7 @@ public class CSVController {
     @Value("${elastic.index.max_result_window:10000}")
     private int maxQuantity;
 
-    CSVController(ServiceBundleService service, ProviderService provider, VocabularyService vocabulary, CSVService csvService) {
+    CSVController(ServiceBundleService<ServiceBundle> service, ProviderService provider, VocabularyService vocabulary, CSVService csvService) {
         this.serviceBundleService = service;
         this.providerService = provider;
         this.vocabularyService = vocabulary;

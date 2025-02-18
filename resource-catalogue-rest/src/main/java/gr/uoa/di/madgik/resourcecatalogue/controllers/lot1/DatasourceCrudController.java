@@ -54,7 +54,7 @@ public class DatasourceCrudController extends ResourceCrudController<DatasourceB
         ff.addFilter("service_id", serviceId);
         List<DatasourceBundle> allDatasources = datasourceService.getAll(ff, auth).getResults();
         if (!allDatasources.isEmpty()) {
-            return new ResponseEntity<>(allDatasources.get(0).getDatasource(), HttpStatus.OK);
+            return new ResponseEntity<>(allDatasources.getFirst().getDatasource(), HttpStatus.OK);
         }
         return new ResponseEntity<>(null, HttpStatus.OK);
     }

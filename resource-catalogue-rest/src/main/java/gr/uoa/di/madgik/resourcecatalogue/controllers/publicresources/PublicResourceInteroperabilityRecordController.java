@@ -10,14 +10,12 @@ import gr.uoa.di.madgik.resourcecatalogue.domain.ResourceInteroperabilityRecordB
 import gr.uoa.di.madgik.resourcecatalogue.domain.User;
 import gr.uoa.di.madgik.resourcecatalogue.service.GenericResourceService;
 import gr.uoa.di.madgik.resourcecatalogue.service.ResourceInteroperabilityRecordService;
-import gr.uoa.di.madgik.resourcecatalogue.service.ResourceService;
 import gr.uoa.di.madgik.resourcecatalogue.service.SecurityService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -38,17 +36,14 @@ public class PublicResourceInteroperabilityRecordController {
 
     private final SecurityService securityService;
     private final ResourceInteroperabilityRecordService resourceInteroperabilityRecordService;
-    private final ResourceService<ResourceInteroperabilityRecordBundle> publicResourceInteroperabilityRecordManager;
     private final GenericResourceService genericResourceService;
 
     PublicResourceInteroperabilityRecordController(SecurityService securityService,
                                                    ResourceInteroperabilityRecordService resourceInteroperabilityRecordService,
-                                                   @Qualifier("publicResourceInteroperabilityRecordManager") ResourceService<ResourceInteroperabilityRecordBundle> publicResourceInteroperabilityRecordManager,
                                                    GenericResourceService genericResourceService) {
 
         this.securityService = securityService;
         this.resourceInteroperabilityRecordService = resourceInteroperabilityRecordService;
-        this.publicResourceInteroperabilityRecordManager = publicResourceInteroperabilityRecordManager;
         this.genericResourceService = genericResourceService;
     }
 

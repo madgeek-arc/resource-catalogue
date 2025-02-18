@@ -22,7 +22,7 @@ import java.util.List;
 @Service("draftTrainingResourceManager")
 public class DraftTrainingResourceManager extends ResourceManager<TrainingResourceBundle> implements DraftResourceService<TrainingResourceBundle> {
 
-    private static final Logger logger = LoggerFactory.getLogger(DraftServiceManager.class);
+    private static final Logger logger = LoggerFactory.getLogger(DraftTrainingResourceManager.class);
 
     private final TrainingResourceService trainingResourceService;
     private final IdCreator idCreator;
@@ -55,7 +55,7 @@ public class DraftTrainingResourceManager extends ResourceManager<TrainingResour
 
         bundle.setId(idCreator.generate(getResourceTypeName()));
 
-        logger.trace("Attempting to add a new Draft Training Resource with id {}", bundle.getId());
+        logger.trace("Attempting to add a new Draft Training Resource with id '{}'", bundle.getId());
         bundle.setMetadata(Metadata.updateMetadata(bundle.getMetadata(), AuthenticationInfo.getFullName(auth), AuthenticationInfo.getEmail(auth).toLowerCase()));
 
         List<LoggingInfo> loggingInfoList = new ArrayList<>();
@@ -79,7 +79,7 @@ public class DraftTrainingResourceManager extends ResourceManager<TrainingResour
         Resource existing = getDraftResource(bundle.getTrainingResource().getId());
         // block catalogueId updates from Provider Admins
         bundle.getTrainingResource().setCatalogueId(catalogueId);
-        logger.trace("Attempting to update the Draft Training Resource with id {}", bundle.getId());
+        logger.trace("Attempting to update the Draft Training Resource with id '{}'", bundle.getId());
         bundle.setMetadata(Metadata.updateMetadata(bundle.getMetadata(), AuthenticationInfo.getFullName(auth)));
         // save existing resource with new payload
         existing.setPayload(serialize(bundle));
@@ -102,7 +102,8 @@ public class DraftTrainingResourceManager extends ResourceManager<TrainingResour
 
     @Override
     public TrainingResourceBundle transformToNonDraft(TrainingResourceBundle bundle, Authentication auth) {
-        logger.trace("Attempting to transform the Draft Training Resource with id {} to Training Resource", bundle.getId());
+        logger.trace("Attempting to transform the Draft Training Resource with id '{}' to Training Resource",
+                bundle.getId());
         trainingResourceService.validate(bundle);
 
         // update loggingInfo
@@ -122,7 +123,7 @@ public class DraftTrainingResourceManager extends ResourceManager<TrainingResour
             bundle.setStatus(vocabularyService.get("pending resource").getId());
         }
         bundle.setLoggingInfo(loggingInfoList);
-        bundle.setLatestOnboardingInfo(loggingInfoList.get(loggingInfoList.size() - 1));
+        bundle.setLatestOnboardingInfo(loggingInfoList.getLast());
 
         bundle.setMetadata(Metadata.updateMetadata(bundle.getMetadata(), AuthenticationInfo.getFullName(auth), AuthenticationInfo.getEmail(auth).toLowerCase()));
         bundle.setDraft(false);
@@ -157,7 +158,7 @@ public class DraftTrainingResourceManager extends ResourceManager<TrainingResour
                 .cqlQuery(String.format("resource_internal_id = \"%s\" AND catalogue_id = \"%s\"", id, catalogueId),
                         getResourceTypeName());
         assert resources != null;
-        return resources.getTotal() == 0 ? null : resources.getResults().get(0);
+        return resources.getTotal() == 0 ? null : resources.getResults().getFirst();
     }
 
 }

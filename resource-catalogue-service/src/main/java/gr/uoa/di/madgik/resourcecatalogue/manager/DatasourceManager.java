@@ -72,13 +72,13 @@ public class DatasourceManager extends ResourceManager<DatasourceBundle> impleme
     public DatasourceBundle add(DatasourceBundle datasourceBundle, Authentication auth) {
 
         // if Datasource has ID -> check if it exists in OpenAIRE Datasources list
-        if (datasourceBundle.getId() != null && !datasourceBundle.getId().equals("")) {
+        if (datasourceBundle.getId() != null && !datasourceBundle.getId().isEmpty()) {
             checkOpenAIREIDExistence(datasourceBundle);
         }
         datasourceBundle.setId(idCreator.generate(getResourceTypeName()));
         logger.trace("Attempting to add a new Datasource: {}", datasourceBundle);
 
-        this.validate(datasourceBundle);
+        this.validateDatasource(datasourceBundle);
 
         datasourceBundle.setMetadata(Metadata.createMetadata(AuthenticationInfo.getFullName(auth), AuthenticationInfo.getEmail(auth).toLowerCase()));
         List<LoggingInfo> loggingInfoList = commonMethods.returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(datasourceBundle, auth);
@@ -95,7 +95,7 @@ public class DatasourceManager extends ResourceManager<DatasourceBundle> impleme
         if (datasourceBundle.getDatasource().getCatalogueId().equals(catalogueId)) {
             datasourceBundle.setActive(false);
             datasourceBundle.setStatus(vocabularyService.get("pending datasource").getId());
-            datasourceBundle.setLatestOnboardingInfo(datasourceBundle.getLoggingInfo().get(0));
+            datasourceBundle.setLatestOnboardingInfo(datasourceBundle.getLoggingInfo().getFirst());
             registrationMailService.sendEmailsForDatasourceExtensionToPortalAdmins(datasourceBundle, "post");
         } else {
             datasourceBundle.setActive(true);
@@ -176,8 +176,7 @@ public class DatasourceManager extends ResourceManager<DatasourceBundle> impleme
         resourceService.updateResource(existing);
     }
 
-    @Override
-    public DatasourceBundle validate(DatasourceBundle datasourceBundle) {
+    public DatasourceBundle validateDatasource(DatasourceBundle datasourceBundle) {
         String serviceId = datasourceBundle.getDatasource().getServiceId();
         String catalogueId = datasourceBundle.getDatasource().getCatalogueId();
 
@@ -197,7 +196,7 @@ public class DatasourceManager extends ResourceManager<DatasourceBundle> impleme
         if (!statusVocabulary.getType().equals("Datasource state")) {
             throw new ValidationException(String.format("Vocabulary %s does not consist an Datasource state!", status));
         }
-        logger.trace("Verifying Datasource with id: '{}' | status -> '{}' | active -> '{}'", id, status, active);
+        logger.trace("Verifying Datasource with id: '{}' | status: '{}' | active: '{}'", id, status, active);
         DatasourceBundle datasourceBundle = get(id);
 
         // Verify that Service is Approved before proceeding
@@ -212,8 +211,6 @@ public class DatasourceManager extends ResourceManager<DatasourceBundle> impleme
         LoggingInfo loggingInfo;
 
         switch (status) {
-            case "pending datasource":
-                break;
             case "approved datasource":
                 datasourceBundle.setActive(active);
                 loggingInfo = commonMethods.createLoggingInfo(auth, LoggingInfo.Types.ONBOARD.getKey(),
@@ -236,6 +233,7 @@ public class DatasourceManager extends ResourceManager<DatasourceBundle> impleme
                 // latestOnboardingInfo
                 datasourceBundle.setLatestOnboardingInfo(loggingInfo);
                 break;
+            case "pending datasource":
             default:
                 break;
         }
@@ -276,9 +274,9 @@ public class DatasourceManager extends ResourceManager<DatasourceBundle> impleme
         String registerBy;
         if (datasourceBundle != null) {
             String originalOpenAIREId = datasourceBundle.getOriginalOpenAIREId();
-            if (originalOpenAIREId != null && !originalOpenAIREId.equals("")) {
+            if (originalOpenAIREId != null && !originalOpenAIREId.isEmpty()) {
                 registerBy = openAIREDatasourceManager.getRegisterBy(originalOpenAIREId);
-                if (registerBy != null && !registerBy.equals("")) {
+                if (registerBy != null && !registerBy.isEmpty()) {
                     found = true;
                 }
             }
@@ -287,10 +285,4 @@ public class DatasourceManager extends ResourceManager<DatasourceBundle> impleme
         }
         return found;
     }
-
-//    public DatasourceBundle createPublicResource(DatasourceBundle datasourceBundle, Authentication auth){
-//        publicDatasourceManager.add(datasourceBundle, auth);
-//        return datasourceBundle;
-//    }
-
 }

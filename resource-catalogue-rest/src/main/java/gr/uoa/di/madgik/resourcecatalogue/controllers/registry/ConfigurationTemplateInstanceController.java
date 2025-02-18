@@ -179,7 +179,7 @@ public class ConfigurationTemplateInstanceController {
     public ResponseEntity<ConfigurationTemplateInstanceBundle> updateBundle(@RequestBody ConfigurationTemplateInstanceBundle configurationTemplateInstanceBundle,
                                                                             @Parameter(hidden = true) Authentication auth) {
         ResponseEntity<ConfigurationTemplateInstanceBundle> ret = new ResponseEntity<>(ctiService.update(configurationTemplateInstanceBundle, auth), HttpStatus.OK);
-        logger.info("Updated ConfigurationTemplateInstanceBundle with id: {}", configurationTemplateInstanceBundle.getConfigurationTemplateInstance().getId());
+        logger.info("Updated ConfigurationTemplateInstanceBundle with id: '{}'", configurationTemplateInstanceBundle.getConfigurationTemplateInstance().getId());
         return ret;
     }
 }

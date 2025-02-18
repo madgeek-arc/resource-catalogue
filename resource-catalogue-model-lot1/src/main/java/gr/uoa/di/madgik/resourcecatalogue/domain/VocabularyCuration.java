@@ -16,7 +16,7 @@ import java.util.List;
 @XmlRootElement(namespace = "http://einfracentral.eu")
 public class VocabularyCuration implements Identifiable {
 
-    private static final Logger logger = LogManager.getLogger(User.class);
+    private static final Logger logger = LogManager.getLogger(VocabularyCuration.class);
 
     @XmlElement(required = true)
     @Schema

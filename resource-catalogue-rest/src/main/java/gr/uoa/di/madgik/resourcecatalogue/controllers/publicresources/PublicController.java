@@ -39,7 +39,7 @@ public class PublicController {
             for (String resourceType : resourceTypeNames) {
                 try {
                     someResources.add(genericResourceService.get(resourceType, id));
-                } catch (ResourceNotFoundException e) {
+                } catch (ResourceNotFoundException ignored) {
                 }
             }
         }

@@ -2,6 +2,7 @@ package gr.uoa.di.madgik.resourcecatalogue.controllers.registry;
 
 
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
+import gr.uoa.di.madgik.resourcecatalogue.domain.ServiceBundle;
 import gr.uoa.di.madgik.resourcecatalogue.service.ProviderService;
 import gr.uoa.di.madgik.resourcecatalogue.service.SecurityService;
 import gr.uoa.di.madgik.resourcecatalogue.service.ServiceBundleService;
@@ -27,11 +28,11 @@ import java.util.Map;
 @Tag(name = "info", description = "Information about various resources in the Catalogue")
 public class InfoController {
 
-    private final ServiceBundleService serviceBundleService;
+    private final ServiceBundleService<ServiceBundle> serviceBundleService;
     private final ProviderService providerService;
     private final SecurityService securityService;
 
-    InfoController(ServiceBundleService service, ProviderService provider, SecurityService securityService) {
+    InfoController(ServiceBundleService<ServiceBundle> service, ProviderService provider, SecurityService securityService) {
         this.serviceBundleService = service;
         this.providerService = provider;
         this.securityService = securityService;
