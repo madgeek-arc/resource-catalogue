@@ -14,8 +14,6 @@ import gr.uoa.di.madgik.resourcecatalogue.service.SecurityService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -31,7 +29,6 @@ import org.springframework.web.bind.annotation.*;
 @Tag(name = "public resource interoperability record")
 public class PublicResourceInteroperabilityRecordController {
 
-    private static final Logger logger = LogManager.getLogger(PublicResourceInteroperabilityRecordController.class);
     private static final Gson gson = new Gson();
 
     private final SecurityService securityService;

@@ -11,19 +11,18 @@ public interface ConfigurationTemplateInstanceService extends ResourceService<Co
     /**
      * Return a List of ConfigurationTemplateInstances providing a resource ID
      *
-     * @param resourceId resource ID
+     * @param id resource ID
      * @return {@link List}&lt;{@link ConfigurationTemplateInstance}&gt;
      */
-    List<ConfigurationTemplateInstance> getCTIByResourceId(String resourceId);
+    List<ConfigurationTemplateInstance> getByResourceId(String id);
 
     /**
      * Return a List of ConfigurationTemplateInstances providing a ConfigurationTemplate ID
      *
-     * @param configurationTemplateId resource ID
+     * @param id resource ID
      * @return {@link List}&lt;{@link ConfigurationTemplateInstance}&gt;
      */
-    List<ConfigurationTemplateInstance> getCTIByConfigurationTemplateId(
-            String configurationTemplateId);
+    List<ConfigurationTemplateInstance> getByConfigurationTemplateId(String id);
 
     /**
      * Given a ConfigurationTemplateInstance return a ConfigurationTemplateInstanceDto
@@ -31,6 +30,5 @@ public interface ConfigurationTemplateInstanceService extends ResourceService<Co
      * @param configurationTemplateInstance ConfigurationTemplateInstance
      * @return {@link ConfigurationTemplateInstanceDto}
      */
-    ConfigurationTemplateInstanceDto createCTIDto(
-            ConfigurationTemplateInstance configurationTemplateInstance);
+    ConfigurationTemplateInstanceDto createCTIDto(ConfigurationTemplateInstance configurationTemplateInstance);
 }

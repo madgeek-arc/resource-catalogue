@@ -12,8 +12,6 @@ import gr.uoa.di.madgik.resourcecatalogue.service.SecurityService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -32,7 +30,6 @@ import java.util.List;
 @Tag(name = "public configuration template instance")
 public class PublicConfigurationTemplateInstanceController {
 
-    private static final Logger logger = LogManager.getLogger(PublicConfigurationTemplateInstanceController.class);
     private static final Gson gson = new Gson();
 
     private final SecurityService securityService;

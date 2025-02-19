@@ -7,8 +7,6 @@ import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -26,22 +24,19 @@ import org.springframework.web.bind.annotation.RestController;
 @Tag(name = "configuration template", description = "Operations about Configuration Templates")
 public class ConfigurationTemplateController {
 
-    private static final Logger logger = LogManager.getLogger(ConfigurationTemplateController.class);
-    private final ConfigurationTemplateService configurationTemplateService;
+    private final ConfigurationTemplateService service;
 
-    public ConfigurationTemplateController(ConfigurationTemplateService configurationTemplateService) {
-        this.configurationTemplateService = configurationTemplateService;
+    public ConfigurationTemplateController(ConfigurationTemplateService service) {
+        this.service = service;
     }
 
     @Hidden
     @Operation(summary = "Create a new ConfigurationTemplate.")
     @PostMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public ResponseEntity<ConfigurationTemplate> addConfigurationTemplate(@RequestBody ConfigurationTemplate configurationTemplate,
-                                                                          @Parameter(hidden = true) Authentication auth) {
-        ConfigurationTemplateBundle configurationTemplateBundle = configurationTemplateService.addConfigurationTemplate(
-                new ConfigurationTemplateBundle(configurationTemplate), auth);
-        logger.info("Added the Configuration Template Instance with id '{}'", configurationTemplate.getId());
-        return new ResponseEntity<>(configurationTemplateBundle.getConfigurationTemplate(), HttpStatus.CREATED);
+    public ResponseEntity<ConfigurationTemplate> add(@RequestBody ConfigurationTemplate configurationTemplate,
+                                                     @Parameter(hidden = true) Authentication auth) {
+        ConfigurationTemplateBundle bundle = service.add(new ConfigurationTemplateBundle(configurationTemplate), auth);
+        return new ResponseEntity<>(bundle.getConfigurationTemplate(), HttpStatus.CREATED);
     }
 }

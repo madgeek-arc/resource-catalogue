@@ -18,8 +18,6 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -39,7 +37,6 @@ import java.util.List;
 @Tag(name = "public interoperability record")
 public class PublicInteroperabilityRecordController {
 
-    private static final Logger logger = LogManager.getLogger(PublicInteroperabilityRecordController.class);
     private static final Gson gson = new Gson();
 
     private final SecurityService securityService;
