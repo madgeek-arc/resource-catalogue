@@ -149,7 +149,8 @@ public class InternalToPublicConsistency {
         // check consistency for Resource Interoperability Records
         for (ResourceInteroperabilityRecordBundle resourceInteroperabilityRecordBundle : allInternalApprovedRIR) {
             String resourceInteroperabilityRecordId = resourceInteroperabilityRecordBundle.getId();
-            String publicResourceInteroperabilityRecordId = resourceInteroperabilityRecordBundle.getResourceInteroperabilityRecord().getCatalogueId() + "." + resourceInteroperabilityRecordId;
+            String publicResourceInteroperabilityRecordId = publicResourceUtils.createPublicResourceId(resourceInteroperabilityRecordId,
+                    resourceInteroperabilityRecordBundle.getResourceInteroperabilityRecord().getCatalogueId());
             // try and get its Public instance
             try {
                 publicResourceInteroperabilityRecordManager.get(publicResourceInteroperabilityRecordId);
