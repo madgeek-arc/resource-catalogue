@@ -1,12 +1,12 @@
 /**
  * Copyright 2017-2025 OpenAIRE AMKE & Athena Research and Innovation Center
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *      https://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * https://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -309,12 +309,13 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
 
     @Override
     public Browsing<TrainingResourceBundle> getMy(FacetFilter filter, Authentication auth) {
-        List<ProviderBundle> providers = providerService.getMy(filter, auth).getResults();
         FacetFilter ff = new FacetFilter();
-        ff.addFilter("resource_organisation", providers.stream().map(ProviderBundle::getId).toList());
-        ff.setResourceType(getResourceTypeName());
         ff.setQuantity(1000);
-        return this.getAll(ff, auth);
+        List<ProviderBundle> providers = providerService.getMy(ff, auth).getResults();
+
+        filter.addFilter("resource_organisation", providers.stream().map(ProviderBundle::getId).toList());
+        filter.setResourceType(getResourceTypeName());
+        return this.getAll(filter, auth);
     }
 
     @Override
@@ -654,17 +655,6 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
             throw new ResourceNotFoundException(String.format("Could not find Training Resource with id: %s and catalogueId: %s", id, catalogueId));
         }
         return deserialize(resource);
-    }
-
-    private TrainingResourceBundle checkIdExistenceInOtherCatalogues(String id) {
-        FacetFilter ff = new FacetFilter();
-        ff.setQuantity(maxQuantity);
-        ff.addFilter("resource_internal_id", id);
-        List<TrainingResourceBundle> allResources = getAll(ff, null).getResults();
-        if (allResources.size() > 0) {
-            return allResources.get(0);
-        }
-        return null;
     }
 
     // for sendProviderMails on RegistrationMailService AND StatisticsManager
