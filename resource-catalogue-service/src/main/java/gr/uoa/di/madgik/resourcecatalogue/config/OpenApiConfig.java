@@ -37,7 +37,7 @@ public class OpenApiConfig {
     @Value("${catalogue.id}")
     String projectName;
 
-    @Value("#{'${catalogue.version}'.split('[-]')[0]}")
+    @Value("${catalogue.version}")
     String projectVersion;
 
     @Value("${catalogue.debug:false}")
