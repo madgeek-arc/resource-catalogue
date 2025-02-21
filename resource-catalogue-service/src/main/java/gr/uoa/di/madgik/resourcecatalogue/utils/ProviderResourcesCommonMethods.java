@@ -239,7 +239,7 @@ public class ProviderResourcesCommonMethods {
             bundle.setLatestUpdateInfo(loggingInfo);
 
             logger.info("User [{}] set 'suspended' of {} '{}' to '{}'",
-                    Objects.requireNonNull(User.of(auth)).getEmail().toLowerCase(),
+                    Objects.requireNonNull(AuthenticationInfo.getEmail(auth).toLowerCase()),
                     bundle.getPayload().getClass().getSimpleName(),
                     bundle.getId(), suspend);
         }

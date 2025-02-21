@@ -125,7 +125,7 @@ public class OIDCSecurityService implements SecurityService {
         if (hasRole(auth, "ROLE_ANONYMOUS")) {
             return Optional.empty();
         }
-        return Optional.of(User.of(auth));
+        return Optional.of(Objects.requireNonNull(User.of(auth)));
     }
 
     private boolean isProvider(String id) {

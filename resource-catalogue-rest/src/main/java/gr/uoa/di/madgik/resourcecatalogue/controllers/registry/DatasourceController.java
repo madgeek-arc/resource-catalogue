@@ -16,8 +16,6 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpStatus;
@@ -38,7 +36,6 @@ import java.util.Map;
 @Tag(name = "datasource")
 public class DatasourceController {
 
-    private static final Logger logger = LogManager.getLogger(DatasourceController.class);
     private final DatasourceService datasourceService;
     private final GenericResourceService genericResourceService;
     private final OpenAIREDatasourceService openAIREDatasourceService;
@@ -112,7 +109,6 @@ public class DatasourceController {
     public ResponseEntity<Datasource> addDatasource(@Valid @RequestBody Datasource datasource,
                                                     @Parameter(hidden = true) Authentication auth) {
         DatasourceBundle datasourceBundle = datasourceService.add(new DatasourceBundle(datasource), auth);
-        logger.info("Added the Datasource with id '{}'", datasource.getId());
         return new ResponseEntity<>(datasourceBundle.getDatasource(), HttpStatus.CREATED);
     }
 
@@ -125,7 +121,6 @@ public class DatasourceController {
         DatasourceBundle datasourceBundle = datasourceService.get(datasource.getId());
         datasourceBundle.setDatasource(datasource);
         datasourceBundle = datasourceService.update(datasourceBundle, comment, auth);
-        logger.info("Updated the Datasource with id '{}'", datasource.getId());
         return new ResponseEntity<>(datasourceBundle.getDatasource(), HttpStatus.OK);
     }
 
@@ -139,12 +134,7 @@ public class DatasourceController {
         if (datasourceBundle == null) {
             return new ResponseEntity<>(HttpStatus.GONE);
         }
-        logger.info("Deleting Datasource: {} of the Catalogue: {}", datasourceBundle.getDatasource().getId(),
-                datasourceBundle.getDatasource().getCatalogueId());
-        // delete Datasource
         datasourceService.delete(datasourceBundle);
-        logger.info("Deleted the Datasource with id '{}' of the Catalogue '{}'",
-                datasourceBundle.getDatasource().getId(), datasourceBundle.getDatasource().getCatalogueId());
         return new ResponseEntity<>(datasourceBundle.getDatasource(), HttpStatus.OK);
     }
 
@@ -162,12 +152,7 @@ public class DatasourceController {
         if (datasourceBundle == null) {
             return new ResponseEntity<>(HttpStatus.GONE);
         }
-        logger.info("Deleting Datasource: {} of the Catalogue: {}", datasourceBundle.getDatasource().getId(),
-                datasourceBundle.getDatasource().getCatalogueId());
-        // delete Datasource
         datasourceService.delete(datasourceBundle);
-        logger.info("Deleted the Datasource with id '{}' of the Catalogue '{}'", datasourceBundle.getDatasource().getId(),
-                datasourceBundle.getDatasource().getCatalogueId());
         return new ResponseEntity<>(datasourceBundle.getDatasource(), HttpStatus.OK);
     }
 
@@ -181,7 +166,6 @@ public class DatasourceController {
                                                              @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
         DatasourceBundle resource = datasourceService.verify(id, status, active, auth);
-        logger.info("Updated Datasource with id '{}' [status: {}] [active: {}]", resource.getDatasource().getId(), status, active);
         return new ResponseEntity<>(resource, HttpStatus.OK);
     }
 

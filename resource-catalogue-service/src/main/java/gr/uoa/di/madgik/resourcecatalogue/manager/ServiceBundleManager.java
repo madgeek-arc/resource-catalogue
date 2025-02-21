@@ -631,8 +631,6 @@ public class ServiceBundleManager extends AbstractServiceBundleManager<ServiceBu
             throw new ValidationException("You cannot move a Service to a Provider of another Catalogue");
         }
 
-        User user = User.of(auth);
-
         // update loggingInfo
         List<LoggingInfo> loggingInfoList = serviceBundle.getLoggingInfo();
         LoggingInfo loggingInfo;
@@ -652,7 +650,7 @@ public class ServiceBundleManager extends AbstractServiceBundleManager<ServiceBu
         // update metadata
         Metadata metadata = serviceBundle.getMetadata();
         metadata.setModifiedAt(String.valueOf(System.currentTimeMillis()));
-        metadata.setModifiedBy(user.getFullName());
+        metadata.setModifiedBy(AuthenticationInfo.getFullName(auth));
         metadata.setTerms(null);
         serviceBundle.setMetadata(metadata);
 

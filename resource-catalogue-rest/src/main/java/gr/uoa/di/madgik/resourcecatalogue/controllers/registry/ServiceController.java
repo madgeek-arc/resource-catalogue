@@ -127,7 +127,7 @@ public class ServiceController {
                                                         @RequestParam(required = false) String status, @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
         ServiceBundle resource = serviceBundleService.verify(id, status, active, auth);
-        logger.info("Updated Resource with name '{}' [status: {}] [active: {}]", resource.getService().getName(), status, active);
+        logger.info("Updated Resource with id: '{}' | status: '{}' | active: '{}'", resource.getId(), status, active);
         return new ResponseEntity<>(resource, HttpStatus.OK);
     }
 

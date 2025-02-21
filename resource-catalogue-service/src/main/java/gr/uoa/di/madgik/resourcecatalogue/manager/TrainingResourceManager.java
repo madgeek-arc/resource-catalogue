@@ -847,8 +847,6 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
             throw new ValidationException("You cannot move a Training Resource to a Provider of another Catalogue");
         }
 
-        User user = User.of(auth);
-
         // update loggingInfo
         List<LoggingInfo> loggingInfoList = trainingResourceBundle.getLoggingInfo();
         LoggingInfo loggingInfo;
@@ -868,7 +866,7 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
         // update metadata
         Metadata metadata = trainingResourceBundle.getMetadata();
         metadata.setModifiedAt(String.valueOf(System.currentTimeMillis()));
-        metadata.setModifiedBy(user.getFullName());
+        metadata.setModifiedBy(AuthenticationInfo.getFullName(auth));
         metadata.setTerms(null);
         trainingResourceBundle.setMetadata(metadata);
 

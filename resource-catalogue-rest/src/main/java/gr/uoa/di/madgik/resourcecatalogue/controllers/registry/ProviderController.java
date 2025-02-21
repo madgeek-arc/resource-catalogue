@@ -288,7 +288,7 @@ public class ProviderController {
                                                          @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
         ProviderBundle provider = providerService.verify(id, status, active, auth);
-        logger.info("Updated Provider with name '{}' [status: {}] [active: {}]", provider.getProvider().getName(), status, active);
+        logger.info("Updated Provider with id: '{}' | status: '{}' | active: '{}'", provider.getId(), status, active);
         return new ResponseEntity<>(provider, HttpStatus.OK);
     }
 

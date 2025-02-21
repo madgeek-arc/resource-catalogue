@@ -5,7 +5,6 @@ import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.domain.LoggingInfo;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Metadata;
 import gr.uoa.di.madgik.resourcecatalogue.domain.ProviderBundle;
-import gr.uoa.di.madgik.resourcecatalogue.domain.User;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
 import gr.uoa.di.madgik.resourcecatalogue.utils.AuthenticationInfo;
 import gr.uoa.di.madgik.resourcecatalogue.utils.ProviderResourcesCommonMethods;
@@ -143,7 +142,6 @@ public class DraftProviderManager extends ResourceManager<ProviderBundle> implem
         if (auth == null) {
             throw new InsufficientAuthenticationException("Please log in.");
         }
-        User user = User.of(auth);
         if (ff == null) {
             ff = new FacetFilter();
             ff.setQuantity(maxQuantity);
@@ -151,7 +149,7 @@ public class DraftProviderManager extends ResourceManager<ProviderBundle> implem
         if (!ff.getFilter().containsKey("published")) {
             ff.addFilter("published", false);
         }
-        ff.addFilter("users", user.getEmail().toLowerCase());
+        ff.addFilter("users", AuthenticationInfo.getEmail(auth).toLowerCase());
         ff.addOrderBy("name", "asc");
         return super.getAll(ff, auth);
     }

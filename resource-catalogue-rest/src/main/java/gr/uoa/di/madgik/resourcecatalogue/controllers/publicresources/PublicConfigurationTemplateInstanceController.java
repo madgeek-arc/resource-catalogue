@@ -4,7 +4,6 @@ import com.google.gson.Gson;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.resourcecatalogue.annotations.Browse;
-import gr.uoa.di.madgik.resourcecatalogue.domain.User;
 import gr.uoa.di.madgik.resourcecatalogue.domain.configurationTemplates.ConfigurationTemplateInstanceBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.configurationTemplates.ConfigurationTemplateInstanceDto;
 import gr.uoa.di.madgik.resourcecatalogue.service.ConfigurationTemplateInstanceService;
@@ -63,7 +62,6 @@ public class PublicConfigurationTemplateInstanceController {
         String id = prefix + "/" + suffix;
         ConfigurationTemplateInstanceBundle configurationTemplateInstanceBundle = configurationTemplateInstanceService.get(id);
         if (auth != null && auth.isAuthenticated()) {
-            User user = User.of(auth);
             if (securityService.hasRole(auth, "ROLE_ADMIN") || securityService.hasRole(auth, "ROLE_EPOT")) {
                 if (configurationTemplateInstanceBundle.getMetadata().isPublished()) {
                     return new ResponseEntity<>(configurationTemplateInstanceBundle, HttpStatus.OK);

@@ -4,7 +4,10 @@ import gr.uoa.di.madgik.catalogue.exception.ValidationException;
 import gr.uoa.di.madgik.registry.domain.Resource;
 import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.registry.service.SearchService;
-import gr.uoa.di.madgik.resourcecatalogue.domain.*;
+import gr.uoa.di.madgik.resourcecatalogue.domain.HelpdeskBundle;
+import gr.uoa.di.madgik.resourcecatalogue.domain.LoggingInfo;
+import gr.uoa.di.madgik.resourcecatalogue.domain.Metadata;
+import gr.uoa.di.madgik.resourcecatalogue.domain.ServiceBundle;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
 import gr.uoa.di.madgik.resourcecatalogue.utils.AuthenticationInfo;
 import gr.uoa.di.madgik.resourcecatalogue.utils.ObjectUtils;
@@ -16,7 +19,6 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.security.core.Authentication;
 
 import java.util.List;
-import java.util.Objects;
 
 @org.springframework.stereotype.Service("helpdeskManager")
 public class HelpdeskManager extends ResourceManager<HelpdeskBundle> implements HelpdeskService {
@@ -169,8 +171,8 @@ public class HelpdeskManager extends ResourceManager<HelpdeskBundle> implements 
 
     public HelpdeskBundle createPublicResource(HelpdeskBundle helpdeskBundle, Authentication auth) {
         logger.info("User '{}-{}' attempts to create a Public Helpdesk from Helpdesk '{}' of the '{}' Catalogue",
-                Objects.requireNonNull(User.of(auth)).getFullName(),
-                Objects.requireNonNull(User.of(auth)).getEmail().toLowerCase(),
+                AuthenticationInfo.getFullName(auth),
+                AuthenticationInfo.getEmail(auth).toLowerCase(),
                 helpdeskBundle.getId(), helpdeskBundle.getCatalogueId());
         publicHelpdeskManager.add(helpdeskBundle, auth);
         return helpdeskBundle;

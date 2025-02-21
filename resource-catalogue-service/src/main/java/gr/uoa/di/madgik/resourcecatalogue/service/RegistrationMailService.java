@@ -7,6 +7,7 @@ import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.resourcecatalogue.config.properties.CatalogueProperties;
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
 import gr.uoa.di.madgik.resourcecatalogue.manager.*;
+import gr.uoa.di.madgik.resourcecatalogue.utils.AuthenticationInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -322,8 +323,8 @@ public class RegistrationMailService {
 
         newProviderAdmins.setRoot(oldProviderAdmins.getRoot());
 
-        onboardingTeam.updateRoot("adminFullName", Objects.requireNonNull(User.of(auth)).getFullName());
-        onboardingTeam.updateRoot("adminEmail", Objects.requireNonNull(User.of(auth)).getEmail().toLowerCase());
+        onboardingTeam.updateRoot("adminFullName", Objects.requireNonNull(AuthenticationInfo.getFullName(auth)));
+        onboardingTeam.updateRoot("adminEmail", Objects.requireNonNull(AuthenticationInfo.getEmail(auth).toLowerCase()));
         onboardingTeam.updateRoot("adminRole", securityService.getRoleName(auth));
         onboardingTeam.updateRoot("comment", bundle.getLoggingInfo().getLast().getComment());
 

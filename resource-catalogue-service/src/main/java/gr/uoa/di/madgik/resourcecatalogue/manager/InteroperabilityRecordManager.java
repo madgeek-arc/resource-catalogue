@@ -70,6 +70,7 @@ public class InteroperabilityRecordManager extends ResourceManager<Interoperabil
         } else { // external catalogue
             commonMethods.checkCatalogueIdConsistency(interoperabilityRecordBundle, catalogueId);
         }
+        logger.trace("Attempting to add a new Interoperability Record: {}", interoperabilityRecordBundle.getInteroperabilityRecord());
         interoperabilityRecordBundle.setId(idCreator.generate(getResourceTypeName()));
 
         // register and ensure Resource Catalogue's PID uniqueness
@@ -101,8 +102,8 @@ public class InteroperabilityRecordManager extends ResourceManager<Interoperabil
 
         interoperabilityRecordBundle.getInteroperabilityRecord().setCreated(String.valueOf(System.currentTimeMillis()));
         interoperabilityRecordBundle.getInteroperabilityRecord().setUpdated(interoperabilityRecordBundle.getInteroperabilityRecord().getCreated());
-        logger.trace("Attempting to add a new Interoperability Record: {}", interoperabilityRecordBundle.getInteroperabilityRecord());
-        logger.info("Adding Interoperability Record: {}", interoperabilityRecordBundle.getInteroperabilityRecord());
+        logger.info("Added a new Interoperability Record with id '{}' and title '{}'", interoperabilityRecordBundle.getId(),
+                interoperabilityRecordBundle.getInteroperabilityRecord().getTitle());
         super.add(interoperabilityRecordBundle, auth);
         registrationMailService.sendInteroperabilityRecordOnboardingEmailsToPortalAdmins(interoperabilityRecordBundle, User.of(auth));
 
@@ -197,7 +198,8 @@ public class InteroperabilityRecordManager extends ResourceManager<Interoperabil
         existing.setResourceType(getResourceType());
 
         resourceService.updateResource(existing);
-        logger.debug("Updating Interoperability Record: {}", ret);
+        logger.info("Updated Interoperability Record with id '{}' and title '{}'", ret.getId(),
+                ret.getInteroperabilityRecord().getTitle());
 
         return ret;
     }
@@ -209,6 +211,7 @@ public class InteroperabilityRecordManager extends ResourceManager<Interoperabil
             throw new ValidationException("You cannot directly delete a Public Interoperability Record");
         }
         super.delete(interoperabilityRecordBundle);
+        logger.info("Deleted the Interoperability Record with id '{}'", interoperabilityRecordBundle.getId());
     }
 
 
@@ -252,8 +255,10 @@ public class InteroperabilityRecordManager extends ResourceManager<Interoperabil
                 break;
         }
 
-        logger.info("Verifying Interoperability Record: {}", interoperabilityRecordBundle);
-        registrationMailService.sendInteroperabilityRecordOnboardingEmailsToPortalAdmins(interoperabilityRecordBundle, User.of(auth));
+        logger.info("User '{}' verified Interoperability Record with id: '{}' | status: '{}' | active: '{}'",
+                auth, interoperabilityRecordBundle.getId(), status, active);
+        registrationMailService.sendInteroperabilityRecordOnboardingEmailsToPortalAdmins(interoperabilityRecordBundle,
+                User.of(auth));
         return super.update(interoperabilityRecordBundle, auth);
     }
 
@@ -282,6 +287,10 @@ public class InteroperabilityRecordManager extends ResourceManager<Interoperabil
 
 
         super.update(interoperabilityRecordBundle, auth);
+        logger.info("User '{}-{}' saved Interoperability Record with id '{}' as '{}'",
+                AuthenticationInfo.getFullName(auth),
+                AuthenticationInfo.getEmail(auth).toLowerCase(),
+                id, active);
         return interoperabilityRecordBundle;
     }
 

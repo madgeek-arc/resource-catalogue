@@ -271,8 +271,8 @@ public class MonitoringManager extends ResourceManager<MonitoringBundle> impleme
 
     public MonitoringBundle createPublicResource(MonitoringBundle monitoringBundle, Authentication auth) {
         logger.info("User '{}-{}' attempts to create a Public Monitoring from Monitoring '{}' of the '{}' Catalogue",
-                Objects.requireNonNull(User.of(auth)).getFullName(),
-                Objects.requireNonNull(User.of(auth)).getEmail().toLowerCase(),
+                Objects.requireNonNull(AuthenticationInfo.getFullName(auth)),
+                Objects.requireNonNull(AuthenticationInfo.getEmail(auth).toLowerCase()),
                 monitoringBundle.getId(), monitoringBundle.getCatalogueId());
         publicMonitoringManager.add(monitoringBundle, auth);
         return monitoringBundle;

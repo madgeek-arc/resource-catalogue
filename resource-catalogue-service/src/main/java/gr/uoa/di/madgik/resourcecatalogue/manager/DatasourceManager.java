@@ -86,8 +86,8 @@ public class DatasourceManager extends ResourceManager<DatasourceBundle> impleme
         differentiateInternalFromExternalCatalogueAddition(datasourceBundle);
 
         super.add(datasourceBundle, null);
-        logger.debug("Adding Datasource for Service: {}", datasourceBundle.getDatasource().getServiceId());
-
+        logger.info("Added the Datasource with id '{}' for Service '{}'", datasourceBundle.getId(),
+                datasourceBundle.getDatasource().getServiceId());
         return datasourceBundle;
     }
 
@@ -154,7 +154,7 @@ public class DatasourceManager extends ResourceManager<DatasourceBundle> impleme
         existingResource.setResourceType(getResourceType());
 
         resourceService.updateResource(existingResource);
-        logger.debug("Updating Datasource: {}", ret);
+        logger.info("Updated Datasource with id '{}'", ret.getId());
 
         registrationMailService.sendEmailsForDatasourceExtensionToPortalAdmins(ret, "put");
         return ret;
@@ -238,14 +238,15 @@ public class DatasourceManager extends ResourceManager<DatasourceBundle> impleme
                 break;
         }
 
-        logger.info("Verifying Datasource: {}", datasourceBundle);
+        logger.info("Verifying Datasource with id: '{}' | status: '{}' | active: '{}'", datasourceBundle.getId(), status, active);
         return super.update(datasourceBundle, auth);
     }
 
     @Override
     public void delete(DatasourceBundle datasourceBundle) {
         super.delete(datasourceBundle);
-        logger.debug("Deleting Datasource: {}", datasourceBundle);
+        logger.info("Deleted Datasource with id '{}' of the Catalogue '{}'",
+                datasourceBundle.getDatasource().getId(), datasourceBundle.getDatasource().getCatalogueId());
     }
 
     @Override

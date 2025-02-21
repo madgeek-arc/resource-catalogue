@@ -113,8 +113,7 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
                     securityService.hasRole(auth, "ROLE_EPOT")) {
                 return super.getAll(ff, auth);
             }
-            // if user is CATALOGUE ADMIN return all his Catalogues (rejected, pending) with their sensitive data (Users, MainContact) too
-            User user = User.of(auth);
+
             Browsing<CatalogueBundle> catalogues = super.getAll(ff, auth);
             for (CatalogueBundle catalogueBundle : catalogues.getResults()) {
                 if (catalogueBundle.getStatus().equals(vocabularyService.get("approved catalogue").getId()) ||
@@ -258,12 +257,11 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
         if (auth == null) {
             throw new InsufficientAuthenticationException("Please log in.");
         }
-        User user = User.of(auth);
         if (ff == null) {
             ff = new FacetFilter();
             ff.setQuantity(maxQuantity);
         }
-        ff.addFilter("users", user.getEmail().toLowerCase());
+        ff.addFilter("users", AuthenticationInfo.getEmail(auth).toLowerCase());
         ff.addOrderBy("name", "asc");
         return super.getAll(ff, auth);
     }
@@ -313,13 +311,14 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
             userList.add(user.getEmail().toLowerCase());
         }
         if ((catalogueBundle.getMetadata().getTerms() == null || catalogueBundle.getMetadata().getTerms().isEmpty())) {
-            if (userList.contains(User.of(auth).getEmail().toLowerCase())) {
+            if (userList.contains(AuthenticationInfo.getEmail(auth).toLowerCase())) {
                 return false; //pop-up modal
             } else {
                 return true; //no modal
             }
         }
-        if (!catalogueBundle.getMetadata().getTerms().contains(User.of(auth).getEmail().toLowerCase()) && userList.contains(User.of(auth).getEmail().toLowerCase())) {
+        if (!catalogueBundle.getMetadata().getTerms().contains(AuthenticationInfo.getEmail(auth).toLowerCase()) &&
+                userList.contains(AuthenticationInfo.getEmail(auth).toLowerCase())) {
             return false; // pop-up modal
         }
         return true; // no modal

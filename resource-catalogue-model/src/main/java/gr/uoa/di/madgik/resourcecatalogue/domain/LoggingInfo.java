@@ -126,7 +126,7 @@ public class LoggingInfo {
                                                      String comment) {
         validateLoggingInfoEnums(type, actionType);
         LoggingInfo ret = new LoggingInfo();
-        User user = User.of(auth);
+        User user = Objects.requireNonNull(User.of(auth));
         ret.setDate(String.valueOf(System.currentTimeMillis()));
         ret.setType(type);
         ret.setActionType(actionType);

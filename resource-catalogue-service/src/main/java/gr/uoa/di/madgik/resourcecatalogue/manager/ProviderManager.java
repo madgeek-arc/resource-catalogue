@@ -560,7 +560,6 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         if (auth == null) {
             throw new InsufficientAuthenticationException("Please log in.");
         }
-        User user = User.of(auth);
         if (ff == null) {
             ff = new FacetFilter();
             ff.setQuantity(maxQuantity);
@@ -568,7 +567,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         if (!ff.getFilter().containsKey("published")) {
             ff.addFilter("published", false);
         }
-        ff.addFilter("users", user.getEmail().toLowerCase());
+        ff.addFilter("users", AuthenticationInfo.getEmail(auth).toLowerCase());
         ff.addOrderBy("name", "asc");
         return super.getAll(ff, auth);
     }
@@ -743,13 +742,14 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
             userList.add(user.getEmail().toLowerCase());
         }
         if ((providerBundle.getMetadata().getTerms() == null || providerBundle.getMetadata().getTerms().isEmpty())) {
-            if (userList.contains(User.of(auth).getEmail().toLowerCase())) {
+            if (userList.contains(AuthenticationInfo.getEmail(auth).toLowerCase())) {
                 return false; //pop-up modal
             } else {
                 return true; //no modal
             }
         }
-        if (!providerBundle.getMetadata().getTerms().contains(User.of(auth).getEmail().toLowerCase()) && userList.contains(User.of(auth).getEmail().toLowerCase())) {
+        if (!providerBundle.getMetadata().getTerms().contains(AuthenticationInfo.getEmail(auth).toLowerCase())
+                && userList.contains(AuthenticationInfo.getEmail(auth).toLowerCase())) {
             return false; // pop-up modal
         }
         return true; // no modal
@@ -789,7 +789,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     public void requestProviderDeletion(String providerId, Authentication auth) {
         ProviderBundle provider = get(providerId);
         for (User user : provider.getProvider().getUsers()) {
-            if (user.getEmail().equalsIgnoreCase(User.of(auth).getEmail().toLowerCase())) {
+            if (user.getEmail().equalsIgnoreCase(AuthenticationInfo.getEmail(auth).toLowerCase())) {
                 registrationMailService.informPortalAdminsForProviderDeletion(provider, User.of(auth));
             }
         }

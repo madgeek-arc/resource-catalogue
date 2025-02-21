@@ -138,7 +138,8 @@ public class TrainingResourceController {
                                                                          @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
         TrainingResourceBundle trainingResourceBundle = trainingResourceService.verify(id, status, active, auth);
-        logger.info("Updated Training Resource with title '{}' [status: {}] [active: {}]", trainingResourceBundle.getTrainingResource().getTitle(), status, active);
+        logger.info("Updated Training Resource with id: '{}' | status: '{}' | active: '{}'",
+                trainingResourceBundle.getId(), status, active);
         return new ResponseEntity<>(trainingResourceBundle, HttpStatus.OK);
     }
 

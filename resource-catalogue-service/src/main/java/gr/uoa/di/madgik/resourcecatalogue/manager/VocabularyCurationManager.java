@@ -10,6 +10,7 @@ import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.registry.service.SearchService;
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
+import gr.uoa.di.madgik.resourcecatalogue.utils.AuthenticationInfo;
 import gr.uoa.di.madgik.resourcecatalogue.utils.FacetLabelService;
 import jakarta.validation.constraints.NotNull;
 import org.slf4j.Logger;
@@ -72,7 +73,6 @@ public class VocabularyCurationManager extends ResourceManager<VocabularyCuratio
 
     @Override
     public VocabularyCuration add(VocabularyCuration vocabularyCuration, String resourceType, Authentication auth) {
-        User user = User.of(auth);
         vocabularyCuration.setId(idCreator.generate(getResourceTypeName()));
         // set status, dateOfRequest, userId
         vocabularyCuration.setStatus(VocabularyCuration.Status.PENDING.getKey());
@@ -81,14 +81,15 @@ public class VocabularyCurationManager extends ResourceManager<VocabularyCuratio
         vocabularyCuration.setResolutionUser(null);
         for (VocabularyEntryRequest vocEntryRequest : vocabularyCuration.getVocabularyEntryRequests()) {
             vocEntryRequest.setDateOfRequest(String.valueOf(System.currentTimeMillis()));
-            vocEntryRequest.setUserId(user.getEmail().toLowerCase());
+            vocEntryRequest.setUserId(AuthenticationInfo.getEmail(auth).toLowerCase());
         }
         // if vocabularyCuration doesn't exist
         validate(vocabularyCuration, resourceType, auth);
         if (vocabularyCuration.getVocabularyEntryRequests().size() == 1) {
             super.add(vocabularyCuration, auth);
             logger.info("Adding Vocabulary Curation: {}", vocabularyCuration);
-            registrationMailService.sendEmailsForVocabularyCurationCreation(vocabularyCuration, Objects.requireNonNull(user).getName());
+            registrationMailService.sendEmailsForVocabularyCurationCreation(vocabularyCuration,
+                    Objects.requireNonNull(AuthenticationInfo.getFullName(auth)));
             // if vocabularyCuration already exists in "pending"
         } else {
             update(vocabularyCuration, auth);
@@ -256,7 +257,7 @@ public class VocabularyCurationManager extends ResourceManager<VocabularyCuratio
     }
 
     public void approveOrRejectVocabularyCuration(VocabularyCuration vocabularyCuration, boolean approved, String rejectionReason, Authentication authentication) {
-        vocabularyCuration.setResolutionUser(User.of(authentication).getEmail().toLowerCase());
+        vocabularyCuration.setResolutionUser(AuthenticationInfo.getEmail(authentication).toLowerCase());
         vocabularyCuration.setResolutionDate(String.valueOf(System.currentTimeMillis()));
         logger.info("Updating VocabularyRequest {}", vocabularyCuration.getEntryValueName());
         if (approved) {
@@ -286,7 +287,7 @@ public class VocabularyCurationManager extends ResourceManager<VocabularyCuratio
             vocabulary.setParentId(parentFormed);
         }
         logger.info("User [{}] is adding a new Vocabulary by resolving the vocabulary request '{}'",
-                User.of(authentication).getEmail().toLowerCase(), vocabularyCuration.getId());
+                AuthenticationInfo.getEmail(authentication).toLowerCase(), vocabularyCuration.getId());
         vocabularyService.add(vocabulary, authentication);
     }
 

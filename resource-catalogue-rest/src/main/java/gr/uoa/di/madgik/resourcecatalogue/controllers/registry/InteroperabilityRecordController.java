@@ -55,7 +55,6 @@ public class InteroperabilityRecordController {
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.providerCanAddResources(#auth, #interoperabilityRecord)")
     public ResponseEntity<InteroperabilityRecord> add(@RequestBody InteroperabilityRecord interoperabilityRecord, @Parameter(hidden = true) Authentication auth) {
         InteroperabilityRecordBundle ret = this.interoperabilityRecordService.add(new InteroperabilityRecordBundle(interoperabilityRecord), auth);
-        logger.info("Added a new Interoperability Record with id '{}' and title '{}'", interoperabilityRecord.getId(), interoperabilityRecord.getTitle());
         return new ResponseEntity<>(ret.getInteroperabilityRecord(), HttpStatus.CREATED);
     }
 
@@ -65,7 +64,6 @@ public class InteroperabilityRecordController {
     public ResponseEntity<InteroperabilityRecord> update(@RequestBody InteroperabilityRecord interoperabilityRecord,
                                                          @Parameter(hidden = true) Authentication auth) {
         InteroperabilityRecordBundle ret = this.interoperabilityRecordService.update(new InteroperabilityRecordBundle(interoperabilityRecord), auth);
-        logger.info("Updated Interoperability Record with id '{}' and title '{}'", interoperabilityRecord.getId(), interoperabilityRecord.getTitle());
         return new ResponseEntity<>(ret.getInteroperabilityRecord(), HttpStatus.OK);
     }
 
@@ -81,9 +79,7 @@ public class InteroperabilityRecordController {
         if (interoperabilityRecordBundle == null) {
             return new ResponseEntity<>(HttpStatus.GONE);
         }
-        logger.info("Deleting Interoperability Record: {}", interoperabilityRecordBundle.getId());
         interoperabilityRecordService.delete(interoperabilityRecordBundle);
-        logger.info("Deleted the Interoperability Record with id '{}'", interoperabilityRecordBundle.getId());
         return new ResponseEntity<>(interoperabilityRecordBundle.getInteroperabilityRecord(), HttpStatus.OK);
     }
 
@@ -152,7 +148,6 @@ public class InteroperabilityRecordController {
                                                                @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
         InteroperabilityRecordBundle interoperabilityRecordBundle = interoperabilityRecordService.verify(id, status, active, auth);
-        logger.info("User '{}' verified Interoperability Record with title '{}' [status: {}] [active: {}]", auth, interoperabilityRecordBundle.getInteroperabilityRecord().getTitle(), status, active);
         return new ResponseEntity<>(interoperabilityRecordBundle, HttpStatus.OK);
     }
 
@@ -163,7 +158,6 @@ public class InteroperabilityRecordController {
                                                                   @RequestParam Boolean active,
                                                                   @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
-        logger.info("User '{}-{}' attempts to save Interoperability Record with id '{}' as '{}'", User.of(auth).getFullName(), User.of(auth).getEmail().toLowerCase(), id, active);
         return ResponseEntity.ok(interoperabilityRecordService.publish(id, active, auth));
     }
 
