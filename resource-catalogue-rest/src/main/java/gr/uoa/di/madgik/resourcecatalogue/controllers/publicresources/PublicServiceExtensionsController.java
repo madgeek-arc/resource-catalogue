@@ -79,7 +79,7 @@ public class PublicServiceExtensionsController {
         if (auth != null && auth.isAuthenticated()) {
             User user = User.of(auth);
             if (securityService.hasRole(auth, "ROLE_ADMIN") || securityService.hasRole(auth, "ROLE_EPOT")
-                    || securityService.userIsResourceProviderAdmin(user, helpdeskBundle.getHelpdesk().getServiceId())) {
+                    || securityService.userIsResourceAdmin(user, helpdeskBundle.getHelpdesk().getServiceId())) {
                 if (helpdeskBundle.getMetadata().isPublished()) {
                     return new ResponseEntity<>(helpdeskBundle.getHelpdesk(), HttpStatus.OK);
                 } else {
@@ -103,7 +103,7 @@ public class PublicServiceExtensionsController {
         if (auth != null && auth.isAuthenticated()) {
             User user = User.of(auth);
             if (securityService.hasRole(auth, "ROLE_ADMIN") || securityService.hasRole(auth, "ROLE_EPOT")
-                    || securityService.userIsResourceProviderAdmin(user, helpdeskBundle.getHelpdesk().getServiceId())) {
+                    || securityService.userIsResourceAdmin(user, helpdeskBundle.getHelpdesk().getServiceId())) {
                 if (helpdeskBundle.getMetadata().isPublished()) {
                     return new ResponseEntity<>(helpdeskBundle, HttpStatus.OK);
                 } else {
@@ -153,7 +153,7 @@ public class PublicServiceExtensionsController {
         if (auth != null && auth.isAuthenticated()) {
             User user = User.of(auth);
             if (securityService.hasRole(auth, "ROLE_ADMIN") || securityService.hasRole(auth, "ROLE_EPOT")
-                    || securityService.userIsResourceProviderAdmin(user, monitoringBundle.getMonitoring().getServiceId())) {
+                    || securityService.userIsResourceAdmin(user, monitoringBundle.getMonitoring().getServiceId())) {
                 if (monitoringBundle.getMetadata().isPublished()) {
                     return new ResponseEntity<>(monitoringBundle.getMonitoring(), HttpStatus.OK);
                 } else {
@@ -177,7 +177,7 @@ public class PublicServiceExtensionsController {
         if (auth != null && auth.isAuthenticated()) {
             User user = User.of(auth);
             if (securityService.hasRole(auth, "ROLE_ADMIN") || securityService.hasRole(auth, "ROLE_EPOT")
-                    || securityService.userIsResourceProviderAdmin(user, monitoringBundle.getMonitoring().getServiceId())) {
+                    || securityService.userIsResourceAdmin(user, monitoringBundle.getMonitoring().getServiceId())) {
                 if (monitoringBundle.getMetadata().isPublished()) {
                     return new ResponseEntity<>(monitoringBundle, HttpStatus.OK);
                 } else {

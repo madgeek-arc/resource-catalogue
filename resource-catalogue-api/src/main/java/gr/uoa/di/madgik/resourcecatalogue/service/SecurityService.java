@@ -1,12 +1,12 @@
 /**
  * Copyright 2017-2025 OpenAIRE AMKE & Athena Research and Innovation Center
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *      https://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * https://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -44,40 +44,32 @@ public interface SecurityService {
     boolean hasRole(Authentication auth, String role);
 
     /**
-     * @param auth       Authentication
-     * @param providerId Provider id
-     * @return True if the authenticated user is a Provider Admin
+     * @param auth Authentication
+     * @param id   Catalogue or Provider id
+     * @return True if the authenticated user is a Catalogue or Provider Admin
      */
-    boolean isProviderAdmin(Authentication auth, @NotNull String providerId);
-
-    /**
-     * @param auth       Authentication
-     * @param providerId Provider id
-     * @param noThrow    False to throw error, True to not throw error
-     * @return TTrue if the authenticated user is a Provider Admin
-     */
-    boolean isProviderAdmin(Authentication auth, @NotNull String providerId, boolean noThrow);
+    boolean userHasAdminAccess(Authentication auth, @NotNull String id);
 
     /**
      * @param user User
-     * @param id   Provider or Catalogue id
-     * @return True if the authenticated user is a Provider Admin
+     * @param id   Catalogue or Provider id
+     * @return True if the authenticated user is a Catalogue or Provider Admin
      */
-    boolean userIsProviderAdmin(@NotNull User user, @NotNull String id);
+    boolean userIsAdmin(@NotNull User user, @NotNull String id);
 
     /**
      * @param auth       Authentication
      * @param resourceId resource id
      * @return True if the authenticated user is a Provider Admin for the provider where the resource is registered.
      */
-    boolean isResourceProviderAdmin(Authentication auth, String resourceId);
+    boolean isResourceAdmin(Authentication auth, String resourceId);
 
     /**
      * @param user       User
      * @param resourceId resource id
      * @return True if the authenticated user is a Provider Admin for the provider where the resource is registered.
      */
-    boolean userIsResourceProviderAdmin(User user, String resourceId);
+    boolean userIsResourceAdmin(User user, String resourceId);
 
     /**
      * @param auth    Authentication

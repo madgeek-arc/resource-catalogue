@@ -81,7 +81,7 @@ public class PublicResourceInteroperabilityRecordController {
     }
 
     @GetMapping(path = "public/resourceInteroperabilityRecord/bundle/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth, #prefix+'/'+#suffix)")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceAdmin(#auth, #prefix+'/'+#suffix)")
     public ResponseEntity<?> getPublicResourceInteroperabilityRecordBundle(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
                                                                            @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix,
                                                                            @Parameter(hidden = true) Authentication auth) {
@@ -90,7 +90,7 @@ public class PublicResourceInteroperabilityRecordController {
         if (auth != null && auth.isAuthenticated()) {
             User user = User.of(auth);
             if (securityService.hasRole(auth, "ROLE_ADMIN") || securityService.hasRole(auth, "ROLE_EPOT")
-                    || securityService.userIsResourceProviderAdmin(user, id)) {
+                    || securityService.userIsResourceAdmin(user, id)) {
                 if (resourceInteroperabilityRecordBundle.getMetadata().isPublished()) {
                     return new ResponseEntity<>(resourceInteroperabilityRecordBundle, HttpStatus.OK);
                 } else {

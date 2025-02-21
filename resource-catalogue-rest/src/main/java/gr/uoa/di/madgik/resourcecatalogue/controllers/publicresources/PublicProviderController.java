@@ -79,7 +79,7 @@ public class PublicProviderController {
         if (auth != null && auth.isAuthenticated()) {
             User user = User.of(auth);
             if (securityService.hasRole(auth, "ROLE_ADMIN") || securityService.hasRole(auth, "ROLE_EPOT")
-                    || securityService.userIsProviderAdmin(user, id)) {
+                    || securityService.userIsAdmin(user, id)) {
                 if (providerBundle.getMetadata().isPublished()) {
                     return new ResponseEntity<>(providerBundle.getProvider(), HttpStatus.OK);
                 } else {
@@ -96,7 +96,7 @@ public class PublicProviderController {
 
     //    @Operation(description = "Returns the Public Provider bundle with the given id.")
     @GetMapping(path = "public/provider/bundle/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isProviderAdmin(#auth, #prefix+'/'+#suffix)")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.userHasAdminAccess(#auth, #prefix+'/'+#suffix)")
     public ResponseEntity<?> getPublicProviderBundle(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
                                                      @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix,
                                                      @Parameter(hidden = true) Authentication auth) {
@@ -105,7 +105,7 @@ public class PublicProviderController {
         if (auth != null && auth.isAuthenticated()) {
             User user = User.of(auth);
             if (securityService.hasRole(auth, "ROLE_ADMIN") || securityService.hasRole(auth, "ROLE_EPOT")
-                    || securityService.userIsProviderAdmin(user, id)) {
+                    || securityService.userIsAdmin(user, id)) {
                 if (providerBundle.getMetadata().isPublished()) {
                     return new ResponseEntity<>(providerBundle, HttpStatus.OK);
                 } else {

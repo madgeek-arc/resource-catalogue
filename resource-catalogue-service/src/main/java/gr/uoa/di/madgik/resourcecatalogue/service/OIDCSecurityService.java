@@ -1,12 +1,12 @@
 /**
  * Copyright 2017-2025 OpenAIRE AMKE & Athena Research and Innovation Center
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *      https://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * https://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -109,24 +109,14 @@ public class OIDCSecurityService implements SecurityService {
 
     // region Catalogues & Providers
     @Override
-    public boolean isProviderAdmin(Authentication auth, @NotNull String id) {
+    public boolean userHasAdminAccess(Authentication auth, @NotNull String id) {
         return getAuthenticatedUser(auth)
-                .map(user -> userIsProviderAdmin(user, id))
+                .map(user -> userIsAdmin(user, id))
                 .orElse(false);
     }
 
     @Override
-    public boolean isProviderAdmin(Authentication auth, @NotNull String id, boolean noThrow) {
-        if (noThrow) {
-            return true;
-        }
-        return getAuthenticatedUser(auth)
-                .map(user -> userIsProviderAdmin(user, id))
-                .orElse(false);
-    }
-
-    @Override
-    public boolean userIsProviderAdmin(User user, @NotNull String id) {
+    public boolean userIsAdmin(User user, @NotNull String id) {
         boolean isProvider = isProvider(id);
         List<User> users = isProvider ? getProviderUsers(id) : getCatalogueUsers(id);
         if (users == null) {
@@ -199,16 +189,16 @@ public class OIDCSecurityService implements SecurityService {
 
     // region Resources
     @Override
-    public boolean isResourceProviderAdmin(Authentication auth, String resourceId) {
+    public boolean isResourceAdmin(Authentication auth, String resourceId) {
         return getAuthenticatedUser(auth)
-                .map(user -> userIsResourceProviderAdmin(user, resourceId))
+                .map(user -> userIsResourceAdmin(user, resourceId))
                 .orElse(false);
     }
 
     @Override
-    public boolean userIsResourceProviderAdmin(@NotNull User user, String resourceId) {
+    public boolean userIsResourceAdmin(@NotNull User user, String resourceId) {
         String providerId = getProviderId(resourceId);
-        return userIsProviderAdmin(user, providerId);
+        return userIsAdmin(user, providerId);
     }
 
     private String getProviderId(String resourceId) {
@@ -276,7 +266,7 @@ public class OIDCSecurityService implements SecurityService {
     }
 
     private boolean providerCanAddResources(Authentication auth, ProviderBundle provider, String resourceId) {
-        if (isProviderAdmin(auth, provider.getId())) {
+        if (userHasAdminAccess(auth, provider.getId())) {
             if (provider.getStatus() == null) {
                 throw new ServiceException("Provider status field is null");
             }
@@ -310,7 +300,7 @@ public class OIDCSecurityService implements SecurityService {
         String providerId = getProviderId(resourceId);
         ProviderBundle provider = providerService.get(providerId, auth);
         if (provider != null && provider.isActive()) {
-            if (isProviderAdmin(auth, providerId)) {
+            if (userHasAdminAccess(auth, providerId)) {
                 return true;
             }
         }

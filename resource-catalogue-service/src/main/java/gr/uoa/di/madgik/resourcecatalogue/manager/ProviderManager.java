@@ -267,7 +267,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
             User user = User.of(auth);
             // if user is ADMIN/EPOT or Provider Admin on the specific Provider, return everything
             if (securityService.hasRole(auth, "ROLE_ADMIN") || securityService.hasRole(auth, "ROLE_EPOT") ||
-                    securityService.userIsProviderAdmin(user, providerId)) {
+                    securityService.userIsAdmin(user, providerId)) {
                 return providerBundle;
             }
         }
@@ -285,7 +285,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
             User user = User.of(auth);
             // if user is ADMIN/EPOT or Provider Admin on the specific Provider, return everything
             if (securityService.hasRole(auth, "ROLE_ADMIN") || securityService.hasRole(auth, "ROLE_EPOT") ||
-                    securityService.userIsProviderAdmin(user, id)) {
+                    securityService.userIsAdmin(user, id)) {
                 return providerBundle;
             }
         }
@@ -357,7 +357,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
             Browsing<ProviderBundle> providers = super.getAll(ff, auth);
             for (ProviderBundle providerBundle : providers.getResults()) {
                 if (providerBundle.getStatus().equals(vocabularyService.get("approved provider").getId()) ||
-                        securityService.userIsProviderAdmin(user, providerBundle.getId())) {
+                        securityService.userIsAdmin(user, providerBundle.getId())) {
                     retList.add(providerBundle);
                 }
             }
