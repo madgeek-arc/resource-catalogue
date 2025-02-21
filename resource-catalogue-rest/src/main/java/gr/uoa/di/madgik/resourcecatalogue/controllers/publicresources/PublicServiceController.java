@@ -1,12 +1,12 @@
 /**
  * Copyright 2017-2025 OpenAIRE AMKE & Athena Research and Innovation Center
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *      https://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * https://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -65,15 +65,19 @@ public class PublicServiceController {
 
     @Operation(description = "Returns the Public Service with the given id.")
     @GetMapping(path = "public/service/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    @PreAuthorize("@securityService.serviceIsActive(#prefix+'/'+#suffix) or hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceAdmin(#auth, #prefix+'/'+#suffix)")
+    @PreAuthorize("@securityService.serviceIsActive(#prefix+'/'+#suffix) or hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') " +
+            "or @securityService.isResourceAdmin(#auth, #prefix+'/'+#suffix)")
     public ResponseEntity<?> getPublicService(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
                                               @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix,
                                               @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId,
-                                              @Parameter(hidden = true) Authentication auth) {
+                                              @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
-        return serviceBundleService.get(id, catalogueId).getMetadata().isPublished() ?
-                new ResponseEntity(serviceBundleService.get(id, catalogueId).getService(), HttpStatus.OK) :
-                new ResponseEntity(gson.toJson("The specific Service does not consist a Public entity"), HttpStatus.NOT_FOUND);
+        ServiceBundle serviceBundle = serviceBundleService.get(id, catalogueId);
+        if (serviceBundle.getMetadata().isPublished()) {
+            return new ResponseEntity<>(serviceBundle.getService(), HttpStatus.OK);
+        }
+        return ResponseEntity.status(HttpStatus.FOUND).body(gson.toJson("The specific Service does not consist a " +
+                "Public entity"));
     }
 
     //    @Operation(description = "Returns the Public ServiceBundle with the given id.")
@@ -82,11 +86,14 @@ public class PublicServiceController {
     public ResponseEntity<?> getPublicServiceBundle(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
                                                     @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix,
                                                     @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId,
-                                                    @Parameter(hidden = true) Authentication auth) {
+                                                    @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
-        return serviceBundleService.get(id, catalogueId).getMetadata().isPublished() ?
-                new ResponseEntity(serviceBundleService.get(id, catalogueId), HttpStatus.OK) :
-                new ResponseEntity(gson.toJson("The specific Service does not consist a Public entity"), HttpStatus.NOT_FOUND);
+        ServiceBundle serviceBundle = serviceBundleService.get(id, catalogueId);
+        if (serviceBundle.getMetadata().isPublished()) {
+            return new ResponseEntity<>(serviceBundle, HttpStatus.OK);
+        }
+        return ResponseEntity.status(HttpStatus.FOUND).body(gson.toJson("The specific Service Bundle does not " +
+                "consist a Public entity"));
     }
 
     @Operation(description = "Filter a list of Public Services based on a set of filters or get a list of all Public Services in the Catalogue.")

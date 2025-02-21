@@ -48,14 +48,14 @@ public interface SecurityService {
      * @param id   Catalogue or Provider id
      * @return True if the authenticated user is a Catalogue or Provider Admin
      */
-    boolean userHasAdminAccess(Authentication auth, @NotNull String id);
+    boolean hasAdminAccess(Authentication auth, @NotNull String id);
 
     /**
      * @param user User
      * @param id   Catalogue or Provider id
      * @return True if the authenticated user is a Catalogue or Provider Admin
      */
-    boolean userIsAdmin(@NotNull User user, @NotNull String id);
+    boolean userHasAdminAccess(@NotNull User user, @NotNull String id);
 
     /**
      * @param auth       Authentication
@@ -99,6 +99,12 @@ public interface SecurityService {
      * and provider is active
      */
     boolean providerIsActiveAndUserIsAdmin(Authentication auth, String resourceId);
+
+    /**
+     * @param id provider id
+     * @return True if provider is active
+     */
+    boolean providerIsActive(String id);
 
     /**
      * @param id service id

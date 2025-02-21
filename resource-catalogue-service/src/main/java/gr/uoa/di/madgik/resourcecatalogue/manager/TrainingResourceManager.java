@@ -588,7 +588,7 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
             User user = User.of(auth);
             // if user is ADMIN/EPOT or Provider Admin on the specific Provider, return its Training Resources
             if (securityService.hasRole(auth, "ROLE_ADMIN") || securityService.hasRole(auth, "ROLE_EPOT") ||
-                    securityService.userIsAdmin(user, providerId)) {
+                    securityService.userHasAdminAccess(user, providerId)) {
                 return this.getAll(ff, auth).getResults().stream().map(TrainingResourceBundle::getTrainingResource).collect(Collectors.toList());
             }
         }
