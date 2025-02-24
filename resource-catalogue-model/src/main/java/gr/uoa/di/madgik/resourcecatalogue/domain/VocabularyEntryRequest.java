@@ -25,7 +25,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @XmlType
-@XmlRootElement(namespace = "http://einfracentral.eu")
+@XmlRootElement
 public class VocabularyEntryRequest {
 
     private static final Logger logger = LoggerFactory.getLogger(User.class);

@@ -26,7 +26,7 @@ import jakarta.xml.bind.annotation.XmlType;
 import org.json.simple.JSONObject;
 
 @XmlType
-@XmlRootElement(namespace = "http://einfracentral.eu")
+@XmlRootElement
 public class ConfigurationTemplate implements Identifiable {
 
     @XmlElement

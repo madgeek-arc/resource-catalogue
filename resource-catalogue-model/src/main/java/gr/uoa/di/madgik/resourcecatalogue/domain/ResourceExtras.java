@@ -26,7 +26,7 @@ import jakarta.xml.bind.annotation.XmlType;
 import java.util.List;
 
 @XmlType
-@XmlRootElement(namespace = "http://einfracentral.eu")
+@XmlRootElement
 public class ResourceExtras {
 
     @XmlElementWrapper(name = "eoscIFGuidelines")

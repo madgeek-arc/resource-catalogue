@@ -21,7 +21,7 @@ import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
 
 @XmlType
-@XmlRootElement(namespace = "http://einfracentral.eu")
+@XmlRootElement
 public class ResourceInteroperabilityRecordBundle extends Bundle<ResourceInteroperabilityRecord> {
 
     public ResourceInteroperabilityRecordBundle() {

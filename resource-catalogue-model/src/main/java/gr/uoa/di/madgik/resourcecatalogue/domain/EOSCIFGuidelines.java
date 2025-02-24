@@ -25,7 +25,7 @@ import jakarta.xml.bind.annotation.XmlType;
 import java.net.URL;
 
 @XmlType
-@XmlRootElement(namespace = "http://einfracentral.eu")
+@XmlRootElement
 public class EOSCIFGuidelines {
 
     @XmlElement()

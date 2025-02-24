@@ -26,7 +26,7 @@ import java.net.URL;
 import java.util.Objects;
 
 @XmlType
-@XmlRootElement(namespace = "http://einfracentral.eu")
+@XmlRootElement
 public class RelatedStandard {
 
     /**

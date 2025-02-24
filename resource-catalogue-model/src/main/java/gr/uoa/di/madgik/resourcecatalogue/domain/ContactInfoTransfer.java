@@ -22,7 +22,7 @@ import jakarta.xml.bind.annotation.XmlRootElement;
 
 import java.util.Objects;
 
-@XmlRootElement(namespace = "http://einfracentral.eu")
+@XmlRootElement
 public class ContactInfoTransfer {
     @XmlElement(required = true)
     @Schema

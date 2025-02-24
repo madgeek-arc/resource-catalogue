@@ -24,7 +24,7 @@ import java.util.Objects;
 
 //@Document
 @XmlType
-@XmlRootElement(namespace = "http://einfracentral.eu")
+@XmlRootElement
 public class TrainingResourceBundle extends Bundle<TrainingResource> {
 
     @XmlElement

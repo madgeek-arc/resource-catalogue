@@ -34,7 +34,7 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtAut
 import java.util.Objects;
 
 @XmlType
-@XmlRootElement(namespace = "http://einfracentral.eu")
+@XmlRootElement
 public class User implements Identifiable {
 
     private static final Logger logger = LoggerFactory.getLogger(User.class);

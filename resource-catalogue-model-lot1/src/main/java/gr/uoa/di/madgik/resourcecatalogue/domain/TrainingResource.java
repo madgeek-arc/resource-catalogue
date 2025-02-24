@@ -31,7 +31,7 @@ import java.util.List;
 import java.util.Objects;
 
 @XmlType
-@XmlRootElement(namespace = "http://einfracentral.eu")
+@XmlRootElement
 public class TrainingResource implements Identifiable {
 
     // Basic Information

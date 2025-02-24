@@ -23,7 +23,7 @@ import jakarta.xml.bind.annotation.XmlType;
 
 //@Document
 @XmlType
-@XmlRootElement(namespace = "http://einfracentral.eu")
+@XmlRootElement
 public class ServiceBundle extends Bundle<Service> {
 
     @XmlElement

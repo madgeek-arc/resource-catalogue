@@ -29,7 +29,7 @@ import java.util.Arrays;
 import java.util.List;
 
 @XmlType
-@XmlRootElement(namespace = "http://einfracentral.eu")
+@XmlRootElement
 public class VocabularyCuration implements Identifiable {
 
     private static final Logger logger = LoggerFactory.getLogger(User.class);
