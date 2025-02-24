@@ -22,8 +22,8 @@ import gr.uoa.di.madgik.resourcecatalogue.service.ServiceBundleService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -41,7 +41,7 @@ import java.util.List;
 @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
 public class ResourceExtrasController {
 
-    private static final Logger logger = LogManager.getLogger(ResourceExtrasController.class);
+    private static final Logger logger = LoggerFactory.getLogger(ResourceExtrasController.class);
 
     private final ServiceBundleService serviceBundleService;
 

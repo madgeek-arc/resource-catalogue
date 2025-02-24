@@ -23,8 +23,8 @@ import com.google.i18n.phonenumbers.NumberParseException;
 import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.service.EventService;
 import jakarta.annotation.PostConstruct;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -41,7 +41,7 @@ import java.util.Spliterators;
 @Component
 public class DataParser {
 
-    private static final Logger logger = LogManager.getLogger(DataParser.class);
+    private static final Logger logger = LoggerFactory.getLogger(DataParser.class);
     private static final String SERVICE_VISITS_TEMPLATE = "%s/index.php?token_auth=%s&module=API&method=Events.getNameFromActionId&idSubtable=1&format=JSON&idSite=%s&period=day&date=yesterday";
     private static final String SERVICE_RATINGS_TEMPLATE = "%s/index.php?token_auth=%s&module=API&method=Events.getNameFromActionId&idSubtable=3&format=JSON&idSite=%s&period=day&date=yesterday";
     private static final String SERVICE_ADD_TO_PROJECT_TEMPLATE = "%s/index.php?token_auth=%s&module=API&method=Events.getNameFromActionId&idSubtable=2&format=JSON&idSite=%s&period=day&date=yesterday";
@@ -100,10 +100,8 @@ public class DataParser {
         int eventType = 1; //visits
         try {
             postEventsToDatabase(results, eventType);
-        } catch (ResourceNotFoundException e) {
-            logger.error(e);
-        } catch (NumberParseException e) {
-            logger.error(e);
+        } catch (ResourceNotFoundException | NumberParseException e) {
+            logger.error(e.getMessage(), e);
         }
     }
 
@@ -130,10 +128,8 @@ public class DataParser {
         int eventType = 3; // ratings
         try {
             postEventsToDatabase(results, eventType);
-        } catch (ResourceNotFoundException e) {
-            logger.error(e);
-        } catch (NumberParseException e) {
-            logger.error(e);
+        } catch (ResourceNotFoundException | NumberParseException e) {
+            logger.error(e.getMessage(), e);
         }
     }
 
@@ -160,10 +156,8 @@ public class DataParser {
         int eventType = 2; // addToProject
         try {
             postEventsToDatabase(results, eventType);
-        } catch (ResourceNotFoundException e) {
-            logger.error(e);
-        } catch (NumberParseException e) {
-            logger.error(e);
+        } catch (ResourceNotFoundException | NumberParseException e) {
+            logger.error(e.getMessage(), e);
         }
     }
 

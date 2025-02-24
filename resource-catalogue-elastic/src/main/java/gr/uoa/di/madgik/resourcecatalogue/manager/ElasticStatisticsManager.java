@@ -30,8 +30,8 @@ import gr.uoa.di.madgik.resourcecatalogue.dto.MapValues;
 import gr.uoa.di.madgik.resourcecatalogue.dto.PlaceCount;
 import gr.uoa.di.madgik.resourcecatalogue.dto.Value;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.search.SearchType;
@@ -64,7 +64,7 @@ import java.util.stream.Collectors;
 @EnableScheduling
 public class ElasticStatisticsManager implements StatisticsService {
 
-    private static final Logger logger = LogManager.getLogger(ElasticStatisticsManager.class);
+    private static final Logger logger = LoggerFactory.getLogger(ElasticStatisticsManager.class);
     private final RestHighLevelClient client;
     private final Analytics analyticsService;
     private final ProviderService providerService;

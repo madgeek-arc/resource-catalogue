@@ -31,8 +31,8 @@ import io.swagger.v3.oas.annotations.Parameters;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpStatus;
@@ -56,7 +56,7 @@ import java.util.stream.Collectors;
 @Tag(name = "service")
 public class ServiceController {
 
-    private static final Logger logger = LogManager.getLogger(ServiceController.class);
+    private static final Logger logger = LoggerFactory.getLogger(ServiceController.class);
     private final ServiceBundleService<ServiceBundle> serviceBundleService;
     private final DraftResourceService<ServiceBundle> draftServiceService;
     private final ProviderService providerService;
@@ -187,12 +187,7 @@ public class ServiceController {
     @GetMapping(path = "by/{field}", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<Map<String, List<Service>>> getServicesBy(@PathVariable(value = "field") Service.Field field, @Parameter(hidden = true) Authentication auth) throws NoSuchFieldException {
         Map<String, List<ServiceBundle>> results;
-        try {
-            results = serviceBundleService.getBy(field.getKey(), auth);
-        } catch (NoSuchFieldException e) {
-            logger.error(e);
-            throw e;
-        }
+        results = serviceBundleService.getBy(field.getKey(), auth);
         Map<String, List<Service>> serviceResults = new TreeMap<>();
         for (Map.Entry<String, List<ServiceBundle>> services : results.entrySet()) {
             List<Service> items = services.getValue()

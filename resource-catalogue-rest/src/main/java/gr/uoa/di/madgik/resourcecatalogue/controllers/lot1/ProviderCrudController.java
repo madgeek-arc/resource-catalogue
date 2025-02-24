@@ -20,8 +20,8 @@ import gr.uoa.di.madgik.resourcecatalogue.domain.ProviderBundle;
 import gr.uoa.di.madgik.resourcecatalogue.service.ProviderService;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Profile;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -39,7 +39,7 @@ import java.util.List;
 @Tag(name = "providers")
 public class ProviderCrudController extends ResourceCrudController<ProviderBundle> {
 
-    private static final Logger logger = LogManager.getLogger(ProviderCrudController.class);
+    private static final Logger logger = LoggerFactory.getLogger(ProviderCrudController.class);
     private final ProviderService providerService;
 
     ProviderCrudController(ProviderService providerService) {

@@ -26,7 +26,7 @@ import java.util.Map;
 import java.util.Objects;
 
 @XmlType
-@XmlRootElement
+@XmlRootElement(namespace = "http://einfracentral.eu")
 public class Vocabulary implements Identifiable {
 
     @XmlElement(required = true)

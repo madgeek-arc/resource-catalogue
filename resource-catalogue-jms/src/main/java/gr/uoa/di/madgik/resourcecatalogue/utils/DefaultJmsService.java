@@ -16,8 +16,8 @@
 
 package gr.uoa.di.madgik.resourcecatalogue.utils;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Primary;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.retry.annotation.Backoff;
@@ -28,7 +28,7 @@ import org.springframework.stereotype.Service;
 @Primary
 public class DefaultJmsService implements JmsService {
 
-    private static final Logger logger = LogManager.getLogger(DefaultJmsService.class);
+    private static final Logger logger = LoggerFactory.getLogger(DefaultJmsService.class);
     private final JmsTemplate jmsTopicTemplate;
     private final JmsTemplate jmsQueueTemplate;
 

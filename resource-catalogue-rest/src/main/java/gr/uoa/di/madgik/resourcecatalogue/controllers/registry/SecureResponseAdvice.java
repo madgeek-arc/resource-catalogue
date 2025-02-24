@@ -20,8 +20,8 @@ import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
 import gr.uoa.di.madgik.resourcecatalogue.service.AuthoritiesMapper;
 import gr.uoa.di.madgik.resourcecatalogue.service.SecurityService;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
 import org.springframework.core.MethodParameter;
@@ -52,7 +52,7 @@ public class SecureResponseAdvice<T> implements ResponseBodyAdvice<T> {
         this.epotEmail = epotEmail;
     }
 
-    private static final Logger logger = LogManager.getLogger(SecureResponseAdvice.class);
+    private static final Logger logger = LoggerFactory.getLogger(SecureResponseAdvice.class);
 
     @Override
     public boolean supports(MethodParameter methodParameter, Class<? extends HttpMessageConverter<?>> aClass) {

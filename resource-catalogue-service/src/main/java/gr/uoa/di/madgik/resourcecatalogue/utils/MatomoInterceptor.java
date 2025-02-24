@@ -25,6 +25,7 @@ import org.matomo.java.tracking.TrackerConfiguration;
 import org.matomo.java.tracking.servlet.JakartaHttpServletWrapper;
 import org.matomo.java.tracking.servlet.ServletMatomoRequest;
 import org.slf4j.Logger;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.context.SecurityContextHolder;

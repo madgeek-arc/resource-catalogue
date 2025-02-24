@@ -26,8 +26,8 @@ import gr.uoa.di.madgik.resourcecatalogue.service.ResourceService;
 import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.servlet.http.HttpServletRequest;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -44,7 +44,7 @@ import java.util.Map;
 public abstract class ResourceCrudController<T extends Identifiable> {
     protected final ResourceService<T> service;
 
-    private static final Logger logger = LogManager.getLogger(ResourceCrudController.class);
+    private static final Logger logger = LoggerFactory.getLogger(ResourceCrudController.class);
 
     protected ResourceCrudController(ResourceService<T> service) {
         this.service = service;

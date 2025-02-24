@@ -38,8 +38,8 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
@@ -63,7 +63,7 @@ import java.util.Map;
 @Tag(name = "service extensions", description = "Operations about Services' Helpdesks/Monitorings")
 public class ServiceExtensionsController {
 
-    private static final Logger logger = LogManager.getLogger(ServiceExtensionsController.class);
+    private static final Logger logger = LoggerFactory.getLogger(ServiceExtensionsController.class);
     private final HelpdeskService helpdeskService;
     private final MonitoringService monitoringService;
     private final ServiceBundleService serviceBundleService;

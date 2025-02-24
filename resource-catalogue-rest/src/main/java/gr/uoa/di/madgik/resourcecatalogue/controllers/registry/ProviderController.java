@@ -34,8 +34,8 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpStatus;
@@ -57,7 +57,7 @@ import java.util.stream.Collectors;
 @Tag(name = "provider")
 public class ProviderController {
 
-    private static final Logger logger = LogManager.getLogger(ProviderController.class);
+    private static final Logger logger = LoggerFactory.getLogger(ProviderController.class);
     private final ProviderService providerService;
     private final DraftResourceService<ProviderBundle> draftProviderService;
     private final ServiceBundleService<ServiceBundle> serviceBundleService;

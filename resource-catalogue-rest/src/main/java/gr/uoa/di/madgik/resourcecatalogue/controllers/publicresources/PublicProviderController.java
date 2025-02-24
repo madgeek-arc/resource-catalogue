@@ -33,8 +33,8 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpStatus;
@@ -51,7 +51,7 @@ import org.springframework.web.bind.annotation.*;
 @Tag(name = "public provider")
 public class PublicProviderController {
 
-    private static final Logger logger = LogManager.getLogger(PublicProviderController.class);
+    private static final Logger logger = LoggerFactory.getLogger(PublicProviderController.class);
     private static final Gson gson = new Gson();
 
     private final SecurityService securityService;

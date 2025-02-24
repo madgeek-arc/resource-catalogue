@@ -17,8 +17,8 @@
 package gr.uoa.di.madgik.resourcecatalogue.validators;
 
 import gr.uoa.di.madgik.resourcecatalogue.domain.Helpdesk;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.validation.Errors;
 import org.springframework.validation.ValidationUtils;
 import org.springframework.validation.Validator;
@@ -30,7 +30,7 @@ import static gr.uoa.di.madgik.resourcecatalogue.validators.ValidationMessagesUt
 
 public class HelpdeskValidator implements Validator {
 
-    private static final Logger logger = LogManager.getLogger(HelpdeskValidator.class);
+    private static final Logger logger = LoggerFactory.getLogger(HelpdeskValidator.class);
 
     @Override
     public boolean supports(Class<?> clazz) {
@@ -91,7 +91,7 @@ public class HelpdeskValidator implements Validator {
                 }
             }
         } catch (NoSuchFieldException | IllegalAccessException e) {
-            logger.error(e);
+            logger.error(e.getMessage(), e);
         }
     }
 

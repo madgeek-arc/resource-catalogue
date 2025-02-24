@@ -26,8 +26,8 @@ import gr.uoa.di.madgik.resourcecatalogue.service.*;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpStatus;
@@ -44,7 +44,7 @@ import org.springframework.web.bind.annotation.*;
 @Tag(name = "public service extensions", description = "Get Information about Public Services' Helpdesks/Monitorings")
 public class PublicServiceExtensionsController {
 
-    private static final Logger logger = LogManager.getLogger(PublicServiceExtensionsController.class);
+    private static final Logger logger = LoggerFactory.getLogger(PublicServiceExtensionsController.class);
     private static final Gson gson = new Gson();
 
     private final SecurityService securityService;

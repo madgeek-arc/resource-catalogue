@@ -17,8 +17,8 @@
 package gr.uoa.di.madgik.resourcecatalogue.service.search;
 
 import gr.uoa.di.madgik.registry.service.SearchService;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 
@@ -28,7 +28,7 @@ import java.util.Map;
 //@Service
 public class SearchServiceEIC extends AbstractSearchService implements SearchService {
 
-    private static final Logger logger = LogManager.getLogger(SearchServiceEIC.class);
+    private static final Logger logger = LoggerFactory.getLogger(SearchServiceEIC.class);
 
     public SearchServiceEIC(RestHighLevelClient elasticsearchClient) {
         super(elasticsearchClient);

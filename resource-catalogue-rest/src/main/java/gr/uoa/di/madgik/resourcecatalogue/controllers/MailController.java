@@ -21,8 +21,8 @@ import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -42,7 +42,7 @@ import java.util.stream.Collectors;
 @Tag(name = "mails", description = "Send emails to Users")
 public class MailController {
 
-    private static final Logger logger = LogManager.getLogger(MailController.class);
+    private static final Logger logger = LoggerFactory.getLogger(MailController.class);
 
     @Autowired
     MailService mailService;

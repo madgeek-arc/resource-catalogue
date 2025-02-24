@@ -27,8 +27,8 @@ import gr.uoa.di.madgik.resourcecatalogue.service.OpenAIREDatasourceService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -48,7 +48,7 @@ import java.util.Map;
 @Tag(name = "datasources")
 public class DatasourceCrudController extends ResourceCrudController<DatasourceBundle> {
 
-    private static final Logger logger = LogManager.getLogger(DatasourceCrudController.class);
+    private static final Logger logger = LoggerFactory.getLogger(DatasourceCrudController.class);
     private final DatasourceService datasourceService;
     private final OpenAIREDatasourceService openAIREDatasourceService;
 

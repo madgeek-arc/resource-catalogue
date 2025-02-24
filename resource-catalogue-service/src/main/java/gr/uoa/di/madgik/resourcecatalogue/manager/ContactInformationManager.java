@@ -25,8 +25,8 @@ import gr.uoa.di.madgik.resourcecatalogue.domain.User;
 import gr.uoa.di.madgik.resourcecatalogue.service.CatalogueService;
 import gr.uoa.di.madgik.resourcecatalogue.service.ContactInformationService;
 import gr.uoa.di.madgik.resourcecatalogue.service.ProviderService;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.core.Authentication;
 
 import java.util.ArrayList;
@@ -36,7 +36,7 @@ import java.util.List;
 @org.springframework.stereotype.Service
 public class ContactInformationManager implements ContactInformationService {
 
-    private static final Logger logger = LogManager.getLogger(ContactInformationManager.class);
+    private static final Logger logger = LoggerFactory.getLogger(ContactInformationManager.class);
 
     private final ProviderService providerService;
     private final CatalogueService catalogueService;

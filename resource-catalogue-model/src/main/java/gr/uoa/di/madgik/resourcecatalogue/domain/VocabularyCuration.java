@@ -22,8 +22,8 @@ import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlElementWrapper;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
 import java.util.List;
@@ -32,7 +32,7 @@ import java.util.List;
 @XmlRootElement(namespace = "http://einfracentral.eu")
 public class VocabularyCuration implements Identifiable {
 
-    private static final Logger logger = LogManager.getLogger(User.class);
+    private static final Logger logger = LoggerFactory.getLogger(User.class);
 
     @XmlElement(required = true)
     @Schema

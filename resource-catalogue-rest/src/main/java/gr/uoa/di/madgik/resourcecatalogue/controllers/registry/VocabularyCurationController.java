@@ -23,8 +23,8 @@ import gr.uoa.di.madgik.resourcecatalogue.domain.VocabularyCuration;
 import gr.uoa.di.madgik.resourcecatalogue.service.VocabularyCurationService;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -43,7 +43,7 @@ import java.util.Set;
 @Tag(name = "vocabulary curation", description = "Operations about new Vocabulary suggestions")
 public class VocabularyCurationController extends ResourceController<VocabularyCuration> {
 
-    private static final Logger logger = LogManager.getLogger(VocabularyCurationController.class);
+    private static final Logger logger = LoggerFactory.getLogger(VocabularyCurationController.class);
     private final VocabularyCurationService vocabularyCurationService;
 
     VocabularyCurationController(VocabularyCurationService service) {

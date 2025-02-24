@@ -32,8 +32,8 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpStatus;
@@ -54,7 +54,7 @@ import java.util.Map;
 @Tag(name = "datasource")
 public class DatasourceController {
 
-    private static final Logger logger = LogManager.getLogger(DatasourceController.class);
+    private static final Logger logger = LoggerFactory.getLogger(DatasourceController.class);
     private final DatasourceService datasourceService;
     private final GenericResourceService genericResourceService;
     private final OpenAIREDatasourceService openAIREDatasourceService;

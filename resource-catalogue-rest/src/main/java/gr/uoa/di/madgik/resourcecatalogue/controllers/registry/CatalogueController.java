@@ -29,8 +29,8 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpStatus;
@@ -50,7 +50,7 @@ import java.util.List;
 @Tag(name = "catalogue", description = "Operations about Catalogues and their resources")
 public class CatalogueController {
 
-    private static final Logger logger = LogManager.getLogger(CatalogueController.class);
+    private static final Logger logger = LoggerFactory.getLogger(CatalogueController.class);
     private final CatalogueService catalogueManager;
     private final ProviderService providerManager;
     private final ServiceBundleService<ServiceBundle> serviceBundleService;

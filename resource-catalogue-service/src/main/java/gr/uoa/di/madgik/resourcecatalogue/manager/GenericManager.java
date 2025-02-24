@@ -29,6 +29,7 @@ import gr.uoa.di.madgik.resourcecatalogue.utils.ReflectUtils;
 import jakarta.annotation.PostConstruct;
 import jakarta.validation.constraints.NotNull;
 import org.slf4j.Logger;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;

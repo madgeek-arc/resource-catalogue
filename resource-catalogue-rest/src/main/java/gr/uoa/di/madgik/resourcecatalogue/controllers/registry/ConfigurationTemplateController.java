@@ -23,8 +23,8 @@ import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -42,7 +42,7 @@ import org.springframework.web.bind.annotation.RestController;
 @Tag(name = "configuration template", description = "Operations about Configuration Templates")
 public class ConfigurationTemplateController {
 
-    private static final Logger logger = LogManager.getLogger(ConfigurationTemplateController.class);
+    private static final Logger logger = LoggerFactory.getLogger(ConfigurationTemplateController.class);
     private final ConfigurationTemplateService configurationTemplateService;
 
     public ConfigurationTemplateController(ConfigurationTemplateService configurationTemplateService) {

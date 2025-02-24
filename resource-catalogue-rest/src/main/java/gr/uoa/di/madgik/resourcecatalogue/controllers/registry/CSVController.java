@@ -31,8 +31,8 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletResponse;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
 import org.springframework.http.MediaType;
@@ -54,7 +54,7 @@ import java.util.List;
 @Tag(name = "csv", description = "Export information related to various Catalogue resources to CSV")
 public class CSVController {
 
-    private static Logger logger = LogManager.getLogger(CSVController.class);
+    private static Logger logger = LoggerFactory.getLogger(CSVController.class);
     private final ServiceBundleService serviceBundleService;
     private final ProviderService providerService;
     private final VocabularyService vocabularyService;

@@ -17,8 +17,8 @@
 package gr.uoa.di.madgik.resourcecatalogue.utils;
 
 import gr.uoa.di.madgik.registry.domain.Facet;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.elasticsearch.ElasticsearchStatusException;
 import org.elasticsearch.action.search.*;
 import org.elasticsearch.client.RequestOptions;
@@ -43,7 +43,7 @@ import java.util.TreeMap;
 @Component
 public class ElasticFacetLabelService implements FacetLabelService {
 
-    private static final Logger logger = LogManager.getLogger(ElasticFacetLabelService.class);
+    private static final Logger logger = LoggerFactory.getLogger(ElasticFacetLabelService.class);
     private final RestHighLevelClient client;
 
     ElasticFacetLabelService(RestHighLevelClient client) {

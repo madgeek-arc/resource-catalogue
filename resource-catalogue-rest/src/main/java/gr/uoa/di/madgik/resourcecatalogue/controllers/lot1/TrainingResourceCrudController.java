@@ -20,8 +20,8 @@ import gr.uoa.di.madgik.resourcecatalogue.domain.TrainingResourceBundle;
 import gr.uoa.di.madgik.resourcecatalogue.service.TrainingResourceService;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Profile;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -38,7 +38,7 @@ import java.util.List;
 @Tag(name = "training resources")
 public class TrainingResourceCrudController extends ResourceCrudController<TrainingResourceBundle> {
 
-    private static final Logger logger = LogManager.getLogger(TrainingResourceCrudController.class.getName());
+    private static final Logger logger = LoggerFactory.getLogger(TrainingResourceCrudController.class.getName());
     private final TrainingResourceService trainingResourceService;
 
     TrainingResourceCrudController(TrainingResourceService trainingResourceService) {

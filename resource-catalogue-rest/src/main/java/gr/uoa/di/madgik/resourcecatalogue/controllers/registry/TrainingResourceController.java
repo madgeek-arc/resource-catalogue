@@ -35,8 +35,8 @@ import io.swagger.v3.oas.annotations.Parameters;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpStatus;
@@ -59,7 +59,7 @@ import java.util.stream.Collectors;
 @Tag(name = "training resource")
 public class TrainingResourceController {
 
-    private static final Logger logger = LogManager.getLogger(TrainingResourceController.class.getName());
+    private static final Logger logger = LoggerFactory.getLogger(TrainingResourceController.class.getName());
     private final TrainingResourceService trainingResourceService;
     private final DraftResourceService<TrainingResourceBundle> draftTrainingResourceService;
     private final ProviderService providerService;
@@ -196,12 +196,7 @@ public class TrainingResourceController {
     @GetMapping(path = "by/{field}", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<Map<String, List<TrainingResource>>> getTrainingResourcesBy(@PathVariable(value = "field") Service.Field field, @Parameter(hidden = true) Authentication auth) throws NoSuchFieldException {
         Map<String, List<TrainingResourceBundle>> results;
-        try {
-            results = trainingResourceService.getBy(field.getKey(), auth);
-        } catch (NoSuchFieldException e) {
-            logger.error(e);
-            throw e;
-        }
+        results = trainingResourceService.getBy(field.getKey(), auth);
         Map<String, List<TrainingResource>> trainingResourceResults = new TreeMap<>();
         for (Map.Entry<String, List<TrainingResourceBundle>> trainingResourceBundles : results.entrySet()) {
             List<TrainingResource> items = trainingResourceBundles.getValue()
