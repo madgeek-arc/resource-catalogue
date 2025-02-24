@@ -102,10 +102,9 @@ public class CSVManager implements CSVService {
         return timestamp;
     }
 
-    public void computeApprovedServicesBeforeTimestampAndGenerateCSV(long timestamp,
+    public String computeApprovedServicesBeforeTimestampAndGenerateCSV(long timestamp,
                                                                      List<ProviderBundle> providers,
-                                                                     List<ServiceBundle> services,
-                                                                     HttpServletResponse response) throws IOException {
+                                                                     List<ServiceBundle> services) {
         Map<String, String> providerIdToCountry = new TreeMap<>();
         Map<String, String> providerIdToName = new TreeMap<>();
         Map<String, Integer> providerToServiceCountApprovedBeforeTimestamp = new TreeMap<>();
@@ -153,14 +152,13 @@ public class CSVManager implements CSVService {
                     providerToServiceCountApprovedBeforeTimestamp.getOrDefault(resourceOrganisation, 0) + 1);
         }
 
-        listNumberOfServicesPerProviderCountryToCSV(providerIdToCountry, providerIdToName,
-                providerToServiceCountApprovedBeforeTimestamp, response);
+        return listNumberOfServicesPerProviderCountryToCSV(providerIdToCountry, providerIdToName,
+                providerToServiceCountApprovedBeforeTimestamp);
     }
 
-    private void listNumberOfServicesPerProviderCountryToCSV(Map<String, String> providerIdToCountry,
+    private String listNumberOfServicesPerProviderCountryToCSV(Map<String, String> providerIdToCountry,
                                                              Map<String, String> providerIdToName,
-                                                             Map<String, Integer> providerToServiceCountApprovedBeforeTimestamp,
-                                                             HttpServletResponse response) throws IOException {
+                                                             Map<String, Integer> providerToServiceCountApprovedBeforeTimestamp) {
         // Sort the entries by country
         List<Map.Entry<String, Integer>> sortedEntries = providerToServiceCountApprovedBeforeTimestamp.entrySet().stream()
                 .sorted((entry1, entry2) -> {
@@ -186,14 +184,7 @@ public class CSVManager implements CSVService {
                     .append('\n');
         }
 
-        // Set the response headers
-        response.setContentType("text/csv");
-        response.setCharacterEncoding(StandardCharsets.UTF_8.name());
-        response.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"services_per_country.csv\"");
-
-        // Write the CSV content to the response
-        response.getWriter().write(csvContent.toString());
-        response.getWriter().flush();
+        return csvContent.toString();
     }
 
     private static String formatCSVField(String field) {

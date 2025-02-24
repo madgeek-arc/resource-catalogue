@@ -19,7 +19,6 @@ package gr.uoa.di.madgik.resourcecatalogue.utils;
 import gr.uoa.di.madgik.resourcecatalogue.domain.ProviderBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.ServiceBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Vocabulary;
-import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
 import java.util.List;
@@ -63,10 +62,9 @@ public interface CSVService {
      * @param timestamp Date in Timestamp
      * @param providers List of Providers
      * @param services  List of Services
-     * @param response  HttpServletResponse
+     * @return The CSV as String.
      */
-    void computeApprovedServicesBeforeTimestampAndGenerateCSV(long timestamp,
+    String computeApprovedServicesBeforeTimestampAndGenerateCSV(long timestamp,
                                                               List<ProviderBundle> providers,
-                                                              List<ServiceBundle> services,
-                                                              HttpServletResponse response) throws IOException;
+                                                              List<ServiceBundle> services) throws IOException;
 }

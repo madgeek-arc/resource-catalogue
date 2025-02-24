@@ -35,6 +35,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -45,6 +46,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 @Hidden
@@ -122,7 +124,16 @@ public class CSVController {
         long timestamp = csvService.generateTimestampFromDate(date);
         List<ProviderBundle> providers = providerService.getAll(createFacetFilter(false), auth).getResults();
         List<ServiceBundle> services = serviceBundleService.getAll(createFacetFilter(false), auth).getResults();
-        csvService.computeApprovedServicesBeforeTimestampAndGenerateCSV(timestamp, providers, services, response);
+        String csv = csvService.computeApprovedServicesBeforeTimestampAndGenerateCSV(timestamp, providers, services);
+
+        // Set the response headers
+        response.setContentType("text/csv");
+        response.setCharacterEncoding(StandardCharsets.UTF_8.name());
+        response.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"services_per_country.csv\"");
+
+        // Write the CSV content to the response
+        response.getWriter().write(csv);
+        response.getWriter().flush();
     }
 
     private FacetFilter createFacetFilter(Boolean published) {
