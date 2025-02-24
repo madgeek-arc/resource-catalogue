@@ -78,7 +78,7 @@ public class PublicDatasourceController {
         if (datasourceBundle.getMetadata().isPublished()) {
             return new ResponseEntity<>(datasourceBundle.getDatasource(), HttpStatus.OK);
         }
-        return ResponseEntity.status(HttpStatus.FOUND).body(gson.toJson("The specific Datasource does not consist a " +
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(gson.toJson("The specific Datasource does not consist a " +
                 "Public entity"));
     }
 
@@ -92,7 +92,7 @@ public class PublicDatasourceController {
         if (datasourceBundle.getMetadata().isPublished()) {
             return new ResponseEntity<>(datasourceBundle, HttpStatus.OK);
         }
-        return ResponseEntity.status(HttpStatus.FOUND).body(gson.toJson("The specific Datasource Bundle does not " +
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(gson.toJson("The specific Datasource Bundle does not " +
                 "consist a Public entity"));
     }
 

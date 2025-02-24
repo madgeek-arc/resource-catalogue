@@ -82,7 +82,7 @@ public class PublicServiceExtensionsController {
         if (helpdeskBundle.getMetadata().isPublished()) {
             return new ResponseEntity<>(helpdeskBundle.getHelpdesk(), HttpStatus.OK);
         }
-        return ResponseEntity.status(HttpStatus.FOUND).body(gson.toJson("The specific Helpdesk does not consist a " +
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(gson.toJson("The specific Helpdesk does not consist a " +
                 "Public entity"));
     }
 
@@ -96,7 +96,7 @@ public class PublicServiceExtensionsController {
         if (helpdeskBundle.getMetadata().isPublished()) {
             return new ResponseEntity<>(helpdeskBundle, HttpStatus.OK);
         }
-        return ResponseEntity.status(HttpStatus.FOUND).body(gson.toJson("The specific Helpdesk Bundle does not " +
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(gson.toJson("The specific Helpdesk Bundle does not " +
                 "consist a Public entity"));
     }
 
@@ -136,7 +136,7 @@ public class PublicServiceExtensionsController {
         if (monitoringBundle.getMetadata().isPublished()) {
             return new ResponseEntity<>(monitoringBundle.getMonitoring(), HttpStatus.OK);
         }
-        return ResponseEntity.status(HttpStatus.FOUND).body(gson.toJson("The specific Monitoring does not consist " +
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(gson.toJson("The specific Monitoring does not consist " +
                 "a Public entity"));
     }
 
@@ -150,7 +150,7 @@ public class PublicServiceExtensionsController {
         if (monitoringBundle.getMetadata().isPublished()) {
             return new ResponseEntity<>(monitoringBundle, HttpStatus.OK);
         }
-        return ResponseEntity.status(HttpStatus.FOUND).body(gson.toJson("The specific Monitoring Bundle does not " +
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(gson.toJson("The specific Monitoring Bundle does not " +
                 "consist a Public entity"));
     }
 

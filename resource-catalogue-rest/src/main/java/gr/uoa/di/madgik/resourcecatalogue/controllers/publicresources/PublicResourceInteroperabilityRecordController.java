@@ -76,7 +76,7 @@ public class PublicResourceInteroperabilityRecordController {
         if (bundle.getMetadata().isPublished()) {
             return new ResponseEntity<>(bundle.getResourceInteroperabilityRecord(), HttpStatus.OK);
         }
-        return ResponseEntity.status(HttpStatus.FOUND).body(gson.toJson("The specific Resource Interoperability " +
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(gson.toJson("The specific Resource Interoperability " +
                 "Record does not consist a Public entity"));
     }
 
@@ -90,7 +90,7 @@ public class PublicResourceInteroperabilityRecordController {
         if (bundle.getMetadata().isPublished()) {
             return new ResponseEntity<>(bundle, HttpStatus.OK);
         }
-        return ResponseEntity.status(HttpStatus.FOUND).body(gson.toJson("The specific Resource Interoperability " +
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(gson.toJson("The specific Resource Interoperability " +
                 "Record Bundle does not consist a Public entity"));
     }
 

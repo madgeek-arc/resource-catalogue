@@ -83,7 +83,7 @@ public class PublicTrainingResourceController {
         if (trainingResourceBundle.getMetadata().isPublished()) {
             return new ResponseEntity<>(trainingResourceBundle.getTrainingResource(), HttpStatus.OK);
         }
-        return ResponseEntity.status(HttpStatus.FOUND).body(gson.toJson("The specific Training Resource does not " +
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(gson.toJson("The specific Training Resource does not " +
                 "consist a Public entity"));
     }
 
@@ -98,7 +98,7 @@ public class PublicTrainingResourceController {
         if (trainingResourceBundle.getMetadata().isPublished()) {
             return new ResponseEntity<>(trainingResourceBundle, HttpStatus.OK);
         }
-        return ResponseEntity.status(HttpStatus.FOUND).body(gson.toJson("The specific Training Resource Bundle " +
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(gson.toJson("The specific Training Resource Bundle " +
                 "does not consist a Public entity"));
     }
 

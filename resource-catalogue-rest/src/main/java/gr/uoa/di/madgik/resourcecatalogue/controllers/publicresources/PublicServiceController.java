@@ -76,7 +76,7 @@ public class PublicServiceController {
         if (serviceBundle.getMetadata().isPublished()) {
             return new ResponseEntity<>(serviceBundle.getService(), HttpStatus.OK);
         }
-        return ResponseEntity.status(HttpStatus.FOUND).body(gson.toJson("The specific Service does not consist a " +
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(gson.toJson("The specific Service does not consist a " +
                 "Public entity"));
     }
 
@@ -92,7 +92,7 @@ public class PublicServiceController {
         if (serviceBundle.getMetadata().isPublished()) {
             return new ResponseEntity<>(serviceBundle, HttpStatus.OK);
         }
-        return ResponseEntity.status(HttpStatus.FOUND).body(gson.toJson("The specific Service Bundle does not " +
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(gson.toJson("The specific Service Bundle does not " +
                 "consist a Public entity"));
     }
 

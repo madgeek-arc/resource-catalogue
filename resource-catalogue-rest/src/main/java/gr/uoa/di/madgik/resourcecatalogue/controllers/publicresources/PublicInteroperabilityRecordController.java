@@ -87,7 +87,7 @@ public class PublicInteroperabilityRecordController {
         if (interoperabilityRecordBundle.getMetadata().isPublished()) {
             return new ResponseEntity<>(interoperabilityRecordBundle.getInteroperabilityRecord(), HttpStatus.OK);
         }
-        return ResponseEntity.status(HttpStatus.FOUND).body(gson.toJson("The specific Interoperability Record " +
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(gson.toJson("The specific Interoperability Record " +
                 "does not consist a Public entity."));
     }
 
@@ -102,7 +102,7 @@ public class PublicInteroperabilityRecordController {
         if (interoperabilityRecordBundle.getMetadata().isPublished()) {
             return new ResponseEntity<>(interoperabilityRecordBundle, HttpStatus.OK);
         }
-        return ResponseEntity.status(HttpStatus.FOUND).body(gson.toJson("The specific Interoperability Record " +
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(gson.toJson("The specific Interoperability Record " +
                 "Bundle does not consist a Public entity"));
     }
 

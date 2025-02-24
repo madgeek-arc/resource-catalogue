@@ -80,7 +80,7 @@ public class PublicProviderController {
         if (providerBundle.getMetadata().isPublished()) {
             return new ResponseEntity<>(providerBundle.getProvider(), HttpStatus.OK);
         }
-        return ResponseEntity.status(HttpStatus.FOUND).body(gson.toJson("The specific Provider does not " +
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(gson.toJson("The specific Provider does not " +
                 "consist a Public entity"));
     }
 
@@ -95,7 +95,7 @@ public class PublicProviderController {
         if (providerBundle.getMetadata().isPublished()) {
             return new ResponseEntity<>(providerBundle, HttpStatus.OK);
         }
-        return ResponseEntity.status(HttpStatus.FOUND).body(gson.toJson("The specific Provider Bundle does not " +
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(gson.toJson("The specific Provider Bundle does not " +
                 "consist a Public entity"));
     }
 
