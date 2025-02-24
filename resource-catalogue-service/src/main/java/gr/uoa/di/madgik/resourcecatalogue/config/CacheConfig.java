@@ -18,7 +18,6 @@ package gr.uoa.di.madgik.resourcecatalogue.config;
 
 import com.google.common.cache.CacheBuilder;
 import org.slf4j.Logger;
-import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.EnableCaching;
