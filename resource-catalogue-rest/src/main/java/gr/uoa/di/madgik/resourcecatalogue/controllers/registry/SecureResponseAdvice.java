@@ -158,7 +158,7 @@ public class SecureResponseAdvice<T> implements ResponseBodyAdvice<T> {
     }
 
     private void modifyProvider(T provider, Authentication auth) {
-        if (!this.securityService.userHasAdminAccess(auth, ((Provider) provider).getId())) {
+        if (!this.securityService.hasAdminAccess(auth, ((Provider) provider).getId())) {
             ((Provider) provider).setMainContact(null);
             ((Provider) provider).setUsers(null);
         }
@@ -171,7 +171,7 @@ public class SecureResponseAdvice<T> implements ResponseBodyAdvice<T> {
         modifyLoggingInfo((T) ((ProviderBundle) bundle).getLatestUpdateInfo());
         modifyLoggingInfo((T) ((ProviderBundle) bundle).getLatestOnboardingInfo());
 
-        if (!this.securityService.userHasAdminAccess(auth, ((ProviderBundle) bundle).getId())) {
+        if (!this.securityService.hasAdminAccess(auth, ((ProviderBundle) bundle).getId())) {
             ((ProviderBundle) bundle).getProvider().setMainContact(null);
             ((ProviderBundle) bundle).getProvider().setUsers(null);
             ((ProviderBundle) bundle).getMetadata().setTerms(null);
@@ -179,7 +179,7 @@ public class SecureResponseAdvice<T> implements ResponseBodyAdvice<T> {
     }
 
     private void modifyCatalogue(T catalogue, Authentication auth) {
-        if (!this.securityService.userHasAdminAccess(auth, ((Catalogue) catalogue).getId())) {
+        if (!this.securityService.hasAdminAccess(auth, ((Catalogue) catalogue).getId())) {
             ((Catalogue) catalogue).setMainContact(null);
             ((Catalogue) catalogue).setUsers(null);
         }
@@ -192,7 +192,7 @@ public class SecureResponseAdvice<T> implements ResponseBodyAdvice<T> {
         modifyLoggingInfo((T) ((CatalogueBundle) bundle).getLatestUpdateInfo());
         modifyLoggingInfo((T) ((CatalogueBundle) bundle).getLatestOnboardingInfo());
 
-        if (!this.securityService.userHasAdminAccess(auth, ((CatalogueBundle) bundle).getId())) {
+        if (!this.securityService.hasAdminAccess(auth, ((CatalogueBundle) bundle).getId())) {
             ((CatalogueBundle) bundle).getCatalogue().setMainContact(null);
             ((CatalogueBundle) bundle).getCatalogue().setUsers(null);
             ((CatalogueBundle) bundle).getMetadata().setTerms(null);

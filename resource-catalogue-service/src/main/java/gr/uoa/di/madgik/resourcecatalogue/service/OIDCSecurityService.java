@@ -109,14 +109,14 @@ public class OIDCSecurityService implements SecurityService {
 
     // region Catalogues & Providers
     @Override
-    public boolean userHasAdminAccess(Authentication auth, @NotNull String id) {
+    public boolean hasAdminAccess(Authentication auth, @NotNull String id) {
         return getAuthenticatedUser(auth)
-                .map(user -> userIsAdmin(user, id))
+                .map(user -> userHasAdminAccess(user, id))
                 .orElse(false);
     }
 
     @Override
-    public boolean userIsAdmin(User user, @NotNull String id) {
+    public boolean userHasAdminAccess(User user, @NotNull String id) {
         boolean isProvider = isProvider(id);
         List<User> users = isProvider ? getProviderUsers(id) : getCatalogueUsers(id);
         if (users == null) {
@@ -198,9 +198,11 @@ public class OIDCSecurityService implements SecurityService {
     @Override
     public boolean userIsResourceAdmin(@NotNull User user, String resourceId) {
         String providerId = getProviderId(resourceId);
-        return userIsAdmin(user, providerId);
+        return userHasAdminAccess(user, providerId);
     }
 
+    //TODO: expand to check for other resources too
+    //TODO: when done, refactor PreAuthorization annotations to include them
     private String getProviderId(String resourceId) {
         String providerId;
         Bundle<?> bundle = determineResourceType(resourceId);
@@ -266,7 +268,7 @@ public class OIDCSecurityService implements SecurityService {
     }
 
     private boolean providerCanAddResources(Authentication auth, ProviderBundle provider, String resourceId) {
-        if (userHasAdminAccess(auth, provider.getId())) {
+        if (hasAdminAccess(auth, provider.getId())) {
             if (provider.getStatus() == null) {
                 throw new ServiceException("Provider status field is null");
             }
@@ -300,11 +302,17 @@ public class OIDCSecurityService implements SecurityService {
         String providerId = getProviderId(resourceId);
         ProviderBundle provider = providerService.get(providerId, auth);
         if (provider != null && provider.isActive()) {
-            if (userHasAdminAccess(auth, providerId)) {
+            if (hasAdminAccess(auth, providerId)) {
                 return true;
             }
         }
         return false;
+    }
+
+    @Override
+    public boolean providerIsActive(String id) {
+        ProviderBundle providerBundle = providerService.get(id);
+        return providerBundle.isActive();
     }
 
     @Override

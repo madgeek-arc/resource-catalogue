@@ -111,7 +111,7 @@ public class CatalogueController {
 
     @Operation(summary = "Updates a specific Catalogue.")
     @PutMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.userHasAdminAccess(#auth,#catalogue.id)")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.hasAdminAccess(#auth,#catalogue.id)")
     public ResponseEntity<Catalogue> updateCatalogue(@RequestBody Catalogue catalogue,
                                                      @RequestParam(required = false) String comment,
                                                      @Parameter(hidden = true) Authentication auth) {
@@ -158,7 +158,7 @@ public class CatalogueController {
     @Hidden
     @Operation(summary = "Returns the Catalogue Bundle with the given id.")
     @GetMapping(path = "bundle/{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.userHasAdminAccess(#auth, #id)")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.hasAdminAccess(#auth, #id)")
     public ResponseEntity<CatalogueBundle> getCatalogueBundle(@PathVariable("id") String id,
                                                               @Parameter(hidden = true) Authentication auth) {
         return new ResponseEntity<>(catalogueManager.get(id, auth), HttpStatus.OK);
@@ -343,7 +343,7 @@ public class CatalogueController {
 
     @Operation(description = "Updates the Provider of the specific Catalogue.")
     @PutMapping(path = "{catalogueId}/provider", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.userHasAdminAccess(#auth,#provider.id)")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.hasAdminAccess(#auth,#provider.id)")
     public ResponseEntity<Provider> updateCatalogueProvider(@RequestBody Provider provider,
                                                             @PathVariable String catalogueId,
                                                             @RequestParam(required = false) String comment,
@@ -375,7 +375,7 @@ public class CatalogueController {
 
     @Operation(description = "Deletes the Provider of the specific Catalogue with the given id.")
     @DeleteMapping(path = "{catalogueId}/provider/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.userHasAdminAccess(#auth, #catalogueId)")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.hasAdminAccess(#auth, #catalogueId)")
     public ResponseEntity<Provider> deleteCatalogueProvider(@PathVariable("catalogueId") String catalogueId,
                                                             @Parameter(description = "The left part of the ID before the '/'")
                                                             @PathVariable("prefix") String prefix,
@@ -448,13 +448,13 @@ public class CatalogueController {
 
     @Operation(description = "Deletes the Service of the specific Catalogue with the given id.")
     @DeleteMapping(path = "{catalogueId}/service/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.userHasAdminAccess(#auth, #catalogueId)")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.hasAdminAccess(#auth, #catalogueId)")
     public ResponseEntity<Service> deleteCatalogueService(@PathVariable("catalogueId") String catalogueId,
                                                           @Parameter(description = "The left part of the ID before the '/'")
                                                           @PathVariable("prefix") String prefix,
                                                           @Parameter(description = "The right part of the ID after the '/'")
                                                           @PathVariable("suffix") String suffix,
-                                                          @Parameter(hidden = true) Authentication auth) {
+                                                          @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
         String serviceId = prefix + "/" + suffix;
         ServiceBundle serviceBundle = serviceBundleService.get(serviceId, catalogueId);
         if (serviceBundle == null) {
@@ -511,13 +511,13 @@ public class CatalogueController {
 
     @Operation(description = "Deletes the Datasource of the specific Catalogue with the given id.")
     @DeleteMapping(path = "{catalogueId}/datasource/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.userHasAdminAccess(#auth, #catalogueId)")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.hasAdminAccess(#auth, #catalogueId)")
     public ResponseEntity<Datasource> deleteCatalogueDatasource(@PathVariable("catalogueId") String catalogueId,
                                                                 @Parameter(description = "The left part of the ID before the '/'")
                                                                 @PathVariable("prefix") String prefix,
                                                                 @Parameter(description = "The right part of the ID after the '/'")
                                                                 @PathVariable("suffix") String suffix,
-                                                                @Parameter(hidden = true) Authentication auth) {
+                                                                @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
         String serviceId = prefix + "/" + suffix;
         DatasourceBundle datasourceBundle = datasourceService.get(serviceId, catalogueId);
         if (datasourceBundle == null) {
@@ -588,13 +588,13 @@ public class CatalogueController {
 
     @Operation(description = "Deletes the Training Resource of the specific Catalogue with the given id.")
     @DeleteMapping(path = "{catalogueId}/trainingResource/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.userHasAdminAccess(#auth, #catalogueId)")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.hasAdminAccess(#auth, #catalogueId)")
     public ResponseEntity<TrainingResource> deleteCatalogueTrainingResource(@PathVariable("catalogueId") String catalogueId,
                                                                             @Parameter(description = "The left part of the ID before the '/'")
                                                                             @PathVariable("prefix") String prefix,
                                                                             @Parameter(description = "The right part of the ID after the '/'")
                                                                             @PathVariable("suffix") String suffix,
-                                                                            @Parameter(hidden = true) Authentication auth) {
+                                                                            @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
         String trainingResourceId = prefix + "/" + suffix;
         TrainingResourceBundle trainingResourceBundle = trainingResourceService.get(trainingResourceId, catalogueId);
         if (trainingResourceBundle == null) {
@@ -664,13 +664,13 @@ public class CatalogueController {
 
     @Operation(description = "Deletes the Interoperability Record of the specific Catalogue with the given id.")
     @DeleteMapping(path = "{catalogueId}/interoperabilityRecord/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or @securityService.userHasAdminAccess(#auth, #catalogueId)")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or @securityService.hasAdminAccess(#auth, #catalogueId)")
     public ResponseEntity<InteroperabilityRecord> deleteCatalogueInteroperabilityRecord(@PathVariable("catalogueId") String catalogueId,
                                                                                         @Parameter(description = "The left part of the ID before the '/'")
                                                                                         @PathVariable("prefix") String prefix,
                                                                                         @Parameter(description = "The right part of the ID after the '/'")
                                                                                         @PathVariable("suffix") String suffix,
-                                                                                        @Parameter(hidden = true) Authentication auth) {
+                                                                                        @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
         String interoperabilityRecordId = prefix + "/" + suffix;
         InteroperabilityRecordBundle interoperabilityRecordBundle = interoperabilityRecordService.get(interoperabilityRecordId, catalogueId);
         if (interoperabilityRecordBundle == null) {

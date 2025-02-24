@@ -1,12 +1,12 @@
 /**
  * Copyright 2017-2025 OpenAIRE AMKE & Athena Research and Innovation Center
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *      https://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * https://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,7 +20,6 @@ import com.google.gson.Gson;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.resourcecatalogue.annotations.Browse;
-import gr.uoa.di.madgik.resourcecatalogue.domain.User;
 import gr.uoa.di.madgik.resourcecatalogue.domain.configurationTemplates.ConfigurationTemplateInstanceBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.configurationTemplates.ConfigurationTemplateInstanceDto;
 import gr.uoa.di.madgik.resourcecatalogue.service.ConfigurationTemplateInstanceService;
@@ -66,12 +65,14 @@ public class PublicConfigurationTemplateInstanceController {
     public ResponseEntity<?> getPublicConfigurationTemplateInstance(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
                                                                     @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix) {
         String id = prefix + "/" + suffix;
-        ConfigurationTemplateInstanceBundle configurationTemplateInstanceBundle = configurationTemplateInstanceService.get(id);
-        if (configurationTemplateInstanceBundle.getMetadata().isPublished()) {
-            ConfigurationTemplateInstanceDto ret = configurationTemplateInstanceService.createCTIDto(configurationTemplateInstanceBundle.getConfigurationTemplateInstance());
+        ConfigurationTemplateInstanceBundle bundle = configurationTemplateInstanceService.get(id);
+        if (bundle.getMetadata().isPublished()) {
+            ConfigurationTemplateInstanceDto ret = configurationTemplateInstanceService.
+                    createCTIDto(bundle.getConfigurationTemplateInstance());
             return new ResponseEntity<>(ret, HttpStatus.OK);
         }
-        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(gson.toJson("You cannot view the specific Configuration Template Instance."));
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(gson.toJson("The specific Configuration Template " +
+                "Instance does not consist a Public entity"));
     }
 
     @GetMapping(path = "public/configurationTemplateInstance/bundle/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
@@ -80,21 +81,12 @@ public class PublicConfigurationTemplateInstanceController {
                                                                           @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix,
                                                                           @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
-        ConfigurationTemplateInstanceBundle configurationTemplateInstanceBundle = configurationTemplateInstanceService.get(id);
-        if (auth != null && auth.isAuthenticated()) {
-            User user = User.of(auth);
-            if (securityService.hasRole(auth, "ROLE_ADMIN") || securityService.hasRole(auth, "ROLE_EPOT")) {
-                if (configurationTemplateInstanceBundle.getMetadata().isPublished()) {
-                    return new ResponseEntity<>(configurationTemplateInstanceBundle, HttpStatus.OK);
-                } else {
-                    return ResponseEntity.status(HttpStatus.FOUND).body(gson.toJson("The specific Configuration Template Instance Bundle does not consist a Public entity"));
-                }
-            }
+        ConfigurationTemplateInstanceBundle bundle = configurationTemplateInstanceService.get(id);
+        if (bundle.getMetadata().isPublished()) {
+            return new ResponseEntity<>(bundle, HttpStatus.OK);
         }
-        if (configurationTemplateInstanceBundle.getMetadata().isPublished()) {
-            return new ResponseEntity<>(configurationTemplateInstanceBundle, HttpStatus.OK);
-        }
-        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(gson.toJson("You cannot view the specific Configuration Template Instance."));
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(gson.toJson("The specific Configuration Template " +
+                "Instance Bundle does not consist a Public entity"));
     }
 
     @Operation(description = "Filter a list of Public Configuration Template Instances based on a set of filters or get a list of all Public Configuration Template Instances in the Catalogue.")
