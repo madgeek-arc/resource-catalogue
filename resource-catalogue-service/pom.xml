@@ -20,6 +20,7 @@
     </licenses>
 
     <properties>
+        <maven-war-plugin.version>3.2.3</maven-war-plugin.version>
     </properties>
 
     <profiles>
@@ -47,6 +48,7 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-dependency-plugin</artifactId>
+                        <version>3.5.0</version>
                         <executions>
                             <execution>
                                 <id>copy-beyond-resources</id>
@@ -93,6 +95,7 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-dependency-plugin</artifactId>
+                        <version>3.5.0</version>
                         <executions>
                             <execution>
                                 <id>copy-lot1-resources</id>
