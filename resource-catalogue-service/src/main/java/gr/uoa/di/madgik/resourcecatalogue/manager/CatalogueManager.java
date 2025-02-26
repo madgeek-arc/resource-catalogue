@@ -1,3 +1,19 @@
+/**
+ * Copyright 2017-2025 OpenAIRE AMKE & Athena Research and Innovation Center
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package gr.uoa.di.madgik.resourcecatalogue.manager;
 
 import gr.uoa.di.madgik.catalogue.exception.ValidationException;
@@ -91,7 +107,7 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
         if (auth != null && auth.isAuthenticated()) {
             // if user is ADMIN/EPOT or Catalogue Admin on the specific Catalogue, return everything
             if (securityService.hasRole(auth, "ROLE_ADMIN") || securityService.hasRole(auth, "ROLE_EPOT") ||
-                    securityService.isProviderAdmin(auth, id)) {
+                    securityService.hasAdminAccess(auth, id)) {
                 return catalogueBundle;
             }
         }
@@ -117,7 +133,7 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
             Browsing<CatalogueBundle> catalogues = super.getAll(ff, auth);
             for (CatalogueBundle catalogueBundle : catalogues.getResults()) {
                 if (catalogueBundle.getStatus().equals(vocabularyService.get("approved catalogue").getId()) ||
-                        securityService.isProviderAdmin(auth, catalogueBundle.getId())) {
+                        securityService.hasAdminAccess(auth, catalogueBundle.getId())) {
                     retList.add(catalogueBundle);
                 }
             }

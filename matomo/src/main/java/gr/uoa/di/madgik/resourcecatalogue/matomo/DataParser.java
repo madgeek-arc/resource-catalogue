@@ -1,3 +1,19 @@
+/**
+ * Copyright 2017-2025 OpenAIRE AMKE & Athena Research and Innovation Center
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package gr.uoa.di.madgik.resourcecatalogue.matomo;
 
 import com.fasterxml.jackson.core.JsonFactory;
@@ -7,8 +23,8 @@ import com.google.i18n.phonenumbers.NumberParseException;
 import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.service.EventService;
 import jakarta.annotation.PostConstruct;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -25,7 +41,7 @@ import java.util.Spliterators;
 @Component
 public class DataParser {
 
-    private static final Logger logger = LogManager.getLogger(DataParser.class);
+    private static final Logger logger = LoggerFactory.getLogger(DataParser.class);
     private static final String SERVICE_VISITS_TEMPLATE = "%s/index.php?token_auth=%s&module=API&method=Events.getNameFromActionId&idSubtable=1&format=JSON&idSite=%s&period=day&date=yesterday";
     private static final String SERVICE_RATINGS_TEMPLATE = "%s/index.php?token_auth=%s&module=API&method=Events.getNameFromActionId&idSubtable=3&format=JSON&idSite=%s&period=day&date=yesterday";
     private static final String SERVICE_ADD_TO_PROJECT_TEMPLATE = "%s/index.php?token_auth=%s&module=API&method=Events.getNameFromActionId&idSubtable=2&format=JSON&idSite=%s&period=day&date=yesterday";
@@ -85,7 +101,7 @@ public class DataParser {
         try {
             postEventsToDatabase(results, eventType);
         } catch (ResourceNotFoundException | NumberParseException e) {
-            logger.error(e);
+            logger.error(e.getMessage(), e);
         }
     }
 
@@ -113,7 +129,7 @@ public class DataParser {
         try {
             postEventsToDatabase(results, eventType);
         } catch (ResourceNotFoundException | NumberParseException e) {
-            logger.error(e);
+            logger.error(e.getMessage(), e);
         }
     }
 
@@ -141,7 +157,7 @@ public class DataParser {
         try {
             postEventsToDatabase(results, eventType);
         } catch (ResourceNotFoundException | NumberParseException e) {
-            logger.error(e);
+            logger.error(e.getMessage(), e);
         }
     }
 

@@ -1,9 +1,26 @@
+/**
+ * Copyright 2017-2025 OpenAIRE AMKE & Athena Research and Innovation Center
+ * <p>
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * <p>
+ * https://www.apache.org/licenses/LICENSE-2.0
+ * <p>
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package gr.uoa.di.madgik.resourcecatalogue.controllers.publicresources;
 
 import com.google.gson.Gson;
+import gr.uoa.di.madgik.registry.annotation.BrowseParameters;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.domain.Paging;
-import gr.uoa.di.madgik.resourcecatalogue.annotations.Browse;
+import gr.uoa.di.madgik.registry.annotation.BrowseParameters;
 import gr.uoa.di.madgik.resourcecatalogue.domain.configurationTemplates.ConfigurationTemplateInstanceBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.configurationTemplates.ConfigurationTemplateInstanceDto;
 import gr.uoa.di.madgik.resourcecatalogue.service.ConfigurationTemplateInstanceService;
@@ -11,6 +28,8 @@ import gr.uoa.di.madgik.resourcecatalogue.service.SecurityService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -29,6 +48,7 @@ import java.util.List;
 @Tag(name = "public configuration template instance")
 public class PublicConfigurationTemplateInstanceController {
 
+    private static final Logger logger = LoggerFactory.getLogger(PublicConfigurationTemplateInstanceController.class);
     private static final Gson gson = new Gson();
 
     private final SecurityService securityService;
@@ -46,12 +66,14 @@ public class PublicConfigurationTemplateInstanceController {
     public ResponseEntity<?> getPublicConfigurationTemplateInstance(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
                                                                     @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix) {
         String id = prefix + "/" + suffix;
-        ConfigurationTemplateInstanceBundle configurationTemplateInstanceBundle = configurationTemplateInstanceService.get(id);
-        if (configurationTemplateInstanceBundle.getMetadata().isPublished()) {
-            ConfigurationTemplateInstanceDto ret = configurationTemplateInstanceService.createCTIDto(configurationTemplateInstanceBundle.getConfigurationTemplateInstance());
+        ConfigurationTemplateInstanceBundle bundle = configurationTemplateInstanceService.get(id);
+        if (bundle.getMetadata().isPublished()) {
+            ConfigurationTemplateInstanceDto ret = configurationTemplateInstanceService.
+                    createCTIDto(bundle.getConfigurationTemplateInstance());
             return new ResponseEntity<>(ret, HttpStatus.OK);
         }
-        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(gson.toJson("You cannot view the specific Configuration Template Instance."));
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(gson.toJson("The specific Configuration Template " +
+                "Instance does not consist a Public entity"));
     }
 
     @GetMapping(path = "public/configurationTemplateInstance/bundle/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
@@ -60,24 +82,16 @@ public class PublicConfigurationTemplateInstanceController {
                                                                           @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix,
                                                                           @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
-        ConfigurationTemplateInstanceBundle configurationTemplateInstanceBundle = configurationTemplateInstanceService.get(id);
-        if (auth != null && auth.isAuthenticated()) {
-            if (securityService.hasRole(auth, "ROLE_ADMIN") || securityService.hasRole(auth, "ROLE_EPOT")) {
-                if (configurationTemplateInstanceBundle.getMetadata().isPublished()) {
-                    return new ResponseEntity<>(configurationTemplateInstanceBundle, HttpStatus.OK);
-                } else {
-                    return ResponseEntity.status(HttpStatus.FOUND).body(gson.toJson("The specific Configuration Template Instance Bundle does not consist a Public entity"));
-                }
-            }
+        ConfigurationTemplateInstanceBundle bundle = configurationTemplateInstanceService.get(id);
+        if (bundle.getMetadata().isPublished()) {
+            return new ResponseEntity<>(bundle, HttpStatus.OK);
         }
-        if (configurationTemplateInstanceBundle.getMetadata().isPublished()) {
-            return new ResponseEntity<>(configurationTemplateInstanceBundle, HttpStatus.OK);
-        }
-        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(gson.toJson("You cannot view the specific Configuration Template Instance."));
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(gson.toJson("The specific Configuration Template " +
+                "Instance Bundle does not consist a Public entity"));
     }
 
     @Operation(description = "Filter a list of Public Configuration Template Instances based on a set of filters or get a list of all Public Configuration Template Instances in the Catalogue.")
-    @Browse
+    @BrowseParameters
     @GetMapping(path = "public/configurationTemplateInstance/all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity<Paging<ConfigurationTemplateInstanceDto>> getAllPublicConfigurationTemplateInstances(@Parameter(hidden = true) @RequestParam MultiValueMap<String, Object> allRequestParams,
                                                                                                                @Parameter(hidden = true) Authentication auth) {
@@ -94,7 +108,7 @@ public class PublicConfigurationTemplateInstanceController {
         return new ResponseEntity<>(configurationTemplateInstancePaging, HttpStatus.OK);
     }
 
-    @Browse
+    @BrowseParameters
     @GetMapping(path = "public/configurationTemplateInstance/bundle/all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     public ResponseEntity<Paging<ConfigurationTemplateInstanceBundle>> getAllPublicConfigurationTemplateInstanceBundles(@Parameter(hidden = true) @RequestParam MultiValueMap<String, Object> allRequestParams,

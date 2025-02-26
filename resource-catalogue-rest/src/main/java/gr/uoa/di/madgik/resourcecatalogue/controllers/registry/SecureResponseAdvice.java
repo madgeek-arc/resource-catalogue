@@ -1,11 +1,27 @@
+/**
+ * Copyright 2017-2025 OpenAIRE AMKE & Athena Research and Innovation Center
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package gr.uoa.di.madgik.resourcecatalogue.controllers.registry;
 
 import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
 import gr.uoa.di.madgik.resourcecatalogue.service.AuthoritiesMapper;
 import gr.uoa.di.madgik.resourcecatalogue.service.SecurityService;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
 import org.springframework.core.MethodParameter;
@@ -36,7 +52,7 @@ public class SecureResponseAdvice<T> implements ResponseBodyAdvice<T> {
         this.epotEmail = epotEmail;
     }
 
-    private static final Logger logger = LogManager.getLogger(SecureResponseAdvice.class);
+    private static final Logger logger = LoggerFactory.getLogger(SecureResponseAdvice.class);
 
     @Override
     public boolean supports(MethodParameter methodParameter, Class<? extends HttpMessageConverter<?>> aClass) {
@@ -90,7 +106,7 @@ public class SecureResponseAdvice<T> implements ResponseBodyAdvice<T> {
     }
 
     private void modifyService(T service, Authentication auth) {
-        if (!this.securityService.isResourceProviderAdmin(auth, ((Service) service).getId())) {
+        if (!this.securityService.isResourceAdmin(auth, ((Service) service).getId())) {
             ((Service) service).setMainContact(null);
             ((Service) service).setSecurityContactEmail(null);
         }
@@ -103,7 +119,7 @@ public class SecureResponseAdvice<T> implements ResponseBodyAdvice<T> {
         modifyLoggingInfo((T) ((ServiceBundle) serviceBundle).getLatestUpdateInfo());
         modifyLoggingInfo((T) ((ServiceBundle) serviceBundle).getLatestOnboardingInfo());
 
-        if (!this.securityService.isResourceProviderAdmin(auth, ((ServiceBundle) serviceBundle).getId())) {
+        if (!this.securityService.isResourceAdmin(auth, ((ServiceBundle) serviceBundle).getId())) {
             ((ServiceBundle) serviceBundle).getService().setMainContact(null);
             ((ServiceBundle) serviceBundle).getService().setSecurityContactEmail(null);
             ((ServiceBundle) serviceBundle).getMetadata().setTerms(null);
@@ -111,7 +127,7 @@ public class SecureResponseAdvice<T> implements ResponseBodyAdvice<T> {
     }
 
     private void modifyTrainingResource(T trainingResource, Authentication auth) {
-        if (!this.securityService.isResourceProviderAdmin(auth, ((TrainingResource) trainingResource).getId())) {
+        if (!this.securityService.isResourceAdmin(auth, ((TrainingResource) trainingResource).getId())) {
             ((TrainingResource) trainingResource).setContact(null);
         }
     }
@@ -123,7 +139,7 @@ public class SecureResponseAdvice<T> implements ResponseBodyAdvice<T> {
         modifyLoggingInfo((T) ((TrainingResourceBundle) trainingResourceBundle).getLatestUpdateInfo());
         modifyLoggingInfo((T) ((TrainingResourceBundle) trainingResourceBundle).getLatestOnboardingInfo());
 
-        if (!this.securityService.isResourceProviderAdmin(auth, ((TrainingResourceBundle) trainingResourceBundle).getId())) {
+        if (!this.securityService.isResourceAdmin(auth, ((TrainingResourceBundle) trainingResourceBundle).getId())) {
             ((TrainingResourceBundle) trainingResourceBundle).getTrainingResource().setContact(null);
             ((TrainingResourceBundle) trainingResourceBundle).getMetadata().setTerms(null);
         }
@@ -136,13 +152,13 @@ public class SecureResponseAdvice<T> implements ResponseBodyAdvice<T> {
         modifyLoggingInfo((T) ((InteroperabilityRecordBundle) interoperabilityRecordBundle).getLatestUpdateInfo());
         modifyLoggingInfo((T) ((InteroperabilityRecordBundle) interoperabilityRecordBundle).getLatestOnboardingInfo());
 
-        if (!this.securityService.isResourceProviderAdmin(auth, ((InteroperabilityRecordBundle) interoperabilityRecordBundle).getId())) {
+        if (!this.securityService.isResourceAdmin(auth, ((InteroperabilityRecordBundle) interoperabilityRecordBundle).getId())) {
             ((InteroperabilityRecordBundle) interoperabilityRecordBundle).getMetadata().setTerms(null);
         }
     }
 
     private void modifyProvider(T provider, Authentication auth) {
-        if (!this.securityService.isProviderAdmin(auth, ((Provider) provider).getId())) {
+        if (!this.securityService.hasAdminAccess(auth, ((Provider) provider).getId())) {
             ((Provider) provider).setMainContact(null);
             ((Provider) provider).setUsers(null);
         }
@@ -155,7 +171,7 @@ public class SecureResponseAdvice<T> implements ResponseBodyAdvice<T> {
         modifyLoggingInfo((T) ((ProviderBundle) bundle).getLatestUpdateInfo());
         modifyLoggingInfo((T) ((ProviderBundle) bundle).getLatestOnboardingInfo());
 
-        if (!this.securityService.isProviderAdmin(auth, ((ProviderBundle) bundle).getId())) {
+        if (!this.securityService.hasAdminAccess(auth, ((ProviderBundle) bundle).getId())) {
             ((ProviderBundle) bundle).getProvider().setMainContact(null);
             ((ProviderBundle) bundle).getProvider().setUsers(null);
             ((ProviderBundle) bundle).getMetadata().setTerms(null);
@@ -163,7 +179,7 @@ public class SecureResponseAdvice<T> implements ResponseBodyAdvice<T> {
     }
 
     private void modifyCatalogue(T catalogue, Authentication auth) {
-        if (!this.securityService.isProviderAdmin(auth, ((Catalogue) catalogue).getId(), true)) {
+        if (!this.securityService.hasAdminAccess(auth, ((Catalogue) catalogue).getId())) {
             ((Catalogue) catalogue).setMainContact(null);
             ((Catalogue) catalogue).setUsers(null);
         }
@@ -176,7 +192,7 @@ public class SecureResponseAdvice<T> implements ResponseBodyAdvice<T> {
         modifyLoggingInfo((T) ((CatalogueBundle) bundle).getLatestUpdateInfo());
         modifyLoggingInfo((T) ((CatalogueBundle) bundle).getLatestOnboardingInfo());
 
-        if (!this.securityService.isProviderAdmin(auth, ((CatalogueBundle) bundle).getId(), true)) {
+        if (!this.securityService.hasAdminAccess(auth, ((CatalogueBundle) bundle).getId())) {
             ((CatalogueBundle) bundle).getCatalogue().setMainContact(null);
             ((CatalogueBundle) bundle).getCatalogue().setUsers(null);
             ((CatalogueBundle) bundle).getMetadata().setTerms(null);

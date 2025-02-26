@@ -1,3 +1,19 @@
+/**
+ * Copyright 2017-2025 OpenAIRE AMKE & Athena Research and Innovation Center
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package gr.uoa.di.madgik.resourcecatalogue.controllers.registry;
 
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
@@ -15,10 +31,11 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletResponse;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -29,6 +46,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Objects;
 
@@ -39,7 +57,7 @@ import java.util.Objects;
 @Tag(name = "csv", description = "Export information related to various Catalogue resources to CSV")
 public class CSVController {
 
-    private static final Logger logger = LogManager.getLogger(CSVController.class);
+    private static Logger logger = LoggerFactory.getLogger(CSVController.class);
     private final ServiceBundleService<ServiceBundle> serviceBundleService;
     private final ProviderService providerService;
     private final VocabularyService vocabularyService;
@@ -112,7 +130,16 @@ public class CSVController {
         long timestamp = csvService.generateTimestampFromDate(date);
         List<ProviderBundle> providers = providerService.getAll(createFacetFilter(false), auth).getResults();
         List<ServiceBundle> services = serviceBundleService.getAll(createFacetFilter(false), auth).getResults();
-        csvService.computeApprovedServicesBeforeTimestampAndGenerateCSV(timestamp, providers, services, response);
+        String csv = csvService.computeApprovedServicesBeforeTimestampAndGenerateCSV(timestamp, providers, services);
+
+        // Set the response headers
+        response.setContentType("text/csv");
+        response.setCharacterEncoding(StandardCharsets.UTF_8.name());
+        response.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"services_per_country.csv\"");
+
+        // Write the CSV content to the response
+        response.getWriter().write(csv);
+        response.getWriter().flush();
     }
 
     private FacetFilter createFacetFilter(Boolean published) {

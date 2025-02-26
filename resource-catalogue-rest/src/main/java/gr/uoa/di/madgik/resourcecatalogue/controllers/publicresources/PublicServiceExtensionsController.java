@@ -1,11 +1,30 @@
+/**
+ * Copyright 2017-2025 OpenAIRE AMKE & Athena Research and Innovation Center
+ * <p>
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * <p>
+ * https://www.apache.org/licenses/LICENSE-2.0
+ * <p>
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package gr.uoa.di.madgik.resourcecatalogue.controllers.publicresources;
 
 import com.google.gson.Gson;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.domain.Paging;
-import gr.uoa.di.madgik.resourcecatalogue.annotations.Browse;
+import gr.uoa.di.madgik.registry.annotation.BrowseParameters;
 import gr.uoa.di.madgik.resourcecatalogue.annotations.BrowseCatalogue;
-import gr.uoa.di.madgik.resourcecatalogue.domain.*;
+import gr.uoa.di.madgik.resourcecatalogue.domain.Helpdesk;
+import gr.uoa.di.madgik.resourcecatalogue.domain.HelpdeskBundle;
+import gr.uoa.di.madgik.resourcecatalogue.domain.Monitoring;
+import gr.uoa.di.madgik.resourcecatalogue.domain.MonitoringBundle;
 import gr.uoa.di.madgik.resourcecatalogue.service.GenericResourceService;
 import gr.uoa.di.madgik.resourcecatalogue.service.HelpdeskService;
 import gr.uoa.di.madgik.resourcecatalogue.service.MonitoringService;
@@ -50,52 +69,32 @@ public class PublicServiceExtensionsController {
     @GetMapping(path = "public/helpdesk/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity<?> getPublicHelpdesk(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
                                                @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix,
-                                               @Parameter(hidden = true) Authentication auth) {
+                                               @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
         HelpdeskBundle helpdeskBundle = helpdeskService.get(id);
-        if (auth != null && auth.isAuthenticated()) {
-            User user = User.of(auth);
-            if (securityService.hasRole(auth, "ROLE_ADMIN") || securityService.hasRole(auth, "ROLE_EPOT")
-                    || securityService.userIsResourceProviderAdmin(user, helpdeskBundle.getHelpdesk().getServiceId())) {
-                if (helpdeskBundle.getMetadata().isPublished()) {
-                    return new ResponseEntity<>(helpdeskBundle.getHelpdesk(), HttpStatus.OK);
-                } else {
-                    return ResponseEntity.status(HttpStatus.FOUND).body(gson.toJson("The specific Helpdesk does not consist a Public entity"));
-                }
-            }
-        }
-        if (helpdeskBundle.getMetadata().isPublished() && helpdeskBundle.isActive()) {
+        if (helpdeskBundle.getMetadata().isPublished()) {
             return new ResponseEntity<>(helpdeskBundle.getHelpdesk(), HttpStatus.OK);
         }
-        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(gson.toJson("You cannot view the specific Helpdesk."));
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(gson.toJson("The specific Helpdesk does not consist a " +
+                "Public entity"));
     }
 
     @GetMapping(path = "public/helpdesk/helpdeskBundle/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     public ResponseEntity<?> getPublicHelpdeskBundle(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
                                                      @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix,
-                                                     @Parameter(hidden = true) Authentication auth) {
+                                                     @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
         HelpdeskBundle helpdeskBundle = helpdeskService.get(id);
-        if (auth != null && auth.isAuthenticated()) {
-            User user = User.of(auth);
-            if (securityService.hasRole(auth, "ROLE_ADMIN") || securityService.hasRole(auth, "ROLE_EPOT")
-                    || securityService.userIsResourceProviderAdmin(user, helpdeskBundle.getHelpdesk().getServiceId())) {
-                if (helpdeskBundle.getMetadata().isPublished()) {
-                    return new ResponseEntity<>(helpdeskBundle, HttpStatus.OK);
-                } else {
-                    return ResponseEntity.status(HttpStatus.FOUND).body(gson.toJson("The specific Helpdesk Bundle does not consist a Public entity"));
-                }
-            }
-        }
-        if (helpdeskBundle.getMetadata().isPublished() && helpdeskBundle.isActive()) {
+        if (helpdeskBundle.getMetadata().isPublished()) {
             return new ResponseEntity<>(helpdeskBundle, HttpStatus.OK);
         }
-        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(gson.toJson("You cannot view the specific Helpdesk."));
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(gson.toJson("The specific Helpdesk Bundle does not " +
+                "consist a Public entity"));
     }
 
     @Operation(description = "Filter a list of Public Helpdesks based on a set of filters or get a list of all Public Resources in the Catalogue.")
-    @Browse
+    @BrowseParameters
     @BrowseCatalogue
     @GetMapping(path = "public/helpdesk/all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity<Paging<Helpdesk>> getAllPublicHelpdesks(@Parameter(hidden = true) @RequestParam MultiValueMap<String, Object> allRequestParams) {
@@ -106,7 +105,7 @@ public class PublicServiceExtensionsController {
         return ResponseEntity.ok(paging);
     }
 
-    @Browse
+    @BrowseParameters
     @BrowseCatalogue
     @GetMapping(path = "public/helpdesk/adminPage/all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
@@ -124,52 +123,32 @@ public class PublicServiceExtensionsController {
     @GetMapping(path = "public/monitoring/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity<?> getPublicMonitoring(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
                                                  @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix,
-                                                 @Parameter(hidden = true) Authentication auth) {
+                                                 @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
         MonitoringBundle monitoringBundle = monitoringService.get(id);
-        if (auth != null && auth.isAuthenticated()) {
-            User user = User.of(auth);
-            if (securityService.hasRole(auth, "ROLE_ADMIN") || securityService.hasRole(auth, "ROLE_EPOT")
-                    || securityService.userIsResourceProviderAdmin(user, monitoringBundle.getMonitoring().getServiceId())) {
-                if (monitoringBundle.getMetadata().isPublished()) {
-                    return new ResponseEntity<>(monitoringBundle.getMonitoring(), HttpStatus.OK);
-                } else {
-                    return ResponseEntity.status(HttpStatus.FOUND).body(gson.toJson("The specific Monitoring does not consist a Public entity"));
-                }
-            }
-        }
-        if (monitoringBundle.getMetadata().isPublished() && monitoringBundle.isActive()) {
+        if (monitoringBundle.getMetadata().isPublished()) {
             return new ResponseEntity<>(monitoringBundle.getMonitoring(), HttpStatus.OK);
         }
-        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(gson.toJson("You cannot view the specific Monitoring."));
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(gson.toJson("The specific Monitoring does not consist " +
+                "a Public entity"));
     }
 
     @GetMapping(path = "public/monitoring/monitoringBundle/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     public ResponseEntity<?> getPublicMonitoringBundle(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
                                                        @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix,
-                                                       @Parameter(hidden = true) Authentication auth) {
+                                                       @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
         MonitoringBundle monitoringBundle = monitoringService.get(id);
-        if (auth != null && auth.isAuthenticated()) {
-            User user = User.of(auth);
-            if (securityService.hasRole(auth, "ROLE_ADMIN") || securityService.hasRole(auth, "ROLE_EPOT")
-                    || securityService.userIsResourceProviderAdmin(user, monitoringBundle.getMonitoring().getServiceId())) {
-                if (monitoringBundle.getMetadata().isPublished()) {
-                    return new ResponseEntity<>(monitoringBundle, HttpStatus.OK);
-                } else {
-                    return ResponseEntity.status(HttpStatus.FOUND).body(gson.toJson("The specific Monitoring Bundle does not consist a Public entity"));
-                }
-            }
-        }
-        if (monitoringBundle.getMetadata().isPublished() && monitoringBundle.isActive()) {
+        if (monitoringBundle.getMetadata().isPublished()) {
             return new ResponseEntity<>(monitoringBundle, HttpStatus.OK);
         }
-        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(gson.toJson("You cannot view the specific Monitoring."));
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(gson.toJson("The specific Monitoring Bundle does not " +
+                "consist a Public entity"));
     }
 
     @Operation(description = "Filter a list of Public Monitorings based on a set of filters or get a list of all Public Resources in the Catalogue.")
-    @Browse
+    @BrowseParameters
     @BrowseCatalogue
     @GetMapping(path = "public/monitoring/all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity<Paging<Monitoring>> getAllPublicMonitorings(@Parameter(hidden = true) @RequestParam MultiValueMap<String, Object> allRequestParams) {
@@ -180,7 +159,7 @@ public class PublicServiceExtensionsController {
         return ResponseEntity.ok(paging);
     }
 
-    @Browse
+    @BrowseParameters
     @GetMapping(path = "public/monitoring/adminPage/all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     public ResponseEntity<Paging<MonitoringBundle>> getAllPublicMonitoringBundles(@Parameter(hidden = true) @RequestParam MultiValueMap<String, Object> allRequestParams) {
