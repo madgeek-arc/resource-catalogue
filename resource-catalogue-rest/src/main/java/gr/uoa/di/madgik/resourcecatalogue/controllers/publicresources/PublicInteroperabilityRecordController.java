@@ -19,7 +19,7 @@ package gr.uoa.di.madgik.resourcecatalogue.controllers.publicresources;
 import com.google.gson.Gson;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.domain.Paging;
-import gr.uoa.di.madgik.resourcecatalogue.annotations.Browse;
+import gr.uoa.di.madgik.registry.annotation.BrowseParameters;
 import gr.uoa.di.madgik.resourcecatalogue.annotations.BrowseCatalogue;
 import gr.uoa.di.madgik.resourcecatalogue.domain.InteroperabilityRecord;
 import gr.uoa.di.madgik.resourcecatalogue.domain.InteroperabilityRecordBundle;
@@ -107,7 +107,7 @@ public class PublicInteroperabilityRecordController {
     }
 
     @Operation(description = "Filter a list of Public Interoperability Records based on a set of filters or get a list of all Public Interoperability Records in the Catalogue.")
-    @Browse
+    @BrowseParameters
     @BrowseCatalogue
     @Parameter(name = "suspended", description = "Suspended", content = @Content(schema = @Schema(type = "boolean", defaultValue = "false")))
     @GetMapping(path = "public/interoperabilityRecord/all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
@@ -121,7 +121,7 @@ public class PublicInteroperabilityRecordController {
         return ResponseEntity.ok(paging);
     }
 
-    @Browse
+    @BrowseParameters
     @BrowseCatalogue
     @Parameter(name = "suspended", description = "Suspended", content = @Content(schema = @Schema(type = "boolean", defaultValue = "false")))
     @GetMapping(path = "public/interoperabilityRecord/bundle/all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})

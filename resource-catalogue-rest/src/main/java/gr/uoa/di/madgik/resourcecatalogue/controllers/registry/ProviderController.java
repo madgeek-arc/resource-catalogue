@@ -20,7 +20,7 @@ import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.registry.exception.ResourceException;
 import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
-import gr.uoa.di.madgik.resourcecatalogue.annotations.Browse;
+import gr.uoa.di.madgik.registry.annotation.BrowseParameters;
 import gr.uoa.di.madgik.resourcecatalogue.annotations.BrowseCatalogue;
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
 import gr.uoa.di.madgik.resourcecatalogue.dto.ExtendedValue;
@@ -173,7 +173,7 @@ public class ProviderController {
 
     @Operation(summary = "Filter a list of Providers based on a set of filters or get a list of all Providers in the Catalogue.",
             security = {@SecurityRequirement(name = "bearer-key")})
-    @Browse
+    @BrowseParameters
     @BrowseCatalogue
     @Parameter(name = "suspended", description = "Suspended", content = @Content(schema = @Schema(type = "boolean", defaultValue = "false")))
     @GetMapping(path = "all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
@@ -198,7 +198,7 @@ public class ProviderController {
     }
 
     // Filter a list of Providers based on a set of filters or get a list of all Providers in the Catalogue.
-    @Browse
+    @BrowseParameters
     @BrowseCatalogue
     @Parameters({
             @Parameter(name = "suspended", description = "Suspended", content = @Content(schema = @Schema(type = "boolean", defaultValue = "false"))),
@@ -223,7 +223,7 @@ public class ProviderController {
         throw new UnsupportedOperationException("Method Removed: Contact administrators");
     }
 
-    @Browse
+    @BrowseParameters
     @GetMapping(path = "byCatalogue/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.hasAdminAccess(#auth,#id)")
     public ResponseEntity<Paging<ProviderBundle>> getProvidersByCatalogue(@Parameter(hidden = true) @RequestParam MultiValueMap<String, Object> allRequestParams,
@@ -270,7 +270,7 @@ public class ProviderController {
     }
 
     // Get the rejected services of the given Provider.
-    @Browse
+    @BrowseParameters
     @GetMapping(path = "resources/rejected/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity<Paging<?>> getRejectedResources(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
                                                           @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix,
@@ -492,7 +492,7 @@ public class ProviderController {
         return providerService.suspend(providerId, suspend, auth);
     }
 
-    @Browse
+    @BrowseParameters
     @Operation(description = "Given a HLE, get all Providers associated with it")
     @GetMapping(path = "getAllResourcesUnderASpecificHLE", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
