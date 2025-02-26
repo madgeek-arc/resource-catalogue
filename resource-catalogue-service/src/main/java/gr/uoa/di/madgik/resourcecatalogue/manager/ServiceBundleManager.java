@@ -114,7 +114,7 @@ public class ServiceBundleManager extends AbstractServiceBundleManager<ServiceBu
 
     @Override
     public ServiceBundle addResource(ServiceBundle serviceBundle, String catalogueId, Authentication auth) {
-        if (catalogueId == null || catalogueId.equals("")) { // add catalogue provider
+        if (catalogueId == null || catalogueId.isEmpty()) { // add catalogue provider
             serviceBundle.getService().setCatalogueId(this.catalogueId);
         } else { // add provider from external catalogue
             commonMethods.checkCatalogueIdConsistency(serviceBundle, catalogueId);
@@ -159,7 +159,7 @@ public class ServiceBundleManager extends AbstractServiceBundleManager<ServiceBu
         List<LoggingInfo> loggingInfoList = commonMethods.returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(serviceBundle, auth);
 
         // latestOnboardingInfo
-        serviceBundle.setLatestOnboardingInfo(loggingInfoList.get(0));
+        serviceBundle.setLatestOnboardingInfo(loggingInfoList.getFirst());
 
         // resource status & extra loggingInfo for Approval
         if (providerBundle.getTemplateStatus().equals("approved template")) {
@@ -206,14 +206,15 @@ public class ServiceBundleManager extends AbstractServiceBundleManager<ServiceBu
         }
 
 
-        if (catalogueId == null || catalogueId.equals("")) {
+        if (catalogueId == null || catalogueId.isEmpty()) {
             ret.getService().setCatalogueId(this.catalogueId);
         } else {
             commonMethods.checkCatalogueIdConsistency(ret, catalogueId);
         }
         commonMethods.checkRelatedResourceIDsConsistency(ret);
 
-        logger.trace("Attempting to update the Service with id '{}' of the Catalogue '{}'", ret.getService().getId(), ret.getService().getCatalogueId());
+        logger.trace("Attempting to update the Service with id '{}' of the Catalogue '{}'",
+                ret.getService().getId(), ret.getService().getCatalogueId());
         validate(ret);
 
         ProviderBundle providerBundle = providerService.get(ret.getService().getResourceOrganisation(), auth);
@@ -300,8 +301,8 @@ public class ServiceBundleManager extends AbstractServiceBundleManager<ServiceBu
 
         // send notification emails to Portal Admins
         if (ret.getLatestAuditInfo() != null && ret.getLatestUpdateInfo() != null) {
-            Long latestAudit = Long.parseLong(ret.getLatestAuditInfo().getDate());
-            Long latestUpdate = Long.parseLong(ret.getLatestUpdateInfo().getDate());
+            long latestAudit = Long.parseLong(ret.getLatestAuditInfo().getDate());
+            long latestUpdate = Long.parseLong(ret.getLatestUpdateInfo().getDate());
             if (latestAudit < latestUpdate && ret.getLatestAuditInfo().getActionType().equals(LoggingInfo.ActionType.INVALID.getKey())) {
                 registrationMailService.notifyPortalAdminsForInvalidServiceUpdate(ret);
             }
@@ -356,7 +357,7 @@ public class ServiceBundleManager extends AbstractServiceBundleManager<ServiceBu
         if (!statusVocabulary.getType().equals("Resource state")) {
             throw new ValidationException(String.format("Vocabulary %s does not consist a Resource State!", status));
         }
-        logger.trace("verifyResource with id: '{}' | status -> '{}' | active -> '{}'", id, status, active);
+        logger.trace("verifyResource with id: '{}' | status: '{}' | active: '{}'", id, status, active);
         ServiceBundle serviceBundle = getCatalogueResource(catalogueId, id, auth);
         serviceBundle.setStatus(vocabularyService.get(status).getId());
         ProviderBundle resourceProvider = providerService.get(serviceBundle.getService().getResourceOrganisation(), auth);
@@ -424,7 +425,7 @@ public class ServiceBundleManager extends AbstractServiceBundleManager<ServiceBu
         if (providerBundle.getStatus().equals("approved provider") && providerBundle.isActive()) {
             activeProvider = service.getService().getResourceOrganisation();
         }
-        if (active && activeProvider.equals("")) {
+        if (active && activeProvider.isEmpty()) {
             throw new ResourceException("Service does not have active Providers", HttpStatus.CONFLICT);
         }
         service.setActive(active);
@@ -450,9 +451,9 @@ public class ServiceBundleManager extends AbstractServiceBundleManager<ServiceBu
         MonitoringBundle monitoringBundle = monitoringService.get(serviceId, catalogueId);
         DatasourceBundle datasourceBundle = datasourceService.get(serviceId, catalogueId);
         if (active) {
-            logger.info("Activating all related resources of the Service with id: {}", serviceId);
+            logger.info("Activating all related resources of the Service with id: '{}'", serviceId);
         } else {
-            logger.info("Deactivating all related resources of the Service with id: {}", serviceId);
+            logger.info("Deactivating all related resources of the Service with id: '{}'", serviceId);
         }
         if (helpdeskBundle != null) {
             publishServiceExtensionsAndSubprofiles(helpdeskBundle, active, auth);
@@ -470,7 +471,7 @@ public class ServiceBundleManager extends AbstractServiceBundleManager<ServiceBu
 
         // update Bundle's fields
         bundle.setLoggingInfo(loggingInfoList);
-        bundle.setLatestUpdateInfo(loggingInfoList.get(loggingInfoList.size() - 1));
+        bundle.setLatestUpdateInfo(loggingInfoList.getLast());
         bundle.setActive(active);
 
         if (bundle instanceof HelpdeskBundle) {
@@ -619,7 +620,7 @@ public class ServiceBundleManager extends AbstractServiceBundleManager<ServiceBu
             loggingInfoList.sort(Comparator.comparing(LoggingInfo::getDate).reversed());
             return new Browsing<>(loggingInfoList.size(), 0, loggingInfoList.size(), loggingInfoList, null);
         } catch (ResourceNotFoundException e) {
-            logger.info(String.format("Service with id [%s] not found", id));
+            logger.info("Service with id '{}' not found", id);
         }
         return null;
     }
@@ -627,8 +628,7 @@ public class ServiceBundleManager extends AbstractServiceBundleManager<ServiceBu
     public void sendEmailNotificationsToProvidersWithOutdatedResources(String resourceId, Authentication auth) {
         ServiceBundle serviceBundle = get(resourceId);
         ProviderBundle providerBundle = providerService.get(serviceBundle.getService().getResourceOrganisation());
-        logger.info(String.format("Mailing provider [%s]-[%s] for outdated Resources", providerBundle.getId(),
-                providerBundle.getProvider().getName()));
+        logger.info("Mailing provider '{}'-'{}' for outdated Resources", providerBundle.getId(), providerBundle.getProvider().getName());
         registrationMailService.sendEmailNotificationsToProviderAdminsWithOutdatedResources(serviceBundle, providerBundle);
     }
 
@@ -647,12 +647,10 @@ public class ServiceBundleManager extends AbstractServiceBundleManager<ServiceBu
             throw new ValidationException("You cannot move a Service to a Provider of another Catalogue");
         }
 
-        User user = User.of(auth);
-
         // update loggingInfo
         List<LoggingInfo> loggingInfoList = serviceBundle.getLoggingInfo();
         LoggingInfo loggingInfo;
-        if (comment == null || "".equals(comment)) {
+        if (comment == null || comment.isEmpty()) {
             loggingInfo = commonMethods.createLoggingInfo(auth, LoggingInfo.Types.MOVE.getKey(),
                     LoggingInfo.ActionType.MOVED.getKey());
         } else {
@@ -668,7 +666,7 @@ public class ServiceBundleManager extends AbstractServiceBundleManager<ServiceBu
         // update metadata
         Metadata metadata = serviceBundle.getMetadata();
         metadata.setModifiedAt(String.valueOf(System.currentTimeMillis()));
-        metadata.setModifiedBy(user.getFullName());
+        metadata.setModifiedBy(AuthenticationInfo.getFullName(auth));
         metadata.setTerms(null);
         serviceBundle.setMetadata(metadata);
 

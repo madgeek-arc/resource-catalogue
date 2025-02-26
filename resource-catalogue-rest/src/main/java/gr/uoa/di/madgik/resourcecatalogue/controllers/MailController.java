@@ -53,7 +53,7 @@ public class MailController {
     @Autowired
     DraftResourceService<ProviderBundle> draftProviderService;
     @Autowired
-    ServiceBundleService serviceBundleService;
+    ServiceBundleService<ServiceBundle> serviceBundleService;
     @Autowired
     DraftResourceService<ServiceBundle> draftServiceService;
     @Autowired
@@ -84,7 +84,7 @@ public class MailController {
         }
         List<String> allEmails = getAllEmails(includeCatalogueAdmins, includeProviderCatalogueContacts, includeResourceContacts);
         for (List<String> bccChunk : Lists.partition(allEmails, partitionSize)) {
-            logger.info(String.format("Sending emails to: %s", String.join(", ", bccChunk)));
+            logger.info("Sending emails to: {}", String.join(", ", bccChunk));
             mailService.sendMail(new ArrayList<>(), cc, bccChunk, subject, text);
         }
     }

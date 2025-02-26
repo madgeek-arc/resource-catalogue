@@ -34,17 +34,14 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.core.Authentication;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 
 @org.springframework.stereotype.Service("monitoringManager")
 public class MonitoringManager extends ResourceManager<MonitoringBundle> implements MonitoringService {
 
     private static final Logger logger = LoggerFactory.getLogger(MonitoringManager.class);
-    private final ServiceBundleService serviceBundleService;
+    private final ServiceBundleService<ServiceBundle> serviceBundleService;
     private final TrainingResourceService trainingResourceService;
     private final PublicMonitoringManager publicMonitoringManager;
     private final SecurityService securityService;
@@ -59,7 +56,7 @@ public class MonitoringManager extends ResourceManager<MonitoringBundle> impleme
     private final IdCreator idCreator;
 
 
-    public MonitoringManager(ServiceBundleService serviceBundleService,
+    public MonitoringManager(ServiceBundleService<ServiceBundle> serviceBundleService,
                              TrainingResourceService trainingResourceService,
                              PublicMonitoringManager publicMonitoringManager,
                              @Lazy SecurityService securityService,
@@ -123,13 +120,13 @@ public class MonitoringManager extends ResourceManager<MonitoringBundle> impleme
         monitoring.setLoggingInfo(loggingInfoList);
         monitoring.setActive(true);
         // latestOnboardingInfo
-        monitoring.setLatestOnboardingInfo(loggingInfoList.get(0));
+        monitoring.setLatestOnboardingInfo(loggingInfoList.getFirst());
         // default monitoredBy value -> EOSC
         monitoring.getMonitoring().setMonitoredBy("monitored_by-eosc");
 
         MonitoringBundle ret;
         ret = super.add(monitoring, null);
-        logger.debug("Adding Monitoring: {}", monitoring);
+        logger.info("Added Monitoring with id '{}'", monitoring.getId());
 
         registrationMailService.sendEmailsForMonitoringExtensionToPortalAdmins(monitoring, "post");
 
@@ -176,7 +173,7 @@ public class MonitoringManager extends ResourceManager<MonitoringBundle> impleme
         }
 
         resourceService.updateResource(existingResource);
-        logger.debug("Updating Monitoring: {}", ret);
+        logger.info("Updated Monitoring with id '{}'", ret.getId());
 
         registrationMailService.sendEmailsForMonitoringExtensionToPortalAdmins(ret, "put");
 
@@ -202,7 +199,8 @@ public class MonitoringManager extends ResourceManager<MonitoringBundle> impleme
     @Override
     public void delete(MonitoringBundle monitoring) {
         super.delete(monitoring);
-        logger.debug("Deleting Monitoring: {}", monitoring);
+        logger.info("Deleted the Monitoring with id '{}' of the Catalogue '{}'",
+                monitoring.getMonitoring().getId(), monitoring.getCatalogueId());
     }
 
     public List<Vocabulary> getAvailableServiceTypes() {
@@ -288,6 +286,10 @@ public class MonitoringManager extends ResourceManager<MonitoringBundle> impleme
     }
 
     public MonitoringBundle createPublicResource(MonitoringBundle monitoringBundle, Authentication auth) {
+        logger.info("User '{}-{}' attempts to create a Public Monitoring from Monitoring '{}' of the '{}' Catalogue",
+                Objects.requireNonNull(AuthenticationInfo.getFullName(auth)),
+                Objects.requireNonNull(AuthenticationInfo.getEmail(auth).toLowerCase()),
+                monitoringBundle.getId(), monitoringBundle.getCatalogueId());
         publicMonitoringManager.add(monitoringBundle, auth);
         return monitoringBundle;
     }

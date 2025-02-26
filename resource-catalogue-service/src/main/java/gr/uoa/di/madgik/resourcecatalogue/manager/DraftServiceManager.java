@@ -71,7 +71,7 @@ public class DraftServiceManager extends ResourceManager<ServiceBundle> implemen
 
         bundle.setId(idCreator.generate(getResourceTypeName()));
 
-        logger.trace("Attempting to add a new Draft Service with id {}", bundle.getId());
+        logger.trace("Attempting to add a new Draft Service with id '{}'", bundle.getId());
         bundle.setMetadata(Metadata.updateMetadata(bundle.getMetadata(), AuthenticationInfo.getFullName(auth), AuthenticationInfo.getEmail(auth).toLowerCase()));
 
         List<LoggingInfo> loggingInfoList = new ArrayList<>();
@@ -95,7 +95,7 @@ public class DraftServiceManager extends ResourceManager<ServiceBundle> implemen
         Resource existing = getDraftResource(bundle.getService().getId());
         // block catalogueId updates from Provider Admins
         bundle.getService().setCatalogueId(catalogueId);
-        logger.trace("Attempting to update the Draft Service with id {}", bundle.getId());
+        logger.trace("Attempting to update the Draft Service with id '{}'", bundle.getId());
         bundle.setMetadata(Metadata.updateMetadata(bundle.getMetadata(), AuthenticationInfo.getFullName(auth)));
         // save existing resource with new payload
         existing.setPayload(serialize(bundle));
@@ -118,7 +118,7 @@ public class DraftServiceManager extends ResourceManager<ServiceBundle> implemen
 
     @Override
     public ServiceBundle transformToNonDraft(ServiceBundle bundle, Authentication auth) {
-        logger.trace("Attempting to transform the Draft Service with id {} to Service", bundle.getId());
+        logger.trace("Attempting to transform the Draft Service with id '{}' to Service", bundle.getId());
         serviceBundleService.validate(bundle);
 
         // update loggingInfo
@@ -138,7 +138,7 @@ public class DraftServiceManager extends ResourceManager<ServiceBundle> implemen
             bundle.setStatus(vocabularyService.get("pending resource").getId());
         }
         bundle.setLoggingInfo(loggingInfoList);
-        bundle.setLatestOnboardingInfo(loggingInfoList.get(loggingInfoList.size() - 1));
+        bundle.setLatestOnboardingInfo(loggingInfoList.getLast());
 
         bundle.setMetadata(Metadata.updateMetadata(bundle.getMetadata(), AuthenticationInfo.getFullName(auth), AuthenticationInfo.getEmail(auth).toLowerCase()));
         bundle.setDraft(false);
@@ -174,6 +174,6 @@ public class DraftServiceManager extends ResourceManager<ServiceBundle> implemen
                 .cqlQuery(String.format("resource_internal_id = \"%s\" AND catalogue_id = \"%s\"", id, catalogueId),
                         getResourceTypeName());
         assert resources != null;
-        return resources.getTotal() == 0 ? null : resources.getResults().get(0);
+        return resources.getTotal() == 0 ? null : resources.getResults().getFirst();
     }
 }

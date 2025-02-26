@@ -48,6 +48,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.Objects;
 
 @Hidden
 @Profile("beyond")
@@ -57,7 +58,7 @@ import java.util.List;
 public class CSVController {
 
     private static Logger logger = LoggerFactory.getLogger(CSVController.class);
-    private final ServiceBundleService serviceBundleService;
+    private final ServiceBundleService<ServiceBundle> serviceBundleService;
     private final ProviderService providerService;
     private final VocabularyService vocabularyService;
     private final CSVService csvService;
@@ -65,7 +66,8 @@ public class CSVController {
     @Value("${elastic.index.max_result_window:10000}")
     private int maxQuantity;
 
-    CSVController(ServiceBundleService service, ProviderService provider, VocabularyService vocabulary, CSVService csvService) {
+    CSVController(ServiceBundleService<ServiceBundle> service, ProviderService provider,
+                  VocabularyService vocabulary, CSVService csvService) {
         this.serviceBundleService = service;
         this.providerService = provider;
         this.vocabularyService = vocabulary;
@@ -82,7 +84,8 @@ public class CSVController {
         Paging<ProviderBundle> providers = providerService.getAll(createFacetFilter(published), auth);
         String csvData = csvService.listProvidersToCSV(providers.getResults());
         response.setHeader("Content-disposition", "attachment; filename=" + "providers.csv");
-        logger.info("User {} downloaded Providers CSV list", User.of(auth).getEmail().toLowerCase());
+        logger.info("User {} downloaded Providers CSV list",
+                Objects.requireNonNull(User.of(auth)).getEmail().toLowerCase());
         return ResponseEntity.ok(csvData);
     }
 
@@ -96,7 +99,8 @@ public class CSVController {
         Paging<ServiceBundle> serviceBundles = serviceBundleService.getAll(createFacetFilter(published), auth);
         String csvData = csvService.listServicesToCSV(serviceBundles.getResults());
         response.setHeader("Content-disposition", "attachment; filename=" + "services.csv");
-        logger.info("User {} downloaded Services CSV list", User.of(auth).getEmail().toLowerCase());
+        logger.info("User {} downloaded Services CSV list",
+                Objects.requireNonNull(User.of(auth)).getEmail().toLowerCase());
         return ResponseEntity.ok(csvData);
     }
 
@@ -109,7 +113,8 @@ public class CSVController {
         Paging<Vocabulary> vocabularies = vocabularyService.getAll(createFacetFilter(null), auth);
         String csvData = csvService.listVocabulariesToCSV(vocabularies.getResults());
         response.setHeader("Content-disposition", "attachment; filename=" + "vocabularies.csv");
-        logger.info("User {} downloaded Vocabularies CSV list", User.of(auth).getEmail().toLowerCase());
+        logger.info("User {} downloaded Vocabularies CSV list",
+                Objects.requireNonNull(User.of(auth)).getEmail().toLowerCase());
         return ResponseEntity.ok(csvData);
     }
 
@@ -117,7 +122,8 @@ public class CSVController {
     @Operation(summary = "Downloads a csv file with the number of approved services per provider and country, before a specific date.")
     @GetMapping(path = "approvedServicesByProviderAndCountry", produces = {MediaType.APPLICATION_OCTET_STREAM_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
-    public void numberOfServicesPerProviderCountryToCSV(@Parameter(description = "Before date (format yyyy-MM-dd)", example = "2023-01-01")
+    public void numberOfServicesPerProviderCountryToCSV(@Parameter(description = "Before date (format yyyy-MM-dd)",
+                                                                example = "2023-01-01")
                                                         @RequestParam String date,
                                                         @Parameter(hidden = true) Authentication auth,
                                                         HttpServletResponse response) throws IOException {

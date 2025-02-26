@@ -52,7 +52,7 @@ public abstract class BaseIntegrationTest {
                 ClassLoader classLoader = getClass().getClassLoader();
                 List<Vocabulary> vocabularies = objectMapper.readValue(
                         classLoader.getResource("vocabularies.json"),
-                        new TypeReference<List<Vocabulary>>() {
+                        new TypeReference<>() {
                         }
                 );
                 vocabularyService.addBulk(vocabularies, null);

@@ -41,7 +41,6 @@ import org.springframework.security.authentication.InsufficientAuthenticationExc
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 
-import java.net.URL;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.util.*;
@@ -125,7 +124,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
 
     @Override
     public ProviderBundle add(ProviderBundle provider, String catalogueId, Authentication auth) {
-        logger.trace("Attempting to add a new Provider: {} on Catalogue: {}", provider, catalogueId);
+        logger.trace("Attempting to add a new Provider: {} on Catalogue: '{}'", provider, catalogueId);
 
         provider = onboard(provider, catalogueId, auth);
 
@@ -143,7 +142,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
 
         ProviderBundle ret;
         ret = super.add(provider, null);
-        logger.debug("Adding Provider: {} of Catalogue: {}", provider, catalogueId);
+        logger.debug("Adding Provider: {} of Catalogue: '{}'", provider, catalogueId);
 
         registrationMailService.sendEmailsToNewlyAddedProviderAdmins(provider, null);
 
@@ -171,7 +170,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
             }
         }
 
-        if (catalogueId == null || catalogueId.equals("")) {
+        if (catalogueId == null || catalogueId.isEmpty()) {
             ret.getProvider().setCatalogueId(this.catalogueId);
         } else {
             commonMethods.checkCatalogueIdConsistency(ret, catalogueId);
@@ -393,7 +392,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
                     try {
                         serviceBundleService.delete(s);
                     } catch (ResourceNotFoundException e) {
-                        logger.error(String.format("Error deleting Service with ID [%s]", s.getId()));
+                        logger.error("Error deleting Service with ID '{}'", s.getId());
                     }
                 }
             });
@@ -406,7 +405,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
                     try {
                         trainingResourceService.delete(s);
                     } catch (ResourceNotFoundException e) {
-                        logger.error(String.format("Error deleting Training Resource with ID [%s]", s.getId()));
+                        logger.error("Error deleting Training Resource with ID '{}'", s.getId());
                     }
                 }
             });
@@ -419,7 +418,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
                     try {
                         interoperabilityRecordService.delete(s);
                     } catch (ResourceNotFoundException e) {
-                        logger.error(String.format("Error deleting Interoperability Record with ID [%s]", s.getId()));
+                        logger.error("Error deleting Interoperability Record with ID '{}'", s.getId());
                     }
                 }
             });
@@ -456,7 +455,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         if (!statusVocabulary.getType().equals("Provider state")) {
             throw new ValidationException(String.format("Vocabulary %s does not consist a Provider State!", status));
         }
-        logger.trace("verifyProvider with id: '{}' | status -> '{}' | active -> '{}'", id, status, active);
+        logger.trace("verifyProvider with id: '{}' | status: '{}' | active: '{}'", id, status, active);
         ProviderBundle provider = get(id, auth);
         Resource existingResource = getResource(provider.getId(), provider.getProvider().getCatalogueId());
         ProviderBundle existingProvider = deserialize(existingResource);
@@ -577,7 +576,6 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         if (auth == null) {
             throw new InsufficientAuthenticationException("Please log in.");
         }
-        User user = User.of(auth);
         if (ff == null) {
             ff = new FacetFilter();
             ff.setQuantity(maxQuantity);
@@ -585,7 +583,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         if (!ff.getFilter().containsKey("published")) {
             ff.addFilter("published", false);
         }
-        ff.addFilter("users", user.getEmail().toLowerCase());
+        ff.addFilter("users", AuthenticationInfo.getEmail(auth).toLowerCase());
         ff.addOrderBy("name", "asc");
         return super.getAll(ff, auth);
     }
@@ -606,9 +604,9 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         List<TrainingResourceBundle> trainingResources = trainingResourceService.getResourceBundles(providerId, auth);
         List<InteroperabilityRecordBundle> interoperabilityRecords = interoperabilityRecordService.getInteroperabilityRecordBundles(catalogueId, providerId, auth).getResults();
         if (active) {
-            logger.info("Activating all Resources of the Provider with id: {}", providerId);
+            logger.info("Activating all Resources of the Provider with id: '{}'", providerId);
         } else {
-            logger.info("Deactivating all Resources of the Provider with id: {}", providerId);
+            logger.info("Deactivating all Resources of the Provider with id: '{}'", providerId);
         }
         activateProviderServices(services, active, auth);
         activateProviderTrainingResources(trainingResources, active, auth);
@@ -623,7 +621,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
 
                 // update Service's fields
                 service.setLoggingInfo(loggingInfoList);
-                service.setLatestUpdateInfo(loggingInfoList.get(loggingInfoList.size() - 1));
+                service.setLatestUpdateInfo(loggingInfoList.getLast());
                 service.setActive(active);
 
                 try {
@@ -652,7 +650,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
 
                 // update Service's fields
                 trainingResourceBundle.setLoggingInfo(loggingInfoList);
-                trainingResourceBundle.setLatestUpdateInfo(loggingInfoList.get(loggingInfoList.size() - 1));
+                trainingResourceBundle.setLatestUpdateInfo(loggingInfoList.getLast());
                 trainingResourceBundle.setActive(active);
 
                 try {
@@ -681,7 +679,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
 
                 // update Service's fields
                 interoperabilityRecordBundle.setLoggingInfo(loggingInfoList);
-                interoperabilityRecordBundle.setLatestUpdateInfo(loggingInfoList.get(loggingInfoList.size() - 1));
+                interoperabilityRecordBundle.setLatestUpdateInfo(loggingInfoList.getLast());
                 interoperabilityRecordBundle.setActive(active);
 
                 try {
@@ -701,14 +699,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
 
     @Override
     public ProviderBundle validate(ProviderBundle provider) {
-        logger.debug("Validating Provider with id: {}", provider.getId());
-
-        try {
-            fieldValidator.validate(provider);
-        } catch (IllegalAccessException e) {
-            logger.error("", e);
-        }
-
+        logger.debug("Validating Provider with id: '{}'", provider.getId());
         if (provider.getProvider().getScientificDomains() != null && !provider.getProvider().getScientificDomains().isEmpty()) {
             validateScientificDomains(provider.getProvider().getScientificDomains());
         }
@@ -716,7 +707,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
             validateMerilScientificDomains(provider.getProvider().getMerilScientificDomains());
         }
 
-        return provider;
+        return super.validate(provider);
     }
 
     @Override
@@ -743,7 +734,8 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
                         updatedUsers.add(user);
                     }
                 } else {
-                    if (!user.getEmail().equals("") && !user.getEmail().equalsIgnoreCase(authenticatedUser.getEmail())) {
+                    if (!user.getEmail().isEmpty() &&
+                            !user.getEmail().equalsIgnoreCase(Objects.requireNonNull(authenticatedUser).getEmail())) {
                         updatedUsers.add(user);
                     }
                 }
@@ -751,16 +743,6 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
             providerBundle.getProvider().setUsers(updatedUsers);
             update(providerBundle, authentication);
         }
-    }
-
-    // For front-end use
-    public boolean validateUrl(URL urlForValidation) {
-        try {
-            fieldValidator.validateUrl(null, urlForValidation);
-        } catch (Throwable e) {
-            return false;
-        }
-        return true;
     }
 
     @Override
@@ -776,13 +758,14 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
             userList.add(user.getEmail().toLowerCase());
         }
         if ((providerBundle.getMetadata().getTerms() == null || providerBundle.getMetadata().getTerms().isEmpty())) {
-            if (userList.contains(User.of(auth).getEmail().toLowerCase())) {
+            if (userList.contains(AuthenticationInfo.getEmail(auth).toLowerCase())) {
                 return false; //pop-up modal
             } else {
                 return true; //no modal
             }
         }
-        if (!providerBundle.getMetadata().getTerms().contains(User.of(auth).getEmail().toLowerCase()) && userList.contains(User.of(auth).getEmail().toLowerCase())) {
+        if (!providerBundle.getMetadata().getTerms().contains(AuthenticationInfo.getEmail(auth).toLowerCase())
+                && userList.contains(AuthenticationInfo.getEmail(auth).toLowerCase())) {
             return false; // pop-up modal
         }
         return true; // no modal
@@ -822,7 +805,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     public void requestProviderDeletion(String providerId, Authentication auth) {
         ProviderBundle provider = get(providerId);
         for (User user : provider.getProvider().getUsers()) {
-            if (user.getEmail().equalsIgnoreCase(User.of(auth).getEmail().toLowerCase())) {
+            if (user.getEmail().equalsIgnoreCase(AuthenticationInfo.getEmail(auth).toLowerCase())) {
                 registrationMailService.informPortalAdminsForProviderDeletion(provider, User.of(auth));
             }
         }
@@ -873,8 +856,8 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
             }
         }
         Collections.shuffle(providersToBeAudited);
-        for (int i = providersToBeAudited.size() - 1; i > ff.getQuantity() - 1; i--) {
-            providersToBeAudited.remove(i);
+        if (providersToBeAudited.size() > ff.getQuantity()) {
+            providersToBeAudited.subList(ff.getQuantity(), providersToBeAudited.size()).clear();
         }
         return new Browsing<>(providersToBeAudited.size(), 0, providersToBeAudited.size(), providersToBeAudited, providerBrowsing.getFacets());
     }
@@ -894,7 +877,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         // create LoggingInfo
         List<LoggingInfo> loggingInfoList = commonMethods.returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(provider, auth);
         provider.setLoggingInfo(loggingInfoList);
-        if (catalogueId == null || catalogueId.equals("") || catalogueId.equals(this.catalogueId)) {
+        if (catalogueId == null || catalogueId.isEmpty() || catalogueId.equals(this.catalogueId)) {
             // set catalogueId = eosc
             provider.getProvider().setCatalogueId(this.catalogueId);
             provider.setActive(false);

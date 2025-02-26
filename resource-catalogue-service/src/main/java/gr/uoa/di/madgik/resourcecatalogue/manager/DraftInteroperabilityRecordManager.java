@@ -22,7 +22,10 @@ import gr.uoa.di.madgik.resourcecatalogue.domain.InteroperabilityRecordBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.LoggingInfo;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Metadata;
 import gr.uoa.di.madgik.resourcecatalogue.domain.ProviderBundle;
-import gr.uoa.di.madgik.resourcecatalogue.service.*;
+import gr.uoa.di.madgik.resourcecatalogue.service.DraftResourceService;
+import gr.uoa.di.madgik.resourcecatalogue.service.IdCreator;
+import gr.uoa.di.madgik.resourcecatalogue.service.InteroperabilityRecordService;
+import gr.uoa.di.madgik.resourcecatalogue.service.ProviderService;
 import gr.uoa.di.madgik.resourcecatalogue.utils.AuthenticationInfo;
 import gr.uoa.di.madgik.resourcecatalogue.utils.ProviderResourcesCommonMethods;
 import org.slf4j.Logger;
@@ -42,7 +45,6 @@ public class DraftInteroperabilityRecordManager extends ResourceManager<Interope
 
     private final InteroperabilityRecordService interoperabilityRecordService;
     private final IdCreator idCreator;
-    private final VocabularyService vocabularyService;
     private final ProviderService providerService;
     private final ProviderResourcesCommonMethods commonMethods;
 
@@ -50,13 +52,12 @@ public class DraftInteroperabilityRecordManager extends ResourceManager<Interope
     private String catalogueId;
 
     public DraftInteroperabilityRecordManager(InteroperabilityRecordService interoperabilityRecordService,
-                                              IdCreator idCreator, @Lazy VocabularyService vocabularyService,
+                                              IdCreator idCreator,
                                               @Lazy ProviderService providerService,
                                               ProviderResourcesCommonMethods commonMethods) {
         super(InteroperabilityRecordBundle.class);
         this.interoperabilityRecordService = interoperabilityRecordService;
         this.idCreator = idCreator;
-        this.vocabularyService = vocabularyService;
         this.providerService = providerService;
         this.commonMethods = commonMethods;
     }
@@ -71,7 +72,7 @@ public class DraftInteroperabilityRecordManager extends ResourceManager<Interope
 
         bundle.setId(idCreator.generate(getResourceTypeName()));
 
-        logger.trace("Attempting to add a new Draft Interoperability Record with id {}", bundle.getId());
+        logger.trace("Attempting to add a new Draft Interoperability Record with id '{}'", bundle.getId());
         bundle.setMetadata(Metadata.updateMetadata(bundle.getMetadata(), AuthenticationInfo.getFullName(auth), AuthenticationInfo.getEmail(auth).toLowerCase()));
 
         List<LoggingInfo> loggingInfoList = new ArrayList<>();
@@ -95,7 +96,7 @@ public class DraftInteroperabilityRecordManager extends ResourceManager<Interope
         Resource existing = getDraftResource(bundle.getInteroperabilityRecord().getId());
         // block catalogueId updates from Provider Admins
         bundle.getInteroperabilityRecord().setCatalogueId(catalogueId);
-        logger.trace("Attempting to update the Draft Interoperability Record with id {}", bundle.getId());
+        logger.trace("Attempting to update the Draft Interoperability Record with id '{}'", bundle.getId());
         bundle.setMetadata(Metadata.updateMetadata(bundle.getMetadata(), AuthenticationInfo.getFullName(auth)));
         // save existing resource with new payload
         existing.setPayload(serialize(bundle));
@@ -118,7 +119,7 @@ public class DraftInteroperabilityRecordManager extends ResourceManager<Interope
 
     @Override
     public InteroperabilityRecordBundle transformToNonDraft(InteroperabilityRecordBundle bundle, Authentication auth) {
-        logger.trace("Attempting to transform the Draft Interoperability Record with id {} to Active", bundle.getId());
+        logger.trace("Attempting to transform the Draft Interoperability Record with id '{}' to Active", bundle.getId());
         interoperabilityRecordService.validate(bundle);
 
         // update loggingInfo
@@ -127,7 +128,7 @@ public class DraftInteroperabilityRecordManager extends ResourceManager<Interope
                 LoggingInfo.ActionType.REGISTERED.getKey());
         loggingInfoList.add(loggingInfo);
         bundle.setLoggingInfo(loggingInfoList);
-        bundle.setLatestOnboardingInfo(loggingInfoList.get(loggingInfoList.size() - 1));
+        bundle.setLatestOnboardingInfo(loggingInfoList.getLast());
 
         bundle.setStatus("pending interoperability record");
         bundle.setMetadata(Metadata.updateMetadata(bundle.getMetadata(), AuthenticationInfo.getFullName(auth), AuthenticationInfo.getEmail(auth).toLowerCase()));
@@ -164,7 +165,7 @@ public class DraftInteroperabilityRecordManager extends ResourceManager<Interope
                 .cqlQuery(String.format("resource_internal_id = \"%s\" AND catalogue_id = \"%s\"", id, catalogueId),
                         getResourceTypeName());
         assert resources != null;
-        return resources.getTotal() == 0 ? null : resources.getResults().get(0);
+        return resources.getTotal() == 0 ? null : resources.getResults().getFirst();
     }
 
 }

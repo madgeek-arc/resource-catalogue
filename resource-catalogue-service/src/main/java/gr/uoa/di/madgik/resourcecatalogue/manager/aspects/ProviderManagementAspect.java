@@ -43,7 +43,7 @@ public class ProviderManagementAspect {
     private static final Logger logger = LoggerFactory.getLogger(ProviderManagementAspect.class);
 
     private final ProviderService providerService;
-    private final ServiceBundleService serviceBundleService;
+    private final ServiceBundleService<ServiceBundle> serviceBundleService;
     private final TrainingResourceService trainingResourceService;
     private final PublicProviderManager publicProviderManager;
     private final PublicServiceManager publicServiceManager;
@@ -60,7 +60,7 @@ public class ProviderManagementAspect {
     private String catalogueId;
 
     public ProviderManagementAspect(ProviderService providerService,
-                                    ServiceBundleService serviceBundleService,
+                                    ServiceBundleService<ServiceBundle> serviceBundleService,
                                     TrainingResourceService trainingResourceService,
                                     PublicProviderManager publicProviderManager,
                                     PublicServiceManager publicServiceManager,

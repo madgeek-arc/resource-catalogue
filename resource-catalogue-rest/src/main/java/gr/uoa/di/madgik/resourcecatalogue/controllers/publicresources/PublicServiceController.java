@@ -24,15 +24,12 @@ import gr.uoa.di.madgik.resourcecatalogue.annotations.BrowseCatalogue;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Service;
 import gr.uoa.di.madgik.resourcecatalogue.domain.ServiceBundle;
 import gr.uoa.di.madgik.resourcecatalogue.service.GenericResourceService;
-import gr.uoa.di.madgik.resourcecatalogue.service.SecurityService;
 import gr.uoa.di.madgik.resourcecatalogue.service.ServiceBundleService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -48,17 +45,13 @@ import org.springframework.web.bind.annotation.*;
 @Tag(name = "public service")
 public class PublicServiceController {
 
-    private static final Logger logger = LoggerFactory.getLogger(PublicServiceController.class);
     private static final Gson gson = new Gson();
 
-    private final SecurityService securityService;
     private final GenericResourceService genericResourceService;
     private final ServiceBundleService<ServiceBundle> serviceBundleService;
 
-    public PublicServiceController(SecurityService securityService,
-                                   GenericResourceService genericResourceService,
+    public PublicServiceController(GenericResourceService genericResourceService,
                                    ServiceBundleService<ServiceBundle> serviceBundleService) {
-        this.securityService = securityService;
         this.genericResourceService = genericResourceService;
         this.serviceBundleService = serviceBundleService;
     }

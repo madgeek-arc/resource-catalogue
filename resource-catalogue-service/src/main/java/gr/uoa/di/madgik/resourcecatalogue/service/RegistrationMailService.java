@@ -23,6 +23,7 @@ import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.resourcecatalogue.config.properties.CatalogueProperties;
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
 import gr.uoa.di.madgik.resourcecatalogue.manager.*;
+import gr.uoa.di.madgik.resourcecatalogue.utils.AuthenticationInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -65,7 +66,6 @@ public class RegistrationMailService {
     private final String catalogueName;
     private final String homepage;
     private final String helpdeskEmail;
-    private final String helpdeskCC;
     private final String monitoringEmail;
     private final boolean enableAdminNotifications;
     private final boolean enableProviderNotifications;
@@ -105,7 +105,6 @@ public class RegistrationMailService {
         catalogueName = properties.getName();
         this.registrationEmail = properties.getEmails().getRegistrationEmails().getTo();
         this.helpdeskEmail = properties.getEmails().getHelpdeskEmails().getTo();
-        this.helpdeskCC = properties.getEmails().getHelpdeskEmails().getCc();
         this.monitoringEmail = properties.getEmails().getMonitoringEmails().getTo();
         this.enableAdminNotifications = properties.getEmails().isAdminNotifications();
         this.enableProviderNotifications = properties.getEmails().isProviderNotifications();
@@ -202,8 +201,6 @@ public class RegistrationMailService {
 
         Bundle<?> template;
         switch (afterReturningFrom) {
-            case "providerManager":
-                break;
             case "serviceBundleManager":
                 template = serviceBundleManager.getResourceBundles(providerBundle.getId(),
                         securityService.getAdminAccess()).getFirst();
@@ -216,6 +213,7 @@ public class RegistrationMailService {
                 updateRootAccordingToResourceType(template, emailBasicInfoUser);
                 emailBasicInfoUser.updateRoot("resourceType", "training-resource");
                 break;
+            case "providerManager":
             default:
                 break;
         }
@@ -341,8 +339,8 @@ public class RegistrationMailService {
 
         newProviderAdmins.setRoot(oldProviderAdmins.getRoot());
 
-        onboardingTeam.updateRoot("adminFullName", Objects.requireNonNull(User.of(auth)).getFullName());
-        onboardingTeam.updateRoot("adminEmail", Objects.requireNonNull(User.of(auth)).getEmail().toLowerCase());
+        onboardingTeam.updateRoot("adminFullName", Objects.requireNonNull(AuthenticationInfo.getFullName(auth)));
+        onboardingTeam.updateRoot("adminEmail", Objects.requireNonNull(AuthenticationInfo.getEmail(auth).toLowerCase()));
         onboardingTeam.updateRoot("adminRole", securityService.getRoleName(auth));
         onboardingTeam.updateRoot("comment", bundle.getLoggingInfo().getLast().getComment());
 

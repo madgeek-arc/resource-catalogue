@@ -23,7 +23,6 @@ import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.registry.service.ResourceCRUDService;
 import gr.uoa.di.madgik.resourcecatalogue.domain.HelpdeskBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Identifiers;
-import gr.uoa.di.madgik.resourcecatalogue.service.SecurityService;
 import gr.uoa.di.madgik.resourcecatalogue.utils.JmsService;
 import gr.uoa.di.madgik.resourcecatalogue.utils.ProviderResourcesCommonMethods;
 import gr.uoa.di.madgik.resourcecatalogue.utils.PublicResourceUtils;
@@ -38,18 +37,16 @@ import java.lang.reflect.InvocationTargetException;
 @Service("publicHelpdeskManager")
 public class PublicHelpdeskManager extends AbstractPublicResourceManager<HelpdeskBundle> implements ResourceCRUDService<HelpdeskBundle, Authentication> {
 
-    private static final Logger logger = LoggerFactory.getLogger(PublicDatasourceManager.class);
+    private static final Logger logger = LoggerFactory.getLogger(PublicHelpdeskManager.class);
     private final JmsService jmsService;
-    private final SecurityService securityService;
     private final ProviderResourcesCommonMethods commonMethods;
     private final PublicResourceUtils publicResourceUtils;
 
-    public PublicHelpdeskManager(JmsService jmsService, SecurityService securityService,
+    public PublicHelpdeskManager(JmsService jmsService,
                                  ProviderResourcesCommonMethods commonMethods,
                                  PublicResourceUtils publicResourceUtils) {
         super(HelpdeskBundle.class);
         this.jmsService = jmsService;
-        this.securityService = securityService;
         this.commonMethods = commonMethods;
         this.publicResourceUtils = publicResourceUtils;
     }
@@ -87,7 +84,7 @@ public class PublicHelpdeskManager extends AbstractPublicResourceManager<Helpdes
 
         helpdeskBundle.getMetadata().setPublished(true);
         HelpdeskBundle ret;
-        logger.info(String.format("Helpdesk [%s] is being published with id [%s]", lowerLevelResourceId, helpdeskBundle.getId()));
+        logger.info("Helpdesk '{}' is being published with id '{}'", lowerLevelResourceId, helpdeskBundle.getId());
         ret = super.add(helpdeskBundle, null);
         jmsService.convertAndSendTopic("helpdesk.create", helpdeskBundle);
         return ret;
@@ -102,7 +99,7 @@ public class PublicHelpdeskManager extends AbstractPublicResourceManager<Helpdes
         try {
             BeanUtils.copyProperties(ret, helpdeskBundle);
         } catch (IllegalAccessException | InvocationTargetException e) {
-            e.printStackTrace();
+            logger.info("Could not copy properties.");
         }
 
         // sets public id to serviceId
@@ -111,7 +108,7 @@ public class PublicHelpdeskManager extends AbstractPublicResourceManager<Helpdes
         ret.setIdentifiers(published.getIdentifiers());
         ret.setId(published.getId());
         ret.getMetadata().setPublished(true);
-        logger.info(String.format("Updating public Helpdesk with id [%s]", ret.getId()));
+        logger.info("Updating public Helpdesk with id '{}'", ret.getId());
         ret = super.update(ret, null);
         jmsService.convertAndSendTopic("helpdesk.update", helpdeskBundle);
         return ret;
@@ -122,7 +119,7 @@ public class PublicHelpdeskManager extends AbstractPublicResourceManager<Helpdes
         try {
             HelpdeskBundle publicHelpdeskBundle = get(publicResourceUtils.createPublicResourceId(helpdeskBundle.getHelpdesk().getId(),
                     helpdeskBundle.getCatalogueId()));
-            logger.info(String.format("Deleting public Helpdesk with id [%s]", publicHelpdeskBundle.getId()));
+            logger.info("Deleting public Helpdesk with id '{}'", publicHelpdeskBundle.getId());
             super.delete(publicHelpdeskBundle);
             jmsService.convertAndSendTopic("helpdesk.delete", publicHelpdeskBundle);
         } catch (ResourceException | ResourceNotFoundException ignore) {

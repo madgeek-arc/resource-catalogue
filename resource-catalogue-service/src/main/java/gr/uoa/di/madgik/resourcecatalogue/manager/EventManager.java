@@ -23,6 +23,7 @@ import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.registry.service.ParserService;
 import gr.uoa.di.madgik.registry.service.SearchService;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Event;
+import gr.uoa.di.madgik.resourcecatalogue.domain.ServiceBundle;
 import gr.uoa.di.madgik.resourcecatalogue.service.EventService;
 import gr.uoa.di.madgik.resourcecatalogue.service.ServiceBundleService;
 import gr.uoa.di.madgik.resourcecatalogue.utils.AuthenticationInfo;
@@ -42,10 +43,10 @@ public class EventManager extends ResourceManager<Event> implements EventService
 
     private static final Logger logger = LoggerFactory.getLogger(EventManager.class);
     private final ParserService parserService;
-    private final ServiceBundleService serviceBundleService;
+    private final ServiceBundleService<ServiceBundle> serviceBundleService;
 
     public EventManager(ParserService parserService,
-                        @Lazy ServiceBundleService serviceBundleService) {
+                        @Lazy ServiceBundleService<ServiceBundle> serviceBundleService) {
         super(Event.class);
         this.parserService = parserService;
         this.serviceBundleService = serviceBundleService;
@@ -155,13 +156,13 @@ public class EventManager extends ResourceManager<Event> implements EventService
         sort.put("instant", order);
         ff.setOrderBy(sort);
         List<Event> events = getAll(ff, authentication).getResults();
-        List<String> serviceList = events.stream().map(Event::getService).distinct().collect(Collectors.toList());
+        List<String> serviceList = events.stream().map(Event::getService).distinct().toList();
 
         // for each service
         for (String service : serviceList) {
             List<Event> serviceEvents = events.stream()
                     .filter(e -> e.getService().equals(service))
-                    .collect(Collectors.toList());
+                    .toList();
 
             Map<String, Event> userEventsMap = new HashMap<>();
 

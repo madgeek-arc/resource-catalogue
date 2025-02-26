@@ -52,28 +52,28 @@ public abstract class ResourceController<T extends Identifiable> {
     @PostMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<T> add(@RequestBody T t, @Parameter(hidden = true) Authentication auth) {
         ResponseEntity<T> ret = new ResponseEntity<>(service.add(t, auth), HttpStatus.CREATED);
-        logger.debug("Created a new {} with id {}", t.getClass().getSimpleName(), t.getId());
+        logger.debug("Created a new {} with id '{}'", t.getClass().getSimpleName(), t.getId());
         return ret;
     }
 
     @PutMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<T> update(@RequestBody T t, @Parameter(hidden = true) Authentication auth) {
         ResponseEntity<T> ret = new ResponseEntity<>(service.update(t, auth), HttpStatus.OK);
-        logger.debug("Updated {} with id {}", t.getClass().getSimpleName(), t.getId());
+        logger.debug("Updated {} with id '{}'", t.getClass().getSimpleName(), t.getId());
         return ret;
     }
 
     @PostMapping(path = "validate", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<T> validate(@RequestBody T t, @Parameter(hidden = true) Authentication auth) {
         ResponseEntity<T> ret = new ResponseEntity<>(service.validate(t), HttpStatus.OK);
-        logger.debug("Validated {} with id {}", t.getClass().getSimpleName(), t.getId());
+        logger.debug("Validated {} with id '{}'", t.getClass().getSimpleName(), t.getId());
         return ret;
     }
 
     @DeleteMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<T> delete(@RequestBody T t, @Parameter(hidden = true) Authentication auth) {
         service.delete(t);
-        logger.debug("Deleted {} with id {}", t.getClass().getSimpleName(), t.getId());
+        logger.debug("Deleted {} with id '{}'", t.getClass().getSimpleName(), t.getId());
         return new ResponseEntity<>(t, HttpStatus.OK);
     }
 

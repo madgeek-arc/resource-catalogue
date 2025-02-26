@@ -24,7 +24,6 @@ import gr.uoa.di.madgik.resourcecatalogue.annotations.BrowseCatalogue;
 import gr.uoa.di.madgik.resourcecatalogue.domain.TrainingResource;
 import gr.uoa.di.madgik.resourcecatalogue.domain.TrainingResourceBundle;
 import gr.uoa.di.madgik.resourcecatalogue.service.GenericResourceService;
-import gr.uoa.di.madgik.resourcecatalogue.service.ResourceService;
 import gr.uoa.di.madgik.resourcecatalogue.service.SecurityService;
 import gr.uoa.di.madgik.resourcecatalogue.service.TrainingResourceService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -32,9 +31,6 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -51,22 +47,18 @@ import org.springframework.web.bind.annotation.*;
 @Tag(name = "public training resource")
 public class PublicTrainingResourceController {
 
-    private static final Logger logger = LoggerFactory.getLogger(PublicTrainingResourceController.class);
     private static final Gson gson = new Gson();
 
     private final SecurityService securityService;
     private final TrainingResourceService trainingResourceBundleService;
-    private final ResourceService<TrainingResourceBundle> publicTrainingResourceManager;
     private final GenericResourceService genericResourceService;
 
 
     PublicTrainingResourceController(SecurityService securityService,
                                      TrainingResourceService trainingResourceBundleService,
-                                     @Qualifier("publicTrainingResourceManager") ResourceService<TrainingResourceBundle> publicTrainingResourceManager,
                                      GenericResourceService genericResourceService) {
         this.securityService = securityService;
         this.trainingResourceBundleService = trainingResourceBundleService;
-        this.publicTrainingResourceManager = publicTrainingResourceManager;
         this.genericResourceService = genericResourceService;
     }
 

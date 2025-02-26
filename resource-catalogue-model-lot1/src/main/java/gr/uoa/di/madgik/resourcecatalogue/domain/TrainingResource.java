@@ -82,7 +82,7 @@ public class TrainingResource implements Identifiable {
      * contextual information including the direct resolvable link to the resource, if applicable.
      */
     @XmlElement(required = true)
-    @Schema(example = "https://example.com", required = true)
+    @Schema(example = "https://example.com", requiredMode = Schema.RequiredMode.REQUIRED)
     @FieldValidation
     private URL url;
 
@@ -154,7 +154,7 @@ public class TrainingResource implements Identifiable {
      * The version date for the most recently published or broadcast resource.
      */
     @XmlElement(required = true)
-    @Schema(example = "2020-01-01", required = true)
+    @Schema(example = "2020-01-01", requiredMode = Schema.RequiredMode.REQUIRED)
     @FieldValidation
     private Date versionDate;
 

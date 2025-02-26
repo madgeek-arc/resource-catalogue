@@ -117,7 +117,7 @@ public class CatalogueController {
                                                      @Parameter(hidden = true) Authentication auth) {
         CatalogueBundle catalogueBundle = catalogueManager.get(catalogue.getId(), auth);
         catalogueBundle.setCatalogue(catalogue);
-        if (comment == null || comment.equals("")) {
+        if (comment == null || comment.isEmpty()) {
             comment = "no comment";
         }
         catalogueBundle = catalogueManager.update(catalogueBundle, comment, auth);
@@ -181,8 +181,8 @@ public class CatalogueController {
                                                            @RequestParam(required = false) String status,
                                                            @Parameter(hidden = true) Authentication auth) {
         CatalogueBundle catalogue = catalogueManager.verify(id, status, active, auth);
-        logger.info("Updated Catalogue with name '{}' [status: {}] [active: {}]",
-                catalogue.getCatalogue().getName(), status, active);
+        logger.info("Updated Catalogue with id: '{}' | status: '{}' | active: '{}'",
+                catalogue.getId(), status, active);
         return new ResponseEntity<>(catalogue, HttpStatus.OK);
     }
 
@@ -194,8 +194,8 @@ public class CatalogueController {
                                                    @RequestParam(required = false) Boolean active,
                                                    @Parameter(hidden = true) Authentication auth) {
         CatalogueBundle catalogue = catalogueManager.publish(id, active, auth);
-        logger.info("Updated Catalogue with name '{}' [status: {}] [active: {}]",
-                catalogue.getCatalogue().getName(), catalogue.getStatus(), active);
+        logger.info("Updated Catalogue with id: '{}' | status: '{}' | active: '{}'",
+                catalogue.getId(), catalogue.getStatus(), active);
         return new ResponseEntity<>(catalogue, HttpStatus.OK);
     }
 
@@ -350,7 +350,7 @@ public class CatalogueController {
                                                             @Parameter(hidden = true) Authentication auth) {
         ProviderBundle providerBundle = providerManager.get(catalogueId, provider.getId(), auth);
         providerBundle.setProvider(provider);
-        if (comment == null || comment.equals("")) {
+        if (comment == null || comment.isEmpty()) {
             comment = "no comment";
         }
         providerBundle = providerManager.update(providerBundle, comment, auth);

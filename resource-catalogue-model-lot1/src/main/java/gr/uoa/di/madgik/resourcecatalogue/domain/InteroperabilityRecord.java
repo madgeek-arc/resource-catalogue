@@ -37,7 +37,7 @@ public class InteroperabilityRecord implements Identifiable {
      * EOSC Interoperability ID (auto-assigned).
      */
     @XmlElement(required = true)
-    @Schema(required = true, example = "(auto-assigned)")
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED, example = "(auto-assigned)")
     private String id;
 
     /**

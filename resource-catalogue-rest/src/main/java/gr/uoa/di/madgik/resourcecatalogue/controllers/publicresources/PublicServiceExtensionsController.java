@@ -25,13 +25,13 @@ import gr.uoa.di.madgik.resourcecatalogue.domain.Helpdesk;
 import gr.uoa.di.madgik.resourcecatalogue.domain.HelpdeskBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Monitoring;
 import gr.uoa.di.madgik.resourcecatalogue.domain.MonitoringBundle;
-import gr.uoa.di.madgik.resourcecatalogue.service.*;
+import gr.uoa.di.madgik.resourcecatalogue.service.GenericResourceService;
+import gr.uoa.di.madgik.resourcecatalogue.service.HelpdeskService;
+import gr.uoa.di.madgik.resourcecatalogue.service.MonitoringService;
+import gr.uoa.di.madgik.resourcecatalogue.service.SecurityService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -47,27 +47,20 @@ import org.springframework.web.bind.annotation.*;
 @Tag(name = "public service extensions", description = "Get Information about Public Services' Helpdesks/Monitorings")
 public class PublicServiceExtensionsController {
 
-    private static final Logger logger = LoggerFactory.getLogger(PublicServiceExtensionsController.class);
     private static final Gson gson = new Gson();
 
     private final SecurityService securityService;
     private final HelpdeskService helpdeskService;
-    private final ResourceService<HelpdeskBundle> publicHelpdeskManager;
     private final MonitoringService monitoringService;
-    private final ResourceService<MonitoringBundle> publicMonitoringManager;
     private final GenericResourceService genericResourceService;
 
     public PublicServiceExtensionsController(SecurityService securityService,
                                              HelpdeskService helpdeskService,
                                              MonitoringService monitoringService,
-                                             @Qualifier("publicHelpdeskManager") ResourceService<HelpdeskBundle> publicHelpdeskManager,
-                                             @Qualifier("publicMonitoringManager") ResourceService<MonitoringBundle> publicMonitoringManager,
                                              GenericResourceService genericResourceService) {
         this.securityService = securityService;
         this.helpdeskService = helpdeskService;
         this.monitoringService = monitoringService;
-        this.publicHelpdeskManager = publicHelpdeskManager;
-        this.publicMonitoringManager = publicMonitoringManager;
         this.genericResourceService = genericResourceService;
     }
 

@@ -23,6 +23,7 @@ import gr.uoa.di.madgik.resourcecatalogue.domain.*;
 import gr.uoa.di.madgik.resourcecatalogue.service.ProviderService;
 import gr.uoa.di.madgik.resourcecatalogue.service.SecurityService;
 import gr.uoa.di.madgik.resourcecatalogue.service.ServiceBundleService;
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,7 +34,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.web.WebAppConfiguration;
 
 import java.net.MalformedURLException;
-import java.net.URL;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -49,7 +50,7 @@ public class ServiceProviderRegistrationIT {
     ProviderService providerService;
 
     @Autowired
-    ServiceBundleService serviceBundleService;
+    ServiceBundleService<ServiceBundle> serviceBundleService;
 
     @Autowired
     SecurityService securityService;
@@ -101,7 +102,7 @@ public class ServiceProviderRegistrationIT {
             logger.error("ERROR", e);
         } finally {
             provider = providerService.get(providerId, securityService.getAdminAccess());
-            logger.info("Deleting provider with id: {}", provider.getId());
+            logger.info("Deleting provider with id: '{}'", provider.getId());
             providerService.delete(provider);
         }
 
@@ -131,19 +132,7 @@ public class ServiceProviderRegistrationIT {
         mainContact.setLastName("MainSurname");
         mainContact.setPosition("Manager");
 
-        ProviderPublicContact contact1 = new ProviderPublicContact();
-        contact1.setEmail("contact1@gmail.com");
-        contact1.setFirstName("FirstName1");
-        contact1.setLastName("LastName1");
-        contact1.setPhone("0123456789");
-        ProviderPublicContact contact2 = new ProviderPublicContact();
-        contact2.setEmail("contact2@gmail.com");
-        contact2.setFirstName("FirstName1");
-        contact2.setLastName("LastName1");
-        contact2.setPhone("9876543210");
-        List<ProviderPublicContact> publicContacts = new ArrayList<>();
-        publicContacts.add(contact1);
-        publicContacts.add(contact2);
+        List<ProviderPublicContact> publicContacts = getProviderPublicContacts();
 
         List<User> users = new ArrayList<>();
         User user = new User();
@@ -157,9 +146,9 @@ public class ServiceProviderRegistrationIT {
         provider.setId(id);
         provider.setName("WP4_TestProvider");
         provider.setAbbreviation("WP4");
-        provider.setWebsite(new URL("http://wp4.testprovider.com"));
+        provider.setWebsite(URI.create("http://wp4.testprovider.com").toURL());
         provider.setDescription("Jtest for PDT WP4 v2.00 01/10/19");
-        provider.setLogo(new URL("https://wp4.testprovider.logo.com"));
+        provider.setLogo(URI.create("https://wp4.testprovider.logo.com").toURL());
         provider.setStructureTypes(providerTypes);
         provider.setScientificDomains(providerScientificSubdomains);
         provider.setLifeCycleStatus("provider_life_cycle_status-under_construction");
@@ -171,6 +160,23 @@ public class ServiceProviderRegistrationIT {
         return providerService.add(new ProviderBundle(provider), securityService.getAdminAccess());
     }
 
+    private static @NotNull List<ProviderPublicContact> getProviderPublicContacts() {
+        ProviderPublicContact contact1 = new ProviderPublicContact();
+        contact1.setEmail("contact1@gmail.com");
+        contact1.setFirstName("FirstName1");
+        contact1.setLastName("LastName1");
+        contact1.setPhone("0123456789");
+        ProviderPublicContact contact2 = new ProviderPublicContact();
+        contact2.setEmail("contact2@gmail.com");
+        contact2.setFirstName("FirstName1");
+        contact2.setLastName("LastName1");
+        contact2.setPhone("9876543210");
+        List<ProviderPublicContact> publicContacts = new ArrayList<>();
+        publicContacts.add(contact1);
+        publicContacts.add(contact2);
+        return publicContacts;
+    }
+
     private ProviderBundle updateProvider(String id) throws MalformedURLException, ResourceNotFoundException {
         // get provider
         ProviderBundle provider = providerService.get(id);
@@ -178,9 +184,9 @@ public class ServiceProviderRegistrationIT {
         // update provider
         provider.getProvider().setName("WP4_Test UPDATED");
         provider.getProvider().setAbbreviation("WP4UPDATED");
-        provider.getProvider().setWebsite(new URL("http://wp4.test.updated.com"));
+        provider.getProvider().setWebsite(URI.create("http://wp4.test.updated.com").toURL());
         provider.getProvider().setDescription("Jtest for PDT WP4 v2.00 01/10/19 UPDATED");
-        provider.getProvider().setLogo(new URL("https://wp4.testprovider.logo.updated.com"));
+        provider.getProvider().setLogo(URI.create("https://wp4.testprovider.logo.updated.com").toURL());
         provider.getProvider().setLifeCycleStatus("provider_life_cycle_status-being_upgraded");
         provider.getProvider().getLocation().setCountry("EU");
 
@@ -213,6 +219,25 @@ public class ServiceProviderRegistrationIT {
         places.add("GR");
         places.add("FR");
 
+        List<ServicePublicContact> contacts = getServicePublicContacts();
+
+        Service service = new Service();
+        service.setName(serviceName);
+        service.setWebpage(URI.create("https:wp4.testservice.com").toURL());
+        service.setDescription("Jtest for SDT WP4 v2.00 01/10/19");
+        service.setLogo(URI.create("https:wp4.testservice.logo.com").toURL());
+        service.setResourceOrganisation(provider.getId());
+        service.setScientificDomains(scientificSubdomains);
+        service.setCategories(subcategories);
+        service.setTargetUsers(targetUsers);
+        service.setLanguageAvailabilities(languages);
+        service.setGeographicalAvailabilities(places);
+        service.setPublicContacts(contacts);
+
+        return service;
+    }
+
+    private static @NotNull List<ServicePublicContact> getServicePublicContacts() {
         ServicePublicContact contact1 = new ServicePublicContact();
         contact1.setEmail("contact1@gmail.com");
         contact1.setFirstName("FirstName1");
@@ -226,20 +251,6 @@ public class ServiceProviderRegistrationIT {
         List<ServicePublicContact> contacts = new ArrayList<>();
         contacts.add(contact1);
         contacts.add(contact2);
-
-        Service service = new Service();
-        service.setName(serviceName);
-        service.setWebpage(new URL("https:wp4.testservice.com"));
-        service.setDescription("Jtest for SDT WP4 v2.00 01/10/19");
-        service.setLogo(new URL("https:wp4.testservice.logo.com"));
-        service.setResourceOrganisation(provider.getId());
-        service.setScientificDomains(scientificSubdomains);
-        service.setCategories(subcategories);
-        service.setTargetUsers(targetUsers);
-        service.setLanguageAvailabilities(languages);
-        service.setGeographicalAvailabilities(places);
-        service.setPublicContacts(contacts);
-
-        return service;
+        return contacts;
     }
 }

@@ -24,7 +24,6 @@ import gr.uoa.di.madgik.registry.service.ResourceCRUDService;
 import gr.uoa.di.madgik.resourcecatalogue.domain.AlternativeIdentifier;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Identifiers;
 import gr.uoa.di.madgik.resourcecatalogue.domain.TrainingResourceBundle;
-import gr.uoa.di.madgik.resourcecatalogue.service.SecurityService;
 import gr.uoa.di.madgik.resourcecatalogue.utils.FacetLabelService;
 import gr.uoa.di.madgik.resourcecatalogue.utils.JmsService;
 import gr.uoa.di.madgik.resourcecatalogue.utils.ProviderResourcesCommonMethods;
@@ -42,18 +41,16 @@ public class PublicTrainingResourceManager extends AbstractPublicResourceManager
 
     private static final Logger logger = LoggerFactory.getLogger(PublicTrainingResourceManager.class);
     private final JmsService jmsService;
-    private final SecurityService securityService;
-    private ProviderResourcesCommonMethods commonMethods;
+    private final ProviderResourcesCommonMethods commonMethods;
     private final FacetLabelService facetLabelService;
     private final PublicResourceUtils publicResourceUtils;
 
-    public PublicTrainingResourceManager(JmsService jmsService, SecurityService securityService,
+    public PublicTrainingResourceManager(JmsService jmsService,
                                          ProviderResourcesCommonMethods commonMethods,
                                          FacetLabelService facetLabelService,
                                          PublicResourceUtils publicResourceUtils) {
         super(TrainingResourceBundle.class);
         this.jmsService = jmsService;
-        this.securityService = securityService;
         this.commonMethods = commonMethods;
         this.facetLabelService = facetLabelService;
         this.publicResourceUtils = publicResourceUtils;
@@ -95,7 +92,7 @@ public class PublicTrainingResourceManager extends AbstractPublicResourceManager
             }
         }
         if (pid.equalsIgnoreCase("no_pid")) {
-            logger.info("Training Resource with id {} does not have a PID registered under its AlternativeIdentifiers.",
+            logger.info("Training Resource with id '{}' does not have a PID registered under its AlternativeIdentifiers.",
                     trainingResourceBundle.getId());
         } else {
             //TODO: enable when we have PID configuration properties for Beyond
@@ -103,7 +100,7 @@ public class PublicTrainingResourceManager extends AbstractPublicResourceManager
 //            commonMethods.postPID(pid);
         }
         TrainingResourceBundle ret;
-        logger.info(String.format("Training Resource [%s] is being published with id [%s]", lowerLevelResourceId, trainingResourceBundle.getId()));
+        logger.info("Training Resource '{}' is being published with id '{}'", lowerLevelResourceId, trainingResourceBundle.getId());
         ret = super.add(trainingResourceBundle, null);
         jmsService.convertAndSendTopic("training_resource.create", trainingResourceBundle);
         return ret;
@@ -119,7 +116,7 @@ public class PublicTrainingResourceManager extends AbstractPublicResourceManager
         try {
             BeanUtils.copyProperties(ret, trainingResourceBundle);
         } catch (IllegalAccessException | InvocationTargetException e) {
-            e.printStackTrace();
+            logger.info("Could not copy properties.");
         }
 
         // sets public ids to resource organisation, resource providers and EOSC related services
@@ -129,7 +126,7 @@ public class PublicTrainingResourceManager extends AbstractPublicResourceManager
         ret.setIdentifiers(published.getIdentifiers());
         ret.setId(published.getId());
         ret.getMetadata().setPublished(true);
-        logger.info(String.format("Updating public Training Resource with id [%s]", ret.getId()));
+        logger.info("Updating public Training Resource with id '{}'", ret.getId());
         ret = super.update(ret, null);
         jmsService.convertAndSendTopic("training_resource.update", ret);
         return ret;
@@ -141,7 +138,7 @@ public class PublicTrainingResourceManager extends AbstractPublicResourceManager
             TrainingResourceBundle publicTrainingResourceBundle = get(publicResourceUtils.createPublicResourceId(
                     trainingResourceBundle.getTrainingResource().getId(),
                     trainingResourceBundle.getTrainingResource().getCatalogueId()));
-            logger.info(String.format("Deleting public Training Resource with id [%s]", publicTrainingResourceBundle.getId()));
+            logger.info("Deleting public Training Resource with id '{}'", publicTrainingResourceBundle.getId());
             super.delete(publicTrainingResourceBundle);
             jmsService.convertAndSendTopic("training_resource.delete", publicTrainingResourceBundle);
         } catch (ResourceException | ResourceNotFoundException ignore) {

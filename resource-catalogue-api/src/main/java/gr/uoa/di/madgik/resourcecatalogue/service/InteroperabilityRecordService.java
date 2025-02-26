@@ -63,14 +63,6 @@ public interface InteroperabilityRecordService extends ResourceService<Interoper
     InteroperabilityRecordBundle getOrElseReturnNull(String id);
 
     /**
-     * Validates the given Interoperability Record Bundle.
-     *
-     * @param interoperabilityRecordBundle Interoperability Record Bundle
-     * @return True/False
-     */
-    boolean validateInteroperabilityRecord(InteroperabilityRecordBundle interoperabilityRecordBundle);
-
-    /**
      * Get the history of the specific Interoperability Record of the specific Catalogue ID
      *
      * @param id          Interoperability Record ID

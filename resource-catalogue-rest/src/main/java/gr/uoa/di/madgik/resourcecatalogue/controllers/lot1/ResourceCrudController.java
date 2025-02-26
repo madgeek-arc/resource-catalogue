@@ -90,7 +90,7 @@ public abstract class ResourceCrudController<T extends Identifiable> {
         if (service.exists(t))
             throw new ResourceAlreadyExistsException();
         ResponseEntity<T> ret = new ResponseEntity<>(service.save(t), HttpStatus.CREATED);
-        logger.debug("Created a new {} with id {}", t.getClass().getSimpleName(), t.getId());
+        logger.debug("Created a new {} with id '{}'", t.getClass().getSimpleName(), t.getId());
         return ret;
     }
 
@@ -100,14 +100,14 @@ public abstract class ResourceCrudController<T extends Identifiable> {
         if (!service.exists(t))
             throw new ResourceNotFoundException();
         ResponseEntity<T> ret = new ResponseEntity<>(service.save(t), HttpStatus.OK);
-        logger.debug("Updated {} with id {}", t.getClass().getSimpleName(), t.getId());
+        logger.debug("Updated {} with id '{}'", t.getClass().getSimpleName(), t.getId());
         return ret;
     }
 
     @PostMapping(path = "validate", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Void> validate(@RequestBody T t, @Parameter(hidden = true) Authentication auth) {
         service.validate(t);
-        logger.debug("Validated {} with id {}", t.getClass().getSimpleName(), t.getId());
+        logger.debug("Validated {} with id '{}'", t.getClass().getSimpleName(), t.getId());
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
@@ -115,7 +115,7 @@ public abstract class ResourceCrudController<T extends Identifiable> {
     public ResponseEntity<T> delete(@PathVariable String id, @Parameter(hidden = true) Authentication auth) {
         T resource = service.get(id);
         service.delete(resource);
-        logger.debug("Deleted {} with id {}", resource.getClass().getSimpleName(), resource.getId());
+        logger.debug("Deleted {} with id '{}'", resource.getClass().getSimpleName(), resource.getId());
         return new ResponseEntity<>(resource, HttpStatus.OK);
     }
 
@@ -126,7 +126,7 @@ public abstract class ResourceCrudController<T extends Identifiable> {
                                          HttpServletRequest request) {
         T resource = service.get(extractPid(id, request));
         service.delete(resource);
-        logger.debug("Deleted {} with id {}", resource.getClass().getSimpleName(), resource.getId());
+        logger.debug("Deleted {} with id '{}'", resource.getClass().getSimpleName(), resource.getId());
         return new ResponseEntity<>(resource, HttpStatus.OK);
     }
 

@@ -21,7 +21,6 @@ import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.domain.LoggingInfo;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Metadata;
 import gr.uoa.di.madgik.resourcecatalogue.domain.ProviderBundle;
-import gr.uoa.di.madgik.resourcecatalogue.domain.User;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
 import gr.uoa.di.madgik.resourcecatalogue.utils.AuthenticationInfo;
 import gr.uoa.di.madgik.resourcecatalogue.utils.ProviderResourcesCommonMethods;
@@ -147,7 +146,7 @@ public class DraftProviderManager extends ResourceManager<ProviderBundle> implem
         try {
             bundle = providerManager.update(bundle, auth);
         } catch (ResourceNotFoundException e) {
-            e.printStackTrace();
+            logger.info("Provider with id '{}' does not exist", bundle.getId());
         }
 
         registrationMailService.sendEmailsToNewlyAddedProviderAdmins(bundle, null);
@@ -159,7 +158,6 @@ public class DraftProviderManager extends ResourceManager<ProviderBundle> implem
         if (auth == null) {
             throw new InsufficientAuthenticationException("Please log in.");
         }
-        User user = User.of(auth);
         if (ff == null) {
             ff = new FacetFilter();
             ff.setQuantity(maxQuantity);
@@ -167,7 +165,7 @@ public class DraftProviderManager extends ResourceManager<ProviderBundle> implem
         if (!ff.getFilter().containsKey("published")) {
             ff.addFilter("published", false);
         }
-        ff.addFilter("users", user.getEmail().toLowerCase());
+        ff.addFilter("users", AuthenticationInfo.getEmail(auth).toLowerCase());
         ff.addOrderBy("name", "asc");
         return super.getAll(ff, auth);
     }
@@ -178,6 +176,6 @@ public class DraftProviderManager extends ResourceManager<ProviderBundle> implem
                 .cqlQuery(String.format("resource_internal_id = \"%s\" AND catalogue_id = \"%s\"", id, catalogueId),
                         getResourceTypeName());
         assert resources != null;
-        return resources.getTotal() == 0 ? null : resources.getResults().get(0);
+        return resources.getTotal() == 0 ? null : resources.getResults().getFirst();
     }
 }

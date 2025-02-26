@@ -22,6 +22,7 @@ import gr.uoa.di.madgik.registry.service.ResourceService;
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
 import gr.uoa.di.madgik.resourcecatalogue.service.MigrationService;
 import gr.uoa.di.madgik.resourcecatalogue.service.SecurityService;
+import gr.uoa.di.madgik.resourcecatalogue.utils.AuthenticationInfo;
 import gr.uoa.di.madgik.resourcecatalogue.utils.JmsService;
 import gr.uoa.di.madgik.resourcecatalogue.utils.PublicResourceUtils;
 import org.slf4j.Logger;
@@ -87,7 +88,7 @@ public class MigrationManager implements MigrationService {
 
     public ProviderBundle changeProviderCatalogue(String providerId, String catalogueId, String newCatalogueId, Authentication authentication) {
         logger.info("User [{}] is updating the catalogueId of the Provider [{}] and all its Resources to [{}]",
-                User.of(authentication).getFullName(), providerId, newCatalogueId);
+                AuthenticationInfo.getFullName(authentication), providerId, newCatalogueId);
         // Provider
         ProviderBundle providerBundle = providerService.get(catalogueId, providerId, authentication);
         providerBundle.getProvider().setCatalogueId(newCatalogueId);

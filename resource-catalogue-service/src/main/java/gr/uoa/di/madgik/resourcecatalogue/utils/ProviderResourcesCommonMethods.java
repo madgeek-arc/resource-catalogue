@@ -44,14 +44,7 @@ public class ProviderResourcesCommonMethods {
 
     private final CatalogueService catalogueService;
     private final ProviderService providerService;
-    private final DraftResourceService<ProviderBundle> draftProviderService;
-    private final ServiceBundleService serviceBundleService;
-    private final DraftResourceService<ServiceBundle> draftServiceService;
     private final DatasourceService datasourceService;
-    private final TrainingResourceService trainingResourceService;
-    private final DraftResourceService<TrainingResourceBundle> draftTrainingResourceService;
-    private final InteroperabilityRecordService interoperabilityRecordService;
-    private final DraftResourceService<InteroperabilityRecordBundle> draftInteroperabilityRecordService;
     private final HelpdeskService helpdeskService;
     private final MonitoringService monitoringService;
     private final ResourceInteroperabilityRecordService resourceInteroperabilityRecordService;
@@ -62,15 +55,7 @@ public class ProviderResourcesCommonMethods {
 
     public ProviderResourcesCommonMethods(@Lazy CatalogueService catalogueService,
                                           @Lazy ProviderService providerService,
-                                          @Lazy DraftResourceService<ProviderBundle> draftProviderService,
-                                          @Lazy ServiceBundleService serviceBundleService,
-                                          @Lazy DraftResourceService<ServiceBundle> draftServiceService,
                                           @Lazy DatasourceService datasourceService,
-                                          @Lazy TrainingResourceService trainingResourceService,
-                                          @Lazy DraftResourceService<TrainingResourceBundle> draftTrainingResourceService,
-                                          @Lazy InteroperabilityRecordService interoperabilityRecordService,
-                                          @Lazy DraftResourceService<InteroperabilityRecordBundle>
-                                                  draftInteroperabilityRecordService,
                                           @Lazy HelpdeskService helpdeskService,
                                           @Lazy MonitoringService monitoringService,
                                           @Lazy ResourceInteroperabilityRecordService
@@ -81,14 +66,7 @@ public class ProviderResourcesCommonMethods {
                                           PublicResourceUtils publicResourceUtils) {
         this.catalogueService = catalogueService;
         this.providerService = providerService;
-        this.draftProviderService = draftProviderService;
-        this.serviceBundleService = serviceBundleService;
-        this.draftServiceService = draftServiceService;
         this.datasourceService = datasourceService;
-        this.trainingResourceService = trainingResourceService;
-        this.draftTrainingResourceService = draftTrainingResourceService;
-        this.interoperabilityRecordService = interoperabilityRecordService;
-        this.draftInteroperabilityRecordService = draftInteroperabilityRecordService;
         this.helpdeskService = helpdeskService;
         this.monitoringService = monitoringService;
         this.resourceInteroperabilityRecordService = resourceInteroperabilityRecordService;
@@ -104,7 +82,7 @@ public class ProviderResourcesCommonMethods {
         }
         if (o != null) {
             if (o instanceof ProviderBundle) {
-                if (((ProviderBundle) o).getPayload().getCatalogueId() == null || ((ProviderBundle) o).getPayload().getCatalogueId().equals("")) {
+                if (((ProviderBundle) o).getPayload().getCatalogueId() == null || ((ProviderBundle) o).getPayload().getCatalogueId().isEmpty()) {
                     throw new ValidationException("Provider's 'catalogueId' cannot be null or empty");
                 } else {
                     if (!((ProviderBundle) o).getPayload().getCatalogueId().equals(catalogueId)) {
@@ -113,7 +91,7 @@ public class ProviderResourcesCommonMethods {
                 }
             }
             if (o instanceof ServiceBundle) {
-                if (((ServiceBundle) o).getPayload().getCatalogueId() == null || ((ServiceBundle) o).getPayload().getCatalogueId().equals("")) {
+                if (((ServiceBundle) o).getPayload().getCatalogueId() == null || ((ServiceBundle) o).getPayload().getCatalogueId().isEmpty()) {
                     throw new ValidationException("Service's 'catalogueId' cannot be null or empty");
                 } else {
                     if (!((ServiceBundle) o).getPayload().getCatalogueId().equals(catalogueId)) {
@@ -122,7 +100,8 @@ public class ProviderResourcesCommonMethods {
                 }
             }
             if (o instanceof TrainingResourceBundle) {
-                if (((TrainingResourceBundle) o).getPayload().getCatalogueId() == null || ((TrainingResourceBundle) o).getPayload().getCatalogueId().equals("")) {
+                if (((TrainingResourceBundle) o).getPayload().getCatalogueId() == null ||
+                        ((TrainingResourceBundle) o).getPayload().getCatalogueId().isEmpty()) {
                     throw new ValidationException("Training Resource's 'catalogueId' cannot be null or empty");
                 } else {
                     if (!((TrainingResourceBundle) o).getPayload().getCatalogueId().equals(catalogueId)) {
@@ -131,7 +110,8 @@ public class ProviderResourcesCommonMethods {
                 }
             }
             if (o instanceof InteroperabilityRecordBundle) {
-                if (((InteroperabilityRecordBundle) o).getPayload().getCatalogueId() == null || ((InteroperabilityRecordBundle) o).getPayload().getCatalogueId().equals("")) {
+                if (((InteroperabilityRecordBundle) o).getPayload().getCatalogueId() == null ||
+                        ((InteroperabilityRecordBundle) o).getPayload().getCatalogueId().isEmpty()) {
                     throw new ValidationException("Interoperability Record's 'catalogueId' cannot be null or empty");
                 } else {
                     if (!((InteroperabilityRecordBundle) o).getPayload().getCatalogueId().equals(catalogueId)) {
@@ -175,7 +155,7 @@ public class ProviderResourcesCommonMethods {
                             if (!providerBundle.getMetadata().isPublished() && !providerBundle.getProvider().getCatalogueId().equals(catalogueId)) {
                                 throw new ValidationException("Cross Catalogue reference is prohibited. Found in field 'resourceProviders");
                             }
-                        } catch (ResourceNotFoundException e) {
+                        } catch (ResourceNotFoundException ignored) {
                         }
                     }
                 }
@@ -194,7 +174,7 @@ public class ProviderResourcesCommonMethods {
                                 if (!trainingResourceBundle.getMetadata().isPublished() && !trainingResourceBundle.getTrainingResource().getCatalogueId().equals(catalogueId)) {
                                     throw new ValidationException("Cross Catalogue reference is prohibited. Found in field 'requiredResources");
                                 }
-                            } catch (ResourceNotFoundException k) {
+                            } catch (ResourceNotFoundException ignored) {
                             }
                         }
                     }
@@ -214,7 +194,7 @@ public class ProviderResourcesCommonMethods {
                                 if (!trainingResourceBundle.getMetadata().isPublished() && !trainingResourceBundle.getTrainingResource().getCatalogueId().equals(catalogueId)) {
                                     throw new ValidationException("Cross Catalogue reference is prohibited. Found in field 'relatedResources");
                                 }
-                            } catch (ResourceNotFoundException k) {
+                            } catch (ResourceNotFoundException ignored) {
                             }
                         }
                     }
@@ -234,7 +214,7 @@ public class ProviderResourcesCommonMethods {
                                 if (!trainingResourceBundle.getMetadata().isPublished() && !trainingResourceBundle.getTrainingResource().getCatalogueId().equals(catalogueId)) {
                                     throw new ValidationException("Cross Catalogue reference is prohibited. Found in field 'eoscRelatedServices");
                                 }
-                            } catch (ResourceNotFoundException k) {
+                            } catch (ResourceNotFoundException ignored) {
                             }
                         }
                     }
@@ -248,7 +228,7 @@ public class ProviderResourcesCommonMethods {
                             if (!interoperabilityRecordBundle.getMetadata().isPublished() && !interoperabilityRecordBundle.getInteroperabilityRecord().getCatalogueId().equals(catalogueId)) {
                                 throw new ValidationException("Cross Catalogue reference is prohibited. Found in field 'interoperabilityRecordIds");
                             }
-                        } catch (ResourceNotFoundException e) {
+                        } catch (ResourceNotFoundException ignored) {
                         }
                     }
                 }
@@ -274,9 +254,10 @@ public class ProviderResourcesCommonMethods {
             // latestOnboardingInfo
             bundle.setLatestUpdateInfo(loggingInfo);
 
-            logger.info(String.format("User [%s] set 'suspended' of %s [%s] to [%s]",
-                    User.of(auth).getEmail().toLowerCase(), bundle.getPayload().getClass().getSimpleName(),
-                    bundle.getId(), suspend));
+            logger.info("User [{}] set 'suspended' of {} '{}' to '{}'",
+                    Objects.requireNonNull(AuthenticationInfo.getEmail(auth).toLowerCase()),
+                    bundle.getPayload().getClass().getSimpleName(),
+                    bundle.getId(), suspend);
         }
     }
 
@@ -434,7 +415,7 @@ public class ProviderResourcesCommonMethods {
         DatasourceBundle datasourceBundle = datasourceService.get(serviceId, catalogueId);
         if (datasourceBundle != null) {
             try {
-                logger.info("Deleting Datasource of Service with id: {}", serviceId);
+                logger.info("Deleting Datasource of Service with id: '{}'", serviceId);
                 datasourceService.delete(datasourceBundle);
             } catch (gr.uoa.di.madgik.registry.exception.ResourceNotFoundException e) {
                 logger.error(e.getMessage(), e);
@@ -447,7 +428,7 @@ public class ProviderResourcesCommonMethods {
         HelpdeskBundle helpdeskBundle = helpdeskService.get(resourceId, catalogueId);
         if (helpdeskBundle != null) {
             try {
-                logger.info("Deleting Helpdesk of {} with id: {}", resourceType, resourceId);
+                logger.info("Deleting Helpdesk of {} with id: '{}'", resourceType, resourceId);
                 helpdeskService.delete(helpdeskBundle);
             } catch (gr.uoa.di.madgik.registry.exception.ResourceNotFoundException e) {
                 logger.error(e.getMessage(), e);
@@ -456,7 +437,7 @@ public class ProviderResourcesCommonMethods {
         MonitoringBundle monitoringBundle = monitoringService.get(resourceId, catalogueId);
         if (monitoringBundle != null) {
             try {
-                logger.info("Deleting Monitoring of {} with id: {}", resourceType, resourceId);
+                logger.info("Deleting Monitoring of {} with id: '{}'", resourceType, resourceId);
                 monitoringService.delete(monitoringBundle);
             } catch (gr.uoa.di.madgik.registry.exception.ResourceNotFoundException e) {
                 logger.error(e.getMessage(), e);
@@ -466,7 +447,7 @@ public class ProviderResourcesCommonMethods {
         ResourceInteroperabilityRecordBundle resourceInteroperabilityRecordBundle = resourceInteroperabilityRecordService.getWithResourceId(resourceId);
         if (resourceInteroperabilityRecordBundle != null) {
             try {
-                logger.info("Deleting ResourceInteroperabilityRecord of {} with id: {}", resourceType, resourceId);
+                logger.info("Deleting ResourceInteroperabilityRecord of {} with id: '{}'", resourceType, resourceId);
                 resourceInteroperabilityRecordService.delete(resourceInteroperabilityRecordBundle);
             } catch (gr.uoa.di.madgik.registry.exception.ResourceNotFoundException e) {
                 logger.error(e.getMessage(), e);
@@ -567,15 +548,12 @@ public class ProviderResourcesCommonMethods {
     }
 
     public void addAuthenticatedUser(Object object, Authentication auth) {
-        if (object instanceof Catalogue) {
-            Catalogue catalogue = (Catalogue) object;
-            User authUser = User.of(auth);
+        User authUser = User.of(auth);
+        if (object instanceof Catalogue catalogue) {
             Set<User> users = catalogue.getUsers() == null ? new HashSet<>() : new HashSet<>(catalogue.getUsers());
             users.add(authUser);
             catalogue.setUsers(new ArrayList<>(users));
-        } else if (object instanceof Provider) {
-            Provider provider = (Provider) object;
-            User authUser = User.of(auth);
+        } else if (object instanceof Provider provider) {
             Set<User> users = provider.getUsers() == null ? new HashSet<>() : new HashSet<>(provider.getUsers());
             users.add(authUser);
             provider.setUsers(new ArrayList<>(users));

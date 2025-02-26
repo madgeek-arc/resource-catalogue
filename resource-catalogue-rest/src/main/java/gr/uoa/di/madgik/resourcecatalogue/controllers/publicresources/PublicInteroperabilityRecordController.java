@@ -24,15 +24,16 @@ import gr.uoa.di.madgik.resourcecatalogue.annotations.BrowseCatalogue;
 import gr.uoa.di.madgik.resourcecatalogue.domain.InteroperabilityRecord;
 import gr.uoa.di.madgik.resourcecatalogue.domain.InteroperabilityRecordBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.ResourceInteroperabilityRecordBundle;
-import gr.uoa.di.madgik.resourcecatalogue.service.*;
+import gr.uoa.di.madgik.resourcecatalogue.domain.User;
+import gr.uoa.di.madgik.resourcecatalogue.service.GenericResourceService;
+import gr.uoa.di.madgik.resourcecatalogue.service.InteroperabilityRecordService;
+import gr.uoa.di.madgik.resourcecatalogue.service.ResourceInteroperabilityRecordService;
+import gr.uoa.di.madgik.resourcecatalogue.service.SecurityService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -52,25 +53,21 @@ import java.util.List;
 @Tag(name = "public interoperability record")
 public class PublicInteroperabilityRecordController {
 
-    private static final Logger logger = LoggerFactory.getLogger(PublicInteroperabilityRecordController.class);
     private static final Gson gson = new Gson();
 
     private final SecurityService securityService;
     private final InteroperabilityRecordService interoperabilityRecordService;
     private final ResourceInteroperabilityRecordService resourceInteroperabilityRecordService;
-    private final ResourceService<InteroperabilityRecordBundle> publicInteroperabilityRecordManager;
     private final GenericResourceService genericResourceService;
 
 
     PublicInteroperabilityRecordController(SecurityService securityService,
                                            InteroperabilityRecordService interoperabilityRecordService,
                                            ResourceInteroperabilityRecordService resourceInteroperabilityRecordService,
-                                           @Qualifier("publicInteroperabilityRecordManager") ResourceService<InteroperabilityRecordBundle> publicInteroperabilityRecordManager,
                                            GenericResourceService genericResourceService) {
         this.securityService = securityService;
         this.interoperabilityRecordService = interoperabilityRecordService;
         this.resourceInteroperabilityRecordService = resourceInteroperabilityRecordService;
-        this.publicInteroperabilityRecordManager = publicInteroperabilityRecordManager;
         this.genericResourceService = genericResourceService;
     }
 

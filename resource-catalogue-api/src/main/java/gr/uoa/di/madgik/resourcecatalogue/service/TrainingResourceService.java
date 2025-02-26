@@ -62,7 +62,7 @@ public interface TrainingResourceService extends ResourceService<TrainingResourc
      * @throws ResourceNotFoundException The Resource was not found
      */
     TrainingResourceBundle update(TrainingResourceBundle resource, String catalogueId, String comment, Authentication auth)
-           ;
+    ;
 
     /**
      * Get a Training Resource of a specific Catalogue
@@ -101,14 +101,6 @@ public interface TrainingResourceService extends ResourceService<TrainingResourc
      * @return {@link List}&lt;{@link TrainingResource}&gt;
      */
     List<TrainingResource> getByIds(Authentication authentication, String... ids);
-
-    /**
-     * Validates the given Training Resource Bundle.
-     *
-     * @param trainingResourceBundle Training Resource Bundle
-     * @return True/False
-     */
-    boolean validateTrainingResource(TrainingResourceBundle trainingResourceBundle);
 
     /**
      * Return children vocabularies from parent vocabularies

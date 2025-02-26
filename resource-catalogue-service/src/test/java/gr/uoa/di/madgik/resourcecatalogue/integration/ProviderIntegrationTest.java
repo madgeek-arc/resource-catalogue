@@ -192,8 +192,8 @@ class ProviderIntegrationTest extends BaseIntegrationTest {
         ProviderBundle providerBundle = providerService.get(providerId, securityService.getAdminAccess());
         assertNotNull(providerBundle, "Provider should exist before deletion.");
 
-        List mockedList = mock(List.class);
-        Paging mockedPaging = mock(Paging.class);
+        List<ServiceBundle> mockedList = mock(List.class);
+        Paging<ServiceBundle> mockedPaging = mock(Paging.class);
         when(mockedPaging.getResults()).thenReturn(mockedList);
         when(serviceBundleService.getResourceBundles(any(), any(), any())).thenReturn(mockedPaging);
 
@@ -218,9 +218,8 @@ class ProviderIntegrationTest extends BaseIntegrationTest {
     void addProviderFailsOnAuthentication() {
         ProviderBundle inputProviderBundle = new ProviderBundle();
 
-        assertThrows(InsufficientAuthenticationException.class, () -> {
-            providerService.add(inputProviderBundle, null);
-        });
+        assertThrows(InsufficientAuthenticationException.class, () ->
+                providerService.add(inputProviderBundle, null));
     }
 
     /**
@@ -237,9 +236,8 @@ class ProviderIntegrationTest extends BaseIntegrationTest {
         ProviderBundle inputProviderBundle = new ProviderBundle();
         inputProviderBundle.setProvider(new Provider());
 
-        ValidationException exception = assertThrows(ValidationException.class, () -> {
-            providerService.add(inputProviderBundle, securityService.getAdminAccess());
-        });
+        ValidationException exception = assertThrows(ValidationException.class, () ->
+                providerService.add(inputProviderBundle, securityService.getAdminAccess()));
 
         assertEquals("Field 'abbreviation' is mandatory.", exception.getMessage());
     }
@@ -263,9 +261,8 @@ class ProviderIntegrationTest extends BaseIntegrationTest {
         ProviderBundle inputProviderBundle = createProviderBundle();
         inputProviderBundle.getProvider().getLocation().setCountry(invalidCountryValue);
 
-        ValidationException exception = assertThrows(ValidationException.class, () -> {
-            providerService.add(inputProviderBundle, securityService.getAdminAccess());
-        });
+        ValidationException exception = assertThrows(ValidationException.class, () ->
+                providerService.add(inputProviderBundle, securityService.getAdminAccess()));
 
         assertEquals("Vocabulary with ID '" + invalidCountryValue + "' does not exist. " +
                 "Found in field 'country'", exception.getMessage());

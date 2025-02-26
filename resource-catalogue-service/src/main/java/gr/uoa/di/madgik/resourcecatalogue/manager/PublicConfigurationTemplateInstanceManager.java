@@ -23,7 +23,6 @@ import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.registry.service.ResourceCRUDService;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Identifiers;
 import gr.uoa.di.madgik.resourcecatalogue.domain.configurationTemplates.ConfigurationTemplateInstanceBundle;
-import gr.uoa.di.madgik.resourcecatalogue.service.SecurityService;
 import gr.uoa.di.madgik.resourcecatalogue.utils.JmsService;
 import gr.uoa.di.madgik.resourcecatalogue.utils.PublicResourceUtils;
 import org.apache.commons.beanutils.BeanUtils;
@@ -44,17 +43,15 @@ public class PublicConfigurationTemplateInstanceManager extends AbstractPublicRe
 
     private static final Logger logger = LoggerFactory.getLogger(PublicConfigurationTemplateInstanceManager.class);
     private final JmsService jmsService;
-    private final SecurityService securityService;
     private final PublicResourceUtils publicResourceUtils;
 
     @Value("${catalogue.id}")
     private String catalogueId;
 
-    public PublicConfigurationTemplateInstanceManager(JmsService jmsService, SecurityService securityService,
+    public PublicConfigurationTemplateInstanceManager(JmsService jmsService,
                                                       PublicResourceUtils publicResourceUtils) {
         super(ConfigurationTemplateInstanceBundle.class);
         this.jmsService = jmsService;
-        this.securityService = securityService;
         this.publicResourceUtils = publicResourceUtils;
     }
 
@@ -89,7 +86,8 @@ public class PublicConfigurationTemplateInstanceManager extends AbstractPublicRe
         }
         configurationTemplateInstanceBundle.getMetadata().setPublished(true);
         ConfigurationTemplateInstanceBundle ret;
-        logger.info(String.format("ConfigurationTemplateInstanceBundle [%s] is being published with id [%s]", lowerLevelResourceId, configurationTemplateInstanceBundle.getId()));
+        logger.info("ConfigurationTemplateInstanceBundle '{}' is being published with id '{}'",
+                lowerLevelResourceId, configurationTemplateInstanceBundle.getId());
         ret = super.add(configurationTemplateInstanceBundle, null);
         jmsService.convertAndSendTopic("configuration_template_instance.create", configurationTemplateInstanceBundle);
         return ret;
@@ -104,7 +102,7 @@ public class PublicConfigurationTemplateInstanceManager extends AbstractPublicRe
         try {
             BeanUtils.copyProperties(ret, configurationTemplateInstanceBundle);
         } catch (IllegalAccessException | InvocationTargetException e) {
-            e.printStackTrace();
+            logger.info("Could not copy properties.");
         }
 
         // set public id to resourceId
@@ -113,7 +111,7 @@ public class PublicConfigurationTemplateInstanceManager extends AbstractPublicRe
         ret.getConfigurationTemplateInstance().setPayload(published.getConfigurationTemplateInstance().getPayload()); //TODO: refactor when users will be able to update CTIs
         ret.setId(published.getId());
         ret.getMetadata().setPublished(true);
-        logger.info(String.format("Updating public ResourceInteroperabilityRecordBundle with id [%s]", ret.getId()));
+        logger.info("Updating public ResourceInteroperabilityRecordBundle with id '{}'", ret.getId());
         ret = super.update(ret, null);
         jmsService.convertAndSendTopic("resource_interoperability_record.update", ret);
         return ret;
@@ -122,11 +120,14 @@ public class PublicConfigurationTemplateInstanceManager extends AbstractPublicRe
     @Override
     public void delete(ConfigurationTemplateInstanceBundle configurationTemplateInstanceBundle) {
         try {
-            ConfigurationTemplateInstanceBundle publicConfigurationTemplateInstanceBundle = get(publicResourceUtils.createPublicResourceId(
+            ConfigurationTemplateInstanceBundle publicConfigurationTemplateInstanceBundle =
+                    get(publicResourceUtils.createPublicResourceId(
                     configurationTemplateInstanceBundle.getConfigurationTemplateInstance().getId(), catalogueId));
-            logger.info(String.format("Deleting public ConfigurationTemplateInstanceBundle with id [%s]", publicConfigurationTemplateInstanceBundle.getId()));
+            logger.info("Deleting public ConfigurationTemplateInstanceBundle with id '{}'",
+                    publicConfigurationTemplateInstanceBundle.getId());
             super.delete(publicConfigurationTemplateInstanceBundle);
-            jmsService.convertAndSendTopic("configuration_template_instance.delete", publicConfigurationTemplateInstanceBundle);
+            jmsService.convertAndSendTopic("configuration_template_instance.delete",
+                    publicConfigurationTemplateInstanceBundle);
         } catch (ResourceException | ResourceNotFoundException ignore) {
         }
     }

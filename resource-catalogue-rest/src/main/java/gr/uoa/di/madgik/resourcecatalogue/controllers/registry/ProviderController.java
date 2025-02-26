@@ -46,7 +46,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
 
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -154,7 +153,7 @@ public class ProviderController {
                                            @Parameter(hidden = true) Authentication auth) {
         ProviderBundle providerBundle = providerService.get(catalogueId, provider.getId(), auth);
         providerBundle.setProvider(provider);
-        if (comment == null || comment.equals("")) {
+        if (comment == null || comment.isEmpty()) {
             comment = "no comment";
         }
         providerBundle = providerService.update(providerBundle, comment, auth);
@@ -305,7 +304,7 @@ public class ProviderController {
                                                          @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
         ProviderBundle provider = providerService.verify(id, status, active, auth);
-        logger.info("Updated Provider with name '{}' [status: {}] [active: {}]", provider.getProvider().getName(), status, active);
+        logger.info("Updated Provider with id: '{}' | status: '{}' | active: '{}'", provider.getId(), status, active);
         return new ResponseEntity<>(provider, HttpStatus.OK);
     }
 
@@ -359,11 +358,6 @@ public class ProviderController {
     public void adminAcceptedTerms(@RequestParam String providerId, @RequestParam boolean isDraft,
                                    @Parameter(hidden = true) Authentication authentication) {
         providerService.adminAcceptedTerms(providerId, isDraft, authentication);
-    }
-
-    @GetMapping(path = "validateUrl", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    public boolean validateUrl(@RequestParam URL urlForValidation) throws Throwable {
-        return providerService.validateUrl(urlForValidation);
     }
 
     @GetMapping(path = "requestProviderDeletion", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
@@ -423,10 +417,9 @@ public class ProviderController {
 
     @Operation(summary = "Validates the Provider without actually changing the repository.")
     @PostMapping(path = "validate", produces = {MediaType.APPLICATION_JSON_VALUE})
-    public ResponseEntity<Boolean> validate(@RequestBody Provider provider) {
-        ResponseEntity<Boolean> ret = ResponseEntity.ok(providerService.validate(new ProviderBundle(provider)) != null);
-        logger.info("Validated Provider with name '{}' and id '{}'", provider.getName(), provider.getId());
-        return ret;
+    public ResponseEntity<Void> validate(@RequestBody Provider provider) {
+        providerService.validate(new ProviderBundle(provider));
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     // front-end use (Provider form)
@@ -438,14 +431,14 @@ public class ProviderController {
                 .getAll(createFacetFilter(catalogueId, false), securityService.getAdminAccess()).getResults()
                 .stream().map(ProviderBundle::getProvider)
                 .map(c -> new gr.uoa.di.madgik.resourcecatalogue.dto.Value(c.getId(), c.getName()))
-                .collect(Collectors.toList());
+                .toList();
         // fetch non-catalogueId related public Providers
         List<gr.uoa.di.madgik.resourcecatalogue.dto.Value> publicProviders = providerService
                 .getAll(createFacetFilter(catalogueId, true), securityService.getAdminAccess()).getResults()
                 .stream().map(ProviderBundle::getProvider)
                 .filter(c -> !c.getCatalogueId().equals(catalogueId))
                 .map(c -> new gr.uoa.di.madgik.resourcecatalogue.dto.Value(c.getId(), c.getName()))
-                .collect(Collectors.toList());
+                .toList();
 
         allProviders.addAll(catalogueRelatedProviders);
         allProviders.addAll(publicProviders);

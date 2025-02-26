@@ -21,7 +21,6 @@ import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.domain.CatalogueBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.ContactInfoTransfer;
 import gr.uoa.di.madgik.resourcecatalogue.domain.ProviderBundle;
-import gr.uoa.di.madgik.resourcecatalogue.domain.User;
 import gr.uoa.di.madgik.resourcecatalogue.service.CatalogueService;
 import gr.uoa.di.madgik.resourcecatalogue.service.ContactInformationService;
 import gr.uoa.di.madgik.resourcecatalogue.service.ProviderService;
@@ -47,7 +46,7 @@ public class ContactInformationManager implements ContactInformationService {
     }
 
     public List<String> getMy(Authentication authentication) {
-        String email = User.of(authentication).getEmail().toLowerCase();
+        String email = AuthenticationInfo.getEmail(authentication).toLowerCase();
         List<String> myResources = new ArrayList<>();
         List<String> resourcesUserHasAnsweredFor = new ArrayList<>();
         FacetFilter ff = new FacetFilter();
@@ -95,7 +94,7 @@ public class ContactInformationManager implements ContactInformationService {
     }
 
     public void updateContactInfoTransfer(boolean acceptedTransfer, Authentication auth) {
-        String email = User.of(auth).getEmail().toLowerCase();
+        String email = AuthenticationInfo.getEmail(auth).toLowerCase();
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(1000);
         ff.addFilter("published", false);

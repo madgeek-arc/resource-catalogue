@@ -55,7 +55,7 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
     private final FieldValidator fieldValidator;
     private final RegistrationMailService registrationMailService;
     private final ProviderService providerService;
-    private final ServiceBundleService serviceBundleService;
+    private final ServiceBundleService<ServiceBundle> serviceBundleService;
     private final TrainingResourceService trainingResourceService;
     private final InteroperabilityRecordService interoperabilityRecordService;
     private final ProviderResourcesCommonMethods commonMethods;
@@ -65,7 +65,7 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
 
     public CatalogueManager(IdCreator idCreator,
                             @Lazy ProviderService providerService,
-                            @Lazy ServiceBundleService serviceBundleService,
+                            @Lazy ServiceBundleService<ServiceBundle> serviceBundleService,
                             @Lazy TrainingResourceService trainingResourceService,
                             @Lazy InteroperabilityRecordService interoperabilityRecordService,
                             @Lazy FieldValidator fieldValidator,
@@ -129,8 +129,7 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
                     securityService.hasRole(auth, "ROLE_EPOT")) {
                 return super.getAll(ff, auth);
             }
-            // if user is CATALOGUE ADMIN return all his Catalogues (rejected, pending) with their sensitive data (Users, MainContact) too
-            User user = User.of(auth);
+
             Browsing<CatalogueBundle> catalogues = super.getAll(ff, auth);
             for (CatalogueBundle catalogueBundle : catalogues.getResults()) {
                 if (catalogueBundle.getStatus().equals(vocabularyService.get("approved catalogue").getId()) ||
@@ -176,7 +175,7 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
         catalogue.setAuditState(Auditable.NOT_AUDITED);
 
         // latestOnboardingInfo
-        catalogue.setLatestOnboardingInfo(loggingInfoList.get(0));
+        catalogue.setLatestOnboardingInfo(loggingInfoList.getFirst());
 
         CatalogueBundle ret;
         ret = super.add(catalogue, null);
@@ -188,7 +187,7 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
     }
 
     public CatalogueBundle update(CatalogueBundle catalogueBundle, String comment, Authentication auth) {
-        logger.trace("Attempting to update the Catalogue with id '{}'", catalogueBundle);
+        logger.trace("Attempting to update the Catalogue with id '{}'", catalogueBundle.getId());
 
         CatalogueBundle ret = ObjectUtils.clone(catalogueBundle);
         Resource existingResource = whereID(ret.getId(), true);
@@ -222,8 +221,8 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
         adminDifferences(ret, existingCatalogue);
 
         if (ret.getLatestAuditInfo() != null && ret.getLatestUpdateInfo() != null) {
-            Long latestAudit = Long.parseLong(ret.getLatestAuditInfo().getDate());
-            Long latestUpdate = Long.parseLong(ret.getLatestUpdateInfo().getDate());
+            long latestAudit = Long.parseLong(ret.getLatestAuditInfo().getDate());
+            long latestUpdate = Long.parseLong(ret.getLatestUpdateInfo().getDate());
             if (latestAudit < latestUpdate && ret.getLatestAuditInfo().getActionType().equals(LoggingInfo.ActionType.INVALID.getKey())) {
                 registrationMailService.notifyPortalAdminsForInvalidCatalogueUpdate(ret);
             }
@@ -234,19 +233,12 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
 
     @Override
     public CatalogueBundle validate(CatalogueBundle catalogue) {
-        logger.debug("Validating Catalogue with id: {}", catalogue.getId());
-
+        logger.debug("Validating Catalogue with id: '{}'", catalogue.getId());
         if (catalogue.getCatalogue().getScientificDomains() != null && !catalogue.getCatalogue().getScientificDomains().isEmpty()) {
             validateScientificDomains(catalogue.getCatalogue().getScientificDomains());
         }
 
-        try {
-            fieldValidator.validate(catalogue);
-        } catch (IllegalAccessException e) {
-            logger.error("", e);
-        }
-
-        return catalogue;
+        return super.validate(catalogue);
     }
 
     @Override
@@ -281,12 +273,11 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
         if (auth == null) {
             throw new InsufficientAuthenticationException("Please log in.");
         }
-        User user = User.of(auth);
         if (ff == null) {
             ff = new FacetFilter();
             ff.setQuantity(maxQuantity);
         }
-        ff.addFilter("users", user.getEmail().toLowerCase());
+        ff.addFilter("users", AuthenticationInfo.getEmail(auth).toLowerCase());
         ff.addOrderBy("name", "asc");
         return super.getAll(ff, auth);
     }
@@ -336,13 +327,14 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
             userList.add(user.getEmail().toLowerCase());
         }
         if ((catalogueBundle.getMetadata().getTerms() == null || catalogueBundle.getMetadata().getTerms().isEmpty())) {
-            if (userList.contains(User.of(auth).getEmail().toLowerCase())) {
+            if (userList.contains(AuthenticationInfo.getEmail(auth).toLowerCase())) {
                 return false; //pop-up modal
             } else {
                 return true; //no modal
             }
         }
-        if (!catalogueBundle.getMetadata().getTerms().contains(User.of(auth).getEmail().toLowerCase()) && userList.contains(User.of(auth).getEmail().toLowerCase())) {
+        if (!catalogueBundle.getMetadata().getTerms().contains(AuthenticationInfo.getEmail(auth).toLowerCase()) &&
+                userList.contains(AuthenticationInfo.getEmail(auth).toLowerCase())) {
             return false; // pop-up modal
         }
         return true; // no modal
@@ -359,7 +351,7 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
         if (!statusVocabulary.getType().equals("Catalogue state")) {
             throw new ValidationException(String.format("Vocabulary %s does not consist a Catalogue State!", status));
         }
-        logger.trace("verifyCatalogue with id: '{}' | status -> '{}' | active -> '{}'", id, status, active);
+        logger.trace("verifyCatalogue with id: '{}' | status: '{}' | active: '{}'", id, status, active);
         CatalogueBundle catalogue = get(id);
         catalogue.setStatus(vocabularyService.get(status).getId());
         List<LoggingInfo> loggingInfoList = commonMethods.returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(catalogue, auth);

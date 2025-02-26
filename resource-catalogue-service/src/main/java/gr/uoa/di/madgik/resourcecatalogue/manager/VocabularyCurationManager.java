@@ -26,6 +26,7 @@ import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.registry.service.SearchService;
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
+import gr.uoa.di.madgik.resourcecatalogue.utils.AuthenticationInfo;
 import gr.uoa.di.madgik.resourcecatalogue.utils.FacetLabelService;
 import jakarta.validation.constraints.NotNull;
 import org.slf4j.Logger;
@@ -88,7 +89,6 @@ public class VocabularyCurationManager extends ResourceManager<VocabularyCuratio
 
     @Override
     public VocabularyCuration add(VocabularyCuration vocabularyCuration, String resourceType, Authentication auth) {
-        User user = User.of(auth);
         vocabularyCuration.setId(idCreator.generate(getResourceTypeName()));
         // set status, dateOfRequest, userId
         vocabularyCuration.setStatus(VocabularyCuration.Status.PENDING.getKey());
@@ -97,14 +97,15 @@ public class VocabularyCurationManager extends ResourceManager<VocabularyCuratio
         vocabularyCuration.setResolutionUser(null);
         for (VocabularyEntryRequest vocEntryRequest : vocabularyCuration.getVocabularyEntryRequests()) {
             vocEntryRequest.setDateOfRequest(String.valueOf(System.currentTimeMillis()));
-            vocEntryRequest.setUserId(user.getEmail().toLowerCase());
+            vocEntryRequest.setUserId(AuthenticationInfo.getEmail(auth).toLowerCase());
         }
         // if vocabularyCuration doesn't exist
         validate(vocabularyCuration, resourceType, auth);
         if (vocabularyCuration.getVocabularyEntryRequests().size() == 1) {
             super.add(vocabularyCuration, auth);
             logger.info("Adding Vocabulary Curation: {}", vocabularyCuration);
-            registrationMailService.sendEmailsForVocabularyCurationCreation(vocabularyCuration, Objects.requireNonNull(user).getName());
+            registrationMailService.sendEmailsForVocabularyCurationCreation(vocabularyCuration,
+                    Objects.requireNonNull(AuthenticationInfo.getFullName(auth)));
             // if vocabularyCuration already exists in "pending"
         } else {
             update(vocabularyCuration, auth);
@@ -158,7 +159,7 @@ public class VocabularyCurationManager extends ResourceManager<VocabularyCuratio
         List<String> specificVocsIds = new ArrayList<>();
         switch (vocabularyCuration.getVocabulary()) {
             case "CATEGORY":
-                if (vocabularyCuration.getParent() == null || vocabularyCuration.getParent().equals("")) {
+                if (vocabularyCuration.getParent() == null || vocabularyCuration.getParent().isEmpty()) {
                     throw new ValidationException("Vocabulary " + vocabularyCuration.getVocabulary() + " cannot have an empty parent.");
                 } else {
                     specificVocs = vocabularyService.getByType(Vocabulary.Type.SUPERCATEGORY);
@@ -171,7 +172,7 @@ public class VocabularyCurationManager extends ResourceManager<VocabularyCuratio
                 }
                 break;
             case "SUBCATEGORY":
-                if (vocabularyCuration.getParent() == null || vocabularyCuration.getParent().equals("")) {
+                if (vocabularyCuration.getParent() == null || vocabularyCuration.getParent().isEmpty()) {
                     throw new ValidationException("Vocabulary " + vocabularyCuration.getVocabulary() + " cannot have an empty parent.");
                 } else {
                     specificVocs = vocabularyService.getByType(Vocabulary.Type.CATEGORY);
@@ -184,7 +185,7 @@ public class VocabularyCurationManager extends ResourceManager<VocabularyCuratio
                 }
                 break;
             case "PROVIDER MERIL SCIENTIFIC SUBDOMAIN":
-                if (vocabularyCuration.getParent() == null || vocabularyCuration.getParent().equals("")) {
+                if (vocabularyCuration.getParent() == null || vocabularyCuration.getParent().isEmpty()) {
                     throw new ValidationException("Vocabulary " + vocabularyCuration.getVocabulary() + " cannot have an empty parent.");
                 } else {
                     specificVocs = vocabularyService.getByType(Vocabulary.Type.PROVIDER_MERIL_SCIENTIFIC_DOMAIN);
@@ -197,7 +198,7 @@ public class VocabularyCurationManager extends ResourceManager<VocabularyCuratio
                 }
                 break;
             case "SCIENTIFIC SUBDOMAIN":
-                if (vocabularyCuration.getParent() == null || vocabularyCuration.getParent().equals("")) {
+                if (vocabularyCuration.getParent() == null || vocabularyCuration.getParent().isEmpty()) {
                     throw new ValidationException("Vocabulary " + vocabularyCuration.getVocabulary() + " cannot have an empty parent.");
                 } else {
                     specificVocs = vocabularyService.getByType(Vocabulary.Type.SCIENTIFIC_DOMAIN);
@@ -214,19 +215,19 @@ public class VocabularyCurationManager extends ResourceManager<VocabularyCuratio
         }
 
         // validate if providerId/resourceId exists
-        ProviderBundle providerBundle = providerService.get(catalogueId, vocabularyCuration.getVocabularyEntryRequests().get(0).getProviderId(), auth);
+        ProviderBundle providerBundle = providerService.get(catalogueId, vocabularyCuration.getVocabularyEntryRequests().getFirst().getProviderId(), auth);
         switch (resourceType) {
             case "provider":
                 break;
             case "service":
-                ServiceBundle serviceBundle = serviceBundleService.get(vocabularyCuration.getVocabularyEntryRequests().get(0).getResourceId(), catalogueId);
+                ServiceBundle serviceBundle = serviceBundleService.get(vocabularyCuration.getVocabularyEntryRequests().getFirst().getResourceId(), catalogueId);
                 if (!serviceBundle.getService().getResourceOrganisation().equals(providerBundle.getId())) {
                     throw new ResourceNotFoundException(String.format("Provider with id [%s] does not have a Service with id [%s] registered.",
                             providerBundle.getId(), serviceBundle.getId()));
                 }
                 break;
             case "training_resource":
-                TrainingResourceBundle trainingResourceBundle = trainingResourceService.get(vocabularyCuration.getVocabularyEntryRequests().get(0).getResourceId(), catalogueId);
+                TrainingResourceBundle trainingResourceBundle = trainingResourceService.get(vocabularyCuration.getVocabularyEntryRequests().getFirst().getResourceId(), catalogueId);
                 if (!trainingResourceBundle.getTrainingResource().getResourceOrganisation().equals(providerBundle.getId())) {
                     throw new ResourceNotFoundException(String.format("Provider with id [%s] does not have a Training Resource with id [%s] registered.",
                             providerBundle.getId(), trainingResourceBundle.getId()));
@@ -272,9 +273,9 @@ public class VocabularyCurationManager extends ResourceManager<VocabularyCuratio
     }
 
     public void approveOrRejectVocabularyCuration(VocabularyCuration vocabularyCuration, boolean approved, String rejectionReason, Authentication authentication) {
-        vocabularyCuration.setResolutionUser(User.of(authentication).getEmail().toLowerCase());
+        vocabularyCuration.setResolutionUser(AuthenticationInfo.getEmail(authentication).toLowerCase());
         vocabularyCuration.setResolutionDate(String.valueOf(System.currentTimeMillis()));
-        logger.info("Updating VocabularyRequest " + vocabularyCuration.getEntryValueName());
+        logger.info("Updating VocabularyRequest {}", vocabularyCuration.getEntryValueName());
         if (approved) {
             vocabularyCuration.setStatus(VocabularyCuration.Status.APPROVED.getKey());
             createNewVocabulary(vocabularyCuration, authentication);
@@ -293,15 +294,16 @@ public class VocabularyCurationManager extends ResourceManager<VocabularyCuratio
         String valueNameFormed = vocabularyCuration.getEntryValueName().replaceAll(" ", "_").toLowerCase();
         String vocabularyFormed = vocabularyCuration.getVocabulary().replaceAll(" ", "_").toLowerCase();
         vocabulary.setId(vocabularyFormed + "-" + valueNameFormed);
-        vocabulary.setDescription("Vocabulary submitted by " + vocabularyCuration.getVocabularyEntryRequests().get(0).getUserId());
+        vocabulary.setDescription("Vocabulary submitted by " + vocabularyCuration.getVocabularyEntryRequests().getFirst().getUserId());
         vocabulary.setName(vocabularyCuration.getEntryValueName());
         vocabulary.setType(Vocabulary.Type.valueOf(vocabularyFormed.toUpperCase()).getKey());
         vocabulary.setExtras(extras);
-        if (vocabularyCuration.getParent() != null && !vocabularyCuration.getParent().equals("")) {
+        if (vocabularyCuration.getParent() != null && !vocabularyCuration.getParent().isEmpty()) {
             String parentFormed = vocabularyCuration.getParent().replaceAll(" ", "_").toLowerCase();
             vocabulary.setParentId(parentFormed);
         }
-        logger.info("User " + User.of(authentication).getEmail().toLowerCase() + " is adding a new Vocabulary by resolving the vocabulary request " + vocabularyCuration.getId());
+        logger.info("User [{}] is adding a new Vocabulary by resolving the vocabulary request '{}'",
+                AuthenticationInfo.getEmail(authentication).toLowerCase(), vocabularyCuration.getId());
         vocabularyService.add(vocabulary, authentication);
     }
 

@@ -27,8 +27,6 @@ import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -48,7 +46,6 @@ import java.util.List;
 @Tag(name = "configuration template instance", description = "Operations about Configuration Template Instances")
 public class ConfigurationTemplateInstanceController {
 
-    private static final Logger logger = LoggerFactory.getLogger(ConfigurationTemplateInstanceController.class);
     private final ConfigurationTemplateInstanceService ctiService;
 
     public ConfigurationTemplateInstanceController(ConfigurationTemplateInstanceService ctiService) {
@@ -57,10 +54,10 @@ public class ConfigurationTemplateInstanceController {
 
     @Operation(summary = "Returns the Configuration Template Instance with the given id.")
     @GetMapping(path = "{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    public ResponseEntity<ConfigurationTemplateInstanceDto> getCTI(@Parameter(description = "The left part of the ID before the '/'")
-                                                                   @PathVariable("prefix") String prefix,
-                                                                   @Parameter(description = "The right part of the ID after the '/'")
-                                                                   @PathVariable("suffix") String suffix) {
+    public ResponseEntity<ConfigurationTemplateInstanceDto> get(@Parameter(description = "The left part of the ID before the '/'")
+                                                                @PathVariable("prefix") String prefix,
+                                                                @Parameter(description = "The right part of the ID after the '/'")
+                                                                @PathVariable("suffix") String suffix) {
         String id = prefix + "/" + suffix;
         ConfigurationTemplateInstance configurationTemplateInstance = ctiService.get(id).getConfigurationTemplateInstance();
         ConfigurationTemplateInstanceDto ret = ctiService.createCTIDto(configurationTemplateInstance);
@@ -70,9 +67,9 @@ public class ConfigurationTemplateInstanceController {
     @BrowseParameters
     @Operation(summary = "Get a list of all Configuration Template Instances in the Portal.")
     @GetMapping(path = "all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    public ResponseEntity<Paging<ConfigurationTemplateInstanceDto>> getAllCTI(@Parameter(hidden = true)
-                                                                              @RequestParam MultiValueMap<String, Object> params,
-                                                                              @Parameter(hidden = true) Authentication auth) {
+    public ResponseEntity<Paging<ConfigurationTemplateInstanceDto>> getAll(@Parameter(hidden = true)
+                                                                           @RequestParam MultiValueMap<String, Object> params,
+                                                                           @Parameter(hidden = true) Authentication auth) {
         FacetFilter ff = FacetFilter.from(params);
         ff.addFilter("published", false);
         List<ConfigurationTemplateInstanceDto> configurationTemplateInstanceList = new LinkedList<>();
@@ -95,7 +92,7 @@ public class ConfigurationTemplateInstanceController {
                                                                                      @Parameter(description = "The right part of the ID after the '/'")
                                                                                      @PathVariable("suffix") String suffix) {
         String id = prefix + "/" + suffix;
-        List<ConfigurationTemplateInstance> configurationTemplateInstances = ctiService.getCTIByResourceId(id);
+        List<ConfigurationTemplateInstance> configurationTemplateInstances = ctiService.getByResourceId(id);
         List<ConfigurationTemplateInstanceDto> ret = new ArrayList<>();
         for (ConfigurationTemplateInstance configurationTemplateInstance : configurationTemplateInstances) {
             ret.add(ctiService.createCTIDto(configurationTemplateInstance));
@@ -110,7 +107,7 @@ public class ConfigurationTemplateInstanceController {
                                                                                                   @Parameter(description = "The right part of the ID after the '/'")
                                                                                                   @PathVariable("suffix") String suffix) {
         String id = prefix + "/" + suffix;
-        List<ConfigurationTemplateInstance> configurationTemplateInstances = ctiService.getCTIByConfigurationTemplateId(id);
+        List<ConfigurationTemplateInstance> configurationTemplateInstances = ctiService.getByConfigurationTemplateId(id);
         List<ConfigurationTemplateInstanceDto> ret = new ArrayList<>();
         for (ConfigurationTemplateInstance configurationTemplateInstance : configurationTemplateInstances) {
             ret.add(ctiService.createCTIDto(configurationTemplateInstance));
@@ -122,11 +119,10 @@ public class ConfigurationTemplateInstanceController {
     @Operation(summary = "Create a new Configuration Template Instance.")
     @PostMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public ResponseEntity<ConfigurationTemplateInstance> addCTI(@RequestBody ConfigurationTemplateInstance configurationTemplateInstance,
-                                                                @Parameter(hidden = true) Authentication auth) {
+    public ResponseEntity<ConfigurationTemplateInstance> add(@RequestBody ConfigurationTemplateInstance configurationTemplateInstance,
+                                                             @Parameter(hidden = true) Authentication auth) {
         ConfigurationTemplateInstanceBundle configurationTemplateInstanceBundle =
                 ctiService.add(new ConfigurationTemplateInstanceBundle(configurationTemplateInstance), auth);
-        logger.info("Added the Configuration Template Instance with id '{}'", configurationTemplateInstance.getId());
         return new ResponseEntity<>(configurationTemplateInstanceBundle.getConfigurationTemplateInstance(), HttpStatus.CREATED);
     }
 
@@ -138,7 +134,6 @@ public class ConfigurationTemplateInstanceController {
                                                                        @Parameter(hidden = true) Authentication auth) {
         for (ConfigurationTemplateInstance configurationTemplateInstance : configurationTemplateInstances) {
             ctiService.add(new ConfigurationTemplateInstanceBundle(configurationTemplateInstance), auth);
-            logger.info("Added the Configuration Template Instance with id '{}'", configurationTemplateInstance.getId());
         }
         return new ResponseEntity<>(HttpStatus.OK);
     }
@@ -147,12 +142,11 @@ public class ConfigurationTemplateInstanceController {
     @Operation(summary = "Updates the Configuration Template Instance with the given id.")
     @PutMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public ResponseEntity<ConfigurationTemplateInstance> updateCTI(@RequestBody ConfigurationTemplateInstance configurationTemplateInstance,
-                                                                   @Parameter(hidden = true) Authentication auth) {
+    public ResponseEntity<ConfigurationTemplateInstance> update(@RequestBody ConfigurationTemplateInstance configurationTemplateInstance,
+                                                                @Parameter(hidden = true) Authentication auth) {
         ConfigurationTemplateInstanceBundle configurationTemplateInstanceBundle = ctiService.get(configurationTemplateInstance.getId());
         configurationTemplateInstanceBundle.setConfigurationTemplateInstance(configurationTemplateInstance);
         configurationTemplateInstanceBundle = ctiService.update(configurationTemplateInstanceBundle, auth);
-        logger.info("Updated the Configuration Template Instance with id '{}'", configurationTemplateInstanceBundle.getId());
         return new ResponseEntity<>(configurationTemplateInstanceBundle.getConfigurationTemplateInstance(), HttpStatus.OK);
     }
 
@@ -160,19 +154,16 @@ public class ConfigurationTemplateInstanceController {
     @Operation(summary = "Delete the Configuration Template Instance with the given id.")
     @DeleteMapping(path = "{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public ResponseEntity<ConfigurationTemplateInstance> deleteCTI(@Parameter(description = "The left part of the ID before the '/'")
-                                                                   @PathVariable("prefix") String prefix,
-                                                                   @Parameter(description = "The right part of the ID after the '/'")
-                                                                   @PathVariable("suffix") String suffix) {
+    public ResponseEntity<ConfigurationTemplateInstance> delete(@Parameter(description = "The left part of the ID before the '/'")
+                                                                @PathVariable("prefix") String prefix,
+                                                                @Parameter(description = "The right part of the ID after the '/'")
+                                                                @PathVariable("suffix") String suffix) {
         String id = prefix + "/" + suffix;
         ConfigurationTemplateInstanceBundle configurationTemplateInstanceBundle = ctiService.get(id);
         if (configurationTemplateInstanceBundle == null) {
             return new ResponseEntity<>(HttpStatus.GONE);
         }
-        logger.info("Deleting Configuration Template Instance: {}", configurationTemplateInstanceBundle.getConfigurationTemplateInstance().getId());
         ctiService.delete(configurationTemplateInstanceBundle);
-        logger.info("Deleted the Configuration Template Instance with id '{}'",
-                configurationTemplateInstanceBundle.getConfigurationTemplateInstance().getId());
         return new ResponseEntity<>(configurationTemplateInstanceBundle.getConfigurationTemplateInstance(), HttpStatus.OK);
     }
 
@@ -195,7 +186,6 @@ public class ConfigurationTemplateInstanceController {
     public ResponseEntity<ConfigurationTemplateInstanceBundle> updateBundle(@RequestBody ConfigurationTemplateInstanceBundle configurationTemplateInstanceBundle,
                                                                             @Parameter(hidden = true) Authentication auth) {
         ResponseEntity<ConfigurationTemplateInstanceBundle> ret = new ResponseEntity<>(ctiService.update(configurationTemplateInstanceBundle, auth), HttpStatus.OK);
-        logger.info("Updated ConfigurationTemplateInstanceBundle with id: {}", configurationTemplateInstanceBundle.getConfigurationTemplateInstance().getId());
         return ret;
     }
 }

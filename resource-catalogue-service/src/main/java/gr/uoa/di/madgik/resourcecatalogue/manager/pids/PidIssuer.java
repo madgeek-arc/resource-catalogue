@@ -42,7 +42,6 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
 
 import javax.net.ssl.SSLContext;
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileReader;
 import java.net.URI;
@@ -103,7 +102,7 @@ public class PidIssuer {
             X509Certificate certificate;
             try (FileReader certReader = new FileReader(certPath)) {
                 certificate = (X509Certificate) certificateFactory
-                        .generateCertificate(new FileInputStream(new File(certPath)));
+                        .generateCertificate(new FileInputStream(certPath));
             }
 
             // Load private key
@@ -239,11 +238,11 @@ public class PidIssuer {
 
     private void logInfo(ResponseEntity<?> response, String pid, String endpoint) {
         if (response.getStatusCode() == HttpStatus.CREATED) {
-            logger.info("Resource with ID [{}] has been posted on [{}]", pid, endpoint);
+            logger.info("Resource with ID '{}' has been posted on [{}]", pid, endpoint);
         } else if (response.getStatusCode() == HttpStatus.OK) {
-            logger.info("Resource with ID [{}] has been updated on [{}]", pid, endpoint);
+            logger.info("Resource with ID '{}' has been updated on [{}]", pid, endpoint);
         } else {
-            logger.error("Resource with ID [{}] could not be posted/updated : [{}]", pid, response.getBody());
+            logger.error("Resource with ID '{}' could not be posted/updated : [{}]", pid, response.getBody());
         }
     }
 }

@@ -24,7 +24,6 @@ import gr.uoa.di.madgik.registry.service.ResourceCRUDService;
 import gr.uoa.di.madgik.resourcecatalogue.domain.AlternativeIdentifier;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Identifiers;
 import gr.uoa.di.madgik.resourcecatalogue.domain.ServiceBundle;
-import gr.uoa.di.madgik.resourcecatalogue.service.SecurityService;
 import gr.uoa.di.madgik.resourcecatalogue.utils.FacetLabelService;
 import gr.uoa.di.madgik.resourcecatalogue.utils.JmsService;
 import gr.uoa.di.madgik.resourcecatalogue.utils.ProviderResourcesCommonMethods;
@@ -42,19 +41,16 @@ public class PublicServiceManager extends AbstractPublicResourceManager<ServiceB
 
     private static final Logger logger = LoggerFactory.getLogger(PublicServiceManager.class);
     private final JmsService jmsService;
-    private final SecurityService securityService;
     private final ProviderResourcesCommonMethods commonMethods;
     private final FacetLabelService facetLabelService;
     private final PublicResourceUtils publicResourceUtils;
 
     public PublicServiceManager(JmsService jmsService,
-                                SecurityService securityService,
                                 ProviderResourcesCommonMethods commonMethods,
                                 FacetLabelService facetLabelService,
                                 PublicResourceUtils publicResourceUtils) {
         super(ServiceBundle.class);
         this.jmsService = jmsService;
-        this.securityService = securityService;
         this.commonMethods = commonMethods;
         this.facetLabelService = facetLabelService;
         this.publicResourceUtils = publicResourceUtils;
@@ -95,7 +91,7 @@ public class PublicServiceManager extends AbstractPublicResourceManager<ServiceB
             }
         }
         if (pid.equalsIgnoreCase("no_pid")) {
-            logger.info("Service with id {} does not have a PID registered under its AlternativeIdentifiers.",
+            logger.info("Service with id '{}' does not have a PID registered under its AlternativeIdentifiers.",
                     serviceBundle.getId());
         } else {
             //TODO: enable when we have PID configuration properties for Beyond
@@ -103,7 +99,7 @@ public class PublicServiceManager extends AbstractPublicResourceManager<ServiceB
 //            commonMethods.postPID(pid);
         }
         ServiceBundle ret;
-        logger.info(String.format("Service [%s] is being published with id [%s]", lowerLevelResourceId, serviceBundle.getId()));
+        logger.info("Service '{}' is being published with id '{}'", lowerLevelResourceId, serviceBundle.getId());
         ret = super.add(serviceBundle, null);
         jmsService.convertAndSendTopic("service.create", serviceBundle);
         return ret;
@@ -118,7 +114,7 @@ public class PublicServiceManager extends AbstractPublicResourceManager<ServiceB
         try {
             BeanUtils.copyProperties(ret, serviceBundle);
         } catch (IllegalAccessException | InvocationTargetException e) {
-            e.printStackTrace();
+            logger.info("Could not copy properties.");
         }
 
         // sets public ids to resource organisation, resource providers and related/required resources
@@ -128,7 +124,7 @@ public class PublicServiceManager extends AbstractPublicResourceManager<ServiceB
         ret.setIdentifiers(published.getIdentifiers());
         ret.setId(published.getId());
         ret.getMetadata().setPublished(true);
-        logger.info(String.format("Updating public Service with id [%s]", ret.getId()));
+        logger.info("Updating public Service with id '{}'", ret.getId());
         ret = super.update(ret, null);
         jmsService.convertAndSendTopic("service.update", ret);
         return ret;
@@ -140,7 +136,7 @@ public class PublicServiceManager extends AbstractPublicResourceManager<ServiceB
             ServiceBundle publicServiceBundle = get(publicResourceUtils.createPublicResourceId(
                     serviceBundle.getService().getId(),
                     serviceBundle.getService().getCatalogueId()));
-            logger.info(String.format("Deleting public Service with id [%s]", publicServiceBundle.getId()));
+            logger.info("Deleting public Service with id '{}'", publicServiceBundle.getId());
             super.delete(publicServiceBundle);
             jmsService.convertAndSendTopic("service.delete", publicServiceBundle);
         } catch (ResourceException | ResourceNotFoundException ignore) {

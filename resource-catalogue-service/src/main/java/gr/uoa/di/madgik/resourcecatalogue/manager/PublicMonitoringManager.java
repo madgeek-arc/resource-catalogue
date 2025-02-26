@@ -23,7 +23,6 @@ import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.registry.service.ResourceCRUDService;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Identifiers;
 import gr.uoa.di.madgik.resourcecatalogue.domain.MonitoringBundle;
-import gr.uoa.di.madgik.resourcecatalogue.service.SecurityService;
 import gr.uoa.di.madgik.resourcecatalogue.utils.JmsService;
 import gr.uoa.di.madgik.resourcecatalogue.utils.ProviderResourcesCommonMethods;
 import gr.uoa.di.madgik.resourcecatalogue.utils.PublicResourceUtils;
@@ -40,16 +39,14 @@ public class PublicMonitoringManager extends AbstractPublicResourceManager<Monit
 
     private static final Logger logger = LoggerFactory.getLogger(PublicMonitoringManager.class);
     private final JmsService jmsService;
-    private final SecurityService securityService;
     private final ProviderResourcesCommonMethods commonMethods;
     private final PublicResourceUtils publicResourceUtils;
 
-    public PublicMonitoringManager(JmsService jmsService, SecurityService securityService,
+    public PublicMonitoringManager(JmsService jmsService,
                                    ProviderResourcesCommonMethods commonMethods,
                                    PublicResourceUtils publicResourceUtils) {
         super(MonitoringBundle.class);
         this.jmsService = jmsService;
-        this.securityService = securityService;
         this.commonMethods = commonMethods;
         this.publicResourceUtils = publicResourceUtils;
     }
@@ -87,7 +84,7 @@ public class PublicMonitoringManager extends AbstractPublicResourceManager<Monit
 
         monitoringBundle.getMetadata().setPublished(true);
         MonitoringBundle ret;
-        logger.info(String.format("Monitoring [%s] is being published with id [%s]", lowerLevelResourceId, monitoringBundle.getId()));
+        logger.info("Monitoring '{}' is being published with id '{}'", lowerLevelResourceId, monitoringBundle.getId());
         ret = super.add(monitoringBundle, null);
         jmsService.convertAndSendTopic("monitoring.create", monitoringBundle);
         return ret;
@@ -102,7 +99,7 @@ public class PublicMonitoringManager extends AbstractPublicResourceManager<Monit
         try {
             BeanUtils.copyProperties(ret, monitoringBundle);
         } catch (IllegalAccessException | InvocationTargetException e) {
-            e.printStackTrace();
+            logger.info("Could not copy properties.");
         }
 
         // sets public id to serviceId
@@ -111,7 +108,7 @@ public class PublicMonitoringManager extends AbstractPublicResourceManager<Monit
         ret.setIdentifiers(published.getIdentifiers());
         ret.setId(published.getId());
         ret.getMetadata().setPublished(true);
-        logger.info(String.format("Updating public Monitoring with id [%s]", ret.getId()));
+        logger.info("Updating public Monitoring with id '{}'", ret.getId());
         ret = super.update(ret, null);
         jmsService.convertAndSendTopic("monitoring.update", monitoringBundle);
         return ret;
@@ -123,7 +120,7 @@ public class PublicMonitoringManager extends AbstractPublicResourceManager<Monit
             MonitoringBundle publicMonitoringBundle = get(publicResourceUtils.createPublicResourceId(
                     monitoringBundle.getMonitoring().getId(),
                     monitoringBundle.getCatalogueId()));
-            logger.info(String.format("Deleting public Monitoring with id [%s]", publicMonitoringBundle.getId()));
+            logger.info("Deleting public Monitoring with id '{}'", publicMonitoringBundle.getId());
             super.delete(publicMonitoringBundle);
             jmsService.convertAndSendTopic("monitoring.delete", publicMonitoringBundle);
         } catch (ResourceException | ResourceNotFoundException ignore) {

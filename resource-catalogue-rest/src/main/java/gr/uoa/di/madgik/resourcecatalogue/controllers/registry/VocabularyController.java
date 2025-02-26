@@ -35,7 +35,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("vocabulary")
@@ -157,7 +156,7 @@ public class VocabularyController extends ResourceController<Vocabulary> {
             allHLENames.add(voc.getName());
         }
         List<String> duplicateNames = allHLENames.stream()
-                .filter(i -> Collections.frequency(allHLENames, i) > 1).distinct().collect(Collectors.toList());
-        logger.info("Duplicate Names" + duplicateNames);
+                .filter(i -> Collections.frequency(allHLENames, i) > 1).distinct().toList();
+        logger.info("Duplicate Names {}", duplicateNames);
     }
 }

@@ -131,7 +131,7 @@ public class OIDCSecurityService implements SecurityService {
         if (hasRole(auth, "ROLE_ANONYMOUS")) {
             return Optional.empty();
         }
-        return Optional.of(User.of(auth));
+        return Optional.of(Objects.requireNonNull(User.of(auth)));
     }
 
     private boolean isProvider(String id) {
@@ -268,32 +268,32 @@ public class OIDCSecurityService implements SecurityService {
     }
 
     private boolean providerCanAddResources(Authentication auth, ProviderBundle provider, String resourceId) {
-        if (hasAdminAccess(auth, provider.getId())) {
-            if (provider.getStatus() == null) {
-                throw new ServiceException("Provider status field is null");
-            }
-            if (provider.isActive() && provider.getStatus().equals("approved provider")) {
-                return true;
-            } else if (provider.getTemplateStatus().equals("no template status")) {
-                return checkIfProviderHasRegisteredAServiceTemplate(provider, resourceId);
-            }
+        if (!isProviderAdmin(auth, provider.getId())) {
+            return false;
         }
-        return false;
+        if (provider.getStatus() == null) {
+            throw new ServiceException("Provider status field is null");
+        }
+        if (provider.isActive() && "approved provider".equals(provider.getStatus())) {
+            return true;
+        }
+        return "no template status".equals(provider.getTemplateStatus()) &&
+                checkIfProviderHasRegisteredAServiceTemplate(provider, resourceId);
     }
 
     private boolean checkIfProviderHasRegisteredAServiceTemplate(ProviderBundle provider, String resourceId) {
         FacetFilter ff = new FacetFilter();
         ff.addFilter("resource_organisation", provider.getId());
+
         Bundle<?> bundle = determineResourceType(resourceId);
-        if (bundle instanceof ServiceBundle) {
-            if (serviceBundleService.getAll(ff, getAdminAccess()).getResults().isEmpty()) {
-                return true;
-            }
-        } else if (bundle instanceof TrainingResourceBundle) {
-            if (trainingResourceService.getAll(ff, getAdminAccess()).getResults().isEmpty()) {
-                return true;
-            }
+        boolean isServiceBundle = bundle instanceof ServiceBundle;
+        boolean isTrainingResource = bundle instanceof TrainingResourceBundle;
+
+        if ((isServiceBundle && serviceBundleService.getAll(ff, getAdminAccess()).getResults().isEmpty()) ||
+                (isTrainingResource && trainingResourceService.getAll(ff, getAdminAccess()).getResults().isEmpty())) {
+            return true;
         }
+
         throw new ResourceException("You have already created a Service Template.", HttpStatus.CONFLICT);
     }
 

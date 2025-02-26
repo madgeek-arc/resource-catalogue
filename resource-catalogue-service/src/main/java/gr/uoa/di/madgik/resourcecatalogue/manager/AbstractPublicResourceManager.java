@@ -134,7 +134,7 @@ public abstract class AbstractPublicResourceManager<T extends Identifiable> exte
         Set<String> transformed = new HashSet<>();
         if (items != null && !items.isEmpty()) {
             for (String item : items) {
-                if (!item.equals("")) {
+                if (item != null && !item.isEmpty()) {
                     item = publicResourceUtils.createPublicResourceId(item, catalogueId);
                     transformed.add(item);
                 }

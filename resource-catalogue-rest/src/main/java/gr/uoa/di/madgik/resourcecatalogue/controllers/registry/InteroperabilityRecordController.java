@@ -41,7 +41,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Profile("beyond")
 @RestController
@@ -72,7 +71,6 @@ public class InteroperabilityRecordController {
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.providerCanAddResources(#auth, #interoperabilityRecord)")
     public ResponseEntity<InteroperabilityRecord> add(@RequestBody InteroperabilityRecord interoperabilityRecord, @Parameter(hidden = true) Authentication auth) {
         InteroperabilityRecordBundle ret = this.interoperabilityRecordService.add(new InteroperabilityRecordBundle(interoperabilityRecord), auth);
-        logger.info("Added a new Interoperability Record with id '{}' and title '{}'", interoperabilityRecord.getId(), interoperabilityRecord.getTitle());
         return new ResponseEntity<>(ret.getInteroperabilityRecord(), HttpStatus.CREATED);
     }
 
@@ -82,7 +80,6 @@ public class InteroperabilityRecordController {
     public ResponseEntity<InteroperabilityRecord> update(@RequestBody InteroperabilityRecord interoperabilityRecord,
                                                          @Parameter(hidden = true) Authentication auth) {
         InteroperabilityRecordBundle ret = this.interoperabilityRecordService.update(new InteroperabilityRecordBundle(interoperabilityRecord), auth);
-        logger.info("Updated Interoperability Record with id '{}' and title '{}'", interoperabilityRecord.getId(), interoperabilityRecord.getTitle());
         return new ResponseEntity<>(ret.getInteroperabilityRecord(), HttpStatus.OK);
     }
 
@@ -98,9 +95,7 @@ public class InteroperabilityRecordController {
         if (interoperabilityRecordBundle == null) {
             return new ResponseEntity<>(HttpStatus.GONE);
         }
-        logger.info("Deleting Interoperability Record: {}", interoperabilityRecordBundle.getId());
         interoperabilityRecordService.delete(interoperabilityRecordBundle);
-        logger.info("Deleted the Interoperability Record with id '{}'", interoperabilityRecordBundle.getId());
         return new ResponseEntity<>(interoperabilityRecordBundle.getInteroperabilityRecord(), HttpStatus.OK);
     }
 
@@ -169,7 +164,6 @@ public class InteroperabilityRecordController {
                                                                @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
         InteroperabilityRecordBundle interoperabilityRecordBundle = interoperabilityRecordService.verify(id, status, active, auth);
-        logger.info("User '{}' verified Interoperability Record with title '{}' [status: {}] [active: {}]", auth, interoperabilityRecordBundle.getInteroperabilityRecord().getTitle(), status, active);
         return new ResponseEntity<>(interoperabilityRecordBundle, HttpStatus.OK);
     }
 
@@ -180,15 +174,14 @@ public class InteroperabilityRecordController {
                                                                   @RequestParam Boolean active,
                                                                   @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
-        logger.info("User '{}-{}' attempts to save Interoperability Record with id '{}' as '{}'", User.of(auth).getFullName(), User.of(auth).getEmail().toLowerCase(), id, active);
         return ResponseEntity.ok(interoperabilityRecordService.publish(id, active, auth));
     }
 
     @Operation(summary = "Validates the Interoperability Record without actually changing the repository.")
     @PostMapping(path = "validate", produces = {MediaType.APPLICATION_JSON_VALUE})
-    public ResponseEntity<Boolean> validate(@RequestBody InteroperabilityRecord interoperabilityRecord) {
-        ResponseEntity<Boolean> ret = ResponseEntity.ok(interoperabilityRecordService.validateInteroperabilityRecord(new InteroperabilityRecordBundle(interoperabilityRecord)));
-        return ret;
+    public ResponseEntity<Void> validate(@RequestBody InteroperabilityRecord interoperabilityRecord) {
+        interoperabilityRecordService.validate(new InteroperabilityRecordBundle(interoperabilityRecord));
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @BrowseParameters
@@ -258,14 +251,14 @@ public class InteroperabilityRecordController {
                 .getAll(createFacetFilter(catalogueId, false), securityService.getAdminAccess()).getResults()
                 .stream().map(InteroperabilityRecordBundle::getInteroperabilityRecord)
                 .map(c -> new Value(c.getId(), c.getTitle()))
-                .collect(Collectors.toList());
+                .toList();
         // fetch non-catalogueId related public Interoperability Records
         List<Value> publicInteroperabilityRecords = interoperabilityRecordService
                 .getAll(createFacetFilter(catalogueId, true), securityService.getAdminAccess()).getResults()
                 .stream().map(InteroperabilityRecordBundle::getInteroperabilityRecord)
                 .filter(c -> !c.getCatalogueId().equals(catalogueId))
                 .map(c -> new Value(c.getId(), c.getTitle()))
-                .collect(Collectors.toList());
+                .toList();
 
         allInteroperabilityRecords.addAll(catalogueRelatedInteroperabilityRecords);
         allInteroperabilityRecords.addAll(publicInteroperabilityRecords);
@@ -291,7 +284,7 @@ public class InteroperabilityRecordController {
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<InteroperabilityRecordBundle> add(@RequestBody InteroperabilityRecordBundle interoperabilityRecordBundle, Authentication authentication) {
         ResponseEntity<InteroperabilityRecordBundle> ret = new ResponseEntity<>(interoperabilityRecordService.add(interoperabilityRecordBundle, authentication), HttpStatus.OK);
-        logger.info("Added InteroperabilityRecordBundle '{}' with id: {}", interoperabilityRecordBundle.getInteroperabilityRecord().getTitle(), interoperabilityRecordBundle.getId());
+        logger.info("Added InteroperabilityRecordBundle {} with id: '{}'", interoperabilityRecordBundle.getInteroperabilityRecord().getTitle(), interoperabilityRecordBundle.getId());
         return ret;
     }
 
@@ -299,7 +292,7 @@ public class InteroperabilityRecordController {
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<InteroperabilityRecordBundle> update(@RequestBody InteroperabilityRecordBundle interoperabilityRecord, @Parameter(hidden = true) Authentication authentication) {
         InteroperabilityRecordBundle interoperabilityRecordBundle = interoperabilityRecordService.update(interoperabilityRecord, authentication);
-        logger.info("Updated InteroperabilityRecordBundle '{}' with id: {}", interoperabilityRecordBundle.getInteroperabilityRecord().getTitle(), interoperabilityRecordBundle.getId());
+        logger.info("Updated InteroperabilityRecordBundle {} with id: '{}'", interoperabilityRecordBundle.getInteroperabilityRecord().getTitle(), interoperabilityRecordBundle.getId());
         return new ResponseEntity<>(interoperabilityRecordBundle, HttpStatus.OK);
     }
 
@@ -352,8 +345,7 @@ public class InteroperabilityRecordController {
     @PutMapping(path = "/draft", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceAdmin(#auth, #interoperabilityRecord.id)")
     public ResponseEntity<InteroperabilityRecord> updateDraftInteroperabilityRecord(@RequestBody InteroperabilityRecord interoperabilityRecord,
-                                                                                    @Parameter(hidden = true) Authentication auth)
-            {
+                                                                                    @Parameter(hidden = true) Authentication auth) {
         InteroperabilityRecordBundle interoperabilityRecordBundle = draftInteroperabilityRecordService.get(interoperabilityRecord.getId());
         interoperabilityRecordBundle.setInteroperabilityRecord(interoperabilityRecord);
         interoperabilityRecordBundle = draftInteroperabilityRecordService.update(interoperabilityRecordBundle, auth);
@@ -366,8 +358,7 @@ public class InteroperabilityRecordController {
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceAdmin(#auth, #prefix+'/'+#suffix)")
     public ResponseEntity<InteroperabilityRecord> deleteDraftInteroperabilityRecord(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
                                                                                     @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix,
-                                                                                    @Parameter(hidden = true) Authentication auth)
-            {
+                                                                                    @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
         InteroperabilityRecordBundle interoperabilityRecordBundle = draftInteroperabilityRecordService.get(id);
         if (interoperabilityRecordBundle == null) {
@@ -382,8 +373,7 @@ public class InteroperabilityRecordController {
     @PutMapping(path = "draft/transform", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_USER')")
     public ResponseEntity<InteroperabilityRecord> transformToInteroperabilityRecord(@RequestBody InteroperabilityRecord interoperabilityRecord,
-                                                                                    @Parameter(hidden = true) Authentication auth)
-            {
+                                                                                    @Parameter(hidden = true) Authentication auth) {
         InteroperabilityRecordBundle interoperabilityRecordBundle = draftInteroperabilityRecordService.get(interoperabilityRecord.getId());
         interoperabilityRecordBundle.setInteroperabilityRecord(interoperabilityRecord);
 

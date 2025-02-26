@@ -32,7 +32,7 @@ import java.util.List;
 @XmlRootElement
 public class VocabularyCuration implements Identifiable {
 
-    private static final Logger logger = LoggerFactory.getLogger(User.class);
+    private static final Logger logger = LoggerFactory.getLogger(VocabularyCuration.class);
 
     @XmlElement(required = true)
     @Schema

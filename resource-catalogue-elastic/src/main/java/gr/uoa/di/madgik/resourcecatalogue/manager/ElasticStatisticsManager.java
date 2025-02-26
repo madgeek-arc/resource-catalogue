@@ -279,7 +279,7 @@ public class ElasticStatisticsManager implements StatisticsService {
                             return event;
                     })
                     .filter(Objects::nonNull)
-                    .collect(Collectors.toList());
+                    .toList();
 //            weekEvents.sort(Comparator.comparing(Event::getService));
             eventsByDate.put(start, weekEvents);
             start = endDate;

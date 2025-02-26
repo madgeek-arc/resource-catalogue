@@ -91,7 +91,7 @@ public class DataParser {
                 }
                 logger.info("Resource ID : Visits");
                 for (Map.Entry<String, Float> entry : results.entrySet()) {
-                    logger.info(entry.getKey() + " : " + entry.getValue().toString());
+                    logger.info("{} : {}", entry.getKey(), entry.getValue().toString());
                 }
             } catch (Exception e) {
                 logger.error("Cannot retrieve ratings for all Services\nMatomo response: {}\n", json, e);
@@ -119,7 +119,7 @@ public class DataParser {
                 }
                 logger.info("Resource ID : Ratings");
                 for (Map.Entry<String, Float> entry : results.entrySet()) {
-                    logger.info(entry.getKey() + " : " + entry.getValue().toString());
+                    logger.info("{} : {}", entry.getKey(), entry.getValue().toString());
                 }
             } catch (Exception e) {
                 logger.error("Cannot retrieve ratings for all Services\nMatomo response: {}\n", json, e);
@@ -147,7 +147,7 @@ public class DataParser {
                 }
                 logger.info("Resource ID : Add to Project");
                 for (Map.Entry<String, Float> entry : results.entrySet()) {
-                    logger.info(entry.getKey() + " : " + entry.getValue().toString());
+                    logger.info("{} : {}", entry.getKey(), entry.getValue().toString());
                 }
             } catch (Exception e) {
                 logger.error("Cannot retrieve ratings for all Services\nMatomo response: {}\n", json, e);
