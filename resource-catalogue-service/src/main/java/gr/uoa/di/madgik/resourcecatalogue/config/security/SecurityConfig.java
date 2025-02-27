@@ -131,7 +131,7 @@ public class SecurityConfig {
             authorities.forEach(authority -> {
                 String sub = "";
                 String email = "";
-                if (OidcUserAuthority.class.isInstance(authority)) {
+                if (authority instanceof OidcUserAuthority) {
                     // Map the claims found in idToken and/or userInfo
                     // to one or more GrantedAuthority's and add it to mappedAuthorities
 
@@ -158,7 +158,7 @@ public class SecurityConfig {
                     mappedAuthorities.addAll(authoritiesMapper.getAuthorities(email));
                     logger.info("User '{}' with email '{}' mapped as '{}'", sub, email, mappedAuthorities);
 
-                } else if (OAuth2UserAuthority.class.isInstance(authority)) {
+                } else if (authority instanceof OAuth2UserAuthority) {
                     // Map the attributes found in userAttributes
                     // to one or more GrantedAuthority's and add it to mappedAuthorities
 

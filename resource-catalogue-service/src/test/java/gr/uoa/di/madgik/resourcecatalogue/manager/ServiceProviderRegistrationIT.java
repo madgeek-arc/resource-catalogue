@@ -86,7 +86,7 @@ public class ServiceProviderRegistrationIT {
 
             serviceBundle = new ServiceBundle(createService("WP4_TestService", provider.getProvider()));
 
-            serviceBundle = (ServiceBundle) serviceBundleService.addResource(serviceBundle, securityService.getAdminAccess());
+            serviceBundle = serviceBundleService.addResource(serviceBundle, securityService.getAdminAccess());
 
             assert serviceBundle != null;
 

@@ -75,30 +75,29 @@ public class MailController {
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public void sendToAll(@RequestParam(defaultValue = "") List<String> cc, @RequestParam String subject,
                           @RequestParam(defaultValue = "false") Boolean includeCatalogueAdmins,
-                          @RequestParam(defaultValue = "false") Boolean includeProviderCatalogueContacts,
+                          @RequestParam(defaultValue = "false") Boolean includeContacts,
                           @RequestParam(defaultValue = "false") Boolean includeResourceContacts,
                           @RequestBody String text) throws MessagingException {
         int partitionSize = 100;
         if (cc != null) {
             partitionSize -= cc.size();
         }
-        List<String> allEmails = getAllEmails(includeCatalogueAdmins, includeProviderCatalogueContacts, includeResourceContacts);
+        List<String> allEmails = getAllEmails(includeCatalogueAdmins, includeContacts, includeResourceContacts);
         for (List<String> bccChunk : Lists.partition(allEmails, partitionSize)) {
             logger.info("Sending emails to: {}", String.join(", ", bccChunk));
             mailService.sendMail(new ArrayList<>(), cc, bccChunk, subject, text);
         }
     }
 
-    List<String> getAllEmails(Boolean includeCatalogueAdmins, Boolean includeProviderCatalogueContacts,
-                              Boolean includeResourceContacts) {
+    List<String> getAllEmails(Boolean includeCatalogueAdmins, Boolean includeContacts, Boolean includeResourceContacts) {
         Set<String> emails = new HashSet<>();
 
         FacetFilter facetFilter = createFacetFilter(false);
         Authentication adminAccess = securityService.getAdminAccess();
 
-        addEmailsFromProviders(emails, facetFilter, adminAccess, includeProviderCatalogueContacts);
+        addEmailsFromProviders(emails, facetFilter, adminAccess, includeContacts);
         if (includeCatalogueAdmins != null && includeCatalogueAdmins) {
-            addEmailsFromCatalogues(emails, createFacetFilter(true), adminAccess, includeProviderCatalogueContacts);
+            addEmailsFromCatalogues(emails, createFacetFilter(true), adminAccess, includeContacts);
         }
         if (includeResourceContacts != null && includeResourceContacts) {
             addEmailsFromServices(emails, facetFilter, adminAccess);
@@ -109,26 +108,31 @@ public class MailController {
     }
 
     private void addEmailsFromProviders(Set<String> emails, FacetFilter facetFilter, Authentication adminAccess,
-                                        Boolean includeProviderCatalogueContacts) {
+                                        Boolean includeContacts) {
         List<ProviderBundle> allProviders = providerService.getAll(facetFilter, adminAccess).getResults();
         allProviders.addAll(draftProviderService.getAll(facetFilter, adminAccess).getResults());
 
         for (ProviderBundle providerBundle : allProviders) {
-            emails.addAll(providerBundle.getProvider().getUsers().stream().map(User::getEmail).map(String::toLowerCase).collect(Collectors.toSet()));
-            if (includeProviderCatalogueContacts != null && includeProviderCatalogueContacts) {
+            emails.addAll(providerBundle.getProvider().getUsers()
+                    .stream().map(User::getEmail).map(String::toLowerCase).collect(Collectors.toSet()));
+            if (includeContacts != null && includeContacts) {
                 emails.add(providerBundle.getProvider().getMainContact().getEmail().toLowerCase());
-                emails.addAll(providerBundle.getProvider().getPublicContacts().stream().map(ProviderPublicContact::getEmail).map(String::toLowerCase).collect(Collectors.toSet()));
+                emails.addAll(providerBundle.getProvider().getPublicContacts()
+                        .stream().map(ProviderPublicContact::getEmail).map(String::toLowerCase).collect(Collectors.toSet()));
             }
         }
     }
 
-    private void addEmailsFromCatalogues(Set<String> emails, FacetFilter facetFilter, Authentication adminAccess, boolean includeContacts) {
+    private void addEmailsFromCatalogues(Set<String> emails, FacetFilter facetFilter, Authentication adminAccess,
+                                         boolean includeContacts) {
         List<CatalogueBundle> allCatalogues = catalogueService.getAll(facetFilter, adminAccess).getResults();
         for (CatalogueBundle catalogueBundle : allCatalogues) {
-            emails.addAll(catalogueBundle.getCatalogue().getUsers().stream().map(User::getEmail).map(String::toLowerCase).collect(Collectors.toSet()));
+            emails.addAll(catalogueBundle.getCatalogue().getUsers()
+                    .stream().map(User::getEmail).map(String::toLowerCase).collect(Collectors.toSet()));
             if (includeContacts) {
                 emails.add(catalogueBundle.getCatalogue().getMainContact().getEmail());
-                emails.addAll(catalogueBundle.getCatalogue().getPublicContacts().stream().map(ProviderPublicContact::getEmail).map(String::toLowerCase).collect(Collectors.toSet()));
+                emails.addAll(catalogueBundle.getCatalogue().getPublicContacts()
+                        .stream().map(ProviderPublicContact::getEmail).map(String::toLowerCase).collect(Collectors.toSet()));
             }
         }
     }
@@ -138,7 +142,8 @@ public class MailController {
         allServices.addAll(draftServiceService.getAll(facetFilter, adminAccess).getResults());
         for (ServiceBundle serviceBundle : allServices) {
             emails.add(serviceBundle.getService().getMainContact().getEmail());
-            emails.addAll(serviceBundle.getService().getPublicContacts().stream().map(ServicePublicContact::getEmail).map(String::toLowerCase).collect(Collectors.toSet()));
+            emails.addAll(serviceBundle.getService().getPublicContacts()
+                    .stream().map(ServicePublicContact::getEmail).map(String::toLowerCase).collect(Collectors.toSet()));
         }
     }
 

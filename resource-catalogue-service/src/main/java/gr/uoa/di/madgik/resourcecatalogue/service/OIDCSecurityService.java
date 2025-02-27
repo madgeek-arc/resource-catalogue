@@ -302,9 +302,7 @@ public class OIDCSecurityService implements SecurityService {
         String providerId = getProviderId(resourceId);
         ProviderBundle provider = providerService.get(providerId, auth);
         if (provider != null && provider.isActive()) {
-            if (hasAdminAccess(auth, providerId)) {
-                return true;
-            }
+            return hasAdminAccess(auth, providerId);
         }
         return false;
     }

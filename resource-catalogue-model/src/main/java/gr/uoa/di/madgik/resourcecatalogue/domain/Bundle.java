@@ -191,8 +191,7 @@ public abstract class Bundle<T extends Identifiable> implements Identifiable {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof Bundle)) return false;
-        Bundle<?> bundle = (Bundle<?>) o;
+        if (!(o instanceof Bundle<?> bundle)) return false;
         return active == bundle.active && suspended == bundle.suspended && draft == bundle.draft && Objects.equals(payload, bundle.payload) && Objects.equals(metadata, bundle.metadata) && Objects.equals(identifiers, bundle.identifiers) && Objects.equals(migrationStatus, bundle.migrationStatus) && Objects.equals(loggingInfo, bundle.loggingInfo) && Objects.equals(latestAuditInfo, bundle.latestAuditInfo) && Objects.equals(latestOnboardingInfo, bundle.latestOnboardingInfo) && Objects.equals(latestUpdateInfo, bundle.latestUpdateInfo);
     }
 

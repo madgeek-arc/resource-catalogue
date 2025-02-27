@@ -40,27 +40,37 @@ import java.util.stream.Collectors;
 @Tag(name = "public", description = "General methods related to Public resources")
 public class PublicController {
 
-    private final GenericResourceService genericResourceService;
+    private final GenericResourceService genericService;
 
-    PublicController(GenericResourceService genericResourceService) {
-        this.genericResourceService = genericResourceService;
+    PublicController(GenericResourceService genericService) {
+        this.genericService = genericService;
     }
 
-    @Operation(summary = "Get a list of Resources based on a set of ids.")
-    @GetMapping(path = "public/resources/ids", produces = {MediaType.APPLICATION_JSON_VALUE})
-    public ResponseEntity<List<?>> getSomeResources(@RequestParam("ids") String[] ids) {
-        String[] resourceTypeNames = new String[]{"service", "training_resource"};
-        List<?> someResources = new ArrayList<>();
+    @Operation(summary = "Fetch resources by IDs and resourceTypes (defaults to 'service', 'training_resource').")
+    @GetMapping(path = "public/resources/ids",
+            produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    public ResponseEntity<List<?>> getSomeResources(@RequestParam("ids") String[] ids,
+                                                    @RequestParam(value = "resourceTypes", required = false)
+                                                    List<String> resourceTypes) {
+
+        if (resourceTypes == null || resourceTypes.isEmpty()) {
+            resourceTypes = List.of("service", "training_resource");
+        }
+
+        List<Object> someResources = new ArrayList<>();
         for (String id : ids) {
-            for (String resourceType : resourceTypeNames) {
+            for (String resourceType : resourceTypes) {
                 try {
-                    someResources.add(genericResourceService.get(resourceType, id));
+                    someResources.add(genericService.get(resourceType, id));
                 } catch (ResourceNotFoundException ignored) {
                 }
             }
         }
-        List<?> ret = someResources.stream().map(r -> ((Bundle<?>) r).getPayload()).collect(Collectors.toList());
+
+        List<?> ret = someResources.stream()
+                .map(r -> ((Bundle<?>) r).getPayload())
+                .collect(Collectors.toList());
+
         return new ResponseEntity<>(ret, HttpStatus.OK);
     }
-
 }

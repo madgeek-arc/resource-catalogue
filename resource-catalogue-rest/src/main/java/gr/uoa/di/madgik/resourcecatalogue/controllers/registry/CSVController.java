@@ -57,7 +57,7 @@ import java.util.Objects;
 @Tag(name = "csv", description = "Export information related to various Catalogue resources to CSV")
 public class CSVController {
 
-    private static Logger logger = LoggerFactory.getLogger(CSVController.class);
+    private static final Logger logger = LoggerFactory.getLogger(CSVController.class);
     private final ServiceBundleService<ServiceBundle> serviceBundleService;
     private final ProviderService providerService;
     private final VocabularyService vocabularyService;

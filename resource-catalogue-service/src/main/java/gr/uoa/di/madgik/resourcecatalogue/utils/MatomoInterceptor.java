@@ -36,7 +36,7 @@ import java.net.URI;
 @Component
 public class MatomoInterceptor implements AsyncHandlerInterceptor {
 
-    private static Logger logger = LoggerFactory.getLogger(MatomoInterceptor.class);
+    private static final Logger logger = LoggerFactory.getLogger(MatomoInterceptor.class);
 
     @Value("${apitracking.matomo.site:#{null}}")
     private Integer siteId;

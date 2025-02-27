@@ -50,9 +50,9 @@ public abstract class AbstractSyncService<T extends Identifiable> implements Syn
     protected boolean active = false;
     protected String host;
     protected String controller;
-    private String filename;
+    private final String filename;
 
-    private BlockingQueue<Pair<T, String>> queue;
+    private final BlockingQueue<Pair<T, String>> queue;
 
     protected abstract String getController();
 

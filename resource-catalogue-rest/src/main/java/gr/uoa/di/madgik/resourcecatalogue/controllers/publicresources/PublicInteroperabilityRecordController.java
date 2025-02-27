@@ -16,19 +16,16 @@
 
 package gr.uoa.di.madgik.resourcecatalogue.controllers.publicresources;
 
-import com.google.gson.Gson;
+import gr.uoa.di.madgik.registry.annotation.BrowseParameters;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.domain.Paging;
-import gr.uoa.di.madgik.registry.annotation.BrowseParameters;
 import gr.uoa.di.madgik.resourcecatalogue.annotations.BrowseCatalogue;
 import gr.uoa.di.madgik.resourcecatalogue.domain.InteroperabilityRecord;
 import gr.uoa.di.madgik.resourcecatalogue.domain.InteroperabilityRecordBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.ResourceInteroperabilityRecordBundle;
-import gr.uoa.di.madgik.resourcecatalogue.domain.User;
 import gr.uoa.di.madgik.resourcecatalogue.service.GenericResourceService;
 import gr.uoa.di.madgik.resourcecatalogue.service.InteroperabilityRecordService;
 import gr.uoa.di.madgik.resourcecatalogue.service.ResourceInteroperabilityRecordService;
-import gr.uoa.di.madgik.resourcecatalogue.service.SecurityService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -45,6 +42,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 
 @Profile("beyond")
@@ -53,99 +51,110 @@ import java.util.List;
 @Tag(name = "public interoperability record")
 public class PublicInteroperabilityRecordController {
 
-    private static final Gson gson = new Gson();
-
-    private final SecurityService securityService;
-    private final InteroperabilityRecordService interoperabilityRecordService;
-    private final ResourceInteroperabilityRecordService resourceInteroperabilityRecordService;
-    private final GenericResourceService genericResourceService;
+    private final InteroperabilityRecordService service;
+    private final ResourceInteroperabilityRecordService rirService;
+    private final GenericResourceService genericService;
 
 
-    PublicInteroperabilityRecordController(SecurityService securityService,
-                                           InteroperabilityRecordService interoperabilityRecordService,
-                                           ResourceInteroperabilityRecordService resourceInteroperabilityRecordService,
-                                           GenericResourceService genericResourceService) {
-        this.securityService = securityService;
-        this.interoperabilityRecordService = interoperabilityRecordService;
-        this.resourceInteroperabilityRecordService = resourceInteroperabilityRecordService;
-        this.genericResourceService = genericResourceService;
+    PublicInteroperabilityRecordController(InteroperabilityRecordService service,
+                                           ResourceInteroperabilityRecordService rirService,
+                                           GenericResourceService genericService) {
+        this.service = service;
+        this.rirService = rirService;
+        this.genericService = genericService;
     }
 
     @Operation(description = "Returns the Public Interoperability Record with the given id.")
-    @GetMapping(path = "public/interoperabilityRecord/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    @PreAuthorize("@securityService.guidelineIsActive(#prefix+'/'+#suffix) or hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') " +
-            "or @securityService.isResourceAdmin(#auth, #prefix+'/'+#suffix)")
-    public ResponseEntity<?> getPublicInteroperabilityRecord(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
-                                                             @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix,
-                                                             @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId,
-                                                             @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
+    @GetMapping(path = "public/interoperabilityRecord/{prefix}/{suffix}",
+            produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or " +
+            "@securityService.guidelineIsActive(#prefix+'/'+#suffix) or " +
+            "@securityService.isResourceAdmin(#auth, #prefix+'/'+#suffix)")
+    public ResponseEntity<?> get(@Parameter(description = "The left part of the ID before the '/'")
+                                 @PathVariable("prefix") String prefix,
+                                 @Parameter(description = "The right part of the ID after the '/'")
+                                 @PathVariable("suffix") String suffix,
+                                 @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
-        InteroperabilityRecordBundle interoperabilityRecordBundle = interoperabilityRecordService.get(id, catalogueId);
-        if (interoperabilityRecordBundle.getMetadata().isPublished()) {
-            return new ResponseEntity<>(interoperabilityRecordBundle.getInteroperabilityRecord(), HttpStatus.OK);
+        InteroperabilityRecordBundle bundle = service.get(id);
+        if (bundle.getMetadata().isPublished()) {
+            return new ResponseEntity<>(bundle.getInteroperabilityRecord(), HttpStatus.OK);
         }
-        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(gson.toJson("The specific Interoperability Record " +
-                "does not consist a Public entity."));
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("message",
+                "The specific Interoperability Record does not consist a Public entity."));
     }
 
-    @GetMapping(path = "public/interoperabilityRecord/bundle/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceAdmin(#auth, #prefix+'/'+#suffix)")
-    public ResponseEntity<?> getPublicInteroperabilityRecordBundle(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
-                                                                   @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix,
-                                                                   @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId,
-                                                                   @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
+    @GetMapping(path = "public/interoperabilityRecord/bundle/{prefix}/{suffix}",
+            produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or " +
+            "@securityService.isResourceAdmin(#auth, #prefix+'/'+#suffix)")
+    public ResponseEntity<?> getBundle(@Parameter(description = "The left part of the ID before the '/'")
+                                       @PathVariable("prefix") String prefix,
+                                       @Parameter(description = "The right part of the ID after the '/'")
+                                       @PathVariable("suffix") String suffix,
+                                       @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
-        InteroperabilityRecordBundle interoperabilityRecordBundle = interoperabilityRecordService.get(id, catalogueId);
+        InteroperabilityRecordBundle interoperabilityRecordBundle = service.get(id);
         if (interoperabilityRecordBundle.getMetadata().isPublished()) {
             return new ResponseEntity<>(interoperabilityRecordBundle, HttpStatus.OK);
         }
-        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(gson.toJson("The specific Interoperability Record " +
-                "Bundle does not consist a Public entity"));
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("message",
+                "The specific Interoperability Record Bundle does not consist a Public entity"));
     }
 
-    @Operation(description = "Filter a list of Public Interoperability Records based on a set of filters or get a list of all Public Interoperability Records in the Catalogue.")
+    @Operation(description = "Get a list of all Public Interoperability Records in the Catalogue, based on a set of filters.")
     @BrowseParameters
     @BrowseCatalogue
-    @Parameter(name = "suspended", description = "Suspended", content = @Content(schema = @Schema(type = "boolean", defaultValue = "false")))
-    @GetMapping(path = "public/interoperabilityRecord/all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    public ResponseEntity<Paging<InteroperabilityRecord>> getAllPublicInteroperabilityRecords(@Parameter(hidden = true) @RequestParam MultiValueMap<String, Object> allRequestParams) {
-        FacetFilter ff = FacetFilter.from(allRequestParams);
+    @Parameter(name = "suspended", description = "Suspended",
+            content = @Content(schema = @Schema(type = "boolean", defaultValue = "false")))
+    @GetMapping(path = "public/interoperabilityRecord/all",
+            produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    public ResponseEntity<Paging<InteroperabilityRecord>> getAll(@Parameter(hidden = true)
+                                                                 @RequestParam MultiValueMap<String, Object> params) {
+        FacetFilter ff = FacetFilter.from(params);
         ff.setResourceType("interoperability_record");
         ff.addFilter("published", true);
         ff.addFilter("active", true);
         ff.addFilter("status", "approved interoperability record");
-        Paging<InteroperabilityRecord> paging = genericResourceService.getResults(ff).map(r -> ((InteroperabilityRecordBundle) r).getPayload());
+        Paging<InteroperabilityRecord> paging = genericService.getResults(ff).map(
+                r -> ((InteroperabilityRecordBundle) r).getPayload());
         return ResponseEntity.ok(paging);
     }
 
     @BrowseParameters
     @BrowseCatalogue
-    @Parameter(name = "suspended", description = "Suspended", content = @Content(schema = @Schema(type = "boolean", defaultValue = "false")))
-    @GetMapping(path = "public/interoperabilityRecord/bundle/all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    @Parameter(name = "suspended", description = "Suspended",
+            content = @Content(schema = @Schema(type = "boolean", defaultValue = "false")))
+    @GetMapping(path = "public/interoperabilityRecord/bundle/all",
+            produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
-    public ResponseEntity<Paging<InteroperabilityRecordBundle>> getAllPublicInteroperabilityRecordBundles(@Parameter(hidden = true) @RequestParam MultiValueMap<String, Object> allRequestParams) {
-        FacetFilter ff = FacetFilter.from(allRequestParams);
+    public ResponseEntity<Paging<InteroperabilityRecordBundle>> getAllBundles(@Parameter(hidden = true)
+                                                                              @RequestParam MultiValueMap<String, Object> params) {
+        FacetFilter ff = FacetFilter.from(params);
         ff.setResourceType("interoperability_record");
         ff.addFilter("published", true);
-        Paging<InteroperabilityRecordBundle> paging = genericResourceService.getResults(ff);
+        Paging<InteroperabilityRecordBundle> paging = genericService.getResults(ff);
         return ResponseEntity.ok(paging);
     }
 
     @Operation(description = "Returns the Public Related Resources of a specific Interoperability Record given its id.")
-    @GetMapping(path = "public/interoperabilityRecord/relatedResources/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE})
-    public List<String> getAllInteroperabilityRecordRelatedResources(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
-                                                                     @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix) {
+    @GetMapping(path = "public/interoperabilityRecord/relatedResources/{prefix}/{suffix}",
+            produces = {MediaType.APPLICATION_JSON_VALUE})
+    public List<String> getAllRelatedResources(@Parameter(description = "The left part of the ID before the '/'")
+                                               @PathVariable("prefix") String prefix,
+                                               @Parameter(description = "The right part of the ID after the '/'")
+                                               @PathVariable("suffix") String suffix) {
         String id = prefix + "/" + suffix;
-        List<String> allInteroperabilityRecordRelatedResources = new ArrayList<>();
+        List<String> relatedResources = new ArrayList<>();
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(10000);
         ff.addFilter("published", true);
-        List<ResourceInteroperabilityRecordBundle> allResourceInteroperabilityRecords = resourceInteroperabilityRecordService.getAll(ff, null).getResults();
-        for (ResourceInteroperabilityRecordBundle resourceInteroperabilityRecordBundle : allResourceInteroperabilityRecords) {
-            if (resourceInteroperabilityRecordBundle.getResourceInteroperabilityRecord().getInteroperabilityRecordIds().contains(id)) {
-                allInteroperabilityRecordRelatedResources.add(resourceInteroperabilityRecordBundle.getResourceInteroperabilityRecord().getResourceId());
+        List<ResourceInteroperabilityRecordBundle> list = rirService.getAll(ff, null).getResults();
+        for (ResourceInteroperabilityRecordBundle bundle : list) {
+            if (bundle.getResourceInteroperabilityRecord().getInteroperabilityRecordIds().contains(id)) {
+                relatedResources.add(bundle.getResourceInteroperabilityRecord().getResourceId());
             }
         }
-        return allInteroperabilityRecordRelatedResources;
+        return relatedResources;
     }
 }

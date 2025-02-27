@@ -69,8 +69,7 @@ public class User implements Identifiable {
         User user = new User();
         if (auth == null) {
             throw new InsufficientAuthenticationException("You are not authenticated, please log in.");
-        } else if (auth.getPrincipal() instanceof OidcUser) {
-            OidcUser principal = ((OidcUser) auth.getPrincipal());
+        } else if (auth.getPrincipal() instanceof OidcUser principal) {
             user.id = principal.getSubject();
             if (user.id == null) {
                 user.id = "";

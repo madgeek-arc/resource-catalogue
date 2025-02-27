@@ -16,10 +16,9 @@
 
 package gr.uoa.di.madgik.resourcecatalogue.controllers.publicresources;
 
-import com.google.gson.Gson;
+import gr.uoa.di.madgik.registry.annotation.BrowseParameters;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.domain.Paging;
-import gr.uoa.di.madgik.registry.annotation.BrowseParameters;
 import gr.uoa.di.madgik.resourcecatalogue.annotations.BrowseCatalogue;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Service;
 import gr.uoa.di.madgik.resourcecatalogue.domain.ServiceBundle;
@@ -39,81 +38,92 @@ import org.springframework.security.core.Authentication;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
+
 @Profile("beyond")
 @RestController
 @RequestMapping
 @Tag(name = "public service")
 public class PublicServiceController {
 
-    private static final Gson gson = new Gson();
+    private final ServiceBundleService<ServiceBundle> service;
+    private final GenericResourceService genericService;
 
-    private final GenericResourceService genericResourceService;
-    private final ServiceBundleService<ServiceBundle> serviceBundleService;
-
-    public PublicServiceController(GenericResourceService genericResourceService,
-                                   ServiceBundleService<ServiceBundle> serviceBundleService) {
-        this.genericResourceService = genericResourceService;
-        this.serviceBundleService = serviceBundleService;
+    public PublicServiceController(ServiceBundleService<ServiceBundle> service,
+                                   GenericResourceService genericService) {
+        this.service = service;
+        this.genericService = genericService;
     }
 
     @Operation(description = "Returns the Public Service with the given id.")
-    @GetMapping(path = "public/service/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    @PreAuthorize("@securityService.serviceIsActive(#prefix+'/'+#suffix) or hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') " +
+    @GetMapping(path = "public/service/{prefix}/{suffix}",
+            produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or " +
+            "@securityService.serviceIsActive(#prefix+'/'+#suffix) or " +
+            "@securityService.isResourceAdmin(#auth, #prefix+'/'+#suffix)")
+    public ResponseEntity<?> get(@Parameter(description = "The left part of the ID before the '/'")
+                                 @PathVariable("prefix") String prefix,
+                                 @Parameter(description = "The right part of the ID after the '/'")
+                                 @PathVariable("suffix") String suffix,
+                                 @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
+        String id = prefix + "/" + suffix;
+        ServiceBundle bundle = service.get(id);
+        if (bundle.getMetadata().isPublished()) {
+            return new ResponseEntity<>(bundle.getService(), HttpStatus.OK);
+        }
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("message",
+                "The specific Service does not consist a Public entity"));
+    }
+
+    @GetMapping(path = "public/service/infraService/{prefix}/{suffix}",
+            produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') " +
             "or @securityService.isResourceAdmin(#auth, #prefix+'/'+#suffix)")
-    public ResponseEntity<?> getPublicService(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
-                                              @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix,
-                                              @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId,
-                                              @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
+    public ResponseEntity<?> getBundle(@Parameter(description = "The left part of the ID before the '/'")
+                                       @PathVariable("prefix") String prefix,
+                                       @Parameter(description = "The right part of the ID after the '/'")
+                                       @PathVariable("suffix") String suffix,
+                                       @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
-        ServiceBundle serviceBundle = serviceBundleService.get(id, catalogueId);
-        if (serviceBundle.getMetadata().isPublished()) {
-            return new ResponseEntity<>(serviceBundle.getService(), HttpStatus.OK);
+        ServiceBundle bundle = service.get(id);
+        if (bundle.getMetadata().isPublished()) {
+            return new ResponseEntity<>(bundle, HttpStatus.OK);
         }
-        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(gson.toJson("The specific Service does not consist a " +
-                "Public entity"));
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("message",
+                "The specific Service Bundle does not consist a Public entity"));
     }
 
-    //    @Operation(description = "Returns the Public ServiceBundle with the given id.")
-    @GetMapping(path = "public/service/infraService/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceAdmin(#auth, #prefix+'/'+#suffix)")
-    public ResponseEntity<?> getPublicServiceBundle(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
-                                                    @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix,
-                                                    @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId,
-                                                    @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
-        String id = prefix + "/" + suffix;
-        ServiceBundle serviceBundle = serviceBundleService.get(id, catalogueId);
-        if (serviceBundle.getMetadata().isPublished()) {
-            return new ResponseEntity<>(serviceBundle, HttpStatus.OK);
-        }
-        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(gson.toJson("The specific Service Bundle does not " +
-                "consist a Public entity"));
-    }
-
-    @Operation(description = "Filter a list of Public Services based on a set of filters or get a list of all Public Services in the Catalogue.")
+    @Operation(description = "Get a list of all Public Services in the Catalogue, based on a set of filters.")
     @BrowseParameters
     @BrowseCatalogue
-    @Parameter(name = "suspended", description = "Suspended", content = @Content(schema = @Schema(type = "boolean", defaultValue = "false")))
-    @GetMapping(path = "public/service/all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    public ResponseEntity<Paging<Service>> getAllPublicServices(@Parameter(hidden = true) @RequestParam MultiValueMap<String, Object> allRequestParams) {
-        FacetFilter ff = FacetFilter.from(allRequestParams);
+    @Parameter(name = "suspended", description = "Suspended",
+            content = @Content(schema = @Schema(type = "boolean", defaultValue = "false")))
+    @GetMapping(path = "public/service/all",
+            produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    public ResponseEntity<Paging<Service>> getAll(@Parameter(hidden = true)
+                                                  @RequestParam MultiValueMap<String, Object> params) {
+        FacetFilter ff = FacetFilter.from(params);
         ff.setResourceType("service");
         ff.addFilter("published", true);
         ff.addFilter("active", true);
         ff.addFilter("status", "approved resource");
-        Paging<Service> paging = genericResourceService.getResults(ff).map(r -> ((ServiceBundle) r).getPayload());
+        Paging<Service> paging = genericService.getResults(ff).map(r -> ((ServiceBundle) r).getPayload());
         return ResponseEntity.ok(paging);
     }
 
     @BrowseParameters
     @BrowseCatalogue
-    @Parameter(name = "suspended", description = "Suspended", content = @Content(schema = @Schema(type = "boolean", defaultValue = "false")))
-    @GetMapping(path = "public/service/adminPage/all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    @Parameter(name = "suspended", description = "Suspended",
+            content = @Content(schema = @Schema(type = "boolean", defaultValue = "false")))
+    @GetMapping(path = "public/service/adminPage/all",
+            produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
-    public ResponseEntity<Paging<ServiceBundle>> getAllPublicServiceBundles(@Parameter(hidden = true) @RequestParam MultiValueMap<String, Object> allRequestParams) {
-        FacetFilter ff = FacetFilter.from(allRequestParams);
+    public ResponseEntity<Paging<ServiceBundle>> getAllBundles(@Parameter(hidden = true)
+                                                               @RequestParam MultiValueMap<String, Object> params) {
+        FacetFilter ff = FacetFilter.from(params);
         ff.setResourceType("service");
         ff.addFilter("published", true);
-        Paging<ServiceBundle> paging = genericResourceService.getResults(ff);
+        Paging<ServiceBundle> paging = genericService.getResults(ff);
         return ResponseEntity.ok(paging);
     }
 }

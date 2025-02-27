@@ -214,12 +214,12 @@ public class GenericManager implements GenericResourceService {
         Class<?> clazz = getClassFromResourceType(resourceTypeName);
         List<T> results;
         if (clazz != null) { // all resources are from the same resourceType
-            results = (List<T>) paging.getResults()
+            results = paging.getResults()
                     .parallelStream()
                     .map(res -> (T) parserPool.deserialize(res, clazz))
                     .collect(Collectors.toList());
         } else { // mixed resources
-            results = (List<T>) paging.getResults()
+            results = paging.getResults()
                     .stream()
                     .map(resource -> {
                         T item = null;

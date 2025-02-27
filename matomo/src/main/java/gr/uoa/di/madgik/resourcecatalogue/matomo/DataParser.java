@@ -177,7 +177,7 @@ public class DataParser {
                 ResponseEntity<String> responseEntity = restTemplate.exchange(url, HttpMethod.GET, request, String.class);
                 if (responseEntity.getStatusCode() != HttpStatus.OK) {
                     logger.error("Could not retrieve analytics from matomo\nResponse Code: {}\nResponse Body: {}",
-                            responseEntity.getStatusCode().toString(), responseEntity.getBody());
+                            responseEntity.getStatusCode(), responseEntity.getBody());
                 }
                 return responseEntity.getBody();
             } catch (IllegalArgumentException e) {

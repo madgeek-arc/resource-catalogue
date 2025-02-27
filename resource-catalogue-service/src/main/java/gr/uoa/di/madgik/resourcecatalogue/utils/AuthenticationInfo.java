@@ -52,8 +52,7 @@ public class AuthenticationInfo {
     private static Map<String, Object> getClaims(Authentication auth) {
         if (auth == null) {
             return new HashMap<>();
-        } else if (auth.getPrincipal() instanceof OidcUser) {
-            OidcUser principal = ((OidcUser) auth.getPrincipal());
+        } else if (auth.getPrincipal() instanceof OidcUser principal) {
             return principal.getClaims();
         } else if (auth.getPrincipal() instanceof Jwt) {
             return ((Jwt) auth.getPrincipal()).getClaims();
