@@ -38,21 +38,18 @@ import org.springframework.stereotype.Service;
 import java.lang.reflect.InvocationTargetException;
 
 @Service("publicConfigurationTemplateInstanceManager")
-public class PublicConfigurationTemplateInstanceManager extends AbstractPublicResourceManager<ConfigurationTemplateInstanceBundle>
-        implements ResourceCRUDService<ConfigurationTemplateInstanceBundle, Authentication> {
+public class PublicConfigurationTemplateInstanceService extends ResourceManager<ConfigurationTemplateInstanceBundle>
+        implements PublicResourceService<ConfigurationTemplateInstanceBundle> {
 
-    private static final Logger logger = LoggerFactory.getLogger(PublicConfigurationTemplateInstanceManager.class);
+    private static final Logger logger = LoggerFactory.getLogger(PublicConfigurationTemplateInstanceService.class);
     private final JmsService jmsService;
-    private final PublicResourceUtils publicResourceUtils;
 
     @Value("${catalogue.id}")
     private String catalogueId;
 
-    public PublicConfigurationTemplateInstanceManager(JmsService jmsService,
-                                                      PublicResourceUtils publicResourceUtils) {
+    public PublicConfigurationTemplateInstanceService(JmsService jmsService) {
         super(ConfigurationTemplateInstanceBundle.class);
         this.jmsService = jmsService;
-        this.publicResourceUtils = publicResourceUtils;
     }
 
     @Override
@@ -70,15 +67,15 @@ public class PublicConfigurationTemplateInstanceManager extends AbstractPublicRe
     public ConfigurationTemplateInstanceBundle add(ConfigurationTemplateInstanceBundle configurationTemplateInstanceBundle, Authentication authentication) {
         String lowerLevelResourceId = configurationTemplateInstanceBundle.getId();
         Identifiers.createOriginalId(configurationTemplateInstanceBundle);
-        configurationTemplateInstanceBundle.setId(publicResourceUtils.createPublicResourceId(
+        configurationTemplateInstanceBundle.setId(PublicResourceUtils.createPublicResourceId(
                 configurationTemplateInstanceBundle.getConfigurationTemplateInstance().getId(), catalogueId));
 
         // set public id to resourceId
-        updateConfigurationTemplateInstanceIdsToPublic(configurationTemplateInstanceBundle);
+        updateIdsToPublic(configurationTemplateInstanceBundle);
         JSONParser parser = new JSONParser();
         try {
             JSONObject payload = (JSONObject) parser.parse(configurationTemplateInstanceBundle.getConfigurationTemplateInstance().getPayload().replaceAll("'", "\""));
-            payload.put("interoperabilityRecordId", publicResourceUtils.createPublicResourceId(
+            payload.put("interoperabilityRecordId", PublicResourceUtils.createPublicResourceId(
                     payload.get("interoperabilityRecordId").toString(), catalogueId));
             configurationTemplateInstanceBundle.getConfigurationTemplateInstance().setPayload(payload.toString());
         } catch (ParseException e) {
@@ -95,9 +92,9 @@ public class PublicConfigurationTemplateInstanceManager extends AbstractPublicRe
 
     @Override
     public ConfigurationTemplateInstanceBundle update(ConfigurationTemplateInstanceBundle configurationTemplateInstanceBundle, Authentication authentication) {
-        ConfigurationTemplateInstanceBundle published = super.get(publicResourceUtils.createPublicResourceId(
+        ConfigurationTemplateInstanceBundle published = super.get(PublicResourceUtils.createPublicResourceId(
                 configurationTemplateInstanceBundle.getConfigurationTemplateInstance().getId(), catalogueId));
-        ConfigurationTemplateInstanceBundle ret = super.get(publicResourceUtils.createPublicResourceId(
+        ConfigurationTemplateInstanceBundle ret = super.get(PublicResourceUtils.createPublicResourceId(
                 configurationTemplateInstanceBundle.getConfigurationTemplateInstance().getId(), catalogueId));
         try {
             BeanUtils.copyProperties(ret, configurationTemplateInstanceBundle);
@@ -106,7 +103,7 @@ public class PublicConfigurationTemplateInstanceManager extends AbstractPublicRe
         }
 
         // set public id to resourceId
-        updateConfigurationTemplateInstanceIdsToPublic(ret);
+        updateIdsToPublic(ret);
         ret.setIdentifiers(published.getIdentifiers());
         ret.getConfigurationTemplateInstance().setPayload(published.getConfigurationTemplateInstance().getPayload()); //TODO: refactor when users will be able to update CTIs
         ret.setId(published.getId());
@@ -121,7 +118,7 @@ public class PublicConfigurationTemplateInstanceManager extends AbstractPublicRe
     public void delete(ConfigurationTemplateInstanceBundle configurationTemplateInstanceBundle) {
         try {
             ConfigurationTemplateInstanceBundle publicConfigurationTemplateInstanceBundle =
-                    get(publicResourceUtils.createPublicResourceId(
+                    get(PublicResourceUtils.createPublicResourceId(
                     configurationTemplateInstanceBundle.getConfigurationTemplateInstance().getId(), catalogueId));
             logger.info("Deleting public ConfigurationTemplateInstanceBundle with id '{}'",
                     publicConfigurationTemplateInstanceBundle.getId());
@@ -130,6 +127,17 @@ public class PublicConfigurationTemplateInstanceManager extends AbstractPublicRe
                     publicConfigurationTemplateInstanceBundle);
         } catch (ResourceException | ResourceNotFoundException ignore) {
         }
+    }
+
+    //TODO: Refactor if CTIs can belong to a different from the Project's Catalogue
+    public void updateIdsToPublic(ConfigurationTemplateInstanceBundle bundle) {
+        // resourceId
+        bundle.getConfigurationTemplateInstance().setResourceId(PublicResourceUtils.createPublicResourceId(
+                bundle.getConfigurationTemplateInstance().getResourceId(), catalogueId));
+        //TODO: enable if we have public CT
+        // configurationTemplateId
+//        configurationTemplateInstanceBundle.getConfigurationTemplateInstance().setResourceId(PublicResourceUtils.createPublicResourceId(
+//                configurationTemplateInstanceBundle.getConfigurationTemplateInstance().getConfigurationTemplateId(), catalogueId));
     }
 
 }

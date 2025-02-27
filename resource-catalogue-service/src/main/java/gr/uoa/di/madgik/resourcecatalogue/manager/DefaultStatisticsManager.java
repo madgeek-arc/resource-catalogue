@@ -80,7 +80,7 @@ public class DefaultStatisticsManager implements StatisticsService {
 
     @Override
     public Map<String, Integer> providerAddToProject(String id, Interval by) {
-        Map<String, Integer> providerAddToProject = serviceBundleManager.getResources(id)
+        Map<String, Integer> providerAddToProject = serviceBundleManager.getResourcesByProvider(id)
                 .stream()
                 .flatMap(s -> addToProject(s.getId(), by).entrySet().stream())
                 .collect(Collectors.groupingBy(Map.Entry::getKey, Collectors.summingInt(Map.Entry::getValue)));

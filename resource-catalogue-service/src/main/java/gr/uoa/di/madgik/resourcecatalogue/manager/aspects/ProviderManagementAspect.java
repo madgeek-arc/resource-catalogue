@@ -46,15 +46,14 @@ public class ProviderManagementAspect {
     private final ServiceBundleService<ServiceBundle> serviceBundleService;
     private final TrainingResourceService trainingResourceService;
     private final PublicProviderManager publicProviderManager;
-    private final PublicServiceManager publicServiceManager;
-    private final PublicDatasourceManager publicDatasourceManager;
-    private final PublicTrainingResourceManager publicTrainingResourceManager;
-    private final PublicInteroperabilityRecordManager publicInteroperabilityRecordManager;
-    private final PublicConfigurationTemplateInstanceManager publicConfigurationTemplateInstanceManager;
+    private final PublicServiceService publicServiceManager;
+    private final PublicDatasourceService publicDatasourceManager;
+    private final PublicTrainingResourceService publicTrainingResourceManager;
+    private final PublicInteroperabilityRecordService publicInteroperabilityRecordManager;
+    private final PublicConfigurationTemplateInstanceService publicConfigurationTemplateInstanceManager;
     private final RegistrationMailService registrationMailService;
     private final SecurityService securityService;
-    private final PublicResourceInteroperabilityRecordManager publicResourceInteroperabilityRecordManager;
-    private final PublicResourceUtils publicResourceUtils;
+    private final PublicResourceInteroperabilityRecordService publicResourceInteroperabilityRecordManager;
 
     @Value("${catalogue.id}")
     private String catalogueId;
@@ -63,15 +62,14 @@ public class ProviderManagementAspect {
                                     ServiceBundleService<ServiceBundle> serviceBundleService,
                                     TrainingResourceService trainingResourceService,
                                     PublicProviderManager publicProviderManager,
-                                    PublicServiceManager publicServiceManager,
-                                    PublicDatasourceManager publicDatasourceManager,
-                                    PublicTrainingResourceManager publicTrainingResourceManager,
-                                    PublicInteroperabilityRecordManager publicInteroperabilityRecordManager,
-                                    PublicResourceInteroperabilityRecordManager publicResourceInteroperabilityRecordManager,
-                                    PublicConfigurationTemplateInstanceManager publicConfigurationTemplateInstanceManager,
+                                    PublicServiceService publicServiceManager,
+                                    PublicDatasourceService publicDatasourceManager,
+                                    PublicTrainingResourceService publicTrainingResourceManager,
+                                    PublicInteroperabilityRecordService publicInteroperabilityRecordManager,
+                                    PublicResourceInteroperabilityRecordService publicResourceInteroperabilityRecordManager,
+                                    PublicConfigurationTemplateInstanceService publicConfigurationTemplateInstanceManager,
                                     RegistrationMailService registrationMailService,
-                                    SecurityService securityService,
-                                    PublicResourceUtils publicResourceUtils) {
+                                    SecurityService securityService) {
         this.providerService = providerService;
         this.serviceBundleService = serviceBundleService;
         this.trainingResourceService = trainingResourceService;
@@ -84,7 +82,6 @@ public class ProviderManagementAspect {
         this.publicConfigurationTemplateInstanceManager = publicConfigurationTemplateInstanceManager;
         this.registrationMailService = registrationMailService;
         this.securityService = securityService;
-        this.publicResourceUtils = publicResourceUtils;
     }
 
     @AfterReturning(pointcut = "execution(* gr.uoa.di.madgik.resourcecatalogue.manager.DraftServiceManager.transformToNonDraft(..)) " +
@@ -147,7 +144,7 @@ public class ProviderManagementAspect {
     public void addProviderAsPublic(final ProviderBundle providerBundle) {
         if (providerBundle.getStatus().equals("approved provider") && providerBundle.isActive()) {
             try {
-                publicProviderManager.get(publicResourceUtils.createPublicResourceId(providerBundle.getProvider().getId(),
+                publicProviderManager.get(PublicResourceUtils.createPublicResourceId(providerBundle.getProvider().getId(),
                         providerBundle.getProvider().getCatalogueId()));
             } catch (ResourceException | ResourceNotFoundException e) {
                 publicProviderManager.add(ObjectUtils.clone(providerBundle), null);
@@ -199,7 +196,7 @@ public class ProviderManagementAspect {
     }
 
     private void checkIfPublicProviderExistsOrElseThrow(ProviderBundle providerBundle) {
-        String publicId = publicResourceUtils.createPublicResourceId(providerBundle.getProvider().getId(),
+        String publicId = PublicResourceUtils.createPublicResourceId(providerBundle.getProvider().getId(),
                 providerBundle.getProvider().getCatalogueId());
         try {
             publicProviderManager.get(publicId);
@@ -225,7 +222,7 @@ public class ProviderManagementAspect {
     public void addResourceAsPublic(final ServiceBundle serviceBundle) {
         if (serviceBundle.getStatus().equals("approved resource") && serviceBundle.isActive()) {
             try {
-                publicServiceManager.get(publicResourceUtils.createPublicResourceId(serviceBundle.getService().getId(),
+                publicServiceManager.get(PublicResourceUtils.createPublicResourceId(serviceBundle.getService().getId(),
                         serviceBundle.getService().getCatalogueId()));
             } catch (ResourceException | ResourceNotFoundException e) {
                 publicServiceManager.add(ObjectUtils.clone(serviceBundle), null);
@@ -242,7 +239,7 @@ public class ProviderManagementAspect {
     public void addResourceAsPublic(final TrainingResourceBundle trainingResourceBundle) {
         if (trainingResourceBundle.getStatus().equals("approved resource") && trainingResourceBundle.isActive()) {
             try {
-                publicTrainingResourceManager.get(publicResourceUtils.createPublicResourceId(trainingResourceBundle.getTrainingResource().getId(),
+                publicTrainingResourceManager.get(PublicResourceUtils.createPublicResourceId(trainingResourceBundle.getTrainingResource().getId(),
                         trainingResourceBundle.getTrainingResource().getCatalogueId()));
             } catch (ResourceException | ResourceNotFoundException e) {
                 publicTrainingResourceManager.add(ObjectUtils.clone(trainingResourceBundle), null);
@@ -257,7 +254,7 @@ public class ProviderManagementAspect {
     public void addResourceAsPublic(final InteroperabilityRecordBundle interoperabilityRecordBundle) {
         if (interoperabilityRecordBundle.getStatus().equals("approved interoperability record") && interoperabilityRecordBundle.isActive()) {
             try {
-                publicInteroperabilityRecordManager.get(publicResourceUtils.createPublicResourceId(interoperabilityRecordBundle.getInteroperabilityRecord().getId(),
+                publicInteroperabilityRecordManager.get(PublicResourceUtils.createPublicResourceId(interoperabilityRecordBundle.getInteroperabilityRecord().getId(),
                         interoperabilityRecordBundle.getInteroperabilityRecord().getCatalogueId()));
             } catch (ResourceException | ResourceNotFoundException e) {
                 publicInteroperabilityRecordManager.add(ObjectUtils.clone(interoperabilityRecordBundle), null);
@@ -409,7 +406,7 @@ public class ProviderManagementAspect {
     public void addDatasourceAsPublic(final DatasourceBundle datasourceBundle) {
         if (datasourceBundle.getStatus().equals("approved datasource") && datasourceBundle.isActive()) {
             try {
-                publicDatasourceManager.get(publicResourceUtils.createPublicResourceId(datasourceBundle.getDatasource().getId(),
+                publicDatasourceManager.get(PublicResourceUtils.createPublicResourceId(datasourceBundle.getDatasource().getId(),
                         datasourceBundle.getDatasource().getCatalogueId()));
             } catch (ResourceException | ResourceNotFoundException e) {
                 publicDatasourceManager.add(ObjectUtils.clone(datasourceBundle), null);
@@ -452,7 +449,7 @@ public class ProviderManagementAspect {
     public void addResourceInteroperabilityRecordAsPublic(final ResourceInteroperabilityRecordBundle resourceInteroperabilityRecordBundle) {
         // TODO: check Resource states (publish if only approved/active)
         try {
-            publicResourceInteroperabilityRecordManager.get(publicResourceUtils.createPublicResourceId(
+            publicResourceInteroperabilityRecordManager.get(PublicResourceUtils.createPublicResourceId(
                     resourceInteroperabilityRecordBundle.getResourceInteroperabilityRecord().getId(),
                     resourceInteroperabilityRecordBundle.getResourceInteroperabilityRecord().getCatalogueId()));
         } catch (ResourceException | ResourceNotFoundException e) {
@@ -485,7 +482,7 @@ public class ProviderManagementAspect {
     public void addConfigurationTemplateInstanceAsPublic(final ConfigurationTemplateInstanceBundle configurationTemplateInstanceBundle) {
         try {
             //TODO: Refactor if CTIs can belong to a different from the Project's Catalogue
-            publicConfigurationTemplateInstanceManager.get(publicResourceUtils.createPublicResourceId(
+            publicConfigurationTemplateInstanceManager.get(PublicResourceUtils.createPublicResourceId(
                     configurationTemplateInstanceBundle.getConfigurationTemplateInstance().getId(),
                     catalogueId));
         } catch (ResourceException | ResourceNotFoundException e) {

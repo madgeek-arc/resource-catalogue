@@ -51,7 +51,10 @@ public interface InteroperabilityRecordService extends ResourceService<Interoper
      * @param id          Interoperability Record ID
      * @param catalogueId Catalogue ID
      * @return {@link InteroperabilityRecordBundle}
+     *
+     * @deprecated Since resourceId is unique, catalogueId can be safely removed. Replace with {@link #get(String)}.
      */
+    @Deprecated(forRemoval = true)
     InteroperabilityRecordBundle get(String id, String catalogueId);
 
     /**

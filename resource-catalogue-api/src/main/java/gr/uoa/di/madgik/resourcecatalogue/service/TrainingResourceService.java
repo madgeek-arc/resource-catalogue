@@ -80,7 +80,10 @@ public interface TrainingResourceService extends ResourceService<TrainingResourc
      * @param id          Training Resource ID
      * @param catalogueId Catalogue ID
      * @return {@link   TrainingResourceBundle}
+     *
+     * @deprecated Since resourceId is unique, catalogueId can be safely removed. Replace with {@link #get(String)}.
      */
+    @Deprecated(forRemoval = true)
     TrainingResourceBundle get(String id, String catalogueId);
 
     /**
@@ -101,25 +104,6 @@ public interface TrainingResourceService extends ResourceService<TrainingResourc
      * @return {@link List}&lt;{@link TrainingResource}&gt;
      */
     List<TrainingResource> getByIds(Authentication authentication, String... ids);
-
-    /**
-     * Return children vocabularies from parent vocabularies
-     *
-     * @param type   Vocabulary's type
-     * @param parent Vocabulary's parent
-     * @param rec
-     * @return {@link List}&lt;{@link String}&gt;
-     */
-    List<String> getChildrenFromParent(String type, String parent, List<Map<String, Object>> rec);
-
-    /**
-     * Gets a Browsing of all Training Resources for admins
-     *
-     * @param filter FacetFilter
-     * @param auth   Authentication
-     * @return {@link Browsing}&lt;{@link   TrainingResourceBundle}&gt;
-     */
-    Browsing<TrainingResourceBundle> getAllForAdmin(FacetFilter filter, Authentication auth);
 
     /**
      * Get a paging of random Training Resources
@@ -151,15 +135,6 @@ public interface TrainingResourceService extends ResourceService<TrainingResourc
     Paging<TrainingResourceBundle> getResourceBundles(String catalogueId, String providerId, Authentication auth);
 
     /**
-     * Get a list of Training Resources of a specific Provider of the EOSC Catalogue
-     *
-     * @param providerId Provider ID
-     * @param auth       Authentication
-     * @return {@link List}&lt;{@link TrainingResource}&gt;
-     */
-    List<? extends TrainingResource> getResources(String providerId, Authentication auth);
-
-    /**
      * Get an EOSC Provider's Training Resource Template, if exists, else return null
      *
      * @param providerId Provider ID
@@ -188,10 +163,11 @@ public interface TrainingResourceService extends ResourceService<TrainingResourc
      * Get the history of the specific Training Resource of the specific Catalogue ID
      *
      * @param id          Training Resource ID
-     * @param catalogueId Catalogue ID
      * @return {@link Paging}&lt;{@link LoggingInfo}&gt;
      */
-    Paging<LoggingInfo> getLoggingInfoHistory(String id, String catalogueId);
+    default Paging<LoggingInfo> getLoggingInfoHistory(String id) {
+        return getLoggingInfoHistory(get(id));
+    }
 
     /**
      * Change the Provider of the specific Training Resource

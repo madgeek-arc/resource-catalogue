@@ -56,29 +56,20 @@ public class VocabularyCurationManager extends ResourceManager<VocabularyCuratio
     @Autowired
     private FacetLabelService facetLabelService;
 
-    private final AbstractServiceBundleManager<ServiceBundle> abstractServiceBundleManager;
-    @Autowired
-    private final GenericManager genericManager;
-
-    @Autowired
-    private SearchService searchService;
-
     @Value("${catalogue.id}")
     private String catalogueId;
     private final IdCreator idCreator;
 
-    public VocabularyCurationManager(@Lazy RegistrationMailService registrationMailService, ProviderService providerService,
+    public VocabularyCurationManager(@Lazy RegistrationMailService registrationMailService,
+                                     ProviderService providerService,
                                      ServiceBundleService<ServiceBundle> serviceBundleService,
                                      TrainingResourceService trainingResourceService,
-                                     AbstractServiceBundleManager<ServiceBundle> abstractServiceBundleManager,
-                                     GenericManager genericManager, IdCreator idCreator) {
+                                     IdCreator idCreator) {
         super(VocabularyCuration.class);
         this.registrationMailService = registrationMailService;
         this.providerService = providerService;
         this.serviceBundleService = serviceBundleService;
         this.trainingResourceService = trainingResourceService;
-        this.abstractServiceBundleManager = abstractServiceBundleManager;
-        this.genericManager = genericManager;
         this.idCreator = idCreator;
     }
 
@@ -220,7 +211,7 @@ public class VocabularyCurationManager extends ResourceManager<VocabularyCuratio
             case "provider":
                 break;
             case "service":
-                ServiceBundle serviceBundle = serviceBundleService.get(vocabularyCuration.getVocabularyEntryRequests().getFirst().getResourceId(), catalogueId);
+                ServiceBundle serviceBundle = serviceBundleService.get(vocabularyCuration.getVocabularyEntryRequests().getFirst().getResourceId());
                 if (!serviceBundle.getService().getResourceOrganisation().equals(providerBundle.getId())) {
                     throw new ResourceNotFoundException(String.format("Provider with id [%s] does not have a Service with id [%s] registered.",
                             providerBundle.getId(), serviceBundle.getId()));
@@ -312,24 +303,6 @@ public class VocabularyCurationManager extends ResourceManager<VocabularyCuratio
         updatedEntryRequests.addAll(newVocabularyCuration.getVocabularyEntryRequests());
         updatedEntryRequests.addAll(existingVocabularyCuration.getVocabularyEntryRequests());
         return updatedEntryRequests;
-    }
-
-    @Override
-    protected Browsing<VocabularyCuration> getResults(FacetFilter filter) {
-        Browsing<VocabularyCuration> browsing;
-        filter.setResourceType(getResourceTypeName());
-        browsing = convertToBrowsingEIC(searchService.search(filter));
-
-        browsing.setFacets(abstractServiceBundleManager.createCorrectFacets(browsing.getFacets(), filter));
-        return browsing;
-    }
-
-    private Browsing<VocabularyCuration> convertToBrowsingEIC(@NotNull Paging<Resource> paging) {
-        List<VocabularyCuration> results = paging.getResults()
-                .stream()
-                .map(res -> parserPool.deserialize(res, typeParameterClass))
-                .collect(Collectors.toList());
-        return new Browsing<>(paging, results, genericManager.getLabels(getResourceTypeName()));
     }
 
 }

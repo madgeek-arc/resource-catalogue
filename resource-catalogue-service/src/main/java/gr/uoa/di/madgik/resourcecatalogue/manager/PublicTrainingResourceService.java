@@ -22,6 +22,7 @@ import gr.uoa.di.madgik.registry.exception.ResourceException;
 import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.registry.service.ResourceCRUDService;
 import gr.uoa.di.madgik.resourcecatalogue.domain.AlternativeIdentifier;
+import gr.uoa.di.madgik.resourcecatalogue.domain.DatasourceBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Identifiers;
 import gr.uoa.di.madgik.resourcecatalogue.domain.TrainingResourceBundle;
 import gr.uoa.di.madgik.resourcecatalogue.utils.FacetLabelService;
@@ -37,23 +38,21 @@ import org.springframework.stereotype.Service;
 import java.lang.reflect.InvocationTargetException;
 
 @Service("publicTrainingResourceManager")
-public class PublicTrainingResourceManager extends AbstractPublicResourceManager<TrainingResourceBundle> implements ResourceCRUDService<TrainingResourceBundle, Authentication> {
+public class PublicTrainingResourceService extends ResourceManager<TrainingResourceBundle>
+        implements PublicResourceService<TrainingResourceBundle> {
 
-    private static final Logger logger = LoggerFactory.getLogger(PublicTrainingResourceManager.class);
+    private static final Logger logger = LoggerFactory.getLogger(PublicTrainingResourceService.class);
     private final JmsService jmsService;
     private final ProviderResourcesCommonMethods commonMethods;
     private final FacetLabelService facetLabelService;
-    private final PublicResourceUtils publicResourceUtils;
 
-    public PublicTrainingResourceManager(JmsService jmsService,
+    public PublicTrainingResourceService(JmsService jmsService,
                                          ProviderResourcesCommonMethods commonMethods,
-                                         FacetLabelService facetLabelService,
-                                         PublicResourceUtils publicResourceUtils) {
+                                         FacetLabelService facetLabelService) {
         super(TrainingResourceBundle.class);
         this.jmsService = jmsService;
         this.commonMethods = commonMethods;
         this.facetLabelService = facetLabelService;
-        this.publicResourceUtils = publicResourceUtils;
     }
 
     @Override
@@ -74,13 +73,13 @@ public class PublicTrainingResourceManager extends AbstractPublicResourceManager
     public TrainingResourceBundle add(TrainingResourceBundle trainingResourceBundle, Authentication authentication) {
         String lowerLevelResourceId = trainingResourceBundle.getId();
         Identifiers.createOriginalId(trainingResourceBundle);
-        trainingResourceBundle.setId(publicResourceUtils.createPublicResourceId(trainingResourceBundle.getTrainingResource().getId(),
+        trainingResourceBundle.setId(PublicResourceUtils.createPublicResourceId(trainingResourceBundle.getTrainingResource().getId(),
                 trainingResourceBundle.getTrainingResource().getCatalogueId()));
         commonMethods.restrictPrefixRepetitionOnPublicResources(trainingResourceBundle.getId(),
                 trainingResourceBundle.getTrainingResource().getCatalogueId());
 
         // sets public ids to resource organisation, resource providers and EOSC related services
-        updateTrainingResourceIdsToPublic(trainingResourceBundle);
+        updateIdsToPublic(trainingResourceBundle);
 
         trainingResourceBundle.getMetadata().setPublished(true);
         // POST PID
@@ -108,10 +107,10 @@ public class PublicTrainingResourceManager extends AbstractPublicResourceManager
 
     @Override
     public TrainingResourceBundle update(TrainingResourceBundle trainingResourceBundle, Authentication authentication) {
-        TrainingResourceBundle published = super.get(publicResourceUtils.createPublicResourceId(
+        TrainingResourceBundle published = super.get(PublicResourceUtils.createPublicResourceId(
                 trainingResourceBundle.getTrainingResource().getId(),
                 trainingResourceBundle.getTrainingResource().getCatalogueId()));
-        TrainingResourceBundle ret = super.get(publicResourceUtils.createPublicResourceId(trainingResourceBundle.getTrainingResource().getId(),
+        TrainingResourceBundle ret = super.get(PublicResourceUtils.createPublicResourceId(trainingResourceBundle.getTrainingResource().getId(),
                 trainingResourceBundle.getTrainingResource().getCatalogueId()));
         try {
             BeanUtils.copyProperties(ret, trainingResourceBundle);
@@ -120,7 +119,7 @@ public class PublicTrainingResourceManager extends AbstractPublicResourceManager
         }
 
         // sets public ids to resource organisation, resource providers and EOSC related services
-        updateTrainingResourceIdsToPublic(ret);
+        updateIdsToPublic(ret);
 
         ret.getTrainingResource().setAlternativeIdentifiers(published.getTrainingResource().getAlternativeIdentifiers());
         ret.setIdentifiers(published.getIdentifiers());
@@ -135,7 +134,7 @@ public class PublicTrainingResourceManager extends AbstractPublicResourceManager
     @Override
     public void delete(TrainingResourceBundle trainingResourceBundle) {
         try {
-            TrainingResourceBundle publicTrainingResourceBundle = get(publicResourceUtils.createPublicResourceId(
+            TrainingResourceBundle publicTrainingResourceBundle = get(PublicResourceUtils.createPublicResourceId(
                     trainingResourceBundle.getTrainingResource().getId(),
                     trainingResourceBundle.getTrainingResource().getCatalogueId()));
             logger.info("Deleting public Training Resource with id '{}'", publicTrainingResourceBundle.getId());
@@ -143,5 +142,25 @@ public class PublicTrainingResourceManager extends AbstractPublicResourceManager
             jmsService.convertAndSendTopic("training_resource.delete", publicTrainingResourceBundle);
         } catch (ResourceException | ResourceNotFoundException ignore) {
         }
+    }
+
+    @Override
+    public void updateIdsToPublic(TrainingResourceBundle bundle) {
+        // Resource Organisation
+        bundle.getTrainingResource().setResourceOrganisation(PublicResourceUtils.createPublicResourceId(
+                bundle.getTrainingResource().getResourceOrganisation(),
+                bundle.getTrainingResource().getCatalogueId()));
+
+        // Resource Providers
+        bundle.getTrainingResource().setResourceProviders(
+                appendCatalogueId(
+                        bundle.getTrainingResource().getResourceProviders(),
+                        bundle.getTrainingResource().getCatalogueId()));
+
+        // EOSC Related Services
+        bundle.getTrainingResource().setEoscRelatedServices(
+                appendCatalogueId(
+                        bundle.getTrainingResource().getEoscRelatedServices(),
+                        bundle.getTrainingResource().getCatalogueId()));
     }
 }

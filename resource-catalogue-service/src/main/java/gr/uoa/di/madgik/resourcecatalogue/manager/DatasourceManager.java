@@ -216,7 +216,7 @@ public class DatasourceManager extends ResourceManager<DatasourceBundle> impleme
         DatasourceBundle datasourceBundle = get(id);
 
         // Verify that Service is Approved before proceeding
-        if (!serviceBundleService.get(datasourceBundle.getDatasource().getServiceId(), datasourceBundle.getDatasource().getCatalogueId()).getStatus().equals("approved resource")
+        if (!serviceBundleService.get(datasourceBundle.getDatasource().getServiceId()).getStatus().equals("approved resource")
                 && status.equals("approved datasource")) {
             throw new ValidationException("You cannot approve a Datasource when its Service is in Pending or Rejected state");
         }

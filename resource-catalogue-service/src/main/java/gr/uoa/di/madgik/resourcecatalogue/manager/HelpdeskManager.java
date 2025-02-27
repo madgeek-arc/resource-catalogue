@@ -42,7 +42,7 @@ public class HelpdeskManager extends ResourceManager<HelpdeskBundle> implements 
     private static final Logger logger = LoggerFactory.getLogger(HelpdeskManager.class);
     private final ServiceBundleService<ServiceBundle> serviceBundleService;
     private final TrainingResourceService trainingResourceService;
-    private final PublicHelpdeskManager publicHelpdeskManager;
+    private final PublicHelpdeskService publicHelpdeskManager;
     private final SecurityService securityService;
     private final RegistrationMailService registrationMailService;
     private final ProviderResourcesCommonMethods commonMethods;
@@ -50,7 +50,7 @@ public class HelpdeskManager extends ResourceManager<HelpdeskBundle> implements 
 
     public HelpdeskManager(ServiceBundleService<ServiceBundle> serviceBundleService,
                            TrainingResourceService trainingResourceService,
-                           PublicHelpdeskManager publicHelpdeskManager,
+                           PublicHelpdeskService publicHelpdeskManager,
                            @Lazy SecurityService securityService,
                            @Lazy RegistrationMailService registrationMailService,
                            ProviderResourcesCommonMethods commonMethods,

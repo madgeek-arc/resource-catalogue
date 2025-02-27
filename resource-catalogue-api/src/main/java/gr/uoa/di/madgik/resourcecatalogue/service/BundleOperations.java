@@ -16,9 +16,15 @@
 
 package gr.uoa.di.madgik.resourcecatalogue.service;
 
+import gr.uoa.di.madgik.registry.domain.Browsing;
+import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Bundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.LoggingInfo;
+import gr.uoa.di.madgik.resourcecatalogue.domain.ServiceBundle;
 import org.springframework.security.core.Authentication;
+
+import java.util.Comparator;
+import java.util.List;
 
 public interface BundleOperations<T extends Bundle<?>> {
 
@@ -85,4 +91,19 @@ public interface BundleOperations<T extends Bundle<?>> {
      * @return {@link T}
      */
     T audit(String id, String comment, LoggingInfo.ActionType actionType, Authentication auth);
+
+    /**
+     * Get the history of a resource.
+     *
+     * @param bundle
+     * @return
+     */
+    default Paging<LoggingInfo> getLoggingInfoHistory(T bundle) {
+        if (bundle != null && bundle.getLoggingInfo() != null) {
+            List<LoggingInfo> loggingInfoList = bundle.getLoggingInfo();
+            loggingInfoList.sort(Comparator.comparing(LoggingInfo::getDate).reversed());
+            return new Browsing<>(loggingInfoList.size(), 0, loggingInfoList.size(), loggingInfoList, null);
+        }
+        return null;
+    }
 }

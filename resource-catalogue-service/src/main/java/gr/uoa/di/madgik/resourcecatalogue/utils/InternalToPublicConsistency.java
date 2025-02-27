@@ -50,15 +50,14 @@ public class InternalToPublicConsistency {
 
 
     private final PublicProviderManager publicProviderManager;
-    private final PublicServiceManager publicServiceManager;
-    private final PublicTrainingResourceManager publicTrainingResourceManager;
-    private final PublicInteroperabilityRecordManager publicInteroperabilityRecordManager;
-    private final PublicResourceInteroperabilityRecordManager publicResourceInteroperabilityRecordManager;
+    private final PublicServiceService publicServiceManager;
+    private final PublicTrainingResourceService publicTrainingResourceManager;
+    private final PublicInteroperabilityRecordService publicInteroperabilityRecordManager;
+    private final PublicResourceInteroperabilityRecordService publicResourceInteroperabilityRecordManager;
 
     private final SecurityService securityService;
     private final Configuration cfg;
     private final MailService mailService;
-    private final PublicResourceUtils publicResourceUtils;
 
 
     @Value("${catalogue.name:Resource Catalogue}")
@@ -75,12 +74,11 @@ public class InternalToPublicConsistency {
                                        TrainingResourceService trainingResourceService,
                                        InteroperabilityRecordService interoperabilityRecordService,
                                        ResourceInteroperabilityRecordService resourceInteroperabilityRecordService,
-                                       PublicProviderManager publicProviderManager, PublicServiceManager publicServiceManager,
-                                       PublicTrainingResourceManager publicTrainingResourceManager,
-                                       PublicInteroperabilityRecordManager publicInteroperabilityRecordManager,
-                                       PublicResourceInteroperabilityRecordManager publicResourceInteroperabilityRecordManager,
-                                       SecurityService securityService, Configuration cfg, MailService mailService,
-                                       PublicResourceUtils publicResourceUtils) {
+                                       PublicProviderManager publicProviderManager, PublicServiceService publicServiceManager,
+                                       PublicTrainingResourceService publicTrainingResourceManager,
+                                       PublicInteroperabilityRecordService publicInteroperabilityRecordManager,
+                                       PublicResourceInteroperabilityRecordService publicResourceInteroperabilityRecordManager,
+                                       SecurityService securityService, Configuration cfg, MailService mailService) {
         this.providerService = providerService;
         this.serviceBundleService = serviceBundleService;
         this.trainingResourceService = trainingResourceService;
@@ -94,7 +92,6 @@ public class InternalToPublicConsistency {
         this.securityService = securityService;
         this.cfg = cfg;
         this.mailService = mailService;
-        this.publicResourceUtils = publicResourceUtils;
     }
 
     //TODO: Add all resource types which get published
@@ -111,7 +108,7 @@ public class InternalToPublicConsistency {
         // check consistency for Providers
         for (ProviderBundle providerBundle : allInternalApprovedProviders) {
             String providerId = providerBundle.getId();
-            String publicProviderId = publicResourceUtils.createPublicResourceId(providerId, providerBundle.getProvider().getCatalogueId());
+            String publicProviderId = PublicResourceUtils.createPublicResourceId(providerId, providerBundle.getProvider().getCatalogueId());
             // try and get its Public instance
             try {
                 publicProviderManager.get(publicProviderId);
@@ -124,7 +121,7 @@ public class InternalToPublicConsistency {
         // check consistency for Services
         for (ServiceBundle serviceBundle : allInternalApprovedServices) {
             String serviceId = serviceBundle.getId();
-            String publicServiceId = publicResourceUtils.createPublicResourceId(serviceId, serviceBundle.getService().getCatalogueId());
+            String publicServiceId = PublicResourceUtils.createPublicResourceId(serviceId, serviceBundle.getService().getCatalogueId());
             // try and get its Public instance
             try {
                 publicServiceManager.get(publicServiceId);
@@ -137,7 +134,7 @@ public class InternalToPublicConsistency {
         // check consistency for Training Resources
         for (TrainingResourceBundle trainingResourceBundle : allInternalApprovedTR) {
             String trainingResourceId = trainingResourceBundle.getId();
-            String publicTrainingResourceId = publicResourceUtils.createPublicResourceId(trainingResourceId,
+            String publicTrainingResourceId = PublicResourceUtils.createPublicResourceId(trainingResourceId,
                     trainingResourceBundle.getTrainingResource().getCatalogueId());
             // try and get its Public instance
             try {
@@ -151,7 +148,7 @@ public class InternalToPublicConsistency {
         // check consistency for Interoperability Records
         for (InteroperabilityRecordBundle interoperabilityRecordBundle : allInternalApprovedIR) {
             String interoperabilityRecordId = interoperabilityRecordBundle.getId();
-            String publicInteroperabilityRecordId = publicResourceUtils.createPublicResourceId(interoperabilityRecordId,
+            String publicInteroperabilityRecordId = PublicResourceUtils.createPublicResourceId(interoperabilityRecordId,
                     interoperabilityRecordBundle.getInteroperabilityRecord().getCatalogueId());
             // try and get its Public instance
             try {
@@ -165,7 +162,7 @@ public class InternalToPublicConsistency {
         // check consistency for Resource Interoperability Records
         for (ResourceInteroperabilityRecordBundle resourceInteroperabilityRecordBundle : allInternalApprovedRIR) {
             String resourceInteroperabilityRecordId = resourceInteroperabilityRecordBundle.getId();
-            String publicResourceInteroperabilityRecordId = publicResourceUtils.createPublicResourceId(resourceInteroperabilityRecordId,
+            String publicResourceInteroperabilityRecordId = PublicResourceUtils.createPublicResourceId(resourceInteroperabilityRecordId,
                     resourceInteroperabilityRecordBundle.getResourceInteroperabilityRecord().getCatalogueId());
             // try and get its Public instance
             try {

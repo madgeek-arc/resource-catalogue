@@ -57,10 +57,10 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     private final ServiceBundleService<ServiceBundle> serviceBundleService;
     private final TrainingResourceService trainingResourceService;
     private final InteroperabilityRecordService interoperabilityRecordService;
-    private final PublicServiceManager publicServiceManager;
+    private final PublicServiceService publicServiceManager;
     private final PublicProviderManager publicProviderManager;
-    private final PublicTrainingResourceManager publicTrainingResourceManager;
-    private final PublicInteroperabilityRecordManager publicInteroperabilityRecordManager;
+    private final PublicTrainingResourceService publicTrainingResourceManager;
+    private final PublicInteroperabilityRecordService publicInteroperabilityRecordManager;
     private final SecurityService securityService;
     private final FieldValidator fieldValidator;
     private final IdCreator idCreator;
@@ -84,12 +84,12 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
                            @Qualifier("providerSync") SynchronizerService<Provider> synchronizerService,
                            ProviderResourcesCommonMethods commonMethods,
                            CatalogueService catalogueService,
-                           @Lazy PublicServiceManager publicServiceManager,
+                           @Lazy PublicServiceService publicServiceManager,
                            @Lazy PublicProviderManager publicProviderManager,
                            @Lazy TrainingResourceService trainingResourceService,
                            @Lazy InteroperabilityRecordService interoperabilityRecordService,
-                           @Lazy PublicTrainingResourceManager publicTrainingResourceManager,
-                           @Lazy PublicInteroperabilityRecordManager publicInteroperabilityRecordManager) {
+                           @Lazy PublicTrainingResourceService publicTrainingResourceManager,
+                           @Lazy PublicInteroperabilityRecordService publicInteroperabilityRecordManager) {
         super(ProviderBundle.class);
         this.draftProviderService = draftProviderService;
         this.serviceBundleService = serviceBundleService;

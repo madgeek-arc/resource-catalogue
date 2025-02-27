@@ -62,13 +62,12 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
     private final MonitoringService monitoringService;
     private final ResourceInteroperabilityRecordService resourceInteroperabilityRecordService;
     private final CatalogueService catalogueService;
-    private final PublicTrainingResourceManager publicTrainingResourceManager;
-    private final PublicHelpdeskManager publicHelpdeskManager;
-    private final PublicMonitoringManager publicMonitoringManager;
+    private final PublicTrainingResourceService publicTrainingResourceManager;
+    private final PublicHelpdeskService publicHelpdeskManager;
+    private final PublicMonitoringService publicMonitoringManager;
     private final MigrationService migrationService;
     private final ProviderResourcesCommonMethods commonMethods;
     private final GenericManager genericManager;
-    private final PublicResourceUtils publicResourceUtils;
     @Autowired
     private FacetLabelService facetLabelService;
     @Autowired
@@ -90,14 +89,13 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
                                    @Lazy MonitoringService monitoringService,
                                    @Lazy ResourceInteroperabilityRecordService resourceInteroperabilityRecordService,
                                    CatalogueService catalogueService,
-                                   PublicTrainingResourceManager publicTrainingResourceManager,
-                                   PublicHelpdeskManager publicHelpdeskManager,
-                                   PublicMonitoringManager publicMonitoringManager,
+                                   PublicTrainingResourceService publicTrainingResourceManager,
+                                   PublicHelpdeskService publicHelpdeskManager,
+                                   PublicMonitoringService publicMonitoringManager,
                                    SynchronizerService<TrainingResource> synchronizerService,
                                    ProviderResourcesCommonMethods commonMethods,
                                    GenericManager genericManager,
-                                   @Lazy MigrationService migrationService,
-                                   @Lazy PublicResourceUtils publicResourceUtils) {
+                                   @Lazy MigrationService migrationService) {
         super(TrainingResourceBundle.class);
         this.providerService = providerService;
         this.idCreator = idCreator;
@@ -115,7 +113,6 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
         this.commonMethods = commonMethods;
         this.genericManager = genericManager;
         this.migrationService = migrationService;
-        this.publicResourceUtils = publicResourceUtils;
     }
 
     @Override
@@ -311,7 +308,7 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
     @Override
     public Browsing<TrainingResourceBundle> getMy(FacetFilter filter, Authentication auth) {
         FacetFilter ff = new FacetFilter();
-        ff.setQuantity(1000);
+        ff.setQuantity(maxQuantity);
         List<ProviderBundle> providers = providerService.getMy(ff, auth).getResults();
 
         filter.addFilter("resource_organisation", providers.stream().map(ProviderBundle::getId).toList());
@@ -506,7 +503,7 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
                         ((HelpdeskBundle) bundle).getCatalogueId(), bundle.isActive());
                 helpdeskService.updateBundle((HelpdeskBundle) bundle, auth);
                 HelpdeskBundle publicHelpdeskBundle =
-                        publicHelpdeskManager.getOrElseReturnNull(publicResourceUtils.createPublicResourceId(
+                        publicHelpdeskManager.getOrElseReturnNull(PublicResourceUtils.createPublicResourceId(
                                 bundle.getId(), ((HelpdeskBundle) bundle).getCatalogueId()));
                 if (publicHelpdeskBundle != null) {
                     publicHelpdeskManager.update((HelpdeskBundle) bundle, auth);
@@ -523,7 +520,7 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
                         ((MonitoringBundle) bundle).getCatalogueId(), bundle.isActive());
                 monitoringService.updateBundle((MonitoringBundle) bundle, auth);
                 MonitoringBundle publicMonitoringBundle =
-                        publicMonitoringManager.getOrElseReturnNull(publicResourceUtils.createPublicResourceId(
+                        publicMonitoringManager.getOrElseReturnNull(PublicResourceUtils.createPublicResourceId(
                                 bundle.getId(), ((MonitoringBundle) bundle).getCatalogueId()));
                 if (publicMonitoringBundle != null) {
                     publicMonitoringManager.update((MonitoringBundle) bundle, auth);
@@ -578,29 +575,6 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
     }
 
     @Override
-    public List<TrainingResource> getResources(String providerId, Authentication auth) {
-        ProviderBundle providerBundle = providerService.get(providerId);
-        FacetFilter ff = new FacetFilter();
-        ff.addFilter("resource_organisation", providerId);
-        ff.addFilter("catalogue_id", catalogueId);
-        ff.setQuantity(maxQuantity);
-        ff.addOrderBy("title", "asc");
-        if (auth != null && auth.isAuthenticated()) {
-            User user = User.of(auth);
-            // if user is ADMIN/EPOT or Provider Admin on the specific Provider, return its Training Resources
-            if (securityService.hasRole(auth, "ROLE_ADMIN") || securityService.hasRole(auth, "ROLE_EPOT") ||
-                    securityService.userHasAdminAccess(user, providerId)) {
-                return this.getAll(ff, auth).getResults().stream().map(TrainingResourceBundle::getTrainingResource).collect(Collectors.toList());
-            }
-        }
-        // else return Provider's Training Resources ONLY if he is active
-        if (providerBundle.getStatus().equals(vocabularyService.get("approved provider").getId())) {
-            return this.getAll(ff, null).getResults().stream().map(TrainingResourceBundle::getTrainingResource).collect(Collectors.toList());
-        }
-        throw new InsufficientAuthenticationException("You cannot view the Training Resources of the specific Provider");
-    }
-
-    @Override
     public List<TrainingResourceBundle> getInactiveResources(String providerId) {
         FacetFilter ff = new FacetFilter();
         ff.addFilter("resource_organisation", providerId);
@@ -610,28 +584,6 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
         ff.setQuantity(maxQuantity);
         ff.addOrderBy("title", "asc");
         return this.getAll(ff, null).getResults();
-    }
-
-    @Override
-    public Paging<LoggingInfo> getLoggingInfoHistory(String id, String catalogueId) {
-        TrainingResourceBundle trainingResourceBundle;
-        try {
-            trainingResourceBundle = get(id, catalogueId);
-            List<Resource> allResources = getResources(trainingResourceBundle.getTrainingResource().getId(), trainingResourceBundle.getTrainingResource().getCatalogueId()); // get all versions of a specific Service
-            allResources.sort(Comparator.comparing((Resource::getCreationDate)));
-            List<LoggingInfo> loggingInfoList = new ArrayList<>();
-            for (Resource resource : allResources) {
-                TrainingResourceBundle trainingResource = deserialize(resource);
-                if (trainingResource.getLoggingInfo() != null) {
-                    loggingInfoList.addAll(trainingResource.getLoggingInfo());
-                }
-            }
-            loggingInfoList.sort(Comparator.comparing(LoggingInfo::getDate).reversed());
-            return new Browsing<>(loggingInfoList.size(), 0, loggingInfoList.size(), loggingInfoList, null);
-        } catch (ResourceNotFoundException e) {
-            logger.info("Training Resource with id '{}' not found", id);
-        }
-        return null;
     }
 
     @Override
@@ -668,17 +620,6 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
         return this.getAll(ff, securityService.getAdminAccess()).getResults().stream().map(TrainingResourceBundle::getTrainingResource).collect(Collectors.toList());
     }
 
-    public List<Resource> getResources(String id, String catalogueId) {
-        Paging<Resource> resources;
-        resources = searchService
-                .cqlQuery(String.format("resource_internal_id = \"%s\"  AND catalogue_id = \"%s\"", id, catalogueId),
-                        getResourceTypeName(), maxQuantity, 0, "modifiedAt", "DESC");
-        if (resources != null) {
-            return resources.getResults();
-        }
-        return Collections.emptyList();
-    }
-
     @Override
     public TrainingResourceBundle getOrElseReturnNull(String id) {
         TrainingResourceBundle trainingResourceBundle;
@@ -691,83 +632,28 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
     }
 
     @Override
-    public List<String> getChildrenFromParent(String type, String parent, List<Map<String, Object>> rec) {
-        List<String> finalResults = new ArrayList<>();
-        List<String> allSub = new ArrayList<>();
-        List<String> correctedSubs = new ArrayList<>();
-        for (Map<String, Object> map : rec) {
-            for (Map.Entry<String, Object> entry : map.entrySet()) {
-                String trimmed = entry.getValue().toString().replace("{", "").replace("}", "");
-                if (!allSub.contains(trimmed)) {
-                    allSub.add((trimmed));
-                }
-            }
-        }
-        // Required step to fix joint subcategories (sub1,sub2,sub3) who passed as 1 value
-        for (String item : allSub) {
-            if (item.contains(",")) {
-                String[] itemParts = item.split(",");
-                correctedSubs.addAll(Arrays.asList(itemParts));
-            } else {
-                correctedSubs.add(item);
-            }
-        }
-        if (type.equalsIgnoreCase("SCIENTIFIC_DOMAIN")) {
-            String[] parts = parent.split("-");
-            for (String id : correctedSubs) {
-                if (id.contains(parts[1])) {
-                    finalResults.add(id);
-                }
-            }
-        } else {
-            String[] parts = parent.split("-");
-            for (String id : correctedSubs) {
-                if (id.contains(parts[2])) {
-                    finalResults.add(id);
-                }
-            }
-        }
-        return finalResults;
-    }
-
-    @Override
     public Browsing<TrainingResourceBundle> getAll(FacetFilter ff, Authentication auth) {
-        // if user is Unauthorized, return active/latest ONLY
-        if (auth == null) {
-            ff.addFilter("active", true);
-            ff.addFilter("published", false);
-        }
-        if (auth != null && auth.isAuthenticated()) {
-            // if user is Authorized with ROLE_USER, return active/latest ONLY
-            if (!securityService.hasRole(auth, "ROLE_PROVIDER") && !securityService.hasRole(auth, "ROLE_EPOT") &&
-                    !securityService.hasRole(auth, "ROLE_ADMIN")) {
-                ff.addFilter("active", true);
-                ff.addFilter("published", false);
-            }
-        }
+        updateFacetFilterConsideringTheAuthorization(ff, auth);
 
         ff.setBrowseBy(genericManager.getBrowseBy(getResourceTypeName()));
         ff.setResourceType(getResourceTypeName());
-
-        return getMatchingResources(ff);
-    }
-
-    @Override
-    public Browsing<TrainingResourceBundle> getAllForAdmin(FacetFilter filter, Authentication auth) {
-        filter.setBrowseBy(genericManager.getBrowseBy(getResourceTypeName()));
-        filter.setResourceType(getResourceTypeName());
-        return getMatchingResources(filter);
-    }
-
-    private Browsing<TrainingResourceBundle> getMatchingResources(FacetFilter ff) {
         Browsing<TrainingResourceBundle> resources;
-
         resources = getResults(ff);
         if (!resources.getResults().isEmpty() && !resources.getFacets().isEmpty()) {
             resources.setFacets(facetLabelService.generateLabels(resources.getFacets()));
         }
-
         return resources;
+    }
+
+    private void updateFacetFilterConsideringTheAuthorization(FacetFilter filter, Authentication auth) {
+        // if user is Unauthorized, return active ONLY
+        if (auth == null || !auth.isAuthenticated() || (
+                !securityService.hasRole(auth, "ROLE_PROVIDER") &&
+                        !securityService.hasRole(auth, "ROLE_EPOT") &&
+                        !securityService.hasRole(auth, "ROLE_ADMIN"))) {
+            filter.addFilter("active", true);
+            filter.addFilter("published", false);
+        }
     }
 
     @Override

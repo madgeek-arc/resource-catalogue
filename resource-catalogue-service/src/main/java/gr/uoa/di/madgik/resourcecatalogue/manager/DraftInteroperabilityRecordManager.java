@@ -154,6 +154,9 @@ public class DraftInteroperabilityRecordManager extends ResourceManager<Interope
         ff.setQuantity(1000);
         List<ProviderBundle> providers = providerService.getMy(ff, auth).getResults();
 
+        if (filter == null) {
+            filter = new FacetFilter();
+        }
         filter.addFilter("provider_id", providers.stream().map(ProviderBundle::getId).toList());
         filter.setResourceType(getResourceTypeName());
         return this.getAll(filter, auth);

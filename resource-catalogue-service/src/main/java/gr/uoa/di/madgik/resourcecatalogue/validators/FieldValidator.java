@@ -285,7 +285,9 @@ public class FieldValidator {
 
         } catch (HttpStatusCodeException e) {
             logger.trace(e.getMessage());
-            throw e;
+            throw new ValidationException(
+                    String.format("URL '%s' found on field '%s' responded with error code: %d",
+                            urlForValidation, field.getName(), e.getStatusCode().value()));
         } catch (Exception e) {
             logger.trace(e.getMessage());
             throw new ValidationException("Failed to validate URL: " + urlForValidation);

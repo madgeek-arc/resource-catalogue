@@ -71,25 +71,7 @@ public interface ServiceBundleService<T extends Bundle<?>> extends ResourceServi
      * @return {@link T}
      * @throws ResourceNotFoundException
      */
-    T updateResource(T resource, String catalogueId, String comment, Authentication auth)
-           ;
-
-    /**
-     * @param catalogueId Catalogue ID
-     * @param resourceId  Resource ID
-     * @param auth        Authentication
-     * @return {@link T}
-     */
-    T getCatalogueResource(String catalogueId, String resourceId, Authentication auth);
-
-    /**
-     * Returns the Resource with the specified id.
-     *
-     * @param id          Resource ID
-     * @param catalogueId Catalogue ID
-     * @return {@link T}
-     */
-    T get(String id, String catalogueId);
+    T updateResource(T resource, String catalogueId, String comment, Authentication auth);
 
     /**
      * Get ResourceBundles by a specific field.
@@ -124,25 +106,6 @@ public interface ServiceBundleService<T extends Bundle<?>> extends ResourceServi
      * @return {@link Resource}
      */
     Resource getResource(String id, String catalogueId);
-
-    /**
-     * Return children vocabularies from parent vocabularies
-     *
-     * @param type   Vocabulary's type
-     * @param parent Vocabulary's parent
-     * @param rec
-     * @return {@link List}&lt;{@link String}&gt;
-     */
-    List<String> getChildrenFromParent(String type, String parent, List<Map<String, Object>> rec);
-
-    /**
-     * Gets a Browsing of all Services for admins
-     *
-     * @param filter FacetFilter
-     * @param auth   Authentication
-     * @return {@link Browsing}&lt;{@link T}&gt;
-     */
-    Browsing<T> getAllForAdmin(FacetFilter filter, Authentication auth);
 
     /**
      * Get a paging of random Services
@@ -214,7 +177,9 @@ public interface ServiceBundleService<T extends Bundle<?>> extends ResourceServi
      * @param catalogueId Catalogue ID
      * @return {@link Paging}&lt;{@link LoggingInfo}&gt;
      */
-    Paging<LoggingInfo> getLoggingInfoHistory(String id, String catalogueId);
+    default Paging<LoggingInfo> getLoggingInfoHistory(String id, String catalogueId) {
+        return getLoggingInfoHistory(get(id));
+    }
 
     /**
      * Change the Provider of the specific Service

@@ -22,6 +22,7 @@ import gr.uoa.di.madgik.registry.exception.ResourceException;
 import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.registry.service.ResourceCRUDService;
 import gr.uoa.di.madgik.resourcecatalogue.domain.AlternativeIdentifier;
+import gr.uoa.di.madgik.resourcecatalogue.domain.DatasourceBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Identifiers;
 import gr.uoa.di.madgik.resourcecatalogue.domain.InteroperabilityRecordBundle;
 import gr.uoa.di.madgik.resourcecatalogue.utils.JmsService;
@@ -36,21 +37,18 @@ import org.springframework.stereotype.Service;
 import java.lang.reflect.InvocationTargetException;
 
 @Service("publicInteroperabilityRecordManager")
-public class PublicInteroperabilityRecordManager extends AbstractPublicResourceManager<InteroperabilityRecordBundle>
-        implements ResourceCRUDService<InteroperabilityRecordBundle, Authentication> {
+public class PublicInteroperabilityRecordService extends ResourceManager<InteroperabilityRecordBundle>
+        implements PublicResourceService<InteroperabilityRecordBundle> {
 
-    private static final Logger logger = LoggerFactory.getLogger(PublicInteroperabilityRecordManager.class);
+    private static final Logger logger = LoggerFactory.getLogger(PublicInteroperabilityRecordService.class);
     private final JmsService jmsService;
     private final ProviderResourcesCommonMethods commonMethods;
-    private final PublicResourceUtils publicResourceUtils;
 
-    public PublicInteroperabilityRecordManager(JmsService jmsService,
-                                               ProviderResourcesCommonMethods commonMethods,
-                                               PublicResourceUtils publicResourceUtils) {
+    public PublicInteroperabilityRecordService(JmsService jmsService,
+                                               ProviderResourcesCommonMethods commonMethods) {
         super(InteroperabilityRecordBundle.class);
         this.jmsService = jmsService;
         this.commonMethods = commonMethods;
-        this.publicResourceUtils = publicResourceUtils;
     }
 
     @Override
@@ -67,14 +65,14 @@ public class PublicInteroperabilityRecordManager extends AbstractPublicResourceM
     public InteroperabilityRecordBundle add(InteroperabilityRecordBundle interoperabilityRecordBundle, Authentication authentication) {
         String lowerLevelResourceId = interoperabilityRecordBundle.getId();
         Identifiers.createOriginalId(interoperabilityRecordBundle);
-        interoperabilityRecordBundle.setId(publicResourceUtils.createPublicResourceId(
+        interoperabilityRecordBundle.setId(PublicResourceUtils.createPublicResourceId(
                 interoperabilityRecordBundle.getInteroperabilityRecord().getId(),
                 interoperabilityRecordBundle.getInteroperabilityRecord().getCatalogueId()));
         commonMethods.restrictPrefixRepetitionOnPublicResources(interoperabilityRecordBundle.getId(),
                 interoperabilityRecordBundle.getInteroperabilityRecord().getCatalogueId());
 
         // sets public id to providerId
-        updateInteroperabilityRecordIdsToPublic(interoperabilityRecordBundle);
+        updateIdsToPublic(interoperabilityRecordBundle);
 
         interoperabilityRecordBundle.getMetadata().setPublished(true);
         // POST PID
@@ -102,10 +100,10 @@ public class PublicInteroperabilityRecordManager extends AbstractPublicResourceM
 
     @Override
     public InteroperabilityRecordBundle update(InteroperabilityRecordBundle interoperabilityRecordBundle, Authentication authentication) {
-        InteroperabilityRecordBundle published = super.get(publicResourceUtils.createPublicResourceId(
+        InteroperabilityRecordBundle published = super.get(PublicResourceUtils.createPublicResourceId(
                 interoperabilityRecordBundle.getInteroperabilityRecord().getId(),
                 interoperabilityRecordBundle.getInteroperabilityRecord().getCatalogueId()));
-        InteroperabilityRecordBundle ret = super.get(publicResourceUtils.createPublicResourceId(
+        InteroperabilityRecordBundle ret = super.get(PublicResourceUtils.createPublicResourceId(
                 interoperabilityRecordBundle.getInteroperabilityRecord().getId(),
                 interoperabilityRecordBundle.getInteroperabilityRecord().getCatalogueId()));
         try {
@@ -115,7 +113,7 @@ public class PublicInteroperabilityRecordManager extends AbstractPublicResourceM
         }
 
         // sets public id to providerId
-        updateInteroperabilityRecordIdsToPublic(interoperabilityRecordBundle);
+        updateIdsToPublic(interoperabilityRecordBundle);
 
         ret.getInteroperabilityRecord().setAlternativeIdentifiers(published.getInteroperabilityRecord().getAlternativeIdentifiers());
         ret.setIdentifiers(published.getIdentifiers());
@@ -130,7 +128,7 @@ public class PublicInteroperabilityRecordManager extends AbstractPublicResourceM
     @Override
     public void delete(InteroperabilityRecordBundle interoperabilityRecordBundle) {
         try {
-            InteroperabilityRecordBundle publicInteroperabilityRecordBundle = get(publicResourceUtils.createPublicResourceId(
+            InteroperabilityRecordBundle publicInteroperabilityRecordBundle = get(PublicResourceUtils.createPublicResourceId(
                     interoperabilityRecordBundle.getInteroperabilityRecord().getId(),
                     interoperabilityRecordBundle.getInteroperabilityRecord().getCatalogueId()));
             logger.info("Deleting public Interoperability Record with id '{}'", publicInteroperabilityRecordBundle.getId());
@@ -140,4 +138,12 @@ public class PublicInteroperabilityRecordManager extends AbstractPublicResourceM
         }
     }
 
+
+    @Override
+    public void updateIdsToPublic(InteroperabilityRecordBundle bundle) {
+        // providerId
+        bundle.getInteroperabilityRecord().setProviderId(PublicResourceUtils.createPublicResourceId(
+                bundle.getInteroperabilityRecord().getProviderId(),
+                bundle.getInteroperabilityRecord().getCatalogueId()));
+    }
 }

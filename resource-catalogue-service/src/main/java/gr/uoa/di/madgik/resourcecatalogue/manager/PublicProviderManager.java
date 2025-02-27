@@ -43,17 +43,14 @@ public class PublicProviderManager extends ResourceManager<ProviderBundle> imple
     private final JmsService jmsService;
     private final ProviderResourcesCommonMethods commonMethods;
     private final FacetLabelService facetLabelService;
-    private final PublicResourceUtils publicResourceUtils;
 
     public PublicProviderManager(JmsService jmsService,
                                  ProviderResourcesCommonMethods commonMethods,
-                                 FacetLabelService facetLabelService,
-                                 PublicResourceUtils publicResourceUtils) {
+                                 FacetLabelService facetLabelService) {
         super(ProviderBundle.class);
         this.jmsService = jmsService;
         this.commonMethods = commonMethods;
         this.facetLabelService = facetLabelService;
-        this.publicResourceUtils = publicResourceUtils;
     }
 
     @Override
@@ -74,7 +71,7 @@ public class PublicProviderManager extends ResourceManager<ProviderBundle> imple
     public ProviderBundle add(ProviderBundle providerBundle, Authentication authentication) {
         String lowerLevelProviderId = providerBundle.getId();
         Identifiers.createOriginalId(providerBundle);
-        providerBundle.setId(publicResourceUtils.createPublicResourceId(providerBundle.getProvider().getId(),
+        providerBundle.setId(PublicResourceUtils.createPublicResourceId(providerBundle.getProvider().getId(),
                 providerBundle.getProvider().getCatalogueId()));
         commonMethods.restrictPrefixRepetitionOnPublicResources(providerBundle.getId(), providerBundle.getProvider().getCatalogueId());
         providerBundle.getMetadata().setPublished(true);
@@ -103,9 +100,9 @@ public class PublicProviderManager extends ResourceManager<ProviderBundle> imple
 
     @Override
     public ProviderBundle update(ProviderBundle providerBundle, Authentication authentication) {
-        ProviderBundle published = super.get(publicResourceUtils.createPublicResourceId(providerBundle.getProvider().getId(),
+        ProviderBundle published = super.get(PublicResourceUtils.createPublicResourceId(providerBundle.getProvider().getId(),
                 providerBundle.getProvider().getCatalogueId()));
-        ProviderBundle ret = super.get(publicResourceUtils.createPublicResourceId(providerBundle.getProvider().getId(),
+        ProviderBundle ret = super.get(PublicResourceUtils.createPublicResourceId(providerBundle.getProvider().getId(),
                 providerBundle.getProvider().getCatalogueId()));
         try {
             BeanUtils.copyProperties(ret, providerBundle);
@@ -126,7 +123,7 @@ public class PublicProviderManager extends ResourceManager<ProviderBundle> imple
     @Override
     public void delete(ProviderBundle providerBundle) {
         try {
-            ProviderBundle publicProviderBundle = get(publicResourceUtils.createPublicResourceId(
+            ProviderBundle publicProviderBundle = get(PublicResourceUtils.createPublicResourceId(
                     providerBundle.getProvider().getId(),
                     providerBundle.getProvider().getCatalogueId()));
             logger.info("Deleting public Provider with id '{}'", publicProviderBundle.getId());

@@ -22,6 +22,7 @@ import gr.uoa.di.madgik.registry.exception.ResourceException;
 import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.registry.service.ResourceCRUDService;
 import gr.uoa.di.madgik.resourcecatalogue.domain.AlternativeIdentifier;
+import gr.uoa.di.madgik.resourcecatalogue.domain.DatasourceBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Identifiers;
 import gr.uoa.di.madgik.resourcecatalogue.domain.ServiceBundle;
 import gr.uoa.di.madgik.resourcecatalogue.utils.FacetLabelService;
@@ -37,23 +38,21 @@ import org.springframework.stereotype.Service;
 import java.lang.reflect.InvocationTargetException;
 
 @Service("publicServiceManager")
-public class PublicServiceManager extends AbstractPublicResourceManager<ServiceBundle> implements ResourceCRUDService<ServiceBundle, Authentication> {
+public class PublicServiceService extends ResourceManager<ServiceBundle>
+        implements PublicResourceService<ServiceBundle> {
 
-    private static final Logger logger = LoggerFactory.getLogger(PublicServiceManager.class);
+    private static final Logger logger = LoggerFactory.getLogger(PublicServiceService.class);
     private final JmsService jmsService;
     private final ProviderResourcesCommonMethods commonMethods;
     private final FacetLabelService facetLabelService;
-    private final PublicResourceUtils publicResourceUtils;
 
-    public PublicServiceManager(JmsService jmsService,
+    public PublicServiceService(JmsService jmsService,
                                 ProviderResourcesCommonMethods commonMethods,
-                                FacetLabelService facetLabelService,
-                                PublicResourceUtils publicResourceUtils) {
+                                FacetLabelService facetLabelService) {
         super(ServiceBundle.class);
         this.jmsService = jmsService;
         this.commonMethods = commonMethods;
         this.facetLabelService = facetLabelService;
-        this.publicResourceUtils = publicResourceUtils;
     }
 
     @Override
@@ -74,12 +73,12 @@ public class PublicServiceManager extends AbstractPublicResourceManager<ServiceB
     public ServiceBundle add(ServiceBundle serviceBundle, Authentication authentication) {
         String lowerLevelResourceId = serviceBundle.getId();
         Identifiers.createOriginalId(serviceBundle);
-        serviceBundle.setId(publicResourceUtils.createPublicResourceId(serviceBundle.getService().getId(),
+        serviceBundle.setId(PublicResourceUtils.createPublicResourceId(serviceBundle.getService().getId(),
                 serviceBundle.getService().getCatalogueId()));
         commonMethods.restrictPrefixRepetitionOnPublicResources(serviceBundle.getId(), serviceBundle.getService().getCatalogueId());
 
         // sets public ids to resource organisation, resource providers and related/required resources
-        updateServiceIdsToPublic(serviceBundle);
+        updateIdsToPublic(serviceBundle);
 
         serviceBundle.getMetadata().setPublished(true);
         // POST PID
@@ -107,9 +106,9 @@ public class PublicServiceManager extends AbstractPublicResourceManager<ServiceB
 
     @Override
     public ServiceBundle update(ServiceBundle serviceBundle, Authentication authentication) {
-        ServiceBundle published = super.get(publicResourceUtils.createPublicResourceId(serviceBundle.getService().getId(),
+        ServiceBundle published = super.get(PublicResourceUtils.createPublicResourceId(serviceBundle.getService().getId(),
                 serviceBundle.getService().getCatalogueId()));
-        ServiceBundle ret = super.get(publicResourceUtils.createPublicResourceId(serviceBundle.getService().getId(),
+        ServiceBundle ret = super.get(PublicResourceUtils.createPublicResourceId(serviceBundle.getService().getId(),
                 serviceBundle.getService().getCatalogueId()));
         try {
             BeanUtils.copyProperties(ret, serviceBundle);
@@ -118,7 +117,7 @@ public class PublicServiceManager extends AbstractPublicResourceManager<ServiceB
         }
 
         // sets public ids to resource organisation, resource providers and related/required resources
-        updateServiceIdsToPublic(ret);
+        updateIdsToPublic(ret);
 
         ret.getService().setAlternativeIdentifiers(published.getService().getAlternativeIdentifiers());
         ret.setIdentifiers(published.getIdentifiers());
@@ -133,7 +132,7 @@ public class PublicServiceManager extends AbstractPublicResourceManager<ServiceB
     @Override
     public void delete(ServiceBundle serviceBundle) {
         try {
-            ServiceBundle publicServiceBundle = get(publicResourceUtils.createPublicResourceId(
+            ServiceBundle publicServiceBundle = get(PublicResourceUtils.createPublicResourceId(
                     serviceBundle.getService().getId(),
                     serviceBundle.getService().getCatalogueId()));
             logger.info("Deleting public Service with id '{}'", publicServiceBundle.getId());
@@ -141,5 +140,30 @@ public class PublicServiceManager extends AbstractPublicResourceManager<ServiceB
             jmsService.convertAndSendTopic("service.delete", publicServiceBundle);
         } catch (ResourceException | ResourceNotFoundException ignore) {
         }
+    }
+
+    @Override
+    public void updateIdsToPublic(ServiceBundle bundle) {
+        // Resource Organisation
+        bundle.getService().setResourceOrganisation(PublicResourceUtils.createPublicResourceId(
+                bundle.getService().getResourceOrganisation(), bundle.getService().getCatalogueId()));
+
+        // Resource Providers
+        bundle.getService().setResourceProviders(
+                appendCatalogueId(
+                        bundle.getService().getResourceProviders(),
+                        bundle.getService().getCatalogueId()));
+
+        // Related Resources
+        bundle.getService().setRelatedResources(
+                appendCatalogueId(
+                        bundle.getService().getRelatedResources(),
+                        bundle.getService().getCatalogueId()));
+
+        // Required Resources
+        bundle.getService().setRequiredResources(
+                appendCatalogueId(
+                        bundle.getService().getRequiredResources(),
+                        bundle.getService().getCatalogueId()));
     }
 }

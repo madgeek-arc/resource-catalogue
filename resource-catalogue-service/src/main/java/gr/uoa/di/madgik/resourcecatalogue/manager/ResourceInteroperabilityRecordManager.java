@@ -44,7 +44,7 @@ public class ResourceInteroperabilityRecordManager extends ResourceManager<Resou
     private final ServiceBundleService<ServiceBundle> serviceBundleService;
     private final TrainingResourceService trainingResourceService;
     private final InteroperabilityRecordService interoperabilityRecordService;
-    private final PublicResourceInteroperabilityRecordManager publicResourceInteroperabilityRecordManager;
+    private final PublicResourceInteroperabilityRecordService publicResourceInteroperabilityRecordManager;
     private final SecurityService securityService;
     private final ProviderResourcesCommonMethods commonMethods;
     private final IdCreator idCreator;
@@ -53,7 +53,7 @@ public class ResourceInteroperabilityRecordManager extends ResourceManager<Resou
                                                  TrainingResourceService trainingResourceService,
                                                  InteroperabilityRecordService interoperabilityRecordService,
                                                  SecurityService securityService, ProviderResourcesCommonMethods commonMethods,
-                                                 PublicResourceInteroperabilityRecordManager publicResourceInteroperabilityRecordManager,
+                                                 PublicResourceInteroperabilityRecordService publicResourceInteroperabilityRecordManager,
                                                  IdCreator idCreator) {
         super(ResourceInteroperabilityRecordBundle.class);
         this.serviceBundleService = serviceBundleService;

@@ -396,13 +396,13 @@ public class CatalogueController {
     //region Service
     @Operation(description = "Returns the Service of the specific Catalogue with the given id.")
     @GetMapping(path = "{catalogueId}/service/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    public ResponseEntity<?> getCatalogueService(@PathVariable("catalogueId") String catalogueId,
+    public ResponseEntity<?> getCatalogueService(@Deprecated @PathVariable("catalogueId") String catalogueId,
                                                  @Parameter(description = "The left part of the ID before the '/'")
                                                  @PathVariable("prefix") String prefix,
                                                  @Parameter(description = "The right part of the ID after the '/'")
                                                  @PathVariable("suffix") String suffix) {
         String serviceId = prefix + "/" + suffix;
-        return new ResponseEntity<>(serviceBundleService.get(serviceId, catalogueId).getService(), HttpStatus.OK);
+        return new ResponseEntity<>(serviceBundleService.get(serviceId).getService(), HttpStatus.OK);
     }
 
     @Operation(description = "Creates a new Service for the specific Catalogue.")
@@ -449,14 +449,14 @@ public class CatalogueController {
     @Operation(description = "Deletes the Service of the specific Catalogue with the given id.")
     @DeleteMapping(path = "{catalogueId}/service/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.hasAdminAccess(#auth, #catalogueId)")
-    public ResponseEntity<Service> deleteCatalogueService(@PathVariable("catalogueId") String catalogueId,
+    public ResponseEntity<Service> deleteCatalogueService(@Deprecated @PathVariable("catalogueId") String catalogueId,
                                                           @Parameter(description = "The left part of the ID before the '/'")
                                                           @PathVariable("prefix") String prefix,
                                                           @Parameter(description = "The right part of the ID after the '/'")
                                                           @PathVariable("suffix") String suffix,
                                                           @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
         String serviceId = prefix + "/" + suffix;
-        ServiceBundle serviceBundle = serviceBundleService.get(serviceId, catalogueId);
+        ServiceBundle serviceBundle = serviceBundleService.get(serviceId);
         if (serviceBundle == null) {
             return new ResponseEntity<>(HttpStatus.GONE);
         }

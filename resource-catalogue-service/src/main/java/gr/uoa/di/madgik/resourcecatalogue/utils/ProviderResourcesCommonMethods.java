@@ -51,7 +51,6 @@ public class ProviderResourcesCommonMethods {
     private final GenericResourceService genericResourceService;
     private final VocabularyService vocabularyService;
     private final SecurityService securityService;
-    private final PublicResourceUtils publicResourceUtils;
 
     public ProviderResourcesCommonMethods(@Lazy CatalogueService catalogueService,
                                           @Lazy ProviderService providerService,
@@ -62,8 +61,7 @@ public class ProviderResourcesCommonMethods {
                                                   resourceInteroperabilityRecordService,
                                           @Lazy GenericResourceService genericResourceService,
                                           @Lazy VocabularyService vocabularyService,
-                                          @Lazy SecurityService securityService,
-                                          PublicResourceUtils publicResourceUtils) {
+                                          @Lazy SecurityService securityService) {
         this.catalogueService = catalogueService;
         this.providerService = providerService;
         this.datasourceService = datasourceService;
@@ -73,7 +71,6 @@ public class ProviderResourcesCommonMethods {
         this.genericResourceService = genericResourceService;
         this.vocabularyService = vocabularyService;
         this.securityService = securityService;
-        this.publicResourceUtils = publicResourceUtils;
     }
 
     public void checkCatalogueIdConsistency(Object o, String catalogueId) {
@@ -395,7 +392,7 @@ public class ProviderResourcesCommonMethods {
     }
 
     private AlternativeIdentifier createAlternativeIdentifierForPID(String id, String catalogueId) {
-        String pid = publicResourceUtils.createPublicResourceId(id, catalogueId);
+        String pid = PublicResourceUtils.createPublicResourceId(id, catalogueId);
         AlternativeIdentifier alternativeIdentifier = new AlternativeIdentifier();
         alternativeIdentifier.setType("EOSC PID");
         alternativeIdentifier.setValue(pid);
@@ -481,7 +478,7 @@ public class ProviderResourcesCommonMethods {
 
     public List<AlternativeIdentifier> ensureResourceCataloguePidUniqueness(String id, String catalogueId,
                                                                             List<AlternativeIdentifier> alternativeIdentifiers) {
-        String pid = publicResourceUtils.createPublicResourceId(id, catalogueId);
+        String pid = PublicResourceUtils.createPublicResourceId(id, catalogueId);
         // removes duplicates and ensures that EOSC PID has the appropriate value
         List<AlternativeIdentifier> uniqueIdentifiers = removeDuplicates(alternativeIdentifiers);
         // if PID alternative identifier has been falsely updated, set it back to its original value

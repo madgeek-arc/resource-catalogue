@@ -21,8 +21,8 @@ import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.domain.CatalogueBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.HelpdeskBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.MonitoringBundle;
-import gr.uoa.di.madgik.resourcecatalogue.manager.PublicHelpdeskManager;
-import gr.uoa.di.madgik.resourcecatalogue.manager.PublicMonitoringManager;
+import gr.uoa.di.madgik.resourcecatalogue.manager.PublicHelpdeskService;
+import gr.uoa.di.madgik.resourcecatalogue.manager.PublicMonitoringService;
 import gr.uoa.di.madgik.resourcecatalogue.utils.JmsService;
 import gr.uoa.di.madgik.resourcecatalogue.utils.ObjectUtils;
 import gr.uoa.di.madgik.resourcecatalogue.utils.PublicResourceUtils;
@@ -42,17 +42,14 @@ public class JMSManagementAspect {
 
     private static final Logger logger = LoggerFactory.getLogger(JMSManagementAspect.class);
     private final JmsService jmsService;
-    private final PublicHelpdeskManager publicHelpdeskManager;
-    private final PublicMonitoringManager publicMonitoringManager;
-    private final PublicResourceUtils publicResourceUtils;
+    private final PublicHelpdeskService publicHelpdeskManager;
+    private final PublicMonitoringService publicMonitoringManager;
 
-    public JMSManagementAspect(JmsService jmsService, @Lazy PublicHelpdeskManager publicHelpdeskManager,
-                               @Lazy PublicMonitoringManager publicMonitoringManager,
-                               PublicResourceUtils publicResourceUtils) {
+    public JMSManagementAspect(JmsService jmsService, @Lazy PublicHelpdeskService publicHelpdeskManager,
+                               @Lazy PublicMonitoringService publicMonitoringManager) {
         this.jmsService = jmsService;
         this.publicHelpdeskManager = publicHelpdeskManager;
         this.publicMonitoringManager = publicMonitoringManager;
-        this.publicResourceUtils = publicResourceUtils;
     }
 
     @Async
@@ -88,7 +85,7 @@ public class JMSManagementAspect {
             returning = "helpdeskBundle")
     public void addHelpdeskAsPublic(final HelpdeskBundle helpdeskBundle) {
         try {
-            publicHelpdeskManager.get(publicResourceUtils.createPublicResourceId(helpdeskBundle.getHelpdesk().getId(),
+            publicHelpdeskManager.get(PublicResourceUtils.createPublicResourceId(helpdeskBundle.getHelpdesk().getId(),
                     helpdeskBundle.getCatalogueId()));
         } catch (ResourceException | ResourceNotFoundException e) {
             publicHelpdeskManager.add(ObjectUtils.clone(helpdeskBundle), null);
@@ -119,7 +116,7 @@ public class JMSManagementAspect {
             returning = "monitoringBundle")
     public void addMonitoringAsPublic(final MonitoringBundle monitoringBundle) {
         try {
-            publicMonitoringManager.get(publicResourceUtils.createPublicResourceId(monitoringBundle.getMonitoring().getId(),
+            publicMonitoringManager.get(PublicResourceUtils.createPublicResourceId(monitoringBundle.getMonitoring().getId(),
                     monitoringBundle.getCatalogueId()));
         } catch (ResourceException | ResourceNotFoundException e) {
             publicMonitoringManager.add(ObjectUtils.clone(monitoringBundle), null);

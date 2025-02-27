@@ -47,7 +47,7 @@ public class InteroperabilityRecordManager extends ResourceManager<Interoperabil
     private final IdCreator idCreator;
     private final SecurityService securityService;
     private final VocabularyService vocabularyService;
-    private final PublicInteroperabilityRecordManager publicInteroperabilityRecordManager;
+    private final PublicInteroperabilityRecordService publicInteroperabilityRecordManager;
     private final RegistrationMailService registrationMailService;
     private final ProviderResourcesCommonMethods commonMethods;
 
@@ -56,7 +56,7 @@ public class InteroperabilityRecordManager extends ResourceManager<Interoperabil
 
     public InteroperabilityRecordManager(ProviderService providerService, IdCreator idCreator,
                                          SecurityService securityService, VocabularyService vocabularyService,
-                                         PublicInteroperabilityRecordManager publicInteroperabilityRecordManager,
+                                         PublicInteroperabilityRecordService publicInteroperabilityRecordManager,
                                          RegistrationMailService registrationMailService,
                                          ProviderResourcesCommonMethods commonMethods) {
         super(InteroperabilityRecordBundle.class);

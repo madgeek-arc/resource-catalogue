@@ -164,6 +164,9 @@ public class DraftTrainingResourceManager extends ResourceManager<TrainingResour
         ff.setQuantity(1000);
         List<ProviderBundle> providers = providerService.getMy(ff, auth).getResults();
 
+        if (filter == null) {
+            filter = new FacetFilter();
+        }
         filter.addFilter("resource_organisation", providers.stream().map(ProviderBundle::getId).toList());
         filter.setResourceType(getResourceTypeName());
         return this.getAll(filter, auth);

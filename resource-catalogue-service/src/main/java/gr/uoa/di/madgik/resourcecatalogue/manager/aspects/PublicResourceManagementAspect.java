@@ -18,7 +18,7 @@ package gr.uoa.di.madgik.resourcecatalogue.manager.aspects;
 
 import gr.uoa.di.madgik.resourcecatalogue.domain.Bundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.ServiceBundle;
-import gr.uoa.di.madgik.resourcecatalogue.manager.PublicServiceManager;
+import gr.uoa.di.madgik.resourcecatalogue.manager.PublicServiceService;
 import org.aspectj.lang.annotation.AfterReturning;
 import org.aspectj.lang.annotation.Aspect;
 import org.slf4j.Logger;
@@ -32,9 +32,9 @@ public class PublicResourceManagementAspect<T extends Bundle<?>> {
 
     private static final Logger logger = LoggerFactory.getLogger(PublicResourceManagementAspect.class);
 
-    private final PublicServiceManager publicServiceManager;
+    private final PublicServiceService publicServiceManager;
 
-    public PublicResourceManagementAspect(PublicServiceManager publicServiceManager) {
+    public PublicResourceManagementAspect(PublicServiceService publicServiceManager) {
         this.publicServiceManager = publicServiceManager;
     }
 

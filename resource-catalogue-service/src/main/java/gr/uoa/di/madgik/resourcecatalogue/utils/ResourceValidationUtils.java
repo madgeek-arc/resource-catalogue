@@ -35,7 +35,7 @@ public class ResourceValidationUtils {
         resourceType = StringUtils.capitalize(resourceType);
         // check if Resource exists
         try {
-            resourceBundle = serviceBundleService.get(resourceId, catalogueId);
+            resourceBundle = serviceBundleService.get(resourceId);
             // check if Service is Public
             if (resourceBundle.getMetadata().isPublished()) {
                 throw new ValidationException(String.format("Please provide a %s ID with no catalogue prefix.", resourceType));

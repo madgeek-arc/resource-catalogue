@@ -43,7 +43,7 @@ public class MonitoringManager extends ResourceManager<MonitoringBundle> impleme
     private static final Logger logger = LoggerFactory.getLogger(MonitoringManager.class);
     private final ServiceBundleService<ServiceBundle> serviceBundleService;
     private final TrainingResourceService trainingResourceService;
-    private final PublicMonitoringManager publicMonitoringManager;
+    private final PublicMonitoringService publicMonitoringManager;
     private final SecurityService securityService;
     private final RegistrationMailService registrationMailService;
     private final ProviderResourcesCommonMethods commonMethods;
@@ -58,7 +58,7 @@ public class MonitoringManager extends ResourceManager<MonitoringBundle> impleme
 
     public MonitoringManager(ServiceBundleService<ServiceBundle> serviceBundleService,
                              TrainingResourceService trainingResourceService,
-                             PublicMonitoringManager publicMonitoringManager,
+                             PublicMonitoringService publicMonitoringManager,
                              @Lazy SecurityService securityService,
                              @Lazy RegistrationMailService registrationMailService,
                              ProviderResourcesCommonMethods commonMethods,

@@ -23,6 +23,7 @@ import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.registry.service.ResourceCRUDService;
 import gr.uoa.di.madgik.resourcecatalogue.domain.DatasourceBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Identifiers;
+import gr.uoa.di.madgik.resourcecatalogue.domain.configurationTemplates.ConfigurationTemplateInstanceBundle;
 import gr.uoa.di.madgik.resourcecatalogue.utils.JmsService;
 import gr.uoa.di.madgik.resourcecatalogue.utils.ProviderResourcesCommonMethods;
 import gr.uoa.di.madgik.resourcecatalogue.utils.PublicResourceUtils;
@@ -35,20 +36,18 @@ import org.springframework.stereotype.Service;
 import java.lang.reflect.InvocationTargetException;
 
 @Service("publicDatasourceManager")
-public class PublicDatasourceManager extends AbstractPublicResourceManager<DatasourceBundle> implements ResourceCRUDService<DatasourceBundle, Authentication> {
+public class PublicDatasourceService extends ResourceManager<DatasourceBundle>
+        implements PublicResourceService<DatasourceBundle> {
 
-    private static final Logger logger = LoggerFactory.getLogger(PublicDatasourceManager.class);
+    private static final Logger logger = LoggerFactory.getLogger(PublicDatasourceService.class);
     private final JmsService jmsService;
     private final ProviderResourcesCommonMethods commonMethods;
-    private final PublicResourceUtils publicResourceUtils;
 
-    public PublicDatasourceManager(JmsService jmsService,
-                                   ProviderResourcesCommonMethods commonMethods,
-                                   PublicResourceUtils publicResourceUtils) {
+    public PublicDatasourceService(JmsService jmsService,
+                                   ProviderResourcesCommonMethods commonMethods) {
         super(DatasourceBundle.class);
         this.jmsService = jmsService;
         this.commonMethods = commonMethods;
-        this.publicResourceUtils = publicResourceUtils;
     }
 
     @Override
@@ -75,12 +74,12 @@ public class PublicDatasourceManager extends AbstractPublicResourceManager<Datas
     public DatasourceBundle add(DatasourceBundle datasourceBundle, Authentication authentication) {
         String lowerLevelResourceId = datasourceBundle.getId();
         Identifiers.createOriginalId(datasourceBundle);
-        datasourceBundle.setId(publicResourceUtils.createPublicResourceId(datasourceBundle.getDatasource().getId(),
+        datasourceBundle.setId(PublicResourceUtils.createPublicResourceId(datasourceBundle.getDatasource().getId(),
                 datasourceBundle.getDatasource().getCatalogueId()));
         commonMethods.restrictPrefixRepetitionOnPublicResources(datasourceBundle.getId(), datasourceBundle.getDatasource().getCatalogueId());
 
         // sets public ids to providerId, serviceId
-        updateDatasourceIdsToPublic(datasourceBundle);
+        updateIdsToPublic(datasourceBundle);
 
         datasourceBundle.getMetadata().setPublished(true);
         DatasourceBundle ret;
@@ -92,9 +91,9 @@ public class PublicDatasourceManager extends AbstractPublicResourceManager<Datas
 
     @Override
     public DatasourceBundle update(DatasourceBundle datasourceBundle, Authentication authentication) {
-        DatasourceBundle published = super.get(publicResourceUtils.createPublicResourceId(datasourceBundle.getDatasource().getId(),
+        DatasourceBundle published = super.get(PublicResourceUtils.createPublicResourceId(datasourceBundle.getDatasource().getId(),
                 datasourceBundle.getDatasource().getCatalogueId()));
-        DatasourceBundle ret = super.get(publicResourceUtils.createPublicResourceId(datasourceBundle.getDatasource().getId(),
+        DatasourceBundle ret = super.get(PublicResourceUtils.createPublicResourceId(datasourceBundle.getDatasource().getId(),
                 datasourceBundle.getDatasource().getCatalogueId()));
         try {
             BeanUtils.copyProperties(ret, datasourceBundle);
@@ -103,7 +102,7 @@ public class PublicDatasourceManager extends AbstractPublicResourceManager<Datas
         }
 
         // sets public ids to providerId, serviceId
-        updateDatasourceIdsToPublic(datasourceBundle);
+        updateIdsToPublic(datasourceBundle);
 
         ret.setIdentifiers(published.getIdentifiers());
         ret.setId(published.getId());
@@ -117,7 +116,7 @@ public class PublicDatasourceManager extends AbstractPublicResourceManager<Datas
     @Override
     public void delete(DatasourceBundle datasourceBundle) {
         try {
-            DatasourceBundle publicDatasourceBundle = get(publicResourceUtils.createPublicResourceId(
+            DatasourceBundle publicDatasourceBundle = get(PublicResourceUtils.createPublicResourceId(
                     datasourceBundle.getDatasource().getId(),
                     datasourceBundle.getDatasource().getCatalogueId()));
             logger.info("Deleting public Datasource with id '{}'", publicDatasourceBundle.getId());
@@ -125,5 +124,12 @@ public class PublicDatasourceManager extends AbstractPublicResourceManager<Datas
             jmsService.convertAndSendTopic("datasource.delete", publicDatasourceBundle);
         } catch (ResourceException | ResourceNotFoundException ignore) {
         }
+    }
+
+    @Override
+    public void updateIdsToPublic(DatasourceBundle bundle) {
+        // serviceId
+        bundle.getDatasource().setServiceId(PublicResourceUtils.createPublicResourceId(
+                bundle.getDatasource().getServiceId(), bundle.getDatasource().getCatalogueId()));
     }
 }

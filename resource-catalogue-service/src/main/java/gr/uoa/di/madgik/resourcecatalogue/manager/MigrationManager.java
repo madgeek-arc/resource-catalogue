@@ -39,36 +39,34 @@ public class MigrationManager implements MigrationService {
     private static final Logger logger = LoggerFactory.getLogger(MigrationManager.class);
 
     private final ServiceBundleManager serviceBundleManager;
-    private final PublicServiceManager publicServiceManager;
+    private final PublicServiceService publicServiceManager;
     private final TrainingResourceManager trainingResourceManager;
     private final InteroperabilityRecordManager interoperabilityRecordManager;
     private final DatasourceManager datasourceManager;
-    private final PublicTrainingResourceManager publicTrainingResourceManager;
+    private final PublicTrainingResourceService publicTrainingResourceManager;
     private final ProviderManager providerService;
     private final ResourceService resourceService;
     private final ResourceInteroperabilityRecordManager resourceInteroperabilityRecordManager;
-    private final PublicResourceInteroperabilityRecordManager publicResourceInteroperabilityRecordManager;
+    private final PublicResourceInteroperabilityRecordService publicResourceInteroperabilityRecordManager;
     private final HelpdeskManager helpdeskManager;
     private final MonitoringManager monitoringManager;
     private final JmsService jmsService;
     private final SecurityService securityService;
-    private final PublicResourceUtils publicResourceUtils;
 
     @Value("${catalogue.id}")
     private String catalogueId;
     @Value("${elastic.index.max_result_window:10000}")
     private int maxQuantity;
 
-    public MigrationManager(ServiceBundleManager serviceBundleManager, PublicServiceManager publicServiceManager,
+    public MigrationManager(ServiceBundleManager serviceBundleManager, PublicServiceService publicServiceManager,
                             TrainingResourceManager trainingResourceManager, DatasourceManager datasourceManager,
                             InteroperabilityRecordManager interoperabilityRecordManager,
-                            PublicTrainingResourceManager publicTrainingResourceManager,
+                            PublicTrainingResourceService publicTrainingResourceManager,
                             ProviderManager providerService, ResourceService resourceService,
                             ResourceInteroperabilityRecordManager resourceInteroperabilityRecordManager,
-                            PublicResourceInteroperabilityRecordManager publicResourceInteroperabilityRecordManager,
+                            PublicResourceInteroperabilityRecordService publicResourceInteroperabilityRecordManager,
                             HelpdeskManager helpdeskManager, MonitoringManager monitoringManager,
-                            JmsService jmsService, SecurityService securityService,
-                            PublicResourceUtils publicResourceUtils) {
+                            JmsService jmsService, SecurityService securityService) {
         this.serviceBundleManager = serviceBundleManager;
         this.publicServiceManager = publicServiceManager;
         this.trainingResourceManager = trainingResourceManager;
@@ -83,7 +81,6 @@ public class MigrationManager implements MigrationService {
         this.monitoringManager = monitoringManager;
         this.jmsService = jmsService;
         this.securityService = securityService;
-        this.publicResourceUtils = publicResourceUtils;
     }
 
     public ProviderBundle changeProviderCatalogue(String providerId, String catalogueId, String newCatalogueId, Authentication authentication) {
@@ -101,9 +98,9 @@ public class MigrationManager implements MigrationService {
         // Public Provider
         try {
             ProviderBundle publicProviderBundle = providerService.get(catalogueId,
-                    publicResourceUtils.createPublicResourceId(providerId, catalogueId), authentication);
+                    PublicResourceUtils.createPublicResourceId(providerId, catalogueId), authentication);
             String oldPublicId = publicProviderBundle.getProvider().getId();
-            publicProviderBundle.getProvider().setId(publicResourceUtils.createPublicResourceId(providerId, newCatalogueId));
+            publicProviderBundle.getProvider().setId(PublicResourceUtils.createPublicResourceId(providerId, newCatalogueId));
             publicProviderBundle.getProvider().setCatalogueId(newCatalogueId);
 
             Resource publicResource = providerService.getResource(oldPublicId, catalogueId);
@@ -201,8 +198,8 @@ public class MigrationManager implements MigrationService {
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(maxQuantity);
         ff.addFilter("published", false);
-        List<ServiceBundle> allServices = serviceBundleManager.getAllForAdmin(ff, securityService.getAdminAccess()).getResults();
-        List<TrainingResourceBundle> allTrainingResources = trainingResourceManager.getAllForAdmin(ff, securityService.getAdminAccess()).getResults();
+        List<ServiceBundle> allServices = serviceBundleManager.getAll(ff, securityService.getAdminAccess()).getResults();
+        List<TrainingResourceBundle> allTrainingResources = trainingResourceManager.getAll(ff, securityService.getAdminAccess()).getResults();
         List<DatasourceBundle> allDatasourceBundles = datasourceManager.getAll(ff, securityService.getAdminAccess()).getResults();
         List<ResourceInteroperabilityRecordBundle> allResourceInteroperabilityRecords = resourceInteroperabilityRecordManager.getAll(ff, securityService.getAdminAccess()).getResults();
         List<HelpdeskBundle> allHelpdeskBundles = helpdeskManager.getAll(ff, securityService.getAdminAccess()).getResults();
