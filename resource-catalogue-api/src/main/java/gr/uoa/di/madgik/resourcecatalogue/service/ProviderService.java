@@ -20,7 +20,6 @@ import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.resourcecatalogue.domain.LoggingInfo;
 import gr.uoa.di.madgik.resourcecatalogue.domain.ProviderBundle;
-import gr.uoa.di.madgik.resourcecatalogue.domain.ResourceHistory;
 import gr.uoa.di.madgik.resourcecatalogue.dto.ExtendedValue;
 import gr.uoa.di.madgik.resourcecatalogue.dto.MapValues;
 import org.springframework.security.core.Authentication;
@@ -116,15 +115,6 @@ public interface ProviderService extends ResourceService<ProviderBundle>, Bundle
      * @param authentication Authentication
      */
     void deleteUserInfo(Authentication authentication);
-
-    /**
-     * Get the History of the Provider with the specified id.
-     *
-     * @param id          Provider ID
-     * @param catalogueId Catalogue ID
-     * @return {@link Paging}&lt;{@link ResourceHistory}&gt;
-     */
-    Paging<ResourceHistory> getHistory(String id, String catalogueId);
 
     /**
      * Update a Provider of the EOSC Catalogue.

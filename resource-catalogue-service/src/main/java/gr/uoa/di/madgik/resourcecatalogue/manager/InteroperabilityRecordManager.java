@@ -116,8 +116,6 @@ public class InteroperabilityRecordManager extends ResourceManager<Interoperabil
         interoperabilityRecordBundle.setLatestOnboardingInfo(loggingInfoList.getFirst());
         interoperabilityRecordBundle.setAuditState(Auditable.NOT_AUDITED);
 
-        interoperabilityRecordBundle.getInteroperabilityRecord().setCreated(String.valueOf(System.currentTimeMillis()));
-        interoperabilityRecordBundle.getInteroperabilityRecord().setUpdated(interoperabilityRecordBundle.getInteroperabilityRecord().getCreated());
         logger.info("Added a new Interoperability Record with id '{}' and title '{}'", interoperabilityRecordBundle.getId(),
                 interoperabilityRecordBundle.getInteroperabilityRecord().getTitle());
         super.add(interoperabilityRecordBundle, auth);
@@ -192,10 +190,6 @@ public class InteroperabilityRecordManager extends ResourceManager<Interoperabil
         ret.setStatus(existingInteroperabilityRecord.getStatus());
         ret.setSuspended(existingInteroperabilityRecord.isSuspended());
         ret.setAuditState(commonMethods.determineAuditState(ret.getLoggingInfo()));
-
-        // updated && created
-        ret.getInteroperabilityRecord().setCreated(existingInteroperabilityRecord.getInteroperabilityRecord().getCreated());
-        ret.getInteroperabilityRecord().setUpdated(String.valueOf(System.currentTimeMillis()));
 
         // block catalogueId updates from Provider Admins
         if (!securityService.hasRole(auth, "ROLE_ADMIN")) {

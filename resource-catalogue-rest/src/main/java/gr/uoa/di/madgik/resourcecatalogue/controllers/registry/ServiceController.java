@@ -469,8 +469,8 @@ public class ServiceController {
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<ServiceBundle> addBundle(@RequestBody ServiceBundle service, Authentication authentication) {
         ResponseEntity<ServiceBundle> ret = new ResponseEntity<>(serviceBundleService.add(service, authentication), HttpStatus.OK);
-        logger.info("User '{}' added ServiceBundle {} with id: '{}' and version: '{}'",
-                authentication, service.getService().getName(), service.getService().getId(), service.getService().getVersion());
+        logger.info("User '{}' added ServiceBundle {} with id: '{}'",
+                authentication, service.getService().getName(), service.getService().getId());
         return ret;
     }
 

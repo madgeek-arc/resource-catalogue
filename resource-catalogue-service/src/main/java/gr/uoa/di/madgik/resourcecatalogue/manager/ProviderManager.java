@@ -296,52 +296,6 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     }
 
     @Override
-    public Paging<ResourceHistory> getHistory(String id, String catalogueId) {
-        Map<String, ResourceHistory> historyMap = new TreeMap<>();
-
-        Resource resource = getResource(id, catalogueId);
-        List<Version> versions = versionService.getVersionsByResource(resource.getId());
-        versions.sort((version, t1) -> {
-            if (version.getCreationDate().getTime() < t1.getCreationDate().getTime()) {
-                return -1;
-            }
-            return 1;
-        });
-
-        // create the first entry from the current resource
-        ProviderBundle providerBundle;
-        providerBundle = deserialize(resource);
-        if (providerBundle != null && providerBundle.getMetadata() != null) {
-            historyMap.put(providerBundle.getMetadata().getModifiedAt(), new ResourceHistory(providerBundle, resource.getId()));
-        }
-
-        // create version entries
-        for (Version version : versions) {
-            resource = (version.getResource() == null ? getResource(version.getParentId()) : version.getResource());
-            resource.setPayload(version.getPayload());
-            providerBundle = deserialize(resource);
-            if (providerBundle != null) {
-                try {
-                    historyMap.putIfAbsent(providerBundle.getMetadata().getModifiedAt(), new ResourceHistory(providerBundle, version.getId()));
-                } catch (NullPointerException e) {
-                    logger.warn("Provider with id '{}' does not have Metadata", providerBundle.getId());
-                }
-            }
-        }
-
-        // sort list by modification date
-        List<ResourceHistory> history = new ArrayList<>(historyMap.values());
-        history.sort((resourceHistory, t1) -> {
-            if (Long.parseLong(resourceHistory.getModifiedAt()) < Long.parseLong(t1.getModifiedAt())) {
-                return 1;
-            }
-            return -1;
-        });
-
-        return new Browsing<>(history.size(), 0, history.size(), history, null);
-    }
-
-    @Override
     public Browsing<ProviderBundle> getAll(FacetFilter ff, Authentication auth) {
         List<ProviderBundle> retList = new ArrayList<>();
 

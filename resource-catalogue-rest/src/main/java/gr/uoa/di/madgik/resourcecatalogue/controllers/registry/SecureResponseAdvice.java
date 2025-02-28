@@ -107,8 +107,8 @@ public class SecureResponseAdvice<T> implements ResponseBodyAdvice<T> {
 
     private void modifyService(T service, Authentication auth) {
         if (!this.securityService.isResourceAdmin(auth, ((Service) service).getId())) {
-            ((Service) service).setMainContact(null);
-            ((Service) service).setSecurityContactEmail(null);
+            // TODO: role
+//            ((Service) service).setRole(null);
         }
     }
 
@@ -120,8 +120,8 @@ public class SecureResponseAdvice<T> implements ResponseBodyAdvice<T> {
         modifyLoggingInfo((T) ((ServiceBundle) serviceBundle).getLatestOnboardingInfo());
 
         if (!this.securityService.isResourceAdmin(auth, ((ServiceBundle) serviceBundle).getId())) {
-            ((ServiceBundle) serviceBundle).getService().setMainContact(null);
-            ((ServiceBundle) serviceBundle).getService().setSecurityContactEmail(null);
+            // TODO: role
+//            ((ServiceBundle) serviceBundle).getService().setRole(null);
             ((ServiceBundle) serviceBundle).getMetadata().setTerms(null);
         }
     }

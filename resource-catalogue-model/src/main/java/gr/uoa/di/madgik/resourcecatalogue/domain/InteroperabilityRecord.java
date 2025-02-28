@@ -17,8 +17,10 @@
 package gr.uoa.di.madgik.resourcecatalogue.domain;
 
 import gr.uoa.di.madgik.resourcecatalogue.annotation.FieldValidation;
-import gr.uoa.di.madgik.resourcecatalogue.annotation.VocabularyValidation;
-import gr.uoa.di.madgik.resourcecatalogue.domain.interoperabilityRecord.internalFields.*;
+import gr.uoa.di.madgik.resourcecatalogue.domain.interoperabilityRecord.internalFields.Creator;
+import gr.uoa.di.madgik.resourcecatalogue.domain.interoperabilityRecord.internalFields.RelatedStandard;
+import gr.uoa.di.madgik.resourcecatalogue.domain.interoperabilityRecord.internalFields.ResourceTypeInfo;
+import gr.uoa.di.madgik.resourcecatalogue.domain.interoperabilityRecord.internalFields.Right;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlElementWrapper;
@@ -55,14 +57,6 @@ public class InteroperabilityRecord implements Identifiable {
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     @FieldValidation(containsId = true, idClass = Provider.class)
     private String providerId;
-
-    /**
-     * Interoperability Record Identifier Info
-     */
-    @XmlElement(required = true)
-    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
-    @FieldValidation
-    private IdentifierInfo identifierInfo;
 
     /**
      * The main researchers involved in producing the data, or the authors of the publication, in priority order.
@@ -103,22 +97,6 @@ public class InteroperabilityRecord implements Identifiable {
     private List<ResourceTypeInfo> resourceTypesInfo;
 
     /**
-     * Time/date the record was created.
-     */
-    @XmlElement
-    @Schema
-    @FieldValidation(nullable = true)
-    private String created;
-
-    /**
-     * Time/date the record was last saved, with or without modifications.
-     */
-    @XmlElement
-    @Schema
-    @FieldValidation(nullable = true)
-    private String updated;
-
-    /**
      * Standards related to the guideline
      * This should point out to related standards only when it is a prerequisite/dependency, and likely to influence
      * a Provider's design towards interoperability based on the guideline.
@@ -139,51 +117,6 @@ public class InteroperabilityRecord implements Identifiable {
     private List<Right> rights;
 
     /**
-     * All additional information that does not fit in any of the other categories.
-     * May be used for technical information.
-     */
-    @XmlElement(required = true)
-    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
-    @FieldValidation
-    private String description;
-
-    /**
-     * Status of the resource.
-     */
-    @XmlElement(required = true)
-    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
-    @FieldValidation(containsId = true, idClass = Vocabulary.class)
-    @VocabularyValidation(type = Vocabulary.Type.IR_STATUS)
-    private String status;
-
-    /**
-     * Intended Audience for the Guideline.
-     */
-    @XmlElement
-    @Schema
-    @FieldValidation(nullable = true, containsId = true, idClass = Vocabulary.class)
-    @VocabularyValidation(type = Vocabulary.Type.SCIENTIFIC_DOMAIN)
-    private String domain;
-
-    /**
-     * The type of record within the registry
-     */
-    @XmlElement(required = true)
-    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
-    @FieldValidation(containsId = true, idClass = Vocabulary.class)
-    @VocabularyValidation(type = Vocabulary.Type.IR_EOSC_GUIDELINE_TYPE)
-    private String eoscGuidelineType;
-
-    /**
-     * A short summary of any options to integrate this guideline (if applicable).
-     */
-    @XmlElementWrapper(name = "eoscIntegrationOptions")
-    @XmlElement(name = "eoscIntegrationOption")
-    @Schema
-    @FieldValidation(nullable = true)
-    private List<String> eoscIntegrationOptions;
-
-    /**
      * Other types of Identifiers for the specific Service (eg. PID)
      */
     @XmlElementWrapper(name = "alternativeIdentifiers")
@@ -195,38 +128,29 @@ public class InteroperabilityRecord implements Identifiable {
     public InteroperabilityRecord() {
     }
 
-    public InteroperabilityRecord(String id, String catalogueId, String providerId, IdentifierInfo identifierInfo, List<Creator> creators, String title, int publicationYear, List<ResourceTypeInfo> resourceTypesInfo, String created, String updated, List<RelatedStandard> relatedStandards, List<Right> rights, String description, String status, String domain, String eoscGuidelineType, List<String> eoscIntegrationOptions, List<AlternativeIdentifier> alternativeIdentifiers) {
+    public InteroperabilityRecord(String id, String catalogueId, String providerId, List<Creator> creators, String title, int publicationYear, List<ResourceTypeInfo> resourceTypesInfo, List<RelatedStandard> relatedStandards, List<Right> rights, List<AlternativeIdentifier> alternativeIdentifiers) {
         this.id = id;
         this.catalogueId = catalogueId;
         this.providerId = providerId;
-        this.identifierInfo = identifierInfo;
         this.creators = creators;
         this.title = title;
         this.publicationYear = publicationYear;
         this.resourceTypesInfo = resourceTypesInfo;
-        this.created = created;
-        this.updated = updated;
         this.relatedStandards = relatedStandards;
         this.rights = rights;
-        this.description = description;
-        this.status = status;
-        this.domain = domain;
-        this.eoscGuidelineType = eoscGuidelineType;
-        this.eoscIntegrationOptions = eoscIntegrationOptions;
         this.alternativeIdentifiers = alternativeIdentifiers;
     }
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         InteroperabilityRecord that = (InteroperabilityRecord) o;
-        return publicationYear == that.publicationYear && Objects.equals(id, that.id) && Objects.equals(catalogueId, that.catalogueId) && Objects.equals(providerId, that.providerId) && Objects.equals(identifierInfo, that.identifierInfo) && Objects.equals(creators, that.creators) && Objects.equals(title, that.title) && Objects.equals(resourceTypesInfo, that.resourceTypesInfo) && Objects.equals(created, that.created) && Objects.equals(updated, that.updated) && Objects.equals(relatedStandards, that.relatedStandards) && Objects.equals(rights, that.rights) && Objects.equals(description, that.description) && Objects.equals(status, that.status) && Objects.equals(domain, that.domain) && Objects.equals(eoscGuidelineType, that.eoscGuidelineType) && Objects.equals(eoscIntegrationOptions, that.eoscIntegrationOptions) && Objects.equals(alternativeIdentifiers, that.alternativeIdentifiers);
+        return publicationYear == that.publicationYear && Objects.equals(id, that.id) && Objects.equals(catalogueId, that.catalogueId) && Objects.equals(providerId, that.providerId) && Objects.equals(creators, that.creators) && Objects.equals(title, that.title) && Objects.equals(resourceTypesInfo, that.resourceTypesInfo) && Objects.equals(relatedStandards, that.relatedStandards) && Objects.equals(rights, that.rights) && Objects.equals(alternativeIdentifiers, that.alternativeIdentifiers);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, catalogueId, providerId, identifierInfo, creators, title, publicationYear, resourceTypesInfo, created, updated, relatedStandards, rights, description, status, domain, eoscGuidelineType, eoscIntegrationOptions, alternativeIdentifiers);
+        return Objects.hash(id, catalogueId, providerId, creators, title, publicationYear, resourceTypesInfo, relatedStandards, rights, alternativeIdentifiers);
     }
 
     @Override
@@ -235,20 +159,12 @@ public class InteroperabilityRecord implements Identifiable {
                 "id='" + id + '\'' +
                 ", catalogueId='" + catalogueId + '\'' +
                 ", providerId='" + providerId + '\'' +
-                ", identifierInfo=" + identifierInfo +
                 ", creators=" + creators +
                 ", title='" + title + '\'' +
                 ", publicationYear=" + publicationYear +
                 ", resourceTypesInfo=" + resourceTypesInfo +
-                ", created='" + created + '\'' +
-                ", updated='" + updated + '\'' +
                 ", relatedStandards=" + relatedStandards +
                 ", rights=" + rights +
-                ", description='" + description + '\'' +
-                ", status='" + status + '\'' +
-                ", domain='" + domain + '\'' +
-                ", eoscGuidelineType='" + eoscGuidelineType + '\'' +
-                ", eoscIntegrationOptions=" + eoscIntegrationOptions +
                 ", alternativeIdentifiers=" + alternativeIdentifiers +
                 '}';
     }
@@ -277,14 +193,6 @@ public class InteroperabilityRecord implements Identifiable {
 
     public void setProviderId(String providerId) {
         this.providerId = providerId;
-    }
-
-    public IdentifierInfo getIdentifierInfo() {
-        return identifierInfo;
-    }
-
-    public void setIdentifierInfo(IdentifierInfo identifierInfo) {
-        this.identifierInfo = identifierInfo;
     }
 
     public List<Creator> getCreators() {
@@ -319,22 +227,6 @@ public class InteroperabilityRecord implements Identifiable {
         this.resourceTypesInfo = resourceTypesInfoInfo;
     }
 
-    public String getCreated() {
-        return created;
-    }
-
-    public void setCreated(String created) {
-        this.created = created;
-    }
-
-    public String getUpdated() {
-        return updated;
-    }
-
-    public void setUpdated(String updated) {
-        this.updated = updated;
-    }
-
     public List<RelatedStandard> getRelatedStandards() {
         return relatedStandards;
     }
@@ -349,46 +241,6 @@ public class InteroperabilityRecord implements Identifiable {
 
     public void setRights(List<Right> rights) {
         this.rights = rights;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public String getStatus() {
-        return status;
-    }
-
-    public void setStatus(String status) {
-        this.status = status;
-    }
-
-    public String getDomain() {
-        return domain;
-    }
-
-    public void setDomain(String domain) {
-        this.domain = domain;
-    }
-
-    public String getEoscGuidelineType() {
-        return eoscGuidelineType;
-    }
-
-    public void setEoscGuidelineType(String eoscGuidelineType) {
-        this.eoscGuidelineType = eoscGuidelineType;
-    }
-
-    public List<String> getEoscIntegrationOptions() {
-        return eoscIntegrationOptions;
-    }
-
-    public void setEoscIntegrationOptions(List<String> eoscIntegrationOptions) {
-        this.eoscIntegrationOptions = eoscIntegrationOptions;
     }
 
     public List<AlternativeIdentifier> getAlternativeIdentifiers() {

@@ -198,35 +198,12 @@ public class MigrationManager implements MigrationService {
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(maxQuantity);
         ff.addFilter("published", false);
-        List<ServiceBundle> allServices = serviceBundleManager.getAll(ff, securityService.getAdminAccess()).getResults();
+//        List<ServiceBundle> allServices = serviceBundleManager.getAll(ff, securityService.getAdminAccess()).getResults();
         List<TrainingResourceBundle> allTrainingResources = trainingResourceManager.getAll(ff, securityService.getAdminAccess()).getResults();
         List<DatasourceBundle> allDatasourceBundles = datasourceManager.getAll(ff, securityService.getAdminAccess()).getResults();
         List<ResourceInteroperabilityRecordBundle> allResourceInteroperabilityRecords = resourceInteroperabilityRecordManager.getAll(ff, securityService.getAdminAccess()).getResults();
         List<HelpdeskBundle> allHelpdeskBundles = helpdeskManager.getAll(ff, securityService.getAdminAccess()).getResults();
         List<MonitoringBundle> allMonitoringBundles = monitoringManager.getAll(ff, securityService.getAdminAccess()).getResults();
-
-        for (ServiceBundle serviceBundle : allServices) {
-            boolean entered = false;
-            if (serviceBundle.getService().getRequiredResources() != null && !serviceBundle.getService().getRequiredResources().isEmpty()
-                    && serviceBundle.getService().getRequiredResources().contains(oldResourceId)) {
-                serviceBundle.getService().getRequiredResources().remove(oldResourceId);
-                serviceBundle.getService().getRequiredResources().add(newResourceId);
-                entered = true;
-            }
-            if (serviceBundle.getService().getRelatedResources() != null && !serviceBundle.getService().getRelatedResources().isEmpty()
-                    && serviceBundle.getService().getRelatedResources().contains(oldResourceId)) {
-                serviceBundle.getService().getRelatedResources().remove(oldResourceId);
-                serviceBundle.getService().getRelatedResources().add(newResourceId);
-                entered = true;
-            }
-            if (entered) {
-                Resource resource = serviceBundleManager.getResource(serviceBundle.getId(), serviceBundle.getService().getCatalogueId());
-                resource.setPayload(serviceBundleManager.serialize(serviceBundle));
-                resourceService.updateResource(resource);
-                // update Public Service
-                publicServiceManager.update(serviceBundle, securityService.getAdminAccess());
-            }
-        }
 
         for (TrainingResourceBundle trainingResourceBundle : allTrainingResources) {
             if (trainingResourceBundle.getTrainingResource().getEoscRelatedServices() != null && !trainingResourceBundle.getTrainingResource().getEoscRelatedServices().isEmpty()

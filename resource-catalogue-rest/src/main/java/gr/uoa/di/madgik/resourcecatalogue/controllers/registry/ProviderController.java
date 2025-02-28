@@ -370,16 +370,6 @@ public class ProviderController {
         providerService.deleteUserInfo(authentication);
     }
 
-    // Get all modification details of a specific Provider based on id.
-    @GetMapping(path = {"history/{prefix}/{suffix}"}, produces = {MediaType.APPLICATION_JSON_VALUE})
-    public ResponseEntity<Paging<ResourceHistory>> history(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
-                                                           @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix,
-                                                           @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId) {
-        String id = prefix + "/" + suffix;
-        Paging<ResourceHistory> history = this.providerService.getHistory(id, catalogueId);
-        return ResponseEntity.ok(history);
-    }
-
     @PatchMapping(path = "auditProvider/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     public ResponseEntity<ProviderBundle> auditProvider(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,

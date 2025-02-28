@@ -149,10 +149,6 @@ public class ServiceBundleManager extends ResourceManager<ServiceBundle> impleme
             throw new ResourceException(String.format("The Provider with id %s has already registered a Resource " +
                     "Template.", providerBundle.getId()), HttpStatus.CONFLICT);
         }
-        // if Resource version is empty set it null
-        if ("".equals(serviceBundle.getService().getVersion())) {
-            serviceBundle.getService().setVersion(null);
-        }
 
         serviceBundle.setId(idCreator.generate(getResourceTypeName()));
 
@@ -199,8 +195,6 @@ public class ServiceBundleManager extends ResourceManager<ServiceBundle> impleme
         logger.info("Adding Service: {}", serviceBundle);
         ServiceBundle ret;
 
-        prettifyServiceTextFields(serviceBundle, ",");
-
         ret = super.add(serviceBundle, auth);
 
         synchronizerService.syncAdd(serviceBundle.getPayload());
@@ -242,11 +236,6 @@ public class ServiceBundleManager extends ResourceManager<ServiceBundle> impleme
 
         ProviderBundle providerBundle = providerService.get(ret.getService().getResourceOrganisation(), auth);
 
-        // if service version is empty set it null
-        if ("".equals(ret.getService().getVersion())) {
-            ret.getService().setVersion(null);
-        }
-
         // block Public Service update
         if (existingService.getMetadata().isPublished()) {
             throw new ResourceException("You cannot directly update a Public Service", HttpStatus.FORBIDDEN);
@@ -269,17 +258,9 @@ public class ServiceBundleManager extends ResourceManager<ServiceBundle> impleme
         ret.setMigrationStatus(existingService.getMigrationStatus());
 
         List<LoggingInfo> loggingInfoList = commonMethods.returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(existingService, auth);
-        LoggingInfo loggingInfo;
+        LoggingInfo loggingInfo = commonMethods.createLoggingInfo(auth, LoggingInfo.Types.UPDATE.getKey(),
+                LoggingInfo.ActionType.UPDATED.getKey(), comment);
 
-        // update VS version update
-        if (((ret.getService().getVersion() == null) && (existingService.getService().getVersion() == null)) ||
-                (ret.getService().getVersion().equals(existingService.getService().getVersion()))) {
-            loggingInfo = commonMethods.createLoggingInfo(auth, LoggingInfo.Types.UPDATE.getKey(),
-                    LoggingInfo.ActionType.UPDATED.getKey(), comment);
-        } else {
-            loggingInfo = commonMethods.createLoggingInfo(auth, LoggingInfo.Types.UPDATE.getKey(),
-                    LoggingInfo.ActionType.UPDATED_VERSION.getKey(), comment);
-        }
         loggingInfoList.add(loggingInfo);
         loggingInfoList.sort(Comparator.comparing(LoggingInfo::getDate));
         ret.setLoggingInfo(loggingInfoList);
@@ -305,21 +286,12 @@ public class ServiceBundleManager extends ResourceManager<ServiceBundle> impleme
             }
         }
 
-        // if a user updates a service with version to a service with null version then while searching for the service
-        // you get a "Service already exists" error.
-        if (existingService.getService().getVersion() != null && ret.getService().getVersion() == null) {
-            throw new ResourceException("You cannot update a Service registered with version to a Service with null version",
-                    HttpStatus.CONFLICT);
-        }
-
         // block catalogueId updates from Provider Admins
         if (!securityService.hasRole(auth, "ROLE_ADMIN")) {
             if (!existingService.getService().getCatalogueId().equals(ret.getService().getCatalogueId())) {
                 throw new ResourceException("You cannot change catalogueId", HttpStatus.FORBIDDEN);
             }
         }
-
-        prettifyServiceTextFields(serviceBundle, ",");
 
         ret = super.update(ret, auth);
         logger.info("Updating Service: {}", ret);
@@ -945,7 +917,7 @@ public class ServiceBundleManager extends ResourceManager<ServiceBundle> impleme
      * @return
      */
     protected ServiceBundle prettifyServiceTextFields(ServiceBundle serviceBundle, String specialCharacters) {
-        serviceBundle.getService().setTagline(TextUtils.prettifyText(serviceBundle.getService().getTagline(), specialCharacters));
+        //TODO: populate if needed
         return serviceBundle;
     }
 

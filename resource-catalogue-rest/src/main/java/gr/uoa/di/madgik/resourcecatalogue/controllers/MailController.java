@@ -141,9 +141,8 @@ public class MailController {
         List<ServiceBundle> allServices = serviceBundleService.getAll(facetFilter, adminAccess).getResults();
         allServices.addAll(draftServiceService.getAll(facetFilter, adminAccess).getResults());
         for (ServiceBundle serviceBundle : allServices) {
-            emails.add(serviceBundle.getService().getMainContact().getEmail());
-            emails.addAll(serviceBundle.getService().getPublicContacts()
-                    .stream().map(ServicePublicContact::getEmail).map(String::toLowerCase).collect(Collectors.toSet()));
+            // TODO: role
+//            emails.add(serviceBundle.getService().getRole().getEmail());
         }
     }
 

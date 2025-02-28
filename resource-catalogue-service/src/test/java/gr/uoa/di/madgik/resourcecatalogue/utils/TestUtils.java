@@ -62,11 +62,7 @@ public class TestUtils {
         catalogue.setName("EOSC");
         catalogue.setWebsite(createURL());
         catalogue.setLegalEntity(false);
-        catalogue.setInclusionCriteria(createURL());
-        catalogue.setValidationProcess(createURL());
-        catalogue.setEndOfLife("Test End Of Life");
         catalogue.setDescription("Test Description");
-        catalogue.setScope("Test Scope");
         catalogue.setLogo(createURL());
         catalogue.setLocation(createProviderLocation());
         catalogue.setMainContact(createProviderMainContact());
@@ -92,22 +88,13 @@ public class TestUtils {
 
     public static Service createService() {
         Service service = new Service();
-        service.setAbbreviation("Test Abbreviation");
         service.setName("Test Service");
         service.setResourceOrganisation("11.1111/abc123");
         service.setWebpage(createURL());
         service.setDescription("Test Description");
-        service.setTagline("Test Tagline");
         service.setLogo(createURL());
         service.setScientificDomains(createScientificDomains());
         service.setCategories(createCategories());
-        service.setTargetUsers(List.of("target_user-businesses", "target_user-funders"));
-        service.setGeographicalAvailabilities(List.of("AD", "AE"));
-        service.setLanguageAvailabilities(List.of("en", "es"));
-        service.setMainContact(createServiceMainContact());
-        service.setPublicContacts(createServicePublicContacts());
-        service.setHelpdeskEmail("helpdesk@email.com");
-        service.setSecurityContactEmail("security@email.com");
         service.setTrl("trl-9");
         service.setTermsOfUse(createURL());
         service.setPrivacyPolicy(createURL());

@@ -207,20 +207,6 @@ public class ServiceProviderRegistrationIT {
         serviceCategory.setSubcategory("subcategory-access_physical_and_eInfrastructures-instrument_and_equipment-spectrometer");
         subcategories.add(serviceCategory);
 
-        List<String> targetUsers = new ArrayList<>();
-        targetUsers.add("target_users-researchers");
-        targetUsers.add("target_users-research_groups");
-
-        List<String> languages = new ArrayList<>();
-        languages.add("luba-katanga");
-        languages.add("english");
-
-        List<String> places = new ArrayList<>();
-        places.add("GR");
-        places.add("FR");
-
-        List<ServicePublicContact> contacts = getServicePublicContacts();
-
         Service service = new Service();
         service.setName(serviceName);
         service.setWebpage(URI.create("https:wp4.testservice.com").toURL());
@@ -229,28 +215,7 @@ public class ServiceProviderRegistrationIT {
         service.setResourceOrganisation(provider.getId());
         service.setScientificDomains(scientificSubdomains);
         service.setCategories(subcategories);
-        service.setTargetUsers(targetUsers);
-        service.setLanguageAvailabilities(languages);
-        service.setGeographicalAvailabilities(places);
-        service.setPublicContacts(contacts);
 
         return service;
-    }
-
-    private static @NotNull List<ServicePublicContact> getServicePublicContacts() {
-        ServicePublicContact contact1 = new ServicePublicContact();
-        contact1.setEmail("contact1@gmail.com");
-        contact1.setFirstName("FirstName1");
-        contact1.setLastName("LastName1");
-        contact1.setPhone("0123456789");
-        ServicePublicContact contact2 = new ServicePublicContact();
-        contact2.setEmail("contact2@gmail.com");
-        contact2.setFirstName("FirstName1");
-        contact2.setLastName("LastName1");
-        contact2.setPhone("9876543210");
-        List<ServicePublicContact> contacts = new ArrayList<>();
-        contacts.add(contact1);
-        contacts.add(contact2);
-        return contacts;
     }
 }

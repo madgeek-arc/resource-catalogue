@@ -93,30 +93,6 @@ public class Catalogue implements Identifiable {
     @VocabularyValidation(type = Vocabulary.Type.PROVIDER_HOSTING_LEGAL_ENTITY)
     private String hostingLegalEntity;
 
-    /**
-     * Inclusion Criteria
-     */
-    @XmlElement(required = true)
-    @Schema(requiredMode = Schema.RequiredMode.REQUIRED, example = "https://example.com")
-    @FieldValidation
-    private URL inclusionCriteria;
-
-    /**
-     * Validation Process
-     */
-    @XmlElement(required = true)
-    @Schema(requiredMode = Schema.RequiredMode.REQUIRED, example = "https://example.com")
-    @FieldValidation
-    private URL validationProcess;
-
-    /**
-     * In terms of sustainability, what is the expected life of the Catalogue.
-     */
-    @XmlElement(required = true)
-    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
-    @FieldValidation
-    private String endOfLife;
-
 
     // Marketing Information
     /**
@@ -126,14 +102,6 @@ public class Catalogue implements Identifiable {
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     @FieldValidation
     private String description;
-
-    /**
-     * A high-level description of the Catalogue's scope.
-     */
-    @XmlElement(required = true)
-    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
-    @FieldValidation
-    private String scope;
 
     /**
      * Link to the logo/visual identity of the Catalogue.
@@ -246,15 +214,14 @@ public class Catalogue implements Identifiable {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Catalogue catalogue = (Catalogue) o;
-        return legalEntity == catalogue.legalEntity && Objects.equals(id, catalogue.id) && Objects.equals(abbreviation, catalogue.abbreviation) && Objects.equals(name, catalogue.name) && Objects.equals(website, catalogue.website) && Objects.equals(legalStatus, catalogue.legalStatus) && Objects.equals(hostingLegalEntity, catalogue.hostingLegalEntity) && Objects.equals(inclusionCriteria, catalogue.inclusionCriteria) && Objects.equals(validationProcess, catalogue.validationProcess) && Objects.equals(endOfLife, catalogue.endOfLife) && Objects.equals(description, catalogue.description) && Objects.equals(scope, catalogue.scope) && Objects.equals(logo, catalogue.logo) && Objects.equals(multimedia, catalogue.multimedia) && Objects.equals(scientificDomains, catalogue.scientificDomains) && Objects.equals(tags, catalogue.tags) && Objects.equals(location, catalogue.location) && Objects.equals(mainContact, catalogue.mainContact) && Objects.equals(publicContacts, catalogue.publicContacts) && Objects.equals(participatingCountries, catalogue.participatingCountries) && Objects.equals(affiliations, catalogue.affiliations) && Objects.equals(networks, catalogue.networks) && Objects.equals(users, catalogue.users);
+        return legalEntity == catalogue.legalEntity && Objects.equals(id, catalogue.id) && Objects.equals(abbreviation, catalogue.abbreviation) && Objects.equals(name, catalogue.name) && Objects.equals(website, catalogue.website) && Objects.equals(legalStatus, catalogue.legalStatus) && Objects.equals(hostingLegalEntity, catalogue.hostingLegalEntity) && Objects.equals(description, catalogue.description) && Objects.equals(logo, catalogue.logo) && Objects.equals(multimedia, catalogue.multimedia) && Objects.equals(scientificDomains, catalogue.scientificDomains) && Objects.equals(tags, catalogue.tags) && Objects.equals(location, catalogue.location) && Objects.equals(mainContact, catalogue.mainContact) && Objects.equals(publicContacts, catalogue.publicContacts) && Objects.equals(participatingCountries, catalogue.participatingCountries) && Objects.equals(affiliations, catalogue.affiliations) && Objects.equals(networks, catalogue.networks) && Objects.equals(users, catalogue.users);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, abbreviation, name, website, legalEntity, legalStatus, hostingLegalEntity, inclusionCriteria, validationProcess, endOfLife, description, scope, logo, multimedia, scientificDomains, tags, location, mainContact, publicContacts, participatingCountries, affiliations, networks, users);
+        return Objects.hash(id, abbreviation, name, website, legalEntity, legalStatus, hostingLegalEntity, description, logo, multimedia, scientificDomains, tags, location, mainContact, publicContacts, participatingCountries, affiliations, networks, users);
     }
 
     @Override
@@ -267,11 +234,7 @@ public class Catalogue implements Identifiable {
                 ", legalEntity=" + legalEntity +
                 ", legalStatus='" + legalStatus + '\'' +
                 ", hostingLegalEntity='" + hostingLegalEntity + '\'' +
-                ", inclusionCriteria=" + inclusionCriteria +
-                ", validationProcess=" + validationProcess +
-                ", endOfLife='" + endOfLife + '\'' +
                 ", description='" + description + '\'' +
-                ", scope='" + scope + '\'' +
                 ", logo=" + logo +
                 ", multimedia=" + multimedia +
                 ", scientificDomains=" + scientificDomains +
@@ -344,44 +307,12 @@ public class Catalogue implements Identifiable {
         this.hostingLegalEntity = hostingLegalEntity;
     }
 
-    public URL getInclusionCriteria() {
-        return inclusionCriteria;
-    }
-
-    public void setInclusionCriteria(URL inclusionCriteria) {
-        this.inclusionCriteria = inclusionCriteria;
-    }
-
-    public URL getValidationProcess() {
-        return validationProcess;
-    }
-
-    public void setValidationProcess(URL validationProcess) {
-        this.validationProcess = validationProcess;
-    }
-
-    public String getEndOfLife() {
-        return endOfLife;
-    }
-
-    public void setEndOfLife(String endOfLife) {
-        this.endOfLife = endOfLife;
-    }
-
     public String getDescription() {
         return description;
     }
 
     public void setDescription(String description) {
         this.description = description;
-    }
-
-    public String getScope() {
-        return scope;
-    }
-
-    public void setScope(String scope) {
-        this.scope = scope;
     }
 
     public URL getLogo() {
