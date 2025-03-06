@@ -117,15 +117,6 @@ public class ResourceInteroperabilityRecordManager extends ResourceManager<Resou
         return ret;
     }
 
-    @Override
-    public ResourceInteroperabilityRecordBundle get(String id, String catalogueId) {
-        Resource resource = getResource(id, catalogueId);
-        if (resource == null) {
-            throw new ResourceNotFoundException(String.format("Could not find Resource Interoperability Record with id: %s and catalogueId: %s", id, catalogueId));
-        }
-        return deserialize(resource);
-    }
-
     public ResourceInteroperabilityRecordBundle getWithResourceId(String resourceId) {
         Resource res = where(false, new SearchService.KeyValue("resource_id", resourceId));
         return res != null ? deserialize(res) : null;

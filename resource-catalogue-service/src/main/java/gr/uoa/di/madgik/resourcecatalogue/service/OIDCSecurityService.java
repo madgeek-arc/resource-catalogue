@@ -44,10 +44,6 @@ public class OIDCSecurityService implements SecurityService {
     private final ServiceBundleService<ServiceBundle> serviceBundleService;
     private final TrainingResourceService trainingResourceService;
     private final InteroperabilityRecordService interoperabilityRecordService;
-    private final DraftResourceService<ProviderBundle> draftProviderService;
-    private final DraftResourceService<ServiceBundle> draftServiceService;
-    private final DraftResourceService<TrainingResourceBundle> draftTrainingResourceService;
-    private final DraftResourceService<InteroperabilityRecordBundle> draftInteroperabilityRecordService;
     private final Authentication adminAccess = new AdminAuthentication();
 
     private final String providersPrefix;
@@ -61,20 +57,12 @@ public class OIDCSecurityService implements SecurityService {
                                @Lazy ServiceBundleService<ServiceBundle> serviceBundleService,
                                @Lazy TrainingResourceService trainingResourceService,
                                @Lazy InteroperabilityRecordService interoperabilityRecordService,
-                               @Lazy DraftResourceService<ProviderBundle> draftProviderService,
-                               @Lazy DraftResourceService<ServiceBundle> draftServiceService,
-                               @Lazy DraftResourceService<TrainingResourceBundle> draftTrainingResourceService,
-                               @Lazy DraftResourceService<InteroperabilityRecordBundle> draftInteroperabilityRecordService,
                                CatalogueProperties properties) {
         this.catalogueService = catalogueService;
         this.providerService = providerService;
         this.serviceBundleService = serviceBundleService;
         this.trainingResourceService = trainingResourceService;
         this.interoperabilityRecordService = interoperabilityRecordService;
-        this.draftProviderService = draftProviderService;
-        this.draftServiceService = draftServiceService;
-        this.draftTrainingResourceService = draftTrainingResourceService;
-        this.draftInteroperabilityRecordService = draftInteroperabilityRecordService;
         this.providersPrefix = properties.getResources().get(ResourceTypes.PROVIDER).getIdPrefix();
         this.servicesPrefix = properties.getResources().get(ResourceTypes.SERVICE).getIdPrefix();
         this.trainingsPrefix = properties.getResources().get(ResourceTypes.TRAINING_RESOURCE).getIdPrefix();
@@ -140,9 +128,6 @@ public class OIDCSecurityService implements SecurityService {
 
     private List<User> getProviderUsers(String id) {
         ProviderBundle registeredProvider = checkProviderExistence(id);
-        if (registeredProvider == null) {
-            registeredProvider = checkDraftProviderExistence(id);
-        }
         if (registeredProvider == null || registeredProvider.getProvider().getUsers() == null) {
             return null;
         }
@@ -161,14 +146,6 @@ public class OIDCSecurityService implements SecurityService {
         try {
             return providerService.get(providerId, adminAccess);
         } catch (ResourceException | ResourceNotFoundException e) {
-            return null;
-        }
-    }
-
-    private ProviderBundle checkDraftProviderExistence(String providerId) {
-        try {
-            return draftProviderService.get(providerId);
-        } catch (RuntimeException e) {
             return null;
         }
     }
@@ -218,23 +195,11 @@ public class OIDCSecurityService implements SecurityService {
 
     private Bundle<?> determineResourceType(String resourceId) {
         if (isService(resourceId)) {
-            ServiceBundle serviceBundle = serviceBundleService.getOrElseReturnNull(resourceId);
-            if (serviceBundle == null) {
-                serviceBundle = draftServiceService.get(resourceId);
-            }
-            return serviceBundle;
+            return serviceBundleService.getOrElseReturnNull(resourceId);
         } else if (isTrainingResource(resourceId)) {
-            TrainingResourceBundle trainingResourceBundle = trainingResourceService.getOrElseReturnNull(resourceId);
-            if (trainingResourceBundle == null) {
-                trainingResourceBundle = draftTrainingResourceService.get(resourceId);
-            }
-            return trainingResourceBundle;
+            return trainingResourceService.getOrElseReturnNull(resourceId);
         } else {
-            InteroperabilityRecordBundle interoperabilityRecordBundle = interoperabilityRecordService.getOrElseReturnNull(resourceId);
-            if (interoperabilityRecordBundle == null) {
-                interoperabilityRecordBundle = draftInteroperabilityRecordService.get(resourceId);
-            }
-            return interoperabilityRecordBundle;
+            return interoperabilityRecordService.getOrElseReturnNull(resourceId);
         }
     }
 

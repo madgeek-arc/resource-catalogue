@@ -198,7 +198,6 @@ public class MigrationManager implements MigrationService {
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(maxQuantity);
         ff.addFilter("published", false);
-//        List<ServiceBundle> allServices = serviceBundleManager.getAll(ff, securityService.getAdminAccess()).getResults();
         List<TrainingResourceBundle> allTrainingResources = trainingResourceManager.getAll(ff, securityService.getAdminAccess()).getResults();
         List<DatasourceBundle> allDatasourceBundles = datasourceManager.getAll(ff, securityService.getAdminAccess()).getResults();
         List<ResourceInteroperabilityRecordBundle> allResourceInteroperabilityRecords = resourceInteroperabilityRecordManager.getAll(ff, securityService.getAdminAccess()).getResults();
@@ -214,7 +213,7 @@ public class MigrationManager implements MigrationService {
                 resource.setPayload(trainingResourceManager.serialize(trainingResourceBundle));
                 resourceService.updateResource(resource);
                 // update Public Training Resource
-                TrainingResourceBundle updatedTrainingResourceBundle = trainingResourceManager.get(newResourceId, catalogueId);
+                TrainingResourceBundle updatedTrainingResourceBundle = trainingResourceManager.get(newResourceId);
                 publicTrainingResourceManager.update(updatedTrainingResourceBundle, securityService.getAdminAccess());
             }
         }

@@ -218,7 +218,7 @@ public class VocabularyCurationManager extends ResourceManager<VocabularyCuratio
                 }
                 break;
             case "training_resource":
-                TrainingResourceBundle trainingResourceBundle = trainingResourceService.get(vocabularyCuration.getVocabularyEntryRequests().getFirst().getResourceId(), catalogueId);
+                TrainingResourceBundle trainingResourceBundle = trainingResourceService.get(vocabularyCuration.getVocabularyEntryRequests().getFirst().getResourceId());
                 if (!trainingResourceBundle.getTrainingResource().getResourceOrganisation().equals(providerBundle.getId())) {
                     throw new ResourceNotFoundException(String.format("Provider with id [%s] does not have a Training Resource with id [%s] registered.",
                             providerBundle.getId(), trainingResourceBundle.getId()));

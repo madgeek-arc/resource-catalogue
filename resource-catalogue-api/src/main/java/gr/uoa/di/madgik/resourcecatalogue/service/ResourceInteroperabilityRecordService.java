@@ -33,18 +33,6 @@ public interface ResourceInteroperabilityRecordService extends ResourceService<R
                                              String resourceType, Authentication auth);
 
     /**
-     * Get the specific ResourceInteroperabilityRecord Bundle of the specific Catalogue
-     *
-     * @param resourceId  ResourceInteroperabilityRecord Bundle ID
-     * @param catalogueId Catalogue ID
-     * @return {@link ResourceInteroperabilityRecordBundle}
-     *
-     * @deprecated Since resourceId is unique, catalogueId can be safely removed. Replace with {@link #get(String)}.
-     */
-    @Deprecated(forRemoval = true)
-    ResourceInteroperabilityRecordBundle get(String resourceId, String catalogueId);
-
-    /**
      * Validate the ResourceInteroperabilityRecord Bundle related to the specific resource type
      *
      * @param resourceInteroperabilityRecordBundle ResourceInteroperabilityRecord Bundle

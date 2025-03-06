@@ -640,9 +640,6 @@ public class ServiceBundleManager extends ResourceManager<ServiceBundle> impleme
         publicServiceManager.delete(get(resourceId)); // FIXME: ProviderManagementAspect's deletePublicDatasource is not triggered
         delete(get(resourceId));
 
-        // update other resources which had the old resource ID on their fields
-        migrationService.updateRelatedToTheIdFieldsOfOtherResourcesOfThePortal(resourceId, resourceId); //TODO: SEE IF IT WORKS AS INTENDED AND REMOVE
-
         // emails to EPOT, old and new Provider
         registrationMailService.sendEmailsForMovedResources(oldProvider, newProvider, serviceBundle, auth);
 

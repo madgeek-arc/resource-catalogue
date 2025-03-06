@@ -136,7 +136,7 @@ public class InteroperabilityRecordManager extends ResourceManager<Interoperabil
         InteroperabilityRecordBundle ret = ObjectUtils.clone(interoperabilityRecordBundle);
         InteroperabilityRecordBundle existingInteroperabilityRecord;
         try {
-            existingInteroperabilityRecord = get(ret.getInteroperabilityRecord().getId(), ret.getInteroperabilityRecord().getCatalogueId());
+            existingInteroperabilityRecord = get(ret.getInteroperabilityRecord().getId());
             if (ret.getInteroperabilityRecord().equals(existingInteroperabilityRecord.getInteroperabilityRecord())) {
                 return ret;
             }
@@ -326,7 +326,7 @@ public class InteroperabilityRecordManager extends ResourceManager<Interoperabil
     public Paging<LoggingInfo> getLoggingInfoHistory(String id, String catalogueId) {
         InteroperabilityRecordBundle interoperabilityRecordBundle;
         try {
-            interoperabilityRecordBundle = get(id, catalogueId);
+            interoperabilityRecordBundle = get(id);
             Resource resource = getResource(interoperabilityRecordBundle.getInteroperabilityRecord().getId()); // get all versions
 
             List<LoggingInfo> loggingInfoList = new ArrayList<>();
@@ -351,14 +351,6 @@ public class InteroperabilityRecordManager extends ResourceManager<Interoperabil
             return null;
         }
         return interoperabilityRecordBundle;
-    }
-
-    public InteroperabilityRecordBundle get(String id, String catalogueId) {
-        Resource resource = getResource(id, catalogueId);
-        if (resource == null) {
-            throw new ResourceNotFoundException(String.format("Could not find Interoperability Record with id: %s and catalogueId: %s", id, catalogueId));
-        }
-        return deserialize(resource);
     }
 
     @Override

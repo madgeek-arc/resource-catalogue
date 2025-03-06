@@ -194,19 +194,17 @@ public interface ProviderService extends ResourceService<ProviderBundle>, Bundle
     /**
      * Return true if Provider User Admin has accepted registration terms
      *
-     * @param providerId Provider's ID
-     * @param isDraft    boolean value indicating if the Provider is Draft
+     * @param id Provider's ID
      * @param auth       Authentication
      * @return True/False
      */
-    boolean hasAdminAcceptedTerms(String providerId, boolean isDraft, Authentication auth);
+    boolean hasAdminAcceptedTerms(String id, Authentication auth);
 
     /**
      * Update the Provider's list of Users that have accepted the Provider's registration terms
      *
-     * @param providerId Provider's ID
-     * @param isDraft    boolean value indicating if the Provider is Draft
+     * @param id Provider's ID
      * @param auth       Authentication
      */
-    void adminAcceptedTerms(String providerId, boolean isDraft, Authentication auth);
+    void adminAcceptedTerms(String id, Authentication auth);
 }

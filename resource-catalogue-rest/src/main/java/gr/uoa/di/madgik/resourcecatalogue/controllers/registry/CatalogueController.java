@@ -44,6 +44,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.LinkedList;
 import java.util.List;
 
+//TODO: MASS REFACTOR OF catalogueId params - they are useless
 @Profile("beyond")
 @RestController
 @RequestMapping("catalogue")
@@ -539,7 +540,7 @@ public class CatalogueController {
                                                                          @PathVariable("suffix") String suffix,
                                                                          @Parameter(hidden = true) Authentication auth) {
         String trainingResourceId = prefix + "/" + suffix;
-        return new ResponseEntity<>(trainingResourceService.get(trainingResourceId, catalogueId).getTrainingResource(), HttpStatus.OK);
+        return new ResponseEntity<>(trainingResourceService.get(trainingResourceId).getTrainingResource(), HttpStatus.OK);
     }
 
     @Operation(description = "Creates a new Training Resource for the specific Catalogue.")
@@ -596,7 +597,7 @@ public class CatalogueController {
                                                                             @PathVariable("suffix") String suffix,
                                                                             @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
         String trainingResourceId = prefix + "/" + suffix;
-        TrainingResourceBundle trainingResourceBundle = trainingResourceService.get(trainingResourceId, catalogueId);
+        TrainingResourceBundle trainingResourceBundle = trainingResourceService.get(trainingResourceId);
         if (trainingResourceBundle == null) {
             return new ResponseEntity<>(HttpStatus.GONE);
         }
@@ -617,7 +618,7 @@ public class CatalogueController {
                                                                                      @PathVariable("suffix") String suffix,
                                                                                      @Parameter(hidden = true) Authentication auth) {
         String interoperabilityRecordId = prefix + "/" + suffix;
-        return new ResponseEntity<>(interoperabilityRecordService.get(interoperabilityRecordId, catalogueId).getInteroperabilityRecord(), HttpStatus.OK);
+        return new ResponseEntity<>(interoperabilityRecordService.get(interoperabilityRecordId).getInteroperabilityRecord(), HttpStatus.OK);
     }
 
     @Operation(description = "Creates a new Interoperability Record for the specific Catalogue.")
@@ -672,7 +673,7 @@ public class CatalogueController {
                                                                                         @PathVariable("suffix") String suffix,
                                                                                         @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
         String interoperabilityRecordId = prefix + "/" + suffix;
-        InteroperabilityRecordBundle interoperabilityRecordBundle = interoperabilityRecordService.get(interoperabilityRecordId, catalogueId);
+        InteroperabilityRecordBundle interoperabilityRecordBundle = interoperabilityRecordService.get(interoperabilityRecordId);
         if (interoperabilityRecordBundle == null) {
             return new ResponseEntity<>(HttpStatus.GONE);
         }

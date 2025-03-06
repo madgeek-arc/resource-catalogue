@@ -212,7 +212,7 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
         TrainingResourceBundle ret = ObjectUtils.clone(trainingResourceBundle);
         TrainingResourceBundle existingTrainingResource;
         try {
-            existingTrainingResource = get(ret.getTrainingResource().getId(), ret.getTrainingResource().getCatalogueId());
+            existingTrainingResource = get(ret.getTrainingResource().getId());
             if (ret.getTrainingResource().equals(existingTrainingResource.getTrainingResource())) {
                 return ret;
             }
@@ -318,7 +318,7 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
 
     @Override
     public TrainingResourceBundle getCatalogueResource(String catalogueId, String trainingResourceId, Authentication auth) {
-        TrainingResourceBundle trainingResourceBundle = get(trainingResourceId, catalogueId);
+        TrainingResourceBundle trainingResourceBundle = get(trainingResourceId);
         CatalogueBundle catalogueBundle = catalogueService.get(catalogueId);
         if (trainingResourceBundle == null) {
             throw new ResourceNotFoundException(
@@ -436,7 +436,7 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
     public TrainingResourceBundle publish(String trainingResourceId, Boolean active, Authentication auth) {
         TrainingResourceBundle trainingResourceBundle;
         String activeProvider = "";
-        trainingResourceBundle = this.get(trainingResourceId, catalogueId);
+        trainingResourceBundle = get(trainingResourceId);
 
         if ((trainingResourceBundle.getStatus().equals(vocabularyService.get("pending resource").getId()) ||
                 trainingResourceBundle.getStatus().equals(vocabularyService.get("rejected resource").getId())) && !trainingResourceBundle.isActive()) {
@@ -600,15 +600,6 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
         return trainingResourceBundle;
     }
 
-    @Override
-    public TrainingResourceBundle get(String id, String catalogueId) {
-        Resource resource = getResource(id, catalogueId);
-        if (resource == null) {
-            throw new ResourceNotFoundException(String.format("Could not find Training Resource with id: %s and catalogueId: %s", id, catalogueId));
-        }
-        return deserialize(resource);
-    }
-
     // for sendProviderMails on RegistrationMailService AND StatisticsManager
     public List<TrainingResource> getResources(String providerId) {
         FacetFilter ff = new FacetFilter();
@@ -723,7 +714,7 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
                 .map(id ->
                 {
                     try {
-                        return get(id, catalogueId).getTrainingResource();
+                        return get(id).getTrainingResource();
                     } catch (ServiceException | ResourceNotFoundException e) {
                         return null;
                     }
@@ -736,7 +727,7 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
 
     @Override
     public TrainingResourceBundle changeProvider(String resourceId, String newProviderId, String comment, Authentication auth) {
-        TrainingResourceBundle trainingResourceBundle = get(resourceId, catalogueId);
+        TrainingResourceBundle trainingResourceBundle = get(resourceId);
         // check Datasource's status
         if (!trainingResourceBundle.getStatus().equals("approved resource")) {
             throw new ValidationException(String.format("You cannot move Training Resource with id [%s] to another Provider as it" +
@@ -785,8 +776,8 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
 
         // add Resource, delete the old one
         add(trainingResourceBundle, auth);
-        publicTrainingResourceManager.delete(get(resourceId, catalogueId)); // FIXME: ProviderManagementAspect's deletePublicDatasource is not triggered
-        delete(get(resourceId, catalogueId));
+        publicTrainingResourceManager.delete(get(resourceId)); // FIXME: ProviderManagementAspect's deletePublicDatasource is not triggered
+        delete(get(resourceId));
 
         // update other resources which had the old resource ID on their fields
         migrationService.updateRelatedToTheIdFieldsOfOtherResourcesOfThePortal(resourceId, trainingResourceBundle.getId());

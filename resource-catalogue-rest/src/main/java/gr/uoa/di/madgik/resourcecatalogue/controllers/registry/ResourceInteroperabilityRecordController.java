@@ -156,7 +156,7 @@ public class ResourceInteroperabilityRecordController {
                                                                                                         @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix,
                                                                                                         @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId) {
         String id = prefix + "/" + suffix;
-        return new ResponseEntity<>(resourceInteroperabilityRecordService.get(id, catalogueId), HttpStatus.OK);
+        return new ResponseEntity<>(resourceInteroperabilityRecordService.get(id), HttpStatus.OK);
     }
 
     // Create a Public ResourceInteroperabilityRecord if something went bad during its creation

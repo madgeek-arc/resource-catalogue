@@ -21,7 +21,6 @@ import gr.uoa.di.madgik.registry.domain.*;
 import gr.uoa.di.madgik.registry.exception.ResourceException;
 import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.registry.service.ResourceCRUDService;
-import gr.uoa.di.madgik.registry.service.VersionService;
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
 import gr.uoa.di.madgik.resourcecatalogue.dto.ExtendedValue;
 import gr.uoa.di.madgik.resourcecatalogue.dto.MapValues;
@@ -30,7 +29,6 @@ import gr.uoa.di.madgik.resourcecatalogue.utils.Auditable;
 import gr.uoa.di.madgik.resourcecatalogue.utils.AuthenticationInfo;
 import gr.uoa.di.madgik.resourcecatalogue.utils.ObjectUtils;
 import gr.uoa.di.madgik.resourcecatalogue.utils.ProviderResourcesCommonMethods;
-import gr.uoa.di.madgik.resourcecatalogue.validators.FieldValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -53,7 +51,6 @@ import static gr.uoa.di.madgik.resourcecatalogue.utils.VocabularyValidationUtils
 public class ProviderManager extends ResourceManager<ProviderBundle> implements ProviderService {
 
     private static final Logger logger = LoggerFactory.getLogger(ProviderManager.class);
-    private final DraftResourceService<ProviderBundle> draftProviderService;
     private final ServiceBundleService<ServiceBundle> serviceBundleService;
     private final TrainingResourceService trainingResourceService;
     private final InteroperabilityRecordService interoperabilityRecordService;
@@ -62,11 +59,9 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     private final PublicTrainingResourceService publicTrainingResourceManager;
     private final PublicInteroperabilityRecordService publicInteroperabilityRecordManager;
     private final SecurityService securityService;
-    private final FieldValidator fieldValidator;
     private final IdCreator idCreator;
     private final EventService eventService;
     private final RegistrationMailService registrationMailService;
-    private final VersionService versionService;
     private final VocabularyService vocabularyService;
     private final CatalogueService catalogueService;
     private final SynchronizerService<Provider> synchronizerService;
@@ -75,12 +70,10 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     @Value("${catalogue.id}")
     private String catalogueId;
 
-    public ProviderManager(@Lazy DraftResourceService<ProviderBundle> draftProviderService,
-                           @Lazy ServiceBundleService<ServiceBundle> serviceBundleService,
-                           @Lazy SecurityService securityService, @Lazy FieldValidator fieldValidator,
+    public ProviderManager(@Lazy ServiceBundleService<ServiceBundle> serviceBundleService,
+                           @Lazy SecurityService securityService,
                            @Lazy RegistrationMailService registrationMailService, IdCreator idCreator,
-                           EventService eventService, VersionService versionService,
-                           VocabularyService vocabularyService,
+                           EventService eventService, VocabularyService vocabularyService,
                            @Qualifier("providerSync") SynchronizerService<Provider> synchronizerService,
                            ProviderResourcesCommonMethods commonMethods,
                            CatalogueService catalogueService,
@@ -91,14 +84,11 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
                            @Lazy PublicTrainingResourceService publicTrainingResourceManager,
                            @Lazy PublicInteroperabilityRecordService publicInteroperabilityRecordManager) {
         super(ProviderBundle.class);
-        this.draftProviderService = draftProviderService;
         this.serviceBundleService = serviceBundleService;
         this.securityService = securityService;
-        this.fieldValidator = fieldValidator;
         this.idCreator = idCreator;
         this.eventService = eventService;
         this.registrationMailService = registrationMailService;
-        this.versionService = versionService;
         this.vocabularyService = vocabularyService;
         this.synchronizerService = synchronizerService;
         this.commonMethods = commonMethods;
@@ -700,39 +690,49 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     }
 
     @Override
-    public boolean hasAdminAcceptedTerms(String providerId, boolean isDraft, Authentication auth) {
-        ProviderBundle providerBundle;
-        if (isDraft) {
-            providerBundle = draftProviderService.get(providerId);
-        } else {
-            providerBundle = get(providerId, auth);
+    public boolean hasAdminAcceptedTerms(String id, Authentication auth) {
+        ProviderBundle bundle = get(id);
+        String userEmail = AuthenticationInfo.getEmail(auth).toLowerCase();
+
+        List<String> providerAdmins = bundle.getProvider().getUsers().stream()
+                .map(user -> user.getEmail().toLowerCase())
+                .toList();
+
+        List<String> acceptedTerms = bundle.getMetadata().getTerms();
+
+        if (acceptedTerms == null || acceptedTerms.isEmpty()) {
+            return !providerAdmins.contains(userEmail); // false -> show modal, true -> no modal
         }
-        List<String> userList = new ArrayList<>();
-        for (User user : providerBundle.getProvider().getUsers()) {
-            userList.add(user.getEmail().toLowerCase());
+
+        if (providerAdmins.contains(userEmail) && !acceptedTerms.contains(userEmail)) {
+            return false; // Show modal
         }
-        if ((providerBundle.getMetadata().getTerms() == null || providerBundle.getMetadata().getTerms().isEmpty())) {
-            if (userList.contains(AuthenticationInfo.getEmail(auth).toLowerCase())) {
-                return false; //pop-up modal
-            } else {
-                return true; //no modal
-            }
-        }
-        if (!providerBundle.getMetadata().getTerms().contains(AuthenticationInfo.getEmail(auth).toLowerCase())
-                && userList.contains(AuthenticationInfo.getEmail(auth).toLowerCase())) {
-            return false; // pop-up modal
-        }
-        return true; // no modal
+        return true; // No modal
     }
 
+
     @Override
-    public void adminAcceptedTerms(String providerId, boolean isDraft, Authentication auth) {
-        try {
-            draftProviderService.update(draftProviderService.get(providerId), auth);
-        } catch (ResourceNotFoundException e) {
-            update(get(providerId), auth);
+    public void adminAcceptedTerms(String id, Authentication auth) {
+        ProviderBundle bundle = get(id);
+        String userEmail = AuthenticationInfo.getEmail(auth);
+
+        List<String> existingTerms = bundle.getMetadata().getTerms();
+        if (existingTerms == null) {
+            existingTerms = new ArrayList<>();
+        }
+
+        if (!existingTerms.contains(userEmail)) {
+            existingTerms.add(userEmail);
+            bundle.getMetadata().setTerms(existingTerms);
+
+            try {
+                update(bundle, auth);
+            } catch (ResourceNotFoundException e) {
+                logger.info("Could not update terms for Provider with id: '{}'", id);
+            }
         }
     }
+
 
     public void adminDifferences(ProviderBundle updatedProvider, ProviderBundle existingProvider) {
         List<String> existingAdmins = new ArrayList<>();

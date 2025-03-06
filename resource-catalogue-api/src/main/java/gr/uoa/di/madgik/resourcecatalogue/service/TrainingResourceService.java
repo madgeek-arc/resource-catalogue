@@ -75,18 +75,6 @@ public interface TrainingResourceService extends ResourceService<TrainingResourc
     TrainingResourceBundle getCatalogueResource(String catalogueId, String resourceId, Authentication auth);
 
     /**
-     * Returns the Training Resource with the specified ID
-     *
-     * @param id          Training Resource ID
-     * @param catalogueId Catalogue ID
-     * @return {@link   TrainingResourceBundle}
-     *
-     * @deprecated Since resourceId is unique, catalogueId can be safely removed. Replace with {@link #get(String)}.
-     */
-    @Deprecated(forRemoval = true)
-    TrainingResourceBundle get(String id, String catalogueId);
-
-    /**
      * Get Training Resource Bundles by a specific field.
      *
      * @param field Field of Training Resource
