@@ -54,7 +54,11 @@ public class ResourceIdCreator implements IdCreator {
     }
 
     private String createPrefix(String resourceType) {
-        return resourceProperties.get(ResourceTypes.valueOf(resourceType)).getIdPrefix();
+        try {
+            return resourceProperties.get(ResourceTypes.valueOf(resourceType.toUpperCase())).getIdPrefix();
+        } catch (IllegalArgumentException e) {
+            return "non";
+        }
     }
 
     private String randomGenerator() {
