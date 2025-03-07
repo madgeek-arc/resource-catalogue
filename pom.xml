@@ -139,7 +139,7 @@
             <dependency>
                 <groupId>gr.uoa.di.madgik</groupId>
                 <artifactId>catalogue</artifactId>
-                <version>7.0.0-SNAPSHOT</version>
+                <version>7.0.0</version>
             </dependency>
 
             <dependency>
