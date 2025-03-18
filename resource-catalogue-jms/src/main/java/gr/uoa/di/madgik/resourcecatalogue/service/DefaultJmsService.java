@@ -14,18 +14,17 @@
  * limitations under the License.
  */
 
-package gr.uoa.di.madgik.resourcecatalogue.utils;
+package gr.uoa.di.madgik.resourcecatalogue.service;
 
+import gr.uoa.di.madgik.resourcecatalogue.utils.JmsService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.context.annotation.Primary;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 
 @Service
-@Primary
 public class DefaultJmsService implements JmsService {
 
     private static final Logger logger = LoggerFactory.getLogger(DefaultJmsService.class);
