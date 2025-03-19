@@ -48,8 +48,8 @@ public class AmsJmsService extends DefaultJmsService implements JmsService {
     @Value("${ams.jms.key}")
     private String key;
 
-    @Value("${ams.jms.project-names}")
-    private List<String> projectNames; //TODO: revisit getFirst() if more projects are added
+    @Value("${ams.jms.projects}")
+    private List<String> projects; //TODO: revisit getFirst() if more projects are added
 
     public AmsJmsService(JmsTemplate jmsTopicTemplate, JmsTemplate jmsQueueTemplate, RestTemplate restTemplate) {
         super(jmsTopicTemplate, jmsQueueTemplate);
@@ -59,34 +59,34 @@ public class AmsJmsService extends DefaultJmsService implements JmsService {
     //region Topics
     public void createTopic(String topic) {
         HttpEntity<String> request = createHttpRequest();
-        restTemplate.exchange(host + "/" + projectNames.getFirst() + "/topics/" + topic,
+        restTemplate.exchange(host + "/" + projects.getFirst() + "/topics/" + topic,
                 HttpMethod.PUT, request, String.class);
     }
 
     public String deleteTopic(String topic) {
         HttpEntity<String> request = createHttpRequest();
-        ResponseEntity<String> response = restTemplate.exchange(host + "/" + projectNames.getFirst() + "/topics/" + topic,
+        ResponseEntity<String> response = restTemplate.exchange(host + "/" + projects.getFirst() + "/topics/" + topic,
                 HttpMethod.DELETE, request, String.class);
         return response.getBody();
     }
 
     public String getTopic(String topic) {
         HttpEntity<String> request = createHttpRequest();
-        ResponseEntity<String> response = restTemplate.exchange(host + "/" + projectNames.getFirst() + "/topics/" + topic,
+        ResponseEntity<String> response = restTemplate.exchange(host + "/" + projects.getFirst() + "/topics/" + topic,
                 HttpMethod.GET, request, String.class);
         return response.getBody();
     }
 
     public String getAllTopics() {
         HttpEntity<String> request = createHttpRequest();
-        ResponseEntity<String> response = restTemplate.exchange(host + "/" + projectNames.getFirst() + "/topics",
+        ResponseEntity<String> response = restTemplate.exchange(host + "/" + projects.getFirst() + "/topics",
                 HttpMethod.GET, request, String.class);
         return response.getBody();
     }
 
     public void publishTopic(String topic, Object message) {
         HttpEntity<String> request = createHttpRequest(message);
-        restTemplate.exchange(host + "/" + projectNames.getFirst() + "/topics/" + topic + ":publish",
+        restTemplate.exchange(host + "/" + projects.getFirst() + "/topics/" + topic + ":publish",
                 HttpMethod.POST, request, String.class);
         logger.info("Sending JMS to topic: {} via AMS", topic);
     }
@@ -96,7 +96,7 @@ public class AmsJmsService extends DefaultJmsService implements JmsService {
     public String getTopicSubscriptions(String topic) {
         HttpEntity<String> request = createHttpRequest();
         ResponseEntity<String> response =
-                restTemplate.exchange(host + "/" + projectNames.getFirst() + "/topics/" + topic + "/subscriptions",
+                restTemplate.exchange(host + "/" + projects.getFirst() + "/topics/" + topic + "/subscriptions",
                         HttpMethod.GET, request, String.class);
         return response.getBody();
     }
@@ -104,16 +104,16 @@ public class AmsJmsService extends DefaultJmsService implements JmsService {
     public String getAllSubscriptions() {
         HttpEntity<String> request = createHttpRequest();
         ResponseEntity<String> response =
-                restTemplate.exchange(host + "/" + projectNames.getFirst() + "/subscriptions",
+                restTemplate.exchange(host + "/" + projects.getFirst() + "/subscriptions",
                         HttpMethod.GET, request, String.class);
         return response.getBody();
     }
 
     public void createSubscriptionForTopic(String topic, String name) {
-        String bodyUrl = host + "/" + projectNames.getFirst() + "/topics/" + topic;
+        String bodyUrl = host + "/" + projects.getFirst() + "/topics/" + topic;
         HttpEntity<String> request = createHttpRequest(bodyUrl);
         try {
-            restTemplate.exchange(host + "/" + projectNames.getFirst() + "/subscriptions/" + name,
+            restTemplate.exchange(host + "/" + projects.getFirst() + "/subscriptions/" + name,
                     HttpMethod.PUT, request, String.class);
         } catch (HttpClientErrorException e) {
             logger.info(e.getMessage());
