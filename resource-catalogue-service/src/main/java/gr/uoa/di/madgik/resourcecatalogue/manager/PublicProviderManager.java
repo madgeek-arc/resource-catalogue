@@ -116,7 +116,7 @@ public class PublicProviderManager extends ResourceManager<ProviderBundle> imple
         ret.getMetadata().setPublished(true);
         logger.info("Updating public Provider with id '{}'", ret.getId());
         ret = super.update(ret, null);
-        jmsService.convertAndSendTopic("provider.asdf", ret);
+        jmsService.convertAndSendTopic("provider.update", ret);
         return ret;
     }
 
