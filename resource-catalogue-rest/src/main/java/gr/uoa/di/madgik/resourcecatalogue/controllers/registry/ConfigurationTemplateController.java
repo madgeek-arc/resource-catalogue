@@ -28,13 +28,9 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 
-@Hidden
 @RestController
 @RequestMapping("configurationTemplate")
 @Tag(name = "configuration template", description = "Operations about Configuration Templates")
@@ -54,5 +50,17 @@ public class ConfigurationTemplateController {
                                                      @Parameter(hidden = true) Authentication auth) {
         ConfigurationTemplateBundle bundle = service.add(new ConfigurationTemplateBundle(configurationTemplate), auth);
         return new ResponseEntity<>(bundle.getConfigurationTemplate(), HttpStatus.CREATED);
+    }
+
+    @Operation(summary = "Returns the Configuration Template of an Interoperability Record.")
+    @GetMapping(path = "{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE})
+    public ResponseEntity<ConfigurationTemplate> getConfigurationTemplateOfAGuideline(
+            @Parameter(description = "The left part of the ID before the '/'")
+            @PathVariable("prefix") String prefix,
+            @Parameter(description = "The right part of the ID after the '/'")
+            @PathVariable("suffix") String suffix) {
+        String interoperabilityRecordId = prefix + "/" + suffix;
+        ConfigurationTemplate configurationTemplate = service.getByInteroperabilityRecordId(interoperabilityRecordId);
+        return new ResponseEntity<>(configurationTemplate, HttpStatus.OK);
     }
 }
