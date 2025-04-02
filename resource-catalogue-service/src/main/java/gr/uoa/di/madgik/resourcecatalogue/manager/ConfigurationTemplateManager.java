@@ -16,6 +16,8 @@
 
 package gr.uoa.di.madgik.resourcecatalogue.manager;
 
+import gr.uoa.di.madgik.registry.domain.FacetFilter;
+import gr.uoa.di.madgik.resourcecatalogue.domain.configurationTemplates.ConfigurationTemplate;
 import gr.uoa.di.madgik.resourcecatalogue.domain.configurationTemplates.ConfigurationTemplateBundle;
 import gr.uoa.di.madgik.resourcecatalogue.service.ConfigurationTemplateService;
 import gr.uoa.di.madgik.resourcecatalogue.service.IdCreator;
@@ -47,5 +49,12 @@ public class ConfigurationTemplateManager extends ResourceManager<ConfigurationT
         super.add(bundle, auth);
         logger.info("Added the Configuration Template with id '{}'", bundle.getId());
         return bundle;
+    }
+
+    public ConfigurationTemplate getByInteroperabilityRecordId(String interoperabilityRecordId) {
+        FacetFilter ff = new FacetFilter();
+        ff.setResourceType(getResourceTypeName());
+        ff.addFilter("interoperability_record_id", interoperabilityRecordId);
+        return getAll(ff, null).getResults().getFirst().getConfigurationTemplate();
     }
 }
