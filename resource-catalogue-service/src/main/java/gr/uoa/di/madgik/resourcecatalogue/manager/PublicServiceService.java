@@ -153,5 +153,15 @@ public class PublicServiceService extends ResourceManager<ServiceBundle>
                 appendCatalogueId(
                         bundle.getService().getResourceProviders(),
                         bundle.getService().getCatalogueId()));
+        // Related Resources
+        bundle.getService().setRelatedResources(
+                appendCatalogueId(
+                        bundle.getService().getRelatedResources(),
+                        bundle.getService().getCatalogueId()));
+        // Required Resources
+        bundle.getService().setRequiredResources(
+                appendCatalogueId(
+                        bundle.getService().getRequiredResources(),
+                        bundle.getService().getCatalogueId()));
     }
 }

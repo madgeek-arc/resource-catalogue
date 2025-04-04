@@ -131,6 +131,8 @@ public class ProviderResourcesCommonMethods {
             if (o instanceof ServiceBundle) {
                 catalogueId = ((ServiceBundle) o).getService().getCatalogueId();
                 resourceProviders = ((ServiceBundle) o).getService().getResourceProviders();
+                requiredResources = ((ServiceBundle) o).getService().getRequiredResources();
+                relatedResources = ((ServiceBundle) o).getService().getRelatedResources();
             }
             if (o instanceof TrainingResourceBundle) {
                 catalogueId = ((TrainingResourceBundle) o).getTrainingResource().getCatalogueId();

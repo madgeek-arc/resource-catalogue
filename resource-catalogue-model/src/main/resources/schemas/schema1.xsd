@@ -1385,9 +1385,27 @@ For embedded providers (2) - legal status of the hosting legal entity. It is als
         
     <xs:sequence>
             
+      <xs:element minOccurs="0" name="abbreviation" type="xs:string">
+        <xs:annotation>
+          <xs:documentation><![CDATA[An abbreviation of the Resource Name as assigned by the Provider]]></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+            
+      <xs:element maxOccurs="unbounded" minOccurs="0" name="accessModes" nillable="true" type="xs:string">
+        <xs:annotation>
+          <xs:documentation><![CDATA[Eligibility/criteria for granting access to users (excellence-based, free-conditionally, free etc.).]]></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+            
       <xs:element minOccurs="0" name="accessPolicy" type="xs:anyURI">
         <xs:annotation>
           <xs:documentation><![CDATA[Information about the access policies that apply.]]></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+            
+      <xs:element maxOccurs="unbounded" minOccurs="0" name="accessTypes" nillable="true" type="xs:string">
+        <xs:annotation>
+          <xs:documentation><![CDATA[The way a user can access the service/resource (Remote, Physical, Virtual, etc.).]]></xs:documentation>
         </xs:annotation>
       </xs:element>
             
@@ -1409,6 +1427,18 @@ For embedded providers (2) - legal status of the hosting legal entity. It is als
         </xs:annotation>
       </xs:element>
             
+      <xs:element maxOccurs="unbounded" minOccurs="0" name="certifications" nillable="true" type="xs:string">
+        <xs:annotation>
+          <xs:documentation><![CDATA[List of certifications obtained for the Resource (including the certification body).]]></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+            
+      <xs:element maxOccurs="unbounded" minOccurs="0" name="changeLog" nillable="true" type="xs:string">
+        <xs:annotation>
+          <xs:documentation><![CDATA[Summary of the Resource features updated from the previous version.]]></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+            
       <xs:element minOccurs="0" name="description" type="xs:string">
         <xs:annotation>
           <xs:documentation><![CDATA[A high-level description in fairly non-technical terms of a) what the Resource does, functionality it provides and Resources it enables to access,
@@ -1418,9 +1448,63 @@ c) list of customers, communities, users, etc. using the Resource.]]></xs:docume
         </xs:annotation>
       </xs:element>
             
+      <xs:element maxOccurs="unbounded" minOccurs="0" name="fundingBody" nillable="true" type="xs:string">
+        <xs:annotation>
+          <xs:documentation><![CDATA[Name of the funding body that supported the development and/or operation of the Resource.]]></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+            
+      <xs:element maxOccurs="unbounded" minOccurs="0" name="fundingPrograms" nillable="true" type="xs:string">
+        <xs:annotation>
+          <xs:documentation><![CDATA[Name of the funding program that supported the development and/or operation of the Resource.]]></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+            
+      <xs:element maxOccurs="unbounded" minOccurs="0" name="geographicalAvailabilities" nillable="true" type="xs:string">
+        <xs:annotation>
+          <xs:documentation><![CDATA[Locations where the Resource is offered.]]></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+            
+      <xs:element maxOccurs="unbounded" minOccurs="0" name="grantProjectNames" nillable="true" type="xs:string">
+        <xs:annotation>
+          <xs:documentation><![CDATA[Name of the project that supported the development and/or operation of the Resource.]]></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+            
+      <xs:element minOccurs="0" name="helpdeskEmail" type="xs:string">
+        <xs:annotation>
+          <xs:documentation><![CDATA[The email to ask more information from the Provider about this Resource.]]></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+            
+      <xs:element minOccurs="0" name="helpdeskPage" type="xs:anyURI">
+        <xs:annotation>
+          <xs:documentation><![CDATA[The URL to a webpage to ask more information from the Provider about this Resource.]]></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+            
       <xs:element minOccurs="0" name="id" type="xs:string">
         <xs:annotation>
           <xs:documentation><![CDATA[A persistent identifier, a unique reference to the Resource in the context of the EOSC Portal.]]></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+            
+      <xs:element maxOccurs="unbounded" minOccurs="0" name="languageAvailabilities" nillable="true" type="xs:string">
+        <xs:annotation>
+          <xs:documentation><![CDATA[Languages of the (user interface of the) Resource.]]></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+            
+      <xs:element minOccurs="0" name="lastUpdate" type="xs:dateTime">
+        <xs:annotation>
+          <xs:documentation><![CDATA[Date of the latest update of the Resource.]]></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+            
+      <xs:element minOccurs="0" name="lifeCycleStatus" type="xs:string">
+        <xs:annotation>
+          <xs:documentation><![CDATA[Phase of the Resource life-cycle.]]></xs:documentation>
         </xs:annotation>
       </xs:element>
             
@@ -1430,9 +1514,33 @@ c) list of customers, communities, users, etc. using the Resource.]]></xs:docume
         </xs:annotation>
       </xs:element>
             
+      <xs:element minOccurs="0" name="mainContact" type="serviceMainContact">
+        <xs:annotation>
+          <xs:documentation><![CDATA[Service's Main Contact/Resource Owner info.]]></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+            
+      <xs:element minOccurs="0" name="maintenance" type="xs:anyURI">
+        <xs:annotation>
+          <xs:documentation><![CDATA[Webpage with information about planned maintenance windows for this Resource.]]></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+            
+      <xs:element maxOccurs="unbounded" minOccurs="0" name="multimedia" nillable="true" type="multimediaPair">
+        <xs:annotation>
+          <xs:documentation><![CDATA[Link to video, slideshow, photos, screenshots with details of the Provider.]]></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+            
       <xs:element minOccurs="0" name="name" type="xs:string">
         <xs:annotation>
           <xs:documentation><![CDATA[Resource Full Name as assigned by the Provider.]]></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+            
+      <xs:element maxOccurs="unbounded" minOccurs="0" name="openSourceTechnologies" nillable="true" type="xs:string">
+        <xs:annotation>
+          <xs:documentation><![CDATA[List of open source technologies supported by the Resource.]]></xs:documentation>
         </xs:annotation>
       </xs:element>
             
@@ -1466,6 +1574,42 @@ c) list of customers, communities, users, etc. using the Resource.]]></xs:docume
         </xs:annotation>
       </xs:element>
             
+      <xs:element maxOccurs="unbounded" minOccurs="0" name="publicContacts" nillable="true" type="servicePublicContact">
+        <xs:annotation>
+          <xs:documentation><![CDATA[List of the Service's Public Contacts info.]]></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+            
+      <xs:element maxOccurs="unbounded" minOccurs="0" name="relatedPlatforms" nillable="true" type="xs:string">
+        <xs:annotation>
+          <xs:documentation><![CDATA[List of suites or thematic platforms in which the Resource is engaged or Providers (Provider groups) contributing to this Resource.]]></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+            
+      <xs:element maxOccurs="unbounded" minOccurs="0" name="relatedResources" nillable="true" type="xs:string">
+        <xs:annotation>
+          <xs:documentation><![CDATA[List of other Resources that are commonly used with this Resource.]]></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+            
+      <xs:element maxOccurs="unbounded" minOccurs="0" name="requiredResources" nillable="true" type="xs:string">
+        <xs:annotation>
+          <xs:documentation><![CDATA[List of other Resources required to use this Resource.]]></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+            
+      <xs:element maxOccurs="unbounded" minOccurs="0" name="resourceGeographicLocations" nillable="true" type="xs:string">
+        <xs:annotation>
+          <xs:documentation><![CDATA[List of geographic locations where data, samples, etc. are stored and processed.]]></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+            
+      <xs:element minOccurs="0" name="resourceLevel" type="xs:anyURI">
+        <xs:annotation>
+          <xs:documentation><![CDATA[Webpage with the information about the levels of performance that a Provider is expected to deliver.]]></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+            
       <xs:element minOccurs="0" name="resourceOrganisation" type="xs:string">
         <xs:annotation>
           <xs:documentation><![CDATA[The name (or abbreviation) of the organisation that manages or delivers the resource, or that coordinates resource delivery in a federated scenario.]]></xs:documentation>
@@ -1484,9 +1628,45 @@ c) list of customers, communities, users, etc. using the Resource.]]></xs:docume
         </xs:annotation>
       </xs:element>
             
+      <xs:element minOccurs="0" name="securityContactEmail" type="xs:string">
+        <xs:annotation>
+          <xs:documentation><![CDATA[The email to contact the Provider for critical security issues about this Resource.]]></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+            
+      <xs:element maxOccurs="unbounded" minOccurs="0" name="serviceCategories" nillable="true" type="xs:string">
+        <xs:annotation>
+          <xs:documentation><![CDATA[A named group of Resources that offer access to the same type of Resources.]]></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+            
+      <xs:element maxOccurs="unbounded" minOccurs="0" name="standards" nillable="true" type="xs:string">
+        <xs:annotation>
+          <xs:documentation><![CDATA[List of standards supported by the Resource.]]></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+            
+      <xs:element minOccurs="0" name="statusMonitoring" type="xs:anyURI">
+        <xs:annotation>
+          <xs:documentation><![CDATA[Webpage with monitoring information about this Resource.]]></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+            
+      <xs:element minOccurs="0" name="tagline" type="xs:string">
+        <xs:annotation>
+          <xs:documentation><![CDATA[Short catch-phrase for marketing and advertising purposes. It will be usually displayed close to the Resource name and should refer to the main value or purpose of the Resource.]]></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+            
       <xs:element maxOccurs="unbounded" minOccurs="0" name="tags" nillable="true" type="xs:string">
         <xs:annotation>
           <xs:documentation><![CDATA[Keywords associated to the Resource to simplify search by relevant keywords.]]></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+            
+      <xs:element maxOccurs="unbounded" minOccurs="0" name="targetUsers" nillable="true" type="xs:string">
+        <xs:annotation>
+          <xs:documentation><![CDATA[Type of users/customers that commissions a Provider to deliver a Resource.]]></xs:documentation>
         </xs:annotation>
       </xs:element>
             
@@ -1496,9 +1676,33 @@ c) list of customers, communities, users, etc. using the Resource.]]></xs:docume
         </xs:annotation>
       </xs:element>
             
+      <xs:element minOccurs="0" name="trainingInformation" type="xs:anyURI">
+        <xs:annotation>
+          <xs:documentation><![CDATA[Webpage to training information on the Resource.]]></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+            
       <xs:element minOccurs="0" name="trl" type="xs:string">
         <xs:annotation>
           <xs:documentation><![CDATA[The Technology Readiness Level of the Resource (to be further updated in the context of the EOSC).]]></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+            
+      <xs:element maxOccurs="unbounded" minOccurs="0" name="useCases" nillable="true" type="useCasesPair">
+        <xs:annotation>
+          <xs:documentation><![CDATA[Link to use cases supported by this Resource.]]></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+            
+      <xs:element minOccurs="0" name="userManual" type="xs:anyURI">
+        <xs:annotation>
+          <xs:documentation><![CDATA[Link to the Resource user manual and documentation.]]></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+            
+      <xs:element minOccurs="0" name="version" type="xs:string">
+        <xs:annotation>
+          <xs:documentation><![CDATA[Version of the Resource that is in force.]]></xs:documentation>
         </xs:annotation>
       </xs:element>
             
@@ -1527,46 +1731,6 @@ c) list of customers, communities, users, etc. using the Resource.]]></xs:docume
           <xs:documentation><![CDATA[A named group of Resources that offer access to the same type of Resource or capabilities, within the defined Resource Category.]]></xs:documentation>
         </xs:annotation>
       </xs:element>
-          
-    </xs:sequence>
-      
-  </xs:complexType>
-    
-  <xs:complexType name="serviceBundle">
-        
-    <xs:complexContent>
-            
-      <xs:extension base="bundle">
-                
-        <xs:sequence>
-                    
-          <xs:element minOccurs="0" name="auditState" type="xs:string"/>
-                    
-          <xs:element minOccurs="0" name="resourceExtras" type="resourceExtras"/>
-                    
-          <xs:element minOccurs="0" name="service" type="service"/>
-                    
-          <xs:element minOccurs="0" name="status" type="xs:string"/>
-                  
-        </xs:sequence>
-              
-      </xs:extension>
-          
-    </xs:complexContent>
-      
-  </xs:complexType>
-    
-  <xs:complexType name="serviceClassTier">
-        
-    <xs:sequence>
-            
-      <xs:element minOccurs="0" name="accessPolicy" type="xs:string"/>
-            
-      <xs:element minOccurs="0" name="costModel" type="xs:string"/>
-            
-      <xs:element name="level" type="xs:int"/>
-            
-      <xs:element maxOccurs="unbounded" minOccurs="0" name="offerings" nillable="true" type="xs:string"/>
           
     </xs:sequence>
       
@@ -1655,6 +1819,66 @@ c) list of customers, communities, users, etc. using the Resource.]]></xs:docume
           <xs:documentation><![CDATA[Position of the Resource's contact person to be displayed at the portal.]]></xs:documentation>
         </xs:annotation>
       </xs:element>
+          
+    </xs:sequence>
+      
+  </xs:complexType>
+    
+  <xs:complexType name="useCasesPair">
+        
+    <xs:sequence>
+            
+      <xs:element minOccurs="0" name="useCaseName" type="xs:string">
+        <xs:annotation>
+          <xs:documentation><![CDATA[Short description of the Multimedia content.]]></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+            
+      <xs:element minOccurs="0" name="useCaseURL" type="xs:anyURI">
+        <xs:annotation>
+          <xs:documentation><![CDATA[Link to use cases supported by this Resource.]]></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+          
+    </xs:sequence>
+      
+  </xs:complexType>
+    
+  <xs:complexType name="serviceBundle">
+        
+    <xs:complexContent>
+            
+      <xs:extension base="bundle">
+                
+        <xs:sequence>
+                    
+          <xs:element minOccurs="0" name="auditState" type="xs:string"/>
+                    
+          <xs:element minOccurs="0" name="resourceExtras" type="resourceExtras"/>
+                    
+          <xs:element minOccurs="0" name="service" type="service"/>
+                    
+          <xs:element minOccurs="0" name="status" type="xs:string"/>
+                  
+        </xs:sequence>
+              
+      </xs:extension>
+          
+    </xs:complexContent>
+      
+  </xs:complexType>
+    
+  <xs:complexType name="serviceClassTier">
+        
+    <xs:sequence>
+            
+      <xs:element minOccurs="0" name="accessPolicy" type="xs:string"/>
+            
+      <xs:element minOccurs="0" name="costModel" type="xs:string"/>
+            
+      <xs:element name="level" type="xs:int"/>
+            
+      <xs:element maxOccurs="unbounded" minOccurs="0" name="offerings" nillable="true" type="xs:string"/>
           
     </xs:sequence>
       
@@ -1845,26 +2069,6 @@ that is the used scheme (e.g., Web Address URL, DOI, ARK, etc.).]]></xs:document
       </xs:extension>
           
     </xs:complexContent>
-      
-  </xs:complexType>
-    
-  <xs:complexType name="useCasesPair">
-        
-    <xs:sequence>
-            
-      <xs:element minOccurs="0" name="useCaseName" type="xs:string">
-        <xs:annotation>
-          <xs:documentation><![CDATA[Short description of the Multimedia content.]]></xs:documentation>
-        </xs:annotation>
-      </xs:element>
-            
-      <xs:element minOccurs="0" name="useCaseURL" type="xs:anyURI">
-        <xs:annotation>
-          <xs:documentation><![CDATA[Link to use cases supported by this Resource.]]></xs:documentation>
-        </xs:annotation>
-      </xs:element>
-          
-    </xs:sequence>
       
   </xs:complexType>
     
