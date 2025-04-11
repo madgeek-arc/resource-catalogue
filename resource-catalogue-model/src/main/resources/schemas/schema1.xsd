@@ -219,6 +219,12 @@ It is also possible to select Not a legal entity.]]></xs:documentation>
         </xs:annotation>
       </xs:element>
             
+      <xs:element minOccurs="0" name="node" type="xs:string">
+        <xs:annotation>
+          <xs:documentation><![CDATA[Catalogue's original Node]]></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+            
       <xs:element maxOccurs="unbounded" minOccurs="0" name="participatingCountries" nillable="true" type="xs:string">
         <xs:annotation>
           <xs:documentation><![CDATA[Catalogues that are funded/supported by several countries should list here all supporting countries (including the Coordinating country).]]></xs:documentation>
@@ -1317,6 +1323,12 @@ For embedded providers (2) - legal status of the hosting legal entity. It is als
       <xs:element maxOccurs="unbounded" minOccurs="0" name="networks" nillable="true" type="xs:string">
         <xs:annotation>
           <xs:documentation><![CDATA[Providers that are members of networks should list those networks here.]]></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+            
+      <xs:element minOccurs="0" name="node" type="xs:string">
+        <xs:annotation>
+          <xs:documentation><![CDATA[Provider's original Node]]></xs:documentation>
         </xs:annotation>
       </xs:element>
             
@@ -2637,6 +2649,8 @@ that is the used scheme (e.g., Web Address URL, DOI, ARK, etc.).]]></xs:document
   <xs:simpleType name="type">
         
     <xs:restriction base="xs:string">
+            
+      <xs:enumeration value="NODE"/>
             
       <xs:enumeration value="PROVIDER_AREA_OF_ACTIVITY"/>
             
