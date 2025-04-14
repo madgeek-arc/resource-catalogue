@@ -62,7 +62,7 @@ public class Vocabulary implements Identifiable {
 
     public enum Type {
         // Node
-        NODE("node"),
+        NODE("Node"),
         // Provider
         PROVIDER_AREA_OF_ACTIVITY("Provider area of activity"),
         PROVIDER_ESFRI_TYPE("Provider esfri type"),
