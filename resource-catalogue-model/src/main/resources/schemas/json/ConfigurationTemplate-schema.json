@@ -1,0 +1,28 @@
+{
+  "$schema" : "https://json-schema.org/draft/2020-12/schema",
+  "$defs" : {
+    "JSONObject" : {
+      "type" : "object",
+      "additionalProperties" : false
+    }
+  },
+  "type" : "object",
+  "properties" : {
+    "description" : {
+      "type" : "string"
+    },
+    "formModel" : {
+      "$ref" : "#/$defs/JSONObject"
+    },
+    "id" : {
+      "type" : "string"
+    },
+    "interoperabilityRecordId" : {
+      "type" : "string"
+    },
+    "name" : {
+      "type" : "string"
+    }
+  },
+  "additionalProperties" : false
+}

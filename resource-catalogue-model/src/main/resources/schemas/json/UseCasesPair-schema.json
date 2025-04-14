@@ -1,0 +1,39 @@
+{
+  "$schema" : "https://json-schema.org/draft/2020-12/schema",
+  "$defs" : {
+    "URL" : {
+      "type" : "object",
+      "properties" : {
+        "authority" : {
+          "type" : "string"
+        },
+        "file" : {
+          "type" : "string"
+        },
+        "host" : {
+          "type" : "string"
+        },
+        "port" : {
+          "type" : "integer"
+        },
+        "protocol" : {
+          "type" : "string"
+        },
+        "ref" : {
+          "type" : "string"
+        }
+      },
+      "additionalProperties" : false
+    }
+  },
+  "type" : "object",
+  "properties" : {
+    "useCaseName" : {
+      "type" : "string"
+    },
+    "useCaseURL" : {
+      "$ref" : "#/$defs/URL"
+    }
+  },
+  "additionalProperties" : false
+}

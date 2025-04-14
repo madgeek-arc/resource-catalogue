@@ -1,0 +1,22 @@
+{
+  "$schema" : "https://json-schema.org/draft/2020-12/schema",
+  "type" : "object",
+  "properties" : {
+    "dateOfRequest" : {
+      "type" : "string"
+    },
+    "providerId" : {
+      "type" : "string"
+    },
+    "resourceId" : {
+      "type" : "string"
+    },
+    "resourceType" : {
+      "type" : "string"
+    },
+    "userId" : {
+      "type" : "string"
+    }
+  },
+  "additionalProperties" : false
+}

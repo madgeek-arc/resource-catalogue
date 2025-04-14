@@ -1,0 +1,48 @@
+{
+  "$schema" : "https://json-schema.org/draft/2020-12/schema",
+  "$defs" : {
+    "CreatorAffiliationInfo" : {
+      "type" : "object",
+      "properties" : {
+        "affiliation" : {
+          "type" : "string"
+        },
+        "affiliationIdentifier" : {
+          "type" : "string"
+        }
+      },
+      "additionalProperties" : false
+    },
+    "CreatorNameTypeInfo" : {
+      "type" : "object",
+      "properties" : {
+        "creatorName" : {
+          "type" : "string"
+        },
+        "nameType" : {
+          "type" : "string"
+        }
+      },
+      "additionalProperties" : false
+    }
+  },
+  "type" : "object",
+  "properties" : {
+    "creatorAffiliationInfo" : {
+      "$ref" : "#/$defs/CreatorAffiliationInfo"
+    },
+    "creatorNameTypeInfo" : {
+      "$ref" : "#/$defs/CreatorNameTypeInfo"
+    },
+    "familyName" : {
+      "type" : "string"
+    },
+    "givenName" : {
+      "type" : "string"
+    },
+    "nameIdentifier" : {
+      "type" : "string"
+    }
+  },
+  "additionalProperties" : false
+}
