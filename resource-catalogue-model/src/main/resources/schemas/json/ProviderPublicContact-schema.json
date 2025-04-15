@@ -1,0 +1,22 @@
+{
+  "$schema" : "https://json-schema.org/draft/2020-12/schema",
+  "type" : "object",
+  "properties" : {
+    "email" : {
+      "type" : "string"
+    },
+    "firstName" : {
+      "type" : "string"
+    },
+    "lastName" : {
+      "type" : "string"
+    },
+    "phone" : {
+      "type" : "string"
+    },
+    "position" : {
+      "type" : "string"
+    }
+  },
+  "additionalProperties" : false
+}

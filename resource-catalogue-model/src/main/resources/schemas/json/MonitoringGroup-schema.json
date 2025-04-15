@@ -1,0 +1,57 @@
+{
+  "$schema" : "https://json-schema.org/draft/2020-12/schema",
+  "$defs" : {
+    "Metric" : {
+      "type" : "object",
+      "properties" : {
+        "metric" : {
+          "$ref" : "#/$defs/URL"
+        },
+        "probe" : {
+          "$ref" : "#/$defs/URL"
+        }
+      },
+      "additionalProperties" : false
+    },
+    "URL" : {
+      "type" : "object",
+      "properties" : {
+        "authority" : {
+          "type" : "string"
+        },
+        "file" : {
+          "type" : "string"
+        },
+        "host" : {
+          "type" : "string"
+        },
+        "port" : {
+          "type" : "integer"
+        },
+        "protocol" : {
+          "type" : "string"
+        },
+        "ref" : {
+          "type" : "string"
+        }
+      },
+      "additionalProperties" : false
+    }
+  },
+  "type" : "object",
+  "properties" : {
+    "endpoint" : {
+      "type" : "string"
+    },
+    "metrics" : {
+      "type" : "array",
+      "items" : {
+        "$ref" : "#/$defs/Metric"
+      }
+    },
+    "serviceType" : {
+      "type" : "string"
+    }
+  },
+  "additionalProperties" : false
+}

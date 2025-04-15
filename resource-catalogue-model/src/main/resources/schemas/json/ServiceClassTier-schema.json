@@ -1,0 +1,22 @@
+{
+  "$schema" : "https://json-schema.org/draft/2020-12/schema",
+  "type" : "object",
+  "properties" : {
+    "accessPolicy" : {
+      "type" : "string"
+    },
+    "costModel" : {
+      "type" : "string"
+    },
+    "level" : {
+      "type" : "integer"
+    },
+    "offerings" : {
+      "type" : "array",
+      "items" : {
+        "type" : "string"
+      }
+    }
+  },
+  "additionalProperties" : false
+}

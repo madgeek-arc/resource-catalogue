@@ -1,0 +1,199 @@
+{
+  "$schema" : "https://json-schema.org/draft/2020-12/schema",
+  "$defs" : {
+    "AlternativeIdentifier" : {
+      "type" : "object",
+      "properties" : {
+        "type" : {
+          "type" : "string"
+        },
+        "value" : {
+          "type" : "string"
+        }
+      },
+      "additionalProperties" : false
+    },
+    "ServiceMainContact" : {
+      "type" : "object",
+      "properties" : {
+        "email" : {
+          "type" : "string"
+        },
+        "firstName" : {
+          "type" : "string"
+        },
+        "lastName" : {
+          "type" : "string"
+        },
+        "organisation" : {
+          "type" : "string"
+        },
+        "phone" : {
+          "type" : "string"
+        },
+        "position" : {
+          "type" : "string"
+        }
+      },
+      "additionalProperties" : false
+    },
+    "ServiceProviderDomain" : {
+      "type" : "object",
+      "properties" : {
+        "scientificDomain" : {
+          "type" : "string"
+        },
+        "scientificSubdomain" : {
+          "type" : "string"
+        }
+      },
+      "additionalProperties" : false
+    },
+    "URL" : {
+      "type" : "object",
+      "properties" : {
+        "authority" : {
+          "type" : "string"
+        },
+        "file" : {
+          "type" : "string"
+        },
+        "host" : {
+          "type" : "string"
+        },
+        "port" : {
+          "type" : "integer"
+        },
+        "protocol" : {
+          "type" : "string"
+        },
+        "ref" : {
+          "type" : "string"
+        }
+      },
+      "additionalProperties" : false
+    }
+  },
+  "type" : "object",
+  "properties" : {
+    "accessRights" : {
+      "type" : "string"
+    },
+    "alternativeIdentifiers" : {
+      "type" : "array",
+      "items" : {
+        "$ref" : "#/$defs/AlternativeIdentifier"
+      }
+    },
+    "authors" : {
+      "type" : "array",
+      "items" : {
+        "type" : "string"
+      }
+    },
+    "catalogueId" : {
+      "type" : "string"
+    },
+    "contact" : {
+      "$ref" : "#/$defs/ServiceMainContact"
+    },
+    "contentResourceTypes" : {
+      "type" : "array",
+      "items" : {
+        "type" : "string"
+      }
+    },
+    "description" : {
+      "type" : "string"
+    },
+    "duration" : {
+      "type" : "string"
+    },
+    "eoscRelatedServices" : {
+      "type" : "array",
+      "items" : {
+        "type" : "string"
+      }
+    },
+    "expertiseLevel" : {
+      "type" : "string"
+    },
+    "geographicalAvailabilities" : {
+      "type" : "array",
+      "items" : {
+        "type" : "string"
+      }
+    },
+    "id" : {
+      "type" : "string"
+    },
+    "keywords" : {
+      "type" : "array",
+      "items" : {
+        "type" : "string"
+      }
+    },
+    "languages" : {
+      "type" : "array",
+      "items" : {
+        "type" : "string"
+      }
+    },
+    "learningOutcomes" : {
+      "type" : "array",
+      "items" : {
+        "type" : "string"
+      }
+    },
+    "learningResourceTypes" : {
+      "type" : "array",
+      "items" : {
+        "type" : "string"
+      }
+    },
+    "license" : {
+      "type" : "string"
+    },
+    "qualifications" : {
+      "type" : "array",
+      "items" : {
+        "type" : "string"
+      }
+    },
+    "resourceOrganisation" : {
+      "type" : "string"
+    },
+    "resourceProviders" : {
+      "type" : "array",
+      "items" : {
+        "type" : "string"
+      }
+    },
+    "scientificDomains" : {
+      "type" : "array",
+      "items" : {
+        "$ref" : "#/$defs/ServiceProviderDomain"
+      }
+    },
+    "targetGroups" : {
+      "type" : "array",
+      "items" : {
+        "type" : "string"
+      }
+    },
+    "title" : {
+      "type" : "string"
+    },
+    "url" : {
+      "$ref" : "#/$defs/URL"
+    },
+    "urlType" : {
+      "type" : "string"
+    },
+    "versionDate" : {
+      "type" : "string",
+      "format" : "date-time"
+    }
+  },
+  "additionalProperties" : false
+}

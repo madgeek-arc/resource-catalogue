@@ -1,0 +1,213 @@
+{
+  "$schema" : "https://json-schema.org/draft/2020-12/schema",
+  "$defs" : {
+    "AlternativeIdentifier" : {
+      "type" : "object",
+      "properties" : {
+        "type" : {
+          "type" : "string"
+        },
+        "value" : {
+          "type" : "string"
+        }
+      },
+      "additionalProperties" : false
+    },
+    "Creator" : {
+      "type" : "object",
+      "properties" : {
+        "creatorAffiliationInfo" : {
+          "$ref" : "#/$defs/CreatorAffiliationInfo"
+        },
+        "creatorNameTypeInfo" : {
+          "$ref" : "#/$defs/CreatorNameTypeInfo"
+        },
+        "familyName" : {
+          "type" : "string"
+        },
+        "givenName" : {
+          "type" : "string"
+        },
+        "nameIdentifier" : {
+          "type" : "string"
+        }
+      },
+      "additionalProperties" : false
+    },
+    "CreatorAffiliationInfo" : {
+      "type" : "object",
+      "properties" : {
+        "affiliation" : {
+          "type" : "string"
+        },
+        "affiliationIdentifier" : {
+          "type" : "string"
+        }
+      },
+      "additionalProperties" : false
+    },
+    "CreatorNameTypeInfo" : {
+      "type" : "object",
+      "properties" : {
+        "creatorName" : {
+          "type" : "string"
+        },
+        "nameType" : {
+          "type" : "string"
+        }
+      },
+      "additionalProperties" : false
+    },
+    "IdentifierInfo" : {
+      "type" : "object",
+      "properties" : {
+        "identifier" : {
+          "type" : "string"
+        },
+        "identifierType" : {
+          "type" : "string"
+        }
+      },
+      "additionalProperties" : false
+    },
+    "RelatedStandard" : {
+      "type" : "object",
+      "properties" : {
+        "relatedStandardIdentifier" : {
+          "type" : "string"
+        },
+        "relatedStandardURI" : {
+          "$ref" : "#/$defs/URL"
+        }
+      },
+      "additionalProperties" : false
+    },
+    "ResourceTypeInfo" : {
+      "type" : "object",
+      "properties" : {
+        "resourceType" : {
+          "type" : "string"
+        },
+        "resourceTypeGeneral" : {
+          "type" : "string"
+        }
+      },
+      "additionalProperties" : false
+    },
+    "Right" : {
+      "type" : "object",
+      "properties" : {
+        "rightIdentifier" : {
+          "type" : "string"
+        },
+        "rightTitle" : {
+          "type" : "string"
+        },
+        "rightURI" : {
+          "$ref" : "#/$defs/URL"
+        }
+      },
+      "additionalProperties" : false
+    },
+    "URL" : {
+      "type" : "object",
+      "properties" : {
+        "authority" : {
+          "type" : "string"
+        },
+        "file" : {
+          "type" : "string"
+        },
+        "host" : {
+          "type" : "string"
+        },
+        "port" : {
+          "type" : "integer"
+        },
+        "protocol" : {
+          "type" : "string"
+        },
+        "ref" : {
+          "type" : "string"
+        }
+      },
+      "additionalProperties" : false
+    }
+  },
+  "type" : "object",
+  "properties" : {
+    "alternativeIdentifiers" : {
+      "type" : "array",
+      "items" : {
+        "$ref" : "#/$defs/AlternativeIdentifier"
+      }
+    },
+    "catalogueId" : {
+      "type" : "string"
+    },
+    "created" : {
+      "type" : "string"
+    },
+    "creators" : {
+      "type" : "array",
+      "items" : {
+        "$ref" : "#/$defs/Creator"
+      }
+    },
+    "description" : {
+      "type" : "string"
+    },
+    "domain" : {
+      "type" : "string"
+    },
+    "eoscGuidelineType" : {
+      "type" : "string"
+    },
+    "eoscIntegrationOptions" : {
+      "type" : "array",
+      "items" : {
+        "type" : "string"
+      }
+    },
+    "id" : {
+      "type" : "string"
+    },
+    "identifierInfo" : {
+      "$ref" : "#/$defs/IdentifierInfo"
+    },
+    "providerId" : {
+      "type" : "string"
+    },
+    "publicationYear" : {
+      "type" : "integer"
+    },
+    "relatedStandards" : {
+      "type" : "array",
+      "items" : {
+        "$ref" : "#/$defs/RelatedStandard"
+      }
+    },
+    "resourceTypesInfo" : {
+      "type" : "array",
+      "items" : {
+        "$ref" : "#/$defs/ResourceTypeInfo"
+      }
+    },
+    "rights" : {
+      "type" : "array",
+      "items" : {
+        "$ref" : "#/$defs/Right"
+      }
+    },
+    "status" : {
+      "type" : "string"
+    },
+    "title" : {
+      "type" : "string"
+    },
+    "updated" : {
+      "type" : "string"
+    }
+  },
+  "additionalProperties" : false
+}

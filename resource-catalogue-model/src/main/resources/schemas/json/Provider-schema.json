@@ -1,0 +1,303 @@
+{
+  "$schema" : "https://json-schema.org/draft/2020-12/schema",
+  "$defs" : {
+    "AlternativeIdentifier" : {
+      "type" : "object",
+      "properties" : {
+        "type" : {
+          "type" : "string"
+        },
+        "value" : {
+          "type" : "string"
+        }
+      },
+      "additionalProperties" : false
+    },
+    "MultimediaPair" : {
+      "type" : "object",
+      "properties" : {
+        "multimediaName" : {
+          "type" : "string"
+        },
+        "multimediaURL" : {
+          "$ref" : "#/$defs/URL"
+        }
+      },
+      "additionalProperties" : false
+    },
+    "ProviderLocation" : {
+      "type" : "object",
+      "properties" : {
+        "city" : {
+          "type" : "string"
+        },
+        "country" : {
+          "type" : "string"
+        },
+        "postalCode" : {
+          "type" : "string"
+        },
+        "region" : {
+          "type" : "string"
+        },
+        "streetNameAndNumber" : {
+          "type" : "string"
+        }
+      },
+      "additionalProperties" : false
+    },
+    "ProviderMainContact" : {
+      "type" : "object",
+      "properties" : {
+        "email" : {
+          "type" : "string"
+        },
+        "firstName" : {
+          "type" : "string"
+        },
+        "lastName" : {
+          "type" : "string"
+        },
+        "phone" : {
+          "type" : "string"
+        },
+        "position" : {
+          "type" : "string"
+        }
+      },
+      "additionalProperties" : false
+    },
+    "ProviderMerilDomain" : {
+      "type" : "object",
+      "properties" : {
+        "merilScientificDomain" : {
+          "type" : "string"
+        },
+        "merilScientificSubdomain" : {
+          "type" : "string"
+        }
+      },
+      "additionalProperties" : false
+    },
+    "ProviderPublicContact" : {
+      "type" : "object",
+      "properties" : {
+        "email" : {
+          "type" : "string"
+        },
+        "firstName" : {
+          "type" : "string"
+        },
+        "lastName" : {
+          "type" : "string"
+        },
+        "phone" : {
+          "type" : "string"
+        },
+        "position" : {
+          "type" : "string"
+        }
+      },
+      "additionalProperties" : false
+    },
+    "ServiceProviderDomain" : {
+      "type" : "object",
+      "properties" : {
+        "scientificDomain" : {
+          "type" : "string"
+        },
+        "scientificSubdomain" : {
+          "type" : "string"
+        }
+      },
+      "additionalProperties" : false
+    },
+    "URL" : {
+      "type" : "object",
+      "properties" : {
+        "authority" : {
+          "type" : "string"
+        },
+        "file" : {
+          "type" : "string"
+        },
+        "host" : {
+          "type" : "string"
+        },
+        "port" : {
+          "type" : "integer"
+        },
+        "protocol" : {
+          "type" : "string"
+        },
+        "ref" : {
+          "type" : "string"
+        }
+      },
+      "additionalProperties" : false
+    },
+    "User" : {
+      "type" : "object",
+      "properties" : {
+        "email" : {
+          "type" : "string"
+        },
+        "id" : {
+          "type" : "string"
+        },
+        "name" : {
+          "type" : "string"
+        },
+        "surname" : {
+          "type" : "string"
+        }
+      },
+      "additionalProperties" : false
+    }
+  },
+  "type" : "object",
+  "properties" : {
+    "abbreviation" : {
+      "type" : "string"
+    },
+    "affiliations" : {
+      "type" : "array",
+      "items" : {
+        "type" : "string"
+      }
+    },
+    "alternativeIdentifiers" : {
+      "type" : "array",
+      "items" : {
+        "$ref" : "#/$defs/AlternativeIdentifier"
+      }
+    },
+    "areasOfActivity" : {
+      "type" : "array",
+      "items" : {
+        "type" : "string"
+      }
+    },
+    "catalogueId" : {
+      "type" : "string"
+    },
+    "certifications" : {
+      "type" : "array",
+      "items" : {
+        "type" : "string"
+      }
+    },
+    "description" : {
+      "type" : "string"
+    },
+    "esfriDomains" : {
+      "type" : "array",
+      "items" : {
+        "type" : "string"
+      }
+    },
+    "esfriType" : {
+      "type" : "string"
+    },
+    "hostingLegalEntity" : {
+      "type" : "string"
+    },
+    "id" : {
+      "type" : "string"
+    },
+    "legalEntity" : {
+      "type" : "boolean"
+    },
+    "legalStatus" : {
+      "type" : "string"
+    },
+    "lifeCycleStatus" : {
+      "type" : "string"
+    },
+    "location" : {
+      "$ref" : "#/$defs/ProviderLocation"
+    },
+    "logo" : {
+      "$ref" : "#/$defs/URL"
+    },
+    "mainContact" : {
+      "$ref" : "#/$defs/ProviderMainContact"
+    },
+    "merilScientificDomains" : {
+      "type" : "array",
+      "items" : {
+        "$ref" : "#/$defs/ProviderMerilDomain"
+      }
+    },
+    "multimedia" : {
+      "type" : "array",
+      "items" : {
+        "$ref" : "#/$defs/MultimediaPair"
+      }
+    },
+    "name" : {
+      "type" : "string"
+    },
+    "nationalRoadmaps" : {
+      "type" : "array",
+      "items" : {
+        "type" : "string"
+      }
+    },
+    "networks" : {
+      "type" : "array",
+      "items" : {
+        "type" : "string"
+      }
+    },
+    "node" : {
+      "type" : "string"
+    },
+    "participatingCountries" : {
+      "type" : "array",
+      "items" : {
+        "type" : "string"
+      }
+    },
+    "publicContacts" : {
+      "type" : "array",
+      "items" : {
+        "$ref" : "#/$defs/ProviderPublicContact"
+      }
+    },
+    "scientificDomains" : {
+      "type" : "array",
+      "items" : {
+        "$ref" : "#/$defs/ServiceProviderDomain"
+      }
+    },
+    "societalGrandChallenges" : {
+      "type" : "array",
+      "items" : {
+        "type" : "string"
+      }
+    },
+    "structureTypes" : {
+      "type" : "array",
+      "items" : {
+        "type" : "string"
+      }
+    },
+    "tags" : {
+      "type" : "array",
+      "items" : {
+        "type" : "string"
+      }
+    },
+    "users" : {
+      "type" : "array",
+      "items" : {
+        "$ref" : "#/$defs/User"
+      }
+    },
+    "website" : {
+      "$ref" : "#/$defs/URL"
+    }
+  },
+  "additionalProperties" : false
+}

@@ -1,0 +1,25 @@
+{
+  "$schema" : "https://json-schema.org/draft/2020-12/schema",
+  "$defs" : {
+    "JSONObject" : {
+      "type" : "object",
+      "additionalProperties" : false
+    }
+  },
+  "type" : "object",
+  "properties" : {
+    "configurationTemplateId" : {
+      "type" : "string"
+    },
+    "id" : {
+      "type" : "string"
+    },
+    "payload" : {
+      "$ref" : "#/$defs/JSONObject"
+    },
+    "resourceId" : {
+      "type" : "string"
+    }
+  },
+  "additionalProperties" : false
+}

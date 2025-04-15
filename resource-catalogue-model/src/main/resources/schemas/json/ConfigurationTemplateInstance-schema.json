@@ -1,0 +1,19 @@
+{
+  "$schema" : "https://json-schema.org/draft/2020-12/schema",
+  "type" : "object",
+  "properties" : {
+    "configurationTemplateId" : {
+      "type" : "string"
+    },
+    "id" : {
+      "type" : "string"
+    },
+    "payload" : {
+      "type" : "string"
+    },
+    "resourceId" : {
+      "type" : "string"
+    }
+  },
+  "additionalProperties" : false
+}
