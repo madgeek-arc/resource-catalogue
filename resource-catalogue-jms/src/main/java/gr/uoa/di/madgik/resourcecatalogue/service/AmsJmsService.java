@@ -18,10 +18,10 @@ package gr.uoa.di.madgik.resourcecatalogue.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import gr.uoa.di.madgik.resourcecatalogue.config.AmsProperties;
 import gr.uoa.di.madgik.resourcecatalogue.utils.JmsService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Primary;
 import org.springframework.http.*;
 import org.springframework.jms.core.JmsTemplate;
@@ -31,7 +31,6 @@ import org.springframework.web.client.RestTemplate;
 
 import java.util.Base64;
 import java.util.Collections;
-import java.util.List;
 import java.util.Map;
 
 @Service
@@ -41,52 +40,82 @@ public class AmsJmsService extends DefaultJmsService implements JmsService {
     private static final Logger logger = LoggerFactory.getLogger(AmsJmsService.class);
 
     private final RestTemplate restTemplate;
+    private final AmsProperties amsProperties;
 
-    @Value("${ams.jms.host}")
-    private String host;
 
-    @Value("${ams.jms.key}")
-    private String key;
-
-    @Value("${ams.jms.projects}")
-    private List<String> projects; //TODO: revisit getFirst() if more projects are added
-
-    public AmsJmsService(JmsTemplate jmsTopicTemplate, JmsTemplate jmsQueueTemplate, RestTemplate restTemplate) {
+    public AmsJmsService(JmsTemplate jmsTopicTemplate,
+                         JmsTemplate jmsQueueTemplate,
+                         RestTemplate restTemplate,
+                         AmsProperties amsProperties) {
         super(jmsTopicTemplate, jmsQueueTemplate);
         this.restTemplate = restTemplate;
+        this.amsProperties = amsProperties;
+    }
+
+    @Override
+    public void convertAndSendTopic(String messageDestination, Object message) {
+        try {
+            publishTopic(messageDestination.replace(".", "-"), message);
+            super.convertAndSendTopic(messageDestination, message);
+        } catch (HttpClientErrorException e) {
+            if (e.getStatusCode() == HttpStatus.NOT_FOUND) {
+                createTopic(messageDestination.replace(".", "-"));
+            }
+            throw new RuntimeException("Error sending topic", e);
+        }
+    }
+
+    @Override
+    public void convertAndSendQueue(String messageDestination, Object message) {
+        super.convertAndSendTopic(messageDestination, message);
     }
 
     //region Topics
     public void createTopic(String topic) {
+        if (!amsProperties.isEnabled()) {
+            logger.warn("AMS is disabled, skipping execution.");
+        }
         HttpEntity<String> request = createHttpRequest();
-        restTemplate.exchange(host + "/" + projects.getFirst() + "/topics/" + topic,
+        restTemplate.exchange(amsProperties.getHost() + "/" + amsProperties.getProject() + "/topics/" + topic,
                 HttpMethod.PUT, request, String.class);
     }
 
     public String deleteTopic(String topic) {
+        if (!amsProperties.isEnabled()) {
+            throw new IllegalStateException("AMS Service is disabled.");
+        }
         HttpEntity<String> request = createHttpRequest();
-        ResponseEntity<String> response = restTemplate.exchange(host + "/" + projects.getFirst() + "/topics/" + topic,
+        ResponseEntity<String> response = restTemplate.exchange(amsProperties.getHost() + "/" + amsProperties.getProject() + "/topics/" + topic,
                 HttpMethod.DELETE, request, String.class);
         return response.getBody();
     }
 
     public String getTopic(String topic) {
+        if (!amsProperties.isEnabled()) {
+            throw new IllegalStateException("AMS Service is disabled.");
+        }
         HttpEntity<String> request = createHttpRequest();
-        ResponseEntity<String> response = restTemplate.exchange(host + "/" + projects.getFirst() + "/topics/" + topic,
+        ResponseEntity<String> response = restTemplate.exchange(amsProperties.getHost() + "/" + amsProperties.getProject() + "/topics/" + topic,
                 HttpMethod.GET, request, String.class);
         return response.getBody();
     }
 
     public String getAllTopics() {
+        if (!amsProperties.isEnabled()) {
+            throw new IllegalStateException("AMS Service is disabled.");
+        }
         HttpEntity<String> request = createHttpRequest();
-        ResponseEntity<String> response = restTemplate.exchange(host + "/" + projects.getFirst() + "/topics",
+        ResponseEntity<String> response = restTemplate.exchange(amsProperties.getHost() + "/" + amsProperties.getProject() + "/topics",
                 HttpMethod.GET, request, String.class);
         return response.getBody();
     }
 
     public void publishTopic(String topic, Object message) {
+        if (!amsProperties.isEnabled()) {
+            logger.warn("AMS is disabled, skipping execution.");
+        }
         HttpEntity<String> request = createHttpRequest(message);
-        restTemplate.exchange(host + "/" + projects.getFirst() + "/topics/" + topic + ":publish",
+        restTemplate.exchange(amsProperties.getHost() + "/" + amsProperties.getProject() + "/topics/" + topic + ":publish",
                 HttpMethod.POST, request, String.class);
         logger.info("Sending JMS to topic: {} via AMS", topic);
     }
@@ -94,26 +123,35 @@ public class AmsJmsService extends DefaultJmsService implements JmsService {
 
     //region Subscriptions
     public String getTopicSubscriptions(String topic) {
+        if (!amsProperties.isEnabled()) {
+            throw new IllegalStateException("AMS Service is disabled.");
+        }
         HttpEntity<String> request = createHttpRequest();
         ResponseEntity<String> response =
-                restTemplate.exchange(host + "/" + projects.getFirst() + "/topics/" + topic + "/subscriptions",
+                restTemplate.exchange(amsProperties.getHost() + "/" + amsProperties.getProject() + "/topics/" + topic + "/subscriptions",
                         HttpMethod.GET, request, String.class);
         return response.getBody();
     }
 
     public String getAllSubscriptions() {
+        if (!amsProperties.isEnabled()) {
+            throw new IllegalStateException("AMS Service is disabled.");
+        }
         HttpEntity<String> request = createHttpRequest();
         ResponseEntity<String> response =
-                restTemplate.exchange(host + "/" + projects.getFirst() + "/subscriptions",
+                restTemplate.exchange(amsProperties.getHost() + "/" + amsProperties.getProject() + "/subscriptions",
                         HttpMethod.GET, request, String.class);
         return response.getBody();
     }
 
     public void createSubscriptionForTopic(String topic, String name) {
-        String bodyUrl = host + "/" + projects.getFirst() + "/topics/" + topic;
+        if (!amsProperties.isEnabled()) {
+            throw new IllegalStateException("AMS Service is disabled.");
+        }
+        String bodyUrl = amsProperties.getHost() + "/" + amsProperties.getProject() + "/topics/" + topic;
         HttpEntity<String> request = createHttpRequest(bodyUrl);
         try {
-            restTemplate.exchange(host + "/" + projects.getFirst() + "/subscriptions/" + name,
+            restTemplate.exchange(amsProperties.getHost() + "/" + amsProperties.getProject() + "/subscriptions/" + name,
                     HttpMethod.PUT, request, String.class);
         } catch (HttpClientErrorException e) {
             logger.info(e.getMessage());
@@ -121,18 +159,18 @@ public class AmsJmsService extends DefaultJmsService implements JmsService {
     }
     //endregion
 
-    public HttpEntity<String> createHttpRequest() {
+    private HttpEntity<String> createHttpRequest() {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.add("x-api-key", key);
+        headers.add("x-api-key", amsProperties.getKey());
 
         return new HttpEntity<>(headers);
     }
 
-    public HttpEntity<String> createHttpRequest(Object body) {
+    private HttpEntity<String> createHttpRequest(Object body) {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.add("x-api-key", key);
+        headers.add("x-api-key", amsProperties.getKey());
 
         ObjectMapper objectMapper = new ObjectMapper();
         String jsonPayload;
@@ -147,10 +185,10 @@ public class AmsJmsService extends DefaultJmsService implements JmsService {
         return new HttpEntity<>(jsonPayload, headers);
     }
 
-    public HttpEntity<String> createHttpRequest(String url) {
+    private HttpEntity<String> createHttpRequest(String url) {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.add("x-api-key", key);
+        headers.add("x-api-key", amsProperties.getKey());
 
         ObjectMapper objectMapper = new ObjectMapper();
         String jsonPayload;
@@ -179,23 +217,5 @@ public class AmsJmsService extends DefaultJmsService implements JmsService {
                 "topic", url,
                 "ackDeadlineSeconds", 10
         );
-    }
-
-    @Override
-    public void convertAndSendTopic(String messageDestination, Object message) {
-        try {
-            publishTopic(messageDestination.replace(".", "-"), message);
-            super.convertAndSendTopic(messageDestination, message);
-        } catch (HttpClientErrorException e) {
-            if (e.getStatusCode() == HttpStatus.NOT_FOUND) {
-                createTopic(messageDestination.replace(".", "-"));
-            }
-            throw new RuntimeException("Error sending topic", e);
-        }
-    }
-
-    @Override
-    public void convertAndSendQueue(String messageDestination, Object message) {
-        super.convertAndSendTopic(messageDestination, message);
     }
 }
