@@ -29,7 +29,7 @@
 ### Reverts
 
 * Revert "build: change dependencies and versions" ([f41236d](https://github.com/madgeek-arc/resource-catalogue/commit/f41236d462b59838d39325edab381ecc439249bf))
-* Revert "Jaxb2 marshalling (co-op spyroukon)" ([f907ab3](https://github.com/madgeek-arc/resource-catalogue/commit/f907ab3855aaf686ed2816cc8563c04c6f6e809b))
+* Revert "Jaxb2 marshalling" ([f907ab3](https://github.com/madgeek-arc/resource-catalogue/commit/f907ab3855aaf686ed2816cc8563c04c6f6e809b))
 * Revert "updated registry core version" ([f1ff86d](https://github.com/madgeek-arc/resource-catalogue/commit/f1ff86d38d0b7422aef37facda61246f8d950646))
 
 ### Build System
