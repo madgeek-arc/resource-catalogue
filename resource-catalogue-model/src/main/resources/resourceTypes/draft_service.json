@@ -16,6 +16,13 @@
       "type": "java.lang.String"
     },
     {
+      "label": "Node",
+      "multivalued": false,
+      "name": "node",
+      "path": "$.service.node",
+      "type": "java.lang.String"
+    },
+    {
       "label": "Abbreviation",
       "multivalued": false,
       "name": "abbreviation",

@@ -58,6 +58,8 @@
     <xs:sequence>
             
       <xs:element minOccurs="0" name="originalId" type="xs:string"/>
+            
+      <xs:element minOccurs="0" name="pid" type="xs:string"/>
           
     </xs:sequence>
       
@@ -506,6 +508,12 @@ It is also possible to select Not a legal entity.]]></xs:documentation>
       <xs:element minOccurs="0" name="jurisdiction" type="xs:string">
         <xs:annotation>
           <xs:documentation><![CDATA[The property defines the jurisdiction of the users of the data source, based on the vocabulary for this property]]></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+            
+      <xs:element minOccurs="0" name="node" type="xs:string">
+        <xs:annotation>
+          <xs:documentation><![CDATA[Datasource's original Node]]></xs:documentation>
         </xs:annotation>
       </xs:element>
             
@@ -1680,6 +1688,12 @@ infrastructures.]]></xs:documentation>
         </xs:annotation>
       </xs:element>
             
+      <xs:element minOccurs="0" name="node" type="xs:string">
+        <xs:annotation>
+          <xs:documentation><![CDATA[Service's original Node]]></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+            
       <xs:element maxOccurs="unbounded" minOccurs="0" name="openSourceTechnologies" nillable="true" type="xs:string">
         <xs:annotation>
           <xs:documentation><![CDATA[List of open source technologies supported by the Resource.]]></xs:documentation>
@@ -2535,6 +2549,8 @@ that is the used scheme (e.g., Web Address URL, DOI, ARK, etc.).]]></xs:document
       <xs:enumeration value="ABBREVIATION"/>
             
       <xs:enumeration value="NAME"/>
+            
+      <xs:enumeration value="NODE"/>
             
       <xs:enumeration value="RESOURCE_ORGANISATION"/>
             

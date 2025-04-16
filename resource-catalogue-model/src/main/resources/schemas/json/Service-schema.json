@@ -257,6 +257,9 @@
     "name" : {
       "type" : "string"
     },
+    "node" : {
+      "type" : "string"
+    },
     "openSourceTechnologies" : {
       "type" : "array",
       "items" : {

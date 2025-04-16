@@ -23,6 +23,13 @@
       "type": "java.lang.String"
     },
     {
+      "label": "Node",
+      "multivalued": false,
+      "name": "node",
+      "path": "$.datasource.node",
+      "type": "java.lang.String"
+    },
+    {
       "label": null,
       "multivalued": false,
       "name": "registeredBy",

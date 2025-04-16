@@ -82,6 +82,9 @@
     "jurisdiction" : {
       "type" : "string"
     },
+    "node" : {
+      "type" : "string"
+    },
     "persistentIdentitySystems" : {
       "type" : "array",
       "items" : {
