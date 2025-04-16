@@ -1,14 +1,29 @@
+/*
+ * Copyright 2017-2025 OpenAIRE AMKE & Athena Research and Innovation Center
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package gr.uoa.di.madgik.resourcecatalogue.manager;
 
-import gr.uoa.di.madgik.registry.domain.Paging;
-import gr.uoa.di.madgik.registry.domain.Resource;
-import gr.uoa.di.madgik.registry.domain.ResourceType;
+import gr.uoa.di.madgik.registry.domain.*;
 import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.domain.LoggingInfo;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Metadata;
+import gr.uoa.di.madgik.resourcecatalogue.domain.ProviderBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.ServiceBundle;
-import gr.uoa.di.madgik.resourcecatalogue.domain.User;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
+import gr.uoa.di.madgik.resourcecatalogue.utils.AuthenticationInfo;
 import gr.uoa.di.madgik.resourcecatalogue.utils.ProviderResourcesCommonMethods;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,17 +62,17 @@ public class DraftServiceManager extends ResourceManager<ServiceBundle> implemen
     }
 
     @Override
-    public String getResourceType() {
+    public String getResourceTypeName() {
         return "draft_service";
     }
 
     @Override
     public ServiceBundle add(ServiceBundle bundle, Authentication auth) {
 
-        bundle.setId(idCreator.generate(getResourceType()));
+        bundle.setId(idCreator.generate(getResourceTypeName()));
 
-        logger.trace("Attempting to add a new Draft Service with id {}", bundle.getId());
-        bundle.setMetadata(Metadata.updateMetadata(bundle.getMetadata(), User.of(auth).getFullName(), User.of(auth).getEmail()));
+        logger.trace("Attempting to add a new Draft Service with id '{}'", bundle.getId());
+        bundle.setMetadata(Metadata.updateMetadata(bundle.getMetadata(), AuthenticationInfo.getFullName(auth), AuthenticationInfo.getEmail(auth).toLowerCase()));
 
         List<LoggingInfo> loggingInfoList = new ArrayList<>();
         LoggingInfo loggingInfo = commonMethods.createLoggingInfo(auth, LoggingInfo.Types.DRAFT.getKey(),
@@ -80,11 +95,11 @@ public class DraftServiceManager extends ResourceManager<ServiceBundle> implemen
         Resource existing = getDraftResource(bundle.getService().getId());
         // block catalogueId updates from Provider Admins
         bundle.getService().setCatalogueId(catalogueId);
-        logger.trace("Attempting to update the Draft Service with id {}", bundle.getId());
-        bundle.setMetadata(Metadata.updateMetadata(bundle.getMetadata(), User.of(auth).getFullName()));
+        logger.trace("Attempting to update the Draft Service with id '{}'", bundle.getId());
+        bundle.setMetadata(Metadata.updateMetadata(bundle.getMetadata(), AuthenticationInfo.getFullName(auth)));
         // save existing resource with new payload
         existing.setPayload(serialize(bundle));
-        existing.setResourceType(resourceType);
+        existing.setResourceType(getResourceType());
         resourceService.updateResource(existing);
         logger.debug("Updating Draft Service: {}", bundle);
         return bundle;
@@ -103,7 +118,7 @@ public class DraftServiceManager extends ResourceManager<ServiceBundle> implemen
 
     @Override
     public ServiceBundle transformToNonDraft(ServiceBundle bundle, Authentication auth) {
-        logger.trace("Attempting to transform the Draft Service with id {} to Service", bundle.getId());
+        logger.trace("Attempting to transform the Draft Service with id '{}' to Service", bundle.getId());
         serviceBundleService.validate(bundle);
 
         // update loggingInfo
@@ -123,14 +138,14 @@ public class DraftServiceManager extends ResourceManager<ServiceBundle> implemen
             bundle.setStatus(vocabularyService.get("pending resource").getId());
         }
         bundle.setLoggingInfo(loggingInfoList);
-        bundle.setLatestOnboardingInfo(loggingInfoList.get(loggingInfoList.size() - 1));
+        bundle.setLatestOnboardingInfo(loggingInfoList.getLast());
 
-        bundle.setMetadata(Metadata.updateMetadata(bundle.getMetadata(), User.of(auth).getFullName(), User.of(auth).getEmail()));
+        bundle.setMetadata(Metadata.updateMetadata(bundle.getMetadata(), AuthenticationInfo.getFullName(auth), AuthenticationInfo.getEmail(auth).toLowerCase()));
         bundle.setDraft(false);
 
         ResourceType serviceResourceType = resourceTypeService.getResourceType("service");
         Resource resource = getDraftResource(bundle.getId());
-        resource.setResourceType(resourceType);
+        resource.setResourceType(getResourceType());
         resourceService.changeResourceType(resource, serviceResourceType);
 
         try {
@@ -142,18 +157,23 @@ public class DraftServiceManager extends ResourceManager<ServiceBundle> implemen
         return bundle;
     }
 
-    public List<ServiceBundle> getMy(Authentication auth) {
-        //TODO: Implement
-        List<ServiceBundle> re = new ArrayList<>();
-        return re;
+    @Override
+    public Browsing<ServiceBundle> getMy(FacetFilter filter, Authentication auth) {
+        FacetFilter ff = new FacetFilter();
+        ff.setQuantity(1000);
+        List<ProviderBundle> providers = providerService.getMy(ff, auth).getResults();
+
+        filter.addFilter("resource_organisation", providers.stream().map(ProviderBundle::getId).toList());
+        filter.setResourceType(getResourceTypeName());
+        return this.getAll(filter, auth);
     }
 
     private Resource getDraftResource(String id) {
         Paging<Resource> resources;
         resources = searchService
                 .cqlQuery(String.format("resource_internal_id = \"%s\" AND catalogue_id = \"%s\"", id, catalogueId),
-                        resourceType.getName());
+                        getResourceTypeName());
         assert resources != null;
-        return resources.getTotal() == 0 ? null : resources.getResults().get(0);
+        return resources.getTotal() == 0 ? null : resources.getResults().getFirst();
     }
 }

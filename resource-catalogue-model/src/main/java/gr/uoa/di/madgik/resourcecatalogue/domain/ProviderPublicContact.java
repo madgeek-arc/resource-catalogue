@@ -1,23 +1,37 @@
+/*
+ * Copyright 2017-2025 OpenAIRE AMKE & Athena Research and Innovation Center
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package gr.uoa.di.madgik.resourcecatalogue.domain;
 
 import gr.uoa.di.madgik.resourcecatalogue.annotation.EmailValidation;
 import gr.uoa.di.madgik.resourcecatalogue.annotation.FieldValidation;
 import gr.uoa.di.madgik.resourcecatalogue.annotation.PhoneValidation;
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.xml.bind.annotation.XmlElement;
+import jakarta.xml.bind.annotation.XmlRootElement;
+import jakarta.xml.bind.annotation.XmlType;
 
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlType;
 import java.util.Objects;
 
 @XmlType
-@XmlRootElement(namespace = "http://einfracentral.eu")
+@XmlRootElement
 public class ProviderPublicContact {
 
-
-    // Contact Basic Information
     /**
-     * First Name of the Provider's main contact person/Provider manager.
+     * First Name of the resource's public contact person/manager.
      */
     @XmlElement
     @Schema
@@ -25,7 +39,7 @@ public class ProviderPublicContact {
     private String firstName;
 
     /**
-     * Last Name of the Provider's main contact person/Provider manager.
+     * Last Name of the resource's public contact person/manager.
      */
     @XmlElement
     @Schema
@@ -33,7 +47,7 @@ public class ProviderPublicContact {
     private String lastName;
 
     /**
-     * Email of the Provider's main contact person/Provider manager.
+     * Email of the resource's public contact person/manager.
      */
     @XmlElement(required = true)
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
@@ -41,7 +55,7 @@ public class ProviderPublicContact {
     private String email;
 
     /**
-     * Phone of the Provider's main contact person/Provider manager.
+     * Phone of the resource's public contact person/manager.
      */
     @XmlElement
     @Schema
@@ -49,7 +63,7 @@ public class ProviderPublicContact {
     private String phone;
 
     /**
-     * Position of the Provider's main contact person/Provider manager.
+     * Position of the resource's public contact person/manager.
      */
     @XmlElement
     @Schema
@@ -112,7 +126,7 @@ public class ProviderPublicContact {
     }
 
     public void setEmail(String email) {
-        this.email = email;
+        this.email = email != null ? email.toLowerCase() : null;
     }
 
     public String getPhone() {

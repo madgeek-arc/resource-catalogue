@@ -1,6 +1,6 @@
 <p>Dear ${user.name},</p>
 <p>
-    Your email [${user.email}] has been added as an Administrator for the Catalogue [${catalogueBundle.catalogue.name}].
+    Your email [${user.email}] has been added as an Administrator for the Catalogue [${bundle.catalogue.name}].
     <br>
     You can view the Catalogue here: ${endpoint}/catalogue/my
 </p>

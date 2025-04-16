@@ -1,11 +1,29 @@
+/*
+ * Copyright 2017-2025 OpenAIRE AMKE & Athena Research and Innovation Center
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package gr.uoa.di.madgik.resourcecatalogue.config.security;
 
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.service.ServiceException;
+import gr.uoa.di.madgik.resourcecatalogue.config.properties.CatalogueProperties;
 import gr.uoa.di.madgik.resourcecatalogue.domain.CatalogueBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.ProviderBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.User;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
+import jakarta.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -14,7 +32,6 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.PostConstruct;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
@@ -33,22 +50,22 @@ public class InMemoryAuthoritiesMapper implements AuthoritiesMapper {
     private final ProviderService providerService;
 
     private final CatalogueService catalogueService;
-    private final DraftResourceService<ProviderBundle> pendingProviderService;
+    private final DraftResourceService<ProviderBundle> draftProviderService;
     private final SecurityService securityService;
-    private final ResourceCatalogueProperties catalogueProperties;
+    private final CatalogueProperties catalogueProperties;
 
     private final ReentrantLock lock = new ReentrantLock();
 
     public InMemoryAuthoritiesMapper(@Value("${elastic.index.max_result_window:10000}") int maxQuantity,
-                                     ResourceCatalogueProperties catalogueProperties,
+                                     CatalogueProperties catalogueProperties,
                                      ProviderService manager,
                                      CatalogueService catalogueService,
-                                     DraftResourceService<ProviderBundle> pendingProviderService,
+                                     DraftResourceService<ProviderBundle> draftProviderService,
                                      SecurityService securityService) {
         this.catalogueProperties = catalogueProperties;
         this.providerService = manager;
         this.catalogueService = catalogueService;
-        this.pendingProviderService = pendingProviderService;
+        this.draftProviderService = draftProviderService;
         this.securityService = securityService;
         this.maxQuantity = maxQuantity;
         if (catalogueProperties.getAdmins().isEmpty()) {
@@ -112,7 +129,7 @@ public class InMemoryAuthoritiesMapper implements AuthoritiesMapper {
         }
 
         try {
-            providers.addAll(pendingProviderService.getAll(ff, securityService.getAdminAccess()).getResults());
+            providers.addAll(draftProviderService.getAll(ff, securityService.getAdminAccess()).getResults());
         } catch (Exception e) {
             logger.warn("There are no Draft Provider entries in DB");
         }

@@ -1,6 +1,6 @@
 <p>Dear ${project} Portal Admins,</p>
 <p>
-    The Resource [${resourceBundle.payload.name}] has been moved from the Provider
+    The ${resourceType} [${resourceBundleName}]-[${bundleId}] has been moved from the Provider
     [${oldProvider.provider.id}]-[${oldProvider.provider.name}] to the Provider
     [${newProvider.provider.id}]-[${newProvider.provider.name}].
     <br>

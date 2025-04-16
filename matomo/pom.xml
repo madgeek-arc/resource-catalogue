@@ -16,10 +16,6 @@
     <dependencies>
         <dependency>
             <groupId>gr.uoa.di.madgik</groupId>
-            <artifactId>resource-catalogue-model</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>gr.uoa.di.madgik</groupId>
             <artifactId>resource-catalogue-api</artifactId>
         </dependency>
 

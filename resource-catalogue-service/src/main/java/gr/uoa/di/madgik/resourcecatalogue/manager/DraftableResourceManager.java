@@ -1,19 +1,40 @@
+/*
+ * Copyright 2017-2025 OpenAIRE AMKE & Athena Research and Innovation Center
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package gr.uoa.di.madgik.resourcecatalogue.manager;
 
 import gr.uoa.di.madgik.registry.domain.Resource;
 import gr.uoa.di.madgik.registry.domain.ResourceType;
+import gr.uoa.di.madgik.registry.exception.ResourceAlreadyExistsException;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Bundle;
-import gr.uoa.di.madgik.resourcecatalogue.exception.ResourceAlreadyExistsException;
+import gr.uoa.di.madgik.resourcecatalogue.domain.LoggingInfo;
+import gr.uoa.di.madgik.resourcecatalogue.domain.Metadata;
 import gr.uoa.di.madgik.resourcecatalogue.service.DraftResourceService;
 import gr.uoa.di.madgik.resourcecatalogue.service.GenericResourceService;
 import gr.uoa.di.madgik.resourcecatalogue.service.IdCreator;
 import gr.uoa.di.madgik.resourcecatalogue.service.ResourceService;
+import gr.uoa.di.madgik.resourcecatalogue.utils.AuthenticationInfo;
 import gr.uoa.di.madgik.resourcecatalogue.utils.ProviderResourcesCommonMethods;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
 
 
 @Component
@@ -40,29 +61,22 @@ public abstract class DraftableResourceManager<T extends Bundle<?>> extends Reso
             throw new ResourceAlreadyExistsException(String.format("Provider with id = '%s' already exists!", t.getId()));
         }
 
-//        // update loggingInfo
-//        List<LoggingInfo> loggingInfoList = commonMethods.returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(t, auth);
-//        LoggingInfo loggingInfo = commonMethods.createLoggingInfo(auth, LoggingInfo.Types.ONBOARD.getKey(),
-//                LoggingInfo.ActionType.REGISTERED.getKey());
-//        loggingInfoList.add(loggingInfo);
-//        t.setLoggingInfo(loggingInfoList);
-//
-//        // latestOnboardInfo
-//        t.setLatestOnboardingInfo(loggingInfo);
-//
-//        t.setMetadata(Metadata.updateMetadata(t.getMetadata(), User.of(auth).getFullName(), User.of(auth).getEmail()));
-//
-//
-//        // latestOnboardInfo
-//        t.setLatestOnboardingInfo(loggingInfo);
-//
-//        t.setMetadata(Metadata.updateMetadata(t.getMetadata(), User.of(auth).getFullName(), User.of(auth).getEmail()));
-
-        ResourceType providerResourceType = resourceTypeService.getResourceType("provider");
-        Resource resource = genericResourceService.searchResource("getDraftResourceType()", t.getId(), true);
-        resource.setResourceTypeName("getDraftResourceType()");
-        resourceService.changeResourceType(resource, providerResourceType);
+        // update loggingInfo
+        updateLoggingInfo(t, auth);
 
         return t;
+    }
+
+    private void updateLoggingInfo(T t, Authentication auth) {
+        List<LoggingInfo> loggingInfoList = commonMethods.returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(t, auth);
+        LoggingInfo loggingInfo = commonMethods.createLoggingInfo(auth, LoggingInfo.Types.ONBOARD.getKey(),
+                LoggingInfo.ActionType.REGISTERED.getKey());
+        loggingInfoList.add(loggingInfo);
+        t.setLoggingInfo(loggingInfoList);
+
+        // latestOnboardInfo
+        t.setLatestOnboardingInfo(loggingInfo);
+
+        t.setMetadata(Metadata.updateMetadata(t.getMetadata(), AuthenticationInfo.getFullName(auth), AuthenticationInfo.getEmail(auth).toLowerCase()));
     }
 }

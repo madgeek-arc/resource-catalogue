@@ -1,0 +1,42 @@
+{
+  "$schema" : "https://json-schema.org/draft/2020-12/schema",
+  "$defs" : {
+    "EmailMessage" : {
+      "type" : "object",
+      "properties" : {
+        "message" : {
+          "type" : "string"
+        },
+        "recipientEmail" : {
+          "type" : "string"
+        },
+        "senderEmail" : {
+          "type" : "string"
+        },
+        "senderName" : {
+          "type" : "string"
+        },
+        "subject" : {
+          "type" : "string"
+        }
+      },
+      "additionalProperties" : false
+    }
+  },
+  "type" : "object",
+  "properties" : {
+    "date" : {
+      "type" : "string"
+    },
+    "id" : {
+      "type" : "string"
+    },
+    "message" : {
+      "$ref" : "#/$defs/EmailMessage"
+    },
+    "providerId" : {
+      "type" : "string"
+    }
+  },
+  "additionalProperties" : false
+}

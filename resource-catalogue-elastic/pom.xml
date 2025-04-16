@@ -21,11 +21,15 @@
     <dependencies>
         <dependency>
             <groupId>gr.uoa.di.madgik</groupId>
-            <artifactId>registry-core-elasticsearch</artifactId>
+            <artifactId>registry-starter-elasticsearch</artifactId>
         </dependency>
         <dependency>
             <groupId>gr.uoa.di.madgik</groupId>
             <artifactId>resource-catalogue-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
         </dependency>
     </dependencies>
 </project>

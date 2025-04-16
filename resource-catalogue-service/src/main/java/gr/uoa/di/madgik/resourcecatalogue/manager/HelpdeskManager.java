@@ -1,20 +1,36 @@
+/*
+ * Copyright 2017-2025 OpenAIRE AMKE & Athena Research and Innovation Center
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package gr.uoa.di.madgik.resourcecatalogue.manager;
 
+import gr.uoa.di.madgik.catalogue.exception.ValidationException;
 import gr.uoa.di.madgik.registry.domain.Resource;
+import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.registry.service.SearchService;
 import gr.uoa.di.madgik.resourcecatalogue.domain.HelpdeskBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.LoggingInfo;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Metadata;
-import gr.uoa.di.madgik.resourcecatalogue.domain.User;
-import gr.uoa.di.madgik.resourcecatalogue.exception.ResourceNotFoundException;
-import gr.uoa.di.madgik.resourcecatalogue.exception.ValidationException;
+import gr.uoa.di.madgik.resourcecatalogue.domain.ServiceBundle;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
+import gr.uoa.di.madgik.resourcecatalogue.utils.AuthenticationInfo;
 import gr.uoa.di.madgik.resourcecatalogue.utils.ObjectUtils;
 import gr.uoa.di.madgik.resourcecatalogue.utils.ProviderResourcesCommonMethods;
 import gr.uoa.di.madgik.resourcecatalogue.utils.ResourceValidationUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.core.Authentication;
 
@@ -24,18 +40,17 @@ import java.util.List;
 public class HelpdeskManager extends ResourceManager<HelpdeskBundle> implements HelpdeskService {
 
     private static final Logger logger = LoggerFactory.getLogger(HelpdeskManager.class);
-    private final ServiceBundleService serviceBundleService;
+    private final ServiceBundleService<ServiceBundle> serviceBundleService;
     private final TrainingResourceService trainingResourceService;
-    private final PublicHelpdeskManager publicHelpdeskManager;
+    private final PublicHelpdeskService publicHelpdeskManager;
     private final SecurityService securityService;
     private final RegistrationMailService registrationMailService;
     private final ProviderResourcesCommonMethods commonMethods;
     private final IdCreator idCreator;
 
-    @Autowired
-    public HelpdeskManager(ServiceBundleService serviceBundleService,
+    public HelpdeskManager(ServiceBundleService<ServiceBundle> serviceBundleService,
                            TrainingResourceService trainingResourceService,
-                           PublicHelpdeskManager publicHelpdeskManager,
+                           PublicHelpdeskService publicHelpdeskManager,
                            @Lazy SecurityService securityService,
                            @Lazy RegistrationMailService registrationMailService,
                            ProviderResourcesCommonMethods commonMethods,
@@ -51,7 +66,7 @@ public class HelpdeskManager extends ResourceManager<HelpdeskBundle> implements 
     }
 
     @Override
-    public String getResourceType() {
+    public String getResourceTypeName() {
         return "helpdesk";
     }
 
@@ -81,20 +96,20 @@ public class HelpdeskManager extends ResourceManager<HelpdeskBundle> implements 
     public HelpdeskBundle add(HelpdeskBundle helpdesk, String resourceType, Authentication auth) {
         validate(helpdesk, resourceType);
 
-        helpdesk.setId(idCreator.generate(getResourceType()));
+        helpdesk.setId(idCreator.generate(getResourceTypeName()));
         logger.trace("Attempting to add a new Helpdesk: {}", helpdesk);
 
-        helpdesk.setMetadata(Metadata.createMetadata(User.of(auth).getFullName(), User.of(auth).getEmail()));
+        helpdesk.setMetadata(Metadata.createMetadata(AuthenticationInfo.getFullName(auth), AuthenticationInfo.getEmail(auth).toLowerCase()));
         List<LoggingInfo> loggingInfoList = commonMethods.returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(helpdesk, auth);
         helpdesk.setLoggingInfo(loggingInfoList);
         helpdesk.setActive(true);
         // latestOnboardingInfo
-        helpdesk.setLatestOnboardingInfo(loggingInfoList.get(0));
+        helpdesk.setLatestOnboardingInfo(loggingInfoList.getFirst());
 
         super.add(helpdesk, null);
-        logger.debug("Adding Helpdesk: {}", helpdesk);
+        logger.info("Added Helpdesk with id '{}'", helpdesk.getId());
 
-        registrationMailService.sendEmailsForHelpdeskExtension(helpdesk, resourceType, "post");
+        registrationMailService.sendEmailsForHelpdeskExtensionToPortalAdmins(helpdesk, "post");
 
         return helpdesk;
     }
@@ -118,7 +133,7 @@ public class HelpdeskManager extends ResourceManager<HelpdeskBundle> implements 
         }
 
         validate(ret);
-        ret.setMetadata(Metadata.updateMetadata(ret.getMetadata(), User.of(auth).getFullName(), User.of(auth).getEmail()));
+        ret.setMetadata(Metadata.updateMetadata(ret.getMetadata(), AuthenticationInfo.getFullName(auth), AuthenticationInfo.getEmail(auth).toLowerCase()));
         List<LoggingInfo> loggingInfoList = commonMethods.returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(ret, auth);
         LoggingInfo loggingInfo = commonMethods.createLoggingInfo(auth, LoggingInfo.Types.UPDATE.getKey(),
                 LoggingInfo.ActionType.UPDATED.getKey());
@@ -132,7 +147,7 @@ public class HelpdeskManager extends ResourceManager<HelpdeskBundle> implements 
 
         ret.setActive(existingHelpdesk.isActive());
         existingResource.setPayload(serialize(ret));
-        existingResource.setResourceType(resourceType);
+        existingResource.setResourceType(getResourceType());
 
         // block user from updating serviceId
         if (!ret.getHelpdesk().getServiceId().equals(existingHelpdesk.getHelpdesk().getServiceId()) && !securityService.hasRole(auth, "ROLE_ADMIN")) {
@@ -140,9 +155,9 @@ public class HelpdeskManager extends ResourceManager<HelpdeskBundle> implements 
         }
 
         resourceService.updateResource(existingResource);
-        logger.debug("Updating Helpdesk: {}", ret);
+        logger.info("Updated Helpdesk with id '{}'", ret.getId());
 
-        registrationMailService.sendEmailsForHelpdeskExtension(ret, "Resource", "put");
+        registrationMailService.sendEmailsForHelpdeskExtensionToPortalAdmins(ret, "put");
 
         return ret;
     }
@@ -158,7 +173,7 @@ public class HelpdeskManager extends ResourceManager<HelpdeskBundle> implements 
         }
 
         existing.setPayload(serialize(helpdeskBundle));
-        existing.setResourceType(resourceType);
+        existing.setResourceType(getResourceType());
 
         resourceService.updateResource(existing);
     }
@@ -166,10 +181,15 @@ public class HelpdeskManager extends ResourceManager<HelpdeskBundle> implements 
     @Override
     public void delete(HelpdeskBundle helpdesk) {
         super.delete(helpdesk);
-        logger.debug("Deleting Helpdesk: {}", helpdesk);
+        logger.info("Deleted Helpdesk with id '{}' of the Catalogue '{}'",
+                helpdesk.getHelpdesk().getId(), helpdesk.getCatalogueId());
     }
 
     public HelpdeskBundle createPublicResource(HelpdeskBundle helpdeskBundle, Authentication auth) {
+        logger.info("User '{}-{}' attempts to create a Public Helpdesk from Helpdesk '{}' of the '{}' Catalogue",
+                AuthenticationInfo.getFullName(auth),
+                AuthenticationInfo.getEmail(auth).toLowerCase(),
+                helpdeskBundle.getId(), helpdeskBundle.getCatalogueId());
         publicHelpdeskManager.add(helpdeskBundle, auth);
         return helpdeskBundle;
     }

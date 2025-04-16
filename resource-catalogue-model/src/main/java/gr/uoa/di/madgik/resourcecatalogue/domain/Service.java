@@ -1,14 +1,33 @@
+/*
+ * Copyright 2017-2025 OpenAIRE AMKE & Athena Research and Innovation Center
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package gr.uoa.di.madgik.resourcecatalogue.domain;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import gr.uoa.di.madgik.resourcecatalogue.annotation.*;
+import gr.uoa.di.madgik.resourcecatalogue.annotation.EmailValidation;
+import gr.uoa.di.madgik.resourcecatalogue.annotation.FieldValidation;
+import gr.uoa.di.madgik.resourcecatalogue.annotation.GeoLocationVocValidation;
+import gr.uoa.di.madgik.resourcecatalogue.annotation.VocabularyValidation;
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.xml.bind.annotation.XmlElement;
+import jakarta.xml.bind.annotation.XmlElementWrapper;
+import jakarta.xml.bind.annotation.XmlRootElement;
+import jakarta.xml.bind.annotation.XmlType;
 
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlElementWrapper;
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlType;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.Date;
@@ -16,7 +35,7 @@ import java.util.List;
 import java.util.Objects;
 
 @XmlType
-@XmlRootElement(namespace = "http://einfracentral.eu")
+@XmlRootElement
 public class Service implements Identifiable {
 
     // Basic Information
@@ -213,15 +232,6 @@ public class Service implements Identifiable {
     @VocabularyValidation(type = Vocabulary.Type.MARKETPLACE_LOCATION)
     private List<String> marketplaceLocations;
 
-    /**
-     * The tier of a service in the EOSC EU Node.
-     */
-    @XmlElement
-    @Schema
-    @FieldValidation(nullable = true)
-    @ClassTierValidation
-    private ServiceClassTier classTier;
-
 
     // Geographical and Language Availability Information
     /**
@@ -261,17 +271,17 @@ public class Service implements Identifiable {
     /**
      * Service's Main Contact/Resource Owner info.
      */
-    @XmlElement
-    @Schema
+    @XmlElement(required = true)
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     @FieldValidation
     private ServiceMainContact mainContact;
 
     /**
      * List of the Service's Public Contacts info.
      */
-    @XmlElementWrapper(name = "publicContacts")
+    @XmlElementWrapper(name = "publicContacts", required = true)
     @XmlElement(name = "publicContact")
-    @Schema
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     @FieldValidation
     private List<ServicePublicContact> publicContacts;
 
@@ -545,7 +555,7 @@ public class Service implements Identifiable {
         // No arg constructor
     }
 
-    public Service(String id, String abbreviation, String name, String resourceOrganisation, List<String> resourceProviders, URL webpage, List<AlternativeIdentifier> alternativeIdentifiers, String description, String tagline, URL logo, List<MultimediaPair> multimedia, List<UseCasesPair> useCases, List<ServiceProviderDomain> scientificDomains, List<ServiceCategory> categories, List<String> targetUsers, List<String> accessTypes, List<String> accessModes, List<String> tags, Boolean horizontalService, List<String> serviceCategories, List<String> marketplaceLocations, ServiceClassTier classTier, List<String> geographicalAvailabilities, List<String> languageAvailabilities, List<String> resourceGeographicLocations, ServiceMainContact mainContact, List<ServicePublicContact> publicContacts, String helpdeskEmail, String securityContactEmail, String trl, String lifeCycleStatus, List<String> certifications, List<String> standards, List<String> openSourceTechnologies, String version, Date lastUpdate, List<String> changeLog, List<String> requiredResources, List<String> relatedResources, List<String> relatedPlatforms, String catalogueId, List<String> fundingBody, List<String> fundingPrograms, List<String> grantProjectNames, URL helpdeskPage, URL userManual, URL termsOfUse, URL privacyPolicy, URL accessPolicy, URL resourceLevel, URL trainingInformation, URL statusMonitoring, URL maintenance, String orderType, URL order, URL paymentModel, URL pricing) {
+    public Service(String id, String abbreviation, String name, String resourceOrganisation, List<String> resourceProviders, URL webpage, List<AlternativeIdentifier> alternativeIdentifiers, String description, String tagline, URL logo, List<MultimediaPair> multimedia, List<UseCasesPair> useCases, List<ServiceProviderDomain> scientificDomains, List<ServiceCategory> categories, List<String> targetUsers, List<String> accessTypes, List<String> accessModes, List<String> tags, Boolean horizontalService, List<String> serviceCategories, List<String> marketplaceLocations, List<String> geographicalAvailabilities, List<String> languageAvailabilities, List<String> resourceGeographicLocations, ServiceMainContact mainContact, List<ServicePublicContact> publicContacts, String helpdeskEmail, String securityContactEmail, String trl, String lifeCycleStatus, List<String> certifications, List<String> standards, List<String> openSourceTechnologies, String version, Date lastUpdate, List<String> changeLog, List<String> requiredResources, List<String> relatedResources, List<String> relatedPlatforms, String catalogueId, List<String> fundingBody, List<String> fundingPrograms, List<String> grantProjectNames, URL helpdeskPage, URL userManual, URL termsOfUse, URL privacyPolicy, URL accessPolicy, URL resourceLevel, URL trainingInformation, URL statusMonitoring, URL maintenance, String orderType, URL order, URL paymentModel, URL pricing) {
         this.id = id;
         this.abbreviation = abbreviation;
         this.name = name;
@@ -567,7 +577,6 @@ public class Service implements Identifiable {
         this.horizontalService = horizontalService;
         this.serviceCategories = serviceCategories;
         this.marketplaceLocations = marketplaceLocations;
-        this.classTier = classTier;
         this.geographicalAvailabilities = geographicalAvailabilities;
         this.languageAvailabilities = languageAvailabilities;
         this.resourceGeographicLocations = resourceGeographicLocations;
@@ -610,12 +619,12 @@ public class Service implements Identifiable {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Service service = (Service) o;
-        return Objects.equals(id, service.id) && Objects.equals(abbreviation, service.abbreviation) && Objects.equals(name, service.name) && Objects.equals(resourceOrganisation, service.resourceOrganisation) && Objects.equals(resourceProviders, service.resourceProviders) && Objects.equals(webpage, service.webpage) && Objects.equals(alternativeIdentifiers, service.alternativeIdentifiers) && Objects.equals(description, service.description) && Objects.equals(tagline, service.tagline) && Objects.equals(logo, service.logo) && Objects.equals(multimedia, service.multimedia) && Objects.equals(useCases, service.useCases) && Objects.equals(scientificDomains, service.scientificDomains) && Objects.equals(categories, service.categories) && Objects.equals(targetUsers, service.targetUsers) && Objects.equals(accessTypes, service.accessTypes) && Objects.equals(accessModes, service.accessModes) && Objects.equals(tags, service.tags) && Objects.equals(horizontalService, service.horizontalService) && Objects.equals(serviceCategories, service.serviceCategories) && Objects.equals(marketplaceLocations, service.marketplaceLocations) && Objects.equals(classTier, service.classTier) && Objects.equals(geographicalAvailabilities, service.geographicalAvailabilities) && Objects.equals(languageAvailabilities, service.languageAvailabilities) && Objects.equals(resourceGeographicLocations, service.resourceGeographicLocations) && Objects.equals(mainContact, service.mainContact) && Objects.equals(publicContacts, service.publicContacts) && Objects.equals(helpdeskEmail, service.helpdeskEmail) && Objects.equals(securityContactEmail, service.securityContactEmail) && Objects.equals(trl, service.trl) && Objects.equals(lifeCycleStatus, service.lifeCycleStatus) && Objects.equals(certifications, service.certifications) && Objects.equals(standards, service.standards) && Objects.equals(openSourceTechnologies, service.openSourceTechnologies) && Objects.equals(version, service.version) && Objects.equals(lastUpdate, service.lastUpdate) && Objects.equals(changeLog, service.changeLog) && Objects.equals(requiredResources, service.requiredResources) && Objects.equals(relatedResources, service.relatedResources) && Objects.equals(relatedPlatforms, service.relatedPlatforms) && Objects.equals(catalogueId, service.catalogueId) && Objects.equals(fundingBody, service.fundingBody) && Objects.equals(fundingPrograms, service.fundingPrograms) && Objects.equals(grantProjectNames, service.grantProjectNames) && Objects.equals(helpdeskPage, service.helpdeskPage) && Objects.equals(userManual, service.userManual) && Objects.equals(termsOfUse, service.termsOfUse) && Objects.equals(privacyPolicy, service.privacyPolicy) && Objects.equals(accessPolicy, service.accessPolicy) && Objects.equals(resourceLevel, service.resourceLevel) && Objects.equals(trainingInformation, service.trainingInformation) && Objects.equals(statusMonitoring, service.statusMonitoring) && Objects.equals(maintenance, service.maintenance) && Objects.equals(orderType, service.orderType) && Objects.equals(order, service.order) && Objects.equals(paymentModel, service.paymentModel) && Objects.equals(pricing, service.pricing);
+        return Objects.equals(id, service.id) && Objects.equals(abbreviation, service.abbreviation) && Objects.equals(name, service.name) && Objects.equals(resourceOrganisation, service.resourceOrganisation) && Objects.equals(resourceProviders, service.resourceProviders) && Objects.equals(webpage, service.webpage) && Objects.equals(alternativeIdentifiers, service.alternativeIdentifiers) && Objects.equals(description, service.description) && Objects.equals(tagline, service.tagline) && Objects.equals(logo, service.logo) && Objects.equals(multimedia, service.multimedia) && Objects.equals(useCases, service.useCases) && Objects.equals(scientificDomains, service.scientificDomains) && Objects.equals(categories, service.categories) && Objects.equals(targetUsers, service.targetUsers) && Objects.equals(accessTypes, service.accessTypes) && Objects.equals(accessModes, service.accessModes) && Objects.equals(tags, service.tags) && Objects.equals(horizontalService, service.horizontalService) && Objects.equals(serviceCategories, service.serviceCategories) && Objects.equals(marketplaceLocations, service.marketplaceLocations) && Objects.equals(geographicalAvailabilities, service.geographicalAvailabilities) && Objects.equals(languageAvailabilities, service.languageAvailabilities) && Objects.equals(resourceGeographicLocations, service.resourceGeographicLocations) && Objects.equals(mainContact, service.mainContact) && Objects.equals(publicContacts, service.publicContacts) && Objects.equals(helpdeskEmail, service.helpdeskEmail) && Objects.equals(securityContactEmail, service.securityContactEmail) && Objects.equals(trl, service.trl) && Objects.equals(lifeCycleStatus, service.lifeCycleStatus) && Objects.equals(certifications, service.certifications) && Objects.equals(standards, service.standards) && Objects.equals(openSourceTechnologies, service.openSourceTechnologies) && Objects.equals(version, service.version) && Objects.equals(lastUpdate, service.lastUpdate) && Objects.equals(changeLog, service.changeLog) && Objects.equals(requiredResources, service.requiredResources) && Objects.equals(relatedResources, service.relatedResources) && Objects.equals(relatedPlatforms, service.relatedPlatforms) && Objects.equals(catalogueId, service.catalogueId) && Objects.equals(fundingBody, service.fundingBody) && Objects.equals(fundingPrograms, service.fundingPrograms) && Objects.equals(grantProjectNames, service.grantProjectNames) && Objects.equals(helpdeskPage, service.helpdeskPage) && Objects.equals(userManual, service.userManual) && Objects.equals(termsOfUse, service.termsOfUse) && Objects.equals(privacyPolicy, service.privacyPolicy) && Objects.equals(accessPolicy, service.accessPolicy) && Objects.equals(resourceLevel, service.resourceLevel) && Objects.equals(trainingInformation, service.trainingInformation) && Objects.equals(statusMonitoring, service.statusMonitoring) && Objects.equals(maintenance, service.maintenance) && Objects.equals(orderType, service.orderType) && Objects.equals(order, service.order) && Objects.equals(paymentModel, service.paymentModel) && Objects.equals(pricing, service.pricing);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, abbreviation, name, resourceOrganisation, resourceProviders, webpage, alternativeIdentifiers, description, tagline, logo, multimedia, useCases, scientificDomains, categories, targetUsers, accessTypes, accessModes, tags, horizontalService, serviceCategories, marketplaceLocations, classTier, geographicalAvailabilities, languageAvailabilities, resourceGeographicLocations, mainContact, publicContacts, helpdeskEmail, securityContactEmail, trl, lifeCycleStatus, certifications, standards, openSourceTechnologies, version, lastUpdate, changeLog, requiredResources, relatedResources, relatedPlatforms, catalogueId, fundingBody, fundingPrograms, grantProjectNames, helpdeskPage, userManual, termsOfUse, privacyPolicy, accessPolicy, resourceLevel, trainingInformation, statusMonitoring, maintenance, orderType, order, paymentModel, pricing);
+        return Objects.hash(id, abbreviation, name, resourceOrganisation, resourceProviders, webpage, alternativeIdentifiers, description, tagline, logo, multimedia, useCases, scientificDomains, categories, targetUsers, accessTypes, accessModes, tags, horizontalService, serviceCategories, marketplaceLocations, geographicalAvailabilities, languageAvailabilities, resourceGeographicLocations, mainContact, publicContacts, helpdeskEmail, securityContactEmail, trl, lifeCycleStatus, certifications, standards, openSourceTechnologies, version, lastUpdate, changeLog, requiredResources, relatedResources, relatedPlatforms, catalogueId, fundingBody, fundingPrograms, grantProjectNames, helpdeskPage, userManual, termsOfUse, privacyPolicy, accessPolicy, resourceLevel, trainingInformation, statusMonitoring, maintenance, orderType, order, paymentModel, pricing);
     }
 
     @Override
@@ -644,7 +653,7 @@ public class Service implements Identifiable {
     private boolean stringListIsEmpty(List<String> list) {
         if (list == null || list.isEmpty()) {
             return true;
-        } else return list.size() == 1 && "".equals(list.get(0));
+        } else return list.size() == 1 && "".equals(list.getFirst());
     }
 
     public enum Field {
@@ -669,7 +678,6 @@ public class Service implements Identifiable {
         HORIZONTAL_SERVICE("horizontalService"),
         SERVICE_CATEGORIES("serviceCategories"),
         MARKETPLACE_LOCATIONS("marketplaceLocations"),
-        CLASS_TIER("classTier"),
         GEOGRAPHICAL_AVAILABILITIES("geographicalAvailabilities"),
         LANGUAGE_AVAILABILITIES("languageAvailabilities"),
         RESOURCE_GEOGRAPHIC_LOCATIONS("resourceGeographicLocations"),
@@ -896,14 +904,6 @@ public class Service implements Identifiable {
 
     public void setMarketplaceLocations(List<String> marketplaceLocations) {
         this.marketplaceLocations = marketplaceLocations;
-    }
-
-    public ServiceClassTier getClassTier() {
-        return classTier;
-    }
-
-    public void setClassTier(ServiceClassTier classTier) {
-        this.classTier = classTier;
     }
 
     public List<String> getGeographicalAvailabilities() {

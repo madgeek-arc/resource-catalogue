@@ -1,14 +1,31 @@
+/*
+ * Copyright 2017-2025 OpenAIRE AMKE & Athena Research and Innovation Center
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package gr.uoa.di.madgik.resourcecatalogue.manager.aspects;
 
+import gr.uoa.di.madgik.registry.exception.ResourceException;
+import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.domain.CatalogueBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.HelpdeskBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.MonitoringBundle;
-import gr.uoa.di.madgik.resourcecatalogue.exception.ResourceException;
-import gr.uoa.di.madgik.resourcecatalogue.exception.ResourceNotFoundException;
-import gr.uoa.di.madgik.resourcecatalogue.manager.PublicHelpdeskManager;
-import gr.uoa.di.madgik.resourcecatalogue.manager.PublicMonitoringManager;
+import gr.uoa.di.madgik.resourcecatalogue.manager.PublicHelpdeskService;
+import gr.uoa.di.madgik.resourcecatalogue.manager.PublicMonitoringService;
 import gr.uoa.di.madgik.resourcecatalogue.utils.JmsService;
 import gr.uoa.di.madgik.resourcecatalogue.utils.ObjectUtils;
+import gr.uoa.di.madgik.resourcecatalogue.utils.PublicResourceUtils;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.After;
 import org.aspectj.lang.annotation.AfterReturning;
@@ -25,11 +42,11 @@ public class JMSManagementAspect {
 
     private static final Logger logger = LoggerFactory.getLogger(JMSManagementAspect.class);
     private final JmsService jmsService;
-    private final PublicHelpdeskManager publicHelpdeskManager;
-    private final PublicMonitoringManager publicMonitoringManager;
+    private final PublicHelpdeskService publicHelpdeskManager;
+    private final PublicMonitoringService publicMonitoringManager;
 
-    public JMSManagementAspect(JmsService jmsService, @Lazy PublicHelpdeskManager publicHelpdeskManager,
-                               @Lazy PublicMonitoringManager publicMonitoringManager) {
+    public JMSManagementAspect(JmsService jmsService, @Lazy PublicHelpdeskService publicHelpdeskManager,
+                               @Lazy PublicMonitoringService publicMonitoringManager) {
         this.jmsService = jmsService;
         this.publicHelpdeskManager = publicHelpdeskManager;
         this.publicMonitoringManager = publicMonitoringManager;
@@ -68,7 +85,8 @@ public class JMSManagementAspect {
             returning = "helpdeskBundle")
     public void addHelpdeskAsPublic(final HelpdeskBundle helpdeskBundle) {
         try {
-            publicHelpdeskManager.get(String.format("%s.%s", helpdeskBundle.getCatalogueId(), helpdeskBundle.getId()));
+            publicHelpdeskManager.get(PublicResourceUtils.createPublicResourceId(helpdeskBundle.getHelpdesk().getId(),
+                    helpdeskBundle.getCatalogueId()));
         } catch (ResourceException | ResourceNotFoundException e) {
             publicHelpdeskManager.add(ObjectUtils.clone(helpdeskBundle), null);
         }
@@ -98,7 +116,8 @@ public class JMSManagementAspect {
             returning = "monitoringBundle")
     public void addMonitoringAsPublic(final MonitoringBundle monitoringBundle) {
         try {
-            publicMonitoringManager.get(String.format("%s.%s", monitoringBundle.getCatalogueId(), monitoringBundle.getId()));
+            publicMonitoringManager.get(PublicResourceUtils.createPublicResourceId(monitoringBundle.getMonitoring().getId(),
+                    monitoringBundle.getCatalogueId()));
         } catch (ResourceException | ResourceNotFoundException e) {
             publicMonitoringManager.add(ObjectUtils.clone(monitoringBundle), null);
         }

@@ -1,20 +1,30 @@
+/*
+ * Copyright 2017-2025 OpenAIRE AMKE & Athena Research and Innovation Center
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package gr.uoa.di.madgik.resourcecatalogue.domain;
 
 import gr.uoa.di.madgik.resourcecatalogue.annotation.FieldValidation;
 import io.swagger.v3.oas.annotations.media.Schema;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlType;
-import java.util.Date;
+import jakarta.xml.bind.annotation.XmlElement;
+import jakarta.xml.bind.annotation.XmlRootElement;
+import jakarta.xml.bind.annotation.XmlType;
 
 @XmlType
-@XmlRootElement(namespace = "http://einfracentral.eu")
+@XmlRootElement
 public class VocabularyEntryRequest {
-
-    private static final Logger logger = LogManager.getLogger(User.class);
 
     @XmlElement(required = true)
     @Schema
@@ -32,9 +42,9 @@ public class VocabularyEntryRequest {
     private String providerId;
 
     @XmlElement(required = true)
-    @Schema
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED, example = "2020-01-01")
     @FieldValidation
-    private Date dateOfRequest;
+    private String dateOfRequest;
 
     @XmlElement(required = true)
     @Schema
@@ -45,7 +55,7 @@ public class VocabularyEntryRequest {
     public VocabularyEntryRequest() {
     }
 
-    public VocabularyEntryRequest(String userId, String resourceId, String providerId, Date dateOfRequest, String resourceType) {
+    public VocabularyEntryRequest(String userId, String resourceId, String providerId, String dateOfRequest, String resourceType) {
         this.userId = userId;
         this.resourceId = resourceId;
         this.providerId = providerId;
@@ -88,11 +98,11 @@ public class VocabularyEntryRequest {
         this.providerId = providerId;
     }
 
-    public Date getDateOfRequest() {
+    public String getDateOfRequest() {
         return dateOfRequest;
     }
 
-    public void setDateOfRequest(Date dateOfRequest) {
+    public void setDateOfRequest(String dateOfRequest) {
         this.dateOfRequest = dateOfRequest;
     }
 

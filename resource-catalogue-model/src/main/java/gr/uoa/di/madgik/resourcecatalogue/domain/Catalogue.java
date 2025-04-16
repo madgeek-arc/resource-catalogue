@@ -1,19 +1,35 @@
+/*
+ * Copyright 2017-2025 OpenAIRE AMKE & Athena Research and Innovation Center
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package gr.uoa.di.madgik.resourcecatalogue.domain;
 
 import gr.uoa.di.madgik.resourcecatalogue.annotation.FieldValidation;
 import gr.uoa.di.madgik.resourcecatalogue.annotation.VocabularyValidation;
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.xml.bind.annotation.XmlElement;
+import jakarta.xml.bind.annotation.XmlElementWrapper;
+import jakarta.xml.bind.annotation.XmlRootElement;
+import jakarta.xml.bind.annotation.XmlType;
 
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlElementWrapper;
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlType;
 import java.net.URL;
 import java.util.List;
 import java.util.Objects;
 
 @XmlType
-@XmlRootElement(namespace = "http://einfracentral.eu")
+@XmlRootElement
 public class Catalogue implements Identifiable {
 
 
@@ -94,7 +110,7 @@ public class Catalogue implements Identifiable {
     private URL validationProcess;
 
     /**
-     * In terms of sustainability, what is the expected life of the catalogue
+     * In terms of sustainability, what is the expected life of the Catalogue.
      */
     @XmlElement(required = true)
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
@@ -128,7 +144,7 @@ public class Catalogue implements Identifiable {
     private URL logo;
 
     /**
-     * Link to video, slideshow, photos, screenshots with details of the Provider.
+     * Link to video, slideshow, photos, screenshots with details of the Catalogue.
      */
     @XmlElementWrapper(name = "multimedia")
     @XmlElement(name = "multimedia")
@@ -171,17 +187,17 @@ public class Catalogue implements Identifiable {
     /**
      * Catalogue's main contact info.
      */
-    @XmlElement
-    @Schema
+    @XmlElement(required = true)
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     @FieldValidation
     private ProviderMainContact mainContact;
 
     /**
      * List of the Catalogue's public contacts info.
      */
-    @XmlElementWrapper(name = "publicContacts")
+    @XmlElementWrapper(name = "publicContacts", required = true)
     @XmlElement(name = "publicContact")
-    @Schema
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     @FieldValidation
     private List<ProviderPublicContact> publicContacts;
 
@@ -217,7 +233,7 @@ public class Catalogue implements Identifiable {
     private List<String> networks;
 
 
-    // Extra needed fields
+    // Authentication
     @XmlElementWrapper(name = "users", required = true)
     @XmlElement(name = "user")
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED)

@@ -1,21 +1,35 @@
+/*
+ * Copyright 2017-2025 OpenAIRE AMKE & Athena Research and Innovation Center
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package gr.uoa.di.madgik.resourcecatalogue.service;
 
-import gr.uoa.di.madgik.resourcecatalogue.config.security.ResourceCatalogueProperties;
+import gr.uoa.di.madgik.resourcecatalogue.config.properties.CatalogueProperties;
+import jakarta.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.PostConstruct;
 import javax.mail.*;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Component
-//@PropertySource({"classpath:application.properties", "classpath:registry.properties"})
 public class SimpleMailService implements MailService {
 
     private static final Logger logger = LoggerFactory.getLogger(SimpleMailService.class);
@@ -24,31 +38,33 @@ public class SimpleMailService implements MailService {
     private final boolean enableEmails;
     private final String from;
 
-    private final ResourceCatalogueProperties properties;
+    private final CatalogueProperties properties;
 
-    public SimpleMailService(ResourceCatalogueProperties properties) {
+    public SimpleMailService(CatalogueProperties properties) {
         this.properties = properties;
         this.from = properties.getMailer().getFrom();
-        this.enableEmails = properties.getEmailProperties().isEmailsEnabled();
+        this.enableEmails = properties.getEmails().isEnabled();
     }
 
     @PostConstruct
     private void postConstruct() {
-        Properties sessionProps = new Properties();
-        sessionProps.setProperty("mail.transport.protocol", properties.getMailer().getProtocol());
-        sessionProps.setProperty("mail.smtp.auth", String.valueOf(properties.getMailer().isAuth()));
-        sessionProps.setProperty("mail.smtp.host", properties.getMailer().getHost());
-        sessionProps.setProperty("mail.smtp.password", properties.getMailer().getPassword());
-        sessionProps.setProperty("mail.smtp.port", String.valueOf(properties.getMailer().getPort()));
-        sessionProps.setProperty("mail.smtp.ssl.enable", String.valueOf(properties.getMailer().isSsl()));
-        sessionProps.setProperty("mail.smtp.user", properties.getMailer().getUsername());
-        sessionProps.setProperty("mail.smtp.from", properties.getMailer().getFrom());
-        session = Session.getInstance(sessionProps, new Authenticator() {
-            @Override
-            protected PasswordAuthentication getPasswordAuthentication() {
-                return new PasswordAuthentication(properties.getMailer().getUsername(), properties.getMailer().getPassword());
-            }
-        });
+        if (enableEmails) {
+            Properties sessionProps = new Properties();
+            sessionProps.setProperty("mail.transport.protocol", properties.getMailer().getProtocol());
+            sessionProps.setProperty("mail.smtp.auth", String.valueOf(properties.getMailer().isAuth()));
+            sessionProps.setProperty("mail.smtp.host", properties.getMailer().getHost());
+            sessionProps.setProperty("mail.smtp.password", properties.getMailer().getPassword());
+            sessionProps.setProperty("mail.smtp.port", String.valueOf(properties.getMailer().getPort()));
+            sessionProps.setProperty("mail.smtp.ssl.enable", String.valueOf(properties.getMailer().isSsl()));
+            sessionProps.setProperty("mail.smtp.user", properties.getMailer().getUsername());
+            sessionProps.setProperty("mail.smtp.from", properties.getMailer().getFrom());
+            session = Session.getInstance(sessionProps, new Authenticator() {
+                @Override
+                protected PasswordAuthentication getPasswordAuthentication() {
+                    return new PasswordAuthentication(properties.getMailer().getUsername(), properties.getMailer().getPassword());
+                }
+            });
+        }
     }
 
     @Async
@@ -144,10 +160,10 @@ public class SimpleMailService implements MailService {
         List<String> addrTo = new ArrayList<>();
         List<String> addrCc = new ArrayList<>();
         if (to != null) {
-            addrTo.addAll(Arrays.stream(to.split(",")).filter(Objects::nonNull).collect(Collectors.toList()));
+            addrTo.addAll(Arrays.stream(to.split(",")).filter(obj -> true).toList());
         }
         if (cc != null) {
-            addrTo.addAll(Arrays.stream(cc.split(",")).filter(Objects::nonNull).collect(Collectors.toList()));
+            addrTo.addAll(Arrays.stream(cc.split(",")).filter(obj -> true).toList());
         }
         sendMail(addrTo, addrCc, subject, text);
     }
@@ -159,9 +175,9 @@ public class SimpleMailService implements MailService {
 
     private InternetAddress[] createAddresses(List<String> emailAddresses) {
         List<InternetAddress> addresses = new ArrayList<>();
-        for (int i = 0; i < emailAddresses.size(); i++) {
+        for (String emailAddress : emailAddresses) {
             try {
-                addresses.add(new InternetAddress(emailAddresses.get(i)));
+                addresses.add(new InternetAddress(emailAddress));
             } catch (AddressException e) {
                 logger.warn(e.getMessage());
             }

@@ -1,14 +1,29 @@
+/*
+ * Copyright 2017-2025 OpenAIRE AMKE & Athena Research and Innovation Center
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package gr.uoa.di.madgik.resourcecatalogue.manager;
 
-import gr.uoa.di.madgik.registry.domain.Paging;
-import gr.uoa.di.madgik.registry.domain.Resource;
-import gr.uoa.di.madgik.registry.domain.ResourceType;
+import gr.uoa.di.madgik.registry.domain.*;
 import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.domain.LoggingInfo;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Metadata;
+import gr.uoa.di.madgik.resourcecatalogue.domain.ProviderBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.TrainingResourceBundle;
-import gr.uoa.di.madgik.resourcecatalogue.domain.User;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
+import gr.uoa.di.madgik.resourcecatalogue.utils.AuthenticationInfo;
 import gr.uoa.di.madgik.resourcecatalogue.utils.ProviderResourcesCommonMethods;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,7 +38,7 @@ import java.util.List;
 @Service("draftTrainingResourceManager")
 public class DraftTrainingResourceManager extends ResourceManager<TrainingResourceBundle> implements DraftResourceService<TrainingResourceBundle> {
 
-    private static final Logger logger = LoggerFactory.getLogger(DraftServiceManager.class);
+    private static final Logger logger = LoggerFactory.getLogger(DraftTrainingResourceManager.class);
 
     private final TrainingResourceService trainingResourceService;
     private final IdCreator idCreator;
@@ -47,17 +62,17 @@ public class DraftTrainingResourceManager extends ResourceManager<TrainingResour
     }
 
     @Override
-    public String getResourceType() {
+    public String getResourceTypeName() {
         return "draft_training_resource";
     }
 
     @Override
     public TrainingResourceBundle add(TrainingResourceBundle bundle, Authentication auth) {
 
-        bundle.setId(idCreator.generate(getResourceType()));
+        bundle.setId(idCreator.generate(getResourceTypeName()));
 
-        logger.trace("Attempting to add a new Draft Training Resource with id {}", bundle.getId());
-        bundle.setMetadata(Metadata.updateMetadata(bundle.getMetadata(), User.of(auth).getFullName(), User.of(auth).getEmail()));
+        logger.trace("Attempting to add a new Draft Training Resource with id '{}'", bundle.getId());
+        bundle.setMetadata(Metadata.updateMetadata(bundle.getMetadata(), AuthenticationInfo.getFullName(auth), AuthenticationInfo.getEmail(auth).toLowerCase()));
 
         List<LoggingInfo> loggingInfoList = new ArrayList<>();
         LoggingInfo loggingInfo = commonMethods.createLoggingInfo(auth, LoggingInfo.Types.DRAFT.getKey(),
@@ -80,11 +95,11 @@ public class DraftTrainingResourceManager extends ResourceManager<TrainingResour
         Resource existing = getDraftResource(bundle.getTrainingResource().getId());
         // block catalogueId updates from Provider Admins
         bundle.getTrainingResource().setCatalogueId(catalogueId);
-        logger.trace("Attempting to update the Draft Training Resource with id {}", bundle.getId());
-        bundle.setMetadata(Metadata.updateMetadata(bundle.getMetadata(), User.of(auth).getFullName()));
+        logger.trace("Attempting to update the Draft Training Resource with id '{}'", bundle.getId());
+        bundle.setMetadata(Metadata.updateMetadata(bundle.getMetadata(), AuthenticationInfo.getFullName(auth)));
         // save existing resource with new payload
         existing.setPayload(serialize(bundle));
-        existing.setResourceType(resourceType);
+        existing.setResourceType(getResourceType());
         resourceService.updateResource(existing);
         logger.debug("Updating Draft Training Resource: {}", bundle);
         return bundle;
@@ -103,7 +118,8 @@ public class DraftTrainingResourceManager extends ResourceManager<TrainingResour
 
     @Override
     public TrainingResourceBundle transformToNonDraft(TrainingResourceBundle bundle, Authentication auth) {
-        logger.trace("Attempting to transform the Draft Training Resource with id {} to Training Resource", bundle.getId());
+        logger.trace("Attempting to transform the Draft Training Resource with id '{}' to Training Resource",
+                bundle.getId());
         trainingResourceService.validate(bundle);
 
         // update loggingInfo
@@ -123,14 +139,14 @@ public class DraftTrainingResourceManager extends ResourceManager<TrainingResour
             bundle.setStatus(vocabularyService.get("pending resource").getId());
         }
         bundle.setLoggingInfo(loggingInfoList);
-        bundle.setLatestOnboardingInfo(loggingInfoList.get(loggingInfoList.size() - 1));
+        bundle.setLatestOnboardingInfo(loggingInfoList.getLast());
 
-        bundle.setMetadata(Metadata.updateMetadata(bundle.getMetadata(), User.of(auth).getFullName(), User.of(auth).getEmail()));
+        bundle.setMetadata(Metadata.updateMetadata(bundle.getMetadata(), AuthenticationInfo.getFullName(auth), AuthenticationInfo.getEmail(auth).toLowerCase()));
         bundle.setDraft(false);
 
         ResourceType trainingResourceType = resourceTypeService.getResourceType("training_resource");
         Resource resource = getDraftResource(bundle.getId());
-        resource.setResourceType(resourceType);
+        resource.setResourceType(getResourceType());
         resourceService.changeResourceType(resource, trainingResourceType);
 
         try {
@@ -142,19 +158,27 @@ public class DraftTrainingResourceManager extends ResourceManager<TrainingResour
         return bundle;
     }
 
-    public List<TrainingResourceBundle> getMy(Authentication auth) {
-        //TODO: Implement
-        List<TrainingResourceBundle> re = new ArrayList<>();
-        return re;
+    @Override
+    public Browsing<TrainingResourceBundle> getMy(FacetFilter filter, Authentication auth) {
+        FacetFilter ff = new FacetFilter();
+        ff.setQuantity(1000);
+        List<ProviderBundle> providers = providerService.getMy(ff, auth).getResults();
+
+        if (filter == null) {
+            filter = new FacetFilter();
+        }
+        filter.addFilter("resource_organisation", providers.stream().map(ProviderBundle::getId).toList());
+        filter.setResourceType(getResourceTypeName());
+        return this.getAll(filter, auth);
     }
 
     private Resource getDraftResource(String id) {
         Paging<Resource> resources;
         resources = searchService
                 .cqlQuery(String.format("resource_internal_id = \"%s\" AND catalogue_id = \"%s\"", id, catalogueId),
-                        resourceType.getName());
+                        getResourceTypeName());
         assert resources != null;
-        return resources.getTotal() == 0 ? null : resources.getResults().get(0);
+        return resources.getTotal() == 0 ? null : resources.getResults().getFirst();
     }
 
 }

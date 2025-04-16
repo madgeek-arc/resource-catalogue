@@ -1,18 +1,31 @@
+/*
+ * Copyright 2017-2025 OpenAIRE AMKE & Athena Research and Innovation Center
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package gr.uoa.di.madgik.resourcecatalogue.manager;
 
 import com.google.gson.JsonArray;
+import gr.uoa.di.madgik.catalogue.exception.ValidationException;
 import gr.uoa.di.madgik.registry.domain.Resource;
+import gr.uoa.di.madgik.registry.exception.ResourceAlreadyExistsException;
+import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.registry.service.SearchService;
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
 import gr.uoa.di.madgik.resourcecatalogue.dto.MonitoringStatus;
-import gr.uoa.di.madgik.resourcecatalogue.dto.ServiceType;
-import gr.uoa.di.madgik.resourcecatalogue.exception.ResourceNotFoundException;
-import gr.uoa.di.madgik.resourcecatalogue.exception.ValidationException;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
-import gr.uoa.di.madgik.resourcecatalogue.utils.CreateArgoGrnetHttpRequest;
-import gr.uoa.di.madgik.resourcecatalogue.utils.ObjectUtils;
-import gr.uoa.di.madgik.resourcecatalogue.utils.ProviderResourcesCommonMethods;
-import gr.uoa.di.madgik.resourcecatalogue.utils.ResourceValidationUtils;
+import gr.uoa.di.madgik.resourcecatalogue.utils.*;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -21,32 +34,31 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.core.Authentication;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 
 @org.springframework.stereotype.Service("monitoringManager")
 public class MonitoringManager extends ResourceManager<MonitoringBundle> implements MonitoringService {
 
     private static final Logger logger = LoggerFactory.getLogger(MonitoringManager.class);
-    private final ServiceBundleService serviceBundleService;
+    private final ServiceBundleService<ServiceBundle> serviceBundleService;
     private final TrainingResourceService trainingResourceService;
-    private final PublicMonitoringManager publicMonitoringManager;
+    private final PublicMonitoringService publicMonitoringManager;
     private final SecurityService securityService;
     private final RegistrationMailService registrationMailService;
     private final ProviderResourcesCommonMethods commonMethods;
 
-    @Value("${argo.grnet.monitoring.token}")
+    @Value("${argo.grnet.monitoring.token:}")
     private String monitoringToken;
-    @Value("${argo.grnet.monitoring.service.types}")
+    @Value("${argo.grnet.monitoring.service.types:}")
     private String monitoringServiceTypes;
 
     private final IdCreator idCreator;
 
 
-    public MonitoringManager(ServiceBundleService serviceBundleService,
+    public MonitoringManager(ServiceBundleService<ServiceBundle> serviceBundleService,
                              TrainingResourceService trainingResourceService,
-                             PublicMonitoringManager publicMonitoringManager,
+                             PublicMonitoringService publicMonitoringManager,
                              @Lazy SecurityService securityService,
                              @Lazy RegistrationMailService registrationMailService,
                              ProviderResourcesCommonMethods commonMethods,
@@ -62,7 +74,7 @@ public class MonitoringManager extends ResourceManager<MonitoringBundle> impleme
     }
 
     @Override
-    public String getResourceType() {
+    public String getResourceTypeName() {
         return "monitoring";
     }
 
@@ -73,8 +85,9 @@ public class MonitoringManager extends ResourceManager<MonitoringBundle> impleme
 
         MonitoringBundle existingMonitoring = get(resourceId, catalogueId);
         if (existingMonitoring != null) {
-            throw new ValidationException(String.format("Resource [%s] of the Catalogue [%s] has already a Monitoring " +
-                    "registered, with id: [%s]", resourceId, catalogueId, existingMonitoring.getId()));
+            throw new ResourceAlreadyExistsException(
+                    String.format("Resource [%s] of the Catalogue [%s] has already a Monitoring " +
+                            "registered, with id: [%s]", resourceId, catalogueId, existingMonitoring.getId()));
         }
 
         // check if Resource exists and if User belongs to Resource's Provider Admins
@@ -98,23 +111,24 @@ public class MonitoringManager extends ResourceManager<MonitoringBundle> impleme
     public MonitoringBundle add(MonitoringBundle monitoring, String resourceType, Authentication auth) {
         validate(monitoring, resourceType);
 
-        monitoring.setId(idCreator.generate(getResourceType()));
+        monitoring.setId(idCreator.generate(getResourceTypeName()));
         logger.trace("Attempting to add a new Monitoring: {}", monitoring);
 
-        monitoring.setMetadata(Metadata.createMetadata(User.of(auth).getFullName(), User.of(auth).getEmail()));
+        monitoring.setMetadata(Metadata.createMetadata(AuthenticationInfo.getFullName(auth),
+                AuthenticationInfo.getEmail(auth).toLowerCase()));
         List<LoggingInfo> loggingInfoList = commonMethods.returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(monitoring, auth);
         monitoring.setLoggingInfo(loggingInfoList);
         monitoring.setActive(true);
         // latestOnboardingInfo
-        monitoring.setLatestOnboardingInfo(loggingInfoList.get(0));
+        monitoring.setLatestOnboardingInfo(loggingInfoList.getFirst());
         // default monitoredBy value -> EOSC
         monitoring.getMonitoring().setMonitoredBy("monitored_by-eosc");
 
         MonitoringBundle ret;
         ret = super.add(monitoring, null);
-        logger.debug("Adding Monitoring: {}", monitoring);
+        logger.info("Added Monitoring with id '{}'", monitoring.getId());
 
-        registrationMailService.sendEmailsForMonitoringExtension(monitoring, resourceType, "post");
+        registrationMailService.sendEmailsForMonitoringExtensionToPortalAdmins(monitoring, "post");
 
         return ret;
     }
@@ -132,7 +146,8 @@ public class MonitoringManager extends ResourceManager<MonitoringBundle> impleme
         }
 
         validate(ret);
-        ret.setMetadata(Metadata.updateMetadata(ret.getMetadata(), User.of(auth).getFullName(), User.of(auth).getEmail()));
+        ret.setMetadata(Metadata.updateMetadata(ret.getMetadata(), AuthenticationInfo.getFullName(auth),
+                AuthenticationInfo.getEmail(auth).toLowerCase()));
         List<LoggingInfo> loggingInfoList = commonMethods.returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(ret, auth);
         LoggingInfo loggingInfo = commonMethods.createLoggingInfo(auth, LoggingInfo.Types.UPDATE.getKey(),
                 LoggingInfo.ActionType.UPDATED.getKey());
@@ -149,17 +164,18 @@ public class MonitoringManager extends ResourceManager<MonitoringBundle> impleme
 
         ret.setActive(existingMonitoring.isActive());
         existingResource.setPayload(serialize(ret));
-        existingResource.setResourceType(resourceType);
+        existingResource.setResourceType(getResourceType());
 
         // block user from updating serviceId
-        if (!ret.getMonitoring().getServiceId().equals(existingMonitoring.getMonitoring().getServiceId()) && !securityService.hasRole(auth, "ROLE_ADMIN")) {
+        if (!ret.getMonitoring().getServiceId().equals(existingMonitoring.getMonitoring().getServiceId()) &&
+                !securityService.hasRole(auth, "ROLE_ADMIN")) {
             throw new ValidationException("You cannot change the Service Id with which this Monitoring is related");
         }
 
         resourceService.updateResource(existingResource);
-        logger.debug("Updating Monitoring: {}", ret);
+        logger.info("Updated Monitoring with id '{}'", ret.getId());
 
-        registrationMailService.sendEmailsForMonitoringExtension(ret, "Resource", "put");
+        registrationMailService.sendEmailsForMonitoringExtensionToPortalAdmins(ret, "put");
 
         return ret;
     }
@@ -175,7 +191,7 @@ public class MonitoringManager extends ResourceManager<MonitoringBundle> impleme
         }
 
         existing.setPayload(serialize(monitoringBundle));
-        existing.setResourceType(resourceType);
+        existing.setResourceType(getResourceType());
 
         resourceService.updateResource(existing);
     }
@@ -183,41 +199,58 @@ public class MonitoringManager extends ResourceManager<MonitoringBundle> impleme
     @Override
     public void delete(MonitoringBundle monitoring) {
         super.delete(monitoring);
-        logger.debug("Deleting Monitoring: {}", monitoring);
+        logger.info("Deleted the Monitoring with id '{}' of the Catalogue '{}'",
+                monitoring.getMonitoring().getId(), monitoring.getCatalogueId());
     }
 
-    public List<ServiceType> getAvailableServiceTypes() {
-        List<ServiceType> serviceTypeList = new ArrayList<>();
+    public List<Vocabulary> getAvailableServiceTypes() {
         String response = CreateArgoGrnetHttpRequest.createHttpRequest(monitoringServiceTypes, monitoringToken);
         JSONObject obj = new JSONObject(response);
-        JSONArray arr = obj.getJSONArray("data");
-        for (int i = 0; i < arr.length(); i++) {
-            String date = arr.getJSONObject(i).get("date").toString();
-            String name = arr.getJSONObject(i).get("name").toString();
-            String title = arr.getJSONObject(i).get("title").toString();
-            String description = arr.getJSONObject(i).get("description").toString();
-            ServiceType serviceType = new ServiceType(date, name, title, description);
-            serviceTypeList.add(serviceType);
+        JSONArray array = obj.getJSONArray("data");
+        return createServiceTypeVocabularyList(array);
+    }
+
+    private List<Vocabulary> createServiceTypeVocabularyList(JSONArray array) {
+        List<Vocabulary> serviceTypeList = new ArrayList<>();
+        for (int i = 0; i < array.length(); i++) {
+            String date = array.getJSONObject(i).get("date").toString();
+            String name = array.getJSONObject(i).get("name").toString();
+            String title = array.getJSONObject(i).get("title").toString();
+            String description = array.getJSONObject(i).get("description").toString();
+            JSONArray tagsArray = array.getJSONObject(i).getJSONArray("tags");
+            List<String> tags = new ArrayList<>();
+            for (int j = 0; j < tagsArray.length(); j++) {
+                tags.add(tagsArray.getString(j));
+            }
+            String tagsString = String.join(",", tags);
+            Map<String, String> extras = new HashMap<>();
+            extras.put("date", date);
+            extras.put("tags", tagsString);
+            Vocabulary vocabulary = new Vocabulary(name, title, description, null,
+                    "external-monitoring_service_type", extras);
+            serviceTypeList.add(vocabulary);
         }
         return serviceTypeList;
     }
 
     @Override
     public MonitoringBundle get(String serviceId, String catalogueId) {
-        Resource res = where(false, new SearchService.KeyValue("service_id", serviceId), new SearchService.KeyValue("catalogue_id", catalogueId));
+        Resource res = where(false, new SearchService.KeyValue("service_id", serviceId),
+                new SearchService.KeyValue("catalogue_id", catalogueId));
         return res != null ? deserialize(res) : null;
     }
 
     public void serviceTypeValidation(Monitoring monitoring) {
-        List<ServiceType> serviceTypeList = getAvailableServiceTypes();
-        List<String> serviceTypeNames = new ArrayList<>();
-        for (ServiceType type : serviceTypeList) {
-            serviceTypeNames.add(type.getName());
+        List<Vocabulary> serviceTypeList = getAvailableServiceTypes();
+        List<String> serviceTypeIds = new ArrayList<>();
+        for (Vocabulary type : serviceTypeList) {
+            serviceTypeIds.add(type.getId());
         }
         for (MonitoringGroup monitoringGroup : monitoring.getMonitoringGroups()) {
             String serviceType = monitoringGroup.getServiceType();
-            if (!serviceTypeNames.contains(serviceType)) {
-                throw new ValidationException(String.format("The serviceType you provided is wrong. Available serviceTypes are: '%s'", serviceTypeList));
+            if (!serviceTypeIds.contains(serviceType)) {
+                throw new ValidationException(String.format("The serviceType you provided is wrong. " +
+                        "Available serviceTypes are: '%s'", serviceTypeList));
             }
         }
     }
@@ -253,6 +286,10 @@ public class MonitoringManager extends ResourceManager<MonitoringBundle> impleme
     }
 
     public MonitoringBundle createPublicResource(MonitoringBundle monitoringBundle, Authentication auth) {
+        logger.info("User '{}-{}' attempts to create a Public Monitoring from Monitoring '{}' of the '{}' Catalogue",
+                Objects.requireNonNull(AuthenticationInfo.getFullName(auth)),
+                Objects.requireNonNull(AuthenticationInfo.getEmail(auth).toLowerCase()),
+                monitoringBundle.getId(), monitoringBundle.getCatalogueId());
         publicMonitoringManager.add(monitoringBundle, auth);
         return monitoringBundle;
     }

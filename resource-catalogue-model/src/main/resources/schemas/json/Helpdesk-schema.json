@@ -1,0 +1,55 @@
+{
+  "$schema" : "https://json-schema.org/draft/2020-12/schema",
+  "type" : "object",
+  "properties" : {
+    "agents" : {
+      "type" : "array",
+      "items" : {
+        "type" : "string"
+      }
+    },
+    "emails" : {
+      "type" : "array",
+      "items" : {
+        "type" : "string"
+      }
+    },
+    "helpdeskType" : {
+      "type" : "string"
+    },
+    "id" : {
+      "type" : "string"
+    },
+    "organisation" : {
+      "type" : "string"
+    },
+    "serviceId" : {
+      "type" : "string"
+    },
+    "services" : {
+      "type" : "array",
+      "items" : {
+        "type" : "string"
+      }
+    },
+    "signatures" : {
+      "type" : "array",
+      "items" : {
+        "type" : "string"
+      }
+    },
+    "supportGroups" : {
+      "type" : "array",
+      "items" : {
+        "type" : "string"
+      }
+    },
+    "ticketPreservation" : {
+      "type" : "boolean"
+    },
+    "webform" : {
+      "type" : "boolean"
+    }
+  },
+  "additionalProperties" : false
+}

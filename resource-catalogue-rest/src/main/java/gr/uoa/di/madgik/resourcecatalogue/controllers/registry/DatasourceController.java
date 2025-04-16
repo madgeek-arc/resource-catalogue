@@ -1,9 +1,24 @@
+/*
+ * Copyright 2017-2025 OpenAIRE AMKE & Athena Research and Innovation Center
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package gr.uoa.di.madgik.resourcecatalogue.controllers.registry;
 
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.domain.Paging;
-import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
-import gr.uoa.di.madgik.resourcecatalogue.annotations.Browse;
+import gr.uoa.di.madgik.registry.annotation.BrowseParameters;
 import gr.uoa.di.madgik.resourcecatalogue.annotations.BrowseCatalogue;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Datasource;
 import gr.uoa.di.madgik.resourcecatalogue.domain.DatasourceBundle;
@@ -11,14 +26,12 @@ import gr.uoa.di.madgik.resourcecatalogue.dto.OpenAIREMetrics;
 import gr.uoa.di.madgik.resourcecatalogue.service.DatasourceService;
 import gr.uoa.di.madgik.resourcecatalogue.service.GenericResourceService;
 import gr.uoa.di.madgik.resourcecatalogue.service.OpenAIREDatasourceService;
-import gr.uoa.di.madgik.resourcecatalogue.utils.FacetFilterUtils;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import jakarta.validation.Valid;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpStatus;
@@ -29,7 +42,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
 
-import javax.validation.Valid;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
@@ -40,7 +52,6 @@ import java.util.Map;
 @Tag(name = "datasource")
 public class DatasourceController {
 
-    private static final Logger logger = LogManager.getLogger(DatasourceController.class);
     private final DatasourceService datasourceService;
     private final GenericResourceService genericResourceService;
     private final OpenAIREDatasourceService openAIREDatasourceService;
@@ -75,18 +86,18 @@ public class DatasourceController {
         ff.addFilter("service_id", serviceId);
         List<DatasourceBundle> allDatasources = datasourceService.getAll(ff, auth).getResults();
         if (!allDatasources.isEmpty()) {
-            return new ResponseEntity<>(allDatasources.get(0).getDatasource(), HttpStatus.OK);
+            return new ResponseEntity<>(allDatasources.getFirst().getDatasource(), HttpStatus.OK);
         }
         return new ResponseEntity<>(null, HttpStatus.OK);
     }
 
     @Operation(description = "Filter a list of Datasources based on a set of filters or get a list of all Datasources in the Catalogue.")
-    @Browse
+    @BrowseParameters
     @BrowseCatalogue
     @Parameter(name = "suspended", description = "Suspended", content = @Content(schema = @Schema(type = "boolean", defaultValue = "false")))
     @GetMapping(path = "/all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity<Paging<Datasource>> getAllDatasources(@Parameter(hidden = true) @RequestParam MultiValueMap<String, Object> allRequestParams) {
-        FacetFilter ff = FacetFilterUtils.createFacetFilter(allRequestParams);
+        FacetFilter ff = FacetFilter.from(allRequestParams);
         ff.setResourceType("datasource");
         ff.addFilter("published", false);
         ff.addFilter("active", true);
@@ -95,13 +106,13 @@ public class DatasourceController {
         return ResponseEntity.ok(paging);
     }
 
-    @Browse
+    @BrowseParameters
     @BrowseCatalogue
     @Parameter(name = "suspended", description = "Suspended", content = @Content(schema = @Schema(type = "boolean", defaultValue = "false")))
     @GetMapping(path = "adminPage/all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     public ResponseEntity<Paging<DatasourceBundle>> getAllDatasourcesForAdminPage(@Parameter(hidden = true) @RequestParam MultiValueMap<String, Object> allRequestParams) {
-        FacetFilter ff = FacetFilterUtils.createFacetFilter(allRequestParams);
+        FacetFilter ff = FacetFilter.from(allRequestParams);
         ff.setResourceType("datasource");
         ff.addFilter("published", false);
         Paging<DatasourceBundle> paging = genericResourceService.getResults(ff);
@@ -110,24 +121,22 @@ public class DatasourceController {
 
     @Operation(description = "Creates a new Datasource.")
     @PostMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth, #datasource.serviceId, #datasource.catalogueId)")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceAdmin(#auth, #datasource.serviceId)")
     public ResponseEntity<Datasource> addDatasource(@Valid @RequestBody Datasource datasource,
                                                     @Parameter(hidden = true) Authentication auth) {
         DatasourceBundle datasourceBundle = datasourceService.add(new DatasourceBundle(datasource), auth);
-        logger.info("Added the Datasource with id '{}'", datasource.getId());
         return new ResponseEntity<>(datasourceBundle.getDatasource(), HttpStatus.CREATED);
     }
 
     @Operation(description = "Updates the Datasource with the given id.")
     @PutMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth, #datasource.serviceId, #datasource.catalogueId)")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceAdmin(#auth, #datasource.serviceId)")
     public ResponseEntity<Datasource> updateHDatasource(@Valid @RequestBody Datasource datasource,
                                                         @RequestParam(required = false) String comment,
-                                                        @Parameter(hidden = true) Authentication auth) throws ResourceNotFoundException {
+                                                        @Parameter(hidden = true) Authentication auth) {
         DatasourceBundle datasourceBundle = datasourceService.get(datasource.getId());
         datasourceBundle.setDatasource(datasource);
         datasourceBundle = datasourceService.update(datasourceBundle, comment, auth);
-        logger.info("Updated the Datasource with id '{}'", datasource.getId());
         return new ResponseEntity<>(datasourceBundle.getDatasource(), HttpStatus.OK);
     }
 
@@ -135,41 +144,31 @@ public class DatasourceController {
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     public ResponseEntity<Datasource> deleteDatasourceById(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
                                                            @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix,
-                                                           @Parameter(hidden = true) Authentication auth) throws ResourceNotFoundException {
+                                                           @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
         DatasourceBundle datasourceBundle = datasourceService.get(id);
         if (datasourceBundle == null) {
             return new ResponseEntity<>(HttpStatus.GONE);
         }
-        logger.info("Deleting Datasource: {} of the Catalogue: {}", datasourceBundle.getDatasource().getId(),
-                datasourceBundle.getDatasource().getCatalogueId());
-        // delete Datasource
         datasourceService.delete(datasourceBundle);
-        logger.info("Deleted the Datasource with id '{}' of the Catalogue '{}'",
-                datasourceBundle.getDatasource().getId(), datasourceBundle.getDatasource().getCatalogueId());
         return new ResponseEntity<>(datasourceBundle.getDatasource(), HttpStatus.OK);
     }
 
     // Deletes the Datasource of the specific Service of the specific Catalogue.
     @Operation(description = "Deletes the Datasource of the specific Service of the specific Catalogue.")
     @DeleteMapping(path = "/{catalogueId}/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth, #prefix+'/'+#suffix, #catalogueId)")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceAdmin(#auth, #prefix+'/'+#suffix)")
     public ResponseEntity<Datasource> deleteDatasource(@PathVariable("catalogueId") String catalogueId,
                                                        @Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
                                                        @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix,
-                                                       @Parameter(hidden = true) Authentication auth) throws ResourceNotFoundException {
+                                                       @Parameter(hidden = true) Authentication auth) {
         Datasource datasource = getDatasourceByServiceId(prefix, suffix, catalogueId, auth).getBody();
         assert datasource != null;
         DatasourceBundle datasourceBundle = datasourceService.get(datasource.getId());
         if (datasourceBundle == null) {
             return new ResponseEntity<>(HttpStatus.GONE);
         }
-        logger.info("Deleting Datasource: {} of the Catalogue: {}", datasourceBundle.getDatasource().getId(),
-                datasourceBundle.getDatasource().getCatalogueId());
-        // delete Datasource
         datasourceService.delete(datasourceBundle);
-        logger.info("Deleted the Datasource with id '{}' of the Catalogue '{}'", datasourceBundle.getDatasource().getId(),
-                datasourceBundle.getDatasource().getCatalogueId());
         return new ResponseEntity<>(datasourceBundle.getDatasource(), HttpStatus.OK);
     }
 
@@ -183,7 +182,6 @@ public class DatasourceController {
                                                              @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
         DatasourceBundle resource = datasourceService.verify(id, status, active, auth);
-        logger.info("Updated Datasource with id '{}' [status: {}] [active: {}]", resource.getDatasource().getId(), status, active);
         return new ResponseEntity<>(resource, HttpStatus.OK);
     }
 
@@ -201,10 +199,10 @@ public class DatasourceController {
         return datasourceService.isDatasourceRegisteredOnOpenAIRE(id);
     }
 
-    @Browse
+    @BrowseParameters
     @GetMapping(path = "/getAllOpenAIREDatasources", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<Paging<Datasource>> getAllOpenAIREDatasources(@Parameter(hidden = true) @RequestParam MultiValueMap<String, Object> allRequestParams) throws IOException {
-        FacetFilter ff = FacetFilterUtils.createFacetFilter(allRequestParams);
+        FacetFilter ff = FacetFilter.from(allRequestParams);
         Map<Integer, List<Datasource>> datasourceMap = openAIREDatasourceService.getAll(ff);
         Paging<Datasource> datasourcePaging = new Paging<>();
         datasourcePaging.setTotal(datasourceMap.keySet().iterator().next());

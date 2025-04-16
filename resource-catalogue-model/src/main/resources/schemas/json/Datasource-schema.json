@@ -1,0 +1,135 @@
+{
+  "$schema" : "https://json-schema.org/draft/2020-12/schema",
+  "$defs" : {
+    "PersistentIdentitySystem" : {
+      "type" : "object",
+      "properties" : {
+        "persistentIdentityEntityType" : {
+          "type" : "string"
+        },
+        "persistentIdentityEntityTypeSchemes" : {
+          "type" : "array",
+          "items" : {
+            "type" : "string"
+          }
+        }
+      },
+      "additionalProperties" : false
+    },
+    "ResearchProductLicensing" : {
+      "type" : "object",
+      "properties" : {
+        "researchProductLicenseName" : {
+          "type" : "string"
+        },
+        "researchProductLicenseURL" : {
+          "$ref" : "#/$defs/URL"
+        }
+      },
+      "additionalProperties" : false
+    },
+    "ResearchProductMetadataLicensing" : {
+      "type" : "object",
+      "properties" : {
+        "researchProductMetadataLicenseName" : {
+          "type" : "string"
+        },
+        "researchProductMetadataLicenseURL" : {
+          "$ref" : "#/$defs/URL"
+        }
+      },
+      "additionalProperties" : false
+    },
+    "URL" : {
+      "type" : "object",
+      "properties" : {
+        "authority" : {
+          "type" : "string"
+        },
+        "file" : {
+          "type" : "string"
+        },
+        "host" : {
+          "type" : "string"
+        },
+        "port" : {
+          "type" : "integer"
+        },
+        "protocol" : {
+          "type" : "string"
+        },
+        "ref" : {
+          "type" : "string"
+        }
+      },
+      "additionalProperties" : false
+    }
+  },
+  "type" : "object",
+  "properties" : {
+    "catalogueId" : {
+      "type" : "string"
+    },
+    "datasourceClassification" : {
+      "type" : "string"
+    },
+    "harvestable" : {
+      "type" : "boolean"
+    },
+    "id" : {
+      "type" : "string"
+    },
+    "jurisdiction" : {
+      "type" : "string"
+    },
+    "persistentIdentitySystems" : {
+      "type" : "array",
+      "items" : {
+        "$ref" : "#/$defs/PersistentIdentitySystem"
+      }
+    },
+    "preservationPolicyURL" : {
+      "$ref" : "#/$defs/URL"
+    },
+    "researchEntityTypes" : {
+      "type" : "array",
+      "items" : {
+        "type" : "string"
+      }
+    },
+    "researchProductAccessPolicies" : {
+      "type" : "array",
+      "items" : {
+        "type" : "string"
+      }
+    },
+    "researchProductLicensings" : {
+      "type" : "array",
+      "items" : {
+        "$ref" : "#/$defs/ResearchProductLicensing"
+      }
+    },
+    "researchProductMetadataAccessPolicies" : {
+      "type" : "array",
+      "items" : {
+        "type" : "string"
+      }
+    },
+    "researchProductMetadataLicensing" : {
+      "$ref" : "#/$defs/ResearchProductMetadataLicensing"
+    },
+    "serviceId" : {
+      "type" : "string"
+    },
+    "submissionPolicyURL" : {
+      "$ref" : "#/$defs/URL"
+    },
+    "thematic" : {
+      "type" : "boolean"
+    },
+    "versionControl" : {
+      "type" : "boolean"
+    }
+  },
+  "additionalProperties" : false
+}

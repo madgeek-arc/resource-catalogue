@@ -1,9 +1,25 @@
+/*
+ * Copyright 2017-2025 OpenAIRE AMKE & Athena Research and Innovation Center
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package gr.uoa.di.madgik.resourcecatalogue.service;
 
 import com.google.gson.JsonArray;
 import gr.uoa.di.madgik.resourcecatalogue.domain.MonitoringBundle;
+import gr.uoa.di.madgik.resourcecatalogue.domain.Vocabulary;
 import gr.uoa.di.madgik.resourcecatalogue.dto.MonitoringStatus;
-import gr.uoa.di.madgik.resourcecatalogue.dto.ServiceType;
 import org.springframework.security.core.Authentication;
 
 import java.util.List;
@@ -23,9 +39,9 @@ public interface MonitoringService extends ResourceService<MonitoringBundle> {
     /**
      * Returns all the available Service Types
      *
-     * @return {@link List<ServiceType>}
+     * @return {@link List<Vocabulary>}
      */
-    List<ServiceType> getAvailableServiceTypes();
+    List<Vocabulary> getAvailableServiceTypes();
 
     /**
      * Retrieve {@link MonitoringBundle} for a catalogue specific resource.

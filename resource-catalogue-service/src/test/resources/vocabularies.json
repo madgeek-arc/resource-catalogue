@@ -1,0 +1,597 @@
+[
+  {
+    "id": "access_mode-free",
+    "name": "Free",
+    "description": "Users can freely access the Resource provided, registration may be needed.",
+    "parentId": null,
+    "type": "Access mode",
+    "extras": {}
+  },
+  {
+    "id": "access_type-mail_in",
+    "name": "Mail-In",
+    "description": "Samples are sent in to for e.g. analysis and the results are returned to the user without the user actually accessing the RI.",
+    "parentId": null,
+    "type": "Access type",
+    "extras": {}
+  },
+  {
+    "id": "category-access_physical_and_eInfrastructures-compute",
+    "name": "Compute",
+    "description": "High-performance computing resources and scalable cloud compute capacity for demanding job processes.",
+    "parentId": "supercategory-access_physical_and_eInfrastructures",
+    "type": "Category",
+    "extras": {
+      "icon": "ic_compute.svg",
+      "icon_active": "ic_compute_active.svg"
+    }
+  },
+  {
+    "id": "AD",
+    "name": "Andorra",
+    "description": null,
+    "parentId": "geographic_location",
+    "type": "Country",
+    "extras": {
+      "region": "EU"
+    }
+  },
+  {
+    "id": "ct_compatibility-driver",
+    "name": "Driver",
+    "description": "Configuration Template compatibility",
+    "parentId": null,
+    "type": "Configuration Template compatibility",
+    "extras": {}
+  },
+  {
+    "id": "ct_protocol-oai",
+    "name": "OAI",
+    "description": "Configuration Template protocol",
+    "parentId": null,
+    "type": "Configuration Template protocol",
+    "extras": {}
+  },
+  {
+    "id": "ds_classification-repository",
+    "name": "Repository",
+    "description": "",
+    "parentId": null,
+    "type": "Classification",
+    "extras": {}
+  },
+  {
+    "id": "ds_classification-aggregators",
+    "name": "Aggregators",
+    "description": "",
+    "parentId": null,
+    "type": "Classification",
+    "extras": {}
+  },
+  {
+    "id": "ds_coar_access_rights_1_0-embargoed_access",
+    "name": "Embargoed Access",
+    "description": "Embargoed access refers to a resource that is metadata only access until released for open access on a certain date.",
+    "parentId": null,
+    "type": "COAR access rights 1.0",
+    "extras": {}
+  },
+  {
+    "id": "ds_jurisdiction-global",
+    "name": "Global",
+    "description": "Intended for all users",
+    "parentId": null,
+    "type": "Jurisdiction",
+    "extras": {}
+  },
+  {
+    "id": "ds_persistent_identity_scheme-doi",
+    "name": "DOI",
+    "description": "",
+    "parentId": null,
+    "type": "Persistent identity scheme",
+    "extras": {}
+  },
+  {
+    "id": "ds_research_entity_type-research_data",
+    "name": "Research Data",
+    "description": "",
+    "parentId": null,
+    "type": "Research entity type",
+    "extras": {}
+  },
+  {
+    "id": "ds_research_entity_type-research_software",
+    "name": "Research Software",
+    "description": "",
+    "parentId": null,
+    "type": "Research entity type",
+    "extras": {}
+  },
+  {
+    "id": "funding_body-ademe",
+    "name": "Agency for Environment and Energy Management (ADEME)",
+    "description": "France",
+    "parentId": null,
+    "type": "Funding body",
+    "extras": {}
+  },
+  {
+    "id": "funding_program-afis2020",
+    "name": "Anti Fraud Information System (AFIS2020)",
+    "description": null,
+    "parentId": null,
+    "type": "Funding program",
+    "extras": {}
+  },
+  {
+    "id": "ir_eosc_guideline_type-eosc_core_interoperability_guideline",
+    "name": "EOSC-Core Interoperability Guideline",
+    "description": null,
+    "parentId": null,
+    "type": "Interoperability Record eosc guideline type",
+    "extras": {}
+  },
+  {
+    "id": "ir_identifier_type-doi",
+    "name": "DOI",
+    "description": null,
+    "parentId": null,
+    "type": "Interoperability Record identifier type",
+    "extras": {}
+  },
+  {
+    "id": "ir_name_type-organizational",
+    "name": "Organizational",
+    "description": null,
+    "parentId": null,
+    "type": "Interoperability Record name type",
+    "extras": {}
+  },
+  {
+    "id": "ir_resource_type_general-guideline",
+    "name": "Guideline",
+    "description": null,
+    "parentId": null,
+    "type": "Interoperability Record resource type general",
+    "extras": {}
+  },
+  {
+    "id": "ir_status-candidate",
+    "name": "Candidate",
+    "description": null,
+    "parentId": null,
+    "type": "Interoperability Record status",
+    "extras": {}
+  },
+  {
+    "id": "aa",
+    "name": "Afar",
+    "description": null,
+    "parentId": null,
+    "type": "Language",
+    "extras": {}
+  },
+  {
+    "id": "life_cycle_status-alpha",
+    "name": "Alpha",
+    "description": "Resource prototype available for closed set of users",
+    "parentId": null,
+    "type": "Life cycle status",
+    "extras": {}
+  },
+  {
+    "id": "marketplace_location-discover_research_outputs",
+    "name": "Discover Research Outputs",
+    "description": null,
+    "parentId": null,
+    "type": "Marketplace location",
+    "extras": {}
+  },
+  {
+    "id": "monitored_by-eosc",
+    "name": "EOSC",
+    "description": "EOSC",
+    "parentId": null,
+    "type": "Monitored by",
+    "extras": {}
+  },
+  {
+    "id": "order_type-fully_open_access",
+    "name": "Fully Open Access",
+    "description": "No ordering procedure necessary to access the resource and no user authentication required.",
+    "parentId": null,
+    "type": "Order type",
+    "extras": {}
+  },
+  {
+    "id": "provider_area_of_activity-applied_research",
+    "name": "Applied Research",
+    "description": null,
+    "parentId": null,
+    "type": "Provider area of activity",
+    "extras": {}
+  },
+  {
+    "id": "provider_esfri_domain-data_computing_and_digital_research_infrastructures",
+    "name": "Data, Computing & Digital Research Infrastructures",
+    "description": "In research, as in all fields of society, Information and Communications Technology (ICT) has become a key enabling factor for progress. ICT is also changing the modus operandi of research by providing new possibilities for geographically distributed collaboration and sharing. Data-driven science, as well as more and more open access to data and scientific results, is transforming not only how research is conducted, but its overall reach.",
+    "parentId": null,
+    "type": "Provider esfri domain",
+    "extras": {}
+  },
+  {
+    "id": "provider_esfri_type-landmark",
+    "name": "Landmark",
+    "description": "RI is an ESFRI landmark",
+    "parentId": null,
+    "type": "Provider esfri type",
+    "extras": {}
+  },
+  {
+    "id": "provider_hosting_legal_entity-100pit",
+    "name": "100 Percent IT",
+    "description": null,
+    "parentId": null,
+    "type": "Provider hosting legal entity",
+    "extras": {}
+  },
+  {
+    "id": "provider_legal_status-association",
+    "name": "Association",
+    "description": null,
+    "parentId": null,
+    "type": "Provider legal status",
+    "extras": {}
+  },
+  {
+    "id": "provider_life_cycle_status-being_upgraded",
+    "name": "Being Upgraded",
+    "description": "The Research Infrastructure is currently being upgraded. It is probable that many services are in containment or unavailable. Please add the projected year of completion of upgrades.",
+    "parentId": null,
+    "type": "Provider life cycle status",
+    "extras": {}
+  },
+  {
+    "id": "provider_meril_scientific_domain-biological_and_medical_sciences",
+    "name": "Biological & Medical Sciences",
+    "description": null,
+    "parentId": null,
+    "type": "Provider meril scientific domain",
+    "extras": {}
+  },
+  {
+    "id": "provider_meril_scientific_subdomain-biological_and_medical_sciences-agronomy_forestry_plant_breeding_centres",
+    "name": "Agronomy, Forestry, Plant Breeding Centres",
+    "description": "Facilities that enable open field and forest experiments to test the impact of management practices and of environmental conditions on soil, crop, and primary production. These include plants and trees ex-situ collections, experimental facilities for controlled crosses and propagation, and population genetics field testing. The facilities are relevant for Biological- and Environmental Sciences.",
+    "parentId": "provider_meril_scientific_domain-biological_and_medical_sciences",
+    "type": "Provider meril scientific subdomain",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-4c",
+    "name": "Collaboration to Clarify the Costs of Curation (4C)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_societal_grand_challenge-energy",
+    "name": "Energy",
+    "description": "Secure, clean and efficient energy.",
+    "parentId": null,
+    "type": "Provider societal grand challenge",
+    "extras": {}
+  },
+  {
+    "id": "provider_structure_type-distributed",
+    "name": "Distributed",
+    "description": "The Provider has multiple physical locations but a unified management structure and a single coordination centre.",
+    "parentId": null,
+    "type": "Provider structure type",
+    "extras": {}
+  },
+  {
+    "id": "AH",
+    "name": "Schengen Area",
+    "description": "All Schengen Area countries.",
+    "parentId": "geographic_location",
+    "type": "Region",
+    "extras": {}
+  },
+  {
+    "id": "related_platform-ands",
+    "name": "ANDS",
+    "description": null,
+    "parentId": null,
+    "type": "Related platform",
+    "extras": {}
+  },
+  {
+    "id": "research_category-dro",
+    "name": "Discover Research Outputs",
+    "description": null,
+    "parentId": null,
+    "type": "Research category",
+    "extras": {}
+  },
+  {
+    "id": "scientific_domain-agricultural_sciences",
+    "name": "Agricultural Sciences",
+    "description": "Sciences dealing with food and fibre production and processing. They include the technologies of soil cultivation, crop cultivation and harvesting, animal production, and the processing of plant and animal products for human consumption and use.",
+    "parentId": null,
+    "type": "Scientific domain",
+    "extras": {
+      "icon": "ic_analytics.svg",
+      "icon_active": "ic_analytics_active.svg"
+    }
+  },
+  {
+    "id": "scientific_subdomain-agricultural_sciences-agricultural_biotechnology",
+    "name": "Agricultural Biotechnology",
+    "description": null,
+    "parentId": "scientific_domain-agricultural_sciences",
+    "type": "Scientific subdomain",
+    "extras": {}
+  },
+  {
+    "id": "semantic_relationship-cw",
+    "name": "Complies With",
+    "description": null,
+    "parentId": null,
+    "type": "Semantic relationship",
+    "extras": {}
+  },
+  {
+    "id": "service_category-data_source",
+    "name": "Data Source",
+    "description": null,
+    "parentId": null,
+    "type": "Service category",
+    "extras": {}
+  },
+  {
+    "id": "approved catalogue",
+    "name": "Approved Catalogue",
+    "description": "Approved Catalogue",
+    "parentId": null,
+    "type": "Catalogue state",
+    "extras": {}
+  },
+  {
+    "id": "pending catalogue",
+    "name": "Pending Catalogue",
+    "description": "Pending Catalogue",
+    "parentId": null,
+    "type": "Catalogue state",
+    "extras": {}
+  },
+  {
+    "id": "rejected catalogue",
+    "name": "Rejected Catalogue",
+    "description": "Rejected Catalogue",
+    "parentId": null,
+    "type": "Catalogue state",
+    "extras": {}
+  },
+  {
+    "id": "approved provider",
+    "name": "Approved Provider",
+    "description": "Approved Provider",
+    "parentId": null,
+    "type": "Provider state",
+    "extras": {}
+  },
+  {
+    "id": "pending provider",
+    "name": "Pending Provider",
+    "description": "Pending Provider",
+    "parentId": null,
+    "type": "Provider state",
+    "extras": {}
+  },
+  {
+    "id": "rejected provider",
+    "name": "Rejected Provider",
+    "description": "Rejected Provider",
+    "parentId": null,
+    "type": "Provider state",
+    "extras": {}
+  },
+  {
+    "id": "approved template",
+    "name": "Approved Template",
+    "description": "Approved Template",
+    "parentId": null,
+    "type": "Template state",
+    "extras": {}
+  },
+  {
+    "id": "no template status",
+    "name": "No Template Status",
+    "description": "No Template Status",
+    "parentId": null,
+    "type": "Template state",
+    "extras": {}
+  },
+  {
+    "id": "pending template",
+    "name": "Pending Template",
+    "description": "Pending Template",
+    "parentId": null,
+    "type": "Template state",
+    "extras": {}
+  },
+  {
+    "id": "rejected template",
+    "name": "Rejected Template",
+    "description": "Rejected Template",
+    "parentId": null,
+    "type": "Template state",
+    "extras": {}
+  },
+  {
+    "id": "approved resource",
+    "name": "Approved Resource",
+    "description": "Approved Resource",
+    "parentId": null,
+    "type": "Resource state",
+    "extras": {}
+  },
+  {
+    "id": "pending resource",
+    "name": "Pending Resource",
+    "description": "Pending Resource",
+    "parentId": null,
+    "type": "Resource state",
+    "extras": {}
+  },
+  {
+    "id": "rejected resource",
+    "name": "Rejected Resource",
+    "description": "Rejected Resource",
+    "parentId": null,
+    "type": "Resource state",
+    "extras": {}
+  },
+  {
+    "id": "approved datasource",
+    "name": "Approved Datasource",
+    "description": "Approved Datasource",
+    "parentId": null,
+    "type": "Datasource state",
+    "extras": {}
+  },
+  {
+    "id": "pending datasource",
+    "name": "Pending Datasource",
+    "description": "Pending Datasource",
+    "parentId": null,
+    "type": "Datasource state",
+    "extras": {}
+  },
+  {
+    "id": "rejected datasource",
+    "name": "Rejected Datasource",
+    "description": "Rejected Datasource",
+    "parentId": null,
+    "type": "Datasource state",
+    "extras": {}
+  },
+  {
+    "id": "approved interoperability record",
+    "name": "Approved Interoperability Record",
+    "description": "Approved Interoperability Record",
+    "parentId": null,
+    "type": "Interoperability Record state",
+    "extras": {}
+  },
+  {
+    "id": "pending interoperability record",
+    "name": "Pending Interoperability Record",
+    "description": "Pending Interoperability Record",
+    "parentId": null,
+    "type": "Interoperability Record state",
+    "extras": {}
+  },
+  {
+    "id": "rejected interoperability record",
+    "name": "Rejected Interoperability Record",
+    "description": "Rejected Interoperability Record",
+    "parentId": null,
+    "type": "Interoperability Record state",
+    "extras": {}
+  },
+  {
+    "id": "subcategory-access_physical_and_eInfrastructures-compute-container_management",
+    "name": "Container Management",
+    "description": null,
+    "parentId": "category-access_physical_and_eInfrastructures-compute",
+    "type": "Subcategory",
+    "extras": {}
+  },
+  {
+    "id": "supercategory-access_physical_and_eInfrastructures",
+    "name": "Access physical & eInfrastructures",
+    "description": "Ultra-fast connectivity and ubiquitous access, high performance computing, cloud capacity and storage.",
+    "parentId": null,
+    "type": "Supercategory",
+    "extras": {
+      "icon": "ic_security.svg",
+      "icon_active": "ic_security_active.svg"
+    }
+  },
+  {
+    "id": "target_user-businesses",
+    "name": "Businesses",
+    "description": "An organization or economic system where goods and services are exchanged for one another or for money. Businesses can be privately owned, not-for-profit or state-owned.",
+    "parentId": null,
+    "type": "Target user",
+    "extras": {}
+  },
+  {
+    "id": "target_user-funders",
+    "name": "Funders",
+    "description": "Individual or organization financing a part or all of a project's cost as a grant, investment, or loan.",
+    "parentId": null,
+    "type": "Target user",
+    "extras": {}
+  },
+  {
+    "id": "tr_access_right-open_access",
+    "name": "Open Access",
+    "description": "Open access refers to a resource that is immediately and permanently online, and free for all on the Web, without financial and technical barriers.",
+    "parentId": null,
+    "type": "Training Resource access right",
+    "extras": {}
+  },
+  {
+    "id": "tr_content_resource_type-animation",
+    "name": "Animation",
+    "description": null,
+    "parentId": null,
+    "type": "Training Resource content resource type",
+    "extras": {}
+  },
+  {
+    "id": "tr_dcmi_type-activity_plan",
+    "name": "Activity Plan",
+    "description": null,
+    "parentId": null,
+    "type": "Training Resource dcmi type",
+    "extras": {}
+  },
+  {
+    "id": "tr_expertise_level-advanced",
+    "name": "Advanced",
+    "description": null,
+    "parentId": null,
+    "type": "Training Resource expertise level",
+    "extras": {}
+  },
+  {
+    "id": "tr_qualification-badge",
+    "name": "Badge",
+    "description": null,
+    "parentId": null,
+    "type": "Training Resource qualification",
+    "extras": {}
+  },
+  {
+    "id": "tr_url_type-ark",
+    "name": "ARK",
+    "description": "Archival Resource Key",
+    "parentId": null,
+    "type": "Training Resource url type",
+    "extras": {}
+  },
+  {
+    "id": "trl-1",
+    "name": "1 - basic principles observed",
+    "description": "Scientific research has led to observation and reports of basic principles which has evolved to applied research and development.",
+    "parentId": null,
+    "type": "Technology readiness level",
+    "extras": {}
+  }
+]

@@ -1,7 +1,22 @@
+/*
+ * Copyright 2017-2025 OpenAIRE AMKE & Athena Research and Innovation Center
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package gr.uoa.di.madgik.resourcecatalogue.service;
 
 import com.google.i18n.phonenumbers.NumberParseException;
-import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Event;
 import org.springframework.security.core.Authentication;
 
@@ -78,7 +93,7 @@ public interface EventService extends ResourceService<Event> {
      * @param value
      * @return
      */
-    Event setVisit(String serviceId, Float value) throws ResourceNotFoundException, NumberParseException;
+    Event setVisit(String serviceId, Float value) throws NumberParseException;
 
     /**
      * Set an AddToProject Event on a Service.
@@ -87,7 +102,7 @@ public interface EventService extends ResourceService<Event> {
      * @param value
      * @return
      */
-    Event setAddToProject(String serviceId, Float value) throws ResourceNotFoundException, NumberParseException;
+    Event setAddToProject(String serviceId, Float value) throws NumberParseException;
 
     /**
      * Set an Order Event on a Service.
@@ -96,7 +111,7 @@ public interface EventService extends ResourceService<Event> {
      * @param value
      * @return
      */
-    Event setOrder(String serviceId, Float value) throws ResourceNotFoundException, NumberParseException;
+    Event setOrder(String serviceId, Float value) throws NumberParseException;
 
     /**
      * Set a scheduled Rating on a Service.
@@ -105,7 +120,7 @@ public interface EventService extends ResourceService<Event> {
      * @param value
      * @return
      */
-    Event setScheduledRating(String serviceId, Float value) throws ResourceNotFoundException, NumberParseException;
+    Event setScheduledRating(String serviceId, Float value) throws NumberParseException;
 
     /**
      * Get an aggregate of Visits on a specific Service.

@@ -1,3 +1,19 @@
+/*
+ * Copyright 2017-2025 OpenAIRE AMKE & Athena Research and Innovation Center
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package gr.uoa.di.madgik.resourcecatalogue.manager;
 
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
@@ -6,7 +22,9 @@ import gr.uoa.di.madgik.registry.service.ResourceService;
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
 import gr.uoa.di.madgik.resourcecatalogue.service.MigrationService;
 import gr.uoa.di.madgik.resourcecatalogue.service.SecurityService;
+import gr.uoa.di.madgik.resourcecatalogue.utils.AuthenticationInfo;
 import gr.uoa.di.madgik.resourcecatalogue.utils.JmsService;
+import gr.uoa.di.madgik.resourcecatalogue.utils.PublicResourceUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -21,15 +39,15 @@ public class MigrationManager implements MigrationService {
     private static final Logger logger = LoggerFactory.getLogger(MigrationManager.class);
 
     private final ServiceBundleManager serviceBundleManager;
-    private final PublicServiceManager publicServiceManager;
+    private final PublicServiceService publicServiceManager;
     private final TrainingResourceManager trainingResourceManager;
     private final InteroperabilityRecordManager interoperabilityRecordManager;
     private final DatasourceManager datasourceManager;
-    private final PublicTrainingResourceManager publicTrainingResourceManager;
+    private final PublicTrainingResourceService publicTrainingResourceManager;
     private final ProviderManager providerService;
     private final ResourceService resourceService;
     private final ResourceInteroperabilityRecordManager resourceInteroperabilityRecordManager;
-    private final PublicResourceInteroperabilityRecordManager publicResourceInteroperabilityRecordManager;
+    private final PublicResourceInteroperabilityRecordService publicResourceInteroperabilityRecordManager;
     private final HelpdeskManager helpdeskManager;
     private final MonitoringManager monitoringManager;
     private final JmsService jmsService;
@@ -40,13 +58,13 @@ public class MigrationManager implements MigrationService {
     @Value("${elastic.index.max_result_window:10000}")
     private int maxQuantity;
 
-    public MigrationManager(ServiceBundleManager serviceBundleManager, PublicServiceManager publicServiceManager,
+    public MigrationManager(ServiceBundleManager serviceBundleManager, PublicServiceService publicServiceManager,
                             TrainingResourceManager trainingResourceManager, DatasourceManager datasourceManager,
                             InteroperabilityRecordManager interoperabilityRecordManager,
-                            PublicTrainingResourceManager publicTrainingResourceManager,
+                            PublicTrainingResourceService publicTrainingResourceManager,
                             ProviderManager providerService, ResourceService resourceService,
                             ResourceInteroperabilityRecordManager resourceInteroperabilityRecordManager,
-                            PublicResourceInteroperabilityRecordManager publicResourceInteroperabilityRecordManager,
+                            PublicResourceInteroperabilityRecordService publicResourceInteroperabilityRecordManager,
                             HelpdeskManager helpdeskManager, MonitoringManager monitoringManager,
                             JmsService jmsService, SecurityService securityService) {
         this.serviceBundleManager = serviceBundleManager;
@@ -67,7 +85,7 @@ public class MigrationManager implements MigrationService {
 
     public ProviderBundle changeProviderCatalogue(String providerId, String catalogueId, String newCatalogueId, Authentication authentication) {
         logger.info("User [{}] is updating the catalogueId of the Provider [{}] and all its Resources to [{}]",
-                User.of(authentication).getFullName(), providerId, newCatalogueId);
+                AuthenticationInfo.getFullName(authentication), providerId, newCatalogueId);
         // Provider
         ProviderBundle providerBundle = providerService.get(catalogueId, providerId, authentication);
         providerBundle.getProvider().setCatalogueId(newCatalogueId);
@@ -79,9 +97,10 @@ public class MigrationManager implements MigrationService {
 
         // Public Provider
         try {
-            ProviderBundle publicProviderBundle = providerService.get(catalogueId, catalogueId + "." + providerId, authentication);
+            ProviderBundle publicProviderBundle = providerService.get(catalogueId,
+                    PublicResourceUtils.createPublicResourceId(providerId, catalogueId), authentication);
             String oldPublicId = publicProviderBundle.getProvider().getId();
-            publicProviderBundle.getProvider().setId(newCatalogueId + "." + providerId);
+            publicProviderBundle.getProvider().setId(PublicResourceUtils.createPublicResourceId(providerId, newCatalogueId));
             publicProviderBundle.getProvider().setCatalogueId(newCatalogueId);
 
             Resource publicResource = providerService.getResource(oldPublicId, catalogueId);
@@ -179,8 +198,8 @@ public class MigrationManager implements MigrationService {
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(maxQuantity);
         ff.addFilter("published", false);
-        List<ServiceBundle> allServices = serviceBundleManager.getAllForAdmin(ff, securityService.getAdminAccess()).getResults();
-        List<TrainingResourceBundle> allTrainingResources = trainingResourceManager.getAllForAdmin(ff, securityService.getAdminAccess()).getResults();
+        List<ServiceBundle> allServices = serviceBundleManager.getAll(ff, securityService.getAdminAccess()).getResults();
+        List<TrainingResourceBundle> allTrainingResources = trainingResourceManager.getAll(ff, securityService.getAdminAccess()).getResults();
         List<DatasourceBundle> allDatasourceBundles = datasourceManager.getAll(ff, securityService.getAdminAccess()).getResults();
         List<ResourceInteroperabilityRecordBundle> allResourceInteroperabilityRecords = resourceInteroperabilityRecordManager.getAll(ff, securityService.getAdminAccess()).getResults();
         List<HelpdeskBundle> allHelpdeskBundles = helpdeskManager.getAll(ff, securityService.getAdminAccess()).getResults();

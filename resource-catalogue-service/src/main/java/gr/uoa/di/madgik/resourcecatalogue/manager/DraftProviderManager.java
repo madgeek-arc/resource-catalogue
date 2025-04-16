@@ -1,20 +1,34 @@
+/*
+ * Copyright 2017-2025 OpenAIRE AMKE & Athena Research and Innovation Center
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package gr.uoa.di.madgik.resourcecatalogue.manager;
 
-import gr.uoa.di.madgik.registry.domain.FacetFilter;
-import gr.uoa.di.madgik.registry.domain.Paging;
-import gr.uoa.di.madgik.registry.domain.Resource;
-import gr.uoa.di.madgik.registry.domain.ResourceType;
+import gr.uoa.di.madgik.registry.domain.*;
 import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.domain.LoggingInfo;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Metadata;
 import gr.uoa.di.madgik.resourcecatalogue.domain.ProviderBundle;
-import gr.uoa.di.madgik.resourcecatalogue.domain.User;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
+import gr.uoa.di.madgik.resourcecatalogue.utils.AuthenticationInfo;
 import gr.uoa.di.madgik.resourcecatalogue.utils.ProviderResourcesCommonMethods;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
@@ -49,18 +63,18 @@ public class DraftProviderManager extends ResourceManager<ProviderBundle> implem
 
 
     @Override
-    public String getResourceType() {
+    public String getResourceTypeName() {
         return "draft_provider";
     }
 
     @Override
     public ProviderBundle add(ProviderBundle bundle, Authentication auth) {
 
-        bundle.setId(idCreator.generate(getResourceType()));
+        bundle.setId(idCreator.generate(getResourceTypeName()));
         commonMethods.addAuthenticatedUser(bundle.getProvider(), auth);
 
         logger.trace("Attempting to add a new Draft Provider: {}", bundle);
-        bundle.setMetadata(Metadata.updateMetadata(bundle.getMetadata(), User.of(auth).getFullName(), User.of(auth).getEmail()));
+        bundle.setMetadata(Metadata.updateMetadata(bundle.getMetadata(), AuthenticationInfo.getFullName(auth), AuthenticationInfo.getEmail(auth).toLowerCase()));
 
         List<LoggingInfo> loggingInfoList = new ArrayList<>();
         LoggingInfo loggingInfo = commonMethods.createLoggingInfo(auth, LoggingInfo.Types.DRAFT.getKey(),
@@ -84,10 +98,10 @@ public class DraftProviderManager extends ResourceManager<ProviderBundle> implem
         // block catalogueId updates from Provider Admins
         bundle.getProvider().setCatalogueId(catalogueId);
         logger.trace("Attempting to update the Draft Provider: {}", bundle);
-        bundle.setMetadata(Metadata.updateMetadata(bundle.getMetadata(), User.of(auth).getFullName(), User.of(auth).getEmail()));
+        bundle.setMetadata(Metadata.updateMetadata(bundle.getMetadata(), AuthenticationInfo.getFullName(auth), AuthenticationInfo.getEmail(auth).toLowerCase()));
         // save existing resource with new payload
         existing.setPayload(serialize(bundle));
-        existing.setResourceType(resourceType);
+        existing.setResourceType(getResourceType());
         resourceService.updateResource(existing);
         logger.debug("Updating Draft Provider: {}", bundle);
         return bundle;
@@ -121,41 +135,47 @@ public class DraftProviderManager extends ResourceManager<ProviderBundle> implem
         bundle.setStatus(vocabularyService.get("pending provider").getId());
         bundle.setTemplateStatus(vocabularyService.get("no template status").getId());
 
-        bundle.setMetadata(Metadata.updateMetadata(bundle.getMetadata(), User.of(auth).getFullName(), User.of(auth).getEmail()));
+        bundle.setMetadata(Metadata.updateMetadata(bundle.getMetadata(), AuthenticationInfo.getFullName(auth), AuthenticationInfo.getEmail(auth).toLowerCase()));
         bundle.setDraft(false);
 
         ResourceType providerResourceType = resourceTypeService.getResourceType("provider");
         Resource resource = getDraftResource(bundle.getId());
-        resource.setResourceType(resourceType);
+        resource.setResourceType(getResourceType());
         resourceService.changeResourceType(resource, providerResourceType);
 
         try {
             bundle = providerManager.update(bundle, auth);
         } catch (ResourceNotFoundException e) {
-            e.printStackTrace();
+            logger.info("Provider with id '{}' does not exist", bundle.getId());
         }
 
-        registrationMailService.sendEmailsToNewlyAddedAdmins(bundle, null);
+        registrationMailService.sendEmailsToNewlyAddedProviderAdmins(bundle, null);
         return bundle;
     }
 
-    public List<ProviderBundle> getMy(Authentication auth) {
+    @Override
+    public Browsing<ProviderBundle> getMy(FacetFilter ff, Authentication auth) {
         if (auth == null) {
-            return new ArrayList<>();
+            throw new InsufficientAuthenticationException("Please log in.");
         }
-        FacetFilter ff = new FacetFilter();
-        ff.setQuantity(maxQuantity);
-        ff.addFilter("users", User.of(auth).getEmail());
+        if (ff == null) {
+            ff = new FacetFilter();
+            ff.setQuantity(maxQuantity);
+        }
+        if (!ff.getFilter().containsKey("published")) {
+            ff.addFilter("published", false);
+        }
+        ff.addFilter("users", AuthenticationInfo.getEmail(auth).toLowerCase());
         ff.addOrderBy("name", "asc");
-        return super.getAll(ff, auth).getResults();
+        return super.getAll(ff, auth);
     }
 
     private Resource getDraftResource(String id) {
         Paging<Resource> resources;
         resources = searchService
                 .cqlQuery(String.format("resource_internal_id = \"%s\" AND catalogue_id = \"%s\"", id, catalogueId),
-                        resourceType.getName());
+                        getResourceTypeName());
         assert resources != null;
-        return resources.getTotal() == 0 ? null : resources.getResults().get(0);
+        return resources.getTotal() == 0 ? null : resources.getResults().getFirst();
     }
 }

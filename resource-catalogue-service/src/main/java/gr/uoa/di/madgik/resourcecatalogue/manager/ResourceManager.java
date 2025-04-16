@@ -1,17 +1,34 @@
+/*
+ * Copyright 2017-2025 OpenAIRE AMKE & Athena Research and Innovation Center
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package gr.uoa.di.madgik.resourcecatalogue.manager;
 
 import gr.uoa.di.madgik.registry.domain.Browsing;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.domain.Resource;
+import gr.uoa.di.madgik.registry.exception.ResourceAlreadyExistsException;
+import gr.uoa.di.madgik.registry.exception.ResourceException;
 import gr.uoa.di.madgik.registry.service.AbstractGenericService;
 import gr.uoa.di.madgik.registry.service.ParserService;
 import gr.uoa.di.madgik.registry.service.SearchService;
 import gr.uoa.di.madgik.registry.service.ServiceException;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Identifiable;
-import gr.uoa.di.madgik.resourcecatalogue.exception.ResourceAlreadyExistsException;
-import gr.uoa.di.madgik.resourcecatalogue.exception.ResourceException;
 import gr.uoa.di.madgik.resourcecatalogue.service.IdCreator;
 import gr.uoa.di.madgik.resourcecatalogue.service.ResourceService;
+import gr.uoa.di.madgik.resourcecatalogue.utils.AuthenticationInfo;
 import gr.uoa.di.madgik.resourcecatalogue.validators.FieldValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,6 +36,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.security.core.Authentication;
 
 import java.util.List;
@@ -45,7 +63,7 @@ public abstract class ResourceManager<T extends Identifiable> extends AbstractGe
 
     @Override
     public String createId(T t) {
-        return idCreator.generate(getResourceType());
+        return idCreator.generate(getResourceTypeName());
     }
 
     @Override
@@ -63,16 +81,16 @@ public abstract class ResourceManager<T extends Identifiable> extends AbstractGe
         FacetFilter ff = new FacetFilter();
         ff.addFilter("resource_internal_id", id);
         ff.addFilter("catalogue_id", catalogueId);
-        ff.setResourceType(resourceType.getName());
+        ff.setResourceType(getResourceTypeName());
         return searchService.searchFields(
-                resourceType.getName(),
+                getResourceTypeName(),
                 new SearchService.KeyValue("resource_internal_id", id),
                 new SearchService.KeyValue("catalogue_id", catalogueId)
         );
     }
 
     @Override
-    public final Browsing<T> getAll(FacetFilter filter) {
+    public Browsing<T> getAll(FacetFilter filter) {
         filter.setBrowseBy(getBrowseBy());
         return getResults(filter);
     }
@@ -97,12 +115,12 @@ public abstract class ResourceManager<T extends Identifiable> extends AbstractGe
     @Override
     public T add(T t, Authentication auth) {
         if (exists(t)) {
-            throw new ResourceAlreadyExistsException(String.format("%s with id = '%s' already exists!", resourceType.getName(), t.getId()));
+            throw new ResourceAlreadyExistsException(String.format("%s with id = '%s' already exists!", getResourceTypeName(), t.getId()));
         }
         String serialized = serialize(t);
         Resource created = new Resource();
         created.setPayload(serialized);
-        created.setResourceType(resourceType);
+        created.setResourceType(getResourceType());
         resourceService.addResource(created);
         logger.debug("Adding Resource {}", t);
         return t;
@@ -112,7 +130,7 @@ public abstract class ResourceManager<T extends Identifiable> extends AbstractGe
     public T update(T t, Authentication auth) {
         Resource existing = whereID(t.getId(), true);
         existing.setPayload(serialize(t));
-        existing.setResourceType(resourceType);
+        existing.setResourceType(getResourceType());
         resourceService.updateResource(existing);
         logger.debug("Updating Resource {}", t);
         return t;
@@ -124,7 +142,7 @@ public abstract class ResourceManager<T extends Identifiable> extends AbstractGe
         if (exists(t)) { // update
             resource = whereID(t.getId(), true);
             resource.setPayload(serialize(t));
-            resource.setResourceType(resourceType);
+            resource.setResourceType(getResourceType());
             resourceService.updateResource(resource);
             logger.debug("Updated Resource: {}", t);
         } else { // add
@@ -134,7 +152,7 @@ public abstract class ResourceManager<T extends Identifiable> extends AbstractGe
             // save
             String serialized = serialize(t);
             resource.setPayload(serialized);
-            resource.setResourceType(resourceType);
+            resource.setResourceType(getResourceType());
             resourceService.addResource(resource);
             logger.debug("Added Resource: {}", t);
         }
@@ -179,7 +197,7 @@ public abstract class ResourceManager<T extends Identifiable> extends AbstractGe
 
     @Override
     public T validate(T t) {
-        logger.debug("Validating Resource '{}' using FieldValidator", t);
+        logger.debug("Validating Resource {} using FieldValidator", t);
         try {
             fieldValidator.validate(t);
         } catch (IllegalAccessException e) {
@@ -199,9 +217,9 @@ public abstract class ResourceManager<T extends Identifiable> extends AbstractGe
     }
 
     protected String serialize(T t) {
-        String ret = parserPool.serialize(t, ParserService.ParserServiceTypes.fromString(resourceType.getPayloadType()));
+        String ret = parserPool.serialize(t, ParserService.ParserServiceTypes.fromString(getResourceType().getPayloadType()));
         if (ret.equals("failed")) {
-            throw new ResourceException(String.format("Not a valid %s!", resourceType.getName()), HttpStatus.BAD_REQUEST);
+            throw new ResourceException(String.format("Not a valid %s!", getResourceTypeName()), HttpStatus.BAD_REQUEST);
         }
         return ret;
     }
@@ -212,7 +230,7 @@ public abstract class ResourceManager<T extends Identifiable> extends AbstractGe
 
     protected Map<String, List<Resource>> groupBy(String field) {
         FacetFilter ff = new FacetFilter();
-        ff.setResourceType(resourceType.getName());
+        ff.setResourceType(getResourceTypeName());
         ff.setQuantity(maxQuantity);
         return searchService.searchByCategory(ff, field);
     }
@@ -227,9 +245,9 @@ public abstract class ResourceManager<T extends Identifiable> extends AbstractGe
 
     protected Resource where(boolean throwOnNull, SearchService.KeyValue... keyValues) {
         Resource ret;
-        ret = searchService.searchFields(resourceType.getName(), keyValues);
+        ret = searchService.searchFields(getResourceTypeName(), keyValues);
         if (throwOnNull && ret == null) {
-            throw new ResourceException(String.format("%s does not exist!", resourceType.getName()), HttpStatus.NOT_FOUND);
+            throw new ResourceException(String.format("%s does not exist!", getResourceTypeName()), HttpStatus.NOT_FOUND);
         }
         return ret;
     }

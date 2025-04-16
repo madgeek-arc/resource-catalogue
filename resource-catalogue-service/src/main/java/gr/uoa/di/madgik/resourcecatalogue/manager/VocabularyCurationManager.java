@@ -1,16 +1,34 @@
+/*
+ * Copyright 2017-2025 OpenAIRE AMKE & Athena Research and Innovation Center
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package gr.uoa.di.madgik.resourcecatalogue.manager;
 
+import gr.uoa.di.madgik.catalogue.exception.ValidationException;
 import gr.uoa.di.madgik.registry.domain.Browsing;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.registry.domain.Resource;
+import gr.uoa.di.madgik.registry.exception.ResourceAlreadyExistsException;
+import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.registry.service.SearchService;
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
-import gr.uoa.di.madgik.resourcecatalogue.exception.ResourceAlreadyExistsException;
-import gr.uoa.di.madgik.resourcecatalogue.exception.ValidationException;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
+import gr.uoa.di.madgik.resourcecatalogue.utils.AuthenticationInfo;
 import gr.uoa.di.madgik.resourcecatalogue.utils.FacetLabelService;
-import org.apache.commons.lang3.time.DateUtils;
+import jakarta.validation.constraints.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,7 +37,6 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
-import javax.validation.constraints.NotNull;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -39,56 +56,47 @@ public class VocabularyCurationManager extends ResourceManager<VocabularyCuratio
     @Autowired
     private FacetLabelService facetLabelService;
 
-    private final AbstractServiceBundleManager<ServiceBundle> abstractServiceBundleManager;
-    @Autowired
-    private final GenericManager genericManager;
-
-    @Autowired
-    private SearchService searchService;
-
     @Value("${catalogue.id}")
     private String catalogueId;
     private final IdCreator idCreator;
 
-    public VocabularyCurationManager(@Lazy RegistrationMailService registrationMailService, ProviderService providerService,
+    public VocabularyCurationManager(@Lazy RegistrationMailService registrationMailService,
+                                     ProviderService providerService,
                                      ServiceBundleService<ServiceBundle> serviceBundleService,
                                      TrainingResourceService trainingResourceService,
-                                     AbstractServiceBundleManager<ServiceBundle> abstractServiceBundleManager,
-                                     GenericManager genericManager, IdCreator idCreator) {
+                                     IdCreator idCreator) {
         super(VocabularyCuration.class);
         this.registrationMailService = registrationMailService;
         this.providerService = providerService;
         this.serviceBundleService = serviceBundleService;
         this.trainingResourceService = trainingResourceService;
-        this.abstractServiceBundleManager = abstractServiceBundleManager;
-        this.genericManager = genericManager;
         this.idCreator = idCreator;
     }
 
     @Override
-    public String getResourceType() {
+    public String getResourceTypeName() {
         return "vocabulary_curation";
     }
 
     @Override
     public VocabularyCuration add(VocabularyCuration vocabularyCuration, String resourceType, Authentication auth) {
-        User user = User.of(auth);
-        vocabularyCuration.setId(idCreator.generate(getResourceType()));
+        vocabularyCuration.setId(idCreator.generate(getResourceTypeName()));
         // set status, dateOfRequest, userId
         vocabularyCuration.setStatus(VocabularyCuration.Status.PENDING.getKey());
         vocabularyCuration.setRejectionReason(null);
         vocabularyCuration.setResolutionDate(null);
         vocabularyCuration.setResolutionUser(null);
         for (VocabularyEntryRequest vocEntryRequest : vocabularyCuration.getVocabularyEntryRequests()) {
-            vocEntryRequest.setDateOfRequest(DateUtils.truncate(new Date(), Calendar.DAY_OF_MONTH));
-            vocEntryRequest.setUserId(user.getEmail());
+            vocEntryRequest.setDateOfRequest(String.valueOf(System.currentTimeMillis()));
+            vocEntryRequest.setUserId(AuthenticationInfo.getEmail(auth).toLowerCase());
         }
         // if vocabularyCuration doesn't exist
         validate(vocabularyCuration, resourceType, auth);
         if (vocabularyCuration.getVocabularyEntryRequests().size() == 1) {
             super.add(vocabularyCuration, auth);
             logger.info("Adding Vocabulary Curation: {}", vocabularyCuration);
-            registrationMailService.sendVocabularyCurationEmails(vocabularyCuration, user.getName());
+            registrationMailService.sendEmailsForVocabularyCurationCreation(vocabularyCuration,
+                    Objects.requireNonNull(AuthenticationInfo.getFullName(auth)));
             // if vocabularyCuration already exists in "pending"
         } else {
             update(vocabularyCuration, auth);
@@ -134,7 +142,7 @@ public class VocabularyCurationManager extends ResourceManager<VocabularyCuratio
         }
         String voc = vocabularyCuration.getVocabulary();
         if (!possibleValues.contains(voc.toLowerCase())) {
-            throw new ValidationException("Vocabulary " + voc + "' does not exist.");
+            throw new ResourceNotFoundException("Vocabulary " + voc + "' does not exist.");
         }
 
         // check if parent exists
@@ -142,7 +150,7 @@ public class VocabularyCurationManager extends ResourceManager<VocabularyCuratio
         List<String> specificVocsIds = new ArrayList<>();
         switch (vocabularyCuration.getVocabulary()) {
             case "CATEGORY":
-                if (vocabularyCuration.getParent() == null || vocabularyCuration.getParent().equals("")) {
+                if (vocabularyCuration.getParent() == null || vocabularyCuration.getParent().isEmpty()) {
                     throw new ValidationException("Vocabulary " + vocabularyCuration.getVocabulary() + " cannot have an empty parent.");
                 } else {
                     specificVocs = vocabularyService.getByType(Vocabulary.Type.SUPERCATEGORY);
@@ -150,12 +158,12 @@ public class VocabularyCurationManager extends ResourceManager<VocabularyCuratio
                         specificVocsIds.add(vocabulary.getId());
                     }
                     if (!specificVocsIds.contains(vocabularyCuration.getParent())) {
-                        throw new ValidationException("Parent vocabulary " + vocabularyCuration.getParent() + " does not exist.");
+                        throw new ResourceNotFoundException("Parent vocabulary " + vocabularyCuration.getParent() + " does not exist.");
                     }
                 }
                 break;
             case "SUBCATEGORY":
-                if (vocabularyCuration.getParent() == null || vocabularyCuration.getParent().equals("")) {
+                if (vocabularyCuration.getParent() == null || vocabularyCuration.getParent().isEmpty()) {
                     throw new ValidationException("Vocabulary " + vocabularyCuration.getVocabulary() + " cannot have an empty parent.");
                 } else {
                     specificVocs = vocabularyService.getByType(Vocabulary.Type.CATEGORY);
@@ -163,12 +171,12 @@ public class VocabularyCurationManager extends ResourceManager<VocabularyCuratio
                         specificVocsIds.add(vocabulary.getId());
                     }
                     if (!specificVocsIds.contains(vocabularyCuration.getParent())) {
-                        throw new ValidationException("Parent vocabulary " + vocabularyCuration.getParent() + " does not exist.");
+                        throw new ResourceNotFoundException("Parent vocabulary " + vocabularyCuration.getParent() + " does not exist.");
                     }
                 }
                 break;
             case "PROVIDER MERIL SCIENTIFIC SUBDOMAIN":
-                if (vocabularyCuration.getParent() == null || vocabularyCuration.getParent().equals("")) {
+                if (vocabularyCuration.getParent() == null || vocabularyCuration.getParent().isEmpty()) {
                     throw new ValidationException("Vocabulary " + vocabularyCuration.getVocabulary() + " cannot have an empty parent.");
                 } else {
                     specificVocs = vocabularyService.getByType(Vocabulary.Type.PROVIDER_MERIL_SCIENTIFIC_DOMAIN);
@@ -176,12 +184,12 @@ public class VocabularyCurationManager extends ResourceManager<VocabularyCuratio
                         specificVocsIds.add(vocabulary.getId());
                     }
                     if (!specificVocsIds.contains(vocabularyCuration.getParent())) {
-                        throw new ValidationException("Parent vocabulary " + vocabularyCuration.getParent() + " does not exist.");
+                        throw new ResourceNotFoundException("Parent vocabulary " + vocabularyCuration.getParent() + " does not exist.");
                     }
                 }
                 break;
             case "SCIENTIFIC SUBDOMAIN":
-                if (vocabularyCuration.getParent() == null || vocabularyCuration.getParent().equals("")) {
+                if (vocabularyCuration.getParent() == null || vocabularyCuration.getParent().isEmpty()) {
                     throw new ValidationException("Vocabulary " + vocabularyCuration.getVocabulary() + " cannot have an empty parent.");
                 } else {
                     specificVocs = vocabularyService.getByType(Vocabulary.Type.SCIENTIFIC_DOMAIN);
@@ -189,7 +197,7 @@ public class VocabularyCurationManager extends ResourceManager<VocabularyCuratio
                         specificVocsIds.add(vocabulary.getId());
                     }
                     if (!specificVocsIds.contains(vocabularyCuration.getParent())) {
-                        throw new ValidationException("Parent vocabulary " + vocabularyCuration.getParent() + " does not exist.");
+                        throw new ResourceNotFoundException("Parent vocabulary " + vocabularyCuration.getParent() + " does not exist.");
                     }
                 }
                 break;
@@ -198,24 +206,27 @@ public class VocabularyCurationManager extends ResourceManager<VocabularyCuratio
         }
 
         // validate if providerId/resourceId exists
-        ProviderBundle providerBundle = providerService.get(catalogueId, vocabularyCuration.getVocabularyEntryRequests().get(0).getProviderId(), auth);
+        ProviderBundle providerBundle = providerService.get(catalogueId, vocabularyCuration.getVocabularyEntryRequests().getFirst().getProviderId(), auth);
         switch (resourceType) {
             case "provider":
                 break;
             case "service":
-                ServiceBundle serviceBundle = serviceBundleService.get(vocabularyCuration.getVocabularyEntryRequests().get(0).getResourceId(), catalogueId);
+                ServiceBundle serviceBundle = serviceBundleService.get(vocabularyCuration.getVocabularyEntryRequests().getFirst().getResourceId());
                 if (!serviceBundle.getService().getResourceOrganisation().equals(providerBundle.getId())) {
-                    throw new ValidationException(String.format("Provider with id [%s] does not have a Service with id [%s] registered.", providerBundle.getId(), serviceBundle.getId()));
+                    throw new ResourceNotFoundException(String.format("Provider with id [%s] does not have a Service with id [%s] registered.",
+                            providerBundle.getId(), serviceBundle.getId()));
                 }
                 break;
             case "training_resource":
-                TrainingResourceBundle trainingResourceBundle = trainingResourceService.get(vocabularyCuration.getVocabularyEntryRequests().get(0).getResourceId(), catalogueId);
+                TrainingResourceBundle trainingResourceBundle = trainingResourceService.get(vocabularyCuration.getVocabularyEntryRequests().getFirst().getResourceId(), catalogueId);
                 if (!trainingResourceBundle.getTrainingResource().getResourceOrganisation().equals(providerBundle.getId())) {
-                    throw new ValidationException(String.format("Provider with id [%s] does not have a Training Resource with id [%s] registered.", providerBundle.getId(), trainingResourceBundle.getId()));
+                    throw new ResourceNotFoundException(String.format("Provider with id [%s] does not have a Training Resource with id [%s] registered.",
+                            providerBundle.getId(), trainingResourceBundle.getId()));
                 }
                 break;
             default:
-                throw new ValidationException("The resourceType you submitted is not supported. Possible resourceType values: ['provider', 'service', 'datasource', 'training_resource']");
+                throw new ValidationException("The resourceType you submitted is not supported. Possible resourceType " +
+                        "values: ['provider', 'service', 'datasource', 'training_resource']");
         }
         return vocabularyCuration;
     }
@@ -253,17 +264,17 @@ public class VocabularyCurationManager extends ResourceManager<VocabularyCuratio
     }
 
     public void approveOrRejectVocabularyCuration(VocabularyCuration vocabularyCuration, boolean approved, String rejectionReason, Authentication authentication) {
-        vocabularyCuration.setResolutionUser(User.of(authentication).getEmail());
-        vocabularyCuration.setResolutionDate(DateUtils.truncate(new Date(), Calendar.DAY_OF_MONTH));
-        logger.info("Updating VocabularyRequest " + vocabularyCuration.getEntryValueName());
+        vocabularyCuration.setResolutionUser(AuthenticationInfo.getEmail(authentication).toLowerCase());
+        vocabularyCuration.setResolutionDate(String.valueOf(System.currentTimeMillis()));
+        logger.info("Updating VocabularyRequest {}", vocabularyCuration.getEntryValueName());
         if (approved) {
             vocabularyCuration.setStatus(VocabularyCuration.Status.APPROVED.getKey());
             createNewVocabulary(vocabularyCuration, authentication);
-            registrationMailService.approveOrRejectVocabularyCurationEmails(vocabularyCuration);
+            registrationMailService.sendEmailsForVocabularyCurationResolve(vocabularyCuration);
         } else {
             vocabularyCuration.setStatus(VocabularyCuration.Status.REJECTED.getKey());
             vocabularyCuration.setRejectionReason(rejectionReason);
-            registrationMailService.approveOrRejectVocabularyCurationEmails(vocabularyCuration);
+            registrationMailService.sendEmailsForVocabularyCurationResolve(vocabularyCuration);
         }
         update(vocabularyCuration, authentication);
     }
@@ -274,15 +285,16 @@ public class VocabularyCurationManager extends ResourceManager<VocabularyCuratio
         String valueNameFormed = vocabularyCuration.getEntryValueName().replaceAll(" ", "_").toLowerCase();
         String vocabularyFormed = vocabularyCuration.getVocabulary().replaceAll(" ", "_").toLowerCase();
         vocabulary.setId(vocabularyFormed + "-" + valueNameFormed);
-        vocabulary.setDescription("Vocabulary submitted by " + vocabularyCuration.getVocabularyEntryRequests().get(0).getUserId());
+        vocabulary.setDescription("Vocabulary submitted by " + vocabularyCuration.getVocabularyEntryRequests().getFirst().getUserId());
         vocabulary.setName(vocabularyCuration.getEntryValueName());
         vocabulary.setType(Vocabulary.Type.valueOf(vocabularyFormed.toUpperCase()).getKey());
         vocabulary.setExtras(extras);
-        if (vocabularyCuration.getParent() != null && !vocabularyCuration.getParent().equals("")) {
+        if (vocabularyCuration.getParent() != null && !vocabularyCuration.getParent().isEmpty()) {
             String parentFormed = vocabularyCuration.getParent().replaceAll(" ", "_").toLowerCase();
             vocabulary.setParentId(parentFormed);
         }
-        logger.info("User " + User.of(authentication).getEmail() + " is adding a new Vocabulary by resolving the vocabulary request " + vocabularyCuration.getId());
+        logger.info("User [{}] is adding a new Vocabulary by resolving the vocabulary request '{}'",
+                AuthenticationInfo.getEmail(authentication).toLowerCase(), vocabularyCuration.getId());
         vocabularyService.add(vocabulary, authentication);
     }
 
@@ -291,24 +303,6 @@ public class VocabularyCurationManager extends ResourceManager<VocabularyCuratio
         updatedEntryRequests.addAll(newVocabularyCuration.getVocabularyEntryRequests());
         updatedEntryRequests.addAll(existingVocabularyCuration.getVocabularyEntryRequests());
         return updatedEntryRequests;
-    }
-
-    @Override
-    protected Browsing<VocabularyCuration> getResults(FacetFilter filter) {
-        Browsing<VocabularyCuration> browsing;
-        filter.setResourceType(getResourceType());
-        browsing = convertToBrowsingEIC(searchService.search(filter));
-
-        browsing.setFacets(abstractServiceBundleManager.createCorrectFacets(browsing.getFacets(), filter));
-        return browsing;
-    }
-
-    private Browsing<VocabularyCuration> convertToBrowsingEIC(@NotNull Paging<Resource> paging) {
-        List<VocabularyCuration> results = paging.getResults()
-                .stream()
-                .map(res -> parserPool.deserialize(res, typeParameterClass))
-                .collect(Collectors.toList());
-        return new Browsing<>(paging, results, genericManager.getLabels(getResourceType()));
     }
 
 }

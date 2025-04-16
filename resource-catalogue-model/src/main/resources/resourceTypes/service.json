@@ -1,0 +1,383 @@
+{
+  "indexFields": [
+    {
+      "label": null,
+      "multivalued": false,
+      "name": "resource_internal_id",
+      "path": "$.service.id",
+      "primaryKey": true,
+      "type": "java.lang.String"
+    },
+    {
+      "label": "Service Name",
+      "multivalued": false,
+      "name": "name",
+      "path": "$.service.name",
+      "type": "java.lang.String"
+    },
+    {
+      "label": "Abbreviation",
+      "multivalued": false,
+      "name": "abbreviation",
+      "path": "$.service.abbreviation",
+      "type": "java.lang.String"
+    },
+    {
+      "label": "Resource Organisation",
+      "multivalued": false,
+      "name": "resource_organisation",
+      "path": "$.service.resourceOrganisation",
+      "type": "java.lang.String"
+    },
+    {
+      "label": "Resource Provider",
+      "multivalued": true,
+      "name": "resource_providers",
+      "path": "$.service.resourceProviders[*]",
+      "type": "java.lang.String"
+    },
+    {
+      "label": "Alternative Identifier Value",
+      "multivalued": true,
+      "name": "alternative_identifiers_values",
+      "path": "$.service.alternativeIdentifiers[*].value",
+      "type": "java.lang.String"
+    },
+    {
+      "label": "Category",
+      "multivalued": true,
+      "name": "categories",
+      "path": "$.service.categories[*]",
+      "type": "java.lang.String"
+    },
+    {
+      "label": "Subcategory",
+      "multivalued": true,
+      "name": "subcategories",
+      "path": "$.service.categories[*].subcategory",
+      "type": "java.lang.String"
+    },
+    {
+      "label": "Scientific Domain",
+      "multivalued": true,
+      "name": "scientific_domains",
+      "path": "$.service.scientificDomains[*]",
+      "type": "java.lang.String"
+    },
+    {
+      "label": "Scientific Subdomain",
+      "multivalued": true,
+      "name": "scientific_subdomains",
+      "path": "$.service.scientificDomains[*].scientificSubdomain",
+      "type": "java.lang.String"
+    },
+    {
+      "label": "Target User",
+      "multivalued": true,
+      "name": "target_users",
+      "path": "$.service.targetUsers[*]",
+      "type": "java.lang.String"
+    },
+    {
+      "label": "Access Type",
+      "multivalued": true,
+      "name": "access_types",
+      "path": "$.service.accessTypes[*]",
+      "type": "java.lang.String"
+    },
+    {
+      "label": "Access Mode",
+      "multivalued": true,
+      "name": "access_modes",
+      "path": "$.service.accessModes[*]",
+      "type": "java.lang.String"
+    },
+    {
+      "label": "Language Availability",
+      "multivalued": true,
+      "name": "language_availabilities",
+      "path": "$.service.languageAvailabilities[*]",
+      "type": "java.lang.String"
+    },
+    {
+      "label": "Geographical Availability",
+      "multivalued": true,
+      "name": "geographical_availabilities",
+      "path": "$.service.geographicalAvailabilities[*]",
+      "type": "java.lang.String"
+    },
+    {
+      "label": "Resource Geographic Location",
+      "multivalued": true,
+      "name": "resource_geographic_locations",
+      "path": "$.service.resourceGeographicLocations[*]",
+      "type": "java.lang.String"
+    },
+    {
+      "label": "TRL",
+      "multivalued": false,
+      "name": "trl",
+      "path": "$.service.trl",
+      "type": "java.lang.String"
+    },
+    {
+      "label": "Life Cycle Status",
+      "multivalued": false,
+      "name": "life_cycle_status",
+      "path": "$.service.lifeCycleStatus",
+      "type": "java.lang.String"
+    },
+    {
+      "label": "Catalogue ID",
+      "multivalued": false,
+      "name": "catalogue_id",
+      "path": "$.service.catalogueId",
+      "type": "java.lang.String"
+    },
+    {
+      "label": "Funding Body",
+      "multivalued": true,
+      "name": "funding_body",
+      "path": "$.service.fundingBody[*]",
+      "type": "java.lang.String"
+    },
+    {
+      "label": "Funding Program",
+      "multivalued": true,
+      "name": "funding_programs",
+      "path": "$.service.fundingPrograms[*]",
+      "type": "java.lang.String"
+    },
+    {
+      "label": "Description",
+      "multivalued": false,
+      "name": "description",
+      "path": "$.service.description",
+      "type": "java.lang.String"
+    },
+    {
+      "label": "Tagline",
+      "multivalued": false,
+      "name": "tagline",
+      "path": "$.service.tagline",
+      "type": "java.lang.String"
+    },
+    {
+      "label": "Open Source Technology",
+      "multivalued": true,
+      "name": "open_source_technologies",
+      "path": "$.service.openSourceTechnologies[*]",
+      "type": "java.lang.String"
+    },
+    {
+      "label": "Tag",
+      "multivalued": true,
+      "name": "tags",
+      "path": "$.service.tags[*]",
+      "type": "java.lang.String"
+    },
+    {
+      "label": null,
+      "multivalued": false,
+      "name": "horizontalService",
+      "path": "$.service.horizontalService",
+      "type": "java.lang.Boolean"
+    },
+    {
+      "label": "Service Category",
+      "multivalued": true,
+      "name": "service_categories",
+      "path": "$.service.serviceCategories[*]",
+      "type": "java.lang.String"
+    },
+    {
+      "label": "Marketplace Location",
+      "multivalued": true,
+      "name": "marketplace_locations",
+      "path": "$.service.marketplaceLocations[*]",
+      "type": "java.lang.String"
+    },
+    {
+      "label": "Order Type",
+      "multivalued": false,
+      "name": "order_type",
+      "path": "$.service.orderType",
+      "type": "java.lang.String"
+    },
+    {
+      "label": null,
+      "multivalued": false,
+      "name": "registeredBy",
+      "path": "$.metadata.registeredBy",
+      "type": "java.lang.String"
+    },
+    {
+      "label": null,
+      "multivalued": false,
+      "name": "modifiedBy",
+      "path": "$.metadata.modifiedBy",
+      "type": "java.lang.String"
+    },
+    {
+      "label": null,
+      "multivalued": false,
+      "name": "registeredAt",
+      "path": "$.metadata.registeredAt",
+      "type": "java.lang.String"
+    },
+    {
+      "label": null,
+      "multivalued": false,
+      "name": "modifiedAt",
+      "path": "$.metadata.modifiedAt",
+      "type": "java.lang.String"
+    },
+    {
+      "label": null,
+      "multivalued": false,
+      "name": "published",
+      "path": "$.metadata.published",
+      "type": "java.lang.Boolean"
+    },
+    {
+      "label": null,
+      "multivalued": false,
+      "name": "originalId",
+      "path": "$.identifiers.originalId",
+      "type": "java.lang.String"
+    },
+    {
+      "label": null,
+      "multivalued": false,
+      "name": "latestAuditActionType",
+      "path": "$.latestAuditInfo.actionType",
+      "type": "java.lang.String"
+    },
+    {
+      "label": null,
+      "multivalued": false,
+      "name": "latestAuditDate",
+      "path": "$.latestAuditInfo.date",
+      "type": "java.lang.String"
+    },
+    {
+      "label": null,
+      "multivalued": false,
+      "name": "latestAuditType",
+      "path": "$.latestAuditInfo.type",
+      "type": "java.lang.String"
+    },
+    {
+      "label": null,
+      "multivalued": false,
+      "name": "latestAuditUserEmail",
+      "path": "$.latestAuditInfo.userEmail",
+      "type": "java.lang.String"
+    },
+    {
+      "label": null,
+      "multivalued": false,
+      "name": "latestUpdateActionType",
+      "path": "$.latestUpdateInfo.actionType",
+      "type": "java.lang.String"
+    },
+    {
+      "label": null,
+      "multivalued": false,
+      "name": "latestUpdateDate",
+      "path": "$.latestUpdateInfo.date",
+      "type": "java.lang.String"
+    },
+    {
+      "label": null,
+      "multivalued": false,
+      "name": "latestUpdateType",
+      "path": "$.latestUpdateInfo.type",
+      "type": "java.lang.String"
+    },
+    {
+      "label": null,
+      "multivalued": false,
+      "name": "latestUpdateUserEmail",
+      "path": "$.latestUpdateInfo.userEmail",
+      "type": "java.lang.String"
+    },
+    {
+      "label": null,
+      "multivalued": false,
+      "name": "latestOnboardingActionType",
+      "path": "$.latestOnboardingInfo.actionType",
+      "type": "java.lang.String"
+    },
+    {
+      "label": null,
+      "multivalued": false,
+      "name": "latestOnboardingDate",
+      "path": "$.latestOnboardingInfo.date",
+      "type": "java.lang.String"
+    },
+    {
+      "label": null,
+      "multivalued": false,
+      "name": "latestOnboardingType",
+      "path": "$.latestOnboardingInfo.type",
+      "type": "java.lang.String"
+    },
+    {
+      "label": null,
+      "multivalued": false,
+      "name": "latestOnboardingUserEmail",
+      "path": "$.latestOnboardingInfo.userEmail",
+      "type": "java.lang.String"
+    },
+    {
+      "defaultValue": "false",
+      "label": null,
+      "multivalued": false,
+      "name": "active",
+      "path": "$.active",
+      "type": "java.lang.Boolean"
+    },
+    {
+      "defaultValue": "false",
+      "label": null,
+      "multivalued": false,
+      "name": "suspended",
+      "path": "$.suspended",
+      "type": "java.lang.Boolean"
+    },
+    {
+      "defaultValue": "false",
+      "label": null,
+      "multivalued": false,
+      "name": "draft",
+      "path": "$.draft",
+      "type": "java.lang.Boolean"
+    },
+    {
+      "label": null,
+      "multivalued": false,
+      "name": "status",
+      "path": "$.status",
+      "type": "java.lang.String"
+    },
+    {
+      "label": null,
+      "multivalued": false,
+      "name": "audit_state",
+      "path": "$.auditState",
+      "type": "java.lang.String"
+    }
+  ],
+  "indexMapperClass": "gr.uoa.di.madgik.registry.index.DefaultIndexMapper",
+  "aliases": [
+    "resourceTypes",
+    "services"
+  ],
+  "name": "service",
+  "payloadType": "json",
+  "properties": {
+    "class": "gr.uoa.di.madgik.resourcecatalogue.domain.ServiceBundle"
+  },
+  "schema": "{\n\t\"$schema\": \"https://json-schema.org/draft/2019-09/schema\"\n}"
+}

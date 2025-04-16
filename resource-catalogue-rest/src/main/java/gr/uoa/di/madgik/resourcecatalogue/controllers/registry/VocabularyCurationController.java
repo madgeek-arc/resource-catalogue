@@ -1,16 +1,30 @@
+/*
+ * Copyright 2017-2025 OpenAIRE AMKE & Athena Research and Innovation Center
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package gr.uoa.di.madgik.resourcecatalogue.controllers.registry;
 
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.domain.Paging;
-import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
-import gr.uoa.di.madgik.resourcecatalogue.annotations.Browse;
+import gr.uoa.di.madgik.registry.annotation.BrowseParameters;
 import gr.uoa.di.madgik.resourcecatalogue.domain.VocabularyCuration;
 import gr.uoa.di.madgik.resourcecatalogue.service.VocabularyCurationService;
-import gr.uoa.di.madgik.resourcecatalogue.utils.FacetFilterUtils;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -29,7 +43,7 @@ import java.util.Set;
 @Tag(name = "vocabulary curation", description = "Operations about new Vocabulary suggestions")
 public class VocabularyCurationController extends ResourceController<VocabularyCuration> {
 
-    private static final Logger logger = LogManager.getLogger(VocabularyCurationController.class);
+    private static final Logger logger = LoggerFactory.getLogger(VocabularyCurationController.class);
     private final VocabularyCurationService vocabularyCurationService;
 
     VocabularyCurationController(VocabularyCurationService service) {
@@ -64,12 +78,12 @@ public class VocabularyCurationController extends ResourceController<VocabularyC
     }
 
     //    @Operation(summary = "Filter a list of Vocabulary Curation Requests based on a set of filters or get a list of all Vocabulary Curation Requests in the Catalogue.")
-    @Browse
+    @BrowseParameters
     @GetMapping(path = "vocabularyCurationRequests/all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     public ResponseEntity<Paging<VocabularyCuration>> getAllVocabularyCurationRequests(@Parameter(hidden = true) @RequestParam MultiValueMap<String, Object> allRequestParams, @RequestParam(required = false) Set<String> status,
                                                                                        @RequestParam(required = false) Set<String> vocabulary, @Parameter(hidden = true) Authentication authentication) {
-        FacetFilter ff = FacetFilterUtils.createFacetFilter(allRequestParams);
+        FacetFilter ff = FacetFilter.from(allRequestParams);
         return ResponseEntity.ok(vocabularyCurationService.getAllVocabularyCurationRequests(ff, authentication));
     }
 
@@ -84,7 +98,7 @@ public class VocabularyCurationController extends ResourceController<VocabularyC
     @DeleteMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<VocabularyCuration> delete(@RequestBody VocabularyCuration vocabularyCuration,
-                                                     @Parameter(hidden = true) Authentication auth) throws ResourceNotFoundException {
+                                                     @Parameter(hidden = true) Authentication auth) {
         return super.delete(vocabularyCuration, auth);
     }
 

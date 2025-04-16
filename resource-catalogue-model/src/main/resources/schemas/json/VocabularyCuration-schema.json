@@ -1,0 +1,60 @@
+{
+  "$schema" : "https://json-schema.org/draft/2020-12/schema",
+  "$defs" : {
+    "VocabularyEntryRequest" : {
+      "type" : "object",
+      "properties" : {
+        "dateOfRequest" : {
+          "type" : "string"
+        },
+        "providerId" : {
+          "type" : "string"
+        },
+        "resourceId" : {
+          "type" : "string"
+        },
+        "resourceType" : {
+          "type" : "string"
+        },
+        "userId" : {
+          "type" : "string"
+        }
+      },
+      "additionalProperties" : false
+    }
+  },
+  "type" : "object",
+  "properties" : {
+    "entryValueName" : {
+      "type" : "string"
+    },
+    "id" : {
+      "type" : "string"
+    },
+    "parent" : {
+      "type" : "string"
+    },
+    "rejectionReason" : {
+      "type" : "string"
+    },
+    "resolutionDate" : {
+      "type" : "string"
+    },
+    "resolutionUser" : {
+      "type" : "string"
+    },
+    "status" : {
+      "type" : "string"
+    },
+    "vocabulary" : {
+      "type" : "string"
+    },
+    "vocabularyEntryRequests" : {
+      "type" : "array",
+      "items" : {
+        "$ref" : "#/$defs/VocabularyEntryRequest"
+      }
+    }
+  },
+  "additionalProperties" : false
+}

@@ -23,11 +23,32 @@
         <url>https://github.com/madgeek-arc/resource-catalogue.git</url>
         <tag>HEAD</tag>
     </scm>
+
+    <profiles>
+        <profile>
+            <id>beyond</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <dependencies>
+                <dependency>
+                    <groupId>gr.uoa.di.madgik</groupId>
+                    <artifactId>resource-catalogue-model</artifactId>
+                </dependency>
+        </dependencies>
+        </profile>
+        <profile>
+            <id>lot1</id>
+            <dependencies>
+                <dependency>
+                    <groupId>gr.uoa.di.madgik</groupId>
+                    <artifactId>resource-catalogue-model-lot1</artifactId>
+                </dependency>
+            </dependencies>
+        </profile>
+    </profiles>
+
     <dependencies>
-        <dependency>
-            <groupId>gr.uoa.di.madgik</groupId>
-            <artifactId>resource-catalogue-model</artifactId>
-        </dependency>
         <dependency>
             <groupId>gr.uoa.di.madgik</groupId>
             <artifactId>registry-core-api</artifactId>
@@ -42,7 +63,12 @@
         </dependency>
         <dependency>
             <groupId>org.springdoc</groupId>
-            <artifactId>springdoc-openapi-ui</artifactId>
+            <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>gr.uoa.di.madgik</groupId>
+            <artifactId>catalogue</artifactId>
+            <scope>compile</scope>
         </dependency>
     </dependencies>
     <build>

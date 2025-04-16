@@ -25,7 +25,10 @@
 
     <profiles>
         <profile>
-            <id>eosc</id>
+            <id>beyond</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
             <dependencies>
                 <dependency>
                     <groupId>gr.uoa.di.madgik</groupId>
@@ -40,20 +43,102 @@
                     <artifactId>resource-catalogue-matomo</artifactId>
                 </dependency>
             </dependencies>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-dependency-plugin</artifactId>
+                        <version>3.5.0</version>
+                        <executions>
+                            <execution>
+                                <id>copy-beyond-resources</id>
+                                <phase>process-resources</phase>
+                                <goals>
+                                    <goal>unpack</goal>
+                                </goals>
+                                <configuration>
+                                    <artifactItems>
+                                        <artifactItem>
+                                            <groupId>gr.uoa.di.madgik</groupId>
+                                            <artifactId>resource-catalogue-model</artifactId>
+                                            <outputDirectory>${project.build.outputDirectory}</outputDirectory>
+                                            <includes>resourceTypes/**</includes>
+                                        </artifactItem>
+                                        <artifactItem>
+                                            <groupId>gr.uoa.di.madgik</groupId>
+                                            <artifactId>catalogue</artifactId>
+                                            <outputDirectory>${project.build.outputDirectory}</outputDirectory>
+                                            <includes>resourceTypes/**</includes>
+                                        </artifactItem>
+                                    </artifactItems>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>lot1</id>
+            <activation>
+                <activeByDefault>false</activeByDefault>
+            </activation>
+            <dependencies>
+                <dependency>
+                    <groupId>gr.uoa.di.madgik</groupId>
+                    <artifactId>resource-catalogue-model-lot1</artifactId>
+                    <version>1.0.0-SNAPSHOT</version>
+                </dependency>
+            </dependencies>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-dependency-plugin</artifactId>
+                        <version>3.5.0</version>
+                        <executions>
+                            <execution>
+                                <id>copy-lot1-resources</id>
+                                <phase>process-resources</phase>
+                                <goals>
+                                    <goal>unpack</goal>
+                                </goals>
+                                <configuration>
+                                    <artifactItems>
+                                        <artifactItem>
+                                            <groupId>gr.uoa.di.madgik</groupId>
+                                            <artifactId>resource-catalogue-model-lot1</artifactId>
+                                            <outputDirectory>${project.build.outputDirectory}</outputDirectory>
+                                            <includes>resourceTypes/**</includes>
+                                        </artifactItem>
+                                        <artifactItem>
+                                            <groupId>gr.uoa.di.madgik</groupId>
+                                            <artifactId>catalogue</artifactId>
+                                            <outputDirectory>${project.build.outputDirectory}</outputDirectory>
+                                            <includes>resourceTypes/**</includes>
+                                        </artifactItem>
+                                    </artifactItems>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
         </profile>
     </profiles>
 
     <dependencies>
         <dependency>
-            <groupId>javax.persistence</groupId>
-            <artifactId>javax.persistence-api</artifactId>
-            <version>2.2</version>
+            <groupId>jakarta.persistence</groupId>
+            <artifactId>jakarta.persistence-api</artifactId>
         </dependency>
 
-        <dependency>
-            <groupId>org.springframework.batch</groupId>
-            <artifactId>spring-batch-core</artifactId>
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>org.springframework.batch</groupId>-->
+<!--            <artifactId>spring-batch-core</artifactId>-->
+<!--        </dependency>-->
+
+
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
@@ -63,10 +148,6 @@
                     <artifactId>spring-boot-starter-logging</artifactId>
                 </exclusion>
             </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-webflux</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -87,31 +168,19 @@
 
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-tomcat</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-log4j2</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-freemarker</artifactId>
         </dependency>
 
         <!-- Redis Session -->
         <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-data-redis</artifactId>
-        </dependency>
-        <dependency>
             <groupId>org.springframework.session</groupId>
             <artifactId>spring-session-data-redis</artifactId>
         </dependency>
-
         <dependency>
-            <groupId>gr.uoa.di.madgik</groupId>
-            <artifactId>resource-catalogue-model</artifactId>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-redis</artifactId>
         </dependency>
+
         <dependency>
             <groupId>gr.uoa.di.madgik</groupId>
             <artifactId>resource-catalogue-api</artifactId>
@@ -126,32 +195,25 @@
         </dependency>
         <dependency>
             <groupId>gr.uoa.di.madgik</groupId>
+            <artifactId>registry-starter-service</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>gr.uoa.di.madgik</groupId>
             <artifactId>registry-core-rest</artifactId>
         </dependency>
         <dependency>
             <groupId>gr.uoa.di.madgik</groupId>
             <artifactId>registry-core-helper</artifactId>
         </dependency>
-
-        <!--        <dependency>-->
-        <!--            <groupId>org.apache.logging.log4j</groupId>-->
-        <!--            <artifactId>log4j-api</artifactId>-->
-        <!--        </dependency>-->
-        <!--        <dependency>-->
-        <!--            <groupId>org.apache.logging.log4j</groupId>-->
-        <!--            <artifactId>log4j-web</artifactId>-->
-        <!--        </dependency>-->
-        <!--        <dependency>-->
-        <!--            <groupId>org.apache.logging.log4j</groupId>-->
-        <!--            <artifactId>log4j-core</artifactId>-->
-        <!--        </dependency>-->
-        <!--        <dependency>-->
-        <!--            <groupId>org.apache.logging.log4j</groupId>-->
-        <!--            <artifactId>log4j-slf4j2-impl</artifactId>-->
-        <!--        </dependency>-->
         <dependency>
-            <groupId>com.nimbusds</groupId>
-            <artifactId>nimbus-jose-jwt</artifactId>
+            <groupId>gr.uoa.di.madgik</groupId>
+            <artifactId>catalogue</artifactId>
+        </dependency>
+
+
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
@@ -162,57 +224,20 @@
             <artifactId>jackson-mapper-asl</artifactId>
         </dependency>
         <dependency>
-            <groupId>javax.servlet</groupId>
-            <artifactId>javax.servlet-api</artifactId>
+            <groupId>jakarta.servlet</groupId>
+            <artifactId>jakarta.servlet-api</artifactId>
         </dependency>
         <dependency>
             <groupId>com.sun.mail</groupId>
             <artifactId>javax.mail</artifactId>
         </dependency>
         <dependency>
-            <groupId>javax.xml.bind</groupId>
-            <artifactId>jaxb-api</artifactId>
-        </dependency>
-        <dependency>
             <groupId>org.springdoc</groupId>
-            <artifactId>springdoc-openapi-ui</artifactId>
+            <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springframework</groupId>
-            <artifactId>spring-core</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-beans</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-context</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-context-support</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-aop</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-web</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.security</groupId>
-            <artifactId>spring-security-core</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.security</groupId>
-            <artifactId>spring-security-web</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-test</artifactId>
-            <scope>test</scope>
+            <artifactId>spring-webflux</artifactId>
         </dependency>
         <dependency>
             <groupId>org.aspectj</groupId>
@@ -226,12 +251,9 @@
             <groupId>org.javatuples</groupId>
             <artifactId>javatuples</artifactId>
         </dependency>
-
         <dependency>
-            <groupId>org.springframework.session</groupId>
-            <artifactId>spring-session</artifactId>
-            <version>1.3.5.RELEASE</version>
-            <scope>compile</scope>
+            <groupId>org.hibernate.validator</groupId>
+            <artifactId>hibernate-validator</artifactId>
         </dependency>
 
         <!-- JWT signing -->
@@ -255,30 +277,67 @@
 
         <dependency>
             <groupId>org.piwik.java.tracking</groupId>
-            <artifactId>matomo-java-tracker-servlet-javax</artifactId>
+            <artifactId>matomo-java-tracker-servlet-jakarta</artifactId>
             <version>3.0.6</version>
         </dependency>
         <dependency>
-            <groupId>org.springframework.security</groupId>
-            <artifactId>spring-security-config</artifactId>
-            <version>5.7.11</version>
+            <groupId>org.apache.httpcomponents.client5</groupId>
+            <artifactId>httpclient5</artifactId>
+            <version>5.3.1</version>
         </dependency>
         <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter</artifactId>
-            <version>5.10.2</version>
+            <groupId>org.bouncycastle</groupId>
+            <artifactId>bcpkix-jdk18on</artifactId>
+            <version>1.78</version>
+        </dependency>
+
+        <!-- Test Dependencies -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-test</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.mockito</groupId>
-            <artifactId>mockito-core</artifactId>
-            <version>5.11.0</version>
+            <artifactId>mockito-inline</artifactId>
+            <version>5.2.0</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>postgresql</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>elasticsearch</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-testcontainers</artifactId>
             <scope>test</scope>
         </dependency>
 
     </dependencies>
 
     <build>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>true</filtering>
+            </resource>
+        </resources>
         <plugins>
             <plugin>
                 <groupId>org.springframework.boot</groupId>
@@ -295,14 +354,21 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <argLine>-XX:+EnableDynamicAgentLoading</argLine>
+                    <includes>
+                        <include>**/*UnitTest.java</include>
+                    </includes>
+                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-war-plugin</artifactId>
-                <version>${maven-war-plugin.version}</version>
+                <artifactId>maven-failsafe-plugin</artifactId>
                 <configuration>
-                    <warName>resource-catalogue-service</warName>
-                    <failOnMissingWebXml>false</failOnMissingWebXml>
+                    <argLine>-XX:+EnableDynamicAgentLoading</argLine>
+                    <includes>
+                        <include>**/*IntegrationTest.java</include>
+                    </includes>
                 </configuration>
             </plugin>
         </plugins>

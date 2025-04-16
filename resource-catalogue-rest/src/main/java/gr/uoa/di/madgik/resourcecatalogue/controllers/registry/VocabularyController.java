@@ -1,15 +1,29 @@
+/*
+ * Copyright 2017-2025 OpenAIRE AMKE & Athena Research and Innovation Center
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package gr.uoa.di.madgik.resourcecatalogue.controllers.registry;
 
-import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Vocabulary;
 import gr.uoa.di.madgik.resourcecatalogue.dto.VocabularyTree;
 import gr.uoa.di.madgik.resourcecatalogue.service.VocabularyService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -21,17 +35,15 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("vocabulary")
 @Tag(name = "vocabulary")
 public class VocabularyController extends ResourceController<Vocabulary> {
 
-    private static final Logger logger = LogManager.getLogger(VocabularyController.class);
+    private static final Logger logger = LoggerFactory.getLogger(VocabularyController.class);
     private final VocabularyService vocabularyService;
 
-    @Autowired
     VocabularyController(VocabularyService vocabularyService) {
         super(vocabularyService);
         this.vocabularyService = vocabularyService;
@@ -97,14 +109,14 @@ public class VocabularyController extends ResourceController<Vocabulary> {
     @PutMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @Override
-    public ResponseEntity<Vocabulary> update(@RequestBody Vocabulary vocabulary, @Parameter(hidden = true) Authentication auth) throws ResourceNotFoundException {
+    public ResponseEntity<Vocabulary> update(@RequestBody Vocabulary vocabulary, @Parameter(hidden = true) Authentication auth) {
         return super.update(vocabulary, auth);
     }
 
     @DeleteMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @Override
-    public ResponseEntity<Vocabulary> delete(@RequestBody Vocabulary vocabulary, @Parameter(hidden = true) Authentication auth) throws ResourceNotFoundException {
+    public ResponseEntity<Vocabulary> delete(@RequestBody Vocabulary vocabulary, @Parameter(hidden = true) Authentication auth) {
         return super.delete(vocabulary, auth);
     }
 
@@ -116,7 +128,7 @@ public class VocabularyController extends ResourceController<Vocabulary> {
 
     @PutMapping(path = "/updateBulk", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public void updateBulk(@RequestBody List<Vocabulary> vocabularies, @Parameter(hidden = true) Authentication auth) throws ResourceNotFoundException {
+    public void updateBulk(@RequestBody List<Vocabulary> vocabularies, @Parameter(hidden = true) Authentication auth) {
         vocabularyService.updateBulk(vocabularies, auth);
     }
 
@@ -128,7 +140,7 @@ public class VocabularyController extends ResourceController<Vocabulary> {
 
     @DeleteMapping(path = "/deleteByType/{type}", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public void deleteByType(@PathVariable(value = "type") Vocabulary.Type type, @Parameter(hidden = true) Authentication auth) throws ResourceNotFoundException {
+    public void deleteByType(@PathVariable(value = "type") Vocabulary.Type type, @Parameter(hidden = true) Authentication auth) {
         List<Vocabulary> toBeDeleted = vocabularyService.getByType(type);
         for (Vocabulary vocabulary : toBeDeleted) {
             super.delete(vocabulary, auth);
@@ -144,7 +156,7 @@ public class VocabularyController extends ResourceController<Vocabulary> {
             allHLENames.add(voc.getName());
         }
         List<String> duplicateNames = allHLENames.stream()
-                .filter(i -> Collections.frequency(allHLENames, i) > 1).distinct().collect(Collectors.toList());
-        logger.info("Duplicate Names" + duplicateNames);
+                .filter(i -> Collections.frequency(allHLENames, i) > 1).distinct().toList();
+        logger.info("Duplicate Names {}", duplicateNames);
     }
 }

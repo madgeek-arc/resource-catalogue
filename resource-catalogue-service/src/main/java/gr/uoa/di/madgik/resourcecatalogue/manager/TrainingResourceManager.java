@@ -1,21 +1,35 @@
+/*
+ * Copyright 2017-2025 OpenAIRE AMKE & Athena Research and Innovation Center
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package gr.uoa.di.madgik.resourcecatalogue.manager;
 
+import gr.uoa.di.madgik.catalogue.exception.ValidationException;
 import gr.uoa.di.madgik.registry.domain.Browsing;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.registry.domain.Resource;
+import gr.uoa.di.madgik.registry.exception.ResourceException;
+import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.registry.service.SearchService;
 import gr.uoa.di.madgik.registry.service.ServiceException;
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
-import gr.uoa.di.madgik.resourcecatalogue.exception.ResourceException;
-import gr.uoa.di.madgik.resourcecatalogue.exception.ResourceNotFoundException;
-import gr.uoa.di.madgik.resourcecatalogue.exception.ValidationException;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
-import gr.uoa.di.madgik.resourcecatalogue.utils.Auditable;
-import gr.uoa.di.madgik.resourcecatalogue.utils.FacetLabelService;
-import gr.uoa.di.madgik.resourcecatalogue.utils.ObjectUtils;
-import gr.uoa.di.madgik.resourcecatalogue.utils.ProviderResourcesCommonMethods;
+import gr.uoa.di.madgik.resourcecatalogue.utils.*;
 import gr.uoa.di.madgik.resourcecatalogue.validators.FieldValidator;
+import jakarta.validation.constraints.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,9 +37,9 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.security.core.Authentication;
 
-import javax.validation.constraints.NotNull;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.util.*;
@@ -37,7 +51,7 @@ import static java.util.stream.Collectors.toList;
 @org.springframework.stereotype.Service
 public class TrainingResourceManager extends ResourceManager<TrainingResourceBundle> implements TrainingResourceService {
 
-    private static final Logger logger = LoggerFactory.getLogger(ServiceBundleManager.class);
+    private static final Logger logger = LoggerFactory.getLogger(TrainingResourceManager.class);
 
     private final ProviderService providerService;
     private final IdCreator idCreator;
@@ -48,9 +62,9 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
     private final MonitoringService monitoringService;
     private final ResourceInteroperabilityRecordService resourceInteroperabilityRecordService;
     private final CatalogueService catalogueService;
-    private final PublicTrainingResourceManager publicTrainingResourceManager;
-    private final PublicHelpdeskManager publicHelpdeskManager;
-    private final PublicMonitoringManager publicMonitoringManager;
+    private final PublicTrainingResourceService publicTrainingResourceManager;
+    private final PublicHelpdeskService publicHelpdeskManager;
+    private final PublicMonitoringService publicMonitoringManager;
     private final MigrationService migrationService;
     private final ProviderResourcesCommonMethods commonMethods;
     private final GenericManager genericManager;
@@ -75,9 +89,9 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
                                    @Lazy MonitoringService monitoringService,
                                    @Lazy ResourceInteroperabilityRecordService resourceInteroperabilityRecordService,
                                    CatalogueService catalogueService,
-                                   PublicTrainingResourceManager publicTrainingResourceManager,
-                                   PublicHelpdeskManager publicHelpdeskManager,
-                                   PublicMonitoringManager publicMonitoringManager,
+                                   PublicTrainingResourceService publicTrainingResourceManager,
+                                   PublicHelpdeskService publicHelpdeskManager,
+                                   PublicMonitoringService publicMonitoringManager,
                                    SynchronizerService<TrainingResource> synchronizerService,
                                    ProviderResourcesCommonMethods commonMethods,
                                    GenericManager genericManager,
@@ -102,7 +116,7 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
     }
 
     @Override
-    public String getResourceType() {
+    public String getResourceTypeName() {
         return "training_resource";
     }
 
@@ -113,32 +127,35 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
 
     @Override
     public TrainingResourceBundle add(TrainingResourceBundle trainingResourceBundle, String catalogueId, Authentication auth) {
-        if (catalogueId == null || catalogueId.equals("")) { // add catalogue provider
+        if (catalogueId == null || catalogueId.isEmpty()) { // add catalogue provider
             trainingResourceBundle.getTrainingResource().setCatalogueId(this.catalogueId);
         } else { // add provider from external catalogue
             commonMethods.checkCatalogueIdConsistency(trainingResourceBundle, catalogueId);
         }
         commonMethods.checkRelatedResourceIDsConsistency(trainingResourceBundle);
-        trainingResourceBundle.setId(idCreator.generate(getResourceType()));
+        trainingResourceBundle.setId(idCreator.generate(getResourceTypeName()));
 
         // register and ensure Resource Catalogue's PID uniqueness
-        commonMethods.createPIDAndCorrespondingAlternativeIdentifier(trainingResourceBundle, getResourceType());
+        commonMethods.determineResourceAndCreateAlternativeIdentifierForPID(trainingResourceBundle, getResourceTypeName());
         trainingResourceBundle.getTrainingResource().setAlternativeIdentifiers(
                 commonMethods.ensureResourceCataloguePidUniqueness(trainingResourceBundle.getId(),
+                        trainingResourceBundle.getTrainingResource().getCatalogueId(),
                         trainingResourceBundle.getTrainingResource().getAlternativeIdentifiers()));
 
         ProviderBundle providerBundle = providerService.get(trainingResourceBundle.getTrainingResource().getResourceOrganisation(), auth);
         if (providerBundle == null) {
-            throw new ValidationException(String.format("Provider with id '%s' and catalogueId '%s' does not exist", trainingResourceBundle.getTrainingResource().getResourceOrganisation(), trainingResourceBundle.getTrainingResource().getCatalogueId()));
+            throw new ResourceNotFoundException(String.format("Provider with id '%s' and catalogueId '%s' does not exist",
+                    trainingResourceBundle.getTrainingResource().getResourceOrganisation(), trainingResourceBundle.getTrainingResource().getCatalogueId()));
         }
         // check if Provider is approved
         if (!providerBundle.getStatus().equals("approved provider")) {
-            throw new ValidationException(String.format("The Provider '%s' you provided as a Resource Organisation is not yet approved",
-                    trainingResourceBundle.getTrainingResource().getResourceOrganisation()));
+            throw new ResourceException(String.format("The Provider '%s' you provided as a Resource Organisation is not yet approved",
+                    trainingResourceBundle.getTrainingResource().getResourceOrganisation()), HttpStatus.CONFLICT);
         }
         // check Provider's templateStatus
         if (providerBundle.getTemplateStatus().equals("pending template")) {
-            throw new ValidationException(String.format("The Provider with id %s has already registered a Resource Template.", providerBundle.getId()));
+            throw new ResourceException(String.format("The Provider with id %s has already registered a Resource Template.",
+                    providerBundle.getId()), HttpStatus.CONFLICT);
         }
         validateTrainingResource(trainingResourceBundle);
 
@@ -149,13 +166,13 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
 
         // create new Metadata if not exists
         if (trainingResourceBundle.getMetadata() == null) {
-            trainingResourceBundle.setMetadata(Metadata.createMetadata(User.of(auth).getFullName()));
+            trainingResourceBundle.setMetadata(Metadata.createMetadata(AuthenticationInfo.getFullName(auth)));
         }
 
         List<LoggingInfo> loggingInfoList = commonMethods.returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(trainingResourceBundle, auth);
 
         // latestOnboardingInfo
-        trainingResourceBundle.setLatestOnboardingInfo(loggingInfoList.get(0));
+        trainingResourceBundle.setLatestOnboardingInfo(loggingInfoList.getFirst());
 
         // resource status & extra loggingInfo for Approval
         if (providerBundle.getTemplateStatus().equals("approved template")) {
@@ -204,7 +221,7 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
                     ret.getTrainingResource().getId(), ret.getTrainingResource().getCatalogueId()));
         }
 
-        if (catalogueId == null || catalogueId.equals("")) {
+        if (catalogueId == null || catalogueId.isEmpty()) {
             ret.getTrainingResource().setCatalogueId(this.catalogueId);
         } else {
             commonMethods.checkCatalogueIdConsistency(ret, catalogueId);
@@ -214,27 +231,27 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
         // ensure Resource Catalogue's PID uniqueness
         if (ret.getTrainingResource().getAlternativeIdentifiers() == null ||
                 ret.getTrainingResource().getAlternativeIdentifiers().isEmpty()) {
-            commonMethods.createPIDAndCorrespondingAlternativeIdentifier(ret, getResourceType());
+            commonMethods.determineResourceAndCreateAlternativeIdentifierForPID(ret, getResourceTypeName());
         } else {
             ret.getTrainingResource().setAlternativeIdentifiers(
                     commonMethods.ensureResourceCataloguePidUniqueness(ret.getId(),
+                            ret.getTrainingResource().getCatalogueId(),
                             ret.getTrainingResource().getAlternativeIdentifiers()));
         }
 
-        logger.trace("Attempting to update the Training Resource with id '{}' of the Catalogue '{}'", ret.getTrainingResource().getId(), ret.getTrainingResource().getCatalogueId());
+        logger.trace("Attempting to update the Training Resource with id '{}' of the Catalogue '{}'",
+                ret.getTrainingResource().getId(), ret.getTrainingResource().getCatalogueId());
         validateTrainingResource(ret);
 
         ProviderBundle providerBundle = providerService.get(ret.getTrainingResource().getResourceOrganisation(), auth);
 
         // block Public Training Resource update
         if (existingTrainingResource.getMetadata().isPublished()) {
-            throw new ValidationException("You cannot directly update a Public Training Resource");
+            throw new ResourceException("You cannot directly update a Public Training Resource", HttpStatus.FORBIDDEN);
         }
 
-        User user = User.of(auth);
-
         // update existing TrainingResource Metadata, Identifiers, MigrationStatus
-        ret.setMetadata(Metadata.updateMetadata(existingTrainingResource.getMetadata(), user.getFullName()));
+        ret.setMetadata(Metadata.updateMetadata(existingTrainingResource.getMetadata(), AuthenticationInfo.getFullName(auth)));
         ret.setMigrationStatus(existingTrainingResource.getMigrationStatus());
 
         List<LoggingInfo> loggingInfoList = commonMethods.returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(existingTrainingResource, auth);
@@ -267,7 +284,7 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
         // block catalogueId updates from Provider Admins
         if (!securityService.hasRole(auth, "ROLE_ADMIN")) {
             if (!existingTrainingResource.getTrainingResource().getCatalogueId().equals(ret.getTrainingResource().getCatalogueId())) {
-                throw new ValidationException("You cannot change catalogueId");
+                throw new ResourceException("You cannot change catalogueId", HttpStatus.FORBIDDEN);
             }
         }
 
@@ -278,14 +295,25 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
 
         // send notification emails to Portal Admins
         if (ret.getLatestAuditInfo() != null && ret.getLatestUpdateInfo() != null) {
-            Long latestAudit = Long.parseLong(ret.getLatestAuditInfo().getDate());
-            Long latestUpdate = Long.parseLong(ret.getLatestUpdateInfo().getDate());
+            long latestAudit = Long.parseLong(ret.getLatestAuditInfo().getDate());
+            long latestUpdate = Long.parseLong(ret.getLatestUpdateInfo().getDate());
             if (latestAudit < latestUpdate && ret.getLatestAuditInfo().getActionType().equals(LoggingInfo.ActionType.INVALID.getKey())) {
                 registrationMailService.notifyPortalAdminsForInvalidTrainingResourceUpdate(ret);
             }
         }
 
         return ret;
+    }
+
+    @Override
+    public Browsing<TrainingResourceBundle> getMy(FacetFilter filter, Authentication auth) {
+        FacetFilter ff = new FacetFilter();
+        ff.setQuantity(maxQuantity);
+        List<ProviderBundle> providers = providerService.getMy(ff, auth).getResults();
+
+        filter.addFilter("resource_organisation", providers.stream().map(ProviderBundle::getId).toList());
+        filter.setResourceType(getResourceTypeName());
+        return this.getAll(filter, auth);
     }
 
     @Override
@@ -301,12 +329,13 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
                     String.format("Could not find Catalogue with id: %s", catalogueId));
         }
         if (!trainingResourceBundle.getTrainingResource().getCatalogueId().equals(catalogueId)) {
-            throw new ValidationException(String.format("Training Resource with id [%s] does not belong to the catalogue with id [%s]", trainingResourceId, catalogueId));
+            throw new ResourceNotFoundException(String.format("Training Resource with id [%s] does not belong to the" +
+                    " catalogue with id [%s]", trainingResourceId, catalogueId));
         }
         if (auth != null && auth.isAuthenticated()) {
             User user = User.of(auth);
             if (securityService.hasRole(auth, "ROLE_ADMIN") || securityService.hasRole(auth, "ROLE_EPOT") ||
-                    securityService.userIsResourceProviderAdmin(user, trainingResourceId, catalogueId)) {
+                    securityService.userIsResourceAdmin(user, trainingResourceId)) {
                 return trainingResourceBundle;
             }
         }
@@ -314,7 +343,7 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
         if (trainingResourceBundle.getStatus().equals(vocabularyService.get("approved resource").getId())) {
             return trainingResourceBundle;
         }
-        throw new ValidationException("You cannot view the specific Training Resource");
+        throw new InsufficientAuthenticationException("You cannot view the specific Training Resource");
     }
 
     @Override
@@ -332,7 +361,7 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
         if (!statusVocabulary.getType().equals("Resource state")) {
             throw new ValidationException(String.format("Vocabulary %s does not consist a Resource State!", status));
         }
-        logger.trace("verifyResource with id: '{}' | status -> '{}' | active -> '{}'", id, status, active);
+        logger.trace("verifyResource with id: '{}' | status: '{}' | active: '{}'", id, status, active);
         TrainingResourceBundle trainingResourceBundle = getCatalogueResource(catalogueId, id, auth);
         trainingResourceBundle.setStatus(vocabularyService.get(status).getId());
         ProviderBundle resourceProvider = providerService.get(trainingResourceBundle.getTrainingResource().getResourceOrganisation(), auth);
@@ -411,14 +440,15 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
 
         if ((trainingResourceBundle.getStatus().equals(vocabularyService.get("pending resource").getId()) ||
                 trainingResourceBundle.getStatus().equals(vocabularyService.get("rejected resource").getId())) && !trainingResourceBundle.isActive()) {
-            throw new ValidationException(String.format("You cannot activate this Training Resource, because it's Inactive with status = [%s]", trainingResourceBundle.getStatus()));
+            throw new ResourceException(String.format("You cannot activate this Training Resource, because it's Inactive with status = [%s]",
+                    trainingResourceBundle.getStatus()), HttpStatus.CONFLICT);
         }
 
         ProviderBundle providerBundle = providerService.get(trainingResourceBundle.getTrainingResource().getResourceOrganisation(), auth);
         if (providerBundle.getStatus().equals("approved provider") && providerBundle.isActive()) {
             activeProvider = trainingResourceBundle.getTrainingResource().getResourceOrganisation();
         }
-        if (active && activeProvider.equals("")) {
+        if (active && activeProvider.isEmpty()) {
             throw new ResourceException("Training Resource does not have active Providers", HttpStatus.CONFLICT);
         }
         trainingResourceBundle.setActive(active);
@@ -445,9 +475,9 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
         HelpdeskBundle helpdeskBundle = helpdeskService.get(id, catalogueId);
         MonitoringBundle monitoringBundle = monitoringService.get(id, catalogueId);
         if (active) {
-            logger.info("Activating all related resources of the Training Resource with id: {}", id);
+            logger.info("Activating all related resources of the Training Resource with id: '{}'", id);
         } else {
-            logger.info("Deactivating all related resources of the Training Resource with id: {}", id);
+            logger.info("Deactivating all related resources of the Training Resource with id: '{}'", id);
         }
         if (helpdeskBundle != null) {
             publishServiceExtensions(helpdeskBundle, active, auth);
@@ -458,11 +488,12 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
     }
 
     private void publishServiceExtensions(Bundle<?> bundle, boolean active, Authentication auth) {
+
         List<LoggingInfo> loggingInfoList = commonMethods.createActivationLoggingInfo(bundle, active, auth);
 
         // update Bundle's fields
         bundle.setLoggingInfo(loggingInfoList);
-        bundle.setLatestUpdateInfo(loggingInfoList.get(loggingInfoList.size() - 1));
+        bundle.setLatestUpdateInfo(loggingInfoList.getLast());
         bundle.setActive(active);
 
         if (bundle instanceof HelpdeskBundle) {
@@ -472,8 +503,8 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
                         ((HelpdeskBundle) bundle).getCatalogueId(), bundle.isActive());
                 helpdeskService.updateBundle((HelpdeskBundle) bundle, auth);
                 HelpdeskBundle publicHelpdeskBundle =
-                        publicHelpdeskManager.getOrElseReturnNull(((HelpdeskBundle) bundle).getCatalogueId() +
-                                "." + bundle.getId());
+                        publicHelpdeskManager.getOrElseReturnNull(PublicResourceUtils.createPublicResourceId(
+                                bundle.getId(), ((HelpdeskBundle) bundle).getCatalogueId()));
                 if (publicHelpdeskBundle != null) {
                     publicHelpdeskManager.update((HelpdeskBundle) bundle, auth);
                 }
@@ -489,8 +520,8 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
                         ((MonitoringBundle) bundle).getCatalogueId(), bundle.isActive());
                 monitoringService.updateBundle((MonitoringBundle) bundle, auth);
                 MonitoringBundle publicMonitoringBundle =
-                        publicMonitoringManager.getOrElseReturnNull(((MonitoringBundle) bundle).getCatalogueId() +
-                                "." + bundle.getId());
+                        publicMonitoringManager.getOrElseReturnNull(PublicResourceUtils.createPublicResourceId(
+                                bundle.getId(), ((MonitoringBundle) bundle).getCatalogueId()));
                 if (publicMonitoringBundle != null) {
                     publicMonitoringManager.update((MonitoringBundle) bundle, auth);
                 }
@@ -515,11 +546,10 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
         }
 
         // send notification emails to Provider Admins
-        registrationMailService.notifyProviderAdminsForBundleAuditing(trainingResource, "Training Resource",
-                trainingResource.getTrainingResource().getTitle(), provider.getProvider().getUsers());
+        registrationMailService.notifyProviderAdminsForBundleAuditing(trainingResource, provider.getProvider().getUsers());
 
         logger.info("User '{}-{}' audited Training Resource '{}'-'{}' with [actionType: {}]",
-                User.of(auth).getFullName(), User.of(auth).getEmail(),
+                AuthenticationInfo.getFullName(auth), AuthenticationInfo.getEmail(auth).toLowerCase(),
                 trainingResource.getTrainingResource().getId(), trainingResource.getTrainingResource().getTitle(), actionType);
         return super.update(trainingResource, auth);
     }
@@ -545,29 +575,6 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
     }
 
     @Override
-    public List<TrainingResource> getResources(String providerId, Authentication auth) {
-        ProviderBundle providerBundle = providerService.get(providerId);
-        FacetFilter ff = new FacetFilter();
-        ff.addFilter("resource_organisation", providerId);
-        ff.addFilter("catalogue_id", catalogueId);
-        ff.setQuantity(maxQuantity);
-        ff.addOrderBy("title", "asc");
-        if (auth != null && auth.isAuthenticated()) {
-            User user = User.of(auth);
-            // if user is ADMIN/EPOT or Provider Admin on the specific Provider, return its Training Resources
-            if (securityService.hasRole(auth, "ROLE_ADMIN") || securityService.hasRole(auth, "ROLE_EPOT") ||
-                    securityService.userIsProviderAdmin(user, providerBundle)) {
-                return this.getAll(ff, auth).getResults().stream().map(TrainingResourceBundle::getTrainingResource).collect(Collectors.toList());
-            }
-        }
-        // else return Provider's Training Resources ONLY if he is active
-        if (providerBundle.getStatus().equals(vocabularyService.get("approved provider").getId())) {
-            return this.getAll(ff, null).getResults().stream().map(TrainingResourceBundle::getTrainingResource).collect(Collectors.toList());
-        }
-        throw new ValidationException("You cannot view the Training Resources of the specific Provider");
-    }
-
-    @Override
     public List<TrainingResourceBundle> getInactiveResources(String providerId) {
         FacetFilter ff = new FacetFilter();
         ff.addFilter("resource_organisation", providerId);
@@ -580,33 +587,11 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
     }
 
     @Override
-    public Paging<LoggingInfo> getLoggingInfoHistory(String id, String catalogueId) {
-        TrainingResourceBundle trainingResourceBundle;
-        try {
-            trainingResourceBundle = get(id, catalogueId);
-            List<Resource> allResources = getResources(trainingResourceBundle.getTrainingResource().getId(), trainingResourceBundle.getTrainingResource().getCatalogueId()); // get all versions of a specific Service
-            allResources.sort(Comparator.comparing((Resource::getCreationDate)));
-            List<LoggingInfo> loggingInfoList = new ArrayList<>();
-            for (Resource resource : allResources) {
-                TrainingResourceBundle trainingResource = deserialize(resource);
-                if (trainingResource.getLoggingInfo() != null) {
-                    loggingInfoList.addAll(trainingResource.getLoggingInfo());
-                }
-            }
-            loggingInfoList.sort(Comparator.comparing(LoggingInfo::getDate).reversed());
-            return new Browsing<>(loggingInfoList.size(), 0, loggingInfoList.size(), loggingInfoList, null);
-        } catch (ResourceNotFoundException e) {
-            logger.info(String.format("Training Resource with id [%s] not found", id));
-        }
-        return null;
-    }
-
-    @Override
     public void sendEmailNotificationsToProvidersWithOutdatedResources(String resourceId, Authentication auth) {
-        String providerId = providerService.get(get(resourceId).getTrainingResource().getResourceOrganisation()).getId();
-        String providerName = providerService.get(get(resourceId).getTrainingResource().getResourceOrganisation()).getProvider().getName();
-        logger.info(String.format("Mailing provider [%s]-[%s] for outdated Training Resources", providerId, providerName));
-        registrationMailService.sendEmailNotificationsToProvidersWithOutdatedResources(resourceId);
+        TrainingResourceBundle trainingResourceBundle = get(resourceId);
+        ProviderBundle providerBundle = providerService.get(trainingResourceBundle.getTrainingResource().getResourceOrganisation());
+        logger.info("Mailing provider '{}'-'{}' for outdated Training Resources", providerBundle.getId(), providerBundle.getProvider().getName());
+        registrationMailService.sendEmailNotificationsToProviderAdminsWithOutdatedResources(trainingResourceBundle, providerBundle);
     }
 
     @Override
@@ -624,17 +609,6 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
         return deserialize(resource);
     }
 
-    private TrainingResourceBundle checkIdExistenceInOtherCatalogues(String id) {
-        FacetFilter ff = new FacetFilter();
-        ff.setQuantity(maxQuantity);
-        ff.addFilter("resource_internal_id", id);
-        List<TrainingResourceBundle> allResources = getAll(ff, null).getResults();
-        if (allResources.size() > 0) {
-            return allResources.get(0);
-        }
-        return null;
-    }
-
     // for sendProviderMails on RegistrationMailService AND StatisticsManager
     public List<TrainingResource> getResources(String providerId) {
         FacetFilter ff = new FacetFilter();
@@ -646,123 +620,46 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
         return this.getAll(ff, securityService.getAdminAccess()).getResults().stream().map(TrainingResourceBundle::getTrainingResource).collect(Collectors.toList());
     }
 
-    public List<Resource> getResources(String id, String catalogueId) {
-        Paging<Resource> resources;
-        resources = searchService
-                .cqlQuery(String.format("resource_internal_id = \"%s\"  AND catalogue_id = \"%s\"", id, catalogueId),
-                        resourceType.getName(), maxQuantity, 0, "modifiedAt", "DESC");
-        if (resources != null) {
-            return resources.getResults();
-        }
-        return Collections.emptyList();
-    }
-
     @Override
     public TrainingResourceBundle getOrElseReturnNull(String id) {
         TrainingResourceBundle trainingResourceBundle;
         try {
             trainingResourceBundle = get(id);
-        } catch (ResourceNotFoundException e) {
+        } catch (ResourceException | ResourceNotFoundException e) {
             return null;
         }
         return trainingResourceBundle;
-    }
-
-    @Override
-    public TrainingResourceBundle getOrElseReturnNull(String id, String catalogueId) {
-        TrainingResourceBundle trainingResourceBundle;
-        try {
-            trainingResourceBundle = get(id, catalogueId);
-        } catch (ResourceNotFoundException e) {
-            return null;
-        }
-        return trainingResourceBundle;
-    }
-
-    @Override
-    public List<String> getChildrenFromParent(String type, String parent, List<Map<String, Object>> rec) {
-        List<String> finalResults = new ArrayList<>();
-        List<String> allSub = new ArrayList<>();
-        List<String> correctedSubs = new ArrayList<>();
-        for (Map<String, Object> map : rec) {
-            for (Map.Entry<String, Object> entry : map.entrySet()) {
-                String trimmed = entry.getValue().toString().replace("{", "").replace("}", "");
-                if (!allSub.contains(trimmed)) {
-                    allSub.add((trimmed));
-                }
-            }
-        }
-        // Required step to fix joint subcategories (sub1,sub2,sub3) who passed as 1 value
-        for (String item : allSub) {
-            if (item.contains(",")) {
-                String[] itemParts = item.split(",");
-                correctedSubs.addAll(Arrays.asList(itemParts));
-            } else {
-                correctedSubs.add(item);
-            }
-        }
-        if (type.equalsIgnoreCase("SCIENTIFIC_DOMAIN")) {
-            String[] parts = parent.split("-");
-            for (String id : correctedSubs) {
-                if (id.contains(parts[1])) {
-                    finalResults.add(id);
-                }
-            }
-        } else {
-            String[] parts = parent.split("-");
-            for (String id : correctedSubs) {
-                if (id.contains(parts[2])) {
-                    finalResults.add(id);
-                }
-            }
-        }
-        return finalResults;
     }
 
     @Override
     public Browsing<TrainingResourceBundle> getAll(FacetFilter ff, Authentication auth) {
-        // if user is Unauthorized, return active/latest ONLY
-        if (auth == null) {
-            ff.addFilter("active", true);
-            ff.addFilter("published", false);
-        }
-        if (auth != null && auth.isAuthenticated()) {
-            // if user is Authorized with ROLE_USER, return active/latest ONLY
-            if (!securityService.hasRole(auth, "ROLE_PROVIDER") && !securityService.hasRole(auth, "ROLE_EPOT") &&
-                    !securityService.hasRole(auth, "ROLE_ADMIN")) {
-                ff.addFilter("active", true);
-                ff.addFilter("published", false);
-            }
-        }
+        updateFacetFilterConsideringTheAuthorization(ff, auth);
 
-        ff.setBrowseBy(genericManager.getBrowseBy(getResourceType()));
-        ff.setResourceType(getResourceType());
-
-        return getMatchingResources(ff);
-    }
-
-    @Override
-    public Browsing<TrainingResourceBundle> getAllForAdmin(FacetFilter filter, Authentication auth) {
-        filter.setBrowseBy(genericManager.getBrowseBy(getResourceType()));
-        filter.setResourceType(getResourceType());
-        return getMatchingResources(filter);
-    }
-
-    private Browsing<TrainingResourceBundle> getMatchingResources(FacetFilter ff) {
+        ff.setBrowseBy(genericManager.getBrowseBy(getResourceTypeName()));
+        ff.setResourceType(getResourceTypeName());
         Browsing<TrainingResourceBundle> resources;
-
         resources = getResults(ff);
         if (!resources.getResults().isEmpty() && !resources.getFacets().isEmpty()) {
             resources.setFacets(facetLabelService.generateLabels(resources.getFacets()));
         }
-
         return resources;
+    }
+
+    private void updateFacetFilterConsideringTheAuthorization(FacetFilter filter, Authentication auth) {
+        // if user is Unauthorized, return active ONLY
+        if (auth == null || !auth.isAuthenticated() || (
+                !securityService.hasRole(auth, "ROLE_PROVIDER") &&
+                        !securityService.hasRole(auth, "ROLE_EPOT") &&
+                        !securityService.hasRole(auth, "ROLE_ADMIN"))) {
+            filter.addFilter("active", true);
+            filter.addFilter("published", false);
+        }
     }
 
     @Override
     protected Browsing<TrainingResourceBundle> getResults(FacetFilter filter) {
         Browsing<TrainingResourceBundle> browsing;
-        filter.setResourceType(getResourceType());
+        filter.setResourceType(getResourceTypeName());
         browsing = convertToBrowsingEIC(searchService.search(filter));
 
         return browsing;
@@ -773,7 +670,7 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
                 .stream()
                 .map(res -> parserPool.deserialize(res, typeParameterClass))
                 .collect(Collectors.toList());
-        return new Browsing<>(paging, results, genericManager.getLabels(getResourceType()));
+        return new Browsing<>(paging, results, genericManager.getLabels(getResourceTypeName()));
     }
 
     @Override
@@ -794,8 +691,8 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
             }
         }
         Collections.shuffle(trainingResourcesToBeAudited);
-        for (int i = trainingResourcesToBeAudited.size() - 1; i > ff.getQuantity() - 1; i--) {
-            trainingResourcesToBeAudited.remove(i);
+        if (trainingResourcesToBeAudited.size() > ff.getQuantity()) {
+            trainingResourcesToBeAudited.subList(ff.getQuantity(), trainingResourcesToBeAudited.size()).clear();
         }
         return new Browsing<>(trainingResourcesToBeAudited.size(), 0, trainingResourcesToBeAudited.size(), trainingResourcesToBeAudited, trainingResourceBrowsing.getFacets());
     }
@@ -853,12 +750,10 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
             throw new ValidationException("You cannot move a Training Resource to a Provider of another Catalogue");
         }
 
-        User user = User.of(auth);
-
         // update loggingInfo
         List<LoggingInfo> loggingInfoList = trainingResourceBundle.getLoggingInfo();
         LoggingInfo loggingInfo;
-        if (comment == null || "".equals(comment)) {
+        if (comment == null || comment.isEmpty()) {
             loggingInfo = commonMethods.createLoggingInfo(auth, LoggingInfo.Types.MOVE.getKey(),
                     LoggingInfo.ActionType.MOVED.getKey());
         } else {
@@ -874,7 +769,7 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
         // update metadata
         Metadata metadata = trainingResourceBundle.getMetadata();
         metadata.setModifiedAt(String.valueOf(System.currentTimeMillis()));
-        metadata.setModifiedBy(user.getFullName());
+        metadata.setModifiedBy(AuthenticationInfo.getFullName(auth));
         metadata.setTerms(null);
         trainingResourceBundle.setMetadata(metadata);
 
@@ -897,7 +792,7 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
         migrationService.updateRelatedToTheIdFieldsOfOtherResourcesOfThePortal(resourceId, trainingResourceBundle.getId());
 
         // emails to EPOT, old and new Provider
-        registrationMailService.sendEmailsForMovedTrainingResources(oldProvider, newProvider, trainingResourceBundle, auth);
+        registrationMailService.sendEmailsForMovedResources(oldProvider, newProvider, trainingResourceBundle, auth);
 
         return trainingResourceBundle;
     }

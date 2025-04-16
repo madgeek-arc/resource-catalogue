@@ -1,0 +1,27 @@
+{
+  "$schema" : "https://json-schema.org/draft/2020-12/schema",
+  "$defs" : {
+    "ExtrasType" : {
+      "type" : "object",
+      "properties" : {
+        "key" : {
+          "type" : "string"
+        },
+        "value" : {
+          "type" : "string"
+        }
+      },
+      "additionalProperties" : false
+    }
+  },
+  "type" : "object",
+  "properties" : {
+    "entry" : {
+      "type" : "array",
+      "items" : {
+        "$ref" : "#/$defs/ExtrasType"
+      }
+    }
+  },
+  "additionalProperties" : false
+}

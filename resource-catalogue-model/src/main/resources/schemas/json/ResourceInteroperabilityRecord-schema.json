@@ -1,0 +1,22 @@
+{
+  "$schema" : "https://json-schema.org/draft/2020-12/schema",
+  "type" : "object",
+  "properties" : {
+    "catalogueId" : {
+      "type" : "string"
+    },
+    "id" : {
+      "type" : "string"
+    },
+    "interoperabilityRecordIds" : {
+      "type" : "array",
+      "items" : {
+        "type" : "string"
+      }
+    },
+    "resourceId" : {
+      "type" : "string"
+    }
+  },
+  "additionalProperties" : false
+}

@@ -1,49 +1,60 @@
+/*
+ * Copyright 2017-2025 OpenAIRE AMKE & Athena Research and Innovation Center
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package gr.uoa.di.madgik.resourcecatalogue.manager;
 
 import gr.uoa.di.madgik.registry.domain.Browsing;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
+import gr.uoa.di.madgik.registry.exception.ResourceException;
+import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.registry.service.ResourceCRUDService;
 import gr.uoa.di.madgik.resourcecatalogue.domain.AlternativeIdentifier;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Identifiers;
 import gr.uoa.di.madgik.resourcecatalogue.domain.ProviderBundle;
-import gr.uoa.di.madgik.resourcecatalogue.exception.ResourceException;
-import gr.uoa.di.madgik.resourcecatalogue.exception.ResourceNotFoundException;
-import gr.uoa.di.madgik.resourcecatalogue.service.SecurityService;
 import gr.uoa.di.madgik.resourcecatalogue.utils.FacetLabelService;
 import gr.uoa.di.madgik.resourcecatalogue.utils.JmsService;
 import gr.uoa.di.madgik.resourcecatalogue.utils.ProviderResourcesCommonMethods;
+import gr.uoa.di.madgik.resourcecatalogue.utils.PublicResourceUtils;
 import org.apache.commons.beanutils.BeanUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.List;
 
 @Service("publicProviderManager")
 public class PublicProviderManager extends ResourceManager<ProviderBundle> implements ResourceCRUDService<ProviderBundle, Authentication> {
 
     private static final Logger logger = LoggerFactory.getLogger(PublicProviderManager.class);
     private final JmsService jmsService;
-    private final SecurityService securityService;
     private final ProviderResourcesCommonMethods commonMethods;
     private final FacetLabelService facetLabelService;
 
-    public PublicProviderManager(JmsService jmsService, SecurityService securityService,
+    public PublicProviderManager(JmsService jmsService,
                                  ProviderResourcesCommonMethods commonMethods,
                                  FacetLabelService facetLabelService) {
         super(ProviderBundle.class);
         this.jmsService = jmsService;
-        this.securityService = securityService;
         this.commonMethods = commonMethods;
         this.facetLabelService = facetLabelService;
     }
 
     @Override
-    public String getResourceType() {
+    public String getResourceTypeName() {
         return "provider";
     }
 
@@ -57,27 +68,11 @@ public class PublicProviderManager extends ResourceManager<ProviderBundle> imple
     }
 
     @Override
-    public Browsing<ProviderBundle> getMy(FacetFilter facetFilter, Authentication authentication) {
-        if (authentication == null) {
-            throw new InsufficientAuthenticationException("Please log in.");
-        }
-
-        List<ProviderBundle> providerList = new ArrayList<>();
-        Browsing<ProviderBundle> providerBundleBrowsing = super.getAll(facetFilter, authentication);
-        for (ProviderBundle providerBundle : providerBundleBrowsing.getResults()) {
-            if (securityService.isProviderAdmin(authentication, providerBundle.getId(), providerBundle.getProvider().getCatalogueId()) && providerBundle.getMetadata().isPublished()) {
-                providerList.add(providerBundle);
-            }
-        }
-        return new Browsing<>(providerBundleBrowsing.getTotal(), providerBundleBrowsing.getFrom(),
-                providerBundleBrowsing.getTo(), providerList, providerBundleBrowsing.getFacets());
-    }
-
-    @Override
     public ProviderBundle add(ProviderBundle providerBundle, Authentication authentication) {
         String lowerLevelProviderId = providerBundle.getId();
         Identifiers.createOriginalId(providerBundle);
-        providerBundle.setId(String.format("%s.%s", providerBundle.getProvider().getCatalogueId(), providerBundle.getId()));
+        providerBundle.setId(PublicResourceUtils.createPublicResourceId(providerBundle.getProvider().getId(),
+                providerBundle.getProvider().getCatalogueId()));
         commonMethods.restrictPrefixRepetitionOnPublicResources(providerBundle.getId(), providerBundle.getProvider().getCatalogueId());
         providerBundle.getMetadata().setPublished(true);
         // POST PID
@@ -89,7 +84,7 @@ public class PublicProviderManager extends ResourceManager<ProviderBundle> imple
             }
         }
         if (pid.equalsIgnoreCase("no_pid")) {
-            logger.info("Provider with id {} does not have a PID registered under its AlternativeIdentifiers.",
+            logger.info("Provider with id '{}' does not have a PID registered under its AlternativeIdentifiers.",
                     providerBundle.getId());
         } else {
             //TODO: enable when we have PID configuration properties for Beyond
@@ -97,7 +92,7 @@ public class PublicProviderManager extends ResourceManager<ProviderBundle> imple
 //            commonMethods.postPID(pid);
         }
         ProviderBundle ret;
-        logger.info(String.format("Provider [%s] is being published with id [%s]", lowerLevelProviderId, providerBundle.getId()));
+        logger.info("Provider '{}' is being published with id '{}'", lowerLevelProviderId, providerBundle.getId());
         ret = super.add(providerBundle, null);
         jmsService.convertAndSendTopic("provider.create", providerBundle);
         return ret;
@@ -105,21 +100,21 @@ public class PublicProviderManager extends ResourceManager<ProviderBundle> imple
 
     @Override
     public ProviderBundle update(ProviderBundle providerBundle, Authentication authentication) {
-        ProviderBundle published = super.get(String.format("%s.%s", providerBundle.getProvider().getCatalogueId(), providerBundle.getId()));
-        ProviderBundle ret = super.get(String.format("%s.%s", providerBundle.getProvider().getCatalogueId(), providerBundle.getId()));
+        ProviderBundle published = super.get(PublicResourceUtils.createPublicResourceId(providerBundle.getProvider().getId(),
+                providerBundle.getProvider().getCatalogueId()));
+        ProviderBundle ret = super.get(PublicResourceUtils.createPublicResourceId(providerBundle.getProvider().getId(),
+                providerBundle.getProvider().getCatalogueId()));
         try {
             BeanUtils.copyProperties(ret, providerBundle);
         } catch (IllegalAccessException | InvocationTargetException e) {
-            e.printStackTrace();
+            logger.info("Could not copy properties.");
         }
 
-        ret.getProvider().setAlternativeIdentifiers(commonMethods.updateAlternativeIdentifiers(
-                providerBundle.getProvider().getAlternativeIdentifiers(),
-                published.getProvider().getAlternativeIdentifiers()));
+        ret.getProvider().setAlternativeIdentifiers(published.getProvider().getAlternativeIdentifiers());
         ret.setIdentifiers(published.getIdentifiers());
         ret.setId(published.getId());
         ret.getMetadata().setPublished(true);
-        logger.info(String.format("Updating public Provider with id [%s]", ret.getId()));
+        logger.info("Updating public Provider with id '{}'", ret.getId());
         ret = super.update(ret, null);
         jmsService.convertAndSendTopic("provider.update", ret);
         return ret;
@@ -128,8 +123,10 @@ public class PublicProviderManager extends ResourceManager<ProviderBundle> imple
     @Override
     public void delete(ProviderBundle providerBundle) {
         try {
-            ProviderBundle publicProviderBundle = get(String.format("%s.%s", providerBundle.getProvider().getCatalogueId(), providerBundle.getId()));
-            logger.info(String.format("Deleting public Provider with id [%s]", publicProviderBundle.getId()));
+            ProviderBundle publicProviderBundle = get(PublicResourceUtils.createPublicResourceId(
+                    providerBundle.getProvider().getId(),
+                    providerBundle.getProvider().getCatalogueId()));
+            logger.info("Deleting public Provider with id '{}'", publicProviderBundle.getId());
             super.delete(publicProviderBundle);
             jmsService.convertAndSendTopic("provider.delete", publicProviderBundle);
         } catch (ResourceException | ResourceNotFoundException ignore) {

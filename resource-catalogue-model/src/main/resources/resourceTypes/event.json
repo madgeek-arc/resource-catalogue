@@ -1,0 +1,57 @@
+{
+  "indexFields": [
+    {
+      "label": null,
+      "multivalued": false,
+      "name": "resource_internal_id",
+      "path": "$.id",
+      "primaryKey": true,
+      "type": "java.lang.String"
+    },
+    {
+      "label": null,
+      "multivalued": false,
+      "name": "value",
+      "path": "$.value",
+      "type": "java.lang.Float"
+    },
+    {
+      "label": null,
+      "multivalued": false,
+      "name": "instant",
+      "path": "$.instant",
+      "type": "java.util.Date"
+    },
+    {
+      "label": null,
+      "multivalued": false,
+      "name": "service",
+      "path": "$.service",
+      "type": "java.lang.String"
+    },
+    {
+      "label": null,
+      "multivalued": false,
+      "name": "type",
+      "path": "$.type",
+      "type": "java.lang.String"
+    },
+    {
+      "label": null,
+      "multivalued": false,
+      "name": "event_user",
+      "path": "$.user",
+      "type": "java.lang.String"
+    }
+  ],
+  "indexMapperClass": "gr.uoa.di.madgik.registry.index.DefaultIndexMapper",
+  "aliases": [
+    "resourceTypes"
+  ],
+  "name": "event",
+  "payloadType": "json",
+  "properties": {
+    "class": "gr.uoa.di.madgik.resourcecatalogue.domain.Event"
+  },
+  "schema": "{\n\t\"$schema\": \"https://json-schema.org/draft/2019-09/schema\"\n}"
+}

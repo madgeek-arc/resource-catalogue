@@ -1,23 +1,34 @@
+/*
+ * Copyright 2017-2025 OpenAIRE AMKE & Athena Research and Innovation Center
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package gr.uoa.di.madgik.resourcecatalogue.domain;
 
 import gr.uoa.di.madgik.resourcecatalogue.annotation.FieldValidation;
 import io.swagger.v3.oas.annotations.media.Schema;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import jakarta.xml.bind.annotation.XmlElement;
+import jakarta.xml.bind.annotation.XmlElementWrapper;
+import jakarta.xml.bind.annotation.XmlRootElement;
+import jakarta.xml.bind.annotation.XmlType;
 
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlElementWrapper;
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlType;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 
 @XmlType
-@XmlRootElement(namespace = "http://einfracentral.eu")
+@XmlRootElement
 public class VocabularyCuration implements Identifiable {
-
-    private static final Logger logger = LogManager.getLogger(User.class);
 
     @XmlElement(required = true)
     @Schema
@@ -58,7 +69,7 @@ public class VocabularyCuration implements Identifiable {
     @XmlElement
     @Schema
     @FieldValidation(nullable = true)
-    private Date resolutionDate;
+    private String resolutionDate;
 
     @XmlElement
     @Schema
@@ -180,11 +191,11 @@ public class VocabularyCuration implements Identifiable {
         this.rejectionReason = rejectionReason;
     }
 
-    public Date getResolutionDate() {
+    public String getResolutionDate() {
         return resolutionDate;
     }
 
-    public void setResolutionDate(Date resolutionDate) {
+    public void setResolutionDate(String resolutionDate) {
         this.resolutionDate = resolutionDate;
     }
 

@@ -1,3 +1,19 @@
+/*
+ * Copyright 2017-2025 OpenAIRE AMKE & Athena Research and Innovation Center
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package gr.uoa.di.madgik.resourcecatalogue.service.sync;
 
 import gr.uoa.di.madgik.resourcecatalogue.domain.Datasource;
@@ -5,10 +21,10 @@ import gr.uoa.di.madgik.resourcecatalogue.domain.Identifiable;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Provider;
 import gr.uoa.di.madgik.resourcecatalogue.domain.TrainingResource;
 import gr.uoa.di.madgik.resourcecatalogue.service.SynchronizerService;
+import jakarta.annotation.PostConstruct;
 import org.javatuples.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
@@ -17,7 +33,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
 
-import javax.annotation.PostConstruct;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
@@ -35,13 +50,12 @@ public abstract class AbstractSyncService<T extends Identifiable> implements Syn
     protected boolean active = false;
     protected String host;
     protected String controller;
-    private String filename;
+    private final String filename;
 
-    private BlockingQueue<Pair<T, String>> queue;
+    private final BlockingQueue<Pair<T, String>> queue;
 
     protected abstract String getController();
 
-    @Autowired
     public AbstractSyncService(@Value("${sync.host:}") String host, @Value("${sync.token.filepath:}") String filename, @Value("${sync.enable}") boolean enabled) {
         this.host = host;
         this.filename = filename;
@@ -108,12 +122,12 @@ public abstract class AbstractSyncService<T extends Identifiable> implements Syn
         boolean retryKey = true;
         if (active) {
             HttpEntity<T> request = new HttpEntity<>(t, createHeaders());
-            logger.info("Posting resource with id: {} - Host: {}", t.getId(), host);
+            logger.info("Posting resource with id: '{}' - Host: [{}]", t.getId(), host);
             try {
                 URI uri = new URI(host + controller).normalize();
                 ResponseEntity<?> re = restTemplate.exchange(uri.normalize(), HttpMethod.POST, request, t.getClass());
                 if (re.getStatusCode() != HttpStatus.CREATED) {
-                    logger.error("Adding {} with id '{}' from host '{}' returned code '{}'\nResponse body:\n{}",
+                    logger.error("Adding {} with id '{}' from host [{}] returned code '{}'\nResponse body:\n{}",
                             t.getClass(), t.getId(), host, re.getStatusCodeValue(), re.getBody());
                 } else {
                     retryKey = false;
@@ -121,7 +135,7 @@ public abstract class AbstractSyncService<T extends Identifiable> implements Syn
             } catch (URISyntaxException e) {
                 logger.error("could not create URI for host: {}", host, e);
             } catch (HttpServerErrorException e) {
-                logger.error("Failed to post {} with id {} to host {}\nMessage: {}",
+                logger.error("Failed to post {} with id '{}' to host {}\nMessage: {}",
                         t.getClass(), t.getId(), host, e.getResponseBodyAsString());
             } catch (RuntimeException re) {
                 logger.error("syncAdd failed, check if token has expired!\n{}: {}", t.getClass(), t, re);
@@ -141,12 +155,12 @@ public abstract class AbstractSyncService<T extends Identifiable> implements Syn
         boolean retryKey = true;
         if (active) {
             HttpEntity<T> request = new HttpEntity<>(t, createHeaders());
-            logger.info("Updating {} with id: {} - Host: {}", t.getClass(), t.getId(), host);
+            logger.info("Updating {} with id: '{}' - Host: [{}]", t.getClass(), t.getId(), host);
             try {
                 URI uri = new URI(host + controller).normalize();
                 ResponseEntity<?> re = restTemplate.exchange(uri.normalize().toString(), HttpMethod.PUT, request, t.getClass());
                 if (re.getStatusCode() != HttpStatus.OK) {
-                    logger.error("Updating {} with id '{}' from host '{}' returned code '{}'\nResponse body:\n{}",
+                    logger.error("Updating {} with id '{}' from host [{}] returned code '{}'\nResponse body:\n{}",
                             t.getClass(), t.getId(), host, re.getStatusCodeValue(), re.getBody());
                 } else {
                     retryKey = false;
@@ -154,7 +168,7 @@ public abstract class AbstractSyncService<T extends Identifiable> implements Syn
             } catch (URISyntaxException e) {
                 logger.error("could not create URI for host: {}", host, e);
             } catch (HttpServerErrorException e) {
-                logger.error("Failed to update {} with id {} to host {}\nMessage: {}",
+                logger.error("Failed to update {} with id '{}' to host {}\nMessage: {}",
                         t.getClass(), t.getId(), host, e.getResponseBodyAsString());
             } catch (RuntimeException re) {
                 logger.error("syncUpdate failed, check if token has expired!\n{}: {}", t.getClass(), t, re);
@@ -174,12 +188,12 @@ public abstract class AbstractSyncService<T extends Identifiable> implements Syn
         boolean retryKey = true;
         if (active) {
             HttpEntity<T> request = new HttpEntity<>(createHeaders());
-            logger.info("Deleting {} with id: {} - Host: {}", t.getClass(), t.getId(), host);
+            logger.info("Deleting {} with id: '{}' - Host: [{}]", t.getClass(), t.getId(), host);
             try {
                 URI uri = new URI(String.format("%s/%s/%s", host, controller, t.getId())).normalize();
                 ResponseEntity<?> re = restTemplate.exchange(uri.toString(), HttpMethod.DELETE, request, Void.class);
                 if (re.getStatusCode() != HttpStatus.NO_CONTENT) {
-                    logger.error("Deleting {} with id '{}' from host '{}' returned code '{}'\nResponse body:\n{}",
+                    logger.error("Deleting {} with id '{}' from host [{}] returned code '{}'\nResponse body:\n{}",
                             t.getClass(), t.getId(), host, re.getStatusCodeValue(), re.getBody());
                 } else {
                     retryKey = false;
@@ -187,7 +201,7 @@ public abstract class AbstractSyncService<T extends Identifiable> implements Syn
             } catch (URISyntaxException e) {
                 logger.error("could not create URI for host: {}", host, e);
             } catch (HttpServerErrorException e) {
-                logger.error("Failed to delete {} with id {} to host {}\nMessage: {}",
+                logger.error("Failed to delete {} with id '{}' to host {}\nMessage: {}",
                         t.getClass(), t.getId(), host, e.getResponseBodyAsString());
             } catch (RuntimeException re) {
                 logger.error("syncDelete failed, check if token has expired!\n{}: {}", t.getClass(), t, re);
@@ -209,7 +223,7 @@ public abstract class AbstractSyncService<T extends Identifiable> implements Syn
         if (active) {
             HttpEntity<T> request = new HttpEntity<>(t, createHeaders());
             URI uri;
-            logger.info("Verifying resource with id: {} - Host: {}", t.getId(), host);
+            logger.info("Verifying resource with id: '{}' - Host: [{}]", t.getId(), host);
             try {
                 if (t instanceof Provider) {
                     uri = new URI(host + controller + "/verifyProvider/" + t.getId() + "?active=true&status=approved%20provider").normalize();
@@ -232,7 +246,7 @@ public abstract class AbstractSyncService<T extends Identifiable> implements Syn
             } catch (URISyntaxException e) {
                 logger.error("could not create URI for host: {}", host, e);
             } catch (HttpServerErrorException e) {
-                logger.error("Failed to patch {} with id {} to host {}\nMessage: {}",
+                logger.error("Failed to patch {} with id '{}' to host {}\nMessage: {}",
                         t.getClass(), t.getId(), host, e.getResponseBodyAsString());
             } catch (RuntimeException re) {
                 logger.error("syncVerify failed, check if token has expired!\n{}: {}", t.getClass(), t, re);

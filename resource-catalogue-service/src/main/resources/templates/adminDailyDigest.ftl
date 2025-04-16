@@ -23,7 +23,7 @@
             </#list>
         </#if>
         <#if newServices?? && newServices?size &gt; 0>
-            New Resources:
+            New Services:
             <br>
             <#list newServices as service>
                 ${service}
@@ -31,10 +31,42 @@
             </#list>
         </#if>
         <#if updatedServices?? && updatedServices?size &gt; 0>
-            Updated Resources:
+            Updated Services:
             <br>
             <#list updatedServices as service>
                 ${service}
+                <br>
+            </#list>
+        </#if>
+        <#if newTrainings?? && newTrainings?size &gt; 0>
+            New Training Resources:
+            <br>
+            <#list newTrainings as training>
+                ${training}
+                <br>
+            </#list>
+        </#if>
+        <#if updatedTrainings?? && updatedTrainings?size &gt; 0>
+            Updated Training Resources:
+            <br>
+            <#list updatedTrainings as training>
+                ${training}
+                <br>
+            </#list>
+        </#if>
+        <#if newGuidelines?? && newGuidelines?size &gt; 0>
+            New Interoperability Records:
+            <br>
+            <#list newGuidelines as guideline>
+                ${guideline}
+                <br>
+            </#list>
+        </#if>
+        <#if updatedGuidelines?? && updatedGuidelines?size &gt; 0>
+            Updated Interoperability Records:
+            <br>
+            <#list updatedGuidelines as guideline>
+                ${guideline}
                 <br>
             </#list>
         </#if>
@@ -51,12 +83,34 @@
             </#list>
         </#if>
         <#if loggingInfoServiceMap?? && loggingInfoServiceMap?size &gt; 0>
-            Resource Logging Info:
+            Service Logging Info:
             <br>
             <#list loggingInfoServiceMap as key, value>
                 <#list value as item>
                     <#assign serviceItem = item>
-                    Resource "${key}" got "${serviceItem.type}" by [${serviceItem.userRole} - ${serviceItem.userEmail}]
+                    Service "${key}" got "${serviceItem.type}" by [${serviceItem.userRole} - ${serviceItem.userEmail}]
+                    <br>
+                </#list>
+            </#list>
+        </#if>
+        <#if loggingInfoTrainingMap?? && loggingInfoTrainingMap?size &gt; 0>
+            Training Resource Logging Info:
+            <br>
+            <#list loggingInfoTrainingMap as key, value>
+                <#list value as item>
+                    <#assign trainingItem = item>
+                    Training Resource "${key}" got "${trainingItem.type}" by [${trainingItem.userRole} - ${trainingItem.userEmail}]
+                    <br>
+                </#list>
+            </#list>
+        </#if>
+        <#if loggingInfoGuidelineMap?? && loggingInfoGuidelineMap?size &gt; 0>
+            Interoperability Record Logging Info:
+            <br>
+            <#list loggingInfoGuidelineMap as key, value>
+                <#list value as item>
+                    <#assign guidelineItem = item>
+                    Interoperability Record "${key}" got "${guidelineItem.type}" by [${guidelineItem.userRole} - ${guidelineItem.userEmail}]
                     <br>
                 </#list>
             </#list>

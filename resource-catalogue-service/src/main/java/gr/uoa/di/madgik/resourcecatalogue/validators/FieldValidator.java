@@ -1,23 +1,41 @@
+/*
+ * Copyright 2017-2025 OpenAIRE AMKE & Athena Research and Innovation Center
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package gr.uoa.di.madgik.resourcecatalogue.validators;
 
+import gr.uoa.di.madgik.catalogue.exception.ValidationException;
+import gr.uoa.di.madgik.registry.exception.ResourceException;
+import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.annotation.*;
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
-import gr.uoa.di.madgik.resourcecatalogue.exception.ResourceException;
-import gr.uoa.di.madgik.resourcecatalogue.exception.ResourceNotFoundException;
-import gr.uoa.di.madgik.resourcecatalogue.exception.ValidationException;
 import gr.uoa.di.madgik.resourcecatalogue.manager.ProviderManager;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
+import gr.uoa.di.madgik.resourcecatalogue.utils.RestTemplateTrustManager;
 import org.apache.commons.validator.routines.EmailValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpStatusCodeException;
+import org.springframework.web.client.RestTemplate;
 
-import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
-import java.net.HttpURLConnection;
+import java.net.URI;
 import java.net.URL;
 import java.util.*;
 import java.util.regex.Pattern;
@@ -30,7 +48,7 @@ public class FieldValidator {
 
     private final VocabularyService vocabularyService;
     private final ProviderManager providerService;
-    private final ServiceBundleService serviceBundleService;
+    private final ServiceBundleService<ServiceBundle> serviceBundleService;
     private final TrainingResourceService trainingResourceService;
     private final CatalogueService catalogueService;
     private final InteroperabilityRecordService interoperabilityRecordService;
@@ -40,10 +58,9 @@ public class FieldValidator {
 
     private Deque<String> validationLocation;
 
-    @Autowired
     public FieldValidator(VocabularyService vocabularyService,
                           ProviderManager providerService,
-                          @Lazy ServiceBundleService serviceBundleService,
+                          @Lazy ServiceBundleService<ServiceBundle> serviceBundleService,
                           @Lazy TrainingResourceService trainingResourceService,
                           @Lazy CatalogueService catalogueService,
                           @Lazy InteroperabilityRecordService interoperabilityRecordService) {
@@ -119,7 +136,7 @@ public class FieldValidator {
         // check if FieldValidation annotation exists
         Annotation vocabularyValidation = field.getAnnotation(VocabularyValidation.class);
         Annotation geoLocationVocValidation = field.getAnnotation(GeoLocationVocValidation.class);
-        Annotation annotation = field.getAnnotation(FieldValidation.class);
+        FieldValidation annotation = field.getAnnotation(FieldValidation.class);
         if (vocabularyValidation != null && annotation == null) {
             annotation = vocabularyValidation.annotationType().getAnnotation(FieldValidation.class);
         }
@@ -128,7 +145,7 @@ public class FieldValidator {
             annotation = geoLocationVocValidation.annotationType().getAnnotation(FieldValidation.class);
         }
 
-        validateField(field, o, (FieldValidation) annotation);
+        validateField(field, o, annotation);
     }
 
     private void validatePhone(Field field, Object o, PhoneValidation annotation) throws IllegalAccessException {
@@ -241,7 +258,7 @@ public class FieldValidator {
             if (URL.class.equals(clazz)) {
                 URL url = (URL) o;
                 validateUrl(field, url);
-            } else if (ArrayList.class.equals(clazz) && !((ArrayList) o).isEmpty() && URL.class.equals(((ArrayList) o).get(0).getClass())) {
+            } else if (ArrayList.class.equals(clazz) && !((ArrayList) o).isEmpty() && URL.class.equals(((ArrayList) o).getFirst().getClass())) {
                 for (int i = 0; i < ((ArrayList) o).size(); i++) {
                     URL url = (URL) ((ArrayList) o).get(i);
                     validateUrl(field, url);
@@ -251,36 +268,30 @@ public class FieldValidator {
     }
 
     public void validateUrl(Field field, URL urlForValidation) {
-        HttpsTrustManager.allowAllSSL();
-        HttpURLConnection huc;
-        int statusCode = 0;
+        RestTemplate restTemplate = RestTemplateTrustManager.createRestTemplateWithDisabledSSL();
 
         try {
-            // replace spaces with %20
             if (urlForValidation.toString().contains(" ")) {
-                urlForValidation = new URL(urlForValidation.toString().replaceAll("\\s", "%20"));
+                urlForValidation = URI.create(urlForValidation.toString()
+                        .replaceAll("\\s", "%20")).toURL();
             }
 
-            // open connection and get response code
-            huc = (HttpURLConnection) urlForValidation.openConnection();
-            assert huc != null;
-            huc.setRequestMethod("HEAD");
-            huc.setConnectTimeout(5000);
-            statusCode = huc.getResponseCode();
-        } catch (java.net.SocketTimeoutException e) {
-            throw new ValidationException("URI provided is not valid, or takes too long to load. Found in field " + field.getName());
-        } catch (IOException e) {
-            logger.trace(e.getMessage());
-        }
+            SimpleClientHttpRequestFactory requestFactory = new SimpleClientHttpRequestFactory();
+            requestFactory.setConnectTimeout(5000);
+            requestFactory.setReadTimeout(5000);
+            restTemplate.setRequestFactory(requestFactory);
 
-//        if (statusCode != 200 && statusCode != 301 && statusCode != 302 && statusCode != 308
-//                && statusCode != 403 && statusCode != 405 && statusCode != 503) {
-//            if (field == null) {
-//                throw new ValidationException(String.format("The URL '%s' you provided is not valid.", urlForValidation));
-//            } else {
-//                throw new ValidationException(String.format("The URL '%s' you provided is not valid. Found in field '%s'", urlForValidation, field.getName()));
-//            }
-//        }
+            restTemplate.headForHeaders(urlForValidation.toURI());
+
+        } catch (HttpStatusCodeException e) {
+            logger.trace(e.getMessage());
+            throw new ValidationException(
+                    String.format("URL '%s' found on field '%s' responded with error code: %d",
+                            urlForValidation, field.getName(), e.getStatusCode().value()));
+        } catch (Exception e) {
+            logger.trace(e.getMessage());
+            throw new ValidationException("Failed to validate URL: " + urlForValidation);
+        }
     }
 
     // TODO: find a better way to get resources by id

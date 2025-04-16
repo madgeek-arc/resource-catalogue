@@ -19,6 +19,22 @@
     </licenses>
     <dependencies>
         <dependency>
+            <groupId>com.github.victools</groupId>
+            <artifactId>jsonschema-generator</artifactId>
+            <version>4.38.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.github.victools</groupId>
+            <artifactId>jsonschema-module-jackson</artifactId>
+            <version>4.38.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.github.victools</groupId>
+            <artifactId>jsonschema-module-jakarta-validation</artifactId>
+            <version>4.38.0</version>
+        </dependency>
+
+        <dependency>
             <groupId>org.springframework.security</groupId>
             <artifactId>spring-security-core</artifactId>
         </dependency>
@@ -36,11 +52,7 @@
         </dependency>
         <dependency>
             <groupId>org.springdoc</groupId>
-            <artifactId>springdoc-openapi-ui</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>javax.xml.bind</groupId>
-            <artifactId>jaxb-api</artifactId>
+            <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
         </dependency>
         <dependency>
             <groupId>org.apache.commons</groupId>
@@ -51,18 +63,58 @@
             <artifactId>json-simple</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.google.code.gson</groupId>
-            <artifactId>gson</artifactId>
-            <version>2.11.0</version>
-        </dependency>
-        <dependency>
-            <groupId>javax.servlet</groupId>
-            <artifactId>javax.servlet-api</artifactId>
+            <groupId>jakarta.servlet</groupId>
+            <artifactId>jakarta.servlet-api</artifactId>
         </dependency>
     </dependencies>
 
     <build>
         <plugins>
+            <plugin>
+                <groupId>com.github.victools</groupId>
+                <artifactId>jsonschema-maven-plugin</artifactId>
+                <version>4.38.0</version>
+                <executions>
+                    <execution>
+                        <id>generate-jsonschemas</id>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <phase>process-classes</phase>
+                    </execution>
+                </executions>
+                <configuration>
+                    <!-- https://victools.github.io/jsonschema-generator/ -->
+                    <schemaFilePath>${project.basedir}/src/main/resources/schemas/json</schemaFilePath>
+                    <schemaFileName>{0}-schema.json</schemaFileName>
+                    <schemaVersion>DRAFT_2020_12</schemaVersion>
+                    <packageNames>
+                        <packageName>gr.uoa.di.madgik.resourcecatalogue.domain</packageName>
+                    </packageNames>
+                    <options>
+                        <preset>PLAIN_JSON</preset>
+                        <enabled>
+                            <option>DEFINITIONS_FOR_ALL_OBJECTS</option>
+                            <option>FORBIDDEN_ADDITIONAL_PROPERTIES_BY_DEFAULT</option>
+                        </enabled>
+                    </options>
+                    <modules>
+                        <module>
+                            <name>Jackson</name>
+                            <options>
+                                <option>RESPECT_JSONPROPERTY_REQUIRED</option>
+                            </options>
+                        </module>
+                        <module>
+                            <name>JakartaValidation</name>
+                            <options>
+                                <option>NOT_NULLABLE_FIELD_IS_REQUIRED</option>
+                                <option>INCLUDE_PATTERN_EXPRESSIONS</option>
+                            </options>
+                        </module>
+                    </modules>
+                </configuration>
+            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
@@ -91,7 +143,7 @@
                     <sources>
                         <source>${basedir}/src/main/java/gr/uoa/di/madgik/resourcecatalogue/domain</source>
                     </sources>
-                    <outputDirectory>${basedir}/src/main/resources</outputDirectory>
+                    <outputDirectory>${basedir}/src/main/resources/schemas</outputDirectory>
                 </configuration>
             </plugin>
             <plugin>

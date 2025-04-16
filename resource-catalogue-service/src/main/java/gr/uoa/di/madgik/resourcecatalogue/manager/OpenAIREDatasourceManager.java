@@ -1,12 +1,28 @@
+/*
+ * Copyright 2017-2025 OpenAIRE AMKE & Athena Research and Innovation Center
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package gr.uoa.di.madgik.resourcecatalogue.manager;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonNull;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
+import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Datasource;
 import gr.uoa.di.madgik.resourcecatalogue.dto.OpenAIREMetrics;
-import gr.uoa.di.madgik.resourcecatalogue.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.service.OpenAIREDatasourceService;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -30,17 +46,12 @@ public class OpenAIREDatasourceManager implements OpenAIREDatasourceService {
 
     private static final Logger logger = LoggerFactory.getLogger(OpenAIREDatasourceManager.class);
 
-    private final String openaireAPI;
-    private final String openaireMetricsValidated;
-    private final String openaireMetrics;
-
-    public OpenAIREDatasourceManager(@Value("${openaire.dsm.api}") String openaireAPI,
-                                     @Value("${openaire.ds.metrics.validated}") String openaireMetricsValidated,
-                                     @Value("${openaire.ds.metrics}") String openaireMetrics) {
-        this.openaireAPI = openaireAPI;
-        this.openaireMetricsValidated = openaireMetricsValidated;
-        this.openaireMetrics = openaireMetrics;
-    }
+    @Value("${openaire.ds.api:}")
+    private String openaireAPI;
+    @Value("${openaire.ds.metrics.validated:}")
+    private String openaireMetricsValidated;
+    @Value("${openaire.ds.metrics:}")
+    private String openaireMetrics;
 
     private String[] getOpenAIREDatasourcesAsJSON(FacetFilter ff) {
         String[] pagination = createPagination(ff);
@@ -84,7 +95,7 @@ public class OpenAIREDatasourceManager implements OpenAIREDatasourceService {
                 data = "{  \"id\": \"" + ff.getFilter().get("id") + "\"}";
             }
         }
-        if (ff.getKeyword() != null && !ff.getKeyword().equals("")) {
+        if (ff.getKeyword() != null && !ff.getKeyword().isEmpty()) {
             data = "{  \"officialname\": \"" + ff.getKeyword() + "\"}";
         }
         return new String[]{Integer.toString(page), Integer.toString(quantity), ordering, data};
@@ -199,7 +210,7 @@ public class OpenAIREDatasourceManager implements OpenAIREDatasourceService {
     }
 
     public String getOpenAIREDatasourceIdByEOSCDatasourceId(String id) {
-        // API call from Italians
+        //TODO: waiting for new API call
         return "opendoar____::1106";
     }
 

@@ -1,14 +1,31 @@
+/*
+ * Copyright 2017-2025 OpenAIRE AMKE & Athena Research and Innovation Center
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package gr.uoa.di.madgik.resourcecatalogue.manager;
 
+import gr.uoa.di.madgik.catalogue.exception.ValidationException;
 import gr.uoa.di.madgik.registry.domain.Resource;
+import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.registry.service.SearchService;
 import gr.uoa.di.madgik.resourcecatalogue.domain.LoggingInfo;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Metadata;
 import gr.uoa.di.madgik.resourcecatalogue.domain.ResourceInteroperabilityRecordBundle;
-import gr.uoa.di.madgik.resourcecatalogue.domain.User;
-import gr.uoa.di.madgik.resourcecatalogue.exception.ResourceNotFoundException;
-import gr.uoa.di.madgik.resourcecatalogue.exception.ValidationException;
+import gr.uoa.di.madgik.resourcecatalogue.domain.ServiceBundle;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
+import gr.uoa.di.madgik.resourcecatalogue.utils.AuthenticationInfo;
 import gr.uoa.di.madgik.resourcecatalogue.utils.ObjectUtils;
 import gr.uoa.di.madgik.resourcecatalogue.utils.ProviderResourcesCommonMethods;
 import gr.uoa.di.madgik.resourcecatalogue.utils.ResourceValidationUtils;
@@ -24,19 +41,19 @@ public class ResourceInteroperabilityRecordManager extends ResourceManager<Resou
         implements ResourceInteroperabilityRecordService {
 
     private static final Logger logger = LoggerFactory.getLogger(ResourceInteroperabilityRecordManager.class);
-    private final ServiceBundleService serviceBundleService;
+    private final ServiceBundleService<ServiceBundle> serviceBundleService;
     private final TrainingResourceService trainingResourceService;
     private final InteroperabilityRecordService interoperabilityRecordService;
-    private final PublicResourceInteroperabilityRecordManager publicResourceInteroperabilityRecordManager;
+    private final PublicResourceInteroperabilityRecordService publicResourceInteroperabilityRecordManager;
     private final SecurityService securityService;
     private final ProviderResourcesCommonMethods commonMethods;
     private final IdCreator idCreator;
 
-    public ResourceInteroperabilityRecordManager(ServiceBundleService serviceBundleService,
+    public ResourceInteroperabilityRecordManager(ServiceBundleService<ServiceBundle> serviceBundleService,
                                                  TrainingResourceService trainingResourceService,
                                                  InteroperabilityRecordService interoperabilityRecordService,
                                                  SecurityService securityService, ProviderResourcesCommonMethods commonMethods,
-                                                 PublicResourceInteroperabilityRecordManager publicResourceInteroperabilityRecordManager,
+                                                 PublicResourceInteroperabilityRecordService publicResourceInteroperabilityRecordManager,
                                                  IdCreator idCreator) {
         super(ResourceInteroperabilityRecordBundle.class);
         this.serviceBundleService = serviceBundleService;
@@ -49,7 +66,7 @@ public class ResourceInteroperabilityRecordManager extends ResourceManager<Resou
     }
 
     @Override
-    public String getResourceType() {
+    public String getResourceTypeName() {
         return "resource_interoperability_record";
     }
 
@@ -82,13 +99,13 @@ public class ResourceInteroperabilityRecordManager extends ResourceManager<Resou
         validate(bundle, resourceType);
         commonMethods.checkRelatedResourceIDsConsistency(bundle);
 
-        bundle.setId(idCreator.generate(getResourceType()));
+        bundle.setId(idCreator.generate(getResourceTypeName()));
         logger.trace("Attempting to add a new ResourceInteroperabilityRecord: {}", bundle);
 
-        bundle.setMetadata(Metadata.createMetadata(User.of(auth).getFullName(), User.of(auth).getEmail()));
+        bundle.setMetadata(Metadata.createMetadata(AuthenticationInfo.getFullName(auth), AuthenticationInfo.getEmail(auth).toLowerCase()));
         List<LoggingInfo> loggingInfoList = commonMethods.returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(bundle, auth);
         bundle.setLoggingInfo(loggingInfoList);
-        bundle.setLatestOnboardingInfo(loggingInfoList.get(0));
+        bundle.setLatestOnboardingInfo(loggingInfoList.getFirst());
 
         // active
         bundle.setActive(true);
@@ -135,7 +152,7 @@ public class ResourceInteroperabilityRecordManager extends ResourceManager<Resou
         validate(ret);
         checkIfEachInteroperabilityRecordIsApproved(ret);
 
-        ret.setMetadata(Metadata.updateMetadata(ret.getMetadata(), User.of(auth).getFullName(), User.of(auth).getEmail()));
+        ret.setMetadata(Metadata.updateMetadata(ret.getMetadata(), AuthenticationInfo.getFullName(auth), AuthenticationInfo.getEmail(auth).toLowerCase()));
         List<LoggingInfo> loggingInfoList = commonMethods.returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(existingInteroperabilityRecord, auth);
         LoggingInfo loggingInfo = commonMethods.createLoggingInfo(auth, LoggingInfo.Types.UPDATE.getKey(),
                 LoggingInfo.ActionType.UPDATED.getKey());
@@ -149,7 +166,7 @@ public class ResourceInteroperabilityRecordManager extends ResourceManager<Resou
         ret.setLatestAuditInfo(commonMethods.setLatestLoggingInfo(loggingInfoList, LoggingInfo.Types.AUDIT.getKey()));
 
         existingResource.setPayload(serialize(ret));
-        existingResource.setResourceType(resourceType);
+        existingResource.setResourceType(getResourceType());
 
         // block user from updating resourceId
         if (!ret.getResourceInteroperabilityRecord().getResourceId().equals(existingInteroperabilityRecord.getResourceInteroperabilityRecord().getResourceId())

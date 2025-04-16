@@ -28,12 +28,16 @@
             <artifactId>spring-jms</artifactId>
         </dependency>
         <dependency>
-            <groupId>gr.uoa.di.madgik</groupId>
-            <artifactId>registry-core-jms</artifactId>
+            <groupId>org.apache.activemq</groupId>
+            <artifactId>activemq-client</artifactId>
         </dependency>
         <dependency>
             <groupId>gr.uoa.di.madgik</groupId>
             <artifactId>resource-catalogue-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>gr.uoa.di.madgik</groupId>
+            <artifactId>registry-starter-jms</artifactId>
         </dependency>
     </dependencies>
 </project>

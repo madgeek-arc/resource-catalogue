@@ -1,6 +1,6 @@
 <p>Dear ${user.name},</p>
 <p>
-    Your ${resourceType} [${bundleName}] has been audited by the EPOT team.
+    Your ${resourceType} [${resourceName}] has been audited by the EPOT team.
     <br>
     It has been marked as [${bundle.latestAuditInfo.actionType}] with comment:
     <br>

@@ -1,3 +1,19 @@
+/*
+ * Copyright 2017-2025 OpenAIRE AMKE & Athena Research and Innovation Center
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package gr.uoa.di.madgik.resourcecatalogue.service;
 
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
@@ -9,7 +25,6 @@ import gr.uoa.di.madgik.resourcecatalogue.dto.ExtendedValue;
 import gr.uoa.di.madgik.resourcecatalogue.dto.MapValues;
 import org.springframework.security.core.Authentication;
 
-import java.net.URL;
 import java.util.List;
 
 public interface ProviderService extends ResourceService<ProviderBundle>, BundleOperations<ProviderBundle> {
@@ -69,16 +84,7 @@ public interface ProviderService extends ResourceService<ProviderBundle>, Bundle
      * @param authentication Authentication
      * @return {@link List}&lt;{@link ProviderBundle}&gt;
      */
-    List<ProviderBundle> getServiceProviders(String email, Authentication authentication);
-
-    /**
-     * Validates a specific URL regarding the ability to open a connection
-     *
-     * @param urlForValidation URL to be validated
-     * @return True/False
-     * @deprecated Validates a specific URL regarding the response's status code
-     */
-    boolean validateUrl(URL urlForValidation) throws Throwable;
+    List<ProviderBundle> getUserProviders(String email, Authentication authentication);
 
     /**
      * After a Provider's update, calculate if the list of Admins has changed

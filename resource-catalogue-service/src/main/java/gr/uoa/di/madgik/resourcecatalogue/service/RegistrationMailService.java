@@ -1,17 +1,31 @@
+/*
+ * Copyright 2017-2025 OpenAIRE AMKE & Athena Research and Innovation Center
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package gr.uoa.di.madgik.resourcecatalogue.service;
 
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
-import gr.uoa.di.madgik.resourcecatalogue.config.security.ResourceCatalogueProperties;
+import gr.uoa.di.madgik.resourcecatalogue.config.properties.CatalogueProperties;
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
-import gr.uoa.di.madgik.resourcecatalogue.exception.ResourceNotFoundException;
-import gr.uoa.di.madgik.resourcecatalogue.exception.ValidationException;
 import gr.uoa.di.madgik.resourcecatalogue.manager.*;
+import gr.uoa.di.madgik.resourcecatalogue.utils.AuthenticationInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.scheduling.annotation.Async;
@@ -28,6 +42,9 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+//TODO: test
+//TODO: getSimpleName() returns eg. ProviderBundle instead of Provider
+//TODO: rename to something more general (MailService?)
 @Component
 public class RegistrationMailService {
 
@@ -35,19 +52,20 @@ public class RegistrationMailService {
     private final MailService mailService;
     private final Configuration cfg;
     private final ProviderManager providerManager;
-    private final DraftProviderManager pendingProviderManager;
     private final ServiceBundleManager serviceBundleManager;
     private final TrainingResourceManager trainingResourceManager;
-    private final DraftServiceManager pendingServiceManager;
+    private final InteroperabilityRecordManager interoperabilityRecordManager;
+    private final DraftProviderManager draftProviderManager;
+    private final DraftServiceManager draftServiceManager;
+    private final DraftTrainingResourceManager draftTrainingResourceManager;
+    private final DraftInteroperabilityRecordManager draftInteroperabilityRecordManager;
     private final SecurityService securityService;
 
     // Properties
     private final String registrationEmail;
-    private final String catalogueId;
     private final String catalogueName;
     private final String homepage;
     private final String helpdeskEmail;
-    private final String helpdeskCC;
     private final String monitoringEmail;
     private final boolean enableAdminNotifications;
     private final boolean enableProviderNotifications;
@@ -55,509 +73,48 @@ public class RegistrationMailService {
     @Value("${elastic.index.max_result_window:10000}")
     private int maxQuantity;
 
+    private final String providersPrefix;
+    private final String servicesPrefix;
+    private final String trainingsPrefix;
 
-    @Autowired
     public RegistrationMailService(MailService mailService, Configuration cfg,
-                                   ProviderManager providerManager,
-                                   @Lazy DraftProviderManager pendingProviderManager,
-                                   ServiceBundleManager serviceBundleManager,
-                                   TrainingResourceManager trainingResourceManager,
-                                   DraftServiceManager pendingServiceManager,
                                    SecurityService securityService,
-                                   ResourceCatalogueProperties properties) {
+                                   @Lazy ProviderManager providerManager,
+                                   @Lazy ServiceBundleManager serviceBundleManager,
+                                   @Lazy TrainingResourceManager trainingResourceManager,
+                                   @Lazy InteroperabilityRecordManager interoperabilityRecordManager,
+                                   @Lazy DraftProviderManager draftProviderManager,
+                                   @Lazy DraftServiceManager draftServiceManager,
+                                   @Lazy DraftTrainingResourceManager draftTrainingResourceManager,
+                                   @Lazy DraftInteroperabilityRecordManager draftInteroperabilityRecordManager,
+                                   CatalogueProperties properties) {
         this.mailService = mailService;
         this.cfg = cfg;
+        this.securityService = securityService;
         this.providerManager = providerManager;
-        this.pendingProviderManager = pendingProviderManager;
         this.serviceBundleManager = serviceBundleManager;
         this.trainingResourceManager = trainingResourceManager;
-        this.pendingServiceManager = pendingServiceManager;
-        this.securityService = securityService;
+        this.interoperabilityRecordManager = interoperabilityRecordManager;
+        this.draftProviderManager = draftProviderManager;
+        this.draftServiceManager = draftServiceManager;
+        this.draftTrainingResourceManager = draftTrainingResourceManager;
+        this.draftInteroperabilityRecordManager = draftInteroperabilityRecordManager;
 
         // Init properties
         this.homepage = properties.getHomepage();
-        this.catalogueId = properties.getId();
-        this.catalogueName = properties.getName();
-        this.registrationEmail = properties.getEmailProperties().getRegistrationEmails().getTo();
-        this.helpdeskEmail = properties.getEmailProperties().getHelpdeskEmails().getTo();
-        this.helpdeskCC = properties.getEmailProperties().getHelpdeskEmails().getCc();
-        this.monitoringEmail = properties.getEmailProperties().getMonitoringEmails().getTo();
-        this.enableAdminNotifications = properties.getEmailProperties().isAdminNotifications();
-        this.enableProviderNotifications = properties.getEmailProperties().isProviderNotifications();
+        catalogueName = properties.getName();
+        this.registrationEmail = properties.getEmails().getRegistrationEmails().getTo();
+        this.helpdeskEmail = properties.getEmails().getHelpdeskEmails().getTo();
+        this.monitoringEmail = properties.getEmails().getMonitoringEmails().getTo();
+        this.enableAdminNotifications = properties.getEmails().isAdminNotifications();
+        this.enableProviderNotifications = properties.getEmails().isProviderNotifications();
+
+        this.providersPrefix = properties.getResources().get(ResourceTypes.PROVIDER).getIdPrefix();
+        this.servicesPrefix = properties.getResources().get(ResourceTypes.SERVICE).getIdPrefix();
+        this.trainingsPrefix = properties.getResources().get(ResourceTypes.TRAINING_RESOURCE).getIdPrefix();
     }
 
-    @Async
-    public void sendProviderMails(ProviderBundle providerBundle, String afterReturningFrom) {
-        Map<String, Object> root = getRootTemplate();
-        StringWriter out = new StringWriter();
-        String providerMail;
-        String regTeamMail;
-
-        String providerSubject;
-        String regTeamSubject;
-
-        if (providerBundle == null || providerBundle.getProvider() == null) {
-            throw new ResourceNotFoundException("Provider is null");
-        }
-
-        Service serviceTemplate = null;
-        TrainingResource trainingResourceTemplate = null;
-        switch (afterReturningFrom) {
-            case "providerManager":
-                serviceTemplate = new Service();
-                serviceTemplate.setName("");
-                break;
-            case "serviceBundleManager":
-                serviceTemplate = serviceBundleManager.getResources(providerBundle.getId()).get(0);
-                root.put("resourceId", serviceTemplate.getId());
-                root.put("resourceName", serviceTemplate.getName());
-                root.put("resourceType", "resource");
-                break;
-            case "trainingResourceManager":
-                trainingResourceTemplate = trainingResourceManager.getResources(providerBundle.getId()).get(0);
-                root.put("resourceId", trainingResourceTemplate.getId());
-                root.put("resourceName", trainingResourceTemplate.getTitle());
-                root.put("resourceType", "training-resource");
-                break;
-            default:
-                break;
-        }
-
-        if (serviceTemplate != null) {
-            providerSubject = getProviderSubject(providerBundle, serviceTemplate, serviceTemplate.getName());
-            regTeamSubject = getRegTeamSubject(providerBundle, serviceTemplate, serviceTemplate.getId(), serviceTemplate.getName());
-        } else {
-            providerSubject = getProviderSubject(providerBundle, trainingResourceTemplate, trainingResourceTemplate.getTitle());
-            regTeamSubject = getRegTeamSubject(providerBundle, trainingResourceTemplate, trainingResourceTemplate.getId(), trainingResourceTemplate.getTitle());
-        }
-
-        root.put("providerBundle", providerBundle);
-        root.put("registrationEmail", registrationEmail);
-        // get the first user's information for the registration team email
-        for (LoggingInfo loggingInfo : providerBundle.getLoggingInfo()) {
-            if (loggingInfo.getActionType().equals(LoggingInfo.ActionType.REGISTERED.getKey())) {
-                User user = new User();
-                if (loggingInfo.getUserEmail() != null && !loggingInfo.getUserEmail().equals("")) {
-                    user.setEmail(loggingInfo.getUserEmail());
-                } else {
-                    user.setEmail("no email provided");
-                }
-                if (loggingInfo.getUserFullName() != null && !loggingInfo.getUserFullName().equals("")) {
-                    String[] parts = loggingInfo.getUserFullName().split(" ");
-                    String name = parts[0];
-                    String surname = parts[1];
-                    user.setName(name);
-                    user.setSurname(surname);
-                } else {
-                    user.setName("Unknown");
-                    user.setSurname("Unknown");
-                }
-                root.put("user", user);
-                break;
-            }
-        }
-        if (!root.containsKey("user")) {
-            root.put("user", providerBundle.getProvider().getUsers().get(0));
-        }
-
-        try {
-            Template temp = cfg.getTemplate("registrationTeamMailTemplate.ftl");
-            temp.process(root, out);
-            regTeamMail = out.getBuffer().toString();
-            mailService.sendMail(registrationEmail, regTeamSubject, regTeamMail);
-            logger.info("\nRecipient: {}\nTitle: {}\nMail body: \n{}", registrationEmail,
-                    regTeamSubject, regTeamMail);
-
-            temp = cfg.getTemplate("providerMailTemplate.ftl");
-            for (User user : providerBundle.getProvider().getUsers()) {
-                if (user.getEmail() == null || user.getEmail().equals("")) {
-                    continue;
-                }
-//                root.remove("user"); // TODO: check if needed
-                out.getBuffer().setLength(0);
-                root.put("user", user);
-                temp.process(root, out);
-                providerMail = out.getBuffer().toString();
-                mailService.sendMail(user.getEmail(), providerSubject, providerMail);
-                logger.info("\nRecipient: {}\nTitle: {}\nMail body: \n{}", user.getEmail(), providerSubject, providerMail);
-            }
-
-            out.close();
-        } catch (IOException e) {
-            logger.error("Error finding mail template", e);
-        } catch (TemplateException e) {
-            logger.error("ERROR", e);
-        } catch (MessagingException e) {
-            logger.error("Could not send mail", e);
-        }
-    }
-
-    @Async
-    public void sendCatalogueMails(CatalogueBundle catalogueBundle) {
-        Map<String, Object> root = getRootTemplate();
-        StringWriter out = new StringWriter();
-        String catalogueMail;
-        String regTeamMail;
-
-        String catalogueSubject;
-        String regTeamSubject;
-
-        if (catalogueBundle == null || catalogueBundle.getCatalogue() == null) {
-            throw new ResourceNotFoundException("Catalogue is null");
-        }
-
-        catalogueSubject = getCatalogueSubject(catalogueBundle);
-        regTeamSubject = getRegTeamCatalogueSubject(catalogueBundle);
-
-        root.put("catalogueBundle", catalogueBundle);
-        root.put("registrationEmail", registrationEmail);
-        // get the first user's information for the registration team email
-        for (LoggingInfo loggingInfo : catalogueBundle.getLoggingInfo()) {
-            if (loggingInfo.getActionType().equals(LoggingInfo.ActionType.REGISTERED.getKey())) {
-                User user = new User();
-                if (loggingInfo.getUserEmail() != null && !loggingInfo.getUserEmail().equals("")) {
-                    user.setEmail(loggingInfo.getUserEmail());
-                }
-                if (loggingInfo.getUserFullName() != null && !loggingInfo.getUserFullName().equals("")) {
-                    String[] parts = loggingInfo.getUserFullName().split(" ");
-                    String name = parts[0];
-                    String surname = parts[1];
-                    user.setName(name);
-                    user.setSurname(surname);
-                }
-                root.put("user", user);
-                break;
-            }
-        }
-        if (!root.containsKey("user")) {
-            root.put("user", catalogueBundle.getCatalogue().getUsers().get(0));
-        }
-
-        try {
-            Template temp = cfg.getTemplate("registrationTeamMailCatalogueTemplate.ftl");
-            temp.process(root, out);
-            regTeamMail = out.getBuffer().toString();
-            mailService.sendMail(registrationEmail, regTeamSubject, regTeamMail);
-            logger.info("\nRecipient: {}\nTitle: {}\nMail body: \n{}", registrationEmail,
-                    regTeamSubject, regTeamMail);
-
-            temp = cfg.getTemplate("catalogueMailTemplate.ftl");
-            for (User user : catalogueBundle.getCatalogue().getUsers()) {
-                if (user.getEmail() == null || user.getEmail().equals("")) {
-                    continue;
-                }
-//                root.remove("user"); // TODO: check if needed
-                out.getBuffer().setLength(0);
-                root.put("user", user);
-                temp.process(root, out);
-                catalogueMail = out.getBuffer().toString();
-                mailService.sendMail(user.getEmail(), catalogueSubject, catalogueMail);
-                logger.info("\nRecipient: {}\nTitle: {}\nMail body: \n{}", user.getEmail(), catalogueSubject, catalogueMail);
-            }
-
-            out.close();
-        } catch (IOException e) {
-            logger.error("Error finding mail template", e);
-        } catch (TemplateException e) {
-            logger.error("ERROR", e);
-        } catch (MessagingException e) {
-            logger.error("Could not send mail", e);
-        }
-    }
-
-    @Scheduled(cron = "0 0 12 ? * 2/7") // At 12:00:00pm, every 7 days starting on Monday, every month
-    public void sendEmailNotificationsToProviders() {
-        FacetFilter ff = new FacetFilter();
-        ff.setQuantity(maxQuantity);
-        ff.addFilter("published", false);
-        List<ProviderBundle> allProviders = providerManager.getAll(ff, securityService.getAdminAccess()).getResults();
-
-        Map<String, Object> root = getRootTemplate();
-
-        for (ProviderBundle providerBundle : allProviders) {
-            if (providerBundle.getTemplateStatus().equals("no template status")) {
-                if (providerBundle.getProvider().getUsers() == null || providerBundle.getProvider().getUsers().isEmpty()) {
-                    continue;
-                }
-                String subject = String.format("[%s] Friendly reminder for your Provider [%s]", catalogueName, providerBundle.getProvider().getName());
-                root.put("providerBundle", providerBundle);
-                for (User user : providerBundle.getProvider().getUsers()) {
-                    root.put("user", user);
-                    String userRole = "provider";
-                    sendMailsFromTemplate("providerOnboarding.ftl", root, subject, user.getEmail(), userRole);
-                }
-            }
-        }
-    }
-
-    public void sendEmailNotificationsToProvidersWithOutdatedResources(String resourceId) {
-        Map<String, Object> root = getRootTemplate();
-        ProviderBundle providerBundle;
-        ServiceBundle serviceBundle;
-        TrainingResourceBundle trainingResourceBundle = null;
-        serviceBundle = serviceBundleManager.getOrElseReturnNull(resourceId, catalogueId);
-        if (serviceBundle == null) {
-            trainingResourceBundle = trainingResourceManager.getOrElseReturnNull(resourceId, catalogueId);
-            providerBundle = providerManager.get(trainingResourceBundle.getTrainingResource().getResourceOrganisation());
-        } else {
-            providerBundle = providerManager.get(serviceBundle.getService().getResourceOrganisation());
-        }
-        if (providerBundle.getProvider().getUsers() == null || providerBundle.getProvider().getUsers().isEmpty()) {
-            throw new ValidationException(String.format("Provider [%s]-[%s] has no Users", providerBundle.getId(), providerBundle.getProvider().getName()));
-        }
-        String subject = String.format("[%s] Your Provider [%s] has one or more outdated Resources", catalogueName, providerBundle.getProvider().getName());
-        root.put("providerBundle", providerBundle);
-        if (serviceBundle != null) {
-            root.put("serviceBundle", serviceBundle);
-            for (User user : providerBundle.getProvider().getUsers()) {
-                root.put("user", user);
-                String userRole = "provider";
-                sendMailsFromTemplate("providerOutdatedResources.ftl", root, subject, user.getEmail(), userRole);
-            }
-        } else {
-            root.put("trainingResourceBundle", trainingResourceBundle);
-            for (User user : providerBundle.getProvider().getUsers()) {
-                root.put("user", user);
-                String userRole = "provider";
-                sendMailsFromTemplate("providerOutdatedTrainingResources.ftl", root, subject, user.getEmail(), userRole);
-            }
-        }
-    }
-
-    public void sendEmailsForMovedResources(ProviderBundle oldProvider, ProviderBundle newProvider, ServiceBundle serviceBundle, Authentication auth) {
-        Map<String, Object> root = getRootTemplate();
-        if (oldProvider.getProvider().getUsers() == null || oldProvider.getProvider().getUsers().isEmpty()) {
-            throw new ValidationException(String.format("Provider [%s]-[%s] has no Users", oldProvider.getId(), oldProvider.getProvider().getName()));
-        }
-        if (newProvider.getProvider().getUsers() == null || newProvider.getProvider().getUsers().isEmpty()) {
-            throw new ValidationException(String.format("Provider [%s]-[%s] has no Users", newProvider.getId(), newProvider.getProvider().getName()));
-        }
-        String subject = String.format("[%s] Resource [%s] has been moved from Provider [%s] to Provider [%s]", catalogueName, serviceBundle.getService().getName(),
-                oldProvider.getProvider().getName(), newProvider.getProvider().getName());
-        String userRole = "provider";
-        root.put("oldProvider", oldProvider);
-        root.put("newProvider", newProvider);
-        root.put("serviceBundle", serviceBundle);
-        root.put("comment", serviceBundle.getLoggingInfo().get(serviceBundle.getLoggingInfo().size() - 1).getComment());
-
-        // emails to old Provider's Users
-        for (User user : oldProvider.getProvider().getUsers()) {
-            root.put("user", user);
-            sendMailsFromTemplate("resourceMovedOldProvider.ftl", root, subject, user.getEmail(), userRole);
-        }
-//        root.remove("user");
-
-        // emails to new Provider's Users
-        for (User user : newProvider.getProvider().getUsers()) {
-            root.put("user", user);
-            sendMailsFromTemplate("resourceMovedNewProvider.ftl", root, subject, user.getEmail(), userRole);
-        }
-
-        // emails to Admins
-        userRole = "admin";
-        root.put("adminFullName", User.of(auth).getFullName());
-        root.put("adminEmail", User.of(auth).getEmail());
-        root.put("adminRole", securityService.getRoleName(auth));
-        sendMailsFromTemplate("resourceMovedEPOT.ftl", root, subject, registrationEmail, userRole);
-    }
-
-    public void sendEmailsForMovedTrainingResources(ProviderBundle oldProvider, ProviderBundle newProvider, TrainingResourceBundle trainingResourceBundle, Authentication auth) {
-        Map<String, Object> root = getRootTemplate();
-        if (oldProvider.getProvider().getUsers() == null || oldProvider.getProvider().getUsers().isEmpty()) {
-            throw new ValidationException(String.format("Provider [%s]-[%s] has no Users", oldProvider.getId(), oldProvider.getProvider().getName()));
-        }
-        if (newProvider.getProvider().getUsers() == null || newProvider.getProvider().getUsers().isEmpty()) {
-            throw new ValidationException(String.format("Provider [%s]-[%s] has no Users", newProvider.getId(), newProvider.getProvider().getName()));
-        }
-        String subject = String.format("[%s] Training Resource [%s] has been moved from Provider [%s] to Provider [%s]", catalogueName, trainingResourceBundle.getTrainingResource().getTitle(),
-                oldProvider.getProvider().getName(), newProvider.getProvider().getName());
-        String userRole = "provider";
-        root.put("oldProvider", oldProvider);
-        root.put("newProvider", newProvider);
-        root.put("trainingResourceBundle", trainingResourceBundle);
-        root.put("comment", trainingResourceBundle.getLoggingInfo().get(trainingResourceBundle.getLoggingInfo().size() - 1).getComment());
-
-        // emails to old Provider's Users
-        for (User user : oldProvider.getProvider().getUsers()) {
-            root.put("user", user);
-            sendMailsFromTemplate("trainingResourceMovedOldProvider.ftl", root, subject, user.getEmail(), userRole);
-        }
-//        root.remove("user");
-
-        // emails to new Provider's Users
-        for (User user : newProvider.getProvider().getUsers()) {
-            root.put("user", user);
-            sendMailsFromTemplate("trainingResourceMovedNewProvider.ftl", root, subject, user.getEmail(), userRole);
-        }
-
-        // emails to Admins
-        userRole = "admin";
-        root.put("adminFullName", User.of(auth).getFullName());
-        root.put("adminEmail", User.of(auth).getEmail());
-        root.put("adminRole", securityService.getRoleName(auth));
-        sendMailsFromTemplate("trainingResourceMovedEPOT.ftl", root, subject, registrationEmail, userRole);
-    }
-
-    @Scheduled(cron = "0 0 12 ? * 2/2") // At 12:00:00pm, every 2 days starting on Monday, every month
-    public void sendEmailNotificationsToAdmins() {
-        FacetFilter ff = new FacetFilter();
-        ff.setQuantity(maxQuantity);
-        ff.addFilter("published", false);
-        List<ProviderBundle> allProviders = providerManager.getAll(ff, securityService.getAdminAccess()).getResults();
-
-        List<String> providersWaitingForInitialApproval = new ArrayList<>();
-        List<String> providersWaitingForSTApproval = new ArrayList<>();
-        for (ProviderBundle providerBundle : allProviders) {
-            if (providerBundle.getStatus().equals("pending provider")) {
-                providersWaitingForInitialApproval.add(providerBundle.getProvider().getName());
-            }
-            if (providerBundle.getTemplateStatus().equals("pending template")) {
-                providersWaitingForSTApproval.add(providerBundle.getProvider().getName());
-            }
-        }
-
-        Map<String, Object> root = getRootTemplate();
-        root.put("iaProviders", providersWaitingForInitialApproval);
-        root.put("stProviders", providersWaitingForSTApproval);
-
-        String subject = String.format("[%s] Some new Providers are pending for your approval", catalogueName);
-        if (!providersWaitingForInitialApproval.isEmpty() || !providersWaitingForSTApproval.isEmpty()) {
-            String userRole = "admin";
-            sendMailsFromTemplate("adminOnboardingDigest.ftl", root, subject, registrationEmail, userRole);
-        }
-    }
-
-    @Scheduled(cron = "0 0 12 ? * *") // At 12:00:00pm every day
-//    @Scheduled(fixedDelay = 1000)
-    public void dailyNotificationsToAdmins() {
-        // Create timestamps for today and yesterday
-        LocalDate today = LocalDate.now();
-        LocalDate yesterday = LocalDate.now().minusDays(1);
-        Timestamp todayTimestamp = Timestamp.valueOf(today.atStartOfDay());
-        Timestamp yesterdayTimestamp = Timestamp.valueOf(yesterday.atStartOfDay());
-
-        List<String> newProviders = new ArrayList<>();
-        List<String> newServices = new ArrayList<>();
-        List<String> updatedProviders = new ArrayList<>();
-        List<String> updatedServices = new ArrayList<>();
-
-        // Fetch Services and Providers (including Drafts)
-        FacetFilter ff = new FacetFilter();
-        ff.setQuantity(maxQuantity);
-        ff.addFilter("published", false);
-        List<ProviderBundle> activeProviders = providerManager.getAll(ff, securityService.getAdminAccess()).getResults();
-        List<ProviderBundle> pendingProviders = pendingProviderManager.getAll(ff, securityService.getAdminAccess()).getResults();
-        List<ServiceBundle> activeServices = serviceBundleManager.getAll(ff, securityService.getAdminAccess()).getResults();
-        List<ServiceBundle> pendingServices = pendingServiceManager.getAll(ff, securityService.getAdminAccess()).getResults();
-        List<ProviderBundle> allProviders = Stream.concat(activeProviders.stream(), pendingProviders.stream()).collect(Collectors.toList());
-        List<ServiceBundle> allServices = Stream.concat(activeServices.stream(), pendingServices.stream()).collect(Collectors.toList());
-        List<Bundle> allResources = Stream.concat(allProviders.stream(), allServices.stream()).collect(Collectors.toList());
-
-        // New & Updated Providers, Resources
-        for (Bundle bundle : allResources) {
-            Timestamp modified;
-            Timestamp registered;
-            if (bundle.getMetadata() != null) {
-                if (bundle.getMetadata().getModifiedAt() == null || !bundle.getMetadata().getModifiedAt().matches("[0-9]+")) {
-                    modified = new Timestamp(Long.parseLong("0"));
-                } else {
-                    modified = new Timestamp(Long.parseLong(bundle.getMetadata().getModifiedAt()));
-                }
-                if (bundle.getMetadata().getRegisteredAt() == null || !bundle.getMetadata().getRegisteredAt().matches("[0-9]+")) {
-                    registered = new Timestamp(Long.parseLong("0"));
-                } else {
-                    registered = new Timestamp(Long.parseLong(bundle.getMetadata().getRegisteredAt()));
-                }
-            } else {
-                continue;
-            }
-
-            if (modified.after(yesterdayTimestamp) && modified.before(todayTimestamp)) {
-                if (bundle.getId().contains("ser")) {
-                    updatedServices.add(bundle.getId());
-                } else {
-                    updatedProviders.add(bundle.getId());
-                }
-            }
-            if (registered.after(yesterdayTimestamp) && registered.before(todayTimestamp)) {
-                if (bundle.getId().contains("ser")) {
-                    newServices.add(bundle.getId());
-                } else {
-                    newProviders.add(bundle.getId());
-                }
-            }
-        }
-
-        // Provider & Resource Activities
-        Map<String, List<LoggingInfo>> loggingInfoProviderMap = new HashMap<>();
-        Map<String, List<LoggingInfo>> loggingInfoServiceMap = new HashMap<>();
-        List<LoggingInfo> loggingInfoProviderList = new ArrayList<>();
-        List<LoggingInfo> loggingInfoServiceList = new ArrayList<>();
-        Timestamp timestamp;
-        for (ProviderBundle providerBundle : activeProviders) {
-            loggingInfoProviderList = new ArrayList<>();
-            boolean providerHasLoggingChanges = false;
-            if (providerBundle.getLoggingInfo() != null) {
-                List<LoggingInfo> providerLoggingInfo = providerBundle.getLoggingInfo();
-                for (int i = providerLoggingInfo.size() - 1; i >= 0; i--) {
-                    timestamp = new Timestamp(Long.parseLong(providerLoggingInfo.get(i).getDate()));
-                    if (timestamp.after(yesterdayTimestamp) && timestamp.before(todayTimestamp)) {
-                        loggingInfoProviderList.add(providerLoggingInfo.get(i));
-                        providerHasLoggingChanges = true;
-                    } else {
-                        break;
-                    }
-                }
-            } else {
-                continue;
-            }
-            if (providerHasLoggingChanges) {
-                loggingInfoProviderMap.put(providerBundle.getId(), loggingInfoProviderList);
-            }
-        }
-        for (ServiceBundle serviceBundle : activeServices) {
-            loggingInfoServiceList = new ArrayList<>();
-            boolean serviceHasLoggingChanges = false;
-            if (serviceBundle.getLoggingInfo() != null) {
-                List<LoggingInfo> serviceLoggingInfo = serviceBundle.getLoggingInfo();
-                for (int i = serviceLoggingInfo.size() - 1; i >= 0; i--) {
-                    timestamp = new Timestamp(Long.parseLong(serviceLoggingInfo.get(i).getDate()));
-                    if (timestamp.after(yesterdayTimestamp) && timestamp.before(todayTimestamp)) {
-                        loggingInfoServiceList.add(serviceLoggingInfo.get(i));
-                        serviceHasLoggingChanges = true;
-                    }
-                    if (!serviceHasLoggingChanges) {
-                        break;
-                    }
-                }
-            } else {
-                continue;
-            }
-            if (serviceHasLoggingChanges) {
-                loggingInfoServiceMap.put(serviceBundle.getId(), loggingInfoServiceList);
-            }
-        }
-
-        boolean changes = true;
-        if (newProviders.isEmpty() && updatedProviders.isEmpty() && newServices.isEmpty() && updatedServices.isEmpty()
-                && loggingInfoProviderList.isEmpty() && loggingInfoServiceList.isEmpty()) {
-            changes = false;
-        }
-
-        Map<String, Object> root = getRootTemplate();
-        root.put("changes", changes);
-        root.put("newProviders", newProviders);
-        root.put("updatedProviders", updatedProviders);
-        root.put("newServices", newServices);
-        root.put("updatedServices", updatedServices);
-        root.put("loggingInfoProviderMap", loggingInfoProviderMap);
-        root.put("loggingInfoServiceMap", loggingInfoServiceMap);
-
-        String subject = String.format("[%s] Daily Notification - Changes to Resources", catalogueName);
-        String userRole = "admin";
-        sendMailsFromTemplate("adminDailyDigest.ftl", root, subject, registrationEmail, userRole);
-    }
-
+    // sendEmailsFromTemplate
     private void sendMailsFromTemplate(String templateName, Map<String, Object> root, String subject, String email, String userRole) {
         sendMailsFromTemplate(templateName, root, subject, Collections.singletonList(email), userRole);
     }
@@ -580,6 +137,10 @@ public class RegistrationMailService {
             temp.process(root, out);
             String mailBody = out.getBuffer().toString();
 
+            if (userRole.equals("onboarding-team")) {
+                mailService.sendMail(to, subject, mailBody);
+            }
+
             if (enableAdminNotifications && userRole.equals("admin")) {
                 if (cc != null && !cc.isEmpty()) {
                     mailService.sendMail(to, cc, subject, mailBody);
@@ -601,496 +162,881 @@ public class RegistrationMailService {
         }
     }
 
-    private String getProviderSubject(ProviderBundle providerBundle, Object serviceTemplate, String name) {
-        if (providerBundle == null || providerBundle.getProvider() == null) {
-            logger.error("Provider is null");
-            return String.format("[%s]", catalogueName);
-        }
+    // onboarding
+    private String getOnboardingTeamSubject(CatalogueBundle catalogueBundle) {
+        return getSubjectForResourceOnboarding(catalogueBundle, true, false);
+    }
 
-        String subject;
-        String providerName = providerBundle.getProvider().getName();
-
+    private String getOnboardingTeamSubject(ProviderBundle providerBundle) {
         if (providerBundle.getTemplateStatus().equals("no template status")) {
-            switch (providerBundle.getStatus()) {
-                case "pending provider":
-                    subject = String.format("[%s Portal] Your application for registering [%s] " +
-                                    "as a new %s Provider to the %s Portal has been received and is under review",
-                            catalogueName, providerName, catalogueName, catalogueName);
-                    break;
-                case "rejected provider":
-                    subject = String.format("[%s Portal] Your application for registering [%s] " +
-                                    "as a new %s Provider to the %s Portal has been rejected",
-                            catalogueName, providerName, catalogueName, catalogueName);
-                    break;
-                case "approved provider":
-                    subject = String.format("[%s Portal] Your application for registering [%s] " +
-                                    "as a new %s Provider to the %s Portal has been approved",
-                            catalogueName, providerName, catalogueName, catalogueName);
-                    break;
-                default:
-                    subject = String.format("[%s Portal] Provider Registration", catalogueName);
-            }
+            return getSubjectForResourceOnboarding(providerBundle, true, false);
         } else {
-            switch (providerBundle.getTemplateStatus()) {
-                case "pending template":
-                    assert serviceTemplate != null;
-                    subject = String.format("[%s Portal] Your application for registering [%s] " +
-                                    "as a new Resource to the %s Portal has been received and is under review",
-                            catalogueName, name, catalogueName);
-                    break;
-                case "approved template":
-                    if (providerBundle.isActive()) {
-                        assert serviceTemplate != null;
-                        subject = String.format("[%s Portal] Your application for registering [%s] " +
-                                        "as a new Resource to the %s Portal has been approved",
-                                catalogueName, name, catalogueName);
-                        break;
-                    } else {
-                        assert serviceTemplate != null;
-                        subject = String.format("[%s Portal] Your Resource Provider [%s] has been set to inactive",
-                                catalogueName, providerName);
-                        break;
-                    }
-                case "rejected template":
-                    assert serviceTemplate != null;
-                    subject = String.format("[%s Portal] Your application for registering [%s] " +
-                                    "as a new Resource to the %s Portal has been rejected",
-                            catalogueName, name, catalogueName);
-                    break;
-                default:
-                    subject = String.format("[%s Portal] Provider Registration", catalogueName);
-            }
+            return getSubjectForResourceOnboarding(providerBundle, true, true);
         }
-
-        return subject;
     }
 
-    private String getCatalogueSubject(CatalogueBundle catalogueBundle) {
-        if (catalogueBundle == null || catalogueBundle.getCatalogue() == null) {
-            logger.error("Catalogue is null");
-            return String.format("[%s]", catalogueName);
-        }
-
-        String subject;
-        String catalogueName = catalogueBundle.getCatalogue().getName();
-
-        switch (catalogueBundle.getStatus()) {
-            case "pending catalogue":
-                subject = String.format("[%s Portal] Your application for registering [%s] " +
-                                "as a new %s Catalogue to the %s Portal has been received and is under review",
-                        this.catalogueName, catalogueName, this.catalogueName, this.catalogueName);
-                break;
-            case "rejected catalogue":
-                subject = String.format("[%s Portal] Your application for registering [%s] " +
-                                "as a new %s Catalogue to the %s Portal has been rejected",
-                        this.catalogueName, catalogueName, this.catalogueName, this.catalogueName);
-                break;
-            case "approved catalogue":
-                subject = String.format("[%s Portal] Your application for registering [%s] " +
-                                "as a new %s Catalogue to the %s Portal has been approved",
-                        this.catalogueName, catalogueName, this.catalogueName, this.catalogueName);
-                break;
-            default:
-                subject = String.format("[%s Portal] Catalogue Registration", this.catalogueName);
-        }
-        return subject;
+    private String getCatalogueAdminsSubject(CatalogueBundle catalogueBundle) {
+        return getSubjectForResourceOnboarding(catalogueBundle, false, false);
     }
 
-
-    private String getRegTeamSubject(ProviderBundle providerBundle, Object serviceTemplate, String resourceId, String name) {
-        if (providerBundle == null || providerBundle.getProvider() == null) {
-            logger.error("Provider is null");
-            return String.format("[%s]", catalogueName);
-        }
-
-        String subject;
-        String providerName = providerBundle.getProvider().getName();
-        String providerId = providerBundle.getProvider().getId();
-
+    private String getProviderAdminsSubject(ProviderBundle providerBundle) {
         if (providerBundle.getTemplateStatus().equals("no template status")) {
-            switch (providerBundle.getStatus()) {
-                case "pending provider":
-                    subject = String.format("[%s Portal] A new application for registering [%s] - ([%s]) " +
-                                    "as a new %s Provider to the %s Portal has been received and should be reviewed",
-                            catalogueName, providerName, providerId, catalogueName, catalogueName);
-                    break;
-                case "approved provider":
-                    subject = String.format("[%s Portal] The application of [%s] - ([%s]) for registering " +
-                                    "as a new %s Provider has been approved",
-                            catalogueName, providerName, providerId, catalogueName);
-                    break;
-                case "rejected provider":
-                    subject = String.format("[%s Portal] The application of [%s] - ([%s]) for registering " +
-                                    "as a new %s Provider has been rejected",
-                            catalogueName, providerName, providerId, catalogueName);
-                    break;
-                default:
-                    subject = String.format("[%s Portal] Provider Registration", catalogueName);
-            }
+            return getSubjectForResourceOnboarding(providerBundle, false, false);
         } else {
-            switch (providerBundle.getTemplateStatus()) {
-                case "pending template":
-                    assert serviceTemplate != null;
-                    subject = String.format("[%s Portal] A new application for registering [%s] " +
-                                    "as a new Resource to the %s Portal has been received and should be reviewed",
-                            catalogueName, resourceId, catalogueName);
-                    break;
-                case "approved template":
-                    if (providerBundle.isActive()) {
-                        assert serviceTemplate != null;
-                        subject = String.format("[%s Portal] The application of [%s] - ([%s]) " +
-                                        "for registering as a new Resource has been approved",
-                                catalogueName, name, resourceId);
-                        break;
-                    } else {
-                        assert serviceTemplate != null;
-                        subject = String.format("[%s Portal] The Resource Provider [%s] has been set to inactive",
-                                catalogueName, providerName);
-                        break;
-                    }
-                case "rejected template":
-                    assert serviceTemplate != null;
-                    subject = String.format("[%s Portal] The application of [%s] - ([%s]) " +
-                                    "for registering as a %s Resource has been rejected",
-                            catalogueName, name, resourceId, catalogueName);
-                    break;
-                default:
-                    subject = String.format("[%s Portal] Provider Registration", catalogueName);
-            }
+            return getSubjectForResourceOnboarding(providerBundle, false, true);
         }
-
-        return subject;
     }
 
-    private String getRegTeamCatalogueSubject(CatalogueBundle catalogueBundle) {
-        if (catalogueBundle == null || catalogueBundle.getCatalogue() == null) {
-            logger.error("Catalogue is null");
-            return String.format("[%s]", catalogueName);
-        }
+    private String getProviderAdminsSubjectForInteroperabilityRecordOnboarding(
+            InteroperabilityRecordBundle interoperabilityRecordBundle) {
+        return getSubjectForResourceOnboarding(interoperabilityRecordBundle, false, false);
+    }
 
-        String subject;
-        String catalogueName = catalogueBundle.getCatalogue().getName();
-        String catalogueId = catalogueBundle.getCatalogue().getId();
+    @Async
+    public void sendOnboardingEmailsToProviderAdmins(ProviderBundle providerBundle, String afterReturningFrom) {
+        EmailBasicInfo emailBasicInfoUser = initializeEmail("providerMailTemplate.ftl",
+                providerBundle, null, null);
+        EmailBasicInfo emailBasicInfoAdmin = initializeEmail("registrationTeamMailTemplate.ftl",
+                providerBundle, null, null);
 
-        switch (catalogueBundle.getStatus()) {
-            case "pending catalogue":
-                subject = String.format("[%s Portal] A new application for registering [%s] - ([%s]) " +
-                                "as a new %s Catalogue to the %s Portal has been received and should be reviewed",
-                        this.catalogueName, catalogueName, catalogueId, this.catalogueName, this.catalogueName);
+        Bundle<?> template;
+        switch (afterReturningFrom) {
+            case "serviceBundleManager":
+                template = serviceBundleManager.getResourceBundles(providerBundle.getId(),
+                        securityService.getAdminAccess()).getFirst();
+                updateRootAccordingToResourceType(template, emailBasicInfoUser);
+                emailBasicInfoUser.updateRoot("resourceType", "resource");
                 break;
-            case "approved catalogue":
-                subject = String.format("[%s Portal] The application of [%s] - ([%s]) for registering " +
-                                "as a new %s Catalogue has been approved",
-                        this.catalogueName, catalogueName, catalogueId, this.catalogueName);
+            case "trainingResourceManager":
+                template = trainingResourceManager.getResourceBundles(providerBundle.getId(),
+                        securityService.getAdminAccess()).getFirst();
+                updateRootAccordingToResourceType(template, emailBasicInfoUser);
+                emailBasicInfoUser.updateRoot("resourceType", "training-resource");
                 break;
-            case "rejected catalogue":
-                subject = String.format("[%s Portal] The application of [%s] - ([%s]) for registering " +
-                                "as a new %s Catalogue has been rejected",
-                        this.catalogueName, catalogueName, catalogueId, this.catalogueName);
-                break;
+            case "providerManager":
             default:
-                subject = String.format("[%s Portal] Catalogue Registration", this.catalogueName);
+                break;
         }
+        emailBasicInfoAdmin.setRoot(emailBasicInfoUser.getRoot());
 
-        return subject;
+        // Get User Info (the one that registered the resource or the first in the Provider Admin list)
+        Optional<User> registeredUser = providerBundle.getLoggingInfo().stream()
+                .filter(loggingInfo -> LoggingInfo.ActionType.REGISTERED.getKey().equals(loggingInfo.getActionType()))
+                .findFirst()
+                .map(loggingInfo -> {
+                    User user = new User();
+                    user.setEmail(Optional.ofNullable(loggingInfo.getUserEmail())
+                            .filter(email -> !email.isEmpty())
+                            .map(String::toLowerCase)
+                            .orElse("no email provided"));
+
+                    String[] nameParts = Optional.ofNullable(loggingInfo.getUserFullName())
+                            .filter(name -> !name.isEmpty())
+                            .map(fullName -> fullName.split(" "))
+                            .orElse(new String[]{"Unknown", "Unknown"});
+
+                    user.setName(nameParts[0]);
+                    user.setSurname(nameParts.length > 1 ? nameParts[1] : "Unknown");
+
+                    return user;
+                });
+        emailBasicInfoAdmin.updateRoot("user", registeredUser.orElseGet(() -> providerBundle.getProvider().getUsers().getFirst()));
+
+        sendMailsFromTemplate("registrationTeamMailTemplate.ftl", emailBasicInfoAdmin.getRoot(),
+                emailBasicInfoAdmin.getSubject(), registrationEmail, "onboarding-team");
+
+        for (User user : providerBundle.getProvider().getUsers()) {
+            emailBasicInfoUser.updateRoot("user", user);
+            sendMailsFromTemplate("providerMailTemplate.ftl", emailBasicInfoUser.getRoot(),
+                    emailBasicInfoUser.getSubject(), user.getEmail().toLowerCase(), "provider");
+        }
     }
 
-    public void sendEmailsToNewlyAddedAdmins(ProviderBundle providerBundle, List<String> admins) {
+    @Async
+    public void sendOnboardingEmailsToCatalogueAdmins(CatalogueBundle catalogueBundle) {
+        EmailBasicInfo emailBasicInfoUser = initializeEmail("catalogueMailTemplate.ftl",
+                catalogueBundle, null, null);
+        EmailBasicInfo emailBasicInfoAdmin = initializeEmail("registrationTeamMailCatalogueTemplate.ftl",
+                catalogueBundle, null, null);
 
-        Map<String, Object> root = getRootTemplate();
-        root.put("providerBundle", providerBundle);
+        // Get User Info (the one that registered the resource or the first in the Provider Admin list)
+        Optional<User> registeredUser = catalogueBundle.getLoggingInfo().stream()
+                .filter(loggingInfo -> LoggingInfo.ActionType.REGISTERED.getKey().equals(loggingInfo.getActionType()))
+                .findFirst()
+                .map(loggingInfo -> {
+                    User user = new User();
+                    user.setEmail(Optional.ofNullable(loggingInfo.getUserEmail())
+                            .filter(email -> !email.isEmpty())
+                            .map(String::toLowerCase)
+                            .orElse("no email provided"));
 
-        String subject = String.format("[%s Portal] Your email has been added as an Administrator for the Provider '%s'", catalogueName, providerBundle.getProvider().getName());
+                    String[] nameParts = Optional.ofNullable(loggingInfo.getUserFullName())
+                            .filter(name -> !name.isEmpty())
+                            .map(fullName -> fullName.split(" "))
+                            .orElse(new String[]{"Unknown", "Unknown"});
 
-        if (admins == null) {
-            for (User user : providerBundle.getProvider().getUsers()) {
-                root.put("user", user);
-                String userRole = "provider";
-                sendMailsFromTemplate("providerAdminAdded.ftl", root, subject, user.getEmail(), userRole);
-            }
-        } else {
-            for (User user : providerBundle.getProvider().getUsers()) {
-                if (admins.contains(user.getEmail())) {
-                    root.put("user", user);
-                    String userRole = "provider";
-                    sendMailsFromTemplate("providerAdminAdded.ftl", root, subject, user.getEmail(), userRole);
+                    user.setName(nameParts[0]);
+                    user.setSurname(nameParts.length > 1 ? nameParts[1] : "Unknown");
+
+                    return user;
+                });
+        emailBasicInfoAdmin.updateRoot("user", registeredUser.orElseGet(() -> catalogueBundle.getCatalogue().getUsers().getFirst()));
+
+        sendMailsFromTemplate("registrationTeamMailCatalogueTemplate.ftl", emailBasicInfoAdmin.getRoot(),
+                emailBasicInfoAdmin.getSubject(), registrationEmail, "onboarding-team");
+
+        for (User user : catalogueBundle.getCatalogue().getUsers()) {
+            emailBasicInfoUser.updateRoot("user", user);
+            sendMailsFromTemplate("catalogueMailTemplate.ftl", emailBasicInfoUser.getRoot(),
+                    emailBasicInfoUser.getSubject(), user.getEmail().toLowerCase(), "provider");
+        }
+    }
+
+    @Scheduled(cron = "0 0 12 ? * 2/7")
+    public void sendOnboardingEmailNotificationsToProviderAdmins() {
+        EmailBasicInfo emailBasicInfo = initializeEmail("providerOnboarding.ftl");
+
+        List<ProviderBundle> allProviders = fetchProviders(false);
+        for (ProviderBundle providerBundle : allProviders) {
+            if (providerBundle.getTemplateStatus().equals("no template status")) {
+                emailBasicInfo.updateRoot("providerBundle", providerBundle);
+                for (User user : providerBundle.getProvider().getUsers()) {
+                    emailBasicInfo.updateRoot("user", user);
+                    sendMailsFromTemplate("providerOnboarding.ftl", emailBasicInfo.getRoot(),
+                            emailBasicInfo.getSubject(), user.getEmail().toLowerCase(), "provider");
                 }
             }
         }
     }
 
-    public void sendEmailsToNewlyDeletedAdmins(ProviderBundle providerBundle, List<String> admins) {
+    public void sendEmailNotificationsToProviderAdminsWithOutdatedResources(Bundle<?> resourceBundle, ProviderBundle providerBundle) {
+        EmailBasicInfo emailBasicInfo = initializeEmail("providerOutdatedResources.ftl",
+                providerBundle, null, null);
 
-        Map<String, Object> root = getRootTemplate();
-        root.put("providerBundle", providerBundle);
-
-        String subject = String.format("[%s Portal] Your email has been deleted from the Administration Team of the Provider '%s'", catalogueName, providerBundle.getProvider().getName());
+        updateRootAccordingToResourceType(resourceBundle, emailBasicInfo);
 
         for (User user : providerBundle.getProvider().getUsers()) {
-            if (admins.contains(user.getEmail())) {
-                root.put("user", user);
-                String userRole = "provider";
-                sendMailsFromTemplate("providerAdminDeleted.ftl", root, subject, user.getEmail(), userRole);
+            emailBasicInfo.updateRoot("user", user);
+            sendMailsFromTemplate("providerOutdatedResources.ftl", emailBasicInfo.getRoot(),
+                    emailBasicInfo.getSubject(), user.getEmail().toLowerCase(), "provider");
+        }
+    }
+
+    public void sendEmailsForMovedResources(ProviderBundle oldProvider, ProviderBundle newProvider,
+                                            Bundle<?> bundle, Authentication auth) {
+        // are the same for training resources (same root, subject in initialization)
+        EmailBasicInfo oldProviderAdmins = initializeEmail("resourceMovedOldProvider.ftl",
+                bundle, oldProvider.getProvider().getName(), null);
+        EmailBasicInfo newProviderAdmins = initializeEmail("resourceMovedNewProvider.ftl",
+                bundle, oldProvider.getProvider().getName(), null);
+        EmailBasicInfo onboardingTeam = initializeEmail("resourceMovedEPOT.ftl",
+                bundle, oldProvider.getProvider().getName(), null);
+
+        oldProviderAdmins.updateRoot("oldProvider", oldProvider);
+        oldProviderAdmins.updateRoot("newProvider", newProvider);
+        oldProviderAdmins.updateRoot("bundleId", bundle.getId());
+        updateRootAccordingToResourceType(bundle, oldProviderAdmins);
+
+        newProviderAdmins.setRoot(oldProviderAdmins.getRoot());
+
+        onboardingTeam.updateRoot("adminFullName", Objects.requireNonNull(AuthenticationInfo.getFullName(auth)));
+        onboardingTeam.updateRoot("adminEmail", Objects.requireNonNull(AuthenticationInfo.getEmail(auth).toLowerCase()));
+        onboardingTeam.updateRoot("adminRole", securityService.getRoleName(auth));
+        onboardingTeam.updateRoot("comment", bundle.getLoggingInfo().getLast().getComment());
+
+        for (User user : oldProvider.getProvider().getUsers()) {
+            oldProviderAdmins.updateRoot("user", user);
+            sendMailsFromTemplate("resourceMovedOldProvider.ftl", oldProviderAdmins.getRoot(),
+                    oldProviderAdmins.getSubject(), user.getEmail().toLowerCase(), "provider");
+        }
+        for (User user : newProvider.getProvider().getUsers()) {
+            newProviderAdmins.updateRoot("user", user);
+            sendMailsFromTemplate("resourceMovedNewProvider.ftl", newProviderAdmins.getRoot(),
+                    newProviderAdmins.getSubject(), user.getEmail().toLowerCase(), "provider");
+        }
+        sendMailsFromTemplate("resourceMovedEPOT.ftl", onboardingTeam.getRoot(), onboardingTeam.getSubject(),
+                registrationEmail, "admin");
+    }
+
+    private static void updateRootAccordingToResourceType(Bundle<?> bundle, EmailBasicInfo emailBasicInfo) {
+        if (bundle instanceof ServiceBundle) {
+            emailBasicInfo.updateRoot("resourceBundleId", bundle.getId());
+            emailBasicInfo.updateRoot("resourceBundleName", ((ServiceBundle) bundle).getService().getName());
+            emailBasicInfo.updateRoot("resourceEndpoint", "resources");
+            emailBasicInfo.updateRoot("resourceType", "Service");
+        } else {
+            emailBasicInfo.updateRoot("resourceBundleId", bundle.getId());
+            emailBasicInfo.updateRoot("resourceBundleName", ((TrainingResourceBundle) bundle).getTrainingResource().getTitle());
+            emailBasicInfo.updateRoot("resourceEndpoint", "training-resources");
+            emailBasicInfo.updateRoot("resourceType", "Training Resource");
+        }
+    }
+
+    @Scheduled(cron = "0 0 12 ? * 2/2")
+    public void sendOnboardingEmailNotificationsToPortalAdmins() {
+        EmailBasicInfo emailBasicInfo = initializeEmail("adminOnboardingDigest.ftl");
+
+        List<ProviderBundle> allProviders = fetchProviders(false);
+        List<String> providersWaitingForInitialApproval = new ArrayList<>();
+        List<String> providersWaitingForTemplateApproval = new ArrayList<>();
+
+        for (ProviderBundle providerBundle : allProviders) {
+            if (providerBundle.getStatus().equals("pending provider")) {
+                providersWaitingForInitialApproval.add(providerBundle.getProvider().getName());
+            }
+            if (providerBundle.getTemplateStatus().equals("pending template")) {
+                providersWaitingForTemplateApproval.add(providerBundle.getProvider().getName());
+            }
+        }
+
+        emailBasicInfo.updateRoot("providersWaitingForInitialApproval", providersWaitingForInitialApproval);
+        emailBasicInfo.updateRoot("providersWaitingForTemplateApproval", providersWaitingForTemplateApproval);
+
+        if (!providersWaitingForInitialApproval.isEmpty() || !providersWaitingForTemplateApproval.isEmpty()) {
+            sendMailsFromTemplate("adminOnboardingDigest.ftl", emailBasicInfo.getRoot(), emailBasicInfo.getSubject(),
+                    registrationEmail, "admin");
+        }
+    }
+
+    @Scheduled(cron = "0 0 12 ? * *")
+    public void dailyNotificationsToPortalAdmins() {
+        EmailBasicInfo emailBasicInfo = initializeEmail("adminDailyDigest");
+
+        // Generate timestamps
+        LocalDate today = LocalDate.now();
+        LocalDate yesterday = LocalDate.now().minusDays(1);
+        Timestamp todayTimestamp = Timestamp.valueOf(today.atStartOfDay());
+        Timestamp yesterdayTimestamp = Timestamp.valueOf(yesterday.atStartOfDay());
+
+        // Fetch all resources
+        List<ProviderBundle> activeProviders = fetchProviders(false);
+        List<ProviderBundle> draftProviders = fetchProviders(true);
+        List<ServiceBundle> activeServices = fetchServices(false);
+        List<ServiceBundle> draftServices = fetchServices(true);
+        List<TrainingResourceBundle> activeTrainings = fetchTrainings(false);
+        List<TrainingResourceBundle> draftTrainings = fetchTrainings(true);
+        List<InteroperabilityRecordBundle> activeGuidelines = fetchGuidelines(false);
+        List<InteroperabilityRecordBundle> draftGuidelines = fetchGuidelines(true);
+
+        List<Bundle<?>> allResources = mergeResources(activeProviders, draftProviders, activeServices, draftServices,
+                activeTrainings, draftTrainings, activeGuidelines, draftGuidelines);
+
+        // Analyze resource changes
+        Map<String, List<String>> resourceChanges = analyzeResourceChanges(allResources, yesterdayTimestamp, todayTimestamp);
+
+        // Analyze logging activities
+        Map<String, List<LoggingInfo>> loggingInfoProviderMap = analyzeLoggingInfoChanges(activeProviders, yesterdayTimestamp, todayTimestamp);
+        Map<String, List<LoggingInfo>> loggingInfoServiceMap = analyzeLoggingInfoChanges(activeServices, yesterdayTimestamp, todayTimestamp);
+        Map<String, List<LoggingInfo>> loggingInfoTrainingMap = analyzeLoggingInfoChanges(activeTrainings, yesterdayTimestamp, todayTimestamp);
+        Map<String, List<LoggingInfo>> loggingInfoGuidelineMap = analyzeLoggingInfoChanges(activeGuidelines, yesterdayTimestamp, todayTimestamp);
+
+        boolean changes = !resourceChanges.get("newProviders").isEmpty() ||
+                !resourceChanges.get("newServices").isEmpty() ||
+                !resourceChanges.get("newTrainings").isEmpty() ||
+                !resourceChanges.get("newGuidelines").isEmpty() ||
+                !resourceChanges.get("updatedProviders").isEmpty() ||
+                !resourceChanges.get("updatedServices").isEmpty() ||
+                !resourceChanges.get("updatedTrainings").isEmpty() ||
+                !resourceChanges.get("updatedGuidelines").isEmpty() ||
+                !loggingInfoProviderMap.isEmpty() ||
+                !loggingInfoServiceMap.isEmpty() ||
+                !loggingInfoTrainingMap.isEmpty() ||
+                !loggingInfoGuidelineMap.isEmpty();
+
+        // Prepare data for the email
+        emailBasicInfo.updateRoot("changes", changes);
+        emailBasicInfo.updateRoot("newProviders", resourceChanges.get("newProviders"));
+        emailBasicInfo.updateRoot("newServices", resourceChanges.get("newServices"));
+        emailBasicInfo.updateRoot("newTrainings", resourceChanges.get("newTrainings"));
+        emailBasicInfo.updateRoot("newGuidelines", resourceChanges.get("newGuidelines"));
+        emailBasicInfo.updateRoot("updatedProviders", resourceChanges.get("updatedProviders"));
+        emailBasicInfo.updateRoot("updatedServices", resourceChanges.get("updatedServices"));
+        emailBasicInfo.updateRoot("updatedTrainings", resourceChanges.get("updatedTrainings"));
+        emailBasicInfo.updateRoot("updatedGuidelines", resourceChanges.get("updatedGuidelines"));
+        emailBasicInfo.updateRoot("loggingInfoProviderMap", loggingInfoProviderMap);
+        emailBasicInfo.updateRoot("loggingInfoServiceMap", loggingInfoServiceMap);
+        emailBasicInfo.updateRoot("loggingInfoTrainingMap", loggingInfoTrainingMap);
+        emailBasicInfo.updateRoot("loggingInfoGuidelineMap", loggingInfoGuidelineMap);
+
+        // Send email
+        if (changes) {
+            sendMailsFromTemplate("adminDailyDigest.ftl", emailBasicInfo.getRoot(),
+                    emailBasicInfo.getSubject(), registrationEmail, "admin");
+        }
+    }
+
+    private List<ProviderBundle> fetchProviders(boolean isDraft) {
+        FacetFilter ff = createFacetFilter();
+        return isDraft
+                ? draftProviderManager.getAll(ff, securityService.getAdminAccess()).getResults()
+                : providerManager.getAll(ff, securityService.getAdminAccess()).getResults();
+    }
+
+    private List<ServiceBundle> fetchServices(boolean isDraft) {
+        FacetFilter ff = createFacetFilter();
+        return isDraft
+                ? draftServiceManager.getAll(ff, securityService.getAdminAccess()).getResults()
+                : serviceBundleManager.getAll(ff, securityService.getAdminAccess()).getResults();
+    }
+
+    private List<TrainingResourceBundle> fetchTrainings(boolean isDraft) {
+        FacetFilter ff = createFacetFilter();
+        return isDraft
+                ? draftTrainingResourceManager.getAll(ff, securityService.getAdminAccess()).getResults()
+                : trainingResourceManager.getAll(ff, securityService.getAdminAccess()).getResults();
+    }
+
+    private List<InteroperabilityRecordBundle> fetchGuidelines(boolean isDraft) {
+        FacetFilter ff = createFacetFilter();
+        return isDraft
+                ? draftInteroperabilityRecordManager.getAll(ff, securityService.getAdminAccess()).getResults()
+                : interoperabilityRecordManager.getAll(ff, securityService.getAdminAccess()).getResults();
+    }
+
+    private List<Bundle<?>> mergeResources(List<ProviderBundle> activeProviders, List<ProviderBundle> draftProviders,
+                                           List<ServiceBundle> activeServices, List<ServiceBundle> draftServices,
+                                           List<TrainingResourceBundle> activeTrainings, List<TrainingResourceBundle> draftTrainings,
+                                           List<InteroperabilityRecordBundle> activeGuidelines, List<InteroperabilityRecordBundle> draftGuidelines) {
+        List<ProviderBundle> allProviders = Stream.concat(activeProviders.stream(), draftProviders.stream()).toList();
+        List<ServiceBundle> allServices = Stream.concat(activeServices.stream(), draftServices.stream()).toList();
+        List<TrainingResourceBundle> allTrainings = Stream.concat(activeTrainings.stream(), draftTrainings.stream()).toList();
+        List<InteroperabilityRecordBundle> allGuidelines = Stream.concat(activeGuidelines.stream(), draftGuidelines.stream()).toList();
+        return Stream.of(allProviders.stream(), allServices.stream(), allTrainings.stream(), allGuidelines.stream())
+                .flatMap(s -> s)
+                .collect(Collectors.toList());
+    }
+
+    private Map<String, List<String>> analyzeResourceChanges(List<Bundle<?>> allResources, Timestamp yesterday, Timestamp today) {
+        Map<String, List<String>> changes = new HashMap<>();
+        List<String> newProviders = new ArrayList<>();
+        List<String> newServices = new ArrayList<>();
+        List<String> newTrainings = new ArrayList<>();
+        List<String> newGuidelines = new ArrayList<>();
+        List<String> updatedProviders = new ArrayList<>();
+        List<String> updatedServices = new ArrayList<>();
+        List<String> updatedTrainings = new ArrayList<>();
+        List<String> updatedGuidelines = new ArrayList<>();
+
+        for (Bundle<?> bundle : allResources) {
+            if (bundle.getMetadata() == null) continue;
+
+            Timestamp registered = parseTimestamp(bundle.getMetadata().getRegisteredAt());
+            if (registered.after(yesterday) && registered.before(today)) {
+                if (bundle.getId().contains(providersPrefix)) {
+                    newProviders.add(bundle.getId());
+                } else if (bundle.getId().contains(servicesPrefix)) {
+                    newServices.add(bundle.getId());
+                } else if (bundle.getId().contains(trainingsPrefix)) {
+                    newTrainings.add(bundle.getId());
+                } else {
+                    newGuidelines.add(bundle.getId());
+                }
+            }
+            Timestamp modified = parseTimestamp(bundle.getMetadata().getModifiedAt());
+            if (modified.after(yesterday) && modified.before(today)) {
+                if (bundle.getId().contains(providersPrefix)) {
+                    updatedProviders.add(bundle.getId());
+                } else if (bundle.getId().contains(servicesPrefix)) {
+                    updatedServices.add(bundle.getId());
+                } else if (bundle.getId().contains(trainingsPrefix)) {
+                    updatedTrainings.add(bundle.getId());
+                } else {
+                    updatedGuidelines.add(bundle.getId());
+                }
+            }
+        }
+
+        changes.put("newProviders", newProviders);
+        changes.put("newServices", newServices);
+        changes.put("newTrainings", newTrainings);
+        changes.put("newGuidelines", newGuidelines);
+        changes.put("updatedProviders", updatedProviders);
+        changes.put("updatedServices", updatedServices);
+        changes.put("updatedTrainings", updatedTrainings);
+        changes.put("updatedGuidelines", updatedGuidelines);
+
+        return changes;
+    }
+
+    private Map<String, List<LoggingInfo>> analyzeLoggingInfoChanges(List<? extends Bundle> bundles,
+                                                                     Timestamp yesterday, Timestamp today) {
+        Map<String, List<LoggingInfo>> loggingInfoMap = new HashMap<>();
+        for (Bundle<?> bundle : bundles) {
+            if (bundle.getLoggingInfo() == null) {
+                continue;
+            }
+            List<LoggingInfo> recentLogs = bundle.getLoggingInfo().stream()
+                    .filter(log -> {
+                        Timestamp logTimestamp = parseTimestamp(log.getDate());
+                        return logTimestamp.after(yesterday) && logTimestamp.before(today);
+                    })
+                    .collect(Collectors.toList());
+            if (!recentLogs.isEmpty()) {
+                loggingInfoMap.put(bundle.getId(), recentLogs);
+            }
+        }
+        return loggingInfoMap;
+    }
+
+    private Timestamp parseTimestamp(String timestampStr) {
+        if (timestampStr == null || !timestampStr.matches("[0-9]+")) {
+            return new Timestamp(0);
+        }
+        return new Timestamp(Long.parseLong(timestampStr));
+    }
+
+    public void sendEmailsToNewlyAddedProviderAdmins(ProviderBundle providerBundle, List<String> admins) {
+        EmailBasicInfo emailBasicInfo = initializeEmail("providerAdminAdded.ftl", providerBundle,
+                null, null);
+
+        for (User user : providerBundle.getProvider().getUsers()) {
+            String userEmail = user.getEmail().toLowerCase();
+            if (admins == null || admins.contains(userEmail)) {
+                emailBasicInfo.updateRoot("user", user);
+                sendMailsFromTemplate("providerAdminAdded.ftl", emailBasicInfo.getRoot(),
+                        emailBasicInfo.getSubject(), userEmail, "provider");
+            }
+        }
+    }
+
+    public void sendEmailsToNewlyDeletedProviderAdmins(ProviderBundle providerBundle, List<String> admins) {
+        EmailBasicInfo emailBasicInfo = initializeEmail("providerAdminDeleted.ftl", providerBundle,
+                null, null);
+
+        for (User user : providerBundle.getProvider().getUsers()) {
+            if (admins.contains(user.getEmail().toLowerCase())) {
+                emailBasicInfo.updateRoot("user", user);
+                sendMailsFromTemplate("providerAdminDeleted.ftl", emailBasicInfo.getRoot(),
+                        emailBasicInfo.getSubject(), user.getEmail().toLowerCase(), "provider");
             }
         }
     }
 
     public void sendEmailsToNewlyAddedCatalogueAdmins(CatalogueBundle catalogueBundle, List<String> admins) {
+        EmailBasicInfo emailBasicInfo = initializeEmail("catalogueAdminAdded.ftl", catalogueBundle,
+                null, null);
 
-        Map<String, Object> root = getRootTemplate();
-        root.put("catalogueBundle", catalogueBundle);
-
-        String subject = String.format("[%s Portal] Your email has been added as an Administrator for the Catalogue '%s'", catalogueName, catalogueBundle.getCatalogue().getName());
-
-        if (admins == null) {
-            for (User user : catalogueBundle.getCatalogue().getUsers()) {
-                root.put("user", user);
-                String userRole = "provider";
-                sendMailsFromTemplate("catalogueAdminAdded.ftl", root, subject, user.getEmail(), userRole);
-            }
-        } else {
-            for (User user : catalogueBundle.getCatalogue().getUsers()) {
-                if (admins.contains(user.getEmail())) {
-                    root.put("user", user);
-                    String userRole = "provider";
-                    sendMailsFromTemplate("catalogueAdminAdded.ftl", root, subject, user.getEmail(), userRole);
-                }
+        for (User user : catalogueBundle.getCatalogue().getUsers()) {
+            String userEmail = user.getEmail().toLowerCase();
+            if (admins == null || admins.contains(userEmail)) {
+                emailBasicInfo.updateRoot("user", user);
+                sendMailsFromTemplate("catalogueAdminAdded.ftl", emailBasicInfo.getRoot(),
+                        emailBasicInfo.getSubject(), userEmail, "provider");
             }
         }
     }
 
     public void sendEmailsToNewlyDeletedCatalogueAdmins(CatalogueBundle catalogueBundle, List<String> admins) {
-
-        Map<String, Object> root = getRootTemplate();
-        root.put("catalogueBundle", catalogueBundle);
-
-        String subject = String.format("[%s Portal] Your email has been deleted from the Administration Team of the Catalogue '%s'", catalogueName, catalogueBundle.getCatalogue().getName());
+        EmailBasicInfo emailBasicInfo = initializeEmail("catalogueAdminDeleted.ftl", catalogueBundle,
+                null, null);
 
         for (User user : catalogueBundle.getCatalogue().getUsers()) {
-            if (admins.contains(user.getEmail())) {
-                root.put("user", user);
-                String userRole = "provider";
-                sendMailsFromTemplate("catalogueAdminDeleted.ftl", root, subject, user.getEmail(), userRole);
+            if (admins.contains(user.getEmail().toLowerCase())) {
+                emailBasicInfo.updateRoot("user", user);
+                sendMailsFromTemplate("catalogueAdminDeleted.ftl", emailBasicInfo.getRoot(),
+                        emailBasicInfo.getSubject(), user.getEmail().toLowerCase(), "provider");
             }
         }
     }
 
     public void informPortalAdminsForProviderDeletion(ProviderBundle provider, User user) {
-        Map<String, Object> root = getRootTemplate();
-        root.put("user", user);
-        root.put("providerBundle", provider);
+        EmailBasicInfo emailBasicInfo = initializeEmail("providerDeletionRequest.ftl", provider,
+                null, null);
 
-        String subject = String.format("[%s] Provider Deletion Request", catalogueName);
-        String userRole = "admin";
-        sendMailsFromTemplate("providerDeletionRequest.ftl", root, subject, registrationEmail, userRole);
+        sendMailsFromTemplate("providerDeletionRequest.ftl", emailBasicInfo.getRoot(), emailBasicInfo.getSubject(),
+                registrationEmail, "admin");
     }
 
-    public void notifyProviderAdmins(ProviderBundle provider) {
-        Map<String, Object> root = getRootTemplate();
-        root.put("providerBundle", provider);
-
-        String subject = String.format("[%s] Your Provider [%s]-[%s] has been Deleted", catalogueName,
-                provider.getProvider().getId(), provider.getProvider().getName());
+    public void notifyProviderAdminsForProviderDeletion(ProviderBundle provider) {
+        EmailBasicInfo emailBasicInfo = initializeEmail("providerDeletion.ftl", provider,
+                null, null);
         for (User user : provider.getProvider().getUsers()) {
-            root.put("user", user);
-            String userRole = "provider";
-            sendMailsFromTemplate("providerDeletion.ftl", root, subject, user.getEmail(), userRole);
+            emailBasicInfo.updateRoot("user", user);
+            sendMailsFromTemplate("providerDeletion.ftl", emailBasicInfo.getRoot(), emailBasicInfo.getSubject(),
+                    user.getEmail().toLowerCase(), "provider");
         }
     }
 
-    public void sendVocabularyCurationEmails(VocabularyCuration vocabularyCuration, String userName) {
-        Map<String, Object> root = getRootTemplate();
-        root.put("vocabularyCuration", vocabularyCuration);
-        root.put("userName", userName);
-        root.put("userEmail", vocabularyCuration.getVocabularyEntryRequests().get(0).getUserId());
+    public void sendEmailsForVocabularyCurationCreation(VocabularyCuration vocabularyCuration, String userName) {
+        String userEmail = vocabularyCuration.getVocabularyEntryRequests().getFirst().getUserId();
 
-        // send email to User
-        String subject = String.format("[%s] Your Vocabulary [%s]-[%s] has been submitted", catalogueName,
-                vocabularyCuration.getVocabulary(), vocabularyCuration.getEntryValueName());
-        String userRole = "provider";
-        sendMailsFromTemplate("vocabularyCurationUser.ftl", root, subject, vocabularyCuration.getVocabularyEntryRequests().get(0).getUserId(), userRole);
+        EmailBasicInfo emailBasicInfoUser = initializeEmail("vocabularyCurationUser.ftl");
+        EmailBasicInfo emailBasicInfoAdmin = initializeEmail("vocabularyCurationEPOT.ftl");
+        emailBasicInfoUser.updateRoot("vocabularyCuration", vocabularyCuration);
+        emailBasicInfoUser.updateRoot("userName", userName);
+        emailBasicInfoUser.updateRoot("userEmail", userEmail);
+        emailBasicInfoAdmin.setRoot(emailBasicInfoUser.getRoot());
 
-        // send email to Admins
-        String adminSubject = String.format("[%s] A new Vocabulary Request [%s]-[%s] has been submitted", catalogueName,
-                vocabularyCuration.getVocabulary(), vocabularyCuration.getEntryValueName());
-        userRole = "admin";
-        sendMailsFromTemplate("vocabularyCurationEPOT.ftl", root, adminSubject, registrationEmail, userRole);
+        sendMailsFromTemplate("vocabularyCurationUser.ftl", emailBasicInfoUser.getRoot(),
+                emailBasicInfoUser.getSubject(), userEmail, "provider");
+        sendMailsFromTemplate("vocabularyCurationEPOT.ftl", emailBasicInfoAdmin.getRoot(),
+                emailBasicInfoAdmin.getSubject(), registrationEmail, "admin");
     }
 
-    public void approveOrRejectVocabularyCurationEmails(VocabularyCuration vocabularyCuration) {
-        Map<String, Object> root = getRootTemplate();
-        root.put("vocabularyCuration", vocabularyCuration);
-        root.put("userEmail", vocabularyCuration.getVocabularyEntryRequests().get(0).getUserId());
+    public void sendEmailsForVocabularyCurationResolve(VocabularyCuration vocabularyCuration) {
+        String userEmail = vocabularyCuration.getVocabularyEntryRequests().getFirst().getUserId();
+        EmailBasicInfo emailBasicInfoUser;
+        EmailBasicInfo emailBasicInfoAdmin;
+
         if (vocabularyCuration.getStatus().equals(VocabularyCuration.Status.APPROVED.getKey())) {
-            // send emails of Approval
-            String subject = String.format("[%s] Vocabulary [%s]-[%s] has been approved", catalogueName,
-                    vocabularyCuration.getVocabulary(), vocabularyCuration.getEntryValueName());
-            sendMailsFromTemplate("vocabularyCurationApprovalEPOT.ftl", root, subject, vocabularyCuration.getVocabularyEntryRequests().get(0).getUserId(), "admin");
-            sendMailsFromTemplate("vocabularyCurationApprovalUser.ftl", root, subject, vocabularyCuration.getVocabularyEntryRequests().get(0).getUserId(), "provider");
+            emailBasicInfoUser = initializeEmail("vocabularyCurationApprovalUser.ftl");
+            emailBasicInfoAdmin = initializeEmail("vocabularyCurationApprovalEPOT.ftl");
+            emailBasicInfoUser.updateRoot("vocabularyCuration", vocabularyCuration);
+            emailBasicInfoUser.updateRoot("userEmail", userEmail);
+            emailBasicInfoAdmin.setRoot(emailBasicInfoUser.getRoot());
+
+            sendMailsFromTemplate("vocabularyCurationApprovalUser.ftl", emailBasicInfoUser.getRoot(),
+                    emailBasicInfoUser.getSubject(), userEmail, "provider");
+            sendMailsFromTemplate("vocabularyCurationApprovalEPOT.ftl", emailBasicInfoAdmin.getRoot(),
+                    emailBasicInfoAdmin.getSubject(), registrationEmail, "admin");
         } else {
-            // send emails of Rejection
-            String subject = String.format("[%s] Vocabulary [%s]-[%s] has been rejected", catalogueName,
-                    vocabularyCuration.getVocabulary(), vocabularyCuration.getEntryValueName());
-            sendMailsFromTemplate("vocabularyCurationRejectionEPOT.ftl", root, subject, vocabularyCuration.getVocabularyEntryRequests().get(0).getUserId(), "admin");
-            sendMailsFromTemplate("vocabularyCurationRejectionUser.ftl", root, subject, vocabularyCuration.getVocabularyEntryRequests().get(0).getUserId(), "provider");
+            emailBasicInfoUser = initializeEmail("vocabularyCurationRejectionUser.ftl");
+            emailBasicInfoAdmin = initializeEmail("vocabularyCurationRejectionEPOT.ftl");
+            emailBasicInfoUser.updateRoot("vocabularyCuration", vocabularyCuration);
+            emailBasicInfoUser.updateRoot("userEmail", userEmail);
+            emailBasicInfoAdmin.setRoot(emailBasicInfoUser.getRoot());
+
+            sendMailsFromTemplate("vocabularyCurationRejectionUser.ftl", emailBasicInfoUser.getRoot(),
+                    emailBasicInfoAdmin.getSubject(), userEmail, "provider");
+            sendMailsFromTemplate("vocabularyCurationRejectionEPOT.ftl", emailBasicInfoAdmin.getRoot(),
+                    emailBasicInfoAdmin.getSubject(), registrationEmail, "admin");
         }
     }
 
-    public void notifyProviderAdminsForBundleAuditing(Bundle<?> bundle, String resourceType, String bundleName, List<User> users) {
-        Map<String, Object> root = getRootTemplate();
-        root.put("resourceType", resourceType);
-        root.put("bundleName", bundleName);
-        root.put("bundle", bundle);
-
-        String subject = String.format("[%s Portal] Your %s '%s' has been audited by the EPOT team", catalogueName, resourceType, bundleName);
+    public void notifyProviderAdminsForBundleAuditing(Bundle<?> bundle, List<User> users) {
+        EmailBasicInfo emailBasicInfo = initializeEmail("bundleAudit.ftl", bundle, bundle.getId(), null);
 
         for (User user : users) {
-            root.put("user", user);
-            String userRole = "provider";
-            sendMailsFromTemplate("bundleAudit.ftl", root, subject, user.getEmail(), userRole);
+            emailBasicInfo.updateRoot("user", user);
+            emailBasicInfo.updateRoot("resourceType", bundle.getClass().getSimpleName());
+            emailBasicInfo.updateRoot("resourceName", bundle.getId());
+            sendMailsFromTemplate("bundleAudit.ftl", emailBasicInfo.getRoot(), emailBasicInfo.getSubject(),
+                    user.getEmail().toLowerCase(), "provider");
         }
-    }
-
-    public void notifyPortalAdminsForInvalidProviderUpdate(ProviderBundle providerBundle) {
-
-        Map<String, Object> root = getRootTemplate();
-        root.put("providerBundle", providerBundle);
-
-        // send email to Admins
-        String subject = String.format("[%s Portal] The Provider [%s] previously marked as [invalid] has been updated", catalogueName, providerBundle.getProvider().getName());
-        String userRole = "admin";
-        sendMailsFromTemplate("invalidProviderUpdate.ftl", root, subject, registrationEmail, userRole);
     }
 
     public void notifyPortalAdminsForInvalidCatalogueUpdate(CatalogueBundle catalogueBundle) {
-
-        Map<String, Object> root = getRootTemplate();
-        root.put("catalogueBundle", catalogueBundle);
+        EmailBasicInfo emailBasicInfo = initializeEmail("invalidCatalogueUpdate.ftl", catalogueBundle,
+                null, null);
 
         // send email to Admins
-        String subject = String.format("[%s Portal] The Catalogue [%s] previously marked as [invalid] has been updated", catalogueName, catalogueBundle.getCatalogue().getName());
-        String userRole = "admin";
-        sendMailsFromTemplate("invalidCatalogueUpdate.ftl", root, subject, registrationEmail, userRole);
+        sendMailsFromTemplate("invalidCatalogueUpdate.ftl", emailBasicInfo.getRoot(), emailBasicInfo.getSubject(),
+                registrationEmail, "admin");
     }
 
-    public void notifyPortalAdminsForInvalidResourceUpdate(ServiceBundle serviceBundle) {
-
-        Map<String, Object> root = getRootTemplate();
-        root.put("serviceBundle", serviceBundle);
+    public void notifyPortalAdminsForInvalidProviderUpdate(ProviderBundle providerBundle) {
+        EmailBasicInfo emailBasicInfo = initializeEmail("invalidProviderUpdate.ftl", providerBundle,
+                null, null);
 
         // send email to Admins
-        String subject = String.format("[%s Portal] The Resource [%s] previously marked as [invalid] has been updated", catalogueName, serviceBundle.getService().getName());
-        String userRole = "admin";
-        sendMailsFromTemplate("invalidResourceUpdate.ftl", root, subject, registrationEmail, userRole);
+        sendMailsFromTemplate("invalidProviderUpdate.ftl", emailBasicInfo.getRoot(), emailBasicInfo.getSubject(),
+                registrationEmail, "admin");
+    }
+
+    public void notifyPortalAdminsForInvalidServiceUpdate(ServiceBundle serviceBundle) {
+        EmailBasicInfo emailBasicInfo = initializeEmail("invalidServiceUpdate.ftl", serviceBundle,
+                null, null);
+
+        // send email to Admins
+        sendMailsFromTemplate("invalidServiceUpdate.ftl", emailBasicInfo.getRoot(), emailBasicInfo.getSubject(),
+                registrationEmail, "admin");
     }
 
     public void notifyPortalAdminsForInvalidTrainingResourceUpdate(TrainingResourceBundle trainingResourceBundle) {
-
-        Map<String, Object> root = getRootTemplate();
-        root.put("trainingResourceBundle", trainingResourceBundle);
+        EmailBasicInfo emailBasicInfo = initializeEmail("invalidTrainingResourceUpdate.ftl", trainingResourceBundle,
+                null, null);
 
         // send email to Admins
-        String subject = String.format("[%s Portal] The Training Resource [%s] previously marked as [invalid] has been updated", catalogueName, trainingResourceBundle.getTrainingResource().getTitle());
-        String userRole = "admin";
-        sendMailsFromTemplate("invalidTrainingResourceUpdate.ftl", root, subject, registrationEmail, userRole);
+        sendMailsFromTemplate("invalidTrainingResourceUpdate.ftl", emailBasicInfo.getRoot(), emailBasicInfo.getSubject(),
+                registrationEmail, "admin");
     }
 
-    public void sendEmailsForDatasourceExtension(DatasourceBundle datasourceBundle, String action) {
-        Map<String, Object> root = getRootTemplate();
-        root.put("datasourceBundle", datasourceBundle);
-        root.put("action", action);
+    public void sendEmailsForDatasourceExtensionToPortalAdmins(DatasourceBundle datasourceBundle, String action) {
+        EmailBasicInfo emailBasicInfo = initializeEmail("serviceExtensionsDatasource.ftl", datasourceBundle,
+                datasourceBundle.getDatasource().getServiceId(), action);
 
         // send emails
-        String userRole = "admin";
-        String subject = "";
-        if (action.equals("post")) {
-            subject = String.format("[%s Portal] The Service [%s] has created a new Datasource Extension", catalogueName, datasourceBundle.getDatasource().getServiceId());
-        } else {
-            subject = String.format("[%s Portal] The Service [%s] updated its Datasource Extension", catalogueName, datasourceBundle.getDatasource().getServiceId());
-        }
-        sendMailsFromTemplate("serviceExtensionsDatasource.ftl", root, subject, registrationEmail, userRole);
+        sendMailsFromTemplate("serviceExtensionsDatasource.ftl", emailBasicInfo.getRoot(),
+                emailBasicInfo.getSubject(), registrationEmail, "admin");
     }
 
-    public void sendEmailsForHelpdeskExtension(HelpdeskBundle helpdeskBundle, String resourceType, String action) {
-        String resourceName = getResourceNameFromResourceType(resourceType);
-        Map<String, Object> root = getRootTemplate();
-        root.put("helpdeskBundle", helpdeskBundle);
-        root.put("resourceName", resourceName);
-        root.put("action", action);
+    public void sendEmailsForHelpdeskExtensionToPortalAdmins(HelpdeskBundle helpdeskBundle, String action) {
+        EmailBasicInfo emailBasicInfo = initializeEmail("serviceExtensionsHelpdesk.ftl", helpdeskBundle,
+                helpdeskBundle.getHelpdesk().getServiceId(), action);
 
         // send email to help@eosc-future.eu
-        String userRole = "admin";
-        String subject = "";
-        if (action.equals("post")) {
-            subject = String.format("[%s Portal] The %s [%s] has created a new Helpdesk Extension", catalogueName, resourceName, helpdeskBundle.getHelpdesk().getServiceId());
-        } else {
-            subject = String.format("[%s Portal] The %s [%s] updated its Helpdesk Extension", catalogueName, resourceName, helpdeskBundle.getHelpdesk().getServiceId());
-        }
-        sendMailsFromTemplate("serviceExtensionsHelpdesk.ftl", root, subject, helpdeskEmail, Collections.singletonList(helpdeskCC), userRole);
+        sendMailsFromTemplate("serviceExtensionsHelpdesk.ftl", emailBasicInfo.getRoot(),
+                emailBasicInfo.getSubject(), helpdeskEmail, "admin");
     }
 
-    public void sendEmailsForMonitoringExtension(MonitoringBundle monitoringBundle, String resourceType, String action) {
-        String resourceName = getResourceNameFromResourceType(resourceType);
-        Map<String, Object> root = getRootTemplate();
-        root.put("monitoringBundle", monitoringBundle);
-        root.put("resourceName", resourceName);
-        root.put("action", action);
+    public void sendEmailsForMonitoringExtensionToPortalAdmins(MonitoringBundle monitoringBundle, String action) {
+        EmailBasicInfo emailBasicInfo = initializeEmail("serviceExtensionsMonitoring.ftl", monitoringBundle,
+                monitoringBundle.getMonitoring().getServiceId(), action);
 
         // send email to argo@einfra.grnet.gr
-        String userRole = "admin";
-        String subject = "";
-        if (action.equals("post")) {
-            subject = String.format("[%s Portal] The %s [%s] has created a new Monitoring Extension", catalogueName, resourceName, monitoringBundle.getMonitoring().getServiceId());
+        sendMailsFromTemplate("serviceExtensionsMonitoring.ftl", emailBasicInfo.getRoot(),
+                emailBasicInfo.getSubject(), monitoringEmail, "admin");
+    }
+
+    public void sendInteroperabilityRecordOnboardingEmailsToPortalAdmins(
+            InteroperabilityRecordBundle interoperabilityRecordBundle, User registrant) {
+        ProviderBundle providerBundle = providerManager.get(
+                interoperabilityRecordBundle.getInteroperabilityRecord().getCatalogueId(),
+                interoperabilityRecordBundle.getInteroperabilityRecord().getProviderId(),
+                securityService.getAdminAccess());
+
+        EmailBasicInfo portalAdminsEmail = initializeEmail("interoperabilityRecordOnboardingForPortalAdmins.ftl",
+                providerBundle, null, null);
+        portalAdminsEmail.updateRoot("registrant", registrant);
+        sendMailsFromTemplate("interoperabilityRecordOnboardingForPortalAdmins.ftl", portalAdminsEmail.getRoot(),
+                portalAdminsEmail.getSubject(), monitoringEmail, "admin");
+
+        EmailBasicInfo providerAdminsEmail = initializeEmail("interoperabilityRecordOnboardingForProviderAdmins.ftl",
+                providerBundle, null, null);
+        for (User user : providerBundle.getProvider().getUsers()) {
+            providerAdminsEmail.updateRoot("user", user);
+            sendMailsFromTemplate("interoperabilityRecordOnboardingForProviderAdmins.ftl",
+                    providerAdminsEmail.getRoot(), providerAdminsEmail.getSubject(), user.getEmail().toLowerCase(),
+                    "provider");
+        }
+    }
+
+    private String getSubjectForResourceOnboarding(Bundle<?> bundle, boolean isOnboardingTeam, boolean isTemplate) {
+        String bundleName = getBundleNameOrStatus(bundle, "name");
+        String status = getBundleNameOrStatus(bundle, "status");
+        String pronoun = isOnboardingTeam ? "The" : "Your";
+        String baseMessage;
+
+        if (isTemplate) {
+            ProviderBundle providerBundle = (ProviderBundle) bundle;
+            String templateStatus = providerBundle.getTemplateStatus();
+            baseMessage = String.format("[%s Portal] %s application for registering [%s]-[%s] as a new %s Resource",
+                    catalogueName, pronoun, bundleName, bundle.getId(), catalogueName);
+            if (templateStatus.contains("pending")) {
+                return String.format("%s to the %s Portal has been received and %s",
+                        baseMessage, catalogueName, isOnboardingTeam ? "should be reviewed" : "is under review");
+            } else if (templateStatus.contains("approved")) {
+                if (providerBundle.isActive()) {
+                    return String.format("%s has been approved", baseMessage);
+                } else {
+                    return String.format("[%s Portal] The Provider [%s] has been set to inactive", catalogueName, bundleName);
+                }
+            } else if (templateStatus.contains("rejected")) {
+                return String.format("%s has been rejected", baseMessage);
+            } else {
+                return String.format("[%s Portal] Resource Registration", catalogueName);
+            }
         } else {
-            subject = String.format("[%s Portal] The %s [%s] updated its Monitoring Extension", catalogueName, resourceName, monitoringBundle.getMonitoring().getServiceId());
+            baseMessage = String.format("[%s Portal] %s application for registering [%s]-[%s] as a new %s %s",
+                    catalogueName, pronoun, bundleName, bundle.getId(), catalogueName,
+                    bundle.getClass().getSimpleName());
+            if (status.contains("pending")) {
+                return String.format("%s to the %s Portal has been received and %s",
+                        baseMessage, catalogueName, isOnboardingTeam ? "should be reviewed" : "is under review");
+            } else if (status.contains("approved")) {
+                return String.format("%s has been approved", baseMessage);
+            } else if (status.contains("rejected")) {
+                return String.format("%s has been rejected", baseMessage);
+            } else {
+                return String.format("[%s Portal] Resource Registration", catalogueName);
+            }
         }
-        sendMailsFromTemplate("serviceExtensionsMonitoring.ftl", root, subject, monitoringEmail, userRole);
     }
 
-    private String getResourceNameFromResourceType(String resourceType) {
-        switch (resourceType) {
-            case "service":
-                return "Service";
-            case "training_resource":
-                return "Training Resource";
+    private EmailBasicInfo initializeEmail(String template) {
+        EmailBasicInfo emailBasicInfo = new EmailBasicInfo();
+        emailBasicInfo.setRoot(getRootTemplate());
+        switch (template) {
+            case "adminDailyDigest.ftl":
+                emailBasicInfo.setSubject(String.format("[%s Portal] Daily Notification - Changes to Resources",
+                        catalogueName));
+            case "adminOnboardingDigest.ftl":
+                emailBasicInfo.setSubject(String.format("[%s Portal] Some new Providers are pending for your approval",
+                        catalogueName));
+                break;
+            case "providerOnboarding.ftl":
+                emailBasicInfo.setSubject(String.format("[%s Portal] Friendly reminder for your Provider",
+                        catalogueName));
+                break;
+            case "vocabularyCurationUser.ftl":
+                emailBasicInfo.setSubject(String.format("[%s Portal] A Vocabulary you suggested has been submitted",
+                        catalogueName));
+                break;
+            case "vocabularyCurationApprovalUser.ftl":
+                emailBasicInfo.setSubject(String.format("[%s Portal] A Vocabulary you suggested has been approved",
+                        catalogueName));
+                break;
+            case "vocabularyCurationRejectionUser.ftl":
+                emailBasicInfo.setSubject(String.format("[%s Portal] A Vocabulary you suggested has been rejected",
+                        catalogueName));
+                break;
+            case "vocabularyCurationEPOT.ftl":
+                emailBasicInfo.setSubject(String.format("[%s Portal] A new Vocabulary suggestion has been submitted",
+                        catalogueName));
+                break;
+            case "vocabularyCurationApprovalEPOT.ftl":
+                emailBasicInfo.setSubject(String.format("[%s Portal] A Vocabulary suggestion has been approved",
+                        catalogueName));
+                break;
+            case "vocabularyCurationRejectionEPOT.ftl":
+                emailBasicInfo.setSubject(String.format("[%s Portal] A Vocabulary suggestion has been rejected",
+                        catalogueName));
+                break;
             default:
-                return "Resource";
+                break;
+        }
+        return emailBasicInfo;
+    }
+
+    private EmailBasicInfo initializeEmail(String template, Bundle<?> bundle, String associatedResource, String action) {
+        String resourceName = getBundleNameOrStatus(bundle, "name");
+        EmailBasicInfo emailBasicInfo = new EmailBasicInfo();
+        emailBasicInfo.setRoot(initializeRoot(bundle));
+        switch (template) {
+            case "catalogueMailTemplate.ftl":
+                emailBasicInfo.setSubject(getCatalogueAdminsSubject((CatalogueBundle) bundle));
+                break;
+            case "registrationTeamMailCatalogueTemplate.ftl":
+                emailBasicInfo.setSubject(getOnboardingTeamSubject((CatalogueBundle) bundle));
+                break;
+            case "providerMailTemplate.ftl":
+                emailBasicInfo.setSubject(getProviderAdminsSubject((ProviderBundle) bundle));
+                break;
+            case "registrationTeamMailTemplate.ftl":
+                emailBasicInfo.setSubject(getOnboardingTeamSubject((ProviderBundle) bundle));
+                break;
+            case "providerOutdatedResources.ftl":
+                emailBasicInfo.setSubject(String.format("[%s Portal] Your Provider [%s]-[%s] has one or more outdated Resources",
+                        catalogueName, resourceName, bundle.getId()));
+                break;
+            case "resourceMovedOldProvider.ftl":
+            case "resourceMovedNewProvider.ftl":
+            case "resourceMovedEPOT.ftl":
+                emailBasicInfo.setSubject(String.format("[%s Portal] %s [%s]-[%s] has changed Provider",
+                        catalogueName, bundle.getClass().getSimpleName(), resourceName, bundle.getId()));
+                break;
+            case "providerAdminAdded.ftl":
+                emailBasicInfo.setSubject(String.format("[%s Portal] Your email has been added as an Administrator for " +
+                        "the Provider '%s'", catalogueName, resourceName));
+                break;
+            case "providerAdminDeleted.ftl":
+                emailBasicInfo.setSubject(String.format("[%s Portal] Your email has been deleted from the Administration " +
+                        "Team of the Provider '%s'", catalogueName, resourceName));
+                break;
+            case "catalogueAdminAdded.ftl":
+                emailBasicInfo.setSubject(String.format("[%s Portal] Your email has been added as an Administrator for " +
+                        "the Catalogue '%s'", catalogueName, resourceName));
+                break;
+            case "catalogueAdminDeleted.ftl":
+                emailBasicInfo.setSubject(String.format("[%s Portal] Your email has been deleted from the Administration " +
+                        "Team of the Catalogue '%s'", catalogueName, resourceName));
+                break;
+            case "providerDeletionRequest.ftl":
+                emailBasicInfo.setSubject(String.format("[%s Portal] Provider Deletion Request", catalogueName));
+                break;
+            case "providerDeletion.ftl":
+                emailBasicInfo.setSubject(String.format("[%s Portal] Your Provider [%s]-[%s] has been Deleted", catalogueName,
+                        resourceName, bundle.getId()));
+                break;
+            case "bundleAudit.ftl":
+                emailBasicInfo.setSubject(String.format("[%s Portal] Your %s [%s]-[%s] has been audited by the EPOT team",
+                        catalogueName, bundle.getClass().getSimpleName(), resourceName, bundle.getId()));
+                break;
+            case "invalidCatalogueUpdate.ftl":
+                emailBasicInfo.setSubject(String.format("[%s Portal] The Catalogue [%s]-[%s] previously marked as " +
+                        "[invalid] has been updated", catalogueName, resourceName, bundle.getId()));
+                break;
+            case "invalidProviderUpdate.ftl":
+                emailBasicInfo.setSubject(String.format("[%s Portal] The Provider [%s]-[%s] previously marked as " +
+                        "[invalid] has been updated", catalogueName, resourceName, bundle.getId()));
+                break;
+            case "invalidServiceUpdate.ftl":
+                emailBasicInfo.setSubject(String.format("[%s Portal] The Service [%s]-[%s] previously marked as " +
+                        "[invalid] has been updated", catalogueName, resourceName, bundle.getId()));
+                break;
+            case "invalidTrainingResourceUpdate.ftl":
+                emailBasicInfo.setSubject(String.format("[%s Portal] The Training Resource [%s]-[%s] previously marked as " +
+                        "[invalid] has been updated", catalogueName, resourceName, bundle.getId()));
+                break;
+            case "serviceExtensionsDatasource.ftl":
+                if (action.equals("post")) {
+                    emailBasicInfo.setSubject(String.format("[%s Portal] The Service [%s] has created a new Datasource " +
+                            "Extension", catalogueName, associatedResource));
+                } else {
+                    emailBasicInfo.setSubject(String.format("[%s Portal] The Service [%s] updated its Datasource " +
+                            "Extension", catalogueName, associatedResource));
+                }
+                break;
+            case "serviceExtensionsHelpdesk.ftl":
+                if (action.equals("post")) {
+                    emailBasicInfo.setSubject(String.format("[%s Portal] The Resource [%s] has created a new Helpdesk " +
+                            "Extension", catalogueName, associatedResource));
+                } else {
+                    emailBasicInfo.setSubject(String.format("[%s Portal] The Resource [%s] has updated its Helpdesk " +
+                            "Extension", catalogueName, associatedResource));
+                }
+                break;
+            case "serviceExtensionsMonitoring.ftl":
+                if (action.equals("post")) {
+                    emailBasicInfo.setSubject(String.format("[%s Portal] The Resource [%s] has created a new Monitoring " +
+                            "Extension", catalogueName, associatedResource));
+                } else {
+                    emailBasicInfo.setSubject(String.format("[%s Portal] The Resource [%s] has updated its Monitoring " +
+                            "Extension", catalogueName, associatedResource));
+                }
+                emailBasicInfo.getRoot().put("action", action);
+                break;
+            case "interoperabilityRecordOnboardingForPortalAdmins.ftl":
+                emailBasicInfo.setSubject(String.format("[%s Portal] Provider [%s]-[%s] has created a new Interoperability " +
+                        "Record", catalogueName, resourceName, bundle.getId()));
+                break;
+            case "interoperabilityRecordOnboardingForProviderAdmins":
+                emailBasicInfo.setSubject(getProviderAdminsSubjectForInteroperabilityRecordOnboarding(
+                        (InteroperabilityRecordBundle) bundle));
+                break;
+            default:
+                break;
+        }
+        return emailBasicInfo;
+    }
+
+    // helper methods
+    public static class EmailBasicInfo {
+        private Map<String, Object> root;
+        private String subject;
+
+        public EmailBasicInfo() {
+        }
+
+        public Map<String, Object> getRoot() {
+            return root;
+        }
+
+        public void setRoot(Map<String, Object> root) {
+            this.root = root;
+        }
+
+        public void updateRoot(String key, Object value) {
+            if (this.root == null) {
+                this.root = new HashMap<>();
+            }
+            this.root.put(key, value);
+        }
+
+        public String getSubject() {
+            return subject;
+        }
+
+        public void setSubject(String subject) {
+            this.subject = subject;
         }
     }
 
-    public void sendEmailsForInteroperabilityRecordOnboarding(InteroperabilityRecordBundle interoperabilityRecordBundle, User registrant) {
-        ProviderBundle providerBundle = providerManager.get(interoperabilityRecordBundle.getInteroperabilityRecord().getCatalogueId(), interoperabilityRecordBundle.getInteroperabilityRecord().getProviderId(), securityService.getAdminAccess());
-        List<User> providerAdmins = providerBundle.getProvider().getUsers();
-
+    private Map<String, Object> initializeRoot(Bundle<?> bundle) {
         Map<String, Object> root = getRootTemplate();
         root.put("registrationEmail", registrationEmail);
-        root.put("interoperabilityRecordBundle", interoperabilityRecordBundle);
-        root.put("registrant", registrant);
-
-        String subjectForPortalAdmins = String.format("[%s Portal] Provider [%s] has created a new Interoperability Record", catalogueName, interoperabilityRecordBundle.getInteroperabilityRecord().getProviderId());
-        sendMailsFromTemplate("interoperabilityRecordOnboardingForPortalAdmins.ftl", root, subjectForPortalAdmins, monitoringEmail, "admin");
-
-        String subjectForProviderAdmins = getProviderAdminsSubjectForInteroperabilityRecordOnboarding(interoperabilityRecordBundle);
-        for (User user : providerAdmins) {
-            root.put("user", user);
-            sendMailsFromTemplate("interoperabilityRecordOnboardingForProviderAdmins.ftl", root, subjectForProviderAdmins, user.getEmail(), "provider");
-        }
-    }
-
-    private String getProviderAdminsSubjectForInteroperabilityRecordOnboarding(InteroperabilityRecordBundle interoperabilityRecordBundle) {
-        switch (interoperabilityRecordBundle.getStatus()) {
-            case "pending interoperability record":
-                return String.format("[%s Portal] Your application for registering [%s] as a new %s Interoperability Record to the %s Portal has been received and is under review", catalogueName,
-                        interoperabilityRecordBundle.getInteroperabilityRecord().getTitle(), catalogueName, catalogueName);
-            case "rejected interoperability record":
-                return String.format("[%s Portal] Your application for registering [%s] as a new %s Interoperability Record to the %s Portal has been rejected", catalogueName,
-                        interoperabilityRecordBundle.getInteroperabilityRecord().getTitle(), catalogueName, catalogueName);
-            case "approved interoperability record":
-                return String.format("[%s Portal] Your application for registering [%s] as a new %s Interoperability Record to the %s Portal has been approved", catalogueName,
-                        interoperabilityRecordBundle.getInteroperabilityRecord().getTitle(), catalogueName, catalogueName);
-            default:
-                return "[%s Portal] Interoperability Record Registration";
-        }
+        root.put("bundle", bundle);
+        return root;
     }
 
     private Map<String, Object> getRootTemplate() {
@@ -1098,5 +1044,29 @@ public class RegistrationMailService {
         root.put("project", catalogueName);
         root.put("endpoint", homepage);
         return root;
+    }
+
+    private FacetFilter createFacetFilter() {
+        FacetFilter facetFilter = new FacetFilter();
+        facetFilter.setQuantity(maxQuantity);
+        facetFilter.addFilter("published", false);
+        return facetFilter;
+    }
+
+    private String getBundleNameOrStatus(Bundle<?> bundle, String field) {
+        if (bundle instanceof CatalogueBundle) {
+            return "name".equals(field) ? ((CatalogueBundle) bundle).getCatalogue().getName() : ((CatalogueBundle) bundle).getStatus();
+        } else if (bundle instanceof ProviderBundle) {
+            return "name".equals(field) ? ((ProviderBundle) bundle).getProvider().getName() : ((ProviderBundle) bundle).getStatus();
+        } else if (bundle instanceof ServiceBundle) {
+            return "name".equals(field) ? ((ServiceBundle) bundle).getService().getName() : ((ServiceBundle) bundle).getStatus();
+        } else if (bundle instanceof TrainingResourceBundle) {
+            return "name".equals(field) ? ((TrainingResourceBundle) bundle).getTrainingResource().getTitle() :
+                    ((TrainingResourceBundle) bundle).getStatus();
+        } else if (bundle instanceof InteroperabilityRecordBundle) {
+            return "name".equals(field) ? ((InteroperabilityRecordBundle) bundle).getInteroperabilityRecord().getTitle() :
+                    ((InteroperabilityRecordBundle) bundle).getStatus();
+        }
+        return bundle.getId();
     }
 }

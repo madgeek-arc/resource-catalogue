@@ -1,0 +1,156 @@
+{
+  "$schema" : "https://json-schema.org/draft/2020-12/schema",
+  "$defs" : {
+    "ContactInfoTransfer" : {
+      "type" : "object",
+      "properties" : {
+        "acceptedTransfer" : {
+          "type" : "boolean"
+        },
+        "email" : {
+          "type" : "string"
+        }
+      },
+      "additionalProperties" : false
+    },
+    "Identifiers" : {
+      "type" : "object",
+      "properties" : {
+        "originalId" : {
+          "type" : "string"
+        }
+      },
+      "additionalProperties" : false
+    },
+    "LoggingInfo" : {
+      "type" : "object",
+      "properties" : {
+        "actionType" : {
+          "type" : "string"
+        },
+        "comment" : {
+          "type" : "string"
+        },
+        "date" : {
+          "type" : "string"
+        },
+        "type" : {
+          "type" : "string"
+        },
+        "userEmail" : {
+          "type" : "string"
+        },
+        "userFullName" : {
+          "type" : "string"
+        },
+        "userRole" : {
+          "type" : "string"
+        }
+      },
+      "additionalProperties" : false
+    },
+    "Metadata" : {
+      "type" : "object",
+      "properties" : {
+        "modifiedAt" : {
+          "type" : "string"
+        },
+        "modifiedBy" : {
+          "type" : "string"
+        },
+        "published" : {
+          "type" : "boolean"
+        },
+        "registeredAt" : {
+          "type" : "string"
+        },
+        "registeredBy" : {
+          "type" : "string"
+        },
+        "terms" : {
+          "type" : "array",
+          "items" : {
+            "type" : "string"
+          }
+        }
+      },
+      "additionalProperties" : false
+    },
+    "MigrationStatus" : {
+      "type" : "object",
+      "properties" : {
+        "comments" : {
+          "type" : "array",
+          "items" : {
+            "type" : "string"
+          }
+        },
+        "migrationDate" : {
+          "type" : "string"
+        },
+        "modelVersion" : {
+          "type" : "string"
+        },
+        "modified" : {
+          "type" : "string"
+        },
+        "resolutionDate" : {
+          "type" : "string"
+        }
+      },
+      "additionalProperties" : false
+    }
+  },
+  "type" : "object",
+  "properties" : {
+    "active" : {
+      "type" : "boolean"
+    },
+    "auditState" : {
+      "type" : "string"
+    },
+    "draft" : {
+      "type" : "boolean"
+    },
+    "identifiers" : {
+      "$ref" : "#/$defs/Identifiers"
+    },
+    "latestAuditInfo" : {
+      "$ref" : "#/$defs/LoggingInfo"
+    },
+    "latestOnboardingInfo" : {
+      "$ref" : "#/$defs/LoggingInfo"
+    },
+    "latestUpdateInfo" : {
+      "$ref" : "#/$defs/LoggingInfo"
+    },
+    "loggingInfo" : {
+      "type" : "array",
+      "items" : {
+        "$ref" : "#/$defs/LoggingInfo"
+      }
+    },
+    "metadata" : {
+      "$ref" : "#/$defs/Metadata"
+    },
+    "migrationStatus" : {
+      "$ref" : "#/$defs/MigrationStatus"
+    },
+    "status" : {
+      "type" : "string"
+    },
+    "suspended" : {
+      "type" : "boolean"
+    },
+    "templateStatus" : {
+      "type" : "string"
+    },
+    "transferContactInformation" : {
+      "type" : "array",
+      "items" : {
+        "$ref" : "#/$defs/ContactInfoTransfer"
+      }
+    }
+  },
+  "additionalProperties" : false
+}

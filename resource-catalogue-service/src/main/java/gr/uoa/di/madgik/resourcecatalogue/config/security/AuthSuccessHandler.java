@@ -1,28 +1,40 @@
+/*
+ * Copyright 2017-2025 OpenAIRE AMKE & Athena Research and Innovation Center
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package gr.uoa.di.madgik.resourcecatalogue.config.security;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.nimbusds.jose.util.Base64;
+import gr.uoa.di.madgik.resourcecatalogue.config.properties.CatalogueProperties;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
 
-import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.time.Instant;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Component
@@ -30,11 +42,10 @@ public class AuthSuccessHandler implements AuthenticationSuccessHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(AuthSuccessHandler.class);
 
-    private final ResourceCatalogueProperties catalogueProperties;
+    private final CatalogueProperties catalogueProperties;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    @Autowired
-    public AuthSuccessHandler(ResourceCatalogueProperties catalogueProperties) {
+    public AuthSuccessHandler(CatalogueProperties catalogueProperties) {
         this.catalogueProperties = catalogueProperties;
     }
 
@@ -48,7 +59,7 @@ public class AuthSuccessHandler implements AuthenticationSuccessHandler {
         int expireSec = createCookieMaxAge(authentication);
 
         String userInfo = createUserInfoJson(authentication);
-        Cookie cookie = new Cookie("info", Base64.encode(userInfo).toString());
+        Cookie cookie = new Cookie("info", new String(Base64.getEncoder().encode(userInfo.getBytes())));
         cookie.setMaxAge(expireSec);
         cookie.setPath("/");
 //        cookie.setSecure(true);

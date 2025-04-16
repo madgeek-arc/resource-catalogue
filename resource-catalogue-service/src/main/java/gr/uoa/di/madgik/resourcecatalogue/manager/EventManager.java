@@ -1,3 +1,19 @@
+/*
+ * Copyright 2017-2025 OpenAIRE AMKE & Athena Research and Innovation Center
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package gr.uoa.di.madgik.resourcecatalogue.manager;
 
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
@@ -7,12 +23,12 @@ import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.registry.service.ParserService;
 import gr.uoa.di.madgik.registry.service.SearchService;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Event;
+import gr.uoa.di.madgik.resourcecatalogue.domain.ServiceBundle;
 import gr.uoa.di.madgik.resourcecatalogue.service.EventService;
 import gr.uoa.di.madgik.resourcecatalogue.service.ServiceBundleService;
 import gr.uoa.di.madgik.resourcecatalogue.utils.AuthenticationInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.core.Authentication;
@@ -27,11 +43,10 @@ public class EventManager extends ResourceManager<Event> implements EventService
 
     private static final Logger logger = LoggerFactory.getLogger(EventManager.class);
     private final ParserService parserService;
-    private final ServiceBundleService serviceBundleService;
+    private final ServiceBundleService<ServiceBundle> serviceBundleService;
 
-    @Autowired
     public EventManager(ParserService parserService,
-                        @Lazy ServiceBundleService serviceBundleService) {
+                        @Lazy ServiceBundleService<ServiceBundle> serviceBundleService) {
         super(Event.class);
         this.parserService = parserService;
         this.serviceBundleService = serviceBundleService;
@@ -55,7 +70,7 @@ public class EventManager extends ResourceManager<Event> implements EventService
     }
 
     @Override
-    public String getResourceType() {
+    public String getResourceTypeName() {
         return "event";
     }
 
@@ -94,7 +109,7 @@ public class EventManager extends ResourceManager<Event> implements EventService
     @Override
     public List<Event> getEvents(String eventType) {
         Paging<Resource> eventResources = searchService
-                .cqlQuery(String.format("type=\"%s\"", eventType), getResourceType(),
+                .cqlQuery(String.format("type=\"%s\"", eventType), getResourceTypeName(),
                         maxQuantity, 0, "creation_date", "DESC");
         return pagingToList(eventResources);
     }
@@ -106,7 +121,7 @@ public class EventManager extends ResourceManager<Event> implements EventService
         }
         Paging<Resource> eventResources = searchService.cqlQuery(
                 String.format("type=\"%s\" AND service=\"%s\" AND event_user=\"%s\"",
-                        eventType, serviceId, AuthenticationInfo.getSub(authentication)), getResourceType(),
+                        eventType, serviceId, AuthenticationInfo.getSub(authentication)), getResourceTypeName(),
                 maxQuantity, 0, "creation_date", "DESC");
         return pagingToList(eventResources);
     }
@@ -114,7 +129,7 @@ public class EventManager extends ResourceManager<Event> implements EventService
     @Override
     public List<Event> getServiceEvents(String eventType, String serviceId) {
         Paging<Resource> eventResources = searchService.cqlQuery(String.format("type=\"%s\" AND service=\"%s\"",
-                eventType, serviceId), getResourceType(), maxQuantity, 0, "creation_date", "DESC");
+                eventType, serviceId), getResourceTypeName(), maxQuantity, 0, "creation_date", "DESC");
         return pagingToList(eventResources);
     }
 
@@ -124,7 +139,7 @@ public class EventManager extends ResourceManager<Event> implements EventService
             return new ArrayList<>();
         }
         Paging<Resource> eventResources = searchService.cqlQuery(String.format("type=\"%s\" AND event_user=\"%s\"",
-                        eventType, AuthenticationInfo.getSub(authentication)), getResourceType(),
+                        eventType, AuthenticationInfo.getSub(authentication)), getResourceTypeName(),
                 maxQuantity, 0, "creation_date", "DESC");
         return pagingToList(eventResources);
     }
@@ -141,13 +156,13 @@ public class EventManager extends ResourceManager<Event> implements EventService
         sort.put("instant", order);
         ff.setOrderBy(sort);
         List<Event> events = getAll(ff, authentication).getResults();
-        List<String> serviceList = events.stream().map(Event::getService).distinct().collect(Collectors.toList());
+        List<String> serviceList = events.stream().map(Event::getService).distinct().toList();
 
         // for each service
         for (String service : serviceList) {
             List<Event> serviceEvents = events.stream()
                     .filter(e -> e.getService().equals(service))
-                    .collect(Collectors.toList());
+                    .toList();
 
             Map<String, Event> userEventsMap = new HashMap<>();
 
@@ -203,7 +218,7 @@ public class EventManager extends ResourceManager<Event> implements EventService
         }
     }
 
-    public Event setVisit(String serviceId, Float value) throws ResourceNotFoundException {
+    public Event setVisit(String serviceId, Float value) {
         if (!serviceBundleService.exists(new SearchService.KeyValue("resource_internal_id", serviceId))) {
             throw new ResourceNotFoundException("service", serviceId);
         }
@@ -217,7 +232,7 @@ public class EventManager extends ResourceManager<Event> implements EventService
         return event;
     }
 
-    public Event setAddToProject(String serviceId, Float value) throws ResourceNotFoundException {
+    public Event setAddToProject(String serviceId, Float value) {
         if (!serviceBundleService.exists(new SearchService.KeyValue("resource_internal_id", serviceId))) {
             throw new ResourceNotFoundException("service", serviceId);
         }
@@ -231,7 +246,7 @@ public class EventManager extends ResourceManager<Event> implements EventService
         return event;
     }
 
-    public Event setOrder(String serviceId, Float value) throws ResourceNotFoundException {
+    public Event setOrder(String serviceId, Float value) {
         if (!serviceBundleService.exists(new SearchService.KeyValue("resource_internal_id", serviceId))) {
             throw new ResourceNotFoundException("service", serviceId);
         }
@@ -245,7 +260,7 @@ public class EventManager extends ResourceManager<Event> implements EventService
         return event;
     }
 
-    public Event setScheduledFavourite(String serviceId, Float value) throws ResourceNotFoundException {
+    public Event setScheduledFavourite(String serviceId, Float value) {
         if (!serviceBundleService.exists(new SearchService.KeyValue("resource_internal_id", serviceId))) {
             throw new ResourceNotFoundException("service", serviceId);
         }
@@ -259,7 +274,7 @@ public class EventManager extends ResourceManager<Event> implements EventService
         return event;
     }
 
-    public Event setScheduledRating(String serviceId, Float value) throws ResourceNotFoundException {
+    public Event setScheduledRating(String serviceId, Float value) {
         if (!serviceBundleService.exists(new SearchService.KeyValue("resource_internal_id", serviceId))) {
             throw new ResourceNotFoundException("service", serviceId);
         }

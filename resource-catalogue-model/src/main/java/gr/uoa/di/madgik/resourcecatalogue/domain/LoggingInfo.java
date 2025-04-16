@@ -1,18 +1,32 @@
+/*
+ * Copyright 2017-2025 OpenAIRE AMKE & Athena Research and Innovation Center
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package gr.uoa.di.madgik.resourcecatalogue.domain;
 
 
+import jakarta.xml.bind.annotation.XmlElement;
+import jakarta.xml.bind.annotation.XmlRootElement;
+import jakarta.xml.bind.annotation.XmlType;
 import org.springframework.security.core.Authentication;
 
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlType;
 import java.util.Arrays;
-import java.util.Comparator;
-import java.util.List;
 import java.util.Objects;
 
 @XmlType
-@XmlRootElement(namespace = "http://einfracentral.eu")
+@XmlRootElement
 public class LoggingInfo {
 
     @XmlElement(defaultValue = "null")
@@ -126,8 +140,9 @@ public class LoggingInfo {
 
     public static LoggingInfo createLoggingInfoEntry(Authentication auth, String userRole, String type, String actionType,
                                                      String comment) {
+        validateLoggingInfoEnums(type, actionType);
         LoggingInfo ret = new LoggingInfo();
-        User user = User.of(auth);
+        User user = Objects.requireNonNull(User.of(auth));
         ret.setDate(String.valueOf(System.currentTimeMillis()));
         ret.setType(type);
         ret.setActionType(actionType);
@@ -138,6 +153,32 @@ public class LoggingInfo {
         return ret;
     }
 
+    private static void validateLoggingInfoEnums(String type, String actionType) {
+        if (type == null || actionType == null) {
+            throw new IllegalArgumentException("LoggingInfo Type and ActionType cannot be null");
+        }
+        validateLoggingInfoType(type);
+        validateLoggingInfoActionType(actionType);
+    }
+
+    private static void validateLoggingInfoType(String type) {
+        boolean isTypeValid = Arrays.stream(Types.values())
+                .map(Types::getKey)
+                .anyMatch(type::equals);
+        if (!isTypeValid) {
+            throw new IllegalArgumentException("Invalid type: " + type);
+        }
+    }
+
+    private static void validateLoggingInfoActionType(String actionType) {
+        boolean isActionTypeValid = Arrays.stream(ActionType.values())
+                .map(ActionType::getKey)
+                .anyMatch(actionType::equals);
+        if (!isActionTypeValid) {
+            throw new IllegalArgumentException("Invalid action type: " + actionType);
+        }
+    }
+
     public static LoggingInfo systemUpdateLoggingInfo(String actionType) {
         LoggingInfo ret = new LoggingInfo();
         ret.setDate(String.valueOf(System.currentTimeMillis()));
@@ -145,49 +186,6 @@ public class LoggingInfo {
         ret.setActionType(actionType);
         ret.setUserRole("system");
         ret.setUserFullName("system");
-        return ret;
-    }
-
-    // find the AUDIT_STATE of a specific Provider or Resource through its LoggingInfo list
-    public static String createAuditVocabularyStatuses(List<LoggingInfo> loggingInfoList) {
-        loggingInfoList.sort(Comparator.comparing(LoggingInfo::getDate).reversed());
-        boolean hasBeenAudited = false;
-        boolean hasBeenUpdatedAfterAudit = false;
-        String auditActionType = "";
-        int auditIndex = -1;
-        for (LoggingInfo loggingInfo : loggingInfoList) {
-            auditIndex++;
-            if (loggingInfo.getType().equals(Types.AUDIT.getKey())) {
-                hasBeenAudited = true;
-                auditActionType = loggingInfo.getActionType();
-                break;
-            }
-        }
-        // if we have an update after the audit
-        if (hasBeenAudited) {
-            for (int i = 0; i < auditIndex; i++) {
-                if (loggingInfoList.get(i).getType().equals(Types.UPDATE.getKey())) {
-                    hasBeenUpdatedAfterAudit = true;
-                    break;
-                }
-            }
-        }
-        String ret;
-        if (!hasBeenAudited) {
-            ret = "Not Audited";
-        } else if (!hasBeenUpdatedAfterAudit) {
-            if (auditActionType.equals(ActionType.INVALID.getKey())) {
-                ret = "Invalid and not updated";
-            } else {
-                ret = "Valid and not updated";
-            }
-        } else {
-            if (auditActionType.equals(ActionType.INVALID.getKey())) {
-                ret = "Invalid and updated";
-            } else {
-                ret = "Valid and updated";
-            }
-        }
         return ret;
     }
 
@@ -216,7 +214,7 @@ public class LoggingInfo {
     }
 
     public void setUserEmail(String userEmail) {
-        this.userEmail = userEmail;
+        this.userEmail = userEmail != null ? userEmail.toLowerCase() : null;
     }
 
     public String getUserFullName() {
@@ -262,8 +260,7 @@ public class LoggingInfo {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof LoggingInfo)) return false;
-        LoggingInfo that = (LoggingInfo) o;
+        if (!(o instanceof LoggingInfo that)) return false;
         return Objects.equals(date, that.date) && Objects.equals(userEmail, that.userEmail) && Objects.equals(userFullName, that.userFullName) && Objects.equals(userRole, that.userRole) && Objects.equals(type, that.type) && Objects.equals(comment, that.comment) && Objects.equals(actionType, that.actionType);
     }
 

@@ -1,3 +1,19 @@
+/*
+ * Copyright 2017-2025 OpenAIRE AMKE & Athena Research and Innovation Center
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package gr.uoa.di.madgik.resourcecatalogue.matomo;
 
 import com.fasterxml.jackson.core.JsonFactory;
@@ -6,16 +22,15 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.i18n.phonenumbers.NumberParseException;
 import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.service.EventService;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
+import jakarta.annotation.PostConstruct;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
-import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -26,7 +41,7 @@ import java.util.Spliterators;
 @Component
 public class DataParser {
 
-    private static final Logger logger = LogManager.getLogger(DataParser.class);
+    private static final Logger logger = LoggerFactory.getLogger(DataParser.class);
     private static final String SERVICE_VISITS_TEMPLATE = "%s/index.php?token_auth=%s&module=API&method=Events.getNameFromActionId&idSubtable=1&format=JSON&idSite=%s&period=day&date=yesterday";
     private static final String SERVICE_RATINGS_TEMPLATE = "%s/index.php?token_auth=%s&module=API&method=Events.getNameFromActionId&idSubtable=3&format=JSON&idSite=%s&period=day&date=yesterday";
     private static final String SERVICE_ADD_TO_PROJECT_TEMPLATE = "%s/index.php?token_auth=%s&module=API&method=Events.getNameFromActionId&idSubtable=2&format=JSON&idSite=%s&period=day&date=yesterday";
@@ -37,16 +52,15 @@ public class DataParser {
     private HttpHeaders headers;
     private final EventService eventService;
 
-    @Value("${matomoHost:localhost}")
+    @Value("${matomo.host:localhost}")
     private String matomoHost;
 
-    @Value("${matomoToken:}")
+    @Value("${matomo.token:}")
     private String matomoToken;
 
-    @Value("${matomoSiteId:1}")
+    @Value("${matomo.site-id:1}")
     private String matomoSiteId;
 
-    @Autowired
     DataParser(EventService eventService) {
         this.eventService = eventService;
     }
@@ -77,7 +91,7 @@ public class DataParser {
                 }
                 logger.info("Resource ID : Visits");
                 for (Map.Entry<String, Float> entry : results.entrySet()) {
-                    logger.info(entry.getKey() + " : " + entry.getValue().toString());
+                    logger.info("{} : {}", entry.getKey(), entry.getValue().toString());
                 }
             } catch (Exception e) {
                 logger.error("Cannot retrieve ratings for all Services\nMatomo response: {}\n", json, e);
@@ -86,10 +100,8 @@ public class DataParser {
         int eventType = 1; //visits
         try {
             postEventsToDatabase(results, eventType);
-        } catch (ResourceNotFoundException e) {
-            logger.error(e);
-        } catch (NumberParseException e) {
-            logger.error(e);
+        } catch (ResourceNotFoundException | NumberParseException e) {
+            logger.error(e.getMessage(), e);
         }
     }
 
@@ -107,7 +119,7 @@ public class DataParser {
                 }
                 logger.info("Resource ID : Ratings");
                 for (Map.Entry<String, Float> entry : results.entrySet()) {
-                    logger.info(entry.getKey() + " : " + entry.getValue().toString());
+                    logger.info("{} : {}", entry.getKey(), entry.getValue().toString());
                 }
             } catch (Exception e) {
                 logger.error("Cannot retrieve ratings for all Services\nMatomo response: {}\n", json, e);
@@ -116,10 +128,8 @@ public class DataParser {
         int eventType = 3; // ratings
         try {
             postEventsToDatabase(results, eventType);
-        } catch (ResourceNotFoundException e) {
-            logger.error(e);
-        } catch (NumberParseException e) {
-            logger.error(e);
+        } catch (ResourceNotFoundException | NumberParseException e) {
+            logger.error(e.getMessage(), e);
         }
     }
 
@@ -137,7 +147,7 @@ public class DataParser {
                 }
                 logger.info("Resource ID : Add to Project");
                 for (Map.Entry<String, Float> entry : results.entrySet()) {
-                    logger.info(entry.getKey() + " : " + entry.getValue().toString());
+                    logger.info("{} : {}", entry.getKey(), entry.getValue().toString());
                 }
             } catch (Exception e) {
                 logger.error("Cannot retrieve ratings for all Services\nMatomo response: {}\n", json, e);
@@ -146,10 +156,8 @@ public class DataParser {
         int eventType = 2; // addToProject
         try {
             postEventsToDatabase(results, eventType);
-        } catch (ResourceNotFoundException e) {
-            logger.error(e);
-        } catch (NumberParseException e) {
-            logger.error(e);
+        } catch (ResourceNotFoundException | NumberParseException e) {
+            logger.error(e.getMessage(), e);
         }
     }
 
@@ -169,7 +177,7 @@ public class DataParser {
                 ResponseEntity<String> responseEntity = restTemplate.exchange(url, HttpMethod.GET, request, String.class);
                 if (responseEntity.getStatusCode() != HttpStatus.OK) {
                     logger.error("Could not retrieve analytics from matomo\nResponse Code: {}\nResponse Body: {}",
-                            responseEntity.getStatusCode().toString(), responseEntity.getBody());
+                            responseEntity.getStatusCode(), responseEntity.getBody());
                 }
                 return responseEntity.getBody();
             } catch (IllegalArgumentException e) {

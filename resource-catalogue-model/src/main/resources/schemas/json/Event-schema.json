@@ -1,0 +1,25 @@
+{
+  "$schema" : "https://json-schema.org/draft/2020-12/schema",
+  "type" : "object",
+  "properties" : {
+    "id" : {
+      "type" : "string"
+    },
+    "instant" : {
+      "type" : "integer"
+    },
+    "service" : {
+      "type" : "string"
+    },
+    "type" : {
+      "type" : "string"
+    },
+    "user" : {
+      "type" : "string"
+    },
+    "value" : {
+      "type" : "number"
+    }
+  },
+  "additionalProperties" : false
+}

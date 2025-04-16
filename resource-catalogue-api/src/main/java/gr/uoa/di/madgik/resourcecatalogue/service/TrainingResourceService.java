@@ -1,3 +1,19 @@
+/*
+ * Copyright 2017-2025 OpenAIRE AMKE & Athena Research and Innovation Center
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package gr.uoa.di.madgik.resourcecatalogue.service;
 
 import gr.uoa.di.madgik.registry.domain.Browsing;
@@ -33,7 +49,7 @@ public interface TrainingResourceService extends ResourceService<TrainingResourc
      * @return {@link   TrainingResourceBundle}
      * @throws ResourceNotFoundException The Resource was not found
      */
-    TrainingResourceBundle update(TrainingResourceBundle resource, String comment, Authentication auth) throws ResourceNotFoundException;
+    TrainingResourceBundle update(TrainingResourceBundle resource, String comment, Authentication auth);
 
     /**
      * Update a Training Resource of an external Catalogue, providing its Catalogue ID
@@ -46,7 +62,7 @@ public interface TrainingResourceService extends ResourceService<TrainingResourc
      * @throws ResourceNotFoundException The Resource was not found
      */
     TrainingResourceBundle update(TrainingResourceBundle resource, String catalogueId, String comment, Authentication auth)
-            throws ResourceNotFoundException;
+    ;
 
     /**
      * Get a Training Resource of a specific Catalogue
@@ -64,7 +80,10 @@ public interface TrainingResourceService extends ResourceService<TrainingResourc
      * @param id          Training Resource ID
      * @param catalogueId Catalogue ID
      * @return {@link   TrainingResourceBundle}
+     *
+     * @deprecated Since resourceId is unique, catalogueId can be safely removed. Replace with {@link #get(String)}.
      */
+    @Deprecated(forRemoval = true)
     TrainingResourceBundle get(String id, String catalogueId);
 
     /**
@@ -85,33 +104,6 @@ public interface TrainingResourceService extends ResourceService<TrainingResourc
      * @return {@link List}&lt;{@link TrainingResource}&gt;
      */
     List<TrainingResource> getByIds(Authentication authentication, String... ids);
-
-    /**
-     * Validates the given Training Resource Bundle.
-     *
-     * @param trainingResourceBundle Training Resource Bundle
-     * @return True/False
-     */
-    boolean validateTrainingResource(TrainingResourceBundle trainingResourceBundle);
-
-    /**
-     * Return children vocabularies from parent vocabularies
-     *
-     * @param type   Vocabulary's type
-     * @param parent Vocabulary's parent
-     * @param rec
-     * @return {@link List}&lt;{@link String}&gt;
-     */
-    List<String> getChildrenFromParent(String type, String parent, List<Map<String, Object>> rec);
-
-    /**
-     * Gets a Browsing of all Training Resources for admins
-     *
-     * @param filter FacetFilter
-     * @param auth   Authentication
-     * @return {@link Browsing}&lt;{@link   TrainingResourceBundle}&gt;
-     */
-    Browsing<TrainingResourceBundle> getAllForAdmin(FacetFilter filter, Authentication auth);
 
     /**
      * Get a paging of random Training Resources
@@ -143,15 +135,6 @@ public interface TrainingResourceService extends ResourceService<TrainingResourc
     Paging<TrainingResourceBundle> getResourceBundles(String catalogueId, String providerId, Authentication auth);
 
     /**
-     * Get a list of Training Resources of a specific Provider of the EOSC Catalogue
-     *
-     * @param providerId Provider ID
-     * @param auth       Authentication
-     * @return {@link List}&lt;{@link TrainingResource}&gt;
-     */
-    List<? extends TrainingResource> getResources(String providerId, Authentication auth);
-
-    /**
      * Get an EOSC Provider's Training Resource Template, if exists, else return null
      *
      * @param providerId Provider ID
@@ -180,10 +163,11 @@ public interface TrainingResourceService extends ResourceService<TrainingResourc
      * Get the history of the specific Training Resource of the specific Catalogue ID
      *
      * @param id          Training Resource ID
-     * @param catalogueId Catalogue ID
      * @return {@link Paging}&lt;{@link LoggingInfo}&gt;
      */
-    Paging<LoggingInfo> getLoggingInfoHistory(String id, String catalogueId);
+    default Paging<LoggingInfo> getLoggingInfoHistory(String id) {
+        return getLoggingInfoHistory(get(id));
+    }
 
     /**
      * Change the Provider of the specific Training Resource
@@ -203,15 +187,6 @@ public interface TrainingResourceService extends ResourceService<TrainingResourc
      * @return {@link TrainingResourceBundle}
      */
     TrainingResourceBundle getOrElseReturnNull(String id);
-
-    /**
-     * Get a specific Training Resource of an external Catalogue, given its ID, or return null
-     *
-     * @param id          Training Resource ID
-     * @param catalogueId Catalogue ID
-     * @return {@link TrainingResourceBundle}
-     */
-    TrainingResourceBundle getOrElseReturnNull(String id, String catalogueId);
 
     /**
      * Create a Public Training Resource

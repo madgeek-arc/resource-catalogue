@@ -1,3 +1,19 @@
+/*
+ * Copyright 2017-2025 OpenAIRE AMKE & Athena Research and Innovation Center
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package gr.uoa.di.madgik.resourcecatalogue.manager;
 
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
@@ -5,12 +21,12 @@ import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.domain.CatalogueBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.ContactInfoTransfer;
 import gr.uoa.di.madgik.resourcecatalogue.domain.ProviderBundle;
-import gr.uoa.di.madgik.resourcecatalogue.domain.User;
 import gr.uoa.di.madgik.resourcecatalogue.service.CatalogueService;
 import gr.uoa.di.madgik.resourcecatalogue.service.ContactInformationService;
 import gr.uoa.di.madgik.resourcecatalogue.service.ProviderService;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import gr.uoa.di.madgik.resourcecatalogue.utils.AuthenticationInfo;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.core.Authentication;
 
 import java.util.ArrayList;
@@ -20,7 +36,7 @@ import java.util.List;
 @org.springframework.stereotype.Service
 public class ContactInformationManager implements ContactInformationService {
 
-    private static final Logger logger = LogManager.getLogger(ContactInformationManager.class);
+    private static final Logger logger = LoggerFactory.getLogger(ContactInformationManager.class);
 
     private final ProviderService providerService;
     private final CatalogueService catalogueService;
@@ -31,20 +47,20 @@ public class ContactInformationManager implements ContactInformationService {
     }
 
     public List<String> getMy(Authentication authentication) {
-        String email = User.of(authentication).getEmail();
+        String email = AuthenticationInfo.getEmail(authentication).toLowerCase();
         List<String> myResources = new ArrayList<>();
         List<String> resourcesUserHasAnsweredFor = new ArrayList<>();
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(1000);
         ff.addFilter("published", false);
-        List<CatalogueBundle> catalogueList = catalogueService.getMyCatalogues(authentication);
+        List<CatalogueBundle> catalogueList = catalogueService.getMy(null, authentication).getResults();
         if (catalogueList != null && !catalogueList.isEmpty()) {
             for (CatalogueBundle catalogueBundle : catalogueList) {
                 myResources.add(catalogueBundle.getId());
                 List<ContactInfoTransfer> catalogueContactInfoTransferList = catalogueBundle.getTransferContactInformation();
                 if (catalogueContactInfoTransferList != null && !catalogueContactInfoTransferList.isEmpty()) {
                     for (ContactInfoTransfer contactInfoTransfer : catalogueContactInfoTransferList) {
-                        if (contactInfoTransfer.getEmail().equals(email)) {
+                        if (contactInfoTransfer.getEmail().equalsIgnoreCase(email)) {
                             resourcesUserHasAnsweredFor.add(catalogueBundle.getId());
                             break;
                         }
@@ -59,7 +75,7 @@ public class ContactInformationManager implements ContactInformationService {
                 List<ContactInfoTransfer> providerContactInfoTransferList = providerBundle.getTransferContactInformation();
                 if (providerContactInfoTransferList != null && !providerContactInfoTransferList.isEmpty()) {
                     for (ContactInfoTransfer contactInfoTransfer : providerContactInfoTransferList) {
-                        if (contactInfoTransfer.getEmail().equals(email)) {
+                        if (contactInfoTransfer.getEmail().equalsIgnoreCase(email)) {
                             resourcesUserHasAnsweredFor.add(providerBundle.getId());
                             break;
                         }
@@ -79,12 +95,12 @@ public class ContactInformationManager implements ContactInformationService {
     }
 
     public void updateContactInfoTransfer(boolean acceptedTransfer, Authentication auth) {
-        String email = User.of(auth).getEmail();
+        String email = AuthenticationInfo.getEmail(auth).toLowerCase();
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(1000);
         ff.addFilter("published", false);
         ContactInfoTransfer contactInfoTransfer = createContactInfoTransfer(acceptedTransfer, email);
-        List<CatalogueBundle> catalogueList = catalogueService.getMyCatalogues(auth);
+        List<CatalogueBundle> catalogueList = catalogueService.getMy(null, auth).getResults();
         List<ProviderBundle> providerList = providerService.getMy(ff, auth).getResults();
         updateCatalogueContactInfoTransfer(contactInfoTransfer, catalogueList);
         updateProviderContactInfoTransfer(contactInfoTransfer, providerList);
@@ -94,7 +110,7 @@ public class ContactInformationManager implements ContactInformationService {
 
     private ContactInfoTransfer createContactInfoTransfer(boolean acceptedTransfer, String email) {
         ContactInfoTransfer contactInfoTransfer = new ContactInfoTransfer();
-        contactInfoTransfer.setEmail(email);
+        contactInfoTransfer.setEmail(email.toLowerCase());
         contactInfoTransfer.setAcceptedTransfer(acceptedTransfer);
         return contactInfoTransfer;
     }
@@ -135,7 +151,7 @@ public class ContactInformationManager implements ContactInformationService {
                                                 List<ContactInfoTransfer> existingTransferList) {
         boolean found = false;
         for (ContactInfoTransfer cit : existingTransferList) {
-            if (cit.getEmail().equals(contactInfoTransfer.getEmail())) {
+            if (cit.getEmail().equalsIgnoreCase(contactInfoTransfer.getEmail())) {
                 cit.setAcceptedTransfer(contactInfoTransfer.getAcceptedTransfer());
                 found = true;
                 break;

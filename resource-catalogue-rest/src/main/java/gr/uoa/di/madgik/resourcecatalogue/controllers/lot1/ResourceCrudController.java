@@ -1,26 +1,42 @@
+/*
+ * Copyright 2017-2025 OpenAIRE AMKE & Athena Research and Innovation Center
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package gr.uoa.di.madgik.resourcecatalogue.controllers.lot1;
 
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.domain.Paging;
+import gr.uoa.di.madgik.registry.exception.ResourceAlreadyExistsException;
 import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
-import gr.uoa.di.madgik.resourcecatalogue.annotations.Browse;
+import gr.uoa.di.madgik.registry.annotation.BrowseParameters;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Identifiable;
-import gr.uoa.di.madgik.resourcecatalogue.exception.ResourceAlreadyExistsException;
 import gr.uoa.di.madgik.resourcecatalogue.service.ResourceService;
-import gr.uoa.di.madgik.resourcecatalogue.utils.FacetFilterUtils;
 import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Parameter;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import jakarta.servlet.http.HttpServletRequest;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.util.AntPathMatcher;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.HandlerMapping;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.Map;
 
@@ -28,7 +44,7 @@ import java.util.Map;
 public abstract class ResourceCrudController<T extends Identifiable> {
     protected final ResourceService<T> service;
 
-    private static final Logger logger = LogManager.getLogger(ResourceCrudController.class);
+    private static final Logger logger = LoggerFactory.getLogger(ResourceCrudController.class);
 
     protected ResourceCrudController(ResourceService<T> service) {
         this.service = service;
@@ -74,32 +90,32 @@ public abstract class ResourceCrudController<T extends Identifiable> {
         if (service.exists(t))
             throw new ResourceAlreadyExistsException();
         ResponseEntity<T> ret = new ResponseEntity<>(service.save(t), HttpStatus.CREATED);
-        logger.debug("Created a new {} with id {}", t.getClass().getSimpleName(), t.getId());
+        logger.debug("Created a new {} with id '{}'", t.getClass().getSimpleName(), t.getId());
         return ret;
     }
 
     @PutMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<T> update(@RequestBody T t,
-                                    @Parameter(hidden = true) Authentication auth) throws ResourceNotFoundException {
+                                    @Parameter(hidden = true) Authentication auth) {
         if (!service.exists(t))
             throw new ResourceNotFoundException();
         ResponseEntity<T> ret = new ResponseEntity<>(service.save(t), HttpStatus.OK);
-        logger.debug("Updated {} with id {}", t.getClass().getSimpleName(), t.getId());
+        logger.debug("Updated {} with id '{}'", t.getClass().getSimpleName(), t.getId());
         return ret;
     }
 
     @PostMapping(path = "validate", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Void> validate(@RequestBody T t, @Parameter(hidden = true) Authentication auth) {
         service.validate(t);
-        logger.debug("Validated {} with id {}", t.getClass().getSimpleName(), t.getId());
+        logger.debug("Validated {} with id '{}'", t.getClass().getSimpleName(), t.getId());
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @DeleteMapping(path = "{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<T> delete(@PathVariable String id, @Parameter(hidden = true) Authentication auth) throws ResourceNotFoundException {
+    public ResponseEntity<T> delete(@PathVariable String id, @Parameter(hidden = true) Authentication auth) {
         T resource = service.get(id);
         service.delete(resource);
-        logger.debug("Deleted {} with id {}", resource.getClass().getSimpleName(), resource.getId());
+        logger.debug("Deleted {} with id '{}'", resource.getClass().getSimpleName(), resource.getId());
         return new ResponseEntity<>(resource, HttpStatus.OK);
     }
 
@@ -107,18 +123,18 @@ public abstract class ResourceCrudController<T extends Identifiable> {
     @DeleteMapping(path = "{id}/**", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<T> deleteByPid(@PathVariable("id") @Parameter(allowReserved = true) String id,
                                          @Parameter(hidden = true) Authentication authentication,
-                                         HttpServletRequest request) throws ResourceNotFoundException {
+                                         HttpServletRequest request) {
         T resource = service.get(extractPid(id, request));
         service.delete(resource);
-        logger.debug("Deleted {} with id {}", resource.getClass().getSimpleName(), resource.getId());
+        logger.debug("Deleted {} with id '{}'", resource.getClass().getSimpleName(), resource.getId());
         return new ResponseEntity<>(resource, HttpStatus.OK);
     }
 
     // Filter a list of Resources based on a set of filters.
-    @Browse
+    @BrowseParameters
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Paging<T>> getAll(@Parameter(hidden = true) @RequestParam Map<String, Object> allRequestParams, @Parameter(hidden = true) Authentication auth) {
-        FacetFilter ff = FacetFilterUtils.createFacetFilter(allRequestParams);
+    public ResponseEntity<Paging<T>> getAll(@Parameter(hidden = true) @RequestParam MultiValueMap<String, Object> allRequestParams, @Parameter(hidden = true) Authentication auth) {
+        FacetFilter ff = FacetFilter.from(allRequestParams);
         return new ResponseEntity<>(service.getAll(ff), HttpStatus.OK);
     }
 

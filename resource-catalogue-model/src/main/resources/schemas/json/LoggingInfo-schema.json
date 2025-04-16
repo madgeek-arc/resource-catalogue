@@ -1,0 +1,28 @@
+{
+  "$schema" : "https://json-schema.org/draft/2020-12/schema",
+  "type" : "object",
+  "properties" : {
+    "actionType" : {
+      "type" : "string"
+    },
+    "comment" : {
+      "type" : "string"
+    },
+    "date" : {
+      "type" : "string"
+    },
+    "type" : {
+      "type" : "string"
+    },
+    "userEmail" : {
+      "type" : "string"
+    },
+    "userFullName" : {
+      "type" : "string"
+    },
+    "userRole" : {
+      "type" : "string"
+    }
+  },
+  "additionalProperties" : false
+}

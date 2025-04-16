@@ -1,0 +1,186 @@
+{
+  "indexFields": [
+    {
+      "label": null,
+      "multivalued": false,
+      "name": "resource_internal_id",
+      "path": "$.helpdesk.id",
+      "primaryKey": true,
+      "type": "java.lang.String"
+    },
+    {
+      "label": "Service ID",
+      "multivalued": false,
+      "name": "service_id",
+      "path": "$.helpdesk.serviceId",
+      "type": "java.lang.String"
+    },
+    {
+      "label": "Service",
+      "multivalued": true,
+      "name": "services",
+      "path": "$.helpdesk.services[*]",
+      "type": "java.lang.String"
+    },
+    {
+      "label": "Helpdesk Type",
+      "multivalued": false,
+      "name": "helpdesk_type",
+      "path": "$.helpdesk.helpdeskType",
+      "type": "java.lang.String"
+    },
+    {
+      "label": "Support Group",
+      "multivalued": true,
+      "name": "support_groups",
+      "path": "$.helpdesk.supportGroups[*]",
+      "type": "java.lang.String"
+    },
+    {
+      "label": "Organisation",
+      "multivalued": false,
+      "name": "organisation",
+      "path": "$.helpdesk.organisation",
+      "type": "java.lang.String"
+    },
+    {
+      "label": "Email",
+      "multivalued": true,
+      "name": "emails",
+      "path": "$.helpdesk.emails[*]",
+      "type": "java.lang.String"
+    },
+    {
+      "label": "Agent",
+      "multivalued": true,
+      "name": "agents",
+      "path": "$.helpdesk.agents[*]",
+      "type": "java.lang.String"
+    },
+    {
+      "label": "Signature",
+      "multivalued": true,
+      "name": "signatures",
+      "path": "$.helpdesk.signatures[*]",
+      "type": "java.lang.String"
+    },
+    {
+      "label": "Ticket Preservation",
+      "multivalued": false,
+      "name": "ticket_preservation",
+      "path": "$.helpdesk.ticketPreservation",
+      "type": "java.lang.Boolean"
+    },
+    {
+      "label": "Webform",
+      "multivalued": false,
+      "name": "webform",
+      "path": "$.helpdesk.webform",
+      "type": "java.lang.Boolean"
+    },
+    {
+      "label": "Catalogue ID",
+      "multivalued": false,
+      "name": "catalogue_id",
+      "path": "$.catalogueId",
+      "type": "java.lang.String"
+    },
+    {
+      "label": null,
+      "multivalued": false,
+      "name": "latestUpdateActionType",
+      "path": "$.latestUpdateInfo.actionType",
+      "type": "java.lang.String"
+    },
+    {
+      "label": null,
+      "multivalued": false,
+      "name": "latestUpdateDate",
+      "path": "$.latestUpdateInfo.date",
+      "type": "java.lang.String"
+    },
+    {
+      "label": null,
+      "multivalued": false,
+      "name": "latestUpdateType",
+      "path": "$.latestUpdateInfo.type",
+      "type": "java.lang.String"
+    },
+    {
+      "label": null,
+      "multivalued": false,
+      "name": "latestUpdateUserEmail",
+      "path": "$.latestUpdateInfo.userEmail",
+      "type": "java.lang.String"
+    },
+    {
+      "label": null,
+      "multivalued": false,
+      "name": "latestOnboardingActionType",
+      "path": "$.latestOnboardingInfo.actionType",
+      "type": "java.lang.String"
+    },
+    {
+      "label": null,
+      "multivalued": false,
+      "name": "latestOnboardingDate",
+      "path": "$.latestOnboardingInfo.date",
+      "type": "java.lang.String"
+    },
+    {
+      "label": null,
+      "multivalued": false,
+      "name": "latestOnboardingType",
+      "path": "$.latestOnboardingInfo.type",
+      "type": "java.lang.String"
+    },
+    {
+      "label": null,
+      "multivalued": false,
+      "name": "latestOnboardingUserEmail",
+      "path": "$.latestOnboardingInfo.userEmail",
+      "type": "java.lang.String"
+    },
+    {
+      "label": null,
+      "multivalued": false,
+      "name": "published",
+      "path": "$.metadata.published",
+      "type": "java.lang.Boolean"
+    },
+    {
+      "defaultValue": "false",
+      "label": null,
+      "multivalued": false,
+      "name": "active",
+      "path": "$.active",
+      "type": "java.lang.Boolean"
+    },
+    {
+      "defaultValue": "false",
+      "label": null,
+      "multivalued": false,
+      "name": "suspended",
+      "path": "$.suspended",
+      "type": "java.lang.Boolean"
+    },
+    {
+      "defaultValue": "false",
+      "label": null,
+      "multivalued": false,
+      "name": "draft",
+      "path": "$.draft",
+      "type": "java.lang.Boolean"
+    }
+  ],
+  "indexMapperClass": "gr.uoa.di.madgik.registry.index.DefaultIndexMapper",
+  "aliases": [
+    "resourceTypes"
+  ],
+  "name": "helpdesk",
+  "payloadType": "json",
+  "properties": {
+    "class": "gr.uoa.di.madgik.resourcecatalogue.domain.HelpdeskBundle"
+  },
+  "schema": "{\n\t\"$schema\": \"https://json-schema.org/draft/2019-09/schema\"\n}"
+}

@@ -1,24 +1,39 @@
+/*
+ * Copyright 2017-2025 OpenAIRE AMKE & Athena Research and Innovation Center
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package gr.uoa.di.madgik.resourcecatalogue.manager;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import gr.uoa.di.madgik.registry.domain.*;
 import gr.uoa.di.madgik.registry.domain.index.IndexField;
+import gr.uoa.di.madgik.registry.exception.ResourceException;
+import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.registry.service.*;
-import gr.uoa.di.madgik.resourcecatalogue.exception.ResourceException;
-import gr.uoa.di.madgik.resourcecatalogue.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.service.GenericResourceService;
-import gr.uoa.di.madgik.resourcecatalogue.utils.DefaultFacetLabelService;
 import gr.uoa.di.madgik.resourcecatalogue.utils.FacetLabelService;
 import gr.uoa.di.madgik.resourcecatalogue.utils.LoggingUtils;
 import gr.uoa.di.madgik.resourcecatalogue.utils.ReflectUtils;
+import jakarta.annotation.PostConstruct;
+import jakarta.validation.constraints.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.PostConstruct;
-import javax.validation.constraints.NotNull;
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -41,7 +56,7 @@ public class GenericManager implements GenericResourceService {
                              ResourceService resourceService,
                              ResourceTypeService resourceTypeService,
                              ParserService parserPool,
-                             DefaultFacetLabelService facetLabelService) {
+                             FacetLabelService facetLabelService) {
         this.searchService = searchService;
         this.resourceService = resourceService;
         this.resourceTypeService = resourceTypeService;
@@ -78,15 +93,6 @@ public class GenericManager implements GenericResourceService {
                     browseSet.retainAll(entry.getValue());
                 }
             }
-            if (rt.getAliasGroup() != null) {
-                if (aliasGroupBrowse.get(rt.getAliasGroup()) == null) {
-                    aliasGroupBrowse.put(rt.getAliasGroup(), new TreeSet<>(browseSet));
-                    aliasGroupLabels.put(rt.getAliasGroup(), new TreeMap<>(labels));
-                } else {
-                    aliasGroupBrowse.get(rt.getAliasGroup()).retainAll(browseSet);
-                    aliasGroupLabels.get(rt.getAliasGroup()).keySet().retainAll(labels.keySet());
-                }
-            }
             if (rt.getAliases() != null) {
                 for (String alias : rt.getAliases()) {
                     if (aliasGroupBrowse.get(alias) == null) {
@@ -101,7 +107,7 @@ public class GenericManager implements GenericResourceService {
 
             labelsMap.put(rt.getName(), labels);
             browseByMap.put(rt.getName(), new ArrayList<>(browseSet));
-            logger.debug("Generating browse fields for [{}]", rt.getName());
+            logger.debug("Generating browse fields for '{}'", rt.getName());
         }
         for (String alias : aliasGroupBrowse.keySet()) {
             browseByMap.put(alias, aliasGroupBrowse.get(alias).stream().sorted().collect(Collectors.toList()));
@@ -188,6 +194,9 @@ public class GenericManager implements GenericResourceService {
     @Override
     public <T> Browsing<T> getResults(FacetFilter filter) {
         Set<String> browseBy = new HashSet<>(filter.getBrowseBy());
+        if (browseByMap.isEmpty()) {
+            initResourceTypesBrowseFields();
+        }
         browseBy.addAll(browseByMap.get(filter.getResourceType()));
         filter.setBrowseBy(new ArrayList<>(browseBy));
         Browsing<T> browsing;
@@ -205,12 +214,12 @@ public class GenericManager implements GenericResourceService {
         Class<?> clazz = getClassFromResourceType(resourceTypeName);
         List<T> results;
         if (clazz != null) { // all resources are from the same resourceType
-            results = (List<T>) paging.getResults()
+            results = paging.getResults()
                     .parallelStream()
                     .map(res -> (T) parserPool.deserialize(res, clazz))
                     .collect(Collectors.toList());
         } else { // mixed resources
-            results = (List<T>) paging.getResults()
+            results = paging.getResults()
                     .stream()
                     .map(resource -> {
                         T item = null;
@@ -298,8 +307,7 @@ public class GenericManager implements GenericResourceService {
 
     // facets are pre-sorted by 'count' field
     public void sortFacets(List<Facet> facets, String field) {
-        for (Iterator<Facet> iter = facets.listIterator(); iter.hasNext(); ) {
-            Facet facet = iter.next();
+        for (Facet facet : facets) {
             if (facet.getField().equals("catalogue_id") || facet.getField().equals(field)) {
                 try {
                     facet.getValues().sort(Comparator.comparing(gr.uoa.di.madgik.registry.domain.Value::getLabel, String.CASE_INSENSITIVE_ORDER));

@@ -1,5 +1,22 @@
+/*
+ * Copyright 2017-2025 OpenAIRE AMKE & Athena Research and Innovation Center
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package gr.uoa.di.madgik.resourcecatalogue.config.security;
 
+import gr.uoa.di.madgik.resourcecatalogue.config.properties.CatalogueProperties;
 import gr.uoa.di.madgik.resourcecatalogue.service.AuthoritiesMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,18 +52,18 @@ public class SecurityConfig {
     private final AuthenticationSuccessHandler authSuccessHandler;
     private final ClientRegistrationRepository clientRegistrationRepository;
     private final UserInfoService userInfoService;
-    private final ResourceCatalogueProperties resourceCatalogueProperties;
+    private final CatalogueProperties catalogueProperties;
     private final AuthoritiesMapper authoritiesMapper;
 
     public SecurityConfig(AuthenticationSuccessHandler authSuccessHandler,
                           ClientRegistrationRepository clientRegistrationRepository,
                           UserInfoService userInfoService,
-                          ResourceCatalogueProperties resourceCatalogueProperties,
+                          CatalogueProperties catalogueProperties,
                           AuthoritiesMapper authoritiesMapper) {
         this.authSuccessHandler = authSuccessHandler;
         this.clientRegistrationRepository = clientRegistrationRepository;
         this.userInfoService = userInfoService;
-        this.resourceCatalogueProperties = resourceCatalogueProperties;
+        this.catalogueProperties = catalogueProperties;
         this.authoritiesMapper = authoritiesMapper;
     }
 
@@ -66,11 +83,11 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-                .authorizeRequests(authorizeRequests ->
+                .authorizeHttpRequests(authorizeRequests ->
                         authorizeRequests
-                                .regexMatchers("/resourcesync/.*").permitAll()
-                                .regexMatchers("/dump/.*", "/restore/", "/resources.*", "/resourceType.*", "/search.*").hasAnyAuthority("ROLE_ADMIN")
-
+                                .requestMatchers("/resourcesync/**").permitAll()
+                                .requestMatchers("/dump/", "/restore/", "/resources/**", "/resourceType/**",
+                                        "/search/**").hasAuthority("ROLE_ADMIN")
                                 .anyRequest().permitAll()
                 )
 
@@ -78,9 +95,10 @@ public class SecurityConfig {
                         oauth2login
                                 .successHandler(authSuccessHandler))
 
-                .oauth2ResourceServer((oauth2) -> oauth2
-                        .jwt()
-                        .jwtAuthenticationConverter(authenticationConverter())
+                .oauth2ResourceServer(oauth2 -> oauth2
+                        .jwt(jwt -> jwt
+                            .jwtAuthenticationConverter(authenticationConverter())
+                        )
                 )
 
                 .logout(logout ->
@@ -100,7 +118,7 @@ public class SecurityConfig {
                 new OidcClientInitiatedLogoutSuccessHandler(
                         this.clientRegistrationRepository);
 
-        oidcLogoutSuccessHandler.setPostLogoutRedirectUri(resourceCatalogueProperties.getLogoutRedirect());
+        oidcLogoutSuccessHandler.setPostLogoutRedirectUri(catalogueProperties.getLogoutRedirect());
 
         return oidcLogoutSuccessHandler;
     }
@@ -113,7 +131,7 @@ public class SecurityConfig {
             authorities.forEach(authority -> {
                 String sub = "";
                 String email = "";
-                if (OidcUserAuthority.class.isInstance(authority)) {
+                if (authority instanceof OidcUserAuthority) {
                     // Map the claims found in idToken and/or userInfo
                     // to one or more GrantedAuthority's and add it to mappedAuthorities
 
@@ -122,16 +140,16 @@ public class SecurityConfig {
                     OidcIdToken idToken = oidcUserAuthority.getIdToken();
                     OidcUserInfo userInfo = oidcUserAuthority.getUserInfo();
 
-                    if (idToken != null && resourceCatalogueProperties.getAdmins().contains(idToken.getClaims().get("email"))) {
+                    if (idToken != null && catalogueProperties.getAdmins().contains(idToken.getClaims().get("email"))) {
                         sub = idToken.getClaimAsString("sub");
                         email = idToken.getClaimAsString("email");
-                    } else if (userInfo != null && resourceCatalogueProperties.getAdmins().contains(userInfo.getEmail())) {
+                    } else if (userInfo != null && catalogueProperties.getAdmins().contains(userInfo.getEmail())) {
                         sub = userInfo.getSubject();
                         email = userInfo.getEmail();
                     } else {
                         if (((OidcUserAuthority) authority).getAttributes() != null
                                 && ((OidcUserAuthority) authority).getAttributes().containsKey("email")
-                                && (resourceCatalogueProperties.getAdmins().contains(((OidcUserAuthority) authority).getAttributes().get("email")))) {
+                                && (catalogueProperties.getAdmins().contains(((OidcUserAuthority) authority).getAttributes().get("email")))) {
                             sub = ((OidcUserAuthority) authority).getAttributes().get("sub").toString();
                             email = ((OidcUserAuthority) authority).getAttributes().get("email").toString();
                         }
@@ -140,14 +158,14 @@ public class SecurityConfig {
                     mappedAuthorities.addAll(authoritiesMapper.getAuthorities(email));
                     logger.info("User '{}' with email '{}' mapped as '{}'", sub, email, mappedAuthorities);
 
-                } else if (OAuth2UserAuthority.class.isInstance(authority)) {
+                } else if (authority instanceof OAuth2UserAuthority) {
                     // Map the attributes found in userAttributes
                     // to one or more GrantedAuthority's and add it to mappedAuthorities
 
                     OAuth2UserAuthority oauth2UserAuthority = (OAuth2UserAuthority) authority;
                     Map<String, Object> userAttributes = oauth2UserAuthority.getAttributes();
 
-                    if (userAttributes != null && resourceCatalogueProperties.getAdmins().contains(userAttributes.get("email"))) {
+                    if (userAttributes != null && catalogueProperties.getAdmins().contains(userAttributes.get("email"))) {
                         sub = userAttributes.get("sub").toString();
                         email = userAttributes.get("email").toString();
                     }
@@ -180,7 +198,8 @@ public class SecurityConfig {
             Map<String, Object> claims = new HashMap<>(jwt.getClaims());
             claims.putAll(info);
             Collection<GrantedAuthority> authorities = authoritiesMapper.getAuthorities(email);
-            Jwt token = new Jwt(jwt.getTokenValue(), jwt.getIssuedAt(), jwt.getExpiresAt(), jwt.getHeaders(), Collections.unmodifiableMap(claims));
+            Jwt token = new Jwt(jwt.getTokenValue(), jwt.getIssuedAt(), jwt.getExpiresAt(), jwt.getHeaders(),
+                    Collections.unmodifiableMap(claims));
 
             return new JwtAuthenticationToken(token, authorities);
         }

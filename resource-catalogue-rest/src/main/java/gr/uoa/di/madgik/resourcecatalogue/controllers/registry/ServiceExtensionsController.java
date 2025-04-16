@@ -1,3 +1,19 @@
+/*
+ * Copyright 2017-2025 OpenAIRE AMKE & Athena Research and Innovation Center
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package gr.uoa.di.madgik.resourcecatalogue.controllers.registry;
 
 import com.google.gson.Gson;
@@ -5,29 +21,26 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.domain.Paging;
-import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
-import gr.uoa.di.madgik.resourcecatalogue.annotations.Browse;
+import gr.uoa.di.madgik.registry.exception.ResourceException;
+import gr.uoa.di.madgik.registry.annotation.BrowseParameters;
 import gr.uoa.di.madgik.resourcecatalogue.annotations.BrowseCatalogue;
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
 import gr.uoa.di.madgik.resourcecatalogue.dto.MonitoringStatus;
-import gr.uoa.di.madgik.resourcecatalogue.dto.ServiceType;
-import gr.uoa.di.madgik.resourcecatalogue.exception.ResourceException;
 import gr.uoa.di.madgik.resourcecatalogue.service.GenericResourceService;
 import gr.uoa.di.madgik.resourcecatalogue.service.HelpdeskService;
 import gr.uoa.di.madgik.resourcecatalogue.service.MonitoringService;
 import gr.uoa.di.madgik.resourcecatalogue.service.ServiceBundleService;
 import gr.uoa.di.madgik.resourcecatalogue.utils.CreateArgoGrnetHttpRequest;
-import gr.uoa.di.madgik.resourcecatalogue.utils.FacetFilterUtils;
 import gr.uoa.di.madgik.resourcecatalogue.validators.HelpdeskValidator;
 import gr.uoa.di.madgik.resourcecatalogue.validators.MonitoringValidator;
 import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import jakarta.validation.Valid;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.json.JSONObject;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpStatus;
@@ -39,7 +52,6 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
 
-import javax.validation.Valid;
 import java.time.OffsetDateTime;
 import java.util.HashMap;
 import java.util.List;
@@ -51,15 +63,15 @@ import java.util.Map;
 @Tag(name = "service extensions", description = "Operations about Services' Helpdesks/Monitorings")
 public class ServiceExtensionsController {
 
-    private static final Logger logger = LogManager.getLogger(ServiceExtensionsController.class);
+    private static final Logger logger = LoggerFactory.getLogger(ServiceExtensionsController.class);
     private final HelpdeskService helpdeskService;
     private final MonitoringService monitoringService;
-    private final ServiceBundleService serviceBundleService;
-    @Value("${argo.grnet.monitoring.availability}")
+    private final ServiceBundleService<ServiceBundle> serviceBundleService;
+    @Value("${argo.grnet.monitoring.availability:}")
     private String monitoringAvailability;
-    @Value("${argo.grnet.monitoring.status}")
+    @Value("${argo.grnet.monitoring.status:}")
     private String monitoringStatus;
-    @Value("${argo.grnet.monitoring.token}")
+    @Value("${argo.grnet.monitoring.token:}")
     private String monitoringToken;
     private final GenericResourceService genericResourceService;
 
@@ -73,10 +85,9 @@ public class ServiceExtensionsController {
         binder.addValidators(new MonitoringValidator());
     }
 
-    @Autowired
     ServiceExtensionsController(HelpdeskService helpdeskService,
                                 MonitoringService monitoringService,
-                                ServiceBundleService serviceBundleService,
+                                ServiceBundleService<ServiceBundle> serviceBundleService,
                                 GenericResourceService genericResourceService) {
         this.helpdeskService = helpdeskService;
         this.monitoringService = monitoringService;
@@ -112,34 +123,32 @@ public class ServiceExtensionsController {
         String serviceId = prefix + "/" + suffix;
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(1000);
+        ff.addFilter("service_id", serviceId);
         List<HelpdeskBundle> allHelpdesks = helpdeskService.getAll(ff, auth).getResults();
-        for (HelpdeskBundle helpdesk : allHelpdesks) {
-            if (helpdesk.getCatalogueId().equals(catalogueId) && (helpdesk.getHelpdesk().getServiceId().equals(serviceId)
-                    || (catalogueId + '.' + helpdesk.getHelpdesk().getServiceId()).equals(serviceId))) {
-                return new ResponseEntity<>(helpdesk.getHelpdesk(), HttpStatus.OK);
-            }
+        if (!allHelpdesks.isEmpty()) {
+            return new ResponseEntity<>(allHelpdesks.getFirst().getHelpdesk(), HttpStatus.OK);
         }
         return new ResponseEntity<>(null, HttpStatus.OK);
     }
 
     @Operation(summary = "Filter a list of Helpdesks based on a set of filters or get a list of all Helpdesks in the Catalogue.")
-    @Browse
+    @BrowseParameters
     @BrowseCatalogue
     @GetMapping(path = "/helpdesk/all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    public ResponseEntity<Paging<Helpdesk>> getAllHelpdesks(@Parameter(hidden = true) @RequestParam Map<String, Object> allRequestParams) {
-        FacetFilter ff = FacetFilterUtils.createFacetFilter(allRequestParams);
+    public ResponseEntity<Paging<Helpdesk>> getAllHelpdesks(@Parameter(hidden = true) @RequestParam MultiValueMap<String, Object> allRequestParams) {
+        FacetFilter ff = FacetFilter.from(allRequestParams);
         ff.setResourceType("helpdesk");
         ff.addFilter("published", false);
         Paging<Helpdesk> paging = genericResourceService.getResults(ff).map(r -> ((HelpdeskBundle) r).getPayload());
         return ResponseEntity.ok(paging);
     }
 
-    @Browse
+    @BrowseParameters
     @BrowseCatalogue
     @GetMapping(path = "/helpdesk/bundle/all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     public ResponseEntity<Paging<HelpdeskBundle>> getAllHelpdeskBundles(@Parameter(hidden = true) @RequestParam MultiValueMap<String, Object> allRequestParams) {
-        FacetFilter ff = FacetFilterUtils.createFacetFilter(allRequestParams);
+        FacetFilter ff = FacetFilter.from(allRequestParams);
         ff.setResourceType("helpdesk");
         ff.addFilter("published", false);
         Paging<HelpdeskBundle> paging = genericResourceService.getResults(ff);
@@ -148,13 +157,12 @@ public class ServiceExtensionsController {
 
     @Operation(summary = "Creates a new Helpdesk.")
     @PostMapping(path = "/helpdesk", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth, #helpdesk.serviceId, #catalogueId)")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceAdmin(#auth, #helpdesk.serviceId)")
     public ResponseEntity<Helpdesk> addHelpdesk(@Valid @RequestBody Helpdesk helpdesk,
                                                 @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId,
                                                 @RequestParam String resourceType,
                                                 @Parameter(hidden = true) Authentication auth) {
         HelpdeskBundle helpdeskBundle = helpdeskService.add(new HelpdeskBundle(helpdesk, catalogueId), resourceType, auth);
-        logger.info("Added the Helpdesk with id '{}'", helpdesk.getId());
         return new ResponseEntity<>(helpdeskBundle.getHelpdesk(), HttpStatus.CREATED);
     }
 
@@ -163,11 +171,10 @@ public class ServiceExtensionsController {
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<Helpdesk> updateHelpdesk(@Valid @RequestBody Helpdesk helpdesk,
                                                    @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId,
-                                                   @Parameter(hidden = true) Authentication auth) throws ResourceNotFoundException {
+                                                   @Parameter(hidden = true) Authentication auth) {
         HelpdeskBundle helpdeskBundle = helpdeskService.get(helpdesk.getId());
         helpdeskBundle.setHelpdesk(helpdesk);
         helpdeskBundle = helpdeskService.update(helpdeskBundle, auth);
-        logger.info("Updated the Helpdesk with id '{}'", helpdesk.getId());
         return new ResponseEntity<>(helpdeskBundle.getHelpdesk(), HttpStatus.OK);
     }
 
@@ -176,37 +183,31 @@ public class ServiceExtensionsController {
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     public ResponseEntity<Helpdesk> deleteHelpdeskById(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
                                                        @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix,
-                                                       @Parameter(hidden = true) Authentication auth) throws ResourceNotFoundException {
+                                                       @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
         HelpdeskBundle helpdeskBundle = helpdeskService.get(id);
         if (helpdeskBundle == null) {
             return new ResponseEntity<>(HttpStatus.GONE);
         }
-        logger.info("Deleting Helpdesk: {} of the Catalogue: {}", helpdeskBundle.getHelpdesk().getId(), helpdeskBundle.getCatalogueId());
-        // delete Helpdesk
         helpdeskService.delete(helpdeskBundle);
-        logger.info("Deleted the Helpdesk with id '{}' of the Catalogue '{}'", helpdeskBundle.getHelpdesk().getId(), helpdeskBundle.getCatalogueId());
         return new ResponseEntity<>(helpdeskBundle.getHelpdesk(), HttpStatus.OK);
     }
 
     // Deletes the Helpdesk of the specific Service of the specific Catalogue.
     @Operation(summary = "Deletes the Helpdesk of the specific Service of the specific Catalogue.")
     @DeleteMapping(path = "/helpdesk/{catalogueId}/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth, #prefix+'/'+#suffix, #catalogueId)")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceAdmin(#auth, #prefix+'/'+#suffix)")
     public ResponseEntity<Helpdesk> deleteHelpdesk(@PathVariable("catalogueId") String catalogueId,
                                                    @Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
                                                    @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix,
-                                                   @Parameter(hidden = true) Authentication auth) throws ResourceNotFoundException {
+                                                   @Parameter(hidden = true) Authentication auth) {
         Helpdesk helpdesk = getHelpdeskByServiceId(prefix, suffix, catalogueId, auth).getBody();
         assert helpdesk != null;
         HelpdeskBundle helpdeskBundle = helpdeskService.get(helpdesk.getId());
         if (helpdeskBundle == null) {
             return new ResponseEntity<>(HttpStatus.GONE);
         }
-        logger.info("Deleting Helpdesk: {} of the Catalogue: {}", helpdeskBundle.getHelpdesk().getId(), helpdeskBundle.getCatalogueId());
-        // delete Helpdesk
         helpdeskService.delete(helpdeskBundle);
-        logger.info("Deleted the Helpdesk with id '{}' of the Catalogue '{}'", helpdeskBundle.getHelpdesk().getId(), helpdeskBundle.getCatalogueId());
         return new ResponseEntity<>(helpdeskBundle.getHelpdesk(), HttpStatus.OK);
     }
 
@@ -215,8 +216,6 @@ public class ServiceExtensionsController {
     @PostMapping(path = "createPublicHelpdesk", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<HelpdeskBundle> createPublicHelpdesk(@RequestBody HelpdeskBundle helpdeskBundle, @Parameter(hidden = true) Authentication auth) {
-        logger.info("User '{}-{}' attempts to create a Public Helpdesk from Helpdesk '{}' of the '{}' Catalogue", User.of(auth).getFullName(),
-                User.of(auth).getEmail(), helpdeskBundle.getId(), helpdeskBundle.getCatalogueId());
         return ResponseEntity.ok(helpdeskService.createPublicResource(helpdeskBundle, auth));
     }
 
@@ -232,7 +231,7 @@ public class ServiceExtensionsController {
             try {
                 helpdeskService.createPublicResource(helpdeskBundle, auth);
             } catch (ResourceException e) {
-                logger.info("Helpdesk with ID {} is already registered as Public", helpdeskBundle.getId());
+                logger.info("Helpdesk with ID '{}' is already registered as Public", helpdeskBundle.getId());
             }
         }
     }
@@ -266,33 +265,31 @@ public class ServiceExtensionsController {
         String serviceId = prefix + "/" + suffix;
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(1000);
+        ff.addFilter("service_id", serviceId);
         List<MonitoringBundle> allMonitorings = monitoringService.getAll(ff, auth).getResults();
-        for (MonitoringBundle monitoring : allMonitorings) {
-            if (monitoring.getCatalogueId().equals(catalogueId) && (monitoring.getMonitoring().getServiceId().equals(serviceId)
-                    || (catalogueId + '.' + monitoring.getMonitoring().getServiceId()).equals(serviceId))) {
-                return new ResponseEntity<>(monitoring.getMonitoring(), HttpStatus.OK);
-            }
+        if (!allMonitorings.isEmpty()) {
+            return new ResponseEntity<>(allMonitorings.getFirst().getMonitoring(), HttpStatus.OK);
         }
         return new ResponseEntity<>(null, HttpStatus.OK);
     }
 
     @Operation(summary = "Filter a list of Monitorings based on a set of filters or get a list of all Monitorings in the Catalogue.")
-    @Browse
+    @BrowseParameters
     @GetMapping(path = "monitoring/all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    public ResponseEntity<Paging<Monitoring>> getAllMonitorings(@Parameter(hidden = true) @RequestParam Map<String, Object> allRequestParams) {
-        FacetFilter ff = FacetFilterUtils.createFacetFilter(allRequestParams);
+    public ResponseEntity<Paging<Monitoring>> getAllMonitorings(@Parameter(hidden = true) @RequestParam MultiValueMap<String, Object> allRequestParams) {
+        FacetFilter ff = FacetFilter.from(allRequestParams);
         ff.setResourceType("monitoring");
         ff.addFilter("published", false);
         Paging<Monitoring> paging = genericResourceService.getResults(ff).map(r -> ((MonitoringBundle) r).getPayload());
         return ResponseEntity.ok(paging);
     }
 
-    @Browse
+    @BrowseParameters
     @BrowseCatalogue
     @GetMapping(path = "/monitoring/bundle/all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     public ResponseEntity<Paging<MonitoringBundle>> getAllMonitoringBundles(@Parameter(hidden = true) @RequestParam MultiValueMap<String, Object> allRequestParams) {
-        FacetFilter ff = FacetFilterUtils.createFacetFilter(allRequestParams);
+        FacetFilter ff = FacetFilter.from(allRequestParams);
         ff.setResourceType("monitoring");
         ff.addFilter("published", false);
         Paging<MonitoringBundle> paging = genericResourceService.getResults(ff);
@@ -301,19 +298,18 @@ public class ServiceExtensionsController {
 
     @Operation(summary = "Returns all the available Monitoring serviceTypes")
     @GetMapping(path = "/monitoring/serviceTypes", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    public ResponseEntity<List<ServiceType>> getAvailableServiceTypes() {
+    public ResponseEntity<List<Vocabulary>> getAvailableServiceTypes() {
         return new ResponseEntity<>(monitoringService.getAvailableServiceTypes(), HttpStatus.OK);
     }
 
     @Operation(summary = "Creates a new Monitoring.")
     @PostMapping(path = "/monitoring", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth, #monitoring.serviceId, #catalogueId)")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceAdmin(#auth, #monitoring.serviceId)")
     public ResponseEntity<Monitoring> addMonitoring(@Valid @RequestBody Monitoring monitoring,
                                                     @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId,
                                                     @RequestParam String resourceType,
                                                     @Parameter(hidden = true) Authentication auth) {
         MonitoringBundle monitoringBundle = monitoringService.add(new MonitoringBundle(monitoring, catalogueId), resourceType, auth);
-        logger.info("Added the Monitoring with id '{}'", monitoring.getId());
         return new ResponseEntity<>(monitoringBundle.getMonitoring(), HttpStatus.CREATED);
     }
 
@@ -322,11 +318,10 @@ public class ServiceExtensionsController {
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<Monitoring> updateMonitoring(@Valid @RequestBody Monitoring monitoring,
                                                        @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId,
-                                                       @Parameter(hidden = true) Authentication auth) throws ResourceNotFoundException {
+                                                       @Parameter(hidden = true) Authentication auth) {
         MonitoringBundle monitoringBundle = monitoringService.get(monitoring.getId());
         monitoringBundle.setMonitoring(monitoring);
         monitoringBundle = monitoringService.update(monitoringBundle, auth);
-        logger.info("Updated the Monitoring with id '{}'", monitoring.getId());
         return new ResponseEntity<>(monitoringBundle.getMonitoring(), HttpStatus.OK);
     }
 
@@ -335,37 +330,31 @@ public class ServiceExtensionsController {
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     public ResponseEntity<Monitoring> deleteMonitoringById(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
                                                            @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix,
-                                                           @Parameter(hidden = true) Authentication auth) throws ResourceNotFoundException {
+                                                           @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
         MonitoringBundle monitoringBundle = monitoringService.get(id);
         if (monitoringBundle == null) {
             return new ResponseEntity<>(HttpStatus.GONE);
         }
-        logger.info("Deleting Monitoring: {} of the Catalogue: {}", monitoringBundle.getMonitoring().getId(), monitoringBundle.getCatalogueId());
-        // delete Monitoring
         monitoringService.delete(monitoringBundle);
-        logger.info("Deleted the Monitoring with id '{}' of the Catalogue '{}'", monitoringBundle.getMonitoring().getId(), monitoringBundle.getCatalogueId());
         return new ResponseEntity<>(monitoringBundle.getMonitoring(), HttpStatus.OK);
     }
 
     // Deletes the Monitoring of the specific Service of the specific Catalogue.
     @Operation(summary = "Deletes the Monitoring of the specific Service of the specific Catalogue.")
     @DeleteMapping(path = "/monitoring/{catalogueId}/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceProviderAdmin(#auth, #prefix+'/'+#suffix, #catalogueId)")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceAdmin(#auth, #prefix+'/'+#suffix)")
     public ResponseEntity<Monitoring> deleteMonitoring(@PathVariable("catalogueId") String catalogueId,
                                                        @Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
                                                        @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix,
-                                                       @Parameter(hidden = true) Authentication auth) throws ResourceNotFoundException {
+                                                       @Parameter(hidden = true) Authentication auth) {
         Monitoring monitoring = getMonitoringByServiceId(prefix, suffix, catalogueId, auth).getBody();
         assert monitoring != null;
         MonitoringBundle monitoringBundle = monitoringService.get(monitoring.getId());
         if (monitoringBundle == null) {
             return new ResponseEntity<>(HttpStatus.GONE);
         }
-        logger.info("Deleting Monitoring: {} of the Catalogue: {}", monitoringBundle.getMonitoring().getId(), monitoringBundle.getCatalogueId());
-        // delete Monitoring
         monitoringService.delete(monitoringBundle);
-        logger.info("Deleted the Monitoring with id '{}' of the Catalogue '{}'", monitoringBundle.getMonitoring().getId(), monitoringBundle.getCatalogueId());
         return new ResponseEntity<>(monitoringBundle.getMonitoring(), HttpStatus.OK);
     }
 
@@ -455,7 +444,7 @@ public class ServiceExtensionsController {
 
     private String getServiceMonitoringStatusValue(String serviceId) {
         try {
-            return getMonitoringStatus(serviceId.split("/")[0], serviceId.split("/")[1], false).get(0).getValue();
+            return getMonitoringStatus(serviceId.split("/")[0], serviceId.split("/")[1], false).getFirst().getValue();
         } catch (NullPointerException e) {
             return "";
         }
@@ -466,8 +455,6 @@ public class ServiceExtensionsController {
     @PostMapping(path = "createPublicMonitoring", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<MonitoringBundle> createPublicMonitoring(@RequestBody MonitoringBundle monitoringBundle, @Parameter(hidden = true) Authentication auth) {
-        logger.info("User '{}-{}' attempts to create a Public Monitoring from Monitoring '{}' of the '{}' Catalogue", User.of(auth).getFullName(),
-                User.of(auth).getEmail(), monitoringBundle.getId(), monitoringBundle.getCatalogueId());
         return ResponseEntity.ok(monitoringService.createPublicResource(monitoringBundle, auth));
     }
 
@@ -483,7 +470,7 @@ public class ServiceExtensionsController {
             try {
                 monitoringService.createPublicResource(monitoringBundle, auth);
             } catch (ResourceException e) {
-                logger.info("Monitoring with ID {} is already registered as Public", monitoringBundle.getId());
+                logger.info("Monitoring with ID '{}' is already registered as Public", monitoringBundle.getId());
             }
         }
     }

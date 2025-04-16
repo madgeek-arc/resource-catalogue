@@ -1,6 +1,6 @@
 <p>Dear ${user.name},</p>
 <p>
-    Your Provider [${providerBundle.provider.id}]-[${providerBundle.provider.name}] alongside all of its Resources
+    Your Provider [${bundle.provider.id}]-[${bundle.provider.name}] alongside all of its Resources
     has been deleted.
 </p>
 <p>

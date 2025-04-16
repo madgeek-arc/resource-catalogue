@@ -1,21 +1,36 @@
+/*
+ * Copyright 2017-2025 OpenAIRE AMKE & Athena Research and Innovation Center
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package gr.uoa.di.madgik.resourcecatalogue.manager;
 
 import gr.uoa.di.madgik.registry.domain.Browsing;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.domain.Resource;
+import gr.uoa.di.madgik.registry.exception.ResourceAlreadyExistsException;
+import gr.uoa.di.madgik.registry.exception.ResourceException;
+import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.domain.ProviderBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Vocabulary;
 import gr.uoa.di.madgik.resourcecatalogue.dto.VocabularyTree;
-import gr.uoa.di.madgik.resourcecatalogue.exception.ResourceAlreadyExistsException;
-import gr.uoa.di.madgik.resourcecatalogue.exception.ResourceException;
 import gr.uoa.di.madgik.resourcecatalogue.service.IdCreator;
 import gr.uoa.di.madgik.resourcecatalogue.service.SecurityService;
 import gr.uoa.di.madgik.resourcecatalogue.service.VocabularyService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Lazy;
-import org.springframework.http.HttpStatus;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
@@ -40,7 +55,7 @@ public class VocabularyManager extends ResourceManager<Vocabulary> implements Vo
     }
 
     @Override
-    public String getResourceType() {
+    public String getResourceTypeName() {
         return "vocabulary";
     }
 
@@ -50,7 +65,7 @@ public class VocabularyManager extends ResourceManager<Vocabulary> implements Vo
         try {
             vocabulary = get(id);
         } catch (ResourceException e) {
-            throw new ResourceException(String.format("Vocabulary with id '%s' does not exist!", id), HttpStatus.NOT_FOUND);
+            throw new ResourceNotFoundException(String.format("Vocabulary with id '%s' does not exist!", id));
         }
         return vocabulary;
     }
@@ -82,19 +97,34 @@ public class VocabularyManager extends ResourceManager<Vocabulary> implements Vo
     @Override
     public Map<Vocabulary.Type, List<Vocabulary>> getAllVocabulariesByType() {
         Map<Vocabulary.Type, List<Vocabulary>> allVocabularies = new HashMap<>();
-        for (Vocabulary.Type type : Vocabulary.Type.values()) {
-            allVocabularies.put(type, getByType(type));
-        }
+        FacetFilter ff = new FacetFilter();
+        ff.setResourceType(getResourceTypeName());
+        ff.setQuantity(maxQuantity);
+        Browsing<Vocabulary> allVocs = getAll(ff);
+        allVocabularies = allVocs.getResults()
+                .parallelStream()
+                .filter(Objects::nonNull)
+                .collect(Collectors
+                        .groupingBy(value -> Vocabulary.Type.fromString(value.getType()),
+                                Collectors.collectingAndThen(
+                                        Collectors.toList(),
+                                        list -> list.stream()
+                                                .sorted(Comparator.comparing(Vocabulary::getName))
+                                                .collect(Collectors.toList())
+                                )
+                        )
+                );
         return allVocabularies;
     }
 
     @Override
     public List<Vocabulary> getByType(Vocabulary.Type type) {
         FacetFilter ff = new FacetFilter();
+        ff.setResourceType(getResourceTypeName());
         ff.setQuantity(maxQuantity);
         ff.addFilter("type", type.getKey());
         List<Vocabulary> vocList = getAll(ff, null).getResults();
-        return vocList.stream().sorted(Comparator.comparing(Vocabulary::getId)).collect(Collectors.toList());
+        return vocList.stream().sorted(Comparator.comparing(Vocabulary::getName)).collect(Collectors.toList());
     }
 
     @Override
@@ -180,12 +210,12 @@ public class VocabularyManager extends ResourceManager<Vocabulary> implements Vo
             vocabulary.setId(id);
         }
         if (exists(vocabulary)) {
-            throw new ResourceAlreadyExistsException(String.format("%s already exists!%n%s", resourceType.getName(), vocabulary));
+            throw new ResourceAlreadyExistsException(String.format("%s already exists!%n%s", getResourceTypeName(), vocabulary));
         }
         String serialized = serialize(vocabulary);
         Resource created = new Resource();
         created.setPayload(serialized);
-        created.setResourceType(resourceType);
+        created.setResourceType(getResourceType());
         resourceService.addResource(created);
         logger.debug("Adding Vocabulary {}", vocabulary);
         return vocabulary;
@@ -198,14 +228,14 @@ public class VocabularyManager extends ResourceManager<Vocabulary> implements Vo
         serialized = serialized.replace(":tns", "");
         serialized = serialized.replace("tns:", "");
         existing.setPayload(serialized);
-        existing.setResourceType(resourceType);
+        existing.setResourceType(getResourceType());
         resourceService.updateResource(existing);
         logger.debug("Updating Vocabulary {}", vocabulary);
         return vocabulary;
     }
 
     //    @Scheduled(initialDelay = 0, fixedRate = 120000)
-    @Scheduled(cron = "0 0 12 ? * 2/7") // At 12:00:00pm, every 7 days starting on Monday, every month
+//    @Scheduled(cron = "0 0 12 ? * 2/7") // At 12:00:00pm, every 7 days starting on Monday, every month
     public void updateHostingLegalEntityVocabularyList() {
         logger.info("Checking for possible new Hosting Legal Entity entries..");
         List<Vocabulary> hostingLegalEntities = getByType(Vocabulary.Type.PROVIDER_HOSTING_LEGAL_ENTITY);
@@ -244,8 +274,8 @@ public class VocabularyManager extends ResourceManager<Vocabulary> implements Vo
             newHostingLegalEntity.setName(newHLE);
             newHostingLegalEntity.setType(Vocabulary.Type.PROVIDER_HOSTING_LEGAL_ENTITY.getKey());
             //TODO: Also add catalogueId as extras if this method gets activated
-            logger.info(String.format("Creating a new Hosting Legal Entity Vocabulary with id: [%s] and name: [%s]",
-                    newHostingLegalEntity.getId(), newHostingLegalEntity.getName()));
+            logger.info("Creating a new Hosting Legal Entity Vocabulary with id: '{}' and name: '{}'",
+                    newHostingLegalEntity.getId(), newHostingLegalEntity.getName());
 //                        add(newHostingLegalEntity, null);
         }
     }
