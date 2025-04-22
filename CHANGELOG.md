@@ -1,4 +1,4 @@
-## [](https://github.com/madgeek-arc/resource-catalogue/compare/v3.0.1...v) (2025-04-16)
+## [](https://github.com/madgeek-arc/resource-catalogue/compare/v3.0.1...v) (2025-04-22)
 
 ### ⚠ BREAKING CHANGES
 
@@ -7,6 +7,7 @@
 ### Features
 
 * Add dependency on 'catalogue' project. Remove duplicate code. ([c780de1](https://github.com/madgeek-arc/resource-catalogue/commit/c780de1fb7d063076eb20da7edf02d2e25baf446))
+* Add enable/disable functionality for AMS service ([a79b2ed](https://github.com/madgeek-arc/resource-catalogue/commit/a79b2edb9afc2d4cc1539e492d72b30b1928b3a4))
 * AMS initial commit ([923faa2](https://github.com/madgeek-arc/resource-catalogue/commit/923faa23b28495e09ea9aa13b4399ee07ea9de80))
 * AMS initial commit ([626a8a3](https://github.com/madgeek-arc/resource-catalogue/commit/626a8a3dba7931f6eff0a818bdb41471e3f2e1e9))
 * Create new API call to get a Configuration Template providing its Interoperability Record ID ([4bc8fc2](https://github.com/madgeek-arc/resource-catalogue/commit/4bc8fc2ed7d2358334c1cc1d0b809a917b850317))
@@ -14,6 +15,7 @@
 
 ### Bug Fixes
 
+* Add missing dependency ([9e5b69b](https://github.com/madgeek-arc/resource-catalogue/commit/9e5b69b89005c4c749c7fc89a6d4f8cfa63545af))
 * Add needed missing action (post/put) on Monitoring email template ([2e01b53](https://github.com/madgeek-arc/resource-catalogue/commit/2e01b537a0d5e9194e06b7b7ba72481c28522b14))
 * Add missing email field from user info cookie ([82db52f](https://github.com/madgeek-arc/resource-catalogue/commit/82db52fca428132e1abc7dee72668ac90fe7f89e))
 * Correct public ID creation for resource interoperability records when sending consistency emails ([9e5586c](https://github.com/madgeek-arc/resource-catalogue/commit/9e5586c2b2ec76f39b69f7b2de5867dbc720faf9))
@@ -34,4 +36,4 @@
 
 ### Build System
 
-* Change "catalogue" dependency FQPN ([48dce34](https://github.com/madgeek-arc/resource-catalogue/commit/48dce34d15beb5d40458e2388c0bc3a3fb2af3b7))
+* change "catalogue" dependency FQPN ([48dce34](https://github.com/madgeek-arc/resource-catalogue/commit/48dce34d15beb5d40458e2388c0bc3a3fb2af3b7))
