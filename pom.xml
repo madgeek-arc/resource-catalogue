@@ -297,6 +297,7 @@
                 <artifactId>maven-checkstyle-plugin</artifactId>
                 <version>3.6.0</version>
                 <configuration>
+                    <configLocation>google_checks.xml</configLocation>
                     <outputFile>${project.build.directory}/checkstyle-result.xml</outputFile>
                     <outputFileFormat>xml</outputFileFormat>
                 </configuration>
