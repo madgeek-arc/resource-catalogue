@@ -100,6 +100,7 @@ public class HelpdeskManager extends ResourceManager<HelpdeskBundle> implements 
         logger.trace("Attempting to add a new Helpdesk: {}", helpdesk);
 
         helpdesk.setMetadata(Metadata.createMetadata(AuthenticationInfo.getFullName(auth), AuthenticationInfo.getEmail(auth).toLowerCase()));
+        commonMethods.createIdentifiers(helpdesk, getResourceTypeName(), false);
         List<LoggingInfo> loggingInfoList = commonMethods.returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(helpdesk, auth);
         helpdesk.setLoggingInfo(loggingInfoList);
         helpdesk.setActive(true);
@@ -134,6 +135,7 @@ public class HelpdeskManager extends ResourceManager<HelpdeskBundle> implements 
 
         validate(ret);
         ret.setMetadata(Metadata.updateMetadata(ret.getMetadata(), AuthenticationInfo.getFullName(auth), AuthenticationInfo.getEmail(auth).toLowerCase()));
+        ret.setIdentifiers(existingHelpdesk.getIdentifiers());
         List<LoggingInfo> loggingInfoList = commonMethods.returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(ret, auth);
         LoggingInfo loggingInfo = commonMethods.createLoggingInfo(auth, LoggingInfo.Types.UPDATE.getKey(),
                 LoggingInfo.ActionType.UPDATED.getKey());

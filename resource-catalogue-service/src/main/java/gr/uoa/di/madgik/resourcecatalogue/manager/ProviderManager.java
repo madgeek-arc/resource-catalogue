@@ -52,7 +52,8 @@ import static gr.uoa.di.madgik.resourcecatalogue.utils.VocabularyValidationUtils
 @org.springframework.stereotype.Service("providerManager")
 public class ProviderManager extends ResourceManager<ProviderBundle> implements ProviderService {
 
-    private static final Logger logger = LoggerFactory.getLogger(ProviderManager.class);
+    private static final
+    Logger logger = LoggerFactory.getLogger(ProviderManager.class);
     private final DraftResourceService<ProviderBundle> draftProviderService;
     private final ServiceBundleService<ServiceBundle> serviceBundleService;
     private final TrainingResourceService trainingResourceService;
@@ -128,14 +129,6 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
 
         provider = onboard(provider, catalogueId, auth);
 
-        provider.setId(idCreator.generate(getResourceTypeName()));
-
-        // register and ensure Resource Catalogue's PID uniqueness
-        commonMethods.determineResourceAndCreateAlternativeIdentifierForPID(provider, getResourceTypeName());
-        provider.getProvider().setAlternativeIdentifiers(commonMethods.ensureResourceCataloguePidUniqueness(provider.getId(),
-                provider.getProvider().getCatalogueId(),
-                provider.getProvider().getAlternativeIdentifiers()));
-
         commonMethods.addAuthenticatedUser(provider.getProvider(), auth);
         validate(provider);
         provider.setMetadata(Metadata.createMetadata(AuthenticationInfo.getFullName(auth), AuthenticationInfo.getEmail(auth).toLowerCase()));
@@ -176,16 +169,6 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
             commonMethods.checkCatalogueIdConsistency(ret, catalogueId);
         }
 
-        // ensure Resource Catalogue's PID uniqueness
-        if (ret.getProvider().getAlternativeIdentifiers() == null ||
-                ret.getProvider().getAlternativeIdentifiers().isEmpty()) {
-            commonMethods.determineResourceAndCreateAlternativeIdentifierForPID(ret, getResourceTypeName());
-        } else {
-            ret.getProvider().setAlternativeIdentifiers(commonMethods.ensureResourceCataloguePidUniqueness(ret.getId(),
-                    ret.getProvider().getCatalogueId(),
-                    ret.getProvider().getAlternativeIdentifiers()));
-        }
-
         // block Public Provider update
         if (ret.getMetadata().isPublished()) {
             throw new ValidationException("You cannot directly update a Public Provider");
@@ -208,6 +191,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         if (!securityService.hasRole(auth, "ROLE_ADMIN") && !existingProvider.getProvider().getCatalogueId().equals(ret.getProvider().getCatalogueId())) {
             throw new ValidationException("You cannot change catalogueId");
         }
+        ret.setIdentifiers(existingProvider.getIdentifiers());
         ret.setActive(existingProvider.isActive());
         ret.setStatus(existingProvider.getStatus());
         ret.setSuspended(existingProvider.isSuspended());
@@ -246,7 +230,8 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     private ProviderBundle getWithCatalogue(String id, String catalogueId) {
         Resource resource = getResource(id, catalogueId);
         if (resource == null) {
-            throw new gr.uoa.di.madgik.registry.exception.ResourceNotFoundException(String.format("Could not find provider with id: %s and catalogueId: %s", id, catalogueId));
+            throw new gr.uoa.di.madgik.registry.exception.ResourceNotFoundException(String.format(
+                    "Could not find provider with id: %s and catalogueId: %s", id, catalogueId));
         }
         return deserialize(resource);
     }
@@ -883,6 +868,8 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
             provider.setActive(false);
             provider.setStatus(vocabularyService.get("pending provider").getId());
             provider.setTemplateStatus(vocabularyService.get("no template status").getId());
+            provider.setId(idCreator.generate(getResourceTypeName()));
+            commonMethods.createIdentifiers(provider, getResourceTypeName(), false);
         } else {
             commonMethods.checkCatalogueIdConsistency(provider, catalogueId);
             provider.setActive(true);
@@ -890,8 +877,12 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
             provider.setTemplateStatus(vocabularyService.get("approved template").getId());
             loggingInfoList.add(commonMethods.createLoggingInfo(auth, LoggingInfo.Types.ONBOARD.getKey(),
                     LoggingInfo.ActionType.APPROVED.getKey()));
+            // check that external source has provided its own ID
+            if (provider.getId() == null || provider.getId().isEmpty()) {
+                throw new ValidationException("Provider ID should not be empty");
+            }
+            commonMethods.createIdentifiers(provider, getResourceTypeName(), true);
         }
-
         provider.setAuditState(Auditable.NOT_AUDITED);
         provider.setLatestOnboardingInfo(loggingInfoList.getLast());
 

@@ -22,7 +22,9 @@ import gr.uoa.di.madgik.registry.exception.ResourceException;
 import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.registry.service.ResourceCRUDService;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Identifiers;
+import gr.uoa.di.madgik.resourcecatalogue.domain.InteroperabilityRecordBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.configurationTemplates.ConfigurationTemplateInstanceBundle;
+import gr.uoa.di.madgik.resourcecatalogue.service.InteroperabilityRecordService;
 import gr.uoa.di.madgik.resourcecatalogue.utils.JmsService;
 import gr.uoa.di.madgik.resourcecatalogue.utils.PublicResourceUtils;
 import org.apache.commons.beanutils.BeanUtils;
@@ -43,13 +45,16 @@ public class PublicConfigurationTemplateInstanceService extends ResourceManager<
 
     private static final Logger logger = LoggerFactory.getLogger(PublicConfigurationTemplateInstanceService.class);
     private final JmsService jmsService;
+    private final InteroperabilityRecordService interoperabilityRecordService;
 
     @Value("${catalogue.id}")
     private String catalogueId;
 
-    public PublicConfigurationTemplateInstanceService(JmsService jmsService) {
+    public PublicConfigurationTemplateInstanceService(JmsService jmsService,
+                                                      InteroperabilityRecordService interoperabilityRecordService) {
         super(ConfigurationTemplateInstanceBundle.class);
         this.jmsService = jmsService;
+        this.interoperabilityRecordService = interoperabilityRecordService;
     }
 
     @Override
@@ -66,17 +71,16 @@ public class PublicConfigurationTemplateInstanceService extends ResourceManager<
     @Override
     public ConfigurationTemplateInstanceBundle add(ConfigurationTemplateInstanceBundle configurationTemplateInstanceBundle, Authentication authentication) {
         String lowerLevelResourceId = configurationTemplateInstanceBundle.getId();
-        Identifiers.createOriginalId(configurationTemplateInstanceBundle);
-        configurationTemplateInstanceBundle.setId(PublicResourceUtils.createPublicResourceId(
-                configurationTemplateInstanceBundle.getConfigurationTemplateInstance().getId(), catalogueId));
+        configurationTemplateInstanceBundle.setId(configurationTemplateInstanceBundle.getIdentifiers().getPid());
 
         // set public id to resourceId
         updateIdsToPublic(configurationTemplateInstanceBundle);
         JSONParser parser = new JSONParser();
         try {
             JSONObject payload = (JSONObject) parser.parse(configurationTemplateInstanceBundle.getConfigurationTemplateInstance().getPayload().replaceAll("'", "\""));
-            payload.put("interoperabilityRecordId", PublicResourceUtils.createPublicResourceId(
-                    payload.get("interoperabilityRecordId").toString(), catalogueId));
+            //TODO: are CTI from external catalogues supported?
+            InteroperabilityRecordBundle bundle = interoperabilityRecordService.get(payload.get("interoperabilityRecordId").toString());
+            payload.put("interoperabilityRecordId", bundle.getIdentifiers().getPid());
             configurationTemplateInstanceBundle.getConfigurationTemplateInstance().setPayload(payload.toString());
         } catch (ParseException e) {
             //continue
@@ -92,10 +96,8 @@ public class PublicConfigurationTemplateInstanceService extends ResourceManager<
 
     @Override
     public ConfigurationTemplateInstanceBundle update(ConfigurationTemplateInstanceBundle configurationTemplateInstanceBundle, Authentication authentication) {
-        ConfigurationTemplateInstanceBundle published = super.get(PublicResourceUtils.createPublicResourceId(
-                configurationTemplateInstanceBundle.getConfigurationTemplateInstance().getId(), catalogueId));
-        ConfigurationTemplateInstanceBundle ret = super.get(PublicResourceUtils.createPublicResourceId(
-                configurationTemplateInstanceBundle.getConfigurationTemplateInstance().getId(), catalogueId));
+        ConfigurationTemplateInstanceBundle published = super.get(configurationTemplateInstanceBundle.getIdentifiers().getPid());
+        ConfigurationTemplateInstanceBundle ret = super.get(configurationTemplateInstanceBundle.getIdentifiers().getPid());
         try {
             BeanUtils.copyProperties(ret, configurationTemplateInstanceBundle);
         } catch (IllegalAccessException | InvocationTargetException e) {
@@ -118,8 +120,7 @@ public class PublicConfigurationTemplateInstanceService extends ResourceManager<
     public void delete(ConfigurationTemplateInstanceBundle configurationTemplateInstanceBundle) {
         try {
             ConfigurationTemplateInstanceBundle publicConfigurationTemplateInstanceBundle =
-                    get(PublicResourceUtils.createPublicResourceId(
-                    configurationTemplateInstanceBundle.getConfigurationTemplateInstance().getId(), catalogueId));
+                    get(configurationTemplateInstanceBundle.getIdentifiers().getPid());
             logger.info("Deleting public ConfigurationTemplateInstanceBundle with id '{}'",
                     publicConfigurationTemplateInstanceBundle.getId());
             super.delete(publicConfigurationTemplateInstanceBundle);

@@ -100,6 +100,7 @@ public class ResourceInteroperabilityRecordManager extends ResourceManager<Resou
         commonMethods.checkRelatedResourceIDsConsistency(bundle);
 
         bundle.setId(idCreator.generate(getResourceTypeName()));
+        commonMethods.createIdentifiers(bundle, getResourceTypeName(), false);
         logger.trace("Attempting to add a new ResourceInteroperabilityRecord: {}", bundle);
 
         bundle.setMetadata(Metadata.createMetadata(AuthenticationInfo.getFullName(auth), AuthenticationInfo.getEmail(auth).toLowerCase()));
@@ -115,15 +116,6 @@ public class ResourceInteroperabilityRecordManager extends ResourceManager<Resou
         logger.debug("Adding ResourceInteroperabilityRecord: {}", bundle);
 
         return ret;
-    }
-
-    @Override
-    public ResourceInteroperabilityRecordBundle get(String id, String catalogueId) {
-        Resource resource = getResource(id, catalogueId);
-        if (resource == null) {
-            throw new ResourceNotFoundException(String.format("Could not find Resource Interoperability Record with id: %s and catalogueId: %s", id, catalogueId));
-        }
-        return deserialize(resource);
     }
 
     public ResourceInteroperabilityRecordBundle getWithResourceId(String resourceId) {
@@ -153,6 +145,7 @@ public class ResourceInteroperabilityRecordManager extends ResourceManager<Resou
         checkIfEachInteroperabilityRecordIsApproved(ret);
 
         ret.setMetadata(Metadata.updateMetadata(ret.getMetadata(), AuthenticationInfo.getFullName(auth), AuthenticationInfo.getEmail(auth).toLowerCase()));
+        ret.setIdentifiers(existingInteroperabilityRecord.getIdentifiers());
         List<LoggingInfo> loggingInfoList = commonMethods.returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(existingInteroperabilityRecord, auth);
         LoggingInfo loggingInfo = commonMethods.createLoggingInfo(auth, LoggingInfo.Types.UPDATE.getKey(),
                 LoggingInfo.ActionType.UPDATED.getKey());

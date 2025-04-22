@@ -128,10 +128,16 @@ public class ServiceBundleManager extends ResourceManager<ServiceBundle> impleme
 
     @Override
     public ServiceBundle addResource(ServiceBundle serviceBundle, String catalogueId, Authentication auth) {
-        if (catalogueId == null || catalogueId.isEmpty()) { // add catalogue provider
+        if (catalogueId == null || catalogueId.isEmpty() || catalogueId.equals(this.catalogueId)) { // add catalogue provider
             serviceBundle.getService().setCatalogueId(this.catalogueId);
+            serviceBundle.setId(idCreator.generate(getResourceTypeName()));
+            commonMethods.createIdentifiers(serviceBundle, getResourceTypeName(), false);
         } else { // add provider from external catalogue
             commonMethods.checkCatalogueIdConsistency(serviceBundle, catalogueId);
+            if (serviceBundle.getId() == null || serviceBundle.getId().isEmpty()) {
+                throw new ValidationException("Service ID should not be empty");
+            }
+            commonMethods.createIdentifiers(serviceBundle, getResourceTypeName(), true);
         }
         commonMethods.checkRelatedResourceIDsConsistency(serviceBundle);
 
@@ -153,14 +159,6 @@ public class ServiceBundleManager extends ResourceManager<ServiceBundle> impleme
         if ("".equals(serviceBundle.getService().getVersion())) {
             serviceBundle.getService().setVersion(null);
         }
-
-        serviceBundle.setId(idCreator.generate(getResourceTypeName()));
-
-        // register and ensure Resource Catalogue's PID uniqueness
-        commonMethods.determineResourceAndCreateAlternativeIdentifierForPID(serviceBundle, getResourceTypeName());
-        serviceBundle.getService().setAlternativeIdentifiers(commonMethods.ensureResourceCataloguePidUniqueness(serviceBundle.getId(),
-                serviceBundle.getService().getCatalogueId(),
-                serviceBundle.getService().getAlternativeIdentifiers()));
 
         validate(serviceBundle);
 
@@ -219,7 +217,7 @@ public class ServiceBundleManager extends ResourceManager<ServiceBundle> impleme
         ServiceBundle ret = ObjectUtils.clone(serviceBundle);
         ServiceBundle existingService;
         try {
-            existingService = get(ret.getService().getId());
+            existingService = get(ret.getService().getId(), ret.getService().getCatalogueId());
             if (ret.getService().equals(existingService.getService())) {
                 return ret;
             }
@@ -252,20 +250,10 @@ public class ServiceBundleManager extends ResourceManager<ServiceBundle> impleme
             throw new ResourceException("You cannot directly update a Public Service", HttpStatus.FORBIDDEN);
         }
 
-        // ensure Resource Catalogue's PID uniqueness
-        if (ret.getService().getAlternativeIdentifiers() == null ||
-                ret.getService().getAlternativeIdentifiers().isEmpty()) {
-            commonMethods.determineResourceAndCreateAlternativeIdentifierForPID(ret, getResourceTypeName());
-        } else {
-            ret.getService().setAlternativeIdentifiers(commonMethods.ensureResourceCataloguePidUniqueness(ret.getId(),
-                    ret.getService().getCatalogueId(),
-                    ret.getService().getAlternativeIdentifiers()));
-        }
-
         // update existing service Metadata, ResourceExtras, Identifiers, MigrationStatus
         ret.setMetadata(Metadata.updateMetadata(existingService.getMetadata(), AuthenticationInfo.getFullName(auth)));
         ret.setResourceExtras(existingService.getResourceExtras());
-//        ret.setIdentifiers(existingService.getIdentifiers());
+        ret.setIdentifiers(existingService.getIdentifiers());
         ret.setMigrationStatus(existingService.getMigrationStatus());
 
         List<LoggingInfo> loggingInfoList = commonMethods.returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(existingService, auth);

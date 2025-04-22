@@ -20,15 +20,15 @@ import gr.uoa.di.madgik.registry.domain.Browsing;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.exception.ResourceException;
 import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
-import gr.uoa.di.madgik.registry.service.ResourceCRUDService;
-import gr.uoa.di.madgik.resourcecatalogue.domain.AlternativeIdentifier;
-import gr.uoa.di.madgik.resourcecatalogue.domain.DatasourceBundle;
-import gr.uoa.di.madgik.resourcecatalogue.domain.Identifiers;
+import gr.uoa.di.madgik.resourcecatalogue.domain.Bundle;
+import gr.uoa.di.madgik.resourcecatalogue.domain.ProviderBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.ServiceBundle;
+import gr.uoa.di.madgik.resourcecatalogue.manager.pids.PidIssuer;
+import gr.uoa.di.madgik.resourcecatalogue.service.ProviderService;
+import gr.uoa.di.madgik.resourcecatalogue.service.ServiceBundleService;
+import gr.uoa.di.madgik.resourcecatalogue.service.TrainingResourceService;
 import gr.uoa.di.madgik.resourcecatalogue.utils.FacetLabelService;
 import gr.uoa.di.madgik.resourcecatalogue.utils.JmsService;
-import gr.uoa.di.madgik.resourcecatalogue.utils.ProviderResourcesCommonMethods;
-import gr.uoa.di.madgik.resourcecatalogue.utils.PublicResourceUtils;
 import org.apache.commons.beanutils.BeanUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,6 +36,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
+import java.util.List;
 
 @Service("publicServiceManager")
 public class PublicServiceService extends ResourceManager<ServiceBundle>
@@ -43,16 +45,25 @@ public class PublicServiceService extends ResourceManager<ServiceBundle>
 
     private static final Logger logger = LoggerFactory.getLogger(PublicServiceService.class);
     private final JmsService jmsService;
-    private final ProviderResourcesCommonMethods commonMethods;
+    private final PidIssuer pidIssuer;
     private final FacetLabelService facetLabelService;
+    private final ProviderService providerService;
+    private final ServiceBundleService<ServiceBundle> serviceBundleService;
+    private final TrainingResourceService trainingResourceService;
 
     public PublicServiceService(JmsService jmsService,
-                                ProviderResourcesCommonMethods commonMethods,
-                                FacetLabelService facetLabelService) {
+                                PidIssuer pidIssuer,
+                                FacetLabelService facetLabelService,
+                                ProviderService providerService,
+                                ServiceBundleService<ServiceBundle> serviceBundleService,
+                                TrainingResourceService trainingResourceService) {
         super(ServiceBundle.class);
         this.jmsService = jmsService;
-        this.commonMethods = commonMethods;
+        this.pidIssuer = pidIssuer;
         this.facetLabelService = facetLabelService;
+        this.providerService = providerService;
+        this.serviceBundleService = serviceBundleService;
+        this.trainingResourceService = trainingResourceService;
     }
 
     @Override
@@ -72,31 +83,16 @@ public class PublicServiceService extends ResourceManager<ServiceBundle>
     @Override
     public ServiceBundle add(ServiceBundle serviceBundle, Authentication authentication) {
         String lowerLevelResourceId = serviceBundle.getId();
-        Identifiers.createOriginalId(serviceBundle);
-        serviceBundle.setId(PublicResourceUtils.createPublicResourceId(serviceBundle.getService().getId(),
-                serviceBundle.getService().getCatalogueId()));
-        commonMethods.restrictPrefixRepetitionOnPublicResources(serviceBundle.getId(), serviceBundle.getService().getCatalogueId());
+        serviceBundle.setId(serviceBundle.getIdentifiers().getPid());
+        serviceBundle.getMetadata().setPublished(true);
 
         // sets public ids to resource organisation, resource providers and related/required resources
         updateIdsToPublic(serviceBundle);
 
-        serviceBundle.getMetadata().setPublished(true);
         // POST PID
-        String pid = "no_pid";
-        for (AlternativeIdentifier alternativeIdentifier : serviceBundle.getService().getAlternativeIdentifiers()) {
-            if (alternativeIdentifier.getType().equalsIgnoreCase("EOSC PID")) {
-                pid = alternativeIdentifier.getValue();
-                break;
-            }
-        }
-        if (pid.equalsIgnoreCase("no_pid")) {
-            logger.info("Service with id '{}' does not have a PID registered under its AlternativeIdentifiers.",
-                    serviceBundle.getId());
-        } else {
-            //TODO: enable when we have PID configuration properties for Beyond
-            logger.info("PID POST disabled");
-//            commonMethods.postPID(pid);
-        }
+        logger.info("PID POST disabled");
+//        pidIssuer.postPID(serviceBundle.getId(), null);
+
         ServiceBundle ret;
         logger.info("Service '{}' is being published with id '{}'", lowerLevelResourceId, serviceBundle.getId());
         ret = super.add(serviceBundle, null);
@@ -106,10 +102,8 @@ public class PublicServiceService extends ResourceManager<ServiceBundle>
 
     @Override
     public ServiceBundle update(ServiceBundle serviceBundle, Authentication authentication) {
-        ServiceBundle published = super.get(PublicResourceUtils.createPublicResourceId(serviceBundle.getService().getId(),
-                serviceBundle.getService().getCatalogueId()));
-        ServiceBundle ret = super.get(PublicResourceUtils.createPublicResourceId(serviceBundle.getService().getId(),
-                serviceBundle.getService().getCatalogueId()));
+        ServiceBundle published = super.get(serviceBundle.getIdentifiers().getPid());
+        ServiceBundle ret = super.get(serviceBundle.getIdentifiers().getPid());
         try {
             BeanUtils.copyProperties(ret, serviceBundle);
         } catch (IllegalAccessException | InvocationTargetException e) {
@@ -132,9 +126,7 @@ public class PublicServiceService extends ResourceManager<ServiceBundle>
     @Override
     public void delete(ServiceBundle serviceBundle) {
         try {
-            ServiceBundle publicServiceBundle = get(PublicResourceUtils.createPublicResourceId(
-                    serviceBundle.getService().getId(),
-                    serviceBundle.getService().getCatalogueId()));
+            ServiceBundle publicServiceBundle = get(serviceBundle.getIdentifiers().getPid());
             logger.info("Deleting public Service with id '{}'", publicServiceBundle.getId());
             super.delete(publicServiceBundle);
             jmsService.convertAndSendTopic("service.delete", publicServiceBundle);
@@ -145,25 +137,45 @@ public class PublicServiceService extends ResourceManager<ServiceBundle>
     @Override
     public void updateIdsToPublic(ServiceBundle bundle) {
         // Resource Organisation
-        bundle.getService().setResourceOrganisation(PublicResourceUtils.createPublicResourceId(
-                bundle.getService().getResourceOrganisation(), bundle.getService().getCatalogueId()));
+        ProviderBundle providerBundle = providerService.get(bundle.getService().getResourceOrganisation(),
+                bundle.getService().getCatalogueId());
+        bundle.getService().setResourceOrganisation(providerBundle.getIdentifiers().getPid());
 
         // Resource Providers
-        bundle.getService().setResourceProviders(
-                appendCatalogueId(
-                        bundle.getService().getResourceProviders(),
-                        bundle.getService().getCatalogueId()));
+        List<String> resourceProviders = new ArrayList<>();
+        for (String resourceProviderId : bundle.getService().getResourceProviders()) {
+            //TODO: do we allow related resources from different catalogues?
+            ProviderBundle resourceProvider = providerService.get(resourceProviderId, bundle.getService().getCatalogueId());
+            resourceProviders.add(resourceProvider.getIdentifiers().getPid());
+        }
+        bundle.getService().setResourceProviders(resourceProviders);
 
         // Related Resources
-        bundle.getService().setRelatedResources(
-                appendCatalogueId(
-                        bundle.getService().getRelatedResources(),
-                        bundle.getService().getCatalogueId()));
+        List<String> relatedResources = new ArrayList<>();
+        for (String relatedResourceId : bundle.getService().getRelatedResources()) {
+            //TODO: do we allow related resources from different catalogues?
+            Bundle<?> relatedResource;
+            try {
+                relatedResource = serviceBundleService.get(relatedResourceId, bundle.getService().getCatalogueId());
+            } catch (ResourceNotFoundException e) {
+                relatedResource = trainingResourceService.get(relatedResourceId, bundle.getService().getCatalogueId());
+            }
+            relatedResources.add(relatedResource.getIdentifiers().getPid());
+        }
+        bundle.getService().setRelatedResources(relatedResources);
 
         // Required Resources
-        bundle.getService().setRequiredResources(
-                appendCatalogueId(
-                        bundle.getService().getRequiredResources(),
-                        bundle.getService().getCatalogueId()));
+        List<String> requiredResources = new ArrayList<>();
+        for (String requiredResourceId : bundle.getService().getRequiredResources()) {
+            //TODO: do we allow related resources from different catalogues?
+            Bundle<?> requiredResource;
+            try {
+                requiredResource = serviceBundleService.get(requiredResourceId, bundle.getService().getCatalogueId());
+            } catch (ResourceNotFoundException e) {
+                requiredResource = trainingResourceService.get(requiredResourceId, bundle.getService().getCatalogueId());
+            }
+            requiredResources.add(requiredResource.getIdentifiers().getPid());
+        }
+        bundle.getService().setRequiredResources(requiredResources);
     }
 }

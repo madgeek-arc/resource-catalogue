@@ -46,18 +46,6 @@ public interface InteroperabilityRecordService extends ResourceService<Interoper
                                         Authentication auth);
 
     /**
-     * Returns the Interoperability Record with the specified ID
-     *
-     * @param id          Interoperability Record ID
-     * @param catalogueId Catalogue ID
-     * @return {@link InteroperabilityRecordBundle}
-     *
-     * @deprecated Since resourceId is unique, catalogueId can be safely removed. Replace with {@link #get(String)}.
-     */
-    @Deprecated(forRemoval = true)
-    InteroperabilityRecordBundle get(String id, String catalogueId);
-
-    /**
      * Get a specific Interoperability Record of an external Catalogue, given its ID, or return null
      *
      * @param id Interoperability Record ID

@@ -112,6 +112,7 @@ public class MonitoringManager extends ResourceManager<MonitoringBundle> impleme
         validate(monitoring, resourceType);
 
         monitoring.setId(idCreator.generate(getResourceTypeName()));
+        commonMethods.createIdentifiers(monitoring, getResourceTypeName(), false);
         logger.trace("Attempting to add a new Monitoring: {}", monitoring);
 
         monitoring.setMetadata(Metadata.createMetadata(AuthenticationInfo.getFullName(auth),
@@ -148,6 +149,7 @@ public class MonitoringManager extends ResourceManager<MonitoringBundle> impleme
         validate(ret);
         ret.setMetadata(Metadata.updateMetadata(ret.getMetadata(), AuthenticationInfo.getFullName(auth),
                 AuthenticationInfo.getEmail(auth).toLowerCase()));
+        ret.setIdentifiers(existingMonitoring.getIdentifiers());
         List<LoggingInfo> loggingInfoList = commonMethods.returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(ret, auth);
         LoggingInfo loggingInfo = commonMethods.createLoggingInfo(auth, LoggingInfo.Types.UPDATE.getKey(),
                 LoggingInfo.ActionType.UPDATED.getKey());

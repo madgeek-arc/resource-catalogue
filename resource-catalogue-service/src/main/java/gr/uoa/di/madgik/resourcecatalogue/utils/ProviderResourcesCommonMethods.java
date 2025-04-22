@@ -31,8 +31,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 @Component
 public class ProviderResourcesCommonMethods {
@@ -51,6 +49,7 @@ public class ProviderResourcesCommonMethods {
     private final GenericResourceService genericResourceService;
     private final VocabularyService vocabularyService;
     private final SecurityService securityService;
+    private final IdCreator idCreator;
 
     public ProviderResourcesCommonMethods(@Lazy CatalogueService catalogueService,
                                           @Lazy ProviderService providerService,
@@ -61,7 +60,8 @@ public class ProviderResourcesCommonMethods {
                                                   resourceInteroperabilityRecordService,
                                           @Lazy GenericResourceService genericResourceService,
                                           @Lazy VocabularyService vocabularyService,
-                                          @Lazy SecurityService securityService) {
+                                          @Lazy SecurityService securityService,
+                                          @Lazy IdCreator idCreator) {
         this.catalogueService = catalogueService;
         this.providerService = providerService;
         this.datasourceService = datasourceService;
@@ -71,6 +71,7 @@ public class ProviderResourcesCommonMethods {
         this.genericResourceService = genericResourceService;
         this.vocabularyService = vocabularyService;
         this.securityService = securityService;
+        this.idCreator = idCreator;
     }
 
     public void checkCatalogueIdConsistency(Object o, String catalogueId) {
@@ -333,70 +334,16 @@ public class ProviderResourcesCommonMethods {
         return loggingInfoList;
     }
 
-    public void determineResourceAndCreateAlternativeIdentifierForPID(Bundle<?> bundle, String resourceType) {
-        AlternativeIdentifier alternativeIdentifier;
-        List<AlternativeIdentifier> alternativeIdentifiers = new ArrayList<>();
-        List<AlternativeIdentifier> existingAlternativeIdentifiers;
-        switch (resourceType) {
-            case "provider":
-                ProviderBundle providerBundle = (ProviderBundle) bundle;
-                existingAlternativeIdentifiers = providerBundle.getProvider().getAlternativeIdentifiers();
-                alternativeIdentifier = createAlternativeIdentifierForPID(providerBundle.getProvider().getId(),
-                        providerBundle.getProvider().getCatalogueId());
-                if (existingAlternativeIdentifiers != null && !existingAlternativeIdentifiers.isEmpty()) {
-                    existingAlternativeIdentifiers.add(alternativeIdentifier);
-                } else {
-                    alternativeIdentifiers.add(alternativeIdentifier);
-                    providerBundle.getProvider().setAlternativeIdentifiers(alternativeIdentifiers);
-                }
-                break;
-            case "service":
-                ServiceBundle serviceBundle = (ServiceBundle) bundle;
-                existingAlternativeIdentifiers = serviceBundle.getService().getAlternativeIdentifiers();
-                alternativeIdentifier = createAlternativeIdentifierForPID(serviceBundle.getService().getId(),
-                        serviceBundle.getService().getCatalogueId());
-                if (existingAlternativeIdentifiers != null && !existingAlternativeIdentifiers.isEmpty()) {
-                    existingAlternativeIdentifiers.add(alternativeIdentifier);
-                } else {
-                    alternativeIdentifiers.add(alternativeIdentifier);
-                    serviceBundle.getService().setAlternativeIdentifiers(alternativeIdentifiers);
-                }
-                break;
-            case "training_resource":
-                TrainingResourceBundle trainingResourceBundle = (TrainingResourceBundle) bundle;
-                existingAlternativeIdentifiers = trainingResourceBundle.getTrainingResource().getAlternativeIdentifiers();
-                alternativeIdentifier = createAlternativeIdentifierForPID(trainingResourceBundle.getTrainingResource().getId(),
-                        trainingResourceBundle.getTrainingResource().getCatalogueId());
-                if (existingAlternativeIdentifiers != null && !existingAlternativeIdentifiers.isEmpty()) {
-                    existingAlternativeIdentifiers.add(alternativeIdentifier);
-                } else {
-                    alternativeIdentifiers.add(alternativeIdentifier);
-                    trainingResourceBundle.getTrainingResource().setAlternativeIdentifiers(alternativeIdentifiers);
-                }
-                break;
-            case "interoperability_record":
-                InteroperabilityRecordBundle interoperabilityRecordBundle = (InteroperabilityRecordBundle) bundle;
-                existingAlternativeIdentifiers = interoperabilityRecordBundle.getInteroperabilityRecord().getAlternativeIdentifiers();
-                alternativeIdentifier = createAlternativeIdentifierForPID(interoperabilityRecordBundle.getInteroperabilityRecord().getId(),
-                        interoperabilityRecordBundle.getInteroperabilityRecord().getCatalogueId());
-                if (existingAlternativeIdentifiers != null && !existingAlternativeIdentifiers.isEmpty()) {
-                    existingAlternativeIdentifiers.add(alternativeIdentifier);
-                } else {
-                    alternativeIdentifiers.add(alternativeIdentifier);
-                    interoperabilityRecordBundle.getInteroperabilityRecord().setAlternativeIdentifiers(alternativeIdentifiers);
-                }
-                break;
-            default:
-                break;
+    public void createIdentifiers(Bundle<?> bundle, String resourceType, boolean external) {
+        Identifiers identifiers = new Identifiers();
+        if (external) {
+            identifiers.setOriginalId(bundle.getId());
+            identifiers.setPid(idCreator.generate(resourceType));
+        } else {
+            identifiers.setOriginalId(bundle.getId());
+            identifiers.setPid(bundle.getId());
         }
-    }
-
-    private AlternativeIdentifier createAlternativeIdentifierForPID(String id, String catalogueId) {
-        String pid = PublicResourceUtils.createPublicResourceId(id, catalogueId);
-        AlternativeIdentifier alternativeIdentifier = new AlternativeIdentifier();
-        alternativeIdentifier.setType("EOSC PID");
-        alternativeIdentifier.setValue(pid);
-        return alternativeIdentifier;
+        bundle.setIdentifiers(identifiers);
     }
 
     public void blockResourceDeletion(String status, boolean isPublished) {
@@ -414,7 +361,7 @@ public class ProviderResourcesCommonMethods {
             try {
                 logger.info("Deleting Datasource of Service with id: '{}'", serviceId);
                 datasourceService.delete(datasourceBundle);
-            } catch (gr.uoa.di.madgik.registry.exception.ResourceNotFoundException e) {
+            } catch (ResourceNotFoundException e) {
                 logger.error(e.getMessage(), e);
             }
         }
@@ -427,7 +374,7 @@ public class ProviderResourcesCommonMethods {
             try {
                 logger.info("Deleting Helpdesk of {} with id: '{}'", resourceType, resourceId);
                 helpdeskService.delete(helpdeskBundle);
-            } catch (gr.uoa.di.madgik.registry.exception.ResourceNotFoundException e) {
+            } catch (ResourceNotFoundException e) {
                 logger.error(e.getMessage(), e);
             }
         }
@@ -436,7 +383,7 @@ public class ProviderResourcesCommonMethods {
             try {
                 logger.info("Deleting Monitoring of {} with id: '{}'", resourceType, resourceId);
                 monitoringService.delete(monitoringBundle);
-            } catch (gr.uoa.di.madgik.registry.exception.ResourceNotFoundException e) {
+            } catch (ResourceNotFoundException e) {
                 logger.error(e.getMessage(), e);
             }
         }
@@ -446,7 +393,7 @@ public class ProviderResourcesCommonMethods {
             try {
                 logger.info("Deleting ResourceInteroperabilityRecord of {} with id: '{}'", resourceType, resourceId);
                 resourceInteroperabilityRecordService.delete(resourceInteroperabilityRecordBundle);
-            } catch (gr.uoa.di.madgik.registry.exception.ResourceNotFoundException e) {
+            } catch (ResourceNotFoundException e) {
                 logger.error(e.getMessage(), e);
             }
         }
@@ -460,47 +407,6 @@ public class ProviderResourcesCommonMethods {
             }
         }
         return null;
-    }
-
-    public void restrictPrefixRepetitionOnPublicResources(String id, String cataloguePrefix) {
-        String regex = cataloguePrefix + ".";
-        Pattern pattern = Pattern.compile(regex);
-        Matcher matcher = pattern.matcher(id);
-        int count = 0;
-        while (matcher.find()) {
-            count++;
-        }
-        if (count > 1) {
-            throw new ResourceException(String.format("Resource with ID %s cannot have a Public registry", id),
-                    HttpStatus.CONFLICT);
-        }
-    }
-
-    public List<AlternativeIdentifier> ensureResourceCataloguePidUniqueness(String id, String catalogueId,
-                                                                            List<AlternativeIdentifier> alternativeIdentifiers) {
-        String pid = PublicResourceUtils.createPublicResourceId(id, catalogueId);
-        // removes duplicates and ensures that EOSC PID has the appropriate value
-        List<AlternativeIdentifier> uniqueIdentifiers = removeDuplicates(alternativeIdentifiers);
-        // if PID alternative identifier has been falsely updated, set it back to its original value
-        if (!uniqueIdentifiers.isEmpty()) {
-            for (AlternativeIdentifier uniqueIdentifier : uniqueIdentifiers) {
-                if (uniqueIdentifier.getType().equalsIgnoreCase("EOSC PID")) {
-                    uniqueIdentifier.setValue(pid);
-                }
-            }
-        }
-        return uniqueIdentifiers;
-    }
-
-    private static List<AlternativeIdentifier> removeDuplicates(List<AlternativeIdentifier> alternativeIdentifiers) {
-        Set<String> uniqueTypes = new HashSet<>();
-        List<AlternativeIdentifier> uniqueIdentifiers = new ArrayList<>();
-        for (AlternativeIdentifier identifier : alternativeIdentifiers) {
-            if (uniqueTypes.add(identifier.getType().toLowerCase())) {
-                uniqueIdentifiers.add(identifier);
-            }
-        }
-        return uniqueIdentifiers;
     }
 
     public String determineAuditState(List<LoggingInfo> loggingInfoList) {

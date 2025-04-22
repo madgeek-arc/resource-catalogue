@@ -23,7 +23,6 @@ import gr.uoa.di.madgik.resourcecatalogue.domain.configurationTemplates.Configur
 import gr.uoa.di.madgik.resourcecatalogue.manager.*;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
 import gr.uoa.di.madgik.resourcecatalogue.utils.ObjectUtils;
-import gr.uoa.di.madgik.resourcecatalogue.utils.PublicResourceUtils;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.After;
 import org.aspectj.lang.annotation.AfterReturning;
@@ -144,8 +143,7 @@ public class ProviderManagementAspect {
     public void addProviderAsPublic(final ProviderBundle providerBundle) {
         if (providerBundle.getStatus().equals("approved provider") && providerBundle.isActive()) {
             try {
-                publicProviderManager.get(PublicResourceUtils.createPublicResourceId(providerBundle.getProvider().getId(),
-                        providerBundle.getProvider().getCatalogueId()));
+                publicProviderManager.get(providerBundle.getIdentifiers().getPid());
             } catch (ResourceException | ResourceNotFoundException e) {
                 publicProviderManager.add(ObjectUtils.clone(providerBundle), null);
             }
@@ -196,8 +194,7 @@ public class ProviderManagementAspect {
     }
 
     private void checkIfPublicProviderExistsOrElseThrow(ProviderBundle providerBundle) {
-        String publicId = PublicResourceUtils.createPublicResourceId(providerBundle.getProvider().getId(),
-                providerBundle.getProvider().getCatalogueId());
+        String publicId = providerBundle.getIdentifiers().getPid();
         try {
             publicProviderManager.get(publicId);
         } catch (ResourceException | ResourceNotFoundException e) {
@@ -222,8 +219,7 @@ public class ProviderManagementAspect {
     public void addResourceAsPublic(final ServiceBundle serviceBundle) {
         if (serviceBundle.getStatus().equals("approved resource") && serviceBundle.isActive()) {
             try {
-                publicServiceManager.get(PublicResourceUtils.createPublicResourceId(serviceBundle.getService().getId(),
-                        serviceBundle.getService().getCatalogueId()));
+                publicServiceManager.get(serviceBundle.getIdentifiers().getPid());
             } catch (ResourceException | ResourceNotFoundException e) {
                 publicServiceManager.add(ObjectUtils.clone(serviceBundle), null);
             }
@@ -239,8 +235,7 @@ public class ProviderManagementAspect {
     public void addResourceAsPublic(final TrainingResourceBundle trainingResourceBundle) {
         if (trainingResourceBundle.getStatus().equals("approved resource") && trainingResourceBundle.isActive()) {
             try {
-                publicTrainingResourceManager.get(PublicResourceUtils.createPublicResourceId(trainingResourceBundle.getTrainingResource().getId(),
-                        trainingResourceBundle.getTrainingResource().getCatalogueId()));
+                publicTrainingResourceManager.get(trainingResourceBundle.getIdentifiers().getPid());
             } catch (ResourceException | ResourceNotFoundException e) {
                 publicTrainingResourceManager.add(ObjectUtils.clone(trainingResourceBundle), null);
             }
@@ -254,8 +249,7 @@ public class ProviderManagementAspect {
     public void addResourceAsPublic(final InteroperabilityRecordBundle interoperabilityRecordBundle) {
         if (interoperabilityRecordBundle.getStatus().equals("approved interoperability record") && interoperabilityRecordBundle.isActive()) {
             try {
-                publicInteroperabilityRecordManager.get(PublicResourceUtils.createPublicResourceId(interoperabilityRecordBundle.getInteroperabilityRecord().getId(),
-                        interoperabilityRecordBundle.getInteroperabilityRecord().getCatalogueId()));
+                publicInteroperabilityRecordManager.get(interoperabilityRecordBundle.getIdentifiers().getPid());
             } catch (ResourceException | ResourceNotFoundException e) {
                 publicInteroperabilityRecordManager.add(ObjectUtils.clone(interoperabilityRecordBundle), null);
             }
@@ -371,7 +365,7 @@ public class ProviderManagementAspect {
     public void updateServiceProviderStates(ServiceBundle serviceBundle) {
         if (serviceBundle.getService().getCatalogueId().equals(catalogueId)) {
             try {
-                ProviderBundle providerBundle = providerService.get(serviceBundle.getService().getResourceOrganisation(), null);
+                ProviderBundle providerBundle = providerService.get(serviceBundle.getService().getResourceOrganisation(), serviceBundle.getService().getCatalogueId());
                 if (providerBundle.getTemplateStatus().equals("no template status") || providerBundle.getTemplateStatus().equals("rejected template")) {
                     logger.debug("Updating state of Provider with id '{}' : '{}' --> to '{}'",
                             serviceBundle.getService().getResourceOrganisation(), providerBundle.getTemplateStatus(), "pending template");
@@ -387,7 +381,7 @@ public class ProviderManagementAspect {
     public void updateTrainingResourceProviderStates(TrainingResourceBundle trainingResourceBundle) {
         if (trainingResourceBundle.getTrainingResource().getCatalogueId().equals(catalogueId)) {
             try {
-                ProviderBundle providerBundle = providerService.get(trainingResourceBundle.getTrainingResource().getResourceOrganisation(), null);
+                ProviderBundle providerBundle = providerService.get(trainingResourceBundle.getTrainingResource().getResourceOrganisation(), trainingResourceBundle.getTrainingResource().getCatalogueId());
                 if (providerBundle.getTemplateStatus().equals("no template status") || providerBundle.getTemplateStatus().equals("rejected template")) {
                     logger.debug("Updating state of Provider with id '{}' : '{}' --> to '{}'",
                             trainingResourceBundle.getTrainingResource().getResourceOrganisation(), providerBundle.getTemplateStatus(), "pending template");
@@ -406,8 +400,7 @@ public class ProviderManagementAspect {
     public void addDatasourceAsPublic(final DatasourceBundle datasourceBundle) {
         if (datasourceBundle.getStatus().equals("approved datasource") && datasourceBundle.isActive()) {
             try {
-                publicDatasourceManager.get(PublicResourceUtils.createPublicResourceId(datasourceBundle.getDatasource().getId(),
-                        datasourceBundle.getDatasource().getCatalogueId()));
+                publicDatasourceManager.get(datasourceBundle.getIdentifiers().getPid());
             } catch (ResourceException | ResourceNotFoundException e) {
                 publicDatasourceManager.add(ObjectUtils.clone(datasourceBundle), null);
             }
@@ -449,9 +442,7 @@ public class ProviderManagementAspect {
     public void addResourceInteroperabilityRecordAsPublic(final ResourceInteroperabilityRecordBundle resourceInteroperabilityRecordBundle) {
         // TODO: check Resource states (publish if only approved/active)
         try {
-            publicResourceInteroperabilityRecordManager.get(PublicResourceUtils.createPublicResourceId(
-                    resourceInteroperabilityRecordBundle.getResourceInteroperabilityRecord().getId(),
-                    resourceInteroperabilityRecordBundle.getResourceInteroperabilityRecord().getCatalogueId()));
+            publicResourceInteroperabilityRecordManager.get(resourceInteroperabilityRecordBundle.getIdentifiers().getPid());
         } catch (ResourceException | ResourceNotFoundException e) {
             publicResourceInteroperabilityRecordManager.add(ObjectUtils.clone(resourceInteroperabilityRecordBundle), null);
         }
@@ -482,9 +473,7 @@ public class ProviderManagementAspect {
     public void addConfigurationTemplateInstanceAsPublic(final ConfigurationTemplateInstanceBundle configurationTemplateInstanceBundle) {
         try {
             //TODO: Refactor if CTIs can belong to a different from the Project's Catalogue
-            publicConfigurationTemplateInstanceManager.get(PublicResourceUtils.createPublicResourceId(
-                    configurationTemplateInstanceBundle.getConfigurationTemplateInstance().getId(),
-                    catalogueId));
+            publicConfigurationTemplateInstanceManager.get(configurationTemplateInstanceBundle.getIdentifiers().getPid());
         } catch (ResourceException | ResourceNotFoundException e) {
             publicConfigurationTemplateInstanceManager.add(ObjectUtils.clone(configurationTemplateInstanceBundle), null);
         }

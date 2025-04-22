@@ -21,6 +21,7 @@ import gr.uoa.di.madgik.resourcecatalogue.domain.configurationTemplates.Configur
 import gr.uoa.di.madgik.resourcecatalogue.domain.configurationTemplates.ConfigurationTemplateBundle;
 import gr.uoa.di.madgik.resourcecatalogue.service.ConfigurationTemplateService;
 import gr.uoa.di.madgik.resourcecatalogue.service.IdCreator;
+import gr.uoa.di.madgik.resourcecatalogue.utils.ProviderResourcesCommonMethods;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.security.core.Authentication;
@@ -31,10 +32,12 @@ public class ConfigurationTemplateManager extends ResourceManager<ConfigurationT
 
     private static final Logger logger = LogManager.getLogger(ConfigurationTemplateManager.class);
     private final IdCreator idCreator;
+    private final ProviderResourcesCommonMethods commonMethods;
 
-    public ConfigurationTemplateManager(IdCreator idCreator) {
+    public ConfigurationTemplateManager(IdCreator idCreator, ProviderResourcesCommonMethods commonMethods) {
         super(ConfigurationTemplateBundle.class);
         this.idCreator = idCreator;
+        this.commonMethods = commonMethods;
     }
 
     @Override
@@ -45,6 +48,7 @@ public class ConfigurationTemplateManager extends ResourceManager<ConfigurationT
     @Override
     public ConfigurationTemplateBundle add(ConfigurationTemplateBundle bundle, Authentication auth) {
         bundle.setId(idCreator.generate(getResourceTypeName()));
+        commonMethods.createIdentifiers(bundle, getResourceTypeName(), false);
         validate(bundle);
         super.add(bundle, auth);
         logger.info("Added the Configuration Template with id '{}'", bundle.getId());

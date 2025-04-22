@@ -16,7 +16,6 @@
 
 package gr.uoa.di.madgik.resourcecatalogue.service;
 
-import gr.uoa.di.madgik.registry.domain.Browsing;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
@@ -73,18 +72,6 @@ public interface TrainingResourceService extends ResourceService<TrainingResourc
      * @return {@link   TrainingResourceBundle}
      */
     TrainingResourceBundle getCatalogueResource(String catalogueId, String resourceId, Authentication auth);
-
-    /**
-     * Returns the Training Resource with the specified ID
-     *
-     * @param id          Training Resource ID
-     * @param catalogueId Catalogue ID
-     * @return {@link   TrainingResourceBundle}
-     *
-     * @deprecated Since resourceId is unique, catalogueId can be safely removed. Replace with {@link #get(String)}.
-     */
-    @Deprecated(forRemoval = true)
-    TrainingResourceBundle get(String id, String catalogueId);
 
     /**
      * Get Training Resource Bundles by a specific field.

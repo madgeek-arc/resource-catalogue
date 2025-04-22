@@ -24,7 +24,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
+//TODO: remove
 public interface PublicResourceService<T extends Identifiable> extends ResourceService<T> {
 
     void updateIdsToPublic(T resource);

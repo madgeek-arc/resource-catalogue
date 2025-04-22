@@ -127,20 +127,18 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
 
     @Override
     public TrainingResourceBundle add(TrainingResourceBundle trainingResourceBundle, String catalogueId, Authentication auth) {
-        if (catalogueId == null || catalogueId.isEmpty()) { // add catalogue provider
+        if (catalogueId == null || catalogueId.isEmpty() || catalogueId.equals(this.catalogueId)) { // add catalogue provider
             trainingResourceBundle.getTrainingResource().setCatalogueId(this.catalogueId);
+            trainingResourceBundle.setId(idCreator.generate(getResourceTypeName()));
+            commonMethods.createIdentifiers(trainingResourceBundle, getResourceTypeName(), false);
         } else { // add provider from external catalogue
             commonMethods.checkCatalogueIdConsistency(trainingResourceBundle, catalogueId);
+            if (trainingResourceBundle.getId() == null || trainingResourceBundle.getId().isEmpty()) {
+                throw new ValidationException("Training Resource ID should not be empty");
+            }
+            commonMethods.createIdentifiers(trainingResourceBundle, getResourceTypeName(), true);
         }
         commonMethods.checkRelatedResourceIDsConsistency(trainingResourceBundle);
-        trainingResourceBundle.setId(idCreator.generate(getResourceTypeName()));
-
-        // register and ensure Resource Catalogue's PID uniqueness
-        commonMethods.determineResourceAndCreateAlternativeIdentifierForPID(trainingResourceBundle, getResourceTypeName());
-        trainingResourceBundle.getTrainingResource().setAlternativeIdentifiers(
-                commonMethods.ensureResourceCataloguePidUniqueness(trainingResourceBundle.getId(),
-                        trainingResourceBundle.getTrainingResource().getCatalogueId(),
-                        trainingResourceBundle.getTrainingResource().getAlternativeIdentifiers()));
 
         ProviderBundle providerBundle = providerService.get(trainingResourceBundle.getTrainingResource().getResourceOrganisation(), auth);
         if (providerBundle == null) {
@@ -228,17 +226,6 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
         }
         commonMethods.checkRelatedResourceIDsConsistency(ret);
 
-        // ensure Resource Catalogue's PID uniqueness
-        if (ret.getTrainingResource().getAlternativeIdentifiers() == null ||
-                ret.getTrainingResource().getAlternativeIdentifiers().isEmpty()) {
-            commonMethods.determineResourceAndCreateAlternativeIdentifierForPID(ret, getResourceTypeName());
-        } else {
-            ret.getTrainingResource().setAlternativeIdentifiers(
-                    commonMethods.ensureResourceCataloguePidUniqueness(ret.getId(),
-                            ret.getTrainingResource().getCatalogueId(),
-                            ret.getTrainingResource().getAlternativeIdentifiers()));
-        }
-
         logger.trace("Attempting to update the Training Resource with id '{}' of the Catalogue '{}'",
                 ret.getTrainingResource().getId(), ret.getTrainingResource().getCatalogueId());
         validateTrainingResource(ret);
@@ -252,6 +239,7 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
 
         // update existing TrainingResource Metadata, Identifiers, MigrationStatus
         ret.setMetadata(Metadata.updateMetadata(existingTrainingResource.getMetadata(), AuthenticationInfo.getFullName(auth)));
+        ret.setIdentifiers(existingTrainingResource.getIdentifiers());
         ret.setMigrationStatus(existingTrainingResource.getMigrationStatus());
 
         List<LoggingInfo> loggingInfoList = commonMethods.returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(existingTrainingResource, auth);
@@ -598,15 +586,6 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
     public TrainingResourceBundle createPublicResource(TrainingResourceBundle trainingResourceBundle, Authentication auth) {
         publicTrainingResourceManager.add(trainingResourceBundle, auth);
         return trainingResourceBundle;
-    }
-
-    @Override
-    public TrainingResourceBundle get(String id, String catalogueId) {
-        Resource resource = getResource(id, catalogueId);
-        if (resource == null) {
-            throw new ResourceNotFoundException(String.format("Could not find Training Resource with id: %s and catalogueId: %s", id, catalogueId));
-        }
-        return deserialize(resource);
     }
 
     // for sendProviderMails on RegistrationMailService AND StatisticsManager

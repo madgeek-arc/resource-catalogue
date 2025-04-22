@@ -91,7 +91,6 @@ public class DatasourceManager extends ResourceManager<DatasourceBundle> impleme
         if (datasourceBundle.getId() != null && !datasourceBundle.getId().isEmpty()) {
             checkOpenAIREIDExistence(datasourceBundle);
         }
-        datasourceBundle.setId(idCreator.generate(getResourceTypeName()));
         logger.trace("Attempting to add a new Datasource: {}", datasourceBundle);
 
         this.validateDatasource(datasourceBundle);
@@ -113,6 +112,8 @@ public class DatasourceManager extends ResourceManager<DatasourceBundle> impleme
             datasourceBundle.setStatus(vocabularyService.get("pending datasource").getId());
             datasourceBundle.setLatestOnboardingInfo(datasourceBundle.getLoggingInfo().getFirst());
             registrationMailService.sendEmailsForDatasourceExtensionToPortalAdmins(datasourceBundle, "post");
+            datasourceBundle.setId(idCreator.generate(getResourceTypeName()));
+            commonMethods.createIdentifiers(datasourceBundle, getResourceTypeName(), false);
         } else {
             datasourceBundle.setActive(true);
             datasourceBundle.setStatus(vocabularyService.get("approved datasource").getId());
@@ -120,6 +121,10 @@ public class DatasourceManager extends ResourceManager<DatasourceBundle> impleme
                     LoggingInfo.Types.ONBOARD.getKey(), LoggingInfo.ActionType.APPROVED.getKey());
             datasourceBundle.getLoggingInfo().add(loggingInfo);
             datasourceBundle.setLatestOnboardingInfo(datasourceBundle.getLoggingInfo().get(1));
+            if (datasourceBundle.getId() == null || datasourceBundle.getId().isEmpty()) {
+                throw new ValidationException("Service ID should not be empty");
+            }
+            commonMethods.createIdentifiers(datasourceBundle, getResourceTypeName(), true);
         }
     }
 

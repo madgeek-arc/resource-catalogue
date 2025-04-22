@@ -21,6 +21,7 @@ import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.domain.Resource;
 import gr.uoa.di.madgik.registry.exception.ResourceAlreadyExistsException;
 import gr.uoa.di.madgik.registry.exception.ResourceException;
+import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.registry.service.AbstractGenericService;
 import gr.uoa.di.madgik.registry.service.ParserService;
 import gr.uoa.di.madgik.registry.service.SearchService;
@@ -87,6 +88,15 @@ public abstract class ResourceManager<T extends Identifiable> extends AbstractGe
                 new SearchService.KeyValue("resource_internal_id", id),
                 new SearchService.KeyValue("catalogue_id", catalogueId)
         );
+    }
+    @Override
+    public T get(String id, String catalogueId) {
+        Resource resource = getResource(id, catalogueId);
+        if (resource == null) {
+            throw new ResourceNotFoundException(String.format("Could not find %s with id: %s and catalogueId: %s",
+                    typeParameterClass.getSimpleName(), id, catalogueId));
+        }
+        return deserialize(resource);
     }
 
     @Override

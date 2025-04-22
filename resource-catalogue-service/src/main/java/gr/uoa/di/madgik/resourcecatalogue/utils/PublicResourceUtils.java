@@ -18,6 +18,7 @@ package gr.uoa.di.madgik.resourcecatalogue.utils;
 
 public class PublicResourceUtils {
 
+    //TODO: remove me
     /**
      * Creates public ID for the following resources:
      * Provider, Service, Datasource, Helpdesk, Monitoring, Training Resource, Interoperability Record

@@ -21,15 +21,16 @@ import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.exception.ResourceException;
 import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.registry.service.ResourceCRUDService;
-import gr.uoa.di.madgik.resourcecatalogue.domain.DatasourceBundle;
-import gr.uoa.di.madgik.resourcecatalogue.domain.Identifiers;
-import gr.uoa.di.madgik.resourcecatalogue.domain.MonitoringBundle;
+import gr.uoa.di.madgik.resourcecatalogue.domain.*;
+import gr.uoa.di.madgik.resourcecatalogue.service.ServiceBundleService;
+import gr.uoa.di.madgik.resourcecatalogue.service.TrainingResourceService;
 import gr.uoa.di.madgik.resourcecatalogue.utils.JmsService;
 import gr.uoa.di.madgik.resourcecatalogue.utils.ProviderResourcesCommonMethods;
 import gr.uoa.di.madgik.resourcecatalogue.utils.PublicResourceUtils;
 import org.apache.commons.beanutils.BeanUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
@@ -42,12 +43,19 @@ public class PublicMonitoringService extends ResourceManager<MonitoringBundle>
     private static final Logger logger = LoggerFactory.getLogger(PublicMonitoringService.class);
     private final JmsService jmsService;
     private final ProviderResourcesCommonMethods commonMethods;
+    private final ServiceBundleService<ServiceBundle> serviceBundleService;
+    private final TrainingResourceService trainingResourceService;
 
     public PublicMonitoringService(JmsService jmsService,
-                                   ProviderResourcesCommonMethods commonMethods) {
+                                   ProviderResourcesCommonMethods commonMethods,
+                                   @Lazy ServiceBundleService<ServiceBundle> serviceBundleService,
+                                   @Lazy TrainingResourceService trainingResourceService
+                                   ) {
         super(MonitoringBundle.class);
         this.jmsService = jmsService;
         this.commonMethods = commonMethods;
+        this.serviceBundleService = serviceBundleService;
+        this.trainingResourceService = trainingResourceService;
     }
 
     @Override
@@ -73,15 +81,12 @@ public class PublicMonitoringService extends ResourceManager<MonitoringBundle>
     @Override
     public MonitoringBundle add(MonitoringBundle monitoringBundle, Authentication authentication) {
         String lowerLevelResourceId = monitoringBundle.getId();
-        Identifiers.createOriginalId(monitoringBundle);
-        monitoringBundle.setId(PublicResourceUtils.createPublicResourceId(monitoringBundle.getMonitoring().getId(),
-                monitoringBundle.getCatalogueId()));
-        commonMethods.restrictPrefixRepetitionOnPublicResources(monitoringBundle.getId(), monitoringBundle.getCatalogueId());
+        monitoringBundle.setId(monitoringBundle.getIdentifiers().getPid());
+        monitoringBundle.getMetadata().setPublished(true);
 
         // sets public id to serviceId
         updateIdsToPublic(monitoringBundle);
 
-        monitoringBundle.getMetadata().setPublished(true);
         MonitoringBundle ret;
         logger.info("Monitoring '{}' is being published with id '{}'", lowerLevelResourceId, monitoringBundle.getId());
         ret = super.add(monitoringBundle, null);
@@ -91,10 +96,8 @@ public class PublicMonitoringService extends ResourceManager<MonitoringBundle>
 
     @Override
     public MonitoringBundle update(MonitoringBundle monitoringBundle, Authentication authentication) {
-        MonitoringBundle published = super.get(PublicResourceUtils.createPublicResourceId(monitoringBundle.getMonitoring().getId(),
-                monitoringBundle.getCatalogueId()));
-        MonitoringBundle ret = super.get(PublicResourceUtils.createPublicResourceId(monitoringBundle.getMonitoring().getId(),
-                monitoringBundle.getCatalogueId()));
+        MonitoringBundle published = super.get(monitoringBundle.getIdentifiers().getPid());
+        MonitoringBundle ret = super.get(monitoringBundle.getIdentifiers().getPid());
         try {
             BeanUtils.copyProperties(ret, monitoringBundle);
         } catch (IllegalAccessException | InvocationTargetException e) {
@@ -116,9 +119,7 @@ public class PublicMonitoringService extends ResourceManager<MonitoringBundle>
     @Override
     public void delete(MonitoringBundle monitoringBundle) {
         try {
-            MonitoringBundle publicMonitoringBundle = get(PublicResourceUtils.createPublicResourceId(
-                    monitoringBundle.getMonitoring().getId(),
-                    monitoringBundle.getCatalogueId()));
+            MonitoringBundle publicMonitoringBundle = get(monitoringBundle.getIdentifiers().getPid());
             logger.info("Deleting public Monitoring with id '{}'", publicMonitoringBundle.getId());
             super.delete(publicMonitoringBundle);
             jmsService.convertAndSendTopic("monitoring.delete", publicMonitoringBundle);
@@ -129,7 +130,12 @@ public class PublicMonitoringService extends ResourceManager<MonitoringBundle>
     @Override
     public void updateIdsToPublic(MonitoringBundle bundle) {
         // serviceId
-        bundle.getMonitoring().setServiceId(PublicResourceUtils.createPublicResourceId(
-                bundle.getMonitoring().getServiceId(), bundle.getCatalogueId()));
+        Bundle<?> resourceBundle;
+        try {
+            resourceBundle = serviceBundleService.get(bundle.getMonitoring().getServiceId(), bundle.getCatalogueId());
+        } catch (ResourceNotFoundException e) {
+            resourceBundle = trainingResourceService.get(bundle.getMonitoring().getServiceId(), bundle.getCatalogueId());
+        }
+        bundle.getMonitoring().setServiceId(resourceBundle.getIdentifiers().getPid());
     }
 }
