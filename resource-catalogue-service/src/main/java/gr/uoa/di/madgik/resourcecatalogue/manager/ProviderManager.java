@@ -50,7 +50,7 @@ import static gr.uoa.di.madgik.resourcecatalogue.utils.VocabularyValidationUtils
 import static gr.uoa.di.madgik.resourcecatalogue.utils.VocabularyValidationUtils.validateScientificDomains;
 
 @org.springframework.stereotype.Service("providerManager")
-public class ProviderManager extends ResourceManager<ProviderBundle> implements ProviderService {
+public class ProviderManager extends ResourceCatalogueManager<ProviderBundle> implements ProviderService {
 
     private static final
     Logger logger = LoggerFactory.getLogger(ProviderManager.class);
@@ -59,7 +59,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     private final TrainingResourceService trainingResourceService;
     private final InteroperabilityRecordService interoperabilityRecordService;
     private final PublicServiceService publicServiceManager;
-    private final PublicProviderManager publicProviderManager;
+    private final PublicProviderService publicProviderService;
     private final PublicTrainingResourceService publicTrainingResourceManager;
     private final PublicInteroperabilityRecordService publicInteroperabilityRecordManager;
     private final SecurityService securityService;
@@ -86,7 +86,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
                            ProviderResourcesCommonMethods commonMethods,
                            CatalogueService catalogueService,
                            @Lazy PublicServiceService publicServiceManager,
-                           @Lazy PublicProviderManager publicProviderManager,
+                           @Lazy PublicProviderService publicProviderService,
                            @Lazy TrainingResourceService trainingResourceService,
                            @Lazy InteroperabilityRecordService interoperabilityRecordService,
                            @Lazy PublicTrainingResourceService publicTrainingResourceManager,
@@ -105,7 +105,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         this.commonMethods = commonMethods;
         this.catalogueService = catalogueService;
         this.publicServiceManager = publicServiceManager;
-        this.publicProviderManager = publicProviderManager;
+        this.publicProviderService = publicProviderService;
         this.trainingResourceService = trainingResourceService;
         this.interoperabilityRecordService = interoperabilityRecordService;
         this.publicTrainingResourceManager = publicTrainingResourceManager;
@@ -154,7 +154,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         logger.trace("Attempting to update the Provider with id '{}' of the Catalogue '{}'", providerBundle, providerBundle.getProvider().getCatalogueId());
 
         ProviderBundle ret = ObjectUtils.clone(providerBundle);
-        Resource existingResource = getResource(ret.getId(), ret.getProvider().getCatalogueId());
+        Resource existingResource = getResource(ret.getId(), ret.getProvider().getCatalogueId(), false);
         ProviderBundle existingProvider = deserialize(existingResource);
         // check if there are actual changes in the Provider
         if (ret.getTemplateStatus().equals(existingProvider.getTemplateStatus()) && ret.getProvider().equals(existingProvider.getProvider())) {
@@ -228,7 +228,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
      * @return
      */
     private ProviderBundle getWithCatalogue(String id, String catalogueId) {
-        Resource resource = getResource(id, catalogueId);
+        Resource resource = getResource(id, catalogueId, false);
         if (resource == null) {
             throw new gr.uoa.di.madgik.registry.exception.ResourceNotFoundException(String.format(
                     "Could not find provider with id: %s and catalogueId: %s", id, catalogueId));
@@ -284,7 +284,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     public Paging<ResourceHistory> getHistory(String id, String catalogueId) {
         Map<String, ResourceHistory> historyMap = new TreeMap<>();
 
-        Resource resource = getResource(id, catalogueId);
+        Resource resource = getResource(id, catalogueId, false);
         List<Version> versions = versionService.getVersionsByResource(resource.getId());
         versions.sort((version, t1) -> {
             if (version.getCreationDate().getTime() < t1.getCreationDate().getTime()) {
@@ -421,7 +421,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     }
 
     private void deleteBundle(ProviderBundle providerBundle) {
-        Resource existingResource = getResource(providerBundle.getId(), providerBundle.getProvider().getCatalogueId());
+        Resource existingResource = getResource(providerBundle.getId(), providerBundle.getProvider().getCatalogueId(), false);
         ProviderBundle existingProvider = deserialize(existingResource);
 
         // block Public Provider update
@@ -441,8 +441,8 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
             throw new ValidationException(String.format("Vocabulary %s does not consist a Provider State!", status));
         }
         logger.trace("verifyProvider with id: '{}' | status: '{}' | active: '{}'", id, status, active);
-        ProviderBundle provider = get(id, auth);
-        Resource existingResource = getResource(provider.getId(), provider.getProvider().getCatalogueId());
+        ProviderBundle provider = get(catalogueId, id, auth);
+        Resource existingResource = getResource(provider.getId(), provider.getProvider().getCatalogueId(), false);
         ProviderBundle existingProvider = deserialize(existingResource);
 
         existingProvider.setStatus(vocabularyService.get(status).getId());
@@ -486,7 +486,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     @Override
     public ProviderBundle publish(String id, Boolean active, Authentication auth) {
         ProviderBundle provider = get(id);
-        Resource existingResource = getResource(provider.getId(), provider.getProvider().getCatalogueId());
+        Resource existingResource = getResource(provider.getId(), provider.getProvider().getCatalogueId(), false);
         ProviderBundle existingProvider = deserialize(existingResource);
 
         if ((existingProvider.getStatus().equals(vocabularyService.get("pending provider").getId()) ||
@@ -798,8 +798,8 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
 
     @Override
     public ProviderBundle audit(String providerId, String comment, LoggingInfo.ActionType actionType, Authentication auth) {
-        ProviderBundle provider = get(providerId);
-        Resource existingResource = getResource(provider.getId(), provider.getProvider().getCatalogueId());
+        ProviderBundle provider = get(providerId, catalogueId, false);
+        Resource existingResource = getResource(provider.getId(), provider.getProvider().getCatalogueId(), false);
         ProviderBundle existingProvider = deserialize(existingResource);
 
         commonMethods.auditResource(existingProvider, comment, actionType, auth);
@@ -849,7 +849,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
 
     @Override
     public Paging<LoggingInfo> getLoggingInfoHistory(String id) {
-        ProviderBundle providerBundle = get(id);
+        ProviderBundle providerBundle = get(id, catalogueId, false);
         if (providerBundle.getLoggingInfo() != null) {
             List<LoggingInfo> loggingInfoList = providerBundle.getLoggingInfo();
             loggingInfoList.sort(Comparator.comparing(LoggingInfo::getDate).reversed());
@@ -940,15 +940,15 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
 
     @Override
     public ProviderBundle createPublicProvider(ProviderBundle providerBundle, Authentication auth) {
-        publicProviderManager.add(providerBundle, auth);
+        publicProviderService.add(providerBundle, auth);
         return providerBundle;
     }
 
 
     @Override
     public ProviderBundle suspend(String providerId, boolean suspend, Authentication auth) {
-        ProviderBundle providerBundle = get(providerId, auth);
-        Resource existingResource = getResource(providerBundle.getId(), providerBundle.getProvider().getCatalogueId());
+        ProviderBundle providerBundle = get(catalogueId, providerId, auth);
+        Resource existingResource = getResource(providerBundle.getId(), providerBundle.getProvider().getCatalogueId(), false);
         ProviderBundle existingProvider = deserialize(existingResource);
         commonMethods.suspensionValidation(existingProvider, catalogueId, providerId, suspend, auth);
 

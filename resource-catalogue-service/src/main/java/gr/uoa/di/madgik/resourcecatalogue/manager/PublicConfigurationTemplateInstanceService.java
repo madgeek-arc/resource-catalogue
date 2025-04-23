@@ -21,10 +21,14 @@ import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.exception.ResourceException;
 import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.registry.service.ResourceCRUDService;
+import gr.uoa.di.madgik.resourcecatalogue.domain.Bundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Identifiers;
 import gr.uoa.di.madgik.resourcecatalogue.domain.InteroperabilityRecordBundle;
+import gr.uoa.di.madgik.resourcecatalogue.domain.ServiceBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.configurationTemplates.ConfigurationTemplateInstanceBundle;
 import gr.uoa.di.madgik.resourcecatalogue.service.InteroperabilityRecordService;
+import gr.uoa.di.madgik.resourcecatalogue.service.ServiceBundleService;
+import gr.uoa.di.madgik.resourcecatalogue.service.TrainingResourceService;
 import gr.uoa.di.madgik.resourcecatalogue.utils.JmsService;
 import gr.uoa.di.madgik.resourcecatalogue.utils.PublicResourceUtils;
 import org.apache.commons.beanutils.BeanUtils;
@@ -40,21 +44,27 @@ import org.springframework.stereotype.Service;
 import java.lang.reflect.InvocationTargetException;
 
 @Service("publicConfigurationTemplateInstanceManager")
-public class PublicConfigurationTemplateInstanceService extends ResourceManager<ConfigurationTemplateInstanceBundle>
+public class PublicConfigurationTemplateInstanceService extends ResourceCatalogueManager<ConfigurationTemplateInstanceBundle>
         implements PublicResourceService<ConfigurationTemplateInstanceBundle> {
 
     private static final Logger logger = LoggerFactory.getLogger(PublicConfigurationTemplateInstanceService.class);
     private final JmsService jmsService;
     private final InteroperabilityRecordService interoperabilityRecordService;
+    private final ServiceBundleService<ServiceBundle> serviceBundleService;
+    private final TrainingResourceService trainingResourceService;
 
     @Value("${catalogue.id}")
     private String catalogueId;
 
     public PublicConfigurationTemplateInstanceService(JmsService jmsService,
-                                                      InteroperabilityRecordService interoperabilityRecordService) {
+                                                      InteroperabilityRecordService interoperabilityRecordService,
+                                                      ServiceBundleService<ServiceBundle> serviceBundleService,
+                                                      TrainingResourceService trainingResourceService) {
         super(ConfigurationTemplateInstanceBundle.class);
         this.jmsService = jmsService;
         this.interoperabilityRecordService = interoperabilityRecordService;
+        this.serviceBundleService = serviceBundleService;
+        this.trainingResourceService = trainingResourceService;
     }
 
     @Override
@@ -96,6 +106,7 @@ public class PublicConfigurationTemplateInstanceService extends ResourceManager<
 
     @Override
     public ConfigurationTemplateInstanceBundle update(ConfigurationTemplateInstanceBundle configurationTemplateInstanceBundle, Authentication authentication) {
+        //TODO: use get with catalogueId if CTI belongs to more than 1 Catalogues
         ConfigurationTemplateInstanceBundle published = super.get(configurationTemplateInstanceBundle.getIdentifiers().getPid());
         ConfigurationTemplateInstanceBundle ret = super.get(configurationTemplateInstanceBundle.getIdentifiers().getPid());
         try {
@@ -133,12 +144,13 @@ public class PublicConfigurationTemplateInstanceService extends ResourceManager<
     //TODO: Refactor if CTIs can belong to a different from the Project's Catalogue
     public void updateIdsToPublic(ConfigurationTemplateInstanceBundle bundle) {
         // resourceId
-        bundle.getConfigurationTemplateInstance().setResourceId(PublicResourceUtils.createPublicResourceId(
-                bundle.getConfigurationTemplateInstance().getResourceId(), catalogueId));
-        //TODO: enable if we have public CT
-        // configurationTemplateId
-//        configurationTemplateInstanceBundle.getConfigurationTemplateInstance().setResourceId(PublicResourceUtils.createPublicResourceId(
-//                configurationTemplateInstanceBundle.getConfigurationTemplateInstance().getConfigurationTemplateId(), catalogueId));
+        Bundle<?> resourceBundle;
+        try {
+            resourceBundle = serviceBundleService.get(bundle.getConfigurationTemplateInstance().getResourceId());
+        } catch (ResourceNotFoundException e) {
+            resourceBundle = trainingResourceService.get(bundle.getConfigurationTemplateInstance().getResourceId());
+        }
+        bundle.getConfigurationTemplateInstance().setResourceId(resourceBundle.getIdentifiers().getPid());
     }
 
 }

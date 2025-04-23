@@ -97,13 +97,12 @@ public class MigrationManager implements MigrationService {
 
         // Public Provider
         try {
-            ProviderBundle publicProviderBundle = providerService.get(catalogueId,
-                    PublicResourceUtils.createPublicResourceId(providerId, catalogueId), authentication);
-            String oldPublicId = publicProviderBundle.getProvider().getId();
-            publicProviderBundle.getProvider().setId(PublicResourceUtils.createPublicResourceId(providerId, newCatalogueId));
+            ProviderBundle publicProviderBundle = providerService.get(providerBundle.getIdentifiers().getPid(),
+                    providerBundle.getProvider().getCatalogueId());
+            //TODO: does the public provider id need to change?
             publicProviderBundle.getProvider().setCatalogueId(newCatalogueId);
 
-            Resource publicResource = providerService.getResource(oldPublicId, catalogueId);
+            Resource publicResource = providerService.getResource(publicProviderBundle.getId(), catalogueId);
             publicResource.setPayload(providerService.serialize(publicProviderBundle));
             logger.info("Migrating Public Provider: {} from Catalogue: {} to Catalogue: {}", publicProviderBundle.getId(), catalogueId, newCatalogueId);
             resourceService.updateResource(publicResource);

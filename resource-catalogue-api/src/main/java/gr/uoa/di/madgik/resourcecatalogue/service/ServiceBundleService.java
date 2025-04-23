@@ -29,7 +29,7 @@ import org.springframework.security.core.Authentication;
 import java.util.List;
 import java.util.Map;
 
-public interface ServiceBundleService<T extends Bundle<?>> extends ResourceService<T>, BundleOperations<T> {
+public interface ServiceBundleService<T extends Bundle<?>> extends ResourceCatalogueService<T>, BundleOperations<T> {
 
     /**
      * Method to add a new resource.

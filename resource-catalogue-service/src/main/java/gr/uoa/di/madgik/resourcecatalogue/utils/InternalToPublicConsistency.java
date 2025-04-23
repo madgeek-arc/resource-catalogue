@@ -49,7 +49,7 @@ public class InternalToPublicConsistency {
     private final ResourceInteroperabilityRecordService resourceInteroperabilityRecordService;
 
 
-    private final PublicProviderManager publicProviderManager;
+    private final PublicProviderService publicProviderService;
     private final PublicServiceService publicServiceManager;
     private final PublicTrainingResourceService publicTrainingResourceManager;
     private final PublicInteroperabilityRecordService publicInteroperabilityRecordManager;
@@ -74,7 +74,7 @@ public class InternalToPublicConsistency {
                                        TrainingResourceService trainingResourceService,
                                        InteroperabilityRecordService interoperabilityRecordService,
                                        ResourceInteroperabilityRecordService resourceInteroperabilityRecordService,
-                                       PublicProviderManager publicProviderManager, PublicServiceService publicServiceManager,
+                                       PublicProviderService publicProviderService, PublicServiceService publicServiceManager,
                                        PublicTrainingResourceService publicTrainingResourceManager,
                                        PublicInteroperabilityRecordService publicInteroperabilityRecordManager,
                                        PublicResourceInteroperabilityRecordService publicResourceInteroperabilityRecordManager,
@@ -84,7 +84,7 @@ public class InternalToPublicConsistency {
         this.trainingResourceService = trainingResourceService;
         this.interoperabilityRecordService = interoperabilityRecordService;
         this.resourceInteroperabilityRecordService = resourceInteroperabilityRecordService;
-        this.publicProviderManager = publicProviderManager;
+        this.publicProviderService = publicProviderService;
         this.publicServiceManager = publicServiceManager;
         this.publicTrainingResourceManager = publicTrainingResourceManager;
         this.publicInteroperabilityRecordManager = publicInteroperabilityRecordManager;
@@ -108,10 +108,10 @@ public class InternalToPublicConsistency {
         // check consistency for Providers
         for (ProviderBundle providerBundle : allInternalApprovedProviders) {
             String providerId = providerBundle.getId();
-            String publicProviderId = PublicResourceUtils.createPublicResourceId(providerId, providerBundle.getProvider().getCatalogueId());
+            String publicProviderId = providerBundle.getIdentifiers().getPid();
             // try and get its Public instance
             try {
-                publicProviderManager.get(publicProviderId);
+                publicProviderService.get(publicProviderId);
             } catch (ResourceException | ResourceNotFoundException e) {
                 logs.add(String.format("Provider with ID [%s] is missing its Public instance [%s]",
                         providerId, publicProviderId));
@@ -121,7 +121,7 @@ public class InternalToPublicConsistency {
         // check consistency for Services
         for (ServiceBundle serviceBundle : allInternalApprovedServices) {
             String serviceId = serviceBundle.getId();
-            String publicServiceId = PublicResourceUtils.createPublicResourceId(serviceId, serviceBundle.getService().getCatalogueId());
+            String publicServiceId = serviceBundle.getIdentifiers().getPid();
             // try and get its Public instance
             try {
                 publicServiceManager.get(publicServiceId);
@@ -134,8 +134,7 @@ public class InternalToPublicConsistency {
         // check consistency for Training Resources
         for (TrainingResourceBundle trainingResourceBundle : allInternalApprovedTR) {
             String trainingResourceId = trainingResourceBundle.getId();
-            String publicTrainingResourceId = PublicResourceUtils.createPublicResourceId(trainingResourceId,
-                    trainingResourceBundle.getTrainingResource().getCatalogueId());
+            String publicTrainingResourceId = trainingResourceBundle.getIdentifiers().getPid();
             // try and get its Public instance
             try {
                 publicTrainingResourceManager.get(publicTrainingResourceId);
@@ -148,8 +147,7 @@ public class InternalToPublicConsistency {
         // check consistency for Interoperability Records
         for (InteroperabilityRecordBundle interoperabilityRecordBundle : allInternalApprovedIR) {
             String interoperabilityRecordId = interoperabilityRecordBundle.getId();
-            String publicInteroperabilityRecordId = PublicResourceUtils.createPublicResourceId(interoperabilityRecordId,
-                    interoperabilityRecordBundle.getInteroperabilityRecord().getCatalogueId());
+            String publicInteroperabilityRecordId = interoperabilityRecordBundle.getIdentifiers().getPid();
             // try and get its Public instance
             try {
                 publicInteroperabilityRecordManager.get(publicInteroperabilityRecordId);
@@ -162,8 +160,7 @@ public class InternalToPublicConsistency {
         // check consistency for Resource Interoperability Records
         for (ResourceInteroperabilityRecordBundle resourceInteroperabilityRecordBundle : allInternalApprovedRIR) {
             String resourceInteroperabilityRecordId = resourceInteroperabilityRecordBundle.getId();
-            String publicResourceInteroperabilityRecordId = PublicResourceUtils.createPublicResourceId(resourceInteroperabilityRecordId,
-                    resourceInteroperabilityRecordBundle.getResourceInteroperabilityRecord().getCatalogueId());
+            String publicResourceInteroperabilityRecordId = resourceInteroperabilityRecordBundle.getIdentifiers().getPid();
             // try and get its Public instance
             try {
                 publicResourceInteroperabilityRecordManager.get(publicResourceInteroperabilityRecordId);

@@ -27,7 +27,7 @@ import org.springframework.security.core.Authentication;
 import java.util.List;
 import java.util.Map;
 
-public interface TrainingResourceService extends ResourceService<TrainingResourceBundle>, BundleOperations<TrainingResourceBundle> {
+public interface TrainingResourceService extends ResourceCatalogueService<TrainingResourceBundle>, BundleOperations<TrainingResourceBundle> {
 
     /**
      * Add a new Training Resource on an external Catalogue, providing the Catalogue's ID

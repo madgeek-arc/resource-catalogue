@@ -87,6 +87,10 @@ public class ProviderResourcesCommonMethods {
                         throw new ValidationException("Parameter 'catalogueId' and Provider's 'catalogueId' don't match");
                     }
                 }
+                if (!catalogueService.get(catalogueId).getStatus().equals("approved catalogue")) {
+                    throw new ResourceException(String.format("The Catalogue '%s' is not yet approved", catalogueId),
+                            HttpStatus.CONFLICT);
+                }
             }
             if (o instanceof ServiceBundle) {
                 if (((ServiceBundle) o).getPayload().getCatalogueId() == null || ((ServiceBundle) o).getPayload().getCatalogueId().isEmpty()) {

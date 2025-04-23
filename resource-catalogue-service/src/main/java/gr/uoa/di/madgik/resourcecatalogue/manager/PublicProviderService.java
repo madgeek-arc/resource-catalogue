@@ -34,14 +34,14 @@ import org.springframework.stereotype.Service;
 import java.lang.reflect.InvocationTargetException;
 
 @Service("publicProviderManager")
-public class PublicProviderManager extends ResourceManager<ProviderBundle> implements ResourceCRUDService<ProviderBundle, Authentication> {
+public class PublicProviderService extends ResourceCatalogueManager<ProviderBundle> implements ResourceCRUDService<ProviderBundle, Authentication> {
 
-    private static final Logger logger = LoggerFactory.getLogger(PublicProviderManager.class);
+    private static final Logger logger = LoggerFactory.getLogger(PublicProviderService.class);
     private final JmsService jmsService;
     private final PidIssuer pidIssuer;
     private final FacetLabelService facetLabelService;
 
-    public PublicProviderManager(JmsService jmsService,
+    public PublicProviderService(JmsService jmsService,
                                  PidIssuer pidIssuer,
                                  FacetLabelService facetLabelService) {
         super(ProviderBundle.class);
@@ -84,15 +84,16 @@ public class PublicProviderManager extends ResourceManager<ProviderBundle> imple
 
     @Override
     public ProviderBundle update(ProviderBundle providerBundle, Authentication authentication) {
-        ProviderBundle published = super.get(providerBundle.getIdentifiers().getPid());
-        ProviderBundle ret = super.get(providerBundle.getIdentifiers().getPid());
+        ProviderBundle published = super.get(providerBundle.getIdentifiers().getPid(),
+                providerBundle.getProvider().getCatalogueId(), true);
+        ProviderBundle ret = super.get(providerBundle.getIdentifiers().getPid(),
+                providerBundle.getProvider().getCatalogueId(), true);
         try {
             BeanUtils.copyProperties(ret, providerBundle);
         } catch (IllegalAccessException | InvocationTargetException e) {
             logger.info("Could not copy properties.");
         }
 
-        ret.getProvider().setAlternativeIdentifiers(published.getProvider().getAlternativeIdentifiers());
         ret.setIdentifiers(published.getIdentifiers());
         ret.setId(published.getId());
         ret.getMetadata().setPublished(true);

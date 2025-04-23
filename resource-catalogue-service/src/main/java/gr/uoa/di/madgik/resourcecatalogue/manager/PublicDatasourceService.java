@@ -34,7 +34,7 @@ import org.springframework.stereotype.Service;
 import java.lang.reflect.InvocationTargetException;
 
 @Service("publicDatasourceManager")
-public class PublicDatasourceService extends ResourceManager<DatasourceBundle>
+public class PublicDatasourceService extends ResourceCatalogueManager<DatasourceBundle>
         implements PublicResourceService<DatasourceBundle> {
 
     private static final Logger logger = LoggerFactory.getLogger(PublicDatasourceService.class);
@@ -89,8 +89,8 @@ public class PublicDatasourceService extends ResourceManager<DatasourceBundle>
 
     @Override
     public DatasourceBundle update(DatasourceBundle datasourceBundle, Authentication authentication) {
-        DatasourceBundle published = super.get(datasourceBundle.getIdentifiers().getPid());
-        DatasourceBundle ret = super.get(datasourceBundle.getIdentifiers().getPid());
+        DatasourceBundle published = super.get(datasourceBundle.getIdentifiers().getPid(), datasourceBundle.getDatasource().getCatalogueId(), true);
+        DatasourceBundle ret = super.get(datasourceBundle.getIdentifiers().getPid(), datasourceBundle.getDatasource().getCatalogueId(), true);
         try {
             BeanUtils.copyProperties(ret, datasourceBundle);
         } catch (IllegalAccessException | InvocationTargetException e) {

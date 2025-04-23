@@ -43,7 +43,7 @@ import java.util.Comparator;
 import java.util.List;
 
 @org.springframework.stereotype.Service("configurationTemplateInstanceManager")
-public class ConfigurationTemplateInstanceManager extends ResourceManager<ConfigurationTemplateInstanceBundle>
+public class ConfigurationTemplateInstanceManager extends ResourceCatalogueManager<ConfigurationTemplateInstanceBundle>
         implements ConfigurationTemplateInstanceService {
 
     private static final Logger logger = LoggerFactory.getLogger(ConfigurationTemplateInstanceManager.class);

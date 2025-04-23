@@ -33,7 +33,7 @@ import org.springframework.stereotype.Service;
 import java.lang.reflect.InvocationTargetException;
 
 @Service("publicInteroperabilityRecordManager")
-public class PublicInteroperabilityRecordService extends ResourceManager<InteroperabilityRecordBundle>
+public class PublicInteroperabilityRecordService extends ResourceCatalogueManager<InteroperabilityRecordBundle>
         implements PublicResourceService<InteroperabilityRecordBundle> {
 
     private static final Logger logger = LoggerFactory.getLogger(PublicInteroperabilityRecordService.class);
@@ -82,8 +82,10 @@ public class PublicInteroperabilityRecordService extends ResourceManager<Interop
 
     @Override
     public InteroperabilityRecordBundle update(InteroperabilityRecordBundle interoperabilityRecordBundle, Authentication authentication) {
-        InteroperabilityRecordBundle published = super.get(interoperabilityRecordBundle.getIdentifiers().getPid());
-        InteroperabilityRecordBundle ret = super.get(interoperabilityRecordBundle.getIdentifiers().getPid());
+        InteroperabilityRecordBundle published = super.get(interoperabilityRecordBundle.getIdentifiers().getPid(),
+                interoperabilityRecordBundle.getInteroperabilityRecord().getCatalogueId(), true);
+        InteroperabilityRecordBundle ret = super.get(interoperabilityRecordBundle.getIdentifiers().getPid(),
+                interoperabilityRecordBundle.getInteroperabilityRecord().getCatalogueId(), true);
         try {
             BeanUtils.copyProperties(ret, interoperabilityRecordBundle);
         } catch (IllegalAccessException | InvocationTargetException e) {
@@ -93,7 +95,6 @@ public class PublicInteroperabilityRecordService extends ResourceManager<Interop
         // sets public id to providerId
         updateIdsToPublic(interoperabilityRecordBundle);
 
-        ret.getInteroperabilityRecord().setAlternativeIdentifiers(published.getInteroperabilityRecord().getAlternativeIdentifiers());
         ret.setIdentifiers(published.getIdentifiers());
         ret.setId(published.getId());
         ret.getMetadata().setPublished(true);

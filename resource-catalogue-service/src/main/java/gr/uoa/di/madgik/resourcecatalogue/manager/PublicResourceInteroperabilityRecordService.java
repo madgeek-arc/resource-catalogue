@@ -36,7 +36,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service("publicResourceInteroperabilityRecordManager")
-public class PublicResourceInteroperabilityRecordService extends ResourceManager<ResourceInteroperabilityRecordBundle>
+public class PublicResourceInteroperabilityRecordService extends ResourceCatalogueManager<ResourceInteroperabilityRecordBundle>
         implements PublicResourceService<ResourceInteroperabilityRecordBundle> {
 
     private static final Logger logger = LoggerFactory.getLogger(PublicResourceInteroperabilityRecordService.class);
@@ -84,8 +84,10 @@ public class PublicResourceInteroperabilityRecordService extends ResourceManager
 
     @Override
     public ResourceInteroperabilityRecordBundle update(ResourceInteroperabilityRecordBundle resourceInteroperabilityRecordBundle, Authentication authentication) {
-        ResourceInteroperabilityRecordBundle published = super.get(resourceInteroperabilityRecordBundle.getIdentifiers().getPid());
-        ResourceInteroperabilityRecordBundle ret = super.get(resourceInteroperabilityRecordBundle.getIdentifiers().getPid());
+        ResourceInteroperabilityRecordBundle published = super.get(resourceInteroperabilityRecordBundle.getIdentifiers().getPid(),
+                resourceInteroperabilityRecordBundle.getResourceInteroperabilityRecord().getCatalogueId(),true);
+        ResourceInteroperabilityRecordBundle ret = super.get(resourceInteroperabilityRecordBundle.getIdentifiers().getPid(),
+                resourceInteroperabilityRecordBundle.getResourceInteroperabilityRecord().getCatalogueId(),true);
         try {
             BeanUtils.copyProperties(ret, resourceInteroperabilityRecordBundle);
         } catch (IllegalAccessException | InvocationTargetException e) {

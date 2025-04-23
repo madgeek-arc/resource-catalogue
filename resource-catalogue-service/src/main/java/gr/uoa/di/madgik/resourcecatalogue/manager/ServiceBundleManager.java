@@ -45,7 +45,7 @@ import java.util.stream.Collectors;
 import static java.util.stream.Collectors.toList;
 
 @org.springframework.stereotype.Service
-public class ServiceBundleManager extends ResourceManager<ServiceBundle> implements ServiceBundleService<ServiceBundle> {
+public class ServiceBundleManager extends ResourceCatalogueManager<ServiceBundle> implements ServiceBundleService<ServiceBundle> {
 
     private static final Logger logger = LoggerFactory.getLogger(ServiceBundleManager.class);
 
@@ -474,8 +474,7 @@ public class ServiceBundleManager extends ResourceManager<ServiceBundle> impleme
                         ((HelpdeskBundle) bundle).getCatalogueId(), bundle.isActive());
                 helpdeskService.updateBundle((HelpdeskBundle) bundle, auth);
                 HelpdeskBundle publicHelpdeskBundle =
-                        publicHelpdeskManager.getOrElseReturnNull(PublicResourceUtils.createPublicResourceId(
-                                bundle.getId(), ((HelpdeskBundle) bundle).getCatalogueId()));
+                        publicHelpdeskManager.getOrElseReturnNull(bundle.getIdentifiers().getPid());
                 if (publicHelpdeskBundle != null) {
                     publicHelpdeskManager.update((HelpdeskBundle) bundle, auth);
                 }
@@ -491,8 +490,7 @@ public class ServiceBundleManager extends ResourceManager<ServiceBundle> impleme
                         ((MonitoringBundle) bundle).getCatalogueId(), bundle.isActive());
                 monitoringService.updateBundle((MonitoringBundle) bundle, auth);
                 MonitoringBundle publicMonitoringBundle =
-                        publicMonitoringManager.getOrElseReturnNull(PublicResourceUtils.createPublicResourceId(
-                                bundle.getId(), ((MonitoringBundle) bundle).getCatalogueId()));
+                        publicMonitoringManager.getOrElseReturnNull(bundle.getIdentifiers().getPid());
                 if (publicMonitoringBundle != null) {
                     publicMonitoringManager.update((MonitoringBundle) bundle, auth);
                 }
@@ -508,8 +506,7 @@ public class ServiceBundleManager extends ResourceManager<ServiceBundle> impleme
                         ((DatasourceBundle) bundle).getDatasource().getCatalogueId(), bundle.isActive());
                 datasourceService.updateBundle((DatasourceBundle) bundle, auth);
                 DatasourceBundle publicDatasourceBundle =
-                        publicDatasourceManager.getOrElseReturnNull(PublicResourceUtils.createPublicResourceId(
-                                bundle.getId(), ((DatasourceBundle) bundle).getDatasource().getCatalogueId()));
+                        publicDatasourceManager.getOrElseReturnNull(bundle.getIdentifiers().getPid());
                 if (publicDatasourceBundle != null) {
                     publicDatasourceManager.update((DatasourceBundle) bundle, auth);
                 }
@@ -547,6 +544,7 @@ public class ServiceBundleManager extends ResourceManager<ServiceBundle> impleme
         FacetFilter ff = new FacetFilter();
         ff.addFilter("resource_organisation", providerId);
         ff.addFilter("catalogue_id", catalogueId);
+        ff.addFilter("published", false);
         ff.setQuantity(maxQuantity);
         ff.addOrderBy("name", "asc");
         return this.getAll(ff, auth).getResults();
@@ -557,6 +555,7 @@ public class ServiceBundleManager extends ResourceManager<ServiceBundle> impleme
         FacetFilter ff = new FacetFilter();
         ff.addFilter("resource_organisation", providerId);
         ff.addFilter("catalogue_id", catalogueId);
+        ff.addFilter("published", false);
         ff.setQuantity(maxQuantity);
         ff.addOrderBy("name", "asc");
         return this.getAll(ff, auth);
@@ -568,6 +567,7 @@ public class ServiceBundleManager extends ResourceManager<ServiceBundle> impleme
         FacetFilter ff = new FacetFilter();
         ff.addFilter("resource_organisation", providerId);
         ff.addFilter("catalogue_id", catalogueId);
+        ff.addFilter("published", false);
         ff.setQuantity(maxQuantity);
         ff.addOrderBy("name", "asc");
         if (auth != null && auth.isAuthenticated()) {
@@ -814,6 +814,7 @@ public class ServiceBundleManager extends ResourceManager<ServiceBundle> impleme
         FacetFilter ff = new FacetFilter();
         ff.addFilter("resource_organisation", providerId);
         ff.addFilter("catalogue_id", catalogueId);
+        ff.addFilter("published", false);
         List<ServiceBundle> allProviderResources = getAll(ff, auth).getResults();
         for (ServiceBundle resourceBundle : allProviderResources) {
             if (resourceBundle.getStatus().equals(vocabularyService.get("pending resource").getId())) {
@@ -969,6 +970,7 @@ public class ServiceBundleManager extends ResourceManager<ServiceBundle> impleme
         FacetFilter ff = new FacetFilter();
         ff.addFilter("resource_organisation", providerId);
         ff.addFilter("catalogue_id", catalogueId);
+        ff.addFilter("published", false);
         ff.addFilter("active", false);
         ff.setFrom(0);
         ff.setQuantity(maxQuantity);

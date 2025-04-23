@@ -40,7 +40,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service("publicServiceManager")
-public class PublicServiceService extends ResourceManager<ServiceBundle>
+public class PublicServiceService extends ResourceCatalogueManager<ServiceBundle>
         implements PublicResourceService<ServiceBundle> {
 
     private static final Logger logger = LoggerFactory.getLogger(PublicServiceService.class);
@@ -102,8 +102,8 @@ public class PublicServiceService extends ResourceManager<ServiceBundle>
 
     @Override
     public ServiceBundle update(ServiceBundle serviceBundle, Authentication authentication) {
-        ServiceBundle published = super.get(serviceBundle.getIdentifiers().getPid());
-        ServiceBundle ret = super.get(serviceBundle.getIdentifiers().getPid());
+        ServiceBundle published = super.get(serviceBundle.getIdentifiers().getPid(), serviceBundle.getService().getCatalogueId(), true);
+        ServiceBundle ret = super.get(serviceBundle.getIdentifiers().getPid(), serviceBundle.getService().getCatalogueId(), true);
         try {
             BeanUtils.copyProperties(ret, serviceBundle);
         } catch (IllegalAccessException | InvocationTargetException e) {
@@ -113,7 +113,6 @@ public class PublicServiceService extends ResourceManager<ServiceBundle>
         // sets public ids to resource organisation, resource providers and related/required resources
         updateIdsToPublic(ret);
 
-        ret.getService().setAlternativeIdentifiers(published.getService().getAlternativeIdentifiers());
         ret.setIdentifiers(published.getIdentifiers());
         ret.setId(published.getId());
         ret.getMetadata().setPublished(true);

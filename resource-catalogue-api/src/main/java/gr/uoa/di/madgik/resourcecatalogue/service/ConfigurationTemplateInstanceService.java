@@ -22,7 +22,7 @@ import gr.uoa.di.madgik.resourcecatalogue.domain.configurationTemplates.Configur
 
 import java.util.List;
 
-public interface ConfigurationTemplateInstanceService extends ResourceService<ConfigurationTemplateInstanceBundle> {
+public interface ConfigurationTemplateInstanceService extends ResourceCatalogueService<ConfigurationTemplateInstanceBundle> {
 
     /**
      * Return a List of ConfigurationTemplateInstances providing a resource ID

@@ -37,7 +37,7 @@ import org.springframework.stereotype.Service;
 import java.lang.reflect.InvocationTargetException;
 
 @Service("publicMonitoringManager")
-public class PublicMonitoringService extends ResourceManager<MonitoringBundle>
+public class PublicMonitoringService extends ResourceCatalogueManager<MonitoringBundle>
         implements PublicResourceService<MonitoringBundle> {
 
     private static final Logger logger = LoggerFactory.getLogger(PublicMonitoringService.class);
@@ -96,8 +96,8 @@ public class PublicMonitoringService extends ResourceManager<MonitoringBundle>
 
     @Override
     public MonitoringBundle update(MonitoringBundle monitoringBundle, Authentication authentication) {
-        MonitoringBundle published = super.get(monitoringBundle.getIdentifiers().getPid());
-        MonitoringBundle ret = super.get(monitoringBundle.getIdentifiers().getPid());
+        MonitoringBundle published = super.get(monitoringBundle.getIdentifiers().getPid(), monitoringBundle.getCatalogueId(), true);
+        MonitoringBundle ret = super.get(monitoringBundle.getIdentifiers().getPid(), monitoringBundle.getCatalogueId(), true);
         try {
             BeanUtils.copyProperties(ret, monitoringBundle);
         } catch (IllegalAccessException | InvocationTargetException e) {

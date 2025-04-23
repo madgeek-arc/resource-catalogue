@@ -27,7 +27,7 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.security.core.Authentication;
 
 @org.springframework.stereotype.Service("configurationTemplateManager")
-public class ConfigurationTemplateManager extends ResourceManager<ConfigurationTemplateBundle>
+public class ConfigurationTemplateManager extends ResourceCatalogueManager<ConfigurationTemplateBundle>
         implements ConfigurationTemplateService {
 
     private static final Logger logger = LogManager.getLogger(ConfigurationTemplateManager.class);

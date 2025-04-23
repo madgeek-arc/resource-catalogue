@@ -37,7 +37,7 @@ import org.springframework.security.core.Authentication;
 import java.util.List;
 
 @org.springframework.stereotype.Service("helpdeskManager")
-public class HelpdeskManager extends ResourceManager<HelpdeskBundle> implements HelpdeskService {
+public class HelpdeskManager extends ResourceCatalogueManager<HelpdeskBundle> implements HelpdeskService {
 
     private static final Logger logger = LoggerFactory.getLogger(HelpdeskManager.class);
     private final ServiceBundleService<ServiceBundle> serviceBundleService;

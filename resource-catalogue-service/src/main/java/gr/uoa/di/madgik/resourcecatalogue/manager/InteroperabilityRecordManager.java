@@ -40,7 +40,7 @@ import java.util.Comparator;
 import java.util.List;
 
 @org.springframework.stereotype.Service("interoperabilityRecordManager")
-public class InteroperabilityRecordManager extends ResourceManager<InteroperabilityRecordBundle> implements InteroperabilityRecordService {
+public class InteroperabilityRecordManager extends ResourceCatalogueManager<InteroperabilityRecordBundle> implements InteroperabilityRecordService {
 
     private static final Logger logger = LoggerFactory.getLogger(InteroperabilityRecordManager.class);
     private final ProviderService providerService;
@@ -352,6 +352,7 @@ public class InteroperabilityRecordManager extends ResourceManager<Interoperabil
         FacetFilter ff = new FacetFilter();
         ff.addFilter("provider_id", providerId);
         ff.addFilter("catalogue_id", catalogueId);
+        ff.addFilter("published", false);
         ff.setQuantity(maxQuantity);
         ff.addOrderBy("title", "asc");
         return this.getAll(ff, auth);

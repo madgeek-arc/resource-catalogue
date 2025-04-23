@@ -35,7 +35,7 @@ import org.springframework.stereotype.Service;
 import java.lang.reflect.InvocationTargetException;
 
 @Service("publicHelpdeskManager")
-public class PublicHelpdeskService extends ResourceManager<HelpdeskBundle>
+public class PublicHelpdeskService extends ResourceCatalogueManager<HelpdeskBundle>
         implements PublicResourceService<HelpdeskBundle> {
 
     private static final Logger logger = LoggerFactory.getLogger(PublicHelpdeskService.class);
@@ -93,8 +93,8 @@ public class PublicHelpdeskService extends ResourceManager<HelpdeskBundle>
 
     @Override
     public HelpdeskBundle update(HelpdeskBundle helpdeskBundle, Authentication authentication) {
-        HelpdeskBundle published = super.get(helpdeskBundle.getIdentifiers().getPid());
-        HelpdeskBundle ret = super.get(helpdeskBundle.getIdentifiers().getPid());
+        HelpdeskBundle published = super.get(helpdeskBundle.getIdentifiers().getPid(), helpdeskBundle.getCatalogueId(), true);
+        HelpdeskBundle ret = super.get(helpdeskBundle.getIdentifiers().getPid(), helpdeskBundle.getCatalogueId(), true);
         try {
             BeanUtils.copyProperties(ret, helpdeskBundle);
         } catch (IllegalAccessException | InvocationTargetException e) {

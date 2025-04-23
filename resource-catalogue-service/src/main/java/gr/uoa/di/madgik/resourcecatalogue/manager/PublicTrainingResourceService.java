@@ -39,7 +39,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service("publicTrainingResourceManager")
-public class PublicTrainingResourceService extends ResourceManager<TrainingResourceBundle>
+public class PublicTrainingResourceService extends ResourceCatalogueManager<TrainingResourceBundle>
         implements PublicResourceService<TrainingResourceBundle> {
 
     private static final Logger logger = LoggerFactory.getLogger(PublicTrainingResourceService.class);
@@ -100,8 +100,8 @@ public class PublicTrainingResourceService extends ResourceManager<TrainingResou
 
     @Override
     public TrainingResourceBundle update(TrainingResourceBundle trainingResourceBundle, Authentication authentication) {
-        TrainingResourceBundle published = super.get(trainingResourceBundle.getIdentifiers().getPid());
-        TrainingResourceBundle ret = super.get(trainingResourceBundle.getIdentifiers().getPid());
+        TrainingResourceBundle published = super.get(trainingResourceBundle.getIdentifiers().getPid(), trainingResourceBundle.getTrainingResource().getCatalogueId(), true);
+        TrainingResourceBundle ret = super.get(trainingResourceBundle.getIdentifiers().getPid(), trainingResourceBundle.getTrainingResource().getCatalogueId(), true);
         try {
             BeanUtils.copyProperties(ret, trainingResourceBundle);
         } catch (IllegalAccessException | InvocationTargetException e) {

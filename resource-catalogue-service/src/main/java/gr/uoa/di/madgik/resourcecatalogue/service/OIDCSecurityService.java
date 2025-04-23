@@ -50,9 +50,6 @@ public class OIDCSecurityService implements SecurityService {
     private final DraftResourceService<InteroperabilityRecordBundle> draftInteroperabilityRecordService;
     private final Authentication adminAccess = new AdminAuthentication();
 
-    private final String providersPrefix;
-    private final String servicesPrefix;
-    private final String trainingsPrefix;
     @Value("${elastic.index.max_result_window:10000}")
     protected int maxQuantity;
 
@@ -75,9 +72,6 @@ public class OIDCSecurityService implements SecurityService {
         this.draftServiceService = draftServiceService;
         this.draftTrainingResourceService = draftTrainingResourceService;
         this.draftInteroperabilityRecordService = draftInteroperabilityRecordService;
-        this.providersPrefix = properties.getResources().get(ResourceTypes.PROVIDER).getIdPrefix();
-        this.servicesPrefix = properties.getResources().get(ResourceTypes.SERVICE).getIdPrefix();
-        this.trainingsPrefix = properties.getResources().get(ResourceTypes.TRAINING_RESOURCE).getIdPrefix();
     }
 
     @Override
@@ -135,7 +129,7 @@ public class OIDCSecurityService implements SecurityService {
     }
 
     private boolean isProvider(String id) {
-        return id.startsWith(providersPrefix);
+        return providerService.exists(id);
     }
 
     private List<User> getProviderUsers(String id) {
@@ -239,11 +233,11 @@ public class OIDCSecurityService implements SecurityService {
     }
 
     private boolean isService(String id) {
-        return id.startsWith(servicesPrefix);
+        return serviceBundleService.exists(id);
     }
 
     private boolean isTrainingResource(String id) {
-        return id.startsWith(trainingsPrefix);
+        return trainingResourceService.exists(id);
     }
 
     @Override

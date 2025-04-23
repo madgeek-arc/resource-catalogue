@@ -16,16 +16,10 @@
 
 package gr.uoa.di.madgik.resourcecatalogue.service;
 
-import gr.uoa.di.madgik.resourcecatalogue.domain.configurationTemplates.ConfigurationTemplate;
-import gr.uoa.di.madgik.resourcecatalogue.domain.configurationTemplates.ConfigurationTemplateBundle;
+import gr.uoa.di.madgik.registry.domain.Resource;
 
-public interface ConfigurationTemplateService extends ResourceCatalogueService<ConfigurationTemplateBundle> {
+public interface ResourceCatalogueService<T> extends ResourceService<T> {
 
-    /**
-     * Returns the Configuration Template of an Interoperability Record given its ID
-     *
-     * @param interoperabilityRecordId Interoperability Record ID
-     * @return {@link ConfigurationTemplate}
-     */
-    ConfigurationTemplate getByInteroperabilityRecordId(String interoperabilityRecordId);
+    T get(String id, String catalogueId, boolean published);
+    Resource getResource(String id, String catalogueId, boolean published);
 }

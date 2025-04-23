@@ -49,7 +49,7 @@ import static gr.uoa.di.madgik.resourcecatalogue.utils.VocabularyValidationUtils
 import static java.util.stream.Collectors.toList;
 
 @org.springframework.stereotype.Service
-public class TrainingResourceManager extends ResourceManager<TrainingResourceBundle> implements TrainingResourceService {
+public class TrainingResourceManager extends ResourceCatalogueManager<TrainingResourceBundle> implements TrainingResourceService {
 
     private static final Logger logger = LoggerFactory.getLogger(TrainingResourceManager.class);
 
@@ -491,8 +491,7 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
                         ((HelpdeskBundle) bundle).getCatalogueId(), bundle.isActive());
                 helpdeskService.updateBundle((HelpdeskBundle) bundle, auth);
                 HelpdeskBundle publicHelpdeskBundle =
-                        publicHelpdeskManager.getOrElseReturnNull(PublicResourceUtils.createPublicResourceId(
-                                bundle.getId(), ((HelpdeskBundle) bundle).getCatalogueId()));
+                        publicHelpdeskManager.getOrElseReturnNull(bundle.getIdentifiers().getPid());
                 if (publicHelpdeskBundle != null) {
                     publicHelpdeskManager.update((HelpdeskBundle) bundle, auth);
                 }
@@ -508,8 +507,7 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
                         ((MonitoringBundle) bundle).getCatalogueId(), bundle.isActive());
                 monitoringService.updateBundle((MonitoringBundle) bundle, auth);
                 MonitoringBundle publicMonitoringBundle =
-                        publicMonitoringManager.getOrElseReturnNull(PublicResourceUtils.createPublicResourceId(
-                                bundle.getId(), ((MonitoringBundle) bundle).getCatalogueId()));
+                        publicMonitoringManager.getOrElseReturnNull(bundle.getIdentifiers().getPid());
                 if (publicMonitoringBundle != null) {
                     publicMonitoringManager.update((MonitoringBundle) bundle, auth);
                 }
@@ -547,6 +545,7 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
         FacetFilter ff = new FacetFilter();
         ff.addFilter("resource_organisation", providerId);
         ff.addFilter("catalogue_id", catalogueId);
+        ff.addFilter("published", false);
         ff.setQuantity(maxQuantity);
         ff.addOrderBy("title", "asc");
         return this.getAll(ff, auth).getResults();
@@ -557,6 +556,7 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
         FacetFilter ff = new FacetFilter();
         ff.addFilter("resource_organisation", providerId);
         ff.addFilter("catalogue_id", catalogueId);
+        ff.addFilter("published", false);
         ff.setQuantity(maxQuantity);
         ff.addOrderBy("title", "asc");
         return this.getAll(ff, auth);
@@ -567,6 +567,7 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
         FacetFilter ff = new FacetFilter();
         ff.addFilter("resource_organisation", providerId);
         ff.addFilter("catalogue_id", catalogueId);
+        ff.addFilter("published", false);
         ff.addFilter("active", false);
         ff.setFrom(0);
         ff.setQuantity(maxQuantity);
@@ -681,6 +682,7 @@ public class TrainingResourceManager extends ResourceManager<TrainingResourceBun
         FacetFilter ff = new FacetFilter();
         ff.addFilter("resource_organisation", providerId);
         ff.addFilter("catalogue_id", catalogueId);
+        ff.addFilter("published", false);
         List<TrainingResourceBundle> allProviderTrainingResources = getAll(ff, auth).getResults();
         for (TrainingResourceBundle trainingResourceBundle : allProviderTrainingResources) {
             if (trainingResourceBundle.getStatus().equals(vocabularyService.get("pending resource").getId())) {
