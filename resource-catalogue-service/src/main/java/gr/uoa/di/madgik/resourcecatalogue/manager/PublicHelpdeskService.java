@@ -28,6 +28,7 @@ import gr.uoa.di.madgik.resourcecatalogue.utils.ProviderResourcesCommonMethods;
 import org.apache.commons.beanutils.BeanUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
@@ -43,6 +44,9 @@ public class PublicHelpdeskService extends ResourceCatalogueManager<HelpdeskBund
     private final ProviderResourcesCommonMethods commonMethods;
     private final ServiceBundleService<ServiceBundle> serviceBundleService;
     private final TrainingResourceService trainingResourceService;
+
+    @Value("${catalogue.id}")
+    private String catalogueId;
 
     public PublicHelpdeskService(JmsService jmsService,
                                  ProviderResourcesCommonMethods commonMethods,
@@ -68,7 +72,7 @@ public class PublicHelpdeskService extends ResourceCatalogueManager<HelpdeskBund
     public HelpdeskBundle getOrElseReturnNull(String id) {
         HelpdeskBundle helpdeskBundle;
         try {
-            helpdeskBundle = get(id);
+            helpdeskBundle = get(id, catalogueId, true);
         } catch (ResourceException | ResourceNotFoundException e) {
             return null;
         }

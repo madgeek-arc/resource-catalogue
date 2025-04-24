@@ -173,13 +173,12 @@ public interface ServiceBundleService<T extends Bundle<?>> extends ResourceCatal
     /**
      * Get the history of the specific Service of the specific Catalogue ID
      *
-     * @param id          Service ID
      * @param catalogueId Catalogue ID
+     * @param id          Service ID
+     *
      * @return {@link Paging}&lt;{@link LoggingInfo}&gt;
      */
-    default Paging<LoggingInfo> getLoggingInfoHistory(String id, String catalogueId) {
-        return getLoggingInfoHistory(get(id));
-    }
+    Paging<LoggingInfo> getLoggingInfoHistory(String catalogueId, String id);
 
     /**
      * Change the Provider of the specific Service

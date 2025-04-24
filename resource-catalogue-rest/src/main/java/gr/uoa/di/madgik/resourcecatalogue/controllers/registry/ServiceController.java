@@ -91,7 +91,7 @@ public class ServiceController {
                                                 @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
         ServiceBundle service;
-        service = serviceBundleService.get(id);
+        service = serviceBundleService.get(id, catalogueId, false);
 
         // Block users of deleting Services of another Catalogue
         if (!service.getService().getCatalogueId().equals(this.catalogueId)) {
@@ -113,7 +113,7 @@ public class ServiceController {
                                         @Deprecated @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId,
                                         @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
-        return new ResponseEntity<>(serviceBundleService.get(id).getService(), HttpStatus.OK);
+        return new ResponseEntity<>(serviceBundleService.get(id, catalogueId, false).getService(), HttpStatus.OK);
     }
 
     @Operation(summary = "Creates a new Resource.")
@@ -445,7 +445,7 @@ public class ServiceController {
                                                       @Parameter(hidden = true) Authentication authentication) {
         String id = prefix + "/" + suffix;
         ServiceBundle service;
-        service = serviceBundleService.get(id);
+        service = serviceBundleService.get(id, catalogueId, false);
         if (service == null) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
@@ -462,7 +462,7 @@ public class ServiceController {
                                        @Deprecated @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId,
                                        @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
-        return new ResponseEntity<>(serviceBundleService.get(id), HttpStatus.OK);
+        return new ResponseEntity<>(serviceBundleService.get(id, catalogueId, false), HttpStatus.OK);
     }
 
     @PostMapping(path = {"/bundle"}, produces = {MediaType.APPLICATION_JSON_VALUE})
@@ -501,7 +501,7 @@ public class ServiceController {
     public ResponseEntity<Service> getDraftService(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
                                                    @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix) {
         String id = prefix + "/" + suffix;
-        return new ResponseEntity<>(draftServiceService.get(id).getService(), HttpStatus.OK);
+        return new ResponseEntity<>(draftServiceService.get(id, catalogueId, false).getService(), HttpStatus.OK);
     }
 
     @GetMapping(path = "/draft/getMyDraftServices", produces = {MediaType.APPLICATION_JSON_VALUE})
@@ -518,6 +518,7 @@ public class ServiceController {
         String id = String.join("/", prefix, suffix);
         FacetFilter ff = FacetFilter.from(allRequestParams);
         ff.addFilter("resource_organisation", id);
+        ff.addFilter("catalogue_id", catalogueId);
         return new ResponseEntity<>(draftServiceService.getAll(ff, auth), HttpStatus.OK);
     }
 
@@ -533,7 +534,7 @@ public class ServiceController {
     @PutMapping(path = "/draft", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceAdmin(#auth, #service.id)")
     public ResponseEntity<Service> updateDraftService(@RequestBody Service service, @Parameter(hidden = true) Authentication auth) {
-        ServiceBundle serviceBundle = draftServiceService.get(service.getId());
+        ServiceBundle serviceBundle = draftServiceService.get(service.getId(), catalogueId, false);
         serviceBundle.setService(service);
         serviceBundle = draftServiceService.update(serviceBundle, auth);
         logger.info("User '{}' updated the Draft Service with name '{}' and id '{}'", User.of(auth).getEmail().toLowerCase(),
@@ -547,7 +548,7 @@ public class ServiceController {
                                                       @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix,
                                                       @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
-        ServiceBundle serviceBundle = draftServiceService.get(id);
+        ServiceBundle serviceBundle = draftServiceService.get(id, catalogueId, false);
         if (serviceBundle == null) {
             return new ResponseEntity<>(HttpStatus.GONE);
         }
@@ -561,7 +562,7 @@ public class ServiceController {
     @PreAuthorize("hasRole('ROLE_USER')")
     public ResponseEntity<Service> transformService(@RequestBody Service service,
                                                     @Parameter(hidden = true) Authentication auth) {
-        ServiceBundle serviceBundle = draftServiceService.get(service.getId());
+        ServiceBundle serviceBundle = draftServiceService.get(service.getId(), catalogueId, false);
         serviceBundle.setService(service);
 
         serviceBundleService.validate(serviceBundle);

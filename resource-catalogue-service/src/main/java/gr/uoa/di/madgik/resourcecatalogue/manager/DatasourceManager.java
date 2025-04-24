@@ -38,7 +38,7 @@ import java.util.Comparator;
 import java.util.List;
 
 @org.springframework.stereotype.Service
-public class DatasourceManager extends ResourceManager<DatasourceBundle> implements DatasourceService {
+public class DatasourceManager extends ResourceCatalogueManager<DatasourceBundle> implements DatasourceService {
 
     private static final Logger logger = LoggerFactory.getLogger(DatasourceManager.class);
     private final ServiceBundleService<ServiceBundle> serviceBundleService;
@@ -80,7 +80,10 @@ public class DatasourceManager extends ResourceManager<DatasourceBundle> impleme
     }
 
     public DatasourceBundle get(String serviceId, String catalogueId) {
-        Resource res = where(false, new SearchService.KeyValue("service_id", serviceId), new SearchService.KeyValue("catalogue_id", catalogueId));
+        Resource res = where(false,
+                new SearchService.KeyValue("service_id", serviceId),
+                new SearchService.KeyValue("catalogue_id", catalogueId),
+                new SearchService.KeyValue("published", "false"));
         return res != null ? deserialize(res) : null;
     }
 
@@ -121,9 +124,7 @@ public class DatasourceManager extends ResourceManager<DatasourceBundle> impleme
                     LoggingInfo.Types.ONBOARD.getKey(), LoggingInfo.ActionType.APPROVED.getKey());
             datasourceBundle.getLoggingInfo().add(loggingInfo);
             datasourceBundle.setLatestOnboardingInfo(datasourceBundle.getLoggingInfo().get(1));
-            if (datasourceBundle.getId() == null || datasourceBundle.getId().isEmpty()) {
-                throw new ValidationException("Service ID should not be empty");
-            }
+            idCreator.validateId(datasourceBundle.getId());
             commonMethods.createIdentifiers(datasourceBundle, getResourceTypeName(), true);
         }
     }

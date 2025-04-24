@@ -441,7 +441,7 @@ public class ProviderManager extends ResourceCatalogueManager<ProviderBundle> im
             throw new ValidationException(String.format("Vocabulary %s does not consist a Provider State!", status));
         }
         logger.trace("verifyProvider with id: '{}' | status: '{}' | active: '{}'", id, status, active);
-        ProviderBundle provider = get(catalogueId, id, auth);
+        ProviderBundle provider = get(id, catalogueId, false);
         Resource existingResource = getResource(provider.getId(), provider.getProvider().getCatalogueId(), false);
         ProviderBundle existingProvider = deserialize(existingResource);
 
@@ -485,7 +485,7 @@ public class ProviderManager extends ResourceCatalogueManager<ProviderBundle> im
 
     @Override
     public ProviderBundle publish(String id, Boolean active, Authentication auth) {
-        ProviderBundle provider = get(id);
+        ProviderBundle provider = getWithCatalogue(id, catalogueId);
         Resource existingResource = getResource(provider.getId(), provider.getProvider().getCatalogueId(), false);
         ProviderBundle existingProvider = deserialize(existingResource);
 
@@ -736,7 +736,7 @@ public class ProviderManager extends ResourceCatalogueManager<ProviderBundle> im
         if (isDraft) {
             providerBundle = draftProviderService.get(providerId);
         } else {
-            providerBundle = get(providerId, auth);
+            providerBundle = get(providerId, catalogueId, false);
         }
         List<String> userList = new ArrayList<>();
         for (User user : providerBundle.getProvider().getUsers()) {
@@ -761,7 +761,7 @@ public class ProviderManager extends ResourceCatalogueManager<ProviderBundle> im
         try {
             draftProviderService.update(draftProviderService.get(providerId), auth);
         } catch (ResourceNotFoundException e) {
-            update(get(providerId), auth);
+            update(get(providerId, catalogueId, false), auth);
         }
     }
 
@@ -788,7 +788,7 @@ public class ProviderManager extends ResourceCatalogueManager<ProviderBundle> im
 
     @Override
     public void requestProviderDeletion(String providerId, Authentication auth) {
-        ProviderBundle provider = get(providerId);
+        ProviderBundle provider = get(providerId, catalogueId, false);
         for (User user : provider.getProvider().getUsers()) {
             if (user.getEmail().equalsIgnoreCase(AuthenticationInfo.getEmail(auth).toLowerCase())) {
                 registrationMailService.informPortalAdminsForProviderDeletion(provider, User.of(auth));
@@ -848,8 +848,8 @@ public class ProviderManager extends ResourceCatalogueManager<ProviderBundle> im
     }
 
     @Override
-    public Paging<LoggingInfo> getLoggingInfoHistory(String id) {
-        ProviderBundle providerBundle = get(id, catalogueId, false);
+    public Paging<LoggingInfo> getLoggingInfoHistory(String catalogueId, String providerId) {
+        ProviderBundle providerBundle = get(providerId, catalogueId, false);
         if (providerBundle.getLoggingInfo() != null) {
             List<LoggingInfo> loggingInfoList = providerBundle.getLoggingInfo();
             loggingInfoList.sort(Comparator.comparing(LoggingInfo::getDate).reversed());
@@ -878,9 +878,7 @@ public class ProviderManager extends ResourceCatalogueManager<ProviderBundle> im
             loggingInfoList.add(commonMethods.createLoggingInfo(auth, LoggingInfo.Types.ONBOARD.getKey(),
                     LoggingInfo.ActionType.APPROVED.getKey()));
             // check that external source has provided its own ID
-            if (provider.getId() == null || provider.getId().isEmpty()) {
-                throw new ValidationException("Provider ID should not be empty");
-            }
+            idCreator.validateId(provider.getId());
             commonMethods.createIdentifiers(provider, getResourceTypeName(), true);
         }
         provider.setAuditState(Auditable.NOT_AUDITED);
@@ -893,9 +891,6 @@ public class ProviderManager extends ResourceCatalogueManager<ProviderBundle> im
         if (providerBundle.getStatus().equals("approved provider") && providerBundle.getProvider().isLegalEntity()) {
             List<String> allHLENames = vocabularyService.getByType(Vocabulary.Type.PROVIDER_HOSTING_LEGAL_ENTITY)
                     .stream().map(Vocabulary::getName).toList();
-            for (String hle : allHLENames) {
-                logger.info(hle);
-            }
             if (!allHLENames.contains(providerBundle.getProvider().getName())) {
                 addApprovedProviderToHLEVocabulary(providerBundle);
             }
@@ -947,7 +942,7 @@ public class ProviderManager extends ResourceCatalogueManager<ProviderBundle> im
 
     @Override
     public ProviderBundle suspend(String providerId, boolean suspend, Authentication auth) {
-        ProviderBundle providerBundle = get(catalogueId, providerId, auth);
+        ProviderBundle providerBundle = get(providerId, catalogueId, false);
         Resource existingResource = getResource(providerBundle.getId(), providerBundle.getProvider().getCatalogueId(), false);
         ProviderBundle existingProvider = deserialize(existingResource);
         commonMethods.suspensionValidation(existingProvider, catalogueId, providerId, suspend, auth);

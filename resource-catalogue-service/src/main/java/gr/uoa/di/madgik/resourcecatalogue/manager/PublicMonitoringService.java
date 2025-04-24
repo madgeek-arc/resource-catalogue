@@ -30,6 +30,7 @@ import gr.uoa.di.madgik.resourcecatalogue.utils.PublicResourceUtils;
 import org.apache.commons.beanutils.BeanUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
@@ -45,6 +46,9 @@ public class PublicMonitoringService extends ResourceCatalogueManager<Monitoring
     private final ProviderResourcesCommonMethods commonMethods;
     private final ServiceBundleService<ServiceBundle> serviceBundleService;
     private final TrainingResourceService trainingResourceService;
+
+    @Value("${catalogue.id}")
+    private String catalogueId;
 
     public PublicMonitoringService(JmsService jmsService,
                                    ProviderResourcesCommonMethods commonMethods,
@@ -71,7 +75,7 @@ public class PublicMonitoringService extends ResourceCatalogueManager<Monitoring
     public MonitoringBundle getOrElseReturnNull(String id) {
         MonitoringBundle monitoringBundle;
         try {
-            monitoringBundle = get(id);
+            monitoringBundle = get(id, catalogueId, true);
         } catch (ResourceException | ResourceNotFoundException e) {
             return null;
         }

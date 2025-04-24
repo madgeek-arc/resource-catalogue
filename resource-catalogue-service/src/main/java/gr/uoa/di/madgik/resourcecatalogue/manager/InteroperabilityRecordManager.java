@@ -87,9 +87,7 @@ public class InteroperabilityRecordManager extends ResourceCatalogueManager<Inte
             commonMethods.createIdentifiers(interoperabilityRecordBundle, getResourceTypeName(), false);
         } else { // external catalogue
             commonMethods.checkCatalogueIdConsistency(interoperabilityRecordBundle, catalogueId);
-            if (interoperabilityRecordBundle.getId() == null || interoperabilityRecordBundle.getId().isEmpty()) {
-                throw new ValidationException("Interoperability Record ID should not be empty");
-            }
+            idCreator.validateId(interoperabilityRecordBundle.getId());
             commonMethods.createIdentifiers(interoperabilityRecordBundle, getResourceTypeName(), true);
         }
         logger.trace("Attempting to add a new Interoperability Record: {}", interoperabilityRecordBundle.getInteroperabilityRecord());

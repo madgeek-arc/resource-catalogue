@@ -39,7 +39,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service("draftInteroperabilityRecordManager")
-public class DraftInteroperabilityRecordManager extends ResourceManager<InteroperabilityRecordBundle> implements DraftResourceService<InteroperabilityRecordBundle> {
+public class DraftInteroperabilityRecordManager extends ResourceCatalogueManager<InteroperabilityRecordBundle> implements DraftResourceService<InteroperabilityRecordBundle> {
 
     private static final Logger logger = LoggerFactory.getLogger(DraftInteroperabilityRecordManager.class);
 

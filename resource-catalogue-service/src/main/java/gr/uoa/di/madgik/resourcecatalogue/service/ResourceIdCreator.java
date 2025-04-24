@@ -16,6 +16,7 @@
 
 package gr.uoa.di.madgik.resourcecatalogue.service;
 
+import gr.uoa.di.madgik.catalogue.exception.ValidationException;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.registry.service.SearchService;
@@ -100,5 +101,18 @@ public class ResourceIdCreator implements IdCreator {
                 .replaceAll("[^a-zA-Z0-9\\s\\-_/]+", "")
                 .replaceAll("[/\\s]+", "_")
                 .toLowerCase();
+    }
+
+    @Override
+    public void validateId(String id) {
+        if (id == null || id.isEmpty()) {
+            throw new ValidationException("ID cannot be null or empty");
+        }
+        if (id.length() > 50) {
+            throw new ValidationException("ID is too long; max 50 characters allowed.");
+        }
+        if (!id.matches("^[a-zA-Z0-9_-]+$")) {
+            throw new ValidationException("Invalid ID: only letters, digits, hyphens, and underscores are allowed.");
+        }
     }
 }

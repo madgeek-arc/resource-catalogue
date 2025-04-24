@@ -53,6 +53,9 @@ public class OIDCSecurityService implements SecurityService {
     @Value("${elastic.index.max_result_window:10000}")
     protected int maxQuantity;
 
+    @Value("${catalogue.id}")
+    private String catalogueId;
+
     public OIDCSecurityService(@Lazy CatalogueService catalogueService,
                                @Lazy ProviderService providerService,
                                @Lazy ServiceBundleService<ServiceBundle> serviceBundleService,
@@ -112,6 +115,7 @@ public class OIDCSecurityService implements SecurityService {
     @Override
     public boolean userHasAdminAccess(User user, @NotNull String id) {
         boolean isProvider = isProvider(id);
+        //FIXME: if provider,catalogue have the same ID
         List<User> users = isProvider ? getProviderUsers(id) : getCatalogueUsers(id);
         if (users == null) {
             return false;
@@ -243,21 +247,24 @@ public class OIDCSecurityService implements SecurityService {
     @Override
     public boolean providerCanAddResources(Authentication auth, gr.uoa.di.madgik.resourcecatalogue.domain.Service service) {
         String providerId = service.getResourceOrganisation();
-        ProviderBundle provider = providerService.get(providerId, auth);
+        String catalogueId = service.getCatalogueId();
+        ProviderBundle provider = providerService.get(catalogueId, providerId, auth);
         return providerCanAddResources(auth, provider, service.getId());
     }
 
     @Override
     public boolean providerCanAddResources(Authentication auth, gr.uoa.di.madgik.resourcecatalogue.domain.TrainingResource trainingResource) {
         String providerId = trainingResource.getResourceOrganisation();
-        ProviderBundle provider = providerService.get(providerId, auth);
+        String catalogueId = trainingResource.getCatalogueId();
+        ProviderBundle provider = providerService.get(catalogueId, providerId, auth);
         return providerCanAddResources(auth, provider, trainingResource.getId());
     }
 
     @Override
     public boolean providerCanAddResources(Authentication auth, gr.uoa.di.madgik.resourcecatalogue.domain.InteroperabilityRecord interoperabilityRecord) {
         String providerId = interoperabilityRecord.getProviderId();
-        ProviderBundle provider = providerService.get(providerId, auth);
+        String catalogueId = interoperabilityRecord.getCatalogueId();
+        ProviderBundle provider = providerService.get(catalogueId, providerId, auth);
         return providerIsActiveAndUserIsAdmin(auth, interoperabilityRecord.getId()) && provider.getStatus().equals("approved provider");
     }
 
@@ -294,7 +301,7 @@ public class OIDCSecurityService implements SecurityService {
     @Override
     public boolean providerIsActiveAndUserIsAdmin(Authentication auth, String resourceId) {
         String providerId = getProviderId(resourceId);
-        ProviderBundle provider = providerService.get(providerId, auth);
+        ProviderBundle provider = providerService.get(catalogueId, providerId, auth);
         if (provider != null && provider.isActive()) {
             return hasAdminAccess(auth, providerId);
         }

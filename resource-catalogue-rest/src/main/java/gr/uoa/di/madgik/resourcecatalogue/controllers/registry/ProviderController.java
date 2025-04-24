@@ -334,6 +334,7 @@ public class ProviderController {
         ff.setQuantity(1000);
         ff.addFilter("resource_organisation", id);
         ff.addFilter("catalogue_id", catalogueId);
+        ff.addFilter("published", false);
         List<ServiceBundle> services = serviceBundleService.getAll(ff, auth).getResults();
         for (ServiceBundle service : services) {
             service.setActive(active);
@@ -411,7 +412,7 @@ public class ProviderController {
     public ResponseEntity<Paging<LoggingInfo>> loggingInfoHistory(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
                                                                   @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix) {
         String id = prefix + "/" + suffix;
-        Paging<LoggingInfo> loggingInfoHistory = this.providerService.getLoggingInfoHistory(id);
+        Paging<LoggingInfo> loggingInfoHistory = this.providerService.getLoggingInfoHistory(catalogueId, id);
         return ResponseEntity.ok(loggingInfoHistory);
     }
 
@@ -510,7 +511,7 @@ public class ProviderController {
     public ResponseEntity<Provider> getDraftProvider(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
                                                      @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix) {
         String id = prefix + "/" + suffix;
-        return new ResponseEntity<>(draftProviderService.get(id).getProvider(), HttpStatus.OK);
+        return new ResponseEntity<>(draftProviderService.get(id, catalogueId, false).getProvider(), HttpStatus.OK);
     }
 
     @GetMapping(path = "/draft/getMyDraftProviders", produces = {MediaType.APPLICATION_JSON_VALUE})
@@ -532,7 +533,7 @@ public class ProviderController {
     @PutMapping(path = "/draft", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.hasAdminAccess(#auth,#provider.id)")
     public ResponseEntity<Provider> updateDraftProvider(@RequestBody Provider provider, @Parameter(hidden = true) Authentication auth) {
-        ProviderBundle providerBundle = draftProviderService.get(provider.getId());
+        ProviderBundle providerBundle = draftProviderService.get(provider.getId(), catalogueId, false);
         providerBundle.setProvider(provider);
         providerBundle = draftProviderService.update(providerBundle, auth);
         logger.info("User '{}' updated the Draft Provider with name '{}' and id '{}'", User.of(auth).getEmail().toLowerCase(),
@@ -546,7 +547,7 @@ public class ProviderController {
                                                         @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix,
                                                         @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
-        ProviderBundle providerBundle = draftProviderService.get(id);
+        ProviderBundle providerBundle = draftProviderService.get(id, catalogueId, false);
         if (providerBundle == null) {
             return new ResponseEntity<>(HttpStatus.GONE);
         }
@@ -559,7 +560,7 @@ public class ProviderController {
     @PutMapping(path = "draft/transform", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_USER')")
     public ResponseEntity<Provider> transformToProvider(@RequestBody Provider provider, @Parameter(hidden = true) Authentication auth) {
-        ProviderBundle providerBundle = draftProviderService.get(provider.getId());
+        ProviderBundle providerBundle = draftProviderService.get(provider.getId(), catalogueId, false);
         providerBundle.setProvider(provider);
 
         providerService.validate(providerBundle);

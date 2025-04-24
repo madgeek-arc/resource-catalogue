@@ -36,7 +36,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service("draftServiceManager")
-public class DraftServiceManager extends ResourceManager<ServiceBundle> implements DraftResourceService<ServiceBundle> {
+public class DraftServiceManager extends ResourceCatalogueManager<ServiceBundle> implements DraftResourceService<ServiceBundle> {
 
     private static final Logger logger = LoggerFactory.getLogger(DraftServiceManager.class);
 

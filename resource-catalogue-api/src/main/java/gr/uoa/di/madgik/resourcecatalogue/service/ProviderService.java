@@ -160,10 +160,11 @@ public interface ProviderService extends ResourceCatalogueService<ProviderBundle
     /**
      * Get the history of the specific Provider of the specific Catalogue ID
      *
-     * @param id Provider ID
+     * @param catalogueId Catalogue ID
+     * @param providerId  Provider ID
      * @return {@link Paging}&lt;{@link LoggingInfo}&gt;
      */
-    Paging<LoggingInfo> getLoggingInfoHistory(String id);
+    Paging<LoggingInfo> getLoggingInfoHistory(String catalogueId, String providerId);
 
     /**
      * Get a Provider's rejected resources

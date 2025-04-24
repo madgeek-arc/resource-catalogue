@@ -37,7 +37,7 @@ import java.util.Comparator;
 import java.util.List;
 
 @org.springframework.stereotype.Service("resourceInteroperabilityRecordManager")
-public class ResourceInteroperabilityRecordManager extends ResourceManager<ResourceInteroperabilityRecordBundle>
+public class ResourceInteroperabilityRecordManager extends ResourceCatalogueManager<ResourceInteroperabilityRecordBundle>
         implements ResourceInteroperabilityRecordService {
 
     private static final Logger logger = LoggerFactory.getLogger(ResourceInteroperabilityRecordManager.class);
@@ -119,7 +119,10 @@ public class ResourceInteroperabilityRecordManager extends ResourceManager<Resou
     }
 
     public ResourceInteroperabilityRecordBundle getWithResourceId(String resourceId) {
-        Resource res = where(false, new SearchService.KeyValue("resource_id", resourceId));
+        Resource res = where(false,
+                new SearchService.KeyValue("resource_id", resourceId),
+//                new SearchService.KeyValue("catalogue_id", resourceId), //TODO: enable when RIR from different catalogues is supported
+                new SearchService.KeyValue("published", "false"));
         return res != null ? deserialize(res) : null;
     }
 

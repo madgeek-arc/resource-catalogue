@@ -19,7 +19,7 @@ package gr.uoa.di.madgik.resourcecatalogue.service;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Bundle;
 import org.springframework.security.core.Authentication;
 
-public interface DraftResourceService<T extends Bundle> extends ResourceService<T> {
+public interface DraftResourceService<T extends Bundle> extends ResourceCatalogueService<T> {
 
     /**
      * Transforms the resource to active.

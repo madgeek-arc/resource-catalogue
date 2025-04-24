@@ -36,7 +36,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service("draftProviderManager")
-public class DraftProviderManager extends ResourceManager<ProviderBundle> implements DraftResourceService<ProviderBundle> {
+public class DraftProviderManager extends ResourceCatalogueManager<ProviderBundle> implements DraftResourceService<ProviderBundle> {
 
     private static final Logger logger = LoggerFactory.getLogger(DraftProviderManager.class);
 
@@ -71,6 +71,7 @@ public class DraftProviderManager extends ResourceManager<ProviderBundle> implem
     public ProviderBundle add(ProviderBundle bundle, Authentication auth) {
 
         bundle.setId(idCreator.generate(getResourceTypeName()));
+        commonMethods.createIdentifiers(bundle, getResourceTypeName(), false);
         commonMethods.addAuthenticatedUser(bundle.getProvider(), auth);
 
         logger.trace("Attempting to add a new Draft Provider: {}", bundle);

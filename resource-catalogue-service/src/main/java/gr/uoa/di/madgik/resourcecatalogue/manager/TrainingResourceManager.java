@@ -133,9 +133,7 @@ public class TrainingResourceManager extends ResourceCatalogueManager<TrainingRe
             commonMethods.createIdentifiers(trainingResourceBundle, getResourceTypeName(), false);
         } else { // add provider from external catalogue
             commonMethods.checkCatalogueIdConsistency(trainingResourceBundle, catalogueId);
-            if (trainingResourceBundle.getId() == null || trainingResourceBundle.getId().isEmpty()) {
-                throw new ValidationException("Training Resource ID should not be empty");
-            }
+            idCreator.validateId(trainingResourceBundle.getId());
             commonMethods.createIdentifiers(trainingResourceBundle, getResourceTypeName(), true);
         }
         commonMethods.checkRelatedResourceIDsConsistency(trainingResourceBundle);
