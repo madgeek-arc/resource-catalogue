@@ -158,15 +158,6 @@ public interface ProviderService extends ResourceCatalogueService<ProviderBundle
     Paging<ProviderBundle> getRandomProviders(FacetFilter ff, String auditingInterval, Authentication auth);
 
     /**
-     * Get the history of the specific Provider of the specific Catalogue ID
-     *
-     * @param catalogueId Catalogue ID
-     * @param providerId  Provider ID
-     * @return {@link Paging}&lt;{@link LoggingInfo}&gt;
-     */
-    Paging<LoggingInfo> getLoggingInfoHistory(String catalogueId, String providerId);
-
-    /**
      * Get a Provider's rejected resources
      *
      * @param ff           FacetFilter

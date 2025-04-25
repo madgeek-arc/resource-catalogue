@@ -16,10 +16,10 @@
 
 package gr.uoa.di.madgik.resourcecatalogue.controllers.registry;
 
+import gr.uoa.di.madgik.registry.annotation.BrowseParameters;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.registry.exception.ResourceException;
-import gr.uoa.di.madgik.registry.annotation.BrowseParameters;
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
 import io.swagger.v3.oas.annotations.Hidden;
@@ -253,7 +253,7 @@ public class CatalogueController {
             throw new ResourceException(String.format("You cannot suspend the [%s] Catalogue", this.catalogueId),
                     HttpStatus.CONFLICT);
         }
-        return catalogueManager.suspend(catalogueId, suspend, auth);
+        return catalogueManager.suspend(catalogueId, catalogueId, suspend, auth);
     }
 
     @Hidden
@@ -264,7 +264,7 @@ public class CatalogueController {
                                                           @RequestParam(required = false) String comment,
                                                           @RequestParam LoggingInfo.ActionType actionType,
                                                           @Parameter(hidden = true) Authentication auth) {
-        CatalogueBundle catalogue = catalogueManager.audit(id, comment, actionType, auth);
+        CatalogueBundle catalogue = catalogueManager.audit(id, id, comment, actionType, auth);
         return new ResponseEntity<>(catalogue, HttpStatus.OK);
     }
 
@@ -297,7 +297,8 @@ public class CatalogueController {
     @GetMapping(path = {"{catalogueId}/provider/loggingInfoHistory/{providerId}"}, produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<Paging<LoggingInfo>> providerLoggingInfoHistory(@PathVariable("catalogueId") String catalogueId,
                                                                           @PathVariable("providerId") String providerId) {
-        Paging<LoggingInfo> loggingInfoHistory = providerManager.getLoggingInfoHistory(catalogueId, providerId);
+        ProviderBundle bundle = providerManager.get(providerId, catalogueId, false);
+        Paging<LoggingInfo> loggingInfoHistory = providerManager.getLoggingInfoHistory(bundle);
         return ResponseEntity.ok(loggingInfoHistory);
     }
 
@@ -431,8 +432,9 @@ public class CatalogueController {
 
     @GetMapping(path = {"{catalogueId}/service/loggingInfoHistory/{serviceId}"}, produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<Paging<LoggingInfo>> serviceLoggingInfoHistory(@PathVariable("catalogueId") String catalogueId,
-                                                                  @PathVariable("serviceId") String serviceId) {
-        Paging<LoggingInfo> loggingInfoHistory = serviceBundleService.getLoggingInfoHistory(catalogueId, serviceId);
+                                                                         @PathVariable("serviceId") String serviceId) {
+        ServiceBundle bundle = serviceBundleService.get(serviceId, catalogueId, false);
+        Paging<LoggingInfo> loggingInfoHistory = serviceBundleService.getLoggingInfoHistory(bundle);
         return ResponseEntity.ok(loggingInfoHistory);
     }
 
@@ -567,6 +569,24 @@ public class CatalogueController {
         return ResponseEntity.ok(paging);
     }
 
+    @Operation(description = "Returns the TrainingResourceBundle of the specific Catalogue with the given id.")
+    @GetMapping(path = "{catalogueId}/trainingResource/bundle/{trainingResourceId}",
+            produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceAdmin(#auth, #trainingResourceId)")
+    public ResponseEntity<TrainingResourceBundle> getCatalogueTrainingResourceBundle(@PathVariable("catalogueId") String catalogueId,
+                                                                   @PathVariable("trainingResourceId") String trainingResourceId,
+                                                                   @Parameter(hidden = true) Authentication auth) {
+        return new ResponseEntity<>(trainingResourceService.get(trainingResourceId, catalogueId, false), HttpStatus.OK);
+    }
+
+    @GetMapping(path = {"{catalogueId}/trainingResource/loggingInfoHistory/{trainingResourceId}"}, produces = {MediaType.APPLICATION_JSON_VALUE})
+    public ResponseEntity<Paging<LoggingInfo>> trainingResourceLoggingInfoHistory(@PathVariable("catalogueId") String catalogueId,
+                                                                         @PathVariable("trainingResourceId") String trainingResourceId) {
+        TrainingResourceBundle bundle = trainingResourceService.get(trainingResourceId, catalogueId, false);
+        Paging<LoggingInfo> loggingInfoHistory = trainingResourceService.getLoggingInfoHistory(bundle);
+        return ResponseEntity.ok(loggingInfoHistory);
+    }
+
     @Operation(description = "Deletes the Training Resource of the specific Catalogue with the given id.")
     @DeleteMapping(path = "{catalogueId}/trainingResource/{trainingResourceId}", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.hasAdminAccess(#auth, #catalogueId)")
@@ -629,6 +649,24 @@ public class CatalogueController {
         ff.addFilter("provider_id", providerId);
         Paging<InteroperabilityRecord> paging = genericResourceService.getResults(ff).map(r -> ((InteroperabilityRecordBundle) r).getPayload());
         return ResponseEntity.ok(paging);
+    }
+
+    @Operation(description = "Returns the InteroperabilityRecordBundle of the specific Catalogue with the given id.")
+    @GetMapping(path = "{catalogueId}/interoperabilityRecord/bundle/{interoperabilityRecordId}",
+            produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceAdmin(#auth, #interoperabilityRecordId)")
+    public ResponseEntity<InteroperabilityRecordBundle> getCatalogueInteroperabilityRecordBundle(@PathVariable("catalogueId") String catalogueId,
+                                                                                     @PathVariable("interoperabilityRecordId") String interoperabilityRecordId,
+                                                                                     @Parameter(hidden = true) Authentication auth) {
+        return new ResponseEntity<>(interoperabilityRecordService.get(interoperabilityRecordId, catalogueId, false), HttpStatus.OK);
+    }
+
+    @GetMapping(path = {"{catalogueId}/interoperabilityRecord/loggingInfoHistory/{interoperabilityRecordId}"}, produces = {MediaType.APPLICATION_JSON_VALUE})
+    public ResponseEntity<Paging<LoggingInfo>> interoperabilityRecordLoggingInfoHistory(@PathVariable("catalogueId") String catalogueId,
+                                                                                  @PathVariable("interoperabilityRecordId") String interoperabilityRecordId) {
+        InteroperabilityRecordBundle bundle = interoperabilityRecordService.get(interoperabilityRecordId, catalogueId, false);
+        Paging<LoggingInfo> loggingInfoHistory = interoperabilityRecordService.getLoggingInfoHistory(bundle);
+        return ResponseEntity.ok(loggingInfoHistory);
     }
 
     @Operation(description = "Deletes the Interoperability Record of the specific Catalogue with the given id.")

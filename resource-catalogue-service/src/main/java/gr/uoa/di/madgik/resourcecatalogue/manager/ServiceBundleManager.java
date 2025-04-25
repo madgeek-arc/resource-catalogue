@@ -325,17 +325,6 @@ public class ServiceBundleManager extends ResourceCatalogueManager<ServiceBundle
     }
 
     @Override
-    public Paging<LoggingInfo> getLoggingInfoHistory(String catalogueId, String serviceId) {
-        ServiceBundle serviceBundle = get(serviceId, catalogueId, false);
-        if (serviceBundle.getLoggingInfo() != null) {
-            List<LoggingInfo> loggingInfoList = serviceBundle.getLoggingInfo();
-            loggingInfoList.sort(Comparator.comparing(LoggingInfo::getDate).reversed());
-            return new Browsing<>(loggingInfoList.size(), 0, loggingInfoList.size(), loggingInfoList, null);
-        }
-        return null;
-    }
-
-    @Override
     public void delete(ServiceBundle serviceBundle) {
         String catalogue = serviceBundle.getService().getCatalogueId();
         commonMethods.blockResourceDeletion(serviceBundle.getStatus(), serviceBundle.getMetadata().isPublished());
@@ -528,7 +517,7 @@ public class ServiceBundleManager extends ResourceCatalogueManager<ServiceBundle
     }
 
     @Override
-    public ServiceBundle audit(String serviceId, String comment, LoggingInfo.ActionType actionType, Authentication auth) {
+    public ServiceBundle audit(String serviceId, String catalogueId, String comment, LoggingInfo.ActionType actionType, Authentication auth) {
         ServiceBundle service = get(serviceId, catalogueId, false);
         ProviderBundle provider = providerService.get(service.getService().getCatalogueId(), service.getService().getResourceOrganisation(), auth);
         commonMethods.auditResource(service, comment, actionType, auth);
@@ -680,7 +669,7 @@ public class ServiceBundleManager extends ResourceCatalogueManager<ServiceBundle
     }
 
     @Override
-    public ServiceBundle suspend(String serviceId, boolean suspend, Authentication auth) {
+    public ServiceBundle suspend(String serviceId, String catalogueId, boolean suspend, Authentication auth) {
         ServiceBundle serviceBundle = get(serviceId, catalogueId, false);
         commonMethods.suspensionValidation(serviceBundle, serviceBundle.getService().getCatalogueId(),
                 serviceBundle.getService().getResourceOrganisation(), suspend, auth);

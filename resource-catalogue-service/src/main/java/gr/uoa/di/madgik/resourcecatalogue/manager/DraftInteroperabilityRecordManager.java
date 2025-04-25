@@ -71,6 +71,7 @@ public class DraftInteroperabilityRecordManager extends ResourceCatalogueManager
     public InteroperabilityRecordBundle add(InteroperabilityRecordBundle bundle, Authentication auth) {
 
         bundle.setId(idCreator.generate(getResourceTypeName()));
+        commonMethods.createIdentifiers(bundle, getResourceTypeName(), false);
 
         logger.trace("Attempting to add a new Draft Interoperability Record with id '{}'", bundle.getId());
         bundle.setMetadata(Metadata.updateMetadata(bundle.getMetadata(), AuthenticationInfo.getFullName(auth), AuthenticationInfo.getEmail(auth).toLowerCase()));

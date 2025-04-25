@@ -91,9 +91,10 @@ public class DatasourceManager extends ResourceCatalogueManager<DatasourceBundle
     public DatasourceBundle add(DatasourceBundle datasourceBundle, Authentication auth) {
 
         // if Datasource has ID -> check if it exists in OpenAIRE Datasources list
-        if (datasourceBundle.getId() != null && !datasourceBundle.getId().isEmpty()) {
-            checkOpenAIREIDExistence(datasourceBundle);
-        }
+        //TODO: enable when openaire api returns info. Decide how to proceed for external catalogues
+//        if (datasourceBundle.getId() != null && !datasourceBundle.getId().isEmpty()) {
+//            checkOpenAIREIDExistence(datasourceBundle);
+//        }
         logger.trace("Attempting to add a new Datasource: {}", datasourceBundle);
 
         this.validateDatasource(datasourceBundle);

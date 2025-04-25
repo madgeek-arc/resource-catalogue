@@ -54,15 +54,6 @@ public interface InteroperabilityRecordService extends ResourceCatalogueService<
     InteroperabilityRecordBundle getOrElseReturnNull(String id);
 
     /**
-     * Get the history of the specific Interoperability Record of the specific Catalogue ID
-     *
-     * @param id          Interoperability Record ID
-     * @param catalogueId Catalogue ID
-     * @return {@link Paging}&lt;{@link LoggingInfo}&gt;
-     */
-    Paging<LoggingInfo> getLoggingInfoHistory(String id, String catalogueId);
-
-    /**
      * Create a Public Interoperability Record
      *
      * @param interoperabilityRecordBundle Interoperability Record

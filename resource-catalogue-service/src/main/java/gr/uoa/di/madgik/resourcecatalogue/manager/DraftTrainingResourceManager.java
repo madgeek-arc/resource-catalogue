@@ -70,6 +70,7 @@ public class DraftTrainingResourceManager extends ResourceCatalogueManager<Train
     public TrainingResourceBundle add(TrainingResourceBundle bundle, Authentication auth) {
 
         bundle.setId(idCreator.generate(getResourceTypeName()));
+        commonMethods.createIdentifiers(bundle, getResourceTypeName(), false);
 
         logger.trace("Attempting to add a new Draft Training Resource with id '{}'", bundle.getId());
         bundle.setMetadata(Metadata.updateMetadata(bundle.getMetadata(), AuthenticationInfo.getFullName(auth), AuthenticationInfo.getEmail(auth).toLowerCase()));

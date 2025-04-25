@@ -390,7 +390,7 @@ public class ProviderController {
                                                         @RequestParam LoggingInfo.ActionType actionType,
                                                         @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
-        ProviderBundle provider = providerService.audit(id, comment, actionType, auth);
+        ProviderBundle provider = providerService.audit(id, catalogueId, comment, actionType, auth);
         return new ResponseEntity<>(provider, HttpStatus.OK);
     }
 
@@ -412,7 +412,8 @@ public class ProviderController {
     public ResponseEntity<Paging<LoggingInfo>> loggingInfoHistory(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
                                                                   @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix) {
         String id = prefix + "/" + suffix;
-        Paging<LoggingInfo> loggingInfoHistory = this.providerService.getLoggingInfoHistory(catalogueId, id);
+        ProviderBundle bundle = providerService.get(id, catalogueId, false);
+        Paging<LoggingInfo> loggingInfoHistory = providerService.getLoggingInfoHistory(bundle);
         return ResponseEntity.ok(loggingInfoHistory);
     }
 
@@ -482,8 +483,9 @@ public class ProviderController {
     @Operation(description = "Suspends a Provider and all its resources")
     @PutMapping(path = "suspend", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
-    public ProviderBundle suspendProvider(@RequestParam String providerId, @RequestParam boolean suspend, @Parameter(hidden = true) Authentication auth) {
-        return providerService.suspend(providerId, suspend, auth);
+    public ProviderBundle suspendProvider(@RequestParam String providerId, @RequestParam String catalogueId,
+                                          @RequestParam boolean suspend, @Parameter(hidden = true) Authentication auth) {
+        return providerService.suspend(providerId, catalogueId, suspend, auth);
     }
 
     @BrowseParameters

@@ -92,7 +92,7 @@ public class TrainingResourceController {
                                                          @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
         TrainingResourceBundle trainingResourceBundle;
-        trainingResourceBundle = trainingResourceService.get(id);
+        trainingResourceBundle = trainingResourceService.get(id, catalogueId, false);
 
         // Block users of deleting Services of another Catalogue
         if (!trainingResourceBundle.getTrainingResource().getCatalogueId().equals(this.catalogueId)) {
@@ -114,17 +114,19 @@ public class TrainingResourceController {
                                                                 @Deprecated @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId,
                                                                 @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
-        return new ResponseEntity<>(trainingResourceService.get(id).getTrainingResource(), HttpStatus.OK);
+        return new ResponseEntity<>(trainingResourceService.get(id, catalogueId, false).getTrainingResource(), HttpStatus.OK);
     }
 
     @GetMapping(path = "bundle/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceAdmin(#auth, #prefix+'/'+#suffix)")
-    public ResponseEntity<TrainingResourceBundle> getTrainingResourceBundle(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
-                                                                            @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix,
+    public ResponseEntity<TrainingResourceBundle> getTrainingResourceBundle(@Parameter(description = "The left part of the ID before the '/'")
+                                                                            @PathVariable("prefix") String prefix,
+                                                                            @Parameter(description = "The right part of the ID after the '/'")
+                                                                            @PathVariable("suffix") String suffix,
                                                                             @Deprecated @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId,
                                                                             @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
-        return new ResponseEntity<>(trainingResourceService.get(id), HttpStatus.OK);
+        return new ResponseEntity<>(trainingResourceService.get(id, catalogueId, false), HttpStatus.OK);
     }
 
     @Operation(summary = "Creates a new TrainingResource.")
@@ -132,14 +134,17 @@ public class TrainingResourceController {
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.providerCanAddResources(#auth, #trainingResource)")
     public ResponseEntity<TrainingResource> addTrainingResource(@RequestBody TrainingResource trainingResource, @Parameter(hidden = true) Authentication auth) {
         TrainingResourceBundle ret = this.trainingResourceService.add(new TrainingResourceBundle(trainingResource), auth);
-        logger.info("User '{}' created a new Training Resource with title '{}' and id '{}'", User.of(auth).getEmail().toLowerCase(), trainingResource.getTitle(), trainingResource.getId());
+        logger.info("User '{}' created a new Training Resource with title '{}' and id '{}'",
+                User.of(auth).getEmail().toLowerCase(), trainingResource.getTitle(), trainingResource.getId());
         return new ResponseEntity<>(ret.getTrainingResource(), HttpStatus.CREATED);
     }
 
     @Operation(summary = "Updates the TrainingResource assigned the given id with the given TrainingResource, keeping a version of revisions.")
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceAdmin(#auth,#trainingResource.id)")
     @PutMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
-    public ResponseEntity<TrainingResource> updateTrainingResource(@RequestBody TrainingResource trainingResource, @RequestParam(required = false) String comment, @Parameter(hidden = true) Authentication auth) {
+    public ResponseEntity<TrainingResource> updateTrainingResource(@RequestBody TrainingResource trainingResource,
+                                                                   @RequestParam(required = false) String comment,
+                                                                   @Parameter(hidden = true) Authentication auth) {
         TrainingResourceBundle ret = this.trainingResourceService.update(new TrainingResourceBundle(trainingResource), comment, auth);
         logger.info("Updated Training Resource with title '{}' and id '{}'", trainingResource.getTitle(), trainingResource.getId());
         return new ResponseEntity<>(ret.getTrainingResource(), HttpStatus.OK);
@@ -148,8 +153,10 @@ public class TrainingResourceController {
     // Accept/Reject a Resource.
     @PatchMapping(path = "verifyTrainingResource/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
-    public ResponseEntity<TrainingResourceBundle> verifyTrainingResource(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
-                                                                         @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix,
+    public ResponseEntity<TrainingResourceBundle> verifyTrainingResource(@Parameter(description = "The left part of the ID before the '/'")
+                                                                         @PathVariable("prefix") String prefix,
+                                                                         @Parameter(description = "The right part of the ID after the '/'")
+                                                                         @PathVariable("suffix") String suffix,
                                                                          @RequestParam(required = false) Boolean active,
                                                                          @RequestParam(required = false) String status,
                                                                          @Parameter(hidden = true) Authentication auth) {
@@ -195,7 +202,8 @@ public class TrainingResourceController {
 
     @Operation(summary = "Get all Training Resources in the catalogue organized by an attribute, e.g. get Training Resources organized in categories.")
     @GetMapping(path = "by/{field}", produces = {MediaType.APPLICATION_JSON_VALUE})
-    public ResponseEntity<Map<String, List<TrainingResource>>> getTrainingResourcesBy(@PathVariable(value = "field") Service.Field field, @Parameter(hidden = true) Authentication auth) throws NoSuchFieldException {
+    public ResponseEntity<Map<String, List<TrainingResource>>> getTrainingResourcesBy(@PathVariable(value = "field") Service.Field field,
+                                                                                      @Parameter(hidden = true) Authentication auth) throws NoSuchFieldException {
         Map<String, List<TrainingResourceBundle>> results;
         results = trainingResourceService.getBy(field.getKey(), auth);
         Map<String, List<TrainingResource>> trainingResourceResults = new TreeMap<>();
@@ -287,7 +295,8 @@ public class TrainingResourceController {
     @Parameter(name = "suspended", description = "Suspended", content = @Content(schema = @Schema(type = "boolean", defaultValue = "false")))
     @GetMapping(path = "adminPage/all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
-    public ResponseEntity<Paging<TrainingResourceBundle>> getAllTrainingResourcesForAdminPage(@Parameter(hidden = true) @RequestParam MultiValueMap<String, Object> allRequestParams) {
+    public ResponseEntity<Paging<TrainingResourceBundle>> getAllTrainingResourcesForAdminPage(@Parameter(hidden = true)
+                                                                                              @RequestParam MultiValueMap<String, Object> allRequestParams) {
         FacetFilter ff = FacetFilter.from(allRequestParams);
         ff.setResourceType("training_resource");
         ff.addFilter("published", false);
@@ -304,7 +313,7 @@ public class TrainingResourceController {
                                                                 @RequestParam LoggingInfo.ActionType actionType,
                                                                 @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
-        TrainingResourceBundle trainingResource = trainingResourceService.audit(id, comment, actionType, auth);
+        TrainingResourceBundle trainingResource = trainingResourceService.audit(id, catalogueId, comment, actionType, auth);
         return new ResponseEntity<>(trainingResource, HttpStatus.OK);
     }
 
@@ -328,7 +337,8 @@ public class TrainingResourceController {
                                                                   @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix,
                                                                   @Deprecated @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId) {
         String id = prefix + "/" + suffix;
-        Paging<LoggingInfo> loggingInfoHistory = this.trainingResourceService.getLoggingInfoHistory(id);
+        TrainingResourceBundle bundle = trainingResourceService.get(id, catalogueId, false);
+        Paging<LoggingInfo> loggingInfoHistory = trainingResourceService.getLoggingInfoHistory(bundle);
         return ResponseEntity.ok(loggingInfoHistory);
     }
 
@@ -391,8 +401,9 @@ public class TrainingResourceController {
     @Operation(summary = "Suspends a specific Training Resource.")
     @PutMapping(path = "suspend", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
-    public TrainingResourceBundle suspendTrainingResource(@RequestParam String trainingResourceId, @RequestParam boolean suspend, @Parameter(hidden = true) Authentication auth) {
-        return trainingResourceService.suspend(trainingResourceId, suspend, auth);
+    public TrainingResourceBundle suspendTrainingResource(@RequestParam String trainingResourceId, @RequestParam String catalogueId,
+                                                          @RequestParam boolean suspend, @Parameter(hidden = true) Authentication auth) {
+        return trainingResourceService.suspend(trainingResourceId, catalogueId, suspend, auth);
     }
 
     @PostMapping(path = "/addBulk", produces = {MediaType.APPLICATION_JSON_VALUE})
@@ -407,7 +418,7 @@ public class TrainingResourceController {
     public ResponseEntity<TrainingResource> getDraftTrainingResource(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
                                                                      @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix) {
         String id = prefix + "/" + suffix;
-        return new ResponseEntity<>(draftTrainingResourceService.get(id).getTrainingResource(), HttpStatus.OK);
+        return new ResponseEntity<>(draftTrainingResourceService.get(id, catalogueId, false).getTrainingResource(), HttpStatus.OK);
     }
 
     @GetMapping(path = "/draft/getMyDraftTrainingResources", produces = {MediaType.APPLICATION_JSON_VALUE})
@@ -429,7 +440,7 @@ public class TrainingResourceController {
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceAdmin(#auth, #trainingResource.id)")
     public ResponseEntity<TrainingResource> updateDraftTrainingResource(@RequestBody TrainingResource trainingResource,
                                                                         @Parameter(hidden = true) Authentication auth) {
-        TrainingResourceBundle trainingResourceBundle = draftTrainingResourceService.get(trainingResource.getId());
+        TrainingResourceBundle trainingResourceBundle = draftTrainingResourceService.get(trainingResource.getId(), catalogueId, false);
         trainingResourceBundle.setTrainingResource(trainingResource);
         trainingResourceBundle = draftTrainingResourceService.update(trainingResourceBundle, auth);
         logger.info("User '{}' updated the Draft Training Resource with name '{}' and id '{}'", User.of(auth).getEmail().toLowerCase(),
@@ -443,7 +454,7 @@ public class TrainingResourceController {
                                                                         @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix,
                                                                         @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
-        TrainingResourceBundle trainingResourceBundle = draftTrainingResourceService.get(id);
+        TrainingResourceBundle trainingResourceBundle = draftTrainingResourceService.get(id, catalogueId, false);
         if (trainingResourceBundle == null) {
             return new ResponseEntity<>(HttpStatus.GONE);
         }
@@ -457,7 +468,7 @@ public class TrainingResourceController {
     @PreAuthorize("hasRole('ROLE_USER')")
     public ResponseEntity<TrainingResource> transformToTrainingResource(@RequestBody TrainingResource trainingResource,
                                                                         @Parameter(hidden = true) Authentication auth) {
-        TrainingResourceBundle trainingResourceBundle = draftTrainingResourceService.get(trainingResource.getId());
+        TrainingResourceBundle trainingResourceBundle = draftTrainingResourceService.get(trainingResource.getId(), catalogueId, false);
         trainingResourceBundle.setTrainingResource(trainingResource);
 
         trainingResourceService.validate(trainingResourceBundle);

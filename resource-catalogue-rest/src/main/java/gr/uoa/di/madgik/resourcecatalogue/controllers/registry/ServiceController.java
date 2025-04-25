@@ -292,7 +292,7 @@ public class ServiceController {
                                                       @RequestParam LoggingInfo.ActionType actionType,
                                                       @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
-        ServiceBundle service = serviceBundleService.audit(id, comment, actionType, auth);
+        ServiceBundle service = serviceBundleService.audit(id, catalogueId, comment, actionType, auth);
         return new ResponseEntity<>(service, HttpStatus.OK);
     }
 
@@ -318,7 +318,8 @@ public class ServiceController {
                                                                   @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix,
                                                                   @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId) {
         String id = prefix + "/" + suffix;
-        Paging<LoggingInfo> loggingInfoHistory = this.serviceBundleService.getLoggingInfoHistory(id, catalogueId);
+        ServiceBundle bundle = serviceBundleService.get(id, catalogueId, false);
+        Paging<LoggingInfo> loggingInfoHistory = serviceBundleService.getLoggingInfoHistory(bundle);
         return ResponseEntity.ok(loggingInfoHistory);
     }
 
@@ -425,8 +426,9 @@ public class ServiceController {
     @Operation(summary = "Suspends a specific Service.")
     @PutMapping(path = "suspend", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
-    public ServiceBundle suspendService(@RequestParam String serviceId, @RequestParam boolean suspend, @Parameter(hidden = true) Authentication auth) {
-        return serviceBundleService.suspend(serviceId, suspend, auth);
+    public ServiceBundle suspendService(@RequestParam String serviceId, @RequestParam String catalogueId,
+                                        @RequestParam boolean suspend, @Parameter(hidden = true) Authentication auth) {
+        return serviceBundleService.suspend(serviceId, catalogueId, suspend, auth);
     }
 
     @PostMapping(path = "/addBulk", produces = {MediaType.APPLICATION_JSON_VALUE})

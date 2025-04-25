@@ -171,16 +171,6 @@ public interface ServiceBundleService<T extends Bundle<?>> extends ResourceCatal
     void sendEmailNotificationsToProvidersWithOutdatedResources(String resourceId, Authentication auth);
 
     /**
-     * Get the history of the specific Service of the specific Catalogue ID
-     *
-     * @param catalogueId Catalogue ID
-     * @param id          Service ID
-     *
-     * @return {@link Paging}&lt;{@link LoggingInfo}&gt;
-     */
-    Paging<LoggingInfo> getLoggingInfoHistory(String catalogueId, String id);
-
-    /**
      * Change the Provider of the specific Service
      *
      * @param resourceId  Service ID

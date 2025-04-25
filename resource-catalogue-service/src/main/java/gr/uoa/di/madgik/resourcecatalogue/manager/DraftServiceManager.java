@@ -70,6 +70,7 @@ public class DraftServiceManager extends ResourceCatalogueManager<ServiceBundle>
     public ServiceBundle add(ServiceBundle bundle, Authentication auth) {
 
         bundle.setId(idCreator.generate(getResourceTypeName()));
+        commonMethods.createIdentifiers(bundle, getResourceTypeName(), false);
 
         logger.trace("Attempting to add a new Draft Service with id '{}'", bundle.getId());
         bundle.setMetadata(Metadata.updateMetadata(bundle.getMetadata(), AuthenticationInfo.getFullName(auth), AuthenticationInfo.getEmail(auth).toLowerCase()));

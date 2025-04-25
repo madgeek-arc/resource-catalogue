@@ -416,7 +416,7 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
         return super.update(catalogue, auth);
     }
 
-    public CatalogueBundle suspend(String id, boolean suspend, Authentication auth) {
+    public CatalogueBundle suspend(String id, String catalogueId, boolean suspend, Authentication auth) {
         CatalogueBundle catalogueBundle = get(id, auth);
 
         // Suspend Catalogue
@@ -428,14 +428,14 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
 
         if (providers != null && !providers.isEmpty()) {
             for (ProviderBundle providerBundle : providers) {
-                providerService.suspend(providerBundle.getId(), suspend, auth);
+                providerService.suspend(providerBundle.getId(), id, suspend, auth);
             }
         }
 
         return catalogueBundle;
     }
 
-    public CatalogueBundle audit(String id, String comment, LoggingInfo.ActionType actionType, Authentication auth) {
+    public CatalogueBundle audit(String id, String catalogueId, String comment, LoggingInfo.ActionType actionType, Authentication auth) {
         CatalogueBundle catalogue = get(id);
         commonMethods.auditResource(catalogue, comment, actionType, auth);
         if (actionType.getKey().equals(LoggingInfo.ActionType.VALID.getKey())) {

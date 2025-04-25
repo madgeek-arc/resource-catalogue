@@ -133,7 +133,7 @@ public class OIDCSecurityService implements SecurityService {
     }
 
     private boolean isProvider(String id) {
-        return providerService.exists(id);
+        return providerService.exists(id) || draftProviderService.exists(id);
     }
 
     private List<User> getProviderUsers(String id) {
@@ -237,17 +237,20 @@ public class OIDCSecurityService implements SecurityService {
     }
 
     private boolean isService(String id) {
-        return serviceBundleService.exists(id);
+        return serviceBundleService.exists(id) || draftServiceService.exists(id);
     }
 
     private boolean isTrainingResource(String id) {
-        return trainingResourceService.exists(id);
+        return trainingResourceService.exists(id) || draftTrainingResourceService.exists(id);
     }
 
     @Override
     public boolean providerCanAddResources(Authentication auth, gr.uoa.di.madgik.resourcecatalogue.domain.Service service) {
         String providerId = service.getResourceOrganisation();
         String catalogueId = service.getCatalogueId();
+        if (catalogueId == null || catalogueId.isEmpty()) {
+            catalogueId = this.catalogueId;
+        }
         ProviderBundle provider = providerService.get(catalogueId, providerId, auth);
         return providerCanAddResources(auth, provider, service.getId());
     }
@@ -256,6 +259,9 @@ public class OIDCSecurityService implements SecurityService {
     public boolean providerCanAddResources(Authentication auth, gr.uoa.di.madgik.resourcecatalogue.domain.TrainingResource trainingResource) {
         String providerId = trainingResource.getResourceOrganisation();
         String catalogueId = trainingResource.getCatalogueId();
+        if (catalogueId == null || catalogueId.isEmpty()) {
+            catalogueId = this.catalogueId;
+        }
         ProviderBundle provider = providerService.get(catalogueId, providerId, auth);
         return providerCanAddResources(auth, provider, trainingResource.getId());
     }
@@ -264,6 +270,9 @@ public class OIDCSecurityService implements SecurityService {
     public boolean providerCanAddResources(Authentication auth, gr.uoa.di.madgik.resourcecatalogue.domain.InteroperabilityRecord interoperabilityRecord) {
         String providerId = interoperabilityRecord.getProviderId();
         String catalogueId = interoperabilityRecord.getCatalogueId();
+        if (catalogueId == null || catalogueId.isEmpty()) {
+            catalogueId = this.catalogueId;
+        }
         ProviderBundle provider = providerService.get(catalogueId, providerId, auth);
         return providerIsActiveAndUserIsAdmin(auth, interoperabilityRecord.getId()) && provider.getStatus().equals("approved provider");
     }

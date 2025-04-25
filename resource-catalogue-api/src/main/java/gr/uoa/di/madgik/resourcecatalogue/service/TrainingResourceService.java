@@ -147,16 +147,6 @@ public interface TrainingResourceService extends ResourceCatalogueService<Traini
     void sendEmailNotificationsToProvidersWithOutdatedResources(String resourceId, Authentication auth);
 
     /**
-     * Get the history of the specific Training Resource of the specific Catalogue ID
-     *
-     * @param id          Training Resource ID
-     * @return {@link Paging}&lt;{@link LoggingInfo}&gt;
-     */
-    default Paging<LoggingInfo> getLoggingInfoHistory(String id) {
-        return getLoggingInfoHistory(get(id));
-    }
-
-    /**
      * Change the Provider of the specific Training Resource
      *
      * @param resourceId  Training Resource ID

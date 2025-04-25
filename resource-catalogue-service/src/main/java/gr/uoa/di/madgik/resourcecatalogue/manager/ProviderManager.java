@@ -797,7 +797,7 @@ public class ProviderManager extends ResourceCatalogueManager<ProviderBundle> im
     }
 
     @Override
-    public ProviderBundle audit(String providerId, String comment, LoggingInfo.ActionType actionType, Authentication auth) {
+    public ProviderBundle audit(String providerId, String catalogueId, String comment, LoggingInfo.ActionType actionType, Authentication auth) {
         ProviderBundle provider = get(providerId, catalogueId, false);
         Resource existingResource = getResource(provider.getId(), provider.getProvider().getCatalogueId(), false);
         ProviderBundle existingProvider = deserialize(existingResource);
@@ -845,17 +845,6 @@ public class ProviderManager extends ResourceCatalogueManager<ProviderBundle> im
             providersToBeAudited.subList(ff.getQuantity(), providersToBeAudited.size()).clear();
         }
         return new Browsing<>(providersToBeAudited.size(), 0, providersToBeAudited.size(), providersToBeAudited, providerBrowsing.getFacets());
-    }
-
-    @Override
-    public Paging<LoggingInfo> getLoggingInfoHistory(String catalogueId, String providerId) {
-        ProviderBundle providerBundle = get(providerId, catalogueId, false);
-        if (providerBundle.getLoggingInfo() != null) {
-            List<LoggingInfo> loggingInfoList = providerBundle.getLoggingInfo();
-            loggingInfoList.sort(Comparator.comparing(LoggingInfo::getDate).reversed());
-            return new Browsing<>(loggingInfoList.size(), 0, loggingInfoList.size(), loggingInfoList, null);
-        }
-        return null;
     }
 
     private ProviderBundle onboard(ProviderBundle provider, String catalogueId, Authentication auth) {
@@ -941,7 +930,7 @@ public class ProviderManager extends ResourceCatalogueManager<ProviderBundle> im
 
 
     @Override
-    public ProviderBundle suspend(String providerId, boolean suspend, Authentication auth) {
+    public ProviderBundle suspend(String providerId, String catalogueId, boolean suspend, Authentication auth) {
         ProviderBundle providerBundle = get(providerId, catalogueId, false);
         Resource existingResource = getResource(providerBundle.getId(), providerBundle.getProvider().getCatalogueId(), false);
         ProviderBundle existingProvider = deserialize(existingResource);
@@ -960,17 +949,17 @@ public class ProviderManager extends ResourceCatalogueManager<ProviderBundle> im
 
         if (services != null && !services.isEmpty()) {
             for (ServiceBundle serviceBundle : services) {
-                serviceBundleService.suspend(serviceBundle.getId(), suspend, auth);
+                serviceBundleService.suspend(serviceBundle.getId(), catalogueId, suspend, auth);
             }
         }
         if (trainingResources != null && !trainingResources.isEmpty()) {
             for (TrainingResourceBundle trainingResourceBundle : trainingResources) {
-                trainingResourceService.suspend(trainingResourceBundle.getId(), suspend, auth);
+                trainingResourceService.suspend(trainingResourceBundle.getId(), catalogueId, suspend, auth);
             }
         }
         if (interoperabilityRecords != null && !interoperabilityRecords.isEmpty()) {
             for (InteroperabilityRecordBundle interoperabilityRecordBundle : interoperabilityRecords) {
-                interoperabilityRecordService.suspend(interoperabilityRecordBundle.getId(), suspend, auth);
+                interoperabilityRecordService.suspend(interoperabilityRecordBundle.getId(), catalogueId, suspend, auth);
             }
         }
 
