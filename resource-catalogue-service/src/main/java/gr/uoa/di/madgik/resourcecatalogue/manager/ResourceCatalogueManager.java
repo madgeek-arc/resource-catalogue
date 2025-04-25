@@ -24,6 +24,7 @@ import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.registry.service.ParserService;
 import gr.uoa.di.madgik.registry.service.SearchService;
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
+import gr.uoa.di.madgik.resourcecatalogue.exceptions.CatalogueResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.service.ResourceCatalogueService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -142,7 +143,7 @@ public abstract class ResourceCatalogueManager<T extends Identifiable> extends R
     public T get(String id, String catalogueId, boolean published) {
         Resource resource = getResource(id, catalogueId, published);
         if (resource == null) {
-            throw new ResourceNotFoundException(String.format("Could not find %s with id: %s and catalogueId: %s",
+            throw new CatalogueResourceNotFoundException(String.format("Could not find %s with id: %s and catalogueId: %s",
                     typeParameterClass.getSimpleName(), id, catalogueId));
         }
         return deserialize(resource);

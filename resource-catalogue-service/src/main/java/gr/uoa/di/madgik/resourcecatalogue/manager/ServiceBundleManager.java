@@ -23,6 +23,7 @@ import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.registry.service.SearchService;
 import gr.uoa.di.madgik.registry.service.ServiceException;
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
+import gr.uoa.di.madgik.resourcecatalogue.exceptions.CatalogueResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
 import gr.uoa.di.madgik.resourcecatalogue.utils.*;
 import org.slf4j.Logger;
@@ -69,6 +70,7 @@ public class ServiceBundleManager extends ResourceCatalogueManager<ServiceBundle
     private final Validator serviceValidator;
     private final FacetLabelService facetLabelService;
     private final GenericResourceService genericResourceService;
+    private final RelationshipValidator relationshipValidator;
 
     @Value("${catalogue.id}")
     private String catalogueId;
@@ -88,11 +90,12 @@ public class ServiceBundleManager extends ResourceCatalogueManager<ServiceBundle
                                 @Lazy PublicDatasourceService publicDatasourceManager,
                                 @Lazy ResourceInteroperabilityRecordService
                                         resourceInteroperabilityRecordService,
-                                ProviderResourcesCommonMethods commonMethods,
+                                @Lazy ProviderResourcesCommonMethods commonMethods,
                                 SynchronizerService<Service> synchronizerService,
                                 @Qualifier("serviceValidator") Validator serviceValidator,
                                 FacetLabelService facetLabelService,
-                                GenericResourceService genericResourceService) {
+                                GenericResourceService genericResourceService,
+                                @Lazy RelationshipValidator relationshipValidator) {
         super(ServiceBundle.class);
         this.providerService = providerService; // for providers
         this.idCreator = idCreator;
@@ -114,6 +117,7 @@ public class ServiceBundleManager extends ResourceCatalogueManager<ServiceBundle
         this.serviceValidator = serviceValidator;
         this.facetLabelService = facetLabelService;
         this.genericResourceService = genericResourceService;
+        this.relationshipValidator = relationshipValidator;
     }
 
     @Override
@@ -128,7 +132,7 @@ public class ServiceBundleManager extends ResourceCatalogueManager<ServiceBundle
 
     @Override
     public ServiceBundle addResource(ServiceBundle serviceBundle, String catalogueId, Authentication auth) {
-        if (catalogueId == null || catalogueId.isEmpty() || catalogueId.equals(this.catalogueId)) { // add catalogue provider
+        if (catalogueId == null || catalogueId.isEmpty() || catalogueId.equals(this.catalogueId)) { // add catalogue service
             serviceBundle.getService().setCatalogueId(this.catalogueId);
             serviceBundle.setId(idCreator.generate(getResourceTypeName()));
             commonMethods.createIdentifiers(serviceBundle, getResourceTypeName(), false);
@@ -137,11 +141,12 @@ public class ServiceBundleManager extends ResourceCatalogueManager<ServiceBundle
             idCreator.validateId(serviceBundle.getId());
             commonMethods.createIdentifiers(serviceBundle, getResourceTypeName(), true);
         }
-        commonMethods.checkRelatedResourceIDsConsistency(serviceBundle);
+        relationshipValidator.checkRelatedResourceIDsConsistency(serviceBundle);
 
         ProviderBundle providerBundle = providerService.get(serviceBundle.getService().getCatalogueId(), serviceBundle.getService().getResourceOrganisation(), auth);
         if (providerBundle == null) {
-            throw new ResourceNotFoundException(String.format("Provider with id '%s' and catalogueId '%s' does not exist", serviceBundle.getService().getResourceOrganisation(), serviceBundle.getService().getCatalogueId()));
+            throw new CatalogueResourceNotFoundException(String.format("Provider with id '%s' and catalogueId '%s' does not exist",
+                    serviceBundle.getService().getResourceOrganisation(), serviceBundle.getService().getCatalogueId()));
         }
         // check if Provider is approved
         if (!providerBundle.getStatus().equals("approved provider")) {
@@ -220,7 +225,7 @@ public class ServiceBundleManager extends ResourceCatalogueManager<ServiceBundle
                 return ret;
             }
         } catch (ResourceNotFoundException e) {
-            throw new ResourceNotFoundException(String.format("There is no Service with id [%s] on the [%s] Catalogue",
+            throw new CatalogueResourceNotFoundException(String.format("There is no Service with id [%s] on the [%s] Catalogue",
                     ret.getService().getId(), ret.getService().getCatalogueId()));
         }
 
@@ -230,7 +235,7 @@ public class ServiceBundleManager extends ResourceCatalogueManager<ServiceBundle
         } else {
             commonMethods.checkCatalogueIdConsistency(ret, catalogueId);
         }
-        commonMethods.checkRelatedResourceIDsConsistency(ret);
+        relationshipValidator.checkRelatedResourceIDsConsistency(ret);
 
         logger.trace("Attempting to update the Service with id '{}' of the Catalogue '{}'",
                 ret.getService().getId(), ret.getService().getCatalogueId());

@@ -171,7 +171,6 @@ public class CatalogueController {
         return new ResponseEntity<>(catalogueManager.getMy(ff, auth).getResults(), HttpStatus.OK);
     }
 
-    @Hidden
     @Operation(summary = "Verifies the specific Catalogue.")
     @PatchMapping(path = "verifyCatalogue/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
@@ -243,7 +242,6 @@ public class CatalogueController {
         return new ResponseEntity<>(catalogueBundle.getCatalogue(), HttpStatus.OK);
     }
 
-    @Hidden
     @Operation(summary = "Suspends a Catalogue and all its resources.")
     @PutMapping(path = "suspend", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
@@ -256,7 +254,6 @@ public class CatalogueController {
         return catalogueManager.suspend(catalogueId, catalogueId, suspend, auth);
     }
 
-    @Hidden
     @Operation(summary = "Audits a Catalogue.")
     @PatchMapping(path = "auditCatalogue/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")

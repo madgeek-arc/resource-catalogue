@@ -26,6 +26,7 @@ import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.registry.service.SearchService;
 import gr.uoa.di.madgik.registry.service.ServiceException;
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
+import gr.uoa.di.madgik.resourcecatalogue.exceptions.CatalogueResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
 import gr.uoa.di.madgik.resourcecatalogue.utils.*;
 import gr.uoa.di.madgik.resourcecatalogue.validators.FieldValidator;
@@ -68,6 +69,7 @@ public class TrainingResourceManager extends ResourceCatalogueManager<TrainingRe
     private final MigrationService migrationService;
     private final ProviderResourcesCommonMethods commonMethods;
     private final GenericManager genericManager;
+    private final RelationshipValidator relationshipValidator;
     @Autowired
     private FacetLabelService facetLabelService;
     @Autowired
@@ -93,9 +95,10 @@ public class TrainingResourceManager extends ResourceCatalogueManager<TrainingRe
                                    PublicHelpdeskService publicHelpdeskManager,
                                    PublicMonitoringService publicMonitoringManager,
                                    SynchronizerService<TrainingResource> synchronizerService,
-                                   ProviderResourcesCommonMethods commonMethods,
+                                   @Lazy ProviderResourcesCommonMethods commonMethods,
                                    GenericManager genericManager,
-                                   @Lazy MigrationService migrationService) {
+                                   @Lazy MigrationService migrationService,
+                                   @Lazy RelationshipValidator relationshipValidator) {
         super(TrainingResourceBundle.class);
         this.providerService = providerService;
         this.idCreator = idCreator;
@@ -113,6 +116,7 @@ public class TrainingResourceManager extends ResourceCatalogueManager<TrainingRe
         this.commonMethods = commonMethods;
         this.genericManager = genericManager;
         this.migrationService = migrationService;
+        this.relationshipValidator = relationshipValidator;
     }
 
     @Override
@@ -136,12 +140,12 @@ public class TrainingResourceManager extends ResourceCatalogueManager<TrainingRe
             idCreator.validateId(trainingResourceBundle.getId());
             commonMethods.createIdentifiers(trainingResourceBundle, getResourceTypeName(), true);
         }
-        commonMethods.checkRelatedResourceIDsConsistency(trainingResourceBundle);
+        relationshipValidator.checkRelatedResourceIDsConsistency(trainingResourceBundle);
 
         ProviderBundle providerBundle = providerService.get(trainingResourceBundle.getTrainingResource().getCatalogueId(),
                 trainingResourceBundle.getTrainingResource().getResourceOrganisation(), auth);
         if (providerBundle == null) {
-            throw new ResourceNotFoundException(String.format("Provider with id '%s' and catalogueId '%s' does not exist",
+            throw new CatalogueResourceNotFoundException(String.format("Provider with id '%s' and catalogueId '%s' does not exist",
                     trainingResourceBundle.getTrainingResource().getResourceOrganisation(), trainingResourceBundle.getTrainingResource().getCatalogueId()));
         }
         // check if Provider is approved
@@ -214,7 +218,7 @@ public class TrainingResourceManager extends ResourceCatalogueManager<TrainingRe
                 return ret;
             }
         } catch (ResourceNotFoundException e) {
-            throw new ResourceNotFoundException(String.format("There is no Training Resource with id [%s] on the [%s] Catalogue",
+            throw new CatalogueResourceNotFoundException(String.format("There is no Training Resource with id [%s] on the [%s] Catalogue",
                     ret.getTrainingResource().getId(), ret.getTrainingResource().getCatalogueId()));
         }
 
@@ -223,7 +227,7 @@ public class TrainingResourceManager extends ResourceCatalogueManager<TrainingRe
         } else {
             commonMethods.checkCatalogueIdConsistency(ret, catalogueId);
         }
-        commonMethods.checkRelatedResourceIDsConsistency(ret);
+        relationshipValidator.checkRelatedResourceIDsConsistency(ret);
 
         logger.trace("Attempting to update the Training Resource with id '{}' of the Catalogue '{}'",
                 ret.getTrainingResource().getId(), ret.getTrainingResource().getCatalogueId());
@@ -309,15 +313,13 @@ public class TrainingResourceManager extends ResourceCatalogueManager<TrainingRe
         TrainingResourceBundle trainingResourceBundle = get(trainingResourceId, catalogueId, false);
         CatalogueBundle catalogueBundle = catalogueService.get(catalogueId);
         if (trainingResourceBundle == null) {
-            throw new ResourceNotFoundException(
-                    String.format("Could not find Training Resource with id: %s", trainingResourceId));
+            throw new ResourceNotFoundException(trainingResourceId, "Training Resource");
         }
         if (catalogueBundle == null) {
-            throw new ResourceNotFoundException(
-                    String.format("Could not find Catalogue with id: %s", catalogueId));
+            throw new ResourceNotFoundException(catalogueId, "Catalogue");
         }
         if (!trainingResourceBundle.getTrainingResource().getCatalogueId().equals(catalogueId)) {
-            throw new ResourceNotFoundException(String.format("Training Resource with id [%s] does not belong to the" +
+            throw new CatalogueResourceNotFoundException(String.format("Training Resource with id [%s] does not belong to the" +
                     " catalogue with id [%s]", trainingResourceId, catalogueId));
         }
         if (auth != null && auth.isAuthenticated()) {

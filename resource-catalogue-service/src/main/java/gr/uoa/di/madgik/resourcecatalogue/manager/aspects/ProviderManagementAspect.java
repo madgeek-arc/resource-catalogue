@@ -20,6 +20,7 @@ import gr.uoa.di.madgik.registry.exception.ResourceException;
 import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
 import gr.uoa.di.madgik.resourcecatalogue.domain.configurationTemplates.ConfigurationTemplateInstanceBundle;
+import gr.uoa.di.madgik.resourcecatalogue.exceptions.CatalogueResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.manager.*;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
 import gr.uoa.di.madgik.resourcecatalogue.utils.ObjectUtils;
@@ -201,7 +202,7 @@ public class ProviderManagementAspect {
         try {
             publicProviderService.get(publicId, providerBundle.getProvider().getCatalogueId(), true);
         } catch (ResourceException | ResourceNotFoundException e) {
-            throw new ResourceNotFoundException(String.format("Provider with id [%s] is not yet published or does not exist",
+            throw new CatalogueResourceNotFoundException(String.format("Provider with id [%s] is not yet published or does not exist",
                     publicId));
         }
     }

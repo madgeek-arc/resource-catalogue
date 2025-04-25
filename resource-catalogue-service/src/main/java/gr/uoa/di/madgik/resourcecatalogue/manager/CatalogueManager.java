@@ -95,8 +95,7 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
     public CatalogueBundle get(String id) {
         CatalogueBundle catalogue = super.get(id);
         if (catalogue == null) {
-            throw new ResourceNotFoundException(
-                    String.format("Could not find catalogue with id: %s", id));
+            throw new ResourceNotFoundException(id, "Catalogue");
         }
         return catalogue;
     }

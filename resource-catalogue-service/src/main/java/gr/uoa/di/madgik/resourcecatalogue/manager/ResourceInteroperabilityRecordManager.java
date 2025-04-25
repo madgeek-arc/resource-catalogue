@@ -24,12 +24,10 @@ import gr.uoa.di.madgik.resourcecatalogue.domain.Metadata;
 import gr.uoa.di.madgik.resourcecatalogue.domain.ResourceInteroperabilityRecordBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.ServiceBundle;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
-import gr.uoa.di.madgik.resourcecatalogue.utils.AuthenticationInfo;
-import gr.uoa.di.madgik.resourcecatalogue.utils.ObjectUtils;
-import gr.uoa.di.madgik.resourcecatalogue.utils.ProviderResourcesCommonMethods;
-import gr.uoa.di.madgik.resourcecatalogue.utils.ResourceValidationUtils;
+import gr.uoa.di.madgik.resourcecatalogue.utils.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.security.core.Authentication;
 
 import java.util.Comparator;
@@ -47,13 +45,14 @@ public class ResourceInteroperabilityRecordManager extends ResourceCatalogueMana
     private final SecurityService securityService;
     private final ProviderResourcesCommonMethods commonMethods;
     private final IdCreator idCreator;
+    private final RelationshipValidator relationshipValidator;
 
     public ResourceInteroperabilityRecordManager(ServiceBundleService<ServiceBundle> serviceBundleService,
                                                  TrainingResourceService trainingResourceService,
                                                  InteroperabilityRecordService interoperabilityRecordService,
                                                  SecurityService securityService, ProviderResourcesCommonMethods commonMethods,
                                                  PublicResourceInteroperabilityRecordService publicResourceInteroperabilityRecordManager,
-                                                 IdCreator idCreator) {
+                                                 IdCreator idCreator, @Lazy RelationshipValidator relationshipValidator) {
         super(ResourceInteroperabilityRecordBundle.class);
         this.serviceBundleService = serviceBundleService;
         this.trainingResourceService = trainingResourceService;
@@ -62,6 +61,7 @@ public class ResourceInteroperabilityRecordManager extends ResourceCatalogueMana
         this.commonMethods = commonMethods;
         this.publicResourceInteroperabilityRecordManager = publicResourceInteroperabilityRecordManager;
         this.idCreator = idCreator;
+        this.relationshipValidator = relationshipValidator;
     }
 
     @Override
@@ -96,7 +96,7 @@ public class ResourceInteroperabilityRecordManager extends ResourceCatalogueMana
     @Override
     public ResourceInteroperabilityRecordBundle add(ResourceInteroperabilityRecordBundle bundle, String resourceType, Authentication auth) {
         validate(bundle, resourceType);
-        commonMethods.checkRelatedResourceIDsConsistency(bundle);
+        relationshipValidator.checkRelatedResourceIDsConsistency(bundle);
 
         bundle.setId(idCreator.generate(getResourceTypeName()));
         commonMethods.createIdentifiers(bundle, getResourceTypeName(), false);
@@ -136,7 +136,7 @@ public class ResourceInteroperabilityRecordManager extends ResourceCatalogueMana
         if (ret.getResourceInteroperabilityRecord().equals(existingInteroperabilityRecord.getResourceInteroperabilityRecord())) {
             return ret;
         }
-        commonMethods.checkRelatedResourceIDsConsistency(ret);
+        relationshipValidator.checkRelatedResourceIDsConsistency(ret);
 
         // block Public ResourceInteroperabilityRecordBundle updates
         if (ret.getMetadata().isPublished()) {

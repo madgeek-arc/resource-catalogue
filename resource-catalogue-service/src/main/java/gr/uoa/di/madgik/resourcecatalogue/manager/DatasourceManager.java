@@ -23,6 +23,7 @@ import gr.uoa.di.madgik.registry.domain.Resource;
 import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.registry.service.SearchService;
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
+import gr.uoa.di.madgik.resourcecatalogue.exceptions.CatalogueResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
 import gr.uoa.di.madgik.resourcecatalogue.utils.AuthenticationInfo;
 import gr.uoa.di.madgik.resourcecatalogue.utils.ObjectUtils;
@@ -56,7 +57,7 @@ public class DatasourceManager extends ResourceCatalogueManager<DatasourceBundle
                              @Lazy SecurityService securityService,
                              @Lazy RegistrationMailService registrationMailService,
                              @Lazy VocabularyService vocabularyService,
-                             ProviderResourcesCommonMethods commonMethods,
+                             @Lazy ProviderResourcesCommonMethods commonMethods,
                              OpenAIREDatasourceManager openAIREDatasourceManager,
                              IdCreator idCreator) {
         super(DatasourceBundle.class);
@@ -111,7 +112,7 @@ public class DatasourceManager extends ResourceCatalogueManager<DatasourceBundle
     }
 
     private void differentiateInternalFromExternalCatalogueAddition(DatasourceBundle datasourceBundle) {
-        if (datasourceBundle.getDatasource().getCatalogueId().equals(catalogueId)) {
+        if (catalogueId == null || catalogueId.isEmpty() || datasourceBundle.getDatasource().getCatalogueId().equals(catalogueId)) {
             datasourceBundle.setActive(false);
             datasourceBundle.setStatus(vocabularyService.get("pending datasource").getId());
             datasourceBundle.setLatestOnboardingInfo(datasourceBundle.getLoggingInfo().getFirst());
@@ -188,9 +189,7 @@ public class DatasourceManager extends ResourceCatalogueManager<DatasourceBundle
 
         Resource existing = getResource(datasourceBundle.getId());
         if (existing == null) {
-            throw new ResourceNotFoundException(
-                    String.format("Could not update Datasource with id '%s' because it does not exist",
-                            datasourceBundle.getId()));
+            throw new ResourceNotFoundException(datasourceBundle.getId(), "Datasource");
         }
 
         existing.setPayload(serialize(datasourceBundle));
@@ -287,7 +286,7 @@ public class DatasourceManager extends ResourceCatalogueManager<DatasourceBundle
         if (datasource != null) {
             datasourceBundle.setOriginalOpenAIREId(datasourceBundle.getId());
         } else {
-            throw new ResourceNotFoundException(String.format("The ID [%s] you provided does not belong to an OpenAIRE" +
+            throw new CatalogueResourceNotFoundException(String.format("The ID [%s] you provided does not belong to an OpenAIRE" +
                     " Datasource", datasourceBundle.getId()));
         }
     }
@@ -305,7 +304,7 @@ public class DatasourceManager extends ResourceCatalogueManager<DatasourceBundle
                 }
             }
         } else {
-            throw new ResourceNotFoundException(String.format("There is no Datasource with ID [%s]", id));
+            throw new ResourceNotFoundException(id, "Datasource");
         }
         return found;
     }

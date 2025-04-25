@@ -187,9 +187,7 @@ public class MonitoringManager extends ResourceCatalogueManager<MonitoringBundle
 
         Resource existing = getResource(monitoringBundle.getId());
         if (existing == null) {
-            throw new ResourceNotFoundException(
-                    String.format("Could not update Monitoring with id '%s' because it does not exist",
-                            monitoringBundle.getId()));
+            throw new ResourceNotFoundException(monitoringBundle.getId(), "Monitoring");
         }
 
         existing.setPayload(serialize(monitoringBundle));

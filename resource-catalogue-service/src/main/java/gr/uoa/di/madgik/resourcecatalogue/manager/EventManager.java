@@ -220,7 +220,7 @@ public class EventManager extends ResourceManager<Event> implements EventService
 
     public Event setVisit(String serviceId, Float value) {
         if (!serviceBundleService.exists(new SearchService.KeyValue("resource_internal_id", serviceId))) {
-            throw new ResourceNotFoundException("service", serviceId);
+            throw new ResourceNotFoundException(serviceId, "Service");
         }
         Event event;
         event = new Event();
@@ -234,7 +234,7 @@ public class EventManager extends ResourceManager<Event> implements EventService
 
     public Event setAddToProject(String serviceId, Float value) {
         if (!serviceBundleService.exists(new SearchService.KeyValue("resource_internal_id", serviceId))) {
-            throw new ResourceNotFoundException("service", serviceId);
+            throw new ResourceNotFoundException(serviceId, "Service");
         }
         Event event;
         event = new Event();
@@ -248,7 +248,7 @@ public class EventManager extends ResourceManager<Event> implements EventService
 
     public Event setOrder(String serviceId, Float value) {
         if (!serviceBundleService.exists(new SearchService.KeyValue("resource_internal_id", serviceId))) {
-            throw new ResourceNotFoundException("service", serviceId);
+            throw new ResourceNotFoundException(serviceId, "Service");
         }
         Event event;
         event = new Event();
@@ -262,7 +262,7 @@ public class EventManager extends ResourceManager<Event> implements EventService
 
     public Event setScheduledFavourite(String serviceId, Float value) {
         if (!serviceBundleService.exists(new SearchService.KeyValue("resource_internal_id", serviceId))) {
-            throw new ResourceNotFoundException("service", serviceId);
+            throw new ResourceNotFoundException(serviceId, "Service");
         }
         Event event;
         event = new Event();
@@ -276,7 +276,7 @@ public class EventManager extends ResourceManager<Event> implements EventService
 
     public Event setScheduledRating(String serviceId, Float value) {
         if (!serviceBundleService.exists(new SearchService.KeyValue("resource_internal_id", serviceId))) {
-            throw new ResourceNotFoundException("service", serviceId);
+            throw new ResourceNotFoundException(serviceId, "Service");
         }
         Event event;
         event = new Event();

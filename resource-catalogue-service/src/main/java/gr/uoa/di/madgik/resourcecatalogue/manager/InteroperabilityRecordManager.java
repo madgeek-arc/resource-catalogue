@@ -24,6 +24,7 @@ import gr.uoa.di.madgik.registry.domain.Resource;
 import gr.uoa.di.madgik.registry.exception.ResourceException;
 import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
+import gr.uoa.di.madgik.resourcecatalogue.exceptions.CatalogueResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
 import gr.uoa.di.madgik.resourcecatalogue.utils.Auditable;
 import gr.uoa.di.madgik.resourcecatalogue.utils.AuthenticationInfo;
@@ -140,7 +141,7 @@ public class InteroperabilityRecordManager extends ResourceCatalogueManager<Inte
                 return ret;
             }
         } catch (ResourceNotFoundException e) {
-            throw new ResourceNotFoundException(String.format("There is no Interoperability Record with id [%s] on the [%s] Catalogue",
+            throw new CatalogueResourceNotFoundException(String.format("There is no Interoperability Record with id [%s] on the [%s] Catalogue",
                     ret.getInteroperabilityRecord().getId(), ret.getInteroperabilityRecord().getCatalogueId()));
         }
 
@@ -193,9 +194,7 @@ public class InteroperabilityRecordManager extends ResourceCatalogueManager<Inte
 
         Resource existing = getResource(ret.getInteroperabilityRecord().getId(), ret.getInteroperabilityRecord().getCatalogueId());
         if (existing == null) {
-            throw new ResourceNotFoundException(
-                    String.format("Could not update Interoperability Record with id '%s' because it does not exist",
-                            ret.getInteroperabilityRecord().getId()));
+            throw new ResourceNotFoundException(ret.getId(), "Interoperability Record");
         }
         existing.setPayload(serialize(ret));
         existing.setResourceType(getResourceType());

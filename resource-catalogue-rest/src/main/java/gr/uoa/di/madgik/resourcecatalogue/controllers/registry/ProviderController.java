@@ -328,7 +328,7 @@ public class ProviderController {
                                                                @Parameter(hidden = true) Authentication auth) {
         ProviderBundle provider = providerService.get(catalogueId, id, auth);
         if (provider == null) {
-            throw new ResourceNotFoundException("Provider with id '" + id + "' does not exist.");
+            throw new ResourceNotFoundException(id, "Provider");
         }
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(1000);

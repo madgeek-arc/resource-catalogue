@@ -53,7 +53,7 @@ public class HelpdeskManager extends ResourceCatalogueManager<HelpdeskBundle> im
                            PublicHelpdeskService publicHelpdeskManager,
                            @Lazy SecurityService securityService,
                            @Lazy RegistrationMailService registrationMailService,
-                           ProviderResourcesCommonMethods commonMethods,
+                           @Lazy ProviderResourcesCommonMethods commonMethods,
                            IdCreator idCreator) {
         super(HelpdeskBundle.class);
         this.serviceBundleService = serviceBundleService;
@@ -172,9 +172,7 @@ public class HelpdeskManager extends ResourceCatalogueManager<HelpdeskBundle> im
 
         Resource existing = getResource(helpdeskBundle.getId());
         if (existing == null) {
-            throw new ResourceNotFoundException(
-                    String.format("Could not update Helpdesk with id '%s' because it does not exist",
-                            helpdeskBundle.getId()));
+            throw new ResourceNotFoundException(helpdeskBundle.getId(), "Helpdesk");
         }
 
         existing.setPayload(serialize(helpdeskBundle));

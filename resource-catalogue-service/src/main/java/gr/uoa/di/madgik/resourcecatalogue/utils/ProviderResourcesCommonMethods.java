@@ -46,7 +46,6 @@ public class ProviderResourcesCommonMethods {
     private final HelpdeskService helpdeskService;
     private final MonitoringService monitoringService;
     private final ResourceInteroperabilityRecordService resourceInteroperabilityRecordService;
-    private final GenericResourceService genericResourceService;
     private final VocabularyService vocabularyService;
     private final SecurityService securityService;
     private final IdCreator idCreator;
@@ -58,7 +57,6 @@ public class ProviderResourcesCommonMethods {
                                           @Lazy MonitoringService monitoringService,
                                           @Lazy ResourceInteroperabilityRecordService
                                                   resourceInteroperabilityRecordService,
-                                          @Lazy GenericResourceService genericResourceService,
                                           @Lazy VocabularyService vocabularyService,
                                           @Lazy SecurityService securityService,
                                           @Lazy IdCreator idCreator) {
@@ -68,7 +66,6 @@ public class ProviderResourcesCommonMethods {
         this.helpdeskService = helpdeskService;
         this.monitoringService = monitoringService;
         this.resourceInteroperabilityRecordService = resourceInteroperabilityRecordService;
-        this.genericResourceService = genericResourceService;
         this.vocabularyService = vocabularyService;
         this.securityService = securityService;
         this.idCreator = idCreator;
@@ -76,7 +73,7 @@ public class ProviderResourcesCommonMethods {
 
     public void checkCatalogueIdConsistency(Object o, String catalogueId) {
         if (!catalogueService.exists(catalogueId)) {
-            throw new ResourceNotFoundException(String.format("Catalogue with id '%s' does not exists.", catalogueId));
+            throw new ResourceNotFoundException(catalogueId, "Catalogue");
         }
         if (o != null) {
             if (o instanceof ProviderBundle) {
@@ -118,120 +115,6 @@ public class ProviderResourcesCommonMethods {
                 } else {
                     if (!((InteroperabilityRecordBundle) o).getPayload().getCatalogueId().equals(catalogueId)) {
                         throw new ValidationException("Parameter 'catalogueId' and Interoperability Record's 'catalogueId' don't match");
-                    }
-                }
-            }
-        }
-    }
-
-    // check if the lower level resource ID is from an external catalogue
-    public void checkRelatedResourceIDsConsistency(Object o) {
-        String catalogueId = null;
-        List<String> resourceProviders = new ArrayList<>();
-        List<String> requiredResources = new ArrayList<>();
-        List<String> relatedResources = new ArrayList<>();
-        List<String> eoscRelatedServices = new ArrayList<>();
-        List<String> interoperabilityRecordIds = new ArrayList<>();
-        if (o != null) {
-            if (o instanceof ServiceBundle) {
-                catalogueId = ((ServiceBundle) o).getService().getCatalogueId();
-                resourceProviders = ((ServiceBundle) o).getService().getResourceProviders();
-                requiredResources = ((ServiceBundle) o).getService().getRequiredResources();
-                relatedResources = ((ServiceBundle) o).getService().getRelatedResources();
-            }
-            if (o instanceof TrainingResourceBundle) {
-                catalogueId = ((TrainingResourceBundle) o).getTrainingResource().getCatalogueId();
-                resourceProviders = ((TrainingResourceBundle) o).getTrainingResource().getResourceProviders();
-                eoscRelatedServices = ((TrainingResourceBundle) o).getTrainingResource().getEoscRelatedServices();
-            }
-            if (o instanceof ResourceInteroperabilityRecordBundle) {
-                catalogueId = ((ResourceInteroperabilityRecordBundle) o).getResourceInteroperabilityRecord().getCatalogueId();
-                interoperabilityRecordIds = ((ResourceInteroperabilityRecordBundle) o).getResourceInteroperabilityRecord().getInteroperabilityRecordIds();
-            }
-            if (resourceProviders != null && !resourceProviders.isEmpty() && resourceProviders.stream().anyMatch(Objects::nonNull)) {
-                for (String resourceProvider : resourceProviders) {
-                    if (resourceProvider != null && !resourceProvider.isEmpty()) {
-                        try {
-                            //FIXME: get(resourceTypeName, id) won't work as intended if there are 2 or more resources with the same ID
-                            ProviderBundle providerBundle = genericResourceService.get("provider", resourceProvider);
-                            if (!providerBundle.getMetadata().isPublished() && !providerBundle.getProvider().getCatalogueId().equals(catalogueId)) {
-                                throw new ValidationException("Cross Catalogue reference is prohibited. Found in field 'resourceProviders");
-                            }
-                        } catch (ResourceNotFoundException ignored) {
-                        }
-                    }
-                }
-            }
-            if (requiredResources != null && !requiredResources.isEmpty() && requiredResources.stream().anyMatch(Objects::nonNull)) {
-                for (String requiredResource : requiredResources) {
-                    if (requiredResource != null && !requiredResource.isEmpty()) {
-                        try {
-                            ServiceBundle serviceBundle = genericResourceService.get("service", requiredResource);
-                            if (!serviceBundle.getMetadata().isPublished() && !serviceBundle.getService().getCatalogueId().equals(catalogueId)) {
-                                throw new ValidationException("Cross Catalogue reference is prohibited. Found in field 'requiredResources");
-                            }
-                        } catch (ResourceNotFoundException j) {
-                            try {
-                                TrainingResourceBundle trainingResourceBundle = genericResourceService.get("training_resource", requiredResource);
-                                if (!trainingResourceBundle.getMetadata().isPublished() && !trainingResourceBundle.getTrainingResource().getCatalogueId().equals(catalogueId)) {
-                                    throw new ValidationException("Cross Catalogue reference is prohibited. Found in field 'requiredResources");
-                                }
-                            } catch (ResourceNotFoundException ignored) {
-                            }
-                        }
-                    }
-                }
-            }
-            if (relatedResources != null && !relatedResources.isEmpty() && relatedResources.stream().anyMatch(Objects::nonNull)) {
-                for (String relatedResource : relatedResources) {
-                    if (relatedResource != null && !relatedResource.isEmpty()) {
-                        try {
-                            ServiceBundle serviceBundle = genericResourceService.get("service", relatedResource);
-                            if (!serviceBundle.getMetadata().isPublished() && !serviceBundle.getService().getCatalogueId().equals(catalogueId)) {
-                                throw new ValidationException("Cross Catalogue reference is prohibited. Found in field 'relatedResources");
-                            }
-                        } catch (ResourceNotFoundException j) {
-                            try {
-                                TrainingResourceBundle trainingResourceBundle = genericResourceService.get("training_resource", relatedResource);
-                                if (!trainingResourceBundle.getMetadata().isPublished() && !trainingResourceBundle.getTrainingResource().getCatalogueId().equals(catalogueId)) {
-                                    throw new ValidationException("Cross Catalogue reference is prohibited. Found in field 'relatedResources");
-                                }
-                            } catch (ResourceNotFoundException ignored) {
-                            }
-                        }
-                    }
-                }
-            }
-            if (eoscRelatedServices != null && !eoscRelatedServices.isEmpty() && eoscRelatedServices.stream().anyMatch(Objects::nonNull)) {
-                for (String eoscRelatedService : eoscRelatedServices) {
-                    if (eoscRelatedService != null && !eoscRelatedService.isEmpty()) {
-                        try {
-                            ServiceBundle serviceBundle = genericResourceService.get("service", eoscRelatedService);
-                            if (!serviceBundle.getMetadata().isPublished() && !serviceBundle.getService().getCatalogueId().equals(catalogueId)) {
-                                throw new ValidationException("Cross Catalogue reference is prohibited. Found in field 'eoscRelatedServices");
-                            }
-                        } catch (ResourceNotFoundException j) {
-                            try {
-                                TrainingResourceBundle trainingResourceBundle = genericResourceService.get("training_resource", eoscRelatedService);
-                                if (!trainingResourceBundle.getMetadata().isPublished() && !trainingResourceBundle.getTrainingResource().getCatalogueId().equals(catalogueId)) {
-                                    throw new ValidationException("Cross Catalogue reference is prohibited. Found in field 'eoscRelatedServices");
-                                }
-                            } catch (ResourceNotFoundException ignored) {
-                            }
-                        }
-                    }
-                }
-            }
-            if (interoperabilityRecordIds != null && !interoperabilityRecordIds.isEmpty() && interoperabilityRecordIds.stream().anyMatch(Objects::nonNull)) {
-                for (String interoperabilityRecordId : interoperabilityRecordIds) {
-                    if (interoperabilityRecordId != null && !interoperabilityRecordId.isEmpty()) {
-                        try {
-                            InteroperabilityRecordBundle interoperabilityRecordBundle = genericResourceService.get("interoperability_record", interoperabilityRecordId);
-                            if (!interoperabilityRecordBundle.getMetadata().isPublished() && !interoperabilityRecordBundle.getInteroperabilityRecord().getCatalogueId().equals(catalogueId)) {
-                                throw new ValidationException("Cross Catalogue reference is prohibited. Found in field 'interoperabilityRecordIds");
-                            }
-                        } catch (ResourceNotFoundException ignored) {
-                        }
                     }
                 }
             }

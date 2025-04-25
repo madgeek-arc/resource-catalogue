@@ -25,6 +25,7 @@ import gr.uoa.di.madgik.registry.exception.ResourceAlreadyExistsException;
 import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.registry.service.SearchService;
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
+import gr.uoa.di.madgik.resourcecatalogue.exceptions.CatalogueResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
 import gr.uoa.di.madgik.resourcecatalogue.utils.AuthenticationInfo;
 import gr.uoa.di.madgik.resourcecatalogue.utils.FacetLabelService;
@@ -142,7 +143,7 @@ public class VocabularyCurationManager extends ResourceManager<VocabularyCuratio
         }
         String voc = vocabularyCuration.getVocabulary();
         if (!possibleValues.contains(voc.toLowerCase())) {
-            throw new ResourceNotFoundException("Vocabulary " + voc + "' does not exist.");
+            throw new ResourceNotFoundException(voc, "Vocabulary");
         }
 
         // check if parent exists
@@ -158,7 +159,7 @@ public class VocabularyCurationManager extends ResourceManager<VocabularyCuratio
                         specificVocsIds.add(vocabulary.getId());
                     }
                     if (!specificVocsIds.contains(vocabularyCuration.getParent())) {
-                        throw new ResourceNotFoundException("Parent vocabulary " + vocabularyCuration.getParent() + " does not exist.");
+                        throw new CatalogueResourceNotFoundException("Parent vocabulary " + vocabularyCuration.getParent() + " does not exist.");
                     }
                 }
                 break;
@@ -171,7 +172,7 @@ public class VocabularyCurationManager extends ResourceManager<VocabularyCuratio
                         specificVocsIds.add(vocabulary.getId());
                     }
                     if (!specificVocsIds.contains(vocabularyCuration.getParent())) {
-                        throw new ResourceNotFoundException("Parent vocabulary " + vocabularyCuration.getParent() + " does not exist.");
+                        throw new CatalogueResourceNotFoundException("Parent vocabulary " + vocabularyCuration.getParent() + " does not exist.");
                     }
                 }
                 break;
@@ -184,7 +185,7 @@ public class VocabularyCurationManager extends ResourceManager<VocabularyCuratio
                         specificVocsIds.add(vocabulary.getId());
                     }
                     if (!specificVocsIds.contains(vocabularyCuration.getParent())) {
-                        throw new ResourceNotFoundException("Parent vocabulary " + vocabularyCuration.getParent() + " does not exist.");
+                        throw new CatalogueResourceNotFoundException("Parent vocabulary " + vocabularyCuration.getParent() + " does not exist.");
                     }
                 }
                 break;
@@ -197,7 +198,7 @@ public class VocabularyCurationManager extends ResourceManager<VocabularyCuratio
                         specificVocsIds.add(vocabulary.getId());
                     }
                     if (!specificVocsIds.contains(vocabularyCuration.getParent())) {
-                        throw new ResourceNotFoundException("Parent vocabulary " + vocabularyCuration.getParent() + " does not exist.");
+                        throw new CatalogueResourceNotFoundException("Parent vocabulary " + vocabularyCuration.getParent() + " does not exist.");
                     }
                 }
                 break;
@@ -213,14 +214,14 @@ public class VocabularyCurationManager extends ResourceManager<VocabularyCuratio
             case "service":
                 ServiceBundle serviceBundle = serviceBundleService.get(vocabularyCuration.getVocabularyEntryRequests().getFirst().getResourceId());
                 if (!serviceBundle.getService().getResourceOrganisation().equals(providerBundle.getId())) {
-                    throw new ResourceNotFoundException(String.format("Provider with id [%s] does not have a Service with id [%s] registered.",
+                    throw new CatalogueResourceNotFoundException(String.format("Provider with id [%s] does not have a Service with id [%s] registered.",
                             providerBundle.getId(), serviceBundle.getId()));
                 }
                 break;
             case "training_resource":
                 TrainingResourceBundle trainingResourceBundle = trainingResourceService.get(vocabularyCuration.getVocabularyEntryRequests().getFirst().getResourceId(), catalogueId);
                 if (!trainingResourceBundle.getTrainingResource().getResourceOrganisation().equals(providerBundle.getId())) {
-                    throw new ResourceNotFoundException(String.format("Provider with id [%s] does not have a Training Resource with id [%s] registered.",
+                    throw new CatalogueResourceNotFoundException(String.format("Provider with id [%s] does not have a Training Resource with id [%s] registered.",
                             providerBundle.getId(), trainingResourceBundle.getId()));
                 }
                 break;

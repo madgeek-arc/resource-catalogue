@@ -31,6 +31,7 @@ import gr.uoa.di.madgik.resourcecatalogue.utils.AuthenticationInfo;
 import gr.uoa.di.madgik.resourcecatalogue.utils.ObjectUtils;
 import gr.uoa.di.madgik.resourcecatalogue.utils.ProviderResourcesCommonMethods;
 import gr.uoa.di.madgik.resourcecatalogue.validators.FieldValidator;
+import jakarta.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -83,7 +84,7 @@ public class ProviderManager extends ResourceCatalogueManager<ProviderBundle> im
                            EventService eventService, VersionService versionService,
                            VocabularyService vocabularyService,
                            @Qualifier("providerSync") SynchronizerService<Provider> synchronizerService,
-                           ProviderResourcesCommonMethods commonMethods,
+                           @Lazy ProviderResourcesCommonMethods commonMethods,
                            CatalogueService catalogueService,
                            @Lazy PublicServiceService publicServiceManager,
                            @Lazy PublicProviderService publicProviderService,
