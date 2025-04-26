@@ -23,7 +23,6 @@ import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.registry.service.SearchService;
 import gr.uoa.di.madgik.registry.service.ServiceException;
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
-import gr.uoa.di.madgik.resourcecatalogue.exceptions.CatalogueResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
 import gr.uoa.di.madgik.resourcecatalogue.utils.*;
 import org.slf4j.Logger;
@@ -32,7 +31,6 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.security.core.Authentication;
 import org.springframework.validation.Validator;
@@ -145,7 +143,7 @@ public class ServiceBundleManager extends ResourceCatalogueManager<ServiceBundle
 
         ProviderBundle providerBundle = providerService.get(serviceBundle.getService().getCatalogueId(), serviceBundle.getService().getResourceOrganisation(), auth);
         if (providerBundle == null) {
-            throw new CatalogueResourceNotFoundException(String.format("Provider with id '%s' and catalogueId '%s' does not exist",
+            throw new ResourceNotFoundException(String.format("Provider with id '%s' and catalogueId '%s' does not exist",
                     serviceBundle.getService().getResourceOrganisation(), serviceBundle.getService().getCatalogueId()));
         }
         // check if Provider is approved
@@ -225,7 +223,7 @@ public class ServiceBundleManager extends ResourceCatalogueManager<ServiceBundle
                 return ret;
             }
         } catch (ResourceNotFoundException e) {
-            throw new CatalogueResourceNotFoundException(String.format("There is no Service with id [%s] on the [%s] Catalogue",
+            throw new ResourceNotFoundException(String.format("There is no Service with id [%s] on the [%s] Catalogue",
                     ret.getService().getId(), ret.getService().getCatalogueId()));
         }
 
@@ -477,7 +475,8 @@ public class ServiceBundleManager extends ResourceCatalogueManager<ServiceBundle
                         ((HelpdeskBundle) bundle).getCatalogueId(), bundle.isActive());
                 helpdeskService.updateBundle((HelpdeskBundle) bundle, auth);
                 HelpdeskBundle publicHelpdeskBundle =
-                        publicHelpdeskManager.getOrElseReturnNull(bundle.getIdentifiers().getPid());
+                        publicHelpdeskManager.getOrElseReturnNull(bundle.getIdentifiers().getPid(),
+                                ((HelpdeskBundle) bundle).getCatalogueId());
                 if (publicHelpdeskBundle != null) {
                     publicHelpdeskManager.update((HelpdeskBundle) bundle, auth);
                 }
@@ -493,7 +492,7 @@ public class ServiceBundleManager extends ResourceCatalogueManager<ServiceBundle
                         ((MonitoringBundle) bundle).getCatalogueId(), bundle.isActive());
                 monitoringService.updateBundle((MonitoringBundle) bundle, auth);
                 MonitoringBundle publicMonitoringBundle =
-                        publicMonitoringManager.getOrElseReturnNull(bundle.getIdentifiers().getPid());
+                        publicMonitoringManager.getOrElseReturnNull(bundle.getIdentifiers().getPid(), ((MonitoringBundle) bundle).getCatalogueId());
                 if (publicMonitoringBundle != null) {
                     publicMonitoringManager.update((MonitoringBundle) bundle, auth);
                 }
@@ -509,7 +508,7 @@ public class ServiceBundleManager extends ResourceCatalogueManager<ServiceBundle
                         ((DatasourceBundle) bundle).getDatasource().getCatalogueId(), bundle.isActive());
                 datasourceService.updateBundle((DatasourceBundle) bundle, auth);
                 DatasourceBundle publicDatasourceBundle =
-                        publicDatasourceManager.getOrElseReturnNull(bundle.getIdentifiers().getPid());
+                        publicDatasourceManager.getOrElseReturnNull(bundle.getIdentifiers().getPid(), ((DatasourceBundle) bundle).getDatasource().getCatalogueId());
                 if (publicDatasourceBundle != null) {
                     publicDatasourceManager.update((DatasourceBundle) bundle, auth);
                 }
@@ -794,7 +793,7 @@ public class ServiceBundleManager extends ResourceCatalogueManager<ServiceBundle
                 .map(id ->
                 {
                     try {
-                        return get(id);
+                        return get(id, null, false);
                     } catch (ServiceException | ResourceNotFoundException e) {
                         return null;
                     }

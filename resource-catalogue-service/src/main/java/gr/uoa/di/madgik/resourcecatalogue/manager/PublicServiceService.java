@@ -125,7 +125,8 @@ public class PublicServiceService extends ResourceCatalogueManager<ServiceBundle
     @Override
     public void delete(ServiceBundle serviceBundle) {
         try {
-            ServiceBundle publicServiceBundle = get(serviceBundle.getIdentifiers().getPid());
+            ServiceBundle publicServiceBundle = get(serviceBundle.getIdentifiers().getPid(),
+                    serviceBundle.getService().getCatalogueId(), true);
             logger.info("Deleting public Service with id '{}'", publicServiceBundle.getId());
             super.delete(publicServiceBundle);
             jmsService.convertAndSendTopic("service.delete", publicServiceBundle);
@@ -137,14 +138,14 @@ public class PublicServiceService extends ResourceCatalogueManager<ServiceBundle
     public void updateIdsToPublic(ServiceBundle bundle) {
         // Resource Organisation
         ProviderBundle providerBundle = providerService.get(bundle.getService().getResourceOrganisation(),
-                bundle.getService().getCatalogueId());
+                bundle.getService().getCatalogueId(), false);
         bundle.getService().setResourceOrganisation(providerBundle.getIdentifiers().getPid());
 
         // Resource Providers
         List<String> resourceProviders = new ArrayList<>();
         for (String resourceProviderId : bundle.getService().getResourceProviders()) {
             //TODO: do we allow related resources from different catalogues?
-            ProviderBundle resourceProvider = providerService.get(resourceProviderId, bundle.getService().getCatalogueId());
+            ProviderBundle resourceProvider = providerService.get(resourceProviderId, bundle.getService().getCatalogueId(), false);
             resourceProviders.add(resourceProvider.getIdentifiers().getPid());
         }
         bundle.getService().setResourceProviders(resourceProviders);
@@ -155,9 +156,9 @@ public class PublicServiceService extends ResourceCatalogueManager<ServiceBundle
             //TODO: do we allow related resources from different catalogues?
             Bundle<?> relatedResource;
             try {
-                relatedResource = serviceBundleService.get(relatedResourceId, bundle.getService().getCatalogueId());
+                relatedResource = serviceBundleService.get(relatedResourceId, bundle.getService().getCatalogueId(), false);
             } catch (ResourceNotFoundException e) {
-                relatedResource = trainingResourceService.get(relatedResourceId, bundle.getService().getCatalogueId());
+                relatedResource = trainingResourceService.get(relatedResourceId, bundle.getService().getCatalogueId(), false);
             }
             relatedResources.add(relatedResource.getIdentifiers().getPid());
         }
@@ -169,9 +170,9 @@ public class PublicServiceService extends ResourceCatalogueManager<ServiceBundle
             //TODO: do we allow related resources from different catalogues?
             Bundle<?> requiredResource;
             try {
-                requiredResource = serviceBundleService.get(requiredResourceId, bundle.getService().getCatalogueId());
+                requiredResource = serviceBundleService.get(requiredResourceId, bundle.getService().getCatalogueId(), false);
             } catch (ResourceNotFoundException e) {
-                requiredResource = trainingResourceService.get(requiredResourceId, bundle.getService().getCatalogueId());
+                requiredResource = trainingResourceService.get(requiredResourceId, bundle.getService().getCatalogueId(), false);
             }
             requiredResources.add(requiredResource.getIdentifiers().getPid());
         }

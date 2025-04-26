@@ -62,7 +62,7 @@ public class PublicResourceInteroperabilityRecordController {
                                  @Parameter(description = "The right part of the ID after the '/'")
                                  @PathVariable("suffix") String suffix) {
         String id = prefix + "/" + suffix;
-        ResourceInteroperabilityRecordBundle bundle = service.get(id);
+        ResourceInteroperabilityRecordBundle bundle = service.get(id, null, true);
         if (bundle.getMetadata().isPublished()) {
             return new ResponseEntity<>(bundle.getResourceInteroperabilityRecord(), HttpStatus.OK);
         }
@@ -80,7 +80,7 @@ public class PublicResourceInteroperabilityRecordController {
                                        @PathVariable("suffix") String suffix,
                                        @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
-        ResourceInteroperabilityRecordBundle bundle = service.get(id);
+        ResourceInteroperabilityRecordBundle bundle = service.get(id, null, true);
         if (bundle.getMetadata().isPublished()) {
             return new ResponseEntity<>(bundle, HttpStatus.OK);
         }

@@ -59,7 +59,7 @@ public class PublicServiceController {
     @GetMapping(path = "public/service/{prefix}/{suffix}",
             produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or " +
-            "@securityService.serviceIsActive(#prefix+'/'+#suffix) or " +
+            "@securityService.serviceIsActive(#prefix+'/'+#suffix, null, true) or " +
             "@securityService.isResourceAdmin(#auth, #prefix+'/'+#suffix)")
     public ResponseEntity<?> get(@Parameter(description = "The left part of the ID before the '/'")
                                  @PathVariable("prefix") String prefix,
@@ -67,7 +67,7 @@ public class PublicServiceController {
                                  @PathVariable("suffix") String suffix,
                                  @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
-        ServiceBundle bundle = service.get(id);
+        ServiceBundle bundle = service.get(id, null, true);
         if (bundle.getMetadata().isPublished()) {
             return new ResponseEntity<>(bundle.getService(), HttpStatus.OK);
         }
@@ -85,7 +85,7 @@ public class PublicServiceController {
                                        @PathVariable("suffix") String suffix,
                                        @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
-        ServiceBundle bundle = service.get(id);
+        ServiceBundle bundle = service.get(id, null, true);
         if (bundle.getMetadata().isPublished()) {
             return new ResponseEntity<>(bundle, HttpStatus.OK);
         }

@@ -62,7 +62,7 @@ public class PublicDatasourceController {
                                  @Parameter(description = "The right part of the ID after the '/'")
                                  @PathVariable("suffix") String suffix) {
         String id = prefix + "/" + suffix;
-        DatasourceBundle bundle = service.get(id);
+        DatasourceBundle bundle = service.get(id, null, true);
         if (bundle.getMetadata().isPublished()) {
             return new ResponseEntity<>(bundle.getDatasource(), HttpStatus.OK);
         }
@@ -78,7 +78,7 @@ public class PublicDatasourceController {
                                        @Parameter(description = "The right part of the ID after the '/'")
                                        @PathVariable("suffix") String suffix) {
         String id = prefix + "/" + suffix;
-        DatasourceBundle bundle = service.get(id);
+        DatasourceBundle bundle = service.get(id, null, true);
         if (bundle.getMetadata().isPublished()) {
             return new ResponseEntity<>(bundle, HttpStatus.OK);
         }

@@ -59,7 +59,7 @@ public class PublicConfigurationTemplateInstanceController {
                                  @Parameter(description = "The right part of the ID after the '/'")
                                  @PathVariable("suffix") String suffix) {
         String id = prefix + "/" + suffix;
-        ConfigurationTemplateInstanceBundle bundle = service.get(id);
+        ConfigurationTemplateInstanceBundle bundle = service.get(id, null, true);
         if (bundle.getMetadata().isPublished()) {
             ConfigurationTemplateInstanceDto ret = service.createCTIDto(bundle.getConfigurationTemplateInstance());
             return new ResponseEntity<>(ret, HttpStatus.OK);
@@ -76,7 +76,7 @@ public class PublicConfigurationTemplateInstanceController {
                                        @Parameter(description = "The right part of the ID after the '/'")
                                        @PathVariable("suffix") String suffix) {
         String id = prefix + "/" + suffix;
-        ConfigurationTemplateInstanceBundle bundle = service.get(id);
+        ConfigurationTemplateInstanceBundle bundle = service.get(id, null, true);
         if (bundle.getMetadata().isPublished()) {
             return new ResponseEntity<>(bundle, HttpStatus.OK);
         }

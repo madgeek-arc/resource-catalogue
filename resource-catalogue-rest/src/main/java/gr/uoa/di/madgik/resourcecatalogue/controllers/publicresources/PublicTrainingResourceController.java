@@ -61,7 +61,7 @@ public class PublicTrainingResourceController {
     @GetMapping(path = "public/trainingResource/{prefix}/{suffix}",
             produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or " +
-            "@securityService.trainingResourceIsActive(#prefix+'/'+#suffix) or " +
+            "@securityService.trainingResourceIsActive(#prefix+'/'+#suffix, null, true) or " +
             "@securityService.isResourceAdmin(#auth, #prefix+'/'+#suffix)")
     public ResponseEntity<?> get(@Parameter(description = "The left part of the ID before the '/'")
                                  @PathVariable("prefix") String prefix,
@@ -69,7 +69,7 @@ public class PublicTrainingResourceController {
                                  @PathVariable("suffix") String suffix,
                                  @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
-        TrainingResourceBundle bundle = service.get(id);
+        TrainingResourceBundle bundle = service.get(id, null, true);
         if (bundle.getMetadata().isPublished()) {
             return new ResponseEntity<>(bundle.getTrainingResource(), HttpStatus.OK);
         }
@@ -87,7 +87,7 @@ public class PublicTrainingResourceController {
                                        @PathVariable("suffix") String suffix,
                                        @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
-        TrainingResourceBundle bundle = service.get(id);
+        TrainingResourceBundle bundle = service.get(id, null, true);
         if (bundle.getMetadata().isPublished()) {
             return new ResponseEntity<>(bundle, HttpStatus.OK);
         }

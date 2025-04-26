@@ -82,6 +82,7 @@ public class PublicConfigurationTemplateInstanceService extends ResourceCatalogu
     public ConfigurationTemplateInstanceBundle add(ConfigurationTemplateInstanceBundle configurationTemplateInstanceBundle, Authentication authentication) {
         String lowerLevelResourceId = configurationTemplateInstanceBundle.getId();
         configurationTemplateInstanceBundle.setId(configurationTemplateInstanceBundle.getIdentifiers().getPid());
+        configurationTemplateInstanceBundle.getMetadata().setPublished(true);
 
         // set public id to resourceId
         updateIdsToPublic(configurationTemplateInstanceBundle);
@@ -95,7 +96,6 @@ public class PublicConfigurationTemplateInstanceService extends ResourceCatalogu
         } catch (ParseException e) {
             //continue
         }
-        configurationTemplateInstanceBundle.getMetadata().setPublished(true);
         ConfigurationTemplateInstanceBundle ret;
         logger.info("ConfigurationTemplateInstanceBundle '{}' is being published with id '{}'",
                 lowerLevelResourceId, configurationTemplateInstanceBundle.getId());
@@ -146,9 +146,9 @@ public class PublicConfigurationTemplateInstanceService extends ResourceCatalogu
         // resourceId
         Bundle<?> resourceBundle;
         try {
-            resourceBundle = serviceBundleService.get(bundle.getConfigurationTemplateInstance().getResourceId());
+            resourceBundle = serviceBundleService.get(bundle.getConfigurationTemplateInstance().getResourceId(), catalogueId, false);
         } catch (ResourceNotFoundException e) {
-            resourceBundle = trainingResourceService.get(bundle.getConfigurationTemplateInstance().getResourceId());
+            resourceBundle = trainingResourceService.get(bundle.getConfigurationTemplateInstance().getResourceId(), catalogueId, false);
         }
         bundle.getConfigurationTemplateInstance().setResourceId(resourceBundle.getIdentifiers().getPid());
     }

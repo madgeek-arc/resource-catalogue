@@ -72,7 +72,7 @@ public class PublicMonitoringService extends ResourceCatalogueManager<Monitoring
         return super.getAll(facetFilter, authentication);
     }
 
-    public MonitoringBundle getOrElseReturnNull(String id) {
+    public MonitoringBundle getOrElseReturnNull(String id, String catalogueId) {
         MonitoringBundle monitoringBundle;
         try {
             monitoringBundle = get(id, catalogueId, true);
@@ -123,7 +123,8 @@ public class PublicMonitoringService extends ResourceCatalogueManager<Monitoring
     @Override
     public void delete(MonitoringBundle monitoringBundle) {
         try {
-            MonitoringBundle publicMonitoringBundle = get(monitoringBundle.getIdentifiers().getPid());
+            MonitoringBundle publicMonitoringBundle = get(monitoringBundle.getIdentifiers().getPid(),
+                    monitoringBundle.getCatalogueId(), true);
             logger.info("Deleting public Monitoring with id '{}'", publicMonitoringBundle.getId());
             super.delete(publicMonitoringBundle);
             jmsService.convertAndSendTopic("monitoring.delete", publicMonitoringBundle);
@@ -136,9 +137,9 @@ public class PublicMonitoringService extends ResourceCatalogueManager<Monitoring
         // serviceId
         Bundle<?> resourceBundle;
         try {
-            resourceBundle = serviceBundleService.get(bundle.getMonitoring().getServiceId(), bundle.getCatalogueId());
+            resourceBundle = serviceBundleService.get(bundle.getMonitoring().getServiceId(), bundle.getCatalogueId(), false);
         } catch (ResourceNotFoundException e) {
-            resourceBundle = trainingResourceService.get(bundle.getMonitoring().getServiceId(), bundle.getCatalogueId());
+            resourceBundle = trainingResourceService.get(bundle.getMonitoring().getServiceId(), bundle.getCatalogueId(), false);
         }
         bundle.getMonitoring().setServiceId(resourceBundle.getIdentifiers().getPid());
     }

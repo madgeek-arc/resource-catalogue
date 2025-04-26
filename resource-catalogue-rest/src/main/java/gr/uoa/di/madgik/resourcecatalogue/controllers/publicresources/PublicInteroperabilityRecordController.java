@@ -68,7 +68,7 @@ public class PublicInteroperabilityRecordController {
     @GetMapping(path = "public/interoperabilityRecord/{prefix}/{suffix}",
             produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or " +
-            "@securityService.guidelineIsActive(#prefix+'/'+#suffix) or " +
+            "@securityService.guidelineIsActive(#prefix+'/'+#suffix, null, true) or " +
             "@securityService.isResourceAdmin(#auth, #prefix+'/'+#suffix)")
     public ResponseEntity<?> get(@Parameter(description = "The left part of the ID before the '/'")
                                  @PathVariable("prefix") String prefix,
@@ -76,7 +76,7 @@ public class PublicInteroperabilityRecordController {
                                  @PathVariable("suffix") String suffix,
                                  @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
-        InteroperabilityRecordBundle bundle = service.get(id);
+        InteroperabilityRecordBundle bundle = service.get(id, null, true);
         if (bundle.getMetadata().isPublished()) {
             return new ResponseEntity<>(bundle.getInteroperabilityRecord(), HttpStatus.OK);
         }
@@ -94,7 +94,7 @@ public class PublicInteroperabilityRecordController {
                                        @PathVariable("suffix") String suffix,
                                        @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
-        InteroperabilityRecordBundle interoperabilityRecordBundle = service.get(id);
+        InteroperabilityRecordBundle interoperabilityRecordBundle = service.get(id, null, true);
         if (interoperabilityRecordBundle.getMetadata().isPublished()) {
             return new ResponseEntity<>(interoperabilityRecordBundle, HttpStatus.OK);
         }

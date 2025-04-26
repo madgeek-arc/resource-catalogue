@@ -69,7 +69,7 @@ public class PublicHelpdeskService extends ResourceCatalogueManager<HelpdeskBund
         return super.getAll(facetFilter, authentication);
     }
 
-    public HelpdeskBundle getOrElseReturnNull(String id) {
+    public HelpdeskBundle getOrElseReturnNull(String id, String catalogueId) {
         HelpdeskBundle helpdeskBundle;
         try {
             helpdeskBundle = get(id, catalogueId, true);
@@ -120,7 +120,7 @@ public class PublicHelpdeskService extends ResourceCatalogueManager<HelpdeskBund
     @Override
     public void delete(HelpdeskBundle helpdeskBundle) {
         try {
-            HelpdeskBundle publicHelpdeskBundle = get(helpdeskBundle.getIdentifiers().getPid());
+            HelpdeskBundle publicHelpdeskBundle = get(helpdeskBundle.getIdentifiers().getPid(), helpdeskBundle.getCatalogueId(), true);
             logger.info("Deleting public Helpdesk with id '{}'", publicHelpdeskBundle.getId());
             super.delete(publicHelpdeskBundle);
             jmsService.convertAndSendTopic("helpdesk.delete", publicHelpdeskBundle);
@@ -133,9 +133,9 @@ public class PublicHelpdeskService extends ResourceCatalogueManager<HelpdeskBund
         // serviceId
         Bundle<?> resourceBundle;
         try {
-            resourceBundle = serviceBundleService.get(bundle.getHelpdesk().getServiceId(), bundle.getCatalogueId());
+            resourceBundle = serviceBundleService.get(bundle.getHelpdesk().getServiceId(), bundle.getCatalogueId(), false);
         } catch (ResourceNotFoundException e) {
-            resourceBundle = trainingResourceService.get(bundle.getHelpdesk().getServiceId(), bundle.getCatalogueId());
+            resourceBundle = trainingResourceService.get(bundle.getHelpdesk().getServiceId(), bundle.getCatalogueId(), false);
         }
         bundle.getHelpdesk().setServiceId(resourceBundle.getIdentifiers().getPid());
     }

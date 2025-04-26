@@ -106,7 +106,8 @@ public class PublicProviderService extends ResourceCatalogueManager<ProviderBund
     @Override
     public void delete(ProviderBundle providerBundle) {
         try {
-            ProviderBundle publicProviderBundle = get(providerBundle.getIdentifiers().getPid());
+            ProviderBundle publicProviderBundle = get(providerBundle.getIdentifiers().getPid(),
+                    providerBundle.getProvider().getCatalogueId(), true);
             logger.info("Deleting public Provider with id '{}'", publicProviderBundle.getId());
             super.delete(publicProviderBundle);
             jmsService.convertAndSendTopic("provider.delete", publicProviderBundle);

@@ -109,7 +109,9 @@ public class PublicResourceInteroperabilityRecordService extends ResourceCatalog
     @Override
     public void delete(ResourceInteroperabilityRecordBundle resourceInteroperabilityRecordBundle) {
         try {
-            ResourceInteroperabilityRecordBundle publicResourceInteroperabilityRecordBundle = get(resourceInteroperabilityRecordBundle.getIdentifiers().getPid());
+            ResourceInteroperabilityRecordBundle publicResourceInteroperabilityRecordBundle =
+                    get(resourceInteroperabilityRecordBundle.getIdentifiers().getPid(),
+                            resourceInteroperabilityRecordBundle.getResourceInteroperabilityRecord().getCatalogueId(), true);
             logger.info("Deleting public ResourceInteroperabilityRecordBundle with id '{}'", publicResourceInteroperabilityRecordBundle.getId());
             super.delete(publicResourceInteroperabilityRecordBundle);
             jmsService.convertAndSendTopic("resource_interoperability_record.delete", publicResourceInteroperabilityRecordBundle);
@@ -123,10 +125,10 @@ public class PublicResourceInteroperabilityRecordService extends ResourceCatalog
         Bundle<?> resource;
         try {
             resource = serviceBundleService.get(bundle.getResourceInteroperabilityRecord().getResourceId(),
-                    bundle.getResourceInteroperabilityRecord().getCatalogueId());
+                    bundle.getResourceInteroperabilityRecord().getCatalogueId(), false);
         } catch (ResourceNotFoundException e) {
             resource = trainingResourceService.get(bundle.getResourceInteroperabilityRecord().getResourceId(),
-                    bundle.getResourceInteroperabilityRecord().getCatalogueId());
+                    bundle.getResourceInteroperabilityRecord().getCatalogueId(), false);
         }
         bundle.getResourceInteroperabilityRecord().setResourceId(resource.getIdentifiers().getPid());
 
@@ -134,7 +136,7 @@ public class PublicResourceInteroperabilityRecordService extends ResourceCatalog
         List<String> interoperabilityRecordIds = new ArrayList<>();
         for (String interoperabilityRecordId : bundle.getResourceInteroperabilityRecord().getInteroperabilityRecordIds()) {
             InteroperabilityRecordBundle interoperabilityRecord = interoperabilityRecordService.get(
-                    interoperabilityRecordId, bundle.getResourceInteroperabilityRecord().getCatalogueId());
+                    interoperabilityRecordId, bundle.getResourceInteroperabilityRecord().getCatalogueId(), false);
             interoperabilityRecordIds.add(interoperabilityRecord.getIdentifiers().getPid());
         }
         bundle.getResourceInteroperabilityRecord().setInteroperabilityRecordIds(interoperabilityRecordIds);

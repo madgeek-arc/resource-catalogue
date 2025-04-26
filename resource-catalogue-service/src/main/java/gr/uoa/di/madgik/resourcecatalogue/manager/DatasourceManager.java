@@ -23,7 +23,6 @@ import gr.uoa.di.madgik.registry.domain.Resource;
 import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.registry.service.SearchService;
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
-import gr.uoa.di.madgik.resourcecatalogue.exceptions.CatalogueResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
 import gr.uoa.di.madgik.resourcecatalogue.utils.AuthenticationInfo;
 import gr.uoa.di.madgik.resourcecatalogue.utils.ObjectUtils;
@@ -98,12 +97,12 @@ public class DatasourceManager extends ResourceCatalogueManager<DatasourceBundle
 //        }
         logger.trace("Attempting to add a new Datasource: {}", datasourceBundle);
 
-        this.validateDatasource(datasourceBundle);
-
         datasourceBundle.setMetadata(Metadata.createMetadata(AuthenticationInfo.getFullName(auth), AuthenticationInfo.getEmail(auth).toLowerCase()));
         List<LoggingInfo> loggingInfoList = commonMethods.returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(datasourceBundle, auth);
         datasourceBundle.setLoggingInfo(loggingInfoList);
         differentiateInternalFromExternalCatalogueAddition(datasourceBundle);
+
+        this.validateDatasource(datasourceBundle);
 
         super.add(datasourceBundle, null);
         logger.info("Added the Datasource with id '{}' for Service '{}'", datasourceBundle.getId(),
@@ -286,7 +285,7 @@ public class DatasourceManager extends ResourceCatalogueManager<DatasourceBundle
         if (datasource != null) {
             datasourceBundle.setOriginalOpenAIREId(datasourceBundle.getId());
         } else {
-            throw new CatalogueResourceNotFoundException(String.format("The ID [%s] you provided does not belong to an OpenAIRE" +
+            throw new ResourceNotFoundException(String.format("The ID [%s] you provided does not belong to an OpenAIRE" +
                     " Datasource", datasourceBundle.getId()));
         }
     }

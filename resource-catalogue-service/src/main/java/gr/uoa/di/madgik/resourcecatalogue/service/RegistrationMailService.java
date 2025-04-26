@@ -789,7 +789,7 @@ public class RegistrationMailService {
                 providerBundle, null, null);
         portalAdminsEmail.updateRoot("registrant", registrant);
         sendMailsFromTemplate("interoperabilityRecordOnboardingForPortalAdmins.ftl", portalAdminsEmail.getRoot(),
-                portalAdminsEmail.getSubject(), monitoringEmail, "admin");
+                portalAdminsEmail.getSubject(), registrationEmail, "admin");
 
         EmailBasicInfo providerAdminsEmail = initializeEmail("interoperabilityRecordOnboardingForProviderAdmins.ftl",
                 providerBundle, null, null);

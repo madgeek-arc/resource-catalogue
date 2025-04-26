@@ -24,7 +24,6 @@ import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.registry.service.ParserService;
 import gr.uoa.di.madgik.registry.service.SearchService;
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
-import gr.uoa.di.madgik.resourcecatalogue.exceptions.CatalogueResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.service.ResourceCatalogueService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -143,7 +142,7 @@ public abstract class ResourceCatalogueManager<T extends Identifiable> extends R
     public T get(String id, String catalogueId, boolean published) {
         Resource resource = getResource(id, catalogueId, published);
         if (resource == null) {
-            throw new CatalogueResourceNotFoundException(String.format("Could not find %s with id: %s and catalogueId: %s",
+            throw new ResourceNotFoundException(String.format("Could not find %s with id: %s and catalogueId: %s",
                     typeParameterClass.getSimpleName(), id, catalogueId));
         }
         return deserialize(resource);
@@ -152,14 +151,25 @@ public abstract class ResourceCatalogueManager<T extends Identifiable> extends R
     public Resource getResource(String id, String catalogueId, boolean published) {
         FacetFilter ff = new FacetFilter();
         ff.addFilter("resource_internal_id", id);
-        ff.addFilter("catalogue_id", catalogueId);
+        if (catalogueId != null) {
+            ff.addFilter("catalogue_id", catalogueId);
+        }
         ff.addFilter("published", published);
         ff.setResourceType(getResourceTypeName());
-        return searchService.searchFields(
-                getResourceTypeName(),
-                new SearchService.KeyValue("resource_internal_id", id),
-                new SearchService.KeyValue("catalogue_id", catalogueId),
-                new SearchService.KeyValue("published", String.valueOf(published))
-        );
+
+        if (catalogueId != null) {
+            return searchService.searchFields(
+                    getResourceTypeName(),
+                    new SearchService.KeyValue("resource_internal_id", id),
+                    new SearchService.KeyValue("catalogue_id", catalogueId),
+                    new SearchService.KeyValue("published", String.valueOf(published))
+            );
+        } else {
+            return searchService.searchFields(
+                    getResourceTypeName(),
+                    new SearchService.KeyValue("resource_internal_id", id),
+                    new SearchService.KeyValue("published", String.valueOf(published))
+            );
+        }
     }
 }

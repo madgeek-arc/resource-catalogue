@@ -69,7 +69,7 @@ public class PublicServiceExtensionsController {
                                          @PathVariable("suffix") String suffix,
                                          @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
-        HelpdeskBundle bundle = helpdeskService.get(id);
+        HelpdeskBundle bundle = helpdeskService.get(id, null, true);
         if (bundle.getMetadata().isPublished()) {
             return new ResponseEntity<>(bundle.getHelpdesk(), HttpStatus.OK);
         }
@@ -86,7 +86,7 @@ public class PublicServiceExtensionsController {
                                                @PathVariable("suffix") String suffix,
                                                @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
-        HelpdeskBundle bundle = helpdeskService.get(id);
+        HelpdeskBundle bundle = helpdeskService.get(id, null, true);
         if (bundle.getMetadata().isPublished()) {
             return new ResponseEntity<>(bundle, HttpStatus.OK);
         }
@@ -133,7 +133,7 @@ public class PublicServiceExtensionsController {
                                            @PathVariable("suffix") String suffix,
                                            @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
-        MonitoringBundle bundle = monitoringService.get(id);
+        MonitoringBundle bundle = monitoringService.get(id, null, true);
         if (bundle.getMetadata().isPublished()) {
             return new ResponseEntity<>(bundle.getMonitoring(), HttpStatus.OK);
         }
@@ -150,7 +150,7 @@ public class PublicServiceExtensionsController {
                                                  @PathVariable("suffix") String suffix,
                                                  @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
-        MonitoringBundle bundle = monitoringService.get(id);
+        MonitoringBundle bundle = monitoringService.get(id, null, true);
         if (bundle.getMetadata().isPublished()) {
             return new ResponseEntity<>(bundle, HttpStatus.OK);
         }

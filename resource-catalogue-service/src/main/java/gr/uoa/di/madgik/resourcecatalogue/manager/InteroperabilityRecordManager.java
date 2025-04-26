@@ -24,7 +24,6 @@ import gr.uoa.di.madgik.registry.domain.Resource;
 import gr.uoa.di.madgik.registry.exception.ResourceException;
 import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
-import gr.uoa.di.madgik.resourcecatalogue.exceptions.CatalogueResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
 import gr.uoa.di.madgik.resourcecatalogue.utils.Auditable;
 import gr.uoa.di.madgik.resourcecatalogue.utils.AuthenticationInfo;
@@ -110,9 +109,20 @@ public class InteroperabilityRecordManager extends ResourceCatalogueManager<Inte
         }
         // loggingInfo
         List<LoggingInfo> loggingInfoList = commonMethods.returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(interoperabilityRecordBundle, auth);
-        interoperabilityRecordBundle.setLoggingInfo(loggingInfoList);
         interoperabilityRecordBundle.setLatestOnboardingInfo(loggingInfoList.getFirst());
         interoperabilityRecordBundle.setAuditState(Auditable.NOT_AUDITED);
+
+        if (!providerBundle.getProvider().getCatalogueId().equals(this.catalogueId)) {
+            interoperabilityRecordBundle.setStatus(vocabularyService.get("approved interoperability record").getId());
+            interoperabilityRecordBundle.setActive(true);
+            LoggingInfo loggingInfoApproved = commonMethods.createLoggingInfo(auth, LoggingInfo.Types.ONBOARD.getKey(),
+                    LoggingInfo.ActionType.APPROVED.getKey());
+            loggingInfoList.add(loggingInfoApproved);
+
+            // latestOnboardingInfo
+            interoperabilityRecordBundle.setLatestOnboardingInfo(loggingInfoApproved);
+        }
+        interoperabilityRecordBundle.setLoggingInfo(loggingInfoList);
 
         interoperabilityRecordBundle.getInteroperabilityRecord().setCreated(String.valueOf(System.currentTimeMillis()));
         interoperabilityRecordBundle.getInteroperabilityRecord().setUpdated(interoperabilityRecordBundle.getInteroperabilityRecord().getCreated());
@@ -135,14 +145,9 @@ public class InteroperabilityRecordManager extends ResourceCatalogueManager<Inte
 
         InteroperabilityRecordBundle ret = ObjectUtils.clone(interoperabilityRecordBundle);
         InteroperabilityRecordBundle existingInteroperabilityRecord;
-        try {
-            existingInteroperabilityRecord = get(ret.getInteroperabilityRecord().getId(), ret.getInteroperabilityRecord().getCatalogueId());
-            if (ret.getInteroperabilityRecord().equals(existingInteroperabilityRecord.getInteroperabilityRecord())) {
-                return ret;
-            }
-        } catch (ResourceNotFoundException e) {
-            throw new CatalogueResourceNotFoundException(String.format("There is no Interoperability Record with id [%s] on the [%s] Catalogue",
-                    ret.getInteroperabilityRecord().getId(), ret.getInteroperabilityRecord().getCatalogueId()));
+        existingInteroperabilityRecord = get(ret.getInteroperabilityRecord().getId(), ret.getInteroperabilityRecord().getCatalogueId());
+        if (ret.getInteroperabilityRecord().equals(existingInteroperabilityRecord.getInteroperabilityRecord())) {
+            return ret;
         }
 
         if (catalogueId == null || catalogueId.isEmpty()) {

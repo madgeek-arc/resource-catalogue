@@ -83,6 +83,7 @@ public class PublicTrainingResourceService extends ResourceCatalogueManager<Trai
     public TrainingResourceBundle add(TrainingResourceBundle trainingResourceBundle, Authentication authentication) {
         String lowerLevelResourceId = trainingResourceBundle.getId();
         trainingResourceBundle.setId(trainingResourceBundle.getIdentifiers().getPid());
+        trainingResourceBundle.getMetadata().setPublished(true);
 
         // sets public ids to resource organisation, resource providers and EOSC related services
         updateIdsToPublic(trainingResourceBundle);
@@ -123,7 +124,8 @@ public class PublicTrainingResourceService extends ResourceCatalogueManager<Trai
     @Override
     public void delete(TrainingResourceBundle trainingResourceBundle) {
         try {
-            TrainingResourceBundle publicTrainingResourceBundle = get(trainingResourceBundle.getIdentifiers().getPid());
+            TrainingResourceBundle publicTrainingResourceBundle = get(trainingResourceBundle.getIdentifiers().getPid(),
+                    trainingResourceBundle.getTrainingResource().getCatalogueId(), true);
             logger.info("Deleting public Training Resource with id '{}'", publicTrainingResourceBundle.getId());
             super.delete(publicTrainingResourceBundle);
             jmsService.convertAndSendTopic("training_resource.delete", publicTrainingResourceBundle);
@@ -135,14 +137,15 @@ public class PublicTrainingResourceService extends ResourceCatalogueManager<Trai
     public void updateIdsToPublic(TrainingResourceBundle bundle) {
         // Resource Organisation
         ProviderBundle providerBundle = providerService.get(bundle.getTrainingResource().getResourceOrganisation(),
-                bundle.getTrainingResource().getCatalogueId());
+                bundle.getTrainingResource().getCatalogueId(), false);
         bundle.getTrainingResource().setResourceOrganisation(providerBundle.getIdentifiers().getPid());
 
         // Resource Providers
         List<String> resourceProviders = new ArrayList<>();
         for (String resourceProviderId : bundle.getTrainingResource().getResourceProviders()) {
             //TODO: do we allow related resources from different catalogues?
-            ProviderBundle resourceProvider = providerService.get(resourceProviderId, bundle.getTrainingResource().getCatalogueId());
+            ProviderBundle resourceProvider = providerService.get(resourceProviderId,
+                    bundle.getTrainingResource().getCatalogueId(), false);
             resourceProviders.add(resourceProvider.getIdentifiers().getPid());
         }
         bundle.getTrainingResource().setResourceProviders(resourceProviders);
@@ -153,9 +156,11 @@ public class PublicTrainingResourceService extends ResourceCatalogueManager<Trai
             //TODO: do we allow related resources from different catalogues?
             Bundle<?> eoscRelatedService;
             try {
-                eoscRelatedService = serviceBundleService.get(eoscRelatedServiceId, bundle.getTrainingResource().getCatalogueId());
+                eoscRelatedService = serviceBundleService.get(eoscRelatedServiceId,
+                        bundle.getTrainingResource().getCatalogueId(), false);
             } catch (ResourceNotFoundException e) {
-                eoscRelatedService = trainingResourceService.get(eoscRelatedServiceId, bundle.getTrainingResource().getCatalogueId());
+                eoscRelatedService = trainingResourceService.get(eoscRelatedServiceId,
+                        bundle.getTrainingResource().getCatalogueId(), false);
             }
             eoscRelatedServices.add(eoscRelatedService.getIdentifiers().getPid());
         }

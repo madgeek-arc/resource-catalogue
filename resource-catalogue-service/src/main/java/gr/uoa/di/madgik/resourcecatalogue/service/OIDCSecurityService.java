@@ -274,7 +274,7 @@ public class OIDCSecurityService implements SecurityService {
             catalogueId = this.catalogueId;
         }
         ProviderBundle provider = providerService.get(catalogueId, providerId, auth);
-        return providerIsActiveAndUserIsAdmin(auth, interoperabilityRecord.getId()) && provider.getStatus().equals("approved provider");
+        return providerCanAddResources(auth, provider, interoperabilityRecord.getId());
     }
 
     private boolean providerCanAddResources(Authentication auth, ProviderBundle provider, String resourceId) {
@@ -318,26 +318,26 @@ public class OIDCSecurityService implements SecurityService {
     }
 
     @Override
-    public boolean providerIsActive(String id) {
-        ProviderBundle providerBundle = providerService.get(id);
+    public boolean providerIsActive(String id, String catalogueId, boolean published) {
+        ProviderBundle providerBundle = providerService.get(id, catalogueId, published);
         return providerBundle.isActive();
     }
 
     @Override
-    public boolean serviceIsActive(String id) {
-        ServiceBundle serviceBundle = serviceBundleService.get(id);
+    public boolean serviceIsActive(String id, String catalogueId, boolean published) {
+        ServiceBundle serviceBundle = serviceBundleService.get(id, catalogueId, published);
         return serviceBundle.isActive();
     }
 
     @Override
-    public boolean trainingResourceIsActive(String id) {
-        TrainingResourceBundle trainingResourceBundle = trainingResourceService.get(id);
+    public boolean trainingResourceIsActive(String id, String catalogueId, boolean published) {
+        TrainingResourceBundle trainingResourceBundle = trainingResourceService.get(id, catalogueId, published);
         return trainingResourceBundle.isActive();
     }
 
     @Override
-    public boolean guidelineIsActive(String id) {
-        InteroperabilityRecordBundle interoperabilityRecordBundle = interoperabilityRecordService.get(id);
+    public boolean guidelineIsActive(String id, String catalogueId, boolean published) {
+        InteroperabilityRecordBundle interoperabilityRecordBundle = interoperabilityRecordService.get(id, catalogueId, published);
         return interoperabilityRecordBundle.isActive();
     }
     //endregion

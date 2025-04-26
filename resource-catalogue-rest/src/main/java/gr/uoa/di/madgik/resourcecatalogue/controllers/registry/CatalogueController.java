@@ -291,9 +291,12 @@ public class CatalogueController {
         return new ResponseEntity<>(providerManager.get(providerId, catalogueId, false), HttpStatus.OK);
     }
 
+    @Hidden
     @GetMapping(path = {"{catalogueId}/provider/loggingInfoHistory/{providerId}"}, produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.hasAdminAccess(#auth, #providerId)")
     public ResponseEntity<Paging<LoggingInfo>> providerLoggingInfoHistory(@PathVariable("catalogueId") String catalogueId,
-                                                                          @PathVariable("providerId") String providerId) {
+                                                                          @PathVariable("providerId") String providerId,
+                                                                          @Parameter(hidden = true) Authentication auth) {
         ProviderBundle bundle = providerManager.get(providerId, catalogueId, false);
         Paging<LoggingInfo> loggingInfoHistory = providerManager.getLoggingInfoHistory(bundle);
         return ResponseEntity.ok(loggingInfoHistory);
@@ -427,9 +430,12 @@ public class CatalogueController {
         return new ResponseEntity<>(serviceBundleService.get(serviceId, catalogueId, false), HttpStatus.OK);
     }
 
+    @Hidden
     @GetMapping(path = {"{catalogueId}/service/loggingInfoHistory/{serviceId}"}, produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceAdmin(#auth, #serviceId)")
     public ResponseEntity<Paging<LoggingInfo>> serviceLoggingInfoHistory(@PathVariable("catalogueId") String catalogueId,
-                                                                         @PathVariable("serviceId") String serviceId) {
+                                                                         @PathVariable("serviceId") String serviceId,
+                                                                         @Parameter(hidden = true) Authentication auth) {
         ServiceBundle bundle = serviceBundleService.get(serviceId, catalogueId, false);
         Paging<LoggingInfo> loggingInfoHistory = serviceBundleService.getLoggingInfoHistory(bundle);
         return ResponseEntity.ok(loggingInfoHistory);
@@ -576,9 +582,12 @@ public class CatalogueController {
         return new ResponseEntity<>(trainingResourceService.get(trainingResourceId, catalogueId, false), HttpStatus.OK);
     }
 
+    @Hidden
     @GetMapping(path = {"{catalogueId}/trainingResource/loggingInfoHistory/{trainingResourceId}"}, produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceAdmin(#auth, #trainingResourceId)")
     public ResponseEntity<Paging<LoggingInfo>> trainingResourceLoggingInfoHistory(@PathVariable("catalogueId") String catalogueId,
-                                                                         @PathVariable("trainingResourceId") String trainingResourceId) {
+                                                                                  @PathVariable("trainingResourceId") String trainingResourceId,
+                                                                                  @Parameter(hidden = true) Authentication auth) {
         TrainingResourceBundle bundle = trainingResourceService.get(trainingResourceId, catalogueId, false);
         Paging<LoggingInfo> loggingInfoHistory = trainingResourceService.getLoggingInfoHistory(bundle);
         return ResponseEntity.ok(loggingInfoHistory);
@@ -658,9 +667,12 @@ public class CatalogueController {
         return new ResponseEntity<>(interoperabilityRecordService.get(interoperabilityRecordId, catalogueId, false), HttpStatus.OK);
     }
 
+    @Hidden
     @GetMapping(path = {"{catalogueId}/interoperabilityRecord/loggingInfoHistory/{interoperabilityRecordId}"}, produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceAdmin(#auth, #interoperabilityRecordId)")
     public ResponseEntity<Paging<LoggingInfo>> interoperabilityRecordLoggingInfoHistory(@PathVariable("catalogueId") String catalogueId,
-                                                                                  @PathVariable("interoperabilityRecordId") String interoperabilityRecordId) {
+                                                                                        @PathVariable("interoperabilityRecordId") String interoperabilityRecordId,
+                                                                                        @Parameter(hidden = true) Authentication auth) {
         InteroperabilityRecordBundle bundle = interoperabilityRecordService.get(interoperabilityRecordId, catalogueId, false);
         Paging<LoggingInfo> loggingInfoHistory = interoperabilityRecordService.getLoggingInfoHistory(bundle);
         return ResponseEntity.ok(loggingInfoHistory);

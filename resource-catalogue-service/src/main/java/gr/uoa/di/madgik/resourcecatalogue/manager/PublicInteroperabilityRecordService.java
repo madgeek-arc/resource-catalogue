@@ -107,7 +107,8 @@ public class PublicInteroperabilityRecordService extends ResourceCatalogueManage
     @Override
     public void delete(InteroperabilityRecordBundle interoperabilityRecordBundle) {
         try {
-            InteroperabilityRecordBundle publicInteroperabilityRecordBundle = get(interoperabilityRecordBundle.getIdentifiers().getPid());
+            InteroperabilityRecordBundle publicInteroperabilityRecordBundle = get(interoperabilityRecordBundle.getIdentifiers().getPid(),
+                    interoperabilityRecordBundle.getInteroperabilityRecord().getCatalogueId(), true);
             logger.info("Deleting public Interoperability Record with id '{}'", publicInteroperabilityRecordBundle.getId());
             super.delete(publicInteroperabilityRecordBundle);
             jmsService.convertAndSendTopic("interoperability_record.delete", publicInteroperabilityRecordBundle);
@@ -120,7 +121,7 @@ public class PublicInteroperabilityRecordService extends ResourceCatalogueManage
     public void updateIdsToPublic(InteroperabilityRecordBundle bundle) {
         // providerId
         ProviderBundle providerBundle = providerService.get(bundle.getInteroperabilityRecord().getProviderId(),
-                bundle.getInteroperabilityRecord().getCatalogueId());
+                bundle.getInteroperabilityRecord().getCatalogueId(), false);
         bundle.getInteroperabilityRecord().setProviderId(providerBundle.getIdentifiers().getPid());
     }
 }

@@ -21,7 +21,6 @@ import gr.uoa.di.madgik.registry.exception.ResourceException;
 import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.domain.ServiceBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.TrainingResourceBundle;
-import gr.uoa.di.madgik.resourcecatalogue.exceptions.CatalogueResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.service.ServiceBundleService;
 import gr.uoa.di.madgik.resourcecatalogue.service.TrainingResourceService;
 import org.apache.commons.lang3.StringUtils;
@@ -42,7 +41,7 @@ public class ResourceValidationUtils {
                 throw new ValidationException(String.format("Please provide a %s ID with no catalogue prefix.", resourceType));
             }
         } catch (ResourceNotFoundException e) {
-            throw new CatalogueResourceNotFoundException(String.format("There is no %s with id '%s' in the '%s' Catalogue",
+            throw new ResourceNotFoundException(String.format("There is no %s with id '%s' in the '%s' Catalogue",
                     resourceType, resourceId, catalogueId));
         }
         // check if Service is Active + Approved
@@ -65,7 +64,7 @@ public class ResourceValidationUtils {
                 throw new ValidationException(String.format("Please provide a %s ID with no catalogue prefix.", resourceType));
             }
         } catch (ResourceNotFoundException e) {
-            throw new CatalogueResourceNotFoundException(String.format("There is no %s with id '%s' in the '%s' Catalogue",
+            throw new ResourceNotFoundException(String.format("There is no %s with id '%s' in the '%s' Catalogue",
                     resourceType, resourceId, catalogueId));
         }
         // check if TR is Active + Approved

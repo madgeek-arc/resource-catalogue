@@ -17,8 +17,8 @@
 package gr.uoa.di.madgik.resourcecatalogue.utils;
 
 import gr.uoa.di.madgik.catalogue.exception.ValidationException;
+import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
-import gr.uoa.di.madgik.resourcecatalogue.exceptions.CatalogueResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.service.InteroperabilityRecordService;
 import gr.uoa.di.madgik.resourcecatalogue.service.ProviderService;
 import gr.uoa.di.madgik.resourcecatalogue.service.ServiceBundleService;
@@ -80,7 +80,7 @@ public class RelationshipValidator {
                     if (resourceProvider != null && !resourceProvider.isEmpty()) {
                         try {
                             providerService.get(resourceProvider, catalogueId, false);
-                        } catch (CatalogueResourceNotFoundException e) {
+                        } catch (ResourceNotFoundException e) {
                             throw new ValidationException(String.format("There is no Provider with ID %s in the %s Catalogue. " +
                                     "Found in field 'resourceProviders", resourceProvider, catalogueId));
                         }
@@ -92,10 +92,10 @@ public class RelationshipValidator {
                     if (requiredResource != null && !requiredResource.isEmpty()) {
                         try {
                             serviceBundleService.get(requiredResource, catalogueId, false);
-                        } catch (CatalogueResourceNotFoundException e) {
+                        } catch (ResourceNotFoundException e) {
                             try {
                                 trainingResourceService.get(requiredResource, catalogueId, false);
-                            } catch (CatalogueResourceNotFoundException j) {
+                            } catch (ResourceNotFoundException j) {
                                 throw new ValidationException(String.format("There is no Service or Training Resource " +
                                         "with ID %s in the %s Catalogue. Found in field 'requiredResources", requiredResource, catalogueId));
                             }
@@ -108,10 +108,10 @@ public class RelationshipValidator {
                     if (relatedResource != null && !relatedResource.isEmpty()) {
                         try {
                             serviceBundleService.get(relatedResource, catalogueId, false);
-                        } catch (CatalogueResourceNotFoundException e) {
+                        } catch (ResourceNotFoundException e) {
                             try {
                                 trainingResourceService.get(relatedResource, catalogueId, false);
-                            } catch (CatalogueResourceNotFoundException j) {
+                            } catch (ResourceNotFoundException j) {
                                 throw new ValidationException(String.format("There is no Service or Training Resource with ID %s in the %s Catalogue. " +
                                         "Found in field 'relatedResources", relatedResource, catalogueId));
                             }
@@ -124,10 +124,10 @@ public class RelationshipValidator {
                     if (eoscRelatedService != null && !eoscRelatedService.isEmpty()) {
                         try {
                             serviceBundleService.get(eoscRelatedService, catalogueId, false);
-                        } catch (CatalogueResourceNotFoundException e) {
+                        } catch (ResourceNotFoundException e) {
                             try {
                                 trainingResourceService.get(eoscRelatedService, catalogueId, false);
-                            } catch (CatalogueResourceNotFoundException j) {
+                            } catch (ResourceNotFoundException j) {
                                 throw new ValidationException(String.format("There is no Service or Training Resource with ID %s in the %s Catalogue. " +
                                         "Found in field 'eoscRelatedServices", eoscRelatedService, catalogueId));
                             }
@@ -140,7 +140,7 @@ public class RelationshipValidator {
                     if (interoperabilityRecordId != null && !interoperabilityRecordId.isEmpty()) {
                         try {
                             interoperabilityRecordService.get(interoperabilityRecordId, catalogueId, false);
-                        } catch (CatalogueResourceNotFoundException e) {
+                        } catch (ResourceNotFoundException e) {
                             throw new ValidationException(String.format("There is no Interoperability Record with ID %s in the %s Catalogue. " +
                                     "Found in field 'interoperabilityRecordIds", interoperabilityRecordId, catalogueId));
                         }

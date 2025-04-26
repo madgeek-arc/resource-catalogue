@@ -61,10 +61,10 @@ public class PublicDatasourceService extends ResourceCatalogueManager<Datasource
         return super.getAll(facetFilter, authentication);
     }
 
-    public DatasourceBundle getOrElseReturnNull(String id) {
+    public DatasourceBundle getOrElseReturnNull(String id, String catalogueId) {
         DatasourceBundle datasourceBundle;
         try {
-            datasourceBundle = get(id);
+            datasourceBundle = get(id, catalogueId, true);
         } catch (ResourceException | ResourceNotFoundException e) {
             return null;
         }
@@ -112,7 +112,8 @@ public class PublicDatasourceService extends ResourceCatalogueManager<Datasource
     @Override
     public void delete(DatasourceBundle datasourceBundle) {
         try {
-            DatasourceBundle publicDatasourceBundle = get(datasourceBundle.getIdentifiers().getPid());
+            DatasourceBundle publicDatasourceBundle = get(datasourceBundle.getIdentifiers().getPid(),
+                    datasourceBundle.getDatasource().getCatalogueId(), true);
             logger.info("Deleting public Datasource with id '{}'", publicDatasourceBundle.getId());
             super.delete(publicDatasourceBundle);
             jmsService.convertAndSendTopic("datasource.delete", publicDatasourceBundle);
@@ -124,7 +125,7 @@ public class PublicDatasourceService extends ResourceCatalogueManager<Datasource
     public void updateIdsToPublic(DatasourceBundle bundle) {
         // serviceId
         ServiceBundle serviceBundle = serviceBundleService.get(
-                bundle.getDatasource().getServiceId(), bundle.getDatasource().getCatalogueId());
+                bundle.getDatasource().getServiceId(), bundle.getDatasource().getCatalogueId(), false);
         bundle.getDatasource().setServiceId(serviceBundle.getIdentifiers().getPid());
     }
 }

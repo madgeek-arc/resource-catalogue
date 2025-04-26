@@ -23,7 +23,6 @@ import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Datasource;
 import gr.uoa.di.madgik.resourcecatalogue.dto.OpenAIREMetrics;
-import gr.uoa.di.madgik.resourcecatalogue.exceptions.CatalogueResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.service.OpenAIREDatasourceService;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -129,7 +128,7 @@ public class OpenAIREDatasourceManager implements OpenAIREDatasourceService {
             JSONArray arr = obj.getJSONArray("datasourceInfo");
             if (arr != null) {
                 if (arr.length() == 0) {
-                    throw new CatalogueResourceNotFoundException(String.format("There is no OpenAIRE Datasource with the given id [%s]", id));
+                    throw new ResourceNotFoundException(String.format("There is no OpenAIRE Datasource with the given id [%s]", id));
                 } else {
                     JSONObject map = arr.getJSONObject(0);
                     Gson gson = new Gson();
@@ -138,7 +137,7 @@ public class OpenAIREDatasourceManager implements OpenAIREDatasourceService {
                 }
             }
         }
-        throw new CatalogueResourceNotFoundException(String.format("There is no OpenAIRE Datasource with the given id [%s]", id));
+        throw new ResourceNotFoundException(String.format("There is no OpenAIRE Datasource with the given id [%s]", id));
     }
 
     @Override
@@ -163,7 +162,7 @@ public class OpenAIREDatasourceManager implements OpenAIREDatasourceService {
             datasourceMap.put(total, allDatasources);
             return datasourceMap;
         }
-        throw new CatalogueResourceNotFoundException("There are no OpenAIRE Datasources");
+        throw new ResourceNotFoundException("There are no OpenAIRE Datasources");
     }
 
     private Datasource transformOpenAIREToEOSCDatasource(JsonElement openaireDatasource) {
@@ -183,7 +182,7 @@ public class OpenAIREDatasourceManager implements OpenAIREDatasourceService {
             JSONArray arr = obj.getJSONArray("datasourceInfo");
             if (arr != null) {
                 if (arr.length() == 0) {
-                    throw new CatalogueResourceNotFoundException(String.format("There is no OpenAIRE Datasource with the given id [%s]", openaireDatasourceID));
+                    throw new ResourceNotFoundException(String.format("There is no OpenAIRE Datasource with the given id [%s]", openaireDatasourceID));
                 } else {
                     JSONObject map = arr.getJSONObject(0);
                     Gson gson = new Gson();
