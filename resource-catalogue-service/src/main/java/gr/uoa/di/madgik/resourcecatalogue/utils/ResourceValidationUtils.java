@@ -35,10 +35,10 @@ public class ResourceValidationUtils {
         resourceType = StringUtils.capitalize(resourceType);
         // check if Resource exists
         try {
-            resourceBundle = serviceBundleService.get(resourceId);
+            resourceBundle = serviceBundleService.get(resourceId, catalogueId, false);
             // check if Service is Public
             if (resourceBundle.getMetadata().isPublished()) {
-                throw new ValidationException(String.format("Please provide a %s ID with no catalogue prefix.", resourceType));
+                throw new ValidationException(String.format("Please provide a non public %s ID.", resourceType));
             }
         } catch (ResourceNotFoundException e) {
             throw new ResourceNotFoundException(String.format("There is no %s with id '%s' in the '%s' Catalogue",
@@ -58,10 +58,10 @@ public class ResourceValidationUtils {
         resourceType = StringUtils.capitalize(resourceType);
         // check if Resource exists
         try {
-            trainingResourceBundle = trainingResourceService.get(resourceId, catalogueId);
+            trainingResourceBundle = trainingResourceService.get(resourceId, catalogueId, false);
             // check if Service is Public
             if (trainingResourceBundle.getMetadata().isPublished()) {
-                throw new ValidationException(String.format("Please provide a %s ID with no catalogue prefix.", resourceType));
+                throw new ValidationException(String.format("Please provide a non public %s ID.", resourceType));
             }
         } catch (ResourceNotFoundException e) {
             throw new ResourceNotFoundException(String.format("There is no %s with id '%s' in the '%s' Catalogue",
