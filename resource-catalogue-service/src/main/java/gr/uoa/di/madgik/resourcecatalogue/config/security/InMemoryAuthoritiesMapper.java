@@ -156,6 +156,8 @@ public class InMemoryAuthoritiesMapper implements AuthoritiesMapper {
 
         Set<GrantedAuthority> authorities = new HashSet<>();
 
+        authorities.add(new SimpleGrantedAuthority("ROLE_USER"));
+
         try {
             if (!lock.tryLock(10, TimeUnit.SECONDS)) {
                 throw new InsufficientAuthenticationException("Could not authorize user. Try again...");

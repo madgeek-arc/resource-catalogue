@@ -154,7 +154,6 @@ public class SecurityConfig {
                             email = ((OidcUserAuthority) authority).getAttributes().get("email").toString();
                         }
                     }
-                    mappedAuthorities.add(new SimpleGrantedAuthority("ROLE_USER"));
                     mappedAuthorities.addAll(authoritiesMapper.getAuthorities(email));
                     logger.info("User '{}' with email '{}' mapped as '{}'", sub, email, mappedAuthorities);
 
@@ -169,7 +168,6 @@ public class SecurityConfig {
                         sub = userAttributes.get("sub").toString();
                         email = userAttributes.get("email").toString();
                     }
-                    mappedAuthorities.add(new SimpleGrantedAuthority("ROLE_USER"));
                     mappedAuthorities.addAll(authoritiesMapper.getAuthorities(email));
                     logger.info("User '{}' with email '{}' mapped as '{}'", sub, email, mappedAuthorities);
 
