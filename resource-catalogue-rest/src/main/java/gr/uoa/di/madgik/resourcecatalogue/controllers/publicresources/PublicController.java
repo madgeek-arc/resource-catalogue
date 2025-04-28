@@ -48,7 +48,7 @@ public class PublicController {
 
     @Operation(summary = "Fetch resources by IDs and resourceTypes (defaults to 'service', 'training_resource').")
     @GetMapping(path = "public/resources/ids",
-            produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+            produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<List<?>> getSomeResources(@RequestParam("ids") String[] ids,
                                                     @RequestParam(value = "resourceTypes", required = false)
                                                     List<String> resourceTypes) {

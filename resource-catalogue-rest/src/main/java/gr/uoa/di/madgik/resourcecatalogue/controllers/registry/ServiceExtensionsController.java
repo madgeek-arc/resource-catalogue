@@ -97,7 +97,7 @@ public class ServiceExtensionsController {
 
     //SECTION: HELPDESK
     @Operation(summary = "Returns the Helpdesk with the given id.")
-    @GetMapping(path = "/helpdesk/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    @GetMapping(path = "/helpdesk/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<Helpdesk> getHelpdesk(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
                                                 @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix) {
         String id = prefix + "/" + suffix;
@@ -105,7 +105,7 @@ public class ServiceExtensionsController {
         return new ResponseEntity<>(helpdesk, HttpStatus.OK);
     }
 
-    @GetMapping(path = "/helpdesk/bundle/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    @GetMapping(path = "/helpdesk/bundle/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     public ResponseEntity<HelpdeskBundle> getHelpdeskBundle(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
                                                             @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix) {
@@ -115,7 +115,7 @@ public class ServiceExtensionsController {
     }
 
     @Operation(summary = "Returns the Helpdesk of the given Service of the given Catalogue.")
-    @GetMapping(path = "/helpdesk/byService/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    @GetMapping(path = "/helpdesk/byService/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<Helpdesk> getHelpdeskByServiceId(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
                                                            @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix,
                                                            @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId,
@@ -134,7 +134,7 @@ public class ServiceExtensionsController {
     @Operation(summary = "Filter a list of Helpdesks based on a set of filters or get a list of all Helpdesks in the Catalogue.")
     @BrowseParameters
     @BrowseCatalogue
-    @GetMapping(path = "/helpdesk/all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    @GetMapping(path = "/helpdesk/all", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<Paging<Helpdesk>> getAllHelpdesks(@Parameter(hidden = true) @RequestParam MultiValueMap<String, Object> allRequestParams) {
         FacetFilter ff = FacetFilter.from(allRequestParams);
         ff.setResourceType("helpdesk");
@@ -145,7 +145,7 @@ public class ServiceExtensionsController {
 
     @BrowseParameters
     @BrowseCatalogue
-    @GetMapping(path = "/helpdesk/bundle/all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    @GetMapping(path = "/helpdesk/bundle/all", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     public ResponseEntity<Paging<HelpdeskBundle>> getAllHelpdeskBundles(@Parameter(hidden = true) @RequestParam MultiValueMap<String, Object> allRequestParams) {
         FacetFilter ff = FacetFilter.from(allRequestParams);
@@ -239,7 +239,7 @@ public class ServiceExtensionsController {
 
     //SECTION: MONITORING
     @Operation(summary = "Returns the Monitoring with the given id.")
-    @GetMapping(path = "/monitoring/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    @GetMapping(path = "/monitoring/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<Monitoring> getMonitoring(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
                                                     @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix) {
         String id = prefix + "/" + suffix;
@@ -247,7 +247,7 @@ public class ServiceExtensionsController {
         return new ResponseEntity<>(monitoring, HttpStatus.OK);
     }
 
-    @GetMapping(path = "/monitoring/bundle/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    @GetMapping(path = "/monitoring/bundle/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     public ResponseEntity<MonitoringBundle> getMonitoringBundle(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
                                                                 @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix) {
@@ -257,7 +257,7 @@ public class ServiceExtensionsController {
     }
 
     @Operation(summary = "Returns the Monitoring of the given Service of the given Catalogue.")
-    @GetMapping(path = "/monitoring/byService/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    @GetMapping(path = "/monitoring/byService/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<Monitoring> getMonitoringByServiceId(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
                                                                @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix,
                                                                @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId,
@@ -275,7 +275,7 @@ public class ServiceExtensionsController {
 
     @Operation(summary = "Filter a list of Monitorings based on a set of filters or get a list of all Monitorings in the Catalogue.")
     @BrowseParameters
-    @GetMapping(path = "monitoring/all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    @GetMapping(path = "monitoring/all", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<Paging<Monitoring>> getAllMonitorings(@Parameter(hidden = true) @RequestParam MultiValueMap<String, Object> allRequestParams) {
         FacetFilter ff = FacetFilter.from(allRequestParams);
         ff.setResourceType("monitoring");
@@ -286,7 +286,7 @@ public class ServiceExtensionsController {
 
     @BrowseParameters
     @BrowseCatalogue
-    @GetMapping(path = "/monitoring/bundle/all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    @GetMapping(path = "/monitoring/bundle/all", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     public ResponseEntity<Paging<MonitoringBundle>> getAllMonitoringBundles(@Parameter(hidden = true) @RequestParam MultiValueMap<String, Object> allRequestParams) {
         FacetFilter ff = FacetFilter.from(allRequestParams);
@@ -297,7 +297,7 @@ public class ServiceExtensionsController {
     }
 
     @Operation(summary = "Returns all the available Monitoring serviceTypes")
-    @GetMapping(path = "/monitoring/serviceTypes", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    @GetMapping(path = "/monitoring/serviceTypes", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<List<Vocabulary>> getAvailableServiceTypes() {
         return new ResponseEntity<>(monitoringService.getAvailableServiceTypes(), HttpStatus.OK);
     }
@@ -360,7 +360,7 @@ public class ServiceExtensionsController {
 
 
     // Argo GRNET Monitoring Status API calls
-    @GetMapping(path = "/monitoring/monitoringAvailability/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    @GetMapping(path = "/monitoring/monitoringAvailability/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE})
     public List<MonitoringStatus> getMonitoringAvailability(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
                                                             @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix,
                                                             @RequestParam String start_time,
@@ -381,7 +381,7 @@ public class ServiceExtensionsController {
         return null;
     }
 
-    @GetMapping(path = "/monitoring/monitoringStatus/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    @GetMapping(path = "/monitoring/monitoringStatus/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE})
     public List<MonitoringStatus> getMonitoringStatus(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
                                                       @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix,
                                                       @RequestParam(defaultValue = "false") Boolean allStatuses) {
@@ -406,7 +406,7 @@ public class ServiceExtensionsController {
         return null;
     }
 
-    @GetMapping(path = "/monitoring/monitoringStatusOnSpecificPeriod/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    @GetMapping(path = "/monitoring/monitoringStatusOnSpecificPeriod/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE})
     public List<MonitoringStatus> getMonitoringStatusOnSpecificPeriod(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
                                                                       @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix,
                                                                       @RequestParam String from,
@@ -429,7 +429,7 @@ public class ServiceExtensionsController {
         return null;
     }
 
-    @GetMapping(path = "/monitoring/monitoringStatus/all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    @GetMapping(path = "/monitoring/monitoringStatus/all", produces = {MediaType.APPLICATION_JSON_VALUE})
     public Map<String, String> getMonitoringStatusForAllServices() {
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(10000);
