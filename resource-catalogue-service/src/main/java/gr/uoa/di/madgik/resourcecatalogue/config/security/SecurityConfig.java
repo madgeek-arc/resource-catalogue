@@ -140,16 +140,19 @@ public class SecurityConfig {
                     OidcIdToken idToken = oidcUserAuthority.getIdToken();
                     OidcUserInfo userInfo = oidcUserAuthority.getUserInfo();
 
-                    if (idToken != null && catalogueProperties.getAdmins().contains(idToken.getClaims().get("email"))) {
+                    if (idToken != null && (catalogueProperties.getAdmins().contains(idToken.getClaims().get("email"))
+                            || catalogueProperties.getOnboardingTeam().contains(idToken.getClaims().get("email")))) {
                         sub = idToken.getClaimAsString("sub");
                         email = idToken.getClaimAsString("email");
-                    } else if (userInfo != null && catalogueProperties.getAdmins().contains(userInfo.getEmail())) {
+                    } else if (userInfo != null && (catalogueProperties.getAdmins().contains(userInfo.getEmail())
+                            || catalogueProperties.getOnboardingTeam().contains(userInfo.getEmail()))) {
                         sub = userInfo.getSubject();
                         email = userInfo.getEmail();
                     } else {
                         if (((OidcUserAuthority) authority).getAttributes() != null
                                 && ((OidcUserAuthority) authority).getAttributes().containsKey("email")
-                                && (catalogueProperties.getAdmins().contains(((OidcUserAuthority) authority).getAttributes().get("email")))) {
+                                && (catalogueProperties.getAdmins().contains(((OidcUserAuthority) authority).getAttributes().get("email"))
+                                || catalogueProperties.getOnboardingTeam().contains(((OidcUserAuthority) authority).getAttributes().get("email")))) {
                             sub = ((OidcUserAuthority) authority).getAttributes().get("sub").toString();
                             email = ((OidcUserAuthority) authority).getAttributes().get("email").toString();
                         }
@@ -164,7 +167,8 @@ public class SecurityConfig {
                     OAuth2UserAuthority oauth2UserAuthority = (OAuth2UserAuthority) authority;
                     Map<String, Object> userAttributes = oauth2UserAuthority.getAttributes();
 
-                    if (userAttributes != null && catalogueProperties.getAdmins().contains(userAttributes.get("email"))) {
+                    if (userAttributes != null && (catalogueProperties.getAdmins().contains(userAttributes.get("email"))
+                            || catalogueProperties.getOnboardingTeam().contains(userAttributes.get("email")))) {
                         sub = userAttributes.get("sub").toString();
                         email = userAttributes.get("email").toString();
                     }
