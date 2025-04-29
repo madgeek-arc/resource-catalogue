@@ -247,6 +247,7 @@ public class InternalToPublicConsistency {
             }
         }
 
+        logger.info("Internal to Public Resource Consistency Logs:\n{}", String.join("\n", logs));
         sendConsistencyEmails(logs);
 
     }
