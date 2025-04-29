@@ -54,9 +54,9 @@ public class Datasource implements Identifiable {
     /**
      * Datasource's original Node
      */
-    @XmlElement(required = true)
-    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
-    @FieldValidation(containsId = true, idClass = Vocabulary.class)
+    @XmlElement
+    @Schema
+    @FieldValidation(nullable = true, containsId = true, idClass = Vocabulary.class)
     @VocabularyValidation(type = Vocabulary.Type.NODE)
     private String node;
 
