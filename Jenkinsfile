@@ -36,10 +36,9 @@ pipeline {
           } else if (env.BRANCH_NAME == 'develop') { // pushes 'develop' images
             TAG = "dev"
           }
-          docker.withRegistry( REGISTRY, REGISTY_CRED ) {
+          docker.withRegistry( "https://$REGISTRY", REGISTY_CRED ) {
             DOCKER_IMAGE.push(${TAG})
           }
-          sh "docker rmi $REGISTRY/$IMAGE_NAME:$TAG"
         }
       }
     }
