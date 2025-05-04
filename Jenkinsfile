@@ -32,7 +32,7 @@ pipeline {
       steps{
         script {
           if (env.BRANCH_NAME == 'master') { // pushes 'prod' and 'beta' images
-            TAG = sh(script: 'echo "${VERSION}" | sed s/SNAPSHOT/beta/g', returnStdout: true).trim()
+            TAG = sh(script: "echo \"${VERSION}\" | sed -e 's/SNAPSHOT/beta/g'", returnStdout: true).trim()
           } else if (env.BRANCH_NAME == 'develop') { // pushes 'develop' images
             TAG = "dev"
           }
