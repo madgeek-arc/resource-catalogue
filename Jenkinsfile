@@ -4,7 +4,7 @@ pipeline {
   environment {
     IMAGE_NAME = "resource-catalogue"
     REGISTRY = "docker.madgik.di.uoa.gr"
-    REGISTY_CRED = 'docker-registry'
+    REGISTRY_CRED = 'docker-registry'
     DOCKER_IMAGE = ''
     VERSION = ''
   }
@@ -19,7 +19,7 @@ pipeline {
     stage('Building image') {
       steps{
         script {
-          DOCKER_IMAGE = docker.build("${IMAGE_NAME}", "--build-arg profile=beyond .")
+          DOCKER_IMAGE = docker.build("${REGISTRY}/${IMAGE_NAME}", "--build-arg profile=beyond .")
         }
       }
     }
@@ -36,8 +36,13 @@ pipeline {
           } else if (env.BRANCH_NAME == 'develop') { // pushes 'develop' images
             TAG = "dev"
           }
-          docker.withRegistry( "https://$REGISTRY", REGISTY_CRED ) {
-            DOCKER_IMAGE.push(${TAG})
+          withCredentials([usernamePassword(credentialsId: "${REGISTRY_CRED}", usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+              sh """
+                  echo "Pushing image: ${REGISTRY}/${IMAGE_NAME}:${TAG}"
+                  echo "$DOCKER_PASS" | docker login ${REGISTRY} -u "$DOCKER_USER" --password-stdin
+              """
+              DOCKER_IMAGE.push("${TAG}")
+              sh "docker rmi ${DOCKER_IMAGE.id}"
           }
         }
       }
