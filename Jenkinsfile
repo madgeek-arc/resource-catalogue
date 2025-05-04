@@ -16,34 +16,48 @@ pipeline {
         }
       }
     }
-    stage('Building image') {
+    stage('Create Image Tag') {
+      steps {
+        script {
+          if (env.BRANCH_NAME == 'master') { // creates 'prod' and 'beta' image tags
+            TAG = sh(script: "echo \"${VERSION}\" | sed -e 's/SNAPSHOT/beta/g'", returnStdout: true).trim()
+          } else if (env.BRANCH_NAME == 'develop') { // creates 'develop' image tag
+            TAG = "dev"
+          } else { // creates tags for all other branches
+            TAG = env.BRANCH_NAME.replaceAll('/', '-')
+          }
+        }
+      }
+    }
+    stage('Build Image') {
       steps{
         script {
-          DOCKER_IMAGE = docker.build("${REGISTRY}/${IMAGE_NAME}", "--build-arg profile=beyond .")
+          DOCKER_IMAGE = docker.build("${REGISTRY}/${IMAGE_NAME}:${TAG}", "--build-arg profile=beyond .")
         }
       }
     }
     stage('Upload Image') {
-      when {
+      when { // upload images only from 'develop' or 'master' branches
         expression {
           return env.BRANCH_NAME == 'master' || env.BRANCH_NAME == 'develop'
         }
       }
       steps{
         script {
-          if (env.BRANCH_NAME == 'master') { // pushes 'prod' and 'beta' images
-            TAG = sh(script: "echo \"${VERSION}\" | sed -e 's/SNAPSHOT/beta/g'", returnStdout: true).trim()
-          } else if (env.BRANCH_NAME == 'develop') { // pushes 'develop' images
-            TAG = "dev"
-          }
           withCredentials([usernamePassword(credentialsId: "${REGISTRY_CRED}", usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
               sh """
-                  echo "Pushing image: ${REGISTRY}/${IMAGE_NAME}:${TAG}"
+                  echo "Pushing image: ${DOCKER_IMAGE.id}"
                   echo "$DOCKER_PASS" | docker login ${REGISTRY} -u "$DOCKER_USER" --password-stdin
               """
-              DOCKER_IMAGE.push("${TAG}")
-              sh "docker rmi ${DOCKER_IMAGE.id}"
+              DOCKER_IMAGE.push()
           }
+        }
+      }
+    }
+    stage('Remove Image') {
+      steps{
+        script {
+          sh "docker rmi ${DOCKER_IMAGE.id}"
         }
       }
     }
