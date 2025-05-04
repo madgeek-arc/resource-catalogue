@@ -1,2 +1,4 @@
-**/target
-**/*.iml
+target/
+**/target/
+.git/
+*.log
