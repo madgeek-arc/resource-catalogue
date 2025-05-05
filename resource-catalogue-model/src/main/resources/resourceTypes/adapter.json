@@ -1,0 +1,29 @@
+{
+  "indexFields": [
+    {
+      "label": null,
+      "multivalued": false,
+      "name": "resource_internal_id",
+      "path": "$.adapter.id",
+      "primaryKey": true,
+      "type": "java.lang.String"
+    },
+    {
+      "label": "Adapter Name",
+      "multivalued": false,
+      "name": "name",
+      "path": "$.adapter.name",
+      "type": "java.lang.String"
+    }
+  ],
+  "indexMapperClass": "gr.uoa.di.madgik.registry.index.DefaultIndexMapper",
+  "aliases": [
+    "resourceTypes"
+  ],
+  "name": "adapter",
+  "payloadType": "json",
+  "properties": {
+    "class": "gr.uoa.di.madgik.resourcecatalogue.domain.AdapterBundle"
+  },
+  "schema": "{\n\t\"$schema\": \"https://json-schema.org/draft/2019-09/schema\"\n}"
+}

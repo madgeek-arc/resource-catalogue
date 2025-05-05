@@ -1,0 +1,79 @@
+{
+  "$schema" : "https://json-schema.org/draft/2020-12/schema",
+  "type" : "object",
+  "properties" : {
+    "changeLog" : {
+      "type" : "string"
+    },
+    "description" : {
+      "type" : "string"
+    },
+    "documentation" : {
+      "type" : "string",
+      "format" : "uri"
+    },
+    "email" : {
+      "type" : "array",
+      "items" : {
+        "type" : "string"
+      }
+    },
+    "funding" : {
+      "type" : "array",
+      "items" : {
+        "type" : "string"
+      }
+    },
+    "id" : {
+      "type" : "string"
+    },
+    "lastUpdate" : {
+      "type" : "string",
+      "format" : "date-time"
+    },
+    "license" : {
+      "type" : "string"
+    },
+    "linkedResource" : {
+      "type" : "string"
+    },
+    "logo" : {
+      "type" : "string"
+    },
+    "maintainers" : {
+      "type" : "array",
+      "items" : { }
+    },
+    "name" : {
+      "type" : "string"
+    },
+    "organization" : {
+      "type" : "string"
+    },
+    "organizationURL" : {
+      "type" : "string",
+      "format" : "uri"
+    },
+    "pkg" : {
+      "type" : "array",
+      "items" : {
+        "type" : "string",
+        "format" : "uri"
+      }
+    },
+    "programmingLanguage" : {
+      "type" : "string"
+    },
+    "repository" : {
+      "type" : "string",
+      "format" : "uri"
+    },
+    "tagline" : {
+      "type" : "string"
+    },
+    "version" : {
+      "type" : "string"
+    }
+  },
+  "additionalProperties" : false
+}
