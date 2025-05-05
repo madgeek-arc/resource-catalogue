@@ -97,9 +97,6 @@
     "active" : {
       "type" : "boolean"
     },
-    "catalogueId" : {
-      "type" : "string"
-    },
     "draft" : {
       "type" : "boolean"
     },

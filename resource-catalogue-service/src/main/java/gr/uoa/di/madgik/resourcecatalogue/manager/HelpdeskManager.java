@@ -31,6 +31,7 @@ import gr.uoa.di.madgik.resourcecatalogue.utils.ProviderResourcesCommonMethods;
 import gr.uoa.di.madgik.resourcecatalogue.utils.ResourceValidationUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.core.Authentication;
 
@@ -47,6 +48,9 @@ public class HelpdeskManager extends ResourceCatalogueManager<HelpdeskBundle> im
     private final RegistrationMailService registrationMailService;
     private final ProviderResourcesCommonMethods commonMethods;
     private final IdCreator idCreator;
+
+    @Value("${catalogue.id}")
+    private String catalogueId;
 
     public HelpdeskManager(ServiceBundleService<ServiceBundle> serviceBundleService,
                            TrainingResourceService trainingResourceService,
@@ -73,7 +77,7 @@ public class HelpdeskManager extends ResourceCatalogueManager<HelpdeskBundle> im
     @Override
     public HelpdeskBundle validate(HelpdeskBundle helpdeskBundle, String resourceType) {
         String resourceId = helpdeskBundle.getHelpdesk().getServiceId();
-        String catalogueId = helpdeskBundle.getCatalogueId();
+        String catalogueId = helpdeskBundle.getHelpdesk().getCatalogueId();
 
         HelpdeskBundle existingHelpdesk = get(resourceId, catalogueId);
         if (existingHelpdesk != null) {
@@ -94,6 +98,11 @@ public class HelpdeskManager extends ResourceCatalogueManager<HelpdeskBundle> im
 
     @Override
     public HelpdeskBundle add(HelpdeskBundle helpdesk, String resourceType, Authentication auth) {
+        if (helpdesk.getHelpdesk().getCatalogueId() == null || helpdesk.getHelpdesk().getCatalogueId().isEmpty()) {
+            // set catalogueId = eosc
+            helpdesk.getHelpdesk().setCatalogueId(catalogueId);
+        }
+
         validate(helpdesk, resourceType);
 
         helpdesk.setId(idCreator.generate(getResourceTypeName()));
@@ -185,14 +194,14 @@ public class HelpdeskManager extends ResourceCatalogueManager<HelpdeskBundle> im
     public void delete(HelpdeskBundle helpdesk) {
         super.delete(helpdesk);
         logger.info("Deleted Helpdesk with id '{}' of the Catalogue '{}'",
-                helpdesk.getHelpdesk().getId(), helpdesk.getCatalogueId());
+                helpdesk.getHelpdesk().getId(), helpdesk.getHelpdesk().getCatalogueId());
     }
 
     public HelpdeskBundle createPublicResource(HelpdeskBundle helpdeskBundle, Authentication auth) {
         logger.info("User '{}-{}' attempts to create a Public Helpdesk from Helpdesk '{}' of the '{}' Catalogue",
                 AuthenticationInfo.getFullName(auth),
                 AuthenticationInfo.getEmail(auth).toLowerCase(),
-                helpdeskBundle.getId(), helpdeskBundle.getCatalogueId());
+                helpdeskBundle.getId(), helpdeskBundle.getHelpdesk().getCatalogueId());
         publicHelpdeskManager.add(helpdeskBundle, auth);
         return helpdeskBundle;
     }

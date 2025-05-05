@@ -491,35 +491,35 @@ public class TrainingResourceManager extends ResourceCatalogueManager<TrainingRe
             try {
                 logger.debug("Setting Helpdesk '{}' of the Training Resource '{}' of the '{}' Catalogue to active: '{}'",
                         bundle.getId(), ((HelpdeskBundle) bundle).getHelpdesk().getServiceId(),
-                        ((HelpdeskBundle) bundle).getCatalogueId(), bundle.isActive());
+                        ((HelpdeskBundle) bundle).getHelpdesk().getCatalogueId(), bundle.isActive());
                 helpdeskService.updateBundle((HelpdeskBundle) bundle, auth);
                 HelpdeskBundle publicHelpdeskBundle =
                         publicHelpdeskManager.getOrElseReturnNull(bundle.getIdentifiers().getPid(),
-                                ((HelpdeskBundle) bundle).getCatalogueId());
+                                ((HelpdeskBundle) bundle).getHelpdesk().getCatalogueId());
                 if (publicHelpdeskBundle != null) {
                     publicHelpdeskManager.update((HelpdeskBundle) bundle, auth);
                 }
             } catch (ResourceNotFoundException e) {
                 logger.error("Could not update Helpdesk '{}' of the Training Resource '{}' of the '{}' Catalogue",
                         bundle.getId(), ((HelpdeskBundle) bundle).getHelpdesk().getServiceId(),
-                        ((HelpdeskBundle) bundle).getCatalogueId());
+                        ((HelpdeskBundle) bundle).getHelpdesk().getCatalogueId());
             }
         } else {
             try {
                 logger.debug("Setting Monitoring '{}' of the Training Resource '{}' of the '{}' Catalogue to active: '{}'",
                         bundle.getId(), ((MonitoringBundle) bundle).getMonitoring().getServiceId(),
-                        ((MonitoringBundle) bundle).getCatalogueId(), bundle.isActive());
+                        ((MonitoringBundle) bundle).getMonitoring().getCatalogueId(), bundle.isActive());
                 monitoringService.updateBundle((MonitoringBundle) bundle, auth);
                 MonitoringBundle publicMonitoringBundle =
                         publicMonitoringManager.getOrElseReturnNull(bundle.getIdentifiers().getPid(),
-                                ((MonitoringBundle) bundle).getCatalogueId());
+                                ((MonitoringBundle) bundle).getMonitoring().getCatalogueId());
                 if (publicMonitoringBundle != null) {
                     publicMonitoringManager.update((MonitoringBundle) bundle, auth);
                 }
             } catch (ResourceNotFoundException e) {
                 logger.error("Could not update Monitoring '{}' of the Training Resource '{}' of the '{}' Catalogue",
                         bundle.getId(), ((MonitoringBundle) bundle).getMonitoring().getServiceId(),
-                        ((MonitoringBundle) bundle).getCatalogueId());
+                        ((MonitoringBundle) bundle).getMonitoring().getCatalogueId());
             }
         }
     }

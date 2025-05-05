@@ -16,6 +16,20 @@
       "type": "java.lang.String"
     },
     {
+      "label": "Catalogue ID",
+      "multivalued": false,
+      "name": "catalogue_id",
+      "path": "$.monitoring.catalogueId",
+      "type": "java.lang.String"
+    },
+    {
+      "label": "Node",
+      "multivalued": false,
+      "name": "node",
+      "path": "$.monitoring.node",
+      "type": "java.lang.String"
+    },
+    {
       "label": "Monitored by",
       "multivalued": false,
       "name": "monitored_by",
@@ -34,13 +48,6 @@
       "multivalued": true,
       "name": "endpoint",
       "path": "$.monitoring.monitoringGroups[*].endpoint",
-      "type": "java.lang.String"
-    },
-    {
-      "label": "Catalogue ID",
-      "multivalued": false,
-      "name": "catalogue_id",
-      "path": "$.catalogueId",
       "type": "java.lang.String"
     },
     {

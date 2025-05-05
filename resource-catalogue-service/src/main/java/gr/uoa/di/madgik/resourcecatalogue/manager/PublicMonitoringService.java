@@ -100,8 +100,10 @@ public class PublicMonitoringService extends ResourceCatalogueManager<Monitoring
 
     @Override
     public MonitoringBundle update(MonitoringBundle monitoringBundle, Authentication authentication) {
-        MonitoringBundle published = super.get(monitoringBundle.getIdentifiers().getPid(), monitoringBundle.getCatalogueId(), true);
-        MonitoringBundle ret = super.get(monitoringBundle.getIdentifiers().getPid(), monitoringBundle.getCatalogueId(), true);
+        MonitoringBundle published = super.get(monitoringBundle.getIdentifiers().getPid(),
+                monitoringBundle.getMonitoring().getCatalogueId(), true);
+        MonitoringBundle ret = super.get(monitoringBundle.getIdentifiers().getPid(),
+                monitoringBundle.getMonitoring().getCatalogueId(), true);
         try {
             BeanUtils.copyProperties(ret, monitoringBundle);
         } catch (IllegalAccessException | InvocationTargetException e) {
@@ -124,7 +126,7 @@ public class PublicMonitoringService extends ResourceCatalogueManager<Monitoring
     public void delete(MonitoringBundle monitoringBundle) {
         try {
             MonitoringBundle publicMonitoringBundle = get(monitoringBundle.getIdentifiers().getPid(),
-                    monitoringBundle.getCatalogueId(), true);
+                    monitoringBundle.getMonitoring().getCatalogueId(), true);
             logger.info("Deleting public Monitoring with id '{}'", publicMonitoringBundle.getId());
             super.delete(publicMonitoringBundle);
             jmsService.convertAndSendTopic("monitoring.delete", publicMonitoringBundle);
@@ -137,9 +139,11 @@ public class PublicMonitoringService extends ResourceCatalogueManager<Monitoring
         // serviceId
         Bundle<?> resourceBundle;
         try {
-            resourceBundle = serviceBundleService.get(bundle.getMonitoring().getServiceId(), bundle.getCatalogueId(), false);
+            resourceBundle = serviceBundleService.get(bundle.getMonitoring().getServiceId(),
+                    bundle.getMonitoring().getCatalogueId(), false);
         } catch (ResourceNotFoundException e) {
-            resourceBundle = trainingResourceService.get(bundle.getMonitoring().getServiceId(), bundle.getCatalogueId(), false);
+            resourceBundle = trainingResourceService.get(bundle.getMonitoring().getServiceId(),
+                    bundle.getMonitoring().getCatalogueId(), false);
         }
         bundle.getMonitoring().setServiceId(resourceBundle.getIdentifiers().getPid());
     }

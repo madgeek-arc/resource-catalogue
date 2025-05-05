@@ -47,7 +47,7 @@ public class Datasource implements Identifiable {
     private String serviceId;
 
     @XmlElement(required = true)
-    @Schema
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     @FieldValidation(containsId = true, idClass = Catalogue.class)
     private String catalogueId;
 

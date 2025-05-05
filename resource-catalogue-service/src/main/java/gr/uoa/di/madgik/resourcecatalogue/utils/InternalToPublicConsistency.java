@@ -216,10 +216,10 @@ public class InternalToPublicConsistency {
             // try and get its Public instance
             try {
                 publicHelpdeskService.get(helpdeskBundle.getIdentifiers().getPid(),
-                        helpdeskBundle.getCatalogueId(), true);
+                        helpdeskBundle.getHelpdesk().getCatalogueId(), true);
             } catch (ResourceException | ResourceNotFoundException e) {
                 logs.add(String.format("Helpdesk with ID [%s] of the Catalogue [%s] is missing its Public instance [%s]",
-                        helpdeskBundle.getId(), helpdeskBundle.getCatalogueId(), helpdeskBundle.getIdentifiers().getPid()));
+                        helpdeskBundle.getId(), helpdeskBundle.getHelpdesk().getCatalogueId(), helpdeskBundle.getIdentifiers().getPid()));
             }
         }
 
@@ -228,10 +228,10 @@ public class InternalToPublicConsistency {
             // try and get its Public instance
             try {
                 publicMonitoringService.get(monitoringBundle.getIdentifiers().getPid(),
-                        monitoringBundle.getCatalogueId(), true);
+                        monitoringBundle.getMonitoring().getCatalogueId(), true);
             } catch (ResourceException | ResourceNotFoundException e) {
                 logs.add(String.format("Monitoring with ID [%s] of the Catalogue [%s] is missing its Public instance [%s]",
-                        monitoringBundle.getId(), monitoringBundle.getCatalogueId(), monitoringBundle.getIdentifiers().getPid()));
+                        monitoringBundle.getId(), monitoringBundle.getMonitoring().getCatalogueId(), monitoringBundle.getIdentifiers().getPid()));
             }
         }
 

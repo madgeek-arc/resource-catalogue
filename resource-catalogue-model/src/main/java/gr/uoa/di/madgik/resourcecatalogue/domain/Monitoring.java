@@ -40,6 +40,17 @@ public class Monitoring implements Identifiable {
     @FieldValidation(containsId = true, containsResourceId = true)
     private String serviceId;
 
+    @XmlElement
+    @Schema
+    @FieldValidation(nullable = true, containsId = true, idClass = Catalogue.class)
+    private String catalogueId;
+
+    @XmlElement
+    @Schema
+    @FieldValidation(nullable = true, containsId = true, idClass = Vocabulary.class)
+    @VocabularyValidation(type = Vocabulary.Type.NODE)
+    private String node;
+
     @XmlElement()
     @Schema
     @FieldValidation(nullable = true, containsId = true, idClass = Vocabulary.class)
@@ -55,24 +66,25 @@ public class Monitoring implements Identifiable {
     public Monitoring() {
     }
 
-    public Monitoring(String id, String serviceId, String monitoredBy, List<MonitoringGroup> monitoringGroups) {
+    public Monitoring(String id, String serviceId, String catalogueId, String node, String monitoredBy, List<MonitoringGroup> monitoringGroups) {
         this.id = id;
         this.serviceId = serviceId;
+        this.catalogueId = catalogueId;
+        this.node = node;
         this.monitoredBy = monitoredBy;
         this.monitoringGroups = monitoringGroups;
     }
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Monitoring that = (Monitoring) o;
-        return Objects.equals(id, that.id) && Objects.equals(serviceId, that.serviceId) && Objects.equals(monitoredBy, that.monitoredBy) && Objects.equals(monitoringGroups, that.monitoringGroups);
+        return Objects.equals(id, that.id) && Objects.equals(serviceId, that.serviceId) && Objects.equals(catalogueId, that.catalogueId) && Objects.equals(node, that.node) && Objects.equals(monitoredBy, that.monitoredBy) && Objects.equals(monitoringGroups, that.monitoringGroups);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, serviceId, monitoredBy, monitoringGroups);
+        return Objects.hash(id, serviceId, catalogueId, node, monitoredBy, monitoringGroups);
     }
 
     @Override
@@ -80,6 +92,8 @@ public class Monitoring implements Identifiable {
         return "Monitoring{" +
                 "id='" + id + '\'' +
                 ", serviceId='" + serviceId + '\'' +
+                ", catalogueId='" + catalogueId + '\'' +
+                ", node='" + node + '\'' +
                 ", monitoredBy='" + monitoredBy + '\'' +
                 ", monitoringGroups=" + monitoringGroups +
                 '}';
@@ -101,6 +115,22 @@ public class Monitoring implements Identifiable {
 
     public void setServiceId(String serviceId) {
         this.serviceId = serviceId;
+    }
+
+    public String getCatalogueId() {
+        return catalogueId;
+    }
+
+    public void setCatalogueId(String catalogueId) {
+        this.catalogueId = catalogueId;
+    }
+
+    public String getNode() {
+        return node;
+    }
+
+    public void setNode(String node) {
+        this.node = node;
     }
 
     public String getMonitoredBy() {

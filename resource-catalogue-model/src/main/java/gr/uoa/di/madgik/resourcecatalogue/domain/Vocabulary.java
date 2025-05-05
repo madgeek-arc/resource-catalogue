@@ -116,6 +116,9 @@ public class Vocabulary implements Identifiable {
         TR_EXPERTISE_LEVEL("Training Resource expertise level"),
         TR_CONTENT_RESOURCE_TYPE("Training Resource content resource type"),
         TR_QUALIFICATION("Training Resource qualification"),
+        // Adapter
+        ADAPTER_PROGRAMMING_LANGUAGE("Adapter programming language"),
+        ADAPTER_LICENSE("Adapter license"),
         // Monitoring
         MONITORING_MONITORED_BY("Monitored by"),
         // Bundle Extras

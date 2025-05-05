@@ -162,7 +162,7 @@ public class ServiceExtensionsController {
                                                 @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId,
                                                 @RequestParam String resourceType,
                                                 @Parameter(hidden = true) Authentication auth) {
-        HelpdeskBundle helpdeskBundle = helpdeskService.add(new HelpdeskBundle(helpdesk, catalogueId), resourceType, auth);
+        HelpdeskBundle helpdeskBundle = helpdeskService.add(new HelpdeskBundle(helpdesk), resourceType, auth);
         return new ResponseEntity<>(helpdeskBundle.getHelpdesk(), HttpStatus.CREATED);
     }
 
@@ -309,7 +309,7 @@ public class ServiceExtensionsController {
                                                     @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId,
                                                     @RequestParam String resourceType,
                                                     @Parameter(hidden = true) Authentication auth) {
-        MonitoringBundle monitoringBundle = monitoringService.add(new MonitoringBundle(monitoring, catalogueId), resourceType, auth);
+        MonitoringBundle monitoringBundle = monitoringService.add(new MonitoringBundle(monitoring), resourceType, auth);
         return new ResponseEntity<>(monitoringBundle.getMonitoring(), HttpStatus.CREATED);
     }
 

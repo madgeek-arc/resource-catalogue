@@ -16,6 +16,13 @@
       "type": "java.lang.String"
     },
     {
+      "label": "Node",
+      "multivalued": false,
+      "name": "node",
+      "path": "$.trainingResource.node",
+      "type": "java.lang.String"
+    },
+    {
       "label": "Resource Organisation",
       "multivalued": false,
       "name": "resource_organisation",

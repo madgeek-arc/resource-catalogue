@@ -265,7 +265,8 @@ public class MigrationManager implements MigrationService {
         for (HelpdeskBundle helpdeskBundle : allHelpdeskBundles) {
             if (helpdeskBundle.getHelpdesk().getServiceId().equals(oldResourceId)) {
                 helpdeskBundle.getHelpdesk().setServiceId(newResourceId);
-                Resource resource = helpdeskManager.getResource(helpdeskBundle.getId(), helpdeskBundle.getCatalogueId(), false);
+                Resource resource = helpdeskManager.getResource(helpdeskBundle.getId(),
+                        helpdeskBundle.getHelpdesk().getCatalogueId(), false);
                 resource.setPayload(helpdeskManager.serialize(helpdeskBundle));
                 resourceService.updateResource(resource);
                 jmsService.convertAndSendTopic("helpdesk.update", helpdeskBundle);
@@ -275,7 +276,8 @@ public class MigrationManager implements MigrationService {
         for (MonitoringBundle monitoringBundle : allMonitoringBundles) {
             if (monitoringBundle.getMonitoring().getServiceId().equals(oldResourceId)) {
                 monitoringBundle.getMonitoring().setServiceId(newResourceId);
-                Resource resource = monitoringManager.getResource(monitoringBundle.getId(), monitoringBundle.getCatalogueId(), false);
+                Resource resource = monitoringManager.getResource(monitoringBundle.getId(),
+                        monitoringBundle.getMonitoring().getCatalogueId(), false);
                 resource.setPayload(monitoringManager.serialize(monitoringBundle));
                 resourceService.updateResource(resource);
                 jmsService.convertAndSendTopic("monitoring.update", monitoringBundle);

@@ -97,8 +97,8 @@ public class PublicHelpdeskService extends ResourceCatalogueManager<HelpdeskBund
 
     @Override
     public HelpdeskBundle update(HelpdeskBundle helpdeskBundle, Authentication authentication) {
-        HelpdeskBundle published = super.get(helpdeskBundle.getIdentifiers().getPid(), helpdeskBundle.getCatalogueId(), true);
-        HelpdeskBundle ret = super.get(helpdeskBundle.getIdentifiers().getPid(), helpdeskBundle.getCatalogueId(), true);
+        HelpdeskBundle published = super.get(helpdeskBundle.getIdentifiers().getPid(), helpdeskBundle.getHelpdesk().getCatalogueId(), true);
+        HelpdeskBundle ret = super.get(helpdeskBundle.getIdentifiers().getPid(), helpdeskBundle.getHelpdesk().getCatalogueId(), true);
         try {
             BeanUtils.copyProperties(ret, helpdeskBundle);
         } catch (IllegalAccessException | InvocationTargetException e) {
@@ -120,7 +120,8 @@ public class PublicHelpdeskService extends ResourceCatalogueManager<HelpdeskBund
     @Override
     public void delete(HelpdeskBundle helpdeskBundle) {
         try {
-            HelpdeskBundle publicHelpdeskBundle = get(helpdeskBundle.getIdentifiers().getPid(), helpdeskBundle.getCatalogueId(), true);
+            HelpdeskBundle publicHelpdeskBundle = get(helpdeskBundle.getIdentifiers().getPid(),
+                    helpdeskBundle.getHelpdesk().getCatalogueId(), true);
             logger.info("Deleting public Helpdesk with id '{}'", publicHelpdeskBundle.getId());
             super.delete(publicHelpdeskBundle);
             jmsService.convertAndSendTopic("helpdesk.delete", publicHelpdeskBundle);
@@ -133,9 +134,9 @@ public class PublicHelpdeskService extends ResourceCatalogueManager<HelpdeskBund
         // serviceId
         Bundle<?> resourceBundle;
         try {
-            resourceBundle = serviceBundleService.get(bundle.getHelpdesk().getServiceId(), bundle.getCatalogueId(), false);
+            resourceBundle = serviceBundleService.get(bundle.getHelpdesk().getServiceId(), bundle.getHelpdesk().getCatalogueId(), false);
         } catch (ResourceNotFoundException e) {
-            resourceBundle = trainingResourceService.get(bundle.getHelpdesk().getServiceId(), bundle.getCatalogueId(), false);
+            resourceBundle = trainingResourceService.get(bundle.getHelpdesk().getServiceId(), bundle.getHelpdesk().getCatalogueId(), false);
         }
         bundle.getHelpdesk().setServiceId(resourceBundle.getIdentifiers().getPid());
     }

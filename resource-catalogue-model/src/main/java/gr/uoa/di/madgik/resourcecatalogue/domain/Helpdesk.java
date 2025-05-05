@@ -17,6 +17,7 @@
 package gr.uoa.di.madgik.resourcecatalogue.domain;
 
 import gr.uoa.di.madgik.resourcecatalogue.annotation.FieldValidation;
+import gr.uoa.di.madgik.resourcecatalogue.annotation.VocabularyValidation;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlElementWrapper;
@@ -39,6 +40,17 @@ public class Helpdesk implements Identifiable {
     @Schema
     @FieldValidation(containsId = true, containsResourceId = true)
     private String serviceId;
+
+    @XmlElement
+    @Schema
+    @FieldValidation(nullable = true, containsId = true, idClass = Catalogue.class)
+    private String catalogueId;
+
+    @XmlElement
+    @Schema
+    @FieldValidation(nullable = true, containsId = true, idClass = Vocabulary.class)
+    @VocabularyValidation(type = Vocabulary.Type.NODE)
+    private String node;
 
     @XmlElementWrapper(name = "services")
     @XmlElement(name = "service")
@@ -89,9 +101,11 @@ public class Helpdesk implements Identifiable {
     public Helpdesk() {
     }
 
-    public Helpdesk(String id, String serviceId, List<String> services, String helpdeskType, List<String> supportGroups, String organisation, List<String> emails, List<String> agents, List<String> signatures, Boolean ticketPreservation, Boolean webform) {
+    public Helpdesk(String id, String serviceId, String catalogueId, String node, List<String> services, String helpdeskType, List<String> supportGroups, String organisation, List<String> emails, List<String> agents, List<String> signatures, Boolean ticketPreservation, Boolean webform) {
         this.id = id;
         this.serviceId = serviceId;
+        this.catalogueId = catalogueId;
+        this.node = node;
         this.services = services;
         this.helpdeskType = helpdeskType;
         this.supportGroups = supportGroups;
@@ -133,22 +147,23 @@ public class Helpdesk implements Identifiable {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Helpdesk helpdesk = (Helpdesk) o;
-        return Objects.equals(id, helpdesk.id) && Objects.equals(serviceId, helpdesk.serviceId) && Objects.equals(services, helpdesk.services) && Objects.equals(helpdeskType, helpdesk.helpdeskType) && Objects.equals(supportGroups, helpdesk.supportGroups) && Objects.equals(organisation, helpdesk.organisation) && Objects.equals(emails, helpdesk.emails) && Objects.equals(agents, helpdesk.agents) && Objects.equals(signatures, helpdesk.signatures) && Objects.equals(ticketPreservation, helpdesk.ticketPreservation) && Objects.equals(webform, helpdesk.webform);
+        return Objects.equals(id, helpdesk.id) && Objects.equals(serviceId, helpdesk.serviceId) && Objects.equals(catalogueId, helpdesk.catalogueId) && Objects.equals(node, helpdesk.node) && Objects.equals(services, helpdesk.services) && Objects.equals(helpdeskType, helpdesk.helpdeskType) && Objects.equals(supportGroups, helpdesk.supportGroups) && Objects.equals(organisation, helpdesk.organisation) && Objects.equals(emails, helpdesk.emails) && Objects.equals(agents, helpdesk.agents) && Objects.equals(signatures, helpdesk.signatures) && Objects.equals(ticketPreservation, helpdesk.ticketPreservation) && Objects.equals(webform, helpdesk.webform);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, serviceId, services, helpdeskType, supportGroups, organisation, emails, agents, signatures, ticketPreservation, webform);
+        return Objects.hash(id, serviceId, catalogueId, node, services, helpdeskType, supportGroups, organisation, emails, agents, signatures, ticketPreservation, webform);
     }
 
     @Override
     public String toString() {
         return "Helpdesk{" +
                 "id='" + id + '\'' +
-                ", serviceId=" + serviceId +
+                ", serviceId='" + serviceId + '\'' +
+                ", catalogueId='" + catalogueId + '\'' +
+                ", node='" + node + '\'' +
                 ", services=" + services +
                 ", helpdeskType='" + helpdeskType + '\'' +
                 ", supportGroups=" + supportGroups +
@@ -177,6 +192,22 @@ public class Helpdesk implements Identifiable {
 
     public void setServiceId(String serviceId) {
         this.serviceId = serviceId;
+    }
+
+    public String getCatalogueId() {
+        return catalogueId;
+    }
+
+    public void setCatalogueId(String catalogueId) {
+        this.catalogueId = catalogueId;
+    }
+
+    public String getNode() {
+        return node;
+    }
+
+    public void setNode(String node) {
+        this.node = node;
     }
 
     public List<String> getServices() {

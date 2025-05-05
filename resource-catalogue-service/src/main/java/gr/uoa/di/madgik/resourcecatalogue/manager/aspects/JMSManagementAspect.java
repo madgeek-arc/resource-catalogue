@@ -85,7 +85,8 @@ public class JMSManagementAspect {
             returning = "helpdeskBundle")
     public void addHelpdeskAsPublic(final HelpdeskBundle helpdeskBundle) {
         try {
-            publicHelpdeskManager.get(helpdeskBundle.getIdentifiers().getPid(), helpdeskBundle.getCatalogueId(), true);
+            publicHelpdeskManager.get(helpdeskBundle.getIdentifiers().getPid(),
+                    helpdeskBundle.getHelpdesk().getCatalogueId(), true);
         } catch (ResourceException | ResourceNotFoundException e) {
             publicHelpdeskManager.add(ObjectUtils.clone(helpdeskBundle), null);
         }
@@ -115,7 +116,8 @@ public class JMSManagementAspect {
             returning = "monitoringBundle")
     public void addMonitoringAsPublic(final MonitoringBundle monitoringBundle) {
         try {
-            publicMonitoringManager.get(monitoringBundle.getIdentifiers().getPid(), monitoringBundle.getCatalogueId(), true);
+            publicMonitoringManager.get(monitoringBundle.getIdentifiers().getPid(),
+                    monitoringBundle.getMonitoring().getCatalogueId(), true);
         } catch (ResourceException | ResourceNotFoundException e) {
             publicMonitoringManager.add(ObjectUtils.clone(monitoringBundle), null);
         }

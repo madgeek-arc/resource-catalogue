@@ -48,6 +48,9 @@ public class MonitoringManager extends ResourceCatalogueManager<MonitoringBundle
     private final RegistrationMailService registrationMailService;
     private final ProviderResourcesCommonMethods commonMethods;
 
+    @Value("${catalogue.id}")
+    private String catalogueId;
+
     @Value("${argo.grnet.monitoring.token:}")
     private String monitoringToken;
     @Value("${argo.grnet.monitoring.service.types:}")
@@ -81,7 +84,7 @@ public class MonitoringManager extends ResourceCatalogueManager<MonitoringBundle
     @Override
     public MonitoringBundle validate(MonitoringBundle monitoringBundle, String resourceType) {
         String resourceId = monitoringBundle.getMonitoring().getServiceId();
-        String catalogueId = monitoringBundle.getCatalogueId();
+        String catalogueId = monitoringBundle.getMonitoring().getCatalogueId();
 
         MonitoringBundle existingMonitoring = get(resourceId, catalogueId);
         if (existingMonitoring != null) {
@@ -109,6 +112,11 @@ public class MonitoringManager extends ResourceCatalogueManager<MonitoringBundle
 
     @Override
     public MonitoringBundle add(MonitoringBundle monitoring, String resourceType, Authentication auth) {
+        if (monitoring.getMonitoring().getCatalogueId() == null || monitoring.getMonitoring().getCatalogueId().isEmpty()) {
+            // set catalogueId = eosc
+            monitoring.getMonitoring().setCatalogueId(catalogueId);
+        }
+
         validate(monitoring, resourceType);
 
         monitoring.setId(idCreator.generate(getResourceTypeName()));
@@ -200,7 +208,7 @@ public class MonitoringManager extends ResourceCatalogueManager<MonitoringBundle
     public void delete(MonitoringBundle monitoring) {
         super.delete(monitoring);
         logger.info("Deleted the Monitoring with id '{}' of the Catalogue '{}'",
-                monitoring.getMonitoring().getId(), monitoring.getCatalogueId());
+                monitoring.getMonitoring().getId(), monitoring.getMonitoring().getCatalogueId());
     }
 
     public List<Vocabulary> getAvailableServiceTypes() {
@@ -291,7 +299,7 @@ public class MonitoringManager extends ResourceCatalogueManager<MonitoringBundle
         logger.info("User '{}-{}' attempts to create a Public Monitoring from Monitoring '{}' of the '{}' Catalogue",
                 Objects.requireNonNull(AuthenticationInfo.getFullName(auth)),
                 Objects.requireNonNull(AuthenticationInfo.getEmail(auth).toLowerCase()),
-                monitoringBundle.getId(), monitoringBundle.getCatalogueId());
+                monitoringBundle.getId(), monitoringBundle.getMonitoring().getCatalogueId());
         publicMonitoringManager.add(monitoringBundle, auth);
         return monitoringBundle;
     }
