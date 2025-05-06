@@ -21,17 +21,14 @@ import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.domain.InteroperabilityRecordBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.LoggingInfo;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Metadata;
-import gr.uoa.di.madgik.resourcecatalogue.domain.ProviderBundle;
 import gr.uoa.di.madgik.resourcecatalogue.service.DraftResourceService;
 import gr.uoa.di.madgik.resourcecatalogue.service.IdCreator;
 import gr.uoa.di.madgik.resourcecatalogue.service.InteroperabilityRecordService;
-import gr.uoa.di.madgik.resourcecatalogue.service.ProviderService;
 import gr.uoa.di.madgik.resourcecatalogue.utils.AuthenticationInfo;
 import gr.uoa.di.madgik.resourcecatalogue.utils.ProviderResourcesCommonMethods;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
@@ -45,7 +42,6 @@ public class DraftInteroperabilityRecordManager extends ResourceCatalogueManager
 
     private final InteroperabilityRecordService interoperabilityRecordService;
     private final IdCreator idCreator;
-    private final ProviderService providerService;
     private final ProviderResourcesCommonMethods commonMethods;
 
     @Value("${catalogue.id}")
@@ -53,18 +49,16 @@ public class DraftInteroperabilityRecordManager extends ResourceCatalogueManager
 
     public DraftInteroperabilityRecordManager(InteroperabilityRecordService interoperabilityRecordService,
                                               IdCreator idCreator,
-                                              @Lazy ProviderService providerService,
                                               ProviderResourcesCommonMethods commonMethods) {
         super(InteroperabilityRecordBundle.class);
         this.interoperabilityRecordService = interoperabilityRecordService;
         this.idCreator = idCreator;
-        this.providerService = providerService;
         this.commonMethods = commonMethods;
     }
 
     @Override
     public String getResourceTypeName() {
-        return "draft_interoperability_record";
+        return "interoperability_record";
     }
 
     @Override
@@ -94,7 +88,7 @@ public class DraftInteroperabilityRecordManager extends ResourceCatalogueManager
     @Override
     public InteroperabilityRecordBundle update(InteroperabilityRecordBundle bundle, Authentication auth) {
         // get existing resource
-        Resource existing = getDraftResource(bundle.getInteroperabilityRecord().getId());
+        Resource existing = getResource(bundle.getInteroperabilityRecord().getId());
         // block catalogueId updates from Provider Admins
         bundle.getInteroperabilityRecord().setCatalogueId(catalogueId);
         logger.trace("Attempting to update the Draft Interoperability Record with id '{}'", bundle.getId());
@@ -114,7 +108,7 @@ public class DraftInteroperabilityRecordManager extends ResourceCatalogueManager
 
     @Override
     public InteroperabilityRecordBundle transformToNonDraft(String id, Authentication auth) {
-        InteroperabilityRecordBundle interoperabilityRecordBundle = this.get(id);
+        InteroperabilityRecordBundle interoperabilityRecordBundle = get(id, catalogueId, false);
         return transformToNonDraft(interoperabilityRecordBundle, auth);
     }
 
@@ -135,11 +129,6 @@ public class DraftInteroperabilityRecordManager extends ResourceCatalogueManager
         bundle.setMetadata(Metadata.updateMetadata(bundle.getMetadata(), AuthenticationInfo.getFullName(auth), AuthenticationInfo.getEmail(auth).toLowerCase()));
         bundle.setDraft(false);
 
-        ResourceType guidelinesResourceType = resourceTypeService.getResourceType("interoperability_record");
-        Resource resource = getDraftResource(bundle.getId());
-        resource.setResourceType(getResourceType());
-        resourceService.changeResourceType(resource, guidelinesResourceType);
-
         try {
             bundle = interoperabilityRecordService.update(bundle, auth);
         } catch (ResourceNotFoundException e) {
@@ -148,28 +137,4 @@ public class DraftInteroperabilityRecordManager extends ResourceCatalogueManager
 
         return bundle;
     }
-
-    @Override
-    public Browsing<InteroperabilityRecordBundle> getMy(FacetFilter filter, Authentication auth) {
-        FacetFilter ff = new FacetFilter();
-        ff.setQuantity(1000);
-        List<ProviderBundle> providers = providerService.getMy(ff, auth).getResults();
-
-        if (filter == null) {
-            filter = new FacetFilter();
-        }
-        filter.addFilter("provider_id", providers.stream().map(ProviderBundle::getId).toList());
-        filter.setResourceType(getResourceTypeName());
-        return this.getAll(filter, auth);
-    }
-
-    private Resource getDraftResource(String id) {
-        Paging<Resource> resources;
-        resources = searchService
-                .cqlQuery(String.format("resource_internal_id = \"%s\" AND catalogue_id = \"%s\"", id, catalogueId),
-                        getResourceTypeName());
-        assert resources != null;
-        return resources.getTotal() == 0 ? null : resources.getResults().getFirst();
-    }
-
 }

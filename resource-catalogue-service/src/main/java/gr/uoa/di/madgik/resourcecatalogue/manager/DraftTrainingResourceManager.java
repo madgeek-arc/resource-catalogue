@@ -20,7 +20,6 @@ import gr.uoa.di.madgik.registry.domain.*;
 import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.domain.LoggingInfo;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Metadata;
-import gr.uoa.di.madgik.resourcecatalogue.domain.ProviderBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.TrainingResourceBundle;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
 import gr.uoa.di.madgik.resourcecatalogue.utils.AuthenticationInfo;
@@ -63,7 +62,7 @@ public class DraftTrainingResourceManager extends ResourceCatalogueManager<Train
 
     @Override
     public String getResourceTypeName() {
-        return "draft_training_resource";
+        return "training_resource";
     }
 
     @Override
@@ -93,7 +92,7 @@ public class DraftTrainingResourceManager extends ResourceCatalogueManager<Train
     @Override
     public TrainingResourceBundle update(TrainingResourceBundle bundle, Authentication auth) {
         // get existing resource
-        Resource existing = getDraftResource(bundle.getTrainingResource().getId());
+        Resource existing = getResource(bundle.getId());
         // block catalogueId updates from Provider Admins
         bundle.getTrainingResource().setCatalogueId(catalogueId);
         logger.trace("Attempting to update the Draft Training Resource with id '{}'", bundle.getId());
@@ -113,7 +112,7 @@ public class DraftTrainingResourceManager extends ResourceCatalogueManager<Train
 
     @Override
     public TrainingResourceBundle transformToNonDraft(String id, Authentication auth) {
-        TrainingResourceBundle trainingResourceBundle = this.get(id);
+        TrainingResourceBundle trainingResourceBundle = get(id, catalogueId, false);
         return transformToNonDraft(trainingResourceBundle, auth);
     }
 
@@ -145,11 +144,6 @@ public class DraftTrainingResourceManager extends ResourceCatalogueManager<Train
         bundle.setMetadata(Metadata.updateMetadata(bundle.getMetadata(), AuthenticationInfo.getFullName(auth), AuthenticationInfo.getEmail(auth).toLowerCase()));
         bundle.setDraft(false);
 
-        ResourceType trainingResourceType = resourceTypeService.getResourceType("training_resource");
-        Resource resource = getDraftResource(bundle.getId());
-        resource.setResourceType(getResourceType());
-        resourceService.changeResourceType(resource, trainingResourceType);
-
         try {
             bundle = trainingResourceService.update(bundle, auth);
         } catch (ResourceNotFoundException e) {
@@ -158,28 +152,4 @@ public class DraftTrainingResourceManager extends ResourceCatalogueManager<Train
 
         return bundle;
     }
-
-    @Override
-    public Browsing<TrainingResourceBundle> getMy(FacetFilter filter, Authentication auth) {
-        FacetFilter ff = new FacetFilter();
-        ff.setQuantity(1000);
-        List<ProviderBundle> providers = providerService.getMy(ff, auth).getResults();
-
-        if (filter == null) {
-            filter = new FacetFilter();
-        }
-        filter.addFilter("resource_organisation", providers.stream().map(ProviderBundle::getId).toList());
-        filter.setResourceType(getResourceTypeName());
-        return this.getAll(filter, auth);
-    }
-
-    private Resource getDraftResource(String id) {
-        Paging<Resource> resources;
-        resources = searchService
-                .cqlQuery(String.format("resource_internal_id = \"%s\" AND catalogue_id = \"%s\"", id, catalogueId),
-                        getResourceTypeName());
-        assert resources != null;
-        return resources.getTotal() == 0 ? null : resources.getResults().getFirst();
-    }
-
 }

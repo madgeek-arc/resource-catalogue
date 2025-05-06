@@ -502,12 +502,19 @@ public class ServiceController {
     public ResponseEntity<Service> getDraftService(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
                                                    @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix) {
         String id = prefix + "/" + suffix;
-        return new ResponseEntity<>(draftServiceService.get(id, catalogueId, false).getService(), HttpStatus.OK);
+        ServiceBundle bundle = serviceBundleService.get(id, catalogueId, false);
+        if (bundle.isDraft()) {
+            return new ResponseEntity<>(bundle.getService(), HttpStatus.OK);
+        }
+        return null;
     }
 
     @GetMapping(path = "/draft/getMyDraftServices", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<List<ServiceBundle>> getMyDraftServices(@Parameter(hidden = true) Authentication auth) {
-        return new ResponseEntity<>(draftServiceService.getMy(null, auth).getResults(), HttpStatus.OK);
+        FacetFilter ff = new FacetFilter();
+        ff.setQuantity(1000);
+        ff.addFilter("draft", true);
+        return new ResponseEntity<>(serviceBundleService.getMy(ff, auth).getResults(), HttpStatus.OK);
     }
 
     @BrowseParameters
@@ -549,9 +556,12 @@ public class ServiceController {
                                                       @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix,
                                                       @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
-        ServiceBundle serviceBundle = draftServiceService.get(id, catalogueId, false);
+        ServiceBundle serviceBundle = serviceBundleService.get(id, catalogueId, false);
         if (serviceBundle == null) {
             return new ResponseEntity<>(HttpStatus.GONE);
+        }
+        if (!serviceBundle.isDraft()) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
         draftServiceService.delete(serviceBundle);
         logger.info("User '{}' deleted the Draft Service '{}'-'{}'", User.of(auth).getEmail().toLowerCase(),

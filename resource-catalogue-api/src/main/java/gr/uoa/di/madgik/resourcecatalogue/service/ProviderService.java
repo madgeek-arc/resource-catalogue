@@ -197,18 +197,16 @@ public interface ProviderService extends ResourceCatalogueService<ProviderBundle
      * Return true if Provider User Admin has accepted registration terms
      *
      * @param providerId Provider's ID
-     * @param isDraft    boolean value indicating if the Provider is Draft
      * @param auth       Authentication
      * @return True/False
      */
-    boolean hasAdminAcceptedTerms(String providerId, boolean isDraft, Authentication auth);
+    boolean hasAdminAcceptedTerms(String providerId, Authentication auth);
 
     /**
      * Update the Provider's list of Users that have accepted the Provider's registration terms
      *
      * @param providerId Provider's ID
-     * @param isDraft    boolean value indicating if the Provider is Draft
      * @param auth       Authentication
      */
-    void adminAcceptedTerms(String providerId, boolean isDraft, Authentication auth);
+    void adminAcceptedTerms(String providerId, Authentication auth);
 }

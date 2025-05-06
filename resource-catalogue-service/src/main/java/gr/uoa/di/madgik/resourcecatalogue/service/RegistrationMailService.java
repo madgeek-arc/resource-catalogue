@@ -55,10 +55,6 @@ public class RegistrationMailService {
     private final ServiceBundleManager serviceBundleManager;
     private final TrainingResourceManager trainingResourceManager;
     private final InteroperabilityRecordManager interoperabilityRecordManager;
-    private final DraftProviderManager draftProviderManager;
-    private final DraftServiceManager draftServiceManager;
-    private final DraftTrainingResourceManager draftTrainingResourceManager;
-    private final DraftInteroperabilityRecordManager draftInteroperabilityRecordManager;
     private final SecurityService securityService;
 
     // Properties
@@ -83,10 +79,6 @@ public class RegistrationMailService {
                                    @Lazy ServiceBundleManager serviceBundleManager,
                                    @Lazy TrainingResourceManager trainingResourceManager,
                                    @Lazy InteroperabilityRecordManager interoperabilityRecordManager,
-                                   @Lazy DraftProviderManager draftProviderManager,
-                                   @Lazy DraftServiceManager draftServiceManager,
-                                   @Lazy DraftTrainingResourceManager draftTrainingResourceManager,
-                                   @Lazy DraftInteroperabilityRecordManager draftInteroperabilityRecordManager,
                                    CatalogueProperties properties) {
         this.mailService = mailService;
         this.cfg = cfg;
@@ -95,10 +87,6 @@ public class RegistrationMailService {
         this.serviceBundleManager = serviceBundleManager;
         this.trainingResourceManager = trainingResourceManager;
         this.interoperabilityRecordManager = interoperabilityRecordManager;
-        this.draftProviderManager = draftProviderManager;
-        this.draftServiceManager = draftServiceManager;
-        this.draftTrainingResourceManager = draftTrainingResourceManager;
-        this.draftInteroperabilityRecordManager = draftInteroperabilityRecordManager;
 
         // Init properties
         this.homepage = properties.getHomepage();
@@ -296,8 +284,8 @@ public class RegistrationMailService {
     public void sendOnboardingEmailNotificationsToProviderAdmins() {
         EmailBasicInfo emailBasicInfo = initializeEmail("providerOnboarding.ftl");
 
-        List<ProviderBundle> allProviders = fetchProviders(false);
-        for (ProviderBundle providerBundle : allProviders) {
+        List<ProviderBundle> allNonDraftProviders = fetchProviders(false);
+        for (ProviderBundle providerBundle : allNonDraftProviders) {
             if (providerBundle.getTemplateStatus().equals("no template status")) {
                 emailBasicInfo.updateRoot("providerBundle", providerBundle);
                 for (User user : providerBundle.getProvider().getUsers()) {
@@ -376,11 +364,11 @@ public class RegistrationMailService {
     public void sendOnboardingEmailNotificationsToPortalAdmins() {
         EmailBasicInfo emailBasicInfo = initializeEmail("adminOnboardingDigest.ftl");
 
-        List<ProviderBundle> allProviders = fetchProviders(false);
+        List<ProviderBundle> allNonDraftProviders = fetchProviders(false);
         List<String> providersWaitingForInitialApproval = new ArrayList<>();
         List<String> providersWaitingForTemplateApproval = new ArrayList<>();
 
-        for (ProviderBundle providerBundle : allProviders) {
+        for (ProviderBundle providerBundle : allNonDraftProviders) {
             if (providerBundle.getStatus().equals("pending provider")) {
                 providersWaitingForInitialApproval.add(providerBundle.getProvider().getName());
             }
@@ -409,26 +397,20 @@ public class RegistrationMailService {
         Timestamp yesterdayTimestamp = Timestamp.valueOf(yesterday.atStartOfDay());
 
         // Fetch all resources
-        List<ProviderBundle> activeProviders = fetchProviders(false);
-        List<ProviderBundle> draftProviders = fetchProviders(true);
-        List<ServiceBundle> activeServices = fetchServices(false);
-        List<ServiceBundle> draftServices = fetchServices(true);
-        List<TrainingResourceBundle> activeTrainings = fetchTrainings(false);
-        List<TrainingResourceBundle> draftTrainings = fetchTrainings(true);
-        List<InteroperabilityRecordBundle> activeGuidelines = fetchGuidelines(false);
-        List<InteroperabilityRecordBundle> draftGuidelines = fetchGuidelines(true);
-
-        List<Bundle<?>> allResources = mergeResources(activeProviders, draftProviders, activeServices, draftServices,
-                activeTrainings, draftTrainings, activeGuidelines, draftGuidelines);
+        List<ProviderBundle> allProviders = fetchProviders(null);
+        List<ServiceBundle> allServices = fetchServices();
+        List<TrainingResourceBundle> allTrainings = fetchTrainings();
+        List<InteroperabilityRecordBundle> allGuidelines = fetchGuidelines();
+        List<Bundle<?>> allResources = mergeResources(allProviders, allServices, allTrainings, allGuidelines);
 
         // Analyze resource changes
         Map<String, List<String>> resourceChanges = analyzeResourceChanges(allResources, yesterdayTimestamp, todayTimestamp);
 
         // Analyze logging activities
-        Map<String, List<LoggingInfo>> loggingInfoProviderMap = analyzeLoggingInfoChanges(activeProviders, yesterdayTimestamp, todayTimestamp);
-        Map<String, List<LoggingInfo>> loggingInfoServiceMap = analyzeLoggingInfoChanges(activeServices, yesterdayTimestamp, todayTimestamp);
-        Map<String, List<LoggingInfo>> loggingInfoTrainingMap = analyzeLoggingInfoChanges(activeTrainings, yesterdayTimestamp, todayTimestamp);
-        Map<String, List<LoggingInfo>> loggingInfoGuidelineMap = analyzeLoggingInfoChanges(activeGuidelines, yesterdayTimestamp, todayTimestamp);
+        Map<String, List<LoggingInfo>> loggingInfoProviderMap = analyzeLoggingInfoChanges(allProviders, yesterdayTimestamp, todayTimestamp);
+        Map<String, List<LoggingInfo>> loggingInfoServiceMap = analyzeLoggingInfoChanges(allServices, yesterdayTimestamp, todayTimestamp);
+        Map<String, List<LoggingInfo>> loggingInfoTrainingMap = analyzeLoggingInfoChanges(allTrainings, yesterdayTimestamp, todayTimestamp);
+        Map<String, List<LoggingInfo>> loggingInfoGuidelineMap = analyzeLoggingInfoChanges(allGuidelines, yesterdayTimestamp, todayTimestamp);
 
         boolean changes = !resourceChanges.get("newProviders").isEmpty() ||
                 !resourceChanges.get("newServices").isEmpty() ||
@@ -465,42 +447,33 @@ public class RegistrationMailService {
         }
     }
 
-    private List<ProviderBundle> fetchProviders(boolean isDraft) {
+    private List<ProviderBundle> fetchProviders(Boolean draft) {
         FacetFilter ff = createFacetFilter();
-        return isDraft
-                ? draftProviderManager.getAll(ff, securityService.getAdminAccess()).getResults()
-                : providerManager.getAll(ff, securityService.getAdminAccess()).getResults();
+        if (draft != null) {
+            ff.addFilter("draft", draft);
+        }
+        return providerManager.getAll(ff, securityService.getAdminAccess()).getResults();
     }
 
-    private List<ServiceBundle> fetchServices(boolean isDraft) {
+    private List<ServiceBundle> fetchServices() {
         FacetFilter ff = createFacetFilter();
-        return isDraft
-                ? draftServiceManager.getAll(ff, securityService.getAdminAccess()).getResults()
-                : serviceBundleManager.getAll(ff, securityService.getAdminAccess()).getResults();
+        return serviceBundleManager.getAll(ff, securityService.getAdminAccess()).getResults();
     }
 
-    private List<TrainingResourceBundle> fetchTrainings(boolean isDraft) {
+    private List<TrainingResourceBundle> fetchTrainings() {
         FacetFilter ff = createFacetFilter();
-        return isDraft
-                ? draftTrainingResourceManager.getAll(ff, securityService.getAdminAccess()).getResults()
-                : trainingResourceManager.getAll(ff, securityService.getAdminAccess()).getResults();
+        return trainingResourceManager.getAll(ff, securityService.getAdminAccess()).getResults();
     }
 
-    private List<InteroperabilityRecordBundle> fetchGuidelines(boolean isDraft) {
+    private List<InteroperabilityRecordBundle> fetchGuidelines() {
         FacetFilter ff = createFacetFilter();
-        return isDraft
-                ? draftInteroperabilityRecordManager.getAll(ff, securityService.getAdminAccess()).getResults()
-                : interoperabilityRecordManager.getAll(ff, securityService.getAdminAccess()).getResults();
+        return interoperabilityRecordManager.getAll(ff, securityService.getAdminAccess()).getResults();
     }
 
-    private List<Bundle<?>> mergeResources(List<ProviderBundle> activeProviders, List<ProviderBundle> draftProviders,
-                                           List<ServiceBundle> activeServices, List<ServiceBundle> draftServices,
-                                           List<TrainingResourceBundle> activeTrainings, List<TrainingResourceBundle> draftTrainings,
-                                           List<InteroperabilityRecordBundle> activeGuidelines, List<InteroperabilityRecordBundle> draftGuidelines) {
-        List<ProviderBundle> allProviders = Stream.concat(activeProviders.stream(), draftProviders.stream()).toList();
-        List<ServiceBundle> allServices = Stream.concat(activeServices.stream(), draftServices.stream()).toList();
-        List<TrainingResourceBundle> allTrainings = Stream.concat(activeTrainings.stream(), draftTrainings.stream()).toList();
-        List<InteroperabilityRecordBundle> allGuidelines = Stream.concat(activeGuidelines.stream(), draftGuidelines.stream()).toList();
+    private List<Bundle<?>> mergeResources(List<ProviderBundle> allProviders,
+                                           List<ServiceBundle> allServices,
+                                           List<TrainingResourceBundle> allTrainings,
+                                           List<InteroperabilityRecordBundle> allGuidelines) {
         return Stream.of(allProviders.stream(), allServices.stream(), allTrainings.stream(), allGuidelines.stream())
                 .flatMap(s -> s)
                 .collect(Collectors.toList());

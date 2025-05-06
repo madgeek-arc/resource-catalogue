@@ -418,12 +418,19 @@ public class TrainingResourceController {
     public ResponseEntity<TrainingResource> getDraftTrainingResource(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
                                                                      @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix) {
         String id = prefix + "/" + suffix;
-        return new ResponseEntity<>(draftTrainingResourceService.get(id, catalogueId, false).getTrainingResource(), HttpStatus.OK);
+        TrainingResourceBundle bundle = trainingResourceService.get(id, catalogueId, false);
+        if (bundle.isDraft()) {
+            return new ResponseEntity<>(bundle.getTrainingResource(), HttpStatus.OK);
+        }
+        return null;
     }
 
     @GetMapping(path = "/draft/getMyDraftTrainingResources", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<List<TrainingResourceBundle>> getMyDraftTrainingResources(@Parameter(hidden = true) Authentication auth) {
-        return new ResponseEntity<>(draftTrainingResourceService.getMy(null, auth).getResults(), HttpStatus.OK);
+        FacetFilter ff = new FacetFilter();
+        ff.setQuantity(1000);
+        ff.addFilter("draft", true);
+        return new ResponseEntity<>(trainingResourceService.getMy(ff, auth).getResults(), HttpStatus.OK);
     }
 
     @PostMapping(path = "/draft", produces = {MediaType.APPLICATION_JSON_VALUE})
@@ -454,9 +461,12 @@ public class TrainingResourceController {
                                                                         @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix,
                                                                         @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
-        TrainingResourceBundle trainingResourceBundle = draftTrainingResourceService.get(id, catalogueId, false);
+        TrainingResourceBundle trainingResourceBundle = trainingResourceService.get(id, catalogueId, false);
         if (trainingResourceBundle == null) {
             return new ResponseEntity<>(HttpStatus.GONE);
+        }
+        if (!trainingResourceBundle.isDraft()) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
         draftTrainingResourceService.delete(trainingResourceBundle);
         logger.info("User '{}' deleted the Draft Training Resource '{}'-'{}'", User.of(auth).getEmail().toLowerCase(),

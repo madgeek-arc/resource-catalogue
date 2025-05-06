@@ -30,8 +30,6 @@ import gr.uoa.di.madgik.resourcecatalogue.utils.Auditable;
 import gr.uoa.di.madgik.resourcecatalogue.utils.AuthenticationInfo;
 import gr.uoa.di.madgik.resourcecatalogue.utils.ObjectUtils;
 import gr.uoa.di.madgik.resourcecatalogue.utils.ProviderResourcesCommonMethods;
-import gr.uoa.di.madgik.resourcecatalogue.validators.FieldValidator;
-import jakarta.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -55,7 +53,6 @@ public class ProviderManager extends ResourceCatalogueManager<ProviderBundle> im
 
     private static final
     Logger logger = LoggerFactory.getLogger(ProviderManager.class);
-    private final DraftResourceService<ProviderBundle> draftProviderService;
     private final ServiceBundleService<ServiceBundle> serviceBundleService;
     private final TrainingResourceService trainingResourceService;
     private final InteroperabilityRecordService interoperabilityRecordService;
@@ -64,7 +61,6 @@ public class ProviderManager extends ResourceCatalogueManager<ProviderBundle> im
     private final PublicTrainingResourceService publicTrainingResourceManager;
     private final PublicInteroperabilityRecordService publicInteroperabilityRecordManager;
     private final SecurityService securityService;
-    private final FieldValidator fieldValidator;
     private final IdCreator idCreator;
     private final EventService eventService;
     private final RegistrationMailService registrationMailService;
@@ -77,9 +73,8 @@ public class ProviderManager extends ResourceCatalogueManager<ProviderBundle> im
     @Value("${catalogue.id}")
     private String catalogueId;
 
-    public ProviderManager(@Lazy DraftResourceService<ProviderBundle> draftProviderService,
-                           @Lazy ServiceBundleService<ServiceBundle> serviceBundleService,
-                           @Lazy SecurityService securityService, @Lazy FieldValidator fieldValidator,
+    public ProviderManager(@Lazy ServiceBundleService<ServiceBundle> serviceBundleService,
+                           @Lazy SecurityService securityService,
                            @Lazy RegistrationMailService registrationMailService, IdCreator idCreator,
                            EventService eventService, VersionService versionService,
                            VocabularyService vocabularyService,
@@ -93,10 +88,8 @@ public class ProviderManager extends ResourceCatalogueManager<ProviderBundle> im
                            @Lazy PublicTrainingResourceService publicTrainingResourceManager,
                            @Lazy PublicInteroperabilityRecordService publicInteroperabilityRecordManager) {
         super(ProviderBundle.class);
-        this.draftProviderService = draftProviderService;
         this.serviceBundleService = serviceBundleService;
         this.securityService = securityService;
-        this.fieldValidator = fieldValidator;
         this.idCreator = idCreator;
         this.eventService = eventService;
         this.registrationMailService = registrationMailService;
@@ -732,37 +725,45 @@ public class ProviderManager extends ResourceCatalogueManager<ProviderBundle> im
     }
 
     @Override
-    public boolean hasAdminAcceptedTerms(String providerId, boolean isDraft, Authentication auth) {
-        ProviderBundle providerBundle;
-        if (isDraft) {
-            providerBundle = draftProviderService.get(providerId);
-        } else {
-            providerBundle = get(providerId, catalogueId, false);
+    public boolean hasAdminAcceptedTerms(String id, Authentication auth) {
+        ProviderBundle bundle = get(id, catalogueId, false);
+        String userEmail = AuthenticationInfo.getEmail(auth).toLowerCase();
+
+        List<String> providerAdmins = bundle.getProvider().getUsers().stream()
+                .map(user -> user.getEmail().toLowerCase())
+                .toList();
+
+        List<String> acceptedTerms = bundle.getMetadata().getTerms();
+
+        if (acceptedTerms == null || acceptedTerms.isEmpty()) {
+            return !providerAdmins.contains(userEmail); // false -> show modal, true -> no modal
         }
-        List<String> userList = new ArrayList<>();
-        for (User user : providerBundle.getProvider().getUsers()) {
-            userList.add(user.getEmail().toLowerCase());
+
+        if (providerAdmins.contains(userEmail) && !acceptedTerms.contains(userEmail)) {
+            return false; // Show modal
         }
-        if ((providerBundle.getMetadata().getTerms() == null || providerBundle.getMetadata().getTerms().isEmpty())) {
-            if (userList.contains(AuthenticationInfo.getEmail(auth).toLowerCase())) {
-                return false; //pop-up modal
-            } else {
-                return true; //no modal
-            }
-        }
-        if (!providerBundle.getMetadata().getTerms().contains(AuthenticationInfo.getEmail(auth).toLowerCase())
-                && userList.contains(AuthenticationInfo.getEmail(auth).toLowerCase())) {
-            return false; // pop-up modal
-        }
-        return true; // no modal
+        return true; // No modal
     }
 
     @Override
-    public void adminAcceptedTerms(String providerId, boolean isDraft, Authentication auth) {
-        try {
-            draftProviderService.update(draftProviderService.get(providerId), auth);
-        } catch (ResourceNotFoundException e) {
-            update(get(providerId, catalogueId, false), auth);
+    public void adminAcceptedTerms(String id, Authentication auth) {
+        ProviderBundle bundle = get(id, catalogueId, false);
+        String userEmail = AuthenticationInfo.getEmail(auth);
+
+        List<String> existingTerms = bundle.getMetadata().getTerms();
+        if (existingTerms == null) {
+            existingTerms = new ArrayList<>();
+        }
+
+        if (!existingTerms.contains(userEmail)) {
+            existingTerms.add(userEmail);
+            bundle.getMetadata().setTerms(existingTerms);
+
+            try {
+                update(bundle, auth);
+            } catch (ResourceNotFoundException e) {
+                logger.info("Could not update terms for Provider with id: '{}'", id);
+            }
         }
     }
 

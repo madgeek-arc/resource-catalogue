@@ -28,7 +28,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
-import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
@@ -64,7 +63,7 @@ public class DraftProviderManager extends ResourceCatalogueManager<ProviderBundl
 
     @Override
     public String getResourceTypeName() {
-        return "draft_provider";
+        return "provider";
     }
 
     @Override
@@ -95,7 +94,7 @@ public class DraftProviderManager extends ResourceCatalogueManager<ProviderBundl
     @Override
     public ProviderBundle update(ProviderBundle bundle, Authentication auth) {
         // get existing resource
-        Resource existing = getDraftResource(bundle.getId());
+        Resource existing = getResource(bundle.getId());
         // block catalogueId updates from Provider Admins
         bundle.getProvider().setCatalogueId(catalogueId);
         logger.trace("Attempting to update the Draft Provider: {}", bundle);
@@ -115,7 +114,7 @@ public class DraftProviderManager extends ResourceCatalogueManager<ProviderBundl
 
     @Override
     public ProviderBundle transformToNonDraft(String id, Authentication auth) {
-        ProviderBundle providerBundle = get(id);
+        ProviderBundle providerBundle = get(id, catalogueId, false);
         return transformToNonDraft(providerBundle, auth);
     }
 
@@ -139,11 +138,6 @@ public class DraftProviderManager extends ResourceCatalogueManager<ProviderBundl
         bundle.setMetadata(Metadata.updateMetadata(bundle.getMetadata(), AuthenticationInfo.getFullName(auth), AuthenticationInfo.getEmail(auth).toLowerCase()));
         bundle.setDraft(false);
 
-        ResourceType providerResourceType = resourceTypeService.getResourceType("provider");
-        Resource resource = getDraftResource(bundle.getId());
-        resource.setResourceType(getResourceType());
-        resourceService.changeResourceType(resource, providerResourceType);
-
         try {
             bundle = providerManager.update(bundle, auth);
         } catch (ResourceNotFoundException e) {
@@ -152,31 +146,5 @@ public class DraftProviderManager extends ResourceCatalogueManager<ProviderBundl
 
         registrationMailService.sendEmailsToNewlyAddedProviderAdmins(bundle, null);
         return bundle;
-    }
-
-    @Override
-    public Browsing<ProviderBundle> getMy(FacetFilter ff, Authentication auth) {
-        if (auth == null) {
-            throw new InsufficientAuthenticationException("Please log in.");
-        }
-        if (ff == null) {
-            ff = new FacetFilter();
-            ff.setQuantity(maxQuantity);
-        }
-        if (!ff.getFilter().containsKey("published")) {
-            ff.addFilter("published", false);
-        }
-        ff.addFilter("users", AuthenticationInfo.getEmail(auth).toLowerCase());
-        ff.addOrderBy("name", "asc");
-        return super.getAll(ff, auth);
-    }
-
-    private Resource getDraftResource(String id) {
-        Paging<Resource> resources;
-        resources = searchService
-                .cqlQuery(String.format("resource_internal_id = \"%s\" AND catalogue_id = \"%s\"", id, catalogueId),
-                        getResourceTypeName());
-        assert resources != null;
-        return resources.getTotal() == 0 ? null : resources.getResults().getFirst();
     }
 }

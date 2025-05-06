@@ -16,14 +16,11 @@
 
 package gr.uoa.di.madgik.resourcecatalogue.manager;
 
-import gr.uoa.di.madgik.registry.domain.Resource;
-import gr.uoa.di.madgik.registry.domain.ResourceType;
 import gr.uoa.di.madgik.registry.exception.ResourceAlreadyExistsException;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Bundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.LoggingInfo;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Metadata;
 import gr.uoa.di.madgik.resourcecatalogue.service.DraftResourceService;
-import gr.uoa.di.madgik.resourcecatalogue.service.GenericResourceService;
 import gr.uoa.di.madgik.resourcecatalogue.service.IdCreator;
 import gr.uoa.di.madgik.resourcecatalogue.service.ResourceService;
 import gr.uoa.di.madgik.resourcecatalogue.utils.AuthenticationInfo;
@@ -42,8 +39,6 @@ public abstract class DraftableResourceManager<T extends Bundle<?>> extends Reso
 
     private static final Logger logger = LoggerFactory.getLogger(DraftableResourceManager.class);
 
-    @Autowired
-    protected GenericResourceService genericResourceService;
     @Autowired
     protected IdCreator idCreator;
     @Autowired

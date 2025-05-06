@@ -250,6 +250,7 @@ public class ProviderController {
     public ResponseEntity<List<ProviderBundle>> getMyProviders(@Parameter(hidden = true) Authentication auth) {
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(1000);
+        ff.addFilter("draft", false);
         return new ResponseEntity<>(providerService.getMy(ff, auth).getResults(), HttpStatus.OK);
     }
 
@@ -352,15 +353,13 @@ public class ProviderController {
     }
 
     @GetMapping(path = "hasAdminAcceptedTerms", produces = {MediaType.APPLICATION_JSON_VALUE})
-    public boolean hasAdminAcceptedTerms(@RequestParam String providerId, @RequestParam boolean isDraft,
-                                         @Parameter(hidden = true) Authentication authentication) {
-        return providerService.hasAdminAcceptedTerms(providerId, isDraft, authentication);
+    public boolean hasAdminAcceptedTerms(@RequestParam String providerId, @Parameter(hidden = true) Authentication auth) {
+        return providerService.hasAdminAcceptedTerms(providerId, auth);
     }
 
     @PutMapping(path = "adminAcceptedTerms", produces = {MediaType.APPLICATION_JSON_VALUE})
-    public void adminAcceptedTerms(@RequestParam String providerId, @RequestParam boolean isDraft,
-                                   @Parameter(hidden = true) Authentication authentication) {
-        providerService.adminAcceptedTerms(providerId, isDraft, authentication);
+    public void adminAcceptedTerms(@RequestParam String providerId, @Parameter(hidden = true) Authentication auth) {
+        providerService.adminAcceptedTerms(providerId, auth);
     }
 
     @GetMapping(path = "requestProviderDeletion", produces = {MediaType.APPLICATION_JSON_VALUE})
@@ -516,14 +515,19 @@ public class ProviderController {
     public ResponseEntity<Provider> getDraftProvider(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
                                                      @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix) {
         String id = prefix + "/" + suffix;
-        return new ResponseEntity<>(draftProviderService.get(id, catalogueId, false).getProvider(), HttpStatus.OK);
+        ProviderBundle bundle = providerService.get(id, catalogueId, false);
+        if (bundle.isDraft()) {
+            return new ResponseEntity<>(bundle.getProvider(), HttpStatus.OK);
+        }
+        return null;
     }
 
     @GetMapping(path = "/draft/getMyDraftProviders", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<List<ProviderBundle>> getMyDraftProviders(@Parameter(hidden = true) Authentication auth) {
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(1000);
-        return new ResponseEntity<>(draftProviderService.getMy(ff, auth).getResults(), HttpStatus.OK);
+        ff.addFilter("draft", true);
+        return new ResponseEntity<>(providerService.getMy(ff, auth).getResults(), HttpStatus.OK);
     }
 
     @PostMapping(path = "/draft", produces = {MediaType.APPLICATION_JSON_VALUE})
@@ -552,9 +556,12 @@ public class ProviderController {
                                                         @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix,
                                                         @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
-        ProviderBundle providerBundle = draftProviderService.get(id, catalogueId, false);
+        ProviderBundle providerBundle = providerService.get(id, catalogueId, false);
         if (providerBundle == null) {
             return new ResponseEntity<>(HttpStatus.GONE);
+        }
+        if (!providerBundle.isDraft()) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
         draftProviderService.delete(providerBundle);
         logger.info("User '{}' deleted the Draft Provider '{}'-'{}'", User.of(auth).getEmail().toLowerCase(),
