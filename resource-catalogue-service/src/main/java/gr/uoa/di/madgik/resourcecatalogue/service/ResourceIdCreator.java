@@ -56,7 +56,11 @@ public class ResourceIdCreator implements IdCreator {
 
     private String createPrefix(String resourceType) {
         // TODO: do this when drafts are removed.
-//        return resourceProperties.get(ResourceTypes.valueOf(resourceType)).getIdPrefix();
+//        try {
+//            return resourceProperties.get(ResourceTypes.valueOf(resourceType.toUpperCase())).getIdPrefix();
+//        } catch (IllegalArgumentException e) {
+//            return "non";
+//        }
         return switch (resourceType) {
             // PID related
             case "service", "draft_service" -> resourceProperties.get(ResourceTypes.SERVICE).getIdPrefix();

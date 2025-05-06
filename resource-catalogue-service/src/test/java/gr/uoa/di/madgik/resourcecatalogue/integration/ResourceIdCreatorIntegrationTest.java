@@ -48,6 +48,10 @@ class ResourceIdCreatorIntegrationTest extends BaseIntegrationTest {
                 .map(ResourceType::getName)
                 .filter(name -> !excludedResourceTypes.contains(name))
                 .toList();
+        // TODO: do this when drafts are removed.
+//        resourceTypes = Arrays.stream(ResourceTypes.values())
+//                .map(resourceType -> resourceType.name().toLowerCase())
+//                .collect(Collectors.toList());
     }
 
     /**
