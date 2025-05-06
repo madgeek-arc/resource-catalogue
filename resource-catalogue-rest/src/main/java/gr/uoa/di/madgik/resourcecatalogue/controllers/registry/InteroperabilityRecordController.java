@@ -40,7 +40,9 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Profile("beyond")
 @RestController
@@ -248,7 +250,8 @@ public class InteroperabilityRecordController {
 
     // front-end use (Resource Interoperability Record form)
     @GetMapping(path = {"interoperabilityRecordIdToNameMap"}, produces = {MediaType.APPLICATION_JSON_VALUE})
-    public ResponseEntity<List<Value>> interoperabilityRecordIdToNameMap(String catalogueId) {
+    public ResponseEntity<Map<String, List<Value>>> interoperabilityRecordIdToNameMap(@RequestParam String catalogueId) {
+        Map<String, List<gr.uoa.di.madgik.resourcecatalogue.dto.Value>> ret = new HashMap<>();
         List<Value> allInteroperabilityRecords = new ArrayList<>();
         // fetch catalogueId related non-public Interoperability Records
         List<Value> catalogueRelatedInteroperabilityRecords = interoperabilityRecordService
@@ -266,8 +269,9 @@ public class InteroperabilityRecordController {
 
         allInteroperabilityRecords.addAll(catalogueRelatedInteroperabilityRecords);
         allInteroperabilityRecords.addAll(publicInteroperabilityRecords);
+        ret.put("GUIDELINES_VOC", allInteroperabilityRecords);
 
-        return ResponseEntity.ok(allInteroperabilityRecords);
+        return ResponseEntity.ok(ret);
     }
 
     private FacetFilter createFacetFilter(String catalogueId, boolean isPublic) {

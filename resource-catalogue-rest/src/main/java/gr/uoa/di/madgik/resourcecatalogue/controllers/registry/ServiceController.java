@@ -46,10 +46,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Profile("beyond")
@@ -342,40 +339,42 @@ public class ServiceController {
 
     // front-end use (Service/Datasource/TR forms)
     @GetMapping(path = {"resourceIdToNameMap"}, produces = {MediaType.APPLICATION_JSON_VALUE})
-    public ResponseEntity<List<gr.uoa.di.madgik.resourcecatalogue.dto.Value>> resourceIdToNameMap(@RequestParam String catalogueId) {
+    public ResponseEntity<Map<String, List<gr.uoa.di.madgik.resourcecatalogue.dto.Value>>> resourceIdToNameMap(@RequestParam String catalogueId) {
+        Map<String, List<gr.uoa.di.madgik.resourcecatalogue.dto.Value>> ret = new HashMap<>();
         List<gr.uoa.di.madgik.resourcecatalogue.dto.Value> allResources = new ArrayList<>();
         // fetch catalogueId related non-public Resources
 
         List<gr.uoa.di.madgik.resourcecatalogue.dto.Value> catalogueRelatedServices = genericResourceService
                 .getResultsWithoutFacets(createFacetFilter(catalogueId, false, "service")).getResults()
                 .stream().map(serviceBundle -> (ServiceBundle) serviceBundle)
-                .map(c -> new gr.uoa.di.madgik.resourcecatalogue.dto.Value(c.getId(), c.getService().getResourceOrganisation() + " - " + c.getService().getName()))
+                .map(c -> new gr.uoa.di.madgik.resourcecatalogue.dto.Value(c.getId(), c.getService().getName()))
                 .toList();
         List<gr.uoa.di.madgik.resourcecatalogue.dto.Value> catalogueRelatedTrainingResources = genericResourceService
                 .getResultsWithoutFacets(createFacetFilter(catalogueId, false, "training_resource")).getResults()
                 .stream().map(trainingResourceBundle -> (TrainingResourceBundle) trainingResourceBundle)
-                .map(c -> new gr.uoa.di.madgik.resourcecatalogue.dto.Value(c.getId(), c.getTrainingResource().getResourceOrganisation() + " - " + c.getTrainingResource().getTitle()))
+                .map(c -> new gr.uoa.di.madgik.resourcecatalogue.dto.Value(c.getId(), c.getTrainingResource().getTitle()))
                 .toList();
         // fetch non-catalogueId related public Resources
         List<gr.uoa.di.madgik.resourcecatalogue.dto.Value> publicServices = genericResourceService
                 .getResultsWithoutFacets(createFacetFilter(catalogueId, true, "service")).getResults()
                 .stream().map(serviceBundle -> (ServiceBundle) serviceBundle)
                 .filter(c -> !c.getService().getCatalogueId().equals(catalogueId))
-                .map(c -> new gr.uoa.di.madgik.resourcecatalogue.dto.Value(c.getId(), c.getService().getResourceOrganisation() + " - " + c.getService().getName()))
+                .map(c -> new gr.uoa.di.madgik.resourcecatalogue.dto.Value(c.getId(), c.getService().getName()))
                 .toList();
         List<gr.uoa.di.madgik.resourcecatalogue.dto.Value> publicTrainingResources = genericResourceService
                 .getResultsWithoutFacets(createFacetFilter(catalogueId, true, "training_resource")).getResults()
                 .stream().map(trainingResourceBundle -> (TrainingResourceBundle) trainingResourceBundle)
                 .filter(c -> !c.getTrainingResource().getCatalogueId().equals(catalogueId))
-                .map(c -> new gr.uoa.di.madgik.resourcecatalogue.dto.Value(c.getId(), c.getTrainingResource().getResourceOrganisation() + " - " + c.getTrainingResource().getTitle()))
+                .map(c -> new gr.uoa.di.madgik.resourcecatalogue.dto.Value(c.getId(), c.getTrainingResource().getTitle()))
                 .toList();
 
         allResources.addAll(catalogueRelatedServices);
         allResources.addAll(catalogueRelatedTrainingResources);
         allResources.addAll(publicServices);
         allResources.addAll(publicTrainingResources);
+        ret.put("RESOURCES_VOC", allResources);
 
-        return ResponseEntity.ok(allResources);
+        return ResponseEntity.ok(ret);
     }
 
     //FIXME: FacetFilters reset after each search.

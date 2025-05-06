@@ -47,7 +47,9 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Profile("beyond")
@@ -426,7 +428,8 @@ public class ProviderController {
 
     // front-end use (Provider form)
     @GetMapping(path = {"providerIdToNameMap"}, produces = {MediaType.APPLICATION_JSON_VALUE})
-    public ResponseEntity<List<gr.uoa.di.madgik.resourcecatalogue.dto.Value>> providerIdToNameMap(String catalogueId) {
+    public ResponseEntity<Map<String, List<gr.uoa.di.madgik.resourcecatalogue.dto.Value>>> providerIdToNameMap(@RequestParam String catalogueId) {
+        Map<String, List<gr.uoa.di.madgik.resourcecatalogue.dto.Value>> ret = new HashMap<>();
         List<gr.uoa.di.madgik.resourcecatalogue.dto.Value> allProviders = new ArrayList<>();
         // fetch catalogueId related non-public Providers
         List<gr.uoa.di.madgik.resourcecatalogue.dto.Value> catalogueRelatedProviders = providerService
@@ -444,8 +447,8 @@ public class ProviderController {
 
         allProviders.addAll(catalogueRelatedProviders);
         allProviders.addAll(publicProviders);
-
-        return ResponseEntity.ok(allProviders);
+        ret.put("PROVIDERS_VOC", allProviders);
+        return ResponseEntity.ok(ret);
     }
 
     private FacetFilter createFacetFilter(String catalogueId, boolean isPublic) {
