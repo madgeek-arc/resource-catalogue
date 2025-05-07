@@ -1,3 +1,7 @@
+@Library(['sqa-jenkins-pipeline-library']) _
+
+def projectConfig
+
 pipeline {
   agent any
 
@@ -9,6 +13,14 @@ pipeline {
     VERSION = ''
   }
   stages {
+    stage('SQA baseline dynamic stages') {
+      steps {
+        script {
+          projectConfig = pipelineConfig()
+          buildStages(projectConfig)
+        }
+      }
+    }
     stage('Read Project Version') {
       steps {
         script {

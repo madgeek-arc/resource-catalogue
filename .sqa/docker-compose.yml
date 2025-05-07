@@ -1,0 +1,10 @@
+version: "3.6"
+
+services:
+  resource-catalogue-testing-java:
+    image: "indigodatacloud/ci-images:java"
+    hostname: "resource-catalogue-testing-host"
+    volumes:
+      - type: bind
+        source: ./resource-catalogue
+        target: /resource-catalogue-testing

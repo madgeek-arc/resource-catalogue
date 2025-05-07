@@ -1,0 +1,17 @@
+# .sqa/config.yml - jenkins-pipeline-library configuration file
+
+# generic configuration: workspace, agents
+config:
+  project_repos:
+    resource-catalogue:
+      repo: 'https://github.com/madgeek-arc/resource-catalogue'
+
+sqa_criteria:
+  qc_coverage:
+    repos:
+      resource-catalogue:
+        container: resource-catalogue-testing-java
+        commands:
+          - mvn -f /resource-catalogue-testing/pom.xml checkstyle:checkstyle
+
+timeout: 600
