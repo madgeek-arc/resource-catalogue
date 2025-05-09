@@ -142,28 +142,34 @@ public class PublicTrainingResourceService extends ResourceCatalogueManager<Trai
 
         // Resource Providers
         List<String> resourceProviders = new ArrayList<>();
-        for (String resourceProviderId : bundle.getTrainingResource().getResourceProviders()) {
-            //TODO: do we allow related resources from different catalogues?
-            ProviderBundle resourceProvider = providerService.get(resourceProviderId,
-                    bundle.getTrainingResource().getCatalogueId(), false);
-            resourceProviders.add(resourceProvider.getIdentifiers().getPid());
+        List<String> existingResourceProviders = bundle.getTrainingResource().getResourceProviders();
+        if (existingResourceProviders != null && !existingResourceProviders.isEmpty()) {
+            for (String resourceProviderId : existingResourceProviders) {
+                //TODO: do we allow related resources from different catalogues?
+                ProviderBundle resourceProvider = providerService.get(resourceProviderId,
+                        bundle.getTrainingResource().getCatalogueId(), false);
+                resourceProviders.add(resourceProvider.getIdentifiers().getPid());
+            }
+            bundle.getTrainingResource().setResourceProviders(resourceProviders);
         }
-        bundle.getTrainingResource().setResourceProviders(resourceProviders);
 
         // EOSC Related Services
         List<String> eoscRelatedServices = new ArrayList<>();
-        for (String eoscRelatedServiceId : bundle.getTrainingResource().getEoscRelatedServices()) {
-            //TODO: do we allow related resources from different catalogues?
-            Bundle<?> eoscRelatedService;
-            try {
-                eoscRelatedService = serviceBundleService.get(eoscRelatedServiceId,
-                        bundle.getTrainingResource().getCatalogueId(), false);
-            } catch (ResourceNotFoundException e) {
-                eoscRelatedService = trainingResourceService.get(eoscRelatedServiceId,
-                        bundle.getTrainingResource().getCatalogueId(), false);
+        List<String> existingEoscRelatedServices = bundle.getTrainingResource().getEoscRelatedServices();
+        if (existingEoscRelatedServices != null && !existingEoscRelatedServices.isEmpty()) {
+            for (String eoscRelatedServiceId : existingEoscRelatedServices) {
+                //TODO: do we allow related resources from different catalogues?
+                Bundle<?> eoscRelatedService;
+                try {
+                    eoscRelatedService = serviceBundleService.get(eoscRelatedServiceId,
+                            bundle.getTrainingResource().getCatalogueId(), false);
+                } catch (ResourceNotFoundException e) {
+                    eoscRelatedService = trainingResourceService.get(eoscRelatedServiceId,
+                            bundle.getTrainingResource().getCatalogueId(), false);
+                }
+                eoscRelatedServices.add(eoscRelatedService.getIdentifiers().getPid());
             }
-            eoscRelatedServices.add(eoscRelatedService.getIdentifiers().getPid());
+            bundle.getTrainingResource().setEoscRelatedServices(eoscRelatedServices);
         }
-        bundle.getTrainingResource().setEoscRelatedServices(eoscRelatedServices);
     }
 }

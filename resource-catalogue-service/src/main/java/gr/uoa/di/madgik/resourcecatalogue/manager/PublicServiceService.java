@@ -143,39 +143,48 @@ public class PublicServiceService extends ResourceCatalogueManager<ServiceBundle
 
         // Resource Providers
         List<String> resourceProviders = new ArrayList<>();
-        for (String resourceProviderId : bundle.getService().getResourceProviders()) {
-            //TODO: do we allow related resources from different catalogues?
-            ProviderBundle resourceProvider = providerService.get(resourceProviderId, bundle.getService().getCatalogueId(), false);
-            resourceProviders.add(resourceProvider.getIdentifiers().getPid());
+        List<String> existingResourceProviders = bundle.getService().getResourceProviders();
+        if (existingResourceProviders != null && !existingResourceProviders.isEmpty()) {
+            for (String resourceProviderId : existingResourceProviders) {
+                //TODO: do we allow related resources from different catalogues?
+                ProviderBundle resourceProvider = providerService.get(resourceProviderId, bundle.getService().getCatalogueId(), false);
+                resourceProviders.add(resourceProvider.getIdentifiers().getPid());
+            }
+            bundle.getService().setResourceProviders(resourceProviders);
         }
-        bundle.getService().setResourceProviders(resourceProviders);
 
         // Related Resources
         List<String> relatedResources = new ArrayList<>();
-        for (String relatedResourceId : bundle.getService().getRelatedResources()) {
-            //TODO: do we allow related resources from different catalogues?
-            Bundle<?> relatedResource;
-            try {
-                relatedResource = serviceBundleService.get(relatedResourceId, bundle.getService().getCatalogueId(), false);
-            } catch (ResourceNotFoundException e) {
-                relatedResource = trainingResourceService.get(relatedResourceId, bundle.getService().getCatalogueId(), false);
+        List<String> existingRelatedResources = bundle.getService().getRelatedResources();
+        if (existingRelatedResources != null && !existingRelatedResources.isEmpty()) {
+            for (String relatedResourceId : existingRelatedResources) {
+                //TODO: do we allow related resources from different catalogues?
+                Bundle<?> relatedResource;
+                try {
+                    relatedResource = serviceBundleService.get(relatedResourceId, bundle.getService().getCatalogueId(), false);
+                } catch (ResourceNotFoundException e) {
+                    relatedResource = trainingResourceService.get(relatedResourceId, bundle.getService().getCatalogueId(), false);
+                }
+                relatedResources.add(relatedResource.getIdentifiers().getPid());
             }
-            relatedResources.add(relatedResource.getIdentifiers().getPid());
+            bundle.getService().setRelatedResources(relatedResources);
         }
-        bundle.getService().setRelatedResources(relatedResources);
 
         // Required Resources
         List<String> requiredResources = new ArrayList<>();
-        for (String requiredResourceId : bundle.getService().getRequiredResources()) {
-            //TODO: do we allow related resources from different catalogues?
-            Bundle<?> requiredResource;
-            try {
-                requiredResource = serviceBundleService.get(requiredResourceId, bundle.getService().getCatalogueId(), false);
-            } catch (ResourceNotFoundException e) {
-                requiredResource = trainingResourceService.get(requiredResourceId, bundle.getService().getCatalogueId(), false);
+        List<String> existingRequiredResources = bundle.getService().getRequiredResources();
+        if (existingRequiredResources != null && !existingRequiredResources.isEmpty()) {
+            for (String requiredResourceId : existingRequiredResources) {
+                //TODO: do we allow related resources from different catalogues?
+                Bundle<?> requiredResource;
+                try {
+                    requiredResource = serviceBundleService.get(requiredResourceId, bundle.getService().getCatalogueId(), false);
+                } catch (ResourceNotFoundException e) {
+                    requiredResource = trainingResourceService.get(requiredResourceId, bundle.getService().getCatalogueId(), false);
+                }
+                requiredResources.add(requiredResource.getIdentifiers().getPid());
             }
-            requiredResources.add(requiredResource.getIdentifiers().getPid());
+            bundle.getService().setRequiredResources(requiredResources);
         }
-        bundle.getService().setRequiredResources(requiredResources);
     }
 }
