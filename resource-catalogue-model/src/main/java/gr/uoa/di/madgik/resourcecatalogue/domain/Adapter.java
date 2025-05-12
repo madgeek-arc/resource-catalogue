@@ -49,6 +49,23 @@ public class Adapter implements Identifiable {
     private String name;
 
     /**
+     * The Catalogue this Adapter is originally registered at.
+     */
+    @XmlElement
+    @Schema
+    @FieldValidation(nullable = true, containsId = true, idClass = Catalogue.class)
+    private String catalogueId;
+
+    /**
+     * Adapter's original Node
+     */
+    @XmlElement
+    @Schema
+    @FieldValidation(nullable = true, containsId = true, idClass = Vocabulary.class)
+    @VocabularyValidation(type = Vocabulary.Type.NODE)
+    private String node;
+
+    /**
      * Description
      */
     @XmlElement(required = true)
@@ -76,7 +93,7 @@ public class Adapter implements Identifiable {
      * logo (image) – could be a URL or base64-encoded string
      */
     @XmlElement
-    @Schema
+    @Schema(example = "https://example.com")
     @FieldValidation(nullable = true)
     private String logo;
 
@@ -99,10 +116,10 @@ public class Adapter implements Identifiable {
     /**
      * Links to the latest package release page(s) (e.g., PyPI project, Docker image, GitHub releases page)
      */
-    @XmlElement(required = true)
-    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
-    @FieldValidation
-    private List<URI> pkg;
+    @XmlElement
+    @Schema
+    @FieldValidation(nullable = true)
+    private List<URI> releases;
 
     /**
      * Programming language
@@ -149,34 +166,10 @@ public class Adapter implements Identifiable {
     /**
      * Maintainer(s): an array of objects with names/affiliations, etc.
      */
-    @XmlElement(required = true)
-    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
-    @FieldValidation
-    private List<Object> maintainers;
-
-    /**
-     * Maintainer or organization contact email(s)
-     */
     @XmlElement
     @Schema
     @FieldValidation(nullable = true)
-    private List<String> email;
-
-    /**
-     * Name of the organization (institute, company, university, research group, department, etc.)
-     */
-    @XmlElement
-    @Schema
-    @FieldValidation(nullable = true)
-    private String organization;
-
-    /**
-     * Organization website
-     */
-    @XmlElement
-    @Schema
-    @FieldValidation(nullable = true)
-    private URI organizationURL;
+    private List<Maintainer> maintainers;
 
     /**
      * Funding organization(s), program(s), or grant(s) supporting development/maintenance
@@ -189,7 +182,7 @@ public class Adapter implements Identifiable {
     public Adapter() {
     }
 
-    public Adapter(String id, String name, String description, String linkedResource, String tagline, String logo, URI documentation, URI repository, List<URI> pkg, String programmingLanguage, String license, String version, String changeLog, Date lastUpdate, List<Object> maintainers, List<String> email, String organization, URI organizationURL, List<String> funding) {
+    public Adapter(String id, String name, String description, String linkedResource, String tagline, String logo, URI documentation, URI repository, List<URI> releases, String programmingLanguage, String license, String version, String changeLog, Date lastUpdate, List<Maintainer> maintainers, List<String> funding) {
         this.id = id;
         this.name = name;
         this.description = description;
@@ -198,16 +191,13 @@ public class Adapter implements Identifiable {
         this.logo = logo;
         this.documentation = documentation;
         this.repository = repository;
-        this.pkg = pkg;
+        this.releases = releases;
         this.programmingLanguage = programmingLanguage;
         this.license = license;
         this.version = version;
         this.changeLog = changeLog;
         this.lastUpdate = lastUpdate;
         this.maintainers = maintainers;
-        this.email = email;
-        this.organization = organization;
-        this.organizationURL = organizationURL;
         this.funding = funding;
     }
 
@@ -215,12 +205,12 @@ public class Adapter implements Identifiable {
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
         Adapter adapter = (Adapter) o;
-        return Objects.equals(id, adapter.id) && Objects.equals(name, adapter.name) && Objects.equals(description, adapter.description) && Objects.equals(linkedResource, adapter.linkedResource) && Objects.equals(tagline, adapter.tagline) && Objects.equals(logo, adapter.logo) && Objects.equals(documentation, adapter.documentation) && Objects.equals(repository, adapter.repository) && Objects.equals(pkg, adapter.pkg) && Objects.equals(programmingLanguage, adapter.programmingLanguage) && Objects.equals(license, adapter.license) && Objects.equals(version, adapter.version) && Objects.equals(changeLog, adapter.changeLog) && Objects.equals(lastUpdate, adapter.lastUpdate) && Objects.equals(maintainers, adapter.maintainers) && Objects.equals(email, adapter.email) && Objects.equals(organization, adapter.organization) && Objects.equals(organizationURL, adapter.organizationURL) && Objects.equals(funding, adapter.funding);
+        return Objects.equals(id, adapter.id) && Objects.equals(name, adapter.name) && Objects.equals(description, adapter.description) && Objects.equals(linkedResource, adapter.linkedResource) && Objects.equals(tagline, adapter.tagline) && Objects.equals(logo, adapter.logo) && Objects.equals(documentation, adapter.documentation) && Objects.equals(repository, adapter.repository) && Objects.equals(releases, adapter.releases) && Objects.equals(programmingLanguage, adapter.programmingLanguage) && Objects.equals(license, adapter.license) && Objects.equals(version, adapter.version) && Objects.equals(changeLog, adapter.changeLog) && Objects.equals(lastUpdate, adapter.lastUpdate) && Objects.equals(maintainers, adapter.maintainers) && Objects.equals(funding, adapter.funding);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, name, description, linkedResource, tagline, logo, documentation, repository, pkg, programmingLanguage, license, version, changeLog, lastUpdate, maintainers, email, organization, organizationURL, funding);
+        return Objects.hash(id, name, description, linkedResource, tagline, logo, documentation, repository, releases, programmingLanguage, license, version, changeLog, lastUpdate, maintainers, funding);
     }
 
     @Override
@@ -234,16 +224,13 @@ public class Adapter implements Identifiable {
                 ", logo='" + logo + '\'' +
                 ", documentation=" + documentation +
                 ", repository=" + repository +
-                ", pkg=" + pkg +
+                ", pkg=" + releases +
                 ", programmingLanguage='" + programmingLanguage + '\'' +
                 ", license='" + license + '\'' +
                 ", version='" + version + '\'' +
                 ", changeLog='" + changeLog + '\'' +
                 ", lastUpdate=" + lastUpdate +
                 ", maintainers=" + maintainers +
-                ", email=" + email +
-                ", organization='" + organization + '\'' +
-                ", organizationURL=" + organizationURL +
                 ", funding=" + funding +
                 '}';
     }
@@ -314,12 +301,12 @@ public class Adapter implements Identifiable {
         this.repository = repository;
     }
 
-    public List<URI> getPkg() {
-        return pkg;
+    public List<URI> getReleases() {
+        return releases;
     }
 
-    public void setPkg(List<URI> pkg) {
-        this.pkg = pkg;
+    public void setReleases(List<URI> releases) {
+        this.releases = releases;
     }
 
     public String getProgrammingLanguage() {
@@ -362,36 +349,12 @@ public class Adapter implements Identifiable {
         this.lastUpdate = lastUpdate;
     }
 
-    public List<Object> getMaintainers() {
+    public List<Maintainer> getMaintainers() {
         return maintainers;
     }
 
-    public void setMaintainers(List<Object> maintainers) {
+    public void setMaintainers(List<Maintainer> maintainers) {
         this.maintainers = maintainers;
-    }
-
-    public List<String> getEmail() {
-        return email;
-    }
-
-    public void setEmail(List<String> email) {
-        this.email = email;
-    }
-
-    public String getOrganization() {
-        return organization;
-    }
-
-    public void setOrganization(String organization) {
-        this.organization = organization;
-    }
-
-    public URI getOrganizationURL() {
-        return organizationURL;
-    }
-
-    public void setOrganizationURL(URI organizationURL) {
-        this.organizationURL = organizationURL;
     }
 
     public List<String> getFunding() {

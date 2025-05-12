@@ -1,5 +1,26 @@
 {
   "$schema" : "https://json-schema.org/draft/2020-12/schema",
+  "$defs" : {
+    "Maintainer" : {
+      "type" : "object",
+      "properties" : {
+        "email" : {
+          "type" : "array",
+          "items" : {
+            "type" : "string"
+          }
+        },
+        "name" : {
+          "type" : "string"
+        },
+        "website" : {
+          "type" : "string",
+          "format" : "uri"
+        }
+      },
+      "additionalProperties" : false
+    }
+  },
   "type" : "object",
   "properties" : {
     "changeLog" : {
@@ -11,12 +32,6 @@
     "documentation" : {
       "type" : "string",
       "format" : "uri"
-    },
-    "email" : {
-      "type" : "array",
-      "items" : {
-        "type" : "string"
-      }
     },
     "funding" : {
       "type" : "array",
@@ -42,27 +57,22 @@
     },
     "maintainers" : {
       "type" : "array",
-      "items" : { }
+      "items" : {
+        "$ref" : "#/$defs/Maintainer"
+      }
     },
     "name" : {
       "type" : "string"
     },
-    "organization" : {
+    "programmingLanguage" : {
       "type" : "string"
     },
-    "organizationURL" : {
-      "type" : "string",
-      "format" : "uri"
-    },
-    "pkg" : {
+    "releases" : {
       "type" : "array",
       "items" : {
         "type" : "string",
         "format" : "uri"
       }
-    },
-    "programmingLanguage" : {
-      "type" : "string"
     },
     "repository" : {
       "type" : "string",

@@ -23,12 +23,6 @@
         </xs:annotation>
       </xs:element>
             
-      <xs:element maxOccurs="unbounded" minOccurs="0" name="email" nillable="true" type="xs:string">
-        <xs:annotation>
-          <xs:documentation><![CDATA[Maintainer or organization contact email(s)]]></xs:documentation>
-        </xs:annotation>
-      </xs:element>
-            
       <xs:element maxOccurs="unbounded" minOccurs="0" name="funding" nillable="true" type="xs:string">
         <xs:annotation>
           <xs:documentation><![CDATA[Funding organization(s), program(s), or grant(s) supporting development/maintenance]]></xs:documentation>
@@ -65,7 +59,7 @@
         </xs:annotation>
       </xs:element>
             
-      <xs:element maxOccurs="unbounded" minOccurs="0" name="maintainers" nillable="true" type="xs:anyType">
+      <xs:element maxOccurs="unbounded" minOccurs="0" name="maintainers" nillable="true" type="maintainer">
         <xs:annotation>
           <xs:documentation><![CDATA[Maintainer(s): an array of objects with names/affiliations, etc.]]></xs:documentation>
         </xs:annotation>
@@ -77,27 +71,15 @@
         </xs:annotation>
       </xs:element>
             
-      <xs:element minOccurs="0" name="organization" type="xs:string">
-        <xs:annotation>
-          <xs:documentation><![CDATA[Name of the organization (institute, company, university, research group, department, etc.)]]></xs:documentation>
-        </xs:annotation>
-      </xs:element>
-            
-      <xs:element minOccurs="0" name="organizationURL" type="xs:string">
-        <xs:annotation>
-          <xs:documentation><![CDATA[Organization website]]></xs:documentation>
-        </xs:annotation>
-      </xs:element>
-            
-      <xs:element maxOccurs="unbounded" minOccurs="0" name="pkg" nillable="true" type="xs:string">
-        <xs:annotation>
-          <xs:documentation><![CDATA[Links to the latest package release page(s) (e.g., PyPI project, Docker image, GitHub releases page)]]></xs:documentation>
-        </xs:annotation>
-      </xs:element>
-            
       <xs:element minOccurs="0" name="programmingLanguage" type="xs:string">
         <xs:annotation>
           <xs:documentation><![CDATA[Programming language]]></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+            
+      <xs:element maxOccurs="unbounded" minOccurs="0" name="releases" nillable="true" type="xs:string">
+        <xs:annotation>
+          <xs:documentation><![CDATA[Links to the latest package release page(s) (e.g., PyPI project, Docker image, GitHub releases page)]]></xs:documentation>
         </xs:annotation>
       </xs:element>
             
@@ -116,6 +98,32 @@
       <xs:element minOccurs="0" name="version" type="xs:string">
         <xs:annotation>
           <xs:documentation><![CDATA[Software version]]></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+          
+    </xs:sequence>
+      
+  </xs:complexType>
+    
+  <xs:complexType name="maintainer">
+        
+    <xs:sequence>
+            
+      <xs:element maxOccurs="unbounded" minOccurs="0" name="email" nillable="true" type="xs:string">
+        <xs:annotation>
+          <xs:documentation><![CDATA[Maintainer or organization contact email(s)]]></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+            
+      <xs:element minOccurs="0" name="name" type="xs:string">
+        <xs:annotation>
+          <xs:documentation><![CDATA[Name of the maintainer or organization (institute, company, university, research group, department, etc.)]]></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+            
+      <xs:element minOccurs="0" name="website" type="xs:string">
+        <xs:annotation>
+          <xs:documentation><![CDATA[Maintainer or organization website]]></xs:documentation>
         </xs:annotation>
       </xs:element>
           
