@@ -19,6 +19,7 @@ package gr.uoa.di.madgik.resourcecatalogue.controllers.registry;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Vocabulary;
 import gr.uoa.di.madgik.resourcecatalogue.dto.VocabularyTree;
 import gr.uoa.di.madgik.resourcecatalogue.service.VocabularyService;
+import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -31,10 +32,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @RestController
 @RequestMapping("vocabulary")
@@ -158,5 +156,17 @@ public class VocabularyController extends ResourceController<Vocabulary> {
         List<String> duplicateNames = allHLENames.stream()
                 .filter(i -> Collections.frequency(allHLENames, i) > 1).distinct().toList();
         logger.info("Duplicate Names {}", duplicateNames);
+    }
+
+    // front-end use
+    @Hidden
+    @GetMapping(path = "getTerritories", produces = {MediaType.APPLICATION_JSON_VALUE})
+    public Map<String, List<Vocabulary>> getTerritories() {
+        Map<String, List<Vocabulary>> territories = new HashMap<>();
+        List<Vocabulary> vocs = new ArrayList<>();
+        vocs.addAll(vocabularyService.getByType(Vocabulary.Type.REGION));
+        vocs.addAll(vocabularyService.getByType(Vocabulary.Type.COUNTRY));
+        territories.put("TERRITORIES", vocs);
+        return territories;
     }
 }

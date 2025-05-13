@@ -35,7 +35,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
@@ -124,7 +123,7 @@ public class InteroperabilityRecordManager extends ResourceCatalogueManager<Inte
         }
         interoperabilityRecordBundle.setLoggingInfo(loggingInfoList);
 
-        interoperabilityRecordBundle.getInteroperabilityRecord().setCreated(String.valueOf(System.currentTimeMillis()));
+        interoperabilityRecordBundle.getInteroperabilityRecord().setCreated(commonMethods.transformTimestampToDate(String.valueOf(System.currentTimeMillis())));
         interoperabilityRecordBundle.getInteroperabilityRecord().setUpdated(interoperabilityRecordBundle.getInteroperabilityRecord().getCreated());
         logger.info("Added a new Interoperability Record with id '{}' and title '{}'", interoperabilityRecordBundle.getId(),
                 interoperabilityRecordBundle.getInteroperabilityRecord().getTitle());

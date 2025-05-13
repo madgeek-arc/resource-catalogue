@@ -30,6 +30,10 @@ import org.springframework.security.authentication.InsufficientAuthenticationExc
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 @Component
@@ -348,5 +352,16 @@ public class ProviderResourcesCommonMethods {
             users.add(authUser);
             provider.setUsers(new ArrayList<>(users));
         }
+    }
+
+    public String transformTimestampToDate(String timestampStr) {
+        long timestamp = Long.parseLong(timestampStr);
+
+        LocalDate date = Instant.ofEpochMilli(timestamp)
+                .atZone(ZoneId.systemDefault())
+                .toLocalDate();
+
+        // Format as "YYYY-MM-DD"
+        return date.format(DateTimeFormatter.ISO_LOCAL_DATE);
     }
 }
