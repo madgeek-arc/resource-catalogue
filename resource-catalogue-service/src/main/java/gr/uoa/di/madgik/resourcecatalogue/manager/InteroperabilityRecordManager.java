@@ -145,7 +145,7 @@ public class InteroperabilityRecordManager extends ResourceCatalogueManager<Inte
 
         InteroperabilityRecordBundle ret = ObjectUtils.clone(interoperabilityRecordBundle);
         InteroperabilityRecordBundle existingInteroperabilityRecord;
-        existingInteroperabilityRecord = get(ret.getInteroperabilityRecord().getId(), ret.getInteroperabilityRecord().getCatalogueId());
+        existingInteroperabilityRecord = get(ret.getInteroperabilityRecord().getId(), ret.getInteroperabilityRecord().getCatalogueId(), false);
         if (ret.getInteroperabilityRecord().equals(existingInteroperabilityRecord.getInteroperabilityRecord())) {
             return ret;
         }

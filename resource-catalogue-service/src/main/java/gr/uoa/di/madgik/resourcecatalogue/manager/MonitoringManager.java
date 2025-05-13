@@ -147,7 +147,7 @@ public class MonitoringManager extends ResourceCatalogueManager<MonitoringBundle
         logger.trace("Attempting to update the Monitoring with id '{}'", monitoringBundle.getId());
 
         MonitoringBundle ret = ObjectUtils.clone(monitoringBundle);
-        Resource existingResource = whereID(ret.getId(), true);
+        Resource existingResource = getResource(monitoringBundle.getId(), monitoringBundle.getMonitoring().getCatalogueId(), false);
         MonitoringBundle existingMonitoring = deserialize(existingResource);
         // check if there are actual changes in the Monitoring
         if (ret.getMonitoring().equals(existingMonitoring.getMonitoring())) {

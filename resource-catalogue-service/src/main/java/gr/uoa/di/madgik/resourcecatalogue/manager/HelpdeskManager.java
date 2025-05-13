@@ -138,7 +138,7 @@ public class HelpdeskManager extends ResourceCatalogueManager<HelpdeskBundle> im
         logger.trace("Attempting to update the Helpdesk with id '{}'", helpdeskBundle.getId());
 
         HelpdeskBundle ret = ObjectUtils.clone(helpdeskBundle);
-        Resource existingResource = whereID(ret.getId(), true);
+        Resource existingResource = getResource(helpdeskBundle.getId(), helpdeskBundle.getHelpdesk().getCatalogueId(), false);
         HelpdeskBundle existingHelpdesk = deserialize(existingResource);
         // check if there are actual changes in the Helpdesk
         if (ret.getHelpdesk().equals(existingHelpdesk.getHelpdesk())) {

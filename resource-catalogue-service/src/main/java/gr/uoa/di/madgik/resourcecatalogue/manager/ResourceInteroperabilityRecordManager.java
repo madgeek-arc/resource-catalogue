@@ -130,7 +130,8 @@ public class ResourceInteroperabilityRecordManager extends ResourceCatalogueMana
         logger.trace("Attempting to update the ResourceInteroperabilityRecord with id '{}'", bundle.getId());
 
         ResourceInteroperabilityRecordBundle ret = ObjectUtils.clone(bundle);
-        Resource existingResource = whereID(ret.getId(), true);
+        Resource existingResource = getResource(bundle.getId(),
+                bundle.getResourceInteroperabilityRecord().getCatalogueId(), false);
         ResourceInteroperabilityRecordBundle existingInteroperabilityRecord = deserialize(existingResource);
         // check if there are actual changes in the ResourceInteroperabilityRecord
         if (ret.getResourceInteroperabilityRecord().equals(existingInteroperabilityRecord.getResourceInteroperabilityRecord())) {
