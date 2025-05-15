@@ -74,11 +74,6 @@ public class DatasourceManager extends ResourceCatalogueManager<DatasourceBundle
         return "datasource";
     }
 
-    public DatasourceBundle get(String datasourceId) {
-        Resource res = where(false, new SearchService.KeyValue("resource_internal_id", datasourceId));
-        return res != null ? deserialize(res) : null;
-    }
-
     public DatasourceBundle get(String serviceId, String catalogueId) {
         Resource res = where(false,
                 new SearchService.KeyValue("service_id", serviceId),
@@ -218,11 +213,11 @@ public class DatasourceManager extends ResourceCatalogueManager<DatasourceBundle
             throw new ValidationException(String.format("Vocabulary %s does not consist an Datasource state!", status));
         }
         logger.trace("Verifying Datasource with id: '{}' | status: '{}' | active: '{}'", id, status, active);
-        DatasourceBundle datasourceBundle = get(id);
+        DatasourceBundle datasourceBundle = get(id, catalogueId, false);
 
         // Verify that Service is Approved before proceeding
-        if (!serviceBundleService.get(datasourceBundle.getDatasource().getServiceId()).getStatus().equals("approved resource")
-                && status.equals("approved datasource")) {
+        if (!serviceBundleService.get(datasourceBundle.getDatasource().getServiceId(), datasourceBundle.getDatasource().getCatalogueId(), false)
+                .getStatus().equals("approved resource") && status.equals("approved datasource")) {
             throw new ValidationException("You cannot approve a Datasource when its Service is in Pending or Rejected state");
         }
 

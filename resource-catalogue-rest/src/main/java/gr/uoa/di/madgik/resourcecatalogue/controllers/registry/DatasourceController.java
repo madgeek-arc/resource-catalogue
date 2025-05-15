@@ -32,6 +32,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpStatus;
@@ -56,6 +57,9 @@ public class DatasourceController {
     private final GenericResourceService genericResourceService;
     private final OpenAIREDatasourceService openAIREDatasourceService;
 
+    @Value("${catalogue.id}")
+    private String catalogueId;
+
     public DatasourceController(DatasourceService datasourceService,
                                 @Lazy GenericResourceService genericResourceService,
                                 OpenAIREDatasourceService openAIREDatasourceService) {
@@ -67,9 +71,10 @@ public class DatasourceController {
     @Operation(summary = "Returns the Datasource with the given id.")
     @GetMapping(path = "{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<Datasource> getDatasource(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
-                                                    @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix) {
+                                                    @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix,
+                                                    @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId) {
         String id = prefix + "/" + suffix;
-        Datasource datasource = datasourceService.get(id).getDatasource();
+        Datasource datasource = datasourceService.get(id, catalogueId, false).getDatasource();
         return new ResponseEntity<>(datasource, HttpStatus.OK);
     }
 
@@ -134,7 +139,7 @@ public class DatasourceController {
     public ResponseEntity<Datasource> updateHDatasource(@Valid @RequestBody Datasource datasource,
                                                         @RequestParam(required = false) String comment,
                                                         @Parameter(hidden = true) Authentication auth) {
-        DatasourceBundle datasourceBundle = datasourceService.get(datasource.getId());
+        DatasourceBundle datasourceBundle = datasourceService.get(datasource.getId(), datasource.getCatalogueId(), false);
         datasourceBundle.setDatasource(datasource);
         datasourceBundle = datasourceService.update(datasourceBundle, comment, auth);
         return new ResponseEntity<>(datasourceBundle.getDatasource(), HttpStatus.OK);
@@ -144,9 +149,10 @@ public class DatasourceController {
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     public ResponseEntity<Datasource> deleteDatasourceById(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
                                                            @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix,
+                                                           @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId,
                                                            @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
-        DatasourceBundle datasourceBundle = datasourceService.get(id);
+        DatasourceBundle datasourceBundle = datasourceService.get(id, catalogueId, false);
         if (datasourceBundle == null) {
             return new ResponseEntity<>(HttpStatus.GONE);
         }
@@ -164,7 +170,7 @@ public class DatasourceController {
                                                        @Parameter(hidden = true) Authentication auth) {
         Datasource datasource = getDatasourceByServiceId(prefix, suffix, catalogueId, auth).getBody();
         assert datasource != null;
-        DatasourceBundle datasourceBundle = datasourceService.get(datasource.getId());
+        DatasourceBundle datasourceBundle = datasourceService.get(datasource.getId(), catalogueId, false);
         if (datasourceBundle == null) {
             return new ResponseEntity<>(HttpStatus.GONE);
         }

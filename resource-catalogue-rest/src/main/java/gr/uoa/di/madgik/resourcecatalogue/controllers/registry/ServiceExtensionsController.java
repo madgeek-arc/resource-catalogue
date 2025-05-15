@@ -75,6 +75,9 @@ public class ServiceExtensionsController {
     private String monitoringToken;
     private final GenericResourceService genericResourceService;
 
+    @Value("${catalogue.id}")
+    private String catalogueId;
+
     @InitBinder("helpdesk")
     protected void initHelpdeskBinder(WebDataBinder binder) {
         binder.addValidators(new HelpdeskValidator());
@@ -99,18 +102,20 @@ public class ServiceExtensionsController {
     @Operation(summary = "Returns the Helpdesk with the given id.")
     @GetMapping(path = "/helpdesk/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<Helpdesk> getHelpdesk(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
-                                                @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix) {
+                                                @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix,
+                                                @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId) {
         String id = prefix + "/" + suffix;
-        Helpdesk helpdesk = helpdeskService.get(id).getHelpdesk();
+        Helpdesk helpdesk = helpdeskService.get(id, catalogueId, false).getHelpdesk();
         return new ResponseEntity<>(helpdesk, HttpStatus.OK);
     }
 
     @GetMapping(path = "/helpdesk/bundle/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     public ResponseEntity<HelpdeskBundle> getHelpdeskBundle(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
-                                                            @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix) {
+                                                            @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix,
+                                                            @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId) {
         String id = prefix + "/" + suffix;
-        HelpdeskBundle helpdesk = helpdeskService.get(id);
+        HelpdeskBundle helpdesk = helpdeskService.get(id, catalogueId, false);
         return new ResponseEntity<>(helpdesk, HttpStatus.OK);
     }
 
@@ -172,7 +177,7 @@ public class ServiceExtensionsController {
     public ResponseEntity<Helpdesk> updateHelpdesk(@Valid @RequestBody Helpdesk helpdesk,
                                                    @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId,
                                                    @Parameter(hidden = true) Authentication auth) {
-        HelpdeskBundle helpdeskBundle = helpdeskService.get(helpdesk.getId());
+        HelpdeskBundle helpdeskBundle = helpdeskService.get(helpdesk.getId(), catalogueId, false);
         helpdeskBundle.setHelpdesk(helpdesk);
         helpdeskBundle = helpdeskService.update(helpdeskBundle, auth);
         return new ResponseEntity<>(helpdeskBundle.getHelpdesk(), HttpStatus.OK);
@@ -203,7 +208,7 @@ public class ServiceExtensionsController {
                                                    @Parameter(hidden = true) Authentication auth) {
         Helpdesk helpdesk = getHelpdeskByServiceId(prefix, suffix, catalogueId, auth).getBody();
         assert helpdesk != null;
-        HelpdeskBundle helpdeskBundle = helpdeskService.get(helpdesk.getId());
+        HelpdeskBundle helpdeskBundle = helpdeskService.get(helpdesk.getId(), catalogueId, false);
         if (helpdeskBundle == null) {
             return new ResponseEntity<>(HttpStatus.GONE);
         }
@@ -241,18 +246,20 @@ public class ServiceExtensionsController {
     @Operation(summary = "Returns the Monitoring with the given id.")
     @GetMapping(path = "/monitoring/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<Monitoring> getMonitoring(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
-                                                    @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix) {
+                                                    @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix,
+                                                    @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId) {
         String id = prefix + "/" + suffix;
-        Monitoring monitoring = monitoringService.get(id).getMonitoring();
+        Monitoring monitoring = monitoringService.get(id, catalogueId, false).getMonitoring();
         return new ResponseEntity<>(monitoring, HttpStatus.OK);
     }
 
     @GetMapping(path = "/monitoring/bundle/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     public ResponseEntity<MonitoringBundle> getMonitoringBundle(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
-                                                                @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix) {
+                                                                @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix,
+                                                                @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId) {
         String id = prefix + "/" + suffix;
-        MonitoringBundle monitoring = monitoringService.get(id);
+        MonitoringBundle monitoring = monitoringService.get(id, catalogueId, false);
         return new ResponseEntity<>(monitoring, HttpStatus.OK);
     }
 
@@ -319,13 +326,13 @@ public class ServiceExtensionsController {
     public ResponseEntity<Monitoring> updateMonitoring(@Valid @RequestBody Monitoring monitoring,
                                                        @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId,
                                                        @Parameter(hidden = true) Authentication auth) {
-        MonitoringBundle monitoringBundle = monitoringService.get(monitoring.getId());
+        MonitoringBundle monitoringBundle = monitoringService.get(monitoring.getId(), catalogueId, false);
         monitoringBundle.setMonitoring(monitoring);
         monitoringBundle = monitoringService.update(monitoringBundle, auth);
         return new ResponseEntity<>(monitoringBundle.getMonitoring(), HttpStatus.OK);
     }
 
-    // Deletes the Helpdesk of the given Service ID of the given Catalogue.
+//    // Deletes the Helpdesk of the given Service ID of the given Catalogue.
     @DeleteMapping(path = "/monitoring/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     public ResponseEntity<Monitoring> deleteMonitoringById(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
@@ -350,7 +357,7 @@ public class ServiceExtensionsController {
                                                        @Parameter(hidden = true) Authentication auth) {
         Monitoring monitoring = getMonitoringByServiceId(prefix, suffix, catalogueId, auth).getBody();
         assert monitoring != null;
-        MonitoringBundle monitoringBundle = monitoringService.get(monitoring.getId());
+        MonitoringBundle monitoringBundle = monitoringService.get(monitoring.getId(), catalogueId, false);
         if (monitoringBundle == null) {
             return new ResponseEntity<>(HttpStatus.GONE);
         }
