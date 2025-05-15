@@ -18,9 +18,8 @@ package gr.uoa.di.madgik.resourcecatalogue.manager;
 
 import gr.uoa.di.madgik.registry.domain.Browsing;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
-import gr.uoa.di.madgik.registry.exception.ResourceException;
-import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
+import gr.uoa.di.madgik.resourcecatalogue.exceptions.CatalogueResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.service.InteroperabilityRecordService;
 import gr.uoa.di.madgik.resourcecatalogue.service.ServiceBundleService;
 import gr.uoa.di.madgik.resourcecatalogue.service.TrainingResourceService;
@@ -115,7 +114,7 @@ public class PublicResourceInteroperabilityRecordService extends ResourceCatalog
             logger.info("Deleting public ResourceInteroperabilityRecordBundle with id '{}'", publicResourceInteroperabilityRecordBundle.getId());
             super.delete(publicResourceInteroperabilityRecordBundle);
             jmsService.convertAndSendTopic("resource_interoperability_record.delete", publicResourceInteroperabilityRecordBundle);
-        } catch (ResourceException | ResourceNotFoundException ignore) {
+        } catch (CatalogueResourceNotFoundException ignore) {
         }
     }
 
@@ -126,7 +125,7 @@ public class PublicResourceInteroperabilityRecordService extends ResourceCatalog
         try {
             resource = serviceBundleService.get(bundle.getResourceInteroperabilityRecord().getResourceId(),
                     bundle.getResourceInteroperabilityRecord().getCatalogueId(), false);
-        } catch (ResourceNotFoundException e) {
+        } catch (CatalogueResourceNotFoundException e) {
             resource = trainingResourceService.get(bundle.getResourceInteroperabilityRecord().getResourceId(),
                     bundle.getResourceInteroperabilityRecord().getCatalogueId(), false);
         }

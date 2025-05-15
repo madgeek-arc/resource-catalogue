@@ -22,6 +22,7 @@ import gr.uoa.di.madgik.registry.exception.ResourceException;
 import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.domain.DatasourceBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.ServiceBundle;
+import gr.uoa.di.madgik.resourcecatalogue.exceptions.CatalogueResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.manager.pids.PidIssuer;
 import gr.uoa.di.madgik.resourcecatalogue.service.ServiceBundleService;
 import gr.uoa.di.madgik.resourcecatalogue.utils.JmsService;
@@ -65,7 +66,7 @@ public class PublicDatasourceService extends ResourceCatalogueManager<Datasource
         DatasourceBundle datasourceBundle;
         try {
             datasourceBundle = get(id, catalogueId, true);
-        } catch (ResourceException | ResourceNotFoundException e) {
+        } catch (CatalogueResourceNotFoundException e) {
             return null;
         }
         return datasourceBundle;
@@ -117,7 +118,7 @@ public class PublicDatasourceService extends ResourceCatalogueManager<Datasource
             logger.info("Deleting public Datasource with id '{}'", publicDatasourceBundle.getId());
             super.delete(publicDatasourceBundle);
             jmsService.convertAndSendTopic("datasource.delete", publicDatasourceBundle);
-        } catch (ResourceException | ResourceNotFoundException ignore) {
+        } catch (CatalogueResourceNotFoundException ignore) {
         }
     }
 

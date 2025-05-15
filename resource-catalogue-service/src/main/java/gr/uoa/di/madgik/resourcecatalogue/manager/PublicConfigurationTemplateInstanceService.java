@@ -20,17 +20,15 @@ import gr.uoa.di.madgik.registry.domain.Browsing;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.exception.ResourceException;
 import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
-import gr.uoa.di.madgik.registry.service.ResourceCRUDService;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Bundle;
-import gr.uoa.di.madgik.resourcecatalogue.domain.Identifiers;
 import gr.uoa.di.madgik.resourcecatalogue.domain.InteroperabilityRecordBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.ServiceBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.configurationTemplates.ConfigurationTemplateInstanceBundle;
+import gr.uoa.di.madgik.resourcecatalogue.exceptions.CatalogueResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.service.InteroperabilityRecordService;
 import gr.uoa.di.madgik.resourcecatalogue.service.ServiceBundleService;
 import gr.uoa.di.madgik.resourcecatalogue.service.TrainingResourceService;
 import gr.uoa.di.madgik.resourcecatalogue.utils.JmsService;
-import gr.uoa.di.madgik.resourcecatalogue.utils.PublicResourceUtils;
 import org.apache.commons.beanutils.BeanUtils;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -147,7 +145,7 @@ public class PublicConfigurationTemplateInstanceService extends ResourceCatalogu
         Bundle<?> resourceBundle;
         try {
             resourceBundle = serviceBundleService.get(bundle.getConfigurationTemplateInstance().getResourceId(), catalogueId, false);
-        } catch (ResourceNotFoundException e) {
+        } catch (CatalogueResourceNotFoundException e) {
             resourceBundle = trainingResourceService.get(bundle.getConfigurationTemplateInstance().getResourceId(), catalogueId, false);
         }
         bundle.getConfigurationTemplateInstance().setResourceId(resourceBundle.getIdentifiers().getPid());

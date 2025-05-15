@@ -27,6 +27,7 @@ import gr.uoa.di.madgik.resourcecatalogue.service.ResourceInteroperabilityRecord
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -47,6 +48,9 @@ public class PublicResourceInteroperabilityRecordController {
     private final ResourceInteroperabilityRecordService service;
     private final GenericResourceService genericService;
 
+    @Value("${catalogue.id}")
+    private String catalogueId;
+
     PublicResourceInteroperabilityRecordController(ResourceInteroperabilityRecordService service,
                                                    GenericResourceService genericService) {
 
@@ -60,9 +64,10 @@ public class PublicResourceInteroperabilityRecordController {
     public ResponseEntity<?> get(@Parameter(description = "The left part of the ID before the '/'")
                                  @PathVariable("prefix") String prefix,
                                  @Parameter(description = "The right part of the ID after the '/'")
-                                 @PathVariable("suffix") String suffix) {
+                                 @PathVariable("suffix") String suffix,
+                                 @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId) {
         String id = prefix + "/" + suffix;
-        ResourceInteroperabilityRecordBundle bundle = service.get(id, null, true);
+        ResourceInteroperabilityRecordBundle bundle = service.get(id, catalogueId, true);
         if (bundle.getMetadata().isPublished()) {
             return new ResponseEntity<>(bundle.getResourceInteroperabilityRecord(), HttpStatus.OK);
         }
@@ -78,9 +83,10 @@ public class PublicResourceInteroperabilityRecordController {
                                        @PathVariable("prefix") String prefix,
                                        @Parameter(description = "The right part of the ID after the '/'")
                                        @PathVariable("suffix") String suffix,
+                                       @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId,
                                        @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
-        ResourceInteroperabilityRecordBundle bundle = service.get(id, null, true);
+        ResourceInteroperabilityRecordBundle bundle = service.get(id, catalogueId, true);
         if (bundle.getMetadata().isPublished()) {
             return new ResponseEntity<>(bundle, HttpStatus.OK);
         }

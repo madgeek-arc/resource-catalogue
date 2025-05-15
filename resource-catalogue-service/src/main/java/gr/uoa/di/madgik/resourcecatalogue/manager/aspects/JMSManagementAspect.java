@@ -21,11 +21,11 @@ import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.domain.CatalogueBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.HelpdeskBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.MonitoringBundle;
+import gr.uoa.di.madgik.resourcecatalogue.exceptions.CatalogueResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.manager.PublicHelpdeskService;
 import gr.uoa.di.madgik.resourcecatalogue.manager.PublicMonitoringService;
 import gr.uoa.di.madgik.resourcecatalogue.utils.JmsService;
 import gr.uoa.di.madgik.resourcecatalogue.utils.ObjectUtils;
-import gr.uoa.di.madgik.resourcecatalogue.utils.PublicResourceUtils;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.After;
 import org.aspectj.lang.annotation.AfterReturning;
@@ -87,7 +87,7 @@ public class JMSManagementAspect {
         try {
             publicHelpdeskManager.get(helpdeskBundle.getIdentifiers().getPid(),
                     helpdeskBundle.getHelpdesk().getCatalogueId(), true);
-        } catch (ResourceException | ResourceNotFoundException e) {
+        } catch (CatalogueResourceNotFoundException e) {
             publicHelpdeskManager.add(ObjectUtils.clone(helpdeskBundle), null);
         }
     }
@@ -118,7 +118,7 @@ public class JMSManagementAspect {
         try {
             publicMonitoringManager.get(monitoringBundle.getIdentifiers().getPid(),
                     monitoringBundle.getMonitoring().getCatalogueId(), true);
-        } catch (ResourceException | ResourceNotFoundException e) {
+        } catch (CatalogueResourceNotFoundException e) {
             publicMonitoringManager.add(ObjectUtils.clone(monitoringBundle), null);
         }
     }

@@ -25,6 +25,7 @@ import gr.uoa.di.madgik.registry.service.VersionService;
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
 import gr.uoa.di.madgik.resourcecatalogue.dto.ExtendedValue;
 import gr.uoa.di.madgik.resourcecatalogue.dto.MapValues;
+import gr.uoa.di.madgik.resourcecatalogue.exceptions.CatalogueResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
 import gr.uoa.di.madgik.resourcecatalogue.utils.Auditable;
 import gr.uoa.di.madgik.resourcecatalogue.utils.AuthenticationInfo;
@@ -224,7 +225,7 @@ public class ProviderManager extends ResourceCatalogueManager<ProviderBundle> im
     private ProviderBundle getWithCatalogue(String id, String catalogueId) {
         Resource resource = getResource(id, catalogueId, false);
         if (resource == null) {
-            throw new gr.uoa.di.madgik.registry.exception.ResourceNotFoundException(String.format(
+            throw new CatalogueResourceNotFoundException(String.format(
                     "Could not find provider with id: %s and catalogueId: %s", id, catalogueId));
         }
         return deserialize(resource);
@@ -234,7 +235,7 @@ public class ProviderManager extends ResourceCatalogueManager<ProviderBundle> im
         ProviderBundle providerBundle = getWithCatalogue(providerId, catalogueId);
         CatalogueBundle catalogueBundle = catalogueService.get(catalogueId);
         if (catalogueBundle == null) {
-            throw new gr.uoa.di.madgik.registry.exception.ResourceNotFoundException(
+            throw new CatalogueResourceNotFoundException(
                     String.format("Could not find catalogue with id: %s", catalogueId));
         }
         if (!providerBundle.getProvider().getCatalogueId().equals(catalogueId)) {

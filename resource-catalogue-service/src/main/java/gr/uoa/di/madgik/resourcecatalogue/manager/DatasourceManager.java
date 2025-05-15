@@ -23,6 +23,7 @@ import gr.uoa.di.madgik.registry.domain.Resource;
 import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.registry.service.SearchService;
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
+import gr.uoa.di.madgik.resourcecatalogue.exceptions.CatalogueResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
 import gr.uoa.di.madgik.resourcecatalogue.utils.AuthenticationInfo;
 import gr.uoa.di.madgik.resourcecatalogue.utils.ObjectUtils;
@@ -196,7 +197,7 @@ public class DatasourceManager extends ResourceCatalogueManager<DatasourceBundle
         String serviceId = datasourceBundle.getDatasource().getServiceId();
         String catalogueId = datasourceBundle.getDatasource().getCatalogueId();
 
-        DatasourceBundle existingDatasource = get(serviceId, catalogueId);
+        DatasourceBundle existingDatasource = get(serviceId, catalogueId, false);
         if (existingDatasource != null) {
             throw new ValidationException(String.format("Service [%s] of the Catalogue [%s] has already a Datasource " +
                     "registered, with id: [%s]", serviceId, catalogueId, existingDatasource.getId()));
@@ -280,7 +281,7 @@ public class DatasourceManager extends ResourceCatalogueManager<DatasourceBundle
         if (datasource != null) {
             datasourceBundle.setOriginalOpenAIREId(datasourceBundle.getId());
         } else {
-            throw new ResourceNotFoundException(String.format("The ID [%s] you provided does not belong to an OpenAIRE" +
+            throw new CatalogueResourceNotFoundException(String.format("The ID [%s] you provided does not belong to an OpenAIRE" +
                     " Datasource", datasourceBundle.getId()));
         }
     }

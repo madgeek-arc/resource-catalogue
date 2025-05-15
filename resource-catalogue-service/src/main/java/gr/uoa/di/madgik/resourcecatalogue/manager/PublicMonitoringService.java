@@ -18,15 +18,12 @@ package gr.uoa.di.madgik.resourcecatalogue.manager;
 
 import gr.uoa.di.madgik.registry.domain.Browsing;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
-import gr.uoa.di.madgik.registry.exception.ResourceException;
-import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
-import gr.uoa.di.madgik.registry.service.ResourceCRUDService;
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
+import gr.uoa.di.madgik.resourcecatalogue.exceptions.CatalogueResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.service.ServiceBundleService;
 import gr.uoa.di.madgik.resourcecatalogue.service.TrainingResourceService;
 import gr.uoa.di.madgik.resourcecatalogue.utils.JmsService;
 import gr.uoa.di.madgik.resourcecatalogue.utils.ProviderResourcesCommonMethods;
-import gr.uoa.di.madgik.resourcecatalogue.utils.PublicResourceUtils;
 import org.apache.commons.beanutils.BeanUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -76,7 +73,7 @@ public class PublicMonitoringService extends ResourceCatalogueManager<Monitoring
         MonitoringBundle monitoringBundle;
         try {
             monitoringBundle = get(id, catalogueId, true);
-        } catch (ResourceException | ResourceNotFoundException e) {
+        } catch (CatalogueResourceNotFoundException e) {
             return null;
         }
         return monitoringBundle;
@@ -130,7 +127,7 @@ public class PublicMonitoringService extends ResourceCatalogueManager<Monitoring
             logger.info("Deleting public Monitoring with id '{}'", publicMonitoringBundle.getId());
             super.delete(publicMonitoringBundle);
             jmsService.convertAndSendTopic("monitoring.delete", publicMonitoringBundle);
-        } catch (ResourceException | ResourceNotFoundException ignore) {
+        } catch (CatalogueResourceNotFoundException ignore) {
         }
     }
 
@@ -141,7 +138,7 @@ public class PublicMonitoringService extends ResourceCatalogueManager<Monitoring
         try {
             resourceBundle = serviceBundleService.get(bundle.getMonitoring().getServiceId(),
                     bundle.getMonitoring().getCatalogueId(), false);
-        } catch (ResourceNotFoundException e) {
+        } catch (CatalogueResourceNotFoundException e) {
             resourceBundle = trainingResourceService.get(bundle.getMonitoring().getServiceId(),
                     bundle.getMonitoring().getCatalogueId(), false);
         }
