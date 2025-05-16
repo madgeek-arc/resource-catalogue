@@ -16,12 +16,14 @@
 
 package gr.uoa.di.madgik.resourcecatalogue.exceptions;
 
-public class CatalogueResourceNotFoundException extends RuntimeException {
+import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
+
+public class CatalogueResourceNotFoundException extends ResourceNotFoundException {
 
     /**
      * Constructs a CatalogueResourceNotFoundException with the provided message.
      */
     public CatalogueResourceNotFoundException(String message) {
-        super(message);
+        super(message, new Throwable());
     }
 }
