@@ -29,6 +29,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -49,6 +50,9 @@ public class PublicProviderController {
     private final ProviderService service;
     private final GenericResourceService genericService;
 
+    @Value("${catalogue.id}")
+    private String catalogueId;
+
     public PublicProviderController(ProviderService service,
                                     GenericResourceService genericService) {
         this.service = service;
@@ -65,9 +69,10 @@ public class PublicProviderController {
                                  @PathVariable("prefix") String prefix,
                                  @Parameter(description = "The right part of the ID after the '/'")
                                  @PathVariable("suffix") String suffix,
+                                 @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId,
                                  @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
-        ProviderBundle bundle = service.get(id, null, true);
+        ProviderBundle bundle = service.get(id, catalogueId, true);
         if (bundle.getMetadata().isPublished()) {
             return new ResponseEntity<>(bundle.getProvider(), HttpStatus.OK);
         }
@@ -84,9 +89,10 @@ public class PublicProviderController {
                                        @PathVariable("prefix") String prefix,
                                        @Parameter(description = "The right part of the ID after the '/'")
                                        @PathVariable("suffix") String suffix,
+                                       @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId,
                                        @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
-        ProviderBundle providerBundle = service.get(id, null, true);
+        ProviderBundle providerBundle = service.get(id, catalogueId, true);
         if (providerBundle.getMetadata().isPublished()) {
             return new ResponseEntity<>(providerBundle, HttpStatus.OK);
         }

@@ -18,9 +18,8 @@ package gr.uoa.di.madgik.resourcecatalogue.manager;
 
 import gr.uoa.di.madgik.registry.domain.Browsing;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
-import gr.uoa.di.madgik.registry.exception.ResourceException;
-import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
+import gr.uoa.di.madgik.resourcecatalogue.exceptions.CatalogueResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.manager.pids.PidIssuer;
 import gr.uoa.di.madgik.resourcecatalogue.service.ProviderService;
 import gr.uoa.di.madgik.resourcecatalogue.service.ServiceBundleService;
@@ -101,8 +100,10 @@ public class PublicTrainingResourceService extends ResourceCatalogueManager<Trai
 
     @Override
     public TrainingResourceBundle update(TrainingResourceBundle trainingResourceBundle, Authentication authentication) {
-        TrainingResourceBundle published = super.get(trainingResourceBundle.getIdentifiers().getPid(), trainingResourceBundle.getTrainingResource().getCatalogueId(), true);
-        TrainingResourceBundle ret = super.get(trainingResourceBundle.getIdentifiers().getPid(), trainingResourceBundle.getTrainingResource().getCatalogueId(), true);
+        TrainingResourceBundle published = super.get(trainingResourceBundle.getIdentifiers().getPid(),
+                trainingResourceBundle.getTrainingResource().getCatalogueId(), true);
+        TrainingResourceBundle ret = super.get(trainingResourceBundle.getIdentifiers().getPid(),
+                trainingResourceBundle.getTrainingResource().getCatalogueId(), true);
         try {
             BeanUtils.copyProperties(ret, trainingResourceBundle);
         } catch (IllegalAccessException | InvocationTargetException e) {
@@ -129,7 +130,7 @@ public class PublicTrainingResourceService extends ResourceCatalogueManager<Trai
             logger.info("Deleting public Training Resource with id '{}'", publicTrainingResourceBundle.getId());
             super.delete(publicTrainingResourceBundle);
             jmsService.convertAndSendTopic("training_resource.delete", publicTrainingResourceBundle);
-        } catch (ResourceException | ResourceNotFoundException ignore) {
+        } catch (CatalogueResourceNotFoundException ignore) {
         }
     }
 
@@ -163,7 +164,7 @@ public class PublicTrainingResourceService extends ResourceCatalogueManager<Trai
                 try {
                     eoscRelatedService = serviceBundleService.get(eoscRelatedServiceId,
                             bundle.getTrainingResource().getCatalogueId(), false);
-                } catch (ResourceNotFoundException e) {
+                } catch (CatalogueResourceNotFoundException e) {
                     eoscRelatedService = trainingResourceService.get(eoscRelatedServiceId,
                             bundle.getTrainingResource().getCatalogueId(), false);
                 }

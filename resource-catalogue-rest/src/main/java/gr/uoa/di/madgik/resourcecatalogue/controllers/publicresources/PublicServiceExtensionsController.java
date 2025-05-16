@@ -30,6 +30,7 @@ import gr.uoa.di.madgik.resourcecatalogue.service.MonitoringService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -51,6 +52,9 @@ public class PublicServiceExtensionsController {
     private final MonitoringService monitoringService;
     private final GenericResourceService genericService;
 
+    @Value("${catalogue.id}")
+    private String catalogueId;
+
     public PublicServiceExtensionsController(HelpdeskService helpdeskService,
                                              MonitoringService monitoringService,
                                              GenericResourceService genericService) {
@@ -67,9 +71,10 @@ public class PublicServiceExtensionsController {
                                          @PathVariable("prefix") String prefix,
                                          @Parameter(description = "The right part of the ID after the '/'")
                                          @PathVariable("suffix") String suffix,
+                                         @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId,
                                          @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
-        HelpdeskBundle bundle = helpdeskService.get(id, null, true);
+        HelpdeskBundle bundle = helpdeskService.get(id, catalogueId, true);
         if (bundle.getMetadata().isPublished()) {
             return new ResponseEntity<>(bundle.getHelpdesk(), HttpStatus.OK);
         }
@@ -84,9 +89,10 @@ public class PublicServiceExtensionsController {
                                                @PathVariable("prefix") String prefix,
                                                @Parameter(description = "The right part of the ID after the '/'")
                                                @PathVariable("suffix") String suffix,
+                                               @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId,
                                                @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
-        HelpdeskBundle bundle = helpdeskService.get(id, null, true);
+        HelpdeskBundle bundle = helpdeskService.get(id, catalogueId, true);
         if (bundle.getMetadata().isPublished()) {
             return new ResponseEntity<>(bundle, HttpStatus.OK);
         }
@@ -131,9 +137,10 @@ public class PublicServiceExtensionsController {
                                            @PathVariable("prefix") String prefix,
                                            @Parameter(description = "The right part of the ID after the '/'")
                                            @PathVariable("suffix") String suffix,
+                                           @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId,
                                            @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
-        MonitoringBundle bundle = monitoringService.get(id, null, true);
+        MonitoringBundle bundle = monitoringService.get(id, catalogueId, true);
         if (bundle.getMetadata().isPublished()) {
             return new ResponseEntity<>(bundle.getMonitoring(), HttpStatus.OK);
         }
@@ -148,9 +155,10 @@ public class PublicServiceExtensionsController {
                                                  @PathVariable("prefix") String prefix,
                                                  @Parameter(description = "The right part of the ID after the '/'")
                                                  @PathVariable("suffix") String suffix,
+                                                 @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId,
                                                  @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
-        MonitoringBundle bundle = monitoringService.get(id, null, true);
+        MonitoringBundle bundle = monitoringService.get(id, catalogueId, true);
         if (bundle.getMetadata().isPublished()) {
             return new ResponseEntity<>(bundle, HttpStatus.OK);
         }

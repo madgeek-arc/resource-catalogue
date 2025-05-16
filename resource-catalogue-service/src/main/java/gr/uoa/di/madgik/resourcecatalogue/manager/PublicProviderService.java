@@ -18,10 +18,9 @@ package gr.uoa.di.madgik.resourcecatalogue.manager;
 
 import gr.uoa.di.madgik.registry.domain.Browsing;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
-import gr.uoa.di.madgik.registry.exception.ResourceException;
-import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.registry.service.ResourceCRUDService;
 import gr.uoa.di.madgik.resourcecatalogue.domain.ProviderBundle;
+import gr.uoa.di.madgik.resourcecatalogue.exceptions.CatalogueResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.manager.pids.PidIssuer;
 import gr.uoa.di.madgik.resourcecatalogue.utils.FacetLabelService;
 import gr.uoa.di.madgik.resourcecatalogue.utils.JmsService;
@@ -111,7 +110,7 @@ public class PublicProviderService extends ResourceCatalogueManager<ProviderBund
             logger.info("Deleting public Provider with id '{}'", publicProviderBundle.getId());
             super.delete(publicProviderBundle);
             jmsService.convertAndSendTopic("provider.delete", publicProviderBundle);
-        } catch (ResourceException | ResourceNotFoundException ignore) {
+        } catch (CatalogueResourceNotFoundException ignore) {
         }
     }
 }

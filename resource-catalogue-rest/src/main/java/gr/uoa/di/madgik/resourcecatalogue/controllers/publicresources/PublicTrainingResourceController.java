@@ -29,6 +29,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -50,6 +51,8 @@ public class PublicTrainingResourceController {
     private final TrainingResourceService service;
     private final GenericResourceService genericService;
 
+    @Value("${catalogue.id}")
+    private String catalogueId;
 
     PublicTrainingResourceController(TrainingResourceService service,
                                      GenericResourceService genericService) {
@@ -67,9 +70,10 @@ public class PublicTrainingResourceController {
                                  @PathVariable("prefix") String prefix,
                                  @Parameter(description = "The right part of the ID after the '/'")
                                  @PathVariable("suffix") String suffix,
+                                 @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId,
                                  @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
-        TrainingResourceBundle bundle = service.get(id, null, true);
+        TrainingResourceBundle bundle = service.get(id, catalogueId, true);
         if (bundle.getMetadata().isPublished()) {
             return new ResponseEntity<>(bundle.getTrainingResource(), HttpStatus.OK);
         }
@@ -85,9 +89,10 @@ public class PublicTrainingResourceController {
                                        @PathVariable("prefix") String prefix,
                                        @Parameter(description = "The right part of the ID after the '/'")
                                        @PathVariable("suffix") String suffix,
+                                       @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId,
                                        @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
-        TrainingResourceBundle bundle = service.get(id, null, true);
+        TrainingResourceBundle bundle = service.get(id, catalogueId, true);
         if (bundle.getMetadata().isPublished()) {
             return new ResponseEntity<>(bundle, HttpStatus.OK);
         }

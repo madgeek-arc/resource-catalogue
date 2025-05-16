@@ -29,6 +29,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -48,6 +49,9 @@ public class PublicDatasourceController {
     private final DatasourceService service;
     private final GenericResourceService genericService;
 
+    @Value("${catalogue.id}")
+    private String catalogueId;
+
     public PublicDatasourceController(DatasourceService service,
                                       GenericResourceService genericService) {
         this.service = service;
@@ -60,9 +64,10 @@ public class PublicDatasourceController {
     public ResponseEntity<?> get(@Parameter(description = "The left part of the ID before the '/'")
                                  @PathVariable("prefix") String prefix,
                                  @Parameter(description = "The right part of the ID after the '/'")
-                                 @PathVariable("suffix") String suffix) {
+                                 @PathVariable("suffix") String suffix,
+                                 @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId) {
         String id = prefix + "/" + suffix;
-        DatasourceBundle bundle = service.get(id, null, true);
+        DatasourceBundle bundle = service.get(id, catalogueId, true);
         if (bundle.getMetadata().isPublished()) {
             return new ResponseEntity<>(bundle.getDatasource(), HttpStatus.OK);
         }
@@ -76,9 +81,10 @@ public class PublicDatasourceController {
     public ResponseEntity<?> getBundle(@Parameter(description = "The left part of the ID before the '/'")
                                        @PathVariable("prefix") String prefix,
                                        @Parameter(description = "The right part of the ID after the '/'")
-                                       @PathVariable("suffix") String suffix) {
+                                       @PathVariable("suffix") String suffix,
+                                       @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId) {
         String id = prefix + "/" + suffix;
-        DatasourceBundle bundle = service.get(id, null, true);
+        DatasourceBundle bundle = service.get(id, catalogueId, true);
         if (bundle.getMetadata().isPublished()) {
             return new ResponseEntity<>(bundle, HttpStatus.OK);
         }

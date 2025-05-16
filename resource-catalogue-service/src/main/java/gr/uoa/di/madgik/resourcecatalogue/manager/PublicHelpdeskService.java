@@ -18,9 +18,8 @@ package gr.uoa.di.madgik.resourcecatalogue.manager;
 
 import gr.uoa.di.madgik.registry.domain.Browsing;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
-import gr.uoa.di.madgik.registry.exception.ResourceException;
-import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
+import gr.uoa.di.madgik.resourcecatalogue.exceptions.CatalogueResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.service.ServiceBundleService;
 import gr.uoa.di.madgik.resourcecatalogue.service.TrainingResourceService;
 import gr.uoa.di.madgik.resourcecatalogue.utils.JmsService;
@@ -73,7 +72,7 @@ public class PublicHelpdeskService extends ResourceCatalogueManager<HelpdeskBund
         HelpdeskBundle helpdeskBundle;
         try {
             helpdeskBundle = get(id, catalogueId, true);
-        } catch (ResourceException | ResourceNotFoundException e) {
+        } catch (CatalogueResourceNotFoundException e) {
             return null;
         }
         return helpdeskBundle;
@@ -125,7 +124,7 @@ public class PublicHelpdeskService extends ResourceCatalogueManager<HelpdeskBund
             logger.info("Deleting public Helpdesk with id '{}'", publicHelpdeskBundle.getId());
             super.delete(publicHelpdeskBundle);
             jmsService.convertAndSendTopic("helpdesk.delete", publicHelpdeskBundle);
-        } catch (ResourceException | ResourceNotFoundException ignore) {
+        } catch (CatalogueResourceNotFoundException ignore) {
         }
     }
 
@@ -135,7 +134,7 @@ public class PublicHelpdeskService extends ResourceCatalogueManager<HelpdeskBund
         Bundle<?> resourceBundle;
         try {
             resourceBundle = serviceBundleService.get(bundle.getHelpdesk().getServiceId(), bundle.getHelpdesk().getCatalogueId(), false);
-        } catch (ResourceNotFoundException e) {
+        } catch (CatalogueResourceNotFoundException e) {
             resourceBundle = trainingResourceService.get(bundle.getHelpdesk().getServiceId(), bundle.getHelpdesk().getCatalogueId(), false);
         }
         bundle.getHelpdesk().setServiceId(resourceBundle.getIdentifiers().getPid());

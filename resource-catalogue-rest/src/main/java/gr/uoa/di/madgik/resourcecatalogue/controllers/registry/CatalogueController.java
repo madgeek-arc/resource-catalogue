@@ -279,7 +279,7 @@ public class CatalogueController {
     @GetMapping(path = "{catalogueId}/provider/{providerId}", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<Provider> getCatalogueProvider(@PathVariable("catalogueId") String catalogueId,
                                                          @PathVariable("providerId") String providerId) {
-        return new ResponseEntity<>(providerManager.get(providerId, catalogueId).getProvider(), HttpStatus.OK);
+        return new ResponseEntity<>(providerManager.get(providerId, catalogueId, false).getProvider(), HttpStatus.OK);
     }
 
     @Operation(description = "Returns the ProviderBundle of the specific Catalogue with the given id.")
@@ -380,7 +380,7 @@ public class CatalogueController {
     public ResponseEntity<Provider> deleteCatalogueProvider(@PathVariable("catalogueId") String catalogueId,
                                                             @PathVariable("providerId") String providerId,
                                                             @Parameter(hidden = true) Authentication auth) {
-        ProviderBundle provider = providerManager.get(providerId, catalogueId);
+        ProviderBundle provider = providerManager.get(providerId, catalogueId, false);
         if (provider == null) {
             return new ResponseEntity<>(HttpStatus.GONE);
         }
@@ -407,7 +407,7 @@ public class CatalogueController {
     @GetMapping(path = "{catalogueId}/service/{serviceId}", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<?> getCatalogueService(@PathVariable("catalogueId") String catalogueId,
                                                  @PathVariable("serviceId") String serviceId) {
-        return new ResponseEntity<>(serviceBundleService.get(serviceId, catalogueId).getService(), HttpStatus.OK);
+        return new ResponseEntity<>(serviceBundleService.get(serviceId, catalogueId, false).getService(), HttpStatus.OK);
     }
 
     @Operation(description = "Creates a new Service for the specific Catalogue.")
@@ -491,7 +491,7 @@ public class CatalogueController {
     public ResponseEntity<Service> deleteCatalogueService(@PathVariable("catalogueId") String catalogueId,
                                                           @PathVariable("serviceId") String serviceId,
                                                           @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
-        ServiceBundle serviceBundle = serviceBundleService.get(serviceId, catalogueId);
+        ServiceBundle serviceBundle = serviceBundleService.get(serviceId, catalogueId, false);
         if (serviceBundle == null) {
             return new ResponseEntity<>(HttpStatus.GONE);
         }
@@ -519,7 +519,7 @@ public class CatalogueController {
     @GetMapping(path = "{catalogueId}/datasource/{serviceId}", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<?> getCatalogueDatasource(@PathVariable("catalogueId") String catalogueId,
                                                     @PathVariable("serviceId") String serviceId) {
-        DatasourceBundle datasourceBundle = datasourceService.get(serviceId, catalogueId);
+        DatasourceBundle datasourceBundle = datasourceService.get(serviceId, catalogueId, false);
         return datasourceBundle != null ? new ResponseEntity<>(datasourceBundle.getDatasource(), HttpStatus.OK) :
                 new ResponseEntity<>(null, HttpStatus.OK);
     }
@@ -555,7 +555,7 @@ public class CatalogueController {
     public ResponseEntity<Datasource> deleteCatalogueDatasource(@PathVariable("catalogueId") String catalogueId,
                                                                 @PathVariable("serviceId") String serviceId,
                                                                 @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
-        DatasourceBundle datasourceBundle = datasourceService.get(serviceId, catalogueId);
+        DatasourceBundle datasourceBundle = datasourceService.get(serviceId, catalogueId, false);
         if (datasourceBundle == null) {
             return new ResponseEntity<>(HttpStatus.GONE);
         }
@@ -571,7 +571,7 @@ public class CatalogueController {
     public ResponseEntity<TrainingResource> getCatalogueTrainingResource(@PathVariable("catalogueId") String catalogueId,
                                                                          @PathVariable("trainingResourceId") String trainingResourceId,
                                                                          @Parameter(hidden = true) Authentication auth) {
-        return new ResponseEntity<>(trainingResourceService.get(trainingResourceId, catalogueId).getTrainingResource(), HttpStatus.OK);
+        return new ResponseEntity<>(trainingResourceService.get(trainingResourceId, catalogueId, false).getTrainingResource(), HttpStatus.OK);
     }
 
     @Operation(description = "Creates a new Training Resource for the specific Catalogue.")
@@ -659,7 +659,7 @@ public class CatalogueController {
     public ResponseEntity<TrainingResource> deleteCatalogueTrainingResource(@PathVariable("catalogueId") String catalogueId,
                                                                             @PathVariable("trainingResourceId") String trainingResourceId,
                                                                             @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
-        TrainingResourceBundle trainingResourceBundle = trainingResourceService.get(trainingResourceId, catalogueId);
+        TrainingResourceBundle trainingResourceBundle = trainingResourceService.get(trainingResourceId, catalogueId, false);
         if (trainingResourceBundle == null) {
             return new ResponseEntity<>(HttpStatus.GONE);
         }
@@ -688,7 +688,7 @@ public class CatalogueController {
     public ResponseEntity<InteroperabilityRecord> getCatalogueInteroperabilityRecord(@PathVariable("catalogueId") String catalogueId,
                                                                                      @PathVariable("interoperabilityRecordId") String interoperabilityRecordId,
                                                                                      @Parameter(hidden = true) Authentication auth) {
-        return new ResponseEntity<>(interoperabilityRecordService.get(interoperabilityRecordId, catalogueId).getInteroperabilityRecord(), HttpStatus.OK);
+        return new ResponseEntity<>(interoperabilityRecordService.get(interoperabilityRecordId, catalogueId, false).getInteroperabilityRecord(), HttpStatus.OK);
     }
 
     @Operation(description = "Creates a new Interoperability Record for the specific Catalogue.")
@@ -756,7 +756,7 @@ public class CatalogueController {
     public ResponseEntity<InteroperabilityRecord> deleteCatalogueInteroperabilityRecord(@PathVariable("catalogueId") String catalogueId,
                                                                                         @PathVariable("interoperabilityRecordId") String interoperabilityRecordId,
                                                                                         @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
-        InteroperabilityRecordBundle interoperabilityRecordBundle = interoperabilityRecordService.get(interoperabilityRecordId, catalogueId);
+        InteroperabilityRecordBundle interoperabilityRecordBundle = interoperabilityRecordService.get(interoperabilityRecordId, catalogueId, false);
         if (interoperabilityRecordBundle == null) {
             return new ResponseEntity<>(HttpStatus.GONE);
         }

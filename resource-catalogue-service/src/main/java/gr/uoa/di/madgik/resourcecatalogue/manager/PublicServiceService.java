@@ -18,11 +18,10 @@ package gr.uoa.di.madgik.resourcecatalogue.manager;
 
 import gr.uoa.di.madgik.registry.domain.Browsing;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
-import gr.uoa.di.madgik.registry.exception.ResourceException;
-import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Bundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.ProviderBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.ServiceBundle;
+import gr.uoa.di.madgik.resourcecatalogue.exceptions.CatalogueResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.manager.pids.PidIssuer;
 import gr.uoa.di.madgik.resourcecatalogue.service.ProviderService;
 import gr.uoa.di.madgik.resourcecatalogue.service.ServiceBundleService;
@@ -130,7 +129,7 @@ public class PublicServiceService extends ResourceCatalogueManager<ServiceBundle
             logger.info("Deleting public Service with id '{}'", publicServiceBundle.getId());
             super.delete(publicServiceBundle);
             jmsService.convertAndSendTopic("service.delete", publicServiceBundle);
-        } catch (ResourceException | ResourceNotFoundException ignore) {
+        } catch (CatalogueResourceNotFoundException ignore) {
         }
     }
 
@@ -162,7 +161,7 @@ public class PublicServiceService extends ResourceCatalogueManager<ServiceBundle
                 Bundle<?> relatedResource;
                 try {
                     relatedResource = serviceBundleService.get(relatedResourceId, bundle.getService().getCatalogueId(), false);
-                } catch (ResourceNotFoundException e) {
+                } catch (CatalogueResourceNotFoundException e) {
                     relatedResource = trainingResourceService.get(relatedResourceId, bundle.getService().getCatalogueId(), false);
                 }
                 relatedResources.add(relatedResource.getIdentifiers().getPid());
@@ -179,7 +178,7 @@ public class PublicServiceService extends ResourceCatalogueManager<ServiceBundle
                 Bundle<?> requiredResource;
                 try {
                     requiredResource = serviceBundleService.get(requiredResourceId, bundle.getService().getCatalogueId(), false);
-                } catch (ResourceNotFoundException e) {
+                } catch (CatalogueResourceNotFoundException e) {
                     requiredResource = trainingResourceService.get(requiredResourceId, bundle.getService().getCatalogueId(), false);
                 }
                 requiredResources.add(requiredResource.getIdentifiers().getPid());

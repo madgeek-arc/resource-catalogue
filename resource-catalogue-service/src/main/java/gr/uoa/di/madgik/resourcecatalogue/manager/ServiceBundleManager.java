@@ -23,6 +23,7 @@ import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.registry.service.SearchService;
 import gr.uoa.di.madgik.registry.service.ServiceException;
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
+import gr.uoa.di.madgik.resourcecatalogue.exceptions.CatalogueResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
 import gr.uoa.di.madgik.resourcecatalogue.utils.*;
 import org.slf4j.Logger;
@@ -141,9 +142,10 @@ public class ServiceBundleManager extends ResourceCatalogueManager<ServiceBundle
         }
         relationshipValidator.checkRelatedResourceIDsConsistency(serviceBundle);
 
-        ProviderBundle providerBundle = providerService.get(serviceBundle.getService().getCatalogueId(), serviceBundle.getService().getResourceOrganisation(), auth);
+        ProviderBundle providerBundle = providerService.get(serviceBundle.getService().getCatalogueId(),
+                serviceBundle.getService().getResourceOrganisation(), auth);
         if (providerBundle == null) {
-            throw new ResourceNotFoundException(String.format("Provider with id '%s' and catalogueId '%s' does not exist",
+            throw new CatalogueResourceNotFoundException(String.format("Provider with id '%s' and catalogueId '%s' does not exist",
                     serviceBundle.getService().getResourceOrganisation(), serviceBundle.getService().getCatalogueId()));
         }
         // check if Provider is approved
@@ -217,16 +219,10 @@ public class ServiceBundleManager extends ResourceCatalogueManager<ServiceBundle
 
         ServiceBundle ret = ObjectUtils.clone(serviceBundle);
         ServiceBundle existingService;
-        try {
-            existingService = get(ret.getService().getId(), ret.getService().getCatalogueId(), false);
-            if (ret.getService().equals(existingService.getService())) {
-                return ret;
-            }
-        } catch (ResourceNotFoundException e) {
-            throw new ResourceNotFoundException(String.format("There is no Service with id [%s] on the [%s] Catalogue",
-                    ret.getService().getId(), ret.getService().getCatalogueId()));
+        existingService = get(ret.getService().getId(), ret.getService().getCatalogueId(), false);
+        if (ret.getService().equals(existingService.getService())) {
+            return ret;
         }
-
 
         if (catalogueId == null || catalogueId.isEmpty()) {
             ret.getService().setCatalogueId(this.catalogueId);
@@ -566,7 +562,7 @@ public class ServiceBundleManager extends ResourceCatalogueManager<ServiceBundle
 
     @Override
     public List<Service> getResources(String providerId, Authentication auth) {
-        ProviderBundle providerBundle = providerService.get(providerId);
+        ProviderBundle providerBundle = providerService.get(providerId, catalogueId, false);
         FacetFilter ff = new FacetFilter();
         ff.addFilter("resource_organisation", providerId);
         ff.addFilter("catalogue_id", catalogueId);
@@ -607,14 +603,15 @@ public class ServiceBundleManager extends ResourceCatalogueManager<ServiceBundle
     }
 
     public ServiceBundle changeProvider(String resourceId, String newProviderId, String comment, Authentication auth) {
-        ServiceBundle serviceBundle = get(resourceId);
+        ServiceBundle serviceBundle = get(resourceId, catalogueId, false);
         // check Service's status
         if (!serviceBundle.getStatus().equals("approved resource")) {
             throw new ValidationException(String.format("You cannot move Service with id [%s] to another Provider as it" +
                     "is not yet Approved", serviceBundle.getId()));
         }
         ProviderBundle newProvider = providerService.get(newProviderId, auth);
-        ProviderBundle oldProvider = providerService.get(serviceBundle.getService().getResourceOrganisation(), auth);
+        ProviderBundle oldProvider = providerService.get(serviceBundle.getService().getCatalogueId(),
+                serviceBundle.getService().getResourceOrganisation(), auth);
 
         // check that the 2 Providers co-exist under the same Catalogue
         if (!oldProvider.getProvider().getCatalogueId().equals(newProvider.getProvider().getCatalogueId())) {
@@ -656,8 +653,8 @@ public class ServiceBundleManager extends ResourceCatalogueManager<ServiceBundle
 
         // add Resource, delete the old one
         add(serviceBundle, auth);
-        publicServiceManager.delete(get(resourceId)); // FIXME: ProviderManagementAspect's deletePublicDatasource is not triggered
-        delete(get(resourceId));
+        publicServiceManager.delete(get(resourceId, catalogueId, false)); // FIXME: ProviderManagementAspect's deletePublicDatasource is not triggered
+        delete(get(resourceId, catalogueId, false));
 
         // update other resources which had the old resource ID on their fields
         migrationService.updateRelatedToTheIdFieldsOfOtherResourcesOfThePortal(resourceId, resourceId); //TODO: SEE IF IT WORKS AS INTENDED AND REMOVE
