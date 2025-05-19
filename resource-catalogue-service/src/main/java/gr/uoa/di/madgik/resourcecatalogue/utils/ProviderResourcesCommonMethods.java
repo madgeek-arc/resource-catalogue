@@ -162,10 +162,12 @@ public class ProviderResourcesCommonMethods {
                         HttpStatus.CONFLICT);
             }
         } else {
-            ProviderBundle providerBundle = providerService.get(providerId, auth);
-            if ((catalogueBundle.isSuspended() || providerBundle.isSuspended()) && !suspend) {
-                throw new ResourceException("You cannot unsuspend a Resource when its Provider and/or Catalogue are suspended",
-                        HttpStatus.CONFLICT);
+            if (providerId != null && !providerId.isEmpty()) {
+                ProviderBundle providerBundle = providerService.get(providerId, auth);
+                if ((catalogueBundle.isSuspended() || providerBundle.isSuspended()) && !suspend) {
+                    throw new ResourceException("You cannot unsuspend a Resource when its Provider and/or Catalogue are suspended",
+                            HttpStatus.CONFLICT);
+                }
             }
         }
     }

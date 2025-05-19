@@ -23,6 +23,9 @@
   },
   "type" : "object",
   "properties" : {
+    "catalogueId" : {
+      "type" : "string"
+    },
     "changeLog" : {
       "type" : "string"
     },
@@ -62,6 +65,9 @@
       }
     },
     "name" : {
+      "type" : "string"
+    },
+    "node" : {
       "type" : "string"
     },
     "programmingLanguage" : {

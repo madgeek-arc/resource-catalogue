@@ -44,6 +44,7 @@ public class OIDCSecurityService implements SecurityService {
     private final ServiceBundleService<ServiceBundle> serviceBundleService;
     private final TrainingResourceService trainingResourceService;
     private final InteroperabilityRecordService interoperabilityRecordService;
+    private final AdapterService adapterService;
     private final Authentication adminAccess = new AdminAuthentication();
 
     @Value("${elastic.index.max_result_window:10000}")
@@ -57,12 +58,14 @@ public class OIDCSecurityService implements SecurityService {
                                @Lazy ServiceBundleService<ServiceBundle> serviceBundleService,
                                @Lazy TrainingResourceService trainingResourceService,
                                @Lazy InteroperabilityRecordService interoperabilityRecordService,
+                               @Lazy AdapterService adapterService,
                                CatalogueProperties properties) {
         this.catalogueService = catalogueService;
         this.providerService = providerService;
         this.serviceBundleService = serviceBundleService;
         this.trainingResourceService = trainingResourceService;
         this.interoperabilityRecordService = interoperabilityRecordService;
+        this.adapterService = adapterService;
     }
 
     @Override
@@ -304,6 +307,39 @@ public class OIDCSecurityService implements SecurityService {
     public boolean guidelineIsActive(String id, String catalogueId, boolean published) {
         InteroperabilityRecordBundle interoperabilityRecordBundle = interoperabilityRecordService.get(id, catalogueId, published);
         return interoperabilityRecordBundle.isActive();
+    }
+    //endregion
+
+    //region Adapters
+    @Override
+    public boolean userHasAdapterAccess(Maintainer maintainer, @NotNull String id) {
+        List<Maintainer> maintainers = getMaintainers(id);
+        if (maintainers == null) {
+            return false;
+        }
+        return maintainers.parallelStream()
+                .filter(Objects::nonNull)
+                .anyMatch(m -> maintainerMatches(m, maintainer));
+    }
+
+    private List<Maintainer> getMaintainers(String id) {
+        AdapterBundle adapter = checkAdapterExistence(id);
+        if (adapter == null || adapter.getAdapter().getMaintainers() == null) {
+            return null;
+        }
+        return adapter.getAdapter().getMaintainers();
+    }
+
+    private AdapterBundle checkAdapterExistence(String adapterId) {
+        try {
+            return adapterService.get(adapterId, adminAccess);
+        } catch (ResourceException | ResourceNotFoundException e) {
+            return null;
+        }
+    }
+
+    private boolean maintainerMatches(Maintainer m1, Maintainer m2) {
+        //TODO: match between List of Strings
     }
     //endregion
 }

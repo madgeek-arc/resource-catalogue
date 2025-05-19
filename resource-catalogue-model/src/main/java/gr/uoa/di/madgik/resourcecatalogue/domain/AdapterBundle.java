@@ -16,6 +16,7 @@
 
 package gr.uoa.di.madgik.resourcecatalogue.domain;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
@@ -23,6 +24,14 @@ import jakarta.xml.bind.annotation.XmlType;
 @XmlType
 @XmlRootElement
 public class AdapterBundle extends Bundle<Adapter> {
+
+    @XmlElement
+    @Schema
+    private String status;
+
+    @XmlElement
+    @Schema
+    private String auditState;
 
     public AdapterBundle() {
         // no arg constructor
@@ -38,6 +47,26 @@ public class AdapterBundle extends Bundle<Adapter> {
         this.setMetadata(metadata);
     }
 
+    @Override
+    public boolean equals(Object o) {
+        return super.equals(o);
+    }
+
+    @Override
+    public int hashCode() {
+        return super.hashCode();
+    }
+
+    @Override
+    public String getId() {
+        return super.getId();
+    }
+
+    @Override
+    public void setId(String id) {
+        super.setId(id);
+    }
+
     @XmlElement(name = "adapter")
     public Adapter getAdapter() {
         return this.getPayload();
@@ -47,13 +76,19 @@ public class AdapterBundle extends Bundle<Adapter> {
         this.setPayload(adapter);
     }
 
-    @Override
-    public boolean equals(Object o) {
-        return super.equals(o);
+    public String getStatus() {
+        return status;
     }
 
-    @Override
-    public int hashCode() {
-        return super.hashCode();
+    public String getAuditState() {
+        return auditState;
+    }
+
+    public void setAuditState(String auditState) {
+        this.auditState = auditState;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
     }
 }

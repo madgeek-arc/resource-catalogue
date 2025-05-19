@@ -5,6 +5,12 @@
         
     <xs:sequence>
             
+      <xs:element minOccurs="0" name="catalogueId" type="xs:string">
+        <xs:annotation>
+          <xs:documentation><![CDATA[The Catalogue this Adapter is originally registered at.]]></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+            
       <xs:element minOccurs="0" name="changeLog" type="xs:string">
         <xs:annotation>
           <xs:documentation><![CDATA[Changes in the latest version]]></xs:documentation>
@@ -68,6 +74,12 @@
       <xs:element minOccurs="0" name="name" type="xs:string">
         <xs:annotation>
           <xs:documentation><![CDATA[Unique name]]></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+            
+      <xs:element minOccurs="0" name="node" type="xs:string">
+        <xs:annotation>
+          <xs:documentation><![CDATA[Adapter's original Node]]></xs:documentation>
         </xs:annotation>
       </xs:element>
             
