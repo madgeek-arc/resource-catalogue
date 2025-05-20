@@ -52,6 +52,7 @@ public class FieldValidator {
     private final TrainingResourceService trainingResourceService;
     private final CatalogueService catalogueService;
     private final InteroperabilityRecordService interoperabilityRecordService;
+    private final AdapterService adapterService;
 
     private static final String MANDATORY_FIELD = "Field '%s' is mandatory.";
     private static final String NULL_OBJECT = "Attempt to validate null object..";
@@ -63,13 +64,15 @@ public class FieldValidator {
                           @Lazy ServiceBundleService<ServiceBundle> serviceBundleService,
                           @Lazy TrainingResourceService trainingResourceService,
                           @Lazy CatalogueService catalogueService,
-                          @Lazy InteroperabilityRecordService interoperabilityRecordService) {
+                          @Lazy InteroperabilityRecordService interoperabilityRecordService,
+                          @Lazy AdapterService adapterService) {
         this.vocabularyService = vocabularyService;
         this.providerService = providerService;
         this.serviceBundleService = serviceBundleService;
         this.catalogueService = catalogueService;
         this.interoperabilityRecordService = interoperabilityRecordService;
         this.trainingResourceService = trainingResourceService;
+        this.adapterService = adapterService;
     }
 
     private String getCurrentLocation() {
@@ -311,6 +314,22 @@ public class FieldValidator {
                                     String.format("Field '%s' should ONLY contain the ID of an existing Service " +
                                             "or Training Resource", field.getName()));
                         }
+                    } else if (annotation.idClasses().length > 0) {
+                        boolean found = false;
+                        List<String> classNames = new ArrayList<>();
+                        Class<?>[] classes = annotation.idClasses();
+                        for (Class<?> clazz : classes) {
+                            classNames.add(clazz.getSimpleName());
+                            found = getResource(clazz.getSimpleName(), o);
+                            if (found) {
+                                break;
+                            }
+                        }
+                        if (!found) {
+                            throw new ValidationException(
+                                    String.format("Field '%s' should ONLY contain the ID of an existing resource from '%s'",
+                                            field.getName(), classNames));
+                        }
                     } else if (Vocabulary.class.equals(annotation.idClass())) {
                         Vocabulary voc = vocabularyService.get(o.toString());
                         VocabularyValidation vocabularyValidation = field.getAnnotation(VocabularyValidation.class);
@@ -401,5 +420,14 @@ public class FieldValidator {
                 }
             }
         }
+    }
+
+    private boolean getResource(String className, Object o) {
+        return switch (className) {
+            case "Service" -> serviceBundleService.getOrElseReturnNull(o.toString()) != null;
+            case "TrainingResource" -> trainingResourceService.getOrElseReturnNull(o.toString()) != null;
+            case "InteroperabilityRecord" -> interoperabilityRecordService.getOrElseReturnNull(o.toString()) != null;
+            default -> false;
+        };
     }
 }

@@ -152,6 +152,10 @@
         <xs:sequence>
                     
           <xs:element minOccurs="0" name="adapter" type="adapter"/>
+                    
+          <xs:element minOccurs="0" name="auditState" type="xs:string"/>
+                    
+          <xs:element minOccurs="0" name="status" type="xs:string"/>
                   
         </xs:sequence>
               
@@ -2919,6 +2923,8 @@ that is the used scheme (e.g., Web Address URL, DOI, ARK, etc.).]]></xs:document
       <xs:enumeration value="TEMPLATE_STATE"/>
             
       <xs:enumeration value="INTEROPERABILITY_RECORD_STATE"/>
+            
+      <xs:enumeration value="ADAPTER_STATE"/>
             
       <xs:enumeration value="DS_RESEARCH_ENTITY_TYPE"/>
             

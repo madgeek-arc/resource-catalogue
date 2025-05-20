@@ -22,6 +22,7 @@ import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.registry.service.ServiceException;
 import gr.uoa.di.madgik.resourcecatalogue.config.properties.CatalogueProperties;
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
+import gr.uoa.di.madgik.resourcecatalogue.utils.AuthenticationInfo;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
@@ -32,6 +33,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 // TODO: REFACTOR
 //  1) Replace user.stream().filter/search? with facet filter  email=x
@@ -312,14 +314,29 @@ public class OIDCSecurityService implements SecurityService {
 
     //region Adapters
     @Override
-    public boolean userHasAdapterAccess(Maintainer maintainer, @NotNull String id) {
+    public boolean userHasAdapterAccess(Authentication auth, @NotNull String id) {
+        if (auth == null || id == null) {
+            return false;
+        }
+
+        String userEmail = AuthenticationInfo.getEmail(auth);
+        if (userEmail == null || userEmail.isBlank()) {
+            return false;
+        }
+
         List<Maintainer> maintainers = getMaintainers(id);
         if (maintainers == null) {
             return false;
         }
+
         return maintainers.parallelStream()
                 .filter(Objects::nonNull)
-                .anyMatch(m -> maintainerMatches(m, maintainer));
+                .flatMap(m -> {
+                    List<String> emails = m.getEmail();
+                    return emails == null ? Stream.empty() : emails.stream();
+                })
+                .filter(Objects::nonNull)
+                .anyMatch(email -> email.equalsIgnoreCase(userEmail));
     }
 
     private List<Maintainer> getMaintainers(String id) {
@@ -332,14 +349,10 @@ public class OIDCSecurityService implements SecurityService {
 
     private AdapterBundle checkAdapterExistence(String adapterId) {
         try {
-            return adapterService.get(adapterId, adminAccess);
+            return adapterService.get(adapterId, null, false);
         } catch (ResourceException | ResourceNotFoundException e) {
             return null;
         }
-    }
-
-    private boolean maintainerMatches(Maintainer m1, Maintainer m2) {
-        //TODO: match between List of Strings
     }
     //endregion
 }

@@ -130,9 +130,9 @@ public interface SecurityService {
     boolean guidelineIsActive(String id, String catalogueId, boolean published);
 
     /**
-     * @param maintainer Maintainer
+     * @param auth       Authentication
      * @param id         Catalogue or Adapter id
      * @return True if the authenticated user is an Adapter Maintainer
      */
-    boolean userHasAdapterAccess(Maintainer maintainer, @NotNull String id);
+    boolean userHasAdapterAccess(Authentication auth, @NotNull String id);
 }

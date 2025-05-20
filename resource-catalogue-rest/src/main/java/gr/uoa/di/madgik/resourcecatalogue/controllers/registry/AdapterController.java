@@ -1,17 +1,29 @@
+/**
+ * Copyright 2017-2025 OpenAIRE AMKE & Athena Research and Innovation Center
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package gr.uoa.di.madgik.resourcecatalogue.controllers.registry;
 
 import gr.uoa.di.madgik.registry.annotation.BrowseParameters;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.domain.Paging;
-import gr.uoa.di.madgik.registry.exception.ResourceException;
 import gr.uoa.di.madgik.resourcecatalogue.annotations.BrowseCatalogue;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Adapter;
 import gr.uoa.di.madgik.resourcecatalogue.domain.AdapterBundle;
-import gr.uoa.di.madgik.resourcecatalogue.domain.Provider;
-import gr.uoa.di.madgik.resourcecatalogue.domain.ProviderBundle;
 import gr.uoa.di.madgik.resourcecatalogue.service.AdapterService;
 import gr.uoa.di.madgik.resourcecatalogue.service.GenericResourceService;
-import gr.uoa.di.madgik.resourcecatalogue.service.ProviderService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -52,12 +64,11 @@ public class AdapterController {
 
     @Operation(summary = "Returns the Adapter with the given id.")
     @GetMapping(path = "{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE})
-    public ResponseEntity<Provider> get(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
-                                        @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix,
-                                        @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId,
-                                        @Parameter(hidden = true) Authentication auth) {
+    public ResponseEntity<Adapter> get(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
+                                       @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix,
+                                       @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId) {
         String id = prefix + "/" + suffix;
-        Adapter adapter = adapterService.get(catalogueId, id, auth).getProvider();
+        Adapter adapter = adapterService.get(id, catalogueId, false).getAdapter();
         return new ResponseEntity<>(adapter, HttpStatus.OK);
     }
 
@@ -79,7 +90,7 @@ public class AdapterController {
 
     @PostMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_USER')")
-    public ResponseEntity<Provider> add(@RequestBody Adapter adapter, @Parameter(hidden = true) Authentication auth) {
+    public ResponseEntity<Adapter> add(@RequestBody Adapter adapter, @Parameter(hidden = true) Authentication auth) {
         AdapterBundle adapterBundle = adapterService.add(new AdapterBundle(adapter), auth);
         logger.info("Added the Adapter with name '{}' and id '{}'", adapter.getName(), adapter.getId());
         return new ResponseEntity<>(adapterBundle.getAdapter(), HttpStatus.CREATED);
@@ -92,7 +103,7 @@ public class AdapterController {
                                           @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId,
                                           @RequestParam(required = false) String comment,
                                           @Parameter(hidden = true) Authentication auth) {
-        AdapterBundle adapterBundle = adapterService.get(catalogueId, adapter.getId(), auth);
+        AdapterBundle adapterBundle = adapterService.get(adapter.getId(), catalogueId, false);
         adapterBundle.setAdapter(adapter);
         if (comment == null || comment.isEmpty()) {
             comment = "no comment";
@@ -107,15 +118,13 @@ public class AdapterController {
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     public ResponseEntity<Adapter> delete(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
                                           @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix,
-                                          @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId,
-                                          @Parameter(hidden = true) Authentication auth) {
+                                          @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId) {
         String id = prefix + "/" + suffix;
-        AdapterBundle adapter = adapterService.get(catalogueId, id, auth);
+        AdapterBundle adapter = adapterService.get(id, catalogueId, false);
         if (adapter == null) {
             return new ResponseEntity<>(HttpStatus.GONE);
         }
 
-        // delete Provider
         adapterService.delete(adapter);
         logger.info("Deleted the Adapter with name '{}' and id '{}'", adapter.getAdapter().getName(), adapter.getId());
         return new ResponseEntity<>(adapter.getAdapter(), HttpStatus.OK);
