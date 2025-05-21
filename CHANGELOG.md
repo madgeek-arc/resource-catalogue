@@ -1,4 +1,4 @@
-## [](https://github.com/madgeek-arc/resource-catalogue/compare/v3.0.1...v) (2025-04-22)
+## [](https://github.com/madgeek-arc/resource-catalogue/compare/v3.0.1...v) (2025-05-21)
 
 ### ⚠ BREAKING CHANGES
 
@@ -15,9 +15,13 @@
 
 ### Bug Fixes
 
+* Add https prefix for docker registry ([8c49f2d](https://github.com/madgeek-arc/resource-catalogue/commit/8c49f2d31d778a44e138c00a5e86ff41e039ee90))
+* Add https prefix for docker registry ([b4d35d7](https://github.com/madgeek-arc/resource-catalogue/commit/b4d35d737cbfdafd0cc29e5c88c20fb0582b2cc9))
 * Add missing dependency ([9e5b69b](https://github.com/madgeek-arc/resource-catalogue/commit/9e5b69b89005c4c749c7fc89a6d4f8cfa63545af))
 * Add needed missing action (post/put) on Monitoring email template ([2e01b53](https://github.com/madgeek-arc/resource-catalogue/commit/2e01b537a0d5e9194e06b7b7ba72481c28522b14))
 * Add missing email field from user info cookie ([82db52f](https://github.com/madgeek-arc/resource-catalogue/commit/82db52fca428132e1abc7dee72668ac90fe7f89e))
+* Bump httpclient5 version ([ca2f1c9](https://github.com/madgeek-arc/resource-catalogue/commit/ca2f1c98d6a48b2f8e9bba3d78a3910096815fe4))
+* Change docker login method and image push ([1ffb56c](https://github.com/madgeek-arc/resource-catalogue/commit/1ffb56cfd800ee92865a2928159fabb9f2b5e482))
 * Correct public ID creation for resource interoperability records when sending consistency emails ([9e5586c](https://github.com/madgeek-arc/resource-catalogue/commit/9e5586c2b2ec76f39b69f7b2de5867dbc720faf9))
 * Correct consumes and produces on methods and created method to get resources using pid ([36a0e67](https://github.com/madgeek-arc/resource-catalogue/commit/36a0e67ba431d8827c4c2356fdfdf2afaaa7ae08))
 * Fix problematic usage of FacetFilter on getMy() methods ([0c0abad](https://github.com/madgeek-arc/resource-catalogue/commit/0c0abad9270b8f7ba3733fc5c203cb6beb9a6c36))
@@ -36,4 +40,4 @@
 
 ### Build System
 
-* change "catalogue" dependency FQPN ([48dce34](https://github.com/madgeek-arc/resource-catalogue/commit/48dce34d15beb5d40458e2388c0bc3a3fb2af3b7))
+* Change "catalogue" dependency FQPN ([48dce34](https://github.com/madgeek-arc/resource-catalogue/commit/48dce34d15beb5d40458e2388c0bc3a3fb2af3b7))
