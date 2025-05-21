@@ -26,6 +26,7 @@ import gr.uoa.di.madgik.resourcecatalogue.service.AdapterService;
 import gr.uoa.di.madgik.resourcecatalogue.service.GenericResourceService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.Parameters;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -97,6 +98,25 @@ public class AdapterController {
         ff.addFilter("active", true);
         ff.addFilter("status", "approved adapter");
         Paging<Adapter> paging = genericResourceService.getResults(ff).map(r -> ((AdapterBundle) r).getPayload());
+        return ResponseEntity.ok(paging);
+    }
+
+    @BrowseParameters
+    @BrowseCatalogue
+    @Parameters({
+            @Parameter(name = "suspended", description = "Suspended",
+                    content = @Content(schema = @Schema(type = "boolean", defaultValue = "false"))),
+            @Parameter(name = "active", description = "Active",
+                    content = @Content(schema = @Schema(type = "boolean", defaultValue = "true")))
+    })
+    @GetMapping(path = "bundle/all", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
+    public ResponseEntity<Paging<AdapterBundle>> getAllAdapterBundles(@Parameter(hidden = true)
+                                                                      @RequestParam MultiValueMap<String, Object> allRequestParams) {
+        FacetFilter ff = FacetFilter.from(allRequestParams);
+        ff.setResourceType("adapter");
+        ff.addFilter("published", false);
+        Paging<AdapterBundle> paging = genericResourceService.getResults(ff);
         return ResponseEntity.ok(paging);
     }
 

@@ -102,6 +102,8 @@ public class SecureResponseAdvice<T> implements ResponseBodyAdvice<T> {
             modifyInteroperabilityRecordBundle(t, auth);
         } else if (t instanceof AdapterBundle) {
             modifyAdapterBundle(t, auth);
+        } else if (t instanceof Adapter) {
+            modifyAdapter(t, auth);
         } else if (t instanceof LoggingInfo) {
             modifyLoggingInfo(t);
         }
@@ -198,6 +200,13 @@ public class SecureResponseAdvice<T> implements ResponseBodyAdvice<T> {
             ((CatalogueBundle) bundle).getCatalogue().setMainContact(null);
             ((CatalogueBundle) bundle).getCatalogue().setUsers(null);
             ((CatalogueBundle) bundle).getMetadata().setTerms(null);
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private void modifyAdapter(T adapter, Authentication auth) {
+        if (!this.securityService.userHasAdapterAccess(auth, ((Adapter) adapter).getId())) {
+            ((Adapter) adapter).setAdmins(null);
         }
     }
 
