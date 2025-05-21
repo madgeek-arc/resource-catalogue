@@ -78,6 +78,7 @@ public class AdapterManager extends ResourceCatalogueManager<AdapterBundle> impl
         logger.trace("Attempting to add a new Adapter: {} on Catalogue: '{}'", adapter, catalogueId);
 
         adapter = onboard(adapter, auth);
+        commonMethods.addAuthenticatedUser(adapter.getAdapter(), auth);
 
         validate(adapter);
         adapter.setMetadata(Metadata.createMetadata(AuthenticationInfo.getFullName(auth),

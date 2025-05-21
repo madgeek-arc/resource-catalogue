@@ -132,7 +132,7 @@ public interface SecurityService {
     /**
      * @param auth       Authentication
      * @param id         Catalogue or Adapter id
-     * @return True if the authenticated user is an Adapter Maintainer
+     * @return True if the authenticated user is an Adapter Admin
      */
     boolean userHasAdapterAccess(Authentication auth, @NotNull String id);
 }

@@ -312,6 +312,7 @@ public class OIDCSecurityService implements SecurityService {
     }
     //endregion
 
+    //TODO: refactor this region now that Maintainers became Users
     //region Adapters
     @Override
     public boolean userHasAdapterAccess(Authentication auth, @NotNull String id) {
@@ -324,27 +325,24 @@ public class OIDCSecurityService implements SecurityService {
             return false;
         }
 
-        List<Maintainer> maintainers = getMaintainers(id);
-        if (maintainers == null) {
+        List<User> users = getUsers(id);
+        if (users == null) {
             return false;
         }
 
-        return maintainers.parallelStream()
+        return users.parallelStream()
                 .filter(Objects::nonNull)
-                .flatMap(m -> {
-                    List<String> emails = m.getEmail();
-                    return emails == null ? Stream.empty() : emails.stream();
-                })
+                .map(User::getEmail)
                 .filter(Objects::nonNull)
                 .anyMatch(email -> email.equalsIgnoreCase(userEmail));
     }
 
-    private List<Maintainer> getMaintainers(String id) {
+    private List<User> getUsers(String id) {
         AdapterBundle adapter = checkAdapterExistence(id);
-        if (adapter == null || adapter.getAdapter().getMaintainers() == null) {
+        if (adapter == null || adapter.getAdapter().getAdmins() == null) {
             return null;
         }
-        return adapter.getAdapter().getMaintainers();
+        return adapter.getAdapter().getAdmins();
     }
 
     private AdapterBundle checkAdapterExistence(String adapterId) {

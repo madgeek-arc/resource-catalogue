@@ -20,6 +20,7 @@ import gr.uoa.di.madgik.resourcecatalogue.annotation.FieldValidation;
 import gr.uoa.di.madgik.resourcecatalogue.annotation.VocabularyValidation;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.xml.bind.annotation.XmlElement;
+import jakarta.xml.bind.annotation.XmlElementWrapper;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
 
@@ -164,25 +165,18 @@ public class Adapter implements Identifiable {
     private Date lastUpdate;
 
     /**
-     * Maintainer(s): an array of objects with names/affiliations, etc.
+     * Adapter user admins
      */
-    @XmlElement
-    @Schema
-    @FieldValidation(nullable = true)
-    private List<Maintainer> maintainers;
-
-    /**
-     * Funding organization(s), program(s), or grant(s) supporting development/maintenance
-     */
-    @XmlElement
-    @Schema
-    @FieldValidation(nullable = true)
-    private List<String> funding;
+    @XmlElementWrapper(name = "admins", required = true)
+    @XmlElement(name = "admin")
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
+    @FieldValidation
+    private List<User> admins;
 
     public Adapter() {
     }
 
-    public Adapter(String id, String name, String catalogueId, String node, String description, String linkedResource, String tagline, String logo, URI documentation, URI repository, List<URI> releases, String programmingLanguage, String license, String version, String changeLog, Date lastUpdate, List<Maintainer> maintainers, List<String> funding) {
+    public Adapter(String id, String name, String catalogueId, String node, String description, String linkedResource, String tagline, String logo, URI documentation, URI repository, List<URI> releases, String programmingLanguage, String license, String version, String changeLog, Date lastUpdate, List<User> admins) {
         this.id = id;
         this.name = name;
         this.catalogueId = catalogueId;
@@ -199,20 +193,19 @@ public class Adapter implements Identifiable {
         this.version = version;
         this.changeLog = changeLog;
         this.lastUpdate = lastUpdate;
-        this.maintainers = maintainers;
-        this.funding = funding;
+        this.admins = admins;
     }
 
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
         Adapter adapter = (Adapter) o;
-        return Objects.equals(id, adapter.id) && Objects.equals(name, adapter.name) && Objects.equals(catalogueId, adapter.catalogueId) && Objects.equals(node, adapter.node) && Objects.equals(description, adapter.description) && Objects.equals(linkedResource, adapter.linkedResource) && Objects.equals(tagline, adapter.tagline) && Objects.equals(logo, adapter.logo) && Objects.equals(documentation, adapter.documentation) && Objects.equals(repository, adapter.repository) && Objects.equals(releases, adapter.releases) && Objects.equals(programmingLanguage, adapter.programmingLanguage) && Objects.equals(license, adapter.license) && Objects.equals(version, adapter.version) && Objects.equals(changeLog, adapter.changeLog) && Objects.equals(lastUpdate, adapter.lastUpdate) && Objects.equals(maintainers, adapter.maintainers) && Objects.equals(funding, adapter.funding);
+        return Objects.equals(id, adapter.id) && Objects.equals(name, adapter.name) && Objects.equals(catalogueId, adapter.catalogueId) && Objects.equals(node, adapter.node) && Objects.equals(description, adapter.description) && Objects.equals(linkedResource, adapter.linkedResource) && Objects.equals(tagline, adapter.tagline) && Objects.equals(logo, adapter.logo) && Objects.equals(documentation, adapter.documentation) && Objects.equals(repository, adapter.repository) && Objects.equals(releases, adapter.releases) && Objects.equals(programmingLanguage, adapter.programmingLanguage) && Objects.equals(license, adapter.license) && Objects.equals(version, adapter.version) && Objects.equals(changeLog, adapter.changeLog) && Objects.equals(lastUpdate, adapter.lastUpdate) && Objects.equals(admins, adapter.admins);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, name, catalogueId, node, description, linkedResource, tagline, logo, documentation, repository, releases, programmingLanguage, license, version, changeLog, lastUpdate, maintainers, funding);
+        return Objects.hash(id, name, catalogueId, node, description, linkedResource, tagline, logo, documentation, repository, releases, programmingLanguage, license, version, changeLog, lastUpdate, admins);
     }
 
     @Override
@@ -234,8 +227,7 @@ public class Adapter implements Identifiable {
                 ", version='" + version + '\'' +
                 ", changeLog='" + changeLog + '\'' +
                 ", lastUpdate=" + lastUpdate +
-                ", maintainers=" + maintainers +
-                ", funding=" + funding +
+                ", admins=" + admins +
                 '}';
     }
 
@@ -369,19 +361,11 @@ public class Adapter implements Identifiable {
         this.lastUpdate = lastUpdate;
     }
 
-    public List<Maintainer> getMaintainers() {
-        return maintainers;
+    public List<User> getAdmins() {
+        return admins;
     }
 
-    public void setMaintainers(List<Maintainer> maintainers) {
-        this.maintainers = maintainers;
-    }
-
-    public List<String> getFunding() {
-        return funding;
-    }
-
-    public void setFunding(List<String> funding) {
-        this.funding = funding;
+    public void setAdmins(List<User> admins) {
+        this.admins = admins;
     }
 }
