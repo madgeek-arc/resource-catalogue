@@ -42,6 +42,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @Profile("beyond")
 @RestController
 @RequestMapping("adapter")
@@ -72,6 +74,16 @@ public class AdapterController {
         return new ResponseEntity<>(adapter, HttpStatus.OK);
     }
 
+    @GetMapping(path = "bundle/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.userHasAdapterAccess(#auth, #prefix+'/'+#suffix)")
+    public ResponseEntity<AdapterBundle> getAdapterBundle(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
+                                                          @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix,
+                                                          @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId,
+                                                          @Parameter(hidden = true) Authentication auth) {
+        String id = prefix + "/" + suffix;
+        return new ResponseEntity<>(adapterService.get(id, catalogueId, false), HttpStatus.OK);
+    }
+
     @Operation(summary = "Filter a list of Adapters based on a set of filters or get a list of all Adapters in the Catalogue.",
             security = {@SecurityRequirement(name = "bearer-key")})
     @BrowseParameters
@@ -86,6 +98,13 @@ public class AdapterController {
         ff.addFilter("status", "approved adapter");
         Paging<Adapter> paging = genericResourceService.getResults(ff).map(r -> ((AdapterBundle) r).getPayload());
         return ResponseEntity.ok(paging);
+    }
+
+    @GetMapping(path = "getMy", produces = {MediaType.APPLICATION_JSON_VALUE})
+    public ResponseEntity<List<AdapterBundle>> getMy(@Parameter(hidden = true) Authentication auth) {
+        FacetFilter ff = new FacetFilter();
+        ff.setQuantity(1000);
+        return new ResponseEntity<>(adapterService.getMy(ff, auth).getResults(), HttpStatus.OK);
     }
 
     @PostMapping(produces = {MediaType.APPLICATION_JSON_VALUE})

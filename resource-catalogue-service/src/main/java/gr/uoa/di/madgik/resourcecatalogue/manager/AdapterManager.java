@@ -17,12 +17,11 @@
 package gr.uoa.di.madgik.resourcecatalogue.manager;
 
 import gr.uoa.di.madgik.catalogue.exception.ValidationException;
+import gr.uoa.di.madgik.registry.domain.Browsing;
+import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.registry.domain.Resource;
-import gr.uoa.di.madgik.resourcecatalogue.domain.AdapterBundle;
-import gr.uoa.di.madgik.resourcecatalogue.domain.LoggingInfo;
-import gr.uoa.di.madgik.resourcecatalogue.domain.Metadata;
-import gr.uoa.di.madgik.resourcecatalogue.domain.Vocabulary;
+import gr.uoa.di.madgik.resourcecatalogue.domain.*;
 import gr.uoa.di.madgik.resourcecatalogue.service.AdapterService;
 import gr.uoa.di.madgik.resourcecatalogue.service.IdCreator;
 import gr.uoa.di.madgik.resourcecatalogue.service.OIDCSecurityService;
@@ -35,6 +34,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.security.core.Authentication;
 
 import java.util.Comparator;
@@ -173,6 +173,23 @@ public class AdapterManager extends ResourceCatalogueManager<AdapterBundle> impl
         adapter.setLatestOnboardingInfo(loggingInfoList.getLast());
 
         return adapter;
+    }
+
+    @Override
+    public Browsing<AdapterBundle> getMy(FacetFilter ff, Authentication auth) {
+        if (auth == null) {
+            throw new InsufficientAuthenticationException("Please log in.");
+        }
+        if (ff == null) {
+            ff = new FacetFilter();
+            ff.setQuantity(maxQuantity);
+        }
+        if (!ff.getFilter().containsKey("published")) {
+            ff.addFilter("published", false);
+        }
+        ff.addFilter("admins", AuthenticationInfo.getEmail(auth).toLowerCase());
+        ff.addOrderBy("name", "asc");
+        return super.getAll(ff, auth);
     }
 
     @Override
