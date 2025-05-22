@@ -8,7 +8,7 @@
     </parent>
     <groupId>gr.uoa.di.madgik</groupId>
     <artifactId>resource-catalogue</artifactId>
-    <version>5.0.0</version>
+    <version>5.0.1-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <licenses>
@@ -68,7 +68,7 @@
             <dependency>
                 <groupId>gr.uoa.di.madgik</groupId>
                 <artifactId>resource-catalogue-model-lot1</artifactId>
-                <version>5.0.0</version>
+                <version>5.0.1-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>gr.uoa.di.madgik</groupId>
