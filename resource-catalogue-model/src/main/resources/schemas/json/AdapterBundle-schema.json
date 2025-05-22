@@ -97,6 +97,9 @@
     "active" : {
       "type" : "boolean"
     },
+    "auditState" : {
+      "type" : "string"
+    },
     "draft" : {
       "type" : "boolean"
     },
@@ -123,6 +126,9 @@
     },
     "migrationStatus" : {
       "$ref" : "#/$defs/MigrationStatus"
+    },
+    "status" : {
+      "type" : "string"
     },
     "suspended" : {
       "type" : "boolean"

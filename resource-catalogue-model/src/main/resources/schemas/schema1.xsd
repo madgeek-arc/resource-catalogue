@@ -5,6 +5,18 @@
         
     <xs:sequence>
             
+      <xs:element maxOccurs="unbounded" minOccurs="0" name="admins" nillable="true" type="user">
+        <xs:annotation>
+          <xs:documentation><![CDATA[Adapter user admins]]></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+            
+      <xs:element minOccurs="0" name="catalogueId" type="xs:string">
+        <xs:annotation>
+          <xs:documentation><![CDATA[The Catalogue this Adapter is originally registered at.]]></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+            
       <xs:element minOccurs="0" name="changeLog" type="xs:string">
         <xs:annotation>
           <xs:documentation><![CDATA[Changes in the latest version]]></xs:documentation>
@@ -20,12 +32,6 @@
       <xs:element minOccurs="0" name="documentation" type="xs:string">
         <xs:annotation>
           <xs:documentation><![CDATA[Documentation webpage (e.g., read-the-docs page)]]></xs:documentation>
-        </xs:annotation>
-      </xs:element>
-            
-      <xs:element maxOccurs="unbounded" minOccurs="0" name="funding" nillable="true" type="xs:string">
-        <xs:annotation>
-          <xs:documentation><![CDATA[Funding organization(s), program(s), or grant(s) supporting development/maintenance]]></xs:documentation>
         </xs:annotation>
       </xs:element>
             
@@ -59,15 +65,15 @@
         </xs:annotation>
       </xs:element>
             
-      <xs:element maxOccurs="unbounded" minOccurs="0" name="maintainers" nillable="true" type="maintainer">
-        <xs:annotation>
-          <xs:documentation><![CDATA[Maintainer(s): an array of objects with names/affiliations, etc.]]></xs:documentation>
-        </xs:annotation>
-      </xs:element>
-            
       <xs:element minOccurs="0" name="name" type="xs:string">
         <xs:annotation>
           <xs:documentation><![CDATA[Unique name]]></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+            
+      <xs:element minOccurs="0" name="node" type="xs:string">
+        <xs:annotation>
+          <xs:documentation><![CDATA[Adapter's original Node]]></xs:documentation>
         </xs:annotation>
       </xs:element>
             
@@ -105,27 +111,17 @@
       
   </xs:complexType>
     
-  <xs:complexType name="maintainer">
+  <xs:complexType name="user">
         
     <xs:sequence>
             
-      <xs:element maxOccurs="unbounded" minOccurs="0" name="email" nillable="true" type="xs:string">
-        <xs:annotation>
-          <xs:documentation><![CDATA[Maintainer or organization contact email(s)]]></xs:documentation>
-        </xs:annotation>
-      </xs:element>
+      <xs:element minOccurs="0" name="email" type="xs:string"/>
             
-      <xs:element minOccurs="0" name="name" type="xs:string">
-        <xs:annotation>
-          <xs:documentation><![CDATA[Name of the maintainer or organization (institute, company, university, research group, department, etc.)]]></xs:documentation>
-        </xs:annotation>
-      </xs:element>
+      <xs:element minOccurs="0" name="id" type="xs:string"/>
             
-      <xs:element minOccurs="0" name="website" type="xs:string">
-        <xs:annotation>
-          <xs:documentation><![CDATA[Maintainer or organization website]]></xs:documentation>
-        </xs:annotation>
-      </xs:element>
+      <xs:element minOccurs="0" name="name" type="xs:string"/>
+            
+      <xs:element minOccurs="0" name="surname" type="xs:string"/>
           
     </xs:sequence>
       
@@ -140,6 +136,10 @@
         <xs:sequence>
                     
           <xs:element minOccurs="0" name="adapter" type="adapter"/>
+                    
+          <xs:element minOccurs="0" name="auditState" type="xs:string"/>
+                    
+          <xs:element minOccurs="0" name="status" type="xs:string"/>
                   
         </xs:sequence>
               
@@ -572,22 +572,6 @@ It is also possible to select Not a legal entity.]]></xs:documentation>
           <xs:documentation><![CDATA[The sub-branch of science, scientific sub-discipline that is related to the resource.]]></xs:documentation>
         </xs:annotation>
       </xs:element>
-          
-    </xs:sequence>
-      
-  </xs:complexType>
-    
-  <xs:complexType name="user">
-        
-    <xs:sequence>
-            
-      <xs:element minOccurs="0" name="email" type="xs:string"/>
-            
-      <xs:element minOccurs="0" name="id" type="xs:string"/>
-            
-      <xs:element minOccurs="0" name="name" type="xs:string"/>
-            
-      <xs:element minOccurs="0" name="surname" type="xs:string"/>
           
     </xs:sequence>
       
@@ -2907,6 +2891,8 @@ that is the used scheme (e.g., Web Address URL, DOI, ARK, etc.).]]></xs:document
       <xs:enumeration value="TEMPLATE_STATE"/>
             
       <xs:enumeration value="INTEROPERABILITY_RECORD_STATE"/>
+            
+      <xs:enumeration value="ADAPTER_STATE"/>
             
       <xs:enumeration value="DS_RESEARCH_ENTITY_TYPE"/>
             

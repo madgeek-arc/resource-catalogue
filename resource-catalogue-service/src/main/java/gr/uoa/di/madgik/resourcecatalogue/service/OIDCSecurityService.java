@@ -22,6 +22,7 @@ import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.registry.service.ServiceException;
 import gr.uoa.di.madgik.resourcecatalogue.config.properties.CatalogueProperties;
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
+import gr.uoa.di.madgik.resourcecatalogue.utils.AuthenticationInfo;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
@@ -32,6 +33,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 // TODO: REFACTOR
 //  1) Replace user.stream().filter/search? with facet filter  email=x
@@ -44,6 +46,7 @@ public class OIDCSecurityService implements SecurityService {
     private final ServiceBundleService<ServiceBundle> serviceBundleService;
     private final TrainingResourceService trainingResourceService;
     private final InteroperabilityRecordService interoperabilityRecordService;
+    private final AdapterService adapterService;
     private final Authentication adminAccess = new AdminAuthentication();
 
     @Value("${elastic.index.max_result_window:10000}")
@@ -57,12 +60,14 @@ public class OIDCSecurityService implements SecurityService {
                                @Lazy ServiceBundleService<ServiceBundle> serviceBundleService,
                                @Lazy TrainingResourceService trainingResourceService,
                                @Lazy InteroperabilityRecordService interoperabilityRecordService,
+                               @Lazy AdapterService adapterService,
                                CatalogueProperties properties) {
         this.catalogueService = catalogueService;
         this.providerService = providerService;
         this.serviceBundleService = serviceBundleService;
         this.trainingResourceService = trainingResourceService;
         this.interoperabilityRecordService = interoperabilityRecordService;
+        this.adapterService = adapterService;
     }
 
     @Override
@@ -304,6 +309,48 @@ public class OIDCSecurityService implements SecurityService {
     public boolean guidelineIsActive(String id, String catalogueId, boolean published) {
         InteroperabilityRecordBundle interoperabilityRecordBundle = interoperabilityRecordService.get(id, catalogueId, published);
         return interoperabilityRecordBundle.isActive();
+    }
+    //endregion
+
+    //TODO: refactor this region now that Maintainers became Users
+    //region Adapters
+    @Override
+    public boolean userHasAdapterAccess(Authentication auth, @NotNull String id) {
+        if (auth == null || id == null) {
+            return false;
+        }
+
+        String userEmail = AuthenticationInfo.getEmail(auth);
+        if (userEmail == null || userEmail.isBlank()) {
+            return false;
+        }
+
+        List<User> users = getUsers(id);
+        if (users == null) {
+            return false;
+        }
+
+        return users.parallelStream()
+                .filter(Objects::nonNull)
+                .map(User::getEmail)
+                .filter(Objects::nonNull)
+                .anyMatch(email -> email.equalsIgnoreCase(userEmail));
+    }
+
+    private List<User> getUsers(String id) {
+        AdapterBundle adapter = checkAdapterExistence(id);
+        if (adapter == null || adapter.getAdapter().getAdmins() == null) {
+            return null;
+        }
+        return adapter.getAdapter().getAdmins();
+    }
+
+    private AdapterBundle checkAdapterExistence(String adapterId) {
+        try {
+            return adapterService.get(adapterId, null, false);
+        } catch (ResourceException | ResourceNotFoundException e) {
+            return null;
+        }
     }
     //endregion
 }

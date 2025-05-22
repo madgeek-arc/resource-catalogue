@@ -16,10 +16,7 @@
 
 package gr.uoa.di.madgik.resourcecatalogue.service;
 
-import gr.uoa.di.madgik.resourcecatalogue.domain.InteroperabilityRecord;
-import gr.uoa.di.madgik.resourcecatalogue.domain.Service;
-import gr.uoa.di.madgik.resourcecatalogue.domain.TrainingResource;
-import gr.uoa.di.madgik.resourcecatalogue.domain.User;
+import gr.uoa.di.madgik.resourcecatalogue.domain.*;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.security.core.Authentication;
 
@@ -131,4 +128,11 @@ public interface SecurityService {
      * @return True if interoperability record (guideline) is active
      */
     boolean guidelineIsActive(String id, String catalogueId, boolean published);
+
+    /**
+     * @param auth       Authentication
+     * @param id         Catalogue or Adapter id
+     * @return True if the authenticated user is an Adapter Admin
+     */
+    boolean userHasAdapterAccess(Authentication auth, @NotNull String id);
 }

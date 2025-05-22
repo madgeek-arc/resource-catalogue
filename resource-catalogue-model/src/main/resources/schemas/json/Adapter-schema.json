@@ -1,21 +1,20 @@
 {
   "$schema" : "https://json-schema.org/draft/2020-12/schema",
   "$defs" : {
-    "Maintainer" : {
+    "User" : {
       "type" : "object",
       "properties" : {
         "email" : {
-          "type" : "array",
-          "items" : {
-            "type" : "string"
-          }
+          "type" : "string"
+        },
+        "id" : {
+          "type" : "string"
         },
         "name" : {
           "type" : "string"
         },
-        "website" : {
-          "type" : "string",
-          "format" : "uri"
+        "surname" : {
+          "type" : "string"
         }
       },
       "additionalProperties" : false
@@ -23,6 +22,15 @@
   },
   "type" : "object",
   "properties" : {
+    "admins" : {
+      "type" : "array",
+      "items" : {
+        "$ref" : "#/$defs/User"
+      }
+    },
+    "catalogueId" : {
+      "type" : "string"
+    },
     "changeLog" : {
       "type" : "string"
     },
@@ -32,12 +40,6 @@
     "documentation" : {
       "type" : "string",
       "format" : "uri"
-    },
-    "funding" : {
-      "type" : "array",
-      "items" : {
-        "type" : "string"
-      }
     },
     "id" : {
       "type" : "string"
@@ -55,13 +57,10 @@
     "logo" : {
       "type" : "string"
     },
-    "maintainers" : {
-      "type" : "array",
-      "items" : {
-        "$ref" : "#/$defs/Maintainer"
-      }
-    },
     "name" : {
+      "type" : "string"
+    },
+    "node" : {
       "type" : "string"
     },
     "programmingLanguage" : {
