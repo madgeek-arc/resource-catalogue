@@ -17,8 +17,8 @@ COPY resource-catalogue-rest/pom.xml ./resource-catalogue-rest/
 COPY resource-catalogue-service/pom.xml ./resource-catalogue-service/
 COPY matomo/pom.xml ./matomo/
 
-# Go offline to cache dependencies
-RUN mvn dependency:go-offline -B
+## Go offline to cache dependencies
+#RUN mvn dependency:go-offline -B
 
 # Copy the full source
 COPY . .
