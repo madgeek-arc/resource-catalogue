@@ -22,6 +22,7 @@ import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.resourcecatalogue.annotations.BrowseCatalogue;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Adapter;
 import gr.uoa.di.madgik.resourcecatalogue.domain.AdapterBundle;
+import gr.uoa.di.madgik.resourcecatalogue.domain.ProviderBundle;
 import gr.uoa.di.madgik.resourcecatalogue.service.AdapterService;
 import gr.uoa.di.madgik.resourcecatalogue.service.GenericResourceService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -167,5 +168,18 @@ public class AdapterController {
         adapterService.delete(adapter);
         logger.info("Deleted the Adapter with name '{}' and id '{}'", adapter.getAdapter().getName(), adapter.getId());
         return new ResponseEntity<>(adapter.getAdapter(), HttpStatus.OK);
+    }
+
+    @PatchMapping(path = "verify/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
+    public ResponseEntity<AdapterBundle> verify(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
+                                                @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix,
+                                                @RequestParam(required = false) Boolean active,
+                                                @RequestParam(required = false) String status,
+                                                @Parameter(hidden = true) Authentication auth) {
+        String id = prefix + "/" + suffix;
+        AdapterBundle adapter = adapterService.verify(id, status, active, auth);
+        logger.info("Updated Provider with id: '{}' | status: '{}' | active: '{}'", adapter.getId(), status, active);
+        return new ResponseEntity<>(adapter, HttpStatus.OK);
     }
 }
