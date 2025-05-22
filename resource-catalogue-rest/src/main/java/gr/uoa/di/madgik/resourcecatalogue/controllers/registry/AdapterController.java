@@ -20,9 +20,7 @@ import gr.uoa.di.madgik.registry.annotation.BrowseParameters;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.resourcecatalogue.annotations.BrowseCatalogue;
-import gr.uoa.di.madgik.resourcecatalogue.domain.Adapter;
-import gr.uoa.di.madgik.resourcecatalogue.domain.AdapterBundle;
-import gr.uoa.di.madgik.resourcecatalogue.domain.ProviderBundle;
+import gr.uoa.di.madgik.resourcecatalogue.domain.*;
 import gr.uoa.di.madgik.resourcecatalogue.service.AdapterService;
 import gr.uoa.di.madgik.resourcecatalogue.service.GenericResourceService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -44,7 +42,10 @@ import org.springframework.security.core.Authentication;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Profile("beyond")
 @RestController
@@ -181,5 +182,59 @@ public class AdapterController {
         AdapterBundle adapter = adapterService.verify(id, status, active, auth);
         logger.info("Updated Provider with id: '{}' | status: '{}' | active: '{}'", adapter.getId(), status, active);
         return new ResponseEntity<>(adapter, HttpStatus.OK);
+    }
+
+    @GetMapping(path = {"resourceIdToNameMap"}, produces = {MediaType.APPLICATION_JSON_VALUE})
+    public ResponseEntity<Map<String, List<gr.uoa.di.madgik.resourcecatalogue.dto.Value>>> resourceIdToNameMap(@RequestParam String catalogueId) {
+        Map<String, List<gr.uoa.di.madgik.resourcecatalogue.dto.Value>> ret = new HashMap<>();
+        List<gr.uoa.di.madgik.resourcecatalogue.dto.Value> allResources = new ArrayList<>();
+        // fetch catalogueId related non-public Resources
+
+        List<gr.uoa.di.madgik.resourcecatalogue.dto.Value> catalogueRelatedServices = genericResourceService
+                .getResultsWithoutFacets(createFacetFilter(catalogueId, false, "service")).getResults()
+                .stream().map(serviceBundle -> (ServiceBundle) serviceBundle)
+                .map(c -> new gr.uoa.di.madgik.resourcecatalogue.dto.Value(c.getId(), c.getService().getName()))
+                .toList();
+        List<gr.uoa.di.madgik.resourcecatalogue.dto.Value> catalogueRelatedGuidelines = genericResourceService
+                .getResultsWithoutFacets(createFacetFilter(catalogueId, false, "interoperability_record")).getResults()
+                .stream().map(interoperabilityRecordBundle -> (InteroperabilityRecordBundle) interoperabilityRecordBundle)
+                .map(c -> new gr.uoa.di.madgik.resourcecatalogue.dto.Value(c.getId(), c.getInteroperabilityRecord().getTitle()))
+                .toList();
+        // fetch non-catalogueId related public Resources
+        List<gr.uoa.di.madgik.resourcecatalogue.dto.Value> publicServices = genericResourceService
+                .getResultsWithoutFacets(createFacetFilter(catalogueId, true, "service")).getResults()
+                .stream().map(serviceBundle -> (ServiceBundle) serviceBundle)
+                .filter(c -> !c.getService().getCatalogueId().equals(catalogueId))
+                .map(c -> new gr.uoa.di.madgik.resourcecatalogue.dto.Value(c.getId(), c.getService().getName()))
+                .toList();
+        List<gr.uoa.di.madgik.resourcecatalogue.dto.Value> publicInteroperabilityRecords = genericResourceService
+                .getResultsWithoutFacets(createFacetFilter(catalogueId, true, "interoperability_record")).getResults()
+                .stream().map(interoperabilityRecordBundle -> (InteroperabilityRecordBundle) interoperabilityRecordBundle)
+                .filter(c -> !c.getInteroperabilityRecord().getCatalogueId().equals(catalogueId))
+                .map(c -> new gr.uoa.di.madgik.resourcecatalogue.dto.Value(c.getId(), c.getInteroperabilityRecord().getTitle()))
+                .toList();
+
+        allResources.addAll(catalogueRelatedServices);
+        allResources.addAll(catalogueRelatedGuidelines);
+        allResources.addAll(publicServices);
+        allResources.addAll(publicInteroperabilityRecords);
+        ret.put("ADAPTER_RESOURCES_VOC", allResources);
+
+        return ResponseEntity.ok(ret);
+    }
+
+    private FacetFilter createFacetFilter(String catalogueId, boolean isPublic, String resourceType) {
+        FacetFilter ff = new FacetFilter();
+        ff.setQuantity(10000);
+        ff.addFilter("status", "approved resource");
+        ff.addFilter("active", true);
+        if (isPublic) {
+            ff.addFilter("published", true);
+        } else {
+            ff.addFilter("catalogue_id", catalogueId);
+            ff.addFilter("published", false);
+        }
+        ff.setResourceType(resourceType);
+        return ff;
     }
 }
