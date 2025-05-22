@@ -8,7 +8,7 @@
     </parent>
     <groupId>gr.uoa.di.madgik</groupId>
     <artifactId>resource-catalogue</artifactId>
-    <version>5.0.1</version>
+    <version>5.0.2-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <licenses>
@@ -66,7 +66,7 @@
             <dependency>
                 <groupId>gr.uoa.di.madgik</groupId>
                 <artifactId>resource-catalogue-model-lot1</artifactId>
-                <version>5.0.1</version>
+                <version>5.0.2-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>gr.uoa.di.madgik</groupId>
@@ -233,7 +233,7 @@
         <connection>scm:git:ssh://git@github.com/madgeek-arc/resource-catalogue.git</connection>
         <developerConnection>scm:git:ssh://git@github.com/madgeek-arc/resource-catalogue.git</developerConnection>
         <url>https://github.com/madgeek-arc/resource-catalogue.git</url>
-        <tag>v5.0.1</tag>
+        <tag>HEAD</tag>
     </scm>
 
     <distributionManagement>
