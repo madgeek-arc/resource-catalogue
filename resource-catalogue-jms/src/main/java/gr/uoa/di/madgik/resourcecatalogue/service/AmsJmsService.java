@@ -22,6 +22,7 @@ import gr.uoa.di.madgik.resourcecatalogue.config.AmsProperties;
 import gr.uoa.di.madgik.resourcecatalogue.utils.JmsService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Primary;
 import org.springframework.http.*;
 import org.springframework.jms.core.JmsTemplate;
@@ -42,6 +43,8 @@ public class AmsJmsService extends DefaultJmsService implements JmsService {
     private final RestTemplate restTemplate;
     private final AmsProperties amsProperties;
 
+    @Value("${catalogue.jms.prefix}")
+    private String jmsPrefix;
 
     public AmsJmsService(JmsTemplate jmsTopicTemplate,
                          JmsTemplate jmsQueueTemplate,
@@ -56,7 +59,7 @@ public class AmsJmsService extends DefaultJmsService implements JmsService {
     public void convertAndSendTopic(String messageDestination, Object message) {
         try {
             publishTopic(messageDestination.replace(".", "-"), message);
-            super.convertAndSendTopic(messageDestination, message);
+            super.convertAndSendTopic(jmsPrefix + "." + messageDestination, message);
         } catch (HttpClientErrorException e) {
             if (e.getStatusCode() == HttpStatus.NOT_FOUND) {
                 createTopic(messageDestination.replace(".", "-"));
@@ -67,7 +70,7 @@ public class AmsJmsService extends DefaultJmsService implements JmsService {
 
     @Override
     public void convertAndSendQueue(String messageDestination, Object message) {
-        super.convertAndSendTopic(messageDestination, message);
+        super.convertAndSendTopic(jmsPrefix + "." + messageDestination, message);
     }
 
     //region Topics
