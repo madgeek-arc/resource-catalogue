@@ -3,12 +3,12 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.4.1</version>
+        <version>3.4.5</version>
         <relativePath /> <!-- lookup parent from repository -->
     </parent>
     <groupId>gr.uoa.di.madgik</groupId>
     <artifactId>resource-catalogue</artifactId>
-    <version>5.0.0</version>
+    <version>5.0.1</version>
     <packaging>pom</packaging>
 
     <licenses>
@@ -32,10 +32,8 @@
     <properties>
         <java.version>21</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <logging.version>2.23.1</logging.version>
-        <jackson.version.core>2.17.2</jackson.version.core>
-        <registry-core.version>4.0.2</registry-core.version>
-        <springfox.version>2.7.0</springfox.version>
+        <jackson.version.core>2.18.4</jackson.version.core>
+        <registry-core.version>4.0.3</registry-core.version>
         <javax.mail-version>1.4.3</javax.mail-version>
         <jaxb2-maven-plugin.version>2.5.0</jaxb2-maven-plugin.version>
         <maven-compiler-plugin.version>3.11.0</maven-compiler-plugin.version>
@@ -68,7 +66,7 @@
             <dependency>
                 <groupId>gr.uoa.di.madgik</groupId>
                 <artifactId>resource-catalogue-model-lot1</artifactId>
-                <version>5.0.0</version>
+                <version>5.0.1</version>
             </dependency>
             <dependency>
                 <groupId>gr.uoa.di.madgik</groupId>
@@ -138,7 +136,7 @@
             <dependency>
                 <groupId>gr.uoa.di.madgik</groupId>
                 <artifactId>catalogue</artifactId>
-                <version>8.0.0</version>
+                <version>8.0.1</version>
             </dependency>
 
             <dependency>
@@ -155,7 +153,7 @@
             <dependency>
                 <groupId>org.springdoc</groupId>
                 <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
-                <version>2.6.0</version>
+                <version>2.8.8</version>
             </dependency>
             <dependency>
                 <groupId>com.sun.mail</groupId>
@@ -199,11 +197,6 @@
                 <version>1.2</version>
             </dependency>
             <dependency>
-                <groupId>com.google.code.gson</groupId>
-                <artifactId>gson</artifactId>
-                <version>2.13.0</version>
-            </dependency>
-            <dependency>
                 <groupId>com.googlecode.json-simple</groupId>
                 <artifactId>json-simple</artifactId>
                 <version>1.1.1</version>
@@ -240,7 +233,7 @@
         <connection>scm:git:ssh://git@github.com/madgeek-arc/resource-catalogue.git</connection>
         <developerConnection>scm:git:ssh://git@github.com/madgeek-arc/resource-catalogue.git</developerConnection>
         <url>https://github.com/madgeek-arc/resource-catalogue.git</url>
-        <tag>v5.0.0</tag>
+        <tag>v5.0.1</tag>
     </scm>
 
     <distributionManagement>
