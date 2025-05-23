@@ -71,7 +71,7 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChainNoAuth(HttpSecurity http) throws Exception {
         http
-                .authorizeRequests(authorizeRequests ->
+                .authorizeHttpRequests(authorizeRequests ->
                         authorizeRequests.anyRequest().permitAll()
                 )
                 .cors(AbstractHttpConfigurer::disable)
