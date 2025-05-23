@@ -38,8 +38,6 @@ import java.util.stream.Collectors;
 
 @ConfigurationProperties(prefix = "catalogue")
 @Validated
-@Component
-@Primary
 public class CatalogueProperties {
 
     private static final Logger logger = LoggerFactory.getLogger(CatalogueProperties.class);
