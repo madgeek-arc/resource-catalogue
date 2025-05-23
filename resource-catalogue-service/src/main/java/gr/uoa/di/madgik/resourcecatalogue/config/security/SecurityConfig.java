@@ -44,6 +44,7 @@ import org.springframework.security.web.authentication.logout.LogoutSuccessHandl
 
 import java.util.*;
 
+@Profile("!no-auth")
 @Configuration
 public class SecurityConfig {
 
@@ -67,19 +68,6 @@ public class SecurityConfig {
         this.authoritiesMapper = authoritiesMapper;
     }
 
-    @Profile("no-auth")
-    @Bean
-    public SecurityFilterChain filterChainNoAuth(HttpSecurity http) throws Exception {
-        http
-                .authorizeHttpRequests(authorizeRequests ->
-                        authorizeRequests.anyRequest().permitAll()
-                )
-                .cors(AbstractHttpConfigurer::disable)
-                .csrf(AbstractHttpConfigurer::disable);
-        return http.build();
-    }
-
-    @Profile("!no-auth")
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http

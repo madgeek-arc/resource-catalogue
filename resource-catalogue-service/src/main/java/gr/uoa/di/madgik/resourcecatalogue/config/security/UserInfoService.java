@@ -16,6 +16,7 @@
 
 package gr.uoa.di.madgik.resourcecatalogue.config.security;
 
+import org.springframework.context.annotation.Profile;
 import org.springframework.security.oauth2.client.registration.ClientRegistration;
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
 import org.springframework.stereotype.Service;
@@ -24,6 +25,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+@Profile("!no-auth")
 @Service
 public class UserInfoService {
 
