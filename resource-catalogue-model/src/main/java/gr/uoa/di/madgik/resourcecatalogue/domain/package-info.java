@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright 2017-2025 OpenAIRE AMKE & Athena Research and Innovation Center
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,14 +14,6 @@
  * limitations under the License.
  */
 
-@XmlSchema(
-        namespace = "http://einfracentral.eu",
-        elementFormDefault = XmlNsForm.QUALIFIED,
-        xmlns = {
-                @XmlNs(prefix = "tns", namespaceURI = "http://einfracentral.eu")//,
-                //@XmlNs(prefix = "ns0", namespaceURI = "http://einfracentral.eu")
-        }
-)
 @XmlAccessorOrder(XmlAccessOrder.ALPHABETICAL)
 @XmlAccessorType(XmlAccessType.FIELD)
 package gr.uoa.di.madgik.resourcecatalogue.domain;
