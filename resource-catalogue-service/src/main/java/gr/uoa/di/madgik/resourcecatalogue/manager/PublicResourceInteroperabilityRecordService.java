@@ -18,14 +18,12 @@ package gr.uoa.di.madgik.resourcecatalogue.manager;
 
 import gr.uoa.di.madgik.registry.domain.Browsing;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
-import gr.uoa.di.madgik.registry.exception.ResourceException;
-import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
-import gr.uoa.di.madgik.registry.service.ResourceCRUDService;
-import gr.uoa.di.madgik.resourcecatalogue.domain.DatasourceBundle;
-import gr.uoa.di.madgik.resourcecatalogue.domain.Identifiers;
-import gr.uoa.di.madgik.resourcecatalogue.domain.ResourceInteroperabilityRecordBundle;
+import gr.uoa.di.madgik.resourcecatalogue.domain.*;
+import gr.uoa.di.madgik.resourcecatalogue.exceptions.CatalogueResourceNotFoundException;
+import gr.uoa.di.madgik.resourcecatalogue.service.InteroperabilityRecordService;
+import gr.uoa.di.madgik.resourcecatalogue.service.ServiceBundleService;
+import gr.uoa.di.madgik.resourcecatalogue.service.TrainingResourceService;
 import gr.uoa.di.madgik.resourcecatalogue.utils.JmsService;
-import gr.uoa.di.madgik.resourcecatalogue.utils.PublicResourceUtils;
 import org.apache.commons.beanutils.BeanUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,17 +31,28 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
+import java.util.List;
 
 @Service("publicResourceInteroperabilityRecordManager")
-public class PublicResourceInteroperabilityRecordService extends ResourceManager<ResourceInteroperabilityRecordBundle>
+public class PublicResourceInteroperabilityRecordService extends ResourceCatalogueManager<ResourceInteroperabilityRecordBundle>
         implements PublicResourceService<ResourceInteroperabilityRecordBundle> {
 
     private static final Logger logger = LoggerFactory.getLogger(PublicResourceInteroperabilityRecordService.class);
     private final JmsService jmsService;
+    private final ServiceBundleService<ServiceBundle> serviceBundleService;
+    private final TrainingResourceService trainingResourceService;
+    private final InteroperabilityRecordService interoperabilityRecordService;
 
-    public PublicResourceInteroperabilityRecordService(JmsService jmsService) {
+    public PublicResourceInteroperabilityRecordService(JmsService jmsService,
+                                                       ServiceBundleService<ServiceBundle> serviceBundleService,
+                                                       TrainingResourceService trainingResourceService,
+                                                       InteroperabilityRecordService interoperabilityRecordService) {
         super(ResourceInteroperabilityRecordBundle.class);
         this.jmsService = jmsService;
+        this.serviceBundleService = serviceBundleService;
+        this.trainingResourceService = trainingResourceService;
+        this.interoperabilityRecordService = interoperabilityRecordService;
     }
 
     @Override
@@ -59,15 +68,12 @@ public class PublicResourceInteroperabilityRecordService extends ResourceManager
     @Override
     public ResourceInteroperabilityRecordBundle add(ResourceInteroperabilityRecordBundle resourceInteroperabilityRecordBundle, Authentication authentication) {
         String lowerLevelResourceId = resourceInteroperabilityRecordBundle.getId();
-        Identifiers.createOriginalId(resourceInteroperabilityRecordBundle);
-        resourceInteroperabilityRecordBundle.setId(PublicResourceUtils.createPublicResourceId(
-                resourceInteroperabilityRecordBundle.getResourceInteroperabilityRecord().getId(),
-                resourceInteroperabilityRecordBundle.getResourceInteroperabilityRecord().getCatalogueId()));
+        resourceInteroperabilityRecordBundle.setId(resourceInteroperabilityRecordBundle.getIdentifiers().getPid());
+        resourceInteroperabilityRecordBundle.getMetadata().setPublished(true);
 
         // sets public ids to resourceId and interoperabilityRecordIds
         updateIdsToPublic(resourceInteroperabilityRecordBundle);
 
-        resourceInteroperabilityRecordBundle.getMetadata().setPublished(true);
         ResourceInteroperabilityRecordBundle ret;
         logger.info("ResourceInteroperabilityRecordBundle '{}' is being published with id '{}'", lowerLevelResourceId, resourceInteroperabilityRecordBundle.getId());
         ret = super.add(resourceInteroperabilityRecordBundle, null);
@@ -77,12 +83,10 @@ public class PublicResourceInteroperabilityRecordService extends ResourceManager
 
     @Override
     public ResourceInteroperabilityRecordBundle update(ResourceInteroperabilityRecordBundle resourceInteroperabilityRecordBundle, Authentication authentication) {
-        ResourceInteroperabilityRecordBundle published = super.get(PublicResourceUtils.createPublicResourceId(
-                resourceInteroperabilityRecordBundle.getResourceInteroperabilityRecord().getId(),
-                resourceInteroperabilityRecordBundle.getResourceInteroperabilityRecord().getCatalogueId()));
-        ResourceInteroperabilityRecordBundle ret = super.get(PublicResourceUtils.createPublicResourceId(
-                resourceInteroperabilityRecordBundle.getResourceInteroperabilityRecord().getId(),
-                resourceInteroperabilityRecordBundle.getResourceInteroperabilityRecord().getCatalogueId()));
+        ResourceInteroperabilityRecordBundle published = super.get(resourceInteroperabilityRecordBundle.getIdentifiers().getPid(),
+                resourceInteroperabilityRecordBundle.getResourceInteroperabilityRecord().getCatalogueId(),true);
+        ResourceInteroperabilityRecordBundle ret = super.get(resourceInteroperabilityRecordBundle.getIdentifiers().getPid(),
+                resourceInteroperabilityRecordBundle.getResourceInteroperabilityRecord().getCatalogueId(),true);
         try {
             BeanUtils.copyProperties(ret, resourceInteroperabilityRecordBundle);
         } catch (IllegalAccessException | InvocationTargetException e) {
@@ -104,26 +108,36 @@ public class PublicResourceInteroperabilityRecordService extends ResourceManager
     @Override
     public void delete(ResourceInteroperabilityRecordBundle resourceInteroperabilityRecordBundle) {
         try {
-            ResourceInteroperabilityRecordBundle publicResourceInteroperabilityRecordBundle = get(PublicResourceUtils.createPublicResourceId(
-                    resourceInteroperabilityRecordBundle.getResourceInteroperabilityRecord().getId(),
-                    resourceInteroperabilityRecordBundle.getResourceInteroperabilityRecord().getCatalogueId()));
+            ResourceInteroperabilityRecordBundle publicResourceInteroperabilityRecordBundle =
+                    get(resourceInteroperabilityRecordBundle.getIdentifiers().getPid(),
+                            resourceInteroperabilityRecordBundle.getResourceInteroperabilityRecord().getCatalogueId(), true);
             logger.info("Deleting public ResourceInteroperabilityRecordBundle with id '{}'", publicResourceInteroperabilityRecordBundle.getId());
             super.delete(publicResourceInteroperabilityRecordBundle);
             jmsService.convertAndSendTopic("resource_interoperability_record.delete", publicResourceInteroperabilityRecordBundle);
-        } catch (ResourceException | ResourceNotFoundException ignore) {
+        } catch (CatalogueResourceNotFoundException ignore) {
         }
     }
 
     @Override
     public void updateIdsToPublic(ResourceInteroperabilityRecordBundle bundle) {
         // resourceId
-        bundle.getResourceInteroperabilityRecord().setResourceId(PublicResourceUtils.createPublicResourceId(
-                bundle.getResourceInteroperabilityRecord().getResourceId(),
-                bundle.getResourceInteroperabilityRecord().getCatalogueId()));
+        Bundle<?> resource;
+        try {
+            resource = serviceBundleService.get(bundle.getResourceInteroperabilityRecord().getResourceId(),
+                    bundle.getResourceInteroperabilityRecord().getCatalogueId(), false);
+        } catch (CatalogueResourceNotFoundException e) {
+            resource = trainingResourceService.get(bundle.getResourceInteroperabilityRecord().getResourceId(),
+                    bundle.getResourceInteroperabilityRecord().getCatalogueId(), false);
+        }
+        bundle.getResourceInteroperabilityRecord().setResourceId(resource.getIdentifiers().getPid());
+
         // Interoperability Record IDs
-        bundle.getResourceInteroperabilityRecord().setInteroperabilityRecordIds(
-                appendCatalogueId(
-                        bundle.getResourceInteroperabilityRecord().getInteroperabilityRecordIds(),
-                        bundle.getResourceInteroperabilityRecord().getCatalogueId()));
+        List<String> interoperabilityRecordIds = new ArrayList<>();
+        for (String interoperabilityRecordId : bundle.getResourceInteroperabilityRecord().getInteroperabilityRecordIds()) {
+            InteroperabilityRecordBundle interoperabilityRecord = interoperabilityRecordService.get(
+                    interoperabilityRecordId, bundle.getResourceInteroperabilityRecord().getCatalogueId(), false);
+            interoperabilityRecordIds.add(interoperabilityRecord.getIdentifiers().getPid());
+        }
+        bundle.getResourceInteroperabilityRecord().setInteroperabilityRecordIds(interoperabilityRecordIds);
     }
 }

@@ -30,9 +30,11 @@ import org.springframework.security.authentication.InsufficientAuthenticationExc
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 @Component
 public class ProviderResourcesCommonMethods {
@@ -48,9 +50,9 @@ public class ProviderResourcesCommonMethods {
     private final HelpdeskService helpdeskService;
     private final MonitoringService monitoringService;
     private final ResourceInteroperabilityRecordService resourceInteroperabilityRecordService;
-    private final GenericResourceService genericResourceService;
     private final VocabularyService vocabularyService;
     private final SecurityService securityService;
+    private final IdCreator idCreator;
 
     public ProviderResourcesCommonMethods(@Lazy CatalogueService catalogueService,
                                           @Lazy ProviderService providerService,
@@ -59,23 +61,23 @@ public class ProviderResourcesCommonMethods {
                                           @Lazy MonitoringService monitoringService,
                                           @Lazy ResourceInteroperabilityRecordService
                                                   resourceInteroperabilityRecordService,
-                                          @Lazy GenericResourceService genericResourceService,
                                           @Lazy VocabularyService vocabularyService,
-                                          @Lazy SecurityService securityService) {
+                                          @Lazy SecurityService securityService,
+                                          @Lazy IdCreator idCreator) {
         this.catalogueService = catalogueService;
         this.providerService = providerService;
         this.datasourceService = datasourceService;
         this.helpdeskService = helpdeskService;
         this.monitoringService = monitoringService;
         this.resourceInteroperabilityRecordService = resourceInteroperabilityRecordService;
-        this.genericResourceService = genericResourceService;
         this.vocabularyService = vocabularyService;
         this.securityService = securityService;
+        this.idCreator = idCreator;
     }
 
     public void checkCatalogueIdConsistency(Object o, String catalogueId) {
         if (!catalogueService.exists(catalogueId)) {
-            throw new ResourceNotFoundException(String.format("Catalogue with id '%s' does not exists.", catalogueId));
+            throw new ResourceNotFoundException(catalogueId, "Catalogue");
         }
         if (o != null) {
             if (o instanceof ProviderBundle) {
@@ -85,6 +87,10 @@ public class ProviderResourcesCommonMethods {
                     if (!((ProviderBundle) o).getPayload().getCatalogueId().equals(catalogueId)) {
                         throw new ValidationException("Parameter 'catalogueId' and Provider's 'catalogueId' don't match");
                     }
+                }
+                if (!catalogueService.get(catalogueId).getStatus().equals("approved catalogue")) {
+                    throw new ResourceException(String.format("The Catalogue '%s' is not yet approved", catalogueId),
+                            HttpStatus.CONFLICT);
                 }
             }
             if (o instanceof ServiceBundle) {
@@ -113,120 +119,6 @@ public class ProviderResourcesCommonMethods {
                 } else {
                     if (!((InteroperabilityRecordBundle) o).getPayload().getCatalogueId().equals(catalogueId)) {
                         throw new ValidationException("Parameter 'catalogueId' and Interoperability Record's 'catalogueId' don't match");
-                    }
-                }
-            }
-        }
-    }
-
-    // check if the lower level resource ID is from an external catalogue
-    public void checkRelatedResourceIDsConsistency(Object o) {
-        String catalogueId = null;
-        List<String> resourceProviders = new ArrayList<>();
-        List<String> requiredResources = new ArrayList<>();
-        List<String> relatedResources = new ArrayList<>();
-        List<String> eoscRelatedServices = new ArrayList<>();
-        List<String> interoperabilityRecordIds = new ArrayList<>();
-        if (o != null) {
-            if (o instanceof ServiceBundle) {
-                catalogueId = ((ServiceBundle) o).getService().getCatalogueId();
-                resourceProviders = ((ServiceBundle) o).getService().getResourceProviders();
-                requiredResources = ((ServiceBundle) o).getService().getRequiredResources();
-                relatedResources = ((ServiceBundle) o).getService().getRelatedResources();
-            }
-            if (o instanceof TrainingResourceBundle) {
-                catalogueId = ((TrainingResourceBundle) o).getTrainingResource().getCatalogueId();
-                resourceProviders = ((TrainingResourceBundle) o).getTrainingResource().getResourceProviders();
-                eoscRelatedServices = ((TrainingResourceBundle) o).getTrainingResource().getEoscRelatedServices();
-            }
-            if (o instanceof ResourceInteroperabilityRecordBundle) {
-                catalogueId = ((ResourceInteroperabilityRecordBundle) o).getResourceInteroperabilityRecord().getCatalogueId();
-                interoperabilityRecordIds = ((ResourceInteroperabilityRecordBundle) o).getResourceInteroperabilityRecord().getInteroperabilityRecordIds();
-            }
-            if (resourceProviders != null && !resourceProviders.isEmpty() && resourceProviders.stream().anyMatch(Objects::nonNull)) {
-                for (String resourceProvider : resourceProviders) {
-                    if (resourceProvider != null && !resourceProvider.isEmpty()) {
-                        try {
-                            //FIXME: get(resourceTypeName, id) won't work as intended if there are 2 or more resources with the same ID
-                            ProviderBundle providerBundle = genericResourceService.get("provider", resourceProvider);
-                            if (!providerBundle.getMetadata().isPublished() && !providerBundle.getProvider().getCatalogueId().equals(catalogueId)) {
-                                throw new ValidationException("Cross Catalogue reference is prohibited. Found in field 'resourceProviders");
-                            }
-                        } catch (ResourceNotFoundException ignored) {
-                        }
-                    }
-                }
-            }
-            if (requiredResources != null && !requiredResources.isEmpty() && requiredResources.stream().anyMatch(Objects::nonNull)) {
-                for (String requiredResource : requiredResources) {
-                    if (requiredResource != null && !requiredResource.isEmpty()) {
-                        try {
-                            ServiceBundle serviceBundle = genericResourceService.get("service", requiredResource);
-                            if (!serviceBundle.getMetadata().isPublished() && !serviceBundle.getService().getCatalogueId().equals(catalogueId)) {
-                                throw new ValidationException("Cross Catalogue reference is prohibited. Found in field 'requiredResources");
-                            }
-                        } catch (ResourceNotFoundException j) {
-                            try {
-                                TrainingResourceBundle trainingResourceBundle = genericResourceService.get("training_resource", requiredResource);
-                                if (!trainingResourceBundle.getMetadata().isPublished() && !trainingResourceBundle.getTrainingResource().getCatalogueId().equals(catalogueId)) {
-                                    throw new ValidationException("Cross Catalogue reference is prohibited. Found in field 'requiredResources");
-                                }
-                            } catch (ResourceNotFoundException ignored) {
-                            }
-                        }
-                    }
-                }
-            }
-            if (relatedResources != null && !relatedResources.isEmpty() && relatedResources.stream().anyMatch(Objects::nonNull)) {
-                for (String relatedResource : relatedResources) {
-                    if (relatedResource != null && !relatedResource.isEmpty()) {
-                        try {
-                            ServiceBundle serviceBundle = genericResourceService.get("service", relatedResource);
-                            if (!serviceBundle.getMetadata().isPublished() && !serviceBundle.getService().getCatalogueId().equals(catalogueId)) {
-                                throw new ValidationException("Cross Catalogue reference is prohibited. Found in field 'relatedResources");
-                            }
-                        } catch (ResourceNotFoundException j) {
-                            try {
-                                TrainingResourceBundle trainingResourceBundle = genericResourceService.get("training_resource", relatedResource);
-                                if (!trainingResourceBundle.getMetadata().isPublished() && !trainingResourceBundle.getTrainingResource().getCatalogueId().equals(catalogueId)) {
-                                    throw new ValidationException("Cross Catalogue reference is prohibited. Found in field 'relatedResources");
-                                }
-                            } catch (ResourceNotFoundException ignored) {
-                            }
-                        }
-                    }
-                }
-            }
-            if (eoscRelatedServices != null && !eoscRelatedServices.isEmpty() && eoscRelatedServices.stream().anyMatch(Objects::nonNull)) {
-                for (String eoscRelatedService : eoscRelatedServices) {
-                    if (eoscRelatedService != null && !eoscRelatedService.isEmpty()) {
-                        try {
-                            ServiceBundle serviceBundle = genericResourceService.get("service", eoscRelatedService);
-                            if (!serviceBundle.getMetadata().isPublished() && !serviceBundle.getService().getCatalogueId().equals(catalogueId)) {
-                                throw new ValidationException("Cross Catalogue reference is prohibited. Found in field 'eoscRelatedServices");
-                            }
-                        } catch (ResourceNotFoundException j) {
-                            try {
-                                TrainingResourceBundle trainingResourceBundle = genericResourceService.get("training_resource", eoscRelatedService);
-                                if (!trainingResourceBundle.getMetadata().isPublished() && !trainingResourceBundle.getTrainingResource().getCatalogueId().equals(catalogueId)) {
-                                    throw new ValidationException("Cross Catalogue reference is prohibited. Found in field 'eoscRelatedServices");
-                                }
-                            } catch (ResourceNotFoundException ignored) {
-                            }
-                        }
-                    }
-                }
-            }
-            if (interoperabilityRecordIds != null && !interoperabilityRecordIds.isEmpty() && interoperabilityRecordIds.stream().anyMatch(Objects::nonNull)) {
-                for (String interoperabilityRecordId : interoperabilityRecordIds) {
-                    if (interoperabilityRecordId != null && !interoperabilityRecordId.isEmpty()) {
-                        try {
-                            InteroperabilityRecordBundle interoperabilityRecordBundle = genericResourceService.get("interoperability_record", interoperabilityRecordId);
-                            if (!interoperabilityRecordBundle.getMetadata().isPublished() && !interoperabilityRecordBundle.getInteroperabilityRecord().getCatalogueId().equals(catalogueId)) {
-                                throw new ValidationException("Cross Catalogue reference is prohibited. Found in field 'interoperabilityRecordIds");
-                            }
-                        } catch (ResourceNotFoundException ignored) {
-                        }
                     }
                 }
             }
@@ -270,10 +162,12 @@ public class ProviderResourcesCommonMethods {
                         HttpStatus.CONFLICT);
             }
         } else {
-            ProviderBundle providerBundle = providerService.get(providerId, auth);
-            if ((catalogueBundle.isSuspended() || providerBundle.isSuspended()) && !suspend) {
-                throw new ResourceException("You cannot unsuspend a Resource when its Provider and/or Catalogue are suspended",
-                        HttpStatus.CONFLICT);
+            if (providerId != null && !providerId.isEmpty()) {
+                ProviderBundle providerBundle = providerService.get(providerId, auth);
+                if ((catalogueBundle.isSuspended() || providerBundle.isSuspended()) && !suspend) {
+                    throw new ResourceException("You cannot unsuspend a Resource when its Provider and/or Catalogue are suspended",
+                            HttpStatus.CONFLICT);
+                }
             }
         }
     }
@@ -333,70 +227,16 @@ public class ProviderResourcesCommonMethods {
         return loggingInfoList;
     }
 
-    public void determineResourceAndCreateAlternativeIdentifierForPID(Bundle<?> bundle, String resourceType) {
-        AlternativeIdentifier alternativeIdentifier;
-        List<AlternativeIdentifier> alternativeIdentifiers = new ArrayList<>();
-        List<AlternativeIdentifier> existingAlternativeIdentifiers;
-        switch (resourceType) {
-            case "provider":
-                ProviderBundle providerBundle = (ProviderBundle) bundle;
-                existingAlternativeIdentifiers = providerBundle.getProvider().getAlternativeIdentifiers();
-                alternativeIdentifier = createAlternativeIdentifierForPID(providerBundle.getProvider().getId(),
-                        providerBundle.getProvider().getCatalogueId());
-                if (existingAlternativeIdentifiers != null && !existingAlternativeIdentifiers.isEmpty()) {
-                    existingAlternativeIdentifiers.add(alternativeIdentifier);
-                } else {
-                    alternativeIdentifiers.add(alternativeIdentifier);
-                    providerBundle.getProvider().setAlternativeIdentifiers(alternativeIdentifiers);
-                }
-                break;
-            case "service":
-                ServiceBundle serviceBundle = (ServiceBundle) bundle;
-                existingAlternativeIdentifiers = serviceBundle.getService().getAlternativeIdentifiers();
-                alternativeIdentifier = createAlternativeIdentifierForPID(serviceBundle.getService().getId(),
-                        serviceBundle.getService().getCatalogueId());
-                if (existingAlternativeIdentifiers != null && !existingAlternativeIdentifiers.isEmpty()) {
-                    existingAlternativeIdentifiers.add(alternativeIdentifier);
-                } else {
-                    alternativeIdentifiers.add(alternativeIdentifier);
-                    serviceBundle.getService().setAlternativeIdentifiers(alternativeIdentifiers);
-                }
-                break;
-            case "training_resource":
-                TrainingResourceBundle trainingResourceBundle = (TrainingResourceBundle) bundle;
-                existingAlternativeIdentifiers = trainingResourceBundle.getTrainingResource().getAlternativeIdentifiers();
-                alternativeIdentifier = createAlternativeIdentifierForPID(trainingResourceBundle.getTrainingResource().getId(),
-                        trainingResourceBundle.getTrainingResource().getCatalogueId());
-                if (existingAlternativeIdentifiers != null && !existingAlternativeIdentifiers.isEmpty()) {
-                    existingAlternativeIdentifiers.add(alternativeIdentifier);
-                } else {
-                    alternativeIdentifiers.add(alternativeIdentifier);
-                    trainingResourceBundle.getTrainingResource().setAlternativeIdentifiers(alternativeIdentifiers);
-                }
-                break;
-            case "interoperability_record":
-                InteroperabilityRecordBundle interoperabilityRecordBundle = (InteroperabilityRecordBundle) bundle;
-                existingAlternativeIdentifiers = interoperabilityRecordBundle.getInteroperabilityRecord().getAlternativeIdentifiers();
-                alternativeIdentifier = createAlternativeIdentifierForPID(interoperabilityRecordBundle.getInteroperabilityRecord().getId(),
-                        interoperabilityRecordBundle.getInteroperabilityRecord().getCatalogueId());
-                if (existingAlternativeIdentifiers != null && !existingAlternativeIdentifiers.isEmpty()) {
-                    existingAlternativeIdentifiers.add(alternativeIdentifier);
-                } else {
-                    alternativeIdentifiers.add(alternativeIdentifier);
-                    interoperabilityRecordBundle.getInteroperabilityRecord().setAlternativeIdentifiers(alternativeIdentifiers);
-                }
-                break;
-            default:
-                break;
+    public void createIdentifiers(Bundle<?> bundle, String resourceType, boolean external) {
+        Identifiers identifiers = new Identifiers();
+        if (external) {
+            identifiers.setOriginalId(bundle.getId());
+            identifiers.setPid(idCreator.generate(resourceType));
+        } else {
+            identifiers.setOriginalId(bundle.getId());
+            identifiers.setPid(bundle.getId());
         }
-    }
-
-    private AlternativeIdentifier createAlternativeIdentifierForPID(String id, String catalogueId) {
-        String pid = PublicResourceUtils.createPublicResourceId(id, catalogueId);
-        AlternativeIdentifier alternativeIdentifier = new AlternativeIdentifier();
-        alternativeIdentifier.setType("EOSC PID");
-        alternativeIdentifier.setValue(pid);
-        return alternativeIdentifier;
+        bundle.setIdentifiers(identifiers);
     }
 
     public void blockResourceDeletion(String status, boolean isPublished) {
@@ -414,7 +254,7 @@ public class ProviderResourcesCommonMethods {
             try {
                 logger.info("Deleting Datasource of Service with id: '{}'", serviceId);
                 datasourceService.delete(datasourceBundle);
-            } catch (gr.uoa.di.madgik.registry.exception.ResourceNotFoundException e) {
+            } catch (ResourceNotFoundException e) {
                 logger.error(e.getMessage(), e);
             }
         }
@@ -427,7 +267,7 @@ public class ProviderResourcesCommonMethods {
             try {
                 logger.info("Deleting Helpdesk of {} with id: '{}'", resourceType, resourceId);
                 helpdeskService.delete(helpdeskBundle);
-            } catch (gr.uoa.di.madgik.registry.exception.ResourceNotFoundException e) {
+            } catch (ResourceNotFoundException e) {
                 logger.error(e.getMessage(), e);
             }
         }
@@ -436,7 +276,7 @@ public class ProviderResourcesCommonMethods {
             try {
                 logger.info("Deleting Monitoring of {} with id: '{}'", resourceType, resourceId);
                 monitoringService.delete(monitoringBundle);
-            } catch (gr.uoa.di.madgik.registry.exception.ResourceNotFoundException e) {
+            } catch (ResourceNotFoundException e) {
                 logger.error(e.getMessage(), e);
             }
         }
@@ -446,7 +286,7 @@ public class ProviderResourcesCommonMethods {
             try {
                 logger.info("Deleting ResourceInteroperabilityRecord of {} with id: '{}'", resourceType, resourceId);
                 resourceInteroperabilityRecordService.delete(resourceInteroperabilityRecordBundle);
-            } catch (gr.uoa.di.madgik.registry.exception.ResourceNotFoundException e) {
+            } catch (ResourceNotFoundException e) {
                 logger.error(e.getMessage(), e);
             }
         }
@@ -460,47 +300,6 @@ public class ProviderResourcesCommonMethods {
             }
         }
         return null;
-    }
-
-    public void restrictPrefixRepetitionOnPublicResources(String id, String cataloguePrefix) {
-        String regex = cataloguePrefix + ".";
-        Pattern pattern = Pattern.compile(regex);
-        Matcher matcher = pattern.matcher(id);
-        int count = 0;
-        while (matcher.find()) {
-            count++;
-        }
-        if (count > 1) {
-            throw new ResourceException(String.format("Resource with ID %s cannot have a Public registry", id),
-                    HttpStatus.CONFLICT);
-        }
-    }
-
-    public List<AlternativeIdentifier> ensureResourceCataloguePidUniqueness(String id, String catalogueId,
-                                                                            List<AlternativeIdentifier> alternativeIdentifiers) {
-        String pid = PublicResourceUtils.createPublicResourceId(id, catalogueId);
-        // removes duplicates and ensures that EOSC PID has the appropriate value
-        List<AlternativeIdentifier> uniqueIdentifiers = removeDuplicates(alternativeIdentifiers);
-        // if PID alternative identifier has been falsely updated, set it back to its original value
-        if (!uniqueIdentifiers.isEmpty()) {
-            for (AlternativeIdentifier uniqueIdentifier : uniqueIdentifiers) {
-                if (uniqueIdentifier.getType().equalsIgnoreCase("EOSC PID")) {
-                    uniqueIdentifier.setValue(pid);
-                }
-            }
-        }
-        return uniqueIdentifiers;
-    }
-
-    private static List<AlternativeIdentifier> removeDuplicates(List<AlternativeIdentifier> alternativeIdentifiers) {
-        Set<String> uniqueTypes = new HashSet<>();
-        List<AlternativeIdentifier> uniqueIdentifiers = new ArrayList<>();
-        for (AlternativeIdentifier identifier : alternativeIdentifiers) {
-            if (uniqueTypes.add(identifier.getType().toLowerCase())) {
-                uniqueIdentifiers.add(identifier);
-            }
-        }
-        return uniqueIdentifiers;
     }
 
     public String determineAuditState(List<LoggingInfo> loggingInfoList) {
@@ -554,6 +353,21 @@ public class ProviderResourcesCommonMethods {
             Set<User> users = provider.getUsers() == null ? new HashSet<>() : new HashSet<>(provider.getUsers());
             users.add(authUser);
             provider.setUsers(new ArrayList<>(users));
+        } else if (object instanceof Adapter adapter) {
+            Set<User> users = adapter.getAdmins() == null ? new HashSet<>() : new HashSet<>(adapter.getAdmins());
+            users.add(authUser);
+            adapter.setAdmins(new ArrayList<>(users));
         }
+    }
+
+    public String transformTimestampToDate(String timestampStr) {
+        long timestamp = Long.parseLong(timestampStr);
+
+        LocalDate date = Instant.ofEpochMilli(timestamp)
+                .atZone(ZoneId.systemDefault())
+                .toLocalDate();
+
+        // Format as "YYYY-MM-DD"
+        return date.format(DateTimeFormatter.ISO_LOCAL_DATE);
     }
 }

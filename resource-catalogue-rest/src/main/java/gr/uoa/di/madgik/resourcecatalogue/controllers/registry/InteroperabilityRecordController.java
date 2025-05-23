@@ -40,7 +40,9 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Profile("beyond")
 @RestController
@@ -54,6 +56,9 @@ public class InteroperabilityRecordController {
     private final ResourceInteroperabilityRecordService resourceInteroperabilityRecordService;
     private final GenericResourceService genericResourceService;
     private final SecurityService securityService;
+
+    @org.springframework.beans.factory.annotation.Value("${catalogue.id}")
+    private String catalogueId;
 
     public InteroperabilityRecordController(InteroperabilityRecordService interoperabilityRecordService,
                                             DraftResourceService<InteroperabilityRecordBundle> draftInteroperabilityRecordService,
@@ -91,7 +96,7 @@ public class InteroperabilityRecordController {
                                                          @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId,
                                                          @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
-        InteroperabilityRecordBundle interoperabilityRecordBundle = interoperabilityRecordService.get(id, catalogueId);
+        InteroperabilityRecordBundle interoperabilityRecordBundle = interoperabilityRecordService.get(id, catalogueId, false);
         if (interoperabilityRecordBundle == null) {
             return new ResponseEntity<>(HttpStatus.GONE);
         }
@@ -100,32 +105,32 @@ public class InteroperabilityRecordController {
     }
 
     @Operation(summary = "Returns the Interoperability Record with the given id.")
-    @GetMapping(path = "{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    @PreAuthorize("@securityService.guidelineIsActive(#prefix+'/'+#suffix) or hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceAdmin(#auth, #prefix+'/'+#suffix)")
+    @GetMapping(path = "{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PreAuthorize("@securityService.guidelineIsActive(#prefix+'/'+#suffix, #catalogueId, false) or hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceAdmin(#auth, #prefix+'/'+#suffix)")
     public ResponseEntity<InteroperabilityRecord> getInteroperabilityRecord(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
                                                                             @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix,
                                                                             @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId,
                                                                             @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
-        InteroperabilityRecord interoperabilityRecord = interoperabilityRecordService.get(id, catalogueId).getInteroperabilityRecord();
+        InteroperabilityRecord interoperabilityRecord = interoperabilityRecordService.get(id, catalogueId, false).getInteroperabilityRecord();
         return new ResponseEntity<>(interoperabilityRecord, HttpStatus.OK);
     }
 
-    @GetMapping(path = "bundle/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    @GetMapping(path = "bundle/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceAdmin(#auth, #prefix+'/'+#suffix)")
     public ResponseEntity<InteroperabilityRecordBundle> getInteroperabilityRecordBundle(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
                                                                                         @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix,
                                                                                         @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId,
                                                                                         @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
-        return new ResponseEntity<>(interoperabilityRecordService.get(id, catalogueId), HttpStatus.OK);
+        return new ResponseEntity<>(interoperabilityRecordService.get(id, catalogueId, false), HttpStatus.OK);
     }
 
     @Operation(summary = "Get all Interoperability Records")
     @BrowseParameters
     @BrowseCatalogue
     @Parameter(name = "suspended", description = "Suspended", content = @Content(schema = @Schema(type = "boolean", defaultValue = "false")))
-    @GetMapping(path = "all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    @GetMapping(path = "all", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<Paging<InteroperabilityRecord>> getAll(@Parameter(hidden = true) @RequestParam MultiValueMap<String, Object> allRequestParams) {
         FacetFilter ff = FacetFilter.from(allRequestParams);
         ff.setResourceType("interoperability_record");
@@ -140,7 +145,7 @@ public class InteroperabilityRecordController {
     @BrowseParameters
     @BrowseCatalogue
     @Parameter(name = "suspended", description = "Suspended", content = @Content(schema = @Schema(type = "boolean", defaultValue = "false")))
-    @GetMapping(path = "bundle/all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    @GetMapping(path = "bundle/all", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     public ResponseEntity<Paging<InteroperabilityRecordBundle>> getAllBundles(@Parameter(hidden = true) @RequestParam MultiValueMap<String, Object> allRequestParams) {
         FacetFilter ff = FacetFilter.from(allRequestParams);
@@ -211,7 +216,7 @@ public class InteroperabilityRecordController {
                                                                       @RequestParam LoggingInfo.ActionType actionType,
                                                                       @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
-        InteroperabilityRecordBundle interoperabilityRecordBundle = interoperabilityRecordService.audit(id, comment, actionType, auth);
+        InteroperabilityRecordBundle interoperabilityRecordBundle = interoperabilityRecordService.audit(id, catalogueId, comment, actionType, auth);
         return new ResponseEntity<>(interoperabilityRecordBundle, HttpStatus.OK);
     }
 
@@ -220,7 +225,8 @@ public class InteroperabilityRecordController {
                                                                   @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix,
                                                                   @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId) {
         String id = prefix + "/" + suffix;
-        Paging<LoggingInfo> loggingInfoHistory = this.interoperabilityRecordService.getLoggingInfoHistory(id, catalogueId);
+        InteroperabilityRecordBundle bundle = interoperabilityRecordService.get(id, catalogueId, false);
+        Paging<LoggingInfo> loggingInfoHistory = interoperabilityRecordService.getLoggingInfoHistory(bundle);
         return ResponseEntity.ok(loggingInfoHistory);
     }
 
@@ -244,7 +250,8 @@ public class InteroperabilityRecordController {
 
     // front-end use (Resource Interoperability Record form)
     @GetMapping(path = {"interoperabilityRecordIdToNameMap"}, produces = {MediaType.APPLICATION_JSON_VALUE})
-    public ResponseEntity<List<Value>> interoperabilityRecordIdToNameMap(String catalogueId) {
+    public ResponseEntity<Map<String, List<Value>>> interoperabilityRecordIdToNameMap(@RequestParam String catalogueId) {
+        Map<String, List<gr.uoa.di.madgik.resourcecatalogue.dto.Value>> ret = new HashMap<>();
         List<Value> allInteroperabilityRecords = new ArrayList<>();
         // fetch catalogueId related non-public Interoperability Records
         List<Value> catalogueRelatedInteroperabilityRecords = interoperabilityRecordService
@@ -262,8 +269,9 @@ public class InteroperabilityRecordController {
 
         allInteroperabilityRecords.addAll(catalogueRelatedInteroperabilityRecords);
         allInteroperabilityRecords.addAll(publicInteroperabilityRecords);
+        ret.put("GUIDELINES_VOC", allInteroperabilityRecords);
 
-        return ResponseEntity.ok(allInteroperabilityRecords);
+        return ResponseEntity.ok(ret);
     }
 
     private FacetFilter createFacetFilter(String catalogueId, boolean isPublic) {
@@ -309,8 +317,9 @@ public class InteroperabilityRecordController {
     @Operation(summary = "Suspends a specific Interoperability Record.")
     @PutMapping(path = "suspend", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
-    public InteroperabilityRecordBundle suspendInteroperabilityRecord(@RequestParam String interoperabilityRecordId, @RequestParam boolean suspend, @Parameter(hidden = true) Authentication auth) {
-        return interoperabilityRecordService.suspend(interoperabilityRecordId, suspend, auth);
+    public InteroperabilityRecordBundle suspendInteroperabilityRecord(@RequestParam String interoperabilityRecordId, @RequestParam String catalogueId,
+                                                                      @RequestParam boolean suspend, @Parameter(hidden = true) Authentication auth) {
+        return interoperabilityRecordService.suspend(interoperabilityRecordId, catalogueId, suspend, auth);
     }
 
     @PostMapping(path = "/addBulk", produces = {MediaType.APPLICATION_JSON_VALUE})
@@ -324,12 +333,19 @@ public class InteroperabilityRecordController {
     public ResponseEntity<InteroperabilityRecord> getDraftInteroperabilityRecord(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
                                                                                  @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix) {
         String id = prefix + "/" + suffix;
-        return new ResponseEntity<>(draftInteroperabilityRecordService.get(id).getInteroperabilityRecord(), HttpStatus.OK);
+        InteroperabilityRecordBundle bundle = interoperabilityRecordService.get(id, catalogueId, false);
+        if (bundle.isDraft()) {
+            return new ResponseEntity<>(bundle.getInteroperabilityRecord(), HttpStatus.OK);
+        }
+        return null;
     }
 
     @GetMapping(path = "/draft/getMyDraftInteroperabilityRecords", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<List<InteroperabilityRecordBundle>> getMyDraftInteroperabilityRecords(@Parameter(hidden = true) Authentication auth) {
-        return new ResponseEntity<>(draftInteroperabilityRecordService.getMy(null, auth).getResults(), HttpStatus.OK);
+        FacetFilter ff = new FacetFilter();
+        ff.setQuantity(1000);
+        ff.addFilter("draft", true);
+        return new ResponseEntity<>(interoperabilityRecordService.getMy(ff, auth).getResults(), HttpStatus.OK);
     }
 
     @PostMapping(path = "/draft", produces = {MediaType.APPLICATION_JSON_VALUE})
@@ -346,7 +362,7 @@ public class InteroperabilityRecordController {
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceAdmin(#auth, #interoperabilityRecord.id)")
     public ResponseEntity<InteroperabilityRecord> updateDraftInteroperabilityRecord(@RequestBody InteroperabilityRecord interoperabilityRecord,
                                                                                     @Parameter(hidden = true) Authentication auth) {
-        InteroperabilityRecordBundle interoperabilityRecordBundle = draftInteroperabilityRecordService.get(interoperabilityRecord.getId());
+        InteroperabilityRecordBundle interoperabilityRecordBundle = draftInteroperabilityRecordService.get(interoperabilityRecord.getId(), catalogueId, false);
         interoperabilityRecordBundle.setInteroperabilityRecord(interoperabilityRecord);
         interoperabilityRecordBundle = draftInteroperabilityRecordService.update(interoperabilityRecordBundle, auth);
         logger.info("User '{}' updated the Draft Interoperability Record with name '{}' and id '{}'", User.of(auth).getEmail().toLowerCase(),
@@ -360,9 +376,12 @@ public class InteroperabilityRecordController {
                                                                                     @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix,
                                                                                     @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
-        InteroperabilityRecordBundle interoperabilityRecordBundle = draftInteroperabilityRecordService.get(id);
+        InteroperabilityRecordBundle interoperabilityRecordBundle = interoperabilityRecordService.get(id, catalogueId, false);
         if (interoperabilityRecordBundle == null) {
             return new ResponseEntity<>(HttpStatus.GONE);
+        }
+        if (!interoperabilityRecordBundle.isDraft()) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
         draftInteroperabilityRecordService.delete(interoperabilityRecordBundle);
         logger.info("User '{}' deleted the Draft Interoperability Record '{}'-'{}'", User.of(auth).getEmail().toLowerCase(),
@@ -374,7 +393,7 @@ public class InteroperabilityRecordController {
     @PreAuthorize("hasRole('ROLE_USER')")
     public ResponseEntity<InteroperabilityRecord> transformToInteroperabilityRecord(@RequestBody InteroperabilityRecord interoperabilityRecord,
                                                                                     @Parameter(hidden = true) Authentication auth) {
-        InteroperabilityRecordBundle interoperabilityRecordBundle = draftInteroperabilityRecordService.get(interoperabilityRecord.getId());
+        InteroperabilityRecordBundle interoperabilityRecordBundle = draftInteroperabilityRecordService.get(interoperabilityRecord.getId(), catalogueId, false);
         interoperabilityRecordBundle.setInteroperabilityRecord(interoperabilityRecord);
 
         interoperabilityRecordService.validate(interoperabilityRecordBundle);

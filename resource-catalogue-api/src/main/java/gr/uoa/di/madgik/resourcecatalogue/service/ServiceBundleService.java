@@ -29,7 +29,7 @@ import org.springframework.security.core.Authentication;
 import java.util.List;
 import java.util.Map;
 
-public interface ServiceBundleService<T extends Bundle<?>> extends ResourceService<T>, BundleOperations<T> {
+public interface ServiceBundleService<T extends Bundle<?>> extends ResourceCatalogueService<T>, BundleOperations<T> {
 
     /**
      * Method to add a new resource.
@@ -169,17 +169,6 @@ public interface ServiceBundleService<T extends Bundle<?>> extends ResourceServi
      * @param auth       Authentication
      */
     void sendEmailNotificationsToProvidersWithOutdatedResources(String resourceId, Authentication auth);
-
-    /**
-     * Get the history of the specific Service of the specific Catalogue ID
-     *
-     * @param id          Service ID
-     * @param catalogueId Catalogue ID
-     * @return {@link Paging}&lt;{@link LoggingInfo}&gt;
-     */
-    default Paging<LoggingInfo> getLoggingInfoHistory(String id, String catalogueId) {
-        return getLoggingInfoHistory(get(id));
-    }
 
     /**
      * Change the Provider of the specific Service

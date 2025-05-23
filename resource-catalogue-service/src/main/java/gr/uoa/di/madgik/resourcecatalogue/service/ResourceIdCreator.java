@@ -16,6 +16,7 @@
 
 package gr.uoa.di.madgik.resourcecatalogue.service;
 
+import gr.uoa.di.madgik.catalogue.exception.ValidationException;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.registry.service.SearchService;
@@ -54,29 +55,11 @@ public class ResourceIdCreator implements IdCreator {
     }
 
     private String createPrefix(String resourceType) {
-        // TODO: do this when drafts are removed.
-//        return resourceProperties.get(ResourceTypes.valueOf(resourceType)).getIdPrefix();
-        return switch (resourceType) {
-            // PID related
-            case "service", "draft_service" -> resourceProperties.get(ResourceTypes.SERVICE).getIdPrefix();
-            case "tool" -> resourceProperties.get(ResourceTypes.TOOL).getIdPrefix();
-            case "training_resource", "draft_training_resource" ->
-                    resourceProperties.get(ResourceTypes.TRAINING_RESOURCE).getIdPrefix();
-            case "provider", "draft_provider" -> resourceProperties.get(ResourceTypes.PROVIDER).getIdPrefix();
-            case "interoperability_record", "draft_interoperability_record" ->
-                    resourceProperties.get(ResourceTypes.INTEROPERABILITY_RECORD).getIdPrefix();
-            // non PID related
-            case "configuration_template" -> resourceProperties.get(ResourceTypes.CONFIGURATION_TEMPLATE).getIdPrefix();
-            case "configuration_template_instance" ->
-                    resourceProperties.get(ResourceTypes.CONFIGURATION_TEMPLATE_INSTANCE).getIdPrefix();
-            case "datasource" -> resourceProperties.get(ResourceTypes.DATASOURCE).getIdPrefix();
-            case "helpdesk" -> resourceProperties.get(ResourceTypes.HELPDESK).getIdPrefix();
-            case "monitoring" -> resourceProperties.get(ResourceTypes.MONITORING).getIdPrefix();
-            case "resource_interoperability_record" ->
-                    resourceProperties.get(ResourceTypes.RESOURCE_INTEROPERABILITY_RECORD).getIdPrefix();
-            case "vocabulary_curation" -> resourceProperties.get(ResourceTypes.VOCABULARY_CURATION).getIdPrefix();
-            default -> "non";
-        };
+        try {
+            return resourceProperties.get(ResourceTypes.valueOf(resourceType.toUpperCase())).getIdPrefix();
+        } catch (IllegalArgumentException e) {
+            return "non";
+        }
     }
 
     private String randomGenerator() {
@@ -100,5 +83,18 @@ public class ResourceIdCreator implements IdCreator {
                 .replaceAll("[^a-zA-Z0-9\\s\\-_/]+", "")
                 .replaceAll("[/\\s]+", "_")
                 .toLowerCase();
+    }
+
+    @Override
+    public void validateId(String id) {
+        if (id == null || id.isEmpty()) {
+            throw new ValidationException("ID cannot be null or empty");
+        }
+        if (id.length() > 50) {
+            throw new ValidationException("ID is too long; max 50 characters allowed.");
+        }
+        if (!id.matches("^[a-zA-Z0-9_-]+$")) {
+            throw new ValidationException("Invalid ID: only letters, digits, hyphens, and underscores are allowed.");
+        }
     }
 }

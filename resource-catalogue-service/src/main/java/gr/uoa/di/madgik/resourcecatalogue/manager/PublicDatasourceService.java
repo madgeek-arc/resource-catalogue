@@ -18,15 +18,12 @@ package gr.uoa.di.madgik.resourcecatalogue.manager;
 
 import gr.uoa.di.madgik.registry.domain.Browsing;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
-import gr.uoa.di.madgik.registry.exception.ResourceException;
-import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
-import gr.uoa.di.madgik.registry.service.ResourceCRUDService;
 import gr.uoa.di.madgik.resourcecatalogue.domain.DatasourceBundle;
-import gr.uoa.di.madgik.resourcecatalogue.domain.Identifiers;
-import gr.uoa.di.madgik.resourcecatalogue.domain.configurationTemplates.ConfigurationTemplateInstanceBundle;
+import gr.uoa.di.madgik.resourcecatalogue.domain.ServiceBundle;
+import gr.uoa.di.madgik.resourcecatalogue.exceptions.CatalogueResourceNotFoundException;
+import gr.uoa.di.madgik.resourcecatalogue.manager.pids.PidIssuer;
+import gr.uoa.di.madgik.resourcecatalogue.service.ServiceBundleService;
 import gr.uoa.di.madgik.resourcecatalogue.utils.JmsService;
-import gr.uoa.di.madgik.resourcecatalogue.utils.ProviderResourcesCommonMethods;
-import gr.uoa.di.madgik.resourcecatalogue.utils.PublicResourceUtils;
 import org.apache.commons.beanutils.BeanUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,18 +33,21 @@ import org.springframework.stereotype.Service;
 import java.lang.reflect.InvocationTargetException;
 
 @Service("publicDatasourceManager")
-public class PublicDatasourceService extends ResourceManager<DatasourceBundle>
+public class PublicDatasourceService extends ResourceCatalogueManager<DatasourceBundle>
         implements PublicResourceService<DatasourceBundle> {
 
     private static final Logger logger = LoggerFactory.getLogger(PublicDatasourceService.class);
     private final JmsService jmsService;
-    private final ProviderResourcesCommonMethods commonMethods;
+    private final PidIssuer pidIssuer;
+    private final ServiceBundleService<ServiceBundle> serviceBundleService;
 
     public PublicDatasourceService(JmsService jmsService,
-                                   ProviderResourcesCommonMethods commonMethods) {
+                                   PidIssuer pidIssuer,
+                                   ServiceBundleService<ServiceBundle> serviceBundleService) {
         super(DatasourceBundle.class);
         this.jmsService = jmsService;
-        this.commonMethods = commonMethods;
+        this.pidIssuer = pidIssuer;
+        this.serviceBundleService = serviceBundleService;
     }
 
     @Override
@@ -60,11 +60,11 @@ public class PublicDatasourceService extends ResourceManager<DatasourceBundle>
         return super.getAll(facetFilter, authentication);
     }
 
-    public DatasourceBundle getOrElseReturnNull(String id) {
+    public DatasourceBundle getOrElseReturnNull(String id, String catalogueId) {
         DatasourceBundle datasourceBundle;
         try {
-            datasourceBundle = get(id);
-        } catch (ResourceException | ResourceNotFoundException e) {
+            datasourceBundle = get(id, catalogueId, true);
+        } catch (CatalogueResourceNotFoundException e) {
             return null;
         }
         return datasourceBundle;
@@ -73,15 +73,12 @@ public class PublicDatasourceService extends ResourceManager<DatasourceBundle>
     @Override
     public DatasourceBundle add(DatasourceBundle datasourceBundle, Authentication authentication) {
         String lowerLevelResourceId = datasourceBundle.getId();
-        Identifiers.createOriginalId(datasourceBundle);
-        datasourceBundle.setId(PublicResourceUtils.createPublicResourceId(datasourceBundle.getDatasource().getId(),
-                datasourceBundle.getDatasource().getCatalogueId()));
-        commonMethods.restrictPrefixRepetitionOnPublicResources(datasourceBundle.getId(), datasourceBundle.getDatasource().getCatalogueId());
+        datasourceBundle.setId(datasourceBundle.getIdentifiers().getPid());
+        datasourceBundle.getMetadata().setPublished(true);
 
         // sets public ids to providerId, serviceId
         updateIdsToPublic(datasourceBundle);
 
-        datasourceBundle.getMetadata().setPublished(true);
         DatasourceBundle ret;
         logger.info("Datasource '{}' is being published with id '{}'", lowerLevelResourceId, datasourceBundle.getId());
         ret = super.add(datasourceBundle, null);
@@ -91,10 +88,8 @@ public class PublicDatasourceService extends ResourceManager<DatasourceBundle>
 
     @Override
     public DatasourceBundle update(DatasourceBundle datasourceBundle, Authentication authentication) {
-        DatasourceBundle published = super.get(PublicResourceUtils.createPublicResourceId(datasourceBundle.getDatasource().getId(),
-                datasourceBundle.getDatasource().getCatalogueId()));
-        DatasourceBundle ret = super.get(PublicResourceUtils.createPublicResourceId(datasourceBundle.getDatasource().getId(),
-                datasourceBundle.getDatasource().getCatalogueId()));
+        DatasourceBundle published = super.get(datasourceBundle.getIdentifiers().getPid(), datasourceBundle.getDatasource().getCatalogueId(), true);
+        DatasourceBundle ret = super.get(datasourceBundle.getIdentifiers().getPid(), datasourceBundle.getDatasource().getCatalogueId(), true);
         try {
             BeanUtils.copyProperties(ret, datasourceBundle);
         } catch (IllegalAccessException | InvocationTargetException e) {
@@ -116,20 +111,20 @@ public class PublicDatasourceService extends ResourceManager<DatasourceBundle>
     @Override
     public void delete(DatasourceBundle datasourceBundle) {
         try {
-            DatasourceBundle publicDatasourceBundle = get(PublicResourceUtils.createPublicResourceId(
-                    datasourceBundle.getDatasource().getId(),
-                    datasourceBundle.getDatasource().getCatalogueId()));
+            DatasourceBundle publicDatasourceBundle = get(datasourceBundle.getIdentifiers().getPid(),
+                    datasourceBundle.getDatasource().getCatalogueId(), true);
             logger.info("Deleting public Datasource with id '{}'", publicDatasourceBundle.getId());
             super.delete(publicDatasourceBundle);
             jmsService.convertAndSendTopic("datasource.delete", publicDatasourceBundle);
-        } catch (ResourceException | ResourceNotFoundException ignore) {
+        } catch (CatalogueResourceNotFoundException ignore) {
         }
     }
 
     @Override
     public void updateIdsToPublic(DatasourceBundle bundle) {
         // serviceId
-        bundle.getDatasource().setServiceId(PublicResourceUtils.createPublicResourceId(
-                bundle.getDatasource().getServiceId(), bundle.getDatasource().getCatalogueId()));
+        ServiceBundle serviceBundle = serviceBundleService.get(
+                bundle.getDatasource().getServiceId(), bundle.getDatasource().getCatalogueId(), false);
+        bundle.getDatasource().setServiceId(serviceBundle.getIdentifiers().getPid());
     }
 }

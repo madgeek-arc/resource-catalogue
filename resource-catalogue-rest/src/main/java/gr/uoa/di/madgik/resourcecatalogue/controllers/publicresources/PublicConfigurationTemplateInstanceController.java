@@ -53,13 +53,13 @@ public class PublicConfigurationTemplateInstanceController {
 
     @Operation(description = "Returns the Public Configuration Template Instance with the given id.")
     @GetMapping(path = "public/configurationTemplateInstance/{prefix}/{suffix}",
-            produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+            produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<?> get(@Parameter(description = "The left part of the ID before the '/'")
                                  @PathVariable("prefix") String prefix,
                                  @Parameter(description = "The right part of the ID after the '/'")
                                  @PathVariable("suffix") String suffix) {
         String id = prefix + "/" + suffix;
-        ConfigurationTemplateInstanceBundle bundle = service.get(id);
+        ConfigurationTemplateInstanceBundle bundle = service.get(id, null, true);
         if (bundle.getMetadata().isPublished()) {
             ConfigurationTemplateInstanceDto ret = service.createCTIDto(bundle.getConfigurationTemplateInstance());
             return new ResponseEntity<>(ret, HttpStatus.OK);
@@ -69,14 +69,14 @@ public class PublicConfigurationTemplateInstanceController {
     }
 
     @GetMapping(path = "public/configurationTemplateInstance/bundle/{prefix}/{suffix}",
-            produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+            produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     public ResponseEntity<?> getBundle(@Parameter(description = "The left part of the ID before the '/'")
                                        @PathVariable("prefix") String prefix,
                                        @Parameter(description = "The right part of the ID after the '/'")
                                        @PathVariable("suffix") String suffix) {
         String id = prefix + "/" + suffix;
-        ConfigurationTemplateInstanceBundle bundle = service.get(id);
+        ConfigurationTemplateInstanceBundle bundle = service.get(id, null, true);
         if (bundle.getMetadata().isPublished()) {
             return new ResponseEntity<>(bundle, HttpStatus.OK);
         }
@@ -87,7 +87,7 @@ public class PublicConfigurationTemplateInstanceController {
     @Operation(description = "Get a list of all Public Configuration Template Instances in the Catalogue, based on a set of filters.")
     @BrowseParameters
     @GetMapping(path = "public/configurationTemplateInstance/all",
-            produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+            produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<Paging<ConfigurationTemplateInstanceDto>> getAll(@Parameter(hidden = true)
                                                                            @RequestParam MultiValueMap<String, Object> params,
                                                                            @Parameter(hidden = true) Authentication auth) {
@@ -106,7 +106,7 @@ public class PublicConfigurationTemplateInstanceController {
 
     @BrowseParameters
     @GetMapping(path = "public/configurationTemplateInstance/bundle/all",
-            produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+            produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     public ResponseEntity<Paging<ConfigurationTemplateInstanceBundle>> getAllBundles(@Parameter(hidden = true)
                                                                                      @RequestParam MultiValueMap<String, Object> params,

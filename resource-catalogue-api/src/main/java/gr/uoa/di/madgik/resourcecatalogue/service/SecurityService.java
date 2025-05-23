@@ -16,10 +16,7 @@
 
 package gr.uoa.di.madgik.resourcecatalogue.service;
 
-import gr.uoa.di.madgik.resourcecatalogue.domain.InteroperabilityRecord;
-import gr.uoa.di.madgik.resourcecatalogue.domain.Service;
-import gr.uoa.di.madgik.resourcecatalogue.domain.TrainingResource;
-import gr.uoa.di.madgik.resourcecatalogue.domain.User;
+import gr.uoa.di.madgik.resourcecatalogue.domain.*;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.security.core.Authentication;
 
@@ -101,26 +98,41 @@ public interface SecurityService {
     boolean providerIsActiveAndUserIsAdmin(Authentication auth, String resourceId);
 
     /**
-     * @param id provider id
+     * @param id          service id
+     * @param catalogueId catalogue id
+     * @param published   true/false
      * @return True if provider is active
      */
-    boolean providerIsActive(String id);
+    boolean providerIsActive(String id, String catalogueId, boolean published);
 
     /**
-     * @param id service id
+     * @param id          service id
+     * @param catalogueId catalogue id
+     * @param published   true/false
      * @return True if service is active
      */
-    boolean serviceIsActive(String id);
+    boolean serviceIsActive(String id, String catalogueId, boolean published);
 
     /**
-     * @param id training resource id
+     * @param id          service id
+     * @param catalogueId catalogue id
+     * @param published   true/false
      * @return True if training resource is active
      */
-    boolean trainingResourceIsActive(String id);
+    boolean trainingResourceIsActive(String id, String catalogueId, boolean published);
 
     /**
-     * @param id interoperability record id
+     * @param id          service id
+     * @param catalogueId catalogue id
+     * @param published   true/false
      * @return True if interoperability record (guideline) is active
      */
-    boolean guidelineIsActive(String id);
+    boolean guidelineIsActive(String id, String catalogueId, boolean published);
+
+    /**
+     * @param auth       Authentication
+     * @param id         Catalogue or Adapter id
+     * @return True if the authenticated user is an Adapter Admin
+     */
+    boolean userHasAdapterAccess(Authentication auth, @NotNull String id);
 }

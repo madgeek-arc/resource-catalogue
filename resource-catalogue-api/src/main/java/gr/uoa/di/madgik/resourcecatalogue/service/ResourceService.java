@@ -36,6 +36,15 @@ public interface ResourceService<T> extends ResourceCRUDService<T, Authenticatio
     Browsing<T> getAll(FacetFilter filter);
 
     /**
+     *
+     * @param id          resource ID
+     * @param catalogueId catalogue ID
+     *
+     * @return
+     */
+    T get(String id, String catalogueId);
+
+    /**
      * Creates ID for the given resource.
      *
      * @return the created id

@@ -47,7 +47,9 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Profile("beyond")
@@ -115,7 +117,7 @@ public class ProviderController {
     }
 
     @Operation(summary = "Returns the Provider with the given id.")
-    @GetMapping(path = "{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    @GetMapping(path = "{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<Provider> get(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
                                         @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix,
                                         @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId,
@@ -175,7 +177,7 @@ public class ProviderController {
     @BrowseParameters
     @BrowseCatalogue
     @Parameter(name = "suspended", description = "Suspended", content = @Content(schema = @Schema(type = "boolean", defaultValue = "false")))
-    @GetMapping(path = "all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    @GetMapping(path = "all", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<Paging<Provider>> getAll(@Parameter(hidden = true) @RequestParam MultiValueMap<String, Object> allRequestParams) {
         FacetFilter ff = FacetFilter.from(allRequestParams);
         ff.setResourceType("provider");
@@ -186,7 +188,7 @@ public class ProviderController {
         return ResponseEntity.ok(paging);
     }
 
-    @GetMapping(path = "bundle/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    @GetMapping(path = "bundle/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.hasAdminAccess(#auth, #prefix+'/'+#suffix)")
     public ResponseEntity<ProviderBundle> getProviderBundle(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
                                                             @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix,
@@ -203,7 +205,7 @@ public class ProviderController {
             @Parameter(name = "suspended", description = "Suspended", content = @Content(schema = @Schema(type = "boolean", defaultValue = "false"))),
             @Parameter(name = "active", description = "Active", content = @Content(schema = @Schema(type = "boolean", defaultValue = "true")))
     })
-    @GetMapping(path = "bundle/all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    @GetMapping(path = "bundle/all", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     public ResponseEntity<Paging<ProviderBundle>> getAllProviderBundles(@Parameter(hidden = true) @RequestParam MultiValueMap<String, Object> allRequestParams) {
         FacetFilter ff = FacetFilter.from(allRequestParams);
@@ -215,7 +217,7 @@ public class ProviderController {
 
     @Deprecated
     @Operation(summary = "Get a list of services offered by a Provider.")
-    @GetMapping(path = "services/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    @GetMapping(path = "services/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<List<? extends Service>> getServices(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
                                                                @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix,
                                                                @Parameter(hidden = true) Authentication auth) {
@@ -235,7 +237,7 @@ public class ProviderController {
     }
 
     // Get a list of Providers in which the given user is admin.
-    @GetMapping(path = "getUserProviders", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    @GetMapping(path = "getUserProviders", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<List<Provider>> getUserProviders(@RequestParam("email") String email, @Parameter(hidden = true) Authentication auth) {
         List<Provider> providers = providerService.getUserProviders(email, auth)
                 .stream()
@@ -244,15 +246,16 @@ public class ProviderController {
         return new ResponseEntity<>(providers, HttpStatus.OK);
     }
 
-    @GetMapping(path = "getMyProviders", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    @GetMapping(path = "getMyProviders", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<List<ProviderBundle>> getMyProviders(@Parameter(hidden = true) Authentication auth) {
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(1000);
+        ff.addFilter("draft", false);
         return new ResponseEntity<>(providerService.getMy(ff, auth).getResults(), HttpStatus.OK);
     }
 
     // Get inactive Services of the given Provider.
-    @GetMapping(path = "services/inactive/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    @GetMapping(path = "services/inactive/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<List<Service>> getInactiveServices(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
                                                              @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix) {
         String id = prefix + "/" + suffix;
@@ -260,7 +263,7 @@ public class ProviderController {
         return new ResponseEntity<>(ret, HttpStatus.OK);
     }
 
-    @GetMapping(path = "trainingResources/pending/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    @GetMapping(path = "trainingResources/pending/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<List<TrainingResource>> getInactiveTrainingResources(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
                                                                                @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix) {
         String id = prefix + "/" + suffix;
@@ -270,7 +273,7 @@ public class ProviderController {
 
     // Get the rejected services of the given Provider.
     @BrowseParameters
-    @GetMapping(path = "resources/rejected/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    @GetMapping(path = "resources/rejected/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<Paging<?>> getRejectedResources(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
                                                           @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix,
                                                           @Parameter(hidden = true) @RequestParam MultiValueMap<String, Object> allRequestParams,
@@ -285,7 +288,7 @@ public class ProviderController {
     }
 
     // Get all inactive Providers.
-    @GetMapping(path = "inactive/all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    @GetMapping(path = "inactive/all", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<List<Provider>> getInactive(@Parameter(hidden = true) Authentication auth) {
         List<Provider> ret = providerService.getInactive()
                 .stream()
@@ -328,12 +331,13 @@ public class ProviderController {
                                                                @Parameter(hidden = true) Authentication auth) {
         ProviderBundle provider = providerService.get(catalogueId, id, auth);
         if (provider == null) {
-            throw new ResourceNotFoundException("Provider with id '" + id + "' does not exist.");
+            throw new ResourceNotFoundException(id, "Provider");
         }
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(1000);
         ff.addFilter("resource_organisation", id);
         ff.addFilter("catalogue_id", catalogueId);
+        ff.addFilter("published", false);
         List<ServiceBundle> services = serviceBundleService.getAll(ff, auth).getResults();
         for (ServiceBundle service : services) {
             service.setActive(active);
@@ -348,19 +352,17 @@ public class ProviderController {
         return new ResponseEntity<>(services, HttpStatus.OK);
     }
 
-    @GetMapping(path = "hasAdminAcceptedTerms", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    public boolean hasAdminAcceptedTerms(@RequestParam String providerId, @RequestParam boolean isDraft,
-                                         @Parameter(hidden = true) Authentication authentication) {
-        return providerService.hasAdminAcceptedTerms(providerId, isDraft, authentication);
+    @GetMapping(path = "hasAdminAcceptedTerms", produces = {MediaType.APPLICATION_JSON_VALUE})
+    public boolean hasAdminAcceptedTerms(@RequestParam String providerId, @Parameter(hidden = true) Authentication auth) {
+        return providerService.hasAdminAcceptedTerms(providerId, auth);
     }
 
-    @PutMapping(path = "adminAcceptedTerms", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    public void adminAcceptedTerms(@RequestParam String providerId, @RequestParam boolean isDraft,
-                                   @Parameter(hidden = true) Authentication authentication) {
-        providerService.adminAcceptedTerms(providerId, isDraft, authentication);
+    @PutMapping(path = "adminAcceptedTerms", produces = {MediaType.APPLICATION_JSON_VALUE})
+    public void adminAcceptedTerms(@RequestParam String providerId, @Parameter(hidden = true) Authentication auth) {
+        providerService.adminAcceptedTerms(providerId, auth);
     }
 
-    @GetMapping(path = "requestProviderDeletion", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    @GetMapping(path = "requestProviderDeletion", produces = {MediaType.APPLICATION_JSON_VALUE})
     public void requestProviderDeletion(@RequestParam String providerId, @Parameter(hidden = true) Authentication authentication) {
         providerService.requestProviderDeletion(providerId, authentication);
     }
@@ -389,14 +391,14 @@ public class ProviderController {
                                                         @RequestParam LoggingInfo.ActionType actionType,
                                                         @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
-        ProviderBundle provider = providerService.audit(id, comment, actionType, auth);
+        ProviderBundle provider = providerService.audit(id, catalogueId, comment, actionType, auth);
         return new ResponseEntity<>(provider, HttpStatus.OK);
     }
 
     @Parameters({
             @Parameter(name = "quantity", description = "Quantity to be fetched", schema = @Schema(type = "string"))
     })
-    @GetMapping(path = "randomProviders", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    @GetMapping(path = "randomProviders", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     public ResponseEntity<Paging<ProviderBundle>> getRandomProviders(@Parameter(hidden = true) @RequestParam MultiValueMap<String, Object> allRequestParams, @Parameter(hidden = true) Authentication auth) {
         FacetFilter ff = FacetFilter.from(allRequestParams);
@@ -411,7 +413,8 @@ public class ProviderController {
     public ResponseEntity<Paging<LoggingInfo>> loggingInfoHistory(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
                                                                   @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix) {
         String id = prefix + "/" + suffix;
-        Paging<LoggingInfo> loggingInfoHistory = this.providerService.getLoggingInfoHistory(id);
+        ProviderBundle bundle = providerService.get(id, catalogueId, false);
+        Paging<LoggingInfo> loggingInfoHistory = providerService.getLoggingInfoHistory(bundle);
         return ResponseEntity.ok(loggingInfoHistory);
     }
 
@@ -424,7 +427,8 @@ public class ProviderController {
 
     // front-end use (Provider form)
     @GetMapping(path = {"providerIdToNameMap"}, produces = {MediaType.APPLICATION_JSON_VALUE})
-    public ResponseEntity<List<gr.uoa.di.madgik.resourcecatalogue.dto.Value>> providerIdToNameMap(String catalogueId) {
+    public ResponseEntity<Map<String, List<gr.uoa.di.madgik.resourcecatalogue.dto.Value>>> providerIdToNameMap(@RequestParam String catalogueId) {
+        Map<String, List<gr.uoa.di.madgik.resourcecatalogue.dto.Value>> ret = new HashMap<>();
         List<gr.uoa.di.madgik.resourcecatalogue.dto.Value> allProviders = new ArrayList<>();
         // fetch catalogueId related non-public Providers
         List<gr.uoa.di.madgik.resourcecatalogue.dto.Value> catalogueRelatedProviders = providerService
@@ -442,8 +446,8 @@ public class ProviderController {
 
         allProviders.addAll(catalogueRelatedProviders);
         allProviders.addAll(publicProviders);
-
-        return ResponseEntity.ok(allProviders);
+        ret.put("PROVIDERS_VOC", allProviders);
+        return ResponseEntity.ok(ret);
     }
 
     private FacetFilter createFacetFilter(String catalogueId, boolean isPublic) {
@@ -481,8 +485,9 @@ public class ProviderController {
     @Operation(description = "Suspends a Provider and all its resources")
     @PutMapping(path = "suspend", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
-    public ProviderBundle suspendProvider(@RequestParam String providerId, @RequestParam boolean suspend, @Parameter(hidden = true) Authentication auth) {
-        return providerService.suspend(providerId, suspend, auth);
+    public ProviderBundle suspendProvider(@RequestParam String providerId, @RequestParam String catalogueId,
+                                          @RequestParam boolean suspend, @Parameter(hidden = true) Authentication auth) {
+        return providerService.suspend(providerId, catalogueId, suspend, auth);
     }
 
     @BrowseParameters
@@ -510,14 +515,19 @@ public class ProviderController {
     public ResponseEntity<Provider> getDraftProvider(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
                                                      @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix) {
         String id = prefix + "/" + suffix;
-        return new ResponseEntity<>(draftProviderService.get(id).getProvider(), HttpStatus.OK);
+        ProviderBundle bundle = providerService.get(id, catalogueId, false);
+        if (bundle.isDraft()) {
+            return new ResponseEntity<>(bundle.getProvider(), HttpStatus.OK);
+        }
+        return null;
     }
 
     @GetMapping(path = "/draft/getMyDraftProviders", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<List<ProviderBundle>> getMyDraftProviders(@Parameter(hidden = true) Authentication auth) {
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(1000);
-        return new ResponseEntity<>(draftProviderService.getMy(ff, auth).getResults(), HttpStatus.OK);
+        ff.addFilter("draft", true);
+        return new ResponseEntity<>(providerService.getMy(ff, auth).getResults(), HttpStatus.OK);
     }
 
     @PostMapping(path = "/draft", produces = {MediaType.APPLICATION_JSON_VALUE})
@@ -532,7 +542,7 @@ public class ProviderController {
     @PutMapping(path = "/draft", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.hasAdminAccess(#auth,#provider.id)")
     public ResponseEntity<Provider> updateDraftProvider(@RequestBody Provider provider, @Parameter(hidden = true) Authentication auth) {
-        ProviderBundle providerBundle = draftProviderService.get(provider.getId());
+        ProviderBundle providerBundle = draftProviderService.get(provider.getId(), catalogueId, false);
         providerBundle.setProvider(provider);
         providerBundle = draftProviderService.update(providerBundle, auth);
         logger.info("User '{}' updated the Draft Provider with name '{}' and id '{}'", User.of(auth).getEmail().toLowerCase(),
@@ -546,9 +556,12 @@ public class ProviderController {
                                                         @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix,
                                                         @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
-        ProviderBundle providerBundle = draftProviderService.get(id);
+        ProviderBundle providerBundle = providerService.get(id, catalogueId, false);
         if (providerBundle == null) {
             return new ResponseEntity<>(HttpStatus.GONE);
+        }
+        if (!providerBundle.isDraft()) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
         draftProviderService.delete(providerBundle);
         logger.info("User '{}' deleted the Draft Provider '{}'-'{}'", User.of(auth).getEmail().toLowerCase(),
@@ -559,7 +572,7 @@ public class ProviderController {
     @PutMapping(path = "draft/transform", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_USER')")
     public ResponseEntity<Provider> transformToProvider(@RequestBody Provider provider, @Parameter(hidden = true) Authentication auth) {
-        ProviderBundle providerBundle = draftProviderService.get(provider.getId());
+        ProviderBundle providerBundle = draftProviderService.get(provider.getId(), catalogueId, false);
         providerBundle.setProvider(provider);
 
         providerService.validate(providerBundle);

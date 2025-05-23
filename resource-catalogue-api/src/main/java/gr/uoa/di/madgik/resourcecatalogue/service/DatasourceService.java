@@ -20,7 +20,7 @@ import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.resourcecatalogue.domain.DatasourceBundle;
 import org.springframework.security.core.Authentication;
 
-public interface DatasourceService extends ResourceService<DatasourceBundle> {
+public interface DatasourceService extends ResourceCatalogueService<DatasourceBundle> {
 
     /**
      * Get the Datasource sub-profile of the specific Service of the specific Catalogue

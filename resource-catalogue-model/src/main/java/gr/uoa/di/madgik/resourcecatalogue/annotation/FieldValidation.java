@@ -33,5 +33,8 @@ public @interface FieldValidation {
 
     Class idClass() default Object.class;
 
+    Class<?>[] idClasses() default {};
+
+    //TODO: delete and use idClasses instead
     boolean containsResourceId() default false;
 }

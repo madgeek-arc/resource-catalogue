@@ -6,6 +6,9 @@
       "properties" : {
         "originalId" : {
           "type" : "string"
+        },
+        "pid" : {
+          "type" : "string"
         }
       },
       "additionalProperties" : false

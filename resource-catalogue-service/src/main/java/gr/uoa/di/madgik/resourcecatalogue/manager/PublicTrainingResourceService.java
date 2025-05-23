@@ -18,41 +18,50 @@ package gr.uoa.di.madgik.resourcecatalogue.manager;
 
 import gr.uoa.di.madgik.registry.domain.Browsing;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
-import gr.uoa.di.madgik.registry.exception.ResourceException;
-import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
-import gr.uoa.di.madgik.registry.service.ResourceCRUDService;
-import gr.uoa.di.madgik.resourcecatalogue.domain.AlternativeIdentifier;
-import gr.uoa.di.madgik.resourcecatalogue.domain.DatasourceBundle;
-import gr.uoa.di.madgik.resourcecatalogue.domain.Identifiers;
-import gr.uoa.di.madgik.resourcecatalogue.domain.TrainingResourceBundle;
+import gr.uoa.di.madgik.resourcecatalogue.domain.*;
+import gr.uoa.di.madgik.resourcecatalogue.exceptions.CatalogueResourceNotFoundException;
+import gr.uoa.di.madgik.resourcecatalogue.manager.pids.PidIssuer;
+import gr.uoa.di.madgik.resourcecatalogue.service.ProviderService;
+import gr.uoa.di.madgik.resourcecatalogue.service.ServiceBundleService;
+import gr.uoa.di.madgik.resourcecatalogue.service.TrainingResourceService;
 import gr.uoa.di.madgik.resourcecatalogue.utils.FacetLabelService;
 import gr.uoa.di.madgik.resourcecatalogue.utils.JmsService;
-import gr.uoa.di.madgik.resourcecatalogue.utils.ProviderResourcesCommonMethods;
-import gr.uoa.di.madgik.resourcecatalogue.utils.PublicResourceUtils;
 import org.apache.commons.beanutils.BeanUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
+import java.util.List;
 
 @Service("publicTrainingResourceManager")
-public class PublicTrainingResourceService extends ResourceManager<TrainingResourceBundle>
+public class PublicTrainingResourceService extends ResourceCatalogueManager<TrainingResourceBundle>
         implements PublicResourceService<TrainingResourceBundle> {
 
     private static final Logger logger = LoggerFactory.getLogger(PublicTrainingResourceService.class);
     private final JmsService jmsService;
-    private final ProviderResourcesCommonMethods commonMethods;
+    private final PidIssuer pidIssuer;
     private final FacetLabelService facetLabelService;
+    private final ProviderService providerService;
+    private final ServiceBundleService<ServiceBundle> serviceBundleService;
+    private final TrainingResourceService trainingResourceService;
 
     public PublicTrainingResourceService(JmsService jmsService,
-                                         ProviderResourcesCommonMethods commonMethods,
-                                         FacetLabelService facetLabelService) {
+                                         PidIssuer pidIssuer,
+                                         FacetLabelService facetLabelService,
+                                         ProviderService providerService,
+                                         @Lazy ServiceBundleService<ServiceBundle> serviceBundleService,
+                                         @Lazy TrainingResourceService trainingResourceService) {
         super(TrainingResourceBundle.class);
         this.jmsService = jmsService;
-        this.commonMethods = commonMethods;
+        this.pidIssuer = pidIssuer;
         this.facetLabelService = facetLabelService;
+        this.providerService = providerService;
+        this.serviceBundleService = serviceBundleService;
+        this.trainingResourceService = trainingResourceService;
     }
 
     @Override
@@ -72,32 +81,16 @@ public class PublicTrainingResourceService extends ResourceManager<TrainingResou
     @Override
     public TrainingResourceBundle add(TrainingResourceBundle trainingResourceBundle, Authentication authentication) {
         String lowerLevelResourceId = trainingResourceBundle.getId();
-        Identifiers.createOriginalId(trainingResourceBundle);
-        trainingResourceBundle.setId(PublicResourceUtils.createPublicResourceId(trainingResourceBundle.getTrainingResource().getId(),
-                trainingResourceBundle.getTrainingResource().getCatalogueId()));
-        commonMethods.restrictPrefixRepetitionOnPublicResources(trainingResourceBundle.getId(),
-                trainingResourceBundle.getTrainingResource().getCatalogueId());
+        trainingResourceBundle.setId(trainingResourceBundle.getIdentifiers().getPid());
+        trainingResourceBundle.getMetadata().setPublished(true);
 
         // sets public ids to resource organisation, resource providers and EOSC related services
         updateIdsToPublic(trainingResourceBundle);
 
-        trainingResourceBundle.getMetadata().setPublished(true);
         // POST PID
-        String pid = "no_pid";
-        for (AlternativeIdentifier alternativeIdentifier : trainingResourceBundle.getTrainingResource().getAlternativeIdentifiers()) {
-            if (alternativeIdentifier.getType().equalsIgnoreCase("EOSC PID")) {
-                pid = alternativeIdentifier.getValue();
-                break;
-            }
-        }
-        if (pid.equalsIgnoreCase("no_pid")) {
-            logger.info("Training Resource with id '{}' does not have a PID registered under its AlternativeIdentifiers.",
-                    trainingResourceBundle.getId());
-        } else {
-            //TODO: enable when we have PID configuration properties for Beyond
-            logger.info("PID POST disabled");
-//            commonMethods.postPID(pid);
-        }
+        logger.info("PID POST disabled");
+//        pidIssuer.postPID(trainingResourceBundle.getId(), null);
+
         TrainingResourceBundle ret;
         logger.info("Training Resource '{}' is being published with id '{}'", lowerLevelResourceId, trainingResourceBundle.getId());
         ret = super.add(trainingResourceBundle, null);
@@ -107,11 +100,10 @@ public class PublicTrainingResourceService extends ResourceManager<TrainingResou
 
     @Override
     public TrainingResourceBundle update(TrainingResourceBundle trainingResourceBundle, Authentication authentication) {
-        TrainingResourceBundle published = super.get(PublicResourceUtils.createPublicResourceId(
-                trainingResourceBundle.getTrainingResource().getId(),
-                trainingResourceBundle.getTrainingResource().getCatalogueId()));
-        TrainingResourceBundle ret = super.get(PublicResourceUtils.createPublicResourceId(trainingResourceBundle.getTrainingResource().getId(),
-                trainingResourceBundle.getTrainingResource().getCatalogueId()));
+        TrainingResourceBundle published = super.get(trainingResourceBundle.getIdentifiers().getPid(),
+                trainingResourceBundle.getTrainingResource().getCatalogueId(), true);
+        TrainingResourceBundle ret = super.get(trainingResourceBundle.getIdentifiers().getPid(),
+                trainingResourceBundle.getTrainingResource().getCatalogueId(), true);
         try {
             BeanUtils.copyProperties(ret, trainingResourceBundle);
         } catch (IllegalAccessException | InvocationTargetException e) {
@@ -121,7 +113,6 @@ public class PublicTrainingResourceService extends ResourceManager<TrainingResou
         // sets public ids to resource organisation, resource providers and EOSC related services
         updateIdsToPublic(ret);
 
-        ret.getTrainingResource().setAlternativeIdentifiers(published.getTrainingResource().getAlternativeIdentifiers());
         ret.setIdentifiers(published.getIdentifiers());
         ret.setId(published.getId());
         ret.getMetadata().setPublished(true);
@@ -134,33 +125,52 @@ public class PublicTrainingResourceService extends ResourceManager<TrainingResou
     @Override
     public void delete(TrainingResourceBundle trainingResourceBundle) {
         try {
-            TrainingResourceBundle publicTrainingResourceBundle = get(PublicResourceUtils.createPublicResourceId(
-                    trainingResourceBundle.getTrainingResource().getId(),
-                    trainingResourceBundle.getTrainingResource().getCatalogueId()));
+            TrainingResourceBundle publicTrainingResourceBundle = get(trainingResourceBundle.getIdentifiers().getPid(),
+                    trainingResourceBundle.getTrainingResource().getCatalogueId(), true);
             logger.info("Deleting public Training Resource with id '{}'", publicTrainingResourceBundle.getId());
             super.delete(publicTrainingResourceBundle);
             jmsService.convertAndSendTopic("training_resource.delete", publicTrainingResourceBundle);
-        } catch (ResourceException | ResourceNotFoundException ignore) {
+        } catch (CatalogueResourceNotFoundException ignore) {
         }
     }
 
     @Override
     public void updateIdsToPublic(TrainingResourceBundle bundle) {
         // Resource Organisation
-        bundle.getTrainingResource().setResourceOrganisation(PublicResourceUtils.createPublicResourceId(
-                bundle.getTrainingResource().getResourceOrganisation(),
-                bundle.getTrainingResource().getCatalogueId()));
+        ProviderBundle providerBundle = providerService.get(bundle.getTrainingResource().getResourceOrganisation(),
+                bundle.getTrainingResource().getCatalogueId(), false);
+        bundle.getTrainingResource().setResourceOrganisation(providerBundle.getIdentifiers().getPid());
 
         // Resource Providers
-        bundle.getTrainingResource().setResourceProviders(
-                appendCatalogueId(
-                        bundle.getTrainingResource().getResourceProviders(),
-                        bundle.getTrainingResource().getCatalogueId()));
+        List<String> resourceProviders = new ArrayList<>();
+        List<String> existingResourceProviders = bundle.getTrainingResource().getResourceProviders();
+        if (existingResourceProviders != null && !existingResourceProviders.isEmpty()) {
+            for (String resourceProviderId : existingResourceProviders) {
+                //TODO: do we allow related resources from different catalogues?
+                ProviderBundle resourceProvider = providerService.get(resourceProviderId,
+                        bundle.getTrainingResource().getCatalogueId(), false);
+                resourceProviders.add(resourceProvider.getIdentifiers().getPid());
+            }
+            bundle.getTrainingResource().setResourceProviders(resourceProviders);
+        }
 
         // EOSC Related Services
-        bundle.getTrainingResource().setEoscRelatedServices(
-                appendCatalogueId(
-                        bundle.getTrainingResource().getEoscRelatedServices(),
-                        bundle.getTrainingResource().getCatalogueId()));
+        List<String> eoscRelatedServices = new ArrayList<>();
+        List<String> existingEoscRelatedServices = bundle.getTrainingResource().getEoscRelatedServices();
+        if (existingEoscRelatedServices != null && !existingEoscRelatedServices.isEmpty()) {
+            for (String eoscRelatedServiceId : existingEoscRelatedServices) {
+                //TODO: do we allow related resources from different catalogues?
+                Bundle<?> eoscRelatedService;
+                try {
+                    eoscRelatedService = serviceBundleService.get(eoscRelatedServiceId,
+                            bundle.getTrainingResource().getCatalogueId(), false);
+                } catch (CatalogueResourceNotFoundException e) {
+                    eoscRelatedService = trainingResourceService.get(eoscRelatedServiceId,
+                            bundle.getTrainingResource().getCatalogueId(), false);
+                }
+                eoscRelatedServices.add(eoscRelatedService.getIdentifiers().getPid());
+            }
+            bundle.getTrainingResource().setEoscRelatedServices(eoscRelatedServices);
+        }
     }
 }

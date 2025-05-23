@@ -52,6 +52,15 @@ public class TrainingResource implements Identifiable {
     private String title;
 
     /**
+     * Training Resource's original node
+     */
+    @XmlElement
+    @Schema
+    @FieldValidation(nullable = true, containsId = true, idClass = Vocabulary.class)
+    @VocabularyValidation(type = Vocabulary.Type.NODE)
+    private String node;
+
+    /**
      * The name of the organisation that manages or delivers the resource, or that coordinates the Resource delivery in a federated scenario.
      */
     @XmlElement(required = true)
@@ -282,9 +291,10 @@ public class TrainingResource implements Identifiable {
     public TrainingResource() {
     }
 
-    public TrainingResource(String id, String title, String resourceOrganisation, List<String> resourceProviders, List<String> authors, URL url, String urlType, List<String> eoscRelatedServices, List<AlternativeIdentifier> alternativeIdentifiers, String description, List<String> keywords, String license, String accessRights, Date versionDate, List<String> targetGroups, List<String> learningResourceTypes, List<String> learningOutcomes, String expertiseLevel, List<String> contentResourceTypes, List<String> qualifications, String duration, List<String> languages, List<String> geographicalAvailabilities, List<ServiceProviderDomain> scientificDomains, ServiceMainContact contact, String catalogueId) {
+    public TrainingResource(String id, String title, String node, String resourceOrganisation, List<String> resourceProviders, List<String> authors, URL url, String urlType, List<String> eoscRelatedServices, List<AlternativeIdentifier> alternativeIdentifiers, String description, List<String> keywords, String license, String accessRights, Date versionDate, List<String> targetGroups, List<String> learningResourceTypes, List<String> learningOutcomes, String expertiseLevel, List<String> contentResourceTypes, List<String> qualifications, String duration, List<String> languages, List<String> geographicalAvailabilities, List<ServiceProviderDomain> scientificDomains, ServiceMainContact contact, String catalogueId) {
         this.id = id;
         this.title = title;
+        this.node = node;
         this.resourceOrganisation = resourceOrganisation;
         this.resourceProviders = resourceProviders;
         this.authors = authors;
@@ -313,15 +323,14 @@ public class TrainingResource implements Identifiable {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         TrainingResource that = (TrainingResource) o;
-        return Objects.equals(id, that.id) && Objects.equals(title, that.title) && Objects.equals(resourceOrganisation, that.resourceOrganisation) && Objects.equals(resourceProviders, that.resourceProviders) && Objects.equals(authors, that.authors) && Objects.equals(url, that.url) && Objects.equals(urlType, that.urlType) && Objects.equals(eoscRelatedServices, that.eoscRelatedServices) && Objects.equals(alternativeIdentifiers, that.alternativeIdentifiers) && Objects.equals(description, that.description) && Objects.equals(keywords, that.keywords) && Objects.equals(license, that.license) && Objects.equals(accessRights, that.accessRights) && Objects.equals(versionDate, that.versionDate) && Objects.equals(targetGroups, that.targetGroups) && Objects.equals(learningResourceTypes, that.learningResourceTypes) && Objects.equals(learningOutcomes, that.learningOutcomes) && Objects.equals(expertiseLevel, that.expertiseLevel) && Objects.equals(contentResourceTypes, that.contentResourceTypes) && Objects.equals(qualifications, that.qualifications) && Objects.equals(duration, that.duration) && Objects.equals(languages, that.languages) && Objects.equals(geographicalAvailabilities, that.geographicalAvailabilities) && Objects.equals(scientificDomains, that.scientificDomains) && Objects.equals(contact, that.contact) && Objects.equals(catalogueId, that.catalogueId);
+        return Objects.equals(id, that.id) && Objects.equals(title, that.title) && Objects.equals(node, that.node) && Objects.equals(resourceOrganisation, that.resourceOrganisation) && Objects.equals(resourceProviders, that.resourceProviders) && Objects.equals(authors, that.authors) && Objects.equals(url, that.url) && Objects.equals(urlType, that.urlType) && Objects.equals(eoscRelatedServices, that.eoscRelatedServices) && Objects.equals(alternativeIdentifiers, that.alternativeIdentifiers) && Objects.equals(description, that.description) && Objects.equals(keywords, that.keywords) && Objects.equals(license, that.license) && Objects.equals(accessRights, that.accessRights) && Objects.equals(versionDate, that.versionDate) && Objects.equals(targetGroups, that.targetGroups) && Objects.equals(learningResourceTypes, that.learningResourceTypes) && Objects.equals(learningOutcomes, that.learningOutcomes) && Objects.equals(expertiseLevel, that.expertiseLevel) && Objects.equals(contentResourceTypes, that.contentResourceTypes) && Objects.equals(qualifications, that.qualifications) && Objects.equals(duration, that.duration) && Objects.equals(languages, that.languages) && Objects.equals(geographicalAvailabilities, that.geographicalAvailabilities) && Objects.equals(scientificDomains, that.scientificDomains) && Objects.equals(contact, that.contact) && Objects.equals(catalogueId, that.catalogueId);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, title, resourceOrganisation, resourceProviders, authors, url, urlType, eoscRelatedServices, alternativeIdentifiers, description, keywords, license, accessRights, versionDate, targetGroups, learningResourceTypes, learningOutcomes, expertiseLevel, contentResourceTypes, qualifications, duration, languages, geographicalAvailabilities, scientificDomains, contact, catalogueId);
+        return Objects.hash(id, title, node, resourceOrganisation, resourceProviders, authors, url, urlType, eoscRelatedServices, alternativeIdentifiers, description, keywords, license, accessRights, versionDate, targetGroups, learningResourceTypes, learningOutcomes, expertiseLevel, contentResourceTypes, qualifications, duration, languages, geographicalAvailabilities, scientificDomains, contact, catalogueId);
     }
 
     @Override
@@ -329,6 +338,7 @@ public class TrainingResource implements Identifiable {
         return "TrainingResource{" +
                 "id='" + id + '\'' +
                 ", title='" + title + '\'' +
+                ", node='" + node + '\'' +
                 ", resourceOrganisation='" + resourceOrganisation + '\'' +
                 ", resourceProviders=" + resourceProviders +
                 ", authors=" + authors +
@@ -372,6 +382,14 @@ public class TrainingResource implements Identifiable {
 
     public void setTitle(String title) {
         this.title = title;
+    }
+
+    public String getNode() {
+        return node;
+    }
+
+    public void setNode(String node) {
+        this.node = node;
     }
 
     public String getResourceOrganisation() {

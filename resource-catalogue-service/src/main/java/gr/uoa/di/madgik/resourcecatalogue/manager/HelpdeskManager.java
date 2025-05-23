@@ -31,13 +31,14 @@ import gr.uoa.di.madgik.resourcecatalogue.utils.ProviderResourcesCommonMethods;
 import gr.uoa.di.madgik.resourcecatalogue.utils.ResourceValidationUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.core.Authentication;
 
 import java.util.List;
 
 @org.springframework.stereotype.Service("helpdeskManager")
-public class HelpdeskManager extends ResourceManager<HelpdeskBundle> implements HelpdeskService {
+public class HelpdeskManager extends ResourceCatalogueManager<HelpdeskBundle> implements HelpdeskService {
 
     private static final Logger logger = LoggerFactory.getLogger(HelpdeskManager.class);
     private final ServiceBundleService<ServiceBundle> serviceBundleService;
@@ -48,12 +49,15 @@ public class HelpdeskManager extends ResourceManager<HelpdeskBundle> implements 
     private final ProviderResourcesCommonMethods commonMethods;
     private final IdCreator idCreator;
 
+    @Value("${catalogue.id}")
+    private String catalogueId;
+
     public HelpdeskManager(ServiceBundleService<ServiceBundle> serviceBundleService,
                            TrainingResourceService trainingResourceService,
                            PublicHelpdeskService publicHelpdeskManager,
                            @Lazy SecurityService securityService,
                            @Lazy RegistrationMailService registrationMailService,
-                           ProviderResourcesCommonMethods commonMethods,
+                           @Lazy ProviderResourcesCommonMethods commonMethods,
                            IdCreator idCreator) {
         super(HelpdeskBundle.class);
         this.serviceBundleService = serviceBundleService;
@@ -73,7 +77,7 @@ public class HelpdeskManager extends ResourceManager<HelpdeskBundle> implements 
     @Override
     public HelpdeskBundle validate(HelpdeskBundle helpdeskBundle, String resourceType) {
         String resourceId = helpdeskBundle.getHelpdesk().getServiceId();
-        String catalogueId = helpdeskBundle.getCatalogueId();
+        String catalogueId = helpdeskBundle.getHelpdesk().getCatalogueId();
 
         HelpdeskBundle existingHelpdesk = get(resourceId, catalogueId);
         if (existingHelpdesk != null) {
@@ -94,12 +98,18 @@ public class HelpdeskManager extends ResourceManager<HelpdeskBundle> implements 
 
     @Override
     public HelpdeskBundle add(HelpdeskBundle helpdesk, String resourceType, Authentication auth) {
+        if (helpdesk.getHelpdesk().getCatalogueId() == null || helpdesk.getHelpdesk().getCatalogueId().isEmpty()) {
+            // set catalogueId = eosc
+            helpdesk.getHelpdesk().setCatalogueId(catalogueId);
+        }
+
         validate(helpdesk, resourceType);
 
         helpdesk.setId(idCreator.generate(getResourceTypeName()));
         logger.trace("Attempting to add a new Helpdesk: {}", helpdesk);
 
         helpdesk.setMetadata(Metadata.createMetadata(AuthenticationInfo.getFullName(auth), AuthenticationInfo.getEmail(auth).toLowerCase()));
+        commonMethods.createIdentifiers(helpdesk, getResourceTypeName(), false);
         List<LoggingInfo> loggingInfoList = commonMethods.returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(helpdesk, auth);
         helpdesk.setLoggingInfo(loggingInfoList);
         helpdesk.setActive(true);
@@ -116,7 +126,10 @@ public class HelpdeskManager extends ResourceManager<HelpdeskBundle> implements 
 
     @Override
     public HelpdeskBundle get(String serviceId, String catalogueId) {
-        Resource res = where(false, new SearchService.KeyValue("service_id", serviceId), new SearchService.KeyValue("catalogue_id", catalogueId));
+        Resource res = where(false,
+                new SearchService.KeyValue("service_id", serviceId),
+                new SearchService.KeyValue("catalogue_id", catalogueId),
+                new SearchService.KeyValue("published", "false"));
         return res != null ? deserialize(res) : null;
     }
 
@@ -125,7 +138,7 @@ public class HelpdeskManager extends ResourceManager<HelpdeskBundle> implements 
         logger.trace("Attempting to update the Helpdesk with id '{}'", helpdeskBundle.getId());
 
         HelpdeskBundle ret = ObjectUtils.clone(helpdeskBundle);
-        Resource existingResource = whereID(ret.getId(), true);
+        Resource existingResource = getResource(helpdeskBundle.getId(), helpdeskBundle.getHelpdesk().getCatalogueId(), false);
         HelpdeskBundle existingHelpdesk = deserialize(existingResource);
         // check if there are actual changes in the Helpdesk
         if (ret.getHelpdesk().equals(existingHelpdesk.getHelpdesk())) {
@@ -134,6 +147,7 @@ public class HelpdeskManager extends ResourceManager<HelpdeskBundle> implements 
 
         validate(ret);
         ret.setMetadata(Metadata.updateMetadata(ret.getMetadata(), AuthenticationInfo.getFullName(auth), AuthenticationInfo.getEmail(auth).toLowerCase()));
+        ret.setIdentifiers(existingHelpdesk.getIdentifiers());
         List<LoggingInfo> loggingInfoList = commonMethods.returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(ret, auth);
         LoggingInfo loggingInfo = commonMethods.createLoggingInfo(auth, LoggingInfo.Types.UPDATE.getKey(),
                 LoggingInfo.ActionType.UPDATED.getKey());
@@ -167,9 +181,7 @@ public class HelpdeskManager extends ResourceManager<HelpdeskBundle> implements 
 
         Resource existing = getResource(helpdeskBundle.getId());
         if (existing == null) {
-            throw new ResourceNotFoundException(
-                    String.format("Could not update Helpdesk with id '%s' because it does not exist",
-                            helpdeskBundle.getId()));
+            throw new ResourceNotFoundException(helpdeskBundle.getId(), "Helpdesk");
         }
 
         existing.setPayload(serialize(helpdeskBundle));
@@ -182,14 +194,14 @@ public class HelpdeskManager extends ResourceManager<HelpdeskBundle> implements 
     public void delete(HelpdeskBundle helpdesk) {
         super.delete(helpdesk);
         logger.info("Deleted Helpdesk with id '{}' of the Catalogue '{}'",
-                helpdesk.getHelpdesk().getId(), helpdesk.getCatalogueId());
+                helpdesk.getHelpdesk().getId(), helpdesk.getHelpdesk().getCatalogueId());
     }
 
     public HelpdeskBundle createPublicResource(HelpdeskBundle helpdeskBundle, Authentication auth) {
         logger.info("User '{}-{}' attempts to create a Public Helpdesk from Helpdesk '{}' of the '{}' Catalogue",
                 AuthenticationInfo.getFullName(auth),
                 AuthenticationInfo.getEmail(auth).toLowerCase(),
-                helpdeskBundle.getId(), helpdeskBundle.getCatalogueId());
+                helpdeskBundle.getId(), helpdeskBundle.getHelpdesk().getCatalogueId());
         publicHelpdeskManager.add(helpdeskBundle, auth);
         return helpdeskBundle;
     }

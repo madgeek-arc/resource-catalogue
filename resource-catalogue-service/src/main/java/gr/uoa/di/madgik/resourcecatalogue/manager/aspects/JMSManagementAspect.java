@@ -21,11 +21,11 @@ import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.domain.CatalogueBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.HelpdeskBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.MonitoringBundle;
+import gr.uoa.di.madgik.resourcecatalogue.exceptions.CatalogueResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.manager.PublicHelpdeskService;
 import gr.uoa.di.madgik.resourcecatalogue.manager.PublicMonitoringService;
 import gr.uoa.di.madgik.resourcecatalogue.utils.JmsService;
 import gr.uoa.di.madgik.resourcecatalogue.utils.ObjectUtils;
-import gr.uoa.di.madgik.resourcecatalogue.utils.PublicResourceUtils;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.After;
 import org.aspectj.lang.annotation.AfterReturning;
@@ -85,9 +85,9 @@ public class JMSManagementAspect {
             returning = "helpdeskBundle")
     public void addHelpdeskAsPublic(final HelpdeskBundle helpdeskBundle) {
         try {
-            publicHelpdeskManager.get(PublicResourceUtils.createPublicResourceId(helpdeskBundle.getHelpdesk().getId(),
-                    helpdeskBundle.getCatalogueId()));
-        } catch (ResourceException | ResourceNotFoundException e) {
+            publicHelpdeskManager.get(helpdeskBundle.getIdentifiers().getPid(),
+                    helpdeskBundle.getHelpdesk().getCatalogueId(), true);
+        } catch (CatalogueResourceNotFoundException e) {
             publicHelpdeskManager.add(ObjectUtils.clone(helpdeskBundle), null);
         }
     }
@@ -116,9 +116,9 @@ public class JMSManagementAspect {
             returning = "monitoringBundle")
     public void addMonitoringAsPublic(final MonitoringBundle monitoringBundle) {
         try {
-            publicMonitoringManager.get(PublicResourceUtils.createPublicResourceId(monitoringBundle.getMonitoring().getId(),
-                    monitoringBundle.getCatalogueId()));
-        } catch (ResourceException | ResourceNotFoundException e) {
+            publicMonitoringManager.get(monitoringBundle.getIdentifiers().getPid(),
+                    monitoringBundle.getMonitoring().getCatalogueId(), true);
+        } catch (CatalogueResourceNotFoundException e) {
             publicMonitoringManager.add(ObjectUtils.clone(monitoringBundle), null);
         }
     }

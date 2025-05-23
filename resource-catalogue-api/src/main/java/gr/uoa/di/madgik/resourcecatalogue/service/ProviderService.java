@@ -27,7 +27,7 @@ import org.springframework.security.core.Authentication;
 
 import java.util.List;
 
-public interface ProviderService extends ResourceService<ProviderBundle>, BundleOperations<ProviderBundle> {
+public interface ProviderService extends ResourceCatalogueService<ProviderBundle>, BundleOperations<ProviderBundle> {
 
     /**
      * Add a new Provider on the Project's Catalogue.
@@ -158,14 +158,6 @@ public interface ProviderService extends ResourceService<ProviderBundle>, Bundle
     Paging<ProviderBundle> getRandomProviders(FacetFilter ff, String auditingInterval, Authentication auth);
 
     /**
-     * Get the history of the specific Provider of the specific Catalogue ID
-     *
-     * @param id Provider ID
-     * @return {@link Paging}&lt;{@link LoggingInfo}&gt;
-     */
-    Paging<LoggingInfo> getLoggingInfoHistory(String id);
-
-    /**
      * Get a Provider's rejected resources
      *
      * @param ff           FacetFilter
@@ -205,18 +197,16 @@ public interface ProviderService extends ResourceService<ProviderBundle>, Bundle
      * Return true if Provider User Admin has accepted registration terms
      *
      * @param providerId Provider's ID
-     * @param isDraft    boolean value indicating if the Provider is Draft
      * @param auth       Authentication
      * @return True/False
      */
-    boolean hasAdminAcceptedTerms(String providerId, boolean isDraft, Authentication auth);
+    boolean hasAdminAcceptedTerms(String providerId, Authentication auth);
 
     /**
      * Update the Provider's list of Users that have accepted the Provider's registration terms
      *
      * @param providerId Provider's ID
-     * @param isDraft    boolean value indicating if the Provider is Draft
      * @param auth       Authentication
      */
-    void adminAcceptedTerms(String providerId, boolean isDraft, Authentication auth);
+    void adminAcceptedTerms(String providerId, Authentication auth);
 }

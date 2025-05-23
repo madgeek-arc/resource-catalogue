@@ -24,21 +24,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
 public interface PublicResourceService<T extends Identifiable> extends ResourceService<T> {
 
     void updateIdsToPublic(T resource);
-
-    default List<String> appendCatalogueId(List<String> items, String catalogueId) {
-        Set<String> transformed = new HashSet<>();
-        if (items != null && !items.isEmpty()) {
-            for (String item : items) {
-                if (item != null && !item.isEmpty()) {
-                    item = PublicResourceUtils.createPublicResourceId(item, catalogueId);
-                    transformed.add(item);
-                }
-            }
-        }
-        return new ArrayList<>(transformed);
-    }
 }

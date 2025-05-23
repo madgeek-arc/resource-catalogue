@@ -38,7 +38,7 @@ import java.util.*;
 
 
 @org.springframework.stereotype.Service("monitoringManager")
-public class MonitoringManager extends ResourceManager<MonitoringBundle> implements MonitoringService {
+public class MonitoringManager extends ResourceCatalogueManager<MonitoringBundle> implements MonitoringService {
 
     private static final Logger logger = LoggerFactory.getLogger(MonitoringManager.class);
     private final ServiceBundleService<ServiceBundle> serviceBundleService;
@@ -47,6 +47,9 @@ public class MonitoringManager extends ResourceManager<MonitoringBundle> impleme
     private final SecurityService securityService;
     private final RegistrationMailService registrationMailService;
     private final ProviderResourcesCommonMethods commonMethods;
+
+    @Value("${catalogue.id}")
+    private String catalogueId;
 
     @Value("${argo.grnet.monitoring.token:}")
     private String monitoringToken;
@@ -81,7 +84,7 @@ public class MonitoringManager extends ResourceManager<MonitoringBundle> impleme
     @Override
     public MonitoringBundle validate(MonitoringBundle monitoringBundle, String resourceType) {
         String resourceId = monitoringBundle.getMonitoring().getServiceId();
-        String catalogueId = monitoringBundle.getCatalogueId();
+        String catalogueId = monitoringBundle.getMonitoring().getCatalogueId();
 
         MonitoringBundle existingMonitoring = get(resourceId, catalogueId);
         if (existingMonitoring != null) {
@@ -109,9 +112,15 @@ public class MonitoringManager extends ResourceManager<MonitoringBundle> impleme
 
     @Override
     public MonitoringBundle add(MonitoringBundle monitoring, String resourceType, Authentication auth) {
+        if (monitoring.getMonitoring().getCatalogueId() == null || monitoring.getMonitoring().getCatalogueId().isEmpty()) {
+            // set catalogueId = eosc
+            monitoring.getMonitoring().setCatalogueId(catalogueId);
+        }
+
         validate(monitoring, resourceType);
 
         monitoring.setId(idCreator.generate(getResourceTypeName()));
+        commonMethods.createIdentifiers(monitoring, getResourceTypeName(), false);
         logger.trace("Attempting to add a new Monitoring: {}", monitoring);
 
         monitoring.setMetadata(Metadata.createMetadata(AuthenticationInfo.getFullName(auth),
@@ -138,7 +147,7 @@ public class MonitoringManager extends ResourceManager<MonitoringBundle> impleme
         logger.trace("Attempting to update the Monitoring with id '{}'", monitoringBundle.getId());
 
         MonitoringBundle ret = ObjectUtils.clone(monitoringBundle);
-        Resource existingResource = whereID(ret.getId(), true);
+        Resource existingResource = getResource(monitoringBundle.getId(), monitoringBundle.getMonitoring().getCatalogueId(), false);
         MonitoringBundle existingMonitoring = deserialize(existingResource);
         // check if there are actual changes in the Monitoring
         if (ret.getMonitoring().equals(existingMonitoring.getMonitoring())) {
@@ -148,6 +157,7 @@ public class MonitoringManager extends ResourceManager<MonitoringBundle> impleme
         validate(ret);
         ret.setMetadata(Metadata.updateMetadata(ret.getMetadata(), AuthenticationInfo.getFullName(auth),
                 AuthenticationInfo.getEmail(auth).toLowerCase()));
+        ret.setIdentifiers(existingMonitoring.getIdentifiers());
         List<LoggingInfo> loggingInfoList = commonMethods.returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(ret, auth);
         LoggingInfo loggingInfo = commonMethods.createLoggingInfo(auth, LoggingInfo.Types.UPDATE.getKey(),
                 LoggingInfo.ActionType.UPDATED.getKey());
@@ -185,9 +195,7 @@ public class MonitoringManager extends ResourceManager<MonitoringBundle> impleme
 
         Resource existing = getResource(monitoringBundle.getId());
         if (existing == null) {
-            throw new ResourceNotFoundException(
-                    String.format("Could not update Monitoring with id '%s' because it does not exist",
-                            monitoringBundle.getId()));
+            throw new ResourceNotFoundException(monitoringBundle.getId(), "Monitoring");
         }
 
         existing.setPayload(serialize(monitoringBundle));
@@ -200,7 +208,7 @@ public class MonitoringManager extends ResourceManager<MonitoringBundle> impleme
     public void delete(MonitoringBundle monitoring) {
         super.delete(monitoring);
         logger.info("Deleted the Monitoring with id '{}' of the Catalogue '{}'",
-                monitoring.getMonitoring().getId(), monitoring.getCatalogueId());
+                monitoring.getMonitoring().getId(), monitoring.getMonitoring().getCatalogueId());
     }
 
     public List<Vocabulary> getAvailableServiceTypes() {
@@ -235,8 +243,10 @@ public class MonitoringManager extends ResourceManager<MonitoringBundle> impleme
 
     @Override
     public MonitoringBundle get(String serviceId, String catalogueId) {
-        Resource res = where(false, new SearchService.KeyValue("service_id", serviceId),
-                new SearchService.KeyValue("catalogue_id", catalogueId));
+        Resource res = where(false,
+                new SearchService.KeyValue("service_id", serviceId),
+                new SearchService.KeyValue("catalogue_id", catalogueId),
+                new SearchService.KeyValue("published", "false"));
         return res != null ? deserialize(res) : null;
     }
 
@@ -289,7 +299,7 @@ public class MonitoringManager extends ResourceManager<MonitoringBundle> impleme
         logger.info("User '{}-{}' attempts to create a Public Monitoring from Monitoring '{}' of the '{}' Catalogue",
                 Objects.requireNonNull(AuthenticationInfo.getFullName(auth)),
                 Objects.requireNonNull(AuthenticationInfo.getEmail(auth).toLowerCase()),
-                monitoringBundle.getId(), monitoringBundle.getCatalogueId());
+                monitoringBundle.getId(), monitoringBundle.getMonitoring().getCatalogueId());
         publicMonitoringManager.add(monitoringBundle, auth);
         return monitoringBundle;
     }

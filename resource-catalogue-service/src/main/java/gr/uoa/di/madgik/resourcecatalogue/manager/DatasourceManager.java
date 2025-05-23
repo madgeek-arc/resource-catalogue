@@ -23,6 +23,7 @@ import gr.uoa.di.madgik.registry.domain.Resource;
 import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.registry.service.SearchService;
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
+import gr.uoa.di.madgik.resourcecatalogue.exceptions.CatalogueResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
 import gr.uoa.di.madgik.resourcecatalogue.utils.AuthenticationInfo;
 import gr.uoa.di.madgik.resourcecatalogue.utils.ObjectUtils;
@@ -38,7 +39,7 @@ import java.util.Comparator;
 import java.util.List;
 
 @org.springframework.stereotype.Service
-public class DatasourceManager extends ResourceManager<DatasourceBundle> implements DatasourceService {
+public class DatasourceManager extends ResourceCatalogueManager<DatasourceBundle> implements DatasourceService {
 
     private static final Logger logger = LoggerFactory.getLogger(DatasourceManager.class);
     private final ServiceBundleService<ServiceBundle> serviceBundleService;
@@ -56,7 +57,7 @@ public class DatasourceManager extends ResourceManager<DatasourceBundle> impleme
                              @Lazy SecurityService securityService,
                              @Lazy RegistrationMailService registrationMailService,
                              @Lazy VocabularyService vocabularyService,
-                             ProviderResourcesCommonMethods commonMethods,
+                             @Lazy ProviderResourcesCommonMethods commonMethods,
                              OpenAIREDatasourceManager openAIREDatasourceManager,
                              IdCreator idCreator) {
         super(DatasourceBundle.class);
@@ -74,13 +75,11 @@ public class DatasourceManager extends ResourceManager<DatasourceBundle> impleme
         return "datasource";
     }
 
-    public DatasourceBundle get(String datasourceId) {
-        Resource res = where(false, new SearchService.KeyValue("resource_internal_id", datasourceId));
-        return res != null ? deserialize(res) : null;
-    }
-
     public DatasourceBundle get(String serviceId, String catalogueId) {
-        Resource res = where(false, new SearchService.KeyValue("service_id", serviceId), new SearchService.KeyValue("catalogue_id", catalogueId));
+        Resource res = where(false,
+                new SearchService.KeyValue("service_id", serviceId),
+                new SearchService.KeyValue("catalogue_id", catalogueId),
+                new SearchService.KeyValue("published", "false"));
         return res != null ? deserialize(res) : null;
     }
 
@@ -88,18 +87,18 @@ public class DatasourceManager extends ResourceManager<DatasourceBundle> impleme
     public DatasourceBundle add(DatasourceBundle datasourceBundle, Authentication auth) {
 
         // if Datasource has ID -> check if it exists in OpenAIRE Datasources list
-        if (datasourceBundle.getId() != null && !datasourceBundle.getId().isEmpty()) {
-            checkOpenAIREIDExistence(datasourceBundle);
-        }
-        datasourceBundle.setId(idCreator.generate(getResourceTypeName()));
+        //TODO: enable when openaire api returns info. Decide how to proceed for external catalogues
+//        if (datasourceBundle.getId() != null && !datasourceBundle.getId().isEmpty()) {
+//            checkOpenAIREIDExistence(datasourceBundle);
+//        }
         logger.trace("Attempting to add a new Datasource: {}", datasourceBundle);
-
-        this.validateDatasource(datasourceBundle);
 
         datasourceBundle.setMetadata(Metadata.createMetadata(AuthenticationInfo.getFullName(auth), AuthenticationInfo.getEmail(auth).toLowerCase()));
         List<LoggingInfo> loggingInfoList = commonMethods.returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(datasourceBundle, auth);
         datasourceBundle.setLoggingInfo(loggingInfoList);
         differentiateInternalFromExternalCatalogueAddition(datasourceBundle);
+
+        this.validateDatasource(datasourceBundle);
 
         super.add(datasourceBundle, null);
         logger.info("Added the Datasource with id '{}' for Service '{}'", datasourceBundle.getId(),
@@ -108,11 +107,13 @@ public class DatasourceManager extends ResourceManager<DatasourceBundle> impleme
     }
 
     private void differentiateInternalFromExternalCatalogueAddition(DatasourceBundle datasourceBundle) {
-        if (datasourceBundle.getDatasource().getCatalogueId().equals(catalogueId)) {
+        if (catalogueId == null || catalogueId.isEmpty() || datasourceBundle.getDatasource().getCatalogueId().equals(catalogueId)) {
             datasourceBundle.setActive(false);
             datasourceBundle.setStatus(vocabularyService.get("pending datasource").getId());
             datasourceBundle.setLatestOnboardingInfo(datasourceBundle.getLoggingInfo().getFirst());
             registrationMailService.sendEmailsForDatasourceExtensionToPortalAdmins(datasourceBundle, "post");
+            datasourceBundle.setId(idCreator.generate(getResourceTypeName()));
+            commonMethods.createIdentifiers(datasourceBundle, getResourceTypeName(), false);
         } else {
             datasourceBundle.setActive(true);
             datasourceBundle.setStatus(vocabularyService.get("approved datasource").getId());
@@ -120,6 +121,8 @@ public class DatasourceManager extends ResourceManager<DatasourceBundle> impleme
                     LoggingInfo.Types.ONBOARD.getKey(), LoggingInfo.ActionType.APPROVED.getKey());
             datasourceBundle.getLoggingInfo().add(loggingInfo);
             datasourceBundle.setLatestOnboardingInfo(datasourceBundle.getLoggingInfo().get(1));
+            idCreator.validateId(datasourceBundle.getId());
+            commonMethods.createIdentifiers(datasourceBundle, getResourceTypeName(), true);
         }
     }
 
@@ -128,7 +131,7 @@ public class DatasourceManager extends ResourceManager<DatasourceBundle> impleme
         logger.trace("Attempting to update the Datasource with id '{}'", datasourceBundle.getId());
 
         DatasourceBundle ret = ObjectUtils.clone(datasourceBundle);
-        Resource existingResource = whereID(ret.getId(), true);
+        Resource existingResource = getResource(datasourceBundle.getId(), datasourceBundle.getDatasource().getCatalogueId(), false);
         DatasourceBundle existingDatasource = deserialize(existingResource);
         // check if there are actual changes in the Datasource
         if (ret.getDatasource().equals(existingDatasource.getDatasource())) {
@@ -181,9 +184,7 @@ public class DatasourceManager extends ResourceManager<DatasourceBundle> impleme
 
         Resource existing = getResource(datasourceBundle.getId());
         if (existing == null) {
-            throw new ResourceNotFoundException(
-                    String.format("Could not update Datasource with id '%s' because it does not exist",
-                            datasourceBundle.getId()));
+            throw new ResourceNotFoundException(datasourceBundle.getId(), "Datasource");
         }
 
         existing.setPayload(serialize(datasourceBundle));
@@ -196,7 +197,7 @@ public class DatasourceManager extends ResourceManager<DatasourceBundle> impleme
         String serviceId = datasourceBundle.getDatasource().getServiceId();
         String catalogueId = datasourceBundle.getDatasource().getCatalogueId();
 
-        DatasourceBundle existingDatasource = get(serviceId, catalogueId);
+        DatasourceBundle existingDatasource = get(serviceId, catalogueId, false);
         if (existingDatasource != null) {
             throw new ValidationException(String.format("Service [%s] of the Catalogue [%s] has already a Datasource " +
                     "registered, with id: [%s]", serviceId, catalogueId, existingDatasource.getId()));
@@ -213,11 +214,11 @@ public class DatasourceManager extends ResourceManager<DatasourceBundle> impleme
             throw new ValidationException(String.format("Vocabulary %s does not consist an Datasource state!", status));
         }
         logger.trace("Verifying Datasource with id: '{}' | status: '{}' | active: '{}'", id, status, active);
-        DatasourceBundle datasourceBundle = get(id);
+        DatasourceBundle datasourceBundle = get(id, catalogueId, false);
 
         // Verify that Service is Approved before proceeding
-        if (!serviceBundleService.get(datasourceBundle.getDatasource().getServiceId()).getStatus().equals("approved resource")
-                && status.equals("approved datasource")) {
+        if (!serviceBundleService.get(datasourceBundle.getDatasource().getServiceId(), datasourceBundle.getDatasource().getCatalogueId(), false)
+                .getStatus().equals("approved resource") && status.equals("approved datasource")) {
             throw new ValidationException("You cannot approve a Datasource when its Service is in Pending or Rejected state");
         }
 
@@ -280,7 +281,7 @@ public class DatasourceManager extends ResourceManager<DatasourceBundle> impleme
         if (datasource != null) {
             datasourceBundle.setOriginalOpenAIREId(datasourceBundle.getId());
         } else {
-            throw new ResourceNotFoundException(String.format("The ID [%s] you provided does not belong to an OpenAIRE" +
+            throw new CatalogueResourceNotFoundException(String.format("The ID [%s] you provided does not belong to an OpenAIRE" +
                     " Datasource", datasourceBundle.getId()));
         }
     }
@@ -298,7 +299,7 @@ public class DatasourceManager extends ResourceManager<DatasourceBundle> impleme
                 }
             }
         } else {
-            throw new ResourceNotFoundException(String.format("There is no Datasource with ID [%s]", id));
+            throw new ResourceNotFoundException(id, "Datasource");
         }
         return found;
     }

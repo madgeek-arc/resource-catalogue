@@ -46,10 +46,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Profile("beyond")
@@ -91,7 +88,7 @@ public class ServiceController {
                                                 @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
         ServiceBundle service;
-        service = serviceBundleService.get(id);
+        service = serviceBundleService.get(id, catalogueId, false);
 
         // Block users of deleting Services of another Catalogue
         if (!service.getService().getCatalogueId().equals(this.catalogueId)) {
@@ -106,14 +103,14 @@ public class ServiceController {
     }
 
     @Operation(summary = "Get the most current version of a specific Resource, providing the Resource id.")
-    @GetMapping(path = "{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    @PreAuthorize("@securityService.serviceIsActive(#prefix+'/'+#suffix) or hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceAdmin(#auth, #prefix+'/'+#suffix)")
+    @GetMapping(path = "{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PreAuthorize("@securityService.serviceIsActive(#prefix+'/'+#suffix, #catalogueId, false) or hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceAdmin(#auth, #prefix+'/'+#suffix)")
     public ResponseEntity<Service> getService(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
-                                        @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix,
-                                        @Deprecated @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId,
+                                              @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix,
+                                              @Deprecated @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId,
                                         @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
-        return new ResponseEntity<>(serviceBundleService.get(id).getService(), HttpStatus.OK);
+        return new ResponseEntity<>(serviceBundleService.get(id, catalogueId, false).getService(), HttpStatus.OK);
     }
 
     @Operation(summary = "Creates a new Resource.")
@@ -158,7 +155,7 @@ public class ServiceController {
     @BrowseParameters
     @BrowseCatalogue
     @Parameter(name = "suspended", description = "Suspended", content = @Content(schema = @Schema(type = "boolean", defaultValue = "false")))
-    @GetMapping(path = "all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    @GetMapping(path = "all", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<Paging<Service>> getAllServices(@Parameter(hidden = true) @RequestParam MultiValueMap<String, Object> allRequestParams) {
         FacetFilter ff = FacetFilter.from(allRequestParams);
         ff.setResourceType("service");
@@ -170,7 +167,7 @@ public class ServiceController {
     }
 
     @BrowseParameters
-    @GetMapping(path = "getMyServices", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    @GetMapping(path = "getMyServices", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<Browsing<ServiceBundle>> getMyServices(@RequestParam MultiValueMap<String, Object> params,
                                                                  @Parameter(hidden = true) Authentication auth) {
         return new ResponseEntity<>(serviceBundleService.getMy(FacetFilter.from(params), auth), HttpStatus.OK);
@@ -273,7 +270,7 @@ public class ServiceController {
     @BrowseParameters
     @BrowseCatalogue
     @Parameter(name = "suspended", description = "Suspended", content = @Content(schema = @Schema(type = "boolean", defaultValue = "false")))
-    @GetMapping(path = "adminPage/all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    @GetMapping(path = "adminPage/all", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     public ResponseEntity<Paging<ServiceBundle>> getAllServicesForAdminPage(@Parameter(hidden = true) @RequestParam MultiValueMap<String, Object> allRequestParams) {
         FacetFilter ff = FacetFilter.from(allRequestParams);
@@ -292,7 +289,7 @@ public class ServiceController {
                                                       @RequestParam LoggingInfo.ActionType actionType,
                                                       @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
-        ServiceBundle service = serviceBundleService.audit(id, comment, actionType, auth);
+        ServiceBundle service = serviceBundleService.audit(id, catalogueId, comment, actionType, auth);
         return new ResponseEntity<>(service, HttpStatus.OK);
     }
 
@@ -300,7 +297,7 @@ public class ServiceController {
     @Parameters({
             @Parameter(name = "quantity", description = "Quantity to be fetched", schema = @Schema(type = "string"))
     })
-    @GetMapping(path = "randomResources", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    @GetMapping(path = "randomResources", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     public ResponseEntity<Paging<ServiceBundle>> getRandomResources(@Parameter(hidden = true) @RequestParam MultiValueMap<String, Object> allRequestParams,
                                                                     @Parameter(hidden = true) Authentication auth) {
@@ -318,7 +315,8 @@ public class ServiceController {
                                                                   @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix,
                                                                   @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId) {
         String id = prefix + "/" + suffix;
-        Paging<LoggingInfo> loggingInfoHistory = this.serviceBundleService.getLoggingInfoHistory(id, catalogueId);
+        ServiceBundle bundle = serviceBundleService.get(id, catalogueId, false);
+        Paging<LoggingInfo> loggingInfoHistory = serviceBundleService.getLoggingInfoHistory(bundle);
         return ResponseEntity.ok(loggingInfoHistory);
     }
 
@@ -341,40 +339,42 @@ public class ServiceController {
 
     // front-end use (Service/Datasource/TR forms)
     @GetMapping(path = {"resourceIdToNameMap"}, produces = {MediaType.APPLICATION_JSON_VALUE})
-    public ResponseEntity<List<gr.uoa.di.madgik.resourcecatalogue.dto.Value>> resourceIdToNameMap(@RequestParam String catalogueId) {
+    public ResponseEntity<Map<String, List<gr.uoa.di.madgik.resourcecatalogue.dto.Value>>> resourceIdToNameMap(@RequestParam String catalogueId) {
+        Map<String, List<gr.uoa.di.madgik.resourcecatalogue.dto.Value>> ret = new HashMap<>();
         List<gr.uoa.di.madgik.resourcecatalogue.dto.Value> allResources = new ArrayList<>();
         // fetch catalogueId related non-public Resources
 
         List<gr.uoa.di.madgik.resourcecatalogue.dto.Value> catalogueRelatedServices = genericResourceService
                 .getResultsWithoutFacets(createFacetFilter(catalogueId, false, "service")).getResults()
                 .stream().map(serviceBundle -> (ServiceBundle) serviceBundle)
-                .map(c -> new gr.uoa.di.madgik.resourcecatalogue.dto.Value(c.getId(), c.getService().getResourceOrganisation() + " - " + c.getService().getName()))
+                .map(c -> new gr.uoa.di.madgik.resourcecatalogue.dto.Value(c.getId(), c.getService().getName()))
                 .toList();
         List<gr.uoa.di.madgik.resourcecatalogue.dto.Value> catalogueRelatedTrainingResources = genericResourceService
                 .getResultsWithoutFacets(createFacetFilter(catalogueId, false, "training_resource")).getResults()
                 .stream().map(trainingResourceBundle -> (TrainingResourceBundle) trainingResourceBundle)
-                .map(c -> new gr.uoa.di.madgik.resourcecatalogue.dto.Value(c.getId(), c.getTrainingResource().getResourceOrganisation() + " - " + c.getTrainingResource().getTitle()))
+                .map(c -> new gr.uoa.di.madgik.resourcecatalogue.dto.Value(c.getId(), c.getTrainingResource().getTitle()))
                 .toList();
         // fetch non-catalogueId related public Resources
         List<gr.uoa.di.madgik.resourcecatalogue.dto.Value> publicServices = genericResourceService
                 .getResultsWithoutFacets(createFacetFilter(catalogueId, true, "service")).getResults()
                 .stream().map(serviceBundle -> (ServiceBundle) serviceBundle)
                 .filter(c -> !c.getService().getCatalogueId().equals(catalogueId))
-                .map(c -> new gr.uoa.di.madgik.resourcecatalogue.dto.Value(c.getId(), c.getService().getResourceOrganisation() + " - " + c.getService().getName()))
+                .map(c -> new gr.uoa.di.madgik.resourcecatalogue.dto.Value(c.getId(), c.getService().getName()))
                 .toList();
         List<gr.uoa.di.madgik.resourcecatalogue.dto.Value> publicTrainingResources = genericResourceService
                 .getResultsWithoutFacets(createFacetFilter(catalogueId, true, "training_resource")).getResults()
                 .stream().map(trainingResourceBundle -> (TrainingResourceBundle) trainingResourceBundle)
                 .filter(c -> !c.getTrainingResource().getCatalogueId().equals(catalogueId))
-                .map(c -> new gr.uoa.di.madgik.resourcecatalogue.dto.Value(c.getId(), c.getTrainingResource().getResourceOrganisation() + " - " + c.getTrainingResource().getTitle()))
+                .map(c -> new gr.uoa.di.madgik.resourcecatalogue.dto.Value(c.getId(), c.getTrainingResource().getTitle()))
                 .toList();
 
         allResources.addAll(catalogueRelatedServices);
         allResources.addAll(catalogueRelatedTrainingResources);
         allResources.addAll(publicServices);
         allResources.addAll(publicTrainingResources);
+        ret.put("RESOURCES_VOC", allResources);
 
-        return ResponseEntity.ok(allResources);
+        return ResponseEntity.ok(ret);
     }
 
     //FIXME: FacetFilters reset after each search.
@@ -425,8 +425,9 @@ public class ServiceController {
     @Operation(summary = "Suspends a specific Service.")
     @PutMapping(path = "suspend", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
-    public ServiceBundle suspendService(@RequestParam String serviceId, @RequestParam boolean suspend, @Parameter(hidden = true) Authentication auth) {
-        return serviceBundleService.suspend(serviceId, suspend, auth);
+    public ServiceBundle suspendService(@RequestParam String serviceId, @RequestParam String catalogueId,
+                                        @RequestParam boolean suspend, @Parameter(hidden = true) Authentication auth) {
+        return serviceBundleService.suspend(serviceId, catalogueId, suspend, auth);
     }
 
     @PostMapping(path = "/addBulk", produces = {MediaType.APPLICATION_JSON_VALUE})
@@ -445,7 +446,7 @@ public class ServiceController {
                                                       @Parameter(hidden = true) Authentication authentication) {
         String id = prefix + "/" + suffix;
         ServiceBundle service;
-        service = serviceBundleService.get(id);
+        service = serviceBundleService.get(id, catalogueId, false);
         if (service == null) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
@@ -462,7 +463,7 @@ public class ServiceController {
                                        @Deprecated @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId,
                                        @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
-        return new ResponseEntity<>(serviceBundleService.get(id), HttpStatus.OK);
+        return new ResponseEntity<>(serviceBundleService.get(id, catalogueId, false), HttpStatus.OK);
     }
 
     @PostMapping(path = {"/bundle"}, produces = {MediaType.APPLICATION_JSON_VALUE})
@@ -501,12 +502,19 @@ public class ServiceController {
     public ResponseEntity<Service> getDraftService(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
                                                    @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix) {
         String id = prefix + "/" + suffix;
-        return new ResponseEntity<>(draftServiceService.get(id).getService(), HttpStatus.OK);
+        ServiceBundle bundle = serviceBundleService.get(id, catalogueId, false);
+        if (bundle.isDraft()) {
+            return new ResponseEntity<>(bundle.getService(), HttpStatus.OK);
+        }
+        return null;
     }
 
     @GetMapping(path = "/draft/getMyDraftServices", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<List<ServiceBundle>> getMyDraftServices(@Parameter(hidden = true) Authentication auth) {
-        return new ResponseEntity<>(draftServiceService.getMy(null, auth).getResults(), HttpStatus.OK);
+        FacetFilter ff = new FacetFilter();
+        ff.setQuantity(1000);
+        ff.addFilter("draft", true);
+        return new ResponseEntity<>(serviceBundleService.getMy(ff, auth).getResults(), HttpStatus.OK);
     }
 
     @BrowseParameters
@@ -518,6 +526,7 @@ public class ServiceController {
         String id = String.join("/", prefix, suffix);
         FacetFilter ff = FacetFilter.from(allRequestParams);
         ff.addFilter("resource_organisation", id);
+        ff.addFilter("catalogue_id", catalogueId);
         return new ResponseEntity<>(draftServiceService.getAll(ff, auth), HttpStatus.OK);
     }
 
@@ -533,7 +542,7 @@ public class ServiceController {
     @PutMapping(path = "/draft", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceAdmin(#auth, #service.id)")
     public ResponseEntity<Service> updateDraftService(@RequestBody Service service, @Parameter(hidden = true) Authentication auth) {
-        ServiceBundle serviceBundle = draftServiceService.get(service.getId());
+        ServiceBundle serviceBundle = draftServiceService.get(service.getId(), catalogueId, false);
         serviceBundle.setService(service);
         serviceBundle = draftServiceService.update(serviceBundle, auth);
         logger.info("User '{}' updated the Draft Service with name '{}' and id '{}'", User.of(auth).getEmail().toLowerCase(),
@@ -547,9 +556,12 @@ public class ServiceController {
                                                       @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix,
                                                       @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
-        ServiceBundle serviceBundle = draftServiceService.get(id);
+        ServiceBundle serviceBundle = serviceBundleService.get(id, catalogueId, false);
         if (serviceBundle == null) {
             return new ResponseEntity<>(HttpStatus.GONE);
+        }
+        if (!serviceBundle.isDraft()) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
         draftServiceService.delete(serviceBundle);
         logger.info("User '{}' deleted the Draft Service '{}'-'{}'", User.of(auth).getEmail().toLowerCase(),
@@ -561,7 +573,7 @@ public class ServiceController {
     @PreAuthorize("hasRole('ROLE_USER')")
     public ResponseEntity<Service> transformService(@RequestBody Service service,
                                                     @Parameter(hidden = true) Authentication auth) {
-        ServiceBundle serviceBundle = draftServiceService.get(service.getId());
+        ServiceBundle serviceBundle = draftServiceService.get(service.getId(), catalogueId, false);
         serviceBundle.setService(service);
 
         serviceBundleService.validate(serviceBundle);

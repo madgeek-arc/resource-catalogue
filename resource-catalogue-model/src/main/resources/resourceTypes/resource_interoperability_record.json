@@ -23,6 +23,13 @@
       "type": "java.lang.String"
     },
     {
+      "label": "Node",
+      "multivalued": false,
+      "name": "node",
+      "path": "$.resourceInteroperabilityRecord.node",
+      "type": "java.lang.String"
+    },
+    {
       "label": "Interoperability Record ID",
       "multivalued": false,
       "name": "interoperability_record_ids",

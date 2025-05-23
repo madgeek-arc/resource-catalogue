@@ -175,6 +175,9 @@
     "identifierInfo" : {
       "$ref" : "#/$defs/IdentifierInfo"
     },
+    "node" : {
+      "type" : "string"
+    },
     "providerId" : {
       "type" : "string"
     },

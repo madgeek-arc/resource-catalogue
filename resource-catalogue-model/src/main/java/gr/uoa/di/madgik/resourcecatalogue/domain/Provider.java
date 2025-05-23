@@ -61,6 +61,15 @@ public class Provider implements Identifiable {
     private String name;
 
     /**
+     * Provider's original Node
+     */
+    @XmlElement
+    @Schema
+    @FieldValidation(nullable = true, containsId = true, idClass = Vocabulary.class)
+    @VocabularyValidation(type = Vocabulary.Type.NODE)
+    private String node;
+
+    /**
      * Website with information about the Provider.
      */
     @XmlElement(required = true)
@@ -326,15 +335,14 @@ public class Provider implements Identifiable {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Provider provider = (Provider) o;
-        return legalEntity == provider.legalEntity && Objects.equals(id, provider.id) && Objects.equals(abbreviation, provider.abbreviation) && Objects.equals(name, provider.name) && Objects.equals(website, provider.website) && Objects.equals(legalStatus, provider.legalStatus) && Objects.equals(hostingLegalEntity, provider.hostingLegalEntity) && Objects.equals(alternativeIdentifiers, provider.alternativeIdentifiers) && Objects.equals(description, provider.description) && Objects.equals(logo, provider.logo) && Objects.equals(multimedia, provider.multimedia) && Objects.equals(scientificDomains, provider.scientificDomains) && Objects.equals(tags, provider.tags) && Objects.equals(structureTypes, provider.structureTypes) && Objects.equals(location, provider.location) && Objects.equals(mainContact, provider.mainContact) && Objects.equals(publicContacts, provider.publicContacts) && Objects.equals(lifeCycleStatus, provider.lifeCycleStatus) && Objects.equals(certifications, provider.certifications) && Objects.equals(participatingCountries, provider.participatingCountries) && Objects.equals(affiliations, provider.affiliations) && Objects.equals(networks, provider.networks) && Objects.equals(catalogueId, provider.catalogueId) && Objects.equals(esfriDomains, provider.esfriDomains) && Objects.equals(esfriType, provider.esfriType) && Objects.equals(merilScientificDomains, provider.merilScientificDomains) && Objects.equals(areasOfActivity, provider.areasOfActivity) && Objects.equals(societalGrandChallenges, provider.societalGrandChallenges) && Objects.equals(nationalRoadmaps, provider.nationalRoadmaps) && Objects.equals(users, provider.users);
+        return legalEntity == provider.legalEntity && Objects.equals(id, provider.id) && Objects.equals(abbreviation, provider.abbreviation) && Objects.equals(name, provider.name) && Objects.equals(node, provider.node) && Objects.equals(website, provider.website) && Objects.equals(legalStatus, provider.legalStatus) && Objects.equals(hostingLegalEntity, provider.hostingLegalEntity) && Objects.equals(alternativeIdentifiers, provider.alternativeIdentifiers) && Objects.equals(description, provider.description) && Objects.equals(logo, provider.logo) && Objects.equals(multimedia, provider.multimedia) && Objects.equals(scientificDomains, provider.scientificDomains) && Objects.equals(tags, provider.tags) && Objects.equals(structureTypes, provider.structureTypes) && Objects.equals(location, provider.location) && Objects.equals(mainContact, provider.mainContact) && Objects.equals(publicContacts, provider.publicContacts) && Objects.equals(lifeCycleStatus, provider.lifeCycleStatus) && Objects.equals(certifications, provider.certifications) && Objects.equals(participatingCountries, provider.participatingCountries) && Objects.equals(affiliations, provider.affiliations) && Objects.equals(networks, provider.networks) && Objects.equals(catalogueId, provider.catalogueId) && Objects.equals(esfriDomains, provider.esfriDomains) && Objects.equals(esfriType, provider.esfriType) && Objects.equals(merilScientificDomains, provider.merilScientificDomains) && Objects.equals(areasOfActivity, provider.areasOfActivity) && Objects.equals(societalGrandChallenges, provider.societalGrandChallenges) && Objects.equals(nationalRoadmaps, provider.nationalRoadmaps) && Objects.equals(users, provider.users);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, abbreviation, name, website, legalEntity, legalStatus, hostingLegalEntity, alternativeIdentifiers, description, logo, multimedia, scientificDomains, tags, structureTypes, location, mainContact, publicContacts, lifeCycleStatus, certifications, participatingCountries, affiliations, networks, catalogueId, esfriDomains, esfriType, merilScientificDomains, areasOfActivity, societalGrandChallenges, nationalRoadmaps, users);
+        return Objects.hash(id, abbreviation, name, node, website, legalEntity, legalStatus, hostingLegalEntity, alternativeIdentifiers, description, logo, multimedia, scientificDomains, tags, structureTypes, location, mainContact, publicContacts, lifeCycleStatus, certifications, participatingCountries, affiliations, networks, catalogueId, esfriDomains, esfriType, merilScientificDomains, areasOfActivity, societalGrandChallenges, nationalRoadmaps, users);
     }
 
     @Override
@@ -370,6 +378,14 @@ public class Provider implements Identifiable {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getNode() {
+        return node;
+    }
+
+    public void setNode(String node) {
+        this.node = node;
     }
 
     public URL getWebsite() {
