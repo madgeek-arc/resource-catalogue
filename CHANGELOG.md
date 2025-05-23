@@ -1,3 +1,9 @@
+## [](https://github.com/madgeek-arc/resource-catalogue/compare/v5.0.0...v) (2025-05-22)
+
+### Bug Fixes
+
+* add prefix on resource-catalogue JMS messages ([4234b15](https://github.com/madgeek-arc/resource-catalogue/commit/4234b1537a78697861bb1ff886ff156d7af72d51))
+* Bump dependency versions to fix ControllerAdvice issue when loading swagger ([e0b4d6e](https://github.com/madgeek-arc/resource-catalogue/commit/e0b4d6e338459c4044ff069c27500d44d8ca53e4))
 ## [](https://github.com/madgeek-arc/resource-catalogue/compare/v3.0.1...v) (2025-05-21)
 
 ### ⚠ BREAKING CHANGES
