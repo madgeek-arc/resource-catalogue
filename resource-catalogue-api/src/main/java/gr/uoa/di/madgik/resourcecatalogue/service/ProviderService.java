@@ -18,10 +18,9 @@ package gr.uoa.di.madgik.resourcecatalogue.service;
 
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.domain.Paging;
-import gr.uoa.di.madgik.resourcecatalogue.domain.LoggingInfo;
 import gr.uoa.di.madgik.resourcecatalogue.domain.ProviderBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.ResourceHistory;
-import gr.uoa.di.madgik.resourcecatalogue.dto.ExtendedValue;
+import gr.uoa.di.madgik.resourcecatalogue.dto.CatalogueValue;
 import gr.uoa.di.madgik.resourcecatalogue.dto.MapValues;
 import org.springframework.security.core.Authentication;
 
@@ -189,9 +188,9 @@ public interface ProviderService extends ResourceCatalogueService<ProviderBundle
      *
      * @param hle  Hosting Legal Entity ID
      * @param auth Authentication
-     * @return {@link List}&lt;{@link MapValues}&lt;{@link ExtendedValue}&gt;&gt;
+     * @return {@link List}&lt;{@link MapValues}&lt;{@link CatalogueValue}&gt;&gt;
      */
-    List<MapValues<ExtendedValue>> getAllResourcesUnderASpecificHLE(String hle, Authentication auth);
+    List<MapValues<CatalogueValue>> getAllResourcesUnderASpecificHLE(String hle, Authentication auth);
 
     /**
      * Return true if Provider User Admin has accepted registration terms

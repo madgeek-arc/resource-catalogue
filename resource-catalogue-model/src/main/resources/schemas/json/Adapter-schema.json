@@ -1,6 +1,18 @@
 {
   "$schema" : "https://json-schema.org/draft/2020-12/schema",
   "$defs" : {
+    "LinkedResource" : {
+      "type" : "object",
+      "properties" : {
+        "id" : {
+          "type" : "string"
+        },
+        "type" : {
+          "type" : "string"
+        }
+      },
+      "additionalProperties" : false
+    },
     "User" : {
       "type" : "object",
       "properties" : {
@@ -52,7 +64,7 @@
       "type" : "string"
     },
     "linkedResource" : {
-      "type" : "string"
+      "$ref" : "#/$defs/LinkedResource"
     },
     "logo" : {
       "type" : "string"

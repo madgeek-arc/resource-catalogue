@@ -23,6 +23,7 @@ import gr.uoa.di.madgik.resourcecatalogue.annotations.BrowseCatalogue;
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
 import gr.uoa.di.madgik.resourcecatalogue.service.AdapterService;
 import gr.uoa.di.madgik.resourcecatalogue.service.GenericResourceService;
+import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Parameters;
@@ -78,7 +79,7 @@ public class AdapterController {
     }
 
     @GetMapping(path = "bundle/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.userHasAdapterAccess(#auth, #prefix+'/'+#suffix)")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.hasAdapterAccess(#auth, #prefix+'/'+#suffix)")
     public ResponseEntity<AdapterBundle> getAdapterBundle(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
                                                           @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix,
                                                           @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId,
@@ -139,7 +140,7 @@ public class AdapterController {
 
     @Operation(summary = "Updates the Adapter.")
     @PutMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.userHasAdapterAccess(#auth,#adapter.id)")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.hasAdapterAccess(#auth,#adapter.id)")
     public ResponseEntity<Adapter> update(@RequestBody Adapter adapter,
                                           @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId,
                                           @RequestParam(required = false) String comment,
@@ -184,49 +185,123 @@ public class AdapterController {
         return new ResponseEntity<>(adapter, HttpStatus.OK);
     }
 
-    @GetMapping(path = {"resourceIdToNameMap"}, produces = {MediaType.APPLICATION_JSON_VALUE})
-    public ResponseEntity<Map<String, List<gr.uoa.di.madgik.resourcecatalogue.dto.Value>>> resourceIdToNameMap(@RequestParam String catalogueId) {
-        Map<String, List<gr.uoa.di.madgik.resourcecatalogue.dto.Value>> ret = new HashMap<>();
-        List<gr.uoa.di.madgik.resourcecatalogue.dto.Value> allResources = new ArrayList<>();
+    @PatchMapping(path = "publish/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.hasAdapterAccess(#auth, #prefix+'/'+#suffix)")
+    public ResponseEntity<AdapterBundle> setActive(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
+                                                   @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix,
+                                                   @RequestParam Boolean active,
+                                                   @Parameter(hidden = true) Authentication auth) {
+        String id = prefix + "/" + suffix;
+        return ResponseEntity.ok(adapterService.publish(id, active, auth));
+    }
+
+    @Operation(summary = "Validates the Adapter without actually changing the repository.")
+    @PostMapping(path = "validate", produces = {MediaType.APPLICATION_JSON_VALUE})
+    public ResponseEntity<Void> validate(@RequestBody Adapter adapter) {
+        adapterService.validate(new AdapterBundle(adapter));
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @PatchMapping(path = "audit/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
+    public ResponseEntity<AdapterBundle> audit(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
+                                               @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix,
+                                               @RequestParam("catalogueId") String catalogueId,
+                                               @RequestParam(required = false) String comment,
+                                               @RequestParam LoggingInfo.ActionType actionType,
+                                               @Parameter(hidden = true) Authentication auth) {
+        String id = prefix + "/" + suffix;
+        AdapterBundle adapterBundle = adapterService.audit(id, catalogueId, comment, actionType, auth);
+        return new ResponseEntity<>(adapterBundle, HttpStatus.OK);
+    }
+
+    @Operation(summary = "Suspends an Adapter.")
+    @PutMapping(path = "suspend", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
+    public AdapterBundle suspend(@RequestParam String adapterId, @RequestParam String catalogueId,
+                                 @RequestParam boolean suspend, @Parameter(hidden = true) Authentication auth) {
+        return adapterService.suspend(adapterId, catalogueId, suspend, auth);
+    }
+
+    @GetMapping(path = {"loggingInfoHistory/{prefix}/{suffix}"}, produces = {MediaType.APPLICATION_JSON_VALUE})
+    public ResponseEntity<Paging<LoggingInfo>> loggingInfoHistory(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
+                                                                  @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix,
+                                                                  @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId) {
+        String id = prefix + "/" + suffix;
+        AdapterBundle bundle = adapterService.get(id, catalogueId, false);
+        Paging<LoggingInfo> loggingInfoHistory = adapterService.getLoggingInfoHistory(bundle);
+        return ResponseEntity.ok(loggingInfoHistory);
+    }
+
+    // front-end use
+    @Hidden
+    @GetMapping(path = {"linkedResourceServiceMapDetails"}, produces = {MediaType.APPLICATION_JSON_VALUE})
+    public ResponseEntity<Map<String, List<gr.uoa.di.madgik.resourcecatalogue.dto.ParentValue>>>
+    linkedResourceServiceMapDetails(@RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId) {
+        Map<String, List<gr.uoa.di.madgik.resourcecatalogue.dto.ParentValue>> ret = new HashMap<>();
+        List<gr.uoa.di.madgik.resourcecatalogue.dto.ParentValue> allResources = new ArrayList<>();
         // fetch catalogueId related non-public Resources
 
-        List<gr.uoa.di.madgik.resourcecatalogue.dto.Value> catalogueRelatedServices = genericResourceService
-                .getResultsWithoutFacets(createFacetFilter(catalogueId, false, "service")).getResults()
+        List<gr.uoa.di.madgik.resourcecatalogue.dto.ParentValue> catalogueRelatedServices = genericResourceService
+                .getResultsWithoutFacets(createFacetFilter(catalogueId, false, "approved resource",
+                        "service")).getResults()
                 .stream().map(serviceBundle -> (ServiceBundle) serviceBundle)
-                .map(c -> new gr.uoa.di.madgik.resourcecatalogue.dto.Value(c.getId(), c.getService().getName()))
-                .toList();
-        List<gr.uoa.di.madgik.resourcecatalogue.dto.Value> catalogueRelatedGuidelines = genericResourceService
-                .getResultsWithoutFacets(createFacetFilter(catalogueId, false, "interoperability_record")).getResults()
-                .stream().map(interoperabilityRecordBundle -> (InteroperabilityRecordBundle) interoperabilityRecordBundle)
-                .map(c -> new gr.uoa.di.madgik.resourcecatalogue.dto.Value(c.getId(), c.getInteroperabilityRecord().getTitle()))
+                .map(c -> new gr.uoa.di.madgik.resourcecatalogue.dto.ParentValue(c.getId(),
+                        c.getService().getName(), "Service"))
                 .toList();
         // fetch non-catalogueId related public Resources
-        List<gr.uoa.di.madgik.resourcecatalogue.dto.Value> publicServices = genericResourceService
-                .getResultsWithoutFacets(createFacetFilter(catalogueId, true, "service")).getResults()
+        List<gr.uoa.di.madgik.resourcecatalogue.dto.ParentValue> publicServices = genericResourceService
+                .getResultsWithoutFacets(createFacetFilter(catalogueId, true, "approved resource",
+                        "service")).getResults()
                 .stream().map(serviceBundle -> (ServiceBundle) serviceBundle)
                 .filter(c -> !c.getService().getCatalogueId().equals(catalogueId))
-                .map(c -> new gr.uoa.di.madgik.resourcecatalogue.dto.Value(c.getId(), c.getService().getName()))
-                .toList();
-        List<gr.uoa.di.madgik.resourcecatalogue.dto.Value> publicInteroperabilityRecords = genericResourceService
-                .getResultsWithoutFacets(createFacetFilter(catalogueId, true, "interoperability_record")).getResults()
-                .stream().map(interoperabilityRecordBundle -> (InteroperabilityRecordBundle) interoperabilityRecordBundle)
-                .filter(c -> !c.getInteroperabilityRecord().getCatalogueId().equals(catalogueId))
-                .map(c -> new gr.uoa.di.madgik.resourcecatalogue.dto.Value(c.getId(), c.getInteroperabilityRecord().getTitle()))
+                .map(c -> new gr.uoa.di.madgik.resourcecatalogue.dto.ParentValue(c.getId(),
+                        c.getService().getName(), "Service"))
                 .toList();
 
         allResources.addAll(catalogueRelatedServices);
-        allResources.addAll(catalogueRelatedGuidelines);
         allResources.addAll(publicServices);
-        allResources.addAll(publicInteroperabilityRecords);
-        ret.put("ADAPTER_RESOURCES_VOC", allResources);
+        ret.put("SERVICES_VOC", allResources);
 
         return ResponseEntity.ok(ret);
     }
 
-    private FacetFilter createFacetFilter(String catalogueId, boolean isPublic, String resourceType) {
+    @Hidden
+    @GetMapping(path = {"linkedResourceGuidelineMapDetails"}, produces = {MediaType.APPLICATION_JSON_VALUE})
+    public ResponseEntity<Map<String, List<gr.uoa.di.madgik.resourcecatalogue.dto.ParentValue>>>
+    linkedResourceGuidelineMapDetails(@RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId) {
+        Map<String, List<gr.uoa.di.madgik.resourcecatalogue.dto.ParentValue>> ret = new HashMap<>();
+        List<gr.uoa.di.madgik.resourcecatalogue.dto.ParentValue> allResources = new ArrayList<>();
+        // fetch catalogueId related non-public Resources
+
+        List<gr.uoa.di.madgik.resourcecatalogue.dto.ParentValue> catalogueRelatedGuidelines = genericResourceService
+                .getResultsWithoutFacets(createFacetFilter(catalogueId, false, "approved interoperability record",
+                        "interoperability_record")).getResults()
+                .stream().map(guidelineBundle -> (InteroperabilityRecordBundle) guidelineBundle)
+                .map(c -> new gr.uoa.di.madgik.resourcecatalogue.dto.ParentValue(c.getId(),
+                        c.getInteroperabilityRecord().getTitle(), "Guideline"))
+                .toList();
+        // fetch non-catalogueId related public Resources
+        List<gr.uoa.di.madgik.resourcecatalogue.dto.ParentValue> publicGuidelines = genericResourceService
+                .getResultsWithoutFacets(createFacetFilter(catalogueId, true, "approved interoperability record",
+                        "interoperability_record")).getResults()
+                .stream().map(guidelineBundle -> (InteroperabilityRecordBundle) guidelineBundle)
+                .filter(c -> !c.getInteroperabilityRecord().getCatalogueId().equals(catalogueId))
+                .map(c -> new gr.uoa.di.madgik.resourcecatalogue.dto.ParentValue(c.getId(),
+                        c.getInteroperabilityRecord().getTitle(), "Guideline"))
+                .toList();
+
+        allResources.addAll(catalogueRelatedGuidelines);
+        allResources.addAll(publicGuidelines);
+        ret.put("GUIDELINES_VOC", allResources);
+
+        return ResponseEntity.ok(ret);
+    }
+
+    private FacetFilter createFacetFilter(String catalogueId, boolean isPublic, String status, String resourceType) {
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(10000);
-        ff.addFilter("status", "approved resource");
+        ff.addFilter("status", status);
         ff.addFilter("active", true);
         if (isPublic) {
             ff.addFilter("published", true);

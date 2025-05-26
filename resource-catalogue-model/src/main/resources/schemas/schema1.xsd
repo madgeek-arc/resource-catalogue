@@ -53,7 +53,7 @@
         </xs:annotation>
       </xs:element>
             
-      <xs:element minOccurs="0" name="linkedResource" type="xs:string">
+      <xs:element minOccurs="0" name="linkedResource" type="linkedResource">
         <xs:annotation>
           <xs:documentation><![CDATA[EOSC Guideline or Service ID]]></xs:documentation>
         </xs:annotation>
@@ -122,6 +122,18 @@
       <xs:element minOccurs="0" name="name" type="xs:string"/>
             
       <xs:element minOccurs="0" name="surname" type="xs:string"/>
+          
+    </xs:sequence>
+      
+  </xs:complexType>
+    
+  <xs:complexType name="linkedResource">
+        
+    <xs:sequence>
+            
+      <xs:element minOccurs="0" name="id" type="xs:string"/>
+            
+      <xs:element minOccurs="0" name="type" type="xs:string"/>
           
     </xs:sequence>
       
@@ -2633,6 +2645,18 @@ that is the used scheme (e.g., Web Address URL, DOI, ARK, etc.).]]></xs:document
       <xs:enumeration value="TICKET_REDIRECTION"/>
             
       <xs:enumeration value="DIRECT_USAGE"/>
+          
+    </xs:restriction>
+      
+  </xs:simpleType>
+    
+  <xs:simpleType name="linkedResourceType">
+        
+    <xs:restriction base="xs:string">
+            
+      <xs:enumeration value="GUIDELINE"/>
+            
+      <xs:enumeration value="SERVICE"/>
           
     </xs:restriction>
       

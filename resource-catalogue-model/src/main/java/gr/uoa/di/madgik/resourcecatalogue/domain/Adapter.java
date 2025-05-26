@@ -80,7 +80,7 @@ public class Adapter implements Identifiable {
     @XmlElement(required = true)
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     @FieldValidation(containsId = true, idClasses = {Service.class, InteroperabilityRecord.class})
-    private String linkedResource;
+    private LinkedResource linkedResource;
 
     /**
      * Short catch-phrase
@@ -176,7 +176,7 @@ public class Adapter implements Identifiable {
     public Adapter() {
     }
 
-    public Adapter(String id, String name, String catalogueId, String node, String description, String linkedResource, String tagline, String logo, URI documentation, URI repository, List<URI> releases, String programmingLanguage, String license, String version, String changeLog, Date lastUpdate, List<User> admins) {
+    public Adapter(String id, String name, String catalogueId, String node, String description, LinkedResource linkedResource, String tagline, String logo, URI documentation, URI repository, List<URI> releases, String programmingLanguage, String license, String version, String changeLog, Date lastUpdate, List<User> admins) {
         this.id = id;
         this.name = name;
         this.catalogueId = catalogueId;
@@ -206,29 +206,6 @@ public class Adapter implements Identifiable {
     @Override
     public int hashCode() {
         return Objects.hash(id, name, catalogueId, node, description, linkedResource, tagline, logo, documentation, repository, releases, programmingLanguage, license, version, changeLog, lastUpdate, admins);
-    }
-
-    @Override
-    public String toString() {
-        return "Adapter{" +
-                "id='" + id + '\'' +
-                ", name='" + name + '\'' +
-                ", catalogueId='" + catalogueId + '\'' +
-                ", node='" + node + '\'' +
-                ", description='" + description + '\'' +
-                ", linkedResource='" + linkedResource + '\'' +
-                ", tagline='" + tagline + '\'' +
-                ", logo='" + logo + '\'' +
-                ", documentation=" + documentation +
-                ", repository=" + repository +
-                ", releases=" + releases +
-                ", programmingLanguage='" + programmingLanguage + '\'' +
-                ", license='" + license + '\'' +
-                ", version='" + version + '\'' +
-                ", changeLog='" + changeLog + '\'' +
-                ", lastUpdate=" + lastUpdate +
-                ", admins=" + admins +
-                '}';
     }
 
     @Override
@@ -273,11 +250,11 @@ public class Adapter implements Identifiable {
         this.description = description;
     }
 
-    public String getLinkedResource() {
+    public LinkedResource getLinkedResource() {
         return linkedResource;
     }
 
-    public void setLinkedResource(String linkedResource) {
+    public void setLinkedResource(LinkedResource linkedResource) {
         this.linkedResource = linkedResource;
     }
 
