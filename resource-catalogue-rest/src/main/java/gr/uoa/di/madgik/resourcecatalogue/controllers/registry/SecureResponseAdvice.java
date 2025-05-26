@@ -205,7 +205,7 @@ public class SecureResponseAdvice<T> implements ResponseBodyAdvice<T> {
 
     @SuppressWarnings("unchecked")
     private void modifyAdapter(T adapter, Authentication auth) {
-        if (!this.securityService.userHasAdapterAccess(auth, ((Adapter) adapter).getId())) {
+        if (!this.securityService.hasAdapterAccess(auth, ((Adapter) adapter).getId())) {
             ((Adapter) adapter).setAdmins(null);
         }
     }
@@ -217,7 +217,7 @@ public class SecureResponseAdvice<T> implements ResponseBodyAdvice<T> {
         modifyLoggingInfo((T) ((AdapterBundle) bundle).getLatestUpdateInfo());
         modifyLoggingInfo((T) ((AdapterBundle) bundle).getLatestOnboardingInfo());
 
-        if (!this.securityService.userHasAdapterAccess(auth, ((AdapterBundle) bundle).getId())) {
+        if (!this.securityService.hasAdapterAccess(auth, ((AdapterBundle) bundle).getId())) {
             ((AdapterBundle) bundle).getMetadata().setTerms(null);
         }
     }

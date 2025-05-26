@@ -315,34 +315,23 @@ public class OIDCSecurityService implements SecurityService {
     //TODO: refactor this region now that Maintainers became Users
     //region Adapters
     @Override
-    public boolean userHasAdapterAccess(Authentication auth, @NotNull String id) {
-        if (auth == null || id == null) {
-            return false;
-        }
-
-        String userEmail = AuthenticationInfo.getEmail(auth);
-        if (userEmail == null || userEmail.isBlank()) {
-            return false;
-        }
-
-        List<User> users = getUsers(id);
-        if (users == null) {
-            return false;
-        }
-
-        return users.parallelStream()
-                .filter(Objects::nonNull)
-                .map(User::getEmail)
-                .filter(Objects::nonNull)
-                .anyMatch(email -> email.equalsIgnoreCase(userEmail));
+    public boolean hasAdapterAccess(Authentication auth, @NotNull String id) {
+        return getAuthenticatedUser(auth)
+                .map(user -> userHasAdapterAccess(user, id))
+                .orElse(false);
     }
 
-    private List<User> getUsers(String id) {
-        AdapterBundle adapter = checkAdapterExistence(id);
-        if (adapter == null || adapter.getAdapter().getAdmins() == null) {
-            return null;
+    @Override
+    public boolean userHasAdapterAccess(User user, @NotNull String id) {
+        AdapterBundle registeredAdapter = checkAdapterExistence(id);
+        if (registeredAdapter == null || registeredAdapter.getAdapter().getAdmins() == null) {
+            return false;
         }
-        return adapter.getAdapter().getAdmins();
+        List<User> adapterAdmins = registeredAdapter.getAdapter().getAdmins();
+
+        return adapterAdmins.parallelStream()
+                .filter(Objects::nonNull)
+                .anyMatch(u -> userMatches(u, user));
     }
 
     private AdapterBundle checkAdapterExistence(String adapterId) {

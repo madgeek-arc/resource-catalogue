@@ -23,7 +23,7 @@ import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.registry.service.ResourceCRUDService;
 import gr.uoa.di.madgik.registry.service.VersionService;
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
-import gr.uoa.di.madgik.resourcecatalogue.dto.ExtendedValue;
+import gr.uoa.di.madgik.resourcecatalogue.dto.CatalogueValue;
 import gr.uoa.di.madgik.resourcecatalogue.dto.MapValues;
 import gr.uoa.di.madgik.resourcecatalogue.exceptions.CatalogueResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
@@ -981,12 +981,12 @@ public class ProviderManager extends ResourceCatalogueManager<ProviderBundle> im
     }
 
     @Override
-    public List<MapValues<ExtendedValue>> getAllResourcesUnderASpecificHLE(String hle, Authentication auth) {
+    public List<MapValues<CatalogueValue>> getAllResourcesUnderASpecificHLE(String hle, Authentication auth) {
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(10000);
         ff.addFilter("hosting_legal_entity", hle);
         ff.addFilter("published", false);
-        List<MapValues<ExtendedValue>> mapValuesList = new ArrayList<>();
+        List<MapValues<CatalogueValue>> mapValuesList = new ArrayList<>();
         List<ProviderBundle> providers = getAll(ff, auth).getResults();
         List<ServiceBundle> services = new ArrayList<>();
         List<TrainingResourceBundle> trainingResources = new ArrayList<>();
@@ -1007,12 +1007,12 @@ public class ProviderManager extends ResourceCatalogueManager<ProviderBundle> im
     }
 
     private void createMapValuesForHLE(List<?> resources, String resourceType,
-                                       List<MapValues<ExtendedValue>> mapValuesList) {
-        MapValues<ExtendedValue> mapValues = new MapValues<>();
+                                       List<MapValues<CatalogueValue>> mapValuesList) {
+        MapValues<CatalogueValue> mapValues = new MapValues<>();
         mapValues.setKey(resourceType);
-        List<ExtendedValue> valueList = new ArrayList<>();
+        List<CatalogueValue> valueList = new ArrayList<>();
         for (Object obj : resources) {
-            ExtendedValue value = new ExtendedValue();
+            CatalogueValue value = new CatalogueValue();
             switch (resourceType) {
                 case "provider":
                     ProviderBundle providerBundle = (ProviderBundle) obj;

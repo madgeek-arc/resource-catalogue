@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright 2017-2025 OpenAIRE AMKE & Athena Research and Innovation Center
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -304,6 +304,23 @@ public class FieldValidator {
                 for (Object entry : ((Collection) o)) {
                     validateIds(field, entry, annotation);
                 }
+            } else if (annotation.idClasses().length > 0) {
+                    boolean found = false;
+                    List<String> classNames = new ArrayList<>();
+                    classNames.add("Guideline"); //TODO: fix this
+                    Class<?>[] classes = annotation.idClasses();
+                    for (Class<?> clazz : classes) {
+                        classNames.add(clazz.getSimpleName());
+                        found = getResource(clazz.getSimpleName(), o);
+                        if (found) {
+                            break;
+                        }
+                    }
+                    if (!found) {
+                        throw new ValidationException(
+                                String.format("Field '%s' should ONLY contain the ID of an existing resource from '%s'",
+                                        field.getName(), classNames));
+                    }
             } else if (String.class.equals(o.getClass())) {
                 try {
                     if (annotation.containsResourceId()) {
@@ -313,22 +330,6 @@ public class FieldValidator {
                             throw new ValidationException(
                                     String.format("Field '%s' should ONLY contain the ID of an existing Service " +
                                             "or Training Resource", field.getName()));
-                        }
-                    } else if (annotation.idClasses().length > 0) {
-                        boolean found = false;
-                        List<String> classNames = new ArrayList<>();
-                        Class<?>[] classes = annotation.idClasses();
-                        for (Class<?> clazz : classes) {
-                            classNames.add(clazz.getSimpleName());
-                            found = getResource(clazz.getSimpleName(), o);
-                            if (found) {
-                                break;
-                            }
-                        }
-                        if (!found) {
-                            throw new ValidationException(
-                                    String.format("Field '%s' should ONLY contain the ID of an existing resource from '%s'",
-                                            field.getName(), classNames));
                         }
                     } else if (Vocabulary.class.equals(annotation.idClass())) {
                         Vocabulary voc = vocabularyService.get(o.toString());

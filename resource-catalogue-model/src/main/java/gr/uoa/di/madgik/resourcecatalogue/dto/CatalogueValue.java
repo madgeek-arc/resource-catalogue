@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright 2017-2025 OpenAIRE AMKE & Athena Research and Innovation Center
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,14 +16,14 @@
 
 package gr.uoa.di.madgik.resourcecatalogue.dto;
 
-public class ExtendedValue extends Value {
+public class CatalogueValue extends Value {
 
     private String catalogue;
 
-    public ExtendedValue() {
+    public CatalogueValue() {
     }
 
-    public ExtendedValue(String catalogue) {
+    public CatalogueValue(String catalogue) {
         this.catalogue = catalogue;
     }
 

@@ -62,7 +62,7 @@ public class PublicAdapterController {
     @GetMapping(path = "public/adapter/{prefix}/{suffix}",
             produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or " +
-            "@securityService.userHasAdapterAccess(#auth, #prefix+'/'+#suffix)")
+            "@securityService.hasAdapterAccess(#auth, #prefix+'/'+#suffix)")
     public ResponseEntity<?> get(@Parameter(description = "The left part of the ID before the '/'")
                                  @PathVariable("prefix") String prefix,
                                  @Parameter(description = "The right part of the ID after the '/'")
@@ -81,7 +81,7 @@ public class PublicAdapterController {
     @GetMapping(path = "public/adapter/bundle/{prefix}/{suffix}",
             produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or " +
-            "@securityService.userHasAdapterAccess(#auth, #prefix+'/'+#suffix)")
+            "@securityService.hasAdapterAccess(#auth, #prefix+'/'+#suffix)")
     public ResponseEntity<?> getBundle(@Parameter(description = "The left part of the ID before the '/'")
                                        @PathVariable("prefix") String prefix,
                                        @Parameter(description = "The right part of the ID after the '/'")

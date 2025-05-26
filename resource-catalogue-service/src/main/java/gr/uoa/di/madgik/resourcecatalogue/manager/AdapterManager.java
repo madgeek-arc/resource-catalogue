@@ -19,7 +19,6 @@ package gr.uoa.di.madgik.resourcecatalogue.manager;
 import gr.uoa.di.madgik.catalogue.exception.ValidationException;
 import gr.uoa.di.madgik.registry.domain.Browsing;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
-import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.registry.domain.Resource;
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
 import gr.uoa.di.madgik.resourcecatalogue.service.AdapterService;
@@ -237,19 +236,38 @@ public class AdapterManager extends ResourceCatalogueManager<AdapterBundle> impl
 
     @Override
     public AdapterBundle publish(String id, Boolean active, Authentication auth) {
-        return null;
+        AdapterBundle adapterBundle = get(id, catalogueId, false);
+        adapterBundle.setActive(active);
+
+        List<LoggingInfo> loggingInfoList = commonMethods.createActivationLoggingInfo(adapterBundle, active, auth);
+        loggingInfoList.sort(Comparator.comparing(LoggingInfo::getDate));
+        adapterBundle.setLoggingInfo(loggingInfoList);
+
+        // latestLoggingInfo
+        adapterBundle.setLatestUpdateInfo(commonMethods.setLatestLoggingInfo(loggingInfoList, LoggingInfo.Types.UPDATE.getKey()));
+        adapterBundle.setLatestOnboardingInfo(commonMethods.setLatestLoggingInfo(loggingInfoList, LoggingInfo.Types.ONBOARD.getKey()));
+        adapterBundle.setLatestAuditInfo(commonMethods.setLatestLoggingInfo(loggingInfoList, LoggingInfo.Types.AUDIT.getKey()));
+
+
+        super.update(adapterBundle, auth);
+        logger.info("User '{}-{}' saved Adapter with id '{}' as '{}'",
+                AuthenticationInfo.getFullName(auth),
+                AuthenticationInfo.getEmail(auth).toLowerCase(),
+                id, active);
+        return adapterBundle;
     }
 
     @Override
     public boolean hasAdminAcceptedTerms(String id, boolean isDraft, Authentication authentication) {
-        return AdapterService.super.hasAdminAcceptedTerms(id, isDraft, authentication);
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
     public void adminAcceptedTerms(String id, boolean isDraft, Authentication authentication) {
-        AdapterService.super.adminAcceptedTerms(id, isDraft, authentication);
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 
+    @Override
     public AdapterBundle suspend(String id, String catalogueId, boolean suspend, Authentication auth) {
         AdapterBundle adapterBundle = get(id, catalogueId, false);
         commonMethods.suspensionValidation(adapterBundle, adapterBundle.getAdapter().getCatalogueId(),
@@ -260,14 +278,21 @@ public class AdapterManager extends ResourceCatalogueManager<AdapterBundle> impl
 
     @Override
     public AdapterBundle audit(String id, String catalogueId, String comment, LoggingInfo.ActionType actionType, Authentication auth) {
-        return null;
-    }
+        AdapterBundle adapterBundle = get(id, catalogueId, false);
+        commonMethods.auditResource(adapterBundle, comment, actionType, auth);
+        if (actionType.getKey().equals(LoggingInfo.ActionType.VALID.getKey())) {
+            adapterBundle.setAuditState(Auditable.VALID);
+        }
+        if (actionType.getKey().equals(LoggingInfo.ActionType.INVALID.getKey())) {
+            adapterBundle.setAuditState(Auditable.INVALID_AND_NOT_UPDATED);
+        }
 
-    @Override
-    public Paging<LoggingInfo> getLoggingInfoHistory(AdapterBundle bundle) {
-        return AdapterService.super.getLoggingInfoHistory(bundle);
+        logger.info("User '{}-{}' audited Adapter '{}'-'{}' with [actionType: {}]",
+                AuthenticationInfo.getFullName(auth), AuthenticationInfo.getEmail(auth).toLowerCase(),
+                adapterBundle.getAdapter().getId(),
+                adapterBundle.getAdapter().getName(), actionType);
+        return super.update(adapterBundle, auth);
     }
-
 
     @Override
     public void delete(AdapterBundle adapter) {
@@ -277,4 +302,10 @@ public class AdapterManager extends ResourceCatalogueManager<AdapterBundle> impl
         super.delete(adapter);
         logger.info("Deleted the Adapter with id '{}'", adapter.getId());
     }
+
+//    private validateLinkedResource(LinkedResource linkedResource) {
+//        String type = linkedResource.getType();
+//        String id = linkedResource.getId();
+//
+//    }
 }
