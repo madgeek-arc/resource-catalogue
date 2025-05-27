@@ -21,10 +21,7 @@ import gr.uoa.di.madgik.registry.domain.Browsing;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.domain.Resource;
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
-import gr.uoa.di.madgik.resourcecatalogue.service.AdapterService;
-import gr.uoa.di.madgik.resourcecatalogue.service.IdCreator;
-import gr.uoa.di.madgik.resourcecatalogue.service.OIDCSecurityService;
-import gr.uoa.di.madgik.resourcecatalogue.service.VocabularyService;
+import gr.uoa.di.madgik.resourcecatalogue.service.*;
 import gr.uoa.di.madgik.resourcecatalogue.utils.Auditable;
 import gr.uoa.di.madgik.resourcecatalogue.utils.AuthenticationInfo;
 import gr.uoa.di.madgik.resourcecatalogue.utils.ObjectUtils;
@@ -36,8 +33,8 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.security.core.Authentication;
 
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @org.springframework.stereotype.Service("adapterManager")
 public class AdapterManager extends ResourceCatalogueManager<AdapterBundle> implements AdapterService {
@@ -47,6 +44,9 @@ public class AdapterManager extends ResourceCatalogueManager<AdapterBundle> impl
     private final VocabularyService vocabularyService;
     private final ProviderResourcesCommonMethods commonMethods;
     private final IdCreator idCreator;
+    private final ServiceBundleService serviceBundleService;
+    private final InteroperabilityRecordService interoperabilityRecordService;
+    private final ProviderService providerService;
 
     @Value("${catalogue.id}")
     private String catalogueId;
@@ -54,12 +54,17 @@ public class AdapterManager extends ResourceCatalogueManager<AdapterBundle> impl
     public AdapterManager(OIDCSecurityService securityService,
                           VocabularyService vocabularyService,
                           ProviderResourcesCommonMethods commonMethods,
-                          IdCreator idCreator) {
+                          IdCreator idCreator, ServiceBundleService serviceBundleService,
+                          InteroperabilityRecordService interoperabilityRecordService,
+                          ProviderService providerService) {
         super(AdapterBundle.class);
         this.securityService = securityService;
         this.vocabularyService = vocabularyService;
         this.commonMethods = commonMethods;
         this.idCreator = idCreator;
+        this.serviceBundleService = serviceBundleService;
+        this.interoperabilityRecordService = interoperabilityRecordService;
+        this.providerService = providerService;
     }
 
     @Override
@@ -157,7 +162,7 @@ public class AdapterManager extends ResourceCatalogueManager<AdapterBundle> impl
         adapter.getAdapter().setCatalogueId(this.catalogueId);
 
         if (securityService.hasRole(auth, "ROLE_ADMIN") || securityService.hasRole(auth, "ROLE_EPOT") ||
-                securityService.hasRole(auth, "ROLE_PROVIDER")) {
+                getProviderUserEmails().contains(AuthenticationInfo.getEmail(auth).toLowerCase())) {
             adapter.setActive(true);
             adapter.setStatus(vocabularyService.get("approved adapter").getId());
         } else if (securityService.hasRole(auth, "ROLE_USER")) {
@@ -303,9 +308,43 @@ public class AdapterManager extends ResourceCatalogueManager<AdapterBundle> impl
         logger.info("Deleted the Adapter with id '{}'", adapter.getId());
     }
 
-//    private validateLinkedResource(LinkedResource linkedResource) {
-//        String type = linkedResource.getType();
-//        String id = linkedResource.getId();
-//
-//    }
+    @Override
+    public AdapterBundle validate(AdapterBundle adapter) {
+        validateLinkedResource(adapter.getAdapter().getLinkedResource());
+        return super.validate(adapter);
+    }
+
+    private void validateLinkedResource(LinkedResource linkedResource) {
+        String type = linkedResource.getType();
+        String id = linkedResource.getId();
+
+        switch (type) {
+            case "Guideline":
+                interoperabilityRecordService.get(id, catalogueId, false);
+                break;
+            case "Service":
+                serviceBundleService.get(id, catalogueId, false);
+                break;
+            default:
+                throw new ValidationException("Unsupported linked resource type: [" + type + "]. " +
+                        "Supported types are [Guideline, Service]");
+        }
+    }
+
+    private Set<String> getProviderUserEmails() {
+        FacetFilter ff = new FacetFilter();
+        ff.addFilter("published", false);
+        ff.setQuantity(maxQuantity);
+        List<ProviderBundle> providers = providerService.getAll(ff, securityService.getAdminAccess()).getResults();
+        return providers
+                .stream()
+                .flatMap(p -> (p.getProvider().getUsers() != null ? p.getProvider().getUsers() : new ArrayList<User>())
+                        .stream()
+                        .filter(Objects::nonNull)
+                        .map(User::getEmail)
+                        .filter(Objects::nonNull)
+                        .map(String::toLowerCase))
+                .filter(u -> u != null && !Objects.equals("", u))
+                .collect(Collectors.toSet());
+    }
 }
