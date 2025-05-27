@@ -304,23 +304,26 @@ public class FieldValidator {
                 for (Object entry : ((Collection) o)) {
                     validateIds(field, entry, annotation);
                 }
-            } else if (annotation.idClasses().length > 0) {
-                    boolean found = false;
-                    List<String> classNames = new ArrayList<>();
-                    classNames.add("Guideline"); //TODO: fix this
-                    Class<?>[] classes = annotation.idClasses();
-                    for (Class<?> clazz : classes) {
-                        classNames.add(clazz.getSimpleName());
-                        found = getResource(clazz.getSimpleName(), o);
-                        if (found) {
-                            break;
-                        }
+            } else if (annotation.idClasses().length > 0) { //TODO: revit the way we validate for linkedResources
+                LinkedResource linkedResource = (LinkedResource) o;
+                boolean found = false;
+                Class<?>[] classes = annotation.idClasses();
+                List<String> classSimpleNames = new ArrayList<>();
+                classSimpleNames.add("Guideline");
+                for (Class<?> clazz : classes) {
+                    classSimpleNames.add(clazz.getSimpleName());
+                }
+                for (String classSimpleName : classSimpleNames) {
+                    found = getResource(classSimpleName, linkedResource.getId());
+                    if (found) {
+                        break;
                     }
-                    if (!found) {
-                        throw new ValidationException(
-                                String.format("Field '%s' should ONLY contain the ID of an existing resource from '%s'",
-                                        field.getName(), classNames));
-                    }
+                }
+                if (!found) {
+                    throw new ValidationException(
+                            String.format("Field '%s' should ONLY contain the ID of an existing resource from " +
+                                    "'[Guideline, Service]'", field.getName()));
+                }
             } else if (String.class.equals(o.getClass())) {
                 try {
                     if (annotation.containsResourceId()) {
@@ -427,7 +430,7 @@ public class FieldValidator {
         return switch (className) {
             case "Service" -> serviceBundleService.getOrElseReturnNull(o.toString()) != null;
             case "TrainingResource" -> trainingResourceService.getOrElseReturnNull(o.toString()) != null;
-            case "InteroperabilityRecord" -> interoperabilityRecordService.getOrElseReturnNull(o.toString()) != null;
+            case "InteroperabilityRecord", "Guideline" -> interoperabilityRecordService.getOrElseReturnNull(o.toString()) != null;
             default -> false;
         };
     }

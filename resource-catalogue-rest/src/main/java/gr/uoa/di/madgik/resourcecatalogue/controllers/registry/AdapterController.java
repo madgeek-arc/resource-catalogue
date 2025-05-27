@@ -98,8 +98,9 @@ public class AdapterController {
         FacetFilter ff = FacetFilter.from(allRequestParams);
         ff.setResourceType("adapter");
         ff.addFilter("published", false);
-        ff.addFilter("active", true);
-        ff.addFilter("status", "approved adapter");
+        //TODO: do we need these?
+//        ff.addFilter("active", true);
+//        ff.addFilter("status", "approved adapter");
         Paging<Adapter> paging = genericResourceService.getResults(ff).map(r -> ((AdapterBundle) r).getPayload());
         return ResponseEntity.ok(paging);
     }
