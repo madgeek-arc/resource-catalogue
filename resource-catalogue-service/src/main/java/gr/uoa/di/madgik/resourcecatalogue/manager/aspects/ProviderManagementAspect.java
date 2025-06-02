@@ -54,6 +54,7 @@ public class ProviderManagementAspect {
     private final RegistrationMailService registrationMailService;
     private final SecurityService securityService;
     private final PublicResourceInteroperabilityRecordService publicResourceInteroperabilityRecordManager;
+    private final PublicAdapterService publicAdapterManager;
 
     @Value("${catalogue.id}")
     private String catalogueId;
@@ -68,6 +69,7 @@ public class ProviderManagementAspect {
                                     PublicInteroperabilityRecordService publicInteroperabilityRecordManager,
                                     PublicResourceInteroperabilityRecordService publicResourceInteroperabilityRecordManager,
                                     PublicConfigurationTemplateInstanceService publicConfigurationTemplateInstanceManager,
+                                    PublicAdapterService publicAdapterManager,
                                     RegistrationMailService registrationMailService,
                                     SecurityService securityService) {
         this.providerService = providerService;
@@ -80,6 +82,7 @@ public class ProviderManagementAspect {
         this.publicInteroperabilityRecordManager = publicInteroperabilityRecordManager;
         this.publicResourceInteroperabilityRecordManager = publicResourceInteroperabilityRecordManager;
         this.publicConfigurationTemplateInstanceManager = publicConfigurationTemplateInstanceManager;
+        this.publicAdapterManager = publicAdapterManager;
         this.registrationMailService = registrationMailService;
         this.securityService = securityService;
     }
@@ -500,5 +503,36 @@ public class ProviderManagementAspect {
     public void deletePublicConfigurationTemplateInstance(JoinPoint joinPoint) {
         ConfigurationTemplateInstanceBundle configurationTemplateInstanceBundle = (ConfigurationTemplateInstanceBundle) joinPoint.getArgs()[0];
         publicConfigurationTemplateInstanceManager.delete(configurationTemplateInstanceBundle);
+    }
+
+    @Async
+    @AfterReturning(pointcut = "execution(* gr.uoa.di.madgik.resourcecatalogue.manager.AdapterManager.add(..))",
+            returning = "adapterBundle")
+    public void addAdapterAsPublic(final AdapterBundle adapterBundle) {
+        try {
+            //TODO: Refactor if Adapters can belong to a different from the Project's Catalogue
+            publicAdapterManager.get(adapterBundle.getIdentifiers().getPid());
+        } catch (ResourceException | ResourceNotFoundException e) {
+            publicAdapterManager.add(ObjectUtils.clone(adapterBundle), null);
+        }
+    }
+
+    @Async
+    @AfterReturning(pointcut = "execution(* gr.uoa.di.madgik.resourcecatalogue.manager.AdapterManager.update(..)) " +
+            "&& args(adapterBundle,..)", returning = "ret", argNames = "adapterBundle,ret")
+    public void updatePublicAdapter(AdapterBundle adapterBundle, AdapterBundle ret) {
+        try {
+            if (!ret.equals(adapterBundle)) {
+                publicAdapterManager.update(ObjectUtils.clone(ret), null);
+            }
+        } catch (ResourceException | ResourceNotFoundException ignore) {
+        }
+    }
+
+    @Async
+    @After("execution(* gr.uoa.di.madgik.resourcecatalogue.manager.AdapterManager.delete(..))")
+    public void deletePublicAdapter(JoinPoint joinPoint) {
+        AdapterBundle adapterBundle = (AdapterBundle) joinPoint.getArgs()[0];
+        publicAdapterManager.delete(adapterBundle);
     }
 }
