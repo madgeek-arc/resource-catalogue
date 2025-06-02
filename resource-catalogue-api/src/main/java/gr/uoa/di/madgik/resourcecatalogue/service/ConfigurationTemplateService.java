@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright 2017-2025 OpenAIRE AMKE & Athena Research and Innovation Center
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,16 +16,7 @@
 
 package gr.uoa.di.madgik.resourcecatalogue.service;
 
-import gr.uoa.di.madgik.resourcecatalogue.domain.configurationTemplates.ConfigurationTemplate;
 import gr.uoa.di.madgik.resourcecatalogue.domain.configurationTemplates.ConfigurationTemplateBundle;
 
 public interface ConfigurationTemplateService extends ResourceCatalogueService<ConfigurationTemplateBundle> {
-
-    /**
-     * Returns the Configuration Template of an Interoperability Record given its ID
-     *
-     * @param interoperabilityRecordId Interoperability Record ID
-     * @return {@link ConfigurationTemplate}
-     */
-    ConfigurationTemplate getByInteroperabilityRecordId(String interoperabilityRecordId);
 }

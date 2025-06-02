@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright 2017-2025 OpenAIRE AMKE & Athena Research and Innovation Center
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,15 +16,26 @@
 
 package gr.uoa.di.madgik.resourcecatalogue.manager;
 
-import gr.uoa.di.madgik.registry.domain.FacetFilter;
-import gr.uoa.di.madgik.resourcecatalogue.domain.configurationTemplates.ConfigurationTemplate;
+import gr.uoa.di.madgik.catalogue.exception.ValidationException;
+import gr.uoa.di.madgik.registry.domain.Resource;
+import gr.uoa.di.madgik.registry.exception.ResourceException;
+import gr.uoa.di.madgik.resourcecatalogue.domain.*;
 import gr.uoa.di.madgik.resourcecatalogue.domain.configurationTemplates.ConfigurationTemplateBundle;
 import gr.uoa.di.madgik.resourcecatalogue.service.ConfigurationTemplateService;
 import gr.uoa.di.madgik.resourcecatalogue.service.IdCreator;
+import gr.uoa.di.madgik.resourcecatalogue.service.InteroperabilityRecordService;
+import gr.uoa.di.madgik.resourcecatalogue.service.ProviderService;
+import gr.uoa.di.madgik.resourcecatalogue.utils.AuthenticationInfo;
+import gr.uoa.di.madgik.resourcecatalogue.utils.ObjectUtils;
 import gr.uoa.di.madgik.resourcecatalogue.utils.ProviderResourcesCommonMethods;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
+
+import java.util.Comparator;
+import java.util.List;
 
 @org.springframework.stereotype.Service("configurationTemplateManager")
 public class ConfigurationTemplateManager extends ResourceCatalogueManager<ConfigurationTemplateBundle>
@@ -33,11 +44,19 @@ public class ConfigurationTemplateManager extends ResourceCatalogueManager<Confi
     private static final Logger logger = LogManager.getLogger(ConfigurationTemplateManager.class);
     private final IdCreator idCreator;
     private final ProviderResourcesCommonMethods commonMethods;
+    private final ProviderService providerService;
+    private final InteroperabilityRecordService interoperabilityRecordService;
 
-    public ConfigurationTemplateManager(IdCreator idCreator, ProviderResourcesCommonMethods commonMethods) {
+    @Value("${catalogue.id}")
+    private String catalogueId;
+
+    public ConfigurationTemplateManager(IdCreator idCreator, ProviderResourcesCommonMethods commonMethods,
+                                        ProviderService providerService, InteroperabilityRecordService interoperabilityRecordService) {
         super(ConfigurationTemplateBundle.class);
         this.idCreator = idCreator;
         this.commonMethods = commonMethods;
+        this.providerService = providerService;
+        this.interoperabilityRecordService = interoperabilityRecordService;
     }
 
     @Override
@@ -49,16 +68,80 @@ public class ConfigurationTemplateManager extends ResourceCatalogueManager<Confi
     public ConfigurationTemplateBundle add(ConfigurationTemplateBundle bundle, Authentication auth) {
         bundle.setId(idCreator.generate(getResourceTypeName()));
         commonMethods.createIdentifiers(bundle, getResourceTypeName(), false);
+
+        InteroperabilityRecordBundle interoperabilityRecordBundle = interoperabilityRecordService.get(
+                bundle.getConfigurationTemplate().getInteroperabilityRecordId(), catalogueId, false);
+        ProviderBundle providerBundle = providerService.get(interoperabilityRecordBundle.getInteroperabilityRecord().getCatalogueId(),
+                interoperabilityRecordBundle.getInteroperabilityRecord().getProviderId(), auth);
+        // check if Provider is approved
+        if (!providerBundle.getStatus().equals("approved provider")) {
+            throw new ResourceException(String.format("The Provider ID '%s' you provided is not yet approved",
+                    providerBundle.getId()), HttpStatus.CONFLICT);
+        }
         validate(bundle);
+
+        if (bundle.getMetadata() == null) {
+            bundle.setMetadata(Metadata.createMetadata(AuthenticationInfo.getFullName(auth)));
+        }
+        // loggingInfo
+        List<LoggingInfo> loggingInfoList = commonMethods.returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(bundle, auth);
+        bundle.setLatestOnboardingInfo(loggingInfoList.getFirst());
+        bundle.setActive(true);
+        LoggingInfo loggingInfoApproved = commonMethods.createLoggingInfo(auth, LoggingInfo.Types.ONBOARD.getKey(),
+                LoggingInfo.ActionType.APPROVED.getKey());
+        loggingInfoList.add(loggingInfoApproved);
+        bundle.setLatestOnboardingInfo(loggingInfoApproved);
+        bundle.setLoggingInfo(loggingInfoList);
+
         super.add(bundle, auth);
-        logger.info("Added the Configuration Template with id '{}'", bundle.getId());
+        logger.info("Added a new Configuration Template with id '{}' and title '{}'", bundle.getId(),
+                bundle.getConfigurationTemplate().getName());
         return bundle;
     }
 
-    public ConfigurationTemplate getByInteroperabilityRecordId(String interoperabilityRecordId) {
-        FacetFilter ff = new FacetFilter();
-        ff.setResourceType(getResourceTypeName());
-        ff.addFilter("interoperability_record_id", interoperabilityRecordId);
-        return getAll(ff, null).getResults().getFirst().getConfigurationTemplate();
+    @Override
+    public ConfigurationTemplateBundle update(ConfigurationTemplateBundle bundle, Authentication auth) {
+        ConfigurationTemplateBundle ret = ObjectUtils.clone(bundle);
+        ConfigurationTemplateBundle existingConfigurationTemplate;
+        existingConfigurationTemplate = get(ret.getConfigurationTemplate().getId(), catalogueId, false);
+        if (ret.getConfigurationTemplate().equals(existingConfigurationTemplate.getConfigurationTemplate())) {
+            return ret;
+        }
+
+        validate(ret);
+
+        // block Public Configuration Template update
+        if (existingConfigurationTemplate.getMetadata().isPublished()) {
+            throw new ValidationException("You cannot directly update a Public Configuration Template");
+        }
+
+        // update existing ConfigurationTemplate Metadata, MigrationStatus
+        ret.setMetadata(Metadata.updateMetadata(existingConfigurationTemplate.getMetadata(), AuthenticationInfo.getFullName(auth)));
+        ret.setIdentifiers(existingConfigurationTemplate.getIdentifiers());
+
+        List<LoggingInfo> loggingInfoList = commonMethods.returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(existingConfigurationTemplate, auth);
+        LoggingInfo loggingInfo = commonMethods.createLoggingInfo(auth, LoggingInfo.Types.UPDATE.getKey(),
+                LoggingInfo.ActionType.UPDATED.getKey());
+        loggingInfoList.add(loggingInfo);
+        loggingInfoList.sort(Comparator.comparing(LoggingInfo::getDate));
+        ret.setLoggingInfo(loggingInfoList);
+
+        // latestLoggingInfo
+        ret.setLatestUpdateInfo(loggingInfo);
+        ret.setLatestOnboardingInfo(commonMethods.setLatestLoggingInfo(loggingInfoList, LoggingInfo.Types.ONBOARD.getKey()));
+
+        // active/status
+        ret.setActive(existingConfigurationTemplate.isActive());
+        ret.setSuspended(existingConfigurationTemplate.isSuspended());
+
+        Resource existing = getResource(ret.getConfigurationTemplate().getId(), catalogueId, false);
+        existing.setPayload(serialize(ret));
+        existing.setResourceType(getResourceType());
+
+        resourceService.updateResource(existing);
+        logger.info("Updated Configuration Template with id '{}' and title '{}'", ret.getId(),
+                ret.getConfigurationTemplate().getName());
+
+        return ret;
     }
 }
