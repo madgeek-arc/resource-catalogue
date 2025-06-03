@@ -19,6 +19,7 @@ package gr.uoa.di.madgik.resourcecatalogue.controllers.registry;
 import gr.uoa.di.madgik.registry.annotation.BrowseParameters;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.domain.Paging;
+import gr.uoa.di.madgik.resourcecatalogue.domain.User;
 import gr.uoa.di.madgik.resourcecatalogue.domain.configurationTemplates.ConfigurationTemplate;
 import gr.uoa.di.madgik.resourcecatalogue.domain.configurationTemplates.ConfigurationTemplateBundle;
 import gr.uoa.di.madgik.resourcecatalogue.service.ConfigurationTemplateService;
@@ -26,6 +27,8 @@ import gr.uoa.di.madgik.resourcecatalogue.service.GenericResourceService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -40,12 +43,18 @@ import org.springframework.web.bind.annotation.*;
 @Tag(name = "configuration template", description = "Operations about Configuration Templates")
 public class ConfigurationTemplateController {
 
+    private static final Logger logger = LoggerFactory.getLogger(ConfigurationTemplateController.class);
+
     private final ConfigurationTemplateService service;
     private final GenericResourceService genericResourceService;
+    private final ConfigurationTemplateService configurationTemplateService;
 
-    public ConfigurationTemplateController(ConfigurationTemplateService service, GenericResourceService genericResourceService) {
+    public ConfigurationTemplateController(ConfigurationTemplateService service,
+                                           GenericResourceService genericResourceService,
+                                           ConfigurationTemplateService configurationTemplateService) {
         this.service = service;
         this.genericResourceService = genericResourceService;
+        this.configurationTemplateService = configurationTemplateService;
     }
 
     @Operation(summary = "Create a new Configuration Template.")
@@ -59,12 +68,27 @@ public class ConfigurationTemplateController {
     }
 
     @Operation(summary = "Updates the Configuration Template with the given id.")
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceAdmin(#auth,#interoperabilityRecord.id)")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceAdmin(#auth,#configurationTemplate.interoperabilityRecordId)")
     @PutMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<ConfigurationTemplate> update(@RequestBody ConfigurationTemplate configurationTemplate,
-                                                         @Parameter(hidden = true) Authentication auth) {
+                                                        @Parameter(hidden = true) Authentication auth) {
         ConfigurationTemplateBundle ret = service.update(new ConfigurationTemplateBundle(configurationTemplate), auth);
         return new ResponseEntity<>(ret.getConfigurationTemplate(), HttpStatus.OK);
+    }
+
+    @DeleteMapping(path = "deleteByInteroperabilityRecordId/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceAdmin(#auth, #prefix+'/'+#suffix)")
+    public ResponseEntity<ConfigurationTemplate> delete(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
+                                                        @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix,
+                                                        @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId,
+                                                        @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
+        String id = prefix + "/" + suffix;
+        ConfigurationTemplateBundle configurationTemplateBundle = configurationTemplateService.get(id, catalogueId, false);
+        if (configurationTemplateBundle == null) {
+            return new ResponseEntity<>(HttpStatus.GONE);
+        }
+        configurationTemplateService.delete(configurationTemplateBundle);
+        return new ResponseEntity<>(configurationTemplateBundle.getConfigurationTemplate(), HttpStatus.OK);
     }
 
     @Operation(summary = "Returns all Configuration Templates.")
@@ -72,7 +96,6 @@ public class ConfigurationTemplateController {
     @GetMapping(path = "all", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<Paging<ConfigurationTemplate>> getAll(
             @Parameter(hidden = true) @RequestParam MultiValueMap<String, Object> allRequestParams) {
-        //TODO: add active,status if we have onboarding
         FacetFilter ff = FacetFilter.from(allRequestParams);
         ff.setResourceType("configuration_template");
         ff.addFilter("published", false);
@@ -89,12 +112,22 @@ public class ConfigurationTemplateController {
             @Parameter(description = "The right part of the ID after the '/'")
             @PathVariable("suffix") String suffix,
             @Parameter(hidden = true) @RequestParam MultiValueMap<String, Object> allRequestParams) {
-        //TODO: add active,status if we have onboarding
         FacetFilter ff = FacetFilter.from(allRequestParams);
         ff.setResourceType("configuration_template");
         ff.addFilter("published", false);
         ff.addFilter("interoperability_record_id", prefix + "/" + suffix);
         Paging<ConfigurationTemplate> paging = genericResourceService.getResults(ff);
         return ResponseEntity.ok(paging);
+    }
+
+    @Parameter(hidden = true)
+    @PostMapping(path = "createPublicConfigurationTemplate", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public ResponseEntity<ConfigurationTemplateBundle> createPublicConfigurationTemplate(@RequestBody ConfigurationTemplateBundle configurationTemplateBundle,
+                                                                                         @Parameter(hidden = true) Authentication auth) {
+        logger.info("User '{}-{}' attempts to create a Public Configuration Template from Configuration Template '{}'-'{}' of the '{}' Catalogue",
+                User.of(auth).getFullName(), User.of(auth).getEmail().toLowerCase(), configurationTemplateBundle.getId(),
+                configurationTemplateBundle.getConfigurationTemplate().getName(), configurationTemplateBundle.getConfigurationTemplate().getCatalogueId());
+        return ResponseEntity.ok(configurationTemplateService.createPublicConfigurationTemplate(configurationTemplateBundle, auth));
     }
 }

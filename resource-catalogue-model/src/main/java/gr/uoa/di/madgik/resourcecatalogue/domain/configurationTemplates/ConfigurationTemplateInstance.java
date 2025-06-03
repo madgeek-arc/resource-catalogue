@@ -17,7 +17,10 @@
 package gr.uoa.di.madgik.resourcecatalogue.domain.configurationTemplates;
 
 import gr.uoa.di.madgik.resourcecatalogue.annotation.FieldValidation;
+import gr.uoa.di.madgik.resourcecatalogue.annotation.VocabularyValidation;
+import gr.uoa.di.madgik.resourcecatalogue.domain.Catalogue;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Identifiable;
+import gr.uoa.di.madgik.resourcecatalogue.domain.Vocabulary;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlRootElement;
@@ -43,6 +46,17 @@ public class ConfigurationTemplateInstance implements Identifiable {
     @FieldValidation(containsId = true, idClass = ConfigurationTemplate.class)
     private String configurationTemplateId;
 
+    @XmlElement
+    @Schema
+    @FieldValidation(nullable = true, containsId = true, idClass = Catalogue.class)
+    private String catalogueId;
+
+    @XmlElement
+    @Schema
+    @FieldValidation(nullable = true, containsId = true, idClass = Vocabulary.class)
+    @VocabularyValidation(type = Vocabulary.Type.NODE)
+    private String node;
+
     @XmlElement(required = true)
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     @FieldValidation
@@ -51,24 +65,13 @@ public class ConfigurationTemplateInstance implements Identifiable {
     public ConfigurationTemplateInstance() {
     }
 
-    public ConfigurationTemplateInstance(String id, String resourceId, String configurationTemplateId, String payload) {
+    public ConfigurationTemplateInstance(String id, String resourceId, String configurationTemplateId, String catalogueId, String node, String payload) {
         this.id = id;
         this.resourceId = resourceId;
         this.configurationTemplateId = configurationTemplateId;
+        this.catalogueId = catalogueId;
+        this.node = node;
         this.payload = payload;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        ConfigurationTemplateInstance that = (ConfigurationTemplateInstance) o;
-        return Objects.equals(id, that.id) && Objects.equals(resourceId, that.resourceId) && Objects.equals(configurationTemplateId, that.configurationTemplateId) && Objects.equals(payload, that.payload);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(id, resourceId, configurationTemplateId, payload);
     }
 
     @Override
@@ -77,8 +80,22 @@ public class ConfigurationTemplateInstance implements Identifiable {
                 "id='" + id + '\'' +
                 ", resourceId='" + resourceId + '\'' +
                 ", configurationTemplateId='" + configurationTemplateId + '\'' +
+                ", catalogueId='" + catalogueId + '\'' +
+                ", node='" + node + '\'' +
                 ", payload='" + payload + '\'' +
                 '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        ConfigurationTemplateInstance that = (ConfigurationTemplateInstance) o;
+        return Objects.equals(id, that.id) && Objects.equals(resourceId, that.resourceId) && Objects.equals(configurationTemplateId, that.configurationTemplateId) && Objects.equals(catalogueId, that.catalogueId) && Objects.equals(node, that.node) && Objects.equals(payload, that.payload);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, resourceId, configurationTemplateId, catalogueId, node, payload);
     }
 
     @Override
@@ -105,6 +122,22 @@ public class ConfigurationTemplateInstance implements Identifiable {
 
     public void setConfigurationTemplateId(String configurationTemplateId) {
         this.configurationTemplateId = configurationTemplateId;
+    }
+
+    public String getCatalogueId() {
+        return catalogueId;
+    }
+
+    public void setCatalogueId(String catalogueId) {
+        this.catalogueId = catalogueId;
+    }
+
+    public String getNode() {
+        return node;
+    }
+
+    public void setNode(String node) {
+        this.node = node;
     }
 
     public String getPayload() {

@@ -2,10 +2,16 @@
   "$schema" : "https://json-schema.org/draft/2020-12/schema",
   "type" : "object",
   "properties" : {
+    "catalogueId" : {
+      "type" : "string"
+    },
     "configurationTemplateId" : {
       "type" : "string"
     },
     "id" : {
+      "type" : "string"
+    },
+    "node" : {
       "type" : "string"
     },
     "payload" : {

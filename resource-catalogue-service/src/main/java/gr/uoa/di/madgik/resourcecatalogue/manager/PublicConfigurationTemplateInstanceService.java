@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright 2017-2025 OpenAIRE AMKE & Athena Research and Innovation Center
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -35,7 +35,6 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
@@ -50,9 +49,6 @@ public class PublicConfigurationTemplateInstanceService extends ResourceCatalogu
     private final InteroperabilityRecordService interoperabilityRecordService;
     private final ServiceBundleService<ServiceBundle> serviceBundleService;
     private final TrainingResourceService trainingResourceService;
-
-    @Value("${catalogue.id}")
-    private String catalogueId;
 
     public PublicConfigurationTemplateInstanceService(JmsService jmsService,
                                                       InteroperabilityRecordService interoperabilityRecordService,
@@ -104,9 +100,12 @@ public class PublicConfigurationTemplateInstanceService extends ResourceCatalogu
 
     @Override
     public ConfigurationTemplateInstanceBundle update(ConfigurationTemplateInstanceBundle configurationTemplateInstanceBundle, Authentication authentication) {
-        //TODO: use get with catalogueId if CTI belongs to more than 1 Catalogues
-        ConfigurationTemplateInstanceBundle published = super.get(configurationTemplateInstanceBundle.getIdentifiers().getPid());
-        ConfigurationTemplateInstanceBundle ret = super.get(configurationTemplateInstanceBundle.getIdentifiers().getPid());
+        ConfigurationTemplateInstanceBundle published = super.get(
+                configurationTemplateInstanceBundle.getIdentifiers().getPid(),
+                configurationTemplateInstanceBundle.getConfigurationTemplateInstance().getCatalogueId(), true);
+        ConfigurationTemplateInstanceBundle ret = super.get(
+                configurationTemplateInstanceBundle.getIdentifiers().getPid(),
+                configurationTemplateInstanceBundle.getConfigurationTemplateInstance().getCatalogueId(), true);
         try {
             BeanUtils.copyProperties(ret, configurationTemplateInstanceBundle);
         } catch (IllegalAccessException | InvocationTargetException e) {
@@ -116,12 +115,12 @@ public class PublicConfigurationTemplateInstanceService extends ResourceCatalogu
         // set public id to resourceId
         updateIdsToPublic(ret);
         ret.setIdentifiers(published.getIdentifiers());
-        ret.getConfigurationTemplateInstance().setPayload(published.getConfigurationTemplateInstance().getPayload()); //TODO: refactor when users will be able to update CTIs
+        ret.getConfigurationTemplateInstance().setPayload(published.getConfigurationTemplateInstance().getPayload());
         ret.setId(published.getId());
         ret.getMetadata().setPublished(true);
-        logger.info("Updating public ResourceInteroperabilityRecordBundle with id '{}'", ret.getId());
+        logger.info("Updating public ConfigurationTemplateInstance with id '{}'", ret.getId());
         ret = super.update(ret, null);
-        jmsService.convertAndSendTopic("resource_interoperability_record.update", ret);
+        jmsService.convertAndSendTopic("configuration_template_instance.update", ret);
         return ret;
     }
 
@@ -144,9 +143,11 @@ public class PublicConfigurationTemplateInstanceService extends ResourceCatalogu
         // resourceId
         Bundle<?> resourceBundle;
         try {
-            resourceBundle = serviceBundleService.get(bundle.getConfigurationTemplateInstance().getResourceId(), catalogueId, false);
+            resourceBundle = serviceBundleService.get(bundle.getConfigurationTemplateInstance().getResourceId(),
+                    bundle.getConfigurationTemplateInstance().getCatalogueId(), false);
         } catch (CatalogueResourceNotFoundException e) {
-            resourceBundle = trainingResourceService.get(bundle.getConfigurationTemplateInstance().getResourceId(), catalogueId, false);
+            resourceBundle = trainingResourceService.get(bundle.getConfigurationTemplateInstance().getResourceId(),
+                    bundle.getConfigurationTemplateInstance().getCatalogueId(), false);
         }
         bundle.getConfigurationTemplateInstance().setResourceId(resourceBundle.getIdentifiers().getPid());
     }

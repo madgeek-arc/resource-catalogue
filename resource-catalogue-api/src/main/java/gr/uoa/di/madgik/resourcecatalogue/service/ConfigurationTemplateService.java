@@ -17,6 +17,37 @@
 package gr.uoa.di.madgik.resourcecatalogue.service;
 
 import gr.uoa.di.madgik.resourcecatalogue.domain.configurationTemplates.ConfigurationTemplateBundle;
+import org.springframework.security.core.Authentication;
 
 public interface ConfigurationTemplateService extends ResourceCatalogueService<ConfigurationTemplateBundle> {
+
+    /**
+     * Add a new Configuration Template on an existing Catalogue, providing the Catalogue's ID
+     *
+     * @param bundle                       Configuration Template Bundle
+     * @param catalogueId                  Catalogue ID
+     * @param auth                         Authentication
+     * @return {@link ConfigurationTemplateBundle}
+     */
+    ConfigurationTemplateBundle add(ConfigurationTemplateBundle bundle, String catalogueId, Authentication auth);
+
+    /**
+     * Update an Configuration Template of an existing Catalogue, providing its Catalogue ID
+     *
+     * @param bundle                       Configuration Template Bundle
+     * @param catalogueId                  Catalogue ID
+     * @param auth                         Authentication
+     * @return {@link ConfigurationTemplateBundle}
+     */
+    ConfigurationTemplateBundle update(ConfigurationTemplateBundle bundle, String catalogueId, Authentication auth);
+
+    /**
+     * Create a Public Configuration Template
+     *
+     * @param configurationTemplateBundle  Configuration Template
+     * @param auth                         Authentication
+     * @return {@link ConfigurationTemplateBundle}
+     */
+    ConfigurationTemplateBundle createPublicConfigurationTemplate(
+            ConfigurationTemplateBundle configurationTemplateBundle, Authentication auth);
 }

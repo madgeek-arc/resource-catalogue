@@ -2484,6 +2484,8 @@ that is the used scheme (e.g., Web Address URL, DOI, ARK, etc.).]]></xs:document
         
     <xs:sequence>
             
+      <xs:element minOccurs="0" name="catalogueId" type="xs:string"/>
+            
       <xs:element minOccurs="0" name="description" type="xs:string"/>
             
       <xs:element name="formModel">
@@ -2519,6 +2521,8 @@ that is the used scheme (e.g., Web Address URL, DOI, ARK, etc.).]]></xs:document
       <xs:element minOccurs="0" name="interoperabilityRecordId" type="xs:string"/>
             
       <xs:element minOccurs="0" name="name" type="xs:string"/>
+            
+      <xs:element minOccurs="0" name="node" type="xs:string"/>
           
     </xs:sequence>
       
@@ -2546,9 +2550,13 @@ that is the used scheme (e.g., Web Address URL, DOI, ARK, etc.).]]></xs:document
         
     <xs:sequence>
             
+      <xs:element minOccurs="0" name="catalogueId" type="xs:string"/>
+            
       <xs:element minOccurs="0" name="configurationTemplateId" type="xs:string"/>
             
       <xs:element minOccurs="0" name="id" type="xs:string"/>
+            
+      <xs:element minOccurs="0" name="node" type="xs:string"/>
             
       <xs:element minOccurs="0" name="payload" type="xs:string"/>
             

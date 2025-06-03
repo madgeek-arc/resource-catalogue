@@ -46,17 +46,20 @@ public class ConfigurationTemplateManager extends ResourceCatalogueManager<Confi
     private final ProviderResourcesCommonMethods commonMethods;
     private final ProviderService providerService;
     private final InteroperabilityRecordService interoperabilityRecordService;
+    private final PublicConfigurationTemplateService publicConfigurationTemplateService;
 
     @Value("${catalogue.id}")
     private String catalogueId;
 
     public ConfigurationTemplateManager(IdCreator idCreator, ProviderResourcesCommonMethods commonMethods,
-                                        ProviderService providerService, InteroperabilityRecordService interoperabilityRecordService) {
+                                        ProviderService providerService, InteroperabilityRecordService interoperabilityRecordService,
+                                        PublicConfigurationTemplateService publicConfigurationTemplateService) {
         super(ConfigurationTemplateBundle.class);
         this.idCreator = idCreator;
         this.commonMethods = commonMethods;
         this.providerService = providerService;
         this.interoperabilityRecordService = interoperabilityRecordService;
+        this.publicConfigurationTemplateService = publicConfigurationTemplateService;
     }
 
     @Override
@@ -66,11 +69,21 @@ public class ConfigurationTemplateManager extends ResourceCatalogueManager<Confi
 
     @Override
     public ConfigurationTemplateBundle add(ConfigurationTemplateBundle bundle, Authentication auth) {
+        return add(bundle, bundle.getConfigurationTemplate().getCatalogueId(), auth);
+    }
+
+    @Override
+    public ConfigurationTemplateBundle add(ConfigurationTemplateBundle bundle, String catalogueId, Authentication auth) {
+        InteroperabilityRecordBundle interoperabilityRecordBundle = interoperabilityRecordService.get(
+                bundle.getConfigurationTemplate().getInteroperabilityRecordId(), catalogueId, false);
+        if (!interoperabilityRecordBundle.getInteroperabilityRecord().getCatalogueId().equals(catalogueId)) {
+            throw new ValidationException(String.format("There is no Interoperability Record with ID %s in the %s Catalogue.",
+                    interoperabilityRecordBundle.getId(), catalogueId));
+        }
+
         bundle.setId(idCreator.generate(getResourceTypeName()));
         commonMethods.createIdentifiers(bundle, getResourceTypeName(), false);
 
-        InteroperabilityRecordBundle interoperabilityRecordBundle = interoperabilityRecordService.get(
-                bundle.getConfigurationTemplate().getInteroperabilityRecordId(), catalogueId, false);
         ProviderBundle providerBundle = providerService.get(interoperabilityRecordBundle.getInteroperabilityRecord().getCatalogueId(),
                 interoperabilityRecordBundle.getInteroperabilityRecord().getProviderId(), auth);
         // check if Provider is approved
@@ -101,11 +114,20 @@ public class ConfigurationTemplateManager extends ResourceCatalogueManager<Confi
 
     @Override
     public ConfigurationTemplateBundle update(ConfigurationTemplateBundle bundle, Authentication auth) {
+        return update(bundle, bundle.getConfigurationTemplate().getCatalogueId(), auth);
+    }
+
+    @Override
+    public ConfigurationTemplateBundle update(ConfigurationTemplateBundle bundle, String catalogueId, Authentication auth) {
         ConfigurationTemplateBundle ret = ObjectUtils.clone(bundle);
         ConfigurationTemplateBundle existingConfigurationTemplate;
         existingConfigurationTemplate = get(ret.getConfigurationTemplate().getId(), catalogueId, false);
         if (ret.getConfigurationTemplate().equals(existingConfigurationTemplate.getConfigurationTemplate())) {
             return ret;
+        }
+
+        if (catalogueId == null || catalogueId.isEmpty()) {
+            ret.getConfigurationTemplate().setCatalogueId(this.catalogueId);
         }
 
         validate(ret);
@@ -143,5 +165,20 @@ public class ConfigurationTemplateManager extends ResourceCatalogueManager<Confi
                 ret.getConfigurationTemplate().getName());
 
         return ret;
+    }
+
+    @Override
+    public void delete(ConfigurationTemplateBundle bundle) {
+        // block Public ConfigurationTemplate deletions
+        if (bundle.getMetadata().isPublished()) {
+            throw new ValidationException("You cannot directly delete a Public Configuration Template");
+        }
+        super.delete(bundle);
+        logger.info("Deleted the Configuration Template with id '{}'", bundle.getId());
+    }
+
+    public ConfigurationTemplateBundle createPublicConfigurationTemplate(ConfigurationTemplateBundle bundle, Authentication auth) {
+        publicConfigurationTemplateService.add(bundle, auth);
+        return bundle;
     }
 }

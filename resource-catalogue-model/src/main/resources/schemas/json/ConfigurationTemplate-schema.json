@@ -8,6 +8,9 @@
   },
   "type" : "object",
   "properties" : {
+    "catalogueId" : {
+      "type" : "string"
+    },
     "description" : {
       "type" : "string"
     },
@@ -21,6 +24,9 @@
       "type" : "string"
     },
     "name" : {
+      "type" : "string"
+    },
+    "node" : {
       "type" : "string"
     }
   },

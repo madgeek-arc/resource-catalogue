@@ -148,7 +148,7 @@ public class TestUtils {
 
     private static URL createURL() {
         try {
-            return URI.create("https://www.example.com").toURL();
+            return URI.create("https://example.org").toURL();
         } catch (MalformedURLException e) {
             throw new RuntimeException(e);
         }

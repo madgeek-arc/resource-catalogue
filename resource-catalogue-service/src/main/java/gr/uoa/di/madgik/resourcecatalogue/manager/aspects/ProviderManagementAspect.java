@@ -19,6 +19,7 @@ package gr.uoa.di.madgik.resourcecatalogue.manager.aspects;
 import gr.uoa.di.madgik.registry.exception.ResourceException;
 import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
+import gr.uoa.di.madgik.resourcecatalogue.domain.configurationTemplates.ConfigurationTemplateBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.configurationTemplates.ConfigurationTemplateInstanceBundle;
 import gr.uoa.di.madgik.resourcecatalogue.exceptions.CatalogueResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.manager.*;
@@ -50,6 +51,7 @@ public class ProviderManagementAspect {
     private final PublicDatasourceService publicDatasourceManager;
     private final PublicTrainingResourceService publicTrainingResourceManager;
     private final PublicInteroperabilityRecordService publicInteroperabilityRecordManager;
+    private final PublicConfigurationTemplateService publicConfigurationTemplateManager;
     private final PublicConfigurationTemplateInstanceService publicConfigurationTemplateInstanceManager;
     private final RegistrationMailService registrationMailService;
     private final SecurityService securityService;
@@ -68,6 +70,7 @@ public class ProviderManagementAspect {
                                     PublicTrainingResourceService publicTrainingResourceManager,
                                     PublicInteroperabilityRecordService publicInteroperabilityRecordManager,
                                     PublicResourceInteroperabilityRecordService publicResourceInteroperabilityRecordManager,
+                                    PublicConfigurationTemplateService publicConfigurationTemplateManager,
                                     PublicConfigurationTemplateInstanceService publicConfigurationTemplateInstanceManager,
                                     PublicAdapterService publicAdapterManager,
                                     RegistrationMailService registrationMailService,
@@ -81,6 +84,7 @@ public class ProviderManagementAspect {
         this.publicTrainingResourceManager = publicTrainingResourceManager;
         this.publicInteroperabilityRecordManager = publicInteroperabilityRecordManager;
         this.publicResourceInteroperabilityRecordManager = publicResourceInteroperabilityRecordManager;
+        this.publicConfigurationTemplateManager = publicConfigurationTemplateManager;
         this.publicConfigurationTemplateInstanceManager = publicConfigurationTemplateInstanceManager;
         this.publicAdapterManager = publicAdapterManager;
         this.registrationMailService = registrationMailService;
@@ -472,6 +476,37 @@ public class ProviderManagementAspect {
     public void deletePublicResourceInteroperabilityRecord(JoinPoint joinPoint) {
         ResourceInteroperabilityRecordBundle resourceInteroperabilityRecordBundle = (ResourceInteroperabilityRecordBundle) joinPoint.getArgs()[0];
         publicResourceInteroperabilityRecordManager.delete(resourceInteroperabilityRecordBundle);
+    }
+
+    @Async
+    @AfterReturning(pointcut = "execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ConfigurationTemplateManager.add(..))",
+            returning = "configurationTemplateBundle")
+    public void addConfigurationTemplateAsPublic(final ConfigurationTemplateBundle configurationTemplateBundle) {
+        try {
+            //TODO: Refactor if CTIs can belong to a different from the Project's Catalogue
+            publicConfigurationTemplateManager.get(configurationTemplateBundle.getIdentifiers().getPid());
+        } catch (ResourceException | ResourceNotFoundException e) {
+            publicConfigurationTemplateManager.add(ObjectUtils.clone(configurationTemplateBundle), null);
+        }
+    }
+
+    @Async
+    @AfterReturning(pointcut = "execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ConfigurationTemplateManager.update(..)) " +
+            "&& args(configurationTemplateBundle,..)", returning = "ret", argNames = "configurationTemplateBundle,ret")
+    public void updatePublicConfigurationTemplate(ConfigurationTemplateBundle configurationTemplateBundle, ConfigurationTemplateBundle ret) {
+        try {
+            if (!ret.equals(configurationTemplateBundle)) {
+                publicConfigurationTemplateManager.update(ObjectUtils.clone(ret), null);
+            }
+        } catch (ResourceException | ResourceNotFoundException ignore) {
+        }
+    }
+
+    @Async
+    @After("execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ConfigurationTemplateManager.delete(..))")
+    public void deletePublicConfigurationTemplate(JoinPoint joinPoint) {
+        ConfigurationTemplateBundle configurationTemplateBundle = (ConfigurationTemplateBundle) joinPoint.getArgs()[0];
+        publicConfigurationTemplateManager.delete(configurationTemplateBundle);
     }
 
     @Async
