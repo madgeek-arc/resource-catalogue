@@ -761,7 +761,7 @@ public class ProviderManager extends ResourceCatalogueManager<ProviderBundle> im
     public void adminAcceptedTerms(String providerId, boolean isDraft, Authentication auth) {
         try {
             draftProviderService.update(draftProviderService.get(providerId), auth);
-        } catch (ResourceNotFoundException e) {
+        } catch (ResourceException | ResourceNotFoundException e) {
             update(get(providerId, catalogueId, false), auth);
         }
     }
