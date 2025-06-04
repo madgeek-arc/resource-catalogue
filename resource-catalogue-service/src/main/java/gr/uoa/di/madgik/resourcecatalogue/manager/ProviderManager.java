@@ -775,7 +775,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     public void adminAcceptedTerms(String providerId, boolean isDraft, Authentication auth) {
         try {
             draftProviderService.update(draftProviderService.get(providerId), auth);
-        } catch (ResourceNotFoundException e) {
+        } catch (ResourceException | ResourceNotFoundException e) {
             update(get(providerId), auth);
         }
     }
