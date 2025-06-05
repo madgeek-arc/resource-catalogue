@@ -35,7 +35,7 @@ public class Catalogue implements Identifiable {
 
     // Basic Information
     /**
-     * A persistent identifier, a unique reference to the  (Multi-Provider Regional or Thematic) Catalogue in the context of the EOSC Portal.
+     * A persistent identifier, a unique reference to the (Multi-Provider Regional or Thematic) Catalogue.
      */
     @XmlElement(required = true)
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED)

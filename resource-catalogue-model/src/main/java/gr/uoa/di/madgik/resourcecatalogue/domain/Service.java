@@ -40,7 +40,7 @@ public class Service implements Identifiable {
 
     // Basic Information
     /**
-     * A persistent identifier, a unique reference to the Resource in the context of the EOSC Portal.
+     * A persistent identifier, a unique reference to the Service.
      */
     @XmlElement
     @Schema(example = "(required on PUT only)")
