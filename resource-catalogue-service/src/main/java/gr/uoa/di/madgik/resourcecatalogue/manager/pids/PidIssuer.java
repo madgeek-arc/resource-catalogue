@@ -165,7 +165,7 @@ public class PidIssuer {
         JSONObject id_data = new JSONObject();
 
         hs_admin_data_value.put("handle", config.getUser());
-        hs_admin_data_value.put("index", config.getUserIndex());
+        hs_admin_data_value.put("index", Integer.parseInt(config.getUserIndex()));
         hs_admin_data_value.put("permissions", "011111110011");
         hs_admin_data.put("format", "admin");
         hs_admin_data.put("value", hs_admin_data_value);

@@ -24,6 +24,7 @@ import gr.uoa.di.madgik.resourcecatalogue.domain.configurationTemplates.Configur
 import gr.uoa.di.madgik.resourcecatalogue.domain.configurationTemplates.ConfigurationTemplateBundle;
 import gr.uoa.di.madgik.resourcecatalogue.service.ConfigurationTemplateService;
 import gr.uoa.di.madgik.resourcecatalogue.service.GenericResourceService;
+import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -68,7 +69,8 @@ public class ConfigurationTemplateController {
     }
 
     @Operation(summary = "Updates the Configuration Template with the given id.")
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceAdmin(#auth,#configurationTemplate.interoperabilityRecordId)")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') " +
+            "or @securityService.isResourceAdmin(#auth,#configurationTemplate.interoperabilityRecordId)")
     @PutMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<ConfigurationTemplate> update(@RequestBody ConfigurationTemplate configurationTemplate,
                                                         @Parameter(hidden = true) Authentication auth) {
@@ -77,7 +79,7 @@ public class ConfigurationTemplateController {
     }
 
     @DeleteMapping(path = "deleteByInteroperabilityRecordId/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceAdmin(#auth, #prefix+'/'+#suffix)")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     public ResponseEntity<ConfigurationTemplate> delete(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
                                                         @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix,
                                                         @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId,
@@ -120,7 +122,7 @@ public class ConfigurationTemplateController {
         return ResponseEntity.ok(paging);
     }
 
-    @Parameter(hidden = true)
+    @Hidden
     @PostMapping(path = "createPublicConfigurationTemplate", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<ConfigurationTemplateBundle> createPublicConfigurationTemplate(@RequestBody ConfigurationTemplateBundle configurationTemplateBundle,
