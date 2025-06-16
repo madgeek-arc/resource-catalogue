@@ -116,6 +116,8 @@ server.servlet.context-path=/api
 ## Logging Configuration ##
 logging.level.root=INFO
 
+## PID Service ##
+pid.service.enabled=false
 
 #########################
 ##  Spring Properties  ##
