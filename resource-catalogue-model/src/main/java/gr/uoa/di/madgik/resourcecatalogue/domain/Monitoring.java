@@ -40,9 +40,9 @@ public class Monitoring implements Identifiable {
     @FieldValidation(containsId = true, containsResourceId = true)
     private String serviceId;
 
-    @XmlElement
-    @Schema
-    @FieldValidation(nullable = true, containsId = true, idClass = Catalogue.class)
+    @XmlElement(required = true)
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
+    @FieldValidation(containsId = true, idClass = Catalogue.class)
     private String catalogueId;
 
     @XmlElement

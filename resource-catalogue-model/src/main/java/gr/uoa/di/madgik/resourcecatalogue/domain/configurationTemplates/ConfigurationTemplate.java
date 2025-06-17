@@ -49,9 +49,9 @@ public class ConfigurationTemplate implements Identifiable {
     @FieldValidation
     private String name;
 
-    @XmlElement
-    @Schema
-    @FieldValidation(nullable = true, containsId = true, idClass = Catalogue.class)
+    @XmlElement(required = true)
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
+    @FieldValidation(containsId = true, idClass = Catalogue.class)
     private String catalogueId;
 
     @XmlElement
