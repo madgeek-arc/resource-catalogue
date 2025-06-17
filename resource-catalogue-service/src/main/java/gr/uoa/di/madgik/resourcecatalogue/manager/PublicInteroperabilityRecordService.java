@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright 2017-2025 OpenAIRE AMKE & Athena Research and Innovation Center
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -26,6 +26,7 @@ import gr.uoa.di.madgik.resourcecatalogue.utils.JmsService;
 import org.apache.commons.beanutils.BeanUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
@@ -39,6 +40,9 @@ public class PublicInteroperabilityRecordService extends ResourceCatalogueManage
     private final JmsService jmsService;
     private final PidIssuer pidIssuer;
     private final ProviderService providerService;
+
+    @Value("${pid.service.enabled}")
+    private boolean pidServiceEnabled;
 
     public PublicInteroperabilityRecordService(JmsService jmsService,
                                                PidIssuer pidIssuer,
@@ -69,8 +73,10 @@ public class PublicInteroperabilityRecordService extends ResourceCatalogueManage
         updateIdsToPublic(interoperabilityRecordBundle);
 
         // POST PID
-        logger.info("PID POST disabled");
-//        pidIssuer.postPID(interoperabilityRecordBundle.getId(), null);
+        if (pidServiceEnabled) {
+            logger.info("Posting InteroperabilityRecord with id {} to PID service", interoperabilityRecordBundle.getId());
+            pidIssuer.postPID(interoperabilityRecordBundle.getId(), null);
+        }
 
         InteroperabilityRecordBundle ret;
         logger.info("Interoperability Record '{}' is being published with id '{}'", lowerLevelResourceId, interoperabilityRecordBundle.getId());
