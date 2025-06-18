@@ -19,6 +19,9 @@ package gr.uoa.di.madgik.resourcecatalogue.service;
 import gr.uoa.di.madgik.resourcecatalogue.domain.configurationTemplates.ConfigurationTemplateBundle;
 import org.springframework.security.core.Authentication;
 
+import java.util.List;
+import java.util.Map;
+
 public interface ConfigurationTemplateService extends ResourceCatalogueService<ConfigurationTemplateBundle> {
 
     /**
@@ -50,4 +53,11 @@ public interface ConfigurationTemplateService extends ResourceCatalogueService<C
      */
     ConfigurationTemplateBundle createPublicConfigurationTemplate(
             ConfigurationTemplateBundle configurationTemplateBundle, Authentication auth);
+
+    /**
+     * Return a mapping of Interoperability Record ID to Configuration Template list.
+     *
+     * @return {@link Map}
+     */
+    Map<String, List<String>> getInteroperabilityRecordIdToConfigurationTemplateListMap();
 }

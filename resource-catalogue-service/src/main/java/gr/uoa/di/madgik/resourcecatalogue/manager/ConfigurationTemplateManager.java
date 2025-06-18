@@ -17,6 +17,7 @@
 package gr.uoa.di.madgik.resourcecatalogue.manager;
 
 import gr.uoa.di.madgik.catalogue.exception.ValidationException;
+import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.domain.Resource;
 import gr.uoa.di.madgik.registry.exception.ResourceException;
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
@@ -34,8 +35,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 
 @org.springframework.stereotype.Service("configurationTemplateManager")
 public class ConfigurationTemplateManager extends ResourceCatalogueManager<ConfigurationTemplateBundle>
@@ -175,6 +175,23 @@ public class ConfigurationTemplateManager extends ResourceCatalogueManager<Confi
         }
         super.delete(bundle);
         logger.info("Deleted the Configuration Template with id '{}'", bundle.getId());
+    }
+
+    public Map<String, List<String>> getInteroperabilityRecordIdToConfigurationTemplateListMap() {
+        Map<String, List<String>> ret = new HashMap<>();
+        FacetFilter filter = new FacetFilter();
+        filter.setResourceType(getResourceTypeName());
+        filter.setQuantity(1000);
+        filter.addFilter("published", false);
+        List<ConfigurationTemplateBundle> ctList = getAll(filter).getResults();
+
+        for (ConfigurationTemplateBundle ctBundle : ctList) {
+            String igId = ctBundle.getConfigurationTemplate().getInteroperabilityRecordId();
+            String ctId = ctBundle.getId();
+
+            ret.computeIfAbsent(igId, k -> new ArrayList<>()).add(ctId);
+        }
+        return ret;
     }
 
     public ConfigurationTemplateBundle createPublicConfigurationTemplate(ConfigurationTemplateBundle bundle, Authentication auth) {

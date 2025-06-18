@@ -38,6 +38,9 @@ import org.springframework.security.core.Authentication;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+import java.util.Map;
+
 
 @RestController
 @RequestMapping("configurationTemplate")
@@ -120,6 +123,13 @@ public class ConfigurationTemplateController {
         ff.addFilter("interoperability_record_id", prefix + "/" + suffix);
         Paging<ConfigurationTemplate> paging = genericResourceService.getResults(ff);
         return ResponseEntity.ok(paging);
+    }
+
+    @Operation(summary = "Returns a mapping of Interoperability Record ID to Configuration Template list.")
+    @BrowseParameters
+    @GetMapping(path = "/interoperabilityRecordIdToConfigurationTemplateListMap", produces = {MediaType.APPLICATION_JSON_VALUE})
+    public Map<String, List<String>> interoperabilityRecordIdToConfigurationTemplateListMap() {
+        return service.getInteroperabilityRecordIdToConfigurationTemplateListMap();
     }
 
     @Hidden
