@@ -304,8 +304,7 @@ public class InteroperabilityRecordManager extends ResourceCatalogueManager<Inte
     @Override
     public InteroperabilityRecordBundle validate(InteroperabilityRecordBundle interoperabilityRecordBundle) {
         logger.debug("Validating InteroperabilityRecord with id: '{}'", interoperabilityRecordBundle.getId());
-        super.validate(interoperabilityRecordBundle);
-        return interoperabilityRecordBundle;
+        return super.validate(interoperabilityRecordBundle);
     }
 
     @Override

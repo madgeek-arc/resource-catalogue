@@ -337,9 +337,10 @@ public class ServiceBundleManager extends ResourceCatalogueManager<ServiceBundle
     @Override
     public ServiceBundle validate(ServiceBundle serviceBundle) {
         logger.debug("Validating Service with id: '{}'", serviceBundle.getId());
-        serviceValidator.validate(serviceBundle, null);
 
-        return super.validate(serviceBundle);
+        super.validate(serviceBundle);
+        serviceValidator.validate(serviceBundle, null);
+        return serviceBundle;
     }
 
     public ServiceBundle verify(String id, String status, Boolean active, Authentication auth) {
