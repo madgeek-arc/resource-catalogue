@@ -16,8 +16,11 @@
 
 package gr.uoa.di.madgik.resourcecatalogue.service;
 
+import gr.uoa.di.madgik.registry.domain.Paging;
+import gr.uoa.di.madgik.resourcecatalogue.domain.configurationTemplates.ConfigurationTemplate;
 import gr.uoa.di.madgik.resourcecatalogue.domain.configurationTemplates.ConfigurationTemplateBundle;
 import org.springframework.security.core.Authentication;
+import org.springframework.util.MultiValueMap;
 
 import java.util.List;
 import java.util.Map;
@@ -53,6 +56,16 @@ public interface ConfigurationTemplateService extends ResourceCatalogueService<C
      */
     ConfigurationTemplateBundle createPublicConfigurationTemplate(
             ConfigurationTemplateBundle configurationTemplateBundle, Authentication auth);
+
+    /**
+     * Return all Configuration Templates under a specific Interoperability Record ID
+     *
+     * @param allRequestParams search parameters
+     * @param interoperabilityRecordId Interoperability Record ID
+     * @return {@link Paging<ConfigurationTemplate>}
+     */
+    Paging<ConfigurationTemplate> getAllByInteroperabilityRecordId(MultiValueMap<String, Object> allRequestParams,
+                                                                   String interoperabilityRecordId);
 
     /**
      * Return a mapping of Interoperability Record ID to Configuration Template list.

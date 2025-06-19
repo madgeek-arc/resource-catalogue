@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright 2017-2025 OpenAIRE AMKE & Athena Research and Innovation Center
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -26,6 +26,7 @@ import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
 
+import java.util.Map;
 import java.util.Objects;
 
 @XmlType
@@ -60,12 +61,12 @@ public class ConfigurationTemplateInstance implements Identifiable {
     @XmlElement(required = true)
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     @FieldValidation
-    private String payload;
+    private Map<String, Object> payload;
 
     public ConfigurationTemplateInstance() {
     }
 
-    public ConfigurationTemplateInstance(String id, String resourceId, String configurationTemplateId, String catalogueId, String node, String payload) {
+    public ConfigurationTemplateInstance(String id, String resourceId, String configurationTemplateId, String catalogueId, String node, Map<String, Object> payload) {
         this.id = id;
         this.resourceId = resourceId;
         this.configurationTemplateId = configurationTemplateId;
@@ -140,11 +141,11 @@ public class ConfigurationTemplateInstance implements Identifiable {
         this.node = node;
     }
 
-    public String getPayload() {
+    public Map<String, Object> getPayload() {
         return payload;
     }
 
-    public void setPayload(String payload) {
+    public void setPayload(Map<String, Object> payload) {
         this.payload = payload;
     }
 }

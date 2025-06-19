@@ -23,6 +23,20 @@
       "type": "java.lang.String"
     },
     {
+      "label": "Catalogue ID",
+      "multivalued": false,
+      "name": "catalogue_id",
+      "path": "$.configurationTemplateInstance.catalogueId",
+      "type": "java.lang.String"
+    },
+    {
+      "label": "Node",
+      "multivalued": false,
+      "name": "node",
+      "path": "$.configurationTemplateInstance.node",
+      "type": "java.lang.String"
+    },
+    {
       "label": "Configuration Template Payload",
       "multivalued": false,
       "name": "configuration_template_payload",

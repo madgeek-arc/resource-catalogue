@@ -1,5 +1,11 @@
 {
   "$schema" : "https://json-schema.org/draft/2020-12/schema",
+  "$defs" : {
+    "Map(String,Object)" : {
+      "type" : "object",
+      "additionalProperties" : false
+    }
+  },
   "type" : "object",
   "properties" : {
     "catalogueId" : {
@@ -15,7 +21,7 @@
       "type" : "string"
     },
     "payload" : {
-      "type" : "string"
+      "$ref" : "#/$defs/Map(String,Object)"
     },
     "resourceId" : {
       "type" : "string"

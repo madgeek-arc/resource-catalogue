@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright 2017-2025 OpenAIRE AMKE & Athena Research and Innovation Center
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,6 +16,7 @@
 
 package gr.uoa.di.madgik.resourcecatalogue.service;
 
+import gr.uoa.di.madgik.resourcecatalogue.domain.ResourceInteroperabilityRecord;
 import gr.uoa.di.madgik.resourcecatalogue.domain.ResourceInteroperabilityRecordBundle;
 import org.springframework.security.core.Authentication;
 
@@ -71,4 +72,6 @@ public interface ResourceInteroperabilityRecordService extends ResourceCatalogue
      * @return {@link ResourceInteroperabilityRecordBundle}
      */
     ResourceInteroperabilityRecordBundle getWithResourceId(String resourceId);
+
+    void checkAndRemoveCTI(ResourceInteroperabilityRecord existingRIR, ResourceInteroperabilityRecord updatedRIR);
 }

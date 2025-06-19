@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright 2017-2025 OpenAIRE AMKE & Athena Research and Innovation Center
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -23,6 +23,8 @@ import gr.uoa.di.madgik.resourcecatalogue.annotations.BrowseCatalogue;
 import gr.uoa.di.madgik.resourcecatalogue.domain.ResourceInteroperabilityRecord;
 import gr.uoa.di.madgik.resourcecatalogue.domain.ResourceInteroperabilityRecordBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.User;
+import gr.uoa.di.madgik.resourcecatalogue.domain.configurationTemplates.ConfigurationTemplateInstanceBundle;
+import gr.uoa.di.madgik.resourcecatalogue.service.ConfigurationTemplateInstanceService;
 import gr.uoa.di.madgik.resourcecatalogue.service.GenericResourceService;
 import gr.uoa.di.madgik.resourcecatalogue.service.ResourceInteroperabilityRecordService;
 import io.swagger.v3.oas.annotations.Hidden;
@@ -51,33 +53,45 @@ public class ResourceInteroperabilityRecordController {
 
     private static final Logger logger = LoggerFactory.getLogger(ResourceInteroperabilityRecordController.class);
 
-    private final ResourceInteroperabilityRecordService resourceInteroperabilityRecordService;
+    private final ResourceInteroperabilityRecordService service;
     private final GenericResourceService genericResourceService;
+    private final ConfigurationTemplateInstanceService ctiService;
 
     @Value("${catalogue.id}")
     private String catalogueId;
 
-    public ResourceInteroperabilityRecordController(ResourceInteroperabilityRecordService resourceInteroperabilityRecordService,
-                                                    GenericResourceService genericResourceService) {
-        this.resourceInteroperabilityRecordService = resourceInteroperabilityRecordService;
+    public ResourceInteroperabilityRecordController(ResourceInteroperabilityRecordService service,
+                                                    GenericResourceService genericResourceService,
+                                                    ConfigurationTemplateInstanceService ctiService) {
+        this.service = service;
         this.genericResourceService = genericResourceService;
+        this.ctiService = ctiService;
     }
 
     @Operation(summary = "Returns the ResourceInteroperabilityRecord with the given id.")
     @GetMapping(path = "{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE})
-    public ResponseEntity<ResourceInteroperabilityRecord> getResourceInteroperabilityRecord(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
-                                                                                            @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix,
-                                                                                            @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId) {
+    public ResponseEntity<ResourceInteroperabilityRecord> get(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
+                                                              @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix,
+                                                              @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId) {
         String id = prefix + "/" + suffix;
-        ResourceInteroperabilityRecord resourceInteroperabilityRecord = resourceInteroperabilityRecordService.get(id, catalogueId, false).getResourceInteroperabilityRecord();
+        ResourceInteroperabilityRecord resourceInteroperabilityRecord = service.get(id, catalogueId, false).getResourceInteroperabilityRecord();
         return new ResponseEntity<>(resourceInteroperabilityRecord, HttpStatus.OK);
+    }
+
+    @GetMapping(path = "bundle/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
+    public ResponseEntity<ResourceInteroperabilityRecordBundle> getBundle(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
+                                                                          @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix,
+                                                                          @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId) {
+        String id = prefix + "/" + suffix;
+        return new ResponseEntity<>(service.get(id, catalogueId, false), HttpStatus.OK);
     }
 
     @Operation(summary = "Filter a list of ResourceInteroperabilityRecords based on a set of filters or get a list of all ResourceInteroperabilityRecords in the Catalogue.")
     @BrowseParameters
     @BrowseCatalogue
     @GetMapping(path = "all", produces = {MediaType.APPLICATION_JSON_VALUE})
-    public ResponseEntity<Paging<ResourceInteroperabilityRecord>> getAllResourceInteroperabilityRecords(@Parameter(hidden = true) @RequestParam MultiValueMap<String, Object> allRequestParams) {
+    public ResponseEntity<Paging<ResourceInteroperabilityRecord>> getAll(@Parameter(hidden = true) @RequestParam MultiValueMap<String, Object> allRequestParams) {
         FacetFilter ff = FacetFilter.from(allRequestParams);
         ff.setResourceType("resource_interoperability_record");
         ff.addFilter("published", false);
@@ -89,7 +103,7 @@ public class ResourceInteroperabilityRecordController {
     @BrowseCatalogue
     @GetMapping(path = "bundle/all", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
-    public ResponseEntity<Paging<ResourceInteroperabilityRecordBundle>> getAllResourceInteroperabilityRecordBundles(
+    public ResponseEntity<Paging<ResourceInteroperabilityRecordBundle>> getAllBundles(
             @Parameter(hidden = true) @RequestParam MultiValueMap<String, Object> allRequestParams) {
         FacetFilter ff = FacetFilter.from(allRequestParams);
         ff.setResourceType("resource_interoperability_record");
@@ -100,11 +114,11 @@ public class ResourceInteroperabilityRecordController {
 
     @Operation(summary = "Returns the ResourceInteroperabilityRecord of the given Resource of the given Catalogue.")
     @GetMapping(path = "/byResource/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE})
-    public ResponseEntity<ResourceInteroperabilityRecord> getResourceInteroperabilityRecordByResourceId(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
-                                                                                                        @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix,
-                                                                                                        @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId) {
+    public ResponseEntity<ResourceInteroperabilityRecord> getByResourceId(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
+                                                                          @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix,
+                                                                          @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId) {
         String id = prefix + "/" + suffix;
-        ResourceInteroperabilityRecordBundle resourceInteroperabilityRecordBundle = resourceInteroperabilityRecordService.
+        ResourceInteroperabilityRecordBundle resourceInteroperabilityRecordBundle = service.
                 getWithResourceId(id);
         if (resourceInteroperabilityRecordBundle != null) {
             return new ResponseEntity<>(resourceInteroperabilityRecordBundle.getResourceInteroperabilityRecord(), HttpStatus.OK);
@@ -114,71 +128,69 @@ public class ResourceInteroperabilityRecordController {
 
     @Operation(summary = "Creates a new ResourceInteroperabilityRecord.")
     @PostMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceAdmin(#auth, #resourceInteroperabilityRecord.resourceId)")
-    public ResponseEntity<ResourceInteroperabilityRecord> addResourceInteroperabilityRecord(@RequestBody ResourceInteroperabilityRecord resourceInteroperabilityRecord,
-                                                                                            @RequestParam String resourceType, @Parameter(hidden = true) Authentication auth) {
-        ResourceInteroperabilityRecordBundle resourceInteroperabilityRecordBundle = resourceInteroperabilityRecordService.add(new ResourceInteroperabilityRecordBundle(resourceInteroperabilityRecord), resourceType, auth);
-        logger.info("Added the ResourceInteroperabilityRecord with id '{}'", resourceInteroperabilityRecord.getId());
-        return new ResponseEntity<>(resourceInteroperabilityRecordBundle.getResourceInteroperabilityRecord(), HttpStatus.CREATED);
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceAdmin(#auth, #rir.resourceId)")
+    public ResponseEntity<ResourceInteroperabilityRecord> add(@RequestBody ResourceInteroperabilityRecord rir,
+                                                              @RequestParam String resourceType, @Parameter(hidden = true) Authentication auth) {
+        ResourceInteroperabilityRecordBundle bundle = service.add(new ResourceInteroperabilityRecordBundle(rir), resourceType, auth);
+        logger.info("Added the ResourceInteroperabilityRecord with id '{}'", rir.getId());
+        return new ResponseEntity<>(bundle.getResourceInteroperabilityRecord(), HttpStatus.CREATED);
     }
 
     @Operation(summary = "Updates the ResourceInteroperabilityRecord with the given id.")
     @PutMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceAdmin(#auth, #resourceInteroperabilityRecord.resourceId)")
-    public ResponseEntity<ResourceInteroperabilityRecord> updateResourceInteroperabilityRecord(@RequestBody ResourceInteroperabilityRecord resourceInteroperabilityRecord,
-                                                                                               @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId,
-                                                                                               @Parameter(hidden = true) Authentication auth) {
-        ResourceInteroperabilityRecordBundle resourceInteroperabilityRecordBundle = resourceInteroperabilityRecordService.get(resourceInteroperabilityRecord.getId(), catalogueId, false);
-        resourceInteroperabilityRecordBundle.setResourceInteroperabilityRecord(resourceInteroperabilityRecord);
-        resourceInteroperabilityRecordBundle = resourceInteroperabilityRecordService.update(resourceInteroperabilityRecordBundle, auth);
-        logger.info("Updated the ResourceInteroperabilityRecord with id '{}'", resourceInteroperabilityRecordBundle.getId());
-        return new ResponseEntity<>(resourceInteroperabilityRecordBundle.getResourceInteroperabilityRecord(), HttpStatus.OK);
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceAdmin(#auth, #rir.resourceId)")
+    public ResponseEntity<ResourceInteroperabilityRecord> update(@RequestBody ResourceInteroperabilityRecord rir,
+                                                                 @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId,
+                                                                 @Parameter(hidden = true) Authentication auth) {
+        ResourceInteroperabilityRecordBundle bundle = service.get(rir.getId(), catalogueId, false);
+        service.checkAndRemoveCTI(bundle.getResourceInteroperabilityRecord(), rir);
+        bundle.setResourceInteroperabilityRecord(rir);
+        bundle = service.update(bundle, auth);
+        logger.info("Updated the ResourceInteroperabilityRecord with id '{}'", bundle.getId());
+        return new ResponseEntity<>(bundle.getResourceInteroperabilityRecord(), HttpStatus.OK);
     }
 
     @DeleteMapping(path = "{resourceIdPrefix}/{resourceIdSuffix}/{resourceInteroperabilityRecordIdPrefix}/{resourceInteroperabilityRecordIdSuffix}",
             produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceAdmin(#auth, #resourceIdPrefix+'/'+resourceIdSuffix)")
-    public ResponseEntity<ResourceInteroperabilityRecord> deleteResourceInteroperabilityRecordById(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("resourceIdPrefix") String resourceIdPrefix,
-                                                                                                   @Parameter(description = "The right part of the ID after the '/'") @PathVariable("resourceIdSuffix") String resourceIdSuffix,
-                                                                                                   @Parameter(description = "The left part of the ID before the '/'") @PathVariable("resourceInteroperabilityRecordIdPrefix") String resourceInteroperabilityRecordIdPrefix,
-                                                                                                   @Parameter(description = "The right part of the ID after the '/'") @PathVariable("resourceInteroperabilityRecordIdSuffix") String resourceInteroperabilityRecordIdSuffix,
-                                                                                                   @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId,
-                                                                                                   @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
-        String resourceInteroperabilityRecordId = resourceInteroperabilityRecordIdPrefix + "/" + resourceInteroperabilityRecordIdSuffix;
-        ResourceInteroperabilityRecordBundle resourceInteroperabilityRecordBundle = resourceInteroperabilityRecordService.get(resourceInteroperabilityRecordId, catalogueId, false);
-        if (resourceInteroperabilityRecordBundle == null) {
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceAdmin(#auth, #resourcePrefix+'/'+resourceSuffix)")
+    public ResponseEntity<ResourceInteroperabilityRecord> deleteById(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("resourceIdPrefix") String resourcePrefix,
+                                                                     @Parameter(description = "The right part of the ID after the '/'") @PathVariable("resourceIdSuffix") String resourceSuffix,
+                                                                     @Parameter(description = "The left part of the ID before the '/'") @PathVariable("resourceInteroperabilityRecordIdPrefix") String rirPrefix,
+                                                                     @Parameter(description = "The right part of the ID after the '/'") @PathVariable("resourceInteroperabilityRecordIdSuffix") String rirSuffix,
+                                                                     @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId,
+                                                                     @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
+        String resourceInteroperabilityRecordId = rirPrefix + "/" + rirSuffix;
+        ResourceInteroperabilityRecordBundle bundle = service.get(resourceInteroperabilityRecordId, catalogueId, false);
+        if (bundle == null) {
             return new ResponseEntity<>(HttpStatus.GONE);
         }
-        logger.info("Deleting ResourceInteroperabilityRecord: {} of the Catalogue: {}", resourceInteroperabilityRecordBundle.getResourceInteroperabilityRecord().getId(),
-                resourceInteroperabilityRecordBundle.getResourceInteroperabilityRecord().getCatalogueId());
-        resourceInteroperabilityRecordService.delete(resourceInteroperabilityRecordBundle);
+        logger.info("Deleting ResourceInteroperabilityRecord: {} of the Catalogue: {} along with all the interrelated " +
+                        "Configuration Template Instances",
+                bundle.getResourceInteroperabilityRecord().getId(),
+                bundle.getResourceInteroperabilityRecord().getCatalogueId());
+        List<ConfigurationTemplateInstanceBundle> ctiList = ctiService.getByResourceId(bundle.getResourceInteroperabilityRecord().getResourceId());
+        for (ConfigurationTemplateInstanceBundle ctiBundle : ctiList) {
+            ctiService.delete(ctiBundle);
+        }
+        service.delete(bundle);
         logger.info("Deleted the ResourceInteroperabilityRecord with id '{}' of the Catalogue '{}'",
-                resourceInteroperabilityRecordBundle.getResourceInteroperabilityRecord().getId(), resourceInteroperabilityRecordBundle.getResourceInteroperabilityRecord().getCatalogueId());
-        return new ResponseEntity<>(resourceInteroperabilityRecordBundle.getResourceInteroperabilityRecord(), HttpStatus.OK);
-    }
-
-    @GetMapping(path = "bundle/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
-    public ResponseEntity<ResourceInteroperabilityRecordBundle> getResourceInteroperabilityRecordBundle(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
-                                                                                                        @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix,
-                                                                                                        @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId) {
-        String id = prefix + "/" + suffix;
-        return new ResponseEntity<>(resourceInteroperabilityRecordService.get(id, catalogueId, false), HttpStatus.OK);
+                bundle.getResourceInteroperabilityRecord().getId(), bundle.getResourceInteroperabilityRecord().getCatalogueId());
+        return new ResponseEntity<>(bundle.getResourceInteroperabilityRecord(), HttpStatus.OK);
     }
 
     // Create a Public ResourceInteroperabilityRecord if something went bad during its creation
     @Hidden
     @PostMapping(path = "createPublicResourceInteroperabilityRecord", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public ResponseEntity<ResourceInteroperabilityRecordBundle> createPublicResourceInteroperabilityRecord(@RequestBody ResourceInteroperabilityRecordBundle resourceInteroperabilityRecordBundle, @Parameter(hidden = true) Authentication auth) {
+    public ResponseEntity<ResourceInteroperabilityRecordBundle> createPublicRIR(@RequestBody ResourceInteroperabilityRecordBundle bundle, @Parameter(hidden = true) Authentication auth) {
         logger.info("User '{}-{}' attempts to create a Public Resource Interoperability Record from Resource Interoperability Record '{}' of the '{}' Catalogue", User.of(auth).getFullName(),
-                User.of(auth).getEmail().toLowerCase(), resourceInteroperabilityRecordBundle.getId(), resourceInteroperabilityRecordBundle.getResourceInteroperabilityRecord().getCatalogueId());
-        return ResponseEntity.ok(resourceInteroperabilityRecordService.createPublicResourceInteroperabilityRecord(resourceInteroperabilityRecordBundle, auth));
+                User.of(auth).getEmail().toLowerCase(), bundle.getId(), bundle.getResourceInteroperabilityRecord().getCatalogueId());
+        return ResponseEntity.ok(service.createPublicResourceInteroperabilityRecord(bundle, auth));
     }
 
     @PostMapping(path = "/addBulk", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public void addBulk(@RequestBody List<ResourceInteroperabilityRecordBundle> resourceInteroperabilityRecordList, @Parameter(hidden = true) Authentication auth) {
-        resourceInteroperabilityRecordService.addBulk(resourceInteroperabilityRecordList, auth);
+    public void addBulk(@RequestBody List<ResourceInteroperabilityRecordBundle> rirList, @Parameter(hidden = true) Authentication auth) {
+        service.addBulk(rirList, auth);
     }
 }

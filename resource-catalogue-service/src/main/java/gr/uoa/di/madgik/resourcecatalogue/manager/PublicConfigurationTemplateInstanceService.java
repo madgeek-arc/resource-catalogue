@@ -21,18 +21,13 @@ import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.exception.ResourceException;
 import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Bundle;
-import gr.uoa.di.madgik.resourcecatalogue.domain.InteroperabilityRecordBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.ServiceBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.configurationTemplates.ConfigurationTemplateInstanceBundle;
 import gr.uoa.di.madgik.resourcecatalogue.exceptions.CatalogueResourceNotFoundException;
-import gr.uoa.di.madgik.resourcecatalogue.service.InteroperabilityRecordService;
 import gr.uoa.di.madgik.resourcecatalogue.service.ServiceBundleService;
 import gr.uoa.di.madgik.resourcecatalogue.service.TrainingResourceService;
 import gr.uoa.di.madgik.resourcecatalogue.utils.JmsService;
 import org.apache.commons.beanutils.BeanUtils;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.core.Authentication;
@@ -46,17 +41,14 @@ public class PublicConfigurationTemplateInstanceService extends ResourceCatalogu
 
     private static final Logger logger = LoggerFactory.getLogger(PublicConfigurationTemplateInstanceService.class);
     private final JmsService jmsService;
-    private final InteroperabilityRecordService interoperabilityRecordService;
     private final ServiceBundleService<ServiceBundle> serviceBundleService;
     private final TrainingResourceService trainingResourceService;
 
     public PublicConfigurationTemplateInstanceService(JmsService jmsService,
-                                                      InteroperabilityRecordService interoperabilityRecordService,
                                                       ServiceBundleService<ServiceBundle> serviceBundleService,
                                                       TrainingResourceService trainingResourceService) {
         super(ConfigurationTemplateInstanceBundle.class);
         this.jmsService = jmsService;
-        this.interoperabilityRecordService = interoperabilityRecordService;
         this.serviceBundleService = serviceBundleService;
         this.trainingResourceService = trainingResourceService;
     }
@@ -80,16 +72,6 @@ public class PublicConfigurationTemplateInstanceService extends ResourceCatalogu
 
         // set public id to resourceId
         updateIdsToPublic(configurationTemplateInstanceBundle);
-        JSONParser parser = new JSONParser();
-        try {
-            JSONObject payload = (JSONObject) parser.parse(configurationTemplateInstanceBundle.getConfigurationTemplateInstance().getPayload().replaceAll("'", "\""));
-            //TODO: are CTI from external catalogues supported?
-            InteroperabilityRecordBundle bundle = interoperabilityRecordService.get(payload.get("interoperabilityRecordId").toString());
-            payload.put("interoperabilityRecordId", bundle.getIdentifiers().getPid());
-            configurationTemplateInstanceBundle.getConfigurationTemplateInstance().setPayload(payload.toString());
-        } catch (ParseException e) {
-            //continue
-        }
         ConfigurationTemplateInstanceBundle ret;
         logger.info("ConfigurationTemplateInstanceBundle '{}' is being published with id '{}'",
                 lowerLevelResourceId, configurationTemplateInstanceBundle.getId());
@@ -151,5 +133,4 @@ public class PublicConfigurationTemplateInstanceService extends ResourceCatalogu
         }
         bundle.getConfigurationTemplateInstance().setResourceId(resourceBundle.getIdentifiers().getPid());
     }
-
 }

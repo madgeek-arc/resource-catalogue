@@ -18,14 +18,13 @@ package gr.uoa.di.madgik.resourcecatalogue.manager;
 
 import gr.uoa.di.madgik.catalogue.exception.ValidationException;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
+import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.registry.domain.Resource;
 import gr.uoa.di.madgik.registry.exception.ResourceException;
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
+import gr.uoa.di.madgik.resourcecatalogue.domain.configurationTemplates.ConfigurationTemplate;
 import gr.uoa.di.madgik.resourcecatalogue.domain.configurationTemplates.ConfigurationTemplateBundle;
-import gr.uoa.di.madgik.resourcecatalogue.service.ConfigurationTemplateService;
-import gr.uoa.di.madgik.resourcecatalogue.service.IdCreator;
-import gr.uoa.di.madgik.resourcecatalogue.service.InteroperabilityRecordService;
-import gr.uoa.di.madgik.resourcecatalogue.service.ProviderService;
+import gr.uoa.di.madgik.resourcecatalogue.service.*;
 import gr.uoa.di.madgik.resourcecatalogue.utils.AuthenticationInfo;
 import gr.uoa.di.madgik.resourcecatalogue.utils.ObjectUtils;
 import gr.uoa.di.madgik.resourcecatalogue.utils.ProviderResourcesCommonMethods;
@@ -34,6 +33,7 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
+import org.springframework.util.MultiValueMap;
 
 import java.util.*;
 
@@ -47,19 +47,22 @@ public class ConfigurationTemplateManager extends ResourceCatalogueManager<Confi
     private final ProviderService providerService;
     private final InteroperabilityRecordService interoperabilityRecordService;
     private final PublicConfigurationTemplateService publicConfigurationTemplateService;
+    private final GenericResourceService genericResourceService;
 
     @Value("${catalogue.id}")
     private String catalogueId;
 
     public ConfigurationTemplateManager(IdCreator idCreator, ProviderResourcesCommonMethods commonMethods,
                                         ProviderService providerService, InteroperabilityRecordService interoperabilityRecordService,
-                                        PublicConfigurationTemplateService publicConfigurationTemplateService) {
+                                        PublicConfigurationTemplateService publicConfigurationTemplateService,
+                                        GenericResourceService genericResourceService) {
         super(ConfigurationTemplateBundle.class);
         this.idCreator = idCreator;
         this.commonMethods = commonMethods;
         this.providerService = providerService;
         this.interoperabilityRecordService = interoperabilityRecordService;
         this.publicConfigurationTemplateService = publicConfigurationTemplateService;
+        this.genericResourceService = genericResourceService;
     }
 
     @Override
@@ -175,6 +178,22 @@ public class ConfigurationTemplateManager extends ResourceCatalogueManager<Confi
         }
         super.delete(bundle);
         logger.info("Deleted the Configuration Template with id '{}'", bundle.getId());
+    }
+
+    @Override
+    public Paging<ConfigurationTemplate> getAllByInteroperabilityRecordId(MultiValueMap<String, Object> allRequestParams,
+                                                                          String interoperabilityRecordId) {
+        FacetFilter ff;
+        if (allRequestParams != null) {
+            ff = FacetFilter.from(allRequestParams);
+        } else {
+            ff = new FacetFilter();
+        }
+        ff.setResourceType("configuration_template");
+        ff.setQuantity(1000);
+        ff.addFilter("published", false);
+        ff.addFilter("interoperability_record_id", interoperabilityRecordId);
+        return genericResourceService.getResults(ff);
     }
 
     public Map<String, List<String>> getInteroperabilityRecordIdToConfigurationTemplateListMap() {

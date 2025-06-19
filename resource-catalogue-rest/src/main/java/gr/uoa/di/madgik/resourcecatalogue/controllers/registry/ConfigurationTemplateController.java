@@ -117,11 +117,8 @@ public class ConfigurationTemplateController {
             @Parameter(description = "The right part of the ID after the '/'")
             @PathVariable("suffix") String suffix,
             @Parameter(hidden = true) @RequestParam MultiValueMap<String, Object> allRequestParams) {
-        FacetFilter ff = FacetFilter.from(allRequestParams);
-        ff.setResourceType("configuration_template");
-        ff.addFilter("published", false);
-        ff.addFilter("interoperability_record_id", prefix + "/" + suffix);
-        Paging<ConfigurationTemplate> paging = genericResourceService.getResults(ff);
+        Paging<ConfigurationTemplate> paging = service.getAllByInteroperabilityRecordId(allRequestParams,
+                prefix + "/" + suffix);
         return ResponseEntity.ok(paging);
     }
 

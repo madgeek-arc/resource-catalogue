@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright 2017-2025 OpenAIRE AMKE & Athena Research and Innovation Center
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -26,8 +26,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
-import org.json.simple.JSONObject;
 
+import java.util.Map;
 import java.util.Objects;
 
 @XmlType
@@ -68,12 +68,12 @@ public class ConfigurationTemplate implements Identifiable {
     @XmlElement(required = true)
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     @FieldValidation
-    private JSONObject formModel;
+    private Map<String, Object> formModel;
 
     public ConfigurationTemplate() {
     }
 
-    public ConfigurationTemplate(String id, String interoperabilityRecordId, String name, String catalogueId, String node, String description, JSONObject formModel) {
+    public ConfigurationTemplate(String id, String interoperabilityRecordId, String name, String catalogueId, String node, String description, Map<String, Object> formModel) {
         this.id = id;
         this.interoperabilityRecordId = interoperabilityRecordId;
         this.name = name;
@@ -158,11 +158,11 @@ public class ConfigurationTemplate implements Identifiable {
         this.description = description;
     }
 
-    public JSONObject getFormModel() {
+    public Map<String, Object> getFormModel() {
         return formModel;
     }
 
-    public void setFormModel(JSONObject formModel) {
+    public void setFormModel(Map<String, Object> formModel) {
         this.formModel = formModel;
     }
 }

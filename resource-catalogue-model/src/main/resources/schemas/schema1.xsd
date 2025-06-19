@@ -2500,7 +2500,7 @@ that is the used scheme (e.g., Web Address URL, DOI, ARK, etc.).]]></xs:document
                                 
                 <xs:sequence>
                                     
-                  <xs:element minOccurs="0" name="key" type="xs:anyType"/>
+                  <xs:element minOccurs="0" name="key" type="xs:string"/>
                                     
                   <xs:element minOccurs="0" name="value" type="xs:anyType"/>
                                   
@@ -2558,7 +2558,33 @@ that is the used scheme (e.g., Web Address URL, DOI, ARK, etc.).]]></xs:document
             
       <xs:element minOccurs="0" name="node" type="xs:string"/>
             
-      <xs:element minOccurs="0" name="payload" type="xs:string"/>
+      <xs:element name="payload">
+                
+        <xs:complexType>
+                    
+          <xs:sequence>
+                        
+            <xs:element maxOccurs="unbounded" minOccurs="0" name="entry">
+                            
+              <xs:complexType>
+                                
+                <xs:sequence>
+                                    
+                  <xs:element minOccurs="0" name="key" type="xs:string"/>
+                                    
+                  <xs:element minOccurs="0" name="value" type="xs:anyType"/>
+                                  
+                </xs:sequence>
+                              
+              </xs:complexType>
+                          
+            </xs:element>
+                      
+          </xs:sequence>
+                  
+        </xs:complexType>
+              
+      </xs:element>
             
       <xs:element minOccurs="0" name="resourceId" type="xs:string"/>
           

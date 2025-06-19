@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright 2017-2025 OpenAIRE AMKE & Athena Research and Innovation Center
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,10 +19,10 @@ package gr.uoa.di.madgik.resourcecatalogue.manager;
 import gr.uoa.di.madgik.catalogue.exception.ValidationException;
 import gr.uoa.di.madgik.registry.domain.Resource;
 import gr.uoa.di.madgik.registry.service.SearchService;
-import gr.uoa.di.madgik.resourcecatalogue.domain.LoggingInfo;
-import gr.uoa.di.madgik.resourcecatalogue.domain.Metadata;
-import gr.uoa.di.madgik.resourcecatalogue.domain.ResourceInteroperabilityRecordBundle;
-import gr.uoa.di.madgik.resourcecatalogue.domain.ServiceBundle;
+import gr.uoa.di.madgik.resourcecatalogue.domain.*;
+import gr.uoa.di.madgik.resourcecatalogue.domain.configurationTemplates.ConfigurationTemplate;
+import gr.uoa.di.madgik.resourcecatalogue.domain.configurationTemplates.ConfigurationTemplateInstance;
+import gr.uoa.di.madgik.resourcecatalogue.domain.configurationTemplates.ConfigurationTemplateInstanceBundle;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
 import gr.uoa.di.madgik.resourcecatalogue.utils.*;
 import org.slf4j.Logger;
@@ -30,8 +30,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.core.Authentication;
 
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 
 @org.springframework.stereotype.Service("resourceInteroperabilityRecordManager")
 public class ResourceInteroperabilityRecordManager extends ResourceCatalogueManager<ResourceInteroperabilityRecordBundle>
@@ -46,13 +45,17 @@ public class ResourceInteroperabilityRecordManager extends ResourceCatalogueMana
     private final ProviderResourcesCommonMethods commonMethods;
     private final IdCreator idCreator;
     private final RelationshipValidator relationshipValidator;
+    private final ConfigurationTemplateService ctService;
+    private final ConfigurationTemplateInstanceService ctiService;
 
     public ResourceInteroperabilityRecordManager(ServiceBundleService<ServiceBundle> serviceBundleService,
                                                  TrainingResourceService trainingResourceService,
                                                  InteroperabilityRecordService interoperabilityRecordService,
                                                  SecurityService securityService, ProviderResourcesCommonMethods commonMethods,
                                                  PublicResourceInteroperabilityRecordService publicResourceInteroperabilityRecordManager,
-                                                 IdCreator idCreator, @Lazy RelationshipValidator relationshipValidator) {
+                                                 IdCreator idCreator, @Lazy RelationshipValidator relationshipValidator,
+                                                 ConfigurationTemplateService ctService,
+                                                 ConfigurationTemplateInstanceService ctiService) {
         super(ResourceInteroperabilityRecordBundle.class);
         this.serviceBundleService = serviceBundleService;
         this.trainingResourceService = trainingResourceService;
@@ -62,6 +65,8 @@ public class ResourceInteroperabilityRecordManager extends ResourceCatalogueMana
         this.publicResourceInteroperabilityRecordManager = publicResourceInteroperabilityRecordManager;
         this.idCreator = idCreator;
         this.relationshipValidator = relationshipValidator;
+        this.ctService = ctService;
+        this.ctiService = ctiService;
     }
 
     @Override
@@ -196,6 +201,50 @@ public class ResourceInteroperabilityRecordManager extends ResourceCatalogueMana
             }
         }
         return resourceInteroperabilityRecordBundle;
+    }
+
+    @Override
+    public void checkAndRemoveCTI(ResourceInteroperabilityRecord existingRIR, ResourceInteroperabilityRecord updatedRIR) {
+        List<String> existingGuidelineList = existingRIR.getInteroperabilityRecordIds();
+        List<String> updateGuidelineList = updatedRIR.getInteroperabilityRecordIds();
+
+        // If the lists are equal, do nothing
+        if (new HashSet<>(existingGuidelineList).equals(new HashSet<>(updateGuidelineList))) {
+            return;
+        }
+
+        // Identify deleted Guideline IDs
+        Set<String> missingGuidelineIds = new HashSet<>(existingGuidelineList);
+        missingGuidelineIds.removeAll(updateGuidelineList);
+        if (missingGuidelineIds.isEmpty()) {
+            return;
+        }
+
+        // Delete CTI associated with the specific deleted Guideline
+        for (String missingGuidelineId : missingGuidelineIds) {
+            List<ConfigurationTemplate> ctList = ctService.getAllByInteroperabilityRecordId(null,
+                    missingGuidelineId).getResults();
+            if (ctList == null || ctList.isEmpty()) {
+                continue;
+            }
+            for (ConfigurationTemplate ct : ctList) {
+                List<ConfigurationTemplateInstance> ctiList = ctiService.getByConfigurationTemplateId(ct.getId());
+                if (ctiList == null || ctiList.isEmpty()) {
+                    continue;
+                }
+                for (ConfigurationTemplateInstance cti : ctiList) {
+                    try {
+                        ConfigurationTemplateInstanceBundle ctiBundle = ctiService.get(cti.getId());
+                        if (ctiBundle != null) {
+                            logger.info("Deleting CTI with id '{}'", cti.getId());
+                            ctiService.delete(ctiBundle);
+                        }
+                    } catch (Exception e) {
+                        logger.info("Failed to delete CTI for ID {}: {}", cti.getId(), e.getMessage());
+                    }
+                }
+            }
+        }
     }
 
     @Override

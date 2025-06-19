@@ -16,6 +16,20 @@
       "type": "java.lang.String"
     },
     {
+      "label": "Catalogue ID",
+      "multivalued": false,
+      "name": "catalogue_id",
+      "path": "$.configurationTemplate.catalogueId",
+      "type": "java.lang.String"
+    },
+    {
+      "label": "Node",
+      "multivalued": false,
+      "name": "node",
+      "path": "$.configurationTemplate.node",
+      "type": "java.lang.String"
+    },
+    {
       "label": "Name",
       "multivalued": false,
       "name": "name",

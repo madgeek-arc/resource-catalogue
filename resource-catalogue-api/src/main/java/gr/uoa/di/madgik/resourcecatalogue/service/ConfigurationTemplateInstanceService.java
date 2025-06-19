@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright 2017-2025 OpenAIRE AMKE & Athena Research and Innovation Center
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,7 +18,7 @@ package gr.uoa.di.madgik.resourcecatalogue.service;
 
 import gr.uoa.di.madgik.resourcecatalogue.domain.configurationTemplates.ConfigurationTemplateInstance;
 import gr.uoa.di.madgik.resourcecatalogue.domain.configurationTemplates.ConfigurationTemplateInstanceBundle;
-import gr.uoa.di.madgik.resourcecatalogue.domain.configurationTemplates.ConfigurationTemplateInstanceDto;
+import org.springframework.security.core.Authentication;
 
 import java.util.List;
 
@@ -28,9 +28,9 @@ public interface ConfigurationTemplateInstanceService extends ResourceCatalogueS
      * Return a List of ConfigurationTemplateInstances providing a resource ID
      *
      * @param id resource ID
-     * @return {@link List}&lt;{@link ConfigurationTemplateInstance}&gt;
+     * @return {@link List}&lt;{@link ConfigurationTemplateInstanceBundle}&gt;
      */
-    List<ConfigurationTemplateInstance> getByResourceId(String id);
+    List<ConfigurationTemplateInstanceBundle> getByResourceId(String id);
 
     /**
      * Return a List of ConfigurationTemplateInstances providing a ConfigurationTemplate ID
@@ -41,10 +41,12 @@ public interface ConfigurationTemplateInstanceService extends ResourceCatalogueS
     List<ConfigurationTemplateInstance> getByConfigurationTemplateId(String id);
 
     /**
-     * Given a ConfigurationTemplateInstance return a ConfigurationTemplateInstanceDto
+     * Create a Public Configuration Template Instance
      *
-     * @param configurationTemplateInstance ConfigurationTemplateInstance
-     * @return {@link ConfigurationTemplateInstanceDto}
+     * @param configurationTemplateInstanceBundle Configuration Template Instance
+     * @param auth                                Authentication
+     * @return {@link ConfigurationTemplateInstanceBundle}
      */
-    ConfigurationTemplateInstanceDto createCTIDto(ConfigurationTemplateInstance configurationTemplateInstance);
+    ConfigurationTemplateInstanceBundle createPublicConfigurationTemplateInstance(
+            ConfigurationTemplateInstanceBundle configurationTemplateInstanceBundle, Authentication auth);
 }
