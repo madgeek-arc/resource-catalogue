@@ -97,6 +97,22 @@ public class ConfigurationTemplateInstanceController {
         return new ResponseEntity<>(ret, HttpStatus.OK);
     }
 
+    @Operation(summary = "Returns a list of all Configuration Template Instances associated with the given 'resourceId', 'ctiId'.")
+    @GetMapping(path = "/resources/{resourcePrefix}/{resourceSuffix}/templates/{ctPrefix}/{ctSuffix}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<ConfigurationTemplateInstance> getByResourceAndConfigurationTemplateId(@Parameter(description = "The left part of the ID before the '/'")
+                                                                                                 @PathVariable("resourcePrefix") String resourcePrefix,
+                                                                                                 @Parameter(description = "The right part of the ID after the '/'")
+                                                                                                 @PathVariable("resourceSuffix") String resourceSuffix,
+                                                                                                 @Parameter(description = "The left part of the ID before the '/'")
+                                                                                                 @PathVariable("ctPrefix") String ctPrefix,
+                                                                                                 @Parameter(description = "The right part of the ID after the '/'")
+                                                                                                 @PathVariable("ctSuffix") String ctSuffix) {
+        String resourceId = resourcePrefix + "/" + resourceSuffix;
+        String ctId = ctPrefix + "/" + ctSuffix;
+        ConfigurationTemplateInstance ret = ctiService.getByResourceAndConfigurationTemplateId(resourceId, ctId);
+        return new ResponseEntity<>(ret, HttpStatus.OK);
+    }
+
     @Operation(summary = "Returns a list of all Configuration Template Instances associated with the given 'configurationTemplateId'.")
     @GetMapping(path = "getAllByConfigurationTemplateId/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<List<ConfigurationTemplateInstance>> getCTIByConfigurationTemplateId(@Parameter(description = "The left part of the ID before the '/'")

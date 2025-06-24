@@ -193,6 +193,19 @@ public class ConfigurationTemplateInstanceManager extends ResourceCatalogueManag
         return ret;
     }
 
+    public ConfigurationTemplateInstance getByResourceAndConfigurationTemplateId(String resourceId, String ctId) {
+        FacetFilter ff = new FacetFilter();
+        ff.setQuantity(10000);
+        ff.addFilter("published", false);
+        ff.addFilter("resource_id", resourceId);
+        ff.addFilter("configuration_template_id", ctId);
+        List<ConfigurationTemplateInstanceBundle> list = configInstanceService.getAll(ff, null).getResults();
+        if (!list.isEmpty()) {
+            return list.getFirst().getConfigurationTemplateInstance();
+        }
+        return null;
+    }
+
     private void checkResourceIdAndConfigurationTemplateIdConsistency(ConfigurationTemplateInstanceBundle bundle,
                                                                       Authentication auth) {
         String resourceId = bundle.getConfigurationTemplateInstance().getResourceId();

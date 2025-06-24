@@ -41,6 +41,16 @@ public interface ConfigurationTemplateInstanceService extends ResourceCatalogueS
     List<ConfigurationTemplateInstance> getByConfigurationTemplateId(String id);
 
     /**
+     * Return the ConfigurationTemplateInstance providing its resource and ConfigurationTemplate IDs
+     * or null
+     *
+     * @param resourceId resource ID
+     * @param ctId resource ID
+     * @return {@link List}&lt;{@link ConfigurationTemplateInstance}&gt;
+     */
+    ConfigurationTemplateInstance getByResourceAndConfigurationTemplateId(String resourceId, String ctId);
+
+    /**
      * Create a Public Configuration Template Instance
      *
      * @param configurationTemplateInstanceBundle Configuration Template Instance
