@@ -19,9 +19,10 @@ package gr.uoa.di.madgik.resourcecatalogue.controllers.registry;
 import gr.uoa.di.madgik.registry.annotation.BrowseParameters;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.domain.Paging;
+import gr.uoa.di.madgik.resourcecatalogue.domain.ProviderBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.User;
-import gr.uoa.di.madgik.resourcecatalogue.domain.configurationTemplates.ConfigurationTemplate;
-import gr.uoa.di.madgik.resourcecatalogue.domain.configurationTemplates.ConfigurationTemplateBundle;
+import gr.uoa.di.madgik.resourcecatalogue.domain.ConfigurationTemplate;
+import gr.uoa.di.madgik.resourcecatalogue.domain.ConfigurationTemplateBundle;
 import gr.uoa.di.madgik.resourcecatalogue.service.ConfigurationTemplateService;
 import gr.uoa.di.madgik.resourcecatalogue.service.GenericResourceService;
 import io.swagger.v3.oas.annotations.Hidden;
@@ -104,7 +105,7 @@ public class ConfigurationTemplateController {
         FacetFilter ff = FacetFilter.from(allRequestParams);
         ff.setResourceType("configuration_template");
         ff.addFilter("published", false);
-        Paging<ConfigurationTemplate> paging = genericResourceService.getResults(ff);
+        Paging<ConfigurationTemplate> paging = genericResourceService.getResults(ff).map(r -> ((ConfigurationTemplateBundle) r).getPayload());
         return ResponseEntity.ok(paging);
     }
 

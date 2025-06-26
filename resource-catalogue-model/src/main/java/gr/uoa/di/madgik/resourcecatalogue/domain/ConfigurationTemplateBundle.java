@@ -14,28 +14,26 @@
  * limitations under the License.
  */
 
-package gr.uoa.di.madgik.resourcecatalogue.domain.configurationTemplates;
+package gr.uoa.di.madgik.resourcecatalogue.domain;
 
-import gr.uoa.di.madgik.resourcecatalogue.domain.Bundle;
-import gr.uoa.di.madgik.resourcecatalogue.domain.Metadata;
 import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
 
 @XmlType
 @XmlRootElement
-public class ConfigurationTemplateInstanceBundle extends Bundle<ConfigurationTemplateInstance> {
+public class ConfigurationTemplateBundle extends Bundle<ConfigurationTemplate> {
 
-    public ConfigurationTemplateInstanceBundle() {
+    public ConfigurationTemplateBundle() {
     }
 
-    public ConfigurationTemplateInstanceBundle(ConfigurationTemplateInstance configurationTemplateInstance) {
-        this.setConfigurationTemplateInstance(configurationTemplateInstance);
+    public ConfigurationTemplateBundle(ConfigurationTemplate configurationTemplate) {
+        this.setConfigurationTemplate(configurationTemplate);
         this.setMetadata(null);
     }
 
-    public ConfigurationTemplateInstanceBundle(ConfigurationTemplateInstance configurationTemplateInstance, Metadata metadata) {
-        this.setConfigurationTemplateInstance(configurationTemplateInstance);
+    public ConfigurationTemplateBundle(ConfigurationTemplate configurationTemplate, Metadata metadata) {
+        this.setConfigurationTemplate(configurationTemplate);
         this.setMetadata(metadata);
     }
 
@@ -49,12 +47,13 @@ public class ConfigurationTemplateInstanceBundle extends Bundle<ConfigurationTem
         super.setId(id);
     }
 
-    @XmlElement(name = "configurationTemplateInstance")
-    public ConfigurationTemplateInstance getConfigurationTemplateInstance() {
+    @XmlElement(name = "configurationTemplate")
+    public ConfigurationTemplate getConfigurationTemplate() {
         return this.getPayload();
     }
 
-    public void setConfigurationTemplateInstance(ConfigurationTemplateInstance configurationTemplateInstance) {
-        this.setPayload(configurationTemplateInstance);
+    public void setConfigurationTemplate(ConfigurationTemplate configurationTemplate) {
+        this.setPayload(configurationTemplate);
     }
 }
+
