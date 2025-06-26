@@ -62,4 +62,8 @@ public class PidManager implements PidService {
     public void register(String pid, List<String> endpoints) {
         pidIssuer.postPID(pid, endpoints);
     }
+
+    public void delete(String pid) {
+        pidIssuer.deletePID(pid);
+    }
 }

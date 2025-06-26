@@ -32,10 +32,17 @@ public interface PidService {
     Bundle<?> get(String prefix, String suffix);
 
     /**
-     * Registers a PID on a specific resource
+     * Registers/Updates a PID on a specific resource
      *
      * @param pid       PID
      * @param endpoints List of endpoints in which the specific resource resolves (optional)
      */
     void register(String pid, List<String> endpoints);
+
+    /**
+     * Deletes the resource from the PID service
+     *
+     * @param pid       PID
+     */
+    void delete(String pid);
 }

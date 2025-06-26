@@ -18,6 +18,7 @@ package gr.uoa.di.madgik.resourcecatalogue.controllers.lot1;
 
 import gr.uoa.di.madgik.resourcecatalogue.domain.Bundle;
 import gr.uoa.di.madgik.resourcecatalogue.service.PidService;
+import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -25,6 +26,7 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -52,7 +54,7 @@ public class PidController {
         return new ResponseEntity<>(null, HttpStatus.OK);
     }
 
-    @Operation(summary = "Register a resource on the PID service")
+    @Operation(summary = "Register/Update a resource on the PID service")
     @PostMapping(path = "{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<?> register(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
                                       @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix,
@@ -60,6 +62,21 @@ public class PidController {
         Bundle<?> bundle = pidService.get(prefix, suffix);
         if (bundle != null) {
             pidService.register(bundle.getId(), resolveEndpoints);
+            return new ResponseEntity<>(null, HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
+        }
+    }
+
+    @Hidden
+    @Operation(summary = "Deletes a resource on the PID service")
+    @DeleteMapping(path = "{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public ResponseEntity<?> delete(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
+                                    @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix) {
+        Bundle<?> bundle = pidService.get(prefix, suffix);
+        if (bundle != null) {
+            pidService.delete(bundle.getId());
             return new ResponseEntity<>(null, HttpStatus.OK);
         } else {
             return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
