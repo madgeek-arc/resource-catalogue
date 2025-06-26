@@ -82,7 +82,8 @@ public class ConfigurationTemplateInstanceController {
         ff.setResourceType("configuration_template_instance");
         ff.addFilter("published", false);
         //TODO: find a way to return non-bundle items
-        Paging<ConfigurationTemplateInstance> paging = genericResourceService.getResults(ff);
+        Paging<ConfigurationTemplateInstance> paging = genericResourceService.getResults(ff)
+                .map(r -> ((ConfigurationTemplateInstanceBundle) r).getPayload());
         return ResponseEntity.ok(paging);
     }
 

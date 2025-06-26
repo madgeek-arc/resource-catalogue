@@ -73,5 +73,21 @@ public interface ResourceInteroperabilityRecordService extends ResourceCatalogue
      */
     ResourceInteroperabilityRecordBundle getWithResourceId(String resourceId);
 
+    /**
+     * Check if there are any associated CTI with the specific Resource Interoperability Record.
+     * If there are, delete them.
+     *
+     * @param rir Resource Interoperability Record
+     */
+    void checkAndRemoveCTI(ResourceInteroperabilityRecord rir);
+
+    /**
+     * Check if there are any differences in the Guideline's list when updating a RIR.
+     * If there are Guidelines removed, search and delete any associated CTI for the specific Service for each of those
+     * Guidelines.
+     *
+     * @param existingRIR Existing Resource Interoperability Record
+     * @param updatedRIR  Updated  Resource Interoperability Record
+     */
     void checkAndRemoveCTI(ResourceInteroperabilityRecord existingRIR, ResourceInteroperabilityRecord updatedRIR);
 }

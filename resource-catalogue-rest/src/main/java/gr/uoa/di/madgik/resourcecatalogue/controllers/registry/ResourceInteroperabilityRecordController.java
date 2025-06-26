@@ -153,8 +153,8 @@ public class ResourceInteroperabilityRecordController {
     @DeleteMapping(path = "{resourceIdPrefix}/{resourceIdSuffix}/{resourceInteroperabilityRecordIdPrefix}/{resourceInteroperabilityRecordIdSuffix}",
             produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceAdmin(#auth, #resourcePrefix+'/'+resourceSuffix)")
-    public ResponseEntity<ResourceInteroperabilityRecord> deleteById(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("resourceIdPrefix") String resourcePrefix,
-                                                                     @Parameter(description = "The right part of the ID after the '/'") @PathVariable("resourceIdSuffix") String resourceSuffix,
+    public ResponseEntity<ResourceInteroperabilityRecord> deleteById(@SuppressWarnings("unused") @Parameter(description = "The left part of the ID before the '/'") @PathVariable("resourceIdPrefix") String resourcePrefix,
+                                                                     @SuppressWarnings("unused") @Parameter(description = "The right part of the ID after the '/'") @PathVariable("resourceIdSuffix") String resourceSuffix,
                                                                      @Parameter(description = "The left part of the ID before the '/'") @PathVariable("resourceInteroperabilityRecordIdPrefix") String rirPrefix,
                                                                      @Parameter(description = "The right part of the ID after the '/'") @PathVariable("resourceInteroperabilityRecordIdSuffix") String rirSuffix,
                                                                      @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId,
@@ -164,17 +164,12 @@ public class ResourceInteroperabilityRecordController {
         if (bundle == null) {
             return new ResponseEntity<>(HttpStatus.GONE);
         }
-        logger.info("Deleting ResourceInteroperabilityRecord: {} of the Catalogue: {} along with all the interrelated " +
+        service.checkAndRemoveCTI(bundle.getResourceInteroperabilityRecord());
+        service.delete(bundle);
+        logger.info("Deleted the ResourceInteroperabilityRecord with id '{}' of the Catalogue '{}' along with all the interrelated " +
                         "Configuration Template Instances",
                 bundle.getResourceInteroperabilityRecord().getId(),
                 bundle.getResourceInteroperabilityRecord().getCatalogueId());
-        List<ConfigurationTemplateInstanceBundle> ctiList = ctiService.getByResourceId(bundle.getResourceInteroperabilityRecord().getResourceId());
-        for (ConfigurationTemplateInstanceBundle ctiBundle : ctiList) {
-            ctiService.delete(ctiBundle);
-        }
-        service.delete(bundle);
-        logger.info("Deleted the ResourceInteroperabilityRecord with id '{}' of the Catalogue '{}'",
-                bundle.getResourceInteroperabilityRecord().getId(), bundle.getResourceInteroperabilityRecord().getCatalogueId());
         return new ResponseEntity<>(bundle.getResourceInteroperabilityRecord(), HttpStatus.OK);
     }
 

@@ -193,7 +193,7 @@ public class ConfigurationTemplateManager extends ResourceCatalogueManager<Confi
         ff.setQuantity(1000);
         ff.addFilter("published", false);
         ff.addFilter("interoperability_record_id", interoperabilityRecordId);
-        return genericResourceService.getResults(ff);
+        return genericResourceService.getResults(ff).map(r -> ((ConfigurationTemplateBundle) r).getPayload());
     }
 
     public Map<String, List<String>> getInteroperabilityRecordIdToConfigurationTemplateListMap() {

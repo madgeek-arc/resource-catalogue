@@ -204,7 +204,17 @@ public class ResourceInteroperabilityRecordManager extends ResourceCatalogueMana
     }
 
     @Override
+    public void checkAndRemoveCTI(ResourceInteroperabilityRecord rir) {
+        String resourceId = rir.getResourceId();
+        Set<String> guidelineIds = new HashSet<>(rir.getInteroperabilityRecordIds());
+
+        // Delete CTIs associated with the specific removed Guideline
+        deleteCTI(resourceId, guidelineIds);
+    }
+
+    @Override
     public void checkAndRemoveCTI(ResourceInteroperabilityRecord existingRIR, ResourceInteroperabilityRecord updatedRIR) {
+        String resourceId = existingRIR.getResourceId();
         List<String> existingGuidelineList = existingRIR.getInteroperabilityRecordIds();
         List<String> updateGuidelineList = updatedRIR.getInteroperabilityRecordIds();
 
@@ -215,24 +225,25 @@ public class ResourceInteroperabilityRecordManager extends ResourceCatalogueMana
 
         // Identify deleted Guideline IDs
         Set<String> missingGuidelineIds = new HashSet<>(existingGuidelineList);
-        missingGuidelineIds.removeAll(updateGuidelineList);
+        updateGuidelineList.forEach(missingGuidelineIds::remove);
         if (missingGuidelineIds.isEmpty()) {
             return;
         }
 
-        // Delete CTI associated with the specific deleted Guideline
-        for (String missingGuidelineId : missingGuidelineIds) {
+        // Delete CTIs associated with the specific removed Guideline
+        deleteCTI(resourceId, missingGuidelineIds);
+    }
+
+    private void deleteCTI(String resourceId, Set<String> guidelineIds) {
+        for (String guidelineId : guidelineIds) {
             List<ConfigurationTemplate> ctList = ctService.getAllByInteroperabilityRecordId(null,
-                    missingGuidelineId).getResults();
+                    guidelineId).getResults();
             if (ctList == null || ctList.isEmpty()) {
                 continue;
             }
             for (ConfigurationTemplate ct : ctList) {
-                List<ConfigurationTemplateInstance> ctiList = ctiService.getByConfigurationTemplateId(ct.getId());
-                if (ctiList == null || ctiList.isEmpty()) {
-                    continue;
-                }
-                for (ConfigurationTemplateInstance cti : ctiList) {
+                ConfigurationTemplateInstance cti = ctiService.getByResourceAndConfigurationTemplateId(resourceId ,ct.getId());
+                if (cti != null) {
                     try {
                         ConfigurationTemplateInstanceBundle ctiBundle = ctiService.get(cti.getId());
                         if (ctiBundle != null) {
