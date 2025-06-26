@@ -117,7 +117,7 @@
   ],
   "payloadType": "json",
   "properties": {
-    "class": "gr.uoa.di.madgik.resourcecatalogue.domain.ConfigurationTemplateInstance"
+    "class": "gr.uoa.di.madgik.resourcecatalogue.domain.ConfigurationTemplateInstanceBundle"
   },
   "schema": "{\n\t\"$schema\": \"https://json-schema.org/draft/2019-09/schema\"\n}"
 }
