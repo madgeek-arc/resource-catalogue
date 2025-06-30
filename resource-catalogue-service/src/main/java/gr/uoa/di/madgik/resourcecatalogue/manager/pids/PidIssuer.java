@@ -199,7 +199,13 @@ public class PidIssuer {
                 if (isCustom) {
                     resolveUrl_data.put("value", endpoint);
                 } else {
-                    resolveUrl_data.put("value", String.join("/", endpoint, pid));
+                    //FIXME: temporary solution with the fewest changes
+                    if (endpoint.startsWith("https://search.marketplace.sandbox.eosc-beyond.eu")) {
+                        String encodedSlash = pid.replace("/", "%252F");
+                        resolveUrl_data.put("value", String.join("/", endpoint, encodedSlash));
+                    } else {
+                        resolveUrl_data.put("value", String.join("/", endpoint, pid));
+                    }
                 }
                 resolveUrls.put("index", index);
                 resolveUrls.put("type", "URL");
