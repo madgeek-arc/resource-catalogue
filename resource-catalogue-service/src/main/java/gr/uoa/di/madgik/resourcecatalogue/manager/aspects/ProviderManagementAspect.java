@@ -515,7 +515,8 @@ public class ProviderManagementAspect {
     public void addConfigurationTemplateInstanceAsPublic(final ConfigurationTemplateInstanceBundle configurationTemplateInstanceBundle) {
         try {
             //TODO: Refactor if CTIs can belong to a different from the Project's Catalogue
-            publicConfigurationTemplateInstanceManager.get(configurationTemplateInstanceBundle.getIdentifiers().getPid());
+            publicConfigurationTemplateInstanceManager.get(configurationTemplateInstanceBundle.getIdentifiers().getPid(),
+                    configurationTemplateInstanceBundle.getConfigurationTemplateInstance().getCatalogueId(), true);
         } catch (ResourceException | ResourceNotFoundException e) {
             publicConfigurationTemplateInstanceManager.add(ObjectUtils.clone(configurationTemplateInstanceBundle), null);
         }
@@ -546,7 +547,8 @@ public class ProviderManagementAspect {
     public void addAdapterAsPublic(final AdapterBundle adapterBundle) {
         try {
             //TODO: Refactor if Adapters can belong to a different from the Project's Catalogue
-            publicAdapterManager.get(adapterBundle.getIdentifiers().getPid());
+            publicAdapterManager.get(adapterBundle.getIdentifiers().getPid(),
+                    adapterBundle.getAdapter().getCatalogueId(), true);
         } catch (ResourceException | ResourceNotFoundException e) {
             publicAdapterManager.add(ObjectUtils.clone(adapterBundle), null);
         }
