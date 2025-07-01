@@ -190,6 +190,16 @@ public class ConfigurationTemplateInstanceController {
     }
 
     @Hidden
+    @PostMapping(path = "/bundle", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public ResponseEntity<ConfigurationTemplateInstanceBundle> addBundle(@RequestBody ConfigurationTemplateInstanceBundle cti,
+                                                                         @Parameter(hidden = true) Authentication auth) {
+        ConfigurationTemplateInstanceBundle ctiBundle = configurationTemplateInstanceService.add(cti, auth);
+        logger.info("Added the Configuration Template Instance with id '{}'", ctiBundle.getId());
+        return new ResponseEntity<>(ctiBundle, HttpStatus.CREATED);
+    }
+
+    @Hidden
     @Operation(summary = "Updates the Configuration Template Instance Bundle with the given id.")
     @PutMapping(path = "updateBundle", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")

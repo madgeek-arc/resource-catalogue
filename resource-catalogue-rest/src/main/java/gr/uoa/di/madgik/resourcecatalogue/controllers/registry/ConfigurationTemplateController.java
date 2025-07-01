@@ -19,7 +19,6 @@ package gr.uoa.di.madgik.resourcecatalogue.controllers.registry;
 import gr.uoa.di.madgik.registry.annotation.BrowseParameters;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.domain.Paging;
-import gr.uoa.di.madgik.resourcecatalogue.domain.ProviderBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.User;
 import gr.uoa.di.madgik.resourcecatalogue.domain.ConfigurationTemplate;
 import gr.uoa.di.madgik.resourcecatalogue.domain.ConfigurationTemplateBundle;
@@ -128,6 +127,16 @@ public class ConfigurationTemplateController {
     @GetMapping(path = "/interoperabilityRecordIdToConfigurationTemplateListMap", produces = {MediaType.APPLICATION_JSON_VALUE})
     public Map<String, List<String>> interoperabilityRecordIdToConfigurationTemplateListMap() {
         return service.getInteroperabilityRecordIdToConfigurationTemplateListMap();
+    }
+
+    @Hidden
+    @PostMapping(path = "/bundle", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public ResponseEntity<ConfigurationTemplateBundle> addBundle(@RequestBody ConfigurationTemplateBundle ct,
+                                                                 @Parameter(hidden = true) Authentication auth) {
+        ConfigurationTemplateBundle ctBundle = configurationTemplateService.add(ct, auth);
+        logger.info("Added the Configuration Template with name '{}' and id '{}'", ctBundle.getConfigurationTemplate().getName(), ctBundle.getId());
+        return new ResponseEntity<>(ctBundle, HttpStatus.CREATED);
     }
 
     @Hidden
