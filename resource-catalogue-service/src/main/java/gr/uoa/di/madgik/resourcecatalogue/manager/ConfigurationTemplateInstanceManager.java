@@ -37,6 +37,7 @@ import org.springframework.security.core.Authentication;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Set;
 
 @org.springframework.stereotype.Service("configurationTemplateInstanceManager")
 public class ConfigurationTemplateInstanceManager extends ResourceCatalogueManager<ConfigurationTemplateInstanceBundle>
@@ -77,6 +78,7 @@ public class ConfigurationTemplateInstanceManager extends ResourceCatalogueManag
     public ConfigurationTemplateInstanceBundle add(ConfigurationTemplateInstanceBundle bundle, Authentication auth) {
         validate(bundle);
         checkResourceIdAndConfigurationTemplateIdConsistency(bundle, auth);
+        validateInstanceAgainstTemplate(bundle);
 
         bundle.setId(idCreator.generate(getResourceTypeName()));
         commonMethods.createIdentifiers(bundle, getResourceTypeName(), false);
@@ -244,6 +246,17 @@ public class ConfigurationTemplateInstanceManager extends ResourceCatalogueManag
         ff.setQuantity(10000);
         ff.addFilter("published", false);
         return ff;
+    }
+
+    private void validateInstanceAgainstTemplate(ConfigurationTemplateInstanceBundle bundle) {
+        ConfigurationTemplateBundle ct = configService.get(bundle.getConfigurationTemplateInstance().getConfigurationTemplateId(),
+                bundle.getConfigurationTemplateInstance().getCatalogueId(), false);
+        Set<String> ctKeys = ct.getConfigurationTemplate().getFormModel().keySet();
+        Set<String> ctiKeys = bundle.getConfigurationTemplateInstance().getPayload().keySet();
+
+        if (!ctKeys.equals(ctiKeys)) {
+            throw new ValidationException("Configuration Template Instance does not contain the required model in its payload");
+        }
     }
 
     public ConfigurationTemplateInstanceBundle createPublicConfigurationTemplateInstance(
