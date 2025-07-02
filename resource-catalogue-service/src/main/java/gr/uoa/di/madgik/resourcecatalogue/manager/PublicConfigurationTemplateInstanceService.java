@@ -110,7 +110,9 @@ public class PublicConfigurationTemplateInstanceService extends ResourceCatalogu
     public void delete(ConfigurationTemplateInstanceBundle configurationTemplateInstanceBundle) {
         try {
             ConfigurationTemplateInstanceBundle publicConfigurationTemplateInstanceBundle =
-                    get(configurationTemplateInstanceBundle.getIdentifiers().getPid());
+                    get(configurationTemplateInstanceBundle.getIdentifiers().getPid(),
+                            configurationTemplateInstanceBundle.getConfigurationTemplateInstance().getCatalogueId(),
+                            true);
             logger.info("Deleting public ConfigurationTemplateInstanceBundle with id '{}'",
                     publicConfigurationTemplateInstanceBundle.getId());
             super.delete(publicConfigurationTemplateInstanceBundle);

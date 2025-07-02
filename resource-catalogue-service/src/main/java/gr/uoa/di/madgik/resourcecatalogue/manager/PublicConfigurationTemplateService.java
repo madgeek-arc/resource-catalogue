@@ -101,10 +101,11 @@ public class PublicConfigurationTemplateService extends ResourceCatalogueManager
     }
 
     @Override
-    public void delete(ConfigurationTemplateBundle configurationTemplateIBundle) {
+    public void delete(ConfigurationTemplateBundle configurationTemplateBundle) {
         try {
             ConfigurationTemplateBundle publicConfigurationTemplateBundle =
-                    get(configurationTemplateIBundle.getIdentifiers().getPid());
+                    get(configurationTemplateBundle.getIdentifiers().getPid(),
+                            configurationTemplateBundle.getConfigurationTemplate().getCatalogueId(), true);
             logger.info("Deleting public ConfigurationTemplateBundle with id '{}'",
                     publicConfigurationTemplateBundle.getId());
             super.delete(publicConfigurationTemplateBundle);

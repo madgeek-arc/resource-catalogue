@@ -484,7 +484,8 @@ public class ProviderManagementAspect {
     public void addConfigurationTemplateAsPublic(final ConfigurationTemplateBundle configurationTemplateBundle) {
         try {
             //TODO: Refactor if CTIs can belong to a different from the Project's Catalogue
-            publicConfigurationTemplateManager.get(configurationTemplateBundle.getIdentifiers().getPid());
+            publicConfigurationTemplateManager.get(configurationTemplateBundle.getIdentifiers().getPid(),
+                    configurationTemplateBundle.getConfigurationTemplate().getCatalogueId(), true);
         } catch (ResourceException | ResourceNotFoundException e) {
             publicConfigurationTemplateManager.add(ObjectUtils.clone(configurationTemplateBundle), null);
         }
