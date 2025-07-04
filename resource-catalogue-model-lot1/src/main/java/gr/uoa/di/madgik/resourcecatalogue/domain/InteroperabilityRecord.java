@@ -29,21 +29,17 @@ import java.util.List;
 import java.util.Objects;
 
 
-@XmlType
-@XmlRootElement
 public class InteroperabilityRecord implements Identifiable {
 
     /**
      * EOSC Interoperability ID (auto-assigned).
      */
-    @XmlElement(required = true)
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED, example = "(auto-assigned)")
     private String id;
 
     /**
      * The Catalogue this Interoperability Record is originally registered at.
      */
-    @XmlElement(required = true)
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     @FieldValidation(containsId = true, idClass = Catalogue.class)
     private String catalogueId;
@@ -51,7 +47,6 @@ public class InteroperabilityRecord implements Identifiable {
     /**
      * The Provider this Interoperability Record is originally registered at.
      */
-    @XmlElement(required = true)
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     @FieldValidation(containsId = true, idClass = Provider.class)
     private String providerId;
@@ -59,7 +54,6 @@ public class InteroperabilityRecord implements Identifiable {
     /**
      * Interoperability Record Identifier Info
      */
-    @XmlElement(required = true)
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     @FieldValidation
     private IdentifierInfo identifierInfo;
@@ -68,8 +62,6 @@ public class InteroperabilityRecord implements Identifiable {
      * The main researchers involved in producing the data, or the authors of the publication, in priority order.
      * To supply multiple creators, repeat this property.
      */
-    @XmlElementWrapper(required = true, name = "creators")
-    @XmlElement(name = "creator")
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     @FieldValidation
     private List<Creator> creators;
@@ -77,7 +69,6 @@ public class InteroperabilityRecord implements Identifiable {
     /**
      * A name or title by which a resource is known. It can be the title of a dataset or the name of a piece of software
      */
-    @XmlElement(required = true)
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     @FieldValidation
     private String title;
@@ -88,7 +79,6 @@ public class InteroperabilityRecord implements Identifiable {
      * data available on a specific date to the community of researchers. If there is no standard publication year value,
      * use the date that would be preferred from a citation perspective.
      */
-    @XmlElement(required = true)
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     @FieldValidation
     private int publicationYear;
@@ -96,8 +86,6 @@ public class InteroperabilityRecord implements Identifiable {
     /**
      * Interoperability Record Resource Type Info
      */
-    @XmlElementWrapper(required = true, name = "resourceTypesInfo")
-    @XmlElement(name = "resourceTypeInfo")
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     @FieldValidation
     private List<ResourceTypeInfo> resourceTypesInfo;
@@ -105,7 +93,6 @@ public class InteroperabilityRecord implements Identifiable {
     /**
      * Time/date the record was created.
      */
-    @XmlElement
     @Schema
     @FieldValidation(nullable = true)
     private String created;
@@ -113,7 +100,6 @@ public class InteroperabilityRecord implements Identifiable {
     /**
      * Time/date the record was last saved, with or without modifications.
      */
-    @XmlElement
     @Schema
     @FieldValidation(nullable = true)
     private String updated;
@@ -123,8 +109,6 @@ public class InteroperabilityRecord implements Identifiable {
      * This should point out to related standards only when it is a prerequisite/dependency, and likely to influence
      * a Provider's design towards interoperability based on the guideline.
      */
-    @XmlElementWrapper(name = "relatedStandards")
-    @XmlElement(name = "relatedStandard")
     @Schema
     @FieldValidation(nullable = true)
     private List<RelatedStandard> relatedStandards;
@@ -132,8 +116,6 @@ public class InteroperabilityRecord implements Identifiable {
     /**
      * Any rights information for this resource. The property may be repeated to record complex rights characteristics.
      */
-    @XmlElementWrapper(required = true, name = "rights")
-    @XmlElement(name = "right")
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     @FieldValidation
     private List<Right> rights;
@@ -142,7 +124,6 @@ public class InteroperabilityRecord implements Identifiable {
      * All additional information that does not fit in any of the other categories.
      * May be used for technical information.
      */
-    @XmlElement(required = true)
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     @FieldValidation
     private String description;
@@ -150,7 +131,6 @@ public class InteroperabilityRecord implements Identifiable {
     /**
      * Status of the resource.
      */
-    @XmlElement(required = true)
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     @FieldValidation(containsId = true, idClass = Vocabulary.class)
     @VocabularyValidation(type = Vocabulary.Type.IR_STATUS)
@@ -159,7 +139,6 @@ public class InteroperabilityRecord implements Identifiable {
     /**
      * Intended Audience for the Guideline.
      */
-    @XmlElement
     @Schema
     @FieldValidation(nullable = true, containsId = true, idClass = Vocabulary.class)
     @VocabularyValidation(type = Vocabulary.Type.SCIENTIFIC_DOMAIN)
@@ -168,7 +147,6 @@ public class InteroperabilityRecord implements Identifiable {
     /**
      * The type of record within the registry
      */
-    @XmlElement(required = true)
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     @FieldValidation(containsId = true, idClass = Vocabulary.class)
     @VocabularyValidation(type = Vocabulary.Type.IR_EOSC_GUIDELINE_TYPE)
@@ -177,8 +155,6 @@ public class InteroperabilityRecord implements Identifiable {
     /**
      * A short summary of any options to integrate this guideline (if applicable).
      */
-    @XmlElementWrapper(name = "eoscIntegrationOptions")
-    @XmlElement(name = "eoscIntegrationOption")
     @Schema
     @FieldValidation(nullable = true)
     private List<String> eoscIntegrationOptions;
@@ -186,8 +162,6 @@ public class InteroperabilityRecord implements Identifiable {
     /**
      * Other types of Identifiers for the specific Service (eg. PID)
      */
-    @XmlElementWrapper(name = "alternativeIdentifiers")
-    @XmlElement(name = "alternativeIdentifier")
     @Schema
     @FieldValidation(nullable = true)
     private List<AlternativeIdentifier> alternativeIdentifiers;

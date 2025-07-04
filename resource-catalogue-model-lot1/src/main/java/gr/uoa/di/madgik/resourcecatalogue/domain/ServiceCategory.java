@@ -25,8 +25,6 @@ import jakarta.xml.bind.annotation.XmlType;
 
 import java.util.Objects;
 
-@XmlType
-@XmlRootElement
 public class ServiceCategory {
 
 
@@ -34,7 +32,6 @@ public class ServiceCategory {
     /**
      * A named group of Resources that offer access to the same type of Resources
      */
-    @XmlElement(required = true)
     @Schema
     @FieldValidation(containsId = true, idClass = Vocabulary.class)
     @VocabularyValidation(type = Vocabulary.Type.CATEGORY)
@@ -43,7 +40,6 @@ public class ServiceCategory {
     /**
      * A named group of Resources that offer access to the same type of Resource or capabilities, within the defined Resource Category.
      */
-    @XmlElement(required = true)
     @Schema
     @FieldValidation(containsId = true, idClass = Vocabulary.class)
     @VocabularyValidation(type = Vocabulary.Type.SUBCATEGORY)

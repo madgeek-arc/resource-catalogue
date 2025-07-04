@@ -25,14 +25,11 @@ import jakarta.xml.bind.annotation.XmlType;
 import java.net.URL;
 import java.util.Objects;
 
-@XmlType
-@XmlRootElement
 public class MultimediaPair {
 
     /**
      * Link to video, slideshow, photos, screenshots with details of the resource.
      */
-    @XmlElement(required = true)
     @Schema
     @FieldValidation()
     private URL multimediaURL;
@@ -40,7 +37,6 @@ public class MultimediaPair {
     /**
      * Short description of the Multimedia content.
      */
-    @XmlElement()
     @Schema
     @FieldValidation(nullable = true)
     private String multimediaName;

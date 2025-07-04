@@ -21,27 +21,20 @@ import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
 
-@XmlType
-@XmlRootElement
 public class EmailMessage {
 
-    @XmlElement
     @FieldValidation
     private String recipientEmail;
 
-    @XmlElement
     @FieldValidation
     private String senderEmail;
 
-    @XmlElement
     @FieldValidation
     private String senderName;
 
-    @XmlElement
     @FieldValidation()
     private String subject;
 
-    @XmlElement
     @FieldValidation
     private String message;
 

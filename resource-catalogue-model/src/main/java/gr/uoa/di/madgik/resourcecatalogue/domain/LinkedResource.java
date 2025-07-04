@@ -22,15 +22,11 @@ import jakarta.xml.bind.annotation.*;
 import java.util.Arrays;
 import java.util.Objects;
 
-@XmlType
-@XmlRootElement
 public class LinkedResource {
 
-    @XmlElement(required = true)
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     private String type;
 
-    @XmlElement(required = true)
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     private String id;
 

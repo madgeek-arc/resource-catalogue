@@ -20,17 +20,13 @@ import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
 
-@XmlType
-@XmlRootElement
 public class DatasourceBundle extends Bundle<Datasource> {
 
-    @XmlElement
     private String status;
 
     /**
      * Original OpenAIRE ID, if Datasource already exists in the OpenAIRE Catalogue
      */
-    @XmlElement
     private String originalOpenAIREId;
 
     public DatasourceBundle() {
@@ -74,7 +70,6 @@ public class DatasourceBundle extends Bundle<Datasource> {
                 '}';
     }
 
-    @XmlElement(name = "datasource")
     public Datasource getDatasource() {
         return this.getPayload();
     }

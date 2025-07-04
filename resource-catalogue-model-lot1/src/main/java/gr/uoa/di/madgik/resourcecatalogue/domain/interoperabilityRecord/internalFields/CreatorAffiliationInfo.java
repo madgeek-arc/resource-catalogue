@@ -24,14 +24,11 @@ import jakarta.xml.bind.annotation.XmlType;
 
 import java.util.Objects;
 
-@XmlType
-@XmlRootElement
 public class CreatorAffiliationInfo {
 
     /**
      * The organizational or institutional affiliation of the creator.
      */
-    @XmlElement
     @Schema
     @FieldValidation(nullable = true)
     private String affiliation;
@@ -39,7 +36,6 @@ public class CreatorAffiliationInfo {
     /**
      * Uniquely identifies the organizational affiliation of the creator.
      */
-    @XmlElement
     @Schema
     @FieldValidation(nullable = true)
     private String affiliationIdentifier;

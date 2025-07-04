@@ -22,18 +22,13 @@ import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
 
 //@Document
-@XmlType
-@XmlRootElement
 public class ServiceBundle extends Bundle<Service> {
 
-    @XmlElement
     private String status;
 
-    @XmlElement
     @FieldValidation(nullable = true)
     private ResourceExtras resourceExtras;
 
-    @XmlElement
     private String auditState;
 
     public ServiceBundle() {
@@ -60,7 +55,6 @@ public class ServiceBundle extends Bundle<Service> {
         super.setId(id);
     }
 
-    @XmlElement(name = "service")
     public Service getService() {
         return this.getPayload();
     }

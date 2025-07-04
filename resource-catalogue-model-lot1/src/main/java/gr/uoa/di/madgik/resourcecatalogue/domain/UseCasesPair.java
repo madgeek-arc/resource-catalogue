@@ -25,14 +25,11 @@ import jakarta.xml.bind.annotation.XmlType;
 import java.net.URL;
 import java.util.Objects;
 
-@XmlType
-@XmlRootElement
 public class UseCasesPair {
 
     /**
      * Link to use cases supported by this Resource.
      */
-    @XmlElement(required = true)
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     @FieldValidation()
     private URL useCaseURL;
@@ -40,7 +37,6 @@ public class UseCasesPair {
     /**
      * Short description of the Multimedia content.
      */
-    @XmlElement()
     @Schema
     @FieldValidation(nullable = true)
     private String useCaseName;

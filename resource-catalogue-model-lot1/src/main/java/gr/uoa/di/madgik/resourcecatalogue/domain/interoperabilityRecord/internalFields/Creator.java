@@ -24,14 +24,11 @@ import jakarta.xml.bind.annotation.XmlType;
 
 import java.util.Objects;
 
-@XmlType
-@XmlRootElement
 public class Creator {
 
     /**
      * Creator's full name and name type
      */
-    @XmlElement(required = true)
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     @FieldValidation
     private CreatorNameTypeInfo creatorNameTypeInfo;
@@ -39,7 +36,6 @@ public class Creator {
     /**
      * The personal or first name of the creator.
      */
-    @XmlElement
     @Schema
     @FieldValidation(nullable = true)
     private String givenName;
@@ -47,7 +43,6 @@ public class Creator {
     /**
      * The surname or last name of the creator.
      */
-    @XmlElement
     @Schema
     @FieldValidation(nullable = true)
     private String familyName;
@@ -55,7 +50,6 @@ public class Creator {
     /**
      * Uniquely identifies an individual or legal entity, according to various schemes.
      */
-    @XmlElement
     @Schema
     @FieldValidation(nullable = true)
     private String nameIdentifier;
@@ -63,7 +57,6 @@ public class Creator {
     /**
      * Affiliation
      */
-    @XmlElement
     @Schema
     @FieldValidation(nullable = true)
     private CreatorAffiliationInfo creatorAffiliationInfo;

@@ -25,8 +25,6 @@ import jakarta.xml.bind.annotation.XmlType;
 
 import java.util.Objects;
 
-@XmlType
-@XmlRootElement
 public class ProviderMerilDomain {
 
 
@@ -34,7 +32,6 @@ public class ProviderMerilDomain {
     /**
      * MERIL scientific domain classification.
      */
-    @XmlElement(required = true)
     @Schema
     @FieldValidation(containsId = true, idClass = Vocabulary.class)
     @VocabularyValidation(type = Vocabulary.Type.PROVIDER_MERIL_SCIENTIFIC_DOMAIN)
@@ -43,7 +40,6 @@ public class ProviderMerilDomain {
     /**
      * MERIL scientific subdomain classification.
      */
-    @XmlElement(required = true)
     @Schema
     @FieldValidation(containsId = true, idClass = Vocabulary.class)
     @VocabularyValidation(type = Vocabulary.Type.PROVIDER_MERIL_SCIENTIFIC_SUBDOMAIN)

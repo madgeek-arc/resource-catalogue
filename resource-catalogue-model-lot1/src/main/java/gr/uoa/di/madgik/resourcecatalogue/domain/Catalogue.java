@@ -28,8 +28,6 @@ import java.net.URL;
 import java.util.List;
 import java.util.Objects;
 
-@XmlType
-@XmlRootElement
 public class Catalogue implements Identifiable {
 
 
@@ -37,14 +35,12 @@ public class Catalogue implements Identifiable {
     /**
      * A persistent identifier, a unique reference to the (Multi-Provider Regional or Thematic) Catalogue.
      */
-    @XmlElement(required = true)
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     private String id;
 
     /**
      * An abbreviation of the (Multi-Provider Regional or Thematic) Catalogue Name.
      */
-    @XmlElement(required = true)
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     @FieldValidation
     private String abbreviation;
@@ -52,7 +48,6 @@ public class Catalogue implements Identifiable {
     /**
      * Full Name of the (Multi-Provider Regional or Thematic) Catalogue.
      */
-    @XmlElement(required = true)
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     @FieldValidation
     private String name;
@@ -60,7 +55,6 @@ public class Catalogue implements Identifiable {
     /**
      * Website with information about the (Multi-Provider Regional or Thematic) Catalogue.
      */
-    @XmlElement(required = true)
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED, example = "https://example.com")
     @FieldValidation
     private URL website;
@@ -68,7 +62,6 @@ public class Catalogue implements Identifiable {
     /**
      * A Y/N question to define whether the (Multi-Provider Regional or Thematic) Catalogue is owned by a Legal Entity or not.
      */
-    @XmlElement(required = true)
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     @FieldValidation
     private boolean legalEntity;
@@ -78,7 +71,6 @@ public class Catalogue implements Identifiable {
      * For independent legal entities (1) - legal status of the Catalogue. For embedded Catalogues (2) - legal status of the hosting legal entity.
      * It is also possible to select Not a legal entity.
      */
-    @XmlElement
     @Schema
     @FieldValidation(nullable = true, containsId = true, idClass = Vocabulary.class)
     @VocabularyValidation(type = Vocabulary.Type.PROVIDER_LEGAL_STATUS)
@@ -87,7 +79,6 @@ public class Catalogue implements Identifiable {
     /**
      * Name of the organisation legally hosting (housing) the Catalogue or its coordinating centre.
      */
-    @XmlElement
     @Schema
     @FieldValidation(nullable = true, containsId = true, idClass = Vocabulary.class)
     @VocabularyValidation(type = Vocabulary.Type.PROVIDER_HOSTING_LEGAL_ENTITY)
@@ -96,7 +87,6 @@ public class Catalogue implements Identifiable {
     /**
      * Inclusion Criteria
      */
-    @XmlElement(required = true)
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED, example = "https://example.com")
     @FieldValidation
     private URL inclusionCriteria;
@@ -104,7 +94,6 @@ public class Catalogue implements Identifiable {
     /**
      * Validation Process
      */
-    @XmlElement(required = true)
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED, example = "https://example.com")
     @FieldValidation
     private URL validationProcess;
@@ -112,7 +101,6 @@ public class Catalogue implements Identifiable {
     /**
      * In terms of sustainability, what is the expected life of the catalogue
      */
-    @XmlElement(required = true)
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     @FieldValidation
     private String endOfLife;
@@ -122,7 +110,6 @@ public class Catalogue implements Identifiable {
     /**
      * A high-level description of the Catalogue in fairly non-technical terms, with the vision, mission, objectives, background, experience.
      */
-    @XmlElement(required = true)
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     @FieldValidation
     private String description;
@@ -130,7 +117,6 @@ public class Catalogue implements Identifiable {
     /**
      * A high-level description of the Catalogue's scope.
      */
-    @XmlElement(required = true)
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     @FieldValidation
     private String scope;
@@ -138,7 +124,6 @@ public class Catalogue implements Identifiable {
     /**
      * Link to the logo/visual identity of the Catalogue.
      */
-    @XmlElement(required = true)
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED, example = "https://example.com")
     @FieldValidation
     private URL logo;
@@ -146,8 +131,6 @@ public class Catalogue implements Identifiable {
     /**
      * Link to video, slideshow, photos, screenshots with details of the Provider.
      */
-    @XmlElementWrapper(name = "multimedia")
-    @XmlElement(name = "multimedia")
     @Schema
     @FieldValidation(nullable = true)
     private List<MultimediaPair> multimedia;
@@ -157,8 +140,6 @@ public class Catalogue implements Identifiable {
     /**
      * A named group of providers that offer access to the same type of resource or capabilities.
      */
-    @XmlElementWrapper(name = "scientificDomains")
-    @XmlElement(name = "scientificDomain")
     @Schema
     @FieldValidation(nullable = true)
     private List<ServiceProviderDomain> scientificDomains;
@@ -166,8 +147,6 @@ public class Catalogue implements Identifiable {
     /**
      * Keywords associated to the Catalogue to simplify search by relevant keywords.
      */
-    @XmlElementWrapper(name = "tags")
-    @XmlElement(name = "tag")
     @Schema
     @FieldValidation(nullable = true)
     private List<String> tags;
@@ -177,7 +156,6 @@ public class Catalogue implements Identifiable {
     /**
      * Physical location of the Catalogue.
      */
-    @XmlElement(required = true)
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     @FieldValidation
     private ProviderLocation location;
@@ -187,7 +165,6 @@ public class Catalogue implements Identifiable {
     /**
      * Catalogue's main contact info.
      */
-    @XmlElement
     @Schema
     @FieldValidation
     private ProviderMainContact mainContact;
@@ -195,8 +172,6 @@ public class Catalogue implements Identifiable {
     /**
      * List of the Catalogue's public contacts info.
      */
-    @XmlElementWrapper(name = "publicContacts")
-    @XmlElement(name = "publicContact")
     @Schema
     @FieldValidation
     private List<ProviderPublicContact> publicContacts;
@@ -206,8 +181,6 @@ public class Catalogue implements Identifiable {
     /**
      * Catalogues that are funded/supported by several countries should list here all supporting countries (including the Coordinating country).
      */
-    @XmlElementWrapper(name = "participatingCountries")
-    @XmlElement(name = "participatingCountry")
     @Schema
     @FieldValidation(nullable = true, containsId = true, idClass = Vocabulary.class)
     @VocabularyValidation(type = Vocabulary.Type.COUNTRY)
@@ -216,8 +189,6 @@ public class Catalogue implements Identifiable {
     /**
      * Catalogues that are members or affiliated or associated with other organisations should list those organisations here.
      */
-    @XmlElementWrapper(name = "affiliations")
-    @XmlElement(name = "affiliation")
     @Schema
     @FieldValidation(nullable = true)
     private List<String> affiliations;
@@ -225,8 +196,6 @@ public class Catalogue implements Identifiable {
     /**
      * Catalogues that are members of networks should list those networks here.
      */
-    @XmlElementWrapper(name = "networks")
-    @XmlElement(name = "network")
     @Schema
     @FieldValidation(nullable = true, containsId = true, idClass = Vocabulary.class)
     @VocabularyValidation(type = Vocabulary.Type.PROVIDER_NETWORK)
@@ -234,8 +203,6 @@ public class Catalogue implements Identifiable {
 
 
     // Extra needed fields
-    @XmlElementWrapper(name = "users", required = true)
-    @XmlElement(name = "user")
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     @FieldValidation
     private List<User> users;

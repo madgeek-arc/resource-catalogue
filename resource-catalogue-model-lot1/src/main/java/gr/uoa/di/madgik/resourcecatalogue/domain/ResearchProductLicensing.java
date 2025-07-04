@@ -28,7 +28,6 @@ public class ResearchProductLicensing {
     /**
      * Research product license name
      */
-    @XmlElement(required = true)
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     @FieldValidation()
     private String researchProductLicenseName;
@@ -36,7 +35,6 @@ public class ResearchProductLicensing {
     /**
      * Research product license URL
      */
-    @XmlElement(required = true)
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     @FieldValidation()
     private URL researchProductLicenseURL;

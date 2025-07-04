@@ -27,8 +27,6 @@ import jakarta.xml.bind.annotation.XmlType;
 import java.util.Objects;
 
 
-@XmlType
-@XmlRootElement
 public class ServicePublicContact {
 
 
@@ -36,7 +34,6 @@ public class ServicePublicContact {
     /**
      * First Name of the Resource's contact person to be displayed at the portal.
      */
-    @XmlElement
     @Schema
     @FieldValidation(nullable = true)
     private String firstName;
@@ -44,7 +41,6 @@ public class ServicePublicContact {
     /**
      * Last Name of the Resource's contact person to be displayed at the portal.
      */
-    @XmlElement
     @Schema
     @FieldValidation(nullable = true)
     private String lastName;
@@ -52,7 +48,6 @@ public class ServicePublicContact {
     /**
      * Email of the Resource's contact person or a generic email of the Provider to be displayed at the portal.
      */
-    @XmlElement(required = true)
     @Schema
     @EmailValidation
     private String email;
@@ -60,7 +55,6 @@ public class ServicePublicContact {
     /**
      * Telephone of the Resource's contact person to be displayed at the portal.
      */
-    @XmlElement
     @Schema
     @PhoneValidation(nullable = true)
     private String phone;
@@ -68,7 +62,6 @@ public class ServicePublicContact {
     /**
      * Position of the Resource's contact person to be displayed at the portal.
      */
-    @XmlElement
     @Schema
     @FieldValidation(nullable = true)
     private String position;
@@ -76,7 +69,6 @@ public class ServicePublicContact {
     /**
      * The organisation to which the contact is affiliated.
      */
-    @XmlElement
     @Schema
     @FieldValidation(nullable = true)
     private String organisation;

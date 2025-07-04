@@ -22,8 +22,6 @@ import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
 
-@XmlType
-@XmlRootElement
 public class ConfigurationTemplateBundle extends Bundle<ConfigurationTemplate> {
 
     public ConfigurationTemplateBundle() {
@@ -49,7 +47,6 @@ public class ConfigurationTemplateBundle extends Bundle<ConfigurationTemplate> {
         super.setId(id);
     }
 
-    @XmlElement(name = "configurationTemplate")
     public ConfigurationTemplate getConfigurationTemplate() {
         return this.getPayload();
     }

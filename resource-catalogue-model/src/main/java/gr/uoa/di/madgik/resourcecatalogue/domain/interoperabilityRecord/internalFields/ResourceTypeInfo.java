@@ -26,14 +26,11 @@ import jakarta.xml.bind.annotation.XmlType;
 
 import java.util.Objects;
 
-@XmlType
-@XmlRootElement
 public class ResourceTypeInfo {
 
     /**
      * A description of the resource.
      */
-    @XmlElement(required = true)
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     @FieldValidation
     private String resourceType;
@@ -41,7 +38,6 @@ public class ResourceTypeInfo {
     /**
      * The general type of a resource.
      */
-    @XmlElement(required = true)
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     @FieldValidation(containsId = true, idClass = Vocabulary.class)
     @VocabularyValidation(type = Vocabulary.Type.IR_RESOURCE_TYPE_GENERAL)

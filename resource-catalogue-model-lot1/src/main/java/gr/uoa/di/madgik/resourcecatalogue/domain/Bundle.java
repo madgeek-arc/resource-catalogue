@@ -27,8 +27,6 @@ import java.beans.Transient;
 import java.util.List;
 import java.util.Objects;
 
-@XmlType
-@XmlRootElement
 public abstract class Bundle<T extends Identifiable> implements Identifiable {
 
     @Schema(hidden = true)
@@ -36,37 +34,26 @@ public abstract class Bundle<T extends Identifiable> implements Identifiable {
     @FieldValidation
     private T payload;
 
-    @XmlElement(name = "metadata")
     private Metadata metadata;
 
-    @XmlElement
     private boolean active;
 
-    @XmlElement
     private boolean suspended;
 
-    @XmlElement
     private boolean draft;
 
-    @XmlElement
     private boolean legacy;
 
-    @XmlElement
     private Identifiers identifiers;
 
-    @XmlElement
     private MigrationStatus migrationStatus;
 
-    @XmlElement
     private List<LoggingInfo> loggingInfo;
 
-    @XmlElement
     private LoggingInfo latestAuditInfo;
 
-    @XmlElement
     private LoggingInfo latestOnboardingInfo;
 
-    @XmlElement
     private LoggingInfo latestUpdateInfo;
 
     public Bundle() {

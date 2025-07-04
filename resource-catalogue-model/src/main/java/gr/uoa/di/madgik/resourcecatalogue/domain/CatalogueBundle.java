@@ -24,19 +24,13 @@ import jakarta.xml.bind.annotation.XmlType;
 import java.util.List;
 import java.util.Objects;
 
-@XmlType
-@XmlRootElement
 public class CatalogueBundle extends Bundle<Catalogue> {
 
-    @XmlElement
 //    @VocabularyValidation(type = Vocabulary.Type.CATALOGUE_STATE)
     private String status;
 
-    @XmlElement
     private String auditState;
 
-    @XmlElementWrapper(name = "transferContactInformation")
-    @XmlElement(name = "transferContactInformation")
     private List<ContactInfoTransfer> transferContactInformation;
 
     public CatalogueBundle() {
@@ -53,7 +47,6 @@ public class CatalogueBundle extends Bundle<Catalogue> {
         this.setMetadata(metadata);
     }
 
-    @XmlElement(name = "catalogue")
     public Catalogue getCatalogue() {
         return this.getPayload();
     }

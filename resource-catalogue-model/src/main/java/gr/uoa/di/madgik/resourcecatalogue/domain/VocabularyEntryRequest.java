@@ -22,31 +22,24 @@ import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
 
-@XmlType
-@XmlRootElement
 public class VocabularyEntryRequest {
 
-    @XmlElement(required = true)
     @Schema
     @FieldValidation
     private String userId;
 
-    @XmlElement
     @Schema
     @FieldValidation(nullable = true, containsId = true, containsResourceId = true)
     private String resourceId;
 
-    @XmlElement
     @Schema
     @FieldValidation(nullable = true, containsId = true, idClass = Provider.class)
     private String providerId;
 
-    @XmlElement(required = true)
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED, example = "2020-01-01")
     @FieldValidation
     private String dateOfRequest;
 
-    @XmlElement(required = true)
     @Schema
     @FieldValidation
     private String resourceType;

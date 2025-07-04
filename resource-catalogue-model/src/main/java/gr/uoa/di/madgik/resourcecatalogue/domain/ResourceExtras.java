@@ -25,12 +25,8 @@ import jakarta.xml.bind.annotation.XmlType;
 
 import java.util.List;
 
-@XmlType
-@XmlRootElement
 public class ResourceExtras {
 
-    @XmlElementWrapper(name = "eoscIFGuidelines")
-    @XmlElement(name = "eoscIFGuideline")
     @Schema
     @FieldValidation(nullable = true)
     private List<EOSCIFGuidelines> eoscIFGuidelines;

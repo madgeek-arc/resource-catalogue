@@ -21,15 +21,11 @@ import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
 
-@XmlType
-@XmlRootElement
 public class Identifiers {
 
-    @XmlElement()
     @Schema
     private String originalId;
 
-    @XmlElement()
     @Schema
     private String pid;
 

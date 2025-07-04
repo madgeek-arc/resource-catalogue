@@ -22,14 +22,10 @@ import jakarta.xml.bind.annotation.XmlType;
 
 import java.util.Objects;
 
-@XmlType
-@XmlRootElement
 public class InteroperabilityRecordBundle extends Bundle<InteroperabilityRecord> {
 
-    @XmlElement
     private String status;
 
-    @XmlElement
     private String auditState;
 
     public InteroperabilityRecordBundle() {
@@ -55,7 +51,6 @@ public class InteroperabilityRecordBundle extends Bundle<InteroperabilityRecord>
         super.setId(id);
     }
 
-    @XmlElement(name = "interoperabilityRecord")
     public InteroperabilityRecord getInteroperabilityRecord() {
         return this.getPayload();
     }

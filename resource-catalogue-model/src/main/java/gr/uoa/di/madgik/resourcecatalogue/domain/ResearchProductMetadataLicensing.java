@@ -28,7 +28,6 @@ public class ResearchProductMetadataLicensing {
     /**
      * Research Product Metadata License Name
      */
-    @XmlElement(required = true)
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     @FieldValidation()
     private String researchProductMetadataLicenseName;
@@ -36,7 +35,6 @@ public class ResearchProductMetadataLicensing {
     /**
      * Research Product Metadata License URL
      */
-    @XmlElement(required = true)
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     @FieldValidation()
     private URL researchProductMetadataLicenseURL;

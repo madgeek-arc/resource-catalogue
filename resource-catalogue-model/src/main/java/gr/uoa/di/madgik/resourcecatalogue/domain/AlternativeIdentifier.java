@@ -24,16 +24,12 @@ import jakarta.xml.bind.annotation.XmlType;
 
 import java.util.Objects;
 
-@XmlType
-@XmlRootElement
 public class AlternativeIdentifier {
 
-    @XmlElement()
     @Schema
     @FieldValidation(nullable = true)
     private String type;
 
-    @XmlElement()
     @Schema
     @FieldValidation(nullable = true)
     private String value;

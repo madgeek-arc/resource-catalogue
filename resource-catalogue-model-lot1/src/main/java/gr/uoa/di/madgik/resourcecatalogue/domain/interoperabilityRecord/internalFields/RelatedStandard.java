@@ -25,14 +25,11 @@ import jakarta.xml.bind.annotation.XmlType;
 import java.net.URL;
 import java.util.Objects;
 
-@XmlType
-@XmlRootElement
 public class RelatedStandard {
 
     /**
      * The name of the related standard.
      */
-    @XmlElement
     @Schema
     @FieldValidation(nullable = true)
     private String relatedStandardIdentifier;
@@ -40,7 +37,6 @@ public class RelatedStandard {
     /**
      * The URI of the related standard.
      */
-    @XmlElement
     @Schema
     @FieldValidation(nullable = true)
     private URL relatedStandardURI;

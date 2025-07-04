@@ -22,12 +22,9 @@ import jakarta.xml.bind.annotation.XmlRootElement;
 
 import java.util.Objects;
 
-@XmlRootElement
 public class ContactInfoTransfer {
-    @XmlElement(required = true)
     @Schema
     private String email;
-    @XmlElement(required = true, defaultValue = "false")
     @Schema
     private Boolean acceptedTransfer;
 

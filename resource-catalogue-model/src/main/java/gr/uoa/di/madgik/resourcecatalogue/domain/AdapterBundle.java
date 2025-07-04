@@ -21,15 +21,11 @@ import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
 
-@XmlType
-@XmlRootElement
 public class AdapterBundle extends Bundle<Adapter> {
 
-    @XmlElement
     @Schema
     private String status;
 
-    @XmlElement
     @Schema
     private String auditState;
 
@@ -67,7 +63,6 @@ public class AdapterBundle extends Bundle<Adapter> {
         super.setId(id);
     }
 
-    @XmlElement(name = "adapter")
     public Adapter getAdapter() {
         return this.getPayload();
     }

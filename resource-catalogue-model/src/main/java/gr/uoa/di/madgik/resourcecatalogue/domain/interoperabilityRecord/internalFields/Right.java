@@ -25,14 +25,11 @@ import jakarta.xml.bind.annotation.XmlType;
 import java.net.URL;
 import java.util.Objects;
 
-@XmlType
-@XmlRootElement
 public class Right {
 
     /**
      * Right title.
      */
-    @XmlElement(required = true)
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     @FieldValidation
     private String rightTitle;
@@ -40,7 +37,6 @@ public class Right {
     /**
      * The URI of the license.
      */
-    @XmlElement(required = true)
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     @FieldValidation
     private URL rightURI;
@@ -48,7 +44,6 @@ public class Right {
     /**
      * A short, standardized version of the license name.
      */
-    @XmlElement(required = true)
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     @FieldValidation
     private String rightIdentifier;

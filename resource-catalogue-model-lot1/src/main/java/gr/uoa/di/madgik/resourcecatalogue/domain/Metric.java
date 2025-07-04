@@ -25,16 +25,12 @@ import jakarta.xml.bind.annotation.XmlType;
 import java.net.URL;
 import java.util.Objects;
 
-@XmlType
-@XmlRootElement
 public class Metric {
 
-    @XmlElement
     @Schema
     @FieldValidation(nullable = true)
     private URL probe;
 
-    @XmlElement
     @Schema
     @FieldValidation(nullable = true)
     private URL metric;

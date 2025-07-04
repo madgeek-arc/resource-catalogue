@@ -20,8 +20,6 @@ import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
 
-@XmlType
-@XmlRootElement
 public class ResourceInteroperabilityRecordBundle extends Bundle<ResourceInteroperabilityRecord> {
 
     public ResourceInteroperabilityRecordBundle() {
@@ -37,7 +35,6 @@ public class ResourceInteroperabilityRecordBundle extends Bundle<ResourceInterop
         this.setMetadata(metadata);
     }
 
-    @XmlElement(name = "resourceInteroperabilityRecord")
     public ResourceInteroperabilityRecord getResourceInteroperabilityRecord() {
         return this.getPayload();
     }

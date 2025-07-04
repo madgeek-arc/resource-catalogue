@@ -26,26 +26,19 @@ import jakarta.xml.bind.annotation.XmlType;
 import java.util.List;
 import java.util.Objects;
 
-@XmlType
-@XmlRootElement
 public class ResourceInteroperabilityRecord implements Identifiable {
 
-    @XmlElement()
     @Schema(example = "(required on PUT only)")
     private String id;
 
-    @XmlElement(required = true)
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     @FieldValidation(containsId = true, containsResourceId = true)
     private String resourceId;
 
-    @XmlElement(required = true)
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     @FieldValidation(containsId = true, idClass = Catalogue.class)
     private String catalogueId;
 
-    @XmlElementWrapper(name = "interoperabilityRecordIds", required = true)
-    @XmlElement(name = "interoperabilityRecordId")
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     @FieldValidation(containsId = true, idClass = InteroperabilityRecord.class)
     private List<String> interoperabilityRecordIds;

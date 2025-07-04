@@ -26,22 +26,16 @@ import jakarta.xml.bind.annotation.XmlType;
 import java.util.List;
 import java.util.Objects;
 
-@XmlType
-@XmlRootElement
 public class MonitoringGroup {
 
-    @XmlElement(required = true)
     @Schema
     @FieldValidation
     private String serviceType;
 
-    @XmlElement(required = true)
     @Schema
     @FieldValidation
     private String endpoint;
 
-    @XmlElementWrapper(name = "metrics")
-    @XmlElement(name = "metric")
     @Schema
     @FieldValidation(nullable = true)
     private List<Metric> metrics;

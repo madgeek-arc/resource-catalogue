@@ -321,7 +321,7 @@
             
       <xs:element minOccurs="0" name="id" type="xs:string">
         <xs:annotation>
-          <xs:documentation><![CDATA[A persistent identifier, a unique reference to the  (Multi-Provider Regional or Thematic) Catalogue in the context of the EOSC Portal.]]></xs:documentation>
+          <xs:documentation><![CDATA[A persistent identifier, a unique reference to the (Multi-Provider Regional or Thematic) Catalogue.]]></xs:documentation>
         </xs:annotation>
       </xs:element>
             
@@ -645,7 +645,7 @@ It is also possible to select Not a legal entity.]]></xs:documentation>
             
       <xs:element minOccurs="0" name="id" type="xs:string">
         <xs:annotation>
-          <xs:documentation><![CDATA[A persistent identifier, a unique reference to the Datasource in the context of the EOSC Portal.]]></xs:documentation>
+          <xs:documentation><![CDATA[A persistent identifier, a unique reference to the Datasource.]]></xs:documentation>
         </xs:annotation>
       </xs:element>
             
@@ -869,48 +869,6 @@ Criteria for submitting content to the repository as well as product preparation
       <xs:element minOccurs="0" name="value" type="xs:float"/>
           
     </xs:sequence>
-      
-  </xs:complexType>
-    
-  <xs:complexType name="extrasMapType">
-        
-    <xs:sequence>
-            
-      <xs:element maxOccurs="unbounded" minOccurs="0" name="entry" nillable="true" type="extrasType"/>
-          
-    </xs:sequence>
-      
-  </xs:complexType>
-    
-  <xs:complexType name="extrasType">
-        
-    <xs:sequence>
-            
-      <xs:element minOccurs="0" name="key" type="xs:string"/>
-            
-      <xs:element minOccurs="0" name="value" type="xs:string"/>
-          
-    </xs:sequence>
-      
-  </xs:complexType>
-    
-  <xs:complexType name="extrasMapTypeAdapter">
-        
-    <xs:complexContent>
-            
-      <xs:extension base="xmlAdapter">
-                
-        <xs:sequence/>
-              
-      </xs:extension>
-          
-    </xs:complexContent>
-      
-  </xs:complexType>
-    
-  <xs:complexType abstract="true" name="xmlAdapter">
-        
-    <xs:sequence/>
       
   </xs:complexType>
     
@@ -1417,7 +1375,7 @@ If (1) - name of the research infrastructure, If (2) - name of the hosting organ
             
       <xs:element minOccurs="0" name="id" type="xs:string">
         <xs:annotation>
-          <xs:documentation><![CDATA[A persistent identifier, a unique reference to the Provider in the context of the EOSC Portal.]]></xs:documentation>
+          <xs:documentation><![CDATA[A persistent identifier, a unique reference to the Provider.]]></xs:documentation>
         </xs:annotation>
       </xs:element>
             
@@ -1786,7 +1744,7 @@ infrastructures.]]></xs:documentation>
             
       <xs:element minOccurs="0" name="id" type="xs:string">
         <xs:annotation>
-          <xs:documentation><![CDATA[A persistent identifier, a unique reference to the Resource in the context of the EOSC Portal.]]></xs:documentation>
+          <xs:documentation><![CDATA[A persistent identifier, a unique reference to the Service.]]></xs:documentation>
         </xs:annotation>
       </xs:element>
             

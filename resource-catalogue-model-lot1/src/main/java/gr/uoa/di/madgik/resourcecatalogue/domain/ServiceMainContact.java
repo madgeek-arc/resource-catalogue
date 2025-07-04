@@ -27,8 +27,6 @@ import jakarta.xml.bind.annotation.XmlType;
 import java.util.Objects;
 
 
-@XmlType
-@XmlRootElement
 public class ServiceMainContact {
 
 
@@ -36,7 +34,6 @@ public class ServiceMainContact {
     /**
      * First Name of the Resource's main contact person/manager.
      */
-    @XmlElement(required = true)
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     @FieldValidation
     private String firstName;
@@ -44,7 +41,6 @@ public class ServiceMainContact {
     /**
      * Last Name of the Resource's main contact person/manager.
      */
-    @XmlElement(required = true)
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     @FieldValidation
     private String lastName;
@@ -52,7 +48,6 @@ public class ServiceMainContact {
     /**
      * Email of the Resource's main contact person/manager.
      */
-    @XmlElement(required = true)
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     @EmailValidation
     private String email;
@@ -60,7 +55,6 @@ public class ServiceMainContact {
     /**
      * Telephone of the Resource's main contact person/manager.
      */
-    @XmlElement
     @Schema
     @PhoneValidation(nullable = true)
     private String phone;
@@ -68,7 +62,6 @@ public class ServiceMainContact {
     /**
      * Position of the Resource's main contact person/manager.
      */
-    @XmlElement
     @Schema
     @FieldValidation(nullable = true)
     private String position;
@@ -76,7 +69,6 @@ public class ServiceMainContact {
     /**
      * The organisation to which the contact is affiliated.
      */
-    @XmlElement
     @Schema
     @FieldValidation(nullable = true)
     private String organisation;

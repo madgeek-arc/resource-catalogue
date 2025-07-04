@@ -23,27 +23,20 @@ import jakarta.xml.bind.annotation.XmlType;
 
 import java.util.Objects;
 
-@XmlType
-@XmlRootElement
 public class ProviderRequest implements Identifiable {
 
-    @XmlElement
     @FieldValidation
     private String id;
 
-    @XmlElement
     @FieldValidation
     private EmailMessage message;
 
-    @XmlElement
     @FieldValidation
     private String date;
 
-    @XmlElement
     @FieldValidation(containsId = true, idClass = Provider.class)
     private String providerId;
 
-    @XmlElement
     @FieldValidation
     private boolean isRead;
 

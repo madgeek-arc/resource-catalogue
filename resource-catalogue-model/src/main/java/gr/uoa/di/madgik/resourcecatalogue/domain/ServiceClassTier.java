@@ -24,23 +24,17 @@ import jakarta.xml.bind.annotation.XmlType;
 import java.util.List;
 import java.util.Objects;
 
-@XmlType
-@XmlRootElement
 public class ServiceClassTier {
 
-    @XmlElement(required = true, defaultValue = "3")
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     private int level;
 
-    @XmlElement
     @Schema
     private String accessPolicy;
 
-    @XmlElement
     @Schema
     private String costModel;
 
-    @XmlElement
     @Schema
     private List<String> offerings;
 

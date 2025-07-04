@@ -27,27 +27,20 @@ import jakarta.xml.bind.annotation.XmlType;
 import java.util.List;
 import java.util.Objects;
 
-@XmlType
-@XmlRootElement
 public class Monitoring implements Identifiable {
 
-    @XmlElement()
     @Schema(example = "(required on PUT only)")
     private String id;
 
-    @XmlElement(required = true)
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     @FieldValidation(containsId = true, containsResourceId = true)
     private String serviceId;
 
-    @XmlElement()
     @Schema
     @FieldValidation(nullable = true, containsId = true, idClass = Vocabulary.class)
     @VocabularyValidation(type = Vocabulary.Type.MONITORING_MONITORED_BY)
     private String monitoredBy;
 
-    @XmlElementWrapper(name = "monitoringGroups", required = true)
-    @XmlElement(name = "monitoringGroup")
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     @FieldValidation
     private List<MonitoringGroup> monitoringGroups;

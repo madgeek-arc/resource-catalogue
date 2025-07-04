@@ -30,15 +30,12 @@ import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 
-@XmlType
-@XmlRootElement
 public class TrainingResource implements Identifiable {
 
     // Basic Information
     /**
      * A persistent identifier, a unique reference to the Resource.
      */
-    @XmlElement
     @Schema(example = "(required on PUT only)")
     @FieldValidation
     private String id;
@@ -46,7 +43,6 @@ public class TrainingResource implements Identifiable {
     /**
      * The human-readable name of the learning resource.
      */
-    @XmlElement(required = true)
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     @FieldValidation
     private String title;
@@ -54,7 +50,6 @@ public class TrainingResource implements Identifiable {
     /**
      * Training Resource's original node
      */
-    @XmlElement
     @Schema
     @FieldValidation(nullable = true, containsId = true, idClass = Vocabulary.class)
     @VocabularyValidation(type = Vocabulary.Type.NODE)
@@ -63,7 +58,6 @@ public class TrainingResource implements Identifiable {
     /**
      * The name of the organisation that manages or delivers the resource, or that coordinates the Resource delivery in a federated scenario.
      */
-    @XmlElement(required = true)
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     @FieldValidation(containsId = true, idClass = Provider.class)
     private String resourceOrganisation;
@@ -71,8 +65,6 @@ public class TrainingResource implements Identifiable {
     /**
      * The name(s) of (all) the Provider(s) that manage or deliver the Resource in federated scenarios.
      */
-    @XmlElementWrapper(name = "resourceProviders")
-    @XmlElement(name = "resourceProvider")
     @Schema
     @FieldValidation(nullable = true, containsId = true, idClass = Provider.class)
     private List<String> resourceProviders;
@@ -80,8 +72,6 @@ public class TrainingResource implements Identifiable {
     /**
      * The name of entity(ies) authoring the resource.
      */
-    @XmlElementWrapper(name = "authors", required = true)
-    @XmlElement(name = "author")
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     @FieldValidation
     private List<String> authors;
@@ -90,7 +80,6 @@ public class TrainingResource implements Identifiable {
      * The URL that resolves to the learning resource or to a "landing page" for the resource that contains important
      * contextual information including the direct resolvable link to the resource, if applicable.
      */
-    @XmlElement(required = true)
     @Schema(example = "https://example.com", requiredMode = Schema.RequiredMode.REQUIRED)
     @FieldValidation
     private URL url;
@@ -99,7 +88,6 @@ public class TrainingResource implements Identifiable {
      * The designation of identifier scheme used for the resource URL. It represents the type of the URL of the resource,
      * that is the used scheme (e.g., Web Address URL, DOI, ARK, etc.).
      */
-    @XmlElement
     @Schema
     @FieldValidation(nullable = true, containsId = true, idClass = Vocabulary.class)
     @VocabularyValidation(type = Vocabulary.Type.TR_URL_TYPE)
@@ -108,8 +96,6 @@ public class TrainingResource implements Identifiable {
     /**
      * The name(s) of (all) the Provider(s) that manage or deliver the Resource in federated scenarios.
      */
-    @XmlElementWrapper(name = "eoscRelatedServices")
-    @XmlElement(name = "eoscRelatedService")
     @Schema
     @FieldValidation(nullable = true, containsId = true, containsResourceId = true)
     private List<String> eoscRelatedServices;
@@ -117,8 +103,6 @@ public class TrainingResource implements Identifiable {
     /**
      * Other types of Identifiers for the specific Service (eg. PID)
      */
-    @XmlElementWrapper(name = "alternativeIdentifiers")
-    @XmlElement(name = "alternativeIdentifier")
     @Schema
     @FieldValidation(nullable = true)
     private List<AlternativeIdentifier> alternativeIdentifiers;
@@ -128,7 +112,6 @@ public class TrainingResource implements Identifiable {
     /**
      * A brief synopsis about or description of the learning resource.
      */
-    @XmlElement
     @Schema
     @FieldValidation(nullable = true)
     private String description;
@@ -136,8 +119,6 @@ public class TrainingResource implements Identifiable {
     /**
      * The keyword(s) or tag(s) used to describe the resource.
      */
-    @XmlElementWrapper(name = "keywords")
-    @XmlElement(name = "keyword")
     @Schema
     @FieldValidation(nullable = true)
     private List<String> keywords;
@@ -145,7 +126,6 @@ public class TrainingResource implements Identifiable {
     /**
      * A license document that applies to this content, typically indicated by URL.
      */
-    @XmlElement(required = true)
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     @FieldValidation
     private String license;
@@ -153,7 +133,6 @@ public class TrainingResource implements Identifiable {
     /**
      * The access status of a resource (open, restricted, paid).
      */
-    @XmlElement(required = true)
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     @FieldValidation(containsId = true, idClass = Vocabulary.class)
     @VocabularyValidation(type = Vocabulary.Type.TR_ACCESS_RIGHT)
@@ -162,7 +141,6 @@ public class TrainingResource implements Identifiable {
     /**
      * The version date for the most recently published or broadcast resource.
      */
-    @XmlElement(required = true)
     @Schema(example = "2020-01-01", requiredMode = Schema.RequiredMode.REQUIRED)
     @FieldValidation
     private Date versionDate;
@@ -172,8 +150,6 @@ public class TrainingResource implements Identifiable {
     /**
      * The principal users(s) for which the learning resource was designed.
      */
-    @XmlElementWrapper(name = "targetGroups", required = true)
-    @XmlElement(name = "targetGroup")
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     @FieldValidation(containsId = true, idClass = Vocabulary.class)
     @VocabularyValidation(type = Vocabulary.Type.TARGET_USER)
@@ -182,8 +158,6 @@ public class TrainingResource implements Identifiable {
     /**
      * The predominant type or kind that characterizes the learning resource.
      */
-    @XmlElementWrapper(name = "learningResourceTypes")
-    @XmlElement(name = "learningResourceType")
     @Schema
     @FieldValidation(nullable = true, containsId = true, idClass = Vocabulary.class)
     @VocabularyValidation(type = Vocabulary.Type.TR_DCMI_TYPE)
@@ -192,8 +166,6 @@ public class TrainingResource implements Identifiable {
     /**
      * The descriptions of what knowledge, skills or abilities students should acquire on completion of the resource.
      */
-    @XmlElementWrapper(name = "learningOutcomes", required = true)
-    @XmlElement(name = "learningOutcome")
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     @FieldValidation
     private List<String> learningOutcomes;
@@ -201,7 +173,6 @@ public class TrainingResource implements Identifiable {
     /**
      * Target skill level in the topic being taught.
      */
-    @XmlElement(required = true)
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     @FieldValidation(containsId = true, idClass = Vocabulary.class)
     @VocabularyValidation(type = Vocabulary.Type.TR_EXPERTISE_LEVEL)
@@ -210,8 +181,6 @@ public class TrainingResource implements Identifiable {
     /**
      * The predominant content type of the learning resource (video, game, diagram, slides, etc.).
      */
-    @XmlElementWrapper(name = "contentResourceTypes")
-    @XmlElement(name = "contentResourceType")
     @Schema
     @FieldValidation(nullable = true, containsId = true, idClass = Vocabulary.class)
     @VocabularyValidation(type = Vocabulary.Type.TR_CONTENT_RESOURCE_TYPE)
@@ -220,8 +189,6 @@ public class TrainingResource implements Identifiable {
     /**
      * Identification of certification, accreditation or badge obtained with course or learning resource.
      */
-    @XmlElementWrapper(name = "qualifications")
-    @XmlElement(name = "qualification")
     @Schema
     @FieldValidation(nullable = true, containsId = true, idClass = Vocabulary.class)
     @VocabularyValidation(type = Vocabulary.Type.TR_QUALIFICATION)
@@ -230,7 +197,6 @@ public class TrainingResource implements Identifiable {
     /**
      * Approximate or typical time it takes to work with or through the learning resource for the typical intended target audience.
      */
-    @XmlElement
     @Schema
     @FieldValidation(nullable = true)
     private String duration;
@@ -240,8 +206,6 @@ public class TrainingResource implements Identifiable {
     /**
      * The language in which the resource was originally published or made available.
      */
-    @XmlElementWrapper(name = "languages", required = true)
-    @XmlElement(name = "language")
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     @FieldValidation(containsId = true, idClass = Vocabulary.class)
     @VocabularyValidation(type = Vocabulary.Type.LANGUAGE)
@@ -250,8 +214,6 @@ public class TrainingResource implements Identifiable {
     /**
      * Locations where the Resource is offered.
      */
-    @XmlElementWrapper(name = "geographicalAvailabilities", required = true)
-    @XmlElement(name = "geographicalAvailability")
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     @FieldValidation(containsId = true, idClass = Vocabulary.class)
     @GeoLocationVocValidation(region = Vocabulary.Type.REGION, country = Vocabulary.Type.COUNTRY)
@@ -262,8 +224,6 @@ public class TrainingResource implements Identifiable {
     /**
      * The branch of science, scientific discipline that is related to the Resource.
      */
-    @XmlElementWrapper(name = "scientificDomains", required = true)
-    @XmlElement(name = "scientificDomain")
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     @FieldValidation
     private List<ServiceProviderDomain> scientificDomains;
@@ -273,7 +233,6 @@ public class TrainingResource implements Identifiable {
     /**
      * Training Resource's Main Contact Owner info.
      */
-    @XmlElement(required = true)
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     @FieldValidation
     private ServiceMainContact contact;
@@ -283,7 +242,6 @@ public class TrainingResource implements Identifiable {
     /**
      * The Catalogue this Training Resource is originally registered at.
      */
-    @XmlElement
     @Schema
     @FieldValidation(nullable = true, containsId = true, idClass = Catalogue.class)
     private String catalogueId;
