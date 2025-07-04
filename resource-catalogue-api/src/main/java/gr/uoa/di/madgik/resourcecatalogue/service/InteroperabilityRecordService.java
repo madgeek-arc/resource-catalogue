@@ -18,7 +18,6 @@ package gr.uoa.di.madgik.resourcecatalogue.service;
 
 import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.resourcecatalogue.domain.InteroperabilityRecordBundle;
-import gr.uoa.di.madgik.resourcecatalogue.domain.LoggingInfo;
 import org.springframework.security.core.Authentication;
 
 public interface InteroperabilityRecordService extends ResourceCatalogueService<InteroperabilityRecordBundle>, BundleOperations<InteroperabilityRecordBundle> {
@@ -73,4 +72,11 @@ public interface InteroperabilityRecordService extends ResourceCatalogueService<
      */
     Paging<InteroperabilityRecordBundle> getInteroperabilityRecordBundles(String catalogueId, String providerId,
                                                                           Authentication auth);
+
+    /**
+     * Get the EOSC Monitoring Guideline
+     *
+      * @return {@link InteroperabilityRecordBundle}
+     */
+    InteroperabilityRecordBundle getEOSCMonitoringGuideline();
 }

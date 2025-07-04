@@ -107,7 +107,12 @@ public class ResourceInteroperabilityRecordManager extends ResourceCatalogueMana
         commonMethods.createIdentifiers(bundle, getResourceTypeName(), false);
         logger.trace("Attempting to add a new ResourceInteroperabilityRecord: {}", bundle);
 
-        bundle.setMetadata(Metadata.createMetadata(AuthenticationInfo.getFullName(auth), AuthenticationInfo.getEmail(auth).toLowerCase()));
+        //TODO: refactor getAdminAccess to have more info
+        if (!auth.getName().equals("Administrator")) {
+            bundle.setMetadata(Metadata.createMetadata(AuthenticationInfo.getFullName(auth), AuthenticationInfo.getEmail(auth).toLowerCase()));
+        } else {
+            bundle.setMetadata(Metadata.createMetadata("system", "system"));
+        }
         List<LoggingInfo> loggingInfoList = commonMethods.returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(bundle, auth);
         bundle.setLoggingInfo(loggingInfoList);
         bundle.setLatestOnboardingInfo(loggingInfoList.getFirst());

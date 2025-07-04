@@ -36,6 +36,8 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
+import java.util.Collections;
+
 @Profile("beyond")
 @Aspect
 @Component
@@ -46,6 +48,8 @@ public class ProviderManagementAspect {
     private final ProviderService providerService;
     private final ServiceBundleService<ServiceBundle> serviceBundleService;
     private final TrainingResourceService trainingResourceService;
+    private final InteroperabilityRecordService interoperabilityRecordService;
+    private final ResourceInteroperabilityRecordService rirService;
     private final PublicProviderService publicProviderService;
     private final PublicServiceService publicServiceManager;
     private final PublicDatasourceService publicDatasourceManager;
@@ -64,6 +68,8 @@ public class ProviderManagementAspect {
     public ProviderManagementAspect(ProviderService providerService,
                                     ServiceBundleService<ServiceBundle> serviceBundleService,
                                     TrainingResourceService trainingResourceService,
+                                    InteroperabilityRecordService interoperabilityRecordService,
+                                    ResourceInteroperabilityRecordService rirService,
                                     PublicProviderService publicProviderService,
                                     PublicServiceService publicServiceManager,
                                     PublicDatasourceService publicDatasourceManager,
@@ -78,6 +84,8 @@ public class ProviderManagementAspect {
         this.providerService = providerService;
         this.serviceBundleService = serviceBundleService;
         this.trainingResourceService = trainingResourceService;
+        this.interoperabilityRecordService = interoperabilityRecordService;
+        this.rirService = rirService;
         this.publicProviderService = publicProviderService;
         this.publicServiceManager = publicServiceManager;
         this.publicDatasourceManager = publicDatasourceManager;
@@ -572,5 +580,31 @@ public class ProviderManagementAspect {
     public void deletePublicAdapter(JoinPoint joinPoint) {
         AdapterBundle adapterBundle = (AdapterBundle) joinPoint.getArgs()[0];
         publicAdapterManager.delete(adapterBundle);
+    }
+
+    @Async
+    @AfterReturning(pointcut = "execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ServiceBundleManager.addResource(..))" +
+            "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ServiceBundleManager.verify(..))",
+            returning = "serviceBundle")
+    public void assignEoscMonitoringGuidelineToService(final ServiceBundle serviceBundle) {
+        if (serviceBundle.getStatus().equals("approved resource")) {
+            ResourceInteroperabilityRecord rir = new ResourceInteroperabilityRecord();
+            rir.setCatalogueId(serviceBundle.getService().getCatalogueId());
+            rir.setNode(serviceBundle.getService().getNode());
+            rir.setResourceId(serviceBundle.getId());
+
+            InteroperabilityRecordBundle guideline;
+            try {
+                guideline = interoperabilityRecordService.getEOSCMonitoringGuideline();
+            } catch (CatalogueResourceNotFoundException e) {
+                logger.info("EOSC Monitoring Guideline not found. Skipping interoperability assignment for service: {}",
+                        serviceBundle.getId());
+                return;
+            }
+
+            rir.setInteroperabilityRecordIds(Collections.singletonList(guideline.getId()));
+            rirService.add(new ResourceInteroperabilityRecordBundle(rir),
+                    "service", securityService.getAdminAccess());
+        }
     }
 }
