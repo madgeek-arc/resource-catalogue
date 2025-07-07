@@ -27,6 +27,7 @@ import gr.uoa.di.madgik.resourcecatalogue.utils.JmsService;
 import org.apache.commons.beanutils.BeanUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
@@ -39,6 +40,9 @@ public class PublicProviderService extends ResourceCatalogueManager<ProviderBund
     private final JmsService jmsService;
     private final PidIssuer pidIssuer;
     private final FacetLabelService facetLabelService;
+
+    @Value("${pid.service.enabled}")
+    private boolean pidServiceEnabled;
 
     public PublicProviderService(JmsService jmsService,
                                  PidIssuer pidIssuer,
@@ -70,9 +74,10 @@ public class PublicProviderService extends ResourceCatalogueManager<ProviderBund
         providerBundle.getMetadata().setPublished(true);
 
         //POST PID
-        //TODO: enable when we have PID configuration properties for Beyond
-        logger.info("PID POST disabled");
-//        pidIssuer.postPID(providerBundle.getId(), null);
+        if (pidServiceEnabled) {
+            logger.info("Posting Provider with id {} to PID service", providerBundle.getId());
+            pidIssuer.postPID(providerBundle.getId(), null);
+        }
 
         ProviderBundle ret;
         logger.info("Provider '{}' is being published with id '{}'", lowerLevelProviderId, providerBundle.getId());

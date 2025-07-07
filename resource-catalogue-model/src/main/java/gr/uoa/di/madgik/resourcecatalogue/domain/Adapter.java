@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright 2017-2025 OpenAIRE AMKE & Athena Research and Innovation Center
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,10 +19,6 @@ package gr.uoa.di.madgik.resourcecatalogue.domain;
 import gr.uoa.di.madgik.resourcecatalogue.annotation.FieldValidation;
 import gr.uoa.di.madgik.resourcecatalogue.annotation.VocabularyValidation;
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.xml.bind.annotation.XmlElement;
-import jakarta.xml.bind.annotation.XmlElementWrapper;
-import jakarta.xml.bind.annotation.XmlRootElement;
-import jakarta.xml.bind.annotation.XmlType;
 
 import java.net.URI;
 import java.util.Date;
@@ -48,8 +44,8 @@ public class Adapter implements Identifiable {
     /**
      * The Catalogue this Adapter is originally registered at.
      */
-    @Schema
-    @FieldValidation(nullable = true, containsId = true, idClass = Catalogue.class)
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
+    @FieldValidation(containsId = true, idClass = Catalogue.class)
     private String catalogueId;
 
     /**
@@ -86,7 +82,7 @@ public class Adapter implements Identifiable {
      */
     @Schema(example = "https://example.com")
     @FieldValidation(nullable = true)
-    private String logo;
+    private URI logo;
 
     /**
      * Documentation webpage (e.g., read-the-docs page)
@@ -156,7 +152,7 @@ public class Adapter implements Identifiable {
     public Adapter() {
     }
 
-    public Adapter(String id, String name, String catalogueId, String node, String description, LinkedResource linkedResource, String tagline, String logo, URI documentation, URI repository, List<URI> releases, String programmingLanguage, String license, String version, String changeLog, Date lastUpdate, List<User> admins) {
+    public Adapter(String id, String name, String catalogueId, String node, String description, LinkedResource linkedResource, String tagline, URI logo, URI documentation, URI repository, List<URI> releases, String programmingLanguage, String license, String version, String changeLog, Date lastUpdate, List<User> admins) {
         this.id = id;
         this.name = name;
         this.catalogueId = catalogueId;
@@ -246,11 +242,11 @@ public class Adapter implements Identifiable {
         this.tagline = tagline;
     }
 
-    public String getLogo() {
+    public URI getLogo() {
         return logo;
     }
 
-    public void setLogo(String logo) {
+    public void setLogo(URI logo) {
         this.logo = logo;
     }
 

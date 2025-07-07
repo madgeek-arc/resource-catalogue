@@ -17,9 +17,6 @@
 package gr.uoa.di.madgik.resourcecatalogue.domain;
 
 
-import jakarta.xml.bind.annotation.XmlElement;
-import jakarta.xml.bind.annotation.XmlRootElement;
-import jakarta.xml.bind.annotation.XmlType;
 import org.springframework.security.core.Authentication;
 
 import java.util.Arrays;

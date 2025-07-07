@@ -19,20 +19,11 @@ package gr.uoa.di.madgik.resourcecatalogue.manager;
 import gr.uoa.di.madgik.catalogue.exception.ValidationException;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.domain.Resource;
-import gr.uoa.di.madgik.resourcecatalogue.domain.LoggingInfo;
-import gr.uoa.di.madgik.resourcecatalogue.domain.Metadata;
-import gr.uoa.di.madgik.resourcecatalogue.domain.ResourceInteroperabilityRecordBundle;
-import gr.uoa.di.madgik.resourcecatalogue.domain.configurationTemplates.ConfigurationTemplateBundle;
-import gr.uoa.di.madgik.resourcecatalogue.domain.configurationTemplates.ConfigurationTemplateInstance;
-import gr.uoa.di.madgik.resourcecatalogue.domain.configurationTemplates.ConfigurationTemplateInstanceBundle;
-import gr.uoa.di.madgik.resourcecatalogue.domain.configurationTemplates.ConfigurationTemplateInstanceDto;
+import gr.uoa.di.madgik.resourcecatalogue.domain.*;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
 import gr.uoa.di.madgik.resourcecatalogue.utils.AuthenticationInfo;
 import gr.uoa.di.madgik.resourcecatalogue.utils.ObjectUtils;
 import gr.uoa.di.madgik.resourcecatalogue.utils.ProviderResourcesCommonMethods;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Lazy;
@@ -41,6 +32,7 @@ import org.springframework.security.core.Authentication;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Set;
 
 @org.springframework.stereotype.Service("configurationTemplateInstanceManager")
 public class ConfigurationTemplateInstanceManager extends ResourceCatalogueManager<ConfigurationTemplateInstanceBundle>
@@ -54,12 +46,14 @@ public class ConfigurationTemplateInstanceManager extends ResourceCatalogueManag
     private final SecurityService securityService;
     private final ProviderResourcesCommonMethods commonMethods;
     private final IdCreator idCreator;
+    private final PublicConfigurationTemplateInstanceService publicConfigurationTemplateInstanceService;
 
     public ConfigurationTemplateInstanceManager(@Lazy ConfigurationTemplateInstanceService configInstanceService,
                                                 @Lazy ConfigurationTemplateService configService,
                                                 @Lazy ResourceInteroperabilityRecordService rirService,
                                                 SecurityService securityService, IdCreator idCreator,
-                                                ProviderResourcesCommonMethods commonMethods) {
+                                                ProviderResourcesCommonMethods commonMethods,
+                                                PublicConfigurationTemplateInstanceService publicConfigurationTemplateInstanceService) {
         super(ConfigurationTemplateInstanceBundle.class);
         this.configInstanceService = configInstanceService;
         this.configService = configService;
@@ -67,6 +61,7 @@ public class ConfigurationTemplateInstanceManager extends ResourceCatalogueManag
         this.securityService = securityService;
         this.idCreator = idCreator;
         this.commonMethods = commonMethods;
+        this.publicConfigurationTemplateInstanceService = publicConfigurationTemplateInstanceService;
     }
 
     @Override
@@ -74,12 +69,11 @@ public class ConfigurationTemplateInstanceManager extends ResourceCatalogueManag
         return "configuration_template_instance";
     }
 
-    // TODO: validate/add/update/delete
-
     @Override
     public ConfigurationTemplateInstanceBundle add(ConfigurationTemplateInstanceBundle bundle, Authentication auth) {
         validate(bundle);
         checkResourceIdAndConfigurationTemplateIdConsistency(bundle, auth);
+        validateInstanceAgainstTemplate(bundle);
 
         bundle.setId(idCreator.generate(getResourceTypeName()));
         commonMethods.createIdentifiers(bundle, getResourceTypeName(), false);
@@ -169,14 +163,14 @@ public class ConfigurationTemplateInstanceManager extends ResourceCatalogueManag
         logger.info("Deleted the Configuration Template Instance with id '{}'", bundle.getConfigurationTemplateInstance().getId());
     }
 
-    public List<ConfigurationTemplateInstance> getByResourceId(String id) {
-        List<ConfigurationTemplateInstance> ret = new ArrayList<>();
+    public List<ConfigurationTemplateInstanceBundle> getByResourceId(String id) {
+        List<ConfigurationTemplateInstanceBundle> ret = new ArrayList<>();
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(10000);
         List<ConfigurationTemplateInstanceBundle> list = configInstanceService.getAll(ff, null).getResults();
         for (ConfigurationTemplateInstanceBundle bundle : list) {
             if (bundle.getConfigurationTemplateInstance().getResourceId().equals(id)) {
-                ret.add(bundle.getConfigurationTemplateInstance());
+                ret.add(bundle);
             }
         }
         return ret;
@@ -194,6 +188,19 @@ public class ConfigurationTemplateInstanceManager extends ResourceCatalogueManag
             }
         }
         return ret;
+    }
+
+    public ConfigurationTemplateInstance getByResourceAndConfigurationTemplateId(String resourceId, String ctId) {
+        FacetFilter ff = new FacetFilter();
+        ff.setQuantity(10000);
+        ff.addFilter("published", false);
+        ff.addFilter("resource_id", resourceId);
+        ff.addFilter("configuration_template_id", ctId);
+        List<ConfigurationTemplateInstanceBundle> list = configInstanceService.getAll(ff, null).getResults();
+        if (!list.isEmpty()) {
+            return list.getFirst().getConfigurationTemplateInstance();
+        }
+        return null;
     }
 
     private void checkResourceIdAndConfigurationTemplateIdConsistency(ConfigurationTemplateInstanceBundle bundle,
@@ -217,14 +224,13 @@ public class ConfigurationTemplateInstanceManager extends ResourceCatalogueManag
             throw new ValidationException("Fields resourceId and configurationTemplateId are not related.");
         }
 
-        // check if a Configuration Template Implementation with the same resourceId, configurationTemplateId and payload already exists
+        // check if a Configuration Template Implementation with the same resourceId, configurationTemplateId already exists
         List<ConfigurationTemplateInstanceBundle> configurationTemplateInstanceBundleList = configInstanceService.getAll(createFacetFilter(), auth).getResults();
         for (ConfigurationTemplateInstanceBundle ctiBundle : configurationTemplateInstanceBundleList) {
             if (ctiBundle.getConfigurationTemplateInstance().getResourceId().equals(resourceId) &&
-                    ctiBundle.getConfigurationTemplateInstance().getConfigurationTemplateId().equals(configurationTemplateId) &&
-                    ctiBundle.getConfigurationTemplateInstance().getPayload().equals(bundle.getConfigurationTemplateInstance().getPayload())) {
+                    ctiBundle.getConfigurationTemplateInstance().getConfigurationTemplateId().equals(configurationTemplateId)) {
                 throw new ValidationException(String.format("There is already a Configuration Template Instance registered " +
-                                "for Resource [%s] under [%s] Configuration Template with the same payload",
+                                "for Resource [%s] under [%s] Configuration Template",
                         resourceId, configurationTemplateId));
             }
         }
@@ -237,20 +243,20 @@ public class ConfigurationTemplateInstanceManager extends ResourceCatalogueManag
         return ff;
     }
 
-    public ConfigurationTemplateInstanceDto createCTIDto(ConfigurationTemplateInstance configurationTemplateInstance) {
-        ConfigurationTemplateInstanceDto ret = new ConfigurationTemplateInstanceDto();
-        ret.setId(configurationTemplateInstance.getId());
-        ret.setConfigurationTemplateId(configurationTemplateInstance.getConfigurationTemplateId());
-        ret.setResourceId(configurationTemplateInstance.getResourceId());
-        JSONParser parser = new JSONParser();
-        try {
-            String jsonString = configurationTemplateInstance.getPayload();
-            jsonString = jsonString.replace("'", "\"");
-            JSONObject jsonObject = (JSONObject) parser.parse(jsonString);
-            ret.setPayload(jsonObject);
-        } catch (ParseException e) {
-            logger.error(e.getMessage(), e);
+    private void validateInstanceAgainstTemplate(ConfigurationTemplateInstanceBundle bundle) {
+        ConfigurationTemplateBundle ct = configService.get(bundle.getConfigurationTemplateInstance().getConfigurationTemplateId(),
+                bundle.getConfigurationTemplateInstance().getCatalogueId(), false);
+        Set<String> ctKeys = ct.getConfigurationTemplate().getFormModel().keySet();
+        Set<String> ctiKeys = bundle.getConfigurationTemplateInstance().getPayload().keySet();
+
+        if (!ctKeys.equals(ctiKeys)) {
+            throw new ValidationException("Configuration Template Instance does not contain the required model in its payload");
         }
-        return ret;
+    }
+
+    public ConfigurationTemplateInstanceBundle createPublicConfigurationTemplateInstance(
+            ConfigurationTemplateInstanceBundle bundle, Authentication auth) {
+        publicConfigurationTemplateInstanceService.add(bundle, auth);
+        return bundle;
     }
 }

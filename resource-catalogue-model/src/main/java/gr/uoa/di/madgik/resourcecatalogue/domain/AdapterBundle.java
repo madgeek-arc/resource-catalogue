@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright 2017-2025 OpenAIRE AMKE & Athena Research and Innovation Center
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,9 +17,6 @@
 package gr.uoa.di.madgik.resourcecatalogue.domain;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.xml.bind.annotation.XmlElement;
-import jakarta.xml.bind.annotation.XmlRootElement;
-import jakarta.xml.bind.annotation.XmlType;
 
 public class AdapterBundle extends Bundle<Adapter> {
 

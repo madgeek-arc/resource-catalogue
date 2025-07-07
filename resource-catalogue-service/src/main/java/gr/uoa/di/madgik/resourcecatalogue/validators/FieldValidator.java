@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright 2017-2025 OpenAIRE AMKE & Athena Research and Innovation Center
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -23,13 +23,13 @@ import gr.uoa.di.madgik.resourcecatalogue.annotation.*;
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
 import gr.uoa.di.madgik.resourcecatalogue.manager.ProviderManager;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
-import gr.uoa.di.madgik.resourcecatalogue.utils.RestTemplateTrustManager;
 import org.apache.commons.validator.routines.EmailValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
 
@@ -271,28 +271,30 @@ public class FieldValidator {
     }
 
     public void validateUrl(Field field, URL urlForValidation) {
-        RestTemplate restTemplate = RestTemplateTrustManager.createRestTemplateWithDisabledSSL();
-
         try {
-            if (urlForValidation.toString().contains(" ")) {
-                urlForValidation = URI.create(urlForValidation.toString()
-                        .replaceAll("\\s", "%20")).toURL();
-            }
+            String cleanedUrlString = urlForValidation.toString().replaceAll("\\s", "%20");
+            URL cleanedUrl = new URL(cleanedUrlString);
+            URI uri = cleanedUrl.toURI(); // throws exception if malformed
 
+            RestTemplate restTemplate = new RestTemplate();
             SimpleClientHttpRequestFactory requestFactory = new SimpleClientHttpRequestFactory();
             requestFactory.setConnectTimeout(5000);
             requestFactory.setReadTimeout(5000);
             restTemplate.setRequestFactory(requestFactory);
 
-            restTemplate.headForHeaders(urlForValidation.toURI());
-
+            try {
+                restTemplate.headForHeaders(uri);
+            } catch (HttpClientErrorException.MethodNotAllowed e) { // Fallback to GET if HEAD not allowed
+                restTemplate.getForEntity(uri, String.class);
+            }
         } catch (HttpStatusCodeException e) {
-            logger.trace(e.getMessage());
+            String fieldName = (field != null) ? field.getName() : "unknown";
+            logger.trace("HTTP status error while validating URL: {}", e.getMessage());
             throw new ValidationException(
                     String.format("URL '%s' found on field '%s' responded with error code: %d",
-                            urlForValidation, field.getName(), e.getStatusCode().value()));
+                            urlForValidation, fieldName, e.getStatusCode().value()));
         } catch (Exception e) {
-            logger.trace(e.getMessage());
+            logger.trace("Error while validating URL: {}", e.getMessage());
             throw new ValidationException("Failed to validate URL: " + urlForValidation);
         }
     }

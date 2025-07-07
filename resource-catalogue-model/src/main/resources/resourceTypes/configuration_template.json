@@ -16,6 +16,20 @@
       "type": "java.lang.String"
     },
     {
+      "label": "Catalogue ID",
+      "multivalued": false,
+      "name": "catalogue_id",
+      "path": "$.configurationTemplate.catalogueId",
+      "type": "java.lang.String"
+    },
+    {
+      "label": "Node",
+      "multivalued": false,
+      "name": "node",
+      "path": "$.configurationTemplate.node",
+      "type": "java.lang.String"
+    },
+    {
       "label": "Name",
       "multivalued": false,
       "name": "name",
@@ -96,7 +110,7 @@
   ],
   "payloadType": "json",
   "properties": {
-    "class": "gr.uoa.di.madgik.resourcecatalogue.domain.ConfigurationTemplate"
+    "class": "gr.uoa.di.madgik.resourcecatalogue.domain.ConfigurationTemplateBundle"
   },
   "schema": "{\n\t\"$schema\": \"https://json-schema.org/draft/2019-09/schema\"\n}"
 }

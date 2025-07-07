@@ -1,3 +1,19 @@
+/*
+ * Copyright 2017-2025 OpenAIRE AMKE & Athena Research and Innovation Center
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package gr.uoa.di.madgik.resourcecatalogue.manager;
 
 import gr.uoa.di.madgik.registry.domain.Browsing;
@@ -11,6 +27,7 @@ import gr.uoa.di.madgik.resourcecatalogue.utils.JmsService;
 import org.apache.commons.beanutils.BeanUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
@@ -22,6 +39,9 @@ public class PublicAdapterService extends ResourceCatalogueManager<AdapterBundle
     private final JmsService jmsService;
     private final PidIssuer pidIssuer;
     private final FacetLabelService facetLabelService;
+
+    @Value("${pid.service.enabled}")
+    private boolean pidServiceEnabled;
 
     public PublicAdapterService(JmsService jmsService,
                                 PidIssuer pidIssuer,
@@ -53,9 +73,10 @@ public class PublicAdapterService extends ResourceCatalogueManager<AdapterBundle
         adapterBundle.getMetadata().setPublished(true);
 
         //POST PID
-        //TODO: enable when we have PID configuration properties for Beyond
-        logger.info("PID POST disabled");
-//        pidIssuer.postPID(adapterBundle.getId(), null);
+        if (pidServiceEnabled) {
+            logger.info("Posting Adapter with id {} to PID service", adapterBundle.getId());
+            pidIssuer.postPID(adapterBundle.getId(), null);
+        }
 
         AdapterBundle ret;
         logger.info("Adapter '{}' is being published with id '{}'", lowerLevelAdapterId, adapterBundle.getId());

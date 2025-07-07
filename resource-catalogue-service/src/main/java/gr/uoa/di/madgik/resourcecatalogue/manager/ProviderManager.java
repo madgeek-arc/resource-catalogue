@@ -762,7 +762,7 @@ public class ProviderManager extends ResourceCatalogueManager<ProviderBundle> im
 
             try {
                 update(bundle, auth);
-            } catch (ResourceNotFoundException e) {
+            } catch (ResourceException | ResourceNotFoundException e) {
                 logger.info("Could not update terms for Provider with id: '{}'", id);
             }
         }

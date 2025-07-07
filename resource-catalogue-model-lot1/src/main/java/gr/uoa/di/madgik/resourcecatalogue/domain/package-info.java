@@ -16,4 +16,3 @@
 
 package gr.uoa.di.madgik.resourcecatalogue.domain;
 
-import jakarta.xml.bind.annotation.*;

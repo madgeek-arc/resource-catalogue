@@ -17,8 +17,6 @@
 package gr.uoa.di.madgik.resourcecatalogue.utils;
 
 import gr.uoa.di.madgik.registry.domain.Facet;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.elasticsearch.ElasticsearchStatusException;
 import org.elasticsearch.action.search.*;
 import org.elasticsearch.client.RequestOptions;
@@ -27,6 +25,8 @@ import org.elasticsearch.core.TimeValue;
 import org.elasticsearch.search.Scroll;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Primary;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;

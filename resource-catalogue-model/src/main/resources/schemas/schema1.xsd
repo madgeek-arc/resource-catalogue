@@ -625,6 +625,178 @@ It is also possible to select Not a legal entity.]]></xs:documentation>
       
   </xs:complexType>
     
+  <xs:complexType name="configurationTemplate">
+        
+    <xs:sequence>
+            
+      <xs:element minOccurs="0" name="catalogueId" type="xs:string"/>
+            
+      <xs:element minOccurs="0" name="description" type="xs:string"/>
+            
+      <xs:element name="formModel">
+                
+        <xs:complexType>
+                    
+          <xs:sequence>
+                        
+            <xs:element maxOccurs="unbounded" minOccurs="0" name="entry">
+                            
+              <xs:complexType>
+                                
+                <xs:sequence>
+                                    
+                  <xs:element minOccurs="0" name="key" type="xs:string"/>
+                                    
+                  <xs:element minOccurs="0" name="value" type="xs:anyType"/>
+                                  
+                </xs:sequence>
+                              
+              </xs:complexType>
+                          
+            </xs:element>
+                      
+          </xs:sequence>
+                  
+        </xs:complexType>
+              
+      </xs:element>
+            
+      <xs:element minOccurs="0" name="id" type="xs:string"/>
+            
+      <xs:element minOccurs="0" name="interoperabilityRecordId" type="xs:string"/>
+            
+      <xs:element minOccurs="0" name="name" type="xs:string"/>
+            
+      <xs:element minOccurs="0" name="node" type="xs:string"/>
+          
+    </xs:sequence>
+      
+  </xs:complexType>
+    
+  <xs:complexType name="configurationTemplateBundle">
+        
+    <xs:complexContent>
+            
+      <xs:extension base="bundle">
+                
+        <xs:sequence>
+                    
+          <xs:element minOccurs="0" name="configurationTemplate" type="configurationTemplate"/>
+                  
+        </xs:sequence>
+              
+      </xs:extension>
+          
+    </xs:complexContent>
+      
+  </xs:complexType>
+    
+  <xs:complexType name="configurationTemplateInstance">
+        
+    <xs:sequence>
+            
+      <xs:element minOccurs="0" name="catalogueId" type="xs:string"/>
+            
+      <xs:element minOccurs="0" name="configurationTemplateId" type="xs:string"/>
+            
+      <xs:element minOccurs="0" name="id" type="xs:string"/>
+            
+      <xs:element minOccurs="0" name="node" type="xs:string"/>
+            
+      <xs:element name="payload">
+                
+        <xs:complexType>
+                    
+          <xs:sequence>
+                        
+            <xs:element maxOccurs="unbounded" minOccurs="0" name="entry">
+                            
+              <xs:complexType>
+                                
+                <xs:sequence>
+                                    
+                  <xs:element minOccurs="0" name="key" type="xs:string"/>
+                                    
+                  <xs:element minOccurs="0" name="value" type="xs:anyType"/>
+                                  
+                </xs:sequence>
+                              
+              </xs:complexType>
+                          
+            </xs:element>
+                      
+          </xs:sequence>
+                  
+        </xs:complexType>
+              
+      </xs:element>
+            
+      <xs:element minOccurs="0" name="resourceId" type="xs:string"/>
+          
+    </xs:sequence>
+      
+  </xs:complexType>
+    
+  <xs:complexType name="configurationTemplateInstanceBundle">
+        
+    <xs:complexContent>
+            
+      <xs:extension base="bundle">
+                
+        <xs:sequence>
+                    
+          <xs:element minOccurs="0" name="configurationTemplateInstance" type="configurationTemplateInstance"/>
+                  
+        </xs:sequence>
+              
+      </xs:extension>
+          
+    </xs:complexContent>
+      
+  </xs:complexType>
+    
+  <xs:complexType name="configurationTemplateInstanceDto">
+        
+    <xs:sequence>
+            
+      <xs:element minOccurs="0" name="configurationTemplateId" type="xs:string"/>
+            
+      <xs:element minOccurs="0" name="id" type="xs:string"/>
+            
+      <xs:element name="payload">
+                
+        <xs:complexType>
+                    
+          <xs:sequence>
+                        
+            <xs:element maxOccurs="unbounded" minOccurs="0" name="entry">
+                            
+              <xs:complexType>
+                                
+                <xs:sequence>
+                                    
+                  <xs:element minOccurs="0" name="key" type="xs:anyType"/>
+                                    
+                  <xs:element minOccurs="0" name="value" type="xs:anyType"/>
+                                  
+                </xs:sequence>
+                              
+              </xs:complexType>
+                          
+            </xs:element>
+                      
+          </xs:sequence>
+                  
+        </xs:complexType>
+              
+      </xs:element>
+            
+      <xs:element minOccurs="0" name="resourceId" type="xs:string"/>
+          
+    </xs:sequence>
+      
+  </xs:complexType>
+    
   <xs:complexType name="datasource">
         
     <xs:sequence>
@@ -2433,144 +2605,6 @@ that is the used scheme (e.g., Web Address URL, DOI, ARK, etc.).]]></xs:document
       <xs:element minOccurs="0" name="resourceType" type="xs:string"/>
             
       <xs:element minOccurs="0" name="userId" type="xs:string"/>
-          
-    </xs:sequence>
-      
-  </xs:complexType>
-    
-  <xs:complexType name="configurationTemplate">
-        
-    <xs:sequence>
-            
-      <xs:element minOccurs="0" name="description" type="xs:string"/>
-            
-      <xs:element name="formModel">
-                
-        <xs:complexType>
-                    
-          <xs:sequence>
-                        
-            <xs:element maxOccurs="unbounded" minOccurs="0" name="entry">
-                            
-              <xs:complexType>
-                                
-                <xs:sequence>
-                                    
-                  <xs:element minOccurs="0" name="key" type="xs:anyType"/>
-                                    
-                  <xs:element minOccurs="0" name="value" type="xs:anyType"/>
-                                  
-                </xs:sequence>
-                              
-              </xs:complexType>
-                          
-            </xs:element>
-                      
-          </xs:sequence>
-                  
-        </xs:complexType>
-              
-      </xs:element>
-            
-      <xs:element minOccurs="0" name="id" type="xs:string"/>
-            
-      <xs:element minOccurs="0" name="interoperabilityRecordId" type="xs:string"/>
-            
-      <xs:element minOccurs="0" name="name" type="xs:string"/>
-          
-    </xs:sequence>
-      
-  </xs:complexType>
-    
-  <xs:complexType name="configurationTemplateBundle">
-        
-    <xs:complexContent>
-            
-      <xs:extension base="bundle">
-                
-        <xs:sequence>
-                    
-          <xs:element minOccurs="0" name="configurationTemplate" type="configurationTemplate"/>
-                  
-        </xs:sequence>
-              
-      </xs:extension>
-          
-    </xs:complexContent>
-      
-  </xs:complexType>
-    
-  <xs:complexType name="configurationTemplateInstance">
-        
-    <xs:sequence>
-            
-      <xs:element minOccurs="0" name="configurationTemplateId" type="xs:string"/>
-            
-      <xs:element minOccurs="0" name="id" type="xs:string"/>
-            
-      <xs:element minOccurs="0" name="payload" type="xs:string"/>
-            
-      <xs:element minOccurs="0" name="resourceId" type="xs:string"/>
-          
-    </xs:sequence>
-      
-  </xs:complexType>
-    
-  <xs:complexType name="configurationTemplateInstanceBundle">
-        
-    <xs:complexContent>
-            
-      <xs:extension base="bundle">
-                
-        <xs:sequence>
-                    
-          <xs:element minOccurs="0" name="configurationTemplateInstance" type="configurationTemplateInstance"/>
-                  
-        </xs:sequence>
-              
-      </xs:extension>
-          
-    </xs:complexContent>
-      
-  </xs:complexType>
-    
-  <xs:complexType name="configurationTemplateInstanceDto">
-        
-    <xs:sequence>
-            
-      <xs:element minOccurs="0" name="configurationTemplateId" type="xs:string"/>
-            
-      <xs:element minOccurs="0" name="id" type="xs:string"/>
-            
-      <xs:element name="payload">
-                
-        <xs:complexType>
-                    
-          <xs:sequence>
-                        
-            <xs:element maxOccurs="unbounded" minOccurs="0" name="entry">
-                            
-              <xs:complexType>
-                                
-                <xs:sequence>
-                                    
-                  <xs:element minOccurs="0" name="key" type="xs:anyType"/>
-                                    
-                  <xs:element minOccurs="0" name="value" type="xs:anyType"/>
-                                  
-                </xs:sequence>
-                              
-              </xs:complexType>
-                          
-            </xs:element>
-                      
-          </xs:sequence>
-                  
-        </xs:complexType>
-              
-      </xs:element>
-            
-      <xs:element minOccurs="0" name="resourceId" type="xs:string"/>
           
     </xs:sequence>
       

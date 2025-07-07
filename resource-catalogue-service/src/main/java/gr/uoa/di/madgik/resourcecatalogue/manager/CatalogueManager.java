@@ -352,7 +352,7 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
             bundle.getMetadata().setTerms(existingTerms);
             try {
                 update(bundle, auth);
-            } catch (ResourceNotFoundException e) {
+            } catch (ResourceException | ResourceNotFoundException e) {
                 logger.info("Could not update terms for Provider with id: '{}'", id);
             }
         }

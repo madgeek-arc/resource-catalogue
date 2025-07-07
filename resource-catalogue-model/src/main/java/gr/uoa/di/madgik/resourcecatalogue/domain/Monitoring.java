@@ -19,10 +19,6 @@ package gr.uoa.di.madgik.resourcecatalogue.domain;
 import gr.uoa.di.madgik.resourcecatalogue.annotation.FieldValidation;
 import gr.uoa.di.madgik.resourcecatalogue.annotation.VocabularyValidation;
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.xml.bind.annotation.XmlElement;
-import jakarta.xml.bind.annotation.XmlElementWrapper;
-import jakarta.xml.bind.annotation.XmlRootElement;
-import jakarta.xml.bind.annotation.XmlType;
 
 import java.util.List;
 import java.util.Objects;
@@ -36,8 +32,8 @@ public class Monitoring implements Identifiable {
     @FieldValidation(containsId = true, containsResourceId = true)
     private String serviceId;
 
-    @Schema
-    @FieldValidation(nullable = true, containsId = true, idClass = Catalogue.class)
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
+    @FieldValidation(containsId = true, idClass = Catalogue.class)
     private String catalogueId;
 
     @Schema
