@@ -157,7 +157,8 @@ public class ConfigurationTemplateManager extends ResourceCatalogueManager<Confi
         ret.setActive(existingConfigurationTemplate.isActive());
         ret.setSuspended(existingConfigurationTemplate.isSuspended());
 
-        Resource existing = getResource(ret.getConfigurationTemplate().getId(), catalogueId, false);
+        Resource existing = getResource(ret.getConfigurationTemplate().getId(),
+                ret.getConfigurationTemplate().getCatalogueId(), false);
         existing.setPayload(serialize(ret));
         existing.setResourceType(getResourceType());
 

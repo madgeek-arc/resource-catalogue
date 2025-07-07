@@ -100,7 +100,8 @@ public class ConfigurationTemplateInstanceManager extends ResourceCatalogueManag
         logger.trace("Attempting to update the ConfigurationTemplateInstance with id '{}'", bundle.getId());
 
         ConfigurationTemplateInstanceBundle ret = ObjectUtils.clone(bundle);
-        Resource existing = whereID(ret.getId(), true);
+        Resource existing = getResource(ret.getConfigurationTemplateInstance().getId(),
+                ret.getConfigurationTemplateInstance().getCatalogueId(), false);
         ConfigurationTemplateInstanceBundle existingCTI = deserialize(existing);
         // check if there are actual changes in the ConfigurationTemplateInstance
         if (ret.getConfigurationTemplateInstance().equals(existingCTI.getConfigurationTemplateInstance())) {

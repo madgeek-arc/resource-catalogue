@@ -197,7 +197,8 @@ public class InteroperabilityRecordManager extends ResourceCatalogueManager<Inte
             }
         }
 
-        Resource existing = getResource(ret.getInteroperabilityRecord().getId(), ret.getInteroperabilityRecord().getCatalogueId());
+        Resource existing = getResource(ret.getInteroperabilityRecord().getId(),
+                ret.getInteroperabilityRecord().getCatalogueId(), false);
         if (existing == null) {
             throw new ResourceNotFoundException(ret.getId(), "Interoperability Record");
         }
