@@ -19,7 +19,6 @@ package gr.uoa.di.madgik.resourcecatalogue.controllers.registry;
 import gr.uoa.di.madgik.resourcecatalogue.domain.EOSCIFGuidelines;
 import gr.uoa.di.madgik.resourcecatalogue.domain.ServiceBundle;
 import gr.uoa.di.madgik.resourcecatalogue.service.ServiceBundleService;
-import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -35,7 +34,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@Hidden
 @Profile("beyond")
 @RestController
 @RequestMapping("resource-extras")
