@@ -18,23 +18,16 @@ package gr.uoa.di.madgik.resourcecatalogue.domain;
 
 import gr.uoa.di.madgik.resourcecatalogue.annotation.FieldValidation;
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.xml.bind.annotation.XmlElement;
-import jakarta.xml.bind.annotation.XmlRootElement;
-import jakarta.xml.bind.annotation.XmlType;
 
 import java.net.URL;
 import java.util.Objects;
 
-@XmlType
-@XmlRootElement
 public class Metric {
 
-    @XmlElement
     @Schema
     @FieldValidation(nullable = true)
     private URL probe;
 
-    @XmlElement
     @Schema
     @FieldValidation(nullable = true)
     private URL metric;

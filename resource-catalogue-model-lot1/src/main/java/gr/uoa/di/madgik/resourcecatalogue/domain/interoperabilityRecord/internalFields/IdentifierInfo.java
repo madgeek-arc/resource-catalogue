@@ -20,14 +20,9 @@ import gr.uoa.di.madgik.resourcecatalogue.annotation.FieldValidation;
 import gr.uoa.di.madgik.resourcecatalogue.annotation.VocabularyValidation;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Vocabulary;
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.xml.bind.annotation.XmlElement;
-import jakarta.xml.bind.annotation.XmlRootElement;
-import jakarta.xml.bind.annotation.XmlType;
 
 import java.util.Objects;
 
-@XmlType
-@XmlRootElement
 public class IdentifierInfo {
 
     /**
@@ -35,7 +30,6 @@ public class IdentifierInfo {
      * for a specific version of a piece of software,(per the Force11 Software Citation Principles11), or for all
      * versions. The record's primary key for locating it in the EOSC-IF database.
      */
-    @XmlElement(required = true)
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     @FieldValidation
     private String identifier;
@@ -43,7 +37,6 @@ public class IdentifierInfo {
     /**
      * The type of Identifier.
      */
-    @XmlElement(required = true)
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     @FieldValidation(containsId = true, idClass = Vocabulary.class)
     @VocabularyValidation(type = Vocabulary.Type.IR_IDENTIFIER_TYPE)

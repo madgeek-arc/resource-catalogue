@@ -1,15 +1,10 @@
 package gr.uoa.di.madgik.resourcecatalogue.config;
 
 import jakarta.annotation.PostConstruct;
-import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.Null;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.annotation.Validated;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @Component
 @ConfigurationProperties(prefix = "catalogue.jms.ams")

@@ -16,12 +16,6 @@
 
 package gr.uoa.di.madgik.resourcecatalogue.domain;
 
-import jakarta.xml.bind.annotation.XmlElement;
-import jakarta.xml.bind.annotation.XmlRootElement;
-import jakarta.xml.bind.annotation.XmlType;
-
-@XmlType
-@XmlRootElement
 public class ConfigurationTemplateInstanceBundle extends Bundle<ConfigurationTemplateInstance> {
 
     public ConfigurationTemplateInstanceBundle() {
@@ -47,7 +41,6 @@ public class ConfigurationTemplateInstanceBundle extends Bundle<ConfigurationTem
         super.setId(id);
     }
 
-    @XmlElement(name = "configurationTemplateInstance")
     public ConfigurationTemplateInstance getConfigurationTemplateInstance() {
         return this.getPayload();
     }

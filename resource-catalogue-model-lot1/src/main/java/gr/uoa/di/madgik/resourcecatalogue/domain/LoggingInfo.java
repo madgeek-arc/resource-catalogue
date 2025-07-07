@@ -17,37 +17,25 @@
 package gr.uoa.di.madgik.resourcecatalogue.domain;
 
 
-import jakarta.xml.bind.annotation.XmlElement;
-import jakarta.xml.bind.annotation.XmlRootElement;
-import jakarta.xml.bind.annotation.XmlType;
 import org.springframework.security.core.Authentication;
 
 import java.util.Arrays;
 import java.util.Objects;
 
-@XmlType
-@XmlRootElement
 public class LoggingInfo {
 
-    @XmlElement(defaultValue = "null")
     private String date;
 
-    @XmlElement(defaultValue = "null")
     private String userEmail;
 
-    @XmlElement(defaultValue = "null")
     private String userFullName;
 
-    @XmlElement(defaultValue = "null")
     private String userRole;
 
-    @XmlElement(defaultValue = "null")
     private String type;
 
-    @XmlElement(defaultValue = "null")
     private String comment;
 
-    @XmlElement(defaultValue = "null")
     private String actionType;
 
     public LoggingInfo() {

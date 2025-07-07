@@ -16,35 +16,22 @@
 
 package gr.uoa.di.madgik.resourcecatalogue.domain;
 
-import jakarta.xml.bind.annotation.XmlElement;
-import jakarta.xml.bind.annotation.XmlRootElement;
-import jakarta.xml.bind.annotation.XmlType;
-import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
-
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Objects;
 
-@XmlType
-@XmlRootElement
 public class Vocabulary implements Identifiable {
 
-    @XmlElement(required = true)
     private String id;
 
-    @XmlElement(required = true)
     private String name;
 
-    @XmlElement
     private String description;
 
-    @XmlElement
     private String parentId;
 
-    @XmlElement(required = true)
     private String type;
 
-    @XmlJavaTypeAdapter(ExtrasMapTypeAdapter.class)
     private Map<String, String> extras;
 
     public Vocabulary() {

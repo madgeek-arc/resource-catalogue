@@ -20,9 +20,6 @@ import gr.uoa.di.madgik.catalogue.exception.ValidationException;
 import gr.uoa.di.madgik.registry.domain.Resource;
 import gr.uoa.di.madgik.registry.service.SearchService;
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
-import gr.uoa.di.madgik.resourcecatalogue.domain.ConfigurationTemplate;
-import gr.uoa.di.madgik.resourcecatalogue.domain.ConfigurationTemplateInstance;
-import gr.uoa.di.madgik.resourcecatalogue.domain.ConfigurationTemplateInstanceBundle;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
 import gr.uoa.di.madgik.resourcecatalogue.utils.*;
 import org.slf4j.Logger;
@@ -30,7 +27,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.core.Authentication;
 
-import java.util.*;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 @org.springframework.stereotype.Service("resourceInteroperabilityRecordManager")
 public class ResourceInteroperabilityRecordManager extends ResourceCatalogueManager<ResourceInteroperabilityRecordBundle>

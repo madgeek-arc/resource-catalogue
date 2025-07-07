@@ -718,48 +718,6 @@ Criteria for submitting content to the repository as well as product preparation
       
   </xs:complexType>
     
-  <xs:complexType name="extrasMapType">
-        
-    <xs:sequence>
-            
-      <xs:element maxOccurs="unbounded" minOccurs="0" name="entry" nillable="true" type="extrasType"/>
-          
-    </xs:sequence>
-      
-  </xs:complexType>
-    
-  <xs:complexType name="extrasType">
-        
-    <xs:sequence>
-            
-      <xs:element minOccurs="0" name="key" type="xs:string"/>
-            
-      <xs:element minOccurs="0" name="value" type="xs:string"/>
-          
-    </xs:sequence>
-      
-  </xs:complexType>
-    
-  <xs:complexType name="extrasMapTypeAdapter">
-        
-    <xs:complexContent>
-            
-      <xs:extension base="xmlAdapter">
-                
-        <xs:sequence/>
-              
-      </xs:extension>
-          
-    </xs:complexContent>
-      
-  </xs:complexType>
-    
-  <xs:complexType abstract="true" name="xmlAdapter">
-        
-    <xs:sequence/>
-      
-  </xs:complexType>
-    
   <xs:complexType name="helpdesk">
         
     <xs:sequence>

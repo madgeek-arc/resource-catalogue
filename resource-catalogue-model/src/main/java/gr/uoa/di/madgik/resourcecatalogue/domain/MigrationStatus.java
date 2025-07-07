@@ -16,31 +16,18 @@
 
 package gr.uoa.di.madgik.resourcecatalogue.domain;
 
-import jakarta.xml.bind.annotation.XmlElement;
-import jakarta.xml.bind.annotation.XmlElementWrapper;
-import jakarta.xml.bind.annotation.XmlRootElement;
-import jakarta.xml.bind.annotation.XmlType;
-
 import java.util.List;
 
-@XmlType
-@XmlRootElement
 public class MigrationStatus {
 
-    @XmlElementWrapper(name = "comments")
-    @XmlElement(name = "comment")
     private List<String> comments;
 
-    @XmlElement(defaultValue = "null")
     private String modified;
 
-    @XmlElement(defaultValue = "null")
     private String migrationDate;
 
-    @XmlElement(defaultValue = "null")
     private String resolutionDate;
 
-    @XmlElement(defaultValue = "null")
     private String modelVersion;
 
     public MigrationStatus() {

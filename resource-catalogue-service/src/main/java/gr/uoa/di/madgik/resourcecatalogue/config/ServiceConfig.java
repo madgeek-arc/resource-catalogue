@@ -18,10 +18,6 @@ package gr.uoa.di.madgik.resourcecatalogue.config;
 
 import gr.uoa.di.madgik.resourcecatalogue.config.properties.CatalogueProperties;
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
-import gr.uoa.di.madgik.resourcecatalogue.domain.ConfigurationTemplate;
-import gr.uoa.di.madgik.resourcecatalogue.domain.ConfigurationTemplateBundle;
-import gr.uoa.di.madgik.resourcecatalogue.domain.ConfigurationTemplateInstance;
-import gr.uoa.di.madgik.resourcecatalogue.domain.ConfigurationTemplateInstanceBundle;
 import jakarta.xml.bind.JAXBContext;
 import jakarta.xml.bind.JAXBException;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;

@@ -16,9 +16,9 @@
 
 package gr.uoa.di.madgik.resourcecatalogue.controllers.registry;
 
+import gr.uoa.di.madgik.registry.annotation.BrowseParameters;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.domain.Paging;
-import gr.uoa.di.madgik.registry.annotation.BrowseParameters;
 import gr.uoa.di.madgik.resourcecatalogue.domain.VocabularyCuration;
 import gr.uoa.di.madgik.resourcecatalogue.service.VocabularyCurationService;
 import io.swagger.v3.oas.annotations.Hidden;
