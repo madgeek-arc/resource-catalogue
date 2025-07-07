@@ -37,7 +37,7 @@ public class Provider implements Identifiable {
 
     // Basic Information
     /**
-     * A persistent identifier, a unique reference to the Provider in the context of the EOSC Portal.
+     * A persistent identifier, a unique reference to the Provider.
      */
     @XmlElement(required = true)
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED, example = "(required on PUT only)")

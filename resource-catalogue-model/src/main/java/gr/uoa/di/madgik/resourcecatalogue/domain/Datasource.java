@@ -34,7 +34,7 @@ public class Datasource implements Identifiable {
 
     // Basic Information
     /**
-     * A persistent identifier, a unique reference to the Datasource in the context of the EOSC Portal.
+     * A persistent identifier, a unique reference to the Datasource.
      */
     @XmlElement
     @Schema(example = "(required on PUT only)")
