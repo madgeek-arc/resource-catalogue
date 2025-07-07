@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright 2017-2025 OpenAIRE AMKE & Athena Research and Innovation Center
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -52,9 +52,9 @@ public class Adapter implements Identifiable {
     /**
      * The Catalogue this Adapter is originally registered at.
      */
-    @XmlElement
-    @Schema
-    @FieldValidation(nullable = true, containsId = true, idClass = Catalogue.class)
+    @XmlElement(required = true)
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
+    @FieldValidation(containsId = true, idClass = Catalogue.class)
     private String catalogueId;
 
     /**
@@ -96,7 +96,7 @@ public class Adapter implements Identifiable {
     @XmlElement
     @Schema(example = "https://example.com")
     @FieldValidation(nullable = true)
-    private String logo;
+    private URI logo;
 
     /**
      * Documentation webpage (e.g., read-the-docs page)
@@ -176,7 +176,7 @@ public class Adapter implements Identifiable {
     public Adapter() {
     }
 
-    public Adapter(String id, String name, String catalogueId, String node, String description, LinkedResource linkedResource, String tagline, String logo, URI documentation, URI repository, List<URI> releases, String programmingLanguage, String license, String version, String changeLog, Date lastUpdate, List<User> admins) {
+    public Adapter(String id, String name, String catalogueId, String node, String description, LinkedResource linkedResource, String tagline, URI logo, URI documentation, URI repository, List<URI> releases, String programmingLanguage, String license, String version, String changeLog, Date lastUpdate, List<User> admins) {
         this.id = id;
         this.name = name;
         this.catalogueId = catalogueId;
@@ -266,11 +266,11 @@ public class Adapter implements Identifiable {
         this.tagline = tagline;
     }
 
-    public String getLogo() {
+    public URI getLogo() {
         return logo;
     }
 
-    public void setLogo(String logo) {
+    public void setLogo(URI logo) {
         this.logo = logo;
     }
 

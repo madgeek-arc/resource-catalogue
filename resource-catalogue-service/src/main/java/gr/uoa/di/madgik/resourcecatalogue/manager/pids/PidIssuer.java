@@ -64,19 +64,30 @@ public class PidIssuer {
     }
 
     public void postPID(String pid, List<String> customResolveEndpoints) {
+        sendPIDRequest(pid, customResolveEndpoints, false);
+    }
+
+    public void deletePID(String pid) {
+        sendPIDRequest(pid, null, true);
+    }
+
+    private void sendPIDRequest(String pid, List<String> customResolveEndpoints, boolean delete) {
         String prefix = pid.split("/")[0];
         ResourceProperties resourceProperties = properties.getResourcePropertiesFromPrefix(prefix);
         PidIssuerConfig config = resourceProperties.getPidIssuer();
         RestTemplate restTemplate = createRestTemplate(config);
-        String payload;
-        if (customResolveEndpoints != null && !customResolveEndpoints.isEmpty()) {
-            payload = createPID(pid, config, customResolveEndpoints, true);
-        } else {
-            payload = createPID(pid, config, resourceProperties.getResolveEndpoints(), false);
-        }
         HttpHeaders headers = createHeaders(config);
-
-        exchange(payload, headers, config, pid, restTemplate);
+        if (!delete) {
+            String payload;
+            if (customResolveEndpoints != null && !customResolveEndpoints.isEmpty()) {
+                payload = createPID(pid, config, customResolveEndpoints, true);
+            } else {
+                payload = createPID(pid, config, resourceProperties.getResolveEndpoints(), false);
+            }
+            exchange(payload, headers, config, pid, restTemplate, HttpMethod.PUT);
+        } else {
+            exchange(null, headers, config, pid, restTemplate,  HttpMethod.DELETE);
+        }
     }
 
     private RestTemplate createRestTemplate(PidIssuerConfig config) {
@@ -165,7 +176,7 @@ public class PidIssuer {
         JSONObject id_data = new JSONObject();
 
         hs_admin_data_value.put("handle", config.getUser());
-        hs_admin_data_value.put("index", config.getUserIndex());
+        hs_admin_data_value.put("index", Integer.parseInt(config.getUserIndex()));
         hs_admin_data_value.put("permissions", "011111110011");
         hs_admin_data.put("format", "admin");
         hs_admin_data.put("value", hs_admin_data_value);
@@ -188,7 +199,13 @@ public class PidIssuer {
                 if (isCustom) {
                     resolveUrl_data.put("value", endpoint);
                 } else {
-                    resolveUrl_data.put("value", String.join("/", endpoint, pid));
+                    //FIXME: temporary solution with the fewest changes
+                    if (endpoint.startsWith("https://search.marketplace.sandbox.eosc-beyond.eu")) {
+                        String encodedSlash = pid.replace("/", "%252F");
+                        resolveUrl_data.put("value", String.join("/", endpoint, encodedSlash));
+                    } else {
+                        resolveUrl_data.put("value", String.join("/", endpoint, pid));
+                    }
                 }
                 resolveUrls.put("index", index);
                 resolveUrls.put("type", "URL");
@@ -225,24 +242,30 @@ public class PidIssuer {
     }
 
     private void exchange(String payload, HttpHeaders headers, PidIssuerConfig config, String pid,
-                          RestTemplate restTemplate) {
-        HttpEntity<String> request = new HttpEntity<>(payload, headers);
+                          RestTemplate restTemplate, HttpMethod method) {
+        HttpEntity<String> request = (payload == null || payload.isEmpty())
+                ? new HttpEntity<>(headers) // delete
+                : new HttpEntity<>(payload, headers); // put
         try {
             URI uri = URI.create(String.join("/", config.getUrl(), pid));
-            ResponseEntity<?> response = restTemplate.exchange(uri, HttpMethod.PUT, request, String.class);
-            logInfo(response, pid, config.getUrl());
+            ResponseEntity<?> response = restTemplate.exchange(uri, method, request, String.class);
+            logInfo(response, pid, config.getUrl(), method);
         } catch (Exception e) {
-            throw new RuntimeException("Error during PID post request", e);
+            throw new RuntimeException("Error during PID " + method.name() + " request", e);
         }
     }
 
-    private void logInfo(ResponseEntity<?> response, String pid, String endpoint) {
+    private void logInfo(ResponseEntity<?> response, String pid, String endpoint, HttpMethod method) {
         if (response.getStatusCode() == HttpStatus.CREATED) {
             logger.info("Resource with ID '{}' has been posted on [{}]", pid, endpoint);
         } else if (response.getStatusCode() == HttpStatus.OK) {
-            logger.info("Resource with ID '{}' has been updated on [{}]", pid, endpoint);
+            if (method == HttpMethod.PUT) {
+                logger.info("Resource with ID '{}' has been updated on [{}]", pid, endpoint);
+            } else {
+                logger.info("Resource with ID '{}' has been deleted from [{}]", pid, endpoint);
+            }
         } else {
-            logger.error("Resource with ID '{}' could not be posted/updated : [{}]", pid, response.getBody());
+            logger.error("Resource with ID '{}' could not be posted/updated/deleted : [{}]", pid, response.getBody());
         }
     }
 }

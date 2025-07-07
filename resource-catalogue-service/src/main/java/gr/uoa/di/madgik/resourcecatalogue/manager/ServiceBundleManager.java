@@ -63,7 +63,7 @@ public class ServiceBundleManager extends ResourceCatalogueManager<ServiceBundle
     private final PublicHelpdeskService publicHelpdeskManager;
     private final PublicMonitoringService publicMonitoringManager;
     private final PublicDatasourceService publicDatasourceManager;
-    private final ResourceInteroperabilityRecordService resourceInteroperabilityRecordService;
+    private final ResourceInteroperabilityRecordService rirService;
     private final ProviderResourcesCommonMethods commonMethods;
     private final SynchronizerService<Service> synchronizerService;
     private final Validator serviceValidator;
@@ -87,8 +87,7 @@ public class ServiceBundleManager extends ResourceCatalogueManager<ServiceBundle
                                 @Lazy PublicHelpdeskService publicHelpdeskManager,
                                 @Lazy PublicMonitoringService publicMonitoringManager,
                                 @Lazy PublicDatasourceService publicDatasourceManager,
-                                @Lazy ResourceInteroperabilityRecordService
-                                        resourceInteroperabilityRecordService,
+                                @Lazy ResourceInteroperabilityRecordService rirService,
                                 @Lazy ProviderResourcesCommonMethods commonMethods,
                                 SynchronizerService<Service> synchronizerService,
                                 @Qualifier("serviceValidator") Validator serviceValidator,
@@ -110,7 +109,7 @@ public class ServiceBundleManager extends ResourceCatalogueManager<ServiceBundle
         this.publicHelpdeskManager = publicHelpdeskManager;
         this.publicMonitoringManager = publicMonitoringManager;
         this.publicDatasourceManager = publicDatasourceManager;
-        this.resourceInteroperabilityRecordService = resourceInteroperabilityRecordService;
+        this.rirService = rirService;
         this.commonMethods = commonMethods;
         this.synchronizerService = synchronizerService;
         this.serviceValidator = serviceValidator;
@@ -337,9 +336,10 @@ public class ServiceBundleManager extends ResourceCatalogueManager<ServiceBundle
     @Override
     public ServiceBundle validate(ServiceBundle serviceBundle) {
         logger.debug("Validating Service with id: '{}'", serviceBundle.getId());
-        serviceValidator.validate(serviceBundle, null);
 
-        return super.validate(serviceBundle);
+        super.validate(serviceBundle);
+        serviceValidator.validate(serviceBundle, null);
+        return serviceBundle;
     }
 
     public ServiceBundle verify(String id, String status, Boolean active, Authentication auth) {
@@ -706,11 +706,11 @@ public class ServiceBundleManager extends ResourceCatalogueManager<ServiceBundle
             }
         }
         // suspend ResourceInteroperabilityRecord
-        ResourceInteroperabilityRecordBundle resourceInteroperabilityRecordBundle = resourceInteroperabilityRecordService.getWithResourceId(serviceId);
+        ResourceInteroperabilityRecordBundle resourceInteroperabilityRecordBundle = rirService.getWithResourceId(serviceId);
         if (resourceInteroperabilityRecordBundle != null) {
             try {
                 commonMethods.suspendResource(resourceInteroperabilityRecordBundle, suspend, auth);
-                resourceInteroperabilityRecordService.update(resourceInteroperabilityRecordBundle, auth);
+                rirService.update(resourceInteroperabilityRecordBundle, auth);
             } catch (gr.uoa.di.madgik.registry.exception.ResourceNotFoundException e) {
                 throw new RuntimeException(e);
             }

@@ -24,6 +24,7 @@ import gr.uoa.di.madgik.registry.domain.Resource;
 import gr.uoa.di.madgik.registry.exception.ResourceException;
 import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
+import gr.uoa.di.madgik.resourcecatalogue.exceptions.CatalogueResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
 import gr.uoa.di.madgik.resourcecatalogue.utils.Auditable;
 import gr.uoa.di.madgik.resourcecatalogue.utils.AuthenticationInfo;
@@ -304,8 +305,7 @@ public class InteroperabilityRecordManager extends ResourceCatalogueManager<Inte
     @Override
     public InteroperabilityRecordBundle validate(InteroperabilityRecordBundle interoperabilityRecordBundle) {
         logger.debug("Validating InteroperabilityRecord with id: '{}'", interoperabilityRecordBundle.getId());
-        super.validate(interoperabilityRecordBundle);
-        return interoperabilityRecordBundle;
+        return super.validate(interoperabilityRecordBundle);
     }
 
     @Override
@@ -374,5 +374,17 @@ public class InteroperabilityRecordManager extends ResourceCatalogueManager<Inte
                 interoperabilityRecordBundle.getInteroperabilityRecord().getProviderId(), suspend, auth);
         commonMethods.suspendResource(interoperabilityRecordBundle, suspend, auth);
         return super.update(interoperabilityRecordBundle, auth);
+    }
+
+    //FIXME: find a better way to get EOSC Monitoring IG - title is not unique
+    public InteroperabilityRecordBundle getEOSCMonitoringGuideline() {
+        FacetFilter ff = new FacetFilter();
+        ff.setResourceType(getResourceTypeName());
+        ff.addFilter("title", "EOSC Monitoring: Architecture and Interoperability Guidelines");
+        List<InteroperabilityRecordBundle> igList = getAll(ff).getResults();
+        if (!igList.isEmpty()) {
+            return igList.getFirst();
+        }
+        throw new CatalogueResourceNotFoundException("Could not find EOSC Monitoring Guideline");
     }
 }

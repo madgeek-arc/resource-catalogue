@@ -29,6 +29,7 @@ import gr.uoa.di.madgik.resourcecatalogue.utils.JmsService;
 import org.apache.commons.beanutils.BeanUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
@@ -48,6 +49,9 @@ public class PublicTrainingResourceService extends ResourceCatalogueManager<Trai
     private final ProviderService providerService;
     private final ServiceBundleService<ServiceBundle> serviceBundleService;
     private final TrainingResourceService trainingResourceService;
+
+    @Value("${pid.service.enabled}")
+    private boolean pidServiceEnabled;
 
     public PublicTrainingResourceService(JmsService jmsService,
                                          PidIssuer pidIssuer,
@@ -87,9 +91,10 @@ public class PublicTrainingResourceService extends ResourceCatalogueManager<Trai
         // sets public ids to resource organisation, resource providers and EOSC related services
         updateIdsToPublic(trainingResourceBundle);
 
-        // POST PID
-        logger.info("PID POST disabled");
-//        pidIssuer.postPID(trainingResourceBundle.getId(), null);
+        if (pidServiceEnabled) {
+            logger.info("Posting TrainingResource with id {} to PID service", trainingResourceBundle.getId());
+            pidIssuer.postPID(trainingResourceBundle.getId(), null);
+        }
 
         TrainingResourceBundle ret;
         logger.info("Training Resource '{}' is being published with id '{}'", lowerLevelResourceId, trainingResourceBundle.getId());

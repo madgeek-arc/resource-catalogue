@@ -14,16 +14,17 @@
  * limitations under the License.
  */
 
-package gr.uoa.di.madgik.resourcecatalogue.domain.configurationTemplates;
+package gr.uoa.di.madgik.resourcecatalogue.domain;
 
 import gr.uoa.di.madgik.resourcecatalogue.annotation.FieldValidation;
-import gr.uoa.di.madgik.resourcecatalogue.domain.Identifiable;
-import gr.uoa.di.madgik.resourcecatalogue.domain.InteroperabilityRecord;
+import gr.uoa.di.madgik.resourcecatalogue.annotation.VocabularyValidation;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
-import org.json.simple.JSONObject;
+
+import java.util.Map;
+import java.util.Objects;
 
 @XmlType
 @XmlRootElement
@@ -46,24 +47,61 @@ public class ConfigurationTemplate implements Identifiable {
 
     @XmlElement(required = true)
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
+    @FieldValidation(containsId = true, idClass = Catalogue.class)
+    private String catalogueId;
+
+    @XmlElement
+    @Schema
+    @FieldValidation(nullable = true, containsId = true, idClass = Vocabulary.class)
+    @VocabularyValidation(type = Vocabulary.Type.NODE)
+    private String node;
+
+    @XmlElement(required = true)
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     @FieldValidation
     private String description;
 
     @XmlElement(required = true)
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     @FieldValidation
-    private JSONObject formModel;
+    private Map<String, Object> formModel;
 
     public ConfigurationTemplate() {
     }
 
-    public ConfigurationTemplate(String id, String interoperabilityRecordId, String name, String description,
-                                 JSONObject formModel) {
+    public ConfigurationTemplate(String id, String interoperabilityRecordId, String name, String catalogueId, String node, String description, Map<String, Object> formModel) {
         this.id = id;
         this.interoperabilityRecordId = interoperabilityRecordId;
         this.name = name;
+        this.catalogueId = catalogueId;
+        this.node = node;
         this.description = description;
         this.formModel = formModel;
+    }
+
+    @Override
+    public String toString() {
+        return "ConfigurationTemplate{" +
+                "id='" + id + '\'' +
+                ", interoperabilityRecordId='" + interoperabilityRecordId + '\'' +
+                ", name='" + name + '\'' +
+                ", catalogueId='" + catalogueId + '\'' +
+                ", node='" + node + '\'' +
+                ", description='" + description + '\'' +
+                ", formModel=" + formModel +
+                '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        ConfigurationTemplate that = (ConfigurationTemplate) o;
+        return Objects.equals(id, that.id) && Objects.equals(interoperabilityRecordId, that.interoperabilityRecordId) && Objects.equals(name, that.name) && Objects.equals(catalogueId, that.catalogueId) && Objects.equals(node, that.node) && Objects.equals(description, that.description) && Objects.equals(formModel, that.formModel);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, interoperabilityRecordId, name, catalogueId, node, description, formModel);
     }
 
     @Override
@@ -92,6 +130,22 @@ public class ConfigurationTemplate implements Identifiable {
         this.name = name;
     }
 
+    public String getCatalogueId() {
+        return catalogueId;
+    }
+
+    public void setCatalogueId(String catalogueId) {
+        this.catalogueId = catalogueId;
+    }
+
+    public String getNode() {
+        return node;
+    }
+
+    public void setNode(String node) {
+        this.node = node;
+    }
+
     public String getDescription() {
         return description;
     }
@@ -100,11 +154,11 @@ public class ConfigurationTemplate implements Identifiable {
         this.description = description;
     }
 
-    public JSONObject getFormModel() {
+    public Map<String, Object> getFormModel() {
         return formModel;
     }
 
-    public void setFormModel(JSONObject formModel) {
+    public void setFormModel(Map<String, Object> formModel) {
         this.formModel = formModel;
     }
 }

@@ -19,7 +19,8 @@ package gr.uoa.di.madgik.resourcecatalogue.manager.aspects;
 import gr.uoa.di.madgik.registry.exception.ResourceException;
 import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
-import gr.uoa.di.madgik.resourcecatalogue.domain.configurationTemplates.ConfigurationTemplateInstanceBundle;
+import gr.uoa.di.madgik.resourcecatalogue.domain.ConfigurationTemplateBundle;
+import gr.uoa.di.madgik.resourcecatalogue.domain.ConfigurationTemplateInstanceBundle;
 import gr.uoa.di.madgik.resourcecatalogue.exceptions.CatalogueResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.manager.*;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
@@ -35,6 +36,8 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
+import java.util.Collections;
+
 @Profile("beyond")
 @Aspect
 @Component
@@ -45,11 +48,14 @@ public class ProviderManagementAspect {
     private final ProviderService providerService;
     private final ServiceBundleService<ServiceBundle> serviceBundleService;
     private final TrainingResourceService trainingResourceService;
+    private final InteroperabilityRecordService interoperabilityRecordService;
+    private final ResourceInteroperabilityRecordService rirService;
     private final PublicProviderService publicProviderService;
     private final PublicServiceService publicServiceManager;
     private final PublicDatasourceService publicDatasourceManager;
     private final PublicTrainingResourceService publicTrainingResourceManager;
     private final PublicInteroperabilityRecordService publicInteroperabilityRecordManager;
+    private final PublicConfigurationTemplateService publicConfigurationTemplateManager;
     private final PublicConfigurationTemplateInstanceService publicConfigurationTemplateInstanceManager;
     private final RegistrationMailService registrationMailService;
     private final SecurityService securityService;
@@ -62,12 +68,15 @@ public class ProviderManagementAspect {
     public ProviderManagementAspect(ProviderService providerService,
                                     ServiceBundleService<ServiceBundle> serviceBundleService,
                                     TrainingResourceService trainingResourceService,
+                                    InteroperabilityRecordService interoperabilityRecordService,
+                                    ResourceInteroperabilityRecordService rirService,
                                     PublicProviderService publicProviderService,
                                     PublicServiceService publicServiceManager,
                                     PublicDatasourceService publicDatasourceManager,
                                     PublicTrainingResourceService publicTrainingResourceManager,
                                     PublicInteroperabilityRecordService publicInteroperabilityRecordManager,
                                     PublicResourceInteroperabilityRecordService publicResourceInteroperabilityRecordManager,
+                                    PublicConfigurationTemplateService publicConfigurationTemplateManager,
                                     PublicConfigurationTemplateInstanceService publicConfigurationTemplateInstanceManager,
                                     PublicAdapterService publicAdapterManager,
                                     RegistrationMailService registrationMailService,
@@ -75,12 +84,15 @@ public class ProviderManagementAspect {
         this.providerService = providerService;
         this.serviceBundleService = serviceBundleService;
         this.trainingResourceService = trainingResourceService;
+        this.interoperabilityRecordService = interoperabilityRecordService;
+        this.rirService = rirService;
         this.publicProviderService = publicProviderService;
         this.publicServiceManager = publicServiceManager;
         this.publicDatasourceManager = publicDatasourceManager;
         this.publicTrainingResourceManager = publicTrainingResourceManager;
         this.publicInteroperabilityRecordManager = publicInteroperabilityRecordManager;
         this.publicResourceInteroperabilityRecordManager = publicResourceInteroperabilityRecordManager;
+        this.publicConfigurationTemplateManager = publicConfigurationTemplateManager;
         this.publicConfigurationTemplateInstanceManager = publicConfigurationTemplateInstanceManager;
         this.publicAdapterManager = publicAdapterManager;
         this.registrationMailService = registrationMailService;
@@ -475,12 +487,45 @@ public class ProviderManagementAspect {
     }
 
     @Async
+    @AfterReturning(pointcut = "execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ConfigurationTemplateManager.add(..))",
+            returning = "configurationTemplateBundle")
+    public void addConfigurationTemplateAsPublic(final ConfigurationTemplateBundle configurationTemplateBundle) {
+        try {
+            //TODO: Refactor if CTIs can belong to a different from the Project's Catalogue
+            publicConfigurationTemplateManager.get(configurationTemplateBundle.getIdentifiers().getPid(),
+                    configurationTemplateBundle.getConfigurationTemplate().getCatalogueId(), true);
+        } catch (ResourceException | ResourceNotFoundException e) {
+            publicConfigurationTemplateManager.add(ObjectUtils.clone(configurationTemplateBundle), null);
+        }
+    }
+
+    @Async
+    @AfterReturning(pointcut = "execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ConfigurationTemplateManager.update(..)) " +
+            "&& args(configurationTemplateBundle,..)", returning = "ret", argNames = "configurationTemplateBundle,ret")
+    public void updatePublicConfigurationTemplate(ConfigurationTemplateBundle configurationTemplateBundle, ConfigurationTemplateBundle ret) {
+        try {
+            if (!ret.equals(configurationTemplateBundle)) {
+                publicConfigurationTemplateManager.update(ObjectUtils.clone(ret), null);
+            }
+        } catch (ResourceException | ResourceNotFoundException ignore) {
+        }
+    }
+
+    @Async
+    @After("execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ConfigurationTemplateManager.delete(..))")
+    public void deletePublicConfigurationTemplate(JoinPoint joinPoint) {
+        ConfigurationTemplateBundle configurationTemplateBundle = (ConfigurationTemplateBundle) joinPoint.getArgs()[0];
+        publicConfigurationTemplateManager.delete(configurationTemplateBundle);
+    }
+
+    @Async
     @AfterReturning(pointcut = "execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ConfigurationTemplateInstanceManager.add(..))",
             returning = "configurationTemplateInstanceBundle")
     public void addConfigurationTemplateInstanceAsPublic(final ConfigurationTemplateInstanceBundle configurationTemplateInstanceBundle) {
         try {
             //TODO: Refactor if CTIs can belong to a different from the Project's Catalogue
-            publicConfigurationTemplateInstanceManager.get(configurationTemplateInstanceBundle.getIdentifiers().getPid());
+            publicConfigurationTemplateInstanceManager.get(configurationTemplateInstanceBundle.getIdentifiers().getPid(),
+                    configurationTemplateInstanceBundle.getConfigurationTemplateInstance().getCatalogueId(), true);
         } catch (ResourceException | ResourceNotFoundException e) {
             publicConfigurationTemplateInstanceManager.add(ObjectUtils.clone(configurationTemplateInstanceBundle), null);
         }
@@ -511,7 +556,8 @@ public class ProviderManagementAspect {
     public void addAdapterAsPublic(final AdapterBundle adapterBundle) {
         try {
             //TODO: Refactor if Adapters can belong to a different from the Project's Catalogue
-            publicAdapterManager.get(adapterBundle.getIdentifiers().getPid());
+            publicAdapterManager.get(adapterBundle.getIdentifiers().getPid(),
+                    adapterBundle.getAdapter().getCatalogueId(), true);
         } catch (ResourceException | ResourceNotFoundException e) {
             publicAdapterManager.add(ObjectUtils.clone(adapterBundle), null);
         }
@@ -534,5 +580,31 @@ public class ProviderManagementAspect {
     public void deletePublicAdapter(JoinPoint joinPoint) {
         AdapterBundle adapterBundle = (AdapterBundle) joinPoint.getArgs()[0];
         publicAdapterManager.delete(adapterBundle);
+    }
+
+    @Async
+    @AfterReturning(pointcut = "execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ServiceBundleManager.addResource(..))" +
+            "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ServiceBundleManager.verify(..))",
+            returning = "serviceBundle")
+    public void assignEoscMonitoringGuidelineToService(final ServiceBundle serviceBundle) {
+        if (serviceBundle.getStatus().equals("approved resource")) {
+            ResourceInteroperabilityRecord rir = new ResourceInteroperabilityRecord();
+            rir.setCatalogueId(serviceBundle.getService().getCatalogueId());
+            rir.setNode(serviceBundle.getService().getNode());
+            rir.setResourceId(serviceBundle.getId());
+
+            InteroperabilityRecordBundle guideline;
+            try {
+                guideline = interoperabilityRecordService.getEOSCMonitoringGuideline();
+            } catch (CatalogueResourceNotFoundException e) {
+                logger.info("EOSC Monitoring Guideline not found. Skipping interoperability assignment for service: {}",
+                        serviceBundle.getId());
+                return;
+            }
+
+            rir.setInteroperabilityRecordIds(Collections.singletonList(guideline.getId()));
+            rirService.add(new ResourceInteroperabilityRecordBundle(rir),
+                    "service", securityService.getAdminAccess());
+        }
     }
 }

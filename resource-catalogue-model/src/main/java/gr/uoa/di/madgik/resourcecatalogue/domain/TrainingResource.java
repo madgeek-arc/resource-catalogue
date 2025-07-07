@@ -283,9 +283,9 @@ public class TrainingResource implements Identifiable {
     /**
      * The Catalogue this Training Resource is originally registered at.
      */
-    @XmlElement
-    @Schema
-    @FieldValidation(nullable = true, containsId = true, idClass = Catalogue.class)
+    @XmlElement(required = true)
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
+    @FieldValidation(containsId = true, idClass = Catalogue.class)
     private String catalogueId;
 
     public TrainingResource() {

@@ -414,9 +414,9 @@ public class Service implements Identifiable {
     /**
      * The Catalogue this Resource is originally registered at.
      */
-    @XmlElement
-    @Schema
-    @FieldValidation(nullable = true, containsId = true, idClass = Catalogue.class)
+    @XmlElement(required = true)
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
+    @FieldValidation(containsId = true, idClass = Catalogue.class)
     private String catalogueId;
 
 
