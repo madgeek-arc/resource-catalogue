@@ -65,7 +65,7 @@ public class VocabularyManager extends ResourceManager<Vocabulary> implements Vo
         try {
             vocabulary = get(id);
         } catch (ResourceException e) {
-            throw new ResourceNotFoundException(String.format("Vocabulary with id '%s' does not exist!", id));
+            throw new ResourceNotFoundException(id, "Vocabulary");
         }
         return vocabulary;
     }

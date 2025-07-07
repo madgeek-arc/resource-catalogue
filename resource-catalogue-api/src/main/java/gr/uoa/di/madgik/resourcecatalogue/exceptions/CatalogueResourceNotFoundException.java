@@ -1,5 +1,5 @@
-/*
- * Copyright 2017-2025 OpenAIRE AMKE & Athena Research and Innovation Center
+/**
+ * Copyright 2018-2025 OpenAIRE AMKE & Athena Research and Innovation Center
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,24 +14,16 @@
  * limitations under the License.
  */
 
-package gr.uoa.di.madgik.resourcecatalogue.dto;
+package gr.uoa.di.madgik.resourcecatalogue.exceptions;
 
-public class ExtendedValue extends Value {
+import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 
-    private String catalogue;
+public class CatalogueResourceNotFoundException extends ResourceNotFoundException {
 
-    public ExtendedValue() {
-    }
-
-    public ExtendedValue(String catalogue) {
-        this.catalogue = catalogue;
-    }
-
-    public String getCatalogue() {
-        return catalogue;
-    }
-
-    public void setCatalogue(String catalogue) {
-        this.catalogue = catalogue;
+    /**
+     * Constructs a CatalogueResourceNotFoundException with the provided message.
+     */
+    public CatalogueResourceNotFoundException(String message) {
+        super(message, new Throwable());
     }
 }

@@ -16,8 +16,8 @@
 
 package gr.uoa.di.madgik.resourcecatalogue.integration;
 
-import gr.uoa.di.madgik.registry.domain.ResourceType;
 import gr.uoa.di.madgik.registry.service.ResourceTypeService;
+import gr.uoa.di.madgik.resourcecatalogue.domain.ResourceTypes;
 import gr.uoa.di.madgik.resourcecatalogue.service.ResourceIdCreator;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -25,6 +25,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -41,13 +42,9 @@ class ResourceIdCreatorIntegrationTest extends BaseIntegrationTest {
 
     @BeforeAll
     public void setUp() {
-        excludedResourceTypes = Arrays.asList("catalogue", "event", "vocabulary", "tool", "model", "ui_field_display",
-                "ui_field_form");
-        resourceTypes = resourceTypeService.getAllResourceType()
-                .stream()
-                .map(ResourceType::getName)
-                .filter(name -> !excludedResourceTypes.contains(name))
-                .toList();
+        resourceTypes = Arrays.stream(ResourceTypes.values())
+                .map(resourceType -> resourceType.name().toLowerCase())
+                .collect(Collectors.toList());
     }
 
     /**

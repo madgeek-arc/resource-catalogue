@@ -19,7 +19,7 @@ package gr.uoa.di.madgik.resourcecatalogue.service;
 import gr.uoa.di.madgik.resourcecatalogue.domain.ResourceInteroperabilityRecordBundle;
 import org.springframework.security.core.Authentication;
 
-public interface ResourceInteroperabilityRecordService extends ResourceService<ResourceInteroperabilityRecordBundle> {
+public interface ResourceInteroperabilityRecordService extends ResourceCatalogueService<ResourceInteroperabilityRecordBundle> {
 
     /**
      * Add a new ResourceInteroperabilityRecord Bundle, related to the specific resource type

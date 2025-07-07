@@ -16,6 +16,20 @@
       "type": "java.lang.String"
     },
     {
+      "label": "Catalogue ID",
+      "multivalued": false,
+      "name": "catalogue_id",
+      "path": "$.helpdesk.catalogueId",
+      "type": "java.lang.String"
+    },
+    {
+      "label": "Node",
+      "multivalued": false,
+      "name": "node",
+      "path": "$.helpdesk.node",
+      "type": "java.lang.String"
+    },
+    {
       "label": "Service",
       "multivalued": true,
       "name": "services",
@@ -77,13 +91,6 @@
       "name": "webform",
       "path": "$.helpdesk.webform",
       "type": "java.lang.Boolean"
-    },
-    {
-      "label": "Catalogue ID",
-      "multivalued": false,
-      "name": "catalogue_id",
-      "path": "$.catalogueId",
-      "type": "java.lang.String"
     },
     {
       "label": null,

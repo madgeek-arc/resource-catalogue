@@ -43,7 +43,7 @@ import java.util.Comparator;
 import java.util.List;
 
 @org.springframework.stereotype.Service("configurationTemplateInstanceManager")
-public class ConfigurationTemplateInstanceManager extends ResourceManager<ConfigurationTemplateInstanceBundle>
+public class ConfigurationTemplateInstanceManager extends ResourceCatalogueManager<ConfigurationTemplateInstanceBundle>
         implements ConfigurationTemplateInstanceService {
 
     private static final Logger logger = LoggerFactory.getLogger(ConfigurationTemplateInstanceManager.class);
@@ -82,6 +82,7 @@ public class ConfigurationTemplateInstanceManager extends ResourceManager<Config
         checkResourceIdAndConfigurationTemplateIdConsistency(bundle, auth);
 
         bundle.setId(idCreator.generate(getResourceTypeName()));
+        commonMethods.createIdentifiers(bundle, getResourceTypeName(), false);
         logger.trace("Attempting to add a new ConfigurationTemplateInstance: {}", bundle);
 
         bundle.setMetadata(Metadata.createMetadata(AuthenticationInfo.getFullName(auth),
@@ -121,6 +122,7 @@ public class ConfigurationTemplateInstanceManager extends ResourceManager<Config
 
         ret.setMetadata(Metadata.updateMetadata(
                 ret.getMetadata(), AuthenticationInfo.getFullName(auth), AuthenticationInfo.getEmail(auth).toLowerCase()));
+        ret.setIdentifiers(existingCTI.getIdentifiers());
         List<LoggingInfo> list = commonMethods.returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(existingCTI, auth);
         LoggingInfo loggingInfo = commonMethods.createLoggingInfo(auth, LoggingInfo.Types.UPDATE.getKey(),
                 LoggingInfo.ActionType.UPDATED.getKey());

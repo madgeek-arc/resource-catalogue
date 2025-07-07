@@ -75,22 +75,24 @@ public interface BundleOperations<T extends Bundle<?>> {
     /**
      * Suspend the resource
      *
-     * @param id      resource ID
-     * @param suspend boolean value marking a resource as Suspended or Unsuspended
-     * @param auth    Authentication
+     * @param id          resource ID
+     * @param catalogueId catalogue ID
+     * @param suspend     boolean value marking a resource as Suspended or Unsuspended
+     * @param auth        Authentication
      * @return {@link T}
      */
-    T suspend(String id, boolean suspend, Authentication auth);
+    T suspend(String id, String catalogueId, boolean suspend, Authentication auth);
 
     /**
      * Audit the resource.
      *
-     * @param id         resource ID
-     * @param actionType Validate or Invalidate action
-     * @param auth       Authentication
+     * @param id          resource ID
+     * @param catalogueId catalogue ID
+     * @param actionType  Validate or Invalidate action
+     * @param auth        Authentication
      * @return {@link T}
      */
-    T audit(String id, String comment, LoggingInfo.ActionType actionType, Authentication auth);
+    T audit(String id, String catalogueId, String comment, LoggingInfo.ActionType actionType, Authentication auth);
 
     /**
      * Get the history of a resource.

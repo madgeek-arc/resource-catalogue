@@ -1,4 +1,4 @@
-<p>Dear Project Admins,</p>
+<p>Dear Project Admins of ${projectInstance},</p>
 <p>Daily inconsistency between Internal and Public instances of all Portal Resources:</p>
 <p>
     <#list logs as log>

@@ -18,26 +18,23 @@ package gr.uoa.di.madgik.resourcecatalogue.manager;
 
 import gr.uoa.di.madgik.catalogue.exception.ValidationException;
 import gr.uoa.di.madgik.registry.domain.Resource;
-import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.registry.service.SearchService;
 import gr.uoa.di.madgik.resourcecatalogue.domain.LoggingInfo;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Metadata;
 import gr.uoa.di.madgik.resourcecatalogue.domain.ResourceInteroperabilityRecordBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.ServiceBundle;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
-import gr.uoa.di.madgik.resourcecatalogue.utils.AuthenticationInfo;
-import gr.uoa.di.madgik.resourcecatalogue.utils.ObjectUtils;
-import gr.uoa.di.madgik.resourcecatalogue.utils.ProviderResourcesCommonMethods;
-import gr.uoa.di.madgik.resourcecatalogue.utils.ResourceValidationUtils;
+import gr.uoa.di.madgik.resourcecatalogue.utils.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.security.core.Authentication;
 
 import java.util.Comparator;
 import java.util.List;
 
 @org.springframework.stereotype.Service("resourceInteroperabilityRecordManager")
-public class ResourceInteroperabilityRecordManager extends ResourceManager<ResourceInteroperabilityRecordBundle>
+public class ResourceInteroperabilityRecordManager extends ResourceCatalogueManager<ResourceInteroperabilityRecordBundle>
         implements ResourceInteroperabilityRecordService {
 
     private static final Logger logger = LoggerFactory.getLogger(ResourceInteroperabilityRecordManager.class);
@@ -48,13 +45,14 @@ public class ResourceInteroperabilityRecordManager extends ResourceManager<Resou
     private final SecurityService securityService;
     private final ProviderResourcesCommonMethods commonMethods;
     private final IdCreator idCreator;
+    private final RelationshipValidator relationshipValidator;
 
     public ResourceInteroperabilityRecordManager(ServiceBundleService<ServiceBundle> serviceBundleService,
                                                  TrainingResourceService trainingResourceService,
                                                  InteroperabilityRecordService interoperabilityRecordService,
                                                  SecurityService securityService, ProviderResourcesCommonMethods commonMethods,
                                                  PublicResourceInteroperabilityRecordService publicResourceInteroperabilityRecordManager,
-                                                 IdCreator idCreator) {
+                                                 IdCreator idCreator, @Lazy RelationshipValidator relationshipValidator) {
         super(ResourceInteroperabilityRecordBundle.class);
         this.serviceBundleService = serviceBundleService;
         this.trainingResourceService = trainingResourceService;
@@ -63,6 +61,7 @@ public class ResourceInteroperabilityRecordManager extends ResourceManager<Resou
         this.commonMethods = commonMethods;
         this.publicResourceInteroperabilityRecordManager = publicResourceInteroperabilityRecordManager;
         this.idCreator = idCreator;
+        this.relationshipValidator = relationshipValidator;
     }
 
     @Override
@@ -97,9 +96,10 @@ public class ResourceInteroperabilityRecordManager extends ResourceManager<Resou
     @Override
     public ResourceInteroperabilityRecordBundle add(ResourceInteroperabilityRecordBundle bundle, String resourceType, Authentication auth) {
         validate(bundle, resourceType);
-        commonMethods.checkRelatedResourceIDsConsistency(bundle);
+        relationshipValidator.checkRelatedResourceIDsConsistency(bundle);
 
         bundle.setId(idCreator.generate(getResourceTypeName()));
+        commonMethods.createIdentifiers(bundle, getResourceTypeName(), false);
         logger.trace("Attempting to add a new ResourceInteroperabilityRecord: {}", bundle);
 
         bundle.setMetadata(Metadata.createMetadata(AuthenticationInfo.getFullName(auth), AuthenticationInfo.getEmail(auth).toLowerCase()));
@@ -117,17 +117,11 @@ public class ResourceInteroperabilityRecordManager extends ResourceManager<Resou
         return ret;
     }
 
-    @Override
-    public ResourceInteroperabilityRecordBundle get(String id, String catalogueId) {
-        Resource resource = getResource(id, catalogueId);
-        if (resource == null) {
-            throw new ResourceNotFoundException(String.format("Could not find Resource Interoperability Record with id: %s and catalogueId: %s", id, catalogueId));
-        }
-        return deserialize(resource);
-    }
-
     public ResourceInteroperabilityRecordBundle getWithResourceId(String resourceId) {
-        Resource res = where(false, new SearchService.KeyValue("resource_id", resourceId));
+        Resource res = where(false,
+                new SearchService.KeyValue("resource_id", resourceId),
+//                new SearchService.KeyValue("catalogue_id", resourceId), //TODO: enable when RIR from different catalogues is supported
+                new SearchService.KeyValue("published", "false"));
         return res != null ? deserialize(res) : null;
     }
 
@@ -136,13 +130,14 @@ public class ResourceInteroperabilityRecordManager extends ResourceManager<Resou
         logger.trace("Attempting to update the ResourceInteroperabilityRecord with id '{}'", bundle.getId());
 
         ResourceInteroperabilityRecordBundle ret = ObjectUtils.clone(bundle);
-        Resource existingResource = whereID(ret.getId(), true);
+        Resource existingResource = getResource(bundle.getId(),
+                bundle.getResourceInteroperabilityRecord().getCatalogueId(), false);
         ResourceInteroperabilityRecordBundle existingInteroperabilityRecord = deserialize(existingResource);
         // check if there are actual changes in the ResourceInteroperabilityRecord
         if (ret.getResourceInteroperabilityRecord().equals(existingInteroperabilityRecord.getResourceInteroperabilityRecord())) {
             return ret;
         }
-        commonMethods.checkRelatedResourceIDsConsistency(ret);
+        relationshipValidator.checkRelatedResourceIDsConsistency(ret);
 
         // block Public ResourceInteroperabilityRecordBundle updates
         if (ret.getMetadata().isPublished()) {
@@ -153,6 +148,7 @@ public class ResourceInteroperabilityRecordManager extends ResourceManager<Resou
         checkIfEachInteroperabilityRecordIsApproved(ret);
 
         ret.setMetadata(Metadata.updateMetadata(ret.getMetadata(), AuthenticationInfo.getFullName(auth), AuthenticationInfo.getEmail(auth).toLowerCase()));
+        ret.setIdentifiers(existingInteroperabilityRecord.getIdentifiers());
         List<LoggingInfo> loggingInfoList = commonMethods.returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(existingInteroperabilityRecord, auth);
         LoggingInfo loggingInfo = commonMethods.createLoggingInfo(auth, LoggingInfo.Types.UPDATE.getKey(),
                 LoggingInfo.ActionType.UPDATED.getKey());

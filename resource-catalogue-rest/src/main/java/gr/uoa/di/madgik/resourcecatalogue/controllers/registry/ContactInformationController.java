@@ -45,12 +45,12 @@ public class ContactInformationController {
     }
 
     @Operation(summary = "Returns a list of Catalogues and Providers the user has accepted his/her information transfer.")
-    @GetMapping(path = "getMy", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    @GetMapping(path = "getMy", produces = {MediaType.APPLICATION_JSON_VALUE})
     public List<String> getMy(@Parameter(hidden = true) Authentication authentication) {
         return contactInformationService.getMy(authentication);
     }
 
-    //    @PutMapping(path = "updateContactInfoTransfer", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    //    @PutMapping(path = "updateContactInfoTransfer", produces = {MediaType.APPLICATION_JSON_VALUE})
     public void updateContactInfoTransfer(@RequestParam boolean acceptedTransfer,
                                           @Parameter(hidden = true) Authentication authentication) {
         contactInformationService.updateContactInfoTransfer(acceptedTransfer, authentication);

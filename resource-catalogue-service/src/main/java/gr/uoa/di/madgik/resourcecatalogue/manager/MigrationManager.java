@@ -24,7 +24,6 @@ import gr.uoa.di.madgik.resourcecatalogue.service.MigrationService;
 import gr.uoa.di.madgik.resourcecatalogue.service.SecurityService;
 import gr.uoa.di.madgik.resourcecatalogue.utils.AuthenticationInfo;
 import gr.uoa.di.madgik.resourcecatalogue.utils.JmsService;
-import gr.uoa.di.madgik.resourcecatalogue.utils.PublicResourceUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -90,20 +89,19 @@ public class MigrationManager implements MigrationService {
         ProviderBundle providerBundle = providerService.get(catalogueId, providerId, authentication);
         providerBundle.getProvider().setCatalogueId(newCatalogueId);
 
-        Resource resource = providerService.getResource(providerBundle.getId(), catalogueId);
+        Resource resource = providerService.getResource(providerBundle.getId(), catalogueId, false);
         resource.setPayload(providerService.serialize(providerBundle));
         logger.debug("Migrating Provider: {} of Catalogue: {} to Catalogue: {}", providerBundle.getId(), catalogueId, newCatalogueId);
         resourceService.updateResource(resource);
 
         // Public Provider
         try {
-            ProviderBundle publicProviderBundle = providerService.get(catalogueId,
-                    PublicResourceUtils.createPublicResourceId(providerId, catalogueId), authentication);
-            String oldPublicId = publicProviderBundle.getProvider().getId();
-            publicProviderBundle.getProvider().setId(PublicResourceUtils.createPublicResourceId(providerId, newCatalogueId));
+            ProviderBundle publicProviderBundle = providerService.get(providerBundle.getIdentifiers().getPid(),
+                    providerBundle.getProvider().getCatalogueId(), true);
+            //TODO: does the public provider id need to change?
             publicProviderBundle.getProvider().setCatalogueId(newCatalogueId);
 
-            Resource publicResource = providerService.getResource(oldPublicId, catalogueId);
+            Resource publicResource = providerService.getResource(publicProviderBundle.getId(), catalogueId, true);
             publicResource.setPayload(providerService.serialize(publicProviderBundle));
             logger.info("Migrating Public Provider: {} from Catalogue: {} to Catalogue: {}", publicProviderBundle.getId(), catalogueId, newCatalogueId);
             resourceService.updateResource(publicResource);
@@ -135,7 +133,7 @@ public class MigrationManager implements MigrationService {
                 serviceBundle.getService().setId(id);
             }
             serviceBundle.getService().setCatalogueId(newCatalogueId);
-            Resource resource = serviceBundleManager.getResource(oldResourceId, catalogueId);
+            Resource resource = serviceBundleManager.getResource(oldResourceId, catalogueId, false);
             resource.setPayload(serviceBundleManager.serialize(serviceBundle));
             logger.debug("Migrating Service: {} of Catalogue: {} to Catalogue: {}", serviceBundle.getId(), catalogueId, newCatalogueId);
             resourceService.updateResource(resource);
@@ -160,7 +158,7 @@ public class MigrationManager implements MigrationService {
                 trainingResourceBundle.getTrainingResource().setId(id);
             }
             trainingResourceBundle.getTrainingResource().setCatalogueId(newCatalogueId);
-            Resource resource = trainingResourceManager.getResource(oldResourceId, catalogueId);
+            Resource resource = trainingResourceManager.getResource(oldResourceId, catalogueId, false);
             resource.setPayload(trainingResourceManager.serialize(trainingResourceBundle));
             logger.debug("Migrating Training Resource: {} of Catalogue: {} to Catalogue: {}", trainingResourceBundle.getId(), catalogueId, newCatalogueId);
             resourceService.updateResource(resource);
@@ -184,7 +182,7 @@ public class MigrationManager implements MigrationService {
                 interoperabilityRecordBundle.getInteroperabilityRecord().setId(id);
             }
             interoperabilityRecordBundle.getInteroperabilityRecord().setCatalogueId(newCatalogueId);
-            Resource resource = interoperabilityRecordManager.getResource(oldResourceId, catalogueId);
+            Resource resource = interoperabilityRecordManager.getResource(oldResourceId, catalogueId, false);
             resource.setPayload(interoperabilityRecordManager.serialize(interoperabilityRecordBundle));
             logger.debug("Migrating Interoperability Record: {} of Catalogue: {} to Catalogue: {}", interoperabilityRecordBundle.getId(), catalogueId, newCatalogueId);
             resourceService.updateResource(resource);
@@ -220,7 +218,7 @@ public class MigrationManager implements MigrationService {
                 entered = true;
             }
             if (entered) {
-                Resource resource = serviceBundleManager.getResource(serviceBundle.getId(), serviceBundle.getService().getCatalogueId());
+                Resource resource = serviceBundleManager.getResource(serviceBundle.getId(), serviceBundle.getService().getCatalogueId(), false);
                 resource.setPayload(serviceBundleManager.serialize(serviceBundle));
                 resourceService.updateResource(resource);
                 // update Public Service
@@ -233,19 +231,18 @@ public class MigrationManager implements MigrationService {
                     && trainingResourceBundle.getTrainingResource().getEoscRelatedServices().contains(oldResourceId)) {
                 trainingResourceBundle.getTrainingResource().getEoscRelatedServices().remove(oldResourceId);
                 trainingResourceBundle.getTrainingResource().getEoscRelatedServices().add(newResourceId);
-                Resource resource = trainingResourceManager.getResource(trainingResourceBundle.getId(), trainingResourceBundle.getTrainingResource().getCatalogueId());
+                Resource resource = trainingResourceManager.getResource(trainingResourceBundle.getId(), trainingResourceBundle.getTrainingResource().getCatalogueId(), false);
                 resource.setPayload(trainingResourceManager.serialize(trainingResourceBundle));
                 resourceService.updateResource(resource);
                 // update Public Training Resource
-                TrainingResourceBundle updatedTrainingResourceBundle = trainingResourceManager.get(newResourceId, catalogueId);
-                publicTrainingResourceManager.update(updatedTrainingResourceBundle, securityService.getAdminAccess());
+                publicTrainingResourceManager.update(trainingResourceBundle, securityService.getAdminAccess());
             }
         }
 
         for (DatasourceBundle datasourceBundle : allDatasourceBundles) {
             if (datasourceBundle.getDatasource().getServiceId().equals(oldResourceId)) {
                 datasourceBundle.getDatasource().setServiceId(newResourceId);
-                Resource resource = datasourceManager.getResource(datasourceBundle.getId());
+                Resource resource = datasourceManager.getResource(datasourceBundle.getId(), datasourceBundle.getDatasource().getCatalogueId(), false);
                 resource.setPayload(datasourceManager.serialize(datasourceBundle));
                 resourceService.updateResource(resource);
                 jmsService.convertAndSendTopic("datasource.update", datasourceBundle);
@@ -255,7 +252,8 @@ public class MigrationManager implements MigrationService {
         for (ResourceInteroperabilityRecordBundle resourceInteroperabilityRecordBundle : allResourceInteroperabilityRecords) {
             if (resourceInteroperabilityRecordBundle.getResourceInteroperabilityRecord().getResourceId().equals(oldResourceId)) {
                 resourceInteroperabilityRecordBundle.getResourceInteroperabilityRecord().setResourceId(newResourceId);
-                Resource resource = resourceInteroperabilityRecordManager.getResource(resourceInteroperabilityRecordBundle.getId());
+                Resource resource = resourceInteroperabilityRecordManager.getResource(resourceInteroperabilityRecordBundle.getId(),
+                        resourceInteroperabilityRecordBundle.getResourceInteroperabilityRecord().getCatalogueId(), false);
                 resource.setPayload(resourceInteroperabilityRecordManager.serialize(resourceInteroperabilityRecordBundle));
                 resourceService.updateResource(resource);
                 // update Public Resource Interoperability Record
@@ -266,7 +264,8 @@ public class MigrationManager implements MigrationService {
         for (HelpdeskBundle helpdeskBundle : allHelpdeskBundles) {
             if (helpdeskBundle.getHelpdesk().getServiceId().equals(oldResourceId)) {
                 helpdeskBundle.getHelpdesk().setServiceId(newResourceId);
-                Resource resource = helpdeskManager.getResource(helpdeskBundle.getId());
+                Resource resource = helpdeskManager.getResource(helpdeskBundle.getId(),
+                        helpdeskBundle.getHelpdesk().getCatalogueId(), false);
                 resource.setPayload(helpdeskManager.serialize(helpdeskBundle));
                 resourceService.updateResource(resource);
                 jmsService.convertAndSendTopic("helpdesk.update", helpdeskBundle);
@@ -276,7 +275,8 @@ public class MigrationManager implements MigrationService {
         for (MonitoringBundle monitoringBundle : allMonitoringBundles) {
             if (monitoringBundle.getMonitoring().getServiceId().equals(oldResourceId)) {
                 monitoringBundle.getMonitoring().setServiceId(newResourceId);
-                Resource resource = monitoringManager.getResource(monitoringBundle.getId());
+                Resource resource = monitoringManager.getResource(monitoringBundle.getId(),
+                        monitoringBundle.getMonitoring().getCatalogueId(), false);
                 resource.setPayload(monitoringManager.serialize(monitoringBundle));
                 resourceService.updateResource(resource);
                 jmsService.convertAndSendTopic("monitoring.update", monitoringBundle);

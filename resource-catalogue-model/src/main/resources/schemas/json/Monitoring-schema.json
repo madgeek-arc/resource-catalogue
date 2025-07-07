@@ -58,6 +58,9 @@
   },
   "type" : "object",
   "properties" : {
+    "catalogueId" : {
+      "type" : "string"
+    },
     "id" : {
       "type" : "string"
     },
@@ -69,6 +72,9 @@
       "items" : {
         "$ref" : "#/$defs/MonitoringGroup"
       }
+    },
+    "node" : {
+      "type" : "string"
     },
     "serviceId" : {
       "type" : "string"

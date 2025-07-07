@@ -44,6 +44,7 @@ import org.springframework.security.web.authentication.logout.LogoutSuccessHandl
 
 import java.util.*;
 
+@Profile("!no-auth")
 @Configuration
 public class SecurityConfig {
 
@@ -67,19 +68,6 @@ public class SecurityConfig {
         this.authoritiesMapper = authoritiesMapper;
     }
 
-    @Profile("no-auth")
-    @Bean
-    public SecurityFilterChain filterChainNoAuth(HttpSecurity http) throws Exception {
-        http
-                .authorizeRequests(authorizeRequests ->
-                        authorizeRequests.anyRequest().permitAll()
-                )
-                .cors(AbstractHttpConfigurer::disable)
-                .csrf(AbstractHttpConfigurer::disable);
-        return http.build();
-    }
-
-    @Profile("!no-auth")
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
@@ -140,21 +128,23 @@ public class SecurityConfig {
                     OidcIdToken idToken = oidcUserAuthority.getIdToken();
                     OidcUserInfo userInfo = oidcUserAuthority.getUserInfo();
 
-                    if (idToken != null && catalogueProperties.getAdmins().contains(idToken.getClaims().get("email"))) {
+                    if (idToken != null && (catalogueProperties.getAdmins().contains(idToken.getClaims().get("email"))
+                            || catalogueProperties.getOnboardingTeam().contains(idToken.getClaims().get("email")))) {
                         sub = idToken.getClaimAsString("sub");
                         email = idToken.getClaimAsString("email");
-                    } else if (userInfo != null && catalogueProperties.getAdmins().contains(userInfo.getEmail())) {
+                    } else if (userInfo != null && (catalogueProperties.getAdmins().contains(userInfo.getEmail())
+                            || catalogueProperties.getOnboardingTeam().contains(userInfo.getEmail()))) {
                         sub = userInfo.getSubject();
                         email = userInfo.getEmail();
                     } else {
                         if (((OidcUserAuthority) authority).getAttributes() != null
                                 && ((OidcUserAuthority) authority).getAttributes().containsKey("email")
-                                && (catalogueProperties.getAdmins().contains(((OidcUserAuthority) authority).getAttributes().get("email")))) {
+                                && (catalogueProperties.getAdmins().contains(((OidcUserAuthority) authority).getAttributes().get("email"))
+                                || catalogueProperties.getOnboardingTeam().contains(((OidcUserAuthority) authority).getAttributes().get("email")))) {
                             sub = ((OidcUserAuthority) authority).getAttributes().get("sub").toString();
                             email = ((OidcUserAuthority) authority).getAttributes().get("email").toString();
                         }
                     }
-                    mappedAuthorities.add(new SimpleGrantedAuthority("ROLE_USER"));
                     mappedAuthorities.addAll(authoritiesMapper.getAuthorities(email));
                     logger.info("User '{}' with email '{}' mapped as '{}'", sub, email, mappedAuthorities);
 
@@ -165,11 +155,11 @@ public class SecurityConfig {
                     OAuth2UserAuthority oauth2UserAuthority = (OAuth2UserAuthority) authority;
                     Map<String, Object> userAttributes = oauth2UserAuthority.getAttributes();
 
-                    if (userAttributes != null && catalogueProperties.getAdmins().contains(userAttributes.get("email"))) {
+                    if (userAttributes != null && (catalogueProperties.getAdmins().contains(userAttributes.get("email"))
+                            || catalogueProperties.getOnboardingTeam().contains(userAttributes.get("email")))) {
                         sub = userAttributes.get("sub").toString();
                         email = userAttributes.get("email").toString();
                     }
-                    mappedAuthorities.add(new SimpleGrantedAuthority("ROLE_USER"));
                     mappedAuthorities.addAll(authoritiesMapper.getAuthorities(email));
                     logger.info("User '{}' with email '{}' mapped as '{}'", sub, email, mappedAuthorities);
 

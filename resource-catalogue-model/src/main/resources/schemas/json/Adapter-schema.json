@@ -1,0 +1,100 @@
+{
+  "$schema" : "https://json-schema.org/draft/2020-12/schema",
+  "$defs" : {
+    "LinkedResource" : {
+      "type" : "object",
+      "properties" : {
+        "id" : {
+          "type" : "string"
+        },
+        "type" : {
+          "type" : "string"
+        }
+      },
+      "additionalProperties" : false
+    },
+    "User" : {
+      "type" : "object",
+      "properties" : {
+        "email" : {
+          "type" : "string"
+        },
+        "id" : {
+          "type" : "string"
+        },
+        "name" : {
+          "type" : "string"
+        },
+        "surname" : {
+          "type" : "string"
+        }
+      },
+      "additionalProperties" : false
+    }
+  },
+  "type" : "object",
+  "properties" : {
+    "admins" : {
+      "type" : "array",
+      "items" : {
+        "$ref" : "#/$defs/User"
+      }
+    },
+    "catalogueId" : {
+      "type" : "string"
+    },
+    "changeLog" : {
+      "type" : "string"
+    },
+    "description" : {
+      "type" : "string"
+    },
+    "documentation" : {
+      "type" : "string",
+      "format" : "uri"
+    },
+    "id" : {
+      "type" : "string"
+    },
+    "lastUpdate" : {
+      "type" : "string",
+      "format" : "date-time"
+    },
+    "license" : {
+      "type" : "string"
+    },
+    "linkedResource" : {
+      "$ref" : "#/$defs/LinkedResource"
+    },
+    "logo" : {
+      "type" : "string"
+    },
+    "name" : {
+      "type" : "string"
+    },
+    "node" : {
+      "type" : "string"
+    },
+    "programmingLanguage" : {
+      "type" : "string"
+    },
+    "releases" : {
+      "type" : "array",
+      "items" : {
+        "type" : "string",
+        "format" : "uri"
+      }
+    },
+    "repository" : {
+      "type" : "string",
+      "format" : "uri"
+    },
+    "tagline" : {
+      "type" : "string"
+    },
+    "version" : {
+      "type" : "string"
+    }
+  },
+  "additionalProperties" : false
+}

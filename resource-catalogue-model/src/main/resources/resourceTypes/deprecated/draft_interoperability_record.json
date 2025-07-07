@@ -23,6 +23,13 @@
       "type": "java.lang.String"
     },
     {
+      "label": "Node",
+      "multivalued": false,
+      "name": "node",
+      "path": "$.interoperabilityRecord.node",
+      "type": "java.lang.String"
+    },
+    {
       "label": "Title",
       "multivalued": false,
       "name": "title",

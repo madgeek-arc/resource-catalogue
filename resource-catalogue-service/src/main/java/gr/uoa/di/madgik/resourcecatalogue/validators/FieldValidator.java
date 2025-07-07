@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright 2017-2025 OpenAIRE AMKE & Athena Research and Innovation Center
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -52,6 +52,7 @@ public class FieldValidator {
     private final TrainingResourceService trainingResourceService;
     private final CatalogueService catalogueService;
     private final InteroperabilityRecordService interoperabilityRecordService;
+    private final AdapterService adapterService;
 
     private static final String MANDATORY_FIELD = "Field '%s' is mandatory.";
     private static final String NULL_OBJECT = "Attempt to validate null object..";
@@ -63,13 +64,15 @@ public class FieldValidator {
                           @Lazy ServiceBundleService<ServiceBundle> serviceBundleService,
                           @Lazy TrainingResourceService trainingResourceService,
                           @Lazy CatalogueService catalogueService,
-                          @Lazy InteroperabilityRecordService interoperabilityRecordService) {
+                          @Lazy InteroperabilityRecordService interoperabilityRecordService,
+                          @Lazy AdapterService adapterService) {
         this.vocabularyService = vocabularyService;
         this.providerService = providerService;
         this.serviceBundleService = serviceBundleService;
         this.catalogueService = catalogueService;
         this.interoperabilityRecordService = interoperabilityRecordService;
         this.trainingResourceService = trainingResourceService;
+        this.adapterService = adapterService;
     }
 
     private String getCurrentLocation() {
@@ -301,6 +304,26 @@ public class FieldValidator {
                 for (Object entry : ((Collection) o)) {
                     validateIds(field, entry, annotation);
                 }
+            } else if (annotation.idClasses().length > 0) { //TODO: revit the way we validate for linkedResources
+                LinkedResource linkedResource = (LinkedResource) o;
+                boolean found = false;
+                Class<?>[] classes = annotation.idClasses();
+                List<String> classSimpleNames = new ArrayList<>();
+                classSimpleNames.add("Guideline");
+                for (Class<?> clazz : classes) {
+                    classSimpleNames.add(clazz.getSimpleName());
+                }
+                for (String classSimpleName : classSimpleNames) {
+                    found = getResource(classSimpleName, linkedResource.getId());
+                    if (found) {
+                        break;
+                    }
+                }
+                if (!found) {
+                    throw new ValidationException(
+                            String.format("Field '%s' should ONLY contain the ID of an existing resource from " +
+                                    "'[Guideline, Service]'", field.getName()));
+                }
             } else if (String.class.equals(o.getClass())) {
                 try {
                     if (annotation.containsResourceId()) {
@@ -401,5 +424,14 @@ public class FieldValidator {
                 }
             }
         }
+    }
+
+    private boolean getResource(String className, Object o) {
+        return switch (className) {
+            case "Service" -> serviceBundleService.getOrElseReturnNull(o.toString()) != null;
+            case "TrainingResource" -> trainingResourceService.getOrElseReturnNull(o.toString()) != null;
+            case "InteroperabilityRecord", "Guideline" -> interoperabilityRecordService.getOrElseReturnNull(o.toString()) != null;
+            default -> false;
+        };
     }
 }

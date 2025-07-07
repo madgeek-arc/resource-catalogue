@@ -4,99 +4,50 @@
       "label": null,
       "multivalued": false,
       "name": "resource_internal_id",
-      "path": "$.trainingResource.id",
+      "path": "$.adapter.id",
       "primaryKey": true,
       "type": "java.lang.String"
     },
     {
-      "label": "Title",
+      "label": "Adapter Name",
       "multivalued": false,
-      "name": "title",
-      "path": "$.trainingResource.title",
-      "type": "java.lang.String"
-    },
-    {
-      "label": "Resource Organisation",
-      "multivalued": false,
-      "name": "resource_organisation",
-      "path": "$.trainingResource.resourceOrganisation",
-      "type": "java.lang.String"
-    },
-    {
-      "label": "Resource Provider",
-      "multivalued": true,
-      "name": "resource_providers",
-      "path": "$.trainingResource.resourceProviders[*]",
-      "type": "java.lang.String"
-    },
-    {
-      "label": "Alternative Identifier Value",
-      "multivalued": true,
-      "name": "alternative_identifiers_values",
-      "path": "$.trainingResource.alternativeIdentifiers[*].value",
-      "type": "java.lang.String"
-    },
-    {
-      "label": "Author",
-      "multivalued": true,
-      "name": "authors",
-      "path": "$.trainingResource.authors[*]",
-      "type": "java.lang.String"
-    },
-    {
-      "label": "EOSC Related Service",
-      "multivalued": true,
-      "name": "eosc_related_services",
-      "path": "$.trainingResource.eoscRelatedServices[*]",
-      "type": "java.lang.String"
-    },
-    {
-      "label": "Keyword",
-      "multivalued": true,
-      "name": "keywords",
-      "path": "$.trainingResource.keywords[*]",
-      "type": "java.lang.String"
-    },
-    {
-      "label": "Target Group",
-      "multivalued": true,
-      "name": "target_groups",
-      "path": "$.trainingResource.targetGroups[*]",
-      "type": "java.lang.String"
-    },
-    {
-      "label": "Language",
-      "multivalued": true,
-      "name": "languages",
-      "path": "$.trainingResource.languages[*]",
-      "type": "java.lang.String"
-    },
-    {
-      "label": "Geographical Availability",
-      "multivalued": true,
-      "name": "geographical_availabilities",
-      "path": "$.trainingResource.geographicalAvailabilities[*]",
-      "type": "java.lang.String"
-    },
-    {
-      "label": "Scientific Domain",
-      "multivalued": true,
-      "name": "scientific_domains",
-      "path": "$.trainingResource.scientificDomains[*]",
-      "type": "java.lang.String"
-    },
-    {
-      "label": "Scientific Subdomain",
-      "multivalued": true,
-      "name": "scientific_subdomains",
-      "path": "$.trainingResource.scientificDomains[*].scientificSubdomain",
+      "name": "name",
+      "path": "$.adapter.name",
       "type": "java.lang.String"
     },
     {
       "label": "Catalogue ID",
       "multivalued": false,
       "name": "catalogue_id",
-      "path": "$.trainingResource.catalogueId",
+      "path": "$.adapter.catalogueId",
+      "type": "java.lang.String"
+    },
+    {
+      "label": "Node",
+      "multivalued": false,
+      "name": "node",
+      "path": "$.adapter.node",
+      "type": "java.lang.String"
+    },
+    {
+      "label": "Linked Resource ID",
+      "multivalued": false,
+      "name": "linked_resource_id",
+      "path": "$.adapter.linkedResource.id",
+      "type": "java.lang.String"
+    },
+    {
+      "label": "Linked Resource Type",
+      "multivalued": false,
+      "name": "linked_resource_type",
+      "path": "$.adapter.linkedResource.type",
+      "type": "java.lang.String"
+    },
+    {
+      "label": null,
+      "multivalued": true,
+      "name": "admins",
+      "path": "$.adapter.admins[*].email",
       "type": "java.lang.String"
     },
     {
@@ -130,16 +81,31 @@
     {
       "label": null,
       "multivalued": false,
-      "name": "published",
-      "path": "$.metadata.published",
+      "name": "originalId",
+      "path": "$.identifiers.originalId",
+      "type": "java.lang.String"
+    },
+    {
+      "label": null,
+      "multivalued": false,
+      "name": "status",
+      "path": "$.status",
+      "type": "java.lang.String"
+    },
+    {
+      "defaultValue": "false",
+      "label": null,
+      "multivalued": false,
+      "name": "active",
+      "path": "$.active",
       "type": "java.lang.Boolean"
     },
     {
       "label": null,
       "multivalued": false,
-      "name": "originalId",
-      "path": "$.identifiers.originalId",
-      "type": "java.lang.String"
+      "name": "published",
+      "path": "$.metadata.published",
+      "type": "java.lang.Boolean"
     },
     {
       "label": null,
@@ -229,32 +195,9 @@
       "defaultValue": "false",
       "label": null,
       "multivalued": false,
-      "name": "active",
-      "path": "$.active",
-      "type": "java.lang.Boolean"
-    },
-    {
-      "defaultValue": "false",
-      "label": null,
-      "multivalued": false,
       "name": "suspended",
       "path": "$.suspended",
       "type": "java.lang.Boolean"
-    },
-    {
-      "defaultValue": "true",
-      "label": null,
-      "multivalued": false,
-      "name": "draft",
-      "path": "$.draft",
-      "type": "java.lang.Boolean"
-    },
-    {
-      "label": null,
-      "multivalued": false,
-      "name": "status",
-      "path": "$.status",
-      "type": "java.lang.String"
     },
     {
       "label": null,
@@ -266,13 +209,12 @@
   ],
   "indexMapperClass": "gr.uoa.di.madgik.registry.index.DefaultIndexMapper",
   "aliases": [
-    "resourceTypes",
-    "trainings"
+    "resourceTypes"
   ],
-  "name": "draft_training_resource",
+  "name": "adapter",
   "payloadType": "json",
   "properties": {
-    "class": "gr.uoa.di.madgik.resourcecatalogue.domain.TrainingResourceBundle"
+    "class": "gr.uoa.di.madgik.resourcecatalogue.domain.AdapterBundle"
   },
   "schema": "{\n\t\"$schema\": \"https://json-schema.org/draft/2019-09/schema\"\n}"
 }

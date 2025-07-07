@@ -100,6 +100,10 @@ public class SecureResponseAdvice<T> implements ResponseBodyAdvice<T> {
             modifyTrainingResource(t, auth);
         } else if (t instanceof InteroperabilityRecordBundle) {
             modifyInteroperabilityRecordBundle(t, auth);
+        } else if (t instanceof AdapterBundle) {
+            modifyAdapterBundle(t, auth);
+        } else if (t instanceof Adapter) {
+            modifyAdapter(t, auth);
         } else if (t instanceof LoggingInfo) {
             modifyLoggingInfo(t);
         }
@@ -196,6 +200,25 @@ public class SecureResponseAdvice<T> implements ResponseBodyAdvice<T> {
             ((CatalogueBundle) bundle).getCatalogue().setMainContact(null);
             ((CatalogueBundle) bundle).getCatalogue().setUsers(null);
             ((CatalogueBundle) bundle).getMetadata().setTerms(null);
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private void modifyAdapter(T adapter, Authentication auth) {
+        if (!this.securityService.hasAdapterAccess(auth, ((Adapter) adapter).getId())) {
+            ((Adapter) adapter).setAdmins(null);
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private void modifyAdapterBundle(T bundle, Authentication auth) {
+        modifyLoggingInfoList((T) ((AdapterBundle) bundle).getLoggingInfo());
+        modifyLoggingInfo((T) ((AdapterBundle) bundle).getLatestAuditInfo());
+        modifyLoggingInfo((T) ((AdapterBundle) bundle).getLatestUpdateInfo());
+        modifyLoggingInfo((T) ((AdapterBundle) bundle).getLatestOnboardingInfo());
+
+        if (!this.securityService.hasAdapterAccess(auth, ((AdapterBundle) bundle).getId())) {
+            ((AdapterBundle) bundle).getMetadata().setTerms(null);
         }
     }
 

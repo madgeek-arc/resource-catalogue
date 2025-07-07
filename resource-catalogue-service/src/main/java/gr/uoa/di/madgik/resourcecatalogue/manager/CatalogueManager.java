@@ -95,8 +95,7 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
     public CatalogueBundle get(String id) {
         CatalogueBundle catalogue = super.get(id);
         if (catalogue == null) {
-            throw new ResourceNotFoundException(
-                    String.format("Could not find catalogue with id: %s", id));
+            throw new ResourceNotFoundException(id, "Catalogue");
         }
         return catalogue;
     }
@@ -320,29 +319,43 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
     }
 
     @Override
-    public boolean hasAdminAcceptedTerms(String catalogueId, Authentication auth) {
-        CatalogueBundle catalogueBundle = get(catalogueId);
-        List<String> userList = new ArrayList<>();
-        for (User user : catalogueBundle.getCatalogue().getUsers()) {
-            userList.add(user.getEmail().toLowerCase());
+    public boolean hasAdminAcceptedTerms(String id, Authentication auth) {
+        CatalogueBundle bundle = get(id);
+        String userEmail = AuthenticationInfo.getEmail(auth).toLowerCase();
+
+        List<String> catalogueAdmins = bundle.getCatalogue().getUsers().stream()
+                .map(user -> user.getEmail().toLowerCase())
+                .toList();
+
+        List<String> acceptedTerms = bundle.getMetadata().getTerms();
+
+        if (acceptedTerms == null || acceptedTerms.isEmpty()) {
+            return !catalogueAdmins.contains(userEmail); // false -> show modal, true -> no modal
         }
-        if ((catalogueBundle.getMetadata().getTerms() == null || catalogueBundle.getMetadata().getTerms().isEmpty())) {
-            if (userList.contains(AuthenticationInfo.getEmail(auth).toLowerCase())) {
-                return false; //pop-up modal
-            } else {
-                return true; //no modal
-            }
+
+        if (catalogueAdmins.contains(userEmail) && !acceptedTerms.contains(userEmail)) {
+            return false; // Show modal
         }
-        if (!catalogueBundle.getMetadata().getTerms().contains(AuthenticationInfo.getEmail(auth).toLowerCase()) &&
-                userList.contains(AuthenticationInfo.getEmail(auth).toLowerCase())) {
-            return false; // pop-up modal
-        }
-        return true; // no modal
+        return true; // No modal
     }
 
     @Override
-    public void adminAcceptedTerms(String catalogueId, Authentication auth) {
-        update(get(catalogueId), auth);
+    public void adminAcceptedTerms(String id, Authentication auth) {
+        CatalogueBundle bundle = get(id);
+        String userEmail = AuthenticationInfo.getEmail(auth);
+        List<String> existingTerms = bundle.getMetadata().getTerms();
+        if (existingTerms == null) {
+            existingTerms = new ArrayList<>();
+        }
+        if (!existingTerms.contains(userEmail)) {
+            existingTerms.add(userEmail);
+            bundle.getMetadata().setTerms(existingTerms);
+            try {
+                update(bundle, auth);
+            } catch (ResourceNotFoundException e) {
+                logger.info("Could not update terms for Provider with id: '{}'", id);
+            }
+        }
     }
 
     @Override
@@ -416,7 +429,7 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
         return super.update(catalogue, auth);
     }
 
-    public CatalogueBundle suspend(String id, boolean suspend, Authentication auth) {
+    public CatalogueBundle suspend(String id, String catalogueId, boolean suspend, Authentication auth) {
         CatalogueBundle catalogueBundle = get(id, auth);
 
         // Suspend Catalogue
@@ -428,14 +441,14 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
 
         if (providers != null && !providers.isEmpty()) {
             for (ProviderBundle providerBundle : providers) {
-                providerService.suspend(providerBundle.getId(), suspend, auth);
+                providerService.suspend(providerBundle.getId(), id, suspend, auth);
             }
         }
 
         return catalogueBundle;
     }
 
-    public CatalogueBundle audit(String id, String comment, LoggingInfo.ActionType actionType, Authentication auth) {
+    public CatalogueBundle audit(String id, String catalogueId, String comment, LoggingInfo.ActionType actionType, Authentication auth) {
         CatalogueBundle catalogue = get(id);
         commonMethods.auditResource(catalogue, comment, actionType, auth);
         if (actionType.getKey().equals(LoggingInfo.ActionType.VALID.getKey())) {

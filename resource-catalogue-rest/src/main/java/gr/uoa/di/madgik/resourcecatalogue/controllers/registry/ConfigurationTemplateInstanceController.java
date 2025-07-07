@@ -53,7 +53,7 @@ public class ConfigurationTemplateInstanceController {
     }
 
     @Operation(summary = "Returns the Configuration Template Instance with the given id.")
-    @GetMapping(path = "{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    @GetMapping(path = "{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<ConfigurationTemplateInstanceDto> get(@Parameter(description = "The left part of the ID before the '/'")
                                                                 @PathVariable("prefix") String prefix,
                                                                 @Parameter(description = "The right part of the ID after the '/'")
@@ -66,7 +66,7 @@ public class ConfigurationTemplateInstanceController {
 
     @BrowseParameters
     @Operation(summary = "Get a list of all Configuration Template Instances in the Portal.")
-    @GetMapping(path = "all", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    @GetMapping(path = "all", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<Paging<ConfigurationTemplateInstanceDto>> getAll(@Parameter(hidden = true)
                                                                            @RequestParam MultiValueMap<String, Object> params,
                                                                            @Parameter(hidden = true) Authentication auth) {
@@ -86,7 +86,7 @@ public class ConfigurationTemplateInstanceController {
     }
 
     @Operation(summary = "Returns a list of all Configuration Template Instances associated with the given 'resourceId'.")
-    @GetMapping(path = "getAllByResourceId/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    @GetMapping(path = "getAllByResourceId/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<List<ConfigurationTemplateInstanceDto>> getCTIByResourceId(@Parameter(description = "The left part of the ID before the '/'")
                                                                                      @PathVariable("prefix") String prefix,
                                                                                      @Parameter(description = "The right part of the ID after the '/'")
@@ -101,7 +101,7 @@ public class ConfigurationTemplateInstanceController {
     }
 
     @Operation(summary = "Returns a list of all Configuration Template Instances associated with the given 'configurationTemplateId'.")
-    @GetMapping(path = "getAllByConfigurationTemplateId/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    @GetMapping(path = "getAllByConfigurationTemplateId/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<List<ConfigurationTemplateInstanceDto>> getCTIByConfigurationTemplateId(@Parameter(description = "The left part of the ID before the '/'")
                                                                                                   @PathVariable("prefix") String prefix,
                                                                                                   @Parameter(description = "The right part of the ID after the '/'")

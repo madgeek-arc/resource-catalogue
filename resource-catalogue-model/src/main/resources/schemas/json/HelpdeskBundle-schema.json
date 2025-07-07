@@ -6,6 +6,9 @@
       "properties" : {
         "originalId" : {
           "type" : "string"
+        },
+        "pid" : {
+          "type" : "string"
         }
       },
       "additionalProperties" : false
@@ -93,9 +96,6 @@
   "properties" : {
     "active" : {
       "type" : "boolean"
-    },
-    "catalogueId" : {
-      "type" : "string"
     },
     "draft" : {
       "type" : "boolean"

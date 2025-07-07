@@ -24,7 +24,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.NestedConfigurationProperty;
+import org.springframework.context.annotation.Primary;
 import org.springframework.context.event.EventListener;
+import org.springframework.stereotype.Component;
 import org.springframework.validation.annotation.Validated;
 
 import java.util.Arrays;
@@ -106,16 +108,24 @@ public class CatalogueProperties {
     public CatalogueProperties() {
     }
 
-    //TODO: enable specific or all property changes and reloads
     @EventListener
     public void onPropertyChange(PropertyChangeEvent event) {
-        if ("CATALOGUE_ADMINS".equals(event.getPropertyName())) {
+        if ("catalogue.admins".equals(event.getPropertyName())) {
             String newAdmins = event.getNewValue();
             if (newAdmins != null) {
                 setAdmins(Arrays.stream(newAdmins.split(","))
                         .map(String::trim)
                         .collect(Collectors.toSet()));
                 logger.info("Admins updated to: {}", this.admins);
+            }
+        }
+        if ("catalogue.onboarding-team".equals(event.getPropertyName())) {
+            String newOnboardingTeam = event.getNewValue();
+            if (newOnboardingTeam != null) {
+                setOnboardingTeam(Arrays.stream(newOnboardingTeam.split(","))
+                        .map(String::trim)
+                        .collect(Collectors.toSet()));
+                logger.info("Onboarding Team updated to: {}", this.onboardingTeam);
             }
         }
     }

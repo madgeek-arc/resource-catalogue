@@ -23,14 +23,14 @@ import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.registry.service.ResourceCRUDService;
 import gr.uoa.di.madgik.registry.service.VersionService;
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
-import gr.uoa.di.madgik.resourcecatalogue.dto.ExtendedValue;
+import gr.uoa.di.madgik.resourcecatalogue.dto.CatalogueValue;
 import gr.uoa.di.madgik.resourcecatalogue.dto.MapValues;
+import gr.uoa.di.madgik.resourcecatalogue.exceptions.CatalogueResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
 import gr.uoa.di.madgik.resourcecatalogue.utils.Auditable;
 import gr.uoa.di.madgik.resourcecatalogue.utils.AuthenticationInfo;
 import gr.uoa.di.madgik.resourcecatalogue.utils.ObjectUtils;
 import gr.uoa.di.madgik.resourcecatalogue.utils.ProviderResourcesCommonMethods;
-import gr.uoa.di.madgik.resourcecatalogue.validators.FieldValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -50,19 +50,18 @@ import static gr.uoa.di.madgik.resourcecatalogue.utils.VocabularyValidationUtils
 import static gr.uoa.di.madgik.resourcecatalogue.utils.VocabularyValidationUtils.validateScientificDomains;
 
 @org.springframework.stereotype.Service("providerManager")
-public class ProviderManager extends ResourceManager<ProviderBundle> implements ProviderService {
+public class ProviderManager extends ResourceCatalogueManager<ProviderBundle> implements ProviderService {
 
-    private static final Logger logger = LoggerFactory.getLogger(ProviderManager.class);
-    private final DraftResourceService<ProviderBundle> draftProviderService;
+    private static final
+    Logger logger = LoggerFactory.getLogger(ProviderManager.class);
     private final ServiceBundleService<ServiceBundle> serviceBundleService;
     private final TrainingResourceService trainingResourceService;
     private final InteroperabilityRecordService interoperabilityRecordService;
     private final PublicServiceService publicServiceManager;
-    private final PublicProviderManager publicProviderManager;
+    private final PublicProviderService publicProviderService;
     private final PublicTrainingResourceService publicTrainingResourceManager;
     private final PublicInteroperabilityRecordService publicInteroperabilityRecordManager;
     private final SecurityService securityService;
-    private final FieldValidator fieldValidator;
     private final IdCreator idCreator;
     private final EventService eventService;
     private final RegistrationMailService registrationMailService;
@@ -75,26 +74,23 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     @Value("${catalogue.id}")
     private String catalogueId;
 
-    public ProviderManager(@Lazy DraftResourceService<ProviderBundle> draftProviderService,
-                           @Lazy ServiceBundleService<ServiceBundle> serviceBundleService,
-                           @Lazy SecurityService securityService, @Lazy FieldValidator fieldValidator,
+    public ProviderManager(@Lazy ServiceBundleService<ServiceBundle> serviceBundleService,
+                           @Lazy SecurityService securityService,
                            @Lazy RegistrationMailService registrationMailService, IdCreator idCreator,
                            EventService eventService, VersionService versionService,
                            VocabularyService vocabularyService,
                            @Qualifier("providerSync") SynchronizerService<Provider> synchronizerService,
-                           ProviderResourcesCommonMethods commonMethods,
+                           @Lazy ProviderResourcesCommonMethods commonMethods,
                            CatalogueService catalogueService,
                            @Lazy PublicServiceService publicServiceManager,
-                           @Lazy PublicProviderManager publicProviderManager,
+                           @Lazy PublicProviderService publicProviderService,
                            @Lazy TrainingResourceService trainingResourceService,
                            @Lazy InteroperabilityRecordService interoperabilityRecordService,
                            @Lazy PublicTrainingResourceService publicTrainingResourceManager,
                            @Lazy PublicInteroperabilityRecordService publicInteroperabilityRecordManager) {
         super(ProviderBundle.class);
-        this.draftProviderService = draftProviderService;
         this.serviceBundleService = serviceBundleService;
         this.securityService = securityService;
-        this.fieldValidator = fieldValidator;
         this.idCreator = idCreator;
         this.eventService = eventService;
         this.registrationMailService = registrationMailService;
@@ -104,7 +100,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         this.commonMethods = commonMethods;
         this.catalogueService = catalogueService;
         this.publicServiceManager = publicServiceManager;
-        this.publicProviderManager = publicProviderManager;
+        this.publicProviderService = publicProviderService;
         this.trainingResourceService = trainingResourceService;
         this.interoperabilityRecordService = interoperabilityRecordService;
         this.publicTrainingResourceManager = publicTrainingResourceManager;
@@ -127,14 +123,6 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         logger.trace("Attempting to add a new Provider: {} on Catalogue: '{}'", provider, catalogueId);
 
         provider = onboard(provider, catalogueId, auth);
-
-        provider.setId(idCreator.generate(getResourceTypeName()));
-
-        // register and ensure Resource Catalogue's PID uniqueness
-        commonMethods.determineResourceAndCreateAlternativeIdentifierForPID(provider, getResourceTypeName());
-        provider.getProvider().setAlternativeIdentifiers(commonMethods.ensureResourceCataloguePidUniqueness(provider.getId(),
-                provider.getProvider().getCatalogueId(),
-                provider.getProvider().getAlternativeIdentifiers()));
 
         commonMethods.addAuthenticatedUser(provider.getProvider(), auth);
         validate(provider);
@@ -161,7 +149,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         logger.trace("Attempting to update the Provider with id '{}' of the Catalogue '{}'", providerBundle, providerBundle.getProvider().getCatalogueId());
 
         ProviderBundle ret = ObjectUtils.clone(providerBundle);
-        Resource existingResource = getResource(ret.getId(), ret.getProvider().getCatalogueId());
+        Resource existingResource = getResource(ret.getId(), ret.getProvider().getCatalogueId(), false);
         ProviderBundle existingProvider = deserialize(existingResource);
         // check if there are actual changes in the Provider
         if (ret.getTemplateStatus().equals(existingProvider.getTemplateStatus()) && ret.getProvider().equals(existingProvider.getProvider())) {
@@ -174,16 +162,6 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
             ret.getProvider().setCatalogueId(this.catalogueId);
         } else {
             commonMethods.checkCatalogueIdConsistency(ret, catalogueId);
-        }
-
-        // ensure Resource Catalogue's PID uniqueness
-        if (ret.getProvider().getAlternativeIdentifiers() == null ||
-                ret.getProvider().getAlternativeIdentifiers().isEmpty()) {
-            commonMethods.determineResourceAndCreateAlternativeIdentifierForPID(ret, getResourceTypeName());
-        } else {
-            ret.getProvider().setAlternativeIdentifiers(commonMethods.ensureResourceCataloguePidUniqueness(ret.getId(),
-                    ret.getProvider().getCatalogueId(),
-                    ret.getProvider().getAlternativeIdentifiers()));
         }
 
         // block Public Provider update
@@ -208,6 +186,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         if (!securityService.hasRole(auth, "ROLE_ADMIN") && !existingProvider.getProvider().getCatalogueId().equals(ret.getProvider().getCatalogueId())) {
             throw new ValidationException("You cannot change catalogueId");
         }
+        ret.setIdentifiers(existingProvider.getIdentifiers());
         ret.setActive(existingProvider.isActive());
         ret.setStatus(existingProvider.getStatus());
         ret.setSuspended(existingProvider.isSuspended());
@@ -244,9 +223,10 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
      * @return
      */
     private ProviderBundle getWithCatalogue(String id, String catalogueId) {
-        Resource resource = getResource(id, catalogueId);
+        Resource resource = getResource(id, catalogueId, false);
         if (resource == null) {
-            throw new gr.uoa.di.madgik.registry.exception.ResourceNotFoundException(String.format("Could not find provider with id: %s and catalogueId: %s", id, catalogueId));
+            throw new CatalogueResourceNotFoundException(String.format(
+                    "Could not find provider with id: %s and catalogueId: %s", id, catalogueId));
         }
         return deserialize(resource);
     }
@@ -255,7 +235,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         ProviderBundle providerBundle = getWithCatalogue(providerId, catalogueId);
         CatalogueBundle catalogueBundle = catalogueService.get(catalogueId);
         if (catalogueBundle == null) {
-            throw new gr.uoa.di.madgik.registry.exception.ResourceNotFoundException(
+            throw new CatalogueResourceNotFoundException(
                     String.format("Could not find catalogue with id: %s", catalogueId));
         }
         if (!providerBundle.getProvider().getCatalogueId().equals(catalogueId)) {
@@ -299,7 +279,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     public Paging<ResourceHistory> getHistory(String id, String catalogueId) {
         Map<String, ResourceHistory> historyMap = new TreeMap<>();
 
-        Resource resource = getResource(id, catalogueId);
+        Resource resource = getResource(id, catalogueId, false);
         List<Version> versions = versionService.getVersionsByResource(resource.getId());
         versions.sort((version, t1) -> {
             if (version.getCreationDate().getTime() < t1.getCreationDate().getTime()) {
@@ -436,7 +416,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     }
 
     private void deleteBundle(ProviderBundle providerBundle) {
-        Resource existingResource = getResource(providerBundle.getId(), providerBundle.getProvider().getCatalogueId());
+        Resource existingResource = getResource(providerBundle.getId(), providerBundle.getProvider().getCatalogueId(), false);
         ProviderBundle existingProvider = deserialize(existingResource);
 
         // block Public Provider update
@@ -456,8 +436,8 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
             throw new ValidationException(String.format("Vocabulary %s does not consist a Provider State!", status));
         }
         logger.trace("verifyProvider with id: '{}' | status: '{}' | active: '{}'", id, status, active);
-        ProviderBundle provider = get(id, auth);
-        Resource existingResource = getResource(provider.getId(), provider.getProvider().getCatalogueId());
+        ProviderBundle provider = get(id, catalogueId, false);
+        Resource existingResource = getResource(provider.getId(), provider.getProvider().getCatalogueId(), false);
         ProviderBundle existingProvider = deserialize(existingResource);
 
         existingProvider.setStatus(vocabularyService.get(status).getId());
@@ -500,8 +480,8 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
 
     @Override
     public ProviderBundle publish(String id, Boolean active, Authentication auth) {
-        ProviderBundle provider = get(id);
-        Resource existingResource = getResource(provider.getId(), provider.getProvider().getCatalogueId());
+        ProviderBundle provider = getWithCatalogue(id, catalogueId);
+        Resource existingResource = getResource(provider.getId(), provider.getProvider().getCatalogueId(), false);
         ProviderBundle existingProvider = deserialize(existingResource);
 
         if ((existingProvider.getStatus().equals(vocabularyService.get("pending provider").getId()) ||
@@ -746,37 +726,45 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     }
 
     @Override
-    public boolean hasAdminAcceptedTerms(String providerId, boolean isDraft, Authentication auth) {
-        ProviderBundle providerBundle;
-        if (isDraft) {
-            providerBundle = draftProviderService.get(providerId);
-        } else {
-            providerBundle = get(providerId, auth);
+    public boolean hasAdminAcceptedTerms(String id, Authentication auth) {
+        ProviderBundle bundle = get(id, catalogueId, false);
+        String userEmail = AuthenticationInfo.getEmail(auth).toLowerCase();
+
+        List<String> providerAdmins = bundle.getProvider().getUsers().stream()
+                .map(user -> user.getEmail().toLowerCase())
+                .toList();
+
+        List<String> acceptedTerms = bundle.getMetadata().getTerms();
+
+        if (acceptedTerms == null || acceptedTerms.isEmpty()) {
+            return !providerAdmins.contains(userEmail); // false -> show modal, true -> no modal
         }
-        List<String> userList = new ArrayList<>();
-        for (User user : providerBundle.getProvider().getUsers()) {
-            userList.add(user.getEmail().toLowerCase());
+
+        if (providerAdmins.contains(userEmail) && !acceptedTerms.contains(userEmail)) {
+            return false; // Show modal
         }
-        if ((providerBundle.getMetadata().getTerms() == null || providerBundle.getMetadata().getTerms().isEmpty())) {
-            if (userList.contains(AuthenticationInfo.getEmail(auth).toLowerCase())) {
-                return false; //pop-up modal
-            } else {
-                return true; //no modal
-            }
-        }
-        if (!providerBundle.getMetadata().getTerms().contains(AuthenticationInfo.getEmail(auth).toLowerCase())
-                && userList.contains(AuthenticationInfo.getEmail(auth).toLowerCase())) {
-            return false; // pop-up modal
-        }
-        return true; // no modal
+        return true; // No modal
     }
 
     @Override
-    public void adminAcceptedTerms(String providerId, boolean isDraft, Authentication auth) {
-        try {
-            draftProviderService.update(draftProviderService.get(providerId), auth);
-        } catch (ResourceException | ResourceNotFoundException e) {
-            update(get(providerId), auth);
+    public void adminAcceptedTerms(String id, Authentication auth) {
+        ProviderBundle bundle = get(id, catalogueId, false);
+        String userEmail = AuthenticationInfo.getEmail(auth);
+
+        List<String> existingTerms = bundle.getMetadata().getTerms();
+        if (existingTerms == null) {
+            existingTerms = new ArrayList<>();
+        }
+
+        if (!existingTerms.contains(userEmail)) {
+            existingTerms.add(userEmail);
+            bundle.getMetadata().setTerms(existingTerms);
+
+            try {
+                update(bundle, auth);
+            } catch (ResourceNotFoundException e) {
+                logger.info("Could not update terms for Provider with id: '{}'", id);
+            }
         }
     }
 
@@ -803,7 +791,7 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
 
     @Override
     public void requestProviderDeletion(String providerId, Authentication auth) {
-        ProviderBundle provider = get(providerId);
+        ProviderBundle provider = get(providerId, catalogueId, false);
         for (User user : provider.getProvider().getUsers()) {
             if (user.getEmail().equalsIgnoreCase(AuthenticationInfo.getEmail(auth).toLowerCase())) {
                 registrationMailService.informPortalAdminsForProviderDeletion(provider, User.of(auth));
@@ -812,9 +800,9 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     }
 
     @Override
-    public ProviderBundle audit(String providerId, String comment, LoggingInfo.ActionType actionType, Authentication auth) {
-        ProviderBundle provider = get(providerId);
-        Resource existingResource = getResource(provider.getId(), provider.getProvider().getCatalogueId());
+    public ProviderBundle audit(String providerId, String catalogueId, String comment, LoggingInfo.ActionType actionType, Authentication auth) {
+        ProviderBundle provider = get(providerId, catalogueId, false);
+        Resource existingResource = getResource(provider.getId(), provider.getProvider().getCatalogueId(), false);
         ProviderBundle existingProvider = deserialize(existingResource);
 
         commonMethods.auditResource(existingProvider, comment, actionType, auth);
@@ -862,17 +850,6 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         return new Browsing<>(providersToBeAudited.size(), 0, providersToBeAudited.size(), providersToBeAudited, providerBrowsing.getFacets());
     }
 
-    @Override
-    public Paging<LoggingInfo> getLoggingInfoHistory(String id) {
-        ProviderBundle providerBundle = get(id);
-        if (providerBundle.getLoggingInfo() != null) {
-            List<LoggingInfo> loggingInfoList = providerBundle.getLoggingInfo();
-            loggingInfoList.sort(Comparator.comparing(LoggingInfo::getDate).reversed());
-            return new Browsing<>(loggingInfoList.size(), 0, loggingInfoList.size(), loggingInfoList, null);
-        }
-        return null;
-    }
-
     private ProviderBundle onboard(ProviderBundle provider, String catalogueId, Authentication auth) {
         // create LoggingInfo
         List<LoggingInfo> loggingInfoList = commonMethods.returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(provider, auth);
@@ -883,6 +860,8 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
             provider.setActive(false);
             provider.setStatus(vocabularyService.get("pending provider").getId());
             provider.setTemplateStatus(vocabularyService.get("no template status").getId());
+            provider.setId(idCreator.generate(getResourceTypeName()));
+            commonMethods.createIdentifiers(provider, getResourceTypeName(), false);
         } else {
             commonMethods.checkCatalogueIdConsistency(provider, catalogueId);
             provider.setActive(true);
@@ -890,8 +869,10 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
             provider.setTemplateStatus(vocabularyService.get("approved template").getId());
             loggingInfoList.add(commonMethods.createLoggingInfo(auth, LoggingInfo.Types.ONBOARD.getKey(),
                     LoggingInfo.ActionType.APPROVED.getKey()));
+            // check that external source has provided its own ID
+            idCreator.validateId(provider.getId());
+            commonMethods.createIdentifiers(provider, getResourceTypeName(), true);
         }
-
         provider.setAuditState(Auditable.NOT_AUDITED);
         provider.setLatestOnboardingInfo(loggingInfoList.getLast());
 
@@ -902,9 +883,6 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
         if (providerBundle.getStatus().equals("approved provider") && providerBundle.getProvider().isLegalEntity()) {
             List<String> allHLENames = vocabularyService.getByType(Vocabulary.Type.PROVIDER_HOSTING_LEGAL_ENTITY)
                     .stream().map(Vocabulary::getName).toList();
-            for (String hle : allHLENames) {
-                logger.info(hle);
-            }
             if (!allHLENames.contains(providerBundle.getProvider().getName())) {
                 addApprovedProviderToHLEVocabulary(providerBundle);
             }
@@ -949,15 +927,15 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
 
     @Override
     public ProviderBundle createPublicProvider(ProviderBundle providerBundle, Authentication auth) {
-        publicProviderManager.add(providerBundle, auth);
+        publicProviderService.add(providerBundle, auth);
         return providerBundle;
     }
 
 
     @Override
-    public ProviderBundle suspend(String providerId, boolean suspend, Authentication auth) {
-        ProviderBundle providerBundle = get(providerId, auth);
-        Resource existingResource = getResource(providerBundle.getId(), providerBundle.getProvider().getCatalogueId());
+    public ProviderBundle suspend(String providerId, String catalogueId, boolean suspend, Authentication auth) {
+        ProviderBundle providerBundle = get(providerId, catalogueId, false);
+        Resource existingResource = getResource(providerBundle.getId(), providerBundle.getProvider().getCatalogueId(), false);
         ProviderBundle existingProvider = deserialize(existingResource);
         commonMethods.suspensionValidation(existingProvider, catalogueId, providerId, suspend, auth);
 
@@ -974,17 +952,17 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
 
         if (services != null && !services.isEmpty()) {
             for (ServiceBundle serviceBundle : services) {
-                serviceBundleService.suspend(serviceBundle.getId(), suspend, auth);
+                serviceBundleService.suspend(serviceBundle.getId(), catalogueId, suspend, auth);
             }
         }
         if (trainingResources != null && !trainingResources.isEmpty()) {
             for (TrainingResourceBundle trainingResourceBundle : trainingResources) {
-                trainingResourceService.suspend(trainingResourceBundle.getId(), suspend, auth);
+                trainingResourceService.suspend(trainingResourceBundle.getId(), catalogueId, suspend, auth);
             }
         }
         if (interoperabilityRecords != null && !interoperabilityRecords.isEmpty()) {
             for (InteroperabilityRecordBundle interoperabilityRecordBundle : interoperabilityRecords) {
-                interoperabilityRecordService.suspend(interoperabilityRecordBundle.getId(), suspend, auth);
+                interoperabilityRecordService.suspend(interoperabilityRecordBundle.getId(), catalogueId, suspend, auth);
             }
         }
 
@@ -1003,12 +981,12 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     }
 
     @Override
-    public List<MapValues<ExtendedValue>> getAllResourcesUnderASpecificHLE(String hle, Authentication auth) {
+    public List<MapValues<CatalogueValue>> getAllResourcesUnderASpecificHLE(String hle, Authentication auth) {
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(10000);
         ff.addFilter("hosting_legal_entity", hle);
         ff.addFilter("published", false);
-        List<MapValues<ExtendedValue>> mapValuesList = new ArrayList<>();
+        List<MapValues<CatalogueValue>> mapValuesList = new ArrayList<>();
         List<ProviderBundle> providers = getAll(ff, auth).getResults();
         List<ServiceBundle> services = new ArrayList<>();
         List<TrainingResourceBundle> trainingResources = new ArrayList<>();
@@ -1029,12 +1007,12 @@ public class ProviderManager extends ResourceManager<ProviderBundle> implements 
     }
 
     private void createMapValuesForHLE(List<?> resources, String resourceType,
-                                       List<MapValues<ExtendedValue>> mapValuesList) {
-        MapValues<ExtendedValue> mapValues = new MapValues<>();
+                                       List<MapValues<CatalogueValue>> mapValuesList) {
+        MapValues<CatalogueValue> mapValues = new MapValues<>();
         mapValues.setKey(resourceType);
-        List<ExtendedValue> valueList = new ArrayList<>();
+        List<CatalogueValue> valueList = new ArrayList<>();
         for (Object obj : resources) {
-            ExtendedValue value = new ExtendedValue();
+            CatalogueValue value = new CatalogueValue();
             switch (resourceType) {
                 case "provider":
                     ProviderBundle providerBundle = (ProviderBundle) obj;

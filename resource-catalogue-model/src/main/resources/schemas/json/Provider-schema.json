@@ -250,6 +250,9 @@
         "type" : "string"
       }
     },
+    "node" : {
+      "type" : "string"
+    },
     "participatingCountries" : {
       "type" : "array",
       "items" : {

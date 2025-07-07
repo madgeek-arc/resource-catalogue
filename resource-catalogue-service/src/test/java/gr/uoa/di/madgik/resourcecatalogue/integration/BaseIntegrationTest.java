@@ -35,7 +35,7 @@ import java.util.List;
 //TODO: find a way to load application context only once
 //TODO: configure tests to work with and without elasticsearch
 
-@SpringBootTest(properties = {"spring.profiles.active=test"})
+@SpringBootTest(properties = {"spring.profiles.active=test,no-auth"})
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @ImportTestcontainers(IntegrationTestConfig.class)

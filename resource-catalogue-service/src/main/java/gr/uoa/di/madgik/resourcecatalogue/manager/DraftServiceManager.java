@@ -20,7 +20,6 @@ import gr.uoa.di.madgik.registry.domain.*;
 import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.domain.LoggingInfo;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Metadata;
-import gr.uoa.di.madgik.resourcecatalogue.domain.ProviderBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.ServiceBundle;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
 import gr.uoa.di.madgik.resourcecatalogue.utils.AuthenticationInfo;
@@ -36,7 +35,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service("draftServiceManager")
-public class DraftServiceManager extends ResourceManager<ServiceBundle> implements DraftResourceService<ServiceBundle> {
+public class DraftServiceManager extends ResourceCatalogueManager<ServiceBundle> implements DraftResourceService<ServiceBundle> {
 
     private static final Logger logger = LoggerFactory.getLogger(DraftServiceManager.class);
 
@@ -63,13 +62,14 @@ public class DraftServiceManager extends ResourceManager<ServiceBundle> implemen
 
     @Override
     public String getResourceTypeName() {
-        return "draft_service";
+        return "service";
     }
 
     @Override
     public ServiceBundle add(ServiceBundle bundle, Authentication auth) {
 
         bundle.setId(idCreator.generate(getResourceTypeName()));
+        commonMethods.createIdentifiers(bundle, getResourceTypeName(), false);
 
         logger.trace("Attempting to add a new Draft Service with id '{}'", bundle.getId());
         bundle.setMetadata(Metadata.updateMetadata(bundle.getMetadata(), AuthenticationInfo.getFullName(auth), AuthenticationInfo.getEmail(auth).toLowerCase()));
@@ -92,7 +92,7 @@ public class DraftServiceManager extends ResourceManager<ServiceBundle> implemen
     @Override
     public ServiceBundle update(ServiceBundle bundle, Authentication auth) {
         // get existing resource
-        Resource existing = getDraftResource(bundle.getService().getId());
+        Resource existing = getResource(bundle.getService().getId());
         // block catalogueId updates from Provider Admins
         bundle.getService().setCatalogueId(catalogueId);
         logger.trace("Attempting to update the Draft Service with id '{}'", bundle.getId());
@@ -112,7 +112,7 @@ public class DraftServiceManager extends ResourceManager<ServiceBundle> implemen
 
     @Override
     public ServiceBundle transformToNonDraft(String id, Authentication auth) {
-        ServiceBundle serviceBundle = this.get(id);
+        ServiceBundle serviceBundle = get(id, catalogueId, false);
         return transformToNonDraft(serviceBundle, auth);
     }
 
@@ -143,11 +143,6 @@ public class DraftServiceManager extends ResourceManager<ServiceBundle> implemen
         bundle.setMetadata(Metadata.updateMetadata(bundle.getMetadata(), AuthenticationInfo.getFullName(auth), AuthenticationInfo.getEmail(auth).toLowerCase()));
         bundle.setDraft(false);
 
-        ResourceType serviceResourceType = resourceTypeService.getResourceType("service");
-        Resource resource = getDraftResource(bundle.getId());
-        resource.setResourceType(getResourceType());
-        resourceService.changeResourceType(resource, serviceResourceType);
-
         try {
             bundle = serviceBundleService.update(bundle, auth);
         } catch (ResourceNotFoundException e) {
@@ -155,25 +150,5 @@ public class DraftServiceManager extends ResourceManager<ServiceBundle> implemen
         }
 
         return bundle;
-    }
-
-    @Override
-    public Browsing<ServiceBundle> getMy(FacetFilter filter, Authentication auth) {
-        FacetFilter ff = new FacetFilter();
-        ff.setQuantity(1000);
-        List<ProviderBundle> providers = providerService.getMy(ff, auth).getResults();
-
-        filter.addFilter("resource_organisation", providers.stream().map(ProviderBundle::getId).toList());
-        filter.setResourceType(getResourceTypeName());
-        return this.getAll(filter, auth);
-    }
-
-    private Resource getDraftResource(String id) {
-        Paging<Resource> resources;
-        resources = searchService
-                .cqlQuery(String.format("resource_internal_id = \"%s\" AND catalogue_id = \"%s\"", id, catalogueId),
-                        getResourceTypeName());
-        assert resources != null;
-        return resources.getTotal() == 0 ? null : resources.getResults().getFirst();
     }
 }

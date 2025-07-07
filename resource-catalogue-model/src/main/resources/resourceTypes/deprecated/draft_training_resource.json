@@ -4,155 +4,106 @@
       "label": null,
       "multivalued": false,
       "name": "resource_internal_id",
-      "path": "$.provider.id",
+      "path": "$.trainingResource.id",
       "primaryKey": true,
       "type": "java.lang.String"
     },
     {
-      "label": "Provider Name",
+      "label": "Title",
       "multivalued": false,
-      "name": "name",
-      "path": "$.provider.name",
+      "name": "title",
+      "path": "$.trainingResource.title",
       "type": "java.lang.String"
     },
     {
-      "label": "Abbreviation",
+      "label": "Node",
       "multivalued": false,
-      "name": "abbreviation",
-      "path": "$.provider.abbreviation",
+      "name": "node",
+      "path": "$.trainingResource.node",
       "type": "java.lang.String"
     },
     {
-      "label": "Legal Entity",
+      "label": "Resource Organisation",
       "multivalued": false,
-      "name": "legal_entity",
-      "path": "$.provider.legalEntity",
-      "type": "java.lang.Boolean"
-    },
-    {
-      "label": "Legal Status",
-      "multivalued": false,
-      "name": "legal_status",
-      "path": "$.provider.legalStatus",
+      "name": "resource_organisation",
+      "path": "$.trainingResource.resourceOrganisation",
       "type": "java.lang.String"
     },
     {
-      "label": "Hosting Legal Entity",
-      "multivalued": false,
-      "name": "hosting_legal_entity",
-      "path": "$.provider.hostingLegalEntity",
+      "label": "Resource Provider",
+      "multivalued": true,
+      "name": "resource_providers",
+      "path": "$.trainingResource.resourceProviders[*]",
       "type": "java.lang.String"
     },
     {
       "label": "Alternative Identifier Value",
       "multivalued": true,
       "name": "alternative_identifiers_values",
-      "path": "$.provider.alternativeIdentifiers[*].value",
+      "path": "$.trainingResource.alternativeIdentifiers[*].value",
       "type": "java.lang.String"
     },
     {
-      "label": "Catalogue ID",
-      "multivalued": false,
-      "name": "catalogue_id",
-      "path": "$.provider.catalogueId",
+      "label": "Author",
+      "multivalued": true,
+      "name": "authors",
+      "path": "$.trainingResource.authors[*]",
+      "type": "java.lang.String"
+    },
+    {
+      "label": "EOSC Related Service",
+      "multivalued": true,
+      "name": "eosc_related_services",
+      "path": "$.trainingResource.eoscRelatedServices[*]",
+      "type": "java.lang.String"
+    },
+    {
+      "label": "Keyword",
+      "multivalued": true,
+      "name": "keywords",
+      "path": "$.trainingResource.keywords[*]",
+      "type": "java.lang.String"
+    },
+    {
+      "label": "Target Group",
+      "multivalued": true,
+      "name": "target_groups",
+      "path": "$.trainingResource.targetGroups[*]",
+      "type": "java.lang.String"
+    },
+    {
+      "label": "Language",
+      "multivalued": true,
+      "name": "languages",
+      "path": "$.trainingResource.languages[*]",
+      "type": "java.lang.String"
+    },
+    {
+      "label": "Geographical Availability",
+      "multivalued": true,
+      "name": "geographical_availabilities",
+      "path": "$.trainingResource.geographicalAvailabilities[*]",
       "type": "java.lang.String"
     },
     {
       "label": "Scientific Domain",
       "multivalued": true,
       "name": "scientific_domains",
-      "path": "$.provider.scientificDomains[*]",
+      "path": "$.trainingResource.scientificDomains[*]",
       "type": "java.lang.String"
     },
     {
       "label": "Scientific Subdomain",
       "multivalued": true,
       "name": "scientific_subdomains",
-      "path": "$.provider.scientificDomains[*].scientificSubdomain",
+      "path": "$.trainingResource.scientificDomains[*].scientificSubdomain",
       "type": "java.lang.String"
     },
     {
-      "label": "Meril Scientific Domain",
-      "multivalued": true,
-      "name": "meril_scientific_domains",
-      "path": "$.provider.merilScientificDomains[*]",
-      "type": "java.lang.String"
-    },
-    {
-      "label": "Meril Scientific Subdomain",
-      "multivalued": true,
-      "name": "meril_scientific_subdomains",
-      "path": "$.provider.merilScientificDomains[*].merilScientificSubdomain",
-      "type": "java.lang.String"
-    },
-    {
-      "label": "Structure Type",
-      "multivalued": true,
-      "name": "structure_types",
-      "path": "$.provider.structureTypes[*]",
-      "type": "java.lang.String"
-    },
-    {
-      "label": "Affiliation",
-      "multivalued": true,
-      "name": "affiliations",
-      "path": "$.provider.affiliations[*]",
-      "type": "java.lang.String"
-    },
-    {
-      "label": "Network",
-      "multivalued": true,
-      "name": "networks",
-      "path": "$.provider.networks[*]",
-      "type": "java.lang.String"
-    },
-    {
-      "label": "Tag",
-      "multivalued": true,
-      "name": "tags",
-      "path": "$.provider.tags[*]",
-      "type": "java.lang.String"
-    },
-    {
-      "label": "Esfri Domain",
-      "multivalued": true,
-      "name": "esfri_domains",
-      "path": "$.provider.esfriDomains[*]",
-      "type": "java.lang.String"
-    },
-    {
-      "label": "Life Cycle Status",
+      "label": "Catalogue ID",
       "multivalued": false,
-      "name": "life_cycle_status",
-      "path": "$.provider.lifeCycleStatus",
-      "type": "java.lang.String"
-    },
-    {
-      "label": "Esfri Type",
-      "multivalued": false,
-      "name": "esfri_type",
-      "path": "$.provider.esfriType",
-      "type": "java.lang.String"
-    },
-    {
-      "label": "Area of Activity",
-      "multivalued": true,
-      "name": "areas_of_activity",
-      "path": "$.provider.areasOfActivity[*]",
-      "type": "java.lang.String"
-    },
-    {
-      "label": "Societal Grand Challenge",
-      "multivalued": true,
-      "name": "societal_grand_challenges",
-      "path": "$.provider.societalGrandChallenges[*]",
-      "type": "java.lang.String"
-    },
-    {
-      "label": null,
-      "multivalued": true,
-      "name": "users",
-      "path": "$.provider.users[*].email",
+      "name": "catalogue_id",
+      "path": "$.trainingResource.catalogueId",
       "type": "java.lang.String"
     },
     {
@@ -315,13 +266,6 @@
     {
       "label": null,
       "multivalued": false,
-      "name": "templateStatus",
-      "path": "$.templateStatus",
-      "type": "java.lang.String"
-    },
-    {
-      "label": null,
-      "multivalued": false,
       "name": "audit_state",
       "path": "$.auditState",
       "type": "java.lang.String"
@@ -330,12 +274,12 @@
   "indexMapperClass": "gr.uoa.di.madgik.registry.index.DefaultIndexMapper",
   "aliases": [
     "resourceTypes",
-    "providers"
+    "trainings"
   ],
-  "name": "draft_provider",
+  "name": "draft_training_resource",
   "payloadType": "json",
   "properties": {
-    "class": "gr.uoa.di.madgik.resourcecatalogue.domain.ProviderBundle"
+    "class": "gr.uoa.di.madgik.resourcecatalogue.domain.TrainingResourceBundle"
   },
   "schema": "{\n\t\"$schema\": \"https://json-schema.org/draft/2019-09/schema\"\n}"
 }

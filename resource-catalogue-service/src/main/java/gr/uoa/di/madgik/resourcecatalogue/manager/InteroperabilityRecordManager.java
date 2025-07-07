@@ -35,12 +35,11 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
 @org.springframework.stereotype.Service("interoperabilityRecordManager")
-public class InteroperabilityRecordManager extends ResourceManager<InteroperabilityRecordBundle> implements InteroperabilityRecordService {
+public class InteroperabilityRecordManager extends ResourceCatalogueManager<InteroperabilityRecordBundle> implements InteroperabilityRecordService {
 
     private static final Logger logger = LoggerFactory.getLogger(InteroperabilityRecordManager.class);
     private final ProviderService providerService;
@@ -81,22 +80,19 @@ public class InteroperabilityRecordManager extends ResourceManager<Interoperabil
 
     @Override
     public InteroperabilityRecordBundle add(InteroperabilityRecordBundle interoperabilityRecordBundle, String catalogueId, Authentication auth) {
-        if (catalogueId == null || catalogueId.isEmpty()) { // add catalogue provider
+        if (catalogueId == null || catalogueId.isEmpty() || catalogueId.equals(this.catalogueId)) { // add catalogue provider
             interoperabilityRecordBundle.getInteroperabilityRecord().setCatalogueId(this.catalogueId);
+            interoperabilityRecordBundle.setId(idCreator.generate(getResourceTypeName()));
+            commonMethods.createIdentifiers(interoperabilityRecordBundle, getResourceTypeName(), false);
         } else { // external catalogue
             commonMethods.checkCatalogueIdConsistency(interoperabilityRecordBundle, catalogueId);
+            idCreator.validateId(interoperabilityRecordBundle.getId());
+            commonMethods.createIdentifiers(interoperabilityRecordBundle, getResourceTypeName(), true);
         }
         logger.trace("Attempting to add a new Interoperability Record: {}", interoperabilityRecordBundle.getInteroperabilityRecord());
-        interoperabilityRecordBundle.setId(idCreator.generate(getResourceTypeName()));
 
-        // register and ensure Resource Catalogue's PID uniqueness
-        commonMethods.determineResourceAndCreateAlternativeIdentifierForPID(interoperabilityRecordBundle, getResourceTypeName());
-        interoperabilityRecordBundle.getInteroperabilityRecord().setAlternativeIdentifiers(
-                commonMethods.ensureResourceCataloguePidUniqueness(interoperabilityRecordBundle.getId(),
-                        interoperabilityRecordBundle.getInteroperabilityRecord().getCatalogueId(),
-                        interoperabilityRecordBundle.getInteroperabilityRecord().getAlternativeIdentifiers()));
-
-        ProviderBundle providerBundle = providerService.get(interoperabilityRecordBundle.getInteroperabilityRecord().getCatalogueId(), interoperabilityRecordBundle.getInteroperabilityRecord().getProviderId(), auth);
+        ProviderBundle providerBundle = providerService.get(interoperabilityRecordBundle.getInteroperabilityRecord().
+                getCatalogueId(), interoperabilityRecordBundle.getInteroperabilityRecord().getProviderId(), auth);
         // check if Provider is approved
         if (!providerBundle.getStatus().equals("approved provider")) {
             throw new ResourceException(String.format("The Provider ID '%s' you provided is not yet approved",
@@ -112,11 +108,22 @@ public class InteroperabilityRecordManager extends ResourceManager<Interoperabil
         }
         // loggingInfo
         List<LoggingInfo> loggingInfoList = commonMethods.returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(interoperabilityRecordBundle, auth);
-        interoperabilityRecordBundle.setLoggingInfo(loggingInfoList);
         interoperabilityRecordBundle.setLatestOnboardingInfo(loggingInfoList.getFirst());
         interoperabilityRecordBundle.setAuditState(Auditable.NOT_AUDITED);
 
-        interoperabilityRecordBundle.getInteroperabilityRecord().setCreated(String.valueOf(System.currentTimeMillis()));
+        if (!providerBundle.getProvider().getCatalogueId().equals(this.catalogueId)) {
+            interoperabilityRecordBundle.setStatus(vocabularyService.get("approved interoperability record").getId());
+            interoperabilityRecordBundle.setActive(true);
+            LoggingInfo loggingInfoApproved = commonMethods.createLoggingInfo(auth, LoggingInfo.Types.ONBOARD.getKey(),
+                    LoggingInfo.ActionType.APPROVED.getKey());
+            loggingInfoList.add(loggingInfoApproved);
+
+            // latestOnboardingInfo
+            interoperabilityRecordBundle.setLatestOnboardingInfo(loggingInfoApproved);
+        }
+        interoperabilityRecordBundle.setLoggingInfo(loggingInfoList);
+
+        interoperabilityRecordBundle.getInteroperabilityRecord().setCreated(commonMethods.transformTimestampToDate(String.valueOf(System.currentTimeMillis())));
         interoperabilityRecordBundle.getInteroperabilityRecord().setUpdated(interoperabilityRecordBundle.getInteroperabilityRecord().getCreated());
         logger.info("Added a new Interoperability Record with id '{}' and title '{}'", interoperabilityRecordBundle.getId(),
                 interoperabilityRecordBundle.getInteroperabilityRecord().getTitle());
@@ -137,31 +144,15 @@ public class InteroperabilityRecordManager extends ResourceManager<Interoperabil
 
         InteroperabilityRecordBundle ret = ObjectUtils.clone(interoperabilityRecordBundle);
         InteroperabilityRecordBundle existingInteroperabilityRecord;
-        try {
-            existingInteroperabilityRecord = get(ret.getInteroperabilityRecord().getId(), ret.getInteroperabilityRecord().getCatalogueId());
-            if (ret.getInteroperabilityRecord().equals(existingInteroperabilityRecord.getInteroperabilityRecord())) {
-                return ret;
-            }
-        } catch (ResourceNotFoundException e) {
-            throw new ResourceNotFoundException(String.format("There is no Interoperability Record with id [%s] on the [%s] Catalogue",
-                    ret.getInteroperabilityRecord().getId(), ret.getInteroperabilityRecord().getCatalogueId()));
+        existingInteroperabilityRecord = get(ret.getInteroperabilityRecord().getId(), ret.getInteroperabilityRecord().getCatalogueId(), false);
+        if (ret.getInteroperabilityRecord().equals(existingInteroperabilityRecord.getInteroperabilityRecord())) {
+            return ret;
         }
 
         if (catalogueId == null || catalogueId.isEmpty()) {
             ret.getInteroperabilityRecord().setCatalogueId(this.catalogueId);
         } else {
             commonMethods.checkCatalogueIdConsistency(ret, catalogueId);
-        }
-
-        // ensure Resource Catalogue's PID uniqueness
-        if (ret.getInteroperabilityRecord().getAlternativeIdentifiers() == null ||
-                ret.getInteroperabilityRecord().getAlternativeIdentifiers().isEmpty()) {
-            commonMethods.determineResourceAndCreateAlternativeIdentifierForPID(ret, getResourceTypeName());
-        } else {
-            ret.getInteroperabilityRecord().setAlternativeIdentifiers(
-                    commonMethods.ensureResourceCataloguePidUniqueness(ret.getId(),
-                            ret.getInteroperabilityRecord().getCatalogueId(),
-                            ret.getInteroperabilityRecord().getAlternativeIdentifiers()));
         }
 
         validate(ret);
@@ -173,6 +164,7 @@ public class InteroperabilityRecordManager extends ResourceManager<Interoperabil
 
         // update existing InteroperabilityRecord Metadata, MigrationStatus
         ret.setMetadata(Metadata.updateMetadata(existingInteroperabilityRecord.getMetadata(), AuthenticationInfo.getFullName(auth)));
+        ret.setIdentifiers(existingInteroperabilityRecord.getIdentifiers());
         ret.setMigrationStatus(existingInteroperabilityRecord.getMigrationStatus());
 
         List<LoggingInfo> loggingInfoList = commonMethods.returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(existingInteroperabilityRecord, auth);
@@ -206,9 +198,7 @@ public class InteroperabilityRecordManager extends ResourceManager<Interoperabil
 
         Resource existing = getResource(ret.getInteroperabilityRecord().getId(), ret.getInteroperabilityRecord().getCatalogueId());
         if (existing == null) {
-            throw new ResourceNotFoundException(
-                    String.format("Could not update Interoperability Record with id '%s' because it does not exist",
-                            ret.getInteroperabilityRecord().getId()));
+            throw new ResourceNotFoundException(ret.getId(), "Interoperability Record");
         }
         existing.setPayload(serialize(ret));
         existing.setResourceType(getResourceType());
@@ -237,7 +227,7 @@ public class InteroperabilityRecordManager extends ResourceManager<Interoperabil
             throw new ValidationException(String.format("Vocabulary %s does not consist an Interoperability Record state!", status));
         }
         logger.trace("verifyResource with id: '{}' | status: '{}' | active: '{}'", id, status, active);
-        InteroperabilityRecordBundle interoperabilityRecordBundle = get(id);
+        InteroperabilityRecordBundle interoperabilityRecordBundle = get(id, catalogueId, false);
         interoperabilityRecordBundle.setStatus(vocabularyService.get(status).getId());
 
         List<LoggingInfo> loggingInfoList = commonMethods.returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(interoperabilityRecordBundle, auth);
@@ -280,10 +270,11 @@ public class InteroperabilityRecordManager extends ResourceManager<Interoperabil
 
     @Override
     public InteroperabilityRecordBundle publish(String id, Boolean active, Authentication auth) {
-        InteroperabilityRecordBundle interoperabilityRecordBundle = get(id);
+        InteroperabilityRecordBundle interoperabilityRecordBundle = get(id, catalogueId, false);
         String activeProvider = "";
 
-        ProviderBundle providerBundle = providerService.get(interoperabilityRecordBundle.getInteroperabilityRecord().getCatalogueId(), interoperabilityRecordBundle.getInteroperabilityRecord().getProviderId(), auth);
+        ProviderBundle providerBundle = providerService.get(interoperabilityRecordBundle.getInteroperabilityRecord().getCatalogueId(),
+                interoperabilityRecordBundle.getInteroperabilityRecord().getProviderId(), auth);
         if (providerBundle.getStatus().equals("approved provider") && providerBundle.isActive()) {
             activeProvider = interoperabilityRecordBundle.getInteroperabilityRecord().getProviderId();
         }
@@ -328,27 +319,6 @@ public class InteroperabilityRecordManager extends ResourceManager<Interoperabil
         return this.getAll(filter, auth);
     }
 
-    // TODO: refactor
-    public Paging<LoggingInfo> getLoggingInfoHistory(String id, String catalogueId) {
-        InteroperabilityRecordBundle interoperabilityRecordBundle;
-        try {
-            interoperabilityRecordBundle = get(id, catalogueId);
-            Resource resource = getResource(interoperabilityRecordBundle.getInteroperabilityRecord().getId()); // get all versions
-
-            List<LoggingInfo> loggingInfoList = new ArrayList<>();
-            InteroperabilityRecordBundle interoperabilityRecordResource = deserialize(resource);
-            if (interoperabilityRecordResource.getLoggingInfo() != null) {
-                loggingInfoList.addAll(interoperabilityRecordResource.getLoggingInfo());
-            }
-
-            loggingInfoList.sort(Comparator.comparing(LoggingInfo::getDate).reversed());
-            return new Browsing<>(loggingInfoList.size(), 0, loggingInfoList.size(), loggingInfoList, null);
-        } catch (ResourceNotFoundException e) {
-            logger.info("Interoperability Record with id '{}' not found", id);
-        }
-        return null;
-    }
-
     public InteroperabilityRecordBundle getOrElseReturnNull(String id) {
         InteroperabilityRecordBundle interoperabilityRecordBundle;
         try {
@@ -359,27 +329,21 @@ public class InteroperabilityRecordManager extends ResourceManager<Interoperabil
         return interoperabilityRecordBundle;
     }
 
-    public InteroperabilityRecordBundle get(String id, String catalogueId) {
-        Resource resource = getResource(id, catalogueId);
-        if (resource == null) {
-            throw new ResourceNotFoundException(String.format("Could not find Interoperability Record with id: %s and catalogueId: %s", id, catalogueId));
-        }
-        return deserialize(resource);
-    }
-
     @Override
     public Paging<InteroperabilityRecordBundle> getInteroperabilityRecordBundles(String catalogueId, String providerId, Authentication auth) {
         FacetFilter ff = new FacetFilter();
         ff.addFilter("provider_id", providerId);
         ff.addFilter("catalogue_id", catalogueId);
+        ff.addFilter("published", false);
         ff.setQuantity(maxQuantity);
         ff.addOrderBy("title", "asc");
         return this.getAll(ff, auth);
     }
 
-    public InteroperabilityRecordBundle audit(String id, String comment, LoggingInfo.ActionType actionType, Authentication auth) {
-        InteroperabilityRecordBundle interoperabilityRecordBundle = get(id);
-        ProviderBundle provider = providerService.get(interoperabilityRecordBundle.getInteroperabilityRecord().getProviderId(), auth);
+    public InteroperabilityRecordBundle audit(String id, String catalogueId, String comment, LoggingInfo.ActionType actionType, Authentication auth) {
+        InteroperabilityRecordBundle interoperabilityRecordBundle = get(id, catalogueId, false);
+        ProviderBundle provider = providerService.get(interoperabilityRecordBundle.getInteroperabilityRecord().getCatalogueId(),
+                interoperabilityRecordBundle.getInteroperabilityRecord().getProviderId(), auth);
         commonMethods.auditResource(interoperabilityRecordBundle, comment, actionType, auth);
         if (actionType.getKey().equals(LoggingInfo.ActionType.VALID.getKey())) {
             interoperabilityRecordBundle.setAuditState(Auditable.VALID);
@@ -404,8 +368,8 @@ public class InteroperabilityRecordManager extends ResourceManager<Interoperabil
     }
 
 
-    public InteroperabilityRecordBundle suspend(String interoperabilityRecordId, boolean suspend, Authentication auth) {
-        InteroperabilityRecordBundle interoperabilityRecordBundle = get(interoperabilityRecordId);
+    public InteroperabilityRecordBundle suspend(String interoperabilityRecordId, String catalogueId, boolean suspend, Authentication auth) {
+        InteroperabilityRecordBundle interoperabilityRecordBundle = get(interoperabilityRecordId, catalogueId, false);
         commonMethods.suspensionValidation(interoperabilityRecordBundle, interoperabilityRecordBundle.getInteroperabilityRecord().getCatalogueId(),
                 interoperabilityRecordBundle.getInteroperabilityRecord().getProviderId(), suspend, auth);
         commonMethods.suspendResource(interoperabilityRecordBundle, suspend, auth);

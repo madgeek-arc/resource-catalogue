@@ -18,36 +18,44 @@ package gr.uoa.di.madgik.resourcecatalogue.manager;
 
 import gr.uoa.di.madgik.registry.domain.Browsing;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
-import gr.uoa.di.madgik.registry.exception.ResourceException;
-import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
-import gr.uoa.di.madgik.registry.service.ResourceCRUDService;
-import gr.uoa.di.madgik.resourcecatalogue.domain.DatasourceBundle;
-import gr.uoa.di.madgik.resourcecatalogue.domain.HelpdeskBundle;
-import gr.uoa.di.madgik.resourcecatalogue.domain.Identifiers;
+import gr.uoa.di.madgik.resourcecatalogue.domain.*;
+import gr.uoa.di.madgik.resourcecatalogue.exceptions.CatalogueResourceNotFoundException;
+import gr.uoa.di.madgik.resourcecatalogue.service.ServiceBundleService;
+import gr.uoa.di.madgik.resourcecatalogue.service.TrainingResourceService;
 import gr.uoa.di.madgik.resourcecatalogue.utils.JmsService;
 import gr.uoa.di.madgik.resourcecatalogue.utils.ProviderResourcesCommonMethods;
-import gr.uoa.di.madgik.resourcecatalogue.utils.PublicResourceUtils;
 import org.apache.commons.beanutils.BeanUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
 import java.lang.reflect.InvocationTargetException;
 
 @Service("publicHelpdeskManager")
-public class PublicHelpdeskService extends ResourceManager<HelpdeskBundle>
+public class PublicHelpdeskService extends ResourceCatalogueManager<HelpdeskBundle>
         implements PublicResourceService<HelpdeskBundle> {
 
     private static final Logger logger = LoggerFactory.getLogger(PublicHelpdeskService.class);
     private final JmsService jmsService;
     private final ProviderResourcesCommonMethods commonMethods;
+    private final ServiceBundleService<ServiceBundle> serviceBundleService;
+    private final TrainingResourceService trainingResourceService;
+
+    @Value("${catalogue.id}")
+    private String catalogueId;
 
     public PublicHelpdeskService(JmsService jmsService,
-                                 ProviderResourcesCommonMethods commonMethods) {
+                                 ProviderResourcesCommonMethods commonMethods,
+                                 @Lazy ServiceBundleService<ServiceBundle> serviceBundleService,
+                                 @Lazy TrainingResourceService trainingResourceService) {
         super(HelpdeskBundle.class);
         this.jmsService = jmsService;
         this.commonMethods = commonMethods;
+        this.serviceBundleService = serviceBundleService;
+        this.trainingResourceService = trainingResourceService;
     }
 
     @Override
@@ -60,11 +68,11 @@ public class PublicHelpdeskService extends ResourceManager<HelpdeskBundle>
         return super.getAll(facetFilter, authentication);
     }
 
-    public HelpdeskBundle getOrElseReturnNull(String id) {
+    public HelpdeskBundle getOrElseReturnNull(String id, String catalogueId) {
         HelpdeskBundle helpdeskBundle;
         try {
-            helpdeskBundle = get(id);
-        } catch (ResourceException | ResourceNotFoundException e) {
+            helpdeskBundle = get(id, catalogueId, true);
+        } catch (CatalogueResourceNotFoundException e) {
             return null;
         }
         return helpdeskBundle;
@@ -73,15 +81,12 @@ public class PublicHelpdeskService extends ResourceManager<HelpdeskBundle>
     @Override
     public HelpdeskBundle add(HelpdeskBundle helpdeskBundle, Authentication authentication) {
         String lowerLevelResourceId = helpdeskBundle.getId();
-        Identifiers.createOriginalId(helpdeskBundle);
-        helpdeskBundle.setId(PublicResourceUtils.createPublicResourceId(helpdeskBundle.getHelpdesk().getId(),
-                helpdeskBundle.getCatalogueId()));
-        commonMethods.restrictPrefixRepetitionOnPublicResources(helpdeskBundle.getId(), helpdeskBundle.getCatalogueId());
+        helpdeskBundle.setId(helpdeskBundle.getIdentifiers().getPid());
+        helpdeskBundle.getMetadata().setPublished(true);
 
         // sets public id to serviceId
         updateIdsToPublic(helpdeskBundle);
 
-        helpdeskBundle.getMetadata().setPublished(true);
         HelpdeskBundle ret;
         logger.info("Helpdesk '{}' is being published with id '{}'", lowerLevelResourceId, helpdeskBundle.getId());
         ret = super.add(helpdeskBundle, null);
@@ -91,10 +96,8 @@ public class PublicHelpdeskService extends ResourceManager<HelpdeskBundle>
 
     @Override
     public HelpdeskBundle update(HelpdeskBundle helpdeskBundle, Authentication authentication) {
-        HelpdeskBundle published = super.get(PublicResourceUtils.createPublicResourceId(helpdeskBundle.getHelpdesk().getId(),
-                helpdeskBundle.getCatalogueId()));
-        HelpdeskBundle ret = super.get(PublicResourceUtils.createPublicResourceId(helpdeskBundle.getHelpdesk().getId(),
-                helpdeskBundle.getCatalogueId()));
+        HelpdeskBundle published = super.get(helpdeskBundle.getIdentifiers().getPid(), helpdeskBundle.getHelpdesk().getCatalogueId(), true);
+        HelpdeskBundle ret = super.get(helpdeskBundle.getIdentifiers().getPid(), helpdeskBundle.getHelpdesk().getCatalogueId(), true);
         try {
             BeanUtils.copyProperties(ret, helpdeskBundle);
         } catch (IllegalAccessException | InvocationTargetException e) {
@@ -116,19 +119,24 @@ public class PublicHelpdeskService extends ResourceManager<HelpdeskBundle>
     @Override
     public void delete(HelpdeskBundle helpdeskBundle) {
         try {
-            HelpdeskBundle publicHelpdeskBundle = get(PublicResourceUtils.createPublicResourceId(helpdeskBundle.getHelpdesk().getId(),
-                    helpdeskBundle.getCatalogueId()));
+            HelpdeskBundle publicHelpdeskBundle = get(helpdeskBundle.getIdentifiers().getPid(),
+                    helpdeskBundle.getHelpdesk().getCatalogueId(), true);
             logger.info("Deleting public Helpdesk with id '{}'", publicHelpdeskBundle.getId());
             super.delete(publicHelpdeskBundle);
             jmsService.convertAndSendTopic("helpdesk.delete", publicHelpdeskBundle);
-        } catch (ResourceException | ResourceNotFoundException ignore) {
+        } catch (CatalogueResourceNotFoundException ignore) {
         }
     }
 
     @Override
     public void updateIdsToPublic(HelpdeskBundle bundle) {
         // serviceId
-        bundle.getHelpdesk().setServiceId(PublicResourceUtils.createPublicResourceId(
-                bundle.getHelpdesk().getServiceId(), bundle.getCatalogueId()));
+        Bundle<?> resourceBundle;
+        try {
+            resourceBundle = serviceBundleService.get(bundle.getHelpdesk().getServiceId(), bundle.getHelpdesk().getCatalogueId(), false);
+        } catch (CatalogueResourceNotFoundException e) {
+            resourceBundle = trainingResourceService.get(bundle.getHelpdesk().getServiceId(), bundle.getHelpdesk().getCatalogueId(), false);
+        }
+        bundle.getHelpdesk().setServiceId(resourceBundle.getIdentifiers().getPid());
     }
 }

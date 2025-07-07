@@ -18,16 +18,12 @@ package gr.uoa.di.madgik.resourcecatalogue.manager;
 
 import gr.uoa.di.madgik.registry.domain.Browsing;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
-import gr.uoa.di.madgik.registry.exception.ResourceException;
-import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.registry.service.ResourceCRUDService;
-import gr.uoa.di.madgik.resourcecatalogue.domain.AlternativeIdentifier;
-import gr.uoa.di.madgik.resourcecatalogue.domain.Identifiers;
 import gr.uoa.di.madgik.resourcecatalogue.domain.ProviderBundle;
+import gr.uoa.di.madgik.resourcecatalogue.exceptions.CatalogueResourceNotFoundException;
+import gr.uoa.di.madgik.resourcecatalogue.manager.pids.PidIssuer;
 import gr.uoa.di.madgik.resourcecatalogue.utils.FacetLabelService;
 import gr.uoa.di.madgik.resourcecatalogue.utils.JmsService;
-import gr.uoa.di.madgik.resourcecatalogue.utils.ProviderResourcesCommonMethods;
-import gr.uoa.di.madgik.resourcecatalogue.utils.PublicResourceUtils;
 import org.apache.commons.beanutils.BeanUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,19 +33,19 @@ import org.springframework.stereotype.Service;
 import java.lang.reflect.InvocationTargetException;
 
 @Service("publicProviderManager")
-public class PublicProviderManager extends ResourceManager<ProviderBundle> implements ResourceCRUDService<ProviderBundle, Authentication> {
+public class PublicProviderService extends ResourceCatalogueManager<ProviderBundle> implements ResourceCRUDService<ProviderBundle, Authentication> {
 
-    private static final Logger logger = LoggerFactory.getLogger(PublicProviderManager.class);
+    private static final Logger logger = LoggerFactory.getLogger(PublicProviderService.class);
     private final JmsService jmsService;
-    private final ProviderResourcesCommonMethods commonMethods;
+    private final PidIssuer pidIssuer;
     private final FacetLabelService facetLabelService;
 
-    public PublicProviderManager(JmsService jmsService,
-                                 ProviderResourcesCommonMethods commonMethods,
+    public PublicProviderService(JmsService jmsService,
+                                 PidIssuer pidIssuer,
                                  FacetLabelService facetLabelService) {
         super(ProviderBundle.class);
         this.jmsService = jmsService;
-        this.commonMethods = commonMethods;
+        this.pidIssuer = pidIssuer;
         this.facetLabelService = facetLabelService;
     }
 
@@ -70,27 +66,14 @@ public class PublicProviderManager extends ResourceManager<ProviderBundle> imple
     @Override
     public ProviderBundle add(ProviderBundle providerBundle, Authentication authentication) {
         String lowerLevelProviderId = providerBundle.getId();
-        Identifiers.createOriginalId(providerBundle);
-        providerBundle.setId(PublicResourceUtils.createPublicResourceId(providerBundle.getProvider().getId(),
-                providerBundle.getProvider().getCatalogueId()));
-        commonMethods.restrictPrefixRepetitionOnPublicResources(providerBundle.getId(), providerBundle.getProvider().getCatalogueId());
+        providerBundle.setId(providerBundle.getIdentifiers().getPid());
         providerBundle.getMetadata().setPublished(true);
-        // POST PID
-        String pid = "no_pid";
-        for (AlternativeIdentifier alternativeIdentifier : providerBundle.getProvider().getAlternativeIdentifiers()) {
-            if (alternativeIdentifier.getType().equalsIgnoreCase("EOSC PID")) {
-                pid = alternativeIdentifier.getValue();
-                break;
-            }
-        }
-        if (pid.equalsIgnoreCase("no_pid")) {
-            logger.info("Provider with id '{}' does not have a PID registered under its AlternativeIdentifiers.",
-                    providerBundle.getId());
-        } else {
-            //TODO: enable when we have PID configuration properties for Beyond
-            logger.info("PID POST disabled");
-//            commonMethods.postPID(pid);
-        }
+
+        //POST PID
+        //TODO: enable when we have PID configuration properties for Beyond
+        logger.info("PID POST disabled");
+//        pidIssuer.postPID(providerBundle.getId(), null);
+
         ProviderBundle ret;
         logger.info("Provider '{}' is being published with id '{}'", lowerLevelProviderId, providerBundle.getId());
         ret = super.add(providerBundle, null);
@@ -100,17 +83,16 @@ public class PublicProviderManager extends ResourceManager<ProviderBundle> imple
 
     @Override
     public ProviderBundle update(ProviderBundle providerBundle, Authentication authentication) {
-        ProviderBundle published = super.get(PublicResourceUtils.createPublicResourceId(providerBundle.getProvider().getId(),
-                providerBundle.getProvider().getCatalogueId()));
-        ProviderBundle ret = super.get(PublicResourceUtils.createPublicResourceId(providerBundle.getProvider().getId(),
-                providerBundle.getProvider().getCatalogueId()));
+        ProviderBundle published = super.get(providerBundle.getIdentifiers().getPid(),
+                providerBundle.getProvider().getCatalogueId(), true);
+        ProviderBundle ret = super.get(providerBundle.getIdentifiers().getPid(),
+                providerBundle.getProvider().getCatalogueId(), true);
         try {
             BeanUtils.copyProperties(ret, providerBundle);
         } catch (IllegalAccessException | InvocationTargetException e) {
             logger.info("Could not copy properties.");
         }
 
-        ret.getProvider().setAlternativeIdentifiers(published.getProvider().getAlternativeIdentifiers());
         ret.setIdentifiers(published.getIdentifiers());
         ret.setId(published.getId());
         ret.getMetadata().setPublished(true);
@@ -123,13 +105,12 @@ public class PublicProviderManager extends ResourceManager<ProviderBundle> imple
     @Override
     public void delete(ProviderBundle providerBundle) {
         try {
-            ProviderBundle publicProviderBundle = get(PublicResourceUtils.createPublicResourceId(
-                    providerBundle.getProvider().getId(),
-                    providerBundle.getProvider().getCatalogueId()));
+            ProviderBundle publicProviderBundle = get(providerBundle.getIdentifiers().getPid(),
+                    providerBundle.getProvider().getCatalogueId(), true);
             logger.info("Deleting public Provider with id '{}'", publicProviderBundle.getId());
             super.delete(publicProviderBundle);
             jmsService.convertAndSendTopic("provider.delete", publicProviderBundle);
-        } catch (ResourceException | ResourceNotFoundException ignore) {
+        } catch (CatalogueResourceNotFoundException ignore) {
         }
     }
 }

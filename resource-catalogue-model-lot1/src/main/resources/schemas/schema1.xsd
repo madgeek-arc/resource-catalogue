@@ -161,7 +161,7 @@
             
       <xs:element minOccurs="0" name="id" type="xs:string">
         <xs:annotation>
-          <xs:documentation><![CDATA[A persistent identifier, a unique reference to the  (Multi-Provider Regional or Thematic) Catalogue in the context of the EOSC Portal.]]></xs:documentation>
+          <xs:documentation><![CDATA[A persistent identifier, a unique reference to the (Multi-Provider Regional or Thematic) Catalogue.]]></xs:documentation>
         </xs:annotation>
       </xs:element>
             
@@ -495,7 +495,7 @@ It is also possible to select Not a legal entity.]]></xs:documentation>
             
       <xs:element minOccurs="0" name="id" type="xs:string">
         <xs:annotation>
-          <xs:documentation><![CDATA[A persistent identifier, a unique reference to the Datasource in the context of the EOSC Portal.]]></xs:documentation>
+          <xs:documentation><![CDATA[A persistent identifier, a unique reference to the Datasource.]]></xs:documentation>
         </xs:annotation>
       </xs:element>
             
@@ -1253,7 +1253,7 @@ If (1) - name of the research infrastructure, If (2) - name of the hosting organ
             
       <xs:element minOccurs="0" name="id" type="xs:string">
         <xs:annotation>
-          <xs:documentation><![CDATA[A persistent identifier, a unique reference to the Provider in the context of the EOSC Portal.]]></xs:documentation>
+          <xs:documentation><![CDATA[A persistent identifier, a unique reference to the Provider.]]></xs:documentation>
         </xs:annotation>
       </xs:element>
             
@@ -1620,7 +1620,7 @@ infrastructures.]]></xs:documentation>
             
       <xs:element minOccurs="0" name="id" type="xs:string">
         <xs:annotation>
-          <xs:documentation><![CDATA[A persistent identifier, a unique reference to the Resource in the context of the EOSC Portal.]]></xs:documentation>
+          <xs:documentation><![CDATA[A persistent identifier, a unique reference to the Service.]]></xs:documentation>
         </xs:annotation>
       </xs:element>
             

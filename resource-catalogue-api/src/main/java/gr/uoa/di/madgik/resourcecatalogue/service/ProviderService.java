@@ -18,16 +18,15 @@ package gr.uoa.di.madgik.resourcecatalogue.service;
 
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.domain.Paging;
-import gr.uoa.di.madgik.resourcecatalogue.domain.LoggingInfo;
 import gr.uoa.di.madgik.resourcecatalogue.domain.ProviderBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.ResourceHistory;
-import gr.uoa.di.madgik.resourcecatalogue.dto.ExtendedValue;
+import gr.uoa.di.madgik.resourcecatalogue.dto.CatalogueValue;
 import gr.uoa.di.madgik.resourcecatalogue.dto.MapValues;
 import org.springframework.security.core.Authentication;
 
 import java.util.List;
 
-public interface ProviderService extends ResourceService<ProviderBundle>, BundleOperations<ProviderBundle> {
+public interface ProviderService extends ResourceCatalogueService<ProviderBundle>, BundleOperations<ProviderBundle> {
 
     /**
      * Add a new Provider on the Project's Catalogue.
@@ -158,14 +157,6 @@ public interface ProviderService extends ResourceService<ProviderBundle>, Bundle
     Paging<ProviderBundle> getRandomProviders(FacetFilter ff, String auditingInterval, Authentication auth);
 
     /**
-     * Get the history of the specific Provider of the specific Catalogue ID
-     *
-     * @param id Provider ID
-     * @return {@link Paging}&lt;{@link LoggingInfo}&gt;
-     */
-    Paging<LoggingInfo> getLoggingInfoHistory(String id);
-
-    /**
      * Get a Provider's rejected resources
      *
      * @param ff           FacetFilter
@@ -197,26 +188,24 @@ public interface ProviderService extends ResourceService<ProviderBundle>, Bundle
      *
      * @param hle  Hosting Legal Entity ID
      * @param auth Authentication
-     * @return {@link List}&lt;{@link MapValues}&lt;{@link ExtendedValue}&gt;&gt;
+     * @return {@link List}&lt;{@link MapValues}&lt;{@link CatalogueValue}&gt;&gt;
      */
-    List<MapValues<ExtendedValue>> getAllResourcesUnderASpecificHLE(String hle, Authentication auth);
+    List<MapValues<CatalogueValue>> getAllResourcesUnderASpecificHLE(String hle, Authentication auth);
 
     /**
      * Return true if Provider User Admin has accepted registration terms
      *
      * @param providerId Provider's ID
-     * @param isDraft    boolean value indicating if the Provider is Draft
      * @param auth       Authentication
      * @return True/False
      */
-    boolean hasAdminAcceptedTerms(String providerId, boolean isDraft, Authentication auth);
+    boolean hasAdminAcceptedTerms(String providerId, Authentication auth);
 
     /**
      * Update the Provider's list of Users that have accepted the Provider's registration terms
      *
      * @param providerId Provider's ID
-     * @param isDraft    boolean value indicating if the Provider is Draft
      * @param auth       Authentication
      */
-    void adminAcceptedTerms(String providerId, boolean isDraft, Authentication auth);
+    void adminAcceptedTerms(String providerId, Authentication auth);
 }

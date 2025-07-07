@@ -18,6 +18,7 @@ package gr.uoa.di.madgik.resourcecatalogue.config.security;
 
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.service.ServiceException;
+import gr.uoa.di.madgik.resourcecatalogue.config.dynamicproperties.PropertyChangeEvent;
 import gr.uoa.di.madgik.resourcecatalogue.config.properties.CatalogueProperties;
 import gr.uoa.di.madgik.resourcecatalogue.domain.CatalogueBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.ProviderBundle;
@@ -27,6 +28,7 @@ import jakarta.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.event.EventListener;
 import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -50,9 +52,9 @@ public class InMemoryAuthoritiesMapper implements AuthoritiesMapper {
     private final ProviderService providerService;
 
     private final CatalogueService catalogueService;
-    private final DraftResourceService<ProviderBundle> draftProviderService;
     private final SecurityService securityService;
     private final CatalogueProperties catalogueProperties;
+
 
     private final ReentrantLock lock = new ReentrantLock();
 
@@ -60,12 +62,10 @@ public class InMemoryAuthoritiesMapper implements AuthoritiesMapper {
                                      CatalogueProperties catalogueProperties,
                                      ProviderService manager,
                                      CatalogueService catalogueService,
-                                     DraftResourceService<ProviderBundle> draftProviderService,
                                      SecurityService securityService) {
         this.catalogueProperties = catalogueProperties;
         this.providerService = manager;
         this.catalogueService = catalogueService;
-        this.draftProviderService = draftProviderService;
         this.securityService = securityService;
         this.maxQuantity = maxQuantity;
         if (catalogueProperties.getAdmins().isEmpty()) {
@@ -128,12 +128,6 @@ public class InMemoryAuthoritiesMapper implements AuthoritiesMapper {
             logger.warn("There are no Provider entries in DB");
         }
 
-        try {
-            providers.addAll(draftProviderService.getAll(ff, securityService.getAdminAccess()).getResults());
-        } catch (Exception e) {
-            logger.warn("There are no Draft Provider entries in DB");
-        }
-
         List<CatalogueBundle> catalogues = new ArrayList<>();
         ff.getFilter().remove("published");
         try {
@@ -155,6 +149,8 @@ public class InMemoryAuthoritiesMapper implements AuthoritiesMapper {
         updateAuthorities();
 
         Set<GrantedAuthority> authorities = new HashSet<>();
+
+        authorities.add(new SimpleGrantedAuthority("ROLE_USER"));
 
         try {
             if (!lock.tryLock(10, TimeUnit.SECONDS)) {
@@ -207,6 +203,24 @@ public class InMemoryAuthoritiesMapper implements AuthoritiesMapper {
         for (Map.Entry<String, SimpleGrantedAuthority> role : newRoles.entrySet()) {
             roles.putIfAbsent(role.getKey(), new HashSet<>());
             roles.get(role.getKey()).add(role.getValue());
+        }
+    }
+
+    @EventListener
+    public void onPropertyChange(PropertyChangeEvent event) {
+        if ("catalogue.admins".equals(event.getPropertyName())
+                || "catalogue.onboarding-team".equals(event.getPropertyName())) {
+            updateAdminsAndEpot();
+        }
+    }
+
+    private void updateAdminsAndEpot() {
+        adminsAndEpot.clear();
+        for (String admin : catalogueProperties.getAdmins()) {
+            adminsAndEpot.put(admin, Set.of(new SimpleGrantedAuthority("ROLE_ADMIN")));
+        }
+        for (String epot : catalogueProperties.getOnboardingTeam()) {
+            adminsAndEpot.put(epot, Set.of(new SimpleGrantedAuthority("ROLE_EPOT")));
         }
     }
 }

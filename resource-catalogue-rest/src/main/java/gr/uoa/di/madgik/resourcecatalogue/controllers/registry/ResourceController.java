@@ -34,7 +34,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Map;
 
-@RequestMapping(consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE}, produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+@RequestMapping(consumes = {MediaType.APPLICATION_JSON_VALUE}, produces = {MediaType.APPLICATION_JSON_VALUE})
 public abstract class ResourceController<T extends Identifiable> {
     protected final ResourceService<T> service;
 
@@ -44,7 +44,7 @@ public abstract class ResourceController<T extends Identifiable> {
         this.service = service;
     }
 
-    @GetMapping(path = "{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    @GetMapping(path = "{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<T> get(@PathVariable("id") String id, @Parameter(hidden = true) Authentication authentication) {
         return new ResponseEntity<>(service.get(id), HttpStatus.OK);
     }
@@ -86,7 +86,7 @@ public abstract class ResourceController<T extends Identifiable> {
 
     // Filter a list of Resources based on a set of filters.
     @BrowseParameters
-    @GetMapping(produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    @GetMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<Paging<T>> getAll(@Parameter(hidden = true) @RequestParam MultiValueMap<String, Object> allRequestParams, @Parameter(hidden = true) Authentication auth) {
         FacetFilter ff = FacetFilter.from(allRequestParams);
         return new ResponseEntity<>(service.getAll(ff, null), HttpStatus.OK);

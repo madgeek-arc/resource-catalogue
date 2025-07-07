@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright 2017-2025 OpenAIRE AMKE & Athena Research and Innovation Center
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,23 +14,29 @@
  * limitations under the License.
  */
 
-package gr.uoa.di.madgik.resourcecatalogue.utils;
+package gr.uoa.di.madgik.resourcecatalogue.service;
 
-public class PublicResourceUtils {
+import gr.uoa.di.madgik.registry.domain.Resource;
+
+public interface ResourceCatalogueService<T> extends ResourceService<T> {
 
     /**
-     * Creates public ID for the following resources:
-     * Provider, Service, Datasource, Helpdesk, Monitoring, Training Resource, Interoperability Record
-     * Configuration Template Instance, Resource Interoperability Record
+     * Get resource of a specific catalogue and level
      *
      * @param id          resource ID
-     * @param catalogueId resource catalogue ID
-     * @return public id
+     * @param catalogueId catalogue ID
+     * @param published   true/false
+     * @return {@link T}
      */
-    public static String createPublicResourceId(String id, String catalogueId) {
-        String[] parts = id.split("/");
-        String prefix = parts[0];
-        String suffix = parts[1];
-        return prefix + "/" + catalogueId + "." + suffix;
-    }
+    T get(String id, String catalogueId, boolean published);
+
+    /**
+     * Search for a resource of a specific catalogue and level
+     *
+     * @param id          resource ID
+     * @param catalogueId catalogue ID
+     * @param published   true/false
+     * @return {@link Resource}
+     */
+    Resource getResource(String id, String catalogueId, boolean published);
 }

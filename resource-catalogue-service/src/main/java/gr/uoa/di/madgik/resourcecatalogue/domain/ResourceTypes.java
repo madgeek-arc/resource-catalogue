@@ -17,6 +17,7 @@
 package gr.uoa.di.madgik.resourcecatalogue.domain;
 
 public enum ResourceTypes {
+    ADAPTER,
     CONFIGURATION_TEMPLATE,
     CONFIGURATION_TEMPLATE_INSTANCE,
     DATASOURCE,

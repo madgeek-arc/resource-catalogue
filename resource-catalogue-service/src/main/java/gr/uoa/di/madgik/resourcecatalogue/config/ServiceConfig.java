@@ -37,7 +37,6 @@ import org.springframework.web.util.UrlPathHelper;
 import java.util.Random;
 
 @Configuration
-@EnableSpringHttpSession
 @EnableAspectJAutoProxy
 @EnableAsync
 @EnableConfigurationProperties(CatalogueProperties.class)

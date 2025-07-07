@@ -33,4 +33,11 @@ public interface IdCreator {
      * @return {@link String}
      */
     String sanitizeString(String string);
+
+    /**
+     * Validate the given ID - used for external Catalogue resources
+     *
+     * @param id String
+     */
+    void validateId(String id);
 }

@@ -61,6 +61,8 @@ public class Vocabulary implements Identifiable {
     }
 
     public enum Type {
+        // Node
+        NODE("Node"),
         // Provider
         PROVIDER_AREA_OF_ACTIVITY("Provider area of activity"),
         PROVIDER_ESFRI_TYPE("Provider esfri type"),
@@ -101,6 +103,7 @@ public class Vocabulary implements Identifiable {
         DATASOURCE_STATE("Datasource state"),
         TEMPLATE_STATE("Template state"),
         INTEROPERABILITY_RECORD_STATE("Interoperability Record state"),
+        ADAPTER_STATE("Adapter state"),
         // Datasource
         DS_RESEARCH_ENTITY_TYPE("Research entity type"),
         DS_PERSISTENT_IDENTITY_SCHEME("Persistent identity scheme"),
@@ -114,6 +117,9 @@ public class Vocabulary implements Identifiable {
         TR_EXPERTISE_LEVEL("Training Resource expertise level"),
         TR_CONTENT_RESOURCE_TYPE("Training Resource content resource type"),
         TR_QUALIFICATION("Training Resource qualification"),
+        // Adapter
+        ADAPTER_PROGRAMMING_LANGUAGE("Adapter programming language"),
+        ADAPTER_LICENSE("Adapter license"),
         // Monitoring
         MONITORING_MONITORED_BY("Monitored by"),
         // Bundle Extras
