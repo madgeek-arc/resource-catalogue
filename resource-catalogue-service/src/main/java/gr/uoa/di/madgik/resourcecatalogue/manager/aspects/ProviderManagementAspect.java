@@ -511,7 +511,8 @@ public class ProviderManagementAspect {
     public void addAdapterAsPublic(final AdapterBundle adapterBundle) {
         try {
             //TODO: Refactor if Adapters can belong to a different from the Project's Catalogue
-            publicAdapterManager.get(adapterBundle.getIdentifiers().getPid());
+            publicAdapterManager.get(adapterBundle.getIdentifiers().getPid(),
+                    adapterBundle.getAdapter().getCatalogueId(), true);
         } catch (ResourceException | ResourceNotFoundException e) {
             publicAdapterManager.add(ObjectUtils.clone(adapterBundle), null);
         }
