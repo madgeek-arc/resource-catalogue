@@ -43,14 +43,14 @@ public class Service implements Identifiable {
     /**
      * An abbreviation of the Resource Name as assigned by the Provider
      */
-    @Schema
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     @FieldValidation
     private String abbreviation;
 
     /**
      * Resource Full Name as assigned by the Provider.
      */
-    @Schema
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     @FieldValidation
     private String name;
 
@@ -65,7 +65,7 @@ public class Service implements Identifiable {
     /**
      * The name (or abbreviation) of the organisation that manages or delivers the resource, or that coordinates resource delivery in a federated scenario.
      */
-    @Schema
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     @FieldValidation(containsId = true, idClass = Provider.class)
     private String resourceOrganisation;
 
