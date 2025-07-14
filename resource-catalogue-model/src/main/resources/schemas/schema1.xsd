@@ -990,6 +990,213 @@ Criteria for submitting content to the repository as well as product preparation
       
   </xs:complexType>
     
+  <xs:complexType name="deployableService">
+        
+    <xs:sequence>
+            
+      <xs:element minOccurs="0" name="acronym" type="xs:string">
+        <xs:annotation>
+          <xs:documentation><![CDATA[Acronym of the Resource.]]></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+            
+      <xs:element minOccurs="0" name="catalogueId" type="xs:string">
+        <xs:annotation>
+          <xs:documentation><![CDATA[The Catalogue this Resource is originally registered at.]]></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+            
+      <xs:element maxOccurs="unbounded" minOccurs="0" name="creators" nillable="true" type="creator">
+        <xs:annotation>
+          <xs:documentation><![CDATA[Creators]]></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+            
+      <xs:element minOccurs="0" name="description" type="xs:string">
+        <xs:annotation>
+          <xs:documentation><![CDATA[A high-level description in fairly non-technical terms of a) what the Resource does, functionality it provides
+and Resources it enables to access.]]></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+            
+      <xs:element minOccurs="0" name="id" type="xs:string">
+        <xs:annotation>
+          <xs:documentation><![CDATA[A persistent identifier, a unique reference to the Deployable Service.]]></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+            
+      <xs:element minOccurs="0" name="lastUpdate" type="xs:dateTime">
+        <xs:annotation>
+          <xs:documentation><![CDATA[Date of the latest update of the Resource.]]></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+            
+      <xs:element minOccurs="0" name="license" type="xs:string">
+        <xs:annotation>
+          <xs:documentation><![CDATA[Software/Code license (e.g., MIT, Apache, GPL)]]></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+            
+      <xs:element minOccurs="0" name="logo" type="xs:anyURI">
+        <xs:annotation>
+          <xs:documentation><![CDATA[Link to the logo/visual identity of the Resource. The logo will be visible at the Portal.]]></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+            
+      <xs:element minOccurs="0" name="name" type="xs:string">
+        <xs:annotation>
+          <xs:documentation><![CDATA[Resource Full Name as assigned by the Provider.]]></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+            
+      <xs:element minOccurs="0" name="node" type="xs:string">
+        <xs:annotation>
+          <xs:documentation><![CDATA[Resource's original Node]]></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+            
+      <xs:element minOccurs="0" name="resourceOrganisation" type="xs:string">
+        <xs:annotation>
+          <xs:documentation><![CDATA[The name (or abbreviation) of the organisation that manages or delivers the resource, or that coordinates
+resource delivery in a federated scenario.]]></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+            
+      <xs:element maxOccurs="unbounded" minOccurs="0" name="scientificDomains" nillable="true" type="serviceProviderDomain">
+        <xs:annotation>
+          <xs:documentation><![CDATA[The branch of science, scientific discipline that is related to the Resource.]]></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+            
+      <xs:element minOccurs="0" name="tagline" type="xs:string">
+        <xs:annotation>
+          <xs:documentation><![CDATA[Short catch-phrase for marketing and advertising purposes. It will be usually displayed close to the Resource
+name and should refer to the main value or purpose of the Resource.]]></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+            
+      <xs:element maxOccurs="unbounded" minOccurs="0" name="tags" nillable="true" type="xs:string">
+        <xs:annotation>
+          <xs:documentation><![CDATA[Keywords associated to the Resource to simplify search by relevant keywords.]]></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+            
+      <xs:element minOccurs="0" name="url" type="xs:anyURI">
+        <xs:annotation>
+          <xs:documentation><![CDATA[The URL where the TOSCA template to deploy this service is stored.]]></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+            
+      <xs:element minOccurs="0" name="version" type="xs:string">
+        <xs:annotation>
+          <xs:documentation><![CDATA[Version of the Resource.]]></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+          
+    </xs:sequence>
+      
+  </xs:complexType>
+    
+  <xs:complexType name="creator">
+        
+    <xs:sequence>
+            
+      <xs:element minOccurs="0" name="creatorAffiliationInfo" type="creatorAffiliationInfo">
+        <xs:annotation>
+          <xs:documentation><![CDATA[Affiliation]]></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+            
+      <xs:element minOccurs="0" name="creatorNameTypeInfo" type="creatorNameTypeInfo">
+        <xs:annotation>
+          <xs:documentation><![CDATA[Creator's full name and name type]]></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+            
+      <xs:element minOccurs="0" name="familyName" type="xs:string">
+        <xs:annotation>
+          <xs:documentation><![CDATA[The surname or last name of the creator.]]></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+            
+      <xs:element minOccurs="0" name="givenName" type="xs:string">
+        <xs:annotation>
+          <xs:documentation><![CDATA[The personal or first name of the creator.]]></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+            
+      <xs:element minOccurs="0" name="nameIdentifier" type="xs:string">
+        <xs:annotation>
+          <xs:documentation><![CDATA[Uniquely identifies an individual or legal entity, according to various schemes.]]></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+          
+    </xs:sequence>
+      
+  </xs:complexType>
+    
+  <xs:complexType name="creatorAffiliationInfo">
+        
+    <xs:sequence>
+            
+      <xs:element minOccurs="0" name="affiliation" type="xs:string">
+        <xs:annotation>
+          <xs:documentation><![CDATA[The organizational or institutional affiliation of the creator.]]></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+            
+      <xs:element minOccurs="0" name="affiliationIdentifier" type="xs:string">
+        <xs:annotation>
+          <xs:documentation><![CDATA[Uniquely identifies the organizational affiliation of the creator.]]></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+          
+    </xs:sequence>
+      
+  </xs:complexType>
+    
+  <xs:complexType name="creatorNameTypeInfo">
+        
+    <xs:sequence>
+            
+      <xs:element minOccurs="0" name="creatorName" type="xs:string">
+        <xs:annotation>
+          <xs:documentation><![CDATA[The full name of the creator.]]></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+            
+      <xs:element minOccurs="0" name="nameType" type="xs:string">
+        <xs:annotation>
+          <xs:documentation><![CDATA[The type of name]]></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+          
+    </xs:sequence>
+      
+  </xs:complexType>
+    
+  <xs:complexType name="deployableServiceBundle">
+        
+    <xs:complexContent>
+            
+      <xs:extension base="bundle">
+                
+        <xs:sequence>
+                    
+          <xs:element minOccurs="0" name="auditState" type="xs:string"/>
+                    
+          <xs:element minOccurs="0" name="deployableService" type="deployableService"/>
+                    
+          <xs:element minOccurs="0" name="status" type="xs:string"/>
+                  
+        </xs:sequence>
+              
+      </xs:extension>
+          
+    </xs:complexContent>
+      
+  </xs:complexType>
+    
   <xs:complexType name="eoscifGuidelines">
         
     <xs:sequence>
@@ -1218,84 +1425,6 @@ a Provider's design towards interoperability based on the guideline.]]></xs:docu
       <xs:element minOccurs="0" name="updated" type="xs:string">
         <xs:annotation>
           <xs:documentation><![CDATA[Time/date the record was last saved, with or without modifications.]]></xs:documentation>
-        </xs:annotation>
-      </xs:element>
-          
-    </xs:sequence>
-      
-  </xs:complexType>
-    
-  <xs:complexType name="creator">
-        
-    <xs:sequence>
-            
-      <xs:element minOccurs="0" name="creatorAffiliationInfo" type="creatorAffiliationInfo">
-        <xs:annotation>
-          <xs:documentation><![CDATA[Affiliation]]></xs:documentation>
-        </xs:annotation>
-      </xs:element>
-            
-      <xs:element minOccurs="0" name="creatorNameTypeInfo" type="creatorNameTypeInfo">
-        <xs:annotation>
-          <xs:documentation><![CDATA[Creator's full name and name type]]></xs:documentation>
-        </xs:annotation>
-      </xs:element>
-            
-      <xs:element minOccurs="0" name="familyName" type="xs:string">
-        <xs:annotation>
-          <xs:documentation><![CDATA[The surname or last name of the creator.]]></xs:documentation>
-        </xs:annotation>
-      </xs:element>
-            
-      <xs:element minOccurs="0" name="givenName" type="xs:string">
-        <xs:annotation>
-          <xs:documentation><![CDATA[The personal or first name of the creator.]]></xs:documentation>
-        </xs:annotation>
-      </xs:element>
-            
-      <xs:element minOccurs="0" name="nameIdentifier" type="xs:string">
-        <xs:annotation>
-          <xs:documentation><![CDATA[Uniquely identifies an individual or legal entity, according to various schemes.]]></xs:documentation>
-        </xs:annotation>
-      </xs:element>
-          
-    </xs:sequence>
-      
-  </xs:complexType>
-    
-  <xs:complexType name="creatorAffiliationInfo">
-        
-    <xs:sequence>
-            
-      <xs:element minOccurs="0" name="affiliation" type="xs:string">
-        <xs:annotation>
-          <xs:documentation><![CDATA[The organizational or institutional affiliation of the creator.]]></xs:documentation>
-        </xs:annotation>
-      </xs:element>
-            
-      <xs:element minOccurs="0" name="affiliationIdentifier" type="xs:string">
-        <xs:annotation>
-          <xs:documentation><![CDATA[Uniquely identifies the organizational affiliation of the creator.]]></xs:documentation>
-        </xs:annotation>
-      </xs:element>
-          
-    </xs:sequence>
-      
-  </xs:complexType>
-    
-  <xs:complexType name="creatorNameTypeInfo">
-        
-    <xs:sequence>
-            
-      <xs:element minOccurs="0" name="creatorName" type="xs:string">
-        <xs:annotation>
-          <xs:documentation><![CDATA[The full name of the creator.]]></xs:documentation>
-        </xs:annotation>
-      </xs:element>
-            
-      <xs:element minOccurs="0" name="nameType" type="xs:string">
-        <xs:annotation>
-          <xs:documentation><![CDATA[The type of name]]></xs:documentation>
         </xs:annotation>
       </xs:element>
           
