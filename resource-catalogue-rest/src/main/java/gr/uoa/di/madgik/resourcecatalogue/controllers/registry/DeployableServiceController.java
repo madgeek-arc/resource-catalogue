@@ -178,7 +178,7 @@ public class DeployableServiceController {
         ff.setResourceType("deployable_service");
         ff.addFilter("published", false);
         ff.addFilter("active", true);
-        ff.addFilter("status", "approved deployable service");
+        ff.addFilter("status", "approved resource");
         Paging<DeployableService> paging = genericResourceService.getResults(ff).map(r -> ((DeployableServiceBundle) r).getPayload());
         return ResponseEntity.ok(paging);
     }
@@ -304,7 +304,7 @@ public class DeployableServiceController {
                                                                               @RequestParam MultiValueMap<String, Object> allRequestParams,
                                                                               @Parameter(hidden = true) Authentication auth) {
         FacetFilter ff = FacetFilter.from(allRequestParams);
-        ff.addFilter("status", "approved deployable service");
+        ff.addFilter("status", "approved resource");
         ff.addFilter("published", false);
         Paging<DeployableServiceBundle> paging = service.getRandomResources(ff, auditingInterval, auth);
         return new ResponseEntity<>(paging, HttpStatus.OK);

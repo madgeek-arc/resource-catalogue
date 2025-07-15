@@ -285,7 +285,7 @@ public class ProviderManagementAspect {
             "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.DeployableServiceManager.changeProvider(..))",
             returning = "deployableServiceBundle")
     public void addResourceAsPublic(final DeployableServiceBundle deployableServiceBundle) {
-        if (deployableServiceBundle.getStatus().equals("approved deployable service") && deployableServiceBundle.isActive()) {
+        if (deployableServiceBundle.getStatus().equals("approved resource") && deployableServiceBundle.isActive()) {
             try {
                 publicDeployableServiceManager.get(deployableServiceBundle.getIdentifiers().getPid(),
                         deployableServiceBundle.getDeployableService().getCatalogueId(), true);
@@ -490,7 +490,7 @@ public class ProviderManagementAspect {
                 if (providerBundle.getTemplateStatus().equals("no template status") || providerBundle.getTemplateStatus().equals("rejected template")) {
                     logger.debug("Updating state of Provider with id '{}' : '{}' --> to '{}'",
                             bundle.getDeployableService().getResourceOrganisation(), providerBundle.getTemplateStatus(), "pending template");
-                    deployableServiceService.verify(bundle.getDeployableService().getId(), "pending deployable service", false, securityService.getAdminAccess());
+                    deployableServiceService.verify(bundle.getDeployableService().getId(), "pending resource", false, securityService.getAdminAccess());
                 }
             } catch (RuntimeException e) {
                 logger.error(e.getMessage(), e);

@@ -226,9 +226,9 @@ public class DeployableServiceManager extends ResourceCatalogueManager<Deployabl
         ret.setAuditState(commonMethods.determineAuditState(ret.getLoggingInfo()));
 
         // if Resource's status = "rejected resource", update to "pending resource" & Provider templateStatus to "pending template"
-        if (existingDeployableService.getStatus().equals(vocabularyService.get("rejected deployable service").getId())) {
+        if (existingDeployableService.getStatus().equals(vocabularyService.get("rejected resource").getId())) {
             if (providerBundle.getTemplateStatus().equals(vocabularyService.get("rejected template").getId())) {
-                ret.setStatus(vocabularyService.get("pending deployable service").getId());
+                ret.setStatus(vocabularyService.get("pending resource").getId());
                 ret.setActive(false);
                 providerBundle.setTemplateStatus(vocabularyService.get("pending template").getId());
                 providerService.update(providerBundle, null, auth);
@@ -278,7 +278,7 @@ public class DeployableServiceManager extends ResourceCatalogueManager<Deployabl
             }
         }
         // else return the Deployable Service ONLY if it is active
-        if (deployableServiceBundle.getStatus().equals(vocabularyService.get("approved deployable service").getId())) {
+        if (deployableServiceBundle.getStatus().equals(vocabularyService.get("approved resource").getId())) {
             return deployableServiceBundle;
         }
         throw new InsufficientAuthenticationException("You cannot view the specific Deployable Service");
@@ -307,11 +307,11 @@ public class DeployableServiceManager extends ResourceCatalogueManager<Deployabl
         LoggingInfo loggingInfo;
 
         switch (status) {
-            case "pending deployable service":
+            case "pending resource":
                 // update Provider's templateStatus
                 resourceProvider.setTemplateStatus("pending template");
                 break;
-            case "approved deployable service":
+            case "approved resource":
                 deployableServiceBundle.setActive(active);
                 loggingInfo = commonMethods.createLoggingInfo(auth, LoggingInfo.Types.ONBOARD.getKey(),
                         LoggingInfo.ActionType.APPROVED.getKey());
@@ -325,7 +325,7 @@ public class DeployableServiceManager extends ResourceCatalogueManager<Deployabl
                 // update Provider's templateStatus
                 resourceProvider.setTemplateStatus("approved template");
                 break;
-            case "rejected deployable service":
+            case "rejected resource":
                 deployableServiceBundle.setActive(false);
                 loggingInfo = commonMethods.createLoggingInfo(auth, LoggingInfo.Types.ONBOARD.getKey(),
                         LoggingInfo.ActionType.REJECTED.getKey());
@@ -375,8 +375,8 @@ public class DeployableServiceManager extends ResourceCatalogueManager<Deployabl
         String activeProvider = "";
         deployableServiceBundle = get(deployableServiceId, catalogueId, false);
 
-        if ((deployableServiceBundle.getStatus().equals(vocabularyService.get("pending deployable service").getId()) ||
-                deployableServiceBundle.getStatus().equals(vocabularyService.get("rejected deployable service").getId())) && !deployableServiceBundle.isActive()) {
+        if ((deployableServiceBundle.getStatus().equals(vocabularyService.get("pending resource").getId()) ||
+                deployableServiceBundle.getStatus().equals(vocabularyService.get("rejected resource").getId())) && !deployableServiceBundle.isActive()) {
             throw new ResourceException(String.format("You cannot activate this Deployable Service, because it's Inactive with status = [%s]",
                     deployableServiceBundle.getStatus()), HttpStatus.CONFLICT);
         }
@@ -528,7 +528,7 @@ public class DeployableServiceManager extends ResourceCatalogueManager<Deployabl
     public Paging<DeployableServiceBundle> getRandomResources(FacetFilter ff, String auditingInterval, Authentication auth) {
         FacetFilter facetFilter = new FacetFilter();
         facetFilter.setQuantity(maxQuantity);
-        facetFilter.addFilter("status", "approved deployable service");
+        facetFilter.addFilter("status", "approved resource");
         facetFilter.addFilter("published", false);
         Browsing<DeployableServiceBundle> browsing = getAll(facetFilter, auth);
         List<DeployableServiceBundle> deployableServicesToBeAudited = new ArrayList<>();
@@ -556,7 +556,7 @@ public class DeployableServiceManager extends ResourceCatalogueManager<Deployabl
         ff.addFilter("published", false);
         List<DeployableServiceBundle> allProviderDeployableServices = getAll(ff, auth).getResults();
         for (DeployableServiceBundle deployableServiceBundle : allProviderDeployableServices) {
-            if (deployableServiceBundle.getStatus().equals(vocabularyService.get("pending deployable service").getId())) {
+            if (deployableServiceBundle.getStatus().equals(vocabularyService.get("pending resource").getId())) {
                 return deployableServiceBundle;
             }
         }
