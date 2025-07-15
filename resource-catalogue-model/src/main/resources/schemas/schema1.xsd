@@ -1031,12 +1031,6 @@ and Resources it enables to access.]]></xs:documentation>
         </xs:annotation>
       </xs:element>
             
-      <xs:element minOccurs="0" name="license" type="xs:string">
-        <xs:annotation>
-          <xs:documentation><![CDATA[Software/Code license (e.g., MIT, Apache, GPL)]]></xs:documentation>
-        </xs:annotation>
-      </xs:element>
-            
       <xs:element minOccurs="0" name="logo" type="xs:anyURI">
         <xs:annotation>
           <xs:documentation><![CDATA[Link to the logo/visual identity of the Resource. The logo will be visible at the Portal.]]></xs:documentation>
@@ -1065,6 +1059,12 @@ resource delivery in a federated scenario.]]></xs:documentation>
       <xs:element maxOccurs="unbounded" minOccurs="0" name="scientificDomains" nillable="true" type="serviceProviderDomain">
         <xs:annotation>
           <xs:documentation><![CDATA[The branch of science, scientific discipline that is related to the Resource.]]></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+            
+      <xs:element minOccurs="0" name="softwareLicense" type="xs:string">
+        <xs:annotation>
+          <xs:documentation><![CDATA[Software/Code license (e.g., MIT, Apache, GPL)]]></xs:documentation>
         </xs:annotation>
       </xs:element>
             

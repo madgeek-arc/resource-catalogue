@@ -86,6 +86,8 @@ public abstract class ResourceCatalogueManager<T extends Identifiable> extends R
             return ((ServiceBundle) t).getService().getCatalogueId();
         } else if (t instanceof TrainingResourceBundle) {
             return ((TrainingResourceBundle) t).getTrainingResource().getCatalogueId();
+        } else if (t instanceof DeployableServiceBundle) {
+            return ((DeployableServiceBundle) t).getDeployableService().getCatalogueId();
         } else if (t instanceof InteroperabilityRecordBundle) {
             return ((InteroperabilityRecordBundle) t).getInteroperabilityRecord().getCatalogueId();
         } else if (t instanceof ResourceInteroperabilityRecordBundle) {

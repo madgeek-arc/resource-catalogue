@@ -107,9 +107,6 @@
       "type" : "string",
       "format" : "date-time"
     },
-    "license" : {
-      "type" : "string"
-    },
     "logo" : {
       "$ref" : "#/$defs/URL"
     },
@@ -127,6 +124,9 @@
       "items" : {
         "$ref" : "#/$defs/ServiceProviderDomain"
       }
+    },
+    "softwareLicense" : {
+      "type" : "string"
     },
     "tagline" : {
       "type" : "string"

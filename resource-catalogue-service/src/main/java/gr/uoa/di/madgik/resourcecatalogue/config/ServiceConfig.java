@@ -44,19 +44,19 @@ public class ServiceConfig {
         return urlPathHelper;
     }
 
-    @Bean
-    JAXBContext eicJAXBContext() throws JAXBException {
-        return JAXBContext.newInstance(Event.class, Provider.class, Catalogue.class, CatalogueBundle.class,
-                Service.class, User.class, ServiceBundle.class, VocabularyCuration.class, VocabularyEntryRequest.class,
-                ProviderBundle.class, Vocabulary.class, DatasourceBundle.class, Datasource.class,
-                ProviderMainContact.class, ProviderPublicContact.class, ResourceInteroperabilityRecordBundle.class,
-                ServiceMainContact.class, ServicePublicContact.class, ProviderLocation.class, ProviderRequest.class,
-                Helpdesk.class, Monitoring.class, HelpdeskBundle.class, MonitoringBundle.class, Metric.class,
-                ResourceExtras.class, InteroperabilityRecord.class, InteroperabilityRecordBundle.class,
-                ResourceInteroperabilityRecord.class, TrainingResource.class, TrainingResourceBundle.class,
-                ConfigurationTemplateBundle.class, ConfigurationTemplate.class, ConfigurationTemplateInstance.class,
-                ConfigurationTemplateInstanceBundle.class);
-    }
+//    @Bean
+//    JAXBContext eicJAXBContext() throws JAXBException {
+//        return JAXBContext.newInstance(Event.class, Provider.class, Catalogue.class, CatalogueBundle.class,
+//                Service.class, User.class, ServiceBundle.class, VocabularyCuration.class, VocabularyEntryRequest.class,
+//                ProviderBundle.class, Vocabulary.class, DatasourceBundle.class, Datasource.class,
+//                ProviderMainContact.class, ProviderPublicContact.class, ResourceInteroperabilityRecordBundle.class,
+//                ServiceMainContact.class, ServicePublicContact.class, ProviderLocation.class, ProviderRequest.class,
+//                Helpdesk.class, Monitoring.class, HelpdeskBundle.class, MonitoringBundle.class, Metric.class,
+//                ResourceExtras.class, InteroperabilityRecord.class, InteroperabilityRecordBundle.class,
+//                ResourceInteroperabilityRecord.class, TrainingResource.class, TrainingResourceBundle.class,
+//                ConfigurationTemplateBundle.class, ConfigurationTemplate.class, ConfigurationTemplateInstance.class,
+//                ConfigurationTemplateInstanceBundle.class);
+//    }
 
     @Bean
     public CookieSerializer cookieSerializer() {
