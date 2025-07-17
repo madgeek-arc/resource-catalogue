@@ -145,15 +145,15 @@ public class DeployableServiceController {
     }
 
     // Accept/Reject a Resource.
-    @PatchMapping(path = "verifyDeployableService/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PatchMapping(path = "verify/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
-    public ResponseEntity<DeployableServiceBundle> verifyDeployableService(@Parameter(description = "The left part of the ID before the '/'")
-                                                                          @PathVariable("prefix") String prefix,
-                                                                          @Parameter(description = "The right part of the ID after the '/'")
-                                                                          @PathVariable("suffix") String suffix,
-                                                                          @RequestParam(required = false) Boolean active,
-                                                                          @RequestParam(required = false) String status,
-                                                                          @Parameter(hidden = true) Authentication auth) {
+    public ResponseEntity<DeployableServiceBundle> verify(@Parameter(description = "The left part of the ID before the '/'")
+                                                          @PathVariable("prefix") String prefix,
+                                                          @Parameter(description = "The right part of the ID after the '/'")
+                                                          @PathVariable("suffix") String suffix,
+                                                          @RequestParam(required = false) Boolean active,
+                                                          @RequestParam(required = false) String status,
+                                                          @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
         DeployableServiceBundle deployableServiceBundle = service.verify(id, status, active, auth);
         logger.info("Updated Deployable Service with id: '{}' | status: '{}' | active: '{}'",
@@ -281,14 +281,14 @@ public class DeployableServiceController {
         return ResponseEntity.ok(paging);
     }
 
-    @PatchMapping(path = "auditResource/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PatchMapping(path = "audit/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
-    public ResponseEntity<DeployableServiceBundle> auditResource(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
-                                                                @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix,
-                                                                @RequestParam("catalogueId") String catalogueId,
-                                                                @RequestParam(required = false) String comment,
-                                                                @RequestParam LoggingInfo.ActionType actionType,
-                                                                @Parameter(hidden = true) Authentication auth) {
+    public ResponseEntity<DeployableServiceBundle> audit(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
+                                                         @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix,
+                                                         @RequestParam("catalogueId") String catalogueId,
+                                                         @RequestParam(required = false) String comment,
+                                                         @RequestParam LoggingInfo.ActionType actionType,
+                                                         @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
         DeployableServiceBundle deployableService = service.audit(id, catalogueId, comment, actionType, auth);
         return new ResponseEntity<>(deployableService, HttpStatus.OK);
@@ -340,7 +340,8 @@ public class DeployableServiceController {
         return ResponseEntity.ok(service.createPublicResource(bundle, auth));
     }
 
-    @PostMapping(path = "addDeployableServiceBundle", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @Hidden
+    @PostMapping(path = "addBundle", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<DeployableServiceBundle> add(@RequestBody DeployableServiceBundle bundle, Authentication authentication) {
         ResponseEntity<DeployableServiceBundle> ret = new ResponseEntity<>(service.add(bundle, authentication), HttpStatus.OK);
@@ -348,7 +349,8 @@ public class DeployableServiceController {
         return ret;
     }
 
-    @PutMapping(path = "updateDeployableServiceBundle", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @Hidden
+    @PutMapping(path = "updateBundle", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<DeployableServiceBundle> update(@RequestBody DeployableServiceBundle deployableServiceBundle,
                                                           @Parameter(hidden = true) Authentication authentication) {
