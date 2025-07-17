@@ -103,11 +103,4 @@ public class VocabularyCurationController extends ResourceController<VocabularyC
                                                      @Parameter(hidden = true) Authentication auth) {
         return super.delete(vocabularyCuration, auth);
     }
-
-    @Override
-    @DeleteMapping(path = "all", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public ResponseEntity<List<VocabularyCuration>> delAll(@Parameter(hidden = true) Authentication auth) {
-        throw new UnsupportedOperationException("Not Implemented Yet!");
-    }
 }
