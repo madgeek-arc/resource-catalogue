@@ -295,8 +295,8 @@ public class DeployableServiceManager extends ResourceCatalogueManager<Deployabl
 
     public DeployableServiceBundle verify(String id, String status, Boolean active, Authentication auth) {
         Vocabulary statusVocabulary = vocabularyService.getOrElseThrow(status);
-        if (!statusVocabulary.getType().equals("Deployable Service state")) {
-            throw new ValidationException(String.format("Vocabulary %s does not consist a Deployable Service state!", status));
+        if (!statusVocabulary.getType().equals("Resource state")) {
+            throw new ValidationException(String.format("Vocabulary %s does not consist a Resource state!", status));
         }
         logger.trace("verifyResource with id: '{}' | status: '{}' | active: '{}'", id, status, active);
         DeployableServiceBundle deployableServiceBundle = get(id, catalogueId, false);
