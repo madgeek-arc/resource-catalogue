@@ -215,15 +215,6 @@ public class ProviderController {
         return ResponseEntity.ok(paging);
     }
 
-    @Deprecated
-    @Operation(summary = "Get a list of services offered by a Provider.")
-    @GetMapping(path = "services/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE})
-    public ResponseEntity<List<? extends Service>> getServices(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
-                                                               @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix,
-                                                               @Parameter(hidden = true) Authentication auth) {
-        throw new UnsupportedOperationException("Method Removed: Contact administrators");
-    }
-
     @BrowseParameters
     @GetMapping(path = "byCatalogue/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.hasAdminAccess(#auth,#id)")

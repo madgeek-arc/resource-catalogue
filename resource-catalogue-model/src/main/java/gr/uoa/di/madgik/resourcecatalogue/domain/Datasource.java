@@ -34,7 +34,7 @@ public class Datasource implements Identifiable {
     @FieldValidation
     private String id;
 
-    @Schema
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     @FieldValidation(containsId = true, idClass = Service.class)
     private String serviceId;
 
@@ -87,7 +87,7 @@ public class Datasource implements Identifiable {
     /**
      * The property defines the jurisdiction of the users of the data source, based on the vocabulary for this property
      */
-    @Schema
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     @FieldValidation(containsId = true, idClass = Vocabulary.class)
     @VocabularyValidation(type = Vocabulary.Type.DS_JURISDICTION)
     private String jurisdiction;
@@ -95,7 +95,7 @@ public class Datasource implements Identifiable {
     /**
      * The specific type of the data source based on the vocabulary defined for this property
      */
-    @Schema
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     @FieldValidation(containsId = true, idClass = Vocabulary.class)
     @VocabularyValidation(type = Vocabulary.Type.DS_CLASSIFICATION)
     private String datasourceClassification;

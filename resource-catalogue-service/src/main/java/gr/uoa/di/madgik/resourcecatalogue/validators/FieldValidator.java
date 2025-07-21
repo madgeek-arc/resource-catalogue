@@ -20,6 +20,7 @@ import gr.uoa.di.madgik.catalogue.exception.ValidationException;
 import gr.uoa.di.madgik.registry.exception.ResourceException;
 import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.annotation.*;
+import gr.uoa.di.madgik.resourcecatalogue.controllers.registry.DeployableServiceController;
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
 import gr.uoa.di.madgik.resourcecatalogue.manager.ProviderManager;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
@@ -50,6 +51,7 @@ public class FieldValidator {
     private final ProviderManager providerService;
     private final ServiceBundleService<ServiceBundle> serviceBundleService;
     private final TrainingResourceService trainingResourceService;
+    private final DeployableServiceService deployableServiceService;
     private final CatalogueService catalogueService;
     private final InteroperabilityRecordService interoperabilityRecordService;
     private final AdapterService adapterService;
@@ -65,6 +67,7 @@ public class FieldValidator {
                           @Lazy TrainingResourceService trainingResourceService,
                           @Lazy CatalogueService catalogueService,
                           @Lazy InteroperabilityRecordService interoperabilityRecordService,
+                          @Lazy DeployableServiceService deployableServiceService,
                           @Lazy AdapterService adapterService) {
         this.vocabularyService = vocabularyService;
         this.providerService = providerService;
@@ -72,6 +75,7 @@ public class FieldValidator {
         this.catalogueService = catalogueService;
         this.interoperabilityRecordService = interoperabilityRecordService;
         this.trainingResourceService = trainingResourceService;
+        this.deployableServiceService = deployableServiceService;
         this.adapterService = adapterService;
     }
 
@@ -105,6 +109,9 @@ public class FieldValidator {
             declaredFields.addAll(Arrays.asList(o.getClass().getSuperclass().getDeclaredFields()));
         }
         if (o instanceof TrainingResourceBundle) {
+            declaredFields.addAll(Arrays.asList(o.getClass().getSuperclass().getDeclaredFields()));
+        }
+        if (o instanceof DeployableServiceBundle) {
             declaredFields.addAll(Arrays.asList(o.getClass().getSuperclass().getDeclaredFields()));
         }
         if (o instanceof InteroperabilityRecordBundle) {
@@ -372,6 +379,12 @@ public class FieldValidator {
                             && trainingResourceService.get(o.toString()) == null) {
                         throw new ValidationException(
                                 String.format("Field '%s' should contain the ID of an existing Training Resource",
+                                        field.getName()));
+                    } else if ((DeployableService.class.equals(annotation.idClass())
+                            || DeployableServiceBundle.class.equals(annotation.idClass()))
+                            && deployableServiceService.get(o.toString()) == null) {
+                        throw new ValidationException(
+                                String.format("Field '%s' should contain the ID of an existing Deployable Service",
                                         field.getName()));
                     } else if ((Catalogue.class.equals(annotation.idClass())
                             || CatalogueBundle.class.equals(annotation.idClass()))

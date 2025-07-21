@@ -44,6 +44,7 @@ public class OIDCSecurityService implements SecurityService {
     private final ServiceBundleService<ServiceBundle> serviceBundleService;
     private final TrainingResourceService trainingResourceService;
     private final InteroperabilityRecordService interoperabilityRecordService;
+    private final DeployableServiceService deployableServiceService;
     private final AdapterService adapterService;
     private final Authentication adminAccess = new AdminAuthentication();
 
@@ -58,6 +59,7 @@ public class OIDCSecurityService implements SecurityService {
                                @Lazy ServiceBundleService<ServiceBundle> serviceBundleService,
                                @Lazy TrainingResourceService trainingResourceService,
                                @Lazy InteroperabilityRecordService interoperabilityRecordService,
+                               @Lazy DeployableServiceService deployableServiceService,
                                @Lazy AdapterService adapterService,
                                CatalogueProperties properties) {
         this.catalogueService = catalogueService;
@@ -65,6 +67,7 @@ public class OIDCSecurityService implements SecurityService {
         this.serviceBundleService = serviceBundleService;
         this.trainingResourceService = trainingResourceService;
         this.interoperabilityRecordService = interoperabilityRecordService;
+        this.deployableServiceService = deployableServiceService;
         this.adapterService = adapterService;
     }
 
@@ -184,13 +187,14 @@ public class OIDCSecurityService implements SecurityService {
     private String getProviderId(String resourceId) {
         String providerId;
         Bundle<?> bundle = determineResourceType(resourceId);
-        if (bundle instanceof ServiceBundle) {
-            providerId = ((ServiceBundle) bundle).getService().getResourceOrganisation();
-        } else if (bundle instanceof TrainingResourceBundle) {
-            providerId = ((TrainingResourceBundle) bundle).getTrainingResource().getResourceOrganisation();
-        } else {
-            providerId = ((InteroperabilityRecordBundle) bundle).getInteroperabilityRecord().getProviderId();
-        }
+        providerId = switch (bundle) {
+            case ServiceBundle serviceBundle -> serviceBundle.getService().getResourceOrganisation();
+            case TrainingResourceBundle trainingResourceBundle ->
+                    trainingResourceBundle.getTrainingResource().getResourceOrganisation();
+            case DeployableServiceBundle deployableServiceBundle ->
+                    deployableServiceBundle.getDeployableService().getResourceOrganisation();
+            case null, default -> ((InteroperabilityRecordBundle) bundle).getInteroperabilityRecord().getProviderId();
+        };
         return providerId;
     }
 
@@ -199,6 +203,8 @@ public class OIDCSecurityService implements SecurityService {
             return serviceBundleService.getOrElseReturnNull(resourceId);
         } else if (isTrainingResource(resourceId)) {
             return trainingResourceService.getOrElseReturnNull(resourceId);
+        } else if (isDeployableService(resourceId)) {
+            return deployableServiceService.getOrElseReturnNull(resourceId);
         } else {
             return interoperabilityRecordService.getOrElseReturnNull(resourceId);
         }
@@ -211,6 +217,11 @@ public class OIDCSecurityService implements SecurityService {
     private boolean isTrainingResource(String id) {
         return trainingResourceService.exists(id);
     }
+
+    private boolean isDeployableService(String id) {
+        return deployableServiceService.exists(id);
+    }
+
 
     @Override
     public boolean providerCanAddResources(Authentication auth, gr.uoa.di.madgik.resourcecatalogue.domain.Service service) {
@@ -232,6 +243,17 @@ public class OIDCSecurityService implements SecurityService {
         }
         ProviderBundle provider = providerService.get(catalogueId, providerId, auth);
         return providerCanAddResources(auth, provider, trainingResource.getId());
+    }
+
+    @Override
+    public boolean providerCanAddResources(Authentication auth, gr.uoa.di.madgik.resourcecatalogue.domain.DeployableService deployableService) {
+        String providerId = deployableService.getResourceOrganisation();
+        String catalogueId = deployableService.getCatalogueId();
+        if (catalogueId == null || catalogueId.isEmpty()) {
+            catalogueId = this.catalogueId;
+        }
+        ProviderBundle provider = providerService.get(catalogueId, providerId, auth);
+        return providerCanAddResources(auth, provider, deployableService.getId());
     }
 
     @Override
@@ -266,9 +288,11 @@ public class OIDCSecurityService implements SecurityService {
         Bundle<?> bundle = determineResourceType(resourceId);
         boolean isServiceBundle = bundle instanceof ServiceBundle;
         boolean isTrainingResource = bundle instanceof TrainingResourceBundle;
+        boolean isDeployableService = bundle instanceof DeployableServiceBundle;
 
         if ((isServiceBundle && serviceBundleService.getAll(ff, getAdminAccess()).getResults().isEmpty()) ||
-                (isTrainingResource && trainingResourceService.getAll(ff, getAdminAccess()).getResults().isEmpty())) {
+                (isTrainingResource && trainingResourceService.getAll(ff, getAdminAccess()).getResults().isEmpty()) ||
+                (isDeployableService && deployableServiceService.getAll(ff, getAdminAccess()).getResults().isEmpty())) {
             return true;
         }
 
@@ -308,9 +332,14 @@ public class OIDCSecurityService implements SecurityService {
         InteroperabilityRecordBundle interoperabilityRecordBundle = interoperabilityRecordService.get(id, catalogueId, published);
         return interoperabilityRecordBundle.isActive();
     }
+
+    @Override
+    public boolean deployableServiceIsActive(String id, String catalogueId, boolean published) {
+        DeployableServiceBundle deployableServiceBundle = deployableServiceService.get(id, catalogueId, published);
+        return deployableServiceBundle.isActive();
+    }
     //endregion
 
-    //TODO: refactor this region now that Maintainers became Users
     //region Adapters
     @Override
     public boolean hasAdapterAccess(Authentication auth, @NotNull String id) {

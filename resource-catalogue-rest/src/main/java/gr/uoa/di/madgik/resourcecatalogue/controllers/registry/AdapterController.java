@@ -43,10 +43,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Profile("beyond")
 @RestController
@@ -262,6 +259,10 @@ public class AdapterController {
 
         allResources.addAll(catalogueRelatedServices);
         allResources.addAll(publicServices);
+
+        //sort
+        allResources.sort(Comparator.comparing(gr.uoa.di.madgik.resourcecatalogue.dto.ParentValue::getName, String.CASE_INSENSITIVE_ORDER));
+
         ret.put("SERVICES_VOC", allResources);
 
         return ResponseEntity.ok(ret);
@@ -294,6 +295,10 @@ public class AdapterController {
 
         allResources.addAll(catalogueRelatedGuidelines);
         allResources.addAll(publicGuidelines);
+
+        //sort
+        allResources.sort(Comparator.comparing(gr.uoa.di.madgik.resourcecatalogue.dto.ParentValue::getName, String.CASE_INSENSITIVE_ORDER));
+
         ret.put("GUIDELINES_VOC", allResources);
 
         return ResponseEntity.ok(ret);
