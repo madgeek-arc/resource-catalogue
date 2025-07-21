@@ -179,7 +179,7 @@ public class HelpdeskManager extends ResourceCatalogueManager<HelpdeskBundle> im
     public void updateBundle(HelpdeskBundle helpdeskBundle, Authentication auth) {
         logger.trace("Attempting to update the Helpdesk: {}", helpdeskBundle);
 
-        Resource existing = getResource(helpdeskBundle.getId());
+        Resource existing = getResource(helpdeskBundle.getId(), helpdeskBundle.getHelpdesk().getCatalogueId(), false);
         if (existing == null) {
             throw new ResourceNotFoundException(helpdeskBundle.getId(), "Helpdesk");
         }

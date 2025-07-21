@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright 2017-2025 OpenAIRE AMKE & Athena Research and Innovation Center
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,24 +19,17 @@ package gr.uoa.di.madgik.resourcecatalogue.domain;
 import gr.uoa.di.madgik.resourcecatalogue.annotation.FieldValidation;
 import gr.uoa.di.madgik.resourcecatalogue.annotation.VocabularyValidation;
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.xml.bind.annotation.XmlElement;
-import jakarta.xml.bind.annotation.XmlElementWrapper;
-import jakarta.xml.bind.annotation.XmlRootElement;
-import jakarta.xml.bind.annotation.XmlType;
 
 import java.net.URI;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 
-@XmlType
-@XmlRootElement
 public class Adapter implements Identifiable {
 
     /**
      * Unique ID (automatically given)
      */
-    @XmlElement
     @Schema(example = "(required on PUT only)")
     @FieldValidation
     private String id;
@@ -44,7 +37,6 @@ public class Adapter implements Identifiable {
     /**
      * Unique name
      */
-    @XmlElement(required = true)
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     @FieldValidation
     private String name;
@@ -52,15 +44,13 @@ public class Adapter implements Identifiable {
     /**
      * The Catalogue this Adapter is originally registered at.
      */
-    @XmlElement
-    @Schema
-    @FieldValidation(nullable = true, containsId = true, idClass = Catalogue.class)
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
+    @FieldValidation(containsId = true, idClass = Catalogue.class)
     private String catalogueId;
 
     /**
      * Adapter's original Node
      */
-    @XmlElement
     @Schema
     @FieldValidation(nullable = true, containsId = true, idClass = Vocabulary.class)
     @VocabularyValidation(type = Vocabulary.Type.NODE)
@@ -69,7 +59,6 @@ public class Adapter implements Identifiable {
     /**
      * Description
      */
-    @XmlElement(required = true)
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     @FieldValidation
     private String description;
@@ -77,7 +66,6 @@ public class Adapter implements Identifiable {
     /**
      * EOSC Guideline or Service ID
      */
-    @XmlElement(required = true)
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     @FieldValidation(containsId = true, idClasses = {Service.class, InteroperabilityRecord.class})
     private LinkedResource linkedResource;
@@ -85,7 +73,6 @@ public class Adapter implements Identifiable {
     /**
      * Short catch-phrase
      */
-    @XmlElement
     @Schema
     @FieldValidation(nullable = true)
     private String tagline;
@@ -93,15 +80,13 @@ public class Adapter implements Identifiable {
     /**
      * logo (image) – could be a URL or base64-encoded string
      */
-    @XmlElement
     @Schema(example = "https://example.com")
     @FieldValidation(nullable = true)
-    private String logo;
+    private URI logo;
 
     /**
      * Documentation webpage (e.g., read-the-docs page)
      */
-    @XmlElement(required = true)
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     @FieldValidation
     private URI documentation;
@@ -109,7 +94,6 @@ public class Adapter implements Identifiable {
     /**
      * Code repository webpage (e.g., a GitHub repository)
      */
-    @XmlElement(required = true)
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     @FieldValidation
     private URI repository;
@@ -117,7 +101,6 @@ public class Adapter implements Identifiable {
     /**
      * Links to the latest package release page(s) (e.g., PyPI project, Docker image, GitHub releases page)
      */
-    @XmlElement
     @Schema
     @FieldValidation(nullable = true)
     private List<URI> releases;
@@ -125,7 +108,6 @@ public class Adapter implements Identifiable {
     /**
      * Programming language
      */
-    @XmlElement(required = true)
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     @FieldValidation(containsId = true, idClass = Vocabulary.class)
     @VocabularyValidation(type = Vocabulary.Type.ADAPTER_PROGRAMMING_LANGUAGE)
@@ -134,7 +116,6 @@ public class Adapter implements Identifiable {
     /**
      * Software/Code license (e.g., MIT, Apache, GPL)
      */
-    @XmlElement(required = true)
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     @FieldValidation(containsId = true, idClass = Vocabulary.class)
     @VocabularyValidation(type = Vocabulary.Type.ADAPTER_LICENSE)
@@ -143,7 +124,6 @@ public class Adapter implements Identifiable {
     /**
      * Software version
      */
-    @XmlElement(required = true)
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     @FieldValidation
     private String version;
@@ -151,7 +131,6 @@ public class Adapter implements Identifiable {
     /**
      * Changes in the latest version
      */
-    @XmlElement(required = true)
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     @FieldValidation
     private String changeLog;
@@ -159,7 +138,6 @@ public class Adapter implements Identifiable {
     /**
      * Latest update date
      */
-    @XmlElement(required = true)
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     @FieldValidation
     private Date lastUpdate;
@@ -167,8 +145,6 @@ public class Adapter implements Identifiable {
     /**
      * Adapter user admins
      */
-    @XmlElementWrapper(name = "admins", required = true)
-    @XmlElement(name = "admin")
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     @FieldValidation
     private List<User> admins;
@@ -176,7 +152,7 @@ public class Adapter implements Identifiable {
     public Adapter() {
     }
 
-    public Adapter(String id, String name, String catalogueId, String node, String description, LinkedResource linkedResource, String tagline, String logo, URI documentation, URI repository, List<URI> releases, String programmingLanguage, String license, String version, String changeLog, Date lastUpdate, List<User> admins) {
+    public Adapter(String id, String name, String catalogueId, String node, String description, LinkedResource linkedResource, String tagline, URI logo, URI documentation, URI repository, List<URI> releases, String programmingLanguage, String license, String version, String changeLog, Date lastUpdate, List<User> admins) {
         this.id = id;
         this.name = name;
         this.catalogueId = catalogueId;
@@ -266,11 +242,11 @@ public class Adapter implements Identifiable {
         this.tagline = tagline;
     }
 
-    public String getLogo() {
+    public URI getLogo() {
         return logo;
     }
 
-    public void setLogo(String logo) {
+    public void setLogo(URI logo) {
         this.logo = logo;
     }
 

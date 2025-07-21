@@ -131,7 +131,8 @@ public class DatasourceManager extends ResourceCatalogueManager<DatasourceBundle
         logger.trace("Attempting to update the Datasource with id '{}'", datasourceBundle.getId());
 
         DatasourceBundle ret = ObjectUtils.clone(datasourceBundle);
-        Resource existingResource = getResource(datasourceBundle.getId(), datasourceBundle.getDatasource().getCatalogueId(), false);
+        Resource existingResource = getResource(datasourceBundle.getId(),
+                datasourceBundle.getDatasource().getCatalogueId(), false);
         DatasourceBundle existingDatasource = deserialize(existingResource);
         // check if there are actual changes in the Datasource
         if (ret.getDatasource().equals(existingDatasource.getDatasource())) {
@@ -182,7 +183,8 @@ public class DatasourceManager extends ResourceCatalogueManager<DatasourceBundle
     public void updateBundle(DatasourceBundle datasourceBundle, Authentication auth) {
         logger.trace("Attempting to update the Datasource: {}", datasourceBundle);
 
-        Resource existing = getResource(datasourceBundle.getId());
+        Resource existing = getResource(datasourceBundle.getId(),
+                datasourceBundle.getDatasource().getCatalogueId(), false);
         if (existing == null) {
             throw new ResourceNotFoundException(datasourceBundle.getId(), "Datasource");
         }

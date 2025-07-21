@@ -17,15 +17,9 @@
 package gr.uoa.di.madgik.resourcecatalogue.domain;
 
 import gr.uoa.di.madgik.resourcecatalogue.annotation.FieldValidation;
-import jakarta.xml.bind.annotation.XmlElement;
-import jakarta.xml.bind.annotation.XmlRootElement;
-import jakarta.xml.bind.annotation.XmlType;
 
-@XmlType
-@XmlRootElement
 public class HelpdeskBundle extends Bundle<Helpdesk> {
 
-    @XmlElement
     @FieldValidation(nullable = true, containsId = true, idClass = Catalogue.class)
     private String catalogueId;
 
@@ -48,7 +42,6 @@ public class HelpdeskBundle extends Bundle<Helpdesk> {
         this.setMetadata(metadata);
     }
 
-    @XmlElement(name = "helpdesk")
     public Helpdesk getHelpdesk() {
         return this.getPayload();
     }

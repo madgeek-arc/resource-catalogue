@@ -1,18 +1,21 @@
 {
   "$schema" : "https://json-schema.org/draft/2020-12/schema",
   "$defs" : {
-    "JSONObject" : {
+    "Map(String,Object)" : {
       "type" : "object",
       "additionalProperties" : false
     }
   },
   "type" : "object",
   "properties" : {
+    "catalogueId" : {
+      "type" : "string"
+    },
     "description" : {
       "type" : "string"
     },
     "formModel" : {
-      "$ref" : "#/$defs/JSONObject"
+      "$ref" : "#/$defs/Map(String,Object)"
     },
     "id" : {
       "type" : "string"
@@ -21,6 +24,9 @@
       "type" : "string"
     },
     "name" : {
+      "type" : "string"
+    },
+    "node" : {
       "type" : "string"
     }
   },

@@ -16,15 +16,8 @@
 
 package gr.uoa.di.madgik.resourcecatalogue.domain;
 
-import jakarta.xml.bind.annotation.XmlElement;
-import jakarta.xml.bind.annotation.XmlRootElement;
-import jakarta.xml.bind.annotation.XmlType;
-
-@XmlType
-@XmlRootElement
 public class Identifiers {
 
-    @XmlElement()
     private String originalId;
 
     public Identifiers() {

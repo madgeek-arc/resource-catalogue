@@ -18,60 +18,44 @@ package gr.uoa.di.madgik.resourcecatalogue.domain;
 
 import gr.uoa.di.madgik.resourcecatalogue.annotation.FieldValidation;
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.xml.bind.annotation.XmlElement;
-import jakarta.xml.bind.annotation.XmlElementWrapper;
-import jakarta.xml.bind.annotation.XmlRootElement;
-import jakarta.xml.bind.annotation.XmlType;
 
 import java.util.Arrays;
 import java.util.List;
 
-@XmlType
-@XmlRootElement
 public class VocabularyCuration implements Identifiable {
 
-    @XmlElement(required = true)
     @Schema
 //    @FieldValidation
     private String id;
 
-    @XmlElementWrapper(required = true, name = "vocabularyEntryRequests")
-    @XmlElement(name = "vocabularyEntryRequest")
     @Schema
     @FieldValidation
     private List<VocabularyEntryRequest> vocabularyEntryRequests;
 
-    @XmlElement(required = true)
     @Schema
     @FieldValidation
     private String entryValueName;
 
-    @XmlElement(required = true)
     @Schema
     @FieldValidation
     private String vocabulary;
 
-    @XmlElement
     @Schema
     @FieldValidation(nullable = true, containsId = true, idClass = Vocabulary.class)
     private String parent;
 
-    @XmlElement(required = true)
     @Schema
     @FieldValidation
     private String status;
 
-    @XmlElement
     @Schema
     @FieldValidation(nullable = true)
     private String rejectionReason;
 
-    @XmlElement
     @Schema
     @FieldValidation(nullable = true)
     private String resolutionDate;
 
-    @XmlElement
     @Schema
     @FieldValidation(nullable = true)
     private String resolutionUser;

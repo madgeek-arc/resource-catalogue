@@ -67,7 +67,8 @@
       "$ref" : "#/$defs/LinkedResource"
     },
     "logo" : {
-      "type" : "string"
+      "type" : "string",
+      "format" : "uri"
     },
     "name" : {
       "type" : "string"

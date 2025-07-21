@@ -19,14 +19,9 @@ package gr.uoa.di.madgik.resourcecatalogue.domain;
 import gr.uoa.di.madgik.resourcecatalogue.annotation.FieldValidation;
 import gr.uoa.di.madgik.resourcecatalogue.annotation.VocabularyValidation;
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.xml.bind.annotation.XmlElement;
-import jakarta.xml.bind.annotation.XmlRootElement;
-import jakarta.xml.bind.annotation.XmlType;
 
 import java.util.Objects;
 
-@XmlType
-@XmlRootElement
 public class ProviderMerilDomain {
 
 
@@ -34,7 +29,6 @@ public class ProviderMerilDomain {
     /**
      * MERIL scientific domain classification.
      */
-    @XmlElement(required = true)
     @Schema
     @FieldValidation(containsId = true, idClass = Vocabulary.class)
     @VocabularyValidation(type = Vocabulary.Type.PROVIDER_MERIL_SCIENTIFIC_DOMAIN)
@@ -43,7 +37,6 @@ public class ProviderMerilDomain {
     /**
      * MERIL scientific subdomain classification.
      */
-    @XmlElement(required = true)
     @Schema
     @FieldValidation(containsId = true, idClass = Vocabulary.class)
     @VocabularyValidation(type = Vocabulary.Type.PROVIDER_MERIL_SCIENTIFIC_SUBDOMAIN)

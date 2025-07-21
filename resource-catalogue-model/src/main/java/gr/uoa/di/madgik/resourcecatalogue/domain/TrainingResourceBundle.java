@@ -16,21 +16,13 @@
 
 package gr.uoa.di.madgik.resourcecatalogue.domain;
 
-import jakarta.xml.bind.annotation.XmlElement;
-import jakarta.xml.bind.annotation.XmlRootElement;
-import jakarta.xml.bind.annotation.XmlType;
-
 import java.util.Objects;
 
 //@Document
-@XmlType
-@XmlRootElement
 public class TrainingResourceBundle extends Bundle<TrainingResource> {
 
-    @XmlElement
     private String status;
 
-    @XmlElement
     private String auditState;
 
     public TrainingResourceBundle() {
@@ -57,7 +49,6 @@ public class TrainingResourceBundle extends Bundle<TrainingResource> {
         super.setId(id);
     }
 
-    @XmlElement(name = "trainingResource")
     public TrainingResource getTrainingResource() {
         return this.getPayload();
     }

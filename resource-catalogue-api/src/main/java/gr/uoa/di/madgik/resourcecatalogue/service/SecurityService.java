@@ -16,7 +16,10 @@
 
 package gr.uoa.di.madgik.resourcecatalogue.service;
 
-import gr.uoa.di.madgik.resourcecatalogue.domain.*;
+import gr.uoa.di.madgik.resourcecatalogue.domain.InteroperabilityRecord;
+import gr.uoa.di.madgik.resourcecatalogue.domain.Service;
+import gr.uoa.di.madgik.resourcecatalogue.domain.TrainingResource;
+import gr.uoa.di.madgik.resourcecatalogue.domain.User;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.security.core.Authentication;
 

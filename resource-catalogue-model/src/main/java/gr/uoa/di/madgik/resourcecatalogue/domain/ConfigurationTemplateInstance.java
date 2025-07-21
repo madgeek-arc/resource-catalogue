@@ -14,61 +14,49 @@
  * limitations under the License.
  */
 
-package gr.uoa.di.madgik.resourcecatalogue.domain.configurationTemplates;
+package gr.uoa.di.madgik.resourcecatalogue.domain;
 
 import gr.uoa.di.madgik.resourcecatalogue.annotation.FieldValidation;
-import gr.uoa.di.madgik.resourcecatalogue.domain.Identifiable;
+import gr.uoa.di.madgik.resourcecatalogue.annotation.VocabularyValidation;
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.xml.bind.annotation.XmlElement;
-import jakarta.xml.bind.annotation.XmlRootElement;
-import jakarta.xml.bind.annotation.XmlType;
 
+import java.util.Map;
 import java.util.Objects;
 
-@XmlType
-@XmlRootElement
 public class ConfigurationTemplateInstance implements Identifiable {
 
-    @XmlElement
     @Schema(example = "(required on PUT only)")
     private String id;
 
-    @XmlElement(required = true)
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     @FieldValidation(containsId = true, containsResourceId = true)
     private String resourceId;
 
-    @XmlElement(required = true)
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     @FieldValidation(containsId = true, idClass = ConfigurationTemplate.class)
     private String configurationTemplateId;
 
-    @XmlElement(required = true)
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
+    @FieldValidation(containsId = true, idClass = Catalogue.class)
+    private String catalogueId;
+    @Schema
+    @FieldValidation(nullable = true, containsId = true, idClass = Vocabulary.class)
+    @VocabularyValidation(type = Vocabulary.Type.NODE)
+    private String node;
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     @FieldValidation
-    private String payload;
+    private Map<String, Object> payload;
 
     public ConfigurationTemplateInstance() {
     }
 
-    public ConfigurationTemplateInstance(String id, String resourceId, String configurationTemplateId, String payload) {
+    public ConfigurationTemplateInstance(String id, String resourceId, String configurationTemplateId, String catalogueId, String node, Map<String, Object> payload) {
         this.id = id;
         this.resourceId = resourceId;
         this.configurationTemplateId = configurationTemplateId;
+        this.catalogueId = catalogueId;
+        this.node = node;
         this.payload = payload;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        ConfigurationTemplateInstance that = (ConfigurationTemplateInstance) o;
-        return Objects.equals(id, that.id) && Objects.equals(resourceId, that.resourceId) && Objects.equals(configurationTemplateId, that.configurationTemplateId) && Objects.equals(payload, that.payload);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(id, resourceId, configurationTemplateId, payload);
     }
 
     @Override
@@ -77,8 +65,22 @@ public class ConfigurationTemplateInstance implements Identifiable {
                 "id='" + id + '\'' +
                 ", resourceId='" + resourceId + '\'' +
                 ", configurationTemplateId='" + configurationTemplateId + '\'' +
+                ", catalogueId='" + catalogueId + '\'' +
+                ", node='" + node + '\'' +
                 ", payload='" + payload + '\'' +
                 '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        ConfigurationTemplateInstance that = (ConfigurationTemplateInstance) o;
+        return Objects.equals(id, that.id) && Objects.equals(resourceId, that.resourceId) && Objects.equals(configurationTemplateId, that.configurationTemplateId) && Objects.equals(catalogueId, that.catalogueId) && Objects.equals(node, that.node) && Objects.equals(payload, that.payload);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, resourceId, configurationTemplateId, catalogueId, node, payload);
     }
 
     @Override
@@ -107,11 +109,27 @@ public class ConfigurationTemplateInstance implements Identifiable {
         this.configurationTemplateId = configurationTemplateId;
     }
 
-    public String getPayload() {
+    public String getCatalogueId() {
+        return catalogueId;
+    }
+
+    public void setCatalogueId(String catalogueId) {
+        this.catalogueId = catalogueId;
+    }
+
+    public String getNode() {
+        return node;
+    }
+
+    public void setNode(String node) {
+        this.node = node;
+    }
+
+    public Map<String, Object> getPayload() {
         return payload;
     }
 
-    public void setPayload(String payload) {
+    public void setPayload(Map<String, Object> payload) {
         this.payload = payload;
     }
 }

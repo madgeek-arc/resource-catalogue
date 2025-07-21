@@ -16,36 +16,22 @@
 
 package gr.uoa.di.madgik.resourcecatalogue.domain;
 
-import jakarta.xml.bind.annotation.XmlElement;
-import jakarta.xml.bind.annotation.XmlElementWrapper;
-import jakarta.xml.bind.annotation.XmlRootElement;
-import jakarta.xml.bind.annotation.XmlType;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-@XmlType
-@XmlRootElement
 public class Metadata {
 
-    @XmlElement(defaultValue = "null")
     private String registeredBy;
 
-    @XmlElement(defaultValue = "null")
     private String registeredAt;
 
-    @XmlElement(defaultValue = "null")
     private String modifiedBy;
 
-    @XmlElement(defaultValue = "null")
     private String modifiedAt;
 
-    @XmlElementWrapper(name = "terms")
-    @XmlElement(name = "term")
     private List<String> terms;
 
-    @XmlElement(defaultValue = "false")
     private boolean published = false;
 
 

@@ -16,20 +16,12 @@
 
 package gr.uoa.di.madgik.resourcecatalogue.domain;
 
-import jakarta.xml.bind.annotation.XmlElement;
-import jakarta.xml.bind.annotation.XmlRootElement;
-import jakarta.xml.bind.annotation.XmlType;
-
 import java.util.Objects;
 
-@XmlType
-@XmlRootElement
 public class InteroperabilityRecordBundle extends Bundle<InteroperabilityRecord> {
 
-    @XmlElement
     private String status;
 
-    @XmlElement
     private String auditState;
 
     public InteroperabilityRecordBundle() {
@@ -55,7 +47,6 @@ public class InteroperabilityRecordBundle extends Bundle<InteroperabilityRecord>
         super.setId(id);
     }
 
-    @XmlElement(name = "interoperabilityRecord")
     public InteroperabilityRecord getInteroperabilityRecord() {
         return this.getPayload();
     }

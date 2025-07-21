@@ -19,8 +19,6 @@ package gr.uoa.di.madgik.resourcecatalogue.domain;
 import gr.uoa.di.madgik.resourcecatalogue.annotation.FieldValidation;
 import gr.uoa.di.madgik.resourcecatalogue.annotation.VocabularyValidation;
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.xml.bind.annotation.XmlElement;
-import jakarta.xml.bind.annotation.XmlElementWrapper;
 
 import java.util.List;
 import java.util.Objects;
@@ -30,7 +28,6 @@ public class PersistentIdentitySystem {
     /**
      * Specify the EntityType to which the persistent identifier is referring to.
      */
-    @XmlElement(required = true)
     @Schema
     @FieldValidation()
     @VocabularyValidation(type = Vocabulary.Type.DS_RESEARCH_ENTITY_TYPE)
@@ -39,8 +36,6 @@ public class PersistentIdentitySystem {
     /**
      * Specify the list of persistent identifier schemes used to refer to EntityTypes.
      */
-    @XmlElementWrapper(required = true, name = "persistentIdentityEntityTypeSchemes")
-    @XmlElement(name = "persistentIdentityEntityType")
     @Schema
     @FieldValidation()
     @VocabularyValidation(type = Vocabulary.Type.DS_PERSISTENT_IDENTITY_SCHEME)

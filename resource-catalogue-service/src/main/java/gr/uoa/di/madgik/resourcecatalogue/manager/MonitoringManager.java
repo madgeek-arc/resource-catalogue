@@ -147,7 +147,8 @@ public class MonitoringManager extends ResourceCatalogueManager<MonitoringBundle
         logger.trace("Attempting to update the Monitoring with id '{}'", monitoringBundle.getId());
 
         MonitoringBundle ret = ObjectUtils.clone(monitoringBundle);
-        Resource existingResource = getResource(monitoringBundle.getId(), monitoringBundle.getMonitoring().getCatalogueId(), false);
+        Resource existingResource = getResource(monitoringBundle.getId(),
+                monitoringBundle.getMonitoring().getCatalogueId(), false);
         MonitoringBundle existingMonitoring = deserialize(existingResource);
         // check if there are actual changes in the Monitoring
         if (ret.getMonitoring().equals(existingMonitoring.getMonitoring())) {
@@ -193,7 +194,8 @@ public class MonitoringManager extends ResourceCatalogueManager<MonitoringBundle
     public void updateBundle(MonitoringBundle monitoringBundle, Authentication auth) {
         logger.trace("Attempting to update the Monitoring: {}", monitoringBundle);
 
-        Resource existing = getResource(monitoringBundle.getId());
+        Resource existing = getResource(monitoringBundle.getId(),
+                monitoringBundle.getMonitoring().getCatalogueId(), false);
         if (existing == null) {
             throw new ResourceNotFoundException(monitoringBundle.getId(), "Monitoring");
         }

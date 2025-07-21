@@ -19,20 +19,14 @@ package gr.uoa.di.madgik.resourcecatalogue.domain;
 import gr.uoa.di.madgik.resourcecatalogue.annotation.FieldValidation;
 import gr.uoa.di.madgik.resourcecatalogue.annotation.VocabularyValidation;
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.xml.bind.annotation.XmlElement;
-import jakarta.xml.bind.annotation.XmlRootElement;
-import jakarta.xml.bind.annotation.XmlType;
 
 import java.util.Objects;
 
-@XmlType
-@XmlRootElement
 public class ServiceProviderDomain {
 
     /**
      * The branch of science, scientific discipline that is related to the resource.
      */
-    @XmlElement(required = true)
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     @FieldValidation(containsId = true, idClass = Vocabulary.class)
     @VocabularyValidation(type = Vocabulary.Type.SCIENTIFIC_DOMAIN)
@@ -41,7 +35,6 @@ public class ServiceProviderDomain {
     /**
      * The sub-branch of science, scientific sub-discipline that is related to the resource.
      */
-    @XmlElement(required = true)
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     @FieldValidation(containsId = true, idClass = Vocabulary.class)
     @VocabularyValidation(type = Vocabulary.Type.SCIENTIFIC_SUBDOMAIN)
