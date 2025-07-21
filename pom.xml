@@ -41,7 +41,7 @@
         <maven-source-plugin.version>3.1.0</maven-source-plugin.version>
         <maven-surefire-plugin.version>3.0.0</maven-surefire-plugin.version>
         <typescript-generator-maven-plugin.version>2.16.538</typescript-generator-maven-plugin.version>
-        <org.apache.commons.version>3.15.0</org.apache.commons.version>
+        <org.apache.commons.version>3.18.0</org.apache.commons.version>
     </properties>
 
     <profiles>

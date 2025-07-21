@@ -233,6 +233,7 @@ catalogue.onboarding-team=
 catalogue.login-redirect=
 catalogue.logout-redirect=
 ## Resource ID Prefixes ##
+catalogue.resources.adapter.id-prefix=adapter
 catalogue.resources.configuration-template.id-prefix=configuration_template
 catalogue.resources.configuration-template-instance.id-prefix=configuration_template_instance
 catalogue.resources.datasource.id-prefix=datasource
