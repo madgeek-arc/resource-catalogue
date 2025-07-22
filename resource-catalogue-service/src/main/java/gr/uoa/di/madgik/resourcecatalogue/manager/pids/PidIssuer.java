@@ -18,6 +18,7 @@ package gr.uoa.di.madgik.resourcecatalogue.manager.pids;
 
 import gr.uoa.di.madgik.resourcecatalogue.config.properties.CatalogueProperties;
 import gr.uoa.di.madgik.resourcecatalogue.config.properties.ResourceProperties;
+import gr.uoa.di.madgik.resourcecatalogue.utils.PidServiceResponse;
 import gr.uoa.di.madgik.resourcecatalogue.utils.RestTemplateTrustManager;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.client5.http.impl.classic.HttpClients;
@@ -35,11 +36,13 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.*;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.reactive.function.client.WebClient;
 
 import javax.net.ssl.SSLContext;
 import java.io.FileInputStream;
@@ -51,6 +54,7 @@ import java.security.PrivateKey;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.util.List;
+import java.util.Map;
 
 @Component
 public class PidIssuer {
@@ -267,5 +271,34 @@ public class PidIssuer {
         } else {
             logger.error("Resource with ID '{}' could not be posted/updated/deleted : [{}]", pid, response.getBody());
         }
+    }
+
+    // TODO: can be used in PidController to fetch the body
+    public Map<String, Object> getResource(String pid) {
+        PidServiceResponse response = getPidServiceResponse(pid);
+        if (response.getStatusCode() == HttpStatus.OK) {
+            return response.getBody();
+        }
+        return null;
+    }
+
+    public PidServiceResponse getPidServiceResponse(String pid) {
+        String prefix = pid.split("/")[0];
+        ResourceProperties resourceProperties = properties.getResourcePropertiesFromPrefix(prefix);
+        PidIssuerConfig config = resourceProperties.getPidIssuer();
+
+        WebClient webClient = WebClient.builder()
+                .baseUrl(config.getUrl())
+                .defaultHeader("Content-Type", "application/json")
+                .build();
+
+        return webClient
+                .get()
+                .uri("/" + pid)
+                .exchangeToMono(response ->
+                        response.bodyToMono(new ParameterizedTypeReference<Map<String, Object>>() {})
+                                .map(body -> new PidServiceResponse(response.statusCode(), body))
+                )
+                .block();
     }
 }
