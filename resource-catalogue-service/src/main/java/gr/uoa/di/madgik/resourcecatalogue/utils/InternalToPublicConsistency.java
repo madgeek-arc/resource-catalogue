@@ -276,7 +276,7 @@ public class InternalToPublicConsistency {
         for (AdapterBundle adapterBundle : allInternalApprovedAdapters) {
             // try and get its Public instance
             try {
-                publicDeployableServiceService.get(adapterBundle.getIdentifiers().getPid(),
+                publicAdapterService.get(adapterBundle.getIdentifiers().getPid(),
                         adapterBundle.getAdapter().getCatalogueId(), true);
             } catch (CatalogueResourceNotFoundException e) {
                 logs.add(String.format("Adapter with ID [%s] of the Catalogue [%s] is missing its Public instance [%s]",
