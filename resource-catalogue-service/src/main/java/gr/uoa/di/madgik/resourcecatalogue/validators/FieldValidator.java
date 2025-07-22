@@ -20,24 +20,31 @@ import gr.uoa.di.madgik.catalogue.exception.ValidationException;
 import gr.uoa.di.madgik.registry.exception.ResourceException;
 import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.annotation.*;
-import gr.uoa.di.madgik.resourcecatalogue.controllers.registry.DeployableServiceController;
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
 import gr.uoa.di.madgik.resourcecatalogue.manager.ProviderManager;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
+import io.netty.channel.ChannelOption;
 import org.apache.commons.validator.routines.EmailValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Lazy;
-import org.springframework.http.client.SimpleClientHttpRequestFactory;
+import org.springframework.http.HttpStatusCode;
+import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.HttpClientErrorException;
-import org.springframework.web.client.HttpStatusCodeException;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.web.reactive.function.client.ClientResponse;
+import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.reactive.function.client.WebClientRequestException;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
+import reactor.core.publisher.Mono;
+import reactor.netty.http.client.HttpClient;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
+import java.net.MalformedURLException;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
+import java.time.Duration;
 import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -280,28 +287,31 @@ public class FieldValidator {
     public void validateUrl(Field field, URL urlForValidation) {
         try {
             String cleanedUrlString = urlForValidation.toString().replaceAll("\\s", "%20");
-            URL cleanedUrl = new URL(cleanedUrlString);
-            URI uri = cleanedUrl.toURI(); // throws exception if malformed
+            URI uri = new URL(cleanedUrlString).toURI(); // validate and clean
 
-            RestTemplate restTemplate = new RestTemplate();
-            SimpleClientHttpRequestFactory requestFactory = new SimpleClientHttpRequestFactory();
-            requestFactory.setConnectTimeout(5000);
-            requestFactory.setReadTimeout(5000);
-            restTemplate.setRequestFactory(requestFactory);
+            // add timeout
+            ReactorClientHttpConnector connector = new ReactorClientHttpConnector(
+                    HttpClient.create()
+                            .responseTimeout(Duration.ofSeconds(5))
+                            .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 5000)
+            );
+            WebClient webClient = WebClient.builder()
+                    .clientConnector(connector)
+                    .build();
 
-            try {
-                restTemplate.headForHeaders(uri);
-            } catch (HttpClientErrorException.MethodNotAllowed e) { // Fallback to GET if HEAD not allowed
-                restTemplate.getForEntity(uri, String.class);
+            ClientResponse response = webClient.get()
+                    .uri(uri)
+                    .exchangeToMono(Mono::just)
+                    .block();
+
+            HttpStatusCode statusCode = response.statusCode();
+            if (!statusCode.is2xxSuccessful()) {
+                String fieldName = (field != null) ? field.getName() : "unknown";
+                throw new ValidationException(
+                        String.format("URL '%s' found on field '%s' responded with error code: %d",
+                                urlForValidation, fieldName, statusCode.value()));
             }
-        } catch (HttpStatusCodeException e) {
-            String fieldName = (field != null) ? field.getName() : "unknown";
-            logger.trace("HTTP status error while validating URL: {}", e.getMessage());
-            throw new ValidationException(
-                    String.format("URL '%s' found on field '%s' responded with error code: %d",
-                            urlForValidation, fieldName, e.getStatusCode().value()));
-        } catch (Exception e) {
-            logger.trace("Error while validating URL: {}", e.getMessage());
+        } catch (URISyntaxException | MalformedURLException | WebClientResponseException | WebClientRequestException e) {
             throw new ValidationException("Failed to validate URL: " + urlForValidation);
         }
     }
