@@ -54,8 +54,7 @@ public class CatalogueExceptionController extends GenericExceptionController {
             logger.debug(malformedUrlEx.getMessage(), ex);
             status = HttpStatus.BAD_REQUEST;
         } else {
-            logger.error(ex.getMessage(), ex);
-            ex = new RuntimeException("Internal Server Error", ex);
+            return super.handleException(req, ex);
         }
 
         return ResponseEntity
