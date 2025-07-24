@@ -19,12 +19,16 @@ package gr.uoa.di.madgik.resourcecatalogue.service.sync;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Datasource;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.web.reactive.function.client.WebClient;
 
 @Service
 public class DatasourceSync extends AbstractSyncService<Datasource> {
 
-    public DatasourceSync(@Value("${sync.host:}") String host, @Value("${sync.token.filepath:}") String filename, @Value("${sync.enable:false}") boolean enabled) {
-        super(host, filename, enabled);
+    public DatasourceSync(@Value("${sync.host:}") String host,
+                          @Value("${sync.token.filepath:}") String filename,
+                          @Value("${sync.enable:false}") boolean enabled,
+                          WebClient.Builder webClientBuilder) {
+        super(host, filename, enabled, webClientBuilder);
     }
 
     @Override

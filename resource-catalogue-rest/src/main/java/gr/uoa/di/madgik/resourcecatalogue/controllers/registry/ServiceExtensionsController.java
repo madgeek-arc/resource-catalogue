@@ -30,7 +30,6 @@ import gr.uoa.di.madgik.resourcecatalogue.service.GenericResourceService;
 import gr.uoa.di.madgik.resourcecatalogue.service.HelpdeskService;
 import gr.uoa.di.madgik.resourcecatalogue.service.MonitoringService;
 import gr.uoa.di.madgik.resourcecatalogue.service.ServiceBundleService;
-import gr.uoa.di.madgik.resourcecatalogue.utils.CreateArgoGrnetHttpRequest;
 import gr.uoa.di.madgik.resourcecatalogue.validators.HelpdeskValidator;
 import gr.uoa.di.madgik.resourcecatalogue.validators.MonitoringValidator;
 import io.swagger.v3.oas.annotations.Hidden;
@@ -332,7 +331,7 @@ public class ServiceExtensionsController {
         return new ResponseEntity<>(monitoringBundle.getMonitoring(), HttpStatus.OK);
     }
 
-//    // Deletes the Helpdesk of the given Service ID of the given Catalogue.
+    // Deletes the Helpdesk of the given Service ID of the given Catalogue.
     @DeleteMapping(path = "/monitoring/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     public ResponseEntity<Monitoring> deleteMonitoringById(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
@@ -375,7 +374,7 @@ public class ServiceExtensionsController {
         String serviceId = prefix + "/" + suffix;
         //TODO: test if url works
         String url = monitoringAvailability + serviceId + "?start_time=" + start_time + "&end_time=" + end_time;
-        String response = CreateArgoGrnetHttpRequest.createHttpRequest(url, monitoringToken);
+        String response = monitoringService.createHttpRequest(url, monitoringToken);
         List<MonitoringStatus> serviceMonitoringStatuses;
         if (response != null) {
             JSONObject obj = new JSONObject(response);
@@ -400,7 +399,7 @@ public class ServiceExtensionsController {
                 url += "?view=details";
             }
         }
-        String response = CreateArgoGrnetHttpRequest.createHttpRequest(url, monitoringToken);
+        String response = monitoringService.createHttpRequest(url, monitoringToken);
         List<MonitoringStatus> serviceMonitoringStatuses;
         if (response != null) {
             JSONObject obj = new JSONObject(response);
@@ -423,7 +422,7 @@ public class ServiceExtensionsController {
         OffsetDateTime odtTo = OffsetDateTime.parse(to + "T23:59:59Z");
         //TODO: test if url works
         String url = monitoringStatus + serviceId + "?start_time=" + odtFrom + "&end_time=" + odtTo;
-        String response = CreateArgoGrnetHttpRequest.createHttpRequest(url, monitoringToken);
+        String response = monitoringService.createHttpRequest(url, monitoringToken);
         List<MonitoringStatus> serviceMonitoringStatuses;
         if (response != null) {
             JSONObject obj = new JSONObject(response);

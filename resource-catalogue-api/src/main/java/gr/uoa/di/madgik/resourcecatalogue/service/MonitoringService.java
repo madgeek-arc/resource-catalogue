@@ -94,4 +94,11 @@ public interface MonitoringService extends ResourceCatalogueService<MonitoringBu
      * @return {@link List<MonitoringStatus>}
      */
     List<MonitoringStatus> createMonitoringStatusObject(JsonArray results);
+
+    /**
+     * @param url   Endpoint
+     * @param token token
+     * @return {@link String}
+     */
+    String createHttpRequest(String url, String token);
 }
