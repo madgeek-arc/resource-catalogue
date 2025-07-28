@@ -56,6 +56,7 @@ public class ProviderManager extends ResourceCatalogueManager<ProviderBundle> im
     Logger logger = LoggerFactory.getLogger(ProviderManager.class);
     private final ServiceBundleService<ServiceBundle> serviceBundleService;
     private final TrainingResourceService trainingResourceService;
+    private final DeployableServiceService deployableServiceService;
     private final InteroperabilityRecordService interoperabilityRecordService;
     private final PublicServiceService publicServiceManager;
     private final PublicProviderService publicProviderService;
@@ -70,6 +71,7 @@ public class ProviderManager extends ResourceCatalogueManager<ProviderBundle> im
     private final CatalogueService catalogueService;
     private final SynchronizerService<Provider> synchronizerService;
     private final ProviderResourcesCommonMethods commonMethods;
+    private final PublicDeployableServiceService publicDeployableServiceService;
 
     @Value("${catalogue.id}")
     private String catalogueId;
@@ -85,9 +87,11 @@ public class ProviderManager extends ResourceCatalogueManager<ProviderBundle> im
                            @Lazy PublicServiceService publicServiceManager,
                            @Lazy PublicProviderService publicProviderService,
                            @Lazy TrainingResourceService trainingResourceService,
+                           @Lazy DeployableServiceService deployableServiceService,
                            @Lazy InteroperabilityRecordService interoperabilityRecordService,
                            @Lazy PublicTrainingResourceService publicTrainingResourceManager,
-                           @Lazy PublicInteroperabilityRecordService publicInteroperabilityRecordManager) {
+                           @Lazy PublicInteroperabilityRecordService publicInteroperabilityRecordManager,
+                           @Lazy PublicDeployableServiceService publicDeployableServiceService) {
         super(ProviderBundle.class);
         this.serviceBundleService = serviceBundleService;
         this.securityService = securityService;
@@ -102,9 +106,11 @@ public class ProviderManager extends ResourceCatalogueManager<ProviderBundle> im
         this.publicServiceManager = publicServiceManager;
         this.publicProviderService = publicProviderService;
         this.trainingResourceService = trainingResourceService;
+        this.deployableServiceService = deployableServiceService;
         this.interoperabilityRecordService = interoperabilityRecordService;
         this.publicTrainingResourceManager = publicTrainingResourceManager;
         this.publicInteroperabilityRecordManager = publicInteroperabilityRecordManager;
+        this.publicDeployableServiceService = publicDeployableServiceService;
     }
 
 
@@ -582,6 +588,7 @@ public class ProviderManager extends ResourceCatalogueManager<ProviderBundle> im
     public void activateProviderResources(String providerId, Boolean active, Authentication auth) {
         List<ServiceBundle> services = serviceBundleService.getResourceBundles(providerId, auth);
         List<TrainingResourceBundle> trainingResources = trainingResourceService.getResourceBundles(providerId, auth);
+        List<DeployableServiceBundle> deployableServices = deployableServiceService.getResourceBundles(providerId, auth);
         List<InteroperabilityRecordBundle> interoperabilityRecords = interoperabilityRecordService.getInteroperabilityRecordBundles(catalogueId, providerId, auth).getResults();
         if (active) {
             logger.info("Activating all Resources of the Provider with id: '{}'", providerId);
@@ -590,6 +597,7 @@ public class ProviderManager extends ResourceCatalogueManager<ProviderBundle> im
         }
         activateProviderServices(services, active, auth);
         activateProviderTrainingResources(trainingResources, active, auth);
+        activateProviderDeployableServices(deployableServices, active, auth);
         activateProviderInteroperabilityRecords(interoperabilityRecords, active, auth);
     }
 
@@ -648,6 +656,31 @@ public class ProviderManager extends ResourceCatalogueManager<ProviderBundle> im
                 // Activate/Deactivate Training Resource's Extensions
                 trainingResourceService.publishTrainingResourceRelatedResources(lowerLevelTrainingResource.getId(),
                         lowerLevelTrainingResource.getTrainingResource().getCatalogueId(), active, auth);
+            }
+        }
+    }
+
+    private void activateProviderDeployableServices(List<DeployableServiceBundle> deployableServices, Boolean active, Authentication auth) {
+        for (DeployableServiceBundle bundle : deployableServices) {
+            if (bundle.getStatus().equals("approved resource")) {
+                List<LoggingInfo> loggingInfoList = commonMethods.createActivationLoggingInfo(bundle, active, auth);
+
+                // update Service's fields
+                bundle.setLoggingInfo(loggingInfoList);
+                bundle.setLatestUpdateInfo(loggingInfoList.getLast());
+                bundle.setActive(active);
+
+                try {
+                    logger.debug("Setting Deployable Service '{}'-'{}' of the '{}' Catalogue to active: '{}'", bundle.getId(),
+                            bundle.getDeployableService().getName(), bundle.getDeployableService().getCatalogueId(),
+                            bundle.isActive());
+                    deployableServiceService.update(bundle, auth);
+                    // TODO: FIX ON ProviderManagementAspect
+                    publicDeployableServiceService.update(bundle, auth);
+                } catch (ResourceNotFoundException e) {
+                    logger.error("Could not update Training Resource '{}'-'{}' of the '{}' Catalogue", bundle.getId(),
+                            bundle.getDeployableService().getName(), bundle.getDeployableService().getCatalogueId());
+                }
             }
         }
     }
@@ -762,7 +795,7 @@ public class ProviderManager extends ResourceCatalogueManager<ProviderBundle> im
 
             try {
                 update(bundle, auth);
-            } catch (ResourceNotFoundException e) {
+            } catch (ResourceException | ResourceNotFoundException e) {
                 logger.info("Could not update terms for Provider with id: '{}'", id);
             }
         }

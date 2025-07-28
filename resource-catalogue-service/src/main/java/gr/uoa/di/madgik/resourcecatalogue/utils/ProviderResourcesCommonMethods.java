@@ -112,6 +112,16 @@ public class ProviderResourcesCommonMethods {
                     }
                 }
             }
+            if (o instanceof DeployableServiceBundle) {
+                if (((DeployableServiceBundle) o).getPayload().getCatalogueId() == null ||
+                        ((DeployableServiceBundle) o).getPayload().getCatalogueId().isEmpty()) {
+                    throw new ValidationException("Deployable Service's 'catalogueId' cannot be null or empty");
+                } else {
+                    if (!((DeployableServiceBundle) o).getPayload().getCatalogueId().equals(catalogueId)) {
+                        throw new ValidationException("Parameter 'catalogueId' and Deployable Service's 'catalogueId' don't match");
+                    }
+                }
+            }
             if (o instanceof InteroperabilityRecordBundle) {
                 if (((InteroperabilityRecordBundle) o).getPayload().getCatalogueId() == null ||
                         ((InteroperabilityRecordBundle) o).getPayload().getCatalogueId().isEmpty()) {

@@ -16,16 +16,61 @@
 
 package gr.uoa.di.madgik.resourcecatalogue.service;
 
-import gr.uoa.di.madgik.resourcecatalogue.domain.configurationTemplates.ConfigurationTemplate;
-import gr.uoa.di.madgik.resourcecatalogue.domain.configurationTemplates.ConfigurationTemplateBundle;
+import gr.uoa.di.madgik.registry.domain.Paging;
+import gr.uoa.di.madgik.resourcecatalogue.domain.ConfigurationTemplate;
+import gr.uoa.di.madgik.resourcecatalogue.domain.ConfigurationTemplateBundle;
+import org.springframework.security.core.Authentication;
+import org.springframework.util.MultiValueMap;
+
+import java.util.List;
+import java.util.Map;
 
 public interface ConfigurationTemplateService extends ResourceCatalogueService<ConfigurationTemplateBundle> {
 
     /**
-     * Returns the Configuration Template of an Interoperability Record given its ID
+     * Add a new Configuration Template on an existing Catalogue, providing the Catalogue's ID
      *
-     * @param interoperabilityRecordId Interoperability Record ID
-     * @return {@link ConfigurationTemplate}
+     * @param bundle                       Configuration Template Bundle
+     * @param catalogueId                  Catalogue ID
+     * @param auth                         Authentication
+     * @return {@link ConfigurationTemplateBundle}
      */
-    ConfigurationTemplate getByInteroperabilityRecordId(String interoperabilityRecordId);
+    ConfigurationTemplateBundle add(ConfigurationTemplateBundle bundle, String catalogueId, Authentication auth);
+
+    /**
+     * Update an Configuration Template of an existing Catalogue, providing its Catalogue ID
+     *
+     * @param bundle                       Configuration Template Bundle
+     * @param catalogueId                  Catalogue ID
+     * @param auth                         Authentication
+     * @return {@link ConfigurationTemplateBundle}
+     */
+    ConfigurationTemplateBundle update(ConfigurationTemplateBundle bundle, String catalogueId, Authentication auth);
+
+    /**
+     * Create a Public Configuration Template
+     *
+     * @param configurationTemplateBundle  Configuration Template
+     * @param auth                         Authentication
+     * @return {@link ConfigurationTemplateBundle}
+     */
+    ConfigurationTemplateBundle createPublicConfigurationTemplate(
+            ConfigurationTemplateBundle configurationTemplateBundle, Authentication auth);
+
+    /**
+     * Return all Configuration Templates under a specific Interoperability Record ID
+     *
+     * @param allRequestParams search parameters
+     * @param interoperabilityRecordId Interoperability Record ID
+     * @return {@link Paging<ConfigurationTemplate>}
+     */
+    Paging<ConfigurationTemplate> getAllByInteroperabilityRecordId(MultiValueMap<String, Object> allRequestParams,
+                                                                   String interoperabilityRecordId);
+
+    /**
+     * Return a mapping of Interoperability Record ID to Configuration Template list.
+     *
+     * @return {@link Map}
+     */
+    Map<String, List<String>> getInteroperabilityRecordIdToConfigurationTemplateListMap();
 }

@@ -16,11 +16,11 @@
 
 package gr.uoa.di.madgik.resourcecatalogue.controllers.registry;
 
+import gr.uoa.di.madgik.registry.annotation.BrowseParameters;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.registry.exception.ResourceException;
 import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
-import gr.uoa.di.madgik.registry.annotation.BrowseParameters;
 import gr.uoa.di.madgik.resourcecatalogue.annotations.BrowseCatalogue;
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
 import gr.uoa.di.madgik.resourcecatalogue.dto.CatalogueValue;
@@ -213,15 +213,6 @@ public class ProviderController {
         ff.addFilter("published", false);
         Paging<ProviderBundle> paging = genericResourceService.getResults(ff);
         return ResponseEntity.ok(paging);
-    }
-
-    @Deprecated
-    @Operation(summary = "Get a list of services offered by a Provider.")
-    @GetMapping(path = "services/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE})
-    public ResponseEntity<List<? extends Service>> getServices(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
-                                                               @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix,
-                                                               @Parameter(hidden = true) Authentication auth) {
-        throw new UnsupportedOperationException("Method Removed: Contact administrators");
     }
 
     @BrowseParameters

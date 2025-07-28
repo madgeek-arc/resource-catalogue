@@ -18,21 +18,15 @@ package gr.uoa.di.madgik.resourcecatalogue.domain;
 
 import gr.uoa.di.madgik.resourcecatalogue.annotation.FieldValidation;
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.xml.bind.annotation.XmlElement;
-import jakarta.xml.bind.annotation.XmlRootElement;
-import jakarta.xml.bind.annotation.XmlType;
 
 import java.net.URL;
 import java.util.Objects;
 
-@XmlType
-@XmlRootElement
 public class MultimediaPair {
 
     /**
      * Link to video, slideshow, photos, screenshots with details of the Provider.
      */
-    @XmlElement(required = true)
     @Schema
     @FieldValidation()
     private URL multimediaURL;
@@ -40,7 +34,6 @@ public class MultimediaPair {
     /**
      * Short description of the Multimedia content.
      */
-    @XmlElement()
     @Schema
     @FieldValidation(nullable = true)
     private String multimediaName;

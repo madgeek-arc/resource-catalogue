@@ -18,30 +18,20 @@ package gr.uoa.di.madgik.resourcecatalogue.domain;
 
 import gr.uoa.di.madgik.resourcecatalogue.annotation.FieldValidation;
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.xml.bind.annotation.XmlElement;
-import jakarta.xml.bind.annotation.XmlElementWrapper;
-import jakarta.xml.bind.annotation.XmlRootElement;
-import jakarta.xml.bind.annotation.XmlType;
 
 import java.util.List;
 import java.util.Objects;
 
-@XmlType
-@XmlRootElement
 public class MonitoringGroup {
 
-    @XmlElement(required = true)
     @Schema
     @FieldValidation
     private String serviceType;
 
-    @XmlElement(required = true)
     @Schema
     @FieldValidation
     private String endpoint;
 
-    @XmlElementWrapper(name = "metrics")
-    @XmlElement(name = "metric")
     @Schema
     @FieldValidation(nullable = true)
     private List<Metric> metrics;

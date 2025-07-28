@@ -45,27 +45,36 @@ Follow these steps to set up a development environment for Resource Catalogue:
    ```bash
    git clone https://github.com/madgeek-arc/resource-catalogue.git
    ```
-3. **Create a file named `secret.properties` and populate it to resolve `application.properties` placeholders.
-   You can view an example at [Secret Properties Example](#Secret-Properties-Example).**
+3. **Create the necessary configuration files**
+   1. `application.properties` – Add the required settings. 
+      See the [Application Properties Example](#Application-Properties-Example) for reference.
+   2. `pid.yml` – Create this file only if you plan to use the PID Service. 
+      See the [PID Properties Example](#PID-Properties-Example) for details.
 4. **Build and Package**  
    To build the project and package the code into an executable .jar file with an embedded Tomcat server:
-   1. _Navigate_ to the project directory
-   2. _Execute_ the following Maven command
+   1. Navigate to the project directory
+   2. Execute the following Maven command
    ```bash
    mvn clean package
    ```
 
-5. **Run**  
+5. **Run**
+   1. without PID Service
    ```bash
    java -jar resource-catalogue-service/target/resource-catalogue-service-X.X.X-SNAPSHOT.jar \
-   --spring.config.additional-location=file:/path/to/secret.properties
+   --spring.config.additional-location=file:/path/to/application.properties
+   ```
+   2. with PID Service
+   ```bash
+   java -jar resource-catalogue-service/target/resource-catalogue-service-X.X.X-SNAPSHOT.jar \
+   --spring.config.additional-location=file:/path/to/application.properties,file:/path/to/pid.yml
    ```
 
 ---
 
 ## Test execution:
 ```bash
-  mvn clean verify -Dspring.config.additional-location=file:/path/to/secret.properties
+  mvn clean verify
 ```
 Test results will be displayed in the terminal.
 
@@ -116,6 +125,8 @@ server.servlet.context-path=/api
 ## Logging Configuration ##
 logging.level.root=INFO
 
+## PID Service ##
+pid.service.enabled=false
 
 #########################
 ##  Spring Properties  ##
@@ -226,6 +237,7 @@ catalogue.resources.adapter.id-prefix=adapter
 catalogue.resources.configuration-template.id-prefix=configuration_template
 catalogue.resources.configuration-template-instance.id-prefix=configuration_template_instance
 catalogue.resources.datasource.id-prefix=datasource
+catalogue.resources.deployable-service.id-prefix=deployable_service
 catalogue.resources.helpdesk.id-prefix=helpdesk
 catalogue.resources.interoperability-record.id-prefix=interoperability_record
 catalogue.resources.monitoring.id-prefix=monitoring
@@ -256,3 +268,72 @@ catalogue.mailer.protocol=
 catalogue.mailer.auth=
 catalogue.mailer.ssl=
 ```
+
+##### PID Properties Example
+Refer to [pid.yml](resource-catalogue-service/src/main/resources/pid.yml)
+for the complete set of configuration options.
+
+```yaml
+## PID Properties ##
+catalogue:
+  resources:
+    provider:
+      resolve-endpoints:
+      pid-issuer:
+        url:
+        user:
+        user-index:
+        password:
+        auth:
+          self-signed-cert:
+          client-key:
+          client-cert:
+    service:
+      resolve-endpoints:
+      pid-issuer:
+        url:
+        user:
+        user-index:
+        password:
+        auth:
+          self-signed-cert:
+          client-key:
+          client-cert:
+    training-resource:
+      resolve-endpoints:
+      pid-issuer:
+        url:
+        user:
+        user-index:
+        password:
+        auth:
+          self-signed-cert:
+          client-key:
+          client-cert:
+    interoperability-record:
+      resolve-endpoints:
+      pid-issuer:
+        url:
+        user:
+        user-index:
+        password:
+        auth:
+          self-signed-cert:
+          client-key:
+          client-cert:
+    tool:
+      resolve-endpoints:
+      pid-issuer:
+        url:
+        user:
+        user-index:
+        password:
+        auth:
+          self-signed-cert:
+          client-key:
+          client-cert:
+```
+
+##### Important note: </br>
+Resource Catalogue supports both Mutual TLS (mTLS) and Basic Authentication. </br>
+For Basic Authentication, provide a password; otherwise, provide all necessary configurations under the auth block.

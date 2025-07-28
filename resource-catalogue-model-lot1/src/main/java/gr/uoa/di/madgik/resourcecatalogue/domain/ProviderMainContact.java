@@ -20,14 +20,9 @@ import gr.uoa.di.madgik.resourcecatalogue.annotation.EmailValidation;
 import gr.uoa.di.madgik.resourcecatalogue.annotation.FieldValidation;
 import gr.uoa.di.madgik.resourcecatalogue.annotation.PhoneValidation;
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.xml.bind.annotation.XmlElement;
-import jakarta.xml.bind.annotation.XmlRootElement;
-import jakarta.xml.bind.annotation.XmlType;
 
 import java.util.Objects;
 
-@XmlType
-@XmlRootElement
 public class ProviderMainContact {
 
 
@@ -35,7 +30,6 @@ public class ProviderMainContact {
     /**
      * First Name of the Provider's main contact person/Provider manager.
      */
-    @XmlElement(required = true)
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     @FieldValidation
     private String firstName;
@@ -43,7 +37,6 @@ public class ProviderMainContact {
     /**
      * Last Name of the Provider's main contact person/Provider manager.
      */
-    @XmlElement
     @Schema
     @FieldValidation(nullable = true)
     private String lastName;
@@ -51,7 +44,6 @@ public class ProviderMainContact {
     /**
      * Email of the Provider's main contact person/Provider manager.
      */
-    @XmlElement(required = true)
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     @EmailValidation
     private String email;
@@ -59,7 +51,6 @@ public class ProviderMainContact {
     /**
      * Phone of the Provider's main contact person/Provider manager.
      */
-    @XmlElement
     @Schema
     @PhoneValidation(nullable = true)
     private String phone;
@@ -67,7 +58,6 @@ public class ProviderMainContact {
     /**
      * Position of the Provider's main contact person/Provider manager.
      */
-    @XmlElement
     @Schema
     @FieldValidation(nullable = true)
     private String position;

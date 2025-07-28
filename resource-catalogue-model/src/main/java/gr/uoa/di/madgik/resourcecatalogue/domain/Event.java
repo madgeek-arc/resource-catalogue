@@ -16,24 +16,12 @@
 
 package gr.uoa.di.madgik.resourcecatalogue.domain;
 
-import jakarta.xml.bind.annotation.XmlElement;
-import jakarta.xml.bind.annotation.XmlRootElement;
-import jakarta.xml.bind.annotation.XmlType;
-
-@XmlType
-@XmlRootElement
 public class Event implements Identifiable {
-    @XmlElement(required = true)
     private String id;
-    @XmlElement(required = true)
     private long instant;
-    @XmlElement(required = true)
     private String type;
-    @XmlElement(required = true)
     private String user;
-    @XmlElement(required = true)
     private String service;
-    @XmlElement()
     private Float value;
 
     public Event() {

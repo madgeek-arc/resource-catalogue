@@ -16,31 +16,19 @@
 
 package gr.uoa.di.madgik.resourcecatalogue.domain;
 
-import jakarta.xml.bind.annotation.XmlElement;
-import jakarta.xml.bind.annotation.XmlElementWrapper;
-import jakarta.xml.bind.annotation.XmlRootElement;
-import jakarta.xml.bind.annotation.XmlType;
-
 import java.util.List;
 import java.util.Objects;
 
-@XmlType
-@XmlRootElement
 public class ProviderBundle extends Bundle<Provider> {
 
-    @XmlElement
 //    @VocabularyValidation(type = Vocabulary.Type.PROVIDER_STATE)
     private String status;
 
-    @XmlElement
 //    @VocabularyValidation(type = Vocabulary.Type.TEMPLATE_STATE)
     private String templateStatus;
 
-    @XmlElement
     private String auditState;
 
-    @XmlElementWrapper(name = "transferContactInformation")
-    @XmlElement(name = "transferContactInformation")
     private List<ContactInfoTransfer> transferContactInformation;
 
     public ProviderBundle() {
@@ -67,7 +55,6 @@ public class ProviderBundle extends Bundle<Provider> {
         super.setId(id);
     }
 
-    @XmlElement(name = "provider")
     public Provider getProvider() {
         return this.getPayload();
     }

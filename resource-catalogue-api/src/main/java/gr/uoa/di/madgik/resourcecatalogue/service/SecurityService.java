@@ -83,6 +83,13 @@ public interface SecurityService {
     boolean providerCanAddResources(Authentication auth, TrainingResource trainingResource);
 
     /**
+     * @param auth              Authentication
+     * @param deployableService Deployable Service
+     * @return True if provider where the deployable service is registered is active and approved
+     */
+    boolean providerCanAddResources(Authentication auth, DeployableService deployableService);
+
+    /**
      * @param auth                   Authentication
      * @param interoperabilityRecord Interoperability Record
      * @return True if provider where the interoperability record is registered is active and approved
@@ -112,6 +119,14 @@ public interface SecurityService {
      * @return True if service is active
      */
     boolean serviceIsActive(String id, String catalogueId, boolean published);
+
+    /**
+     * @param id          deployable service id
+     * @param catalogueId catalogue id
+     * @param published   true/false
+     * @return True if service is active
+     */
+    boolean deployableServiceIsActive(String id, String catalogueId, boolean published);
 
     /**
      * @param id          service id

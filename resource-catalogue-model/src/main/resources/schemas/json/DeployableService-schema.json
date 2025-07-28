@@ -1,0 +1,148 @@
+{
+  "$schema" : "https://json-schema.org/draft/2020-12/schema",
+  "$defs" : {
+    "Creator" : {
+      "type" : "object",
+      "properties" : {
+        "creatorAffiliationInfo" : {
+          "$ref" : "#/$defs/CreatorAffiliationInfo"
+        },
+        "creatorNameTypeInfo" : {
+          "$ref" : "#/$defs/CreatorNameTypeInfo"
+        },
+        "familyName" : {
+          "type" : "string"
+        },
+        "givenName" : {
+          "type" : "string"
+        },
+        "nameIdentifier" : {
+          "type" : "string"
+        }
+      },
+      "additionalProperties" : false
+    },
+    "CreatorAffiliationInfo" : {
+      "type" : "object",
+      "properties" : {
+        "affiliation" : {
+          "type" : "string"
+        },
+        "affiliationIdentifier" : {
+          "type" : "string"
+        }
+      },
+      "additionalProperties" : false
+    },
+    "CreatorNameTypeInfo" : {
+      "type" : "object",
+      "properties" : {
+        "creatorName" : {
+          "type" : "string"
+        },
+        "nameType" : {
+          "type" : "string"
+        }
+      },
+      "additionalProperties" : false
+    },
+    "ServiceProviderDomain" : {
+      "type" : "object",
+      "properties" : {
+        "scientificDomain" : {
+          "type" : "string"
+        },
+        "scientificSubdomain" : {
+          "type" : "string"
+        }
+      },
+      "additionalProperties" : false
+    },
+    "URL" : {
+      "type" : "object",
+      "properties" : {
+        "authority" : {
+          "type" : "string"
+        },
+        "file" : {
+          "type" : "string"
+        },
+        "host" : {
+          "type" : "string"
+        },
+        "port" : {
+          "type" : "integer"
+        },
+        "protocol" : {
+          "type" : "string"
+        },
+        "ref" : {
+          "type" : "string"
+        }
+      },
+      "additionalProperties" : false
+    }
+  },
+  "type" : "object",
+  "properties" : {
+    "acronym" : {
+      "type" : "string"
+    },
+    "catalogueId" : {
+      "type" : "string"
+    },
+    "creators" : {
+      "type" : "array",
+      "items" : {
+        "$ref" : "#/$defs/Creator"
+      }
+    },
+    "description" : {
+      "type" : "string"
+    },
+    "id" : {
+      "type" : "string"
+    },
+    "lastUpdate" : {
+      "type" : "string",
+      "format" : "date-time"
+    },
+    "logo" : {
+      "$ref" : "#/$defs/URL"
+    },
+    "name" : {
+      "type" : "string"
+    },
+    "node" : {
+      "type" : "string"
+    },
+    "resourceOrganisation" : {
+      "type" : "string"
+    },
+    "scientificDomains" : {
+      "type" : "array",
+      "items" : {
+        "$ref" : "#/$defs/ServiceProviderDomain"
+      }
+    },
+    "softwareLicense" : {
+      "type" : "string"
+    },
+    "tagline" : {
+      "type" : "string"
+    },
+    "tags" : {
+      "type" : "array",
+      "items" : {
+        "type" : "string"
+      }
+    },
+    "url" : {
+      "$ref" : "#/$defs/URL"
+    },
+    "version" : {
+      "type" : "string"
+    }
+  },
+  "additionalProperties" : false
+}

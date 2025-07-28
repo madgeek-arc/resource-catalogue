@@ -18,9 +18,6 @@ package gr.uoa.di.madgik.resourcecatalogue.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import gr.uoa.di.madgik.resourcecatalogue.annotation.FieldValidation;
-import jakarta.xml.bind.annotation.XmlElement;
-import jakarta.xml.bind.annotation.XmlRootElement;
-import jakarta.xml.bind.annotation.XmlType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.InsufficientAuthenticationException;
@@ -33,24 +30,18 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtAut
 
 import java.util.Objects;
 
-@XmlType
-@XmlRootElement
 public class User implements Identifiable {
 
     private static final Logger logger = LoggerFactory.getLogger(User.class);
 
-    @XmlElement
     private String id;
 
-    @XmlElement
     @FieldValidation
     private String email;
 
-    @XmlElement
     @FieldValidation
     private String name;
 
-    @XmlElement
     @FieldValidation
     private String surname;
 

@@ -14,8 +14,5 @@
  * limitations under the License.
  */
 
-@XmlAccessorOrder(XmlAccessOrder.ALPHABETICAL)
-@XmlAccessorType(XmlAccessType.FIELD)
 package gr.uoa.di.madgik.resourcecatalogue.domain.interoperabilityRecord.internalFields;
 
-import jakarta.xml.bind.annotation.*;

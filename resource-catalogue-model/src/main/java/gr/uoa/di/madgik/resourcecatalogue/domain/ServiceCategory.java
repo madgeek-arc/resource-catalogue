@@ -19,14 +19,9 @@ package gr.uoa.di.madgik.resourcecatalogue.domain;
 import gr.uoa.di.madgik.resourcecatalogue.annotation.FieldValidation;
 import gr.uoa.di.madgik.resourcecatalogue.annotation.VocabularyValidation;
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.xml.bind.annotation.XmlElement;
-import jakarta.xml.bind.annotation.XmlRootElement;
-import jakarta.xml.bind.annotation.XmlType;
 
 import java.util.Objects;
 
-@XmlType
-@XmlRootElement
 public class ServiceCategory {
 
 
@@ -34,7 +29,6 @@ public class ServiceCategory {
     /**
      * A named group of Resources that offer access to the same type of Resources
      */
-    @XmlElement(required = true)
     @Schema
     @FieldValidation(containsId = true, idClass = Vocabulary.class)
     @VocabularyValidation(type = Vocabulary.Type.CATEGORY)
@@ -43,7 +37,6 @@ public class ServiceCategory {
     /**
      * A named group of Resources that offer access to the same type of Resource or capabilities, within the defined Resource Category.
      */
-    @XmlElement(required = true)
     @Schema
     @FieldValidation(containsId = true, idClass = Vocabulary.class)
     @VocabularyValidation(type = Vocabulary.Type.SUBCATEGORY)

@@ -16,9 +16,9 @@
 
 package gr.uoa.di.madgik.resourcecatalogue.service;
 
-import gr.uoa.di.madgik.resourcecatalogue.domain.configurationTemplates.ConfigurationTemplateInstance;
-import gr.uoa.di.madgik.resourcecatalogue.domain.configurationTemplates.ConfigurationTemplateInstanceBundle;
-import gr.uoa.di.madgik.resourcecatalogue.domain.configurationTemplates.ConfigurationTemplateInstanceDto;
+import gr.uoa.di.madgik.resourcecatalogue.domain.ConfigurationTemplateInstance;
+import gr.uoa.di.madgik.resourcecatalogue.domain.ConfigurationTemplateInstanceBundle;
+import org.springframework.security.core.Authentication;
 
 import java.util.List;
 
@@ -28,9 +28,9 @@ public interface ConfigurationTemplateInstanceService extends ResourceCatalogueS
      * Return a List of ConfigurationTemplateInstances providing a resource ID
      *
      * @param id resource ID
-     * @return {@link List}&lt;{@link ConfigurationTemplateInstance}&gt;
+     * @return {@link List}&lt;{@link ConfigurationTemplateInstanceBundle}&gt;
      */
-    List<ConfigurationTemplateInstance> getByResourceId(String id);
+    List<ConfigurationTemplateInstanceBundle> getByResourceId(String id);
 
     /**
      * Return a List of ConfigurationTemplateInstances providing a ConfigurationTemplate ID
@@ -41,10 +41,22 @@ public interface ConfigurationTemplateInstanceService extends ResourceCatalogueS
     List<ConfigurationTemplateInstance> getByConfigurationTemplateId(String id);
 
     /**
-     * Given a ConfigurationTemplateInstance return a ConfigurationTemplateInstanceDto
+     * Return the ConfigurationTemplateInstance providing its resource and ConfigurationTemplate IDs
+     * or null
      *
-     * @param configurationTemplateInstance ConfigurationTemplateInstance
-     * @return {@link ConfigurationTemplateInstanceDto}
+     * @param resourceId resource ID
+     * @param ctId resource ID
+     * @return {@link List}&lt;{@link ConfigurationTemplateInstance}&gt;
      */
-    ConfigurationTemplateInstanceDto createCTIDto(ConfigurationTemplateInstance configurationTemplateInstance);
+    ConfigurationTemplateInstance getByResourceAndConfigurationTemplateId(String resourceId, String ctId);
+
+    /**
+     * Create a Public Configuration Template Instance
+     *
+     * @param configurationTemplateInstanceBundle Configuration Template Instance
+     * @param auth                                Authentication
+     * @return {@link ConfigurationTemplateInstanceBundle}
+     */
+    ConfigurationTemplateInstanceBundle createPublicConfigurationTemplateInstance(
+            ConfigurationTemplateInstanceBundle configurationTemplateInstanceBundle, Authentication auth);
 }

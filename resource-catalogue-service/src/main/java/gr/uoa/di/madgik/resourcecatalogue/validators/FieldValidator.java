@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright 2017-2025 OpenAIRE AMKE & Athena Research and Innovation Center
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -23,20 +23,28 @@ import gr.uoa.di.madgik.resourcecatalogue.annotation.*;
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
 import gr.uoa.di.madgik.resourcecatalogue.manager.ProviderManager;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
-import gr.uoa.di.madgik.resourcecatalogue.utils.RestTemplateTrustManager;
+import io.netty.channel.ChannelOption;
 import org.apache.commons.validator.routines.EmailValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Lazy;
-import org.springframework.http.client.SimpleClientHttpRequestFactory;
+import org.springframework.http.HttpStatusCode;
+import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.HttpStatusCodeException;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.web.reactive.function.client.ClientResponse;
+import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.reactive.function.client.WebClientRequestException;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
+import reactor.core.publisher.Mono;
+import reactor.netty.http.client.HttpClient;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
+import java.net.MalformedURLException;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
+import java.time.Duration;
 import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -50,6 +58,7 @@ public class FieldValidator {
     private final ProviderManager providerService;
     private final ServiceBundleService<ServiceBundle> serviceBundleService;
     private final TrainingResourceService trainingResourceService;
+    private final DeployableServiceService deployableServiceService;
     private final CatalogueService catalogueService;
     private final InteroperabilityRecordService interoperabilityRecordService;
     private final AdapterService adapterService;
@@ -65,6 +74,7 @@ public class FieldValidator {
                           @Lazy TrainingResourceService trainingResourceService,
                           @Lazy CatalogueService catalogueService,
                           @Lazy InteroperabilityRecordService interoperabilityRecordService,
+                          @Lazy DeployableServiceService deployableServiceService,
                           @Lazy AdapterService adapterService) {
         this.vocabularyService = vocabularyService;
         this.providerService = providerService;
@@ -72,6 +82,7 @@ public class FieldValidator {
         this.catalogueService = catalogueService;
         this.interoperabilityRecordService = interoperabilityRecordService;
         this.trainingResourceService = trainingResourceService;
+        this.deployableServiceService = deployableServiceService;
         this.adapterService = adapterService;
     }
 
@@ -105,6 +116,9 @@ public class FieldValidator {
             declaredFields.addAll(Arrays.asList(o.getClass().getSuperclass().getDeclaredFields()));
         }
         if (o instanceof TrainingResourceBundle) {
+            declaredFields.addAll(Arrays.asList(o.getClass().getSuperclass().getDeclaredFields()));
+        }
+        if (o instanceof DeployableServiceBundle) {
             declaredFields.addAll(Arrays.asList(o.getClass().getSuperclass().getDeclaredFields()));
         }
         if (o instanceof InteroperabilityRecordBundle) {
@@ -271,28 +285,33 @@ public class FieldValidator {
     }
 
     public void validateUrl(Field field, URL urlForValidation) {
-        RestTemplate restTemplate = RestTemplateTrustManager.createRestTemplateWithDisabledSSL();
-
         try {
-            if (urlForValidation.toString().contains(" ")) {
-                urlForValidation = URI.create(urlForValidation.toString()
-                        .replaceAll("\\s", "%20")).toURL();
+            String cleanedUrlString = urlForValidation.toString().replaceAll("\\s", "%20");
+            URI uri = new URL(cleanedUrlString).toURI(); // validate and clean
+
+            // add timeout
+            ReactorClientHttpConnector connector = new ReactorClientHttpConnector(
+                    HttpClient.create()
+                            .responseTimeout(Duration.ofSeconds(5))
+                            .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 5000)
+            );
+            WebClient webClient = WebClient.builder()
+                    .clientConnector(connector)
+                    .build();
+
+            ClientResponse response = webClient.get()
+                    .uri(uri)
+                    .exchangeToMono(Mono::just)
+                    .block();
+
+            HttpStatusCode statusCode = response.statusCode();
+            if (!statusCode.is2xxSuccessful()) {
+                String fieldName = (field != null) ? field.getName() : "unknown";
+                throw new ValidationException(
+                        String.format("URL '%s' found on field '%s' responded with error code: %d",
+                                urlForValidation, fieldName, statusCode.value()));
             }
-
-            SimpleClientHttpRequestFactory requestFactory = new SimpleClientHttpRequestFactory();
-            requestFactory.setConnectTimeout(5000);
-            requestFactory.setReadTimeout(5000);
-            restTemplate.setRequestFactory(requestFactory);
-
-            restTemplate.headForHeaders(urlForValidation.toURI());
-
-        } catch (HttpStatusCodeException e) {
-            logger.trace(e.getMessage());
-            throw new ValidationException(
-                    String.format("URL '%s' found on field '%s' responded with error code: %d",
-                            urlForValidation, field.getName(), e.getStatusCode().value()));
-        } catch (Exception e) {
-            logger.trace(e.getMessage());
+        } catch (URISyntaxException | MalformedURLException | WebClientResponseException | WebClientRequestException e) {
             throw new ValidationException("Failed to validate URL: " + urlForValidation);
         }
     }
@@ -370,6 +389,12 @@ public class FieldValidator {
                             && trainingResourceService.get(o.toString()) == null) {
                         throw new ValidationException(
                                 String.format("Field '%s' should contain the ID of an existing Training Resource",
+                                        field.getName()));
+                    } else if ((DeployableService.class.equals(annotation.idClass())
+                            || DeployableServiceBundle.class.equals(annotation.idClass()))
+                            && deployableServiceService.get(o.toString()) == null) {
+                        throw new ValidationException(
+                                String.format("Field '%s' should contain the ID of an existing Deployable Service",
                                         field.getName()));
                     } else if ((Catalogue.class.equals(annotation.idClass())
                             || CatalogueBundle.class.equals(annotation.idClass()))

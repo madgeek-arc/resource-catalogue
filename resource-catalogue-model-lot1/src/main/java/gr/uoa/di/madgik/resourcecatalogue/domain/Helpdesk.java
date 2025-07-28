@@ -18,70 +18,48 @@ package gr.uoa.di.madgik.resourcecatalogue.domain;
 
 import gr.uoa.di.madgik.resourcecatalogue.annotation.FieldValidation;
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.xml.bind.annotation.XmlElement;
-import jakarta.xml.bind.annotation.XmlElementWrapper;
-import jakarta.xml.bind.annotation.XmlRootElement;
-import jakarta.xml.bind.annotation.XmlType;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
-@XmlType
-@XmlRootElement
 public class Helpdesk implements Identifiable {
 
-    @XmlElement
     @Schema(example = "(required on PUT only)")
     private String id;
 
-    @XmlElement(required = true)
     @Schema
     @FieldValidation(containsId = true, containsResourceId = true)
     private String serviceId;
 
-    @XmlElementWrapper(name = "services")
-    @XmlElement(name = "service")
     @Schema
     private List<String> services;
 
-    @XmlElement
     @Schema
     private String helpdeskType;
 
-    @XmlElementWrapper(name = "supportGroups")
-    @XmlElement(name = "supportGroup")
     @Schema
     private List<String> supportGroups;
 
-    @XmlElement
     @Schema
     @FieldValidation(nullable = true)
     private String organisation;
 
-    @XmlElementWrapper(name = "emails")
-    @XmlElement(name = "email")
     @Schema
     // E-mail for direct assignment of the tickets, bypassing the L1 support
     private List<String> emails;
 
-    @XmlElementWrapper(name = "agents")
-    @XmlElement(name = "agent")
     @Schema
     private List<String> agents;
 
-    @XmlElementWrapper(name = "signatures")
-    @XmlElement(name = "signature")
     @Schema
     @FieldValidation(nullable = true)
     private List<String> signatures;
 
-    @XmlElement
     @Schema
     @FieldValidation(nullable = true)
     private Boolean ticketPreservation;
 
-    @XmlElement
     @Schema
     @FieldValidation(nullable = true)
     private Boolean webform;

@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright 2017-2025 OpenAIRE AMKE & Athena Research and Innovation Center
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -86,6 +86,8 @@ public abstract class ResourceCatalogueManager<T extends Identifiable> extends R
             return ((ServiceBundle) t).getService().getCatalogueId();
         } else if (t instanceof TrainingResourceBundle) {
             return ((TrainingResourceBundle) t).getTrainingResource().getCatalogueId();
+        } else if (t instanceof DeployableServiceBundle) {
+            return ((DeployableServiceBundle) t).getDeployableService().getCatalogueId();
         } else if (t instanceof InteroperabilityRecordBundle) {
             return ((InteroperabilityRecordBundle) t).getInteroperabilityRecord().getCatalogueId();
         } else if (t instanceof ResourceInteroperabilityRecordBundle) {
@@ -96,6 +98,12 @@ public abstract class ResourceCatalogueManager<T extends Identifiable> extends R
             return ((MonitoringBundle) t).getMonitoring().getCatalogueId();
         } else if (t instanceof HelpdeskBundle) {
             return ((HelpdeskBundle) t).getHelpdesk().getCatalogueId();
+        } else if (t instanceof AdapterBundle) {
+            return ((AdapterBundle) t).getAdapter().getCatalogueId();
+        } else if (t instanceof ConfigurationTemplateBundle) {
+            return ((ConfigurationTemplateBundle) t).getConfigurationTemplate().getCatalogueId();
+        } else if (t instanceof ConfigurationTemplateInstanceBundle) {
+            return ((ConfigurationTemplateInstanceBundle) t).getConfigurationTemplateInstance().getCatalogueId();
         }
         return catalogueId;
     }

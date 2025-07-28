@@ -1,3 +1,46 @@
+## [](https://github.com/madgeek-arc/resource-catalogue/compare/v5.0.1...v) (2025-07-28)
+
+### Features
+
+* adapter public service ([1ddc28b](https://github.com/madgeek-arc/resource-catalogue/commit/1ddc28bc3e8ec0dc2fcb6bfc0def4ba1a26569e6))
+* adapter public service ([a01c75a](https://github.com/madgeek-arc/resource-catalogue/commit/a01c75a6ba44a1c37caeb77bc8bda99c9a797889))
+* adapters - initial commit ([54586df](https://github.com/madgeek-arc/resource-catalogue/commit/54586dfbfbfa7164553501816bc5f076f30a8392))
+* Add enable/disable functionality for AMS service ([5510c6a](https://github.com/madgeek-arc/resource-catalogue/commit/5510c6a1beb20a78b89de4d31694d77368891426))
+* add scaffold for adapter functionality ([9bfb102](https://github.com/madgeek-arc/resource-catalogue/commit/9bfb102355c7b2c88258f4ade34582b60e9d92d9))
+* auto-assign EOSC Monitoring IG on Service onboard (approved status) ([8dfc3b1](https://github.com/madgeek-arc/resource-catalogue/commit/8dfc3b1abe630f648d52e4186bcea0343c69eef3))
+* configuration template initial commit ([0a892db](https://github.com/madgeek-arc/resource-catalogue/commit/0a892dba057efbeb85b3dc3bec8f0fc54914fc23))
+* deployable service functionality ([6c21446](https://github.com/madgeek-arc/resource-catalogue/commit/6c214466826571c4432d6b60c4abfc6e7d25ea32))
+* deployable service initial commit ([7326fd0](https://github.com/madgeek-arc/resource-catalogue/commit/7326fd0585671a916f199785d4e6537382a3bde6))
+* implement basic adapter methods ([e3559d9](https://github.com/madgeek-arc/resource-catalogue/commit/e3559d9232f16375f1feff0cfb1afdc6a789c23b))
+* sorting on linkedResource dropwdown related front-end calls ([85d40ec](https://github.com/madgeek-arc/resource-catalogue/commit/85d40ec300e4782276ef0de8173bb36528c49c63))
+
+### Bug Fixes
+
+* add prefix on resource-catalogue JMS messages ([0f9177c](https://github.com/madgeek-arc/resource-catalogue/commit/0f9177c53c7cab025c5969d6600ee41f93acd1e6))
+* Add profile 'no-auth' when running tests and add missing properties ([c5a361c](https://github.com/madgeek-arc/resource-catalogue/commit/c5a361c0e53e1ce314eba9baefecc6bf7eb39362))
+* add public CTI and Adapter fix ([cb05a92](https://github.com/madgeek-arc/resource-catalogue/commit/cb05a922515477fa5d8692682b773139a43e6214))
+* add ROLE_USER on token authentication ([e24a69f](https://github.com/madgeek-arc/resource-catalogue/commit/e24a69fd9c2587ab3f0a5b9f2441400b28836a36))
+* addAdapterAsPublic() now tries to fetch the correct public level adapter resource ([15a839e](https://github.com/madgeek-arc/resource-catalogue/commit/15a839e07a6e89ade24ef9e50b1a998438b54daf))
+* adminAcceptedTerms catches the correct exception ([9cbe1f2](https://github.com/madgeek-arc/resource-catalogue/commit/9cbe1f287d388925362c5d50aa5d83e783060d3e))
+* adminAcceptedTerms now catches the correct exception ([b2e9824](https://github.com/madgeek-arc/resource-catalogue/commit/b2e9824d4d8acab350b83eb2c12866a0294a7661))
+* correct Bundle property class on configuration template related .json files ([7c54f80](https://github.com/madgeek-arc/resource-catalogue/commit/7c54f80141a26bb82eb56f8f8c09311875ad02d0))
+* deleting a RIR or updating its Guidelines' list should now properly delete any associated CTI ([8a6b535](https://github.com/madgeek-arc/resource-catalogue/commit/8a6b53572e1857e000dbb70dcbaa7094da8d7f85))
+* deletion on public CT, CTIs ([86ff8b1](https://github.com/madgeek-arc/resource-catalogue/commit/86ff8b199d1a4305467fd5e0dd3c41091afba2bc))
+* dynamic property reload for admin/epot list ([b13ce2e](https://github.com/madgeek-arc/resource-catalogue/commit/b13ce2e8b9077b70c079af362b07588d178227f1))
+* dynamic property reloading for admins/epots (requires relog) ([95f78e8](https://github.com/madgeek-arc/resource-catalogue/commit/95f78e801bef4486d5086376874f4231253d1bb1))
+* fetch correct vocabulary state for deployable services during verify ([5feda7c](https://github.com/madgeek-arc/resource-catalogue/commit/5feda7cb2682c2361c12451242d9d61d1d3ebd18))
+* Filter out unecessary configuration files when profile 'no-auth' is enabled ([c5a43aa](https://github.com/madgeek-arc/resource-catalogue/commit/c5a43aaef7f10f5b65f92281a1261134d28aee1f))
+* minor fix on ResourceValidationUtils ([be3d03a](https://github.com/madgeek-arc/resource-catalogue/commit/be3d03a124b87187f964d4c13211029e1e2d0269))
+* node vocabulary enum type name ([9510b3c](https://github.com/madgeek-arc/resource-catalogue/commit/9510b3c16f8423e37cf165cb0793e0680a7c9971))
+* populate getCatalogueId() method with the new resources ([59f9afb](https://github.com/madgeek-arc/resource-catalogue/commit/59f9afb429cc41f89e15661db5a3f3e75af8d0f7))
+* remove problematic annotations ([4adefc7](https://github.com/madgeek-arc/resource-catalogue/commit/4adefc75e9014e8e01996ea65ef50e583a990421))
+* required fields on Service, Datasource ([918e88a](https://github.com/madgeek-arc/resource-catalogue/commit/918e88a4b8389f97bfc89eeb4cad8d5224a72b20))
+* update methods on various resources now correctly update lower-level resources ([05ce307](https://github.com/madgeek-arc/resource-catalogue/commit/05ce30768cd8accc8fc2f998509c92e896757e04))
+* updateIdsToPublic() method checks for existance first where needed ([acf562c](https://github.com/madgeek-arc/resource-catalogue/commit/acf562c49d6d596bb3180ba3a55acb736cabaa59))
+* use getResource() with published and catalogueId ([91e5052](https://github.com/madgeek-arc/resource-catalogue/commit/91e50522dbe1d8c433ed13340cf61692404ab32f))
+* validation on Adapter's linked resource field. ([21dca9c](https://github.com/madgeek-arc/resource-catalogue/commit/21dca9c5f77e69addaa130e0fafd3873ab4453b9))
+
+
 ## [](https://github.com/madgeek-arc/resource-catalogue/compare/v5.0.0...v) (2025-05-22)
 
 ### Bug Fixes

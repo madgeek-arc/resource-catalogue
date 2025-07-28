@@ -17,13 +17,15 @@
 package gr.uoa.di.madgik.resourcecatalogue.service;
 
 
-import gr.uoa.di.madgik.registry.domain.Browsing;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.registry.domain.Resource;
 import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.registry.service.SearchService;
-import gr.uoa.di.madgik.resourcecatalogue.domain.*;
+import gr.uoa.di.madgik.resourcecatalogue.domain.Bundle;
+import gr.uoa.di.madgik.resourcecatalogue.domain.EOSCIFGuidelines;
+import gr.uoa.di.madgik.resourcecatalogue.domain.Service;
+import gr.uoa.di.madgik.resourcecatalogue.domain.ServiceBundle;
 import org.springframework.security.core.Authentication;
 
 import java.util.List;

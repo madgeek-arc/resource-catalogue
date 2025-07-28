@@ -18,7 +18,6 @@ package gr.uoa.di.madgik.resourcecatalogue.domain;
 
 import gr.uoa.di.madgik.resourcecatalogue.annotation.FieldValidation;
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.xml.bind.annotation.XmlElement;
 
 import java.net.URL;
 import java.util.Objects;
@@ -28,7 +27,6 @@ public class ResearchProductLicensing {
     /**
      * Research product license name
      */
-    @XmlElement(required = true)
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     @FieldValidation()
     private String researchProductLicenseName;
@@ -36,7 +34,6 @@ public class ResearchProductLicensing {
     /**
      * Research product license URL
      */
-    @XmlElement(required = true)
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     @FieldValidation()
     private URL researchProductLicenseURL;

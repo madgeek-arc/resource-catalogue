@@ -14,16 +14,8 @@
  * limitations under the License.
  */
 
-package gr.uoa.di.madgik.resourcecatalogue.domain.configurationTemplates;
+package gr.uoa.di.madgik.resourcecatalogue.domain;
 
-import gr.uoa.di.madgik.resourcecatalogue.domain.Bundle;
-import gr.uoa.di.madgik.resourcecatalogue.domain.Metadata;
-import jakarta.xml.bind.annotation.XmlElement;
-import jakarta.xml.bind.annotation.XmlRootElement;
-import jakarta.xml.bind.annotation.XmlType;
-
-@XmlType
-@XmlRootElement
 public class ConfigurationTemplateBundle extends Bundle<ConfigurationTemplate> {
 
     public ConfigurationTemplateBundle() {
@@ -49,7 +41,6 @@ public class ConfigurationTemplateBundle extends Bundle<ConfigurationTemplate> {
         super.setId(id);
     }
 
-    @XmlElement(name = "configurationTemplate")
     public ConfigurationTemplate getConfigurationTemplate() {
         return this.getPayload();
     }
@@ -57,6 +48,5 @@ public class ConfigurationTemplateBundle extends Bundle<ConfigurationTemplate> {
     public void setConfigurationTemplate(ConfigurationTemplate configurationTemplate) {
         this.setPayload(configurationTemplate);
     }
-
 }
 

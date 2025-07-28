@@ -21,7 +21,6 @@ import freemarker.template.Template;
 import freemarker.template.TemplateException;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
-import gr.uoa.di.madgik.resourcecatalogue.domain.configurationTemplates.ConfigurationTemplateInstanceBundle;
 import gr.uoa.di.madgik.resourcecatalogue.exceptions.CatalogueResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.manager.*;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
@@ -45,6 +44,8 @@ public class InternalToPublicConsistency {
     private final ProviderService providerService;
     private final ServiceBundleService<ServiceBundle> serviceBundleService;
     private final TrainingResourceService trainingResourceService;
+    private final DeployableServiceService deployableServiceService;
+    private final AdapterService adapterService;
     private final InteroperabilityRecordService interoperabilityRecordService;
     private final ResourceInteroperabilityRecordService resourceInteroperabilityRecordService;
     private final DatasourceService datasourceService;
@@ -56,6 +57,8 @@ public class InternalToPublicConsistency {
     private final PublicProviderService publicProviderService;
     private final PublicServiceService publicServiceManager;
     private final PublicTrainingResourceService publicTrainingResourceManager;
+    private final PublicDeployableServiceService publicDeployableServiceService;
+    private final PublicAdapterService publicAdapterService;
     private final PublicInteroperabilityRecordService publicInteroperabilityRecordManager;
     private final PublicResourceInteroperabilityRecordService publicResourceInteroperabilityRecordManager;
     private final PublicDatasourceService publicDatasourceService;
@@ -83,12 +86,16 @@ public class InternalToPublicConsistency {
                                        ServiceBundleService<ServiceBundle> serviceBundleService,
                                        TrainingResourceService trainingResourceService,
                                        InteroperabilityRecordService interoperabilityRecordService,
+                                       DeployableServiceService deployableServiceService,
+                                       AdapterService adapterService,
                                        ResourceInteroperabilityRecordService resourceInteroperabilityRecordService,
                                        DatasourceService datasourceService, HelpdeskService helpdeskService,
                                        MonitoringService monitoringService,
                                        ConfigurationTemplateInstanceService configurationTemplateInstanceService,
                                        PublicProviderService publicProviderService, PublicServiceService publicServiceManager,
                                        PublicTrainingResourceService publicTrainingResourceManager,
+                                       PublicDeployableServiceService publicDeployableServiceService,
+                                       PublicAdapterService publicAdapterService,
                                        PublicInteroperabilityRecordService publicInteroperabilityRecordManager,
                                        PublicDatasourceService publicDatasourceService, PublicHelpdeskService publicHelpdeskService,
                                        PublicMonitoringService publicMonitoringService,
@@ -98,6 +105,8 @@ public class InternalToPublicConsistency {
         this.providerService = providerService;
         this.serviceBundleService = serviceBundleService;
         this.trainingResourceService = trainingResourceService;
+        this.deployableServiceService = deployableServiceService;
+        this.adapterService = adapterService;
         this.interoperabilityRecordService = interoperabilityRecordService;
         this.resourceInteroperabilityRecordService = resourceInteroperabilityRecordService;
         this.datasourceService = datasourceService;
@@ -107,6 +116,8 @@ public class InternalToPublicConsistency {
         this.publicProviderService = publicProviderService;
         this.publicServiceManager = publicServiceManager;
         this.publicTrainingResourceManager = publicTrainingResourceManager;
+        this.publicDeployableServiceService = publicDeployableServiceService;
+        this.publicAdapterService = publicAdapterService;
         this.publicInteroperabilityRecordManager = publicInteroperabilityRecordManager;
         this.publicResourceInteroperabilityRecordManager = publicResourceInteroperabilityRecordManager;
         this.publicDatasourceService = publicDatasourceService;
@@ -125,12 +136,14 @@ public class InternalToPublicConsistency {
         List<ProviderBundle> allInternalApprovedProviders = providerService.getAll(createFacetFilter("approved provider"), securityService.getAdminAccess()).getResults();
         List<ServiceBundle> allInternalApprovedServices = serviceBundleService.getAll(createFacetFilter("approved resource"), securityService.getAdminAccess()).getResults();
         List<TrainingResourceBundle> allInternalApprovedTR = trainingResourceService.getAll(createFacetFilter("approved resource"), securityService.getAdminAccess()).getResults();
+        List<DeployableServiceBundle> allInternalApprovedDS = deployableServiceService.getAll(createFacetFilter("approved resource"), securityService.getAdminAccess()).getResults();
         List<InteroperabilityRecordBundle> allInternalApprovedIR = interoperabilityRecordService.getAll(createFacetFilter("approved interoperability record"), securityService.getAdminAccess()).getResults();
         List<ResourceInteroperabilityRecordBundle> allInternalApprovedRIR = resourceInteroperabilityRecordService.getAll(createFacetFilter(null), securityService.getAdminAccess()).getResults();
         List<DatasourceBundle> allInternalApprovedDatasources = datasourceService.getAll(createFacetFilter(null), securityService.getAdminAccess()).getResults();
         List<HelpdeskBundle> allInternalHelpdesks = helpdeskService.getAll(createFacetFilter(null), securityService.getAdminAccess()).getResults();
         List<MonitoringBundle> allInternalMonitorings = monitoringService.getAll(createFacetFilter(null), securityService.getAdminAccess()).getResults();
         List<ConfigurationTemplateInstanceBundle> allInternalCTI = configurationTemplateInstanceService.getAll(createFacetFilter(null), securityService.getAdminAccess()).getResults();
+        List<AdapterBundle> allInternalApprovedAdapters = adapterService.getAll(createFacetFilter("approved adapter"), securityService.getAdminAccess()).getResults();
         List<String> logs = new ArrayList<>();
 
         // check consistency for Providers
@@ -167,6 +180,19 @@ public class InternalToPublicConsistency {
                 logs.add(String.format("Training Resource with ID [%s] of the Catalogue [%s] is missing its Public instance [%s]",
                         trainingResourceBundle.getId(), trainingResourceBundle.getTrainingResource().getCatalogueId(),
                         trainingResourceBundle.getIdentifiers().getPid()));
+            }
+        }
+
+        // check consistency for Deployable Services
+        for (DeployableServiceBundle deployableServiceBundle : allInternalApprovedDS) {
+            // try and get its Public instance
+            try {
+                publicDeployableServiceService.get(deployableServiceBundle.getIdentifiers().getPid(),
+                        deployableServiceBundle.getDeployableService().getCatalogueId(), true);
+            } catch (CatalogueResourceNotFoundException e) {
+                logs.add(String.format("Deployable Service with ID [%s] of the Catalogue [%s] is missing its Public instance [%s]",
+                        deployableServiceBundle.getId(), deployableServiceBundle.getDeployableService().getCatalogueId(),
+                        deployableServiceBundle.getIdentifiers().getPid()));
             }
         }
 
@@ -243,6 +269,19 @@ public class InternalToPublicConsistency {
             } catch (CatalogueResourceNotFoundException e) {
                 logs.add(String.format("Configuration Template Instance with ID [%s] of the internal Catalogue is missing its Public instance [%s]",
                         ctiBundle.getId(), ctiBundle.getIdentifiers().getPid()));
+            }
+        }
+
+        // check consistency for Adapters
+        for (AdapterBundle adapterBundle : allInternalApprovedAdapters) {
+            // try and get its Public instance
+            try {
+                publicDeployableServiceService.get(adapterBundle.getIdentifiers().getPid(),
+                        adapterBundle.getAdapter().getCatalogueId(), true);
+            } catch (CatalogueResourceNotFoundException e) {
+                logs.add(String.format("Adapter with ID [%s] of the Catalogue [%s] is missing its Public instance [%s]",
+                        adapterBundle.getId(), adapterBundle.getAdapter().getCatalogueId(),
+                        adapterBundle.getIdentifiers().getPid()));
             }
         }
 
