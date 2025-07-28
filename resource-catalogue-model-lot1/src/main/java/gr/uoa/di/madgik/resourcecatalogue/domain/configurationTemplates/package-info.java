@@ -14,11 +14,5 @@
  * limitations under the License.
  */
 
-@XmlAccessorOrder(XmlAccessOrder.ALPHABETICAL)
-@XmlAccessorType(XmlAccessType.FIELD)
 package gr.uoa.di.madgik.resourcecatalogue.domain.configurationTemplates;
 
-import jakarta.xml.bind.annotation.XmlAccessOrder;
-import jakarta.xml.bind.annotation.XmlAccessType;
-import jakarta.xml.bind.annotation.XmlAccessorOrder;
-import jakarta.xml.bind.annotation.XmlAccessorType;
