@@ -188,7 +188,7 @@ public class InteroperabilityRecordManager extends ResourceCatalogueManager<Inte
 
         // updated && created
         ret.getInteroperabilityRecord().setCreated(existingInteroperabilityRecord.getInteroperabilityRecord().getCreated());
-        ret.getInteroperabilityRecord().setUpdated(String.valueOf(System.currentTimeMillis()));
+        ret.getInteroperabilityRecord().setUpdated(commonMethods.transformTimestampToDate(String.valueOf(System.currentTimeMillis())));
 
         // block catalogueId updates from Provider Admins
         if (!securityService.hasRole(auth, "ROLE_ADMIN")) {
