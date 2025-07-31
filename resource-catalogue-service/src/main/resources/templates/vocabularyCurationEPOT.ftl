@@ -1,4 +1,4 @@
-<p>Dear ${project} Portal Admins,</p>
+<p>Dear ${project} Beyond Admins,</p>
 <p>
     A new Vocabulary Request [${vocabularyCuration.vocabulary}]-[${vocabularyCuration.entryValueName}] has been
     submitted by the user [${userName}]-[${userEmail}].

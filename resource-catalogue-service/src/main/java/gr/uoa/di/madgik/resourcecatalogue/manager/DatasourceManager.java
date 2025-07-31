@@ -87,10 +87,9 @@ public class DatasourceManager extends ResourceCatalogueManager<DatasourceBundle
     public DatasourceBundle add(DatasourceBundle datasourceBundle, Authentication auth) {
 
         // if Datasource has ID -> check if it exists in OpenAIRE Datasources list
-        //TODO: enable when openaire api returns info. Decide how to proceed for external catalogues
-//        if (datasourceBundle.getId() != null && !datasourceBundle.getId().isEmpty()) {
-//            checkOpenAIREIDExistence(datasourceBundle);
-//        }
+        if (datasourceBundle.getId() != null && !datasourceBundle.getId().isEmpty()) {
+            checkOpenAIREIDExistence(datasourceBundle);
+        }
         logger.trace("Attempting to add a new Datasource: {}", datasourceBundle);
 
         datasourceBundle.setMetadata(Metadata.createMetadata(AuthenticationInfo.getFullName(auth), AuthenticationInfo.getEmail(auth).toLowerCase()));
@@ -111,8 +110,8 @@ public class DatasourceManager extends ResourceCatalogueManager<DatasourceBundle
             datasourceBundle.setActive(false);
             datasourceBundle.setStatus(vocabularyService.get("pending datasource").getId());
             datasourceBundle.setLatestOnboardingInfo(datasourceBundle.getLoggingInfo().getFirst());
-            registrationMailService.sendEmailsForDatasourceExtensionToPortalAdmins(datasourceBundle, "post");
             datasourceBundle.setId(idCreator.generate(getResourceTypeName()));
+            registrationMailService.sendEmailsForDatasourceExtensionToPortalAdmins(datasourceBundle, "post");
             commonMethods.createIdentifiers(datasourceBundle, getResourceTypeName(), false);
         } else {
             datasourceBundle.setActive(true);
@@ -199,10 +198,13 @@ public class DatasourceManager extends ResourceCatalogueManager<DatasourceBundle
         String serviceId = datasourceBundle.getDatasource().getServiceId();
         String catalogueId = datasourceBundle.getDatasource().getCatalogueId();
 
-        DatasourceBundle existingDatasource = get(serviceId, catalogueId, false);
-        if (existingDatasource != null) {
-            throw new ValidationException(String.format("Service [%s] of the Catalogue [%s] has already a Datasource " +
-                    "registered, with id: [%s]", serviceId, catalogueId, existingDatasource.getId()));
+        try {
+            DatasourceBundle existingDatasource = get(serviceId, catalogueId, false);
+            if (existingDatasource != null) {
+                throw new ValidationException(String.format("Service [%s] of the Catalogue [%s] has already a Datasource " +
+                        "registered, with id: [%s]", serviceId, catalogueId, existingDatasource.getId()));
+            }
+        } catch (CatalogueResourceNotFoundException ignored) {
         }
 
         // check if Service exists and if User belongs to Resource's Provider Admins

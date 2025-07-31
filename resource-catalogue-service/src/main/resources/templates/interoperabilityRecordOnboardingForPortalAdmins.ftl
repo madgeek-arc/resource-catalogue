@@ -1,10 +1,10 @@
-<p>Dear ${project} Portal Onboarding Team,</p>
+<p>Dear ${project} Beyond Onboarding Team,</p>
 <p>
     <#if bundle.status == "pending interoperability record">
         A new application by [${registrant.fullName}] - [${registrant.email}] has been received for registering
         [${bundle.interoperabilityRecord.title}] -
         [${bundle.interoperabilityRecord.id}] as a new ${project} Interoperability Record
-        in ${project} Portal.
+        in ${project} Beyond.
         <br>
         You can review the application here ${endpoint}/guidelines/all and approve or reject it.
     <#elseif bundle.status == "approved interoperability record">
