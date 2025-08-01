@@ -103,7 +103,7 @@ public class AmsJmsService extends DefaultJmsService implements JmsService {
             logger.warn("AMS is disabled, skipping execution.");
             return;
         }
-        HttpEntity<String> request = createHttpRequest(message);
+        HttpEntity<String> request = createHttpRequestForTopic(message);
         sendRequest(buildUrl("/topics/" + topic + ":publish"), HttpMethod.POST, request, false);
         logger.info("Sending JMS to topic: {} via AMS", topic);
     }
@@ -123,7 +123,7 @@ public class AmsJmsService extends DefaultJmsService implements JmsService {
     public void createSubscriptionForTopic(String topic, String name) {
         ensureEnabled();
         String topicUrl = buildUrl("/topics/" + topic);
-        HttpEntity<String> request = createHttpRequest(topicUrl);
+        HttpEntity<String> request = createHttpRequestForSubscription(topicUrl);
         try {
             sendRequest(buildUrl("/subscriptions/" + name), HttpMethod.PUT, request, false);
         } catch (WebClientResponseException e) {
@@ -164,7 +164,7 @@ public class AmsJmsService extends DefaultJmsService implements JmsService {
         return new HttpEntity<>(headers);
     }
 
-    private HttpEntity<String> createHttpRequest(Object body) {
+    private HttpEntity<String> createHttpRequestForTopic(Object body) {
         HttpHeaders headers = createHeaders();
         try {
             String jsonMessage = objectMapper.writeValueAsString(body);
@@ -177,7 +177,7 @@ public class AmsJmsService extends DefaultJmsService implements JmsService {
         }
     }
 
-    private HttpEntity<String> createHttpRequest(String topicUrl) {
+    private HttpEntity<String> createHttpRequestForSubscription(String topicUrl) {
         HttpHeaders headers = createHeaders();
         try {
             Map<String, Object> pubSubMessage = createMessageForSubscription(topicUrl);
