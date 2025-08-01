@@ -83,8 +83,9 @@ public class RelationshipValidator {
                         try {
                             providerService.get(resourceProvider, catalogueId, false);
                         } catch (CatalogueResourceNotFoundException e) {
-                            throw new ValidationException(String.format("There is no Provider with ID %s in the %s Catalogue. " +
-                                    "Found in field 'resourceProviders", resourceProvider, catalogueId));
+                            throw new ValidationException(String.format("Field [resourceProviders]: " +
+                                            "There is no Provider with ID '%s' in the %s Catalogue.",
+                                    resourceProvider, catalogueId));
                         }
                     }
                 }
@@ -98,8 +99,9 @@ public class RelationshipValidator {
                             try {
                                 trainingResourceService.get(requiredResource, catalogueId, false);
                             } catch (CatalogueResourceNotFoundException j) {
-                                throw new ValidationException(String.format("There is no Service or Training Resource " +
-                                        "with ID %s in the %s Catalogue. Found in field 'requiredResources", requiredResource, catalogueId));
+                                throw new ValidationException(String.format("Field [requiredResources]: " +
+                                                "There is no Service or Training Resource with ID '%s' in the %s Catalogue.",
+                                        requiredResource, catalogueId));
                             }
                         }
                     }
@@ -114,8 +116,9 @@ public class RelationshipValidator {
                             try {
                                 trainingResourceService.get(relatedResource, catalogueId, false);
                             } catch (CatalogueResourceNotFoundException j) {
-                                throw new ValidationException(String.format("There is no Service or Training Resource with ID %s in the %s Catalogue. " +
-                                        "Found in field 'relatedResources", relatedResource, catalogueId));
+                                throw new ValidationException(String.format("Field [relatedResources]: " +
+                                                "There is no Service or Training Resource with ID '%s' in the %s Catalogue.",
+                                        relatedResource, catalogueId));
                             }
                         }
                     }
@@ -130,8 +133,9 @@ public class RelationshipValidator {
                             try {
                                 trainingResourceService.get(eoscRelatedService, catalogueId, false);
                             } catch (CatalogueResourceNotFoundException j) {
-                                throw new ValidationException(String.format("There is no Service or Training Resource with ID %s in the %s Catalogue. " +
-                                        "Found in field 'eoscRelatedServices", eoscRelatedService, catalogueId));
+                                throw new ValidationException(String.format("Field [eoscRelatedServices]: " +
+                                                "There is no Service or Training Resource with ID '%s' in the %s Catalogue. ",
+                                        eoscRelatedService, catalogueId));
                             }
                         }
                     }
@@ -143,8 +147,9 @@ public class RelationshipValidator {
                         try {
                             interoperabilityRecordService.get(interoperabilityRecordId, catalogueId, false);
                         } catch (CatalogueResourceNotFoundException e) {
-                            throw new ValidationException(String.format("There is no Interoperability Record with ID %s in the %s Catalogue. " +
-                                    "Found in field 'interoperabilityRecordIds", interoperabilityRecordId, catalogueId));
+                            throw new ValidationException(String.format("Field [interoperabilityRecordIds]: " +
+                                            "There is no Interoperability Record with ID '%s' in the %s Catalogue.",
+                                    interoperabilityRecordId, catalogueId));
                         }
                     }
                 }

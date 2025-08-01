@@ -16,7 +16,9 @@
 
 package gr.uoa.di.madgik.resourcecatalogue.manager;
 
+import com.google.gson.Gson;
 import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import gr.uoa.di.madgik.catalogue.exception.ValidationException;
 import gr.uoa.di.madgik.registry.domain.Resource;
 import gr.uoa.di.madgik.registry.exception.ResourceAlreadyExistsException;
@@ -25,7 +27,10 @@ import gr.uoa.di.madgik.registry.service.SearchService;
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
 import gr.uoa.di.madgik.resourcecatalogue.dto.MonitoringStatus;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
-import gr.uoa.di.madgik.resourcecatalogue.utils.*;
+import gr.uoa.di.madgik.resourcecatalogue.utils.AuthenticationInfo;
+import gr.uoa.di.madgik.resourcecatalogue.utils.ObjectUtils;
+import gr.uoa.di.madgik.resourcecatalogue.utils.ProviderResourcesCommonMethods;
+import gr.uoa.di.madgik.resourcecatalogue.utils.ResourceValidationUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -33,6 +38,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.core.Authentication;
+import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Mono;
 
 import java.util.*;
 
@@ -47,6 +54,7 @@ public class MonitoringManager extends ResourceCatalogueManager<MonitoringBundle
     private final SecurityService securityService;
     private final RegistrationMailService registrationMailService;
     private final ProviderResourcesCommonMethods commonMethods;
+    private final WebClient webClient;
 
     @Value("${catalogue.id}")
     private String catalogueId;
@@ -65,7 +73,8 @@ public class MonitoringManager extends ResourceCatalogueManager<MonitoringBundle
                              @Lazy SecurityService securityService,
                              @Lazy RegistrationMailService registrationMailService,
                              ProviderResourcesCommonMethods commonMethods,
-                             IdCreator idCreator) {
+                             IdCreator idCreator,
+                             WebClient.Builder webClientBuilder) {
         super(MonitoringBundle.class);
         this.serviceBundleService = serviceBundleService;
         this.trainingResourceService = trainingResourceService;
@@ -74,6 +83,7 @@ public class MonitoringManager extends ResourceCatalogueManager<MonitoringBundle
         this.registrationMailService = registrationMailService;
         this.commonMethods = commonMethods;
         this.idCreator = idCreator;
+        this.webClient = webClientBuilder.build();
     }
 
     @Override
@@ -214,7 +224,9 @@ public class MonitoringManager extends ResourceCatalogueManager<MonitoringBundle
     }
 
     public List<Vocabulary> getAvailableServiceTypes() {
-        String response = CreateArgoGrnetHttpRequest.createHttpRequest(monitoringServiceTypes, monitoringToken);
+        String response = callMonitoringApi(monitoringServiceTypes, monitoringToken);
+        if (response == null || response.isEmpty()) return Collections.emptyList();
+
         JSONObject obj = new JSONObject(response);
         JSONArray array = obj.getJSONArray("data");
         return createServiceTypeVocabularyList(array);
@@ -304,5 +316,32 @@ public class MonitoringManager extends ResourceCatalogueManager<MonitoringBundle
                 monitoringBundle.getId(), monitoringBundle.getMonitoring().getCatalogueId());
         publicMonitoringManager.add(monitoringBundle, auth);
         return monitoringBundle;
+    }
+
+    public List<MonitoringStatus> getAvailabilityOrStatus(String url, String field) {
+        String response = callMonitoringApi(url, monitoringToken);
+        List<MonitoringStatus> serviceMonitoringStatuses = null;
+        if (response != null) {
+            JSONObject obj = new JSONObject(response);
+            Gson gson = new Gson();
+            JsonElement jsonObj = gson.fromJson(String.valueOf(obj), JsonElement.class);
+            JsonArray results = jsonObj.getAsJsonObject().get("endpoints").getAsJsonArray().get(0).
+                    getAsJsonObject().get(field).getAsJsonArray();
+            serviceMonitoringStatuses = createMonitoringAvailabilityObject(results);
+        }
+        return serviceMonitoringStatuses;
+    }
+
+    private String callMonitoringApi(String url, String token) {
+        return webClient.get()
+                .uri(url)
+                .header("accept", "application/json")
+                .header("Content-Type", "application/json")
+                .header("x-api-key", token)
+                .retrieve()
+                .onStatus(status -> !status.is2xxSuccessful(), clientResponse -> Mono.empty())
+                .bodyToMono(String.class)
+                .onErrorResume(e -> Mono.empty())
+                .block();
     }
 }

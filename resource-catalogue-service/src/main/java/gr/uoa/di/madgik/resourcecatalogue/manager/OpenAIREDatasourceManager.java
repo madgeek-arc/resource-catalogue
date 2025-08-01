@@ -29,11 +29,11 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.web.reactive.function.client.WebClient;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -101,22 +101,22 @@ public class OpenAIREDatasourceManager implements OpenAIREDatasourceService {
         return new String[]{Integer.toString(page), Integer.toString(quantity), ordering, data};
     }
 
+    private final WebClient webClient = WebClient.builder()
+            .defaultHeader(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE)
+            .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+            .build();
+
     private String createHttpRequest(String url, String data) {
-        RestTemplate restTemplate = new RestTemplate();
-        HttpHeaders headers = new HttpHeaders();
-        headers.add("accept", "application/json");
-        headers.add("Content-Type", "application/json");
-        HttpEntity<String> entity;
-        HttpMethod httpMethod;
-        if (data != null) {
-            entity = new HttpEntity<>(data, headers);
-            httpMethod = HttpMethod.POST;
-        } else {
-            entity = new HttpEntity<>(headers);
-            httpMethod = HttpMethod.GET;
-        }
-        return restTemplate.exchange(url, httpMethod, entity, String.class).getBody();
+        WebClient.RequestBodySpec requestSpec = webClient.method(data != null ? HttpMethod.POST : HttpMethod.GET)
+                .uri(url);
+
+        WebClient.ResponseSpec responseSpec = (data != null)
+                ? requestSpec.bodyValue(data).retrieve()
+                : requestSpec.retrieve();
+
+        return responseSpec.bodyToMono(String.class).block();
     }
+
 
     @Override
     public Datasource get(String id) {

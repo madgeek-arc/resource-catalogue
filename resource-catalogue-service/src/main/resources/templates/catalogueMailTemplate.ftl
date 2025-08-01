@@ -2,17 +2,17 @@
 <p>
     <#if bundle.status == "pending catalogue">
         You have applied for registering [${bundle.catalogue.name}] - ([${bundle.catalogue.id}]) as a
-        new ${project} Catalogue in the ${project} Portal.
+        new ${project} Catalogue in the ${project} Beyond.
         <br>
         Your application will be reviewed and you will be notified on its approval or rejection, as well as for any
         further steps you can follow for registering successfully your catalogue.
         <br>
-        Thank you for your interest in becoming a member of the ${project} Portal.
+        Thank you for your interest in becoming a member of the ${project} Beyond.
     </#if>
     <#if bundle.status == "approved catalogue">
         <#if bundle.active == true>
             You have applied for registering [${bundle.catalogue.name}] - ([${bundle.catalogue.id}])
-            as a new ${project} Catalogue in the ${project} Portal.
+            as a new ${project} Catalogue in the ${project} Beyond.
             <br>
             Your application has been approved.
         <#else>
@@ -24,21 +24,21 @@
     </#if>
     <#if bundle.status == "rejected catalogue">
         You have applied for registering [${bundle.catalogue.name}] - ([${bundle.catalogue.id}]) as a
-        new ${project} Catalogue in the ${project} Portal.
+        new ${project} Catalogue in the ${project} Beyond.
         <br>
         Your application has been rejected, as your catalogue does not comply with the Rules of Participation of
-        the ${project} Portal.
+        the ${project} Beyond.
         <br>
         [Option 1: We would like to offer an information webinar or training session to improve your application.
         If you agree or for any other clarifications, please contact us at ${registrationEmail}].
         <br>
         [Option 2: For any clarifications, please contact us at ${registrationEmail}].
         <br>
-        Thank you for your interest in becoming a member of the ${project} Portal.
+        Thank you for your interest in becoming a member of the ${project} Beyond.
     </#if>
 </p>
 <p>
     Best Regards,
     <br>
-    the ${project} Portal Onboarding Team
+    the ${project} Beyond Onboarding Team
 </p>

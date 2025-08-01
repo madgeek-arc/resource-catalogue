@@ -658,22 +658,44 @@ public class TrainingResourceManager extends ResourceCatalogueManager<TrainingRe
         facetFilter.setQuantity(maxQuantity);
         facetFilter.addFilter("status", "approved resource");
         facetFilter.addFilter("published", false);
-        Browsing<TrainingResourceBundle> trainingResourceBrowsing = getAll(facetFilter, auth);
-        List<TrainingResourceBundle> trainingResourcesToBeAudited = new ArrayList<>();
-        long todayEpochTime = System.currentTimeMillis();
-        long interval = Instant.ofEpochMilli(todayEpochTime).atZone(ZoneId.systemDefault()).minusMonths(Integer.parseInt(auditingInterval)).toEpochSecond();
-        for (TrainingResourceBundle trainingResourceBundle : trainingResourceBrowsing.getResults()) {
-            if (trainingResourceBundle.getLatestAuditInfo() != null) {
-                if (Long.parseLong(trainingResourceBundle.getLatestAuditInfo().getDate()) > interval) {
-                    trainingResourcesToBeAudited.add(trainingResourceBundle);
+
+        Browsing<TrainingResourceBundle> trainingsBrowsing = getAll(facetFilter, auth);
+        List<TrainingResourceBundle> trainingsToBeAudited = new ArrayList<>();
+
+        long todayEpochMillis = System.currentTimeMillis();
+        long intervalEpochSeconds = Instant.ofEpochMilli(todayEpochMillis)
+                .atZone(ZoneId.systemDefault())
+                .minusMonths(Integer.parseInt(auditingInterval))
+                .toEpochSecond();
+
+        for (TrainingResourceBundle trainingResourceBundle : trainingsBrowsing.getResults()) {
+            LoggingInfo auditInfo = trainingResourceBundle.getLatestAuditInfo();
+            if (auditInfo == null) {
+                // Include training resources that have never been audited
+                trainingsToBeAudited.add(trainingResourceBundle);
+            } else {
+                try {
+                    long auditEpochSeconds = Long.parseLong(auditInfo.getDate());
+                    if (auditEpochSeconds < intervalEpochSeconds) {
+                        // Include training resources that were last audited before the threshold
+                        trainingsToBeAudited.add(trainingResourceBundle);
+                    }
+                } catch (NumberFormatException e) {
                 }
             }
         }
-        Collections.shuffle(trainingResourcesToBeAudited);
-        if (trainingResourcesToBeAudited.size() > ff.getQuantity()) {
-            trainingResourcesToBeAudited.subList(ff.getQuantity(), trainingResourcesToBeAudited.size()).clear();
+
+        // Shuffle the list randomly
+        Collections.shuffle(trainingsToBeAudited);
+
+        // Limit the list to the requested quantity
+        int quantity = ff.getQuantity();
+        if (trainingsToBeAudited.size() > quantity) {
+            trainingsToBeAudited = trainingsToBeAudited.subList(0, quantity);
         }
-        return new Browsing<>(trainingResourcesToBeAudited.size(), 0, trainingResourcesToBeAudited.size(), trainingResourcesToBeAudited, trainingResourceBrowsing.getFacets());
+
+        return new Browsing<>(trainingsToBeAudited.size(), 0, trainingsToBeAudited.size(), trainingsToBeAudited,
+                trainingsBrowsing.getFacets());
     }
 
     @Override

@@ -530,22 +530,44 @@ public class DeployableServiceManager extends ResourceCatalogueManager<Deployabl
         facetFilter.setQuantity(maxQuantity);
         facetFilter.addFilter("status", "approved resource");
         facetFilter.addFilter("published", false);
-        Browsing<DeployableServiceBundle> browsing = getAll(facetFilter, auth);
-        List<DeployableServiceBundle> deployableServicesToBeAudited = new ArrayList<>();
-        long todayEpochTime = System.currentTimeMillis();
-        long interval = Instant.ofEpochMilli(todayEpochTime).atZone(ZoneId.systemDefault()).minusMonths(Integer.parseInt(auditingInterval)).toEpochSecond();
-        for (DeployableServiceBundle deployableServiceBundle : browsing.getResults()) {
-            if (deployableServiceBundle.getLatestAuditInfo() != null) {
-                if (Long.parseLong(deployableServiceBundle.getLatestAuditInfo().getDate()) > interval) {
-                    deployableServicesToBeAudited.add(deployableServiceBundle);
+
+        Browsing<DeployableServiceBundle> dsBrowsing = getAll(facetFilter, auth);
+        List<DeployableServiceBundle> dsToBeAudited = new ArrayList<>();
+
+        long todayEpochMillis = System.currentTimeMillis();
+        long intervalEpochSeconds = Instant.ofEpochMilli(todayEpochMillis)
+                .atZone(ZoneId.systemDefault())
+                .minusMonths(Integer.parseInt(auditingInterval))
+                .toEpochSecond();
+
+        for (DeployableServiceBundle deployableServiceBundle : dsBrowsing.getResults()) {
+            LoggingInfo auditInfo = deployableServiceBundle.getLatestAuditInfo();
+            if (auditInfo == null) {
+                // Include services that have never been audited
+                dsToBeAudited.add(deployableServiceBundle);
+            } else {
+                try {
+                    long auditEpochSeconds = Long.parseLong(auditInfo.getDate());
+                    if (auditEpochSeconds < intervalEpochSeconds) {
+                        // Include services that were last audited before the threshold
+                        dsToBeAudited.add(deployableServiceBundle);
+                    }
+                } catch (NumberFormatException e) {
                 }
             }
         }
-        Collections.shuffle(deployableServicesToBeAudited);
-        if (deployableServicesToBeAudited.size() > ff.getQuantity()) {
-            deployableServicesToBeAudited.subList(ff.getQuantity(), deployableServicesToBeAudited.size()).clear();
+
+        // Shuffle the list randomly
+        Collections.shuffle(dsToBeAudited);
+
+        // Limit the list to the requested quantity
+        int quantity = ff.getQuantity();
+        if (dsToBeAudited.size() > quantity) {
+            dsToBeAudited = dsToBeAudited.subList(0, quantity);
         }
-        return new Browsing<>(deployableServicesToBeAudited.size(), 0, deployableServicesToBeAudited.size(), deployableServicesToBeAudited, browsing.getFacets());
+
+        return new Browsing<>(dsToBeAudited.size(), 0, dsToBeAudited.size(), dsToBeAudited,
+                dsBrowsing.getFacets());
     }
 
     @Override

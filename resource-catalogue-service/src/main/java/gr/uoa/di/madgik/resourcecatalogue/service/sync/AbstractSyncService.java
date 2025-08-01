@@ -27,17 +27,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
-import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.HttpServerErrorException;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
 import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
@@ -46,7 +43,7 @@ public abstract class AbstractSyncService<T extends Identifiable> implements Syn
     private static final Logger logger = LoggerFactory.getLogger(AbstractSyncService.class);
     private static boolean isInitialized = false;
 
-    protected RestTemplate restTemplate;
+    protected WebClient webClient;
     protected boolean active = false;
     protected String host;
     protected String controller;
@@ -56,14 +53,18 @@ public abstract class AbstractSyncService<T extends Identifiable> implements Syn
 
     protected abstract String getController();
 
-    public AbstractSyncService(@Value("${sync.host:}") String host, @Value("${sync.token.filepath:}") String filename, @Value("${sync.enable}") boolean enabled) {
+    public AbstractSyncService(@Value("${sync.host:}") String host,
+                               @Value("${sync.token.filepath:}") String filename,
+                               @Value("${sync.enable}") boolean enabled,
+                               WebClient.Builder webClientBuilder) {
         this.host = host;
         this.filename = filename;
-        restTemplate = new RestTemplate();
+        this.webClient = webClientBuilder.build();
 
-        if (!"".equals(host) && enabled) {
-            active = true;
+        if (!host.isBlank() && enabled) {
+            this.active = true;
         }
+
         this.queue = new LinkedBlockingQueue<>();
     }
 
@@ -71,7 +72,7 @@ public abstract class AbstractSyncService<T extends Identifiable> implements Syn
     void init() {
         this.controller = getController();
         if (!isInitialized) {
-            if ("".equals(filename)) {
+            if (filename.isBlank()) {
                 logger.warn("'sync.token.filepath' value not set");
             }
             isInitialized = true;
@@ -82,7 +83,7 @@ public abstract class AbstractSyncService<T extends Identifiable> implements Syn
         return queue;
     }
 
-    @Scheduled(initialDelay = 0, fixedRate = 300000) //run every 5 min
+    @Scheduled(initialDelay = 0, fixedRate = 300000)
     public void retrySync() {
         int syncTries = 0;
 
@@ -95,20 +96,11 @@ public abstract class AbstractSyncService<T extends Identifiable> implements Syn
                 Pair<T, String> pair = queue.take();
                 logger.info("Attempting to perform '{}' operation for the {}:\n{}", pair.getValue1(), pair.getValue0().getClass(), pair.getValue0());
                 switch (pair.getValue1()) {
-                    case "add":
-                        syncAdd(pair.getValue0());
-                        break;
-                    case "update":
-                        syncUpdate(pair.getValue0());
-                        break;
-                    case "delete":
-                        syncDelete(pair.getValue0());
-                        break;
-                    case "verify":
-                        syncVerify(pair.getValue0());
-                        break;
-                    default:
-                        logger.warn("Unsupported action: {}", pair.getValue1());
+                    case "add" -> syncAdd(pair.getValue0());
+                    case "update" -> syncUpdate(pair.getValue0());
+                    case "delete" -> syncDelete(pair.getValue0());
+                    case "verify" -> syncVerify(pair.getValue0());
+                    default -> logger.warn("Unsupported action: {}", pair.getValue1());
                 }
                 syncTries++;
             }
@@ -119,172 +111,146 @@ public abstract class AbstractSyncService<T extends Identifiable> implements Syn
 
     @Override
     public void syncAdd(T t) {
+        if (!active) return;
         boolean retryKey = true;
-        if (active) {
-            HttpEntity<T> request = new HttpEntity<>(t, createHeaders());
-            logger.info("Posting resource with id: '{}' - Host: [{}]", t.getId(), host);
-            try {
-                URI uri = new URI(host + controller).normalize();
-                ResponseEntity<?> re = restTemplate.exchange(uri.normalize(), HttpMethod.POST, request, t.getClass());
-                if (re.getStatusCode() != HttpStatus.CREATED) {
-                    logger.error("Adding {} with id '{}' from host [{}] returned code '{}'\nResponse body:\n{}",
-                            t.getClass(), t.getId(), host, re.getStatusCodeValue(), re.getBody());
-                } else {
-                    retryKey = false;
-                }
-            } catch (URISyntaxException e) {
-                logger.error("could not create URI for host: {}", host, e);
-            } catch (HttpServerErrorException e) {
-                logger.error("Failed to post {} with id '{}' to host {}\nMessage: {}",
-                        t.getClass(), t.getId(), host, e.getResponseBodyAsString());
-            } catch (RuntimeException re) {
-                logger.error("syncAdd failed, check if token has expired!\n{}: {}", t.getClass(), t, re);
-            }
-            if (retryKey) {
-                try {
-                    queue.add(Pair.with(t, "add"));
-                } catch (IllegalStateException e) {
-                    logger.info("No space is currently available in the Queue");
-                }
-            }
+
+        try {
+            ResponseEntity<?> response = sendRequest(HttpMethod.POST, host + controller, t, t.getClass());
+            if (response.getStatusCode() == HttpStatus.CREATED) retryKey = false;
+            else logError("Adding", t, response);
+        } catch (Exception e) {
+            logException("syncAdd", t, e);
         }
+
+        retryIfNecessary(t, "add", retryKey);
     }
 
     @Override
     public void syncUpdate(T t) {
+        if (!active) return;
         boolean retryKey = true;
-        if (active) {
-            HttpEntity<T> request = new HttpEntity<>(t, createHeaders());
-            logger.info("Updating {} with id: '{}' - Host: [{}]", t.getClass(), t.getId(), host);
-            try {
-                URI uri = new URI(host + controller).normalize();
-                ResponseEntity<?> re = restTemplate.exchange(uri.normalize().toString(), HttpMethod.PUT, request, t.getClass());
-                if (re.getStatusCode() != HttpStatus.OK) {
-                    logger.error("Updating {} with id '{}' from host [{}] returned code '{}'\nResponse body:\n{}",
-                            t.getClass(), t.getId(), host, re.getStatusCodeValue(), re.getBody());
-                } else {
-                    retryKey = false;
-                }
-            } catch (URISyntaxException e) {
-                logger.error("could not create URI for host: {}", host, e);
-            } catch (HttpServerErrorException e) {
-                logger.error("Failed to update {} with id '{}' to host {}\nMessage: {}",
-                        t.getClass(), t.getId(), host, e.getResponseBodyAsString());
-            } catch (RuntimeException re) {
-                logger.error("syncUpdate failed, check if token has expired!\n{}: {}", t.getClass(), t, re);
-            }
-            if (retryKey) {
-                try {
-                    queue.add(Pair.with(t, "update"));
-                } catch (IllegalStateException e) {
-                    logger.info("No space is currently available in the Queue");
-                }
-            }
+
+        try {
+            ResponseEntity<?> response = sendRequest(HttpMethod.PUT, host + controller, t, t.getClass());
+            if (response.getStatusCode() == HttpStatus.OK) retryKey = false;
+            else logError("Updating", t, response);
+        } catch (Exception e) {
+            logException("syncUpdate", t, e);
         }
+
+        retryIfNecessary(t, "update", retryKey);
     }
 
     @Override
     public void syncDelete(T t) {
+        if (!active) return;
         boolean retryKey = true;
-        if (active) {
-            HttpEntity<T> request = new HttpEntity<>(createHeaders());
-            logger.info("Deleting {} with id: '{}' - Host: [{}]", t.getClass(), t.getId(), host);
-            try {
-                URI uri = new URI(String.format("%s/%s/%s", host, controller, t.getId())).normalize();
-                ResponseEntity<?> re = restTemplate.exchange(uri.toString(), HttpMethod.DELETE, request, Void.class);
-                if (re.getStatusCode() != HttpStatus.NO_CONTENT) {
-                    logger.error("Deleting {} with id '{}' from host [{}] returned code '{}'\nResponse body:\n{}",
-                            t.getClass(), t.getId(), host, re.getStatusCodeValue(), re.getBody());
-                } else {
-                    retryKey = false;
-                }
-            } catch (URISyntaxException e) {
-                logger.error("could not create URI for host: {}", host, e);
-            } catch (HttpServerErrorException e) {
-                logger.error("Failed to delete {} with id '{}' to host {}\nMessage: {}",
-                        t.getClass(), t.getId(), host, e.getResponseBodyAsString());
-            } catch (RuntimeException re) {
-                logger.error("syncDelete failed, check if token has expired!\n{}: {}", t.getClass(), t, re);
-            }
-            if (retryKey) {
-                try {
-                    queue.add(Pair.with(t, "delete"));
-                } catch (IllegalStateException e) {
-                    logger.info("No space is currently available in the Queue");
-                }
-            }
+
+        String deleteUrl = String.format("%s/%s/%s", host, controller, t.getId());
+        try {
+            ResponseEntity<Void> response = sendRequestWithoutBody(HttpMethod.DELETE, deleteUrl, Void.class);
+            if (response.getStatusCode() == HttpStatus.NO_CONTENT) retryKey = false;
+            else logError("Deleting", t, response);
+        } catch (Exception e) {
+            logException("syncDelete", t, e);
         }
+
+        retryIfNecessary(t, "delete", retryKey);
     }
 
-    //TODO: syncVerify is never used - maybe delete it
     @Override
     public void syncVerify(T t) {
+        if (!active) return;
         boolean retryKey = true;
-        if (active) {
-            HttpEntity<T> request = new HttpEntity<>(t, createHeaders());
-            URI uri;
-            logger.info("Verifying resource with id: '{}' - Host: [{}]", t.getId(), host);
-            try {
-                if (t instanceof Provider) {
-                    uri = new URI(host + controller + "/verifyProvider/" + t.getId() + "?active=true&status=approved%20provider").normalize();
-                } else if (t instanceof TrainingResource) {
-                    uri = new URI(host + controller + "/verifyTrainingResource/" + t.getId() + "?active=true&status=approved%20resource").normalize();
-                } else if (t instanceof Datasource) {
-                    uri = new URI(host + controller + "/verifyDatasource/" + t.getId() + "?active=true&status=approved%20resource").normalize();
-                } else {
-                    uri = new URI(host + controller + "/verifyResource/" + t.getId() + "?active=true&status=approved%20resource").normalize();
-                }
-                HttpComponentsClientHttpRequestFactory requestFactory = new HttpComponentsClientHttpRequestFactory();
-                restTemplate.setRequestFactory(requestFactory);
-                ResponseEntity<?> re = restTemplate.exchange(uri.normalize(), HttpMethod.PATCH, request, t.getClass());
-                if (re.getStatusCode() != HttpStatus.OK) {
-                    logger.error("Verifying {} with id '{}' from host '{}' returned code '{}'\nResponse body:\n{}",
-                            t.getClass(), t.getId(), host, re.getStatusCodeValue(), re.getBody());
-                } else {
-                    retryKey = false;
-                }
-            } catch (URISyntaxException e) {
-                logger.error("could not create URI for host: {}", host, e);
-            } catch (HttpServerErrorException e) {
-                logger.error("Failed to patch {} with id '{}' to host {}\nMessage: {}",
-                        t.getClass(), t.getId(), host, e.getResponseBodyAsString());
-            } catch (RuntimeException re) {
-                logger.error("syncVerify failed, check if token has expired!\n{}: {}", t.getClass(), t, re);
+        String uri;
+
+        try {
+            // Determine the correct verification endpoint
+            uri = switch (t) {
+                case Provider provider ->
+                        host + controller + "/verifyProvider/" + t.getId() + "?active=true&status=approved%20provider";
+                case TrainingResource trainingResource ->
+                        host + controller + "/verifyTrainingResource/" + t.getId() + "?active=true&status=approved%20resource";
+                case Datasource datasource ->
+                        host + controller + "/verifyDatasource/" + t.getId() + "?active=true&status=approved%20resource";
+                default ->
+                        host + controller + "/verifyResource/" + t.getId() + "?active=true&status=approved%20resource";
+            };
+
+            ResponseEntity<?> response = sendRequest(HttpMethod.PATCH, uri, t, t.getClass());
+
+            if (response != null && response.getStatusCode() == HttpStatus.OK) {
+                retryKey = false;
+            } else {
+                logError("Verifying", t, response);
             }
-            if (retryKey) {
-                try {
-                    queue.add(Pair.with(t, "verify"));
-                } catch (IllegalStateException e) {
-                    logger.info("No space is currently available in the Queue");
-                }
-            }
+
+        } catch (Exception e) {
+            logException("syncVerify", t, e);
         }
+
+        retryIfNecessary(t, "verify", retryKey);
+    }
+
+    private <R> ResponseEntity<R> sendRequest(HttpMethod method, String url, Object body, Class<R> responseType) {
+        return webClient
+                .method(method)
+                .uri(url)
+                .headers(headers -> headers.addAll(createHeaders()))
+                .bodyValue(body)
+                .retrieve()
+                .toEntity(responseType)
+                .block();
+    }
+
+    private <R> ResponseEntity<R> sendRequestWithoutBody(HttpMethod method, String url, Class<R> responseType) {
+        return webClient
+                .method(method)
+                .uri(url)
+                .headers(headers -> headers.addAll(createHeaders()))
+                .retrieve()
+                .toEntity(responseType)
+                .block();
     }
 
     protected HttpHeaders createHeaders() {
-        String token;
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         try {
-            token = readFile(filename);
-            headers.add("Authorization", "Bearer " + token);
+            String token = readFile(filename);
+            headers.setBearerAuth(token);
         } catch (IOException e) {
             logger.error("Could not read file '{}' containing the synchronization token", filename, e);
         }
-
         return headers;
     }
 
     protected String readFile(String filename) throws IOException {
-        try (BufferedReader br = new BufferedReader(new FileReader(filename))) {
-            StringBuilder sb = new StringBuilder();
-            String line = br.readLine();
+        return Files.readString(Path.of(filename)).trim();
+    }
 
-            while (line != null) {
-                sb.append(line);
-                line = br.readLine();
+    private void logError(String operation, T t, ResponseEntity<?> response) {
+        logger.error("{} {} with id '{}' from host [{}] returned code '{}'\nResponse body:\n{}",
+                operation, t.getClass().getSimpleName(), t.getId(), host,
+                response.getStatusCodeValue(), response.getBody());
+    }
+
+    private void logException(String operation, T t, Exception e) {
+        if (e instanceof WebClientResponseException wcre) {
+            logger.error("Failed to {} {} with id '{}' to host {}\nMessage: {}",
+                    operation, t.getClass().getSimpleName(), t.getId(), host, wcre.getResponseBodyAsString());
+        } else {
+            logger.error("{} failed, check if token has expired!\n{}: {}", operation, t.getClass(), t, e);
+        }
+    }
+
+    private void retryIfNecessary(T t, String operation, boolean retryKey) {
+        if (retryKey) {
+            try {
+                queue.add(Pair.with(t, operation));
+            } catch (IllegalStateException e) {
+                logger.info("No space is currently available in the Queue");
             }
-            return sb.toString();
         }
     }
 }

@@ -1,4 +1,4 @@
-<p>Dear ${project} Portal Admins,</p>
+<p>Dear ${project} Beyond Admins,</p>
 <p>
     The ${resourceType} [${resourceBundleName}]-[${bundleId}] has been moved from the Provider
     [${oldProvider.provider.id}]-[${oldProvider.provider.name}] to the Provider
