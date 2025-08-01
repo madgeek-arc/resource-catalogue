@@ -99,6 +99,7 @@ public abstract class AbstractSyncService<T extends Identifiable> implements Syn
                     case "add" -> syncAdd(pair.getValue0());
                     case "update" -> syncUpdate(pair.getValue0());
                     case "delete" -> syncDelete(pair.getValue0());
+                    case "verify" -> syncVerify(pair.getValue0());
                     default -> logger.warn("Unsupported action: {}", pair.getValue1());
                 }
                 syncTries++;
