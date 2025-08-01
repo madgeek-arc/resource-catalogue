@@ -38,4 +38,11 @@ public interface SynchronizerService<T> {
      * @param t resource
      */
     void syncDelete(T t);
+
+    /**
+     * Synchronize resource verification on a different host
+     *
+     * @param t resource
+     */
+    void syncVerify(T t);
 }

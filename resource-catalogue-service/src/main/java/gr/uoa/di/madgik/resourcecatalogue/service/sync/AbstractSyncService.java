@@ -16,7 +16,10 @@
 
 package gr.uoa.di.madgik.resourcecatalogue.service.sync;
 
+import gr.uoa.di.madgik.resourcecatalogue.domain.Datasource;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Identifiable;
+import gr.uoa.di.madgik.resourcecatalogue.domain.Provider;
+import gr.uoa.di.madgik.resourcecatalogue.domain.TrainingResource;
 import gr.uoa.di.madgik.resourcecatalogue.service.SynchronizerService;
 import jakarta.annotation.PostConstruct;
 import org.javatuples.Pair;
@@ -152,6 +155,40 @@ public abstract class AbstractSyncService<T extends Identifiable> implements Syn
         }
 
         retryIfNecessary(t, "delete", retryKey);
+    }
+
+    @Override
+    public void syncVerify(T t) {
+        if (!active) return;
+        boolean retryKey = true;
+        String uri;
+
+        try {
+            // Determine the correct verification endpoint
+            uri = switch (t) {
+                case Provider provider ->
+                        host + controller + "/verifyProvider/" + t.getId() + "?active=true&status=approved%20provider";
+                case TrainingResource trainingResource ->
+                        host + controller + "/verifyTrainingResource/" + t.getId() + "?active=true&status=approved%20resource";
+                case Datasource datasource ->
+                        host + controller + "/verifyDatasource/" + t.getId() + "?active=true&status=approved%20resource";
+                default ->
+                        host + controller + "/verifyResource/" + t.getId() + "?active=true&status=approved%20resource";
+            };
+
+            ResponseEntity<?> response = sendRequest(HttpMethod.PATCH, uri, t, t.getClass());
+
+            if (response != null && response.getStatusCode() == HttpStatus.OK) {
+                retryKey = false;
+            } else {
+                logError("Verifying", t, response);
+            }
+
+        } catch (Exception e) {
+            logException("syncVerify", t, e);
+        }
+
+        retryIfNecessary(t, "verify", retryKey);
     }
 
     private <R> ResponseEntity<R> sendRequest(HttpMethod method, String url, Object body, Class<R> responseType) {
