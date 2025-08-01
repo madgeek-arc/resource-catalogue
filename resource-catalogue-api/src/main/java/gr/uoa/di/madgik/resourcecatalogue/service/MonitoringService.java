@@ -88,17 +88,9 @@ public interface MonitoringService extends ResourceCatalogueService<MonitoringBu
     List<MonitoringStatus> createMonitoringAvailabilityObject(JsonArray results);
 
     /**
-     * Returns a list of Monitoring's Status Objects
-     *
-     * @param results JsonArray Results
-     * @return {@link List<MonitoringStatus>}
+     * @param url   endpoint of Monitoring service
+     * @param field results or statuses
+     * @return
      */
-    List<MonitoringStatus> createMonitoringStatusObject(JsonArray results);
-
-    /**
-     * @param url   Endpoint
-     * @param token token
-     * @return {@link String}
-     */
-    String createHttpRequest(String url, String token);
+    List<MonitoringStatus> getAvailabilityOrStatus(String url, String field);
 }
