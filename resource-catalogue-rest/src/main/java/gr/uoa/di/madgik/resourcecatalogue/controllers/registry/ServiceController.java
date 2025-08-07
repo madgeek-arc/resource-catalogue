@@ -168,7 +168,7 @@ public class ServiceController {
 
     @BrowseParameters
     @GetMapping(path = "getMyServices", produces = {MediaType.APPLICATION_JSON_VALUE})
-    public ResponseEntity<Browsing<ServiceBundle>> getMyServices(@RequestParam MultiValueMap<String, Object> params,
+    public ResponseEntity<Browsing<ServiceBundle>> getMyServices(@Parameter(hidden = true) @RequestParam MultiValueMap<String, Object> params,
                                                                  @Parameter(hidden = true) Authentication auth) {
         return new ResponseEntity<>(serviceBundleService.getMy(FacetFilter.from(params), auth), HttpStatus.OK);
     }
