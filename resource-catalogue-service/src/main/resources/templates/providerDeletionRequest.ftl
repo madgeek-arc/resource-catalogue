@@ -1,4 +1,4 @@
-<p>Dear ${project} Beyond Admins,</p>
+<p>Dear ${project} Admins,</p>
 <p>
     Provider Admin [${user.name} ${user.surname}] - [${user.email}] has requested the deletion of the Provider
     [${bundle.provider.id}]-[${bundle.provider.name}].

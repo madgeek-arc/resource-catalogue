@@ -312,7 +312,7 @@ public class InternalToPublicConsistency {
             Template temp = cfg.getTemplate("internalToPublicResourceConsistency.ftl");
             temp.process(root, out);
             String teamMail = out.getBuffer().toString();
-            String subject = String.format("[%s Beyond] Internal to Public Resource Consistency Logs", catalogueName);
+            String subject = String.format("[%s] Internal to Public Resource Consistency Logs", catalogueName);
             if (enableConsistencyEmails) {
                 mailService.sendMail(Collections.singletonList(consistencyTo), null, Collections.singletonList(consistencyCC), subject, teamMail);
             }
