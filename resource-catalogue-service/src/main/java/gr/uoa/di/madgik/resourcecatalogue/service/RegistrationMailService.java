@@ -786,35 +786,35 @@ public class RegistrationMailService {
         if (isTemplate) {
             ProviderBundle providerBundle = (ProviderBundle) bundle;
             String templateStatus = providerBundle.getTemplateStatus();
-            baseMessage = String.format("[%s Beyond] %s application for registering [%s]-[%s] as a new %s Resource",
+            baseMessage = String.format("[%s] %s application for registering [%s]-[%s] as a new %s Resource",
                     catalogueName, pronoun, bundleName, bundle.getId(), catalogueName);
             if (templateStatus.contains("pending")) {
-                return String.format("%s to the %s Beyond has been received and %s",
+                return String.format("%s to the %s has been received and %s",
                         baseMessage, catalogueName, isOnboardingTeam ? "should be reviewed" : "is under review");
             } else if (templateStatus.contains("approved")) {
                 if (providerBundle.isActive()) {
                     return String.format("%s has been approved", baseMessage);
                 } else {
-                    return String.format("[%s Beyond] The Provider [%s] has been set to inactive", catalogueName, bundleName);
+                    return String.format("[%s] The Provider [%s] has been set to inactive", catalogueName, bundleName);
                 }
             } else if (templateStatus.contains("rejected")) {
                 return String.format("%s has been rejected", baseMessage);
             } else {
-                return String.format("[%s Beyond] Resource Registration", catalogueName);
+                return String.format("[%s] Resource Registration", catalogueName);
             }
         } else {
-            baseMessage = String.format("[%s Beyond] %s application for registering [%s]-[%s] as a new %s %s",
+            baseMessage = String.format("[%s] %s application for registering [%s]-[%s] as a new %s %s",
                     catalogueName, pronoun, bundleName, bundle.getId(), catalogueName,
                     bundle.getClass().getSimpleName());
             if (status.contains("pending")) {
-                return String.format("%s to the %s Beyond has been received and %s",
+                return String.format("%s to the %s has been received and %s",
                         baseMessage, catalogueName, isOnboardingTeam ? "should be reviewed" : "is under review");
             } else if (status.contains("approved")) {
                 return String.format("%s has been approved", baseMessage);
             } else if (status.contains("rejected")) {
                 return String.format("%s has been rejected", baseMessage);
             } else {
-                return String.format("[%s Beyond] Resource Registration", catalogueName);
+                return String.format("[%s] Resource Registration", catalogueName);
             }
         }
     }
@@ -824,38 +824,38 @@ public class RegistrationMailService {
         emailBasicInfo.setRoot(getRootTemplate());
         switch (template) {
             case "adminDailyDigest.ftl":
-                emailBasicInfo.setSubject(String.format("[%s Beyond] Daily Notification - Changes to Resources",
+                emailBasicInfo.setSubject(String.format("[%s] Daily Notification - Changes to Resources",
                         catalogueName));
             case "adminOnboardingDigest.ftl":
-                emailBasicInfo.setSubject(String.format("[%s Beyond] Some new Providers are pending for your approval",
+                emailBasicInfo.setSubject(String.format("[%s] Some new Providers are pending for your approval",
                         catalogueName));
                 break;
             case "providerOnboarding.ftl":
-                emailBasicInfo.setSubject(String.format("[%s Beyond] Friendly reminder for your Provider",
+                emailBasicInfo.setSubject(String.format("[%s] Friendly reminder for your Provider",
                         catalogueName));
                 break;
             case "vocabularyCurationUser.ftl":
-                emailBasicInfo.setSubject(String.format("[%s Beyond] A Vocabulary you suggested has been submitted",
+                emailBasicInfo.setSubject(String.format("[%s] A Vocabulary you suggested has been submitted",
                         catalogueName));
                 break;
             case "vocabularyCurationApprovalUser.ftl":
-                emailBasicInfo.setSubject(String.format("[%s Beyond] A Vocabulary you suggested has been approved",
+                emailBasicInfo.setSubject(String.format("[%s] A Vocabulary you suggested has been approved",
                         catalogueName));
                 break;
             case "vocabularyCurationRejectionUser.ftl":
-                emailBasicInfo.setSubject(String.format("[%s Beyond] A Vocabulary you suggested has been rejected",
+                emailBasicInfo.setSubject(String.format("[%s] A Vocabulary you suggested has been rejected",
                         catalogueName));
                 break;
             case "vocabularyCurationEPOT.ftl":
-                emailBasicInfo.setSubject(String.format("[%s Beyond] A new Vocabulary suggestion has been submitted",
+                emailBasicInfo.setSubject(String.format("[%s] A new Vocabulary suggestion has been submitted",
                         catalogueName));
                 break;
             case "vocabularyCurationApprovalEPOT.ftl":
-                emailBasicInfo.setSubject(String.format("[%s Beyond] A Vocabulary suggestion has been approved",
+                emailBasicInfo.setSubject(String.format("[%s] A Vocabulary suggestion has been approved",
                         catalogueName));
                 break;
             case "vocabularyCurationRejectionEPOT.ftl":
-                emailBasicInfo.setSubject(String.format("[%s Beyond] A Vocabulary suggestion has been rejected",
+                emailBasicInfo.setSubject(String.format("[%s] A Vocabulary suggestion has been rejected",
                         catalogueName));
                 break;
             default:
@@ -882,94 +882,94 @@ public class RegistrationMailService {
                 emailBasicInfo.setSubject(getOnboardingTeamSubject((ProviderBundle) bundle));
                 break;
             case "providerOutdatedResources.ftl":
-                emailBasicInfo.setSubject(String.format("[%s Beyond] Your Provider [%s]-[%s] has one or more outdated Resources",
+                emailBasicInfo.setSubject(String.format("[%s] Your Provider [%s]-[%s] has one or more outdated Resources",
                         catalogueName, resourceName, bundle.getId()));
                 break;
             case "resourceMovedOldProvider.ftl":
             case "resourceMovedNewProvider.ftl":
             case "resourceMovedEPOT.ftl":
-                emailBasicInfo.setSubject(String.format("[%s Beyond] %s [%s]-[%s] has changed Provider",
+                emailBasicInfo.setSubject(String.format("[%s] %s [%s]-[%s] has changed Provider",
                         catalogueName, bundle.getClass().getSimpleName(), resourceName, bundle.getId()));
                 break;
             case "providerAdminAdded.ftl":
-                emailBasicInfo.setSubject(String.format("[%s Beyond] Your email has been added as an Administrator for " +
+                emailBasicInfo.setSubject(String.format("[%s] Your email has been added as an Administrator for " +
                         "the Provider '%s'", catalogueName, resourceName));
                 break;
             case "providerAdminDeleted.ftl":
-                emailBasicInfo.setSubject(String.format("[%s Beyond] Your email has been deleted from the Administration " +
+                emailBasicInfo.setSubject(String.format("[%s] Your email has been deleted from the Administration " +
                         "Team of the Provider '%s'", catalogueName, resourceName));
                 break;
             case "catalogueAdminAdded.ftl":
-                emailBasicInfo.setSubject(String.format("[%s Beyond] Your email has been added as an Administrator for " +
+                emailBasicInfo.setSubject(String.format("[%s] Your email has been added as an Administrator for " +
                         "the Catalogue '%s'", catalogueName, resourceName));
                 break;
             case "catalogueAdminDeleted.ftl":
-                emailBasicInfo.setSubject(String.format("[%s Beyond] Your email has been deleted from the Administration " +
+                emailBasicInfo.setSubject(String.format("[%s] Your email has been deleted from the Administration " +
                         "Team of the Catalogue '%s'", catalogueName, resourceName));
                 break;
             case "providerDeletionRequest.ftl":
-                emailBasicInfo.setSubject(String.format("[%s Beyond] Provider Deletion Request", catalogueName));
+                emailBasicInfo.setSubject(String.format("[%s] Provider Deletion Request", catalogueName));
                 break;
             case "providerDeletion.ftl":
-                emailBasicInfo.setSubject(String.format("[%s Beyond] Your Provider [%s]-[%s] has been Deleted", catalogueName,
+                emailBasicInfo.setSubject(String.format("[%s] Your Provider [%s]-[%s] has been Deleted", catalogueName,
                         resourceName, bundle.getId()));
                 break;
             case "bundleAudit.ftl":
-                emailBasicInfo.setSubject(String.format("[%s Beyond] Your %s [%s]-[%s] has been audited by the EPOT team",
+                emailBasicInfo.setSubject(String.format("[%s] Your %s [%s]-[%s] has been audited by the EPOT team",
                         catalogueName, bundle.getClass().getSimpleName(), resourceName, bundle.getId()));
                 break;
             case "invalidCatalogueUpdate.ftl":
-                emailBasicInfo.setSubject(String.format("[%s Beyond] The Catalogue [%s]-[%s] previously marked as " +
+                emailBasicInfo.setSubject(String.format("[%s] The Catalogue [%s]-[%s] previously marked as " +
                         "[invalid] has been updated", catalogueName, resourceName, bundle.getId()));
                 break;
             case "invalidProviderUpdate.ftl":
-                emailBasicInfo.setSubject(String.format("[%s Beyond] The Provider [%s]-[%s] previously marked as " +
+                emailBasicInfo.setSubject(String.format("[%s] The Provider [%s]-[%s] previously marked as " +
                         "[invalid] has been updated", catalogueName, resourceName, bundle.getId()));
                 break;
             case "invalidServiceUpdate.ftl":
-                emailBasicInfo.setSubject(String.format("[%s Beyond] The Service [%s]-[%s] previously marked as " +
+                emailBasicInfo.setSubject(String.format("[%s] The Service [%s]-[%s] previously marked as " +
                         "[invalid] has been updated", catalogueName, resourceName, bundle.getId()));
                 break;
             case "invalidTrainingResourceUpdate.ftl":
-                emailBasicInfo.setSubject(String.format("[%s Beyond] The Training Resource [%s]-[%s] previously marked as " +
+                emailBasicInfo.setSubject(String.format("[%s] The Training Resource [%s]-[%s] previously marked as " +
                         "[invalid] has been updated", catalogueName, resourceName, bundle.getId()));
                 break;
             case "serviceExtensionsDatasource.ftl":
                 if (action.equals("post")) {
-                    emailBasicInfo.setSubject(String.format("[%s Beyond] The Service [%s] has created a new Datasource " +
+                    emailBasicInfo.setSubject(String.format("[%s] The Service [%s] has created a new Datasource " +
                             "Extension", catalogueName, associatedResource));
                     emailBasicInfo.root.put("action", "post");
                 } else {
-                    emailBasicInfo.setSubject(String.format("[%s Beyond] The Service [%s] updated its Datasource " +
+                    emailBasicInfo.setSubject(String.format("[%s] The Service [%s] updated its Datasource " +
                             "Extension", catalogueName, associatedResource));
                     emailBasicInfo.root.put("action", "put");
                 }
                 break;
             case "serviceExtensionsHelpdesk.ftl":
                 if (action.equals("post")) {
-                    emailBasicInfo.setSubject(String.format("[%s Beyond] The Resource [%s] has created a new Helpdesk " +
+                    emailBasicInfo.setSubject(String.format("[%s] The Resource [%s] has created a new Helpdesk " +
                             "Extension", catalogueName, associatedResource));
                     emailBasicInfo.root.put("action", "post");
                 } else {
-                    emailBasicInfo.setSubject(String.format("[%s Beyond] The Resource [%s] has updated its Helpdesk " +
+                    emailBasicInfo.setSubject(String.format("[%s] The Resource [%s] has updated its Helpdesk " +
                             "Extension", catalogueName, associatedResource));
                     emailBasicInfo.root.put("action", "put");
                 }
                 break;
             case "serviceExtensionsMonitoring.ftl":
                 if (action.equals("post")) {
-                    emailBasicInfo.setSubject(String.format("[%s Beyond] The Resource [%s] has created a new Monitoring " +
+                    emailBasicInfo.setSubject(String.format("[%s] The Resource [%s] has created a new Monitoring " +
                             "Extension", catalogueName, associatedResource));
                     emailBasicInfo.root.put("action", "post");
                 } else {
-                    emailBasicInfo.setSubject(String.format("[%s Beyond] The Resource [%s] has updated its Monitoring " +
+                    emailBasicInfo.setSubject(String.format("[%s] The Resource [%s] has updated its Monitoring " +
                             "Extension", catalogueName, associatedResource));
                     emailBasicInfo.root.put("action", "put");
                 }
                 emailBasicInfo.getRoot().put("action", action);
                 break;
             case "interoperabilityRecordOnboardingForPortalAdmins.ftl":
-                emailBasicInfo.setSubject(String.format("[%s Beyond] Provider [%s]-[%s] has created a new Interoperability " +
+                emailBasicInfo.setSubject(String.format("[%s] Provider [%s]-[%s] has created a new Interoperability " +
                         "Record", catalogueName, resourceName, bundle.getId()));
                 break;
             case "interoperabilityRecordOnboardingForProviderAdmins":

@@ -1,10 +1,10 @@
-<p>Dear ${project} Beyond Onboarding Team,</p>
+<p>Dear ${project} Onboarding Team,</p>
 <p>
     <#if bundle.templateStatus == "no template status">
         <#if bundle.status == "pending provider">
             A new application by [${user.fullName}] – [${user.email}] has been received for registering
             [${bundle.provider.name}] - ([${bundle.provider.id}]) as a new ${project} Provider in
-            ${project} Beyond.
+            ${project}.
             <br>
             You can review the application here
             ${endpoint}/dashboard/${project?lower_case}/${bundle.provider.id}/info

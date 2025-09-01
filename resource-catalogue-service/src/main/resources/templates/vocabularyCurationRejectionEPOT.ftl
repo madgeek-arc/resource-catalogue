@@ -1,4 +1,4 @@
-<p>Dear ${project} Beyond Admins,</p>
+<p>Dear ${project} Admins,</p>
 <p>
     The Vocabulary [${vocabularyCuration.vocabulary}]-[${vocabularyCuration.entryValueName}] has been rejected by
     [${vocabularyCuration.resolutionUser}] at [${.now}].
