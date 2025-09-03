@@ -16,7 +16,7 @@
 
 package gr.uoa.di.madgik.resourcecatalogue.controllers;
 
-import gr.uoa.di.madgik.resourcecatalogue.dto.Properties;
+import gr.uoa.di.madgik.resourcecatalogue.config.ResourceCatalogueInfo;
 import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -27,22 +27,28 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @Hidden
-@Profile("beyond")
 @RestController
 @RequestMapping("properties")
 @Tag(name = "properties")
-public class PropertiesController {
+public class CatalogueInfoController {
 
-    private final Properties properties;
+    private final ResourceCatalogueInfo resourceCatalogueInfo;
 
-    public PropertiesController(Properties properties) {
-        this.properties = properties;
+    public record CatalogueConfiguration(String id, String name, String registrationEmail){}
+
+    public CatalogueInfoController(ResourceCatalogueInfo resourceCatalogueInfo) {
+        this.resourceCatalogueInfo = resourceCatalogueInfo;
     }
 
     @Hidden
     @Operation(summary = "Returns important application properties.")
     @GetMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
-    public ResponseEntity<Properties> get() {
-        return new ResponseEntity<>(properties, HttpStatus.OK);
+    public ResponseEntity<CatalogueConfiguration> get() {
+        CatalogueConfiguration conf = new CatalogueConfiguration(
+                resourceCatalogueInfo.getCatalogueId(),
+                resourceCatalogueInfo.getCatalogueName(),
+                resourceCatalogueInfo.getCatalogueRegistrationEmail()
+        );
+        return new ResponseEntity<>(conf, HttpStatus.OK);
     }
 }
