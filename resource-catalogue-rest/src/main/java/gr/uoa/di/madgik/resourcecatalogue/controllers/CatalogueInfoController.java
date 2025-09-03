@@ -34,7 +34,7 @@ public class CatalogueInfoController {
 
     private final ResourceCatalogueInfo resourceCatalogueInfo;
 
-    public record CatalogueConfiguration(String id, String name, String registrationEmail){}
+    public record CatalogueConfiguration(String catalogueId, String catalogueName, String registrationEmail){}
 
     public CatalogueInfoController(ResourceCatalogueInfo resourceCatalogueInfo) {
         this.resourceCatalogueInfo = resourceCatalogueInfo;
