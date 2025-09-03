@@ -1963,7 +1963,7 @@ For embedded providers (2) - legal status of the hosting legal entity. It is als
             
       <xs:element maxOccurs="unbounded" minOccurs="0" name="alternativeIdentifiers" nillable="true" type="alternativeIdentifier">
         <xs:annotation>
-          <xs:documentation><![CDATA[Other types of Identifiers for the specific Service (eg. PID)]]></xs:documentation>
+          <xs:documentation><![CDATA[Other types of Identifiers for the specific Service (e.g. PID)]]></xs:documentation>
         </xs:annotation>
       </xs:element>
             
@@ -2225,7 +2225,7 @@ infrastructures.]]></xs:documentation>
             
       <xs:element minOccurs="0" name="tagline" type="xs:string">
         <xs:annotation>
-          <xs:documentation><![CDATA[Short catch-phrase for marketing and advertising purposes. It will be usually displayed close to the Resource name and should refer to the main value or purpose of the Resource.]]></xs:documentation>
+          <xs:documentation><![CDATA[Short catchphrase for marketing and advertising purposes. It may be displayed close to the Resource name and should refer to the main value or purpose of the Resource.]]></xs:documentation>
         </xs:annotation>
       </xs:element>
             
