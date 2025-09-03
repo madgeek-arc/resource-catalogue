@@ -292,6 +292,7 @@ public class FieldValidator {
             // add timeout
             ReactorClientHttpConnector connector = new ReactorClientHttpConnector(
                     HttpClient.create()
+                            .followRedirect(true)
                             .responseTimeout(Duration.ofSeconds(5))
                             .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 5000)
             );
