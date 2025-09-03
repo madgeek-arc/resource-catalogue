@@ -14,14 +14,13 @@
  * limitations under the License.
  */
 
-package gr.uoa.di.madgik.resourcecatalogue.dto;
+package gr.uoa.di.madgik.resourcecatalogue.config;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-//TODO: populate
 @Component
-public class Properties {
+public class ResourceCatalogueInfo {
 
     @Value("${catalogue.id}")
     private String catalogueId;
@@ -32,10 +31,10 @@ public class Properties {
     @Value("${catalogue.emails.registration-emails.to}")
     private String catalogueRegistrationEmail;
 
-    public Properties() {
+    public ResourceCatalogueInfo() {
     }
 
-    public Properties(String catalogueId, String catalogueName, String catalogueRegistrationEmail) {
+    public ResourceCatalogueInfo(String catalogueId, String catalogueName, String catalogueRegistrationEmail) {
         this.catalogueId = catalogueId;
         this.catalogueName = catalogueName;
         this.catalogueRegistrationEmail = catalogueRegistrationEmail;
