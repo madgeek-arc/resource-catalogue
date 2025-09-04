@@ -28,16 +28,16 @@ public class ResourceCatalogueInfo {
     @Value("${catalogue.name}")
     private String catalogueName;
 
-    @Value("${catalogue.emails.registration-emails.to}")
-    private String catalogueRegistrationEmail;
+    @Value("${catalogue.emails.support}")
+    private String catalogueSupportEmail;
 
     public ResourceCatalogueInfo() {
     }
 
-    public ResourceCatalogueInfo(String catalogueId, String catalogueName, String catalogueRegistrationEmail) {
+    public ResourceCatalogueInfo(String catalogueId, String catalogueName, String catalogueSupportEmail) {
         this.catalogueId = catalogueId;
         this.catalogueName = catalogueName;
-        this.catalogueRegistrationEmail = catalogueRegistrationEmail;
+        this.catalogueSupportEmail = catalogueSupportEmail;
     }
 
     public String getCatalogueId() {
@@ -56,11 +56,11 @@ public class ResourceCatalogueInfo {
         this.catalogueName = catalogueName;
     }
 
-    public String getCatalogueRegistrationEmail() {
-        return catalogueRegistrationEmail;
+    public String getCatalogueSupportEmail() {
+        return catalogueSupportEmail;
     }
 
-    public void setCatalogueRegistrationEmail(String catalogueRegistrationEmail) {
-        this.catalogueRegistrationEmail = catalogueRegistrationEmail;
+    public void setCatalogueSupportEmail(String catalogueSupportEmail) {
+        this.catalogueSupportEmail = catalogueSupportEmail;
     }
 }
