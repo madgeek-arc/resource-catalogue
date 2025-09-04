@@ -80,7 +80,6 @@ public class ServiceController {
         this.genericResourceService = genericResourceService;
     }
 
-    @Tag(name = "ServiceWrite")
     @DeleteMapping(path = "{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceAdmin(#auth, #prefix+'/'+#suffix)")
     public ResponseEntity<ServiceBundle> delete(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
@@ -103,7 +102,6 @@ public class ServiceController {
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
-    @Tag(name = "ServiceRead")
     @Operation(summary = "Get the most current version of a specific Resource, providing the Resource id.")
     @GetMapping(path = "{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("@securityService.serviceIsActive(#prefix+'/'+#suffix, #catalogueId, false) or hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceAdmin(#auth, #prefix+'/'+#suffix)")
@@ -115,7 +113,6 @@ public class ServiceController {
         return new ResponseEntity<>(serviceBundleService.get(id, catalogueId, false).getService(), HttpStatus.OK);
     }
 
-    @Tag(name = "ServiceWrite")
     @Operation(summary = "Creates a new Resource.")
     @PostMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.providerCanAddResources(#auth, #service)")
@@ -125,7 +122,6 @@ public class ServiceController {
         return new ResponseEntity<>(ret.getService(), HttpStatus.CREATED);
     }
 
-    @Tag(name = "ServiceWrite")
     @Operation(summary = "Updates the Resource assigned the given id with the given Resource, keeping a version of revisions.")
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceAdmin(#auth,#service.id)")
     @PutMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
@@ -136,7 +132,6 @@ public class ServiceController {
     }
 
     // Accept/Reject a Resource.
-    @Tag(name = "ServiceAdmin")
     @PatchMapping(path = "verifyResource/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     public ResponseEntity<ServiceBundle> verifyResource(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
@@ -149,7 +144,6 @@ public class ServiceController {
         return new ResponseEntity<>(resource, HttpStatus.OK);
     }
 
-    @Tag(name = "ServiceWrite")
     @Operation(summary = "Validates the Service without actually changing the repository.")
     @PostMapping(path = "validate", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<Void> validate(@RequestBody Service service) {
@@ -157,7 +151,6 @@ public class ServiceController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    @Tag(name = "ServiceRead")
     @Operation(summary = "Filter a list of Resources based on a set of filters or get a list of all Resources in the Catalogue.")
     @BrowseParameters
     @BrowseCatalogue
@@ -173,7 +166,6 @@ public class ServiceController {
         return ResponseEntity.ok(paging);
     }
 
-    @Tag(name = "ServiceRead")
     @BrowseParameters
     @GetMapping(path = "getMyServices", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<Browsing<ServiceBundle>> getMyServices(@Parameter(hidden = true) @RequestParam MultiValueMap<String, Object> params,
@@ -181,7 +173,6 @@ public class ServiceController {
         return new ResponseEntity<>(serviceBundleService.getMy(FacetFilter.from(params), auth), HttpStatus.OK);
     }
 
-    @Tag(name = "ServiceRead")
     @Operation(summary = "Get a list of Resources based on a set of ids.")
     @GetMapping(path = "ids", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<List<Service>> getSomeServices(@RequestParam("ids") String[] ids, @Parameter(hidden = true) Authentication auth) {
@@ -189,7 +180,6 @@ public class ServiceController {
                 serviceBundleService.getByIds(auth, ids).stream().map(ServiceBundle::getService).collect(Collectors.toList()));
     }
 
-    @Tag(name = "ServiceRead")
     @Operation(summary = "Get all Resources in the catalogue organized by an attribute, e.g. get Resources organized in categories.")
     @GetMapping(path = "by/{field}", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<Map<String, List<Service>>> getServicesBy(@PathVariable(value = "field") Service.Field field, @Parameter(hidden = true) Authentication auth) throws NoSuchFieldException {
@@ -207,7 +197,6 @@ public class ServiceController {
         return ResponseEntity.ok(serviceResults);
     }
 
-    @Tag(name = "ServiceRead")
     @BrowseParameters
     @GetMapping(path = "byProvider/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.hasAdminAccess(#auth,#prefix+'/'+#suffix)")
@@ -226,7 +215,6 @@ public class ServiceController {
         return ResponseEntity.ok(paging);
     }
 
-    @Tag(name = "ServiceRead")
     @BrowseParameters
     @GetMapping(path = "byCatalogue/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.hasAdminAccess(#auth,#id)")
@@ -240,7 +228,6 @@ public class ServiceController {
     }
 
     // Filter a list of inactive Services based on a set of filters or get a list of all inactive Services in the Catalogue.
-    @Tag(name = "ServiceRead")
     @BrowseParameters
     @BrowseCatalogue
     @GetMapping(path = "inactive/all", produces = {MediaType.APPLICATION_JSON_VALUE})
@@ -254,7 +241,6 @@ public class ServiceController {
     }
 
     // Providing the Service id, set the Service to active or inactive.
-    @Tag(name = "ServiceWrite")
     @PatchMapping(path = "publish/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.providerIsActiveAndUserIsAdmin(#auth, #prefix+'/'+#suffix)")
     public ResponseEntity<ServiceBundle> setActive(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
@@ -267,7 +253,6 @@ public class ServiceController {
     }
 
     // Get all pending Service Templates.
-    @Tag(name = "ServiceAdmin")
     @GetMapping(path = "pending/all", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     public ResponseEntity<Browsing<Service>> pendingTemplates(@Parameter(hidden = true) Authentication auth) {
@@ -282,7 +267,6 @@ public class ServiceController {
         return ResponseEntity.ok(services);
     }
 
-    @Tag(name = "ServiceAdmin")
     @BrowseParameters
     @BrowseCatalogue
     @Parameter(name = "suspended", description = "Suspended", content = @Content(schema = @Schema(type = "boolean", defaultValue = "false")))
@@ -296,7 +280,6 @@ public class ServiceController {
         return ResponseEntity.ok(paging);
     }
 
-    @Tag(name = "ServiceAdmin")
     @PatchMapping(path = "auditResource/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     public ResponseEntity<ServiceBundle> auditService(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
@@ -311,7 +294,6 @@ public class ServiceController {
     }
 
 
-    @Tag(name = "ServiceAdmin")
     @Parameters({
             @Parameter(name = "quantity", description = "Quantity to be fetched", schema = @Schema(type = "string"))
     })
@@ -328,7 +310,6 @@ public class ServiceController {
     }
 
     // Get all modification details of a specific Resource based on id.
-    @Tag(name = "ServiceRead")
     @GetMapping(path = {"loggingInfoHistory/{prefix}/{suffix}"}, produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<Paging<LoggingInfo>> loggingInfoHistory(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
                                                                   @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix,
@@ -340,7 +321,6 @@ public class ServiceController {
     }
 
     // Send emails to Providers with outdated Resources
-    @Tag(name = "ServiceAdmin")
     @GetMapping(path = {"sendEmailForOutdatedResource/{prefix}/{suffix}"}, produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     public void sendEmailNotificationsToProvidersWithOutdatedResources(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
@@ -351,7 +331,6 @@ public class ServiceController {
     }
 
     // Move a Resource to another Provider
-    @Tag(name = "ServiceAdmin")
     @PostMapping(path = {"changeProvider"}, produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     public void changeProvider(@RequestParam String resourceId, @RequestParam String newProvider, @RequestParam(required = false) String comment, @Parameter(hidden = true) Authentication authentication) {
@@ -359,7 +338,6 @@ public class ServiceController {
     }
 
     // front-end use (Service/Datasource/TR forms)
-    @Tag(name = "ServiceRead")
     @Hidden
     @GetMapping(path = {"resourceIdToNameMap"}, produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<Map<String, List<gr.uoa.di.madgik.resourcecatalogue.dto.Value>>> resourceIdToNameMap(@RequestParam String catalogueId) {
@@ -416,7 +394,6 @@ public class ServiceController {
         return ff;
     }
 
-    @Tag(name = "ServiceRead")
     @BrowseParameters
     @GetMapping(path = "getSharedResources/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or @securityService.hasAdminAccess(#auth,#prefix+'/'+#suffix)")
@@ -437,7 +414,6 @@ public class ServiceController {
     }
 
     // Create a Public ServiceBundle if something went bad during its creation
-    @Tag(name = "ServiceAdmin")
     @Hidden
     @PostMapping(path = "createPublicService", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
@@ -447,7 +423,6 @@ public class ServiceController {
         return ResponseEntity.ok(serviceBundleService.createPublicResource(serviceBundle, auth));
     }
 
-    @Tag(name = "ServiceAdmin")
     @Operation(summary = "Suspends a specific Service.")
     @PutMapping(path = "suspend", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
@@ -456,7 +431,6 @@ public class ServiceController {
         return serviceBundleService.suspend(serviceId, catalogueId, suspend, auth);
     }
 
-    @Tag(name = "ServiceAdmin")
     @PostMapping(path = "/addBulk", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public void addBulk(@RequestBody List<ServiceBundle> serviceList, @Parameter(hidden = true) Authentication auth) {
@@ -465,7 +439,6 @@ public class ServiceController {
 
 
     // Bundles
-    @Tag(name = "ServiceAdmin")
     @DeleteMapping(path = {"/bundle/{prefix}/{suffix}"}, produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<ServiceBundle> deleteBundle(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
@@ -484,7 +457,6 @@ public class ServiceController {
         return new ResponseEntity<>(HttpStatus.GONE);
     }
 
-    @Tag(name = "ServiceRead")
     @GetMapping(path = "/bundle/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceAdmin(#auth, #prefix+'/'+#suffix)")
     public ResponseEntity<ServiceBundle> getBundle(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
@@ -495,7 +467,6 @@ public class ServiceController {
         return new ResponseEntity<>(serviceBundleService.get(id, catalogueId, false), HttpStatus.OK);
     }
 
-    @Tag(name = "ServiceAdmin")
     @PostMapping(path = {"/bundle"}, produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<ServiceBundle> addBundle(@RequestBody ServiceBundle service, Authentication authentication) {
@@ -505,7 +476,6 @@ public class ServiceController {
         return ret;
     }
 
-    @Tag(name = "ServiceAdmin")
     @PutMapping(path = {"/bundle"}, produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<ServiceBundle> updateBundle(@RequestBody ServiceBundle service, @Parameter(hidden = true) Authentication authentication) {
@@ -515,7 +485,6 @@ public class ServiceController {
         return ret;
     }
 
-    @Tag(name = "ServiceAdmin")
     @BrowseParameters
     @BrowseCatalogue
     @GetMapping(path = "/bundle/all", produces = {MediaType.APPLICATION_JSON_VALUE})
@@ -530,7 +499,6 @@ public class ServiceController {
 
 
     // Drafts
-    @Tag(name = "ServiceRead")
     @GetMapping(path = "/draft/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<Service> getDraftService(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
                                                    @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix) {
@@ -542,7 +510,6 @@ public class ServiceController {
         return null;
     }
 
-    @Tag(name = "ServiceRead")
     @GetMapping(path = "/draft/getMyDraftServices", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<List<ServiceBundle>> getMyDraftServices(@Parameter(hidden = true) Authentication auth) {
         FacetFilter ff = new FacetFilter();
@@ -551,7 +518,6 @@ public class ServiceController {
         return new ResponseEntity<>(serviceBundleService.getMy(ff, auth).getResults(), HttpStatus.OK);
     }
 
-    @Tag(name = "ServiceRead")
     @BrowseParameters
     @GetMapping(path = "/draft/byProvider/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<Browsing<ServiceBundle>> getDraftServices(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
@@ -565,7 +531,6 @@ public class ServiceController {
         return new ResponseEntity<>(draftServiceService.getAll(ff, auth), HttpStatus.OK);
     }
 
-    @Tag(name = "ServiceWrite")
     @PostMapping(path = "/draft", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_USER')")
     public ResponseEntity<Service> addDraftService(@RequestBody Service service, @Parameter(hidden = true) Authentication auth) {
@@ -575,7 +540,6 @@ public class ServiceController {
         return new ResponseEntity<>(serviceBundle.getService(), HttpStatus.CREATED);
     }
 
-    @Tag(name = "ServiceWrite")
     @PutMapping(path = "/draft", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceAdmin(#auth, #service.id)")
     public ResponseEntity<Service> updateDraftService(@RequestBody Service service, @Parameter(hidden = true) Authentication auth) {
@@ -587,7 +551,6 @@ public class ServiceController {
         return new ResponseEntity<>(serviceBundle.getService(), HttpStatus.OK);
     }
 
-    @Tag(name = "ServiceWrite")
     @DeleteMapping(path = "/draft/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceAdmin(#auth, #prefix+'/'+#suffix)")
     public ResponseEntity<Service> deleteDraftService(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
@@ -607,7 +570,6 @@ public class ServiceController {
         return new ResponseEntity<>(serviceBundle.getService(), HttpStatus.OK);
     }
 
-    @Tag(name = "ServiceWrite")
     @PutMapping(path = "draft/transform", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_USER')")
     public ResponseEntity<Service> transformService(@RequestBody Service service,
