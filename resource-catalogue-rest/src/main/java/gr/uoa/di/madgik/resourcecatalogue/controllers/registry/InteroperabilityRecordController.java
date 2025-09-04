@@ -72,7 +72,6 @@ public class InteroperabilityRecordController {
         this.securityService = securityService;
     }
 
-    @Tag(name = "InteroperabilityRecordWrite")
     @Operation(summary = "Creates a new Interoperability Record.")
     @PostMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.providerCanAddResources(#auth, #interoperabilityRecord)")
@@ -81,7 +80,6 @@ public class InteroperabilityRecordController {
         return new ResponseEntity<>(ret.getInteroperabilityRecord(), HttpStatus.CREATED);
     }
 
-    @Tag(name = "InteroperabilityRecordWrite")
     @Operation(summary = "Updates the InteroperabilityRecord with the given id.")
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceAdmin(#auth,#interoperabilityRecord.id)")
     @PutMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
@@ -92,7 +90,6 @@ public class InteroperabilityRecordController {
     }
 
     // Deletes the Interoperability Record with the specific ID.
-    @Tag(name = "InteroperabilityRecordWrite")
     @DeleteMapping(path = "{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceAdmin(#auth, #prefix+'/'+#suffix)")
     public ResponseEntity<InteroperabilityRecord> delete(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
@@ -108,7 +105,6 @@ public class InteroperabilityRecordController {
         return new ResponseEntity<>(interoperabilityRecordBundle.getInteroperabilityRecord(), HttpStatus.OK);
     }
 
-    @Tag(name = "InteroperabilityRecordRead")
     @Operation(summary = "Returns the Interoperability Record with the given id.")
     @GetMapping(path = "{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("@securityService.guidelineIsActive(#prefix+'/'+#suffix, #catalogueId, false) or hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceAdmin(#auth, #prefix+'/'+#suffix)")
@@ -121,7 +117,6 @@ public class InteroperabilityRecordController {
         return new ResponseEntity<>(interoperabilityRecord, HttpStatus.OK);
     }
 
-    @Tag(name = "InteroperabilityRecordRead")
     @GetMapping(path = "bundle/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceAdmin(#auth, #prefix+'/'+#suffix)")
     public ResponseEntity<InteroperabilityRecordBundle> getInteroperabilityRecordBundle(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
@@ -132,7 +127,6 @@ public class InteroperabilityRecordController {
         return new ResponseEntity<>(interoperabilityRecordService.get(id, catalogueId, false), HttpStatus.OK);
     }
 
-    @Tag(name = "InteroperabilityRecordRead")
     @Operation(summary = "Get all Interoperability Records")
     @BrowseParameters
     @BrowseCatalogue
@@ -148,7 +142,6 @@ public class InteroperabilityRecordController {
         return ResponseEntity.ok(paging);
     }
 
-    @Tag(name = "InteroperabilityRecordRead")
     @Operation(summary = "Get all Interoperability Record Bundles")
     @BrowseParameters
     @BrowseCatalogue
@@ -163,13 +156,11 @@ public class InteroperabilityRecordController {
         return ResponseEntity.ok(paging);
     }
 
-    @Tag(name = "InteroperabilityRecordRead")
     @GetMapping(path = "getMyInteroperabilityRecords", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<List<InteroperabilityRecordBundle>> getMyInteroperabilityRecords(@Parameter(hidden = true) Authentication auth) {
         return new ResponseEntity<>(interoperabilityRecordService.getMy(null, auth).getResults(), HttpStatus.OK);
     }
 
-    @Tag(name = "InteroperabilityRecordWrite")
     @PatchMapping(path = "verify/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     public ResponseEntity<InteroperabilityRecordBundle> verify(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
@@ -182,7 +173,6 @@ public class InteroperabilityRecordController {
         return new ResponseEntity<>(interoperabilityRecordBundle, HttpStatus.OK);
     }
 
-    @Tag(name = "InteroperabilityRecordWrite")
     @PatchMapping(path = "publish/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.providerIsActiveAndUserIsAdmin(#auth, #prefix+'/'+#suffix)")
     public ResponseEntity<InteroperabilityRecordBundle> setActive(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
@@ -193,7 +183,6 @@ public class InteroperabilityRecordController {
         return ResponseEntity.ok(interoperabilityRecordService.publish(id, active, auth));
     }
 
-    @Tag(name = "InteroperabilityRecordWrite")
     @Operation(summary = "Validates the Interoperability Record without actually changing the repository.")
     @PostMapping(path = "validate", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<Void> validate(@RequestBody InteroperabilityRecord interoperabilityRecord) {
@@ -201,7 +190,6 @@ public class InteroperabilityRecordController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    @Tag(name = "InteroperabilityRecordRead")
     @BrowseParameters
     @GetMapping(path = "byProvider/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.hasAdminAccess(#auth ,#prefix+'/'+#suffix)")
@@ -220,7 +208,6 @@ public class InteroperabilityRecordController {
         return ResponseEntity.ok(paging);
     }
 
-    @Tag(name = "InteroperabilityRecordWrite")
     @PatchMapping(path = "auditResource/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     public ResponseEntity<InteroperabilityRecordBundle> auditResource(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
@@ -234,7 +221,6 @@ public class InteroperabilityRecordController {
         return new ResponseEntity<>(interoperabilityRecordBundle, HttpStatus.OK);
     }
 
-    @Tag(name = "InteroperabilityRecordRead")
     @GetMapping(path = {"loggingInfoHistory/{prefix}/{suffix}"}, produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<Paging<LoggingInfo>> loggingInfoHistory(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
                                                                   @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix,
@@ -245,7 +231,6 @@ public class InteroperabilityRecordController {
         return ResponseEntity.ok(loggingInfoHistory);
     }
 
-    @Tag(name = "InteroperabilityRecordRead")
     @Operation(summary = "Returns the Related Resources of a specific Interoperability Record given its id.")
     @GetMapping(path = {"relatedResources/{prefix}/{suffix}"}, produces = {MediaType.APPLICATION_JSON_VALUE})
     public List<String> getAllInteroperabilityRecordRelatedResources(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
@@ -265,7 +250,6 @@ public class InteroperabilityRecordController {
     }
 
     // front-end use (Resource Interoperability Record form)
-    @Tag(name = "InteroperabilityRecordRead")
     @Hidden
     @GetMapping(path = {"interoperabilityRecordIdToNameMap"}, produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<Map<String, List<Value>>> interoperabilityRecordIdToNameMap(@RequestParam String catalogueId) {
@@ -306,7 +290,6 @@ public class InteroperabilityRecordController {
         return ff;
     }
 
-    @Tag(name = "InteroperabilityRecordWrite")
     @PostMapping(path = "addInteroperabilityRecordBundle", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<InteroperabilityRecordBundle> add(@RequestBody InteroperabilityRecordBundle interoperabilityRecordBundle, Authentication authentication) {
@@ -315,7 +298,6 @@ public class InteroperabilityRecordController {
         return ret;
     }
 
-    @Tag(name = "InteroperabilityRecordWrite")
     @PutMapping(path = "updateInteroperabilityRecordBundle", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<InteroperabilityRecordBundle> update(@RequestBody InteroperabilityRecordBundle interoperabilityRecord, @Parameter(hidden = true) Authentication authentication) {
@@ -325,7 +307,6 @@ public class InteroperabilityRecordController {
     }
 
     // Create a Public InteroperabilityRecord if something went bad during its creation
-    @Tag(name = "InteroperabilityRecordWrite")
     @Hidden
     @PostMapping(path = "createPublicInteroperabilityRecord", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
@@ -335,7 +316,6 @@ public class InteroperabilityRecordController {
         return ResponseEntity.ok(interoperabilityRecordService.createPublicInteroperabilityRecord(interoperabilityRecordBundle, auth));
     }
 
-    @Tag(name = "InteroperabilityRecordWrite")
     @Operation(summary = "Suspends a specific Interoperability Record.")
     @PutMapping(path = "suspend", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
@@ -344,7 +324,6 @@ public class InteroperabilityRecordController {
         return interoperabilityRecordService.suspend(interoperabilityRecordId, catalogueId, suspend, auth);
     }
 
-    @Tag(name = "InteroperabilityRecordWrite")
     @PostMapping(path = "/addBulk", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public void addBulk(@RequestBody List<InteroperabilityRecordBundle> interoperabilityRecordList, @Parameter(hidden = true) Authentication auth) {
@@ -352,7 +331,6 @@ public class InteroperabilityRecordController {
     }
 
     // Drafts
-    @Tag(name = "InteroperabilityRecordRead")
     @GetMapping(path = "/draft/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<InteroperabilityRecord> getDraftInteroperabilityRecord(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
                                                                                  @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix) {
@@ -364,7 +342,6 @@ public class InteroperabilityRecordController {
         return null;
     }
 
-    @Tag(name = "InteroperabilityRecordRead")
     @GetMapping(path = "/draft/getMyDraftInteroperabilityRecords", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<List<InteroperabilityRecordBundle>> getMyDraftInteroperabilityRecords(@Parameter(hidden = true) Authentication auth) {
         FacetFilter ff = new FacetFilter();
@@ -373,7 +350,6 @@ public class InteroperabilityRecordController {
         return new ResponseEntity<>(interoperabilityRecordService.getMy(ff, auth).getResults(), HttpStatus.OK);
     }
 
-    @Tag(name = "InteroperabilityRecordWrite")
     @PostMapping(path = "/draft", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_USER')")
     public ResponseEntity<InteroperabilityRecord> addDraftInteroperabilityRecord(@RequestBody InteroperabilityRecord interoperabilityRecord,
@@ -384,7 +360,6 @@ public class InteroperabilityRecordController {
         return new ResponseEntity<>(interoperabilityRecordBundle.getInteroperabilityRecord(), HttpStatus.CREATED);
     }
 
-    @Tag(name = "InteroperabilityRecordWrite")
     @PutMapping(path = "/draft", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceAdmin(#auth, #interoperabilityRecord.id)")
     public ResponseEntity<InteroperabilityRecord> updateDraftInteroperabilityRecord(@RequestBody InteroperabilityRecord interoperabilityRecord,
@@ -397,7 +372,6 @@ public class InteroperabilityRecordController {
         return new ResponseEntity<>(interoperabilityRecordBundle.getInteroperabilityRecord(), HttpStatus.OK);
     }
 
-    @Tag(name = "InteroperabilityRecordWrite")
     @DeleteMapping(path = "/draft/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceAdmin(#auth, #prefix+'/'+#suffix)")
     public ResponseEntity<InteroperabilityRecord> deleteDraftInteroperabilityRecord(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
@@ -417,7 +391,6 @@ public class InteroperabilityRecordController {
         return new ResponseEntity<>(interoperabilityRecordBundle.getInteroperabilityRecord(), HttpStatus.OK);
     }
 
-    @Tag(name = "InteroperabilityRecordWrite")
     @PutMapping(path = "draft/transform", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_USER')")
     public ResponseEntity<InteroperabilityRecord> transformToInteroperabilityRecord(@RequestBody InteroperabilityRecord interoperabilityRecord,
