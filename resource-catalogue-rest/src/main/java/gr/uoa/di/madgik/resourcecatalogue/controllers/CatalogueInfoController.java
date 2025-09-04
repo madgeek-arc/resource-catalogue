@@ -28,8 +28,8 @@ import org.springframework.web.bind.annotation.*;
 
 @Hidden
 @RestController
-@RequestMapping("properties")
-@Tag(name = "properties")
+@RequestMapping("config")
+@Tag(name = "config")
 public class CatalogueInfoController {
 
     private final ResourceCatalogueInfo resourceCatalogueInfo;
