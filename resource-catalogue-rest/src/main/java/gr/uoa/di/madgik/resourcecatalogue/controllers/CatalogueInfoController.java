@@ -34,7 +34,7 @@ public class CatalogueInfoController {
 
     private final ResourceCatalogueInfo resourceCatalogueInfo;
 
-    public record CatalogueConfiguration(String catalogueId, String catalogueName, String registrationEmail){}
+    public record CatalogueConfiguration(String catalogueId, String catalogueName, String catalogueSupportEmail){}
 
     public CatalogueInfoController(ResourceCatalogueInfo resourceCatalogueInfo) {
         this.resourceCatalogueInfo = resourceCatalogueInfo;
@@ -47,7 +47,7 @@ public class CatalogueInfoController {
         CatalogueConfiguration conf = new CatalogueConfiguration(
                 resourceCatalogueInfo.getCatalogueId(),
                 resourceCatalogueInfo.getCatalogueName(),
-                resourceCatalogueInfo.getCatalogueRegistrationEmail()
+                resourceCatalogueInfo.getCatalogueSupportEmail()
         );
         return new ResponseEntity<>(conf, HttpStatus.OK);
     }
