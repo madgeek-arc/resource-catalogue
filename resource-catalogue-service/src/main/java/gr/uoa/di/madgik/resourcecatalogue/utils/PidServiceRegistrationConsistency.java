@@ -67,8 +67,8 @@ public class PidServiceRegistrationConsistency {
         this.securityService = securityService;
     }
 
-//    @Scheduled(cron = "0 0 0 * * *")
 //    @Scheduled(initialDelay = 0, fixedRate = 6000)
+    @Scheduled(cron = "0 0 0 * * *")
     protected void postUnregisteredResourcesToPIDService() {
         List<ProviderBundle> allPublicProviders = providerService.getAll(createFacetFilter(), securityService.getAdminAccess()).getResults();
         List<ServiceBundle> allPublicServices = serviceBundleService.getAll(createFacetFilter(), securityService.getAdminAccess()).getResults();
@@ -77,6 +77,7 @@ public class PidServiceRegistrationConsistency {
         List<InteroperabilityRecordBundle> allPublicIG = interoperabilityRecordService.getAll(createFacetFilter(), securityService.getAdminAccess()).getResults();
         List<AdapterBundle> allPublicAdapters = adapterService.getAll(createFacetFilter(), securityService.getAdminAccess()).getResults();
 
+        logger.info("PID Service registration consistency");
         // check consistency for Providers
         for (ProviderBundle providerBundle : allPublicProviders) {
             HttpStatusCode httpStatusCode = getResourceFromPidService(providerBundle.getId());
