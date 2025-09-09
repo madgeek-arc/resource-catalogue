@@ -528,6 +528,7 @@ public class ServiceController {
         FacetFilter ff = FacetFilter.from(allRequestParams);
         ff.addFilter("resource_organisation", id);
         ff.addFilter("catalogue_id", catalogueId);
+        ff.addFilter("draft", true);
         return new ResponseEntity<>(draftServiceService.getAll(ff, auth), HttpStatus.OK);
     }
 
