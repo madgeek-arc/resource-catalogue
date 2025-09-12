@@ -81,11 +81,20 @@ public class AnalyticsService implements Analytics {
      *
      * @return
      */
-    @Scheduled(fixedDelay = (5 * 60 * 1000))
+    @Scheduled(fixedDelay = 5 * 60 * 1000)
     public void updateVisitsScheduler() {
-        Map<String, Integer> visits = getServiceVisits();
-        Cache cache = cacheManager.getCache(CACHE_VISITS);
-        Objects.requireNonNull(cache).put(CACHE_VISITS, visits);
+        if (matomoHost == null || matomoHost.isBlank()) {
+            logger.debug("Matomo host not configured. Skipping visit update.");
+            return;
+        }
+
+        try {
+            Map<String, Integer> visits = getServiceVisits();
+            Cache cache = cacheManager.getCache(CACHE_VISITS);
+            Objects.requireNonNull(cache).put(CACHE_VISITS, visits);
+        } catch (Exception e) {
+            logger.warn("Failed to update visits from Matomo: {}", e.getMessage());
+        }
     }
 
 
