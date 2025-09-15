@@ -30,6 +30,25 @@
 * Revert "chore(api-docs): add annotations to group endpoints in OpenAPI - used in horizontal-adapters project" ([5315df4](https://github.com/madgeek-arc/resource-catalogue/commit/5315df41cea3a5652ba5a49d36ee4745f1b28475))
 
 
+## [5.2.0](https://github.com/madgeek-arc/resource-catalogue/compare/v5.1.0...v5.2.0) (2025-09-15)
+
+
+### Bug Fixes
+
+* created, updated fields on InteroperabilityRecord now get consistent values of 'yyyy-MM-dd' format on POST/PUT ([1d5b0c7](https://github.com/madgeek-arc/resource-catalogue/commit/1d5b0c7a5716216929f4939734c87dae76c80432))
+* getDraftServices() now correctly returns draft services ([7500821](https://github.com/madgeek-arc/resource-catalogue/commit/7500821a3efe21362f30531a9c8c85d0bb3b4081))
+* hide allRequestParams to fix OpenAPI codegen issue (MultiValueMapStringObject) ([09a634f](https://github.com/madgeek-arc/resource-catalogue/commit/09a634f566772d6484eb62e9271d9225e31f7670))
+* hide allRequestParams to fix OpenAPI codegen issue (MultiValueMapStringObject) ([3d16df4](https://github.com/madgeek-arc/resource-catalogue/commit/3d16df4891ffa92d62cf93396345444714eb7274))
+* minor fixes in broken email templates. rename of portal -&gt; beyond. enable Openaire Datasource registration ([b7331a0](https://github.com/madgeek-arc/resource-catalogue/commit/b7331a0dd975d1a02e661f3827810e1ce38e05f6))
+* re-introduce deleted method ([726445c](https://github.com/madgeek-arc/resource-catalogue/commit/726445ce66d99c364d20fe47aa358ea257109010))
+* remove 'Beyond' word from emails as it is problematic for other projects/catalogues ([d7c7bcb](https://github.com/madgeek-arc/resource-catalogue/commit/d7c7bcb7bb721f4650e2f5bda88ebe697e288dce))
+* remove 'Beyond' word from emails as it is problematic for other projects/catalogues ([9bd56bd](https://github.com/madgeek-arc/resource-catalogue/commit/9bd56bd0a812461312d219ba1c20427098b2395c))
+* replace hard-coded version with var ([44c03b8](https://github.com/madgeek-arc/resource-catalogue/commit/44c03b8430467338d434ef531d85e2066b6d4447))
+* skip Matomo update when host is not configured and warn on failure ([ab84d54](https://github.com/madgeek-arc/resource-catalogue/commit/ab84d549e3170cf24a3fa772dee27cd98b45fb4a))
+* update on public adapter resource ([a802488](https://github.com/madgeek-arc/resource-catalogue/commit/a8024885cd1525075e41d318b88a7a3c4b91415b))
+* update on public adapter resource ([d38b635](https://github.com/madgeek-arc/resource-catalogue/commit/d38b635d257c424f6b0fcd0018e77ab6f1ffc68d))
+* **verify:** reintroduce method ([1cfa30f](https://github.com/madgeek-arc/resource-catalogue/commit/1cfa30fc351fffa967c95d3852ae6cfdc9d07a0f))
+
 ## [](https://github.com/madgeek-arc/resource-catalogue/compare/v5.0.1...v) (2025-07-28)
 
 ### Features
