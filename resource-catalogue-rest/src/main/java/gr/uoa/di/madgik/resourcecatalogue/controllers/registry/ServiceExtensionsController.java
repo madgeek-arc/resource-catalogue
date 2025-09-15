@@ -16,9 +16,6 @@
 
 package gr.uoa.di.madgik.resourcecatalogue.controllers.registry;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
 import gr.uoa.di.madgik.registry.annotation.BrowseParameters;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.domain.Paging;
@@ -30,7 +27,6 @@ import gr.uoa.di.madgik.resourcecatalogue.service.GenericResourceService;
 import gr.uoa.di.madgik.resourcecatalogue.service.HelpdeskService;
 import gr.uoa.di.madgik.resourcecatalogue.service.MonitoringService;
 import gr.uoa.di.madgik.resourcecatalogue.service.ServiceBundleService;
-import gr.uoa.di.madgik.resourcecatalogue.utils.CreateArgoGrnetHttpRequest;
 import gr.uoa.di.madgik.resourcecatalogue.validators.HelpdeskValidator;
 import gr.uoa.di.madgik.resourcecatalogue.validators.MonitoringValidator;
 import io.swagger.v3.oas.annotations.Hidden;
@@ -38,7 +34,6 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -71,12 +66,7 @@ public class ServiceExtensionsController {
     private String monitoringAvailability;
     @Value("${argo.grnet.monitoring.status:}")
     private String monitoringStatus;
-    @Value("${argo.grnet.monitoring.token:}")
-    private String monitoringToken;
     private final GenericResourceService genericResourceService;
-
-    @Value("${catalogue.id}")
-    private String catalogueId;
 
     @InitBinder("helpdesk")
     protected void initHelpdeskBinder(WebDataBinder binder) {
@@ -332,7 +322,7 @@ public class ServiceExtensionsController {
         return new ResponseEntity<>(monitoringBundle.getMonitoring(), HttpStatus.OK);
     }
 
-//    // Deletes the Helpdesk of the given Service ID of the given Catalogue.
+    // Deletes the Helpdesk of the given Service ID of the given Catalogue.
     @DeleteMapping(path = "/monitoring/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     public ResponseEntity<Monitoring> deleteMonitoringById(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
@@ -373,19 +363,8 @@ public class ServiceExtensionsController {
                                                             @RequestParam String start_time,
                                                             @RequestParam String end_time) {
         String serviceId = prefix + "/" + suffix;
-        //TODO: test if url works
         String url = monitoringAvailability + serviceId + "?start_time=" + start_time + "&end_time=" + end_time;
-        String response = CreateArgoGrnetHttpRequest.createHttpRequest(url, monitoringToken);
-        List<MonitoringStatus> serviceMonitoringStatuses;
-        if (response != null) {
-            JSONObject obj = new JSONObject(response);
-            Gson gson = new Gson();
-            JsonElement jsonObj = gson.fromJson(String.valueOf(obj), JsonElement.class);
-            JsonArray results = jsonObj.getAsJsonObject().get("endpoints").getAsJsonArray().get(0).getAsJsonObject().get("results").getAsJsonArray();
-            serviceMonitoringStatuses = monitoringService.createMonitoringAvailabilityObject(results);
-            return serviceMonitoringStatuses;
-        }
-        return null;
+        return monitoringService.getAvailabilityOrStatus(url, "results");
     }
 
     @GetMapping(path = "/monitoring/monitoringStatus/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE})
@@ -393,24 +372,13 @@ public class ServiceExtensionsController {
                                                       @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix,
                                                       @RequestParam(defaultValue = "false") Boolean allStatuses) {
         String serviceId = prefix + "/" + suffix;
-        //TODO: test if url works
         String url = monitoringStatus + serviceId;
         if (allStatuses != null) {
             if (allStatuses) {
                 url += "?view=details";
             }
         }
-        String response = CreateArgoGrnetHttpRequest.createHttpRequest(url, monitoringToken);
-        List<MonitoringStatus> serviceMonitoringStatuses;
-        if (response != null) {
-            JSONObject obj = new JSONObject(response);
-            Gson gson = new Gson();
-            JsonElement jsonObj = gson.fromJson(String.valueOf(obj), JsonElement.class);
-            JsonArray statuses = jsonObj.getAsJsonObject().get("endpoints").getAsJsonArray().get(0).getAsJsonObject().get("statuses").getAsJsonArray();
-            serviceMonitoringStatuses = monitoringService.createMonitoringStatusObject(statuses);
-            return serviceMonitoringStatuses;
-        }
-        return null;
+        return monitoringService.getAvailabilityOrStatus(url, "statuses");
     }
 
     @GetMapping(path = "/monitoring/monitoringStatusOnSpecificPeriod/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE})
@@ -421,19 +389,8 @@ public class ServiceExtensionsController {
         String serviceId = prefix + "/" + suffix;
         OffsetDateTime odtFrom = OffsetDateTime.parse(from + "T00:00:01Z");
         OffsetDateTime odtTo = OffsetDateTime.parse(to + "T23:59:59Z");
-        //TODO: test if url works
         String url = monitoringStatus + serviceId + "?start_time=" + odtFrom + "&end_time=" + odtTo;
-        String response = CreateArgoGrnetHttpRequest.createHttpRequest(url, monitoringToken);
-        List<MonitoringStatus> serviceMonitoringStatuses;
-        if (response != null) {
-            JSONObject obj = new JSONObject(response);
-            Gson gson = new Gson();
-            JsonElement jsonObj = gson.fromJson(String.valueOf(obj), JsonElement.class);
-            JsonArray statuses = jsonObj.getAsJsonObject().get("endpoints").getAsJsonArray().get(0).getAsJsonObject().get("statuses").getAsJsonArray();
-            serviceMonitoringStatuses = monitoringService.createMonitoringStatusObject(statuses);
-            return serviceMonitoringStatuses;
-        }
-        return null;
+        return monitoringService.getAvailabilityOrStatus(url, "statuses");
     }
 
     @GetMapping(path = "/monitoring/monitoringStatus/all", produces = {MediaType.APPLICATION_JSON_VALUE})

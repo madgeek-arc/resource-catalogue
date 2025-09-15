@@ -30,6 +30,7 @@ import gr.uoa.di.madgik.resourcecatalogue.utils.Auditable;
 import gr.uoa.di.madgik.resourcecatalogue.utils.AuthenticationInfo;
 import gr.uoa.di.madgik.resourcecatalogue.utils.ObjectUtils;
 import gr.uoa.di.madgik.resourcecatalogue.utils.ProviderResourcesCommonMethods;
+import org.joda.time.LocalDate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -124,7 +125,7 @@ public class InteroperabilityRecordManager extends ResourceCatalogueManager<Inte
         }
         interoperabilityRecordBundle.setLoggingInfo(loggingInfoList);
 
-        interoperabilityRecordBundle.getInteroperabilityRecord().setCreated(commonMethods.transformTimestampToDate(String.valueOf(System.currentTimeMillis())));
+        interoperabilityRecordBundle.getInteroperabilityRecord().setCreated(new LocalDate().toString());
         interoperabilityRecordBundle.getInteroperabilityRecord().setUpdated(interoperabilityRecordBundle.getInteroperabilityRecord().getCreated());
         logger.info("Added a new Interoperability Record with id '{}' and title '{}'", interoperabilityRecordBundle.getId(),
                 interoperabilityRecordBundle.getInteroperabilityRecord().getTitle());
@@ -188,7 +189,7 @@ public class InteroperabilityRecordManager extends ResourceCatalogueManager<Inte
 
         // updated && created
         ret.getInteroperabilityRecord().setCreated(existingInteroperabilityRecord.getInteroperabilityRecord().getCreated());
-        ret.getInteroperabilityRecord().setUpdated(String.valueOf(System.currentTimeMillis()));
+        ret.getInteroperabilityRecord().setUpdated(new LocalDate().toString());
 
         // block catalogueId updates from Provider Admins
         if (!securityService.hasRole(auth, "ROLE_ADMIN")) {

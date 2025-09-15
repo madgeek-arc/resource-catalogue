@@ -63,7 +63,7 @@ public class FieldValidator {
     private final InteroperabilityRecordService interoperabilityRecordService;
     private final AdapterService adapterService;
 
-    private static final String MANDATORY_FIELD = "Field '%s' is mandatory.";
+    private static final String MANDATORY_FIELD = "Field [%s] is mandatory.";
     private static final String NULL_OBJECT = "Attempt to validate null object..";
 
     private Deque<String> validationLocation;
@@ -175,7 +175,7 @@ public class FieldValidator {
         }
         Pattern phonePattern = Pattern.compile("^(((\\+)|(00))\\d{1,3}( )?)?((\\(\\d{3}\\))|\\d{3})[- .]?\\d{3}[- .]?\\d{4}$");
         if (!phonePattern.matcher(o.toString()).matches()) {
-            throw new ValidationException(String.format("The phone you provided [%s] is not valid. Found in field [%s]", o, getCurrentLocation()));
+            throw new ValidationException(String.format("Field [%s]: The phone you provided '%s' is not valid.", getCurrentLocation(), o));
         }
     }
 
@@ -189,7 +189,7 @@ public class FieldValidator {
         }
         EmailValidator emailValidator = EmailValidator.getInstance();
         if (!emailValidator.isValid(o.toString())) {
-            throw new ValidationException(String.format("Email [%s] is not valid. Found in field [%s]", o, getCurrentLocation()));
+            throw new ValidationException(String.format("Field [%s]: Email '%s' is not valid.", getCurrentLocation(), o));
         }
     }
 
@@ -292,6 +292,7 @@ public class FieldValidator {
             // add timeout
             ReactorClientHttpConnector connector = new ReactorClientHttpConnector(
                     HttpClient.create()
+                            .followRedirect(true)
                             .responseTimeout(Duration.ofSeconds(5))
                             .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 5000)
             );
@@ -308,8 +309,8 @@ public class FieldValidator {
             if (!statusCode.is2xxSuccessful()) {
                 String fieldName = (field != null) ? field.getName() : "unknown";
                 throw new ValidationException(
-                        String.format("URL '%s' found on field '%s' responded with error code: %d",
-                                urlForValidation, fieldName, statusCode.value()));
+                        String.format("Field [%s]: the URL you provided '%s' responded with error code: %d",
+                                fieldName, urlForValidation, statusCode.value()));
             }
         } catch (URISyntaxException | MalformedURLException | WebClientResponseException | WebClientRequestException e) {
             throw new ValidationException("Failed to validate URL: " + urlForValidation);
@@ -340,8 +341,8 @@ public class FieldValidator {
                 }
                 if (!found) {
                     throw new ValidationException(
-                            String.format("Field '%s' should ONLY contain the ID of an existing resource from " +
-                                    "'[Guideline, Service]'", field.getName()));
+                            String.format("Field [%s]: Should contain the ID of an existing Service " +
+                                    "or Guideline.", field.getName()));
                 }
             } else if (String.class.equals(o.getClass())) {
                 try {
@@ -350,7 +351,7 @@ public class FieldValidator {
                         TrainingResourceBundle trainingResourceBundle = trainingResourceService.getOrElseReturnNull(o.toString());
                         if (serviceBundle == null && trainingResourceBundle == null) {
                             throw new ValidationException(
-                                    String.format("Field '%s' should ONLY contain the ID of an existing Service " +
+                                    String.format("Field [%s]: Should contain the ID of an existing Service " +
                                             "or Training Resource", field.getName()));
                         }
                     } else if (Vocabulary.class.equals(annotation.idClass())) {
@@ -360,7 +361,7 @@ public class FieldValidator {
                         if (vocabularyValidation != null) {
                             if (voc == null || Vocabulary.Type.fromString(voc.getType()) != vocabularyValidation.type()) {
                                 throw new ValidationException(
-                                        String.format("Field '%s' should contain the ID of a type '%s' Vocabulary",
+                                        String.format("Field [%s]: Should contain the ID of a type '%s' Vocabulary",
                                                 field.getName(), vocabularyValidation.type()));
                             }
                         }
@@ -369,50 +370,50 @@ public class FieldValidator {
                             if (voc == null || (Vocabulary.Type.fromString(voc.getType()) != geoLocationVocValidation.region()
                                     && Vocabulary.Type.fromString(voc.getType()) != geoLocationVocValidation.country())) {
                                 throw new ValidationException(
-                                        String.format("Field '%s' should contain the ID of either one of the types '%s' or '%s' Vocabularies",
+                                        String.format("Field [%s]: Should contain the ID of either one of the types '%s' or '%s' Vocabularies",
                                                 field.getName(), geoLocationVocValidation.region(), geoLocationVocValidation.country()));
                             }
                         }
                     } else if (Provider.class.equals(annotation.idClass())
                             && providerService.get(o.toString()) == null) { //FIXME catalogueID
                         throw new ValidationException(
-                                String.format("Field '%s' should contain the ID of an existing Provider",
+                                String.format("Field [%s]: Should contain the ID of an existing Provider",
                                         field.getName()));
                     } else if ((gr.uoa.di.madgik.resourcecatalogue.domain.Service.class.equals(annotation.idClass())
                             || ServiceBundle.class.equals(annotation.idClass()))
                             && serviceBundleService.get(o.toString()) == null) {
                         throw new ValidationException(
-                                String.format("Field '%s' should contain the ID of an existing Service",
+                                String.format("Field [%s]: Should contain the ID of an existing Service",
                                         field.getName()));
                     } else if ((TrainingResource.class.equals(annotation.idClass())
                             || TrainingResourceBundle.class.equals(annotation.idClass()))
                             && trainingResourceService.get(o.toString()) == null) {
                         throw new ValidationException(
-                                String.format("Field '%s' should contain the ID of an existing Training Resource",
+                                String.format("Field [%s]: Should contain the ID of an existing Training Resource",
                                         field.getName()));
                     } else if ((DeployableService.class.equals(annotation.idClass())
                             || DeployableServiceBundle.class.equals(annotation.idClass()))
                             && deployableServiceService.get(o.toString()) == null) {
                         throw new ValidationException(
-                                String.format("Field '%s' should contain the ID of an existing Deployable Service",
+                                String.format("Field [%s]: Should contain the ID of an existing Deployable Service",
                                         field.getName()));
                     } else if ((Catalogue.class.equals(annotation.idClass())
                             || CatalogueBundle.class.equals(annotation.idClass()))
                             && catalogueService.get(o.toString()) == null) {
                         throw new ValidationException(
-                                String.format("Field '%s' should contain the ID of an existing Catalogue",
+                                String.format("Field [%s]: Should contain the ID of an existing Catalogue",
                                         field.getName()));
                     } else if ((InteroperabilityRecord.class.equals(annotation.idClass())
                             || InteroperabilityRecordBundle.class.equals(annotation.idClass()))
                             && interoperabilityRecordService.get(o.toString()) == null) {
                         throw new ValidationException(
-                                String.format("Field '%s' should contain the ID of an existing InteroperabilityRecord",
+                                String.format("Field [%s]: Should contain the ID of an existing InteroperabilityRecord",
                                         field.getName()));
                     }
                 } catch (ResourceException | ResourceNotFoundException e) {
                     throw new ValidationException(
-                            String.format("%s with ID '%s' does not exist. Found in field '%s'",
-                                    annotation.idClass().getSimpleName(), o.toString(), field.getName()));
+                            String.format("Field [%s]: %s with ID '%s' does not exist.", field.getName(),
+                                    annotation.idClass().getSimpleName(), o));
                 }
             }
         }
@@ -444,7 +445,7 @@ public class FieldValidator {
             if (ArrayList.class.equals(clazz)) {
                 for (int i = 0; i < ((ArrayList) o).size(); i++) {
                     if (!duplicateEntries.add(((ArrayList) o).get(i).toString())) {
-                        throw new ValidationException(String.format("Duplicate value found '%s' on field '%s'", ((ArrayList) o).get(i).toString(), subField));
+                        throw new ValidationException(String.format("Field [%s]: Duplicate value found '%s'", subField, ((ArrayList) o).get(i).toString()));
                     }
                 }
             }

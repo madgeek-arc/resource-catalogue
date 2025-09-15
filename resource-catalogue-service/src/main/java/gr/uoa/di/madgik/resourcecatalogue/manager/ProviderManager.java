@@ -860,27 +860,49 @@ public class ProviderManager extends ResourceCatalogueManager<ProviderBundle> im
     }
 
     @Override
-    public Paging<ProviderBundle> getRandomProviders(FacetFilter ff, String auditingInterval, Authentication auth) {
+    public Paging<ProviderBundle> getRandomResources(FacetFilter ff, String auditingInterval, Authentication auth) {
         FacetFilter facetFilter = new FacetFilter();
         facetFilter.setQuantity(maxQuantity);
         facetFilter.addFilter("status", "approved provider");
         facetFilter.addFilter("published", false);
-        Browsing<ProviderBundle> providerBrowsing = getAll(facetFilter, auth);
+
+        Browsing<ProviderBundle> providersBrowsing = getAll(facetFilter, auth);
         List<ProviderBundle> providersToBeAudited = new ArrayList<>();
-        long todayEpochTime = System.currentTimeMillis();
-        long interval = Instant.ofEpochMilli(todayEpochTime).atZone(ZoneId.systemDefault()).minusMonths(Integer.parseInt(auditingInterval)).toEpochSecond();
-        for (ProviderBundle providerBundle : providerBrowsing.getResults()) {
-            if (providerBundle.getLatestAuditInfo() != null) {
-                if (Long.parseLong(providerBundle.getLatestAuditInfo().getDate()) > interval) {
-                    providersToBeAudited.add(providerBundle);
+
+        long todayEpochMillis = System.currentTimeMillis();
+        long intervalEpochSeconds = Instant.ofEpochMilli(todayEpochMillis)
+                .atZone(ZoneId.systemDefault())
+                .minusMonths(Integer.parseInt(auditingInterval))
+                .toEpochSecond();
+
+        for (ProviderBundle providerBundle : providersBrowsing.getResults()) {
+            LoggingInfo auditInfo = providerBundle.getLatestAuditInfo();
+            if (auditInfo == null) {
+                // Include providers that have never been audited
+                providersToBeAudited.add(providerBundle);
+            } else {
+                try {
+                    long auditEpochSeconds = Long.parseLong(auditInfo.getDate());
+                    if (auditEpochSeconds < intervalEpochSeconds) {
+                        // Include providers that were last audited before the threshold
+                        providersToBeAudited.add(providerBundle);
+                    }
+                } catch (NumberFormatException e) {
                 }
             }
         }
+
+        // Shuffle the list randomly
         Collections.shuffle(providersToBeAudited);
-        if (providersToBeAudited.size() > ff.getQuantity()) {
-            providersToBeAudited.subList(ff.getQuantity(), providersToBeAudited.size()).clear();
+
+        // Limit the list to the requested quantity
+        int quantity = ff.getQuantity();
+        if (providersToBeAudited.size() > quantity) {
+            providersToBeAudited = providersToBeAudited.subList(0, quantity);
         }
-        return new Browsing<>(providersToBeAudited.size(), 0, providersToBeAudited.size(), providersToBeAudited, providerBrowsing.getFacets());
+
+        return new Browsing<>(providersToBeAudited.size(), 0, providersToBeAudited.size(), providersToBeAudited,
+                providersBrowsing.getFacets());
     }
 
     private ProviderBundle onboard(ProviderBundle provider, String catalogueId, Authentication auth) {

@@ -395,7 +395,7 @@ public class ProviderController {
         FacetFilter ff = FacetFilter.from(allRequestParams);
         ff.addFilter("status", "approved provider");
         ff.addFilter("published", false);
-        Paging<ProviderBundle> providerBundlePaging = providerService.getRandomProviders(ff, auditingInterval, auth);
+        Paging<ProviderBundle> providerBundlePaging = providerService.getRandomResources(ff, auditingInterval, auth);
         return new ResponseEntity<>(providerBundlePaging, HttpStatus.OK);
     }
 

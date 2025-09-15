@@ -665,6 +665,19 @@ public class ProviderManagementAspect {
     }
 
     @Async
+    @AfterReturning(pointcut = "execution(* gr.uoa.di.madgik.resourcecatalogue.manager.AdapterManager.publish(..))" +
+            "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.AdapterManager.verify(..))" +
+            "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.AdapterManager.suspend(..))" +
+            "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.AdapterManager.audit(..))",
+            returning = "adapterBundle")
+    public void updatePublicAdapter(final AdapterBundle adapterBundle) {
+        try {
+            publicAdapterManager.update(ObjectUtils.clone(adapterBundle), null);
+        } catch (ResourceException | ResourceNotFoundException ignore) {
+        }
+    }
+
+    @Async
     @After("execution(* gr.uoa.di.madgik.resourcecatalogue.manager.AdapterManager.delete(..))")
     public void deletePublicAdapter(JoinPoint joinPoint) {
         AdapterBundle adapterBundle = (AdapterBundle) joinPoint.getArgs()[0];

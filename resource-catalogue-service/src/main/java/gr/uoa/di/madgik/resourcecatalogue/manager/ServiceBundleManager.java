@@ -877,29 +877,50 @@ public class ServiceBundleManager extends ResourceCatalogueManager<ServiceBundle
         return facetList.stream().filter(facet -> !facet.getValues().isEmpty()).toList();
     }
 
-    // FIXME: not working...
     @Override
     public Paging<ServiceBundle> getRandomResources(FacetFilter ff, String auditingInterval, Authentication auth) {
         FacetFilter facetFilter = new FacetFilter();
         facetFilter.setQuantity(maxQuantity);
         facetFilter.addFilter("status", "approved resource");
         facetFilter.addFilter("published", false);
+
         Browsing<ServiceBundle> serviceBrowsing = getAll(facetFilter, auth);
         List<ServiceBundle> servicesToBeAudited = new ArrayList<>();
-        long todayEpochTime = System.currentTimeMillis();
-        long interval = Instant.ofEpochMilli(todayEpochTime).atZone(ZoneId.systemDefault()).minusMonths(Integer.parseInt(auditingInterval)).toEpochSecond();
+
+        long todayEpochMillis = System.currentTimeMillis();
+        long intervalEpochSeconds = Instant.ofEpochMilli(todayEpochMillis)
+                .atZone(ZoneId.systemDefault())
+                .minusMonths(Integer.parseInt(auditingInterval))
+                .toEpochSecond();
+
         for (ServiceBundle serviceBundle : serviceBrowsing.getResults()) {
-            if (serviceBundle.getLatestAuditInfo() != null) {
-                if (Long.parseLong(serviceBundle.getLatestAuditInfo().getDate()) > interval) {
-                    servicesToBeAudited.add(serviceBundle);
+            LoggingInfo auditInfo = serviceBundle.getLatestAuditInfo();
+            if (auditInfo == null) {
+                // Include services that have never been audited
+                servicesToBeAudited.add(serviceBundle);
+            } else {
+                try {
+                    long auditEpochSeconds = Long.parseLong(auditInfo.getDate());
+                    if (auditEpochSeconds < intervalEpochSeconds) {
+                        // Include services that were last audited before the threshold
+                        servicesToBeAudited.add(serviceBundle);
+                    }
+                } catch (NumberFormatException e) {
                 }
             }
         }
+
+        // Shuffle the list randomly
         Collections.shuffle(servicesToBeAudited);
-        if (servicesToBeAudited.size() > ff.getQuantity()) {
-            servicesToBeAudited.subList(ff.getQuantity(), servicesToBeAudited.size()).clear();
+
+        // Limit the list to the requested quantity
+        int quantity = ff.getQuantity();
+        if (servicesToBeAudited.size() > quantity) {
+            servicesToBeAudited = servicesToBeAudited.subList(0, quantity);
         }
-        return new Browsing<>(servicesToBeAudited.size(), 0, servicesToBeAudited.size(), servicesToBeAudited, serviceBrowsing.getFacets());
+
+        return new Browsing<>(servicesToBeAudited.size(), 0, servicesToBeAudited.size(), servicesToBeAudited,
+                serviceBrowsing.getFacets());
     }
 
     @Override

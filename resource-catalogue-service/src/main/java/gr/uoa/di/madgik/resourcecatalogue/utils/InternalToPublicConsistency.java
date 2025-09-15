@@ -276,7 +276,7 @@ public class InternalToPublicConsistency {
         for (AdapterBundle adapterBundle : allInternalApprovedAdapters) {
             // try and get its Public instance
             try {
-                publicDeployableServiceService.get(adapterBundle.getIdentifiers().getPid(),
+                publicAdapterService.get(adapterBundle.getIdentifiers().getPid(),
                         adapterBundle.getAdapter().getCatalogueId(), true);
             } catch (CatalogueResourceNotFoundException e) {
                 logs.add(String.format("Adapter with ID [%s] of the Catalogue [%s] is missing its Public instance [%s]",
@@ -312,7 +312,7 @@ public class InternalToPublicConsistency {
             Template temp = cfg.getTemplate("internalToPublicResourceConsistency.ftl");
             temp.process(root, out);
             String teamMail = out.getBuffer().toString();
-            String subject = String.format("[%s Portal] Internal to Public Resource Consistency Logs", catalogueName);
+            String subject = String.format("[%s] Internal to Public Resource Consistency Logs", catalogueName);
             if (enableConsistencyEmails) {
                 mailService.sendMail(Collections.singletonList(consistencyTo), null, Collections.singletonList(consistencyCC), subject, teamMail);
             }

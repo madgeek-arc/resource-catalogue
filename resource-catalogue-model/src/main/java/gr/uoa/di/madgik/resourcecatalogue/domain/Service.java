@@ -84,7 +84,7 @@ public class Service implements Identifiable {
     private URL webpage;
 
     /**
-     * Other types of Identifiers for the specific Service (eg. PID)
+     * Other types of Identifiers for the specific Service (e.g. PID)
      */
     @Schema
     @FieldValidation(nullable = true)
@@ -103,7 +103,7 @@ public class Service implements Identifiable {
     private String description;
 
     /**
-     * Short catch-phrase for marketing and advertising purposes. It will be usually displayed close to the Resource name and should refer to the main value or purpose of the Resource.
+     * Short catchphrase for marketing and advertising purposes. It may be displayed close to the Resource name and should refer to the main value or purpose of the Resource.
      */
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     @FieldValidation

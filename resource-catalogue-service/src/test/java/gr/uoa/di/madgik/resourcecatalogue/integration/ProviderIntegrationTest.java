@@ -239,7 +239,7 @@ class ProviderIntegrationTest extends BaseIntegrationTest {
         ValidationException exception = assertThrows(ValidationException.class, () ->
                 providerService.add(inputProviderBundle, securityService.getAdminAccess()));
 
-        assertEquals("Field 'abbreviation' is mandatory.", exception.getMessage());
+        assertEquals("Field [abbreviation] is mandatory.", exception.getMessage());
     }
 
     /**
@@ -264,8 +264,7 @@ class ProviderIntegrationTest extends BaseIntegrationTest {
         ValidationException exception = assertThrows(ValidationException.class, () ->
                 providerService.add(inputProviderBundle, securityService.getAdminAccess()));
 
-        assertEquals("Vocabulary with ID '" + invalidCountryValue + "' does not exist. " +
-                "Found in field 'country'", exception.getMessage());
+        assertEquals("Field [country]: Vocabulary with ID '" + invalidCountryValue + "' does not exist.", exception.getMessage());
     }
 
     /**

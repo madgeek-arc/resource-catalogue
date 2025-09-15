@@ -29,13 +29,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.web.reactive.function.client.WebClient;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Spliterator;
-import java.util.Spliterators;
+import java.util.*;
 
 
 @Component
@@ -48,7 +45,7 @@ public class DataParser {
     private String serviceVisits;
     private String serviceRatings;
     private String serviceAddToProject;
-    private RestTemplate restTemplate;
+    private WebClient webClient;
     private HttpHeaders headers;
     private final EventService eventService;
 
@@ -67,7 +64,7 @@ public class DataParser {
 
     @PostConstruct
     void postConstruct() {
-        restTemplate = new RestTemplate();
+        webClient = WebClient.builder().build();
         headers = new HttpHeaders();
         String authorizationHeader = "";
         headers.add("Authorization", authorizationHeader);
@@ -174,8 +171,15 @@ public class DataParser {
         try {
             HttpEntity<String> request = new HttpEntity<>(headers);
             try {
-                ResponseEntity<String> responseEntity = restTemplate.exchange(url, HttpMethod.GET, request, String.class);
-                if (responseEntity.getStatusCode() != HttpStatus.OK) {
+                ResponseEntity<String> responseEntity = webClient
+                        .method(HttpMethod.GET)
+                        .uri(url)
+                        .headers(headers -> headers.addAll(request.getHeaders()))
+                        .bodyValue(Optional.ofNullable(request.getBody()).orElse(""))
+                        .retrieve()
+                        .toEntity(String.class)
+                        .block();
+                if (Objects.requireNonNull(responseEntity).getStatusCode() != HttpStatus.OK) {
                     logger.error("Could not retrieve analytics from matomo\nResponse Code: {}\nResponse Body: {}",
                             responseEntity.getStatusCode(), responseEntity.getBody());
                 }

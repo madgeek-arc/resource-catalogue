@@ -1,9 +1,9 @@
-<p>Dear ${project} Portal Onboarding Team,</p>
+<p>Dear ${project} Onboarding Team,</p>
 <p>
     <#if bundle.status == "pending catalogue">
         A new application by [${user.fullName}] – [${user.email}] has been received for registering
         [${bundle.catalogue.name}] - ([${bundle.catalogue.id}]) as a new ${project} Catalogue
-        in ${project} Portal.
+        in ${project}.
         <br>
         You can review the application here
         ${endpoint}/catalogue-dashboard/${bundle.catalogue.id}/info and approve or reject it.

@@ -125,8 +125,6 @@ server.servlet.context-path=/api
 ## Logging Configuration ##
 logging.level.root=INFO
 
-## PID Service ##
-pid.service.enabled=false
 
 #########################
 ##  Spring Properties  ##
@@ -211,7 +209,10 @@ registry.jms.host=
 registry.jms.prefix=
 registry.jms.username=
 registry.jms.password=
+#### Catalogue JMS Prefix ###
+catalogue.jms.prefix=
 #### AMS ####
+catalogue.jms.ams.enabled=true
 catalogue.jms.ams.host=
 catalogue.jms.ams.key=
 catalogue.jms.ams.project=
@@ -258,6 +259,7 @@ catalogue.emails.monitoring-emails.to=
 catalogue.emails.resource-consistency-notifications=false
 catalogue.emails.resource-consistency-emails.to=
 catalogue.emails.resource-consistency-emails.cc=
+catalogue.emails.support=
 ## Mailer Properties ##
 catalogue.mailer.host=
 catalogue.mailer.from=
@@ -267,6 +269,17 @@ catalogue.mailer.port=
 catalogue.mailer.protocol=
 catalogue.mailer.auth=
 catalogue.mailer.ssl=
+
+
+#########################
+##  External Services  ##
+#########################
+
+## PID Service ##
+pid.service.enabled=false
+
+## OpenAIRE Datasource Properties ##
+openaire.ds.api=https://beta.services.openaire.eu/
 ```
 
 ##### PID Properties Example
@@ -321,7 +334,18 @@ catalogue:
           self-signed-cert:
           client-key:
           client-cert:
-    tool:
+    adapter:
+      resolve-endpoints:
+      pid-issuer:
+        url:
+        user:
+        user-index:
+        password:
+        auth:
+          self-signed-cert:
+          client-key:
+          client-cert:
+    deployable-service:
       resolve-endpoints:
       pid-issuer:
         url:

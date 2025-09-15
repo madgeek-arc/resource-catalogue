@@ -1,3 +1,35 @@
+## [](https://github.com/madgeek-arc/resource-catalogue/compare/v5.1.0...v) (2025-09-12)
+
+### Features
+
+* PID Service registration consistency scheduler ([2753c91](https://github.com/madgeek-arc/resource-catalogue/commit/2753c91d68b5970d0e6b3b48383bd859ed9e3779))
+* properties controller ([67f1797](https://github.com/madgeek-arc/resource-catalogue/commit/67f1797cde93389e749d39f002fab63c717d78a9))
+* properties controller ([7e0160f](https://github.com/madgeek-arc/resource-catalogue/commit/7e0160f36185156ba2a1c3b279e02c0aa9091812))
+
+### Bug Fixes
+
+* created, updated fields on InteroperabilityRecord now get consistent values of 'yyyy-MM-dd' format on POST/PUT ([1d5b0c7](https://github.com/madgeek-arc/resource-catalogue/commit/1d5b0c7a5716216929f4939734c87dae76c80432))
+* getDraftServices() now correctly returns draft services ([7500821](https://github.com/madgeek-arc/resource-catalogue/commit/7500821a3efe21362f30531a9c8c85d0bb3b4081))
+* getRandomResources() now also returns resources that have never been audited. ([20be867](https://github.com/madgeek-arc/resource-catalogue/commit/20be867ecb084bd7a7a7f3590c0db8501130c1bc))
+* hide allRequestParams to fix OpenAPI codegen issue (MultiValueMapStringObject) ([09a634f](https://github.com/madgeek-arc/resource-catalogue/commit/09a634f566772d6484eb62e9271d9225e31f7670))
+* hide allRequestParams to fix OpenAPI codegen issue (MultiValueMapStringObject) ([3d16df4](https://github.com/madgeek-arc/resource-catalogue/commit/3d16df4891ffa92d62cf93396345444714eb7274))
+* minor fix on CatalogueExceptionController ([4e1701c](https://github.com/madgeek-arc/resource-catalogue/commit/4e1701ca5c5988a7f289bc921e3d66bb1ac6fabd))
+* minor fix on InternalToPublicIdConsistency ([4326aed](https://github.com/madgeek-arc/resource-catalogue/commit/4326aed6a9a5686791dc9e0c9a8144c7c5ea030b))
+* minor fixes in broken email templates. rename of portal -> beyond. enable Openaire Datasource registration ([b7331a0](https://github.com/madgeek-arc/resource-catalogue/commit/b7331a0dd975d1a02e661f3827810e1ce38e05f6))
+* re-introduce deleted method ([726445c](https://github.com/madgeek-arc/resource-catalogue/commit/726445ce66d99c364d20fe47aa358ea257109010))
+* remove 'Beyond' word from emails as it is problematic for other projects/catalogues ([d7c7bcb](https://github.com/madgeek-arc/resource-catalogue/commit/d7c7bcb7bb721f4650e2f5bda88ebe697e288dce))
+* remove 'Beyond' word from emails as it is problematic for other projects/catalogues ([9bd56bd](https://github.com/madgeek-arc/resource-catalogue/commit/9bd56bd0a812461312d219ba1c20427098b2395c))
+* skip Matomo update when host is not configured and warn on failure ([ab84d54](https://github.com/madgeek-arc/resource-catalogue/commit/ab84d549e3170cf24a3fa772dee27cd98b45fb4a))
+* update on public adapter resource ([a802488](https://github.com/madgeek-arc/resource-catalogue/commit/a8024885cd1525075e41d318b88a7a3c4b91415b))
+* update on public adapter resource ([d38b635](https://github.com/madgeek-arc/resource-catalogue/commit/d38b635d257c424f6b0fcd0018e77ab6f1ffc68d))
+* **verify:** reintroduce method ([1cfa30f](https://github.com/madgeek-arc/resource-catalogue/commit/1cfa30fc351fffa967c95d3852ae6cfdc9d07a0f))
+
+### Reverts
+
+* Revert "Revert "chore(api-docs): add annotations to group endpoints in OpenAPI - used in horizontal-adapters project"" ([6d9c35e](https://github.com/madgeek-arc/resource-catalogue/commit/6d9c35ee910b4f1bac3cec16ec6f4dc6a3d85b44))
+* Revert "chore(api-docs): add annotations to group endpoints in OpenAPI - used in horizontal-adapters project" ([5315df4](https://github.com/madgeek-arc/resource-catalogue/commit/5315df41cea3a5652ba5a49d36ee4745f1b28475))
+
+
 ## [](https://github.com/madgeek-arc/resource-catalogue/compare/v5.0.1...v) (2025-07-28)
 
 ### Features

@@ -27,10 +27,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
-import org.springframework.http.*;
+import org.springframework.http.HttpHeaders;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Mono;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
@@ -48,7 +49,7 @@ public class AnalyticsService implements Analytics {
     private static final String serviceVisitsTemplate = "%s/index.php?token_auth=%s&module=API&method=Actions.getPageUrls&format=JSON&idSite=%s&flat=1&period=range&date=2017-01-01,%s";
     private String visits;
     private String serviceVisits;
-    private RestTemplate restTemplate;
+    private WebClient webClient;
     private HttpHeaders headers;
 
     @Value("${matomo.host:localhost}")
@@ -68,7 +69,7 @@ public class AnalyticsService implements Analytics {
 
     @PostConstruct
     void postConstruct() {
-        restTemplate = new RestTemplate();
+        webClient = WebClient.builder().build();
         headers = new HttpHeaders();
         headers.add("Authorization", authorizationHeader);
         visits = String.format(visitsTemplate, matomoHost, matomoToken, matomoSiteId, "%s");
@@ -80,11 +81,20 @@ public class AnalyticsService implements Analytics {
      *
      * @return
      */
-    @Scheduled(fixedDelay = (5 * 60 * 1000))
+    @Scheduled(fixedDelay = 5 * 60 * 1000)
     public void updateVisitsScheduler() {
-        Map<String, Integer> visits = getServiceVisits();
-        Cache cache = cacheManager.getCache(CACHE_VISITS);
-        Objects.requireNonNull(cache).put(CACHE_VISITS, visits);
+        if (matomoHost == null || matomoHost.isBlank()) {
+            logger.debug("Matomo host not configured. Skipping visit update.");
+            return;
+        }
+
+        try {
+            Map<String, Integer> visits = getServiceVisits();
+            Cache cache = cacheManager.getCache(CACHE_VISITS);
+            Objects.requireNonNull(cache).put(CACHE_VISITS, visits);
+        } catch (Exception e) {
+            logger.warn("Failed to update visits from Matomo: {}", e.getMessage());
+        }
     }
 
 
@@ -112,7 +122,7 @@ public class AnalyticsService implements Analytics {
 
     private Map<String, Integer> getServiceVisits() {
         String date = new SimpleDateFormat("yyyy-MM-dd").format(new Date());
-        JsonNode json = parse(getMatomoResponse(String.format(serviceVisits, date)));
+        JsonNode json = parse(getMatomoResponse(String.format(serviceVisits, date)).block());
         if (json != null) {
             try {
                 Spliterators.spliteratorUnknownSize(json.iterator(), Spliterator.NONNULL);
@@ -132,7 +142,7 @@ public class AnalyticsService implements Analytics {
     }
 
     private JsonNode getAnalyticsForLabel(String label, StatisticsService.Interval by) {
-        return parse(getMatomoResponse(String.format(visits, by.getKey()) + "&label=" + label));
+        return parse(getMatomoResponse(String.format(visits, by.getKey()) + "&label=" + label).block());
     }
 
     private static JsonNode parse(String json) {
@@ -146,20 +156,29 @@ public class AnalyticsService implements Analytics {
         return null;
     }
 
-    private String getMatomoResponse(String url) {
-        try {
-            HttpEntity<String> request = new HttpEntity<>(headers);
-            ResponseEntity<String> responseEntity = restTemplate.exchange(url, HttpMethod.GET, request, String.class);
-            if (responseEntity.getStatusCode() != HttpStatus.OK) {
-                logger.error("Could not retrieve analytics from matomo\nResponse Code: {}\nResponse Body: {}",
-                        responseEntity.getStatusCode(), responseEntity.getBody());
-            }
-            return responseEntity.getBody();
-        } catch (IllegalArgumentException e) {
-            logger.info("URI is not absolute");
-        } catch (Exception e) {
-            logger.error("Could not retrieve analytics from matomo", e);
-        }
-        return "";
+    private Mono<String> getMatomoResponse(String url) {
+        return webClient.get()
+                .uri(url)
+                .headers(httpHeaders -> httpHeaders.addAll(headers)) // assuming 'headers' is an HttpHeaders object
+                .retrieve()
+                .onStatus(status -> !status.is2xxSuccessful(), clientResponse -> {
+                    return clientResponse.bodyToMono(String.class)
+                            .defaultIfEmpty("No response body")
+                            .flatMap(body -> {
+                                logger.error("Could not retrieve analytics from Matomo\nResponse Code: {}\nResponse Body: {}",
+                                        clientResponse.statusCode(), body);
+                                return Mono.error(new RuntimeException("Failed request"));
+                            });
+                })
+                .bodyToMono(String.class)
+                .onErrorResume(e -> {
+                    if (e instanceof IllegalArgumentException) {
+                        logger.info("URI is not absolute");
+                    } else {
+                        logger.error("Could not retrieve analytics from Matomo", e);
+                    }
+                    return Mono.just(""); // fallback
+                });
     }
+
 }

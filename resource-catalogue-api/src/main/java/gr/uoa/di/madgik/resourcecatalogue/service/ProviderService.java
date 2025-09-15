@@ -154,7 +154,7 @@ public interface ProviderService extends ResourceCatalogueService<ProviderBundle
      * @param auth             Authentication
      * @return {@link Paging}&lt;{@link ProviderBundle}&gt;
      */
-    Paging<ProviderBundle> getRandomProviders(FacetFilter ff, String auditingInterval, Authentication auth);
+    Paging<ProviderBundle> getRandomResources(FacetFilter ff, String auditingInterval, Authentication auth);
 
     /**
      * Get a Provider's rejected resources
