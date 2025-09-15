@@ -82,7 +82,7 @@ pipeline {
               nvm use 20
               npx release-please github-release --repo-url ${GIT_URL} --token ${GH_TOKEN}
 
-              npx release-please release-pr --repo-url ${GIT_URL} --token ${GH_TOKEN} | tee "$TMP_JSON"
+              npx release-please release-pr --repo-url ${GIT_URL} --token ${GH_TOKEN}
             '''
           }
         }
