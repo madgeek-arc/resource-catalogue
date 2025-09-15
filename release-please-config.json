@@ -5,13 +5,6 @@
     ".": {
       "changelog-path": "CHANGELOG.md",
       "release-type": "maven",
-      "extra-files": [
-        {
-          "type": "xml",
-          "path": "pom.xml",
-          "xpath": "/project/properties/revision"
-        }
-      ],
       "bump-minor-pre-major": false,
       "bump-patch-for-minor-pre-major": false,
       "draft": false,
