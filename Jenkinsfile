@@ -44,7 +44,7 @@ pipeline {
     stage('Upload Image') {
       when { // upload images only from 'develop' or 'master' branches
         expression {
-          return env.TAG_NAME != null || env.BRANCH_NAME == 'develop' || env.BRANCH_NAME == 'master')
+          return env.TAG_NAME != null || env.BRANCH_NAME == 'develop' || env.BRANCH_NAME == 'master'
         }
       }
       steps{
