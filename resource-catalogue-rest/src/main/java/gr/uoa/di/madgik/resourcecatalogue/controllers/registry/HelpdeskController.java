@@ -19,6 +19,8 @@ package gr.uoa.di.madgik.resourcecatalogue.controllers.registry;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpStatus;
@@ -38,6 +40,10 @@ import java.util.Map;
 @RequestMapping({"helpdesk"})
 @Tag(name = "helpdesk")
 public class HelpdeskController {
+
+    //TODO: check pre-auth roles for all api calls
+
+    private static final Logger logger = LoggerFactory.getLogger(HelpdeskController.class);
 
     @Value("${helpdesk.endpoint}")
     private String helpdeskEndpoint;
@@ -83,6 +89,7 @@ public class HelpdeskController {
                     .bodyToMono(Object.class)
                     .block();
 
+            logger.info("Ticket submitted successfully");
             return ResponseEntity.ok(response);
         } catch (WebClientResponseException e) {
             return ResponseEntity.status(e.getStatusCode()).body(e.getResponseBodyAsString());
@@ -109,6 +116,7 @@ public class HelpdeskController {
                     .bodyToMono(Object.class)
                     .block();
 
+            logger.info("Articles submitted successfully");
             return ResponseEntity.ok(response);
         } catch (WebClientResponseException e) {
             return ResponseEntity.status(e.getStatusCode()).body(e.getResponseBodyAsString());
