@@ -16,6 +16,7 @@
 
 package gr.uoa.di.madgik.resourcecatalogue.controllers.registry;
 
+import gr.uoa.di.madgik.resourcecatalogue.service.AccountingService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -42,15 +43,16 @@ public class AccountingController {
     @Value("${accounting.project-name}")
     private String accountingProjectName;
 
-    @Value("${accounting.token}")
-    private String accountingToken;
-
     private final WebClient webClient;
+    private final AccountingService accountingService;
 
-    public AccountingController(WebClient.Builder webClientBuilder, @Value("${accounting.endpoint}") String accountingEndpoint) {
+    public AccountingController(WebClient.Builder webClientBuilder,
+                                AccountingService accountingService,
+                                @Value("${accounting.endpoint}") String accountingEndpoint) {
         this.webClient = webClientBuilder
                 .baseUrl(accountingEndpoint)
                 .build();
+        this.accountingService = accountingService;
     }
 
     //region Project
@@ -58,11 +60,12 @@ public class AccountingController {
     @GetMapping(path = "project/info", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Object> getAllProjectProvidersAndInstallations() {
         try {
+            String token = accountingService.getAccessToken();
             Object projectInfo = webClient.get()
                     .uri(uriBuilder -> uriBuilder
                             .path("/projects/" + accountingProjectName)
                             .build())
-                    .header(HttpHeaders.AUTHORIZATION, "Bearer " + accountingToken)
+                    .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
                     .retrieve()
                     .bodyToMono(Object.class)
                     .block();
@@ -79,13 +82,14 @@ public class AccountingController {
     public ResponseEntity<Object> getAllProjectInstallations(@RequestParam(defaultValue = "1") int page,
                                                              @RequestParam(defaultValue = "10") int size) {
         try {
+            String token = accountingService.getAccessToken();
             Object installations = webClient.get()
                     .uri(uriBuilder -> uriBuilder
                             .path("/projects/" + accountingProjectName + "/installations")
                             .queryParam("page", page)
                             .queryParam("size", size)
                             .build())
-                    .header(HttpHeaders.AUTHORIZATION, "Bearer " + accountingToken)
+                    .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
                     .retrieve()
                     .bodyToMono(Object.class)
                     .block();
@@ -102,13 +106,14 @@ public class AccountingController {
     public ResponseEntity<Object> getProjectReport(@RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate start,
                                                    @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate end) {
         try {
+            String token = accountingService.getAccessToken();
             Object projectReport = webClient.get()
                     .uri(uriBuilder -> uriBuilder
                             .path("/projects/" + accountingProjectName + "/report")
                             .queryParam("start", start.toString())
                             .queryParam("end", end.toString())
                             .build())
-                    .header(HttpHeaders.AUTHORIZATION, "Bearer " + accountingToken)
+                    .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
                     .retrieve()
                     .bodyToMono(Object.class)
                     .block();
@@ -132,13 +137,14 @@ public class AccountingController {
                                                     @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate end) {
         String provider_id = encode(prefix + "/" + suffix);
         try {
+            String token = accountingService.getAccessToken();
             Object providerReport = webClient.get()
                     .uri(uriBuilder -> uriBuilder
                             .path("/projects/" + accountingProjectName + "/providers/{provider_id}/report")
                             .queryParam("start", start.toString())
                             .queryParam("end", end.toString())
                             .build(provider_id))
-                    .header(HttpHeaders.AUTHORIZATION, "Bearer " + accountingToken)
+                    .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
                     .retrieve()
                     .bodyToMono(Object.class)
                     .block();
@@ -162,6 +168,7 @@ public class AccountingController {
                                                         @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate end) {
         String installation_id = prefix + "/" + suffix;
         try {
+            String token = accountingService.getAccessToken();
             Object installationReport = webClient.get()
                     .uri(uriBuilder -> uriBuilder
                             .path("installations/external/report")
@@ -169,7 +176,7 @@ public class AccountingController {
                             .queryParam("start", start.toString())
                             .queryParam("end", end.toString())
                             .build())
-                    .header(HttpHeaders.AUTHORIZATION, "Bearer " + accountingToken)
+                    .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
                     .retrieve()
                     .bodyToMono(Object.class)
                     .block();
