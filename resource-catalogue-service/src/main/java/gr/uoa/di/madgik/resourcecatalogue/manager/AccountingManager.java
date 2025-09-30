@@ -61,7 +61,7 @@ public class AccountingManager implements AccountingService {
                 .headers(headers -> headers.setBasicAuth(clientId, clientSecret))
                 .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                 .body(BodyInserters.fromFormData("grant_type", "client_credentials")
-                        .with("scope", "openid email"))
+                        .with("scope", "openid email entitlements"))
                 .retrieve()
                 .bodyToMono(new ParameterizedTypeReference<Map<String, Object>>() {})
                 .block();
