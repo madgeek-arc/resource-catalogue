@@ -27,8 +27,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
+import org.springframework.security.oauth2.client.OAuth2AuthorizedClientService;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
-import org.springframework.security.oauth2.core.oidc.user.DefaultOidcUser;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
@@ -49,9 +50,11 @@ public class HelpdeskController {
     private String helpdeskEndpoint;
 
     private final WebClient webClient;
+    private final OAuth2AuthorizedClientService authorizedClientService;
 
-    public HelpdeskController(WebClient.Builder webClientBuilder) {
+    public HelpdeskController(WebClient.Builder webClientBuilder, OAuth2AuthorizedClientService authorizedClientService) {
         this.webClient = webClientBuilder.build();
+        this.authorizedClientService = authorizedClientService;
     }
 
     @Operation(summary = "Returns a specific ticket.")
@@ -79,7 +82,12 @@ public class HelpdeskController {
     @PreAuthorize("hasRole('ROLE_USER')")
     public ResponseEntity<Object> submitTicket(@RequestBody Map<String, Object> ticketData,
                                                @Parameter(hidden = true) OAuth2AuthenticationToken token) {
-        ticketData.put("userToken", ((DefaultOidcUser) token.getPrincipal()).getIdToken().getTokenValue());
+        OAuth2AuthorizedClient authorizedClient =
+                authorizedClientService.loadAuthorizedClient(
+                        token.getAuthorizedClientRegistrationId(),
+                        token.getName());
+        String accessToken = authorizedClient.getAccessToken().getTokenValue();
+        ticketData.put("accessToken", accessToken);
 
         try {
             Object response = webClient.post()
@@ -104,7 +112,12 @@ public class HelpdeskController {
     public ResponseEntity<Object> submitArticles(@PathVariable String ticketId,
                                                  @RequestBody Map<String, Object> articleData,
                                                  @Parameter(hidden = true) OAuth2AuthenticationToken token) {
-        articleData.put("userToken", ((DefaultOidcUser) token.getPrincipal()).getIdToken().getTokenValue());
+        OAuth2AuthorizedClient authorizedClient =
+                authorizedClientService.loadAuthorizedClient(
+                        token.getAuthorizedClientRegistrationId(),
+                        token.getName());
+        String accessToken = authorizedClient.getAccessToken().getTokenValue();
+        articleData.put("accessToken", accessToken);
 
         try {
             Object response = webClient.post()
