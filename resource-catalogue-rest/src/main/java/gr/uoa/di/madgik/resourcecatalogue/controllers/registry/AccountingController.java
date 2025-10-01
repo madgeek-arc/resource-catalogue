@@ -33,6 +33,7 @@ import org.springframework.web.reactive.function.client.WebClientResponseExcepti
 
 import java.time.LocalDate;
 import java.util.Base64;
+import java.util.Map;
 
 @Profile("beyond")
 @RestController
@@ -135,7 +136,7 @@ public class AccountingController {
                                                     @PathVariable("suffix") String suffix,
                                                     @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate start,
                                                     @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate end) {
-        String provider_id = encode(prefix + "/" + suffix);
+        String providerId = prefix + "/" + suffix;
         try {
             String token = accountingService.getAccessToken();
             Object providerReport = webClient.get()
@@ -143,14 +144,19 @@ public class AccountingController {
                             .path("/projects/" + accountingProjectName + "/providers/{provider_id}/report")
                             .queryParam("start", start.toString())
                             .queryParam("end", end.toString())
-                            .build(provider_id))
+                            .build(encode(providerId)))
                     .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
                     .retrieve()
                     .bodyToMono(Object.class)
                     .block();
             return ResponseEntity.ok(providerReport);
         } catch (WebClientResponseException e) {
-            return ResponseEntity.status(e.getStatusCode()).body(e.getResponseBodyAsString());
+            if (e.getStatusCode() == HttpStatus.NOT_FOUND) {
+                return ResponseEntity.ok(Map.of("message", String.format("Provider with ID [%s] is not yet registered" +
+                        " in the accounting service", providerId)));
+            } else {
+                return ResponseEntity.status(e.getStatusCode()).body(e.getResponseBodyAsString());
+            }
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
         }
@@ -166,13 +172,13 @@ public class AccountingController {
                                                         @PathVariable("suffix") String suffix,
                                                         @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate start,
                                                         @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate end) {
-        String installation_id = prefix + "/" + suffix;
+        String serviceId = prefix + "/" + suffix;
         try {
             String token = accountingService.getAccessToken();
             Object installationReport = webClient.get()
                     .uri(uriBuilder -> uriBuilder
                             .path("installations/external/report")
-                            .queryParam("externalId", installation_id)
+                            .queryParam("externalId", serviceId)
                             .queryParam("start", start.toString())
                             .queryParam("end", end.toString())
                             .build())
@@ -182,7 +188,12 @@ public class AccountingController {
                     .block();
             return ResponseEntity.ok(installationReport);
         } catch (WebClientResponseException e) {
-            return ResponseEntity.status(e.getStatusCode()).body(e.getResponseBodyAsString());
+            if (e.getStatusCode() == HttpStatus.NOT_FOUND) {
+                return ResponseEntity.ok(Map.of("message", String.format("Service with ID [%s] is not yet registered" +
+                        " in the accounting service", serviceId)));
+            } else {
+                return ResponseEntity.status(e.getStatusCode()).body(e.getResponseBodyAsString());
+            }
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
         }
