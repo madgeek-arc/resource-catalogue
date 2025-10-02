@@ -1,5 +1,5 @@
 ### Build using Maven ###
-FROM maven:3.9 AS maven
+FROM maven:3.9-eclipse-temurin-21 AS maven
 ARG profile
 
 WORKDIR /build
