@@ -16,11 +16,11 @@
 
 package gr.uoa.di.madgik.resourcecatalogue.controllers.registry;
 
+import gr.uoa.di.madgik.resourcecatalogue.config.AccountingProperties;
 import gr.uoa.di.madgik.resourcecatalogue.service.AccountingService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpHeaders;
@@ -41,30 +41,37 @@ import java.util.Map;
 @Tag(name = "accounting")
 public class AccountingController {
 
-    @Value("${accounting.project-name}")
-    private String accountingProjectName;
-
-    private final WebClient webClient;
+    private final AccountingProperties accountingProperties;
     private final AccountingService accountingService;
+    private final WebClient webClient;
 
-    public AccountingController(WebClient.Builder webClientBuilder,
+    public AccountingController(AccountingProperties accountingProperties,
                                 AccountingService accountingService,
-                                @Value("${accounting.endpoint}") String accountingEndpoint) {
-        this.webClient = webClientBuilder
-                .baseUrl(accountingEndpoint)
-                .build();
+                                WebClient.Builder webClientBuilder) {
+        this.accountingProperties = accountingProperties;
         this.accountingService = accountingService;
+        if (accountingProperties.isEnabled()) {
+            this.webClient = webClientBuilder
+                    .baseUrl(accountingProperties.getEndpoint())
+                    .build();
+        } else {
+            this.webClient = null;
+        }
     }
 
     //region Project
     @Operation(summary = "Get all Providers and Installations of the Project")
     @GetMapping(path = "project/info", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Object> getAllProjectProvidersAndInstallations() {
+        if (webClient == null) {
+            return ResponseEntity.status(HttpStatus.OK)
+                    .body(Map.of("message", "Accounting service is disabled."));
+        }
         try {
             String token = accountingService.getAccessToken();
             Object projectInfo = webClient.get()
                     .uri(uriBuilder -> uriBuilder
-                            .path("/projects/" + accountingProjectName)
+                            .path("/projects/" + accountingProperties.getProjectName())
                             .build())
                     .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
                     .retrieve()
@@ -82,11 +89,15 @@ public class AccountingController {
     @GetMapping(path = "project/installations", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Object> getAllProjectInstallations(@RequestParam(defaultValue = "1") int page,
                                                              @RequestParam(defaultValue = "10") int size) {
+        if (webClient == null) {
+            return ResponseEntity.status(HttpStatus.OK)
+                    .body(Map.of("message", "Accounting service is disabled."));
+        }
         try {
             String token = accountingService.getAccessToken();
             Object installations = webClient.get()
                     .uri(uriBuilder -> uriBuilder
-                            .path("/projects/" + accountingProjectName + "/installations")
+                            .path("/projects/" + accountingProperties.getProjectName() + "/installations")
                             .queryParam("page", page)
                             .queryParam("size", size)
                             .build())
@@ -106,11 +117,15 @@ public class AccountingController {
     @GetMapping(path = "project/report", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Object> getProjectReport(@RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate start,
                                                    @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate end) {
+        if (webClient == null) {
+            return ResponseEntity.status(HttpStatus.OK)
+                    .body(Map.of("message", "Accounting service is disabled."));
+        }
         try {
             String token = accountingService.getAccessToken();
             Object projectReport = webClient.get()
                     .uri(uriBuilder -> uriBuilder
-                            .path("/projects/" + accountingProjectName + "/report")
+                            .path("/projects/" + accountingProperties.getProjectName() + "/report")
                             .queryParam("start", start.toString())
                             .queryParam("end", end.toString())
                             .build())
@@ -136,12 +151,16 @@ public class AccountingController {
                                                     @PathVariable("suffix") String suffix,
                                                     @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate start,
                                                     @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate end) {
+        if (webClient == null) {
+            return ResponseEntity.status(HttpStatus.OK)
+                    .body(Map.of("message", "Accounting service is disabled."));
+        }
         String providerId = prefix + "/" + suffix;
         try {
             String token = accountingService.getAccessToken();
             Object providerReport = webClient.get()
                     .uri(uriBuilder -> uriBuilder
-                            .path("/projects/" + accountingProjectName + "/providers/{provider_id}/report")
+                            .path("/projects/" + accountingProperties.getProjectName() + "/providers/{provider_id}/report")
                             .queryParam("start", start.toString())
                             .queryParam("end", end.toString())
                             .build(encode(providerId)))
@@ -172,6 +191,10 @@ public class AccountingController {
                                                         @PathVariable("suffix") String suffix,
                                                         @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate start,
                                                         @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate end) {
+        if (webClient == null) {
+            return ResponseEntity.status(HttpStatus.OK)
+                    .body(Map.of("message", "Accounting service is disabled."));
+        }
         String serviceId = prefix + "/" + suffix;
         try {
             String token = accountingService.getAccessToken();
