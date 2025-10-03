@@ -65,8 +65,7 @@ public class AccountingController {
     @GetMapping(path = "project/info", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Object> getAllProjectProvidersAndInstallations() {
         if (webClient == null) {
-            return ResponseEntity.status(HttpStatus.OK)
-                    .body(Map.of("message", "Accounting service is disabled."));
+            throw new UnsupportedOperationException("Accounting service is not enabled.");
         }
         try {
             String token = accountingService.getAccessToken();
@@ -91,8 +90,7 @@ public class AccountingController {
     public ResponseEntity<Object> getAllProjectInstallations(@RequestParam(defaultValue = "1") int page,
                                                              @RequestParam(defaultValue = "10") int size) {
         if (webClient == null) {
-            return ResponseEntity.status(HttpStatus.OK)
-                    .body(Map.of("message", "Accounting service is disabled."));
+            throw new UnsupportedOperationException("Accounting service is not enabled.");
         }
         try {
             String token = accountingService.getAccessToken();
@@ -119,8 +117,7 @@ public class AccountingController {
     public ResponseEntity<Object> getProjectReport(@RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate start,
                                                    @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate end) {
         if (webClient == null) {
-            return ResponseEntity.status(HttpStatus.OK)
-                    .body(Map.of("message", "Accounting service is disabled."));
+            throw new UnsupportedOperationException("Accounting service is not enabled.");
         }
         try {
             String token = accountingService.getAccessToken();
@@ -153,8 +150,7 @@ public class AccountingController {
                                                     @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate start,
                                                     @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate end) {
         if (webClient == null) {
-            return ResponseEntity.status(HttpStatus.OK)
-                    .body(Map.of("message", "Accounting service is disabled."));
+            throw new UnsupportedOperationException("Accounting service is not enabled.");
         }
         String providerId = prefix + "/" + suffix;
         try {
@@ -193,8 +189,7 @@ public class AccountingController {
                                                         @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate start,
                                                         @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate end) {
         if (webClient == null) {
-            return ResponseEntity.status(HttpStatus.OK)
-                    .body(Map.of("message", "Accounting service is disabled."));
+            throw new UnsupportedOperationException("Accounting service is not enabled.");
         }
         String serviceId = prefix + "/" + suffix;
         try {
@@ -239,8 +234,7 @@ public class AccountingController {
                                                      @RequestParam(required = false, defaultValue = "1") int page,
                                                      @RequestParam(required = false, defaultValue = "10") int size) {
         if (webClient == null) {
-            return ResponseEntity.status(HttpStatus.OK)
-                    .body(Map.of("message", "Accounting service is disabled."));
+            throw new UnsupportedOperationException("Accounting service is not enabled.");
         }
         String providerId = prefix + "/" + suffix;
         try {
@@ -295,8 +289,7 @@ public class AccountingController {
                                                          @RequestParam(required = false, defaultValue = "1") int page,
                                                          @RequestParam(required = false, defaultValue = "10") int size) {
         if (webClient == null) {
-            return ResponseEntity.status(HttpStatus.OK)
-                    .body(Map.of("message", "Accounting service is disabled."));
+            throw new UnsupportedOperationException("Accounting service is not enabled.");
         }
         String serviceId = prefix + "/" + suffix;
         try {

@@ -68,8 +68,7 @@ public class HelpdeskController {
     @GetMapping(path = "tickets/{ticketId}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Object> getTicket(@PathVariable("ticketId") String ticketId) {
         if (webClient == null) {
-            return ResponseEntity.status(HttpStatus.OK)
-                    .body(Map.of("message", "Helpdesk service is disabled."));
+            throw new UnsupportedOperationException("Helpdesk service is not enabled.");
         }
         try {
             Object ticket = webClient.get()
@@ -94,8 +93,7 @@ public class HelpdeskController {
     public ResponseEntity<Object> submitTicket(@RequestBody Map<String, Object> ticketData,
                                                @Parameter(hidden = true) OAuth2AuthenticationToken token) {
         if (webClient == null) {
-            return ResponseEntity.status(HttpStatus.OK)
-                    .body(Map.of("message", "Helpdesk service is disabled."));
+            throw new UnsupportedOperationException("Helpdesk service is not enabled.");
         }
 
         OAuth2AuthorizedClient authorizedClient =
@@ -129,8 +127,7 @@ public class HelpdeskController {
                                                  @RequestBody Map<String, Object> articleData,
                                                  @Parameter(hidden = true) OAuth2AuthenticationToken token) {
         if (webClient == null) {
-            return ResponseEntity.status(HttpStatus.OK)
-                    .body(Map.of("message", "Helpdesk service is disabled."));
+            throw new UnsupportedOperationException("Helpdesk service is not enabled.");
         }
 
         OAuth2AuthorizedClient authorizedClient =
