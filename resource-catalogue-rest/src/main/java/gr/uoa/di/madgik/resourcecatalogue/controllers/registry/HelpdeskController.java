@@ -111,8 +111,7 @@ public class HelpdeskController {
                     .block();
 
             logger.info("Ticket submitted successfully");
-            return ResponseEntity.ok("Ticket created successfully! You can navigate to \"My Tickets\" to view your " +
-                    "submitted tickets.");
+            return ResponseEntity.ok(response);
         } catch (WebClientResponseException e) {
             return ResponseEntity.status(e.getStatusCode()).body(e.getResponseBodyAsString());
         } catch (Exception e) {
@@ -148,7 +147,7 @@ public class HelpdeskController {
                     .block();
 
             logger.info("Articles submitted successfully");
-            return ResponseEntity.ok(response); //TODO: create our own message for UI to display when enabled
+            return ResponseEntity.ok(response);
         } catch (WebClientResponseException e) {
             return ResponseEntity.status(e.getStatusCode()).body(e.getResponseBodyAsString());
         } catch (Exception e) {
