@@ -33,7 +33,6 @@ import org.springframework.web.reactive.function.client.WebClientResponseExcepti
 import org.springframework.web.util.UriBuilder;
 
 import java.time.LocalDate;
-import java.util.Base64;
 import java.util.Map;
 
 @Profile("beyond")
@@ -71,7 +70,7 @@ public class AccountingController {
             String token = accountingService.getAccessToken();
             Object projectInfo = webClient.get()
                     .uri(uriBuilder -> uriBuilder
-                            .path("/projects/" + accountingProperties.getProjectName())
+                            .path("/projects/" + accountingProperties.getProjectId())
                             .build())
                     .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
                     .retrieve()
@@ -96,7 +95,7 @@ public class AccountingController {
             String token = accountingService.getAccessToken();
             Object installations = webClient.get()
                     .uri(uriBuilder -> uriBuilder
-                            .path("/projects/" + accountingProperties.getProjectName() + "/installations")
+                            .path("/projects/" + accountingProperties.getProjectId() + "/installations")
                             .queryParam("page", page)
                             .queryParam("size", size)
                             .build())
@@ -123,7 +122,7 @@ public class AccountingController {
             String token = accountingService.getAccessToken();
             Object projectReport = webClient.get()
                     .uri(uriBuilder -> uriBuilder
-                            .path("/projects/" + accountingProperties.getProjectName() + "/report")
+                            .path("/projects/" + accountingProperties.getProjectId() + "/report")
                             .queryParam("start", start.toString())
                             .queryParam("end", end.toString())
                             .build())
@@ -157,10 +156,11 @@ public class AccountingController {
             String token = accountingService.getAccessToken();
             Object providerReport = webClient.get()
                     .uri(uriBuilder -> uriBuilder
-                            .path("/projects/" + accountingProperties.getProjectName() + "/providers/{provider_id}/report")
+                            .path("/projects/" + accountingProperties.getProjectId() + "/providers/external/report")
+                            .queryParam("externalProviderId", providerId)
                             .queryParam("start", start.toString())
                             .queryParam("end", end.toString())
-                            .build(encode(providerId)))
+                            .build())
                     .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
                     .retrieve()
                     .bodyToMono(Object.class)
@@ -242,7 +242,8 @@ public class AccountingController {
             Object metrics = webClient.get()
                     .uri(uriBuilder -> {
                         UriBuilder builder = uriBuilder
-                                .path("/projects/{projectName}/providers/{providerId}/metrics")
+                                .path("/projects/{projectId}/providers/external/metrics")
+                                .queryParam("externalProviderId", providerId)
                                 .queryParam("page", page)
                                 .queryParam("size", size);
 
@@ -256,7 +257,7 @@ public class AccountingController {
                             builder.queryParam("metricDefinitionId", metricDefinitionId);
                         }
 
-                        return builder.build(accountingProperties.getProjectName(), encode(providerId));
+                        return builder.build(accountingProperties.getProjectId());
                     })
                     .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
                     .retrieve()
@@ -297,7 +298,8 @@ public class AccountingController {
             Object metrics = webClient.get()
                     .uri(uriBuilder -> {
                         UriBuilder builder = uriBuilder
-                                .path("/projects/{projectName}/providers/{providerId}/metrics")
+                                .path("/installations/external/metrics")
+                                .queryParam("externalId", serviceId)
                                 .queryParam("page", page)
                                 .queryParam("size", size);
 
@@ -311,7 +313,7 @@ public class AccountingController {
                             builder.queryParam("metricDefinitionId", metricDefinitionId);
                         }
 
-                        return builder.build(accountingProperties.getProjectName(), encode(serviceId));
+                        return builder.build(accountingProperties.getProjectId());
                     })
                     .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
                     .retrieve()
@@ -330,8 +332,4 @@ public class AccountingController {
         }
     }
     //endregion
-
-    private String encode(String id) {
-        return Base64.getUrlEncoder().withoutPadding().encodeToString(id.getBytes());
-    }
 }

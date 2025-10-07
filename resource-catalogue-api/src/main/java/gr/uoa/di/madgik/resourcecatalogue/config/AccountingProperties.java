@@ -32,7 +32,7 @@ public class AccountingProperties {
     private String clientId;
     private String clientSecret;
     private String endpoint;
-    private String projectName;
+    private String projectId;
     private String tokenEndpoint;
 
     public AccountingProperties() {
@@ -50,8 +50,8 @@ public class AccountingProperties {
             if (!StringUtils.hasText(endpoint)) {
                 throw new IllegalArgumentException("Property 'accounting.endpoint' value is missing.");
             }
-            if (!StringUtils.hasText(projectName)) {
-                throw new IllegalArgumentException("Property 'accounting.project-name' value is missing.");
+            if (!StringUtils.hasText(projectId)) {
+                throw new IllegalArgumentException("Property 'accounting.project-id' value is missing.");
             }
             if (!StringUtils.hasText(tokenEndpoint)) {
                 throw new IllegalArgumentException("Property 'accounting.token-endpoint' value is missing.");
@@ -91,12 +91,12 @@ public class AccountingProperties {
         this.endpoint = endpoint;
     }
 
-    public String getProjectName() {
-        return projectName;
+    public String getProjectId() {
+        return projectId;
     }
 
-    public void setProjectName(String projectName) {
-        this.projectName = projectName;
+    public void setProjectId(String projectId) {
+        this.projectId = projectId;
     }
 
     public String getTokenEndpoint() {
