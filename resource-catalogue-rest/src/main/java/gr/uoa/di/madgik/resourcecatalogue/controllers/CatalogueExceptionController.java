@@ -59,6 +59,23 @@ public class CatalogueExceptionController extends GenericExceptionController {
     }
 
     /**
+     * Transforms every thrown exception to a {@link ServerError} response.
+     *
+     * @param req http servlet request
+     * @param ex  the thrown exception
+     * @return {@link ServerError}
+     */
+    @ExceptionHandler(UnsupportedOperationException.class)
+    protected ResponseEntity<ServerError> handleNotImplemented(HttpServletRequest req, Exception ex) {
+        HttpStatusCode status = HttpStatus.NOT_IMPLEMENTED;
+        ServerError serverError = new ServerError(status, req, ex);
+        serverError.setMessage(ex.getMessage());
+        return ResponseEntity
+                .status(status)
+                .body(serverError);
+    }
+
+    /**
      * Traverses the cause chain of a given {@link Throwable} to find the first occurrence
      * of a specific exception type.
      *

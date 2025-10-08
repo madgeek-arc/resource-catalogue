@@ -16,12 +16,12 @@
 
 package gr.uoa.di.madgik.resourcecatalogue.controllers.registry;
 
+import gr.uoa.di.madgik.resourcecatalogue.config.HelpdeskProperties;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -46,24 +46,34 @@ public class HelpdeskController {
 
     private static final Logger logger = LoggerFactory.getLogger(HelpdeskController.class);
 
-    @Value("${helpdesk.endpoint}")
-    private String helpdeskEndpoint;
-
+    private final HelpdeskProperties helpdeskProperties;
     private final WebClient webClient;
     private final OAuth2AuthorizedClientService authorizedClientService;
 
-    public HelpdeskController(WebClient.Builder webClientBuilder, OAuth2AuthorizedClientService authorizedClientService) {
-        this.webClient = webClientBuilder.build();
+    public HelpdeskController(HelpdeskProperties helpdeskProperties,
+                              OAuth2AuthorizedClientService authorizedClientService,
+                              WebClient.Builder webClientBuilder) {
+        this.helpdeskProperties = helpdeskProperties;
         this.authorizedClientService = authorizedClientService;
+        if (helpdeskProperties.isEnabled()) {
+            this.webClient = webClientBuilder
+                    .baseUrl(helpdeskProperties.getEndpoint())
+                    .build();
+        } else {
+            this.webClient = null;
+        }
     }
 
     @Operation(summary = "Returns a specific ticket.")
     @GetMapping(path = "tickets/{ticketId}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Object> getTicket(@PathVariable("ticketId") String ticketId) {
+        if (webClient == null) {
+            throw new UnsupportedOperationException("Helpdesk service is not enabled.");
+        }
         try {
             Object ticket = webClient.get()
                     .uri(uriBuilder -> uriBuilder
-                            .path(helpdeskEndpoint + "/tickets/{ticketId}")
+                            .path("/tickets/{ticketId}")
                             .build(ticketId))
                     .retrieve()
                     .bodyToMono(Object.class)
@@ -82,6 +92,10 @@ public class HelpdeskController {
     @PreAuthorize("hasRole('ROLE_USER')")
     public ResponseEntity<Object> submitTicket(@RequestBody Map<String, Object> ticketData,
                                                @Parameter(hidden = true) OAuth2AuthenticationToken token) {
+        if (webClient == null) {
+            throw new UnsupportedOperationException("Helpdesk service is not enabled.");
+        }
+
         OAuth2AuthorizedClient authorizedClient =
                 authorizedClientService.loadAuthorizedClient(
                         token.getAuthorizedClientRegistrationId(),
@@ -91,7 +105,6 @@ public class HelpdeskController {
 
         try {
             Object response = webClient.post()
-                    .uri(helpdeskEndpoint)
                     .bodyValue(ticketData)
                     .retrieve()
                     .bodyToMono(Object.class)
@@ -112,6 +125,10 @@ public class HelpdeskController {
     public ResponseEntity<Object> submitArticles(@PathVariable String ticketId,
                                                  @RequestBody Map<String, Object> articleData,
                                                  @Parameter(hidden = true) OAuth2AuthenticationToken token) {
+        if (webClient == null) {
+            throw new UnsupportedOperationException("Helpdesk service is not enabled.");
+        }
+
         OAuth2AuthorizedClient authorizedClient =
                 authorizedClientService.loadAuthorizedClient(
                         token.getAuthorizedClientRegistrationId(),
@@ -122,7 +139,7 @@ public class HelpdeskController {
         try {
             Object response = webClient.post()
                     .uri(uriBuilder -> uriBuilder
-                            .path(helpdeskEndpoint + "/tickets/{ticketId}/articles")
+                            .path("/tickets/{ticketId}/articles")
                             .build(ticketId))
                     .bodyValue(articleData)
                     .retrieve()

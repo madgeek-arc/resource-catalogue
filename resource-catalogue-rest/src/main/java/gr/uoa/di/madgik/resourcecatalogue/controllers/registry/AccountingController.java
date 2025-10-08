@@ -16,11 +16,11 @@
 
 package gr.uoa.di.madgik.resourcecatalogue.controllers.registry;
 
+import gr.uoa.di.madgik.resourcecatalogue.config.AccountingProperties;
 import gr.uoa.di.madgik.resourcecatalogue.service.AccountingService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpHeaders;
@@ -30,9 +30,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
+import org.springframework.web.util.UriBuilder;
 
 import java.time.LocalDate;
-import java.util.Base64;
 import java.util.Map;
 
 @Profile("beyond")
@@ -41,30 +41,36 @@ import java.util.Map;
 @Tag(name = "accounting")
 public class AccountingController {
 
-    @Value("${accounting.project-name}")
-    private String accountingProjectName;
-
-    private final WebClient webClient;
+    private final AccountingProperties accountingProperties;
     private final AccountingService accountingService;
+    private final WebClient webClient;
 
-    public AccountingController(WebClient.Builder webClientBuilder,
+    public AccountingController(AccountingProperties accountingProperties,
                                 AccountingService accountingService,
-                                @Value("${accounting.endpoint}") String accountingEndpoint) {
-        this.webClient = webClientBuilder
-                .baseUrl(accountingEndpoint)
-                .build();
+                                WebClient.Builder webClientBuilder) {
+        this.accountingProperties = accountingProperties;
         this.accountingService = accountingService;
+        if (accountingProperties.isEnabled()) {
+            this.webClient = webClientBuilder
+                    .baseUrl(accountingProperties.getEndpoint())
+                    .build();
+        } else {
+            this.webClient = null;
+        }
     }
 
     //region Project
     @Operation(summary = "Get all Providers and Installations of the Project")
     @GetMapping(path = "project/info", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Object> getAllProjectProvidersAndInstallations() {
+        if (webClient == null) {
+            throw new UnsupportedOperationException("Accounting service is not enabled.");
+        }
         try {
             String token = accountingService.getAccessToken();
             Object projectInfo = webClient.get()
                     .uri(uriBuilder -> uriBuilder
-                            .path("/projects/" + accountingProjectName)
+                            .path("/projects/" + accountingProperties.getProjectId())
                             .build())
                     .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
                     .retrieve()
@@ -82,11 +88,14 @@ public class AccountingController {
     @GetMapping(path = "project/installations", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Object> getAllProjectInstallations(@RequestParam(defaultValue = "1") int page,
                                                              @RequestParam(defaultValue = "10") int size) {
+        if (webClient == null) {
+            throw new UnsupportedOperationException("Accounting service is not enabled.");
+        }
         try {
             String token = accountingService.getAccessToken();
             Object installations = webClient.get()
                     .uri(uriBuilder -> uriBuilder
-                            .path("/projects/" + accountingProjectName + "/installations")
+                            .path("/projects/" + accountingProperties.getProjectId() + "/installations")
                             .queryParam("page", page)
                             .queryParam("size", size)
                             .build())
@@ -106,11 +115,14 @@ public class AccountingController {
     @GetMapping(path = "project/report", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Object> getProjectReport(@RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate start,
                                                    @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate end) {
+        if (webClient == null) {
+            throw new UnsupportedOperationException("Accounting service is not enabled.");
+        }
         try {
             String token = accountingService.getAccessToken();
             Object projectReport = webClient.get()
                     .uri(uriBuilder -> uriBuilder
-                            .path("/projects/" + accountingProjectName + "/report")
+                            .path("/projects/" + accountingProperties.getProjectId() + "/report")
                             .queryParam("start", start.toString())
                             .queryParam("end", end.toString())
                             .build())
@@ -136,15 +148,19 @@ public class AccountingController {
                                                     @PathVariable("suffix") String suffix,
                                                     @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate start,
                                                     @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate end) {
+        if (webClient == null) {
+            throw new UnsupportedOperationException("Accounting service is not enabled.");
+        }
         String providerId = prefix + "/" + suffix;
         try {
             String token = accountingService.getAccessToken();
             Object providerReport = webClient.get()
                     .uri(uriBuilder -> uriBuilder
-                            .path("/projects/" + accountingProjectName + "/providers/{provider_id}/report")
+                            .path("/projects/" + accountingProperties.getProjectId() + "/providers/external/report")
+                            .queryParam("externalProviderId", providerId)
                             .queryParam("start", start.toString())
                             .queryParam("end", end.toString())
-                            .build(encode(providerId)))
+                            .build())
                     .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
                     .retrieve()
                     .bodyToMono(Object.class)
@@ -172,6 +188,9 @@ public class AccountingController {
                                                         @PathVariable("suffix") String suffix,
                                                         @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate start,
                                                         @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate end) {
+        if (webClient == null) {
+            throw new UnsupportedOperationException("Accounting service is not enabled.");
+        }
         String serviceId = prefix + "/" + suffix;
         try {
             String token = accountingService.getAccessToken();
@@ -200,7 +219,117 @@ public class AccountingController {
     }
     //endregion
 
-    private String encode(String id) {
-        return Base64.getUrlEncoder().withoutPadding().encodeToString(id.getBytes());
+    //region Metric
+    @Operation(summary = "Get all Metrics under a specific Provider")
+    @GetMapping(path = "project/provider/{prefix}/{suffix}/metrics", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Object> getProviderMetrics(@Parameter(description = "The left part of the ID before the '/'")
+                                                     @PathVariable("prefix") String prefix,
+                                                     @Parameter(description = "The right part of the ID after the '/'")
+                                                     @PathVariable("suffix") String suffix,
+                                                     @RequestParam(required = false)
+                                                     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate start,
+                                                     @RequestParam(required = false)
+                                                     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate end,
+                                                     @RequestParam(required = false) String metricDefinitionId,
+                                                     @RequestParam(required = false, defaultValue = "1") int page,
+                                                     @RequestParam(required = false, defaultValue = "10") int size) {
+        if (webClient == null) {
+            throw new UnsupportedOperationException("Accounting service is not enabled.");
+        }
+        String providerId = prefix + "/" + suffix;
+        try {
+            String token = accountingService.getAccessToken();
+            Object metrics = webClient.get()
+                    .uri(uriBuilder -> {
+                        UriBuilder builder = uriBuilder
+                                .path("/projects/{projectId}/providers/external/metrics")
+                                .queryParam("externalProviderId", providerId)
+                                .queryParam("page", page)
+                                .queryParam("size", size);
+
+                        if (start != null) {
+                            builder.queryParam("start", start);
+                        }
+                        if (end != null) {
+                            builder.queryParam("end", end);
+                        }
+                        if (metricDefinitionId != null) {
+                            builder.queryParam("metricDefinitionId", metricDefinitionId);
+                        }
+
+                        return builder.build(accountingProperties.getProjectId());
+                    })
+                    .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
+                    .retrieve()
+                    .bodyToMono(Object.class)
+                    .block();
+            return ResponseEntity.ok(metrics);
+        } catch (WebClientResponseException e) {
+            if (e.getStatusCode() == HttpStatus.NOT_FOUND) {
+                return ResponseEntity.ok(Map.of("message", String.format("Provider with ID [%s] is not yet registered" +
+                        " in the accounting service", providerId)));
+            } else {
+                return ResponseEntity.status(e.getStatusCode()).body(e.getResponseBodyAsString());
+            }
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+        }
     }
+
+    @Operation(summary = "Get all Metrics under a specific Installation")
+    @GetMapping(path = "project/installation/{prefix}/{suffix}/metrics", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Object> getInstallationMetrics(@Parameter(description = "The left part of the ID before the '/'")
+                                                         @PathVariable("prefix") String prefix,
+                                                         @Parameter(description = "The right part of the ID after the '/'")
+                                                         @PathVariable("suffix") String suffix,
+                                                         @RequestParam(required = false)
+                                                         @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate start,
+                                                         @RequestParam(required = false)
+                                                         @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate end,
+                                                         @RequestParam(required = false) String metricDefinitionId,
+                                                         @RequestParam(required = false, defaultValue = "1") int page,
+                                                         @RequestParam(required = false, defaultValue = "10") int size) {
+        if (webClient == null) {
+            throw new UnsupportedOperationException("Accounting service is not enabled.");
+        }
+        String serviceId = prefix + "/" + suffix;
+        try {
+            String token = accountingService.getAccessToken();
+            Object metrics = webClient.get()
+                    .uri(uriBuilder -> {
+                        UriBuilder builder = uriBuilder
+                                .path("/installations/external/metrics")
+                                .queryParam("externalId", serviceId)
+                                .queryParam("page", page)
+                                .queryParam("size", size);
+
+                        if (start != null) {
+                            builder.queryParam("start", start);
+                        }
+                        if (end != null) {
+                            builder.queryParam("end", end);
+                        }
+                        if (metricDefinitionId != null) {
+                            builder.queryParam("metricDefinitionId", metricDefinitionId);
+                        }
+
+                        return builder.build(accountingProperties.getProjectId());
+                    })
+                    .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
+                    .retrieve()
+                    .bodyToMono(Object.class)
+                    .block();
+            return ResponseEntity.ok(metrics);
+        } catch (WebClientResponseException e) {
+            if (e.getStatusCode() == HttpStatus.NOT_FOUND) {
+                return ResponseEntity.ok(Map.of("message", String.format("Service with ID [%s] is not yet registered" +
+                        " in the accounting service", serviceId)));
+            } else {
+                return ResponseEntity.status(e.getStatusCode()).body(e.getResponseBodyAsString());
+            }
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+        }
+    }
+    //endregion
 }

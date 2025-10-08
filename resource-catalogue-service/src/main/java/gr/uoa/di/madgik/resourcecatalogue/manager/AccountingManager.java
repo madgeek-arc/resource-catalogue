@@ -16,8 +16,8 @@
 
 package gr.uoa.di.madgik.resourcecatalogue.manager;
 
+import gr.uoa.di.madgik.resourcecatalogue.config.AccountingProperties;
 import gr.uoa.di.madgik.resourcecatalogue.service.AccountingService;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
@@ -30,22 +30,16 @@ import java.util.Map;
 @Service("accountingManager")
 public class AccountingManager implements AccountingService {
 
+    private final AccountingProperties accountingProperties;
     private final WebClient webClient;
-    private final String clientId;
-    private final String clientSecret;
-    private final String tokenEndpoint;
 
     private String accessToken;
     private Instant expiryTime;
 
-    public AccountingManager(WebClient.Builder webClientBuilder,
-                        @Value("${accounting.client-id}") String clientId,
-                        @Value("${accounting.client-secret}") String clientSecret,
-                        @Value("${accounting.token-endpoint}") String tokenEndpoint) {
+    public AccountingManager(AccountingProperties accountingProperties,
+                             WebClient.Builder webClientBuilder) {
+        this.accountingProperties = accountingProperties;
         this.webClient = webClientBuilder.build();
-        this.clientId = clientId;
-        this.clientSecret = clientSecret;
-        this.tokenEndpoint = tokenEndpoint;
     }
 
     public synchronized String getAccessToken() {
@@ -57,8 +51,9 @@ public class AccountingManager implements AccountingService {
 
     private void refreshToken() {
         Map<String, Object> response = webClient.post()
-                .uri(tokenEndpoint)
-                .headers(headers -> headers.setBasicAuth(clientId, clientSecret))
+                .uri(accountingProperties.getTokenEndpoint())
+                .headers(headers -> headers.setBasicAuth(accountingProperties.getClientId(),
+                        accountingProperties.getClientSecret()))
                 .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                 .body(BodyInserters.fromFormData("grant_type", "client_credentials")
                         .with("scope", "openid email entitlements"))
