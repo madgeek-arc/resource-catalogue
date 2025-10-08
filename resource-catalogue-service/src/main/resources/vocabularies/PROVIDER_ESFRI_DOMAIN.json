@@ -1,0 +1,58 @@
+[
+  {
+    "id": "provider_esfri_domain-data_computing_and_digital_research_infrastructures",
+    "name": "Data, Computing & Digital Research Infrastructures",
+    "description": "In research, as in all fields of society, Information and Communications Technology (ICT) has become a key enabling factor for progress. ICT is also changing the modus operandi of research by providing new possibilities for geographically distributed collaboration and sharing. Data-driven science, as well as more and more open access to data and scientific results, is transforming not only how research is conducted, but its overall reach.",
+    "parentId": null,
+    "type": "Provider esfri domain",
+    "extras": {}
+  },
+  {
+    "id": "provider_esfri_domain-energy",
+    "name": "Energy",
+    "description": "The energy sector is key to social and economic development. Especially in some non-OECD countries the energy sector sees very high growth rates due to rising GDP. However, it contributes significantly to global CO2 emissions. For the EU, the reduction of CO2 emissions in a sustainable framework is a major driver of its energy policy. This provides opportunities for new technologies both for application within and outside of the EU.",
+    "parentId": null,
+    "type": "Provider esfri domain",
+    "extras": {}
+  },
+  {
+    "id": "provider_esfri_domain-environment",
+    "name": "Environment",
+    "description": "Environmental sciences are traditionally divided into four research and study domains: ATMOSPHERE, HYDROSPHERE, BIOSPHERE and GEOSPHERE. These different spheres are closely interlinked, and therefore environmental sciences can also be presented according to Grand Challenges, such as loss of biodiversity, pollution, depletion of natural resources, risks, hazards and climate change.",
+    "parentId": null,
+    "type": "Provider esfri domain",
+    "extras": {}
+  },
+  {
+    "id": "provider_esfri_domain-health_and_food",
+    "name": "Health & Food",
+    "description": "There is a broad consensus that future competitiveness in a globalised knowledge economy depends on research capability. Research Infrastructures (RIs) in the Biological,  Agri-Food and Medical Sciences – i.e. Health & Food – continue to establish themselves as research, innovation and skills hubs and as a motor for economic impact. This is reflected in increasing levels of industrial access to RIs, and in their European and global positioning.",
+    "parentId": null,
+    "type": "Provider esfri domain",
+    "extras": {}
+  },
+  {
+    "id": "provider_esfri_domain-other",
+    "name": "Other",
+    "description": null,
+    "parentId": null,
+    "type": "Provider esfri domain",
+    "extras": {}
+  },
+  {
+    "id": "provider_esfri_domain-physical_sciences_and_engineering",
+    "name": "Physical Sciences & Engineering",
+    "description": "Research Infrastructures are integral part of the dayto-day activity of Physical Sciences & Engineering. Historically and today the PSE RIs are integrated in the way research is done in these disciplines, and major advances in knowledge are achieved by the research performed at RIs. However, the RIs are much more than research tools; they are truly Hubs of Knowledge & Innovation with a complete multidisciplinary approach and a systematic impact on many areas beyond Physical Sciences and Engineering.",
+    "parentId": null,
+    "type": "Provider esfri domain",
+    "extras": {}
+  },
+  {
+    "id": "provider_esfri_domain-social_and_cultural_innovation",
+    "name": "Social & Cultural Innovation",
+    "description": "Research Infrastructures that support research across and within the Social & Cultural Innovation domain are among the first known infrastructures: libraries, museums and archives are the most obvious examples of this legacy. In today’s digital age, Research Infrastructures in the Social Sciences and Humanities (SSH) enhance research into the historical, social, economic, political and cultural contexts of the European Union, providing data and knowledge to support its strategies.",
+    "parentId": null,
+    "type": "Provider esfri domain",
+    "extras": {}
+  }
+]

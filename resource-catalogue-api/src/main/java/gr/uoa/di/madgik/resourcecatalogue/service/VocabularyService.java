@@ -78,6 +78,13 @@ public interface VocabularyService extends ResourceService<Vocabulary> {
     void deleteAll(Authentication auth);
 
     /**
+     * Deletes all Vocabularies of a specific Vocabulary.Type
+     *
+     * @param type Vocabulary.Type
+     */
+    void deleteByType(Vocabulary.Type type);
+
+    /**
      * Returns a Tree of parents and children for a specific Vocabulary Type
      *
      * @param type Vocabulary Type

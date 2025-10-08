@@ -1,0 +1,79 @@
+[
+  {
+    "id": "supercategory-access_physical_and_eInfrastructures",
+    "name": "Access physical & eInfrastructures",
+    "description": "Ultra-fast connectivity and ubiquitous access, high performance computing, cloud capacity and storage.",
+    "parentId": null,
+    "type": "Supercategory",
+    "extras": {
+      "icon": "ic_security.svg",
+      "icon_active": "ic_security_active.svg"
+    }
+  },
+  {
+    "id": "supercategory-aggregators_and_integrators",
+    "name": "Aggregators & Integrators",
+    "description": null,
+    "parentId": null,
+    "type": "Supercategory",
+    "extras": {
+      "icon": "ic_aggregator.svg",
+      "icon_active": "ic_aggregator_active.svg"
+    }
+  },
+  {
+    "id": "supercategory-other",
+    "name": "Other",
+    "description": null,
+    "parentId": null,
+    "type": "Supercategory",
+    "extras": {
+      "icon": "ic_software.svg",
+      "icon_active": "ic_software_active.svg"
+    }
+  },
+  {
+    "id": "supercategory-processing_and_analysis",
+    "name": "Processing & Analysis",
+    "description": null,
+    "parentId": null,
+    "type": "Supercategory",
+    "extras": {
+      "icon": "ic_analytics.svg",
+      "icon_active": "ic_analytics_active.svg"
+    }
+  },
+  {
+    "id": "supercategory-security_and_operations",
+    "name": "Security & Operations",
+    "description": null,
+    "parentId": null,
+    "type": "Supercategory",
+    "extras": {
+      "icon": "ic_operations.svg",
+      "icon_active": "ic_operations_active.svg"
+    }
+  },
+  {
+    "id": "supercategory-sharing_and_discovery",
+    "name": "Sharing & Discovery",
+    "description": null,
+    "parentId": null,
+    "type": "Supercategory",
+    "extras": {
+      "icon": "ic_data.svg",
+      "icon_active": "ic_data_active.svg"
+    }
+  },
+  {
+    "id": "supercategory-training_and_support",
+    "name": "Training & Support",
+    "description": null,
+    "parentId": null,
+    "type": "Supercategory",
+    "extras": {
+      "icon": "ic_training.svg",
+      "icon_active": "ic_training_active.svg"
+    }
+  }
+]

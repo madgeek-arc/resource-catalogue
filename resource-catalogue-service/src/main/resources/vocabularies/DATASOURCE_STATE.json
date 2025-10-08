@@ -1,0 +1,26 @@
+[
+  {
+    "id": "approved datasource",
+    "name": "Approved Datasource",
+    "description": "Approved Datasource",
+    "parentId": null,
+    "type": "Datasource state",
+    "extras": {}
+  },
+  {
+    "id": "pending datasource",
+    "name": "Pending Datasource",
+    "description": "Pending Datasource",
+    "parentId": null,
+    "type": "Datasource state",
+    "extras": {}
+  },
+  {
+    "id": "rejected datasource",
+    "name": "Rejected Datasource",
+    "description": "Rejected Datasource",
+    "parentId": null,
+    "type": "Datasource state",
+    "extras": {}
+  }
+]

@@ -1,0 +1,50 @@
+[
+  {
+    "id": "ds_jurisdiction-global",
+    "name": "Global",
+    "description": "Intended for all users",
+    "parentId": null,
+    "type": "Jurisdiction",
+    "extras": {}
+  },
+  {
+    "id": "ds_jurisdiction-national",
+    "name": "National",
+    "description": "Intended for users of a country, e.g. national data reppsitory",
+    "parentId": null,
+    "type": "Jurisdiction",
+    "extras": {}
+  },
+  {
+    "id": "ds_jurisdiction-regional",
+    "name": "Regional",
+    "description": "Intended for users of a region (e.g. Europe)",
+    "parentId": null,
+    "type": "Jurisdiction",
+    "extras": {}
+  },
+  {
+    "id": "ds_jurisdiction-institution",
+    "name": "Institution",
+    "description": "Intended for users of an institution, e.g. university publication repository",
+    "parentId": null,
+    "type": "Jurisdiction",
+    "extras": {}
+  },
+  {
+    "id": "ds_jurisdiction-research_infrastructure",
+    "name": "Research Infrastructure",
+    "description": "Intended for users of ESFRI Communities",
+    "parentId": null,
+    "type": "Jurisdiction",
+    "extras": {}
+  },
+  {
+    "id": "ds_jurisdiction-e_infrastructure",
+    "name": "e-Infrastructure",
+    "description": "Intended for users of horizontal e-infra services (e.g. EGI, GEANT, OpenAIRE, EUDAT, Fenix)",
+    "parentId": null,
+    "type": "Jurisdiction",
+    "extras": {}
+  }
+]

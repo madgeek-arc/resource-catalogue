@@ -1,0 +1,34 @@
+[
+  {
+    "id": "service_category-data_source",
+    "name": "Data Source",
+    "description": null,
+    "parentId": null,
+    "type": "Service category",
+    "extras": {}
+  },
+  {
+    "id": "service_category-compute",
+    "name": "Compute",
+    "description": null,
+    "parentId": null,
+    "type": "Service category",
+    "extras": {}
+  },
+  {
+    "id": "service_category-storage",
+    "name": "Storage",
+    "description": null,
+    "parentId": null,
+    "type": "Service category",
+    "extras": {}
+  },
+  {
+    "id": "service_category-other",
+    "name": "Other",
+    "description": null,
+    "parentId": null,
+    "type": "Service category",
+    "extras": {}
+  }
+]

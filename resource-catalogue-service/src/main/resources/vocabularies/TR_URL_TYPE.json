@@ -1,0 +1,58 @@
+[
+  {
+    "id": "tr_url_type-ark",
+    "name": "ARK",
+    "description": "Archival Resource Key",
+    "parentId": null,
+    "type": "Training Resource url type",
+    "extras": {}
+  },
+  {
+    "id": "tr_url_type-doi",
+    "name": "DOI",
+    "description": "Digital Object Identifier",
+    "parentId": null,
+    "type": "Training Resource url type",
+    "extras": {}
+  },
+  {
+    "id": "tr_url_type-handle",
+    "name": "HANDLE",
+    "description": "Handle",
+    "parentId": null,
+    "type": "Training Resource url type",
+    "extras": {}
+  },
+  {
+    "id": "tr_url_type-urn",
+    "name": "URN",
+    "description": "Uniform Resource Name",
+    "parentId": null,
+    "type": "Training Resource url type",
+    "extras": {}
+  },
+  {
+    "id": "tr_url_type-uri",
+    "name": "URI",
+    "description": "Uniform Resource Identifier",
+    "parentId": null,
+    "type": "Training Resource url type",
+    "extras": {}
+  },
+  {
+    "id": "tr_url_type-url",
+    "name": "URL",
+    "description": "Uniform Resource Locator",
+    "parentId": null,
+    "type": "Training Resource url type",
+    "extras": {}
+  },
+  {
+    "id": "tr_url_type-not_applicable",
+    "name": "NOT APPLICABLE",
+    "description": null,
+    "parentId": null,
+    "type": "Training Resource url type",
+    "extras": {}
+  }
+]

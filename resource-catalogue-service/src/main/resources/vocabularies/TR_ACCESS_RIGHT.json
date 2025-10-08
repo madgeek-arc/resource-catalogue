@@ -1,0 +1,34 @@
+[
+  {
+    "id": "tr_access_right-open_access",
+    "name": "Open Access",
+    "description": "Open access refers to a resource that is immediately and permanently online, and free for all on the Web, without financial and technical barriers.",
+    "parentId": null,
+    "type": "Training Resource access right",
+    "extras": {}
+  },
+  {
+    "id": "tr_access_right-restricted_access",
+    "name": "Restricted Access",
+    "description": "Restricted access refers to a resource that is available in a system but with some type of restriction for full open access.",
+    "parentId": null,
+    "type": "Training Resource access right",
+    "extras": {}
+  },
+  {
+    "id": "tr_access_right-metadata_only_access",
+    "name": "Metadata Only Access",
+    "description": "Metadata only access refers to a resource in which access is limited to metadata only. The resource itself is described by the metadata, but neither is directly available through the system or platform nor can be referenced to an open access copy in an external source.",
+    "parentId": null,
+    "type": "Training Resource access right",
+    "extras": {}
+  },
+  {
+    "id": "tr_access_right-paid_access",
+    "name": "Paid Access",
+    "description": "Paid access refers to the need to pay a fee to access the resource.",
+    "parentId": null,
+    "type": "Training Resource access right",
+    "extras": {}
+  }
+]

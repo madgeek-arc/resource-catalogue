@@ -1,0 +1,26 @@
+[
+  {
+    "id": "approved provider",
+    "name": "Approved Provider",
+    "description": "Approved Provider",
+    "parentId": null,
+    "type": "Provider state",
+    "extras": {}
+  },
+  {
+    "id": "pending provider",
+    "name": "Pending Provider",
+    "description": "Pending Provider",
+    "parentId": null,
+    "type": "Provider state",
+    "extras": {}
+  },
+  {
+    "id": "rejected provider",
+    "name": "Rejected Provider",
+    "description": "Rejected Provider",
+    "parentId": null,
+    "type": "Provider state",
+    "extras": {}
+  }
+]

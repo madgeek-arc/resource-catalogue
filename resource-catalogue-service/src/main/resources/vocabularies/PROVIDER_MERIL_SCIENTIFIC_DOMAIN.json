@@ -1,0 +1,74 @@
+[
+  {
+    "id": "provider_meril_scientific_domain-biological_and_medical_sciences",
+    "name": "Biological & Medical Sciences",
+    "description": null,
+    "parentId": null,
+    "type": "Provider meril scientific domain",
+    "extras": {}
+  },
+  {
+    "id": "provider_meril_scientific_domain-chemistry_and_material_sciences",
+    "name": "Chemistry & Material Sciences",
+    "description": null,
+    "parentId": null,
+    "type": "Provider meril scientific domain",
+    "extras": {}
+  },
+  {
+    "id": "provider_meril_scientific_domain-earth_and_environmental_sciences",
+    "name": "Earth & Environmental Sciences",
+    "description": null,
+    "parentId": null,
+    "type": "Provider meril scientific domain",
+    "extras": {}
+  },
+  {
+    "id": "provider_meril_scientific_domain-engineering_and_energy",
+    "name": "Engineering & Energy",
+    "description": null,
+    "parentId": null,
+    "type": "Provider meril scientific domain",
+    "extras": {}
+  },
+  {
+    "id": "provider_meril_scientific_domain-humanities_and_arts",
+    "name": "Humanities & Arts",
+    "description": null,
+    "parentId": null,
+    "type": "Provider meril scientific domain",
+    "extras": {}
+  },
+  {
+    "id": "provider_meril_scientific_domain-information_science_and_technology",
+    "name": "Information Science & Technology",
+    "description": null,
+    "parentId": null,
+    "type": "Provider meril scientific domain",
+    "extras": {}
+  },
+  {
+    "id": "provider_meril_scientific_domain-other",
+    "name": "Other",
+    "description": null,
+    "parentId": null,
+    "type": "Provider meril scientific domain",
+    "extras": {}
+  },
+  {
+    "id": "provider_meril_scientific_domain-physics_astronomy_astrophysics_and_mathematics",
+    "name": "Physics, Astronomy, Astrophysics and Mathematics",
+    "description": null,
+    "parentId": null,
+    "type": "Provider meril scientific domain",
+    "extras": {}
+  },
+  {
+    "id": "provider_meril_scientific_domain-social_sciences",
+    "name": "Social Sciences",
+    "description": null,
+    "parentId": null,
+    "type": "Provider meril scientific domain",
+    "extras": {}
+  }
+]

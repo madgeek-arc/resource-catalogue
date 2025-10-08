@@ -1,0 +1,98 @@
+[
+  {
+    "id": "tr_content_resource_type-animation",
+    "name": "Animation",
+    "description": null,
+    "parentId": null,
+    "type": "Training Resource content resource type",
+    "extras": {}
+  },
+  {
+    "id": "tr_content_resource_type-audio",
+    "name": "Audio",
+    "description": null,
+    "parentId": null,
+    "type": "Training Resource content resource type",
+    "extras": {}
+  },
+  {
+    "id": "tr_content_resource_type-diagram",
+    "name": "Diagram",
+    "description": null,
+    "parentId": null,
+    "type": "Training Resource content resource type",
+    "extras": {}
+  },
+  {
+    "id": "tr_content_resource_type-game",
+    "name": "Game",
+    "description": null,
+    "parentId": null,
+    "type": "Training Resource content resource type",
+    "extras": {}
+  },
+  {
+    "id": "tr_content_resource_type-image",
+    "name": "Image",
+    "description": null,
+    "parentId": null,
+    "type": "Training Resource content resource type",
+    "extras": {}
+  },
+  {
+    "id": "tr_content_resource_type-multimedia",
+    "name": "Multimedia",
+    "description": null,
+    "parentId": null,
+    "type": "Training Resource content resource type",
+    "extras": {}
+  },
+  {
+    "id": "tr_content_resource_type-poster",
+    "name": "Poster",
+    "description": null,
+    "parentId": null,
+    "type": "Training Resource content resource type",
+    "extras": {}
+  },
+  {
+    "id": "tr_content_resource_type-slides",
+    "name": "Slides",
+    "description": null,
+    "parentId": null,
+    "type": "Training Resource content resource type",
+    "extras": {}
+  },
+  {
+    "id": "tr_content_resource_type-text",
+    "name": "Text",
+    "description": null,
+    "parentId": null,
+    "type": "Training Resource content resource type",
+    "extras": {}
+  },
+  {
+    "id": "tr_content_resource_type-video",
+    "name": "Video",
+    "description": null,
+    "parentId": null,
+    "type": "Training Resource content resource type",
+    "extras": {}
+  },
+  {
+    "id": "tr_content_resource_type-website",
+    "name": "Website",
+    "description": null,
+    "parentId": null,
+    "type": "Training Resource content resource type",
+    "extras": {}
+  },
+  {
+    "id": "tr_content_resource_type-other",
+    "name": "Other",
+    "description": null,
+    "parentId": null,
+    "type": "Training Resource content resource type",
+    "extras": {}
+  }
+]

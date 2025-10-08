@@ -1,0 +1,26 @@
+[
+  {
+    "id": "approved resource",
+    "name": "Approved Resource",
+    "description": "Approved Resource",
+    "parentId": null,
+    "type": "Resource state",
+    "extras": {}
+  },
+  {
+    "id": "pending resource",
+    "name": "Pending Resource",
+    "description": "Pending Resource",
+    "parentId": null,
+    "type": "Resource state",
+    "extras": {}
+  },
+  {
+    "id": "rejected resource",
+    "name": "Rejected Resource",
+    "description": "Rejected Resource",
+    "parentId": null,
+    "type": "Resource state",
+    "extras": {}
+  }
+]

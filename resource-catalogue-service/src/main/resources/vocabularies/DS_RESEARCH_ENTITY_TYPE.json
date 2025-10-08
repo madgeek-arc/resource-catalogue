@@ -1,0 +1,74 @@
+[
+  {
+    "id": "ds_research_entity_type-research_data",
+    "name": "Research Data",
+    "description": "",
+    "parentId": null,
+    "type": "Research entity type",
+    "extras": {}
+  },
+  {
+    "id": "ds_research_entity_type-research_software",
+    "name": "Research Software",
+    "description": "",
+    "parentId": null,
+    "type": "Research entity type",
+    "extras": {}
+  },
+  {
+    "id": "ds_research_entity_type-research_publication",
+    "name": "Research Publication",
+    "description": "",
+    "parentId": null,
+    "type": "Research entity type",
+    "extras": {}
+  },
+  {
+    "id": "ds_research_entity_type-other_research_products",
+    "name": "Other Research Products",
+    "description": "",
+    "parentId": null,
+    "type": "Research entity type",
+    "extras": {}
+  },
+  {
+    "id": "ds_research_entity_type-funders",
+    "name": "Funders",
+    "description": "",
+    "parentId": null,
+    "type": "Research entity type",
+    "extras": {}
+  },
+  {
+    "id": "ds_research_entity_type-projects",
+    "name": "Projects",
+    "description": "",
+    "parentId": null,
+    "type": "Research entity type",
+    "extras": {}
+  },
+  {
+    "id": "ds_research_entity_type-researchers",
+    "name": "Researchers",
+    "description": "",
+    "parentId": null,
+    "type": "Research entity type",
+    "extras": {}
+  },
+  {
+    "id": "ds_research_entity_type-organizations",
+    "name": "Orgranizations",
+    "description": "",
+    "parentId": null,
+    "type": "Research entity type",
+    "extras": {}
+  },
+  {
+    "id": "ds_research_entity_type-services",
+    "name": "Services",
+    "description": "",
+    "parentId": null,
+    "type": "Research entity type",
+    "extras": {}
+  }
+]

@@ -1,0 +1,34 @@
+[
+  {
+    "id": "ds_coar_access_rights_1_0-embargoed_access",
+    "name": "Embargoed Access",
+    "description": "Embargoed access refers to a resource that is metadata only access until released for open access on a certain date.",
+    "parentId": null,
+    "type": "COAR access rights 1.0",
+    "extras": {}
+  },
+  {
+    "id": "ds_coar_access_rights_1_0-metadata_only_access",
+    "name": "Metadata Only Access",
+    "description": "Metadata only access refers to a resource in which access is limited to metadata only.",
+    "parentId": null,
+    "type": "COAR access rights 1.0",
+    "extras": {}
+  },
+  {
+    "id": "ds_coar_access_rights_1_0-open_access",
+    "name": "Open Access",
+    "description": "Open access refers to a resource that is immediately and permanently online, and free for all on the Web, without financial and technical barriers.",
+    "parentId": null,
+    "type": "COAR access rights 1.0",
+    "extras": {}
+  },
+  {
+    "id": "ds_coar_access_rights_1_0-restricted_access",
+    "name": "Restricted Access",
+    "description": "Restricted access refers to a resource that is available in a system but with some type of restriction for full open access.",
+    "parentId": null,
+    "type": "COAR access rights 1.0",
+    "extras": {}
+  }
+]

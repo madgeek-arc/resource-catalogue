@@ -1,0 +1,2930 @@
+[
+  {
+    "id": "provider_network-4c",
+    "name": "Collaboration to Clarify the Costs of Curation (4C)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-4m",
+    "name": "4M Association (4M)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-aaa",
+    "name": "African Archeologists Association (AAA)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-accesible",
+    "name": "Accessibility Assessment Simulation Environment for New Applications Design and Development (ACCESSIBLE)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-acsc",
+    "name": "Austrian Centre for Scientific Comuting (ACSC)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-actris",
+    "name": "European Research Infrastructure for the observation of Aerosol, Clouds and Trace Gases (ACTRIS)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-acumen",
+    "name": "Academic Careers Understood through MEasurement and Norms (ACUMEN)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-aegis",
+    "name": "African Studies in Europe (AEGIS)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-aeronet",
+    "name": "AErosol Robotic NETwork (AERONET)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-airca",
+    "name": "Association of International Research and Development Centers for Agriculture (AIRCA)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-alinne",
+    "name": "Alianza por la Investigación y la Innovación Energéticas (ALINNE)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-alistore_eri",
+    "name": "ALISTORE European Research Institute (ALISTORE ERI)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-alternet",
+    "name": "Biodiversity Research Network (ALTER-Net)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-amicom",
+    "name": "Advanced MEMS For RF and Millimeter Wave Communications (AMICOM)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-anaee",
+    "name": "Analysis and Experimentation on Ecosystems (ANAEE)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-anihwa",
+    "name": "Animal Health and Welfare ERA-Net (ANIHWA)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-aparsen",
+    "name": "Alliance for Permanent Access to the Records of Science Network (APARSEN)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-appa_marina",
+    "name": "Asociación de Empresas de Energías Renovables (APPA Marina)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-appec",
+    "name": "Astroparticle Physics European Coordination (ApPEC)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-aquaexcel",
+    "name": "AQUAculture infrastructures for EXCELlence in European fish research towards 2020 (AQUAEXCEL)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-aquamed",
+    "name": "Support the sustainable development of aquaculture in the Mediterranean region (AQUAMED)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-arbo_zoonet",
+    "name": "International network for capacity building for the control of emerging viral vector borne zoonotic diseases (ARBO-ZOONET)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-asem",
+    "name": "Asia-Europe Sustainable Connectivity Scientific Conference (ASEM)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-asp",
+    "name": "Society of Primatology (ASP)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-assemble",
+    "name": "Association of European Marine Biological Laboratories Expanded (ASSEMBLE)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-assemic",
+    "name": "Advanced Methods and Tools for Handling and Assembly in Microtechnology (ASSEMIC)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-astarte",
+    "name": "Assessment, STrategy And Risk Reduction for Tsunamis in Europe (ASTARTE)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-astronet",
+    "name": "Astrodynamics Network (ASTRONET)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-bbib",
+    "name": "Berlin-Brandenburg Institute of Advanced Biodiversity Research (BBIB)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-bbmri_eric",
+    "name": "Biobanking and BioMolecular resources Research Infrastructure – European Research Infrastructure Consortium (BBMRI-ERIC)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-bf",
+    "name": "Biocenter Finland (BF)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-bgci",
+    "name": "European Botanic Gardens Consortium International (BGCI)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-bic",
+    "name": "Bio-based Industries Consortium (BIC)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-bio_nmr",
+    "name": "Biological Nuclear Magnetic Resonance (Bio-NMR)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-biobankcloud",
+    "name": "Scalable, Secure Storage of Biobank Data (BiobankCloud)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-bioimaging_network",
+    "name": "European research infrastructure for imaging technologies in biological and biomedical sciences (BioImaging Network)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-bionet",
+    "name": "Global Network for Taxonomy (BioNET)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-bioshare_eu",
+    "name": "Biobank Standardisation and Harmonisation for Research Excellence in the European Union (BioSHaRE-EU)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-biostruct_x",
+    "name": "Transnational access and enhancement of integrated Biological Structure determination at synchrotron X-ray radiation facilities (BioStruct-X)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-bnc",
+    "name": "Budapest Neutron Centre (BNC)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-brisk",
+    "name": "Biomass Research Infrastructure for Sharing Knowledge (BRISK)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-bsrn",
+    "name": "Baseline Surface Radiation Network (BSRN)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-c_eric",
+    "name": "Central European Research Infrastructure Consortium (C-ERIC)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-cabri",
+    "name": "Common Access to Biotechnological Resources and Information (CABRI)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-calipso",
+    "name": "Cloud-Aerosol Lidar and Infrared Pathfinder Satellite Observation (CALIPSO)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-calpso",
+    "name": "Coordinated Access to Lightsources to Promote Standards and Optimization (CALPSO)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-camf",
+    "name": "CEH Aquatic Mesocosm Facility (CAMF)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-carare",
+    "name": "Connecting Archaeology and Architecture in Europe (CARARE)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-casym",
+    "name": "Coordinating Systems Medicine across Europe (CASyM)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-cedar",
+    "name": "Census Data Open Linked (CEDAR)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-cessda",
+    "name": "Consortium of European Social Science Data Archives (CESSDA)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-cetaf",
+    "name": "Consortium of European Taxonomic Facilities (CETAF)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-charisma",
+    "name": "Cultural Heritage Advanced Research Infrastructures (CHARISMA)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-chembionet",
+    "name": "Resource Network Supporting Academic Chemical Biology Research (ChemBioNet)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-clarin",
+    "name": "European Research Infrastructure for Language Resources and Technology (CLARIN)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-closer",
+    "name": "Cohort and Longitudinal Studies Enhancement Resources (CLOSER)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-cloud_net",
+    "name": "Development of european pilot network of stations for observing cloud profiles (CLOUD-NET)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-cnef",
+    "name": "Cross National Equivalent File (CNEF)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-codesria",
+    "name": "Council for the Development of Social Science Research in Africa (CODESRIA)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-commit",
+    "name": "Cancer Organoids Multiplexed Screening in Microfluidic Textile chips (COMMIT)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-comnap",
+    "name": "Council of Managers of National Antarctic Programs (COMNAP)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-copori",
+    "name": "Communication and Policy development for Research Infrastructures in Europe (CoPoRI)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-corbel",
+    "name": "Coordinated Research Infrastructures Building Enduring Life-Science Services (CORBEL)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-core",
+    "name": "Center for Organelle Research (CORE)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-cpb",
+    "name": "Collections Policy Board (CPB)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-cpe",
+    "name": "Comité Polar Español (CPE)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-crisp",
+    "name": "Citizenship, Recovery and Inclusive Society Partnership (CRISP)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-crs",
+    "name": "Cooperative Research Ships (CRS)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-dariah",
+    "name": "Digital Research Infrastructure for Arts and Humanities (DARIAH)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-dasish",
+    "name": "Digital Services Infrastructure for Social Sciences and Humanities (DASISH)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-dfg_lis",
+    "name": "German Scientific Library Services and Information Systems (DFG LIS)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-diversitas",
+    "name": "International programme of biodiversity science (DIVERSITAS)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-dktk",
+    "name": "German Consortium for Translational Cancer Research (DKTK)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-dnpmag",
+    "name": "Internal Magnets for DNP (DNPMAG)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-dtl",
+    "name": "Dutch Techcentre for Life Sciences (DTL)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-dwb",
+    "name": "Data without Boundaries project (DwB)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-e_fast",
+    "name": "European Facility for Advanced Seismic Testing (E-FAST)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-e_rihs",
+    "name": "European Research Infrastructure for Heritage Science Preparatory Phase (E-RIHS)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-earlinet",
+    "name": "European Aerosol Research Lidar Network (EARLINET)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-east",
+    "name": "European Association for Solar Telescopes (EAST)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-east_nmr",
+    "name": "Enhancing Access and Services To East European users towards an efficient and coordinated panEuropean pool of NMR capacities to enable global collaborative research & boost technological advancements (EAST-NMR)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-eata",
+    "name": "European Association for Transactional analysis (EATA)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-eatip",
+    "name": "European Aquaculture Technology and Innovation Platform (EATIP)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-eatris",
+    "name": "European Advanced Translational Research Infrastructure in Medicine (EATRIS)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-ebi",
+    "name": "EBI",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-ecco",
+    "name": "European Culture Collections' Organisation (ECCO)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-ecn",
+    "name": "UK Environmental Change Network (ECN)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-eco",
+    "name": "European Cancer Organisation (ECO)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-ecochange",
+    "name": "Creating conditions for persistence of biodiversity in the face of climate change (EcoChange)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-ecord",
+    "name": "European Consortium for Ocean Research Drilling (ECORD)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-ecrin_ia",
+    "name": "European Clinical Research Infrastructures Network - Integrating Activity (ECRIN-IA)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-edenext",
+    "name": "Biology and control of vector-borne infections in Europe (EDENEXT)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-edith",
+    "name": "European Distributed Information Technology for Health Care (EDITH)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-een",
+    "name": "Entreprise Europe Network (EEN)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-efda",
+    "name": "European Fusion Development Agreement (EFDA)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-efp",
+    "name": "European Federation for Primatology (EFP)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-egi",
+    "name": "European Grid Infrastructure (EGI)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-ehri",
+    "name": "European Holocaust Research Infrastructure (EHRI)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-eht",
+    "name": "Event Horizon Telescope (EHT)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-eibir",
+    "name": "European Institute for Biomedical Imaging Research (EIBIR)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-elhn",
+    "name": "European Labour History Network (ELHN)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-elias",
+    "name": "European Librarians in African Studies (ELIAS)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-elixir",
+    "name": "European Life Sciences Infrastructure For Biological Information (ELIXIR)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-elmi",
+    "name": "European Light Microscopy Initiative (ELMI)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-elter",
+    "name": "European Long-Term Ecosystem and socio-ecological Research Infrastructure (eLTER)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-embnet",
+    "name": "European Molecular Biology Network (EMBnet)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-embrc",
+    "name": "European Marine Biological Resource Centre (EMBRC)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-emcdda",
+    "name": "European Monitoring Agency for Drugs and Drug Addition (EMCDDA)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-emfl",
+    "name": "European Magnetic Field Laboratory (EMFL)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-emma",
+    "name": "European Mouse Mutant Archive (EMMA)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-emso",
+    "name": "European Multidisciplinary Seafloor Observation (EMSO)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-enivd",
+    "name": "European Network for Diagnostics of Imported Viral Diseases (ENIVD)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-ensar",
+    "name": "European Nuclear Science and Applications Research (ENSAR)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-envri",
+    "name": "Environmental Research Infrastructures (ENVRI)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-epb",
+    "name": "European Polar Board (EPB)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-epn2020_ri",
+    "name": "EUROPLANET 2020 Research Infrastructure (EPN2020-RI)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-epos",
+    "name": "European Plate Observing System (EPOS)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-eposs",
+    "name": "European Technology Platform on Smart Systems Integration (EpoSS)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-eppn",
+    "name": "European Plant Phenotyping Network (EPPN)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-erea",
+    "name": "Association of European Research Establishments in Aeronautics (EREA)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-erg",
+    "name": "EPIZONE European Research Group (ERG)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-erinha",
+    "name": "European Research Infrastructure on Highly Pathogenic Agents (ERINHA)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-erncip",
+    "name": "European Reference Network for Critical Infrastructure Protection (ERNCIP)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-ervo",
+    "name": "European Research Vessels Operators (ERVO)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-esbb",
+    "name": "European, Middle Eastern and African Society for Biopreservation and Biobanking (ESBB)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-esgi",
+    "name": "European Sequencing and Genotyping Infrastructure (ESGI)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-eshe",
+    "name": "European Society for the study of Human Evolution (ESHE)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-ess_sustain",
+    "name": "European Social Survey Sustainability (ESS-SUSTAIN)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-esteem",
+    "name": "Advanced Energy STorage and Regeneration System for Enhanced Energy Management (ESTEEM)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-esti_eiroforum",
+    "name": "European Science Teachers Initiative (ESTI - EIROforum)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-eswirp",
+    "name": "European Strategic Wind Tunnels Improved Research Potential (ESWIRP)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-etp4hpc",
+    "name": "European Technology Platform for High Performance Computing (ETP4HPC)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-eu_life",
+    "name": "Supporting environmental, nature conservation and climate action projects throughout the EU (EU-Life)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-eu_openscreen",
+    "name": "European Infrastructure of Open Screening Platforms for Chemical Biology (EU-OPENSCREEN)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-eu_solaris",
+    "name": "European SOLAR Research Infrastructure for Concentrated Solar Power (EU-SOLARIS)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-eucard",
+    "name": "European Coordination for Accelerator Research & Development (EUCARD)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-eua",
+    "name": "European University Association (EUA)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-eudat",
+    "name": "European Data Infrastructure (EUDAT)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-eudca",
+    "name": "European Data Centre Association (EUDCA)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-eufar",
+    "name": "European Facility for Airborne Research (EUFAR)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-eufmd",
+    "name": "European Commission for the control of Foot and Mouth Disease (EuFMD)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-eumedconnect",
+    "name": "e-Infrastructure in the Mediterranean region dedicated for research and educational use (EUMEDCONNECT)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-euprimnet",
+    "name": "Advancing 3Rs and International Standards in Biological and Biomedical Research (EUPRIM-Net)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-eur2ex",
+    "name": "European rail research network of excellence (EUR2EX)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-euraqua",
+    "name": "European Network of Freshwater Research Organisations (EurAqua)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-euratom",
+    "name": "European Atomic Energy Community (Euratom)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-euro_bioimaging",
+    "name": "Research infrastructure for imaging technologies in biological and biomedical sciences (Euro-BioImaging)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-eurochamp",
+    "name": "Integration of European Simulation Chambers for Investigating Atmospheric Processes (EUROCHAMP)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-eurofleets",
+    "name": "Towards an Alliance of European Research Fleets (EUROFLEETS)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-eurofleets2",
+    "name": "New operational steps towards an alliance of European research fleets (EUROFLEETS2)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-a4u",
+    "name": "Alianza 4 Universidades (A4U)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-europeana",
+    "name": "Platform for Digital Cultural Heritage (Europeana)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-euvas",
+    "name": "European Vasculitis Study Group (EUVAS)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-evn",
+    "name": "European VLBI Network (EVN)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-ewa",
+    "name": "European Windtunnel Association (EWA)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-expeer",
+    "name": "Experimentation in Ecosystem Research (ExpeER)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-fao",
+    "name": "Food and Agricultural Organisation of the United Nations (FAO)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-fdi",
+    "name": "Standing Committee Research Data Infrastructure (FDI)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-fens",
+    "name": "Federation of European Neuroscience Societies (FENS)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-fusenet",
+    "name": "European Fusion Education Network (FUSENET)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-galion",
+    "name": "GAW Aerosol Lidar Observations Network (GALION)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-gaw",
+    "name": "Global Atmosphere Watch Programme (GAW)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-gbif",
+    "name": "Global Biodiversity Information Facility (GBIF)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-gbifnn",
+    "name": "GBIF Nodes Network",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-gcos",
+    "name": "Global Climate Observing System (GCOS)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-gcs",
+    "name": "Gauss Centre for Supercomputing (GCS)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-gdr_chembioscreen",
+    "name": "Network of French researchers involved in chemical biology approaches (GDR ChemBioScreen)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-geant",
+    "name": "Pan-European Research and Education Network (GÉANT)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-geoss",
+    "name": "Global Earth Observation System of Systems (GEOSS)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-eosca",
+    "name": "European Open Science Cloud Association",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-ggbn",
+    "name": "Global Genome Biodiversity Network (GGBN)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-gipca",
+    "name": "Grupo Interinstitucional y Comunitario de Pesca Artesanal del Pacífico Chocoano (GIPCA)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-gleon",
+    "name": "Global Lake Ecology Observatory Network (GLEON)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-gmos",
+    "name": "Global Mercury Observation System (GMOS)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-gmva",
+    "name": "Global mm-VLBI Array (GMVA)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-goos",
+    "name": "Global Ocean Observing System (GOOS)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-guni",
+    "name": "Global University Network for Innovation (GUNI)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-gofairi",
+    "name": "GO FAIR Initiative",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-geriu",
+    "name": "Guild of European Research-Intensive Universities (the)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-goportis",
+    "name": "Leibniz Library Network for Research Information consortium (Goportis)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-gruan",
+    "name": "GCOS Reference Upper-Air Network (GRUAN)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-gsc",
+    "name": "European GNSS Service Centre (GSC)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-gto",
+    "name": "Society for Tropical Ecology (GTO)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-guide",
+    "name": "Gentle User Interfaces for Disabled and Elderly Citizens (GUIDE)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-h2fc",
+    "name": "Integrating European Infrastructure to support science and development of Hydrogen- and Fuel Cell Technologies towards European Strategy for Sustainable, Competitive and Secure Energy (H2FC)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-hbp",
+    "name": "Human Brain Project (HBP)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-hld",
+    "name": "Dresden High Magnetic Field Laboratory (Hochfeld-Magnetlabor Dresden, HLD)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-humanist",
+    "name": "HUMAN centred design for Information Society Technologies (Humanist)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-hupo",
+    "name": "Human Proteome Project (HUPO)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-hycon2",
+    "name": "Highly-complex and networked control systems (HYCON2)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-hydralab",
+    "name": "Complex Interaction of Water with Environmental Elements, Sediment, Structures and Ice (Hydralab)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-hzi",
+    "name": "Helmholtz Centre for Infection Research (HZI)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-iae",
+    "name": "Ice Age Europe",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-ialhi",
+    "name": "International Association of Labour History Institutions (IALHI)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-ibercarot",
+    "name": "Ibero-american network for the study of carotenoids as food ingredients (IBERCAROT)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-ibisa",
+    "name": "Inclusive Blockchain Insurance using Space Assets (IBISA)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-ibol",
+    "name": "International barcode of life (IBOL)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-ica",
+    "name": "International Council on Archives (ICA)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-iceage",
+    "name": "Ice Age Europe (ICEAGE)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-ices",
+    "name": "International Council for the Exploration of the Sea (ICES)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-icgc",
+    "name": "International Cancer Genome Consortium (ICGC)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-icofnet",
+    "name": "Inter-university core facility network (IcoFNET)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-icom",
+    "name": "International Council of Museums (ICOM)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-jrost",
+    "name": "Joint Roadmap for Open Science Tools",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-lraos",
+    "name": "Leibniz Research Alliance Open Science",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-icos",
+    "name": "Integrated Carbon Observation System (ICOS)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-icsti",
+    "name": "International Council for Scientific and Technical Information (ICSTI)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-iea",
+    "name": "International Energy Agency (IEA)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-ifars",
+    "name": "International Forum for Aviation Research Support Action (IFARS)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-ifdo",
+    "name": "International Federation of Data Organizations (IFDO)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-igrs",
+    "name": "International Gravity Reference System (IGRS)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-ikmc",
+    "name": "International Mouse Knock-out Consortium (IKMC)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-ilter",
+    "name": "International Long Term Ecological Research (ILTER)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-impc",
+    "name": "International Mouse Phenotyping Consortium (IMPC)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-imsr",
+    "name": "International Mouse Strain Resources (IMSR)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-inext",
+    "name": "Infrastructure for NMR, EM and X-rays for translational research (iNEXT)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-infrafrontier",
+    "name": "European infrastructure for phenotyping and archiving of model mammalian genomes (INFRAFRONTIER)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-infravec2",
+    "name": "Research infrastructures for the control of insect vector-borne diseases (Infravec2)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-ingos",
+    "name": "Integrated non-CO2 Greenhouse Gas Observing Systems (InGOS)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-inspire",
+    "name": "INfraStructure in Proton International Research (INSPIRE)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-instruct",
+    "name": "INSTRUCT",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-interact",
+    "name": "International Network for Terrestrial Research and Monitoring in the Arctic (INTERACT)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-ioc_iode",
+    "name": "Intergovernmental Oceanographic Commission/International Oceanographic Data and Information Exchange (IOC/IODE)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-iodp",
+    "name": "International Ocean Drilling Program (IODP)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-ipbes",
+    "name": "Intergovernmental Science-Policy Platform on Biodiversity and Ecosystem Services (IPBES)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-ips",
+    "name": "International Primatological Society (IPS)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-ipsmw",
+    "name": "International Panel Survey Methods Workshops (IPSMW)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-iris",
+    "name": "International Research Institute of Stavanger (IRIS)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-irso",
+    "name": "International Research Ship Operators (IRSO)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-isarra",
+    "name": "International Society for Atmospheric Research using Remotely Piloted Aircraft (ISARRA)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-isbe",
+    "name": "Infrastructure for Systems Biology – Europe (ISBE)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-isber",
+    "name": "International Society for Biological and Environmental Repositories (ISBER)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-isn",
+    "name": "International Society of Nephrology (ISN)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-itaca",
+    "name": "Innovation Technologies and Applications for Coastal Archaeological sites (ITACA)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-itpa",
+    "name": "International Tokamak Physics Activity (ITPA)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-ittc",
+    "name": "International Towing Tank Conference (ITTC)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-iucn_ssc",
+    "name": "International Union for Conservation of Nature / Species Survival Commission (IUCN/SSC)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-ivoa",
+    "name": "International Virtual Observatory Alliance (IVOA)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-ivs",
+    "name": "International VLBI Service for Geodesy & Astrometry (IVS)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-jerico",
+    "name": "Towards a joint European research infrastructure network for coastal observatories (JERICO)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-karyon",
+    "name": "Kernel-Based ARchitecture for safetY-critical cONtrol (KARYON)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-kfn",
+    "name": "Committee Research with Neutrons (KFN)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-la3net",
+    "name": "Lasers for Applications at Accelerator facilities for ion beam generation, acceleration and diagnostics (LA3NET)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-labex_iron",
+    "name": "Innovative Radiopharmaceuticals in Oncology and Neurology (Labex IRON)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-larvanet",
+    "name": "Critical success factors for fish larval production in European Aquaculture: a multidisciplinary network (LarvaNET)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-laserlab_europe",
+    "name": "Integrated Initiative of European Laser Research Infrastructures (LASERLAB-EUROPE)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-lbt",
+    "name": "Large Binocular Telescope (LBT)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-leaps",
+    "name": "League of European Accelerator-based Photon Sources (LEAPS)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-lifewatch",
+    "name": "e-Infrastructure for Biodiversity and Ecosystem Research (LifeWatch)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-lncmi",
+    "name": "Laboratoire National de Champs Magnétiques Intenses (LNCMI)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-lovag",
+    "name": "Low Voltage Agreement Group (LOVAG)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-mami",
+    "name": "Transnational Access to MAMI (MAMI)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-marinet",
+    "name": "Marine Renewables Infrastructure Network for Emerging Energy Technologies (MARINET)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-mars",
+    "name": "European Network of Marine Research Institutes and Stations (MARS)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-massif",
+    "name": "MAnagement of Security information and events in Service InFrastructures (MASSIF)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-mesoaqua",
+    "name": "Network of leading MESOcosm facilities to advance the studies of future AQUAtic ecosystems from the Arctic to the Mediterranean (MESOAQUA)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-mesocosm",
+    "name": "Open virtual network for aquatic mesocosm facilities worldwide (MESOCOSM)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-mesonet",
+    "name": "Meson Physics in Low-Energy QCD (MesonNet)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-meta_share",
+    "name": "Open and secure network of repositories for sharing and exchanging language data, tools and related web services (META-SHARE)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-metabolomics_society",
+    "name": "Organization devoted to the development of metabolism-based research (Metabolomics Society)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-meters_and_more",
+    "name": "Open Technology for Digitalisation (Meters & More)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-mimo",
+    "name": "Musical Instrument Museums Online (MIMO)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-minam",
+    "name": "MIcro-and NAnotechnology Manufacturing (MINAM)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-mirri",
+    "name": "Microbial Resources Research Infrastructure (MIRRI)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-mongoos",
+    "name": "Mediterranean Operational Network for the Global Ocean Observing System (MONGOOS)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-msbp",
+    "name": "Millennium Seed Bank (MSB) Partnership",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-mwrnet",
+    "name": "International Network of Ground-Based Microwave Radiometers (MWRnet)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-myocean2",
+    "name": "Prototype Operational Continuity for the GMES Ocean Monitoring and Forecasting Service (MyOcean2)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-nacee",
+    "name": "Network of Aquaculture Centres in Central-Eastern Europe (NACEE)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-nadir",
+    "name": "European Network for Animal Disease and Infectiology Research Facilities (NADIR)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-nano2life",
+    "name": "Network for bringing NANOtechnologies TO LIFE (NANO2LIFE)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-nanofun_poly",
+    "name": "NANOSTRUCTURED AND FUNCTIONAL POLYMER-BASED MATERIALS AND NANOCOMPOSITES (NANOFUN-POLY)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-nanofutures",
+    "name": "Cross-ETP Coordination Initiative on nanotechnology (NANOfutures)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-dini",
+    "name": "Deutsche Initiative für Netzwerkinformation (DINI)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-nanomed",
+    "name": "Enabling the European Nanomedicine Area (NANOMED)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-ndacc",
+    "name": "Network for the Detection of Atmospheric Composition Change (NDACC)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-nearctis",
+    "name": "Network of Excellence for Advanced Road cooperative traffic management in the Information Society (NEARCTIS)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-necer",
+    "name": "Network of European CEntrifige for Research (NECER)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-oana",
+    "name": "Open Access Network Austria (OANA)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-nedimah",
+    "name": "Network for Digital Methods in the Arts and Humanities (NeDiMAH)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-netlake",
+    "name": "Networking Lake Observatories in Europe (NETLAKE)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-nexus",
+    "name": "Towards Game-changer Service Operation Vessels for Offshore Windfarms (NEXUS)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-ngfn",
+    "name": "National Genome Research Network (NGFN)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-nmi3",
+    "name": "Neutron scattering and Muon Spectroscopy Integrating Infrastructure Initiative (NMI3)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-nnn",
+    "name": "Nordic Nanolab Network (NNN)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-nsmicts",
+    "name": "Network of Spanish Marine ICTS (Red de ICTS Marinas)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-roc",
+    "name": "RO-Crate",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-rocc",
+    "name": "RO-Crate Community",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-nupnet",
+    "name": "Nuclear Physics Network (NuPNET)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-oeci",
+    "name": "Organisation of European Cancer Institutes (OECI)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-ofeg",
+    "name": "Ocean Facilities Exchange Group (OFEG)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-oie",
+    "name": "World Organisation for Animal Health (OIE)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-openaire",
+    "name": "Open Access Infrastructure for Research in Europe (OpenAIRE)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-opf",
+    "name": "Open Planets Foundation (OPF)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-opticon",
+    "name": "Optical Infrared Coordination Network for Astronomy (OPTICON)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-orm",
+    "name": "Teide and Roque de los Muchachos Observatories (ORM)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-other",
+    "name": "Other",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-p3g",
+    "name": "Public Population Project in Genomics and Society (P³G)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-p4eu",
+    "name": "Protein Production and Purification Platforms in Europe (P4EU)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-patent_dfmm",
+    "name": "Design for Micro & Nano Manufacture (PATENT-DfMM)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-patrimex",
+    "name": "PATrimoines matériels : Réseau d'Instrumentation Multisites Equipex (PATRIMEX)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-pbol",
+    "name": "Polar Barcode of Life",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-peer",
+    "name": "Partnership for European Environmental Research (PEER)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-photonics21",
+    "name": "Photonics community of industry and research organisations (PHOTONICS21)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-prace",
+    "name": "Partnership for Advanced Computing (PRACE)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-prime",
+    "name": "PoweRline Intelligent Metering Evolution Alliance (PRIME)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-prime_xs",
+    "name": "Proteomics Research Infrastructure Maximising knowledge EXchange and access (PRIME-XS)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-promec",
+    "name": "Proteomics and Metabolomics Core Facility (PROMEC)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-proteored_isciii",
+    "name": "Carlos III Networked Proteomics Platform (ProteoRed-ISCIII)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-psi",
+    "name": "Parelsnoer Institute (PSI)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-qb50",
+    "name": "International network of 50 CubeSats for multi-point, in-situ measurements in the lower thermosphere and re-entry research (QB50)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-rad4med",
+    "name": "Belgian Network for Radiation Applications in Healthcare (Rad4med)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-aakc",
+    "name": "Annotating All Knowledge Coalition",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-acup",
+    "name": "Associació Catalana d'Universitats Públiques (ACUP)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-radionet",
+    "name": "Advanced Radio Astronomy in Europe (RadioNet)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-ratswd",
+    "name": "German Data Forum (RatSWD)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-rda",
+    "name": "Research Data Alliance (RDA)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-reade",
+    "name": "Rede de Remediação e Reabilitação de Ambientes Degradados (READE)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-reage",
+    "name": "Atlantic Network of Geodynamical and Space Stations (REAGE)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-rebt",
+    "name": "International Excellence Research Network (REBT)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-relab",
+    "name": "Biological Alert Laboratories Network, Spain (RELAB)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-rnme",
+    "name": "National Network for Electron Microscopy (RNME)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-fluxnet",
+    "name": "FLUXNET Network",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-sauul",
+    "name": "Science and Applications of ultrafast and ultraintense lasers (SAUUL)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-scandem",
+    "name": "Nordic Microscopy Society (SCANDEM)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-scandiasyn",
+    "name": "Scandinavian Dialect Syntax Network (ScanDiaSyn)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-scicoll",
+    "name": "Scientific Collections International (SciColl)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-scolma",
+    "name": "Standard Conference on Library Materials on Africa (SCOLMA)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-seadatanet",
+    "name": "Pan-European infrastructure for ocean & marine data management (SeaDataNet)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-secfunet",
+    "name": "Security for Future Networks (SecFuNet)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-segrid",
+    "name": "Security for smart Electricity GRIDs (SEGRID)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-sera",
+    "name": "Seismology and Earthquake Engineering Research Infrastructure Alliance for Europe (SERA)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-series",
+    "name": "Seismic Engineering Research Infrastructures for European Synergies (SERIES)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-sfn",
+    "name": "Society for Neuroscience (SfN)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-share",
+    "name": "Stations at High Altitude for Research on the Environment (SHARE)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-sik_isea",
+    "name": "Swiss Institute for Art Research (SIK-ISEA)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-sine",
+    "name": "World class Science and Innovation with Neutrons in Europe (SINE)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-ska",
+    "name": "Square Kilometer Array (SKA)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-sln",
+    "name": "ScienceLink Network",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-solarnet",
+    "name": "High-Resolution Solar Physics Network (SOLARNET)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-sophia",
+    "name": "Social Platrform for Holistic Heritage Imapct Assessment (SOPHIA)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-sphere",
+    "name": "Strange Particles in Hadronic Environment Research in Europe (SPHERE)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-spirit",
+    "name": "Scalable privacy preserving intelligence analysis for resolving identities (SPIRIT)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-spnhc",
+    "name": "Society for the Preservation of Natural History Collections (SPNHC)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-stai",
+    "name": "State-Trait Anxiety Inventory (STAI)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-supermag",
+    "name": "Cooperation between Superconductivity and Magnetism in Mesoscopic systems (SuperMAG)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-synthesis",
+    "name": "Information Network of European Natural History Collections (SYNTHESYS)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-tclouds",
+    "name": "Trustworthy Clouds Privacy and Resilience for Internet-scale Critical Infrastructure (TClouds)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-tdwg",
+    "name": "Biodiversity Information Standards (TDWG)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-tng",
+    "name": "Telescopio Nazionale Galileo (TNG)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-transvac2",
+    "name": "European Network of Vaccine Research and Development (TRANSVAC2)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-trees4future",
+    "name": "Integrative European Research Infrastructure project to integrate, develop and improve major forest genetics and forestry research (TREES4FUTURE)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-unrg",
+    "name": "Ultrafast Nanooptics Research Group - Wigner Research Centre for Physics (UNRG)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-vamdc",
+    "name": "Virtual Atomic and Molecular Data Center (VAMDC)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-vetbionet",
+    "name": "Veterinary Biocontained facility Network for excellence in animal infectious disease research and experimentation (VetBioNet)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-vgos",
+    "name": "VLBI2010 Global Observing System (VGOS)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-visionair",
+    "name": "VISION Advanced Infrastructure for Research (VISIONAIR)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-vph",
+    "name": "Virtual Physiological Human Network of Excellence (VPH)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-wdcm",
+    "name": "World Data Centre for Microorganisms (WDCM)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-wds",
+    "name": "World Data System (WDS)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-wenmr",
+    "name": "Worldwide e-Infrastructure for NMR and structural biology (WeNMR)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-wfcc",
+    "name": "World Federation for Culture Collections (WFCC)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-wlcg",
+    "name": "WorldWide LHC Computing Grid (wLCG)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-wwnmr",
+    "name": "Word Wide NMR (WW-NMR)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-zapi",
+    "name": "Zoonoses Anticipation and Preparedness Initiative (ZAPI)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  },
+  {
+    "id": "provider_network-zikalliance",
+    "name": "Global Alliance for Zika Virus Control and Prevention (ZIKAlliance)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider network",
+    "extras": {}
+  }
+]

@@ -1,0 +1,42 @@
+[
+  {
+    "id": "monitored_by-eosc",
+    "name": "EOSC",
+    "description": "EOSC",
+    "parentId": null,
+    "type": "Monitored by",
+    "extras": {}
+  },
+  {
+    "id": "monitored_by-egi",
+    "name": "EGI",
+    "description": "EGI",
+    "parentId": null,
+    "type": "Monitored by",
+    "extras": {}
+  },
+  {
+    "id": "monitored_by-eudat",
+    "name": "EUDAT",
+    "description": "EUDAT",
+    "parentId": null,
+    "type": "Monitored by",
+    "extras": {}
+  },
+  {
+    "id": "monitored_by-ni4os_europe",
+    "name": "NI4OS-Europe",
+    "description": "NI4OS-Europe",
+    "parentId": null,
+    "type": "Monitored by",
+    "extras": {}
+  },
+  {
+    "id": "monitored_by-other",
+    "name": "Other",
+    "description": "Other",
+    "parentId": null,
+    "type": "Monitored by",
+    "extras": {}
+  }
+]

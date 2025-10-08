@@ -1,0 +1,10 @@
+[
+  {
+    "id": "ir_resource_type_general-guideline",
+    "name": "Guideline",
+    "description": null,
+    "parentId": null,
+    "type": "Interoperability Record resource type general",
+    "extras": {}
+  }
+]

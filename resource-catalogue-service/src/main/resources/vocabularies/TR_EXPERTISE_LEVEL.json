@@ -1,0 +1,34 @@
+[
+  {
+    "id": "tr_expertise_level-advanced",
+    "name": "Advanced",
+    "description": null,
+    "parentId": null,
+    "type": "Training Resource expertise level",
+    "extras": {}
+  },
+  {
+    "id": "tr_expertise_level-intermediate",
+    "name": "Intermediate",
+    "description": null,
+    "parentId": null,
+    "type": "Training Resource expertise level",
+    "extras": {}
+  },
+  {
+    "id": "tr_expertise_level-beginner",
+    "name": "Beginner",
+    "description": null,
+    "parentId": null,
+    "type": "Training Resource expertise level",
+    "extras": {}
+  },
+  {
+    "id": "tr_expertise_level-all",
+    "name": "All",
+    "description": null,
+    "parentId": null,
+    "type": "Training Resource expertise level",
+    "extras": {}
+  }
+]

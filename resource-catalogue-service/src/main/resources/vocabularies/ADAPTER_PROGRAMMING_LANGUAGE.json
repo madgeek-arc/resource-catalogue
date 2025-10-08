@@ -1,0 +1,402 @@
+[
+  {
+    "id": "adapter_programming_language-python",
+    "name": "Python",
+    "description": null,
+    "parentId": null,
+    "type": "Adapter programming language",
+    "extras": {}
+  },
+  {
+    "id": "adapter_programming_language-c_plus_plus",
+    "name": "C++",
+    "description": null,
+    "parentId": null,
+    "type": "Adapter programming language",
+    "extras": {}
+  },
+  {
+    "id": "adapter_programming_language-c",
+    "name": "C",
+    "description": null,
+    "parentId": null,
+    "type": "Adapter programming language",
+    "extras": {}
+  },
+  {
+    "id": "adapter_programming_language-java",
+    "name": "Java",
+    "description": null,
+    "parentId": null,
+    "type": "Adapter programming language",
+    "extras": {}
+  },
+  {
+    "id": "adapter_programming_language-c_sharp",
+    "name": "C#",
+    "description": null,
+    "parentId": null,
+    "type": "Adapter programming language",
+    "extras": {}
+  },
+  {
+    "id": "adapter_programming_language-javascript",
+    "name": "Javascript",
+    "description": null,
+    "parentId": null,
+    "type": "Adapter programming language",
+    "extras": {}
+  },
+  {
+    "id": "adapter_programming_language-go",
+    "name": "Go",
+    "description": null,
+    "parentId": null,
+    "type": "Adapter programming language",
+    "extras": {}
+  },
+  {
+    "id": "adapter_programming_language-vb",
+    "name": "Visual Basic",
+    "description": null,
+    "parentId": null,
+    "type": "Adapter programming language",
+    "extras": {}
+  },
+  {
+    "id": "adapter_programming_language-delphi",
+    "name": "Delphi / Object Pascal",
+    "description": null,
+    "parentId": null,
+    "type": "Adapter programming language",
+    "extras": {}
+  },
+  {
+    "id": "adapter_programming_language-sql",
+    "name": "SQL",
+    "description": null,
+    "parentId": null,
+    "type": "Adapter programming language",
+    "extras": {}
+  },
+  {
+    "id": "adapter_programming_language-fortran",
+    "name": "Fortran",
+    "description": null,
+    "parentId": null,
+    "type": "Adapter programming language",
+    "extras": {}
+  },
+  {
+    "id": "adapter_programming_language-scratch",
+    "name": "Scratch",
+    "description": null,
+    "parentId": null,
+    "type": "Adapter programming language",
+    "extras": {}
+  },
+  {
+    "id": "adapter_programming_language-php",
+    "name": "PHP",
+    "description": null,
+    "parentId": null,
+    "type": "Adapter programming language",
+    "extras": {}
+  },
+  {
+    "id": "adapter_programming_language-r",
+    "name": "R",
+    "description": null,
+    "parentId": null,
+    "type": "Adapter programming language",
+    "extras": {}
+  },
+  {
+    "id": "adapter_programming_language-ada",
+    "name": "Ada",
+    "description": null,
+    "parentId": null,
+    "type": "Adapter programming language",
+    "extras": {}
+  },
+  {
+    "id": "adapter_programming_language-matlab",
+    "name": "MATLAB",
+    "description": null,
+    "parentId": null,
+    "type": "Adapter programming language",
+    "extras": {}
+  },
+  {
+    "id": "adapter_programming_language-assembly",
+    "name": "Assembly Language",
+    "description": null,
+    "parentId": null,
+    "type": "Adapter programming language",
+    "extras": {}
+  },
+  {
+    "id": "adapter_programming_language-rust",
+    "name": "Rust",
+    "description": null,
+    "parentId": null,
+    "type": "Adapter programming language",
+    "extras": {}
+  },
+  {
+    "id": "adapter_programming_language-perl",
+    "name": "Perl",
+    "description": null,
+    "parentId": null,
+    "type": "Adapter programming language",
+    "extras": {}
+  },
+  {
+    "id": "adapter_programming_language-cobol",
+    "name": "COBOL",
+    "description": null,
+    "parentId": null,
+    "type": "Adapter programming language",
+    "extras": {}
+  },
+  {
+    "id": "adapter_programming_language-ruby",
+    "name": "Ruby",
+    "description": null,
+    "parentId": null,
+    "type": "Adapter programming language",
+    "extras": {}
+  },
+  {
+    "id": "adapter_programming_language-prolog",
+    "name": "Prolog",
+    "description": null,
+    "parentId": null,
+    "type": "Adapter programming language",
+    "extras": {}
+  },
+  {
+    "id": "adapter_programming_language-lisp",
+    "name": "Lisp",
+    "description": null,
+    "parentId": null,
+    "type": "Adapter programming language",
+    "extras": {}
+  },
+  {
+    "id": "adapter_programming_language-cvb",
+    "name": "Classic Visual Basic",
+    "description": null,
+    "parentId": null,
+    "type": "Adapter programming language",
+    "extras": {}
+  },
+  {
+    "id": "adapter_programming_language-swift",
+    "name": "Swift",
+    "description": null,
+    "parentId": null,
+    "type": "Adapter programming language",
+    "extras": {}
+  },
+  {
+    "id": "adapter_programming_language-sas",
+    "name": "SAS",
+    "description": null,
+    "parentId": null,
+    "type": "Adapter programming language",
+    "extras": {}
+  },
+  {
+    "id": "adapter_programming_language-scala",
+    "name": "Scala",
+    "description": null,
+    "parentId": null,
+    "type": "Adapter programming language",
+    "extras": {}
+  },
+  {
+    "id": "adapter_programming_language-vfp",
+    "name": "Visaul FoxPro",
+    "description": null,
+    "parentId": null,
+    "type": "Adapter programming language",
+    "extras": {}
+  },
+  {
+    "id": "adapter_programming_language-dart",
+    "name": "Dart",
+    "description": null,
+    "parentId": null,
+    "type": "Adapter programming language",
+    "extras": {}
+  },
+  {
+    "id": "adapter_programming_language-haskell",
+    "name": "Haskell",
+    "description": null,
+    "parentId": null,
+    "type": "Adapter programming language",
+    "extras": {}
+  },
+  {
+    "id": "adapter_programming_language-vbs",
+    "name": "VBScript",
+    "description": null,
+    "parentId": null,
+    "type": "Adapter programming language",
+    "extras": {}
+  },
+  {
+    "id": "adapter_programming_language-lua",
+    "name": "Lua",
+    "description": null,
+    "parentId": null,
+    "type": "Adapter programming language",
+    "extras": {}
+  },
+  {
+    "id": "adapter_programming_language-julia",
+    "name": "Julia",
+    "description": null,
+    "parentId": null,
+    "type": "Adapter programming language",
+    "extras": {}
+  },
+  {
+    "id": "adapter_programming_language-objective_c",
+    "name": "Objective-C",
+    "description": null,
+    "parentId": null,
+    "type": "Adapter programming language",
+    "extras": {}
+  },
+  {
+    "id": "adapter_programming_language-gams",
+    "name": "GAMS",
+    "description": null,
+    "parentId": null,
+    "type": "Adapter programming language",
+    "extras": {}
+  },
+  {
+    "id": "adapter_programming_language-ts",
+    "name": "TypeScript",
+    "description": null,
+    "parentId": null,
+    "type": "Adapter programming language",
+    "extras": {}
+  },
+  {
+    "id": "adapter_programming_language-transact_sql",
+    "name": "Transact-SQL",
+    "description": null,
+    "parentId": null,
+    "type": "Adapter programming language",
+    "extras": {}
+  },
+  {
+    "id": "adapter_programming_language-abap",
+    "name": "ABAP",
+    "description": null,
+    "parentId": null,
+    "type": "Adapter programming language",
+    "extras": {}
+  },
+  {
+    "id": "adapter_programming_language-pl_sql",
+    "name": "PL/SQL",
+    "description": null,
+    "parentId": null,
+    "type": "Adapter programming language",
+    "extras": {}
+  },
+  {
+    "id": "adapter_programming_language-solidity",
+    "name": "Solidity",
+    "description": null,
+    "parentId": null,
+    "type": "Adapter programming language",
+    "extras": {}
+  },
+  {
+    "id": "adapter_programming_language-ps",
+    "name": "PowerShell",
+    "description": null,
+    "parentId": null,
+    "type": "Adapter programming language",
+    "extras": {}
+  },
+  {
+    "id": "adapter_programming_language-d",
+    "name": "D",
+    "description": null,
+    "parentId": null,
+    "type": "Adapter programming language",
+    "extras": {}
+  },
+  {
+    "id": "adapter_programming_language-bash",
+    "name": "Bash",
+    "description": null,
+    "parentId": null,
+    "type": "Adapter programming language",
+    "extras": {}
+  },
+  {
+    "id": "adapter_programming_language-rpg",
+    "name": "RPG",
+    "description": null,
+    "parentId": null,
+    "type": "Adapter programming language",
+    "extras": {}
+  },
+  {
+    "id": "adapter_programming_language-ml",
+    "name": "ML",
+    "description": null,
+    "parentId": null,
+    "type": "Adapter programming language",
+    "extras": {}
+  },
+  {
+    "id": "adapter_programming_language-x_plus_plus",
+    "name": "X++",
+    "description": null,
+    "parentId": null,
+    "type": "Adapter programming language",
+    "extras": {}
+  },
+  {
+    "id": "adapter_programming_language-elixir",
+    "name": "Elixir",
+    "description": null,
+    "parentId": null,
+    "type": "Adapter programming language",
+    "extras": {}
+  },
+  {
+    "id": "adapter_programming_language-awk",
+    "name": "Awk",
+    "description": null,
+    "parentId": null,
+    "type": "Adapter programming language",
+    "extras": {}
+  },
+  {
+    "id": "adapter_programming_language-zig",
+    "name": "Zig",
+    "description": null,
+    "parentId": null,
+    "type": "Adapter programming language",
+    "extras": {}
+  },
+  {
+    "id": "adapter_programming_language-other",
+    "name": "Other",
+    "description": null,
+    "parentId": null,
+    "type": "Adapter programming language",
+    "extras": {}
+  }
+]

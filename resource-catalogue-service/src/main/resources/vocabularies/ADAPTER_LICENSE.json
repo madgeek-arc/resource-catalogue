@@ -1,0 +1,906 @@
+[
+  {
+    "id": "adapter_license-agplv3_0",
+    "name": "GNU Affero General Public License (AGPL) version 3",
+    "description": null,
+    "parentId": null,
+    "type": "Adapter license",
+    "extras": {}
+  },
+  {
+    "id": "adapter_license-apache2",
+    "name": "Apache License, Version 2.0",
+    "description": null,
+    "parentId": null,
+    "type": "Adapter license",
+    "extras": {}
+  },
+  {
+    "id": "adapter_license-bsd2clause",
+    "name": "BSD 2-Clause Simplified License",
+    "description": null,
+    "parentId": null,
+    "type": "Adapter license",
+    "extras": {}
+  },
+  {
+    "id": "adapter_license-bsd3clause",
+    "name": "BSD 3-Clause New or Revised License",
+    "description": null,
+    "parentId": null,
+    "type": "Adapter license",
+    "extras": {}
+  },
+  {
+    "id": "adapter_license-boost",
+    "name": "Boost Software License",
+    "description": null,
+    "parentId": null,
+    "type": "Adapter license",
+    "extras": {}
+  },
+  {
+    "id": "adapter_license-epl",
+    "name": "Eclipse Public License Version 1.0",
+    "description": null,
+    "parentId": null,
+    "type": "Adapter license",
+    "extras": {}
+  },
+  {
+    "id": "adapter_license-epl2",
+    "name": "Eclipse Public License Version 2.0",
+    "description": null,
+    "parentId": null,
+    "type": "Adapter license",
+    "extras": {}
+  },
+  {
+    "id": "adapter_license-gplv2",
+    "name": "GNU General Public License (GPL) version 2",
+    "description": null,
+    "parentId": null,
+    "type": "Adapter license",
+    "extras": {}
+  },
+  {
+    "id": "adapter_license-gnugplv3",
+    "name": "GNU General Public License (GPL) version 3",
+    "description": null,
+    "parentId": null,
+    "type": "Adapter license",
+    "extras": {}
+  },
+  {
+    "id": "adapter_license-lgplv2_1",
+    "name": "GNU Lesser General Public License (LGPL) version 2.1",
+    "description": null,
+    "parentId": null,
+    "type": "Adapter license",
+    "extras": {}
+  },
+  {
+    "id": "adapter_license-lgplv3",
+    "name": "GNU Lesser General Public License (LGPL) version 3",
+    "description": null,
+    "parentId": null,
+    "type": "Adapter license",
+    "extras": {}
+  },
+  {
+    "id": "adapter_license-mit",
+    "name": "MIT License",
+    "description": null,
+    "parentId": null,
+    "type": "Adapter license",
+    "extras": {}
+  },
+  {
+    "id": "adapter_license-mpl",
+    "name": "Mozilla Public License (MPL) version 1.1",
+    "description": null,
+    "parentId": null,
+    "type": "Adapter license",
+    "extras": {}
+  },
+  {
+    "id": "adapter_license-mpl_2_0",
+    "name": "Mozilla Public License (MPL) version 2.0",
+    "description": null,
+    "parentId": null,
+    "type": "Adapter license",
+    "extras": {}
+  },
+  {
+    "id": "adapter_license-unlicense",
+    "name": "The Unlicense",
+    "description": null,
+    "parentId": null,
+    "type": "Adapter license",
+    "extras": {}
+  },
+  {
+    "id": "adapter_license-gnuallpermissive",
+    "name": "GNU All-Permissive License",
+    "description": null,
+    "parentId": null,
+    "type": "Adapter license",
+    "extras": {}
+  },
+  {
+    "id": "adapter_license-artisticlicense2",
+    "name": "Artistic License 2.0",
+    "description": null,
+    "parentId": null,
+    "type": "Adapter license",
+    "extras": {}
+  },
+  {
+    "id": "adapter_license-clarifiedartisticlicense",
+    "name": "Clarified Artistic License",
+    "description": null,
+    "parentId": null,
+    "type": "Adapter license",
+    "extras": {}
+  },
+  {
+    "id": "adapter_license-berkeleydb",
+    "name": "Berkeley Database License",
+    "description": null,
+    "parentId": null,
+    "type": "Adapter license",
+    "extras": {}
+  },
+  {
+    "id": "adapter_license-modifiedbsd",
+    "name": "Modified BSD license",
+    "description": null,
+    "parentId": null,
+    "type": "Adapter license",
+    "extras": {}
+  },
+  {
+    "id": "adapter_license-cc0",
+    "name": "CC0",
+    "description": null,
+    "parentId": null,
+    "type": "Adapter license",
+    "extras": {}
+  },
+  {
+    "id": "adapter_license-cecill",
+    "name": "CeCILL version 2",
+    "description": null,
+    "parentId": null,
+    "type": "Adapter license",
+    "extras": {}
+  },
+  {
+    "id": "adapter_license-clearbsd",
+    "name": "The Clear BSD License",
+    "description": null,
+    "parentId": null,
+    "type": "Adapter license",
+    "extras": {}
+  },
+  {
+    "id": "adapter_license-cryptixgenerallicense",
+    "name": "Cryptix General License",
+    "description": null,
+    "parentId": null,
+    "type": "Adapter license",
+    "extras": {}
+  },
+  {
+    "id": "adapter_license-ecos2_0",
+    "name": "eCos license version 2.0",
+    "description": null,
+    "parentId": null,
+    "type": "Adapter license",
+    "extras": {}
+  },
+  {
+    "id": "adapter_license-ecl2_0",
+    "name": "Educational Community License 2.0",
+    "description": null,
+    "parentId": null,
+    "type": "Adapter license",
+    "extras": {}
+  },
+  {
+    "id": "adapter_license-eiffel",
+    "name": "Eiffel Forum License, version 2",
+    "description": null,
+    "parentId": null,
+    "type": "Adapter license",
+    "extras": {}
+  },
+  {
+    "id": "adapter_license-eudatagrid",
+    "name": "EU DataGrid Software License",
+    "description": null,
+    "parentId": null,
+    "type": "Adapter license",
+    "extras": {}
+  },
+  {
+    "id": "adapter_license-expat",
+    "name": "Expat License",
+    "description": null,
+    "parentId": null,
+    "type": "Adapter license",
+    "extras": {}
+  },
+  {
+    "id": "adapter_license-freebsd",
+    "name": "FreeBSD license",
+    "description": null,
+    "parentId": null,
+    "type": "Adapter license",
+    "extras": {}
+  },
+  {
+    "id": "adapter_license-freetype",
+    "name": "Freetype Project License",
+    "description": null,
+    "parentId": null,
+    "type": "Adapter license",
+    "extras": {}
+  },
+  {
+    "id": "adapter_license-hpnd",
+    "name": "Historical Permission Notice and Disclaimer",
+    "description": null,
+    "parentId": null,
+    "type": "Adapter license",
+    "extras": {}
+  },
+  {
+    "id": "adapter_license-imatix",
+    "name": "License of the iMatix Standard Function Library",
+    "description": null,
+    "parentId": null,
+    "type": "Adapter license",
+    "extras": {}
+  },
+  {
+    "id": "adapter_license-imlib",
+    "name": "License of imlib2",
+    "description": null,
+    "parentId": null,
+    "type": "Adapter license",
+    "extras": {}
+  },
+  {
+    "id": "adapter_license-ijg",
+    "name": "Independent JPEG Group License",
+    "description": null,
+    "parentId": null,
+    "type": "Adapter license",
+    "extras": {}
+  },
+  {
+    "id": "adapter_license-informal",
+    "name": "Informal license",
+    "description": null,
+    "parentId": null,
+    "type": "Adapter license",
+    "extras": {}
+  },
+  {
+    "id": "adapter_license-intel",
+    "name": "Intel Open Source License",
+    "description": null,
+    "parentId": null,
+    "type": "Adapter license",
+    "extras": {}
+  },
+  {
+    "id": "adapter_license-isc",
+    "name": "ISC License",
+    "description": null,
+    "parentId": null,
+    "type": "Adapter license",
+    "extras": {}
+  },
+  {
+    "id": "adapter_license-ncsa",
+    "name": "NCSA/University of Illinois Open Source License",
+    "description": null,
+    "parentId": null,
+    "type": "Adapter license",
+    "extras": {}
+  },
+  {
+    "id": "adapter_license-netscapejavascript",
+    "name": "License of Netscape JavaScript",
+    "description": null,
+    "parentId": null,
+    "type": "Adapter license",
+    "extras": {}
+  },
+  {
+    "id": "adapter_license-newopenldap",
+    "name": "OpenLDAP License, Version 2.7",
+    "description": null,
+    "parentId": null,
+    "type": "Adapter license",
+    "extras": {}
+  },
+  {
+    "id": "adapter_license-perllicense",
+    "name": "License of Perl 5 and below",
+    "description": null,
+    "parentId": null,
+    "type": "Adapter license",
+    "extras": {}
+  },
+  {
+    "id": "adapter_license-publicdomain",
+    "name": "Public Domain",
+    "description": null,
+    "parentId": null,
+    "type": "Adapter license",
+    "extras": {}
+  },
+  {
+    "id": "adapter_license-python",
+    "name": "License of Python 2.0.1, 2.1.1, and newer versions",
+    "description": null,
+    "parentId": null,
+    "type": "Adapter license",
+    "extras": {}
+  },
+  {
+    "id": "adapter_license-python1_6a2",
+    "name": "License of Python 1.6a2 and earlier versions",
+    "description": null,
+    "parentId": null,
+    "type": "Adapter license",
+    "extras": {}
+  },
+  {
+    "id": "adapter_license-ruby",
+    "name": "License of Ruby",
+    "description": null,
+    "parentId": null,
+    "type": "Adapter license",
+    "extras": {}
+  },
+  {
+    "id": "adapter_license-sgifreeb",
+    "name": "SGI Free Software License B, version 2.0",
+    "description": null,
+    "parentId": null,
+    "type": "Adapter license",
+    "extras": {}
+  },
+  {
+    "id": "adapter_license-standardmlofnj",
+    "name": "Standard ML of New Jersey Copyright License",
+    "description": null,
+    "parentId": null,
+    "type": "Adapter license",
+    "extras": {}
+  },
+  {
+    "id": "adapter_license-unicode",
+    "name": "Unicode, Inc. License Agreement for Data Files and Software",
+    "description": null,
+    "parentId": null,
+    "type": "Adapter license",
+    "extras": {}
+  },
+  {
+    "id": "adapter_license-upl",
+    "name": "Universal Permissive License (UPL)",
+    "description": null,
+    "parentId": null,
+    "type": "Adapter license",
+    "extras": {}
+  },
+  {
+    "id": "adapter_license-vim",
+    "name": "License of Vim, Version 6.1 or later",
+    "description": null,
+    "parentId": null,
+    "type": "Adapter license",
+    "extras": {}
+  },
+  {
+    "id": "adapter_license-w3c",
+    "name": "W3C Software Notice and License",
+    "description": null,
+    "parentId": null,
+    "type": "Adapter license",
+    "extras": {}
+  },
+  {
+    "id": "adapter_license-webm",
+    "name": "License of WebM",
+    "description": null,
+    "parentId": null,
+    "type": "Adapter license",
+    "extras": {}
+  },
+  {
+    "id": "adapter_license-wtfpl",
+    "name": "WTFPL, Version 2",
+    "description": null,
+    "parentId": null,
+    "type": "Adapter license",
+    "extras": {}
+  },
+  {
+    "id": "adapter_license-wx",
+    "name": "WxWidgets License",
+    "description": null,
+    "parentId": null,
+    "type": "Adapter license",
+    "extras": {}
+  },
+  {
+    "id": "adapter_license-x11license",
+    "name": "X11 License",
+    "description": null,
+    "parentId": null,
+    "type": "Adapter license",
+    "extras": {}
+  },
+  {
+    "id": "adapter_license-xfree861_1license",
+    "name": "XFree86 1.1 License",
+    "description": null,
+    "parentId": null,
+    "type": "Adapter license",
+    "extras": {}
+  },
+  {
+    "id": "adapter_license-zlib",
+    "name": "License of ZLib",
+    "description": null,
+    "parentId": null,
+    "type": "Adapter license",
+    "extras": {}
+  },
+  {
+    "id": "adapter_license-zope2_0",
+    "name": "Zope Public License, versions 2.0 and 2.1",
+    "description": null,
+    "parentId": null,
+    "type": "Adapter license",
+    "extras": {}
+  },
+  {
+    "id": "adapter_license-agplv1_0",
+    "name": "Affero General Public License version 1",
+    "description": null,
+    "parentId": null,
+    "type": "Adapter license",
+    "extras": {}
+  },
+  {
+    "id": "adapter_license-academicfreelicense",
+    "name": "Academic Free License, all versions through 3.0",
+    "description": null,
+    "parentId": null,
+    "type": "Adapter license",
+    "extras": {}
+  },
+  {
+    "id": "adapter_license-apache1_1",
+    "name": "Apache License, Version 1.1",
+    "description": null,
+    "parentId": null,
+    "type": "Adapter license",
+    "extras": {}
+  },
+  {
+    "id": "adapter_license-apache1",
+    "name": "Apache License, Version 1.0",
+    "description": null,
+    "parentId": null,
+    "type": "Adapter license",
+    "extras": {}
+  },
+  {
+    "id": "adapter_license-apsl2",
+    "name": "Apple Public Source License (APSL), version 2",
+    "description": null,
+    "parentId": null,
+    "type": "Adapter license",
+    "extras": {}
+  },
+  {
+    "id": "adapter_license-bittorrent",
+    "name": "BitTorrent Open Source License",
+    "description": null,
+    "parentId": null,
+    "type": "Adapter license",
+    "extras": {}
+  },
+  {
+    "id": "adapter_license-originalbsd",
+    "name": "Original BSD license",
+    "description": null,
+    "parentId": null,
+    "type": "Adapter license",
+    "extras": {}
+  },
+  {
+    "id": "adapter_license-cddl",
+    "name": "Common Development and Distribution License (CDDL), version 1.0",
+    "description": null,
+    "parentId": null,
+    "type": "Adapter license",
+    "extras": {}
+  },
+  {
+    "id": "adapter_license-cpal",
+    "name": "Common Public Attribution License 1.0 (CPAL)",
+    "description": null,
+    "parentId": null,
+    "type": "Adapter license",
+    "extras": {}
+  },
+  {
+    "id": "adapter_license-commonpubliclicense10",
+    "name": "Common Public License Version 1.0",
+    "description": null,
+    "parentId": null,
+    "type": "Adapter license",
+    "extras": {}
+  },
+  {
+    "id": "adapter_license-condor",
+    "name": "Condor Public License",
+    "description": null,
+    "parentId": null,
+    "type": "Adapter license",
+    "extras": {}
+  },
+  {
+    "id": "adapter_license-eupl",
+    "name": "European Union Public License (EUPL) version 1.1",
+    "description": null,
+    "parentId": null,
+    "type": "Adapter license",
+    "extras": {}
+  },
+  {
+    "id": "adapter_license-gnuplot",
+    "name": "Gnuplot license",
+    "description": null,
+    "parentId": null,
+    "type": "Adapter license",
+    "extras": {}
+  },
+  {
+    "id": "adapter_license-ibmpl",
+    "name": "IBM Public License, Version 1.0",
+    "description": null,
+    "parentId": null,
+    "type": "Adapter license",
+    "extras": {}
+  },
+  {
+    "id": "adapter_license-josl",
+    "name": "Jabber Open Source License, Version 1.0",
+    "description": null,
+    "parentId": null,
+    "type": "Adapter license",
+    "extras": {}
+  },
+  {
+    "id": "adapter_license-lppl_1_3a",
+    "name": "LaTeX Project Public License 1.3a",
+    "description": null,
+    "parentId": null,
+    "type": "Adapter license",
+    "extras": {}
+  },
+  {
+    "id": "adapter_license-lppl_1_2",
+    "name": "LaTeX Project Public License 1.2",
+    "description": null,
+    "parentId": null,
+    "type": "Adapter license",
+    "extras": {}
+  },
+  {
+    "id": "adapter_license-lucent102",
+    "name": "Lucent Public License Version 1.02 (Plan 9 license)",
+    "description": null,
+    "parentId": null,
+    "type": "Adapter license",
+    "extras": {}
+  },
+  {
+    "id": "adapter_license-ms_pl",
+    "name": "Microsoft Public License (Ms-PL)",
+    "description": null,
+    "parentId": null,
+    "type": "Adapter license",
+    "extras": {}
+  },
+  {
+    "id": "adapter_license-ms_rl",
+    "name": "Microsoft Reciprocal License (Ms-RL)",
+    "description": null,
+    "parentId": null,
+    "type": "Adapter license",
+    "extras": {}
+  },
+  {
+    "id": "adapter_license-nosl",
+    "name": "Netizen Open Source License (NOSL), Version 1.0",
+    "description": null,
+    "parentId": null,
+    "type": "Adapter license",
+    "extras": {}
+  },
+  {
+    "id": "adapter_license-npl",
+    "name": "Netscape Public License (NPL)",
+    "description": null,
+    "parentId": null,
+    "type": "Adapter license",
+    "extras": {}
+  },
+  {
+    "id": "adapter_license-nokia",
+    "name": "Nokia Open Source License",
+    "description": null,
+    "parentId": null,
+    "type": "Adapter license",
+    "extras": {}
+  },
+  {
+    "id": "adapter_license-oldopenldap",
+    "name": "Old OpenLDAP License, Version 2.3",
+    "description": null,
+    "parentId": null,
+    "type": "Adapter license",
+    "extras": {}
+  },
+  {
+    "id": "adapter_license-osl",
+    "name": "Open Software License, all versions through 3.0",
+    "description": null,
+    "parentId": null,
+    "type": "Adapter license",
+    "extras": {}
+  },
+  {
+    "id": "adapter_license-openssl",
+    "name": "OpenSSL license",
+    "description": null,
+    "parentId": null,
+    "type": "Adapter license",
+    "extras": {}
+  },
+  {
+    "id": "adapter_license-phorum",
+    "name": "Phorum License, Version 2.0",
+    "description": null,
+    "parentId": null,
+    "type": "Adapter license",
+    "extras": {}
+  },
+  {
+    "id": "adapter_license-php_3_01",
+    "name": "PHP License, Version 3.01",
+    "description": null,
+    "parentId": null,
+    "type": "Adapter license",
+    "extras": {}
+  },
+  {
+    "id": "adapter_license-pythonold",
+    "name": "License of Python 1.6b1 through 2.0 and 2.1",
+    "description": null,
+    "parentId": null,
+    "type": "Adapter license",
+    "extras": {}
+  },
+  {
+    "id": "adapter_license-qpl",
+    "name": "Q Public License (QPL), Version 1.0",
+    "description": null,
+    "parentId": null,
+    "type": "Adapter license",
+    "extras": {}
+  },
+  {
+    "id": "adapter_license-rpsl",
+    "name": "RealNetworks Public Source License (RPSL), Version 1.0",
+    "description": null,
+    "parentId": null,
+    "type": "Adapter license",
+    "extras": {}
+  },
+  {
+    "id": "adapter_license-sissl",
+    "name": "Sun Industry Standards Source License 1.0",
+    "description": null,
+    "parentId": null,
+    "type": "Adapter license",
+    "extras": {}
+  },
+  {
+    "id": "adapter_license-spl",
+    "name": "Sun Public License",
+    "description": null,
+    "parentId": null,
+    "type": "Adapter license",
+    "extras": {}
+  },
+  {
+    "id": "adapter_license-xinetd",
+    "name": "License of xinetd",
+    "description": null,
+    "parentId": null,
+    "type": "Adapter license",
+    "extras": {}
+  },
+  {
+    "id": "adapter_license-yahoo",
+    "name": "Yahoo! Public License 1.1",
+    "description": null,
+    "parentId": null,
+    "type": "Adapter license",
+    "extras": {}
+  },
+  {
+    "id": "adapter_license-zend",
+    "name": "Zend License, Version 2.0",
+    "description": null,
+    "parentId": null,
+    "type": "Adapter license",
+    "extras": {}
+  },
+  {
+    "id": "adapter_license-zimbra",
+    "name": "Zimbra Public License 1.3",
+    "description": null,
+    "parentId": null,
+    "type": "Adapter license",
+    "extras": {}
+  },
+  {
+    "id": "adapter_license-zope",
+    "name": "Zope Public License version 1",
+    "description": null,
+    "parentId": null,
+    "type": "Adapter license",
+    "extras": {}
+  },
+  {
+    "id": "adapter_license-fdl",
+    "name": "GNU Free Documentation License",
+    "description": null,
+    "parentId": null,
+    "type": "Adapter license",
+    "extras": {}
+  },
+  {
+    "id": "adapter_license-freebsddl",
+    "name": "FreeBSD Documentation License",
+    "description": null,
+    "parentId": null,
+    "type": "Adapter license",
+    "extras": {}
+  },
+  {
+    "id": "adapter_license-acdl",
+    "name": "Apple's Common Documentation License, Version 1.0",
+    "description": null,
+    "parentId": null,
+    "type": "Adapter license",
+    "extras": {}
+  },
+  {
+    "id": "adapter_license-openpublicationl",
+    "name": "Open Publication License, Version 1.0",
+    "description": null,
+    "parentId": null,
+    "type": "Adapter license",
+    "extras": {}
+  },
+  {
+    "id": "adapter_license-gplother",
+    "name": "GNU General Public License",
+    "description": null,
+    "parentId": null,
+    "type": "Adapter license",
+    "extras": {}
+  },
+  {
+    "id": "adapter_license-fdlother",
+    "name": "GNU Free Documentation License",
+    "description": null,
+    "parentId": null,
+    "type": "Adapter license",
+    "extras": {}
+  },
+  {
+    "id": "adapter_license-ccby",
+    "name": "Creative Commons Attribution 4.0 license",
+    "description": null,
+    "parentId": null,
+    "type": "Adapter license",
+    "extras": {}
+  },
+  {
+    "id": "adapter_license-ccbysa",
+    "name": "Creative Commons Attribution-Sharealike 4.0 license",
+    "description": null,
+    "parentId": null,
+    "type": "Adapter license",
+    "extras": {}
+  },
+  {
+    "id": "adapter_license-dsl",
+    "name": "Design Science License (DSL)",
+    "description": null,
+    "parentId": null,
+    "type": "Adapter license",
+    "extras": {}
+  },
+  {
+    "id": "adapter_license-freeart",
+    "name": "Free Art License",
+    "description": null,
+    "parentId": null,
+    "type": "Adapter license",
+    "extras": {}
+  },
+  {
+    "id": "adapter_license-odbl",
+    "name": "Open Database license",
+    "description": null,
+    "parentId": null,
+    "type": "Adapter license",
+    "extras": {}
+  },
+  {
+    "id": "adapter_license-gplfonts",
+    "name": "GNU General Public License",
+    "description": null,
+    "parentId": null,
+    "type": "Adapter license",
+    "extras": {}
+  },
+  {
+    "id": "adapter_license-arphic",
+    "name": "Arphic Public License",
+    "description": null,
+    "parentId": null,
+    "type": "Adapter license",
+    "extras": {}
+  },
+  {
+    "id": "adapter_license-ecfonts",
+    "name": "License of the ec fonts for LaTeX",
+    "description": null,
+    "parentId": null,
+    "type": "Adapter license",
+    "extras": {}
+  },
+  {
+    "id": "adapter_license-ipafont",
+    "name": "IPA Font License",
+    "description": null,
+    "parentId": null,
+    "type": "Adapter license",
+    "extras": {}
+  },
+  {
+    "id": "adapter_license-silofl",
+    "name": "SIL Open Font License 1.1",
+    "description": null,
+    "parentId": null,
+    "type": "Adapter license",
+    "extras": {}
+  }
+]
