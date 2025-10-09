@@ -28,7 +28,8 @@
             font-weight: bold;
         }
         .form-row input,
-        .form-row textarea {
+        .form-row textarea,
+        .form-row select {
             flex: 1;
             padding: 6px;
             border: 1px solid #ccc;
@@ -36,6 +37,11 @@
         }
         textarea {
             resize: vertical;
+        }
+        .button-row {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 20px;
         }
         button {
             padding: 8px 16px;
@@ -58,19 +64,34 @@
         a:hover {
             text-decoration: underline;
         }
+        .disabled {
+            background-color: #f5f5f5;
+            color: #888;
+            cursor: not-allowed;
+        }
     </style>
 </head>
 <body>
 
 <h2>Step 3: Create Default Catalogue</h2>
 
-<p>Catalogue ID: <span th:text="${id}"></span></p>
+<p class="description">
+    Please fill all the fields.
+</p>
 
-<form th:action="@{/wizard/save}" th:object="${catalogue}" method="post">
+<p th:if="${successMessage}" th:text="${successMessage}" style="color: green; font-weight: bold;"></p>
+<p th:if="${errorMessage}" th:text="${errorMessage}" style="color: red; font-weight: bold;"></p>
+
+<form th:action="@{/wizard/step3/loadCatalogue}" th:object="${catalogue}" method="post" id="catalogueForm">
 
     <!-- Basic Information -->
     <fieldset>
         <legend>Basic Information</legend>
+        <div class="form-row">
+            <label>ID:</label>
+            <input type="text" th:field="*{id}" readonly
+                   style="background-color: #f0f0f0; color: #555; cursor: not-allowed;" />
+        </div>
         <div class="form-row">
             <label>Abbreviation (String):</label>
             <input type="text" th:field="*{abbreviation}"/>
@@ -86,12 +107,8 @@
         <div class="form-row">
             <label>Legal Entity:</label>
             <div>
-                <label>
-                    <input type="radio" th:field="*{legalEntity}" value="true"/> Yes
-                </label>
-                <label style="margin-left: 20px;">
-                    <input type="radio" th:field="*{legalEntity}" value="false"/> No
-                </label>
+                <label><input type="radio" th:field="*{legalEntity}" value="true"/> Yes</label>
+                <label style="margin-left: 20px;"><input type="radio" th:field="*{legalEntity}" value="false"/> No</label>
             </div>
         </div>
         <div class="form-row">
@@ -141,8 +158,11 @@
             <input type="text" th:field="*{location.city}"/>
         </div>
         <div class="form-row">
-            <label>Country (String):</label>
-            <input type="text" th:field="*{location.country}"/>
+            <label>Country:</label>
+            <select th:field="*{location.country}">
+                <option value="">-- Select a country --</option>
+                <option th:each="c : ${countries}" th:value="${c}" th:text="${c}"></option>
+            </select>
         </div>
     </fieldset>
 
@@ -180,10 +200,31 @@
         </div>
     </fieldset>
 
-    <button type="submit">Finish</button>
-</form>
+    <div class="button-row">
+        <button type="submit"
+                th:if="${successMessage == null}">
+            Submit
+        </button>
 
-<a th:href="@{/wizard/step2}">← Back</a>
+        <button type="button"
+                th:if="${successMessage != null}"
+                th:attr="data-homepage=${homepage}"
+                onclick="window.location.href=this.getAttribute('data-homepage')">
+            Finish
+        </button>
+    </div>
+
+    <a th:href="@{/wizard/step2}"><< Back</a>
+
+    <script th:if="${successMessage != null}">
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('#catalogueForm input, #catalogueForm textarea, #catalogueForm select')
+                .forEach(el => {
+                    el.disabled = true;
+                    el.classList.add('disabled');
+                });
+        });
+    </script>
 
 </body>
 </html>

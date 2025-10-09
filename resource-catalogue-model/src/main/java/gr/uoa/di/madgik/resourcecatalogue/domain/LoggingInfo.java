@@ -130,12 +130,18 @@ public class LoggingInfo {
                                                      String comment) {
         validateLoggingInfoEnums(type, actionType);
         LoggingInfo ret = new LoggingInfo();
-        User user = Objects.requireNonNull(User.of(auth));
+        if (auth != null) {
+            User user = Objects.requireNonNull(User.of(auth));
+            ret.setUserEmail(user.getEmail());
+            ret.setUserFullName(user.getFullName());
+        } else {
+            //TODO: test fails - check how to proceed
+            ret.setUserEmail("system");
+            ret.setUserFullName("system");
+        }
         ret.setDate(String.valueOf(System.currentTimeMillis()));
         ret.setType(type);
         ret.setActionType(actionType);
-        ret.setUserEmail(user.getEmail());
-        ret.setUserFullName(user.getFullName());
         ret.setUserRole(userRole);
         ret.setComment(comment);
         return ret;

@@ -65,6 +65,21 @@
             color: green;
             font-weight: bold;
         }
+        .navigation {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 25px;
+        }
+
+        .navigation a {
+            text-decoration: none;
+            font-size: 1rem;
+            color: #007BFF;
+        }
+        .navigation a:hover {
+            text-decoration: underline;
+        }
     </style>
 </head>
 <body>
@@ -75,7 +90,7 @@
     The following models are going to be loaded:
 </p>
 
-<form th:action="@{step2/load}" method="post">
+<form th:action="@{step2/loadModels}" method="post">
     <ul>
         <li th:each="entry : ${modelStatus}">
             <input type="checkbox" th:id="${entry.key}" th:value="${entry.key}"
@@ -91,8 +106,10 @@
 
 <p class="message" th:if="${message}" th:text="${message}"></p>
 
-<a th:href="@{/wizard/step1}">← Back</a>
-<a th:href="@{/wizard/step3}">Next →</a>
+<div class="navigation">
+    <a th:href="@{/wizard/step1}"><< Back</a>
+    <a th:href="@{/wizard/step3}">Next >></a>
+</div>
 
 </body>
 </html>

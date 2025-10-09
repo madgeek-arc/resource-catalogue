@@ -41,6 +41,13 @@ public interface CatalogueService extends ResourceService<CatalogueBundle>, Bund
     CatalogueBundle add(CatalogueBundle catalogue, Authentication authentication);
 
     /**
+     * Add default/main Catalogue through startup wizard
+     *
+     * @param catalogue Catalogue to be added
+     */
+    void addCatalogueForStartupWizard(CatalogueBundle catalogue);
+
+    /**
      * Update an existing Catalogue
      *
      * @param catalogue Catalogue to be updated

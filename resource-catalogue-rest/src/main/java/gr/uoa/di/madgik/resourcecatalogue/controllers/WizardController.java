@@ -20,9 +20,9 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import gr.uoa.di.madgik.catalogue.service.ModelService;
+import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
 import gr.uoa.di.madgik.resourcecatalogue.service.CatalogueService;
-import gr.uoa.di.madgik.resourcecatalogue.service.SecurityService;
 import gr.uoa.di.madgik.resourcecatalogue.service.VocabularyService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -51,25 +51,26 @@ public class WizardController {
     @Value("${catalogue.id}")
     private String catalogueId;
 
+    @Value("${catalogue.homepage}")
+    private String homepage;
+
     private static final Logger logger = LoggerFactory.getLogger(WizardController.class);
 
     private final VocabularyService vocabularyService;
     private final ModelService modelService;
     private final CatalogueService catalogueService;
-    private final SecurityService securityService;
 
     public WizardController(VocabularyService vocabularyService,
                             ModelService modelService,
-                            CatalogueService catalogueService,
-                            SecurityService securityService) {
+                            CatalogueService catalogueService) {
         this.vocabularyService = vocabularyService;
         this.modelService = modelService;
         this.catalogueService = catalogueService;
-        this.securityService = securityService;
     }
 
+    @Operation(summary = "Check Vocabularies Existence")
     @GetMapping("/step1")
-    public String step1(Model model) throws IOException {
+    public String checkVocabulariesExistence(Model model) throws IOException {
         ObjectMapper objectMapper = new ObjectMapper();
         ClassPathResource vocabDir = new ClassPathResource("vocabularies");
         File[] vocabFiles = vocabDir.getFile().listFiles((dir, name) -> name.endsWith(".json"));
@@ -78,7 +79,8 @@ public class WizardController {
         boolean allPosted = true;
 
         for (File file : vocabFiles) {
-            List<Vocabulary> vocabularies = objectMapper.readValue(file, new TypeReference<>() {});
+            List<Vocabulary> vocabularies = objectMapper.readValue(file, new TypeReference<>() {
+            });
 
             if (!vocabularies.isEmpty()) {
                 String type = vocabularies.get(0).getType();
@@ -97,7 +99,8 @@ public class WizardController {
         return "wizard-step1";
     }
 
-    @PostMapping("/step1/load")
+    @Operation(summary = "Load Vocabularies")
+    @PostMapping("/step1/loadVocabularies")
     public String loadVocabularies() throws IOException {
         ObjectMapper objectMapper = new ObjectMapper();
         ClassPathResource vocabDir = new ClassPathResource("vocabularies");
@@ -105,13 +108,14 @@ public class WizardController {
 
         if (vocabularyFiles != null) {
             for (File file : vocabularyFiles) {
-                List<Vocabulary> vocabularies = objectMapper.readValue(file, new TypeReference<>() {});
+                List<Vocabulary> vocabularies = objectMapper.readValue(file, new TypeReference<>() {
+                });
 
                 if (!vocabularies.isEmpty()) {
                     String type = vocabularies.getFirst().getType();
                     int countInDb = vocabularyService.getByType(Vocabulary.Type.fromString(type)).size();
 
-                    if (countInDb != vocabularies.size()) {
+                    if (countInDb != vocabularies.size() && countInDb < vocabularies.size()) {
                         vocabularyService.deleteByType(Vocabulary.Type.fromString(type));
                     }
 
@@ -125,9 +129,9 @@ public class WizardController {
         return "redirect:/wizard/step1";
     }
 
-    @Operation(summary = "Load models")
+    @Operation(summary = "Check Models Existence")
     @GetMapping("/step2")
-    public String loadModels(Model model) throws IOException {
+    public String checkModelsExistence(Model model) throws IOException {
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
@@ -146,11 +150,18 @@ public class WizardController {
             try {
                 gr.uoa.di.madgik.catalogue.ui.domain.Model m =
                         objectMapper.readValue(file, gr.uoa.di.madgik.catalogue.ui.domain.Model.class);
-
-                boolean exists = modelService.get(m.getId()) != null;
+                boolean exists;
+                try {
+                    exists = modelService.get(m.getId()) != null;
+                } catch (ResourceNotFoundException e) {
+                    exists = false;
+                } catch (Exception e) {
+                    logger.error("Error checking existence of model [{}]: {}", m.getId(), e.getMessage());
+                    continue;
+                }
                 modelStatus.put(m.getName() != null ? m.getName() : m.getId(), exists);
             } catch (Exception e) {
-                logger.warn("Skipping file [{}]: {}", file.getName(), e.getMessage());
+                logger.warn("Skipping model file [{}]: {}", file.getName(), e.getMessage());
             }
         }
 
@@ -161,25 +172,38 @@ public class WizardController {
         return "wizard-step2";
     }
 
-    @PostMapping("/step2/load")
-    public String loadModelsPost() throws IOException {
+    @Operation(summary = "Load Models")
+    @PostMapping("/step2/loadModels")
+    public String loadModels() throws IOException {
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-
         ClassPathResource modelDir = new ClassPathResource("models");
         File[] modelFiles = modelDir.getFile().listFiles((dir, name) -> name.endsWith(".json"));
-        if (modelFiles == null) return "redirect:/wizard/step2";
 
         for (File file : modelFiles) {
             try {
                 gr.uoa.di.madgik.catalogue.ui.domain.Model m =
                         objectMapper.readValue(file, gr.uoa.di.madgik.catalogue.ui.domain.Model.class);
-                if (modelService.get(m.getId()) == null) {
-                    logger.info("Loading model [{}]", m.getId());
-                    modelService.add(m);
+
+                boolean exists;
+                try {
+                    exists = modelService.get(m.getId()) != null;
+                } catch (ResourceNotFoundException | NoSuchElementException e) {
+                    exists = false;
+                } catch (Exception e) {
+                    logger.error("Error checking existence of model [{}]: {}", m.getId(), e.getMessage());
+                    continue;
                 }
+
+                if (!exists) {
+                    logger.info("Loading missing model [{}]", m.getId());
+                    modelService.add(m);
+                } else {
+                    logger.debug("Model [{}] already exists, skipping.", m.getId());
+                }
+
             } catch (Exception e) {
-                logger.error("Failed to load model from {}: {}", file.getName(), e.getMessage());
+                logger.error("Failed to process model file [{}]: {}", file.getName(), e.getMessage());
             }
         }
 
@@ -187,25 +211,42 @@ public class WizardController {
     }
 
 
-
     @Operation(summary = "Create main Catalogue")
     @GetMapping("/step3")
-    public String createMainCatalogue(Model model) {
+    public String createCatalogue(Model model) {
         Catalogue catalogue = new Catalogue();
+        catalogue.setId(catalogueId);
         catalogue.setLocation(new ProviderLocation());
         catalogue.setMainContact(new ProviderMainContact());
         catalogue.setPublicContacts(new ArrayList<>(List.of(new ProviderPublicContact())));
         catalogue.setUsers(new ArrayList<>(List.of(new User())));
+
+        // add country vocabularies
+        List<String> countries = vocabularyService.getByType(Vocabulary.Type.COUNTRY)
+                .stream()
+                .map(Vocabulary::getId)
+                .toList();
+
+        model.addAttribute("countries", countries);
         model.addAttribute("catalogue", catalogue);
         model.addAttribute("id", catalogueId);
         return "wizard-step3";
     }
 
-    @PostMapping("/save")
-    public String saveCatalogue(@ModelAttribute Catalogue catalogue, Model model) {
-        logger.info("Loading main Catalogue with ID [{}]", catalogue.getId());
-        catalogueService.add(new CatalogueBundle(catalogue), securityService.getAdminAccess());
-        model.addAttribute("message", "Catalogue saved successfully!");
-        return "wizard-finished";
+    @PostMapping("/step3/loadCatalogue")
+    public String loadCatalogue(@ModelAttribute Catalogue catalogue, Model model) {
+        try {
+            logger.info("Loading main Catalogue with ID [{}]", catalogue.getId());
+            catalogueService.addCatalogueForStartupWizard(new CatalogueBundle(catalogue));
+            model.addAttribute("successMessage", "Catalogue saved successfully!");
+        } catch (Exception e) {
+            logger.error("Failed to save Catalogue [{}]: {}", catalogue.getId(), e.getMessage());
+            model.addAttribute("errorMessage", "Error saving catalogue: " + e.getMessage());
+            model.addAttribute("catalogue", catalogue);
+        }
+
+        model.addAttribute("id", catalogue.getId());
+        model.addAttribute("homepage", homepage);
+        return "wizard-step3";
     }
 }
