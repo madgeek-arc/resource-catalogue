@@ -17,6 +17,7 @@
 package gr.uoa.di.madgik.resourcecatalogue.controllers;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import gr.uoa.di.madgik.catalogue.service.ModelService;
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
@@ -40,7 +41,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Profile("beyond")
 @Controller
@@ -55,11 +55,17 @@ public class WizardController {
 
     private final VocabularyService vocabularyService;
     private final ModelService modelService;
+    private final CatalogueService catalogueService;
+    private final SecurityService securityService;
 
     public WizardController(VocabularyService vocabularyService,
-                            ModelService modelService) {
+                            ModelService modelService,
+                            CatalogueService catalogueService,
+                            SecurityService securityService) {
         this.vocabularyService = vocabularyService;
         this.modelService = modelService;
+        this.catalogueService = catalogueService;
+        this.securityService = securityService;
     }
 
     @GetMapping("/step1")
@@ -72,11 +78,7 @@ public class WizardController {
         boolean allPosted = true;
 
         for (File file : vocabFiles) {
-            List<Vocabulary> vocabularies = objectMapper.readValue(
-                    file,
-                    new TypeReference<>() {
-                    }
-            );
+            List<Vocabulary> vocabularies = objectMapper.readValue(file, new TypeReference<>() {});
 
             if (!vocabularies.isEmpty()) {
                 String type = vocabularies.get(0).getType();
@@ -91,35 +93,32 @@ public class WizardController {
         }
 
         model.addAttribute("vocabStatus", vocabStatus);
-        model.addAttribute("allVocabPosted", allPosted);
+        model.addAttribute("allVocabLoaded", allPosted);
         return "wizard-step1";
     }
 
     @PostMapping("/step1/load")
-    public String loadVocabularies() throws IOException, InterruptedException {
+    public String loadVocabularies() throws IOException {
         ObjectMapper objectMapper = new ObjectMapper();
         ClassPathResource vocabDir = new ClassPathResource("vocabularies");
-        File[] vocabFiles = vocabDir.getFile().listFiles((dir, name) -> name.endsWith(".json"));
+        File[] vocabularyFiles = vocabDir.getFile().listFiles((dir, name) -> name.endsWith(".json"));
 
-        for (File file : vocabFiles) {
-            List<Vocabulary> vocabularies = objectMapper.readValue(
-                    file,
-                    new TypeReference<>() {
+        if (vocabularyFiles != null) {
+            for (File file : vocabularyFiles) {
+                List<Vocabulary> vocabularies = objectMapper.readValue(file, new TypeReference<>() {});
+
+                if (!vocabularies.isEmpty()) {
+                    String type = vocabularies.getFirst().getType();
+                    int countInDb = vocabularyService.getByType(Vocabulary.Type.fromString(type)).size();
+
+                    if (countInDb != vocabularies.size()) {
+                        vocabularyService.deleteByType(Vocabulary.Type.fromString(type));
                     }
-            );
 
-            if (!vocabularies.isEmpty()) {
-                String type = vocabularies.get(0).getType();
-                List<Vocabulary> vocs = vocabularyService.getByType(Vocabulary.Type.fromString(type));
-                int countInDb = vocs.size();
-
-                if (countInDb != vocabularies.size()) {
-                    vocabularyService.deleteByType(Vocabulary.Type.fromString(type));
-                }
-
-                if (countInDb <  vocabularies.size()) {
-                    logger.info("Loading vocabularies for type [{}]", type);
-                    vocabularyService.addBulk(vocabularies, null);
+                    if (countInDb < vocabularies.size()) {
+                        logger.info("Loading vocabularies for type [{}]", type);
+                        vocabularyService.addBulk(vocabularies, null);
+                    }
                 }
             }
         }
@@ -129,36 +128,64 @@ public class WizardController {
     @Operation(summary = "Load models")
     @GetMapping("/step2")
     public String loadModels(Model model) throws IOException {
-        // Load model files dynamically
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+
         ClassPathResource modelDir = new ClassPathResource("models");
         File[] modelFiles = modelDir.getFile().listFiles((dir, name) -> name.endsWith(".json"));
 
-        List<String> models = Arrays.stream(modelFiles)
-                .map(File::getName)
-                .sorted()
-                .collect(Collectors.toList());
+        if (modelFiles == null || modelFiles.length == 0) {
+            model.addAttribute("modelStatus", Collections.emptyMap());
+            model.addAttribute("allModelsLoaded", true);
+            return "wizard-step2";
+        }
 
-        model.addAttribute("models", models);
+        Map<String, Boolean> modelStatus = new TreeMap<>();
+
+        for (File file : modelFiles) {
+            try {
+                gr.uoa.di.madgik.catalogue.ui.domain.Model m =
+                        objectMapper.readValue(file, gr.uoa.di.madgik.catalogue.ui.domain.Model.class);
+
+                boolean exists = modelService.get(m.getId()) != null;
+                modelStatus.put(m.getName() != null ? m.getName() : m.getId(), exists);
+            } catch (Exception e) {
+                logger.warn("Skipping file [{}]: {}", file.getName(), e.getMessage());
+            }
+        }
+
+        boolean allLoaded = modelStatus.values().stream().allMatch(Boolean::booleanValue);
+        model.addAttribute("modelStatus", modelStatus);
+        model.addAttribute("allModelsLoaded", allLoaded);
+
         return "wizard-step2";
     }
 
     @PostMapping("/step2/load")
-    public String loadModelsPost(Model model) throws IOException {
+    public String loadModelsPost() throws IOException {
         ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+
         ClassPathResource modelDir = new ClassPathResource("models");
         File[] modelFiles = modelDir.getFile().listFiles((dir, name) -> name.endsWith(".json"));
+        if (modelFiles == null) return "redirect:/wizard/step2";
 
         for (File file : modelFiles) {
-            gr.uoa.di.madgik.catalogue.ui.domain.Model singleModel = objectMapper.readValue(
-                    file,
-                    gr.uoa.di.madgik.catalogue.ui.domain.Model.class
-            );
-            modelService.add(singleModel);
+            try {
+                gr.uoa.di.madgik.catalogue.ui.domain.Model m =
+                        objectMapper.readValue(file, gr.uoa.di.madgik.catalogue.ui.domain.Model.class);
+                if (modelService.get(m.getId()) == null) {
+                    logger.info("Loading model [{}]", m.getId());
+                    modelService.add(m);
+                }
+            } catch (Exception e) {
+                logger.error("Failed to load model from {}: {}", file.getName(), e.getMessage());
+            }
         }
 
-        model.addAttribute("message", "Models loaded successfully!");
-        return "wizard-step2";
+        return "redirect:/wizard/step2";
     }
+
 
 
     @Operation(summary = "Create main Catalogue")
@@ -176,7 +203,8 @@ public class WizardController {
 
     @PostMapping("/save")
     public String saveCatalogue(@ModelAttribute Catalogue catalogue, Model model) {
-        logger.info("Main Catalogue submitted");
+        logger.info("Loading main Catalogue with ID [{}]", catalogue.getId());
+        catalogueService.add(new CatalogueBundle(catalogue), securityService.getAdminAccess());
         model.addAttribute("message", "Catalogue saved successfully!");
         return "wizard-finished";
     }

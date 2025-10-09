@@ -66,21 +66,21 @@
 
 <p>Catalogue ID: <span th:text="${id}"></span></p>
 
-<form th:action="@{/api/wizard/save}" th:object="${catalogue}" method="post">
+<form th:action="@{/wizard/save}" th:object="${catalogue}" method="post">
 
     <!-- Basic Information -->
     <fieldset>
         <legend>Basic Information</legend>
         <div class="form-row">
-            <label>Abbreviation:</label>
+            <label>Abbreviation (String):</label>
             <input type="text" th:field="*{abbreviation}"/>
         </div>
         <div class="form-row">
-            <label>Name:</label>
+            <label>Name (String):</label>
             <input type="text" th:field="*{name}"/>
         </div>
         <div class="form-row">
-            <label>Website:</label>
+            <label>Website (URL):</label>
             <input type="url" th:field="*{website}"/>
         </div>
         <div class="form-row">
@@ -95,15 +95,15 @@
             </div>
         </div>
         <div class="form-row">
-            <label>Inclusion Criteria:</label>
+            <label>Inclusion Criteria (URL):</label>
             <input type="url" th:field="*{inclusionCriteria}"/>
         </div>
         <div class="form-row">
-            <label>Validation Process:</label>
+            <label>Validation Process (URL):</label>
             <input type="url" th:field="*{validationProcess}"/>
         </div>
         <div class="form-row">
-            <label>End of Life:</label>
+            <label>End of Life (String):</label>
             <input type="text" th:field="*{endOfLife}"/>
         </div>
     </fieldset>
@@ -112,15 +112,15 @@
     <fieldset>
         <legend>Marketing Information</legend>
         <div class="form-row">
-            <label>Description:</label>
+            <label>Description (String):</label>
             <textarea th:field="*{description}" rows="4"></textarea>
         </div>
         <div class="form-row">
-            <label>Scope:</label>
+            <label>Scope (String):</label>
             <input type="text" th:field="*{scope}"/>
         </div>
         <div class="form-row">
-            <label>Logo:</label>
+            <label>Logo (URL):</label>
             <input type="url" th:field="*{logo}"/>
         </div>
     </fieldset>
@@ -129,19 +129,19 @@
     <fieldset>
         <legend>Location Information</legend>
         <div class="form-row">
-            <label>Street Name and Number:</label>
+            <label>Street Name and Number (String):</label>
             <input type="text" th:field="*{location.streetNameAndNumber}"/>
         </div>
         <div class="form-row">
-            <label>Postal Code:</label>
+            <label>Postal Code (String):</label>
             <input type="text" th:field="*{location.postalCode}"/>
         </div>
         <div class="form-row">
-            <label>City:</label>
+            <label>City (String):</label>
             <input type="text" th:field="*{location.city}"/>
         </div>
         <div class="form-row">
-            <label>Country:</label>
+            <label>Country (String):</label>
             <input type="text" th:field="*{location.country}"/>
         </div>
     </fieldset>
@@ -150,15 +150,15 @@
     <fieldset>
         <legend>Contact Information</legend>
         <div class="form-row">
-            <label>Main Contact First Name:</label>
+            <label>Main Contact First Name (String):</label>
             <input type="text" th:field="*{mainContact.firstName}"/>
         </div>
         <div class="form-row">
-            <label>Main Contact Email:</label>
+            <label>Main Contact Email (String):</label>
             <input type="email" th:field="*{mainContact.email}"/>
         </div>
         <div class="form-row">
-            <label>Public Contact Email:</label>
+            <label>Public Contact Email (String):</label>
             <input type="email" th:field="*{publicContacts[0].email}"/>
         </div>
     </fieldset>
@@ -167,15 +167,15 @@
     <fieldset>
         <legend>Catalogue Admin Information</legend>
         <div class="form-row">
-            <label>Admin Name:</label>
+            <label>Admin Name (String):</label>
             <input type="text" th:field="*{users[0].name}"/>
         </div>
         <div class="form-row">
-            <label>Admin Surname:</label>
+            <label>Admin Surname (String):</label>
             <input type="text" th:field="*{users[0].surname}"/>
         </div>
         <div class="form-row">
-            <label>Admin Email:</label>
+            <label>Admin Email (String):</label>
             <input type="email" th:field="*{users[0].email}"/>
         </div>
     </fieldset>
