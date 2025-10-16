@@ -209,6 +209,10 @@ public class ProviderResourcesCommonMethods {
         return LoggingInfo.createLoggingInfoEntry(auth, securityService.getRoleName(auth), type, actionType, comment);
     }
 
+    public List<LoggingInfo> createLoggingInfoForStartupWizard() {
+        return LoggingInfo.createLoggingInfoListForStartupWizard();
+    }
+
     public List<LoggingInfo> createActivationLoggingInfo(Bundle<?> bundle, boolean active, Authentication auth) {
         List<LoggingInfo> loggingInfoList = returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(bundle, auth);
         LoggingInfo loggingInfo;

@@ -19,8 +19,12 @@ package gr.uoa.di.madgik.resourcecatalogue.domain;
 
 import org.springframework.security.core.Authentication;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class LoggingInfo {
 
@@ -130,22 +134,36 @@ public class LoggingInfo {
                                                      String comment) {
         validateLoggingInfoEnums(type, actionType);
         LoggingInfo ret = new LoggingInfo();
-        if (auth != null) {
-            User user = Objects.requireNonNull(User.of(auth));
-            ret.setUserEmail(user.getEmail());
-            ret.setUserFullName(user.getFullName());
-        } else {
-            //TODO: test fails - check how to proceed
-            ret.setUserEmail("system");
-            ret.setUserFullName("system");
-        }
+        User user = Objects.requireNonNull(User.of(auth));
         ret.setDate(String.valueOf(System.currentTimeMillis()));
         ret.setType(type);
         ret.setActionType(actionType);
+        ret.setUserEmail(user.getEmail());
+        ret.setUserFullName(user.getFullName());
         ret.setUserRole(userRole);
         ret.setComment(comment);
         return ret;
     }
+
+    public static List<LoggingInfo> createLoggingInfoListForStartupWizard() {
+        String currentTime = String.valueOf(System.currentTimeMillis());
+        String system = "system";
+        String type = Types.ONBOARD.getKey();
+
+        return Stream.of(ActionType.REGISTERED, ActionType.APPROVED)
+                .map(action -> {
+                    LoggingInfo info = new LoggingInfo();
+                    info.setDate(currentTime);
+                    info.setType(type);
+                    info.setActionType(action.getKey());
+                    info.setUserEmail(system);
+                    info.setUserFullName(system);
+                    info.setUserRole(system);
+                    return info;
+                })
+                .collect(Collectors.toList());
+    }
+
 
     private static void validateLoggingInfoEnums(String type, String actionType) {
         if (type == null || actionType == null) {

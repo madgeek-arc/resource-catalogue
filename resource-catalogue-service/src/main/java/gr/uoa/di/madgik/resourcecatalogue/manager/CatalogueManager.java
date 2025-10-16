@@ -189,7 +189,7 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
     public void addCatalogueForStartupWizard(CatalogueBundle catalogue) {
 
         catalogue.setMetadata(Metadata.createMetadata("system", "system"));
-        List<LoggingInfo> loggingInfoList = commonMethods.returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(catalogue, null);
+        List<LoggingInfo> loggingInfoList = commonMethods.createLoggingInfoForStartupWizard();
         catalogue.setLoggingInfo(loggingInfoList);
         catalogue.setActive(true);
         catalogue.setStatus(vocabularyService.get("approved catalogue").getId());
