@@ -72,6 +72,28 @@ Follow these steps to set up a development environment for Resource Catalogue:
 
 ---
 
+### Initial Setup Wizard
+Before using the application, you **must run the Setup Wizard** once.  
+This step populates the database with essential resources required for the smooth operation of the service.
+
+#### Purpose
+- Loads necessary controlled vocabularies.
+- Loads required resource models.
+- Creates the default Catalogue.
+
+The Setup Wizard should be executed **only once**, immediately after the first successful startup.
+
+#### How to Run
+Once the application is up and running, open the following URL in your browser or via an API client:
+
+```
+http://localhost:8080/api/wizard/step1
+```
+
+The Setup Wizard will guide you through each step of the initialization process.
+
+---
+
 ## Test execution:
 ```bash
   mvn clean verify
