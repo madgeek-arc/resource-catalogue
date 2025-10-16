@@ -8,15 +8,18 @@
             max-width: 800px;
             margin: 20px auto;
         }
+
         h2 {
             text-align: center;
             margin-bottom: 10px;
         }
+
         p.description {
             font-size: 0.9rem;
             color: #555;
             margin-bottom: 15px;
         }
+
         ul {
             list-style-type: none;
             padding-left: 0;
@@ -24,12 +27,14 @@
             overflow-y: auto;
             font-size: 0.85rem;
         }
+
         li {
             padding: 6px 10px;
             background-color: #f0f0f0;
             margin-bottom: 4px;
             border-radius: 4px;
         }
+
         button {
             padding: 8px 16px;
             font-size: 1rem;
@@ -40,31 +45,38 @@
             cursor: pointer;
             margin-top: 15px;
         }
+
         button:hover {
             background-color: #0056b3;
         }
+
         button:disabled {
             background-color: #ccc;
             color: #666;
             cursor: not-allowed;
             opacity: 0.7;
         }
+
         button:not(:disabled):hover {
             background-color: #0056b3;
         }
+
         a {
             display: inline-block;
             margin-top: 15px;
             text-decoration: none;
             color: #007BFF;
         }
+
         a:hover {
             text-decoration: underline;
         }
+
         p.message {
             color: green;
             font-weight: bold;
         }
+
         .navigation {
             display: flex;
             justify-content: flex-end;
@@ -77,6 +89,7 @@
             font-size: 1rem;
             color: #007BFF;
         }
+
         .navigation a:hover {
             text-decoration: underline;
         }
@@ -99,9 +112,17 @@
         </li>
     </ul>
 
-    <button type="submit" th:disabled="${allVocabLoaded}">
-        Load Vocabularies
-    </button>
+    <div>
+        <div style="display: inline-block">
+            <button type="submit" th:disabled="${allVocabLoading}">
+                Load Vocabularies
+            </button>
+        </div>
+
+        <div style="display: inline-block">
+            <span id="loading" data-th-hidden="isLoadingVocabularies">Loading Vocabularies...</span>
+        </div>
+    </div>
 </form>
 
 <p class="message" th:if="${message}" th:text="${message}"></p>
