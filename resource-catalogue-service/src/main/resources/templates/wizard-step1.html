@@ -2,6 +2,9 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <title>Step 1 - Load Vocabularies</title>
+
+    <meta th:if="${allVocabLoading}" http-equiv="refresh" content="2">
+
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -103,7 +106,7 @@
     The following vocabulary types are going to be loaded:
 </p>
 
-<form th:action="@{step1/loadVocabularies}" method="post">
+<form th:action="@{step1/loadVocabularies}" method="post" id="vocabForm">
     <ul>
         <li th:each="entry : ${vocabStatus}">
             <input type="checkbox" th:id="${entry.key}" th:value="${entry.key}"
@@ -114,16 +117,47 @@
 
     <div>
         <div style="display: inline-block">
-            <button type="submit" th:disabled="${allVocabLoading}">
+            <button type="submit" id="loadBtn" th:disabled="${allVocabLoaded}">
                 Load Vocabularies
             </button>
         </div>
 
-        <div style="display: inline-block">
-            <span id="loading" data-th-hidden="isLoadingVocabularies">Loading Vocabularies...</span>
+        <div id="loadingDiv" style="display: none;">
+            <span id="loading">Loading Vocabularies...</span>
         </div>
     </div>
 </form>
+
+<script>
+    console.log('Script loaded');
+
+    var form = document.getElementById('vocabForm');
+    console.log('Form element:', form);
+
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            console.log('Form submitted!');
+
+            var loadBtn = document.getElementById('loadBtn');
+            var loadingDiv = document.getElementById('loadingDiv');
+
+            console.log('Button:', loadBtn);
+            console.log('Loading div:', loadingDiv);
+
+            // Disable button immediately
+            if (loadBtn) {
+                loadBtn.disabled = true;
+                console.log('Button disabled');
+            }
+
+            // Show loading message immediately
+            if (loadingDiv) {
+                loadingDiv.style.display = 'inline-block';
+                console.log('Loading div shown');
+            }
+        });
+    }
+</script>
 
 <p class="message" th:if="${message}" th:text="${message}"></p>
 

@@ -77,27 +77,32 @@ public class WizardController {
 
         Map<String, Boolean> vocabStatus = new TreeMap<>();
         boolean allPosted = true;
-        boolean allPosting = false;
+        boolean nonePosted = true;
 
         for (File file : vocabFiles) {
             List<Vocabulary> vocabularies = objectMapper.readValue(file, new TypeReference<>() {
             });
 
             if (!vocabularies.isEmpty()) {
-                allPosting = true;
                 String type = vocabularies.get(0).getType();
                 int countInJson = vocabularies.size();
                 int countInDb = vocabularyService.getByType(Vocabulary.Type.fromString(type)).size();
                 boolean fullyPosted = countInDb >= countInJson;
                 vocabStatus.put(type, fullyPosted);
+
+                if (countInDb > 0) {
+                    nonePosted = false; // At least one vocabulary has some data
+                }
                 if (!fullyPosted) {
                     allPosted = false;
                 }
             }
         }
 
+        boolean isLoading = !nonePosted && !allPosted;
+
         model.addAttribute("vocabStatus", vocabStatus);
-        model.addAttribute("allVocabLoading", allPosting);
+        model.addAttribute("allVocabLoading", isLoading);
         model.addAttribute("allVocabLoaded", allPosted);
         return "wizard-step1";
     }
