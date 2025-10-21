@@ -3,7 +3,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.4.5</version>
+        <version>3.5.6</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>gr.uoa.di.madgik</groupId>
@@ -138,7 +138,12 @@
             <dependency>
                 <groupId>gr.uoa.di.madgik</groupId>
                 <artifactId>catalogue</artifactId>
-                <version>8.0.1</version>
+                <version>8.0.3-SNAPSHOT</version>
+            </dependency>
+            <dependency>
+                <groupId>gr.uoa.di.madgik</groupId>
+                <artifactId>request-logging-starter</artifactId>
+                <version>1.0.0</version>
             </dependency>
 
             <dependency>
