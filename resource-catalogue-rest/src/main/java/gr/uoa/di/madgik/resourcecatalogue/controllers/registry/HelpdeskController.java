@@ -105,6 +105,7 @@ public class HelpdeskController {
 
         try {
             Object response = webClient.post()
+                    .headers(headers -> headers.setBearerAuth(accessToken))
                     .bodyValue(ticketData)
                     .retrieve()
                     .bodyToMono(Object.class)
