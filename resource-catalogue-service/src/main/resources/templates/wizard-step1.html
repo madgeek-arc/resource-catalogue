@@ -2,9 +2,6 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <title>Step 1 - Load Vocabularies</title>
-
-    <meta th:if="${allVocabLoading}" http-equiv="refresh" content="2">
-
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -49,7 +46,7 @@
             margin-top: 15px;
         }
 
-        button:hover {
+        button:hover:not(:disabled) {
             background-color: #0056b3;
         }
 
@@ -58,10 +55,6 @@
             color: #666;
             cursor: not-allowed;
             opacity: 0.7;
-        }
-
-        button:not(:disabled):hover {
-            background-color: #0056b3;
         }
 
         a {
@@ -85,16 +78,6 @@
             justify-content: flex-end;
             align-items: center;
             margin-top: 25px;
-        }
-
-        .navigation a {
-            text-decoration: none;
-            font-size: 1rem;
-            color: #007BFF;
-        }
-
-        .navigation a:hover {
-            text-decoration: underline;
         }
     </style>
 </head>
@@ -123,37 +106,25 @@
         </div>
 
         <div id="loadingDiv" style="display: none;">
-            <span id="loading">Loading Vocabularies...</span>
+            <span>Loading Vocabularies...</span>
         </div>
     </div>
 </form>
 
 <script>
-    console.log('Script loaded');
-
     var form = document.getElementById('vocabForm');
-    console.log('Form element:', form);
 
     if (form) {
-        form.addEventListener('submit', function(e) {
-            console.log('Form submitted!');
-
+        form.addEventListener('submit', function () {
             var loadBtn = document.getElementById('loadBtn');
             var loadingDiv = document.getElementById('loadingDiv');
 
-            console.log('Button:', loadBtn);
-            console.log('Loading div:', loadingDiv);
-
-            // Disable button immediately
             if (loadBtn) {
                 loadBtn.disabled = true;
-                console.log('Button disabled');
             }
 
-            // Show loading message immediately
             if (loadingDiv) {
                 loadingDiv.style.display = 'inline-block';
-                console.log('Loading div shown');
             }
         });
     }
@@ -161,8 +132,15 @@
 
 <p class="message" th:if="${message}" th:text="${message}"></p>
 
+<!--<div class="navigation">-->
+<!--    <a th:href="@{/wizard/step2}">Next >></a>-->
+<!--</div>-->
+
 <div class="navigation">
-    <a th:href="@{/wizard/step2}">Next >></a>
+    <button type="button" onclick="window.location.href='/api/wizard/step2'"
+            th:disabled="${!allVocabLoaded}">
+        Next >>
+    </button>
 </div>
 
 </body>

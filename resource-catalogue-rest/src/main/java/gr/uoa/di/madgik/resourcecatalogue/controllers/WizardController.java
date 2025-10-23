@@ -60,9 +60,7 @@ public class WizardController {
     private final ModelService modelService;
     private final CatalogueService catalogueService;
 
-    public WizardController(VocabularyService vocabularyService,
-                            ModelService modelService,
-                            CatalogueService catalogueService) {
+    public WizardController(VocabularyService vocabularyService, ModelService modelService, CatalogueService catalogueService) {
         this.vocabularyService = vocabularyService;
         this.modelService = modelService;
         this.catalogueService = catalogueService;
@@ -76,8 +74,7 @@ public class WizardController {
         File[] vocabFiles = vocabDir.getFile().listFiles((dir, name) -> name.endsWith(".json"));
 
         Map<String, Boolean> vocabStatus = new TreeMap<>();
-        boolean allPosted = true;
-        boolean nonePosted = true;
+        boolean allLoaded = true;
 
         for (File file : vocabFiles) {
             List<Vocabulary> vocabularies = objectMapper.readValue(file, new TypeReference<>() {
@@ -90,20 +87,14 @@ public class WizardController {
                 boolean fullyPosted = countInDb >= countInJson;
                 vocabStatus.put(type, fullyPosted);
 
-                if (countInDb > 0) {
-                    nonePosted = false; // At least one vocabulary has some data
-                }
                 if (!fullyPosted) {
-                    allPosted = false;
+                    allLoaded = false;
                 }
             }
         }
 
-        boolean isLoading = !nonePosted && !allPosted;
-
         model.addAttribute("vocabStatus", vocabStatus);
-        model.addAttribute("allVocabLoading", isLoading);
-        model.addAttribute("allVocabLoaded", allPosted);
+        model.addAttribute("allVocabLoaded", allLoaded);
         return "wizard-step1";
     }
 
@@ -148,16 +139,17 @@ public class WizardController {
 
         if (modelFiles == null || modelFiles.length == 0) {
             model.addAttribute("modelStatus", Collections.emptyMap());
+            model.addAttribute("allModelsLoading", false);
             model.addAttribute("allModelsLoaded", true);
             return "wizard-step2";
         }
 
         Map<String, Boolean> modelStatus = new TreeMap<>();
+        boolean nonePosted = true;
 
         for (File file : modelFiles) {
             try {
-                gr.uoa.di.madgik.catalogue.ui.domain.Model m =
-                        objectMapper.readValue(file, gr.uoa.di.madgik.catalogue.ui.domain.Model.class);
+                gr.uoa.di.madgik.catalogue.ui.domain.Model m = objectMapper.readValue(file, gr.uoa.di.madgik.catalogue.ui.domain.Model.class);
                 boolean exists;
                 try {
                     exists = modelService.get(m.getId()) != null;
@@ -168,13 +160,20 @@ public class WizardController {
                     continue;
                 }
                 modelStatus.put(m.getName() != null ? m.getName() : m.getId(), exists);
+
+                if (exists) {
+                    nonePosted = false;
+                }
             } catch (Exception e) {
                 logger.warn("Skipping model file [{}]: {}", file.getName(), e.getMessage());
             }
         }
 
         boolean allLoaded = modelStatus.values().stream().allMatch(Boolean::booleanValue);
+        boolean isLoading = !nonePosted && !allLoaded;
+
         model.addAttribute("modelStatus", modelStatus);
+        model.addAttribute("allModelsLoading", isLoading);
         model.addAttribute("allModelsLoaded", allLoaded);
 
         return "wizard-step2";
@@ -190,8 +189,7 @@ public class WizardController {
 
         for (File file : modelFiles) {
             try {
-                gr.uoa.di.madgik.catalogue.ui.domain.Model m =
-                        objectMapper.readValue(file, gr.uoa.di.madgik.catalogue.ui.domain.Model.class);
+                gr.uoa.di.madgik.catalogue.ui.domain.Model m = objectMapper.readValue(file, gr.uoa.di.madgik.catalogue.ui.domain.Model.class);
 
                 boolean exists;
                 try {
@@ -230,10 +228,7 @@ public class WizardController {
         catalogue.setUsers(new ArrayList<>(List.of(new User())));
 
         // add country vocabularies
-        List<String> countries = vocabularyService.getByType(Vocabulary.Type.COUNTRY)
-                .stream()
-                .map(Vocabulary::getId)
-                .toList();
+        List<String> countries = vocabularyService.getByType(Vocabulary.Type.COUNTRY).stream().map(Vocabulary::getId).toList();
 
         model.addAttribute("countries", countries);
         model.addAttribute("catalogue", catalogue);

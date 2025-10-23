@@ -8,25 +8,30 @@
             max-width: 900px;
             margin: 20px auto;
         }
+
         fieldset {
             border: 1px solid #ccc;
             padding: 20px;
             margin-bottom: 20px;
             border-radius: 8px;
         }
+
         legend {
             font-weight: bold;
             padding: 0 10px;
         }
+
         .form-row {
             display: flex;
             align-items: center;
             margin-bottom: 12px;
         }
+
         .form-row label {
             width: 200px;
             font-weight: bold;
         }
+
         .form-row input,
         .form-row textarea,
         .form-row select {
@@ -35,14 +40,17 @@
             border: 1px solid #ccc;
             border-radius: 4px;
         }
+
         textarea {
             resize: vertical;
         }
+
         .button-row {
             display: flex;
             justify-content: flex-end;
             margin-top: 20px;
         }
+
         button {
             padding: 8px 16px;
             font-size: 1rem;
@@ -52,18 +60,22 @@
             border: none;
             cursor: pointer;
         }
+
         button:hover {
             background-color: #0056b3;
         }
+
         a {
             display: inline-block;
             margin-top: 15px;
             text-decoration: none;
             color: #007BFF;
         }
+
         a:hover {
             text-decoration: underline;
         }
+
         .disabled {
             background-color: #f5f5f5;
             color: #888;
@@ -90,7 +102,7 @@
         <div class="form-row">
             <label>ID:</label>
             <input type="text" th:field="*{id}" readonly
-                   style="background-color: #f0f0f0; color: #555; cursor: not-allowed;" />
+                   style="background-color: #f0f0f0; color: #555; cursor: not-allowed;"/>
         </div>
         <div class="form-row">
             <label>Abbreviation (String):</label>
@@ -108,7 +120,8 @@
             <label>Legal Entity:</label>
             <div>
                 <label><input type="radio" th:field="*{legalEntity}" value="true"/> Yes</label>
-                <label style="margin-left: 20px;"><input type="radio" th:field="*{legalEntity}" value="false"/> No</label>
+                <label style="margin-left: 20px;"><input type="radio" th:field="*{legalEntity}" value="false"/>
+                    No</label>
             </div>
         </div>
         <div class="form-row">
@@ -214,10 +227,14 @@
         </button>
     </div>
 
-    <a th:href="@{/wizard/step2}"><< Back</a>
+    <div>
+        <button type="button" onclick="window.location.href='/api/wizard/step2'">
+            << Back
+        </button>
+    </div>
 
     <script th:if="${successMessage != null}">
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             document.querySelectorAll('#catalogueForm input, #catalogueForm textarea, #catalogueForm select')
                 .forEach(el => {
                     el.disabled = true;
