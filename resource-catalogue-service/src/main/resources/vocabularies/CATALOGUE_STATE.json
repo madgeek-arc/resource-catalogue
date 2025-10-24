@@ -1,0 +1,26 @@
+[
+  {
+    "id": "approved catalogue",
+    "name": "Approved Catalogue",
+    "description": "Approved Catalogue",
+    "parentId": null,
+    "type": "Catalogue state",
+    "extras": {}
+  },
+  {
+    "id": "pending catalogue",
+    "name": "Pending Catalogue",
+    "description": "Pending Catalogue",
+    "parentId": null,
+    "type": "Catalogue state",
+    "extras": {}
+  },
+  {
+    "id": "rejected catalogue",
+    "name": "Rejected Catalogue",
+    "description": "Rejected Catalogue",
+    "parentId": null,
+    "type": "Catalogue state",
+    "extras": {}
+  }
+]

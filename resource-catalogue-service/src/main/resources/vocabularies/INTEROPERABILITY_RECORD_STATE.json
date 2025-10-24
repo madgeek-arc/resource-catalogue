@@ -1,0 +1,26 @@
+[
+  {
+    "id": "approved interoperability record",
+    "name": "Approved Interoperability Record",
+    "description": "Approved Interoperability Record",
+    "parentId": null,
+    "type": "Interoperability Record state",
+    "extras": {}
+  },
+  {
+    "id": "pending interoperability record",
+    "name": "Pending Interoperability Record",
+    "description": "Pending Interoperability Record",
+    "parentId": null,
+    "type": "Interoperability Record state",
+    "extras": {}
+  },
+  {
+    "id": "rejected interoperability record",
+    "name": "Rejected Interoperability Record",
+    "description": "Rejected Interoperability Record",
+    "parentId": null,
+    "type": "Interoperability Record state",
+    "extras": {}
+  }
+]

@@ -1,0 +1,90 @@
+[
+  {
+    "id": "tr_dcmi_type-activity_plan",
+    "name": "Activity Plan",
+    "description": null,
+    "parentId": null,
+    "type": "Training Resource dcmi type",
+    "extras": {}
+  },
+  {
+    "id": "tr_dcmi_type-assessment",
+    "name": "Assessment",
+    "description": null,
+    "parentId": null,
+    "type": "Training Resource dcmi type",
+    "extras": {}
+  },
+  {
+    "id": "tr_dcmi_type-assessment_item",
+    "name": "Assessment Item",
+    "description": null,
+    "parentId": null,
+    "type": "Training Resource dcmi type",
+    "extras": {}
+  },
+  {
+    "id": "tr_dcmi_type-educator_curriculum_guide",
+    "name": "Educator Curriculum Guide",
+    "description": null,
+    "parentId": null,
+    "type": "Training Resource dcmi type",
+    "extras": {}
+  },
+  {
+    "id": "tr_dcmi_type-lesson_plan",
+    "name": "Lesson Plan",
+    "description": null,
+    "parentId": null,
+    "type": "Training Resource dcmi type",
+    "extras": {}
+  },
+  {
+    "id": "tr_dcmi_type-physical_learning_resource",
+    "name": "Physical Learning Resource",
+    "description": null,
+    "parentId": null,
+    "type": "Training Resource dcmi type",
+    "extras": {}
+  },
+  {
+    "id": "tr_dcmi_type-recorded_lesson",
+    "name": "Recorded Lesson",
+    "description": null,
+    "parentId": null,
+    "type": "Training Resource dcmi type",
+    "extras": {}
+  },
+  {
+    "id": "tr_dcmi_type-supporting_document",
+    "name": "Supporting Document",
+    "description": null,
+    "parentId": null,
+    "type": "Training Resource dcmi type",
+    "extras": {}
+  },
+  {
+    "id": "tr_dcmi_type-textbook",
+    "name": "Textbook",
+    "description": null,
+    "parentId": null,
+    "type": "Training Resource dcmi type",
+    "extras": {}
+  },
+  {
+    "id": "tr_dcmi_type-unit_plan",
+    "name": "Unit Plan",
+    "description": null,
+    "parentId": null,
+    "type": "Training Resource dcmi type",
+    "extras": {}
+  },
+  {
+    "id": "tr_dcmi_type-other",
+    "name": "Other",
+    "description": null,
+    "parentId": null,
+    "type": "Training Resource dcmi type",
+    "extras": {}
+  }
+]

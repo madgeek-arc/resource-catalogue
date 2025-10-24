@@ -1,0 +1,90 @@
+[
+  {
+    "id": "ir_status-candidate",
+    "name": "Candidate",
+    "description": null,
+    "parentId": null,
+    "type": "Interoperability Record status",
+    "extras": {}
+  },
+  {
+    "id": "ir_status-proposed",
+    "name": "Proposed",
+    "description": null,
+    "parentId": null,
+    "type": "Interoperability Record status",
+    "extras": {}
+  },
+  {
+    "id": "ir_status-consultation",
+    "name": "Consultation",
+    "description": null,
+    "parentId": null,
+    "type": "Interoperability Record status",
+    "extras": {}
+  },
+  {
+    "id": "ir_status-on_hold",
+    "name": "On Hold",
+    "description": null,
+    "parentId": null,
+    "type": "Interoperability Record status",
+    "extras": {}
+  },
+  {
+    "id": "ir_status-update_pending",
+    "name": "Update Pending",
+    "description": null,
+    "parentId": null,
+    "type": "Interoperability Record status",
+    "extras": {}
+  },
+  {
+    "id": "ir_status-accepted",
+    "name": "Accepted",
+    "description": null,
+    "parentId": null,
+    "type": "Interoperability Record status",
+    "extras": {}
+  },
+  {
+    "id": "ir_status-operating",
+    "name": "Operating",
+    "description": null,
+    "parentId": null,
+    "type": "Interoperability Record status",
+    "extras": {}
+  },
+  {
+    "id": "ir_status-deprecated",
+    "name": "Deprecated",
+    "description": null,
+    "parentId": null,
+    "type": "Interoperability Record status",
+    "extras": {}
+  },
+  {
+    "id": "ir_status-abandoned",
+    "name": "Abandoned",
+    "description": null,
+    "parentId": null,
+    "type": "Interoperability Record status",
+    "extras": {}
+  },
+  {
+    "id": "ir_status-withdrawn",
+    "name": "Withdrawn",
+    "description": null,
+    "parentId": null,
+    "type": "Interoperability Record status",
+    "extras": {}
+  },
+  {
+    "id": "ir_status-rejected",
+    "name": "Rejected",
+    "description": null,
+    "parentId": null,
+    "type": "Interoperability Record status",
+    "extras": {}
+  }
+]

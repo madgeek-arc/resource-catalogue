@@ -1,0 +1,170 @@
+[
+  {
+    "id": "provider_legal_status-association",
+    "name": "Association",
+    "description": null,
+    "parentId": null,
+    "type": "Provider legal status",
+    "extras": {}
+  },
+  {
+    "id": "provider_legal_status-charity",
+    "name": "Exempt charity under the Charities Act 2011",
+    "description": null,
+    "parentId": null,
+    "type": "Provider legal status",
+    "extras": {}
+  },
+  {
+    "id": "provider_legal_status-consortium",
+    "name": "Consortium",
+    "description": null,
+    "parentId": null,
+    "type": "Provider legal status",
+    "extras": {}
+  },
+  {
+    "id": "provider_legal_status-corporation",
+    "name": "Corporation",
+    "description": null,
+    "parentId": null,
+    "type": "Provider legal status",
+    "extras": {}
+  },
+  {
+    "id": "provider_legal_status-sce",
+    "name": "European Cooperative Society (SCE)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider legal status",
+    "extras": {}
+  },
+  {
+    "id": "provider_legal_status-european_economic_interest_grouping",
+    "name": "European Economic Interest Grouping (EEIG)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider legal status",
+    "extras": {}
+  },
+  {
+    "id": "provider_legal_status-european_research_infrastructure_consortium",
+    "name": "European Research Infrastructure Consortium (ERIC)",
+    "description": null,
+    "parentId": null,
+    "type": "Provider legal status",
+    "extras": {}
+  },
+  {
+    "id": "provider_legal_status-foundation",
+    "name": "Foundation",
+    "description": null,
+    "parentId": null,
+    "type": "Provider legal status",
+    "extras": {}
+  },
+  {
+    "id": "provider_legal_status-grouping",
+    "name": "Grouping",
+    "description": null,
+    "parentId": null,
+    "type": "Provider legal status",
+    "extras": {}
+  },
+  {
+    "id": "provider_legal_status-international_or_intergovernmental_organisation_or_framework",
+    "name": "International or intergovernmental organisation or framework",
+    "description": null,
+    "parentId": null,
+    "type": "Provider legal status",
+    "extras": {}
+  },
+  {
+    "id": "provider_legal_status-non_for_profit_company",
+    "name": "Non For Profit Company",
+    "description": null,
+    "parentId": null,
+    "type": "Provider legal status",
+    "extras": {}
+  },
+  {
+    "id": "provider_legal_status-non_governmental_organisation",
+    "name": "Non-Governmental Organisation",
+    "description": null,
+    "parentId": null,
+    "type": "Provider legal status",
+    "extras": {}
+  },
+  {
+    "id": "provider_legal_status-partnership",
+    "name": "Partnership",
+    "description": null,
+    "parentId": null,
+    "type": "Provider legal status",
+    "extras": {}
+  },
+  {
+    "id": "provider_legal_status-private_company",
+    "name": "Private Company",
+    "description": null,
+    "parentId": null,
+    "type": "Provider legal status",
+    "extras": {}
+  },
+  {
+    "id": "provider_legal_status-public_company",
+    "name": "Public Company",
+    "description": null,
+    "parentId": null,
+    "type": "Provider legal status",
+    "extras": {}
+  },
+  {
+    "id": "provider_legal_status-public_legal_entity",
+    "name": "Public Legal Entity",
+    "description": null,
+    "parentId": null,
+    "type": "Provider legal status",
+    "extras": {}
+  },
+  {
+    "id": "provider_legal_status-public_legal_entity_under_private_law",
+    "name": "Public Legal Entity under Private Law",
+    "description": null,
+    "parentId": null,
+    "type": "Provider legal status",
+    "extras": {}
+  },
+  {
+    "id": "provider_legal_status-self_employed",
+    "name": "Self Employed",
+    "description": null,
+    "parentId": null,
+    "type": "Provider legal status",
+    "extras": {}
+  },
+  {
+    "id": "provider_legal_status-society",
+    "name": "Society",
+    "description": null,
+    "parentId": null,
+    "type": "Provider legal status",
+    "extras": {}
+  },
+  {
+    "id": "provider_legal_status-trust",
+    "name": "Trust",
+    "description": null,
+    "parentId": null,
+    "type": "Provider legal status",
+    "extras": {}
+  },
+  {
+    "id": "provider_legal_status-union",
+    "name": "Union",
+    "description": null,
+    "parentId": null,
+    "type": "Provider legal status",
+    "extras": {}
+  }
+]

@@ -159,6 +159,13 @@ public class VocabularyManager extends ResourceManager<Vocabulary> implements Vo
         }
     }
 
+    public void deleteByType(Vocabulary.Type type) {
+        List<Vocabulary> toBeDeleted = getByType(type);
+        for (Vocabulary vocabulary : toBeDeleted) {
+            super.delete(vocabulary);
+        }
+    }
+
     @Override
     public VocabularyTree getVocabulariesTree(Vocabulary.Type type) { // TODO: refactor method
         VocabularyTree root = new VocabularyTree();

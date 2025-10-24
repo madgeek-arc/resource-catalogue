@@ -1,0 +1,42 @@
+[
+  {
+    "id": "access_type-mail_in",
+    "name": "Mail-In",
+    "description": "Samples are sent in to for e.g. analysis and the results are returned to the user without the user actually accessing the RI.",
+    "parentId": null,
+    "type": "Access type",
+    "extras": {}
+  },
+  {
+    "id": "access_type-other",
+    "name": "Other",
+    "description": null,
+    "parentId": null,
+    "type": "Access type",
+    "extras": {}
+  },
+  {
+    "id": "access_type-physical",
+    "name": "Physical",
+    "description": "Resources require a physical presence of the user. The user can only access the RI if he is physically present in the specific location that the RI is offered.",
+    "parentId": null,
+    "type": "Access type",
+    "extras": {}
+  },
+  {
+    "id": "access_type-remote",
+    "name": "Remote",
+    "description": "Resources are delivered remotely with the use of a physical infrastructure. The user is able to remotely work with the physical RI without the need of physical presence.",
+    "parentId": null,
+    "type": "Access type",
+    "extras": {}
+  },
+  {
+    "id": "access_type-virtual",
+    "name": "Virtual",
+    "description": "The Resource is delivered through a virtual infrastructure that the use may access virtually through the web or an intranet.",
+    "parentId": null,
+    "type": "Access type",
+    "extras": {}
+  }
+]

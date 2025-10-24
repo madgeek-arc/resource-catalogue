@@ -1,0 +1,642 @@
+[
+  {
+    "id": "provider_meril_scientific_subdomain-biological_and_medical_sciences-agronomy_forestry_plant_breeding_centres",
+    "name": "Agronomy, Forestry, Plant Breeding Centres",
+    "description": "Facilities that enable open field and forest experiments to test the impact of management practices and of environmental conditions on soil, crop, and primary production. These include plants and trees ex-situ collections, experimental facilities for controlled crosses and propagation, and population genetics field testing. The facilities are relevant for Biological- and Environmental Sciences.",
+    "parentId": "provider_meril_scientific_domain-biological_and_medical_sciences",
+    "type": "Provider meril scientific subdomain",
+    "extras": {}
+  },
+  {
+    "id": "provider_meril_scientific_subdomain-biological_and_medical_sciences-animal_facilities",
+    "name": "Animal Facilities",
+    "description": "Facilities that provide husbandry of animals and services to the biomedical research community, usually equipped with highly automated systems that provide the best possible conditions for animal reproduction and maintenance. The main activity is the reproduction and maintenance of animal stocks either of inbred strains or genetically engineered animals, such as transgenic and knockout mouse lines, or even chemically-induced mutants.",
+    "parentId": "provider_meril_scientific_domain-biological_and_medical_sciences",
+    "type": "Provider meril scientific subdomain",
+    "extras": {}
+  },
+  {
+    "id": "provider_meril_scientific_subdomain-biological_and_medical_sciences-bioinformatics_facilities",
+    "name": "Bio-Informatics Facilities",
+    "description": "Bioinformatics facilities generate knowledge through computer analysis of biological data. These can consist of the information stored in the genetic code, but also experimental results from various sources, patient statistics, and scientific literature. Research in bioinformatics includes method development for storage, retrieval, and analysis of the data. Bioinformatics is a rapidly developing branch of biology and is highly interdisciplinary, using techniques and concepts from informatics, statistics, mathematics, chemistry, biochemistry, physics, and linguistics. It has many practical applications in different areas of biology and medicine.",
+    "parentId": "provider_meril_scientific_domain-biological_and_medical_sciences",
+    "type": "Provider meril scientific subdomain",
+    "extras": {}
+  },
+  {
+    "id": "provider_meril_scientific_subdomain-biological_and_medical_sciences-biological_biomedical_engineering_and_biotechnology_nanotechnology_research_facilities",
+    "name": "Biological/Biomedical Engineering & Biotechnology/Nanotechnology Research Facilities",
+    "description": "Facilities that are dedicated to application of concepts and methods of bioscience and/or nanoscience, and/or use of living systems and organisms to develop solutions to problems in life- and preclinical sciences using engineering methodologies.",
+    "parentId": "provider_meril_scientific_domain-biological_and_medical_sciences",
+    "type": "Provider meril scientific subdomain",
+    "extras": {}
+  },
+  {
+    "id": "provider_meril_scientific_subdomain-biological_and_medical_sciences-biomedical_imaging_facilities",
+    "name": "Biomedical Imaging Facilities",
+    "description": "Facilities which are equipped for visualisation, characterisation, and measurement of biological processes at the cellular and tissue levels in humans and other living systems.",
+    "parentId": "provider_meril_scientific_domain-biological_and_medical_sciences",
+    "type": "Provider meril scientific subdomain",
+    "extras": {}
+  },
+  {
+    "id": "provider_meril_scientific_subdomain-biological_and_medical_sciences-cell_culture_facilities",
+    "name": "Cell Culture Facilities",
+    "description": "Facilities that are equipped to provide robust support for isolation and culture of a variety of cell lines (like mammalian and insect cell lines, mouse and human embryonic stem cells), including serum preparation, feeders, growth factors and mycoplasma testing, this may be on serum-based or serum-free media.",
+    "parentId": "provider_meril_scientific_domain-biological_and_medical_sciences",
+    "type": "Provider meril scientific subdomain",
+    "extras": {}
+  },
+  {
+    "id": "provider_meril_scientific_subdomain-biological_and_medical_sciences-clinical_research_centres",
+    "name": "Clinical Research Centres",
+    "description": "Facilities that support patient-oriented research, involving a particular person or group of people or using materials from humans. This research can include: studies of mechanisms of human disease; studies of therapies or interventions for disease; clinical trials; studies to develop new technology related to disease.",
+    "parentId": "provider_meril_scientific_domain-biological_and_medical_sciences",
+    "type": "Provider meril scientific subdomain",
+    "extras": {}
+  },
+  {
+    "id": "provider_meril_scientific_subdomain-biological_and_medical_sciences-collections_of_biological_resources",
+    "name": "Collections of Biological Resources",
+    "description": "Facilities for storage of collections of microorganisms, biological material and the associated data and information facilities for a population or a large subset of a population, maintained under controlled conditions (temperature, humidity, atmosphere, etc.). The biological resources, including microorganisms, human/animal cells, tissue, blood and DNA, seeds of crops, trees and wild plant species, are conserved for their genetic endowment. Databases established on these provide holistic information on each accession with scientific descriptors, ethno-botanical/ zoological/microbiological/medical knowledge, including for the purpose of establishing intellectual property rights and ownership over the biomaterial stored.",
+    "parentId": "provider_meril_scientific_domain-biological_and_medical_sciences",
+    "type": "Provider meril scientific subdomain",
+    "extras": {}
+  },
+  {
+    "id": "provider_meril_scientific_subdomain-biological_and_medical_sciences-environmental_health_research_facilities",
+    "name": "Environmental Health Research Facilities",
+    "description": "Environmental health research addresses all potential hazards caused to a human being or an animal by external physical, chemical, and biological factors, and all the related factors impacting behaviours. It encompasses the assessment and control of those environmental factors that can potentially affect health. It is targeted towards preventing disease and creating health-supportive environments. This definition excludes behaviour not related to environment, as well as behaviour related to the social and cultural environment, and genetics. This subdomain includes toxicology and infectious diseases facilities as well as epidemiological study centres.",
+    "parentId": "provider_meril_scientific_domain-biological_and_medical_sciences",
+    "type": "Provider meril scientific subdomain",
+    "extras": {}
+  },
+  {
+    "id": "provider_meril_scientific_subdomain-biological_and_medical_sciences-genomic_transcriptomic_proteomics_and_metabolomics_facilities",
+    "name": "Genomic, Transcriptomic, Proteomics and Metabolomics Facilities",
+    "description": "Multiple sites ranging from single laboratory DNA sequencing and RNA transcript analysis facilities run by biologists for their own department's research to high-throughput facilities aimed at providing a sophisticated service for a broad community of biologists run by informaticians, biologists and engineers. Proteomics: physical chemistry developments for clinical and biological applications getting access to proteins network linked to the physiological and pathological stated of the cells. This includes nutrigenomics research.",
+    "parentId": "provider_meril_scientific_domain-biological_and_medical_sciences",
+    "type": "Provider meril scientific subdomain",
+    "extras": {}
+  },
+  {
+    "id": "provider_meril_scientific_subdomain-biological_and_medical_sciences-other_biological_and_medical_sciences",
+    "name": "Other",
+    "description": null,
+    "parentId": "provider_meril_scientific_domain-biological_and_medical_sciences",
+    "type": "Provider meril scientific subdomain",
+    "extras": {}
+  },
+  {
+    "id": "provider_meril_scientific_subdomain-biological_and_medical_sciences-structural_biology_facilities",
+    "name": "Structural Biology Facilities",
+    "description": "Facilities which are equipped for visualisation, characterisation, and measurement of biological processes at the molecular level in humans and other living systems. Main technologies include protein crystallisation, X-ray diffraction, mass spectrometry, DSC.",
+    "parentId": "provider_meril_scientific_domain-biological_and_medical_sciences",
+    "type": "Provider meril scientific subdomain",
+    "extras": {}
+  },
+  {
+    "id": "provider_meril_scientific_subdomain-biological_and_medical_sciences-systems_biology_computational_biology_facilities",
+    "name": "Systems Biology/Computational Biology Facilities",
+    "description": "Laboratories that combine all relevant scientific disciplines and the know-how to integrate experimental data with computational and theoretical approaches with the aim of targeting, understanding and engineering pathways, cells, organs and complete organisms.",
+    "parentId": "provider_meril_scientific_domain-biological_and_medical_sciences",
+    "type": "Provider meril scientific subdomain",
+    "extras": {}
+  },
+  {
+    "id": "provider_meril_scientific_subdomain-biological_and_medical_sciences-telemedicine_laboratories_and_ehealth_technologies",
+    "name": "Telemedicine Laboratories & E-Health Technologies",
+    "description": "E-Health is an emerging concept relating to the use of networked digital ICTs (primarily the Internet) to facilitate the organisation & delivery of health care and services. It encompasses applications for providers and organisations (e.g. for storing, exchanging and using clinical or administrative data, or aiding evidence-based practice) and for citizens and patients (e.g. web- based health information, education, virtual consulting), as well as research applications of e- Health technologies.",
+    "parentId": "provider_meril_scientific_domain-biological_and_medical_sciences",
+    "type": "Provider meril scientific subdomain",
+    "extras": {}
+  },
+  {
+    "id": "provider_meril_scientific_subdomain-biological_and_medical_sciences-translational_research_centres",
+    "name": "Translational Research Centres",
+    "description": "Translational Research Centres support the integration of evidence based medicine, social sciences and political sciences with the aim of optimising patient care and preventive measures which may extend beyond healthcare services. This is the process of turning appropriate biological discoveries into drugs and medical devices that can be used in the treatment of patients.",
+    "parentId": "provider_meril_scientific_domain-biological_and_medical_sciences",
+    "type": "Provider meril scientific subdomain",
+    "extras": {}
+  },
+  {
+    "id": "provider_meril_scientific_subdomain-chemistry_and_material_sciences-analytical_facilities",
+    "name": "Analytical Facilities",
+    "description": "All facilities where analytical tools are used that are based on one of the following probes or methods: electrons, photons, neutrons, radio frequency, NMR, or analytical chemistry. It does include Surface Science Laboratories dedicated to analysis and characterization of surface and interface phenomena. Different users would come from the scientific domains Chemistry, Earth science, Bio-Medical (including forensic) science and different sensitivities (Analytical Chemistry, electron microscopy laboratories); NMR facilities; surface science laboratories; x- ray diffraction; Electron Microscopy Laboratories, aspects in life sciences, earth, forensics; Surface Science Laboratories.",
+    "parentId": "provider_meril_scientific_domain-chemistry_and_material_sciences",
+    "type": "Provider meril scientific subdomain",
+    "extras": {}
+  },
+  {
+    "id": "provider_meril_scientific_subdomain-chemistry_and_material_sciences-chemical_libraries_and_screening_facilities",
+    "name": "Chemical Libraries & Screening Facilities",
+    "description": "Digital libraries related to chemistry as well as screening facilities.",
+    "parentId": "provider_meril_scientific_domain-chemistry_and_material_sciences",
+    "type": "Provider meril scientific subdomain",
+    "extras": {}
+  },
+  {
+    "id": "provider_meril_scientific_subdomain-chemistry_and_material_sciences-intense_light_sources",
+    "name": "Intense Light Sources",
+    "description": "All facilities that provide access to intense light radiation sources as used for lasers, synchrotrons, Free Electron Lasers. The facilities are relevant to the scientific domains of Physics, Chemistry, Bio-Medical Sciences, Earth and Environmental Sciences, Humanities & Arts, Information Science & Technology; Laser Sources for materials synthesis laboratories; Laser Sources for spectroscopy laboratories; Synchrotron Light Sources and X-Ray Diffraction Facilities.",
+    "parentId": "provider_meril_scientific_domain-chemistry_and_material_sciences",
+    "type": "Provider meril scientific subdomain",
+    "extras": {}
+  },
+  {
+    "id": "provider_meril_scientific_subdomain-chemistry_and_material_sciences-intense_neutron_sources",
+    "name": "Intense Neutron Sources",
+    "description": "Accelerator-based neutron source facility that provides the intense pulsed neutron beam.",
+    "parentId": "provider_meril_scientific_domain-chemistry_and_material_sciences",
+    "type": "Provider meril scientific subdomain",
+    "extras": {}
+  },
+  {
+    "id": "provider_meril_scientific_subdomain-chemistry_and_material_sciences-materials_synthesis_or_testing_facilities",
+    "name": "Materials Synthesis or Testing Facilities",
+    "description": "All single or multi sited facilities run by engineers and materials scientists to process or test materials with regard to predefined specifications. It includes testing and processing equipment, structural and properties characterization instruments. The facilities are relevant to the scientific domains of Engineering, Materials Sciences, Physics, and Chemistry.",
+    "parentId": "provider_meril_scientific_domain-chemistry_and_material_sciences",
+    "type": "Provider meril scientific subdomain",
+    "extras": {}
+  },
+  {
+    "id": "provider_meril_scientific_subdomain-chemistry_and_material_sciences-other_chemistry_and_material_sciences",
+    "name": "Other",
+    "description": null,
+    "parentId": "provider_meril_scientific_domain-chemistry_and_material_sciences",
+    "type": "Provider meril scientific subdomain",
+    "extras": {}
+  },
+  {
+    "id": "provider_meril_scientific_subdomain-chemistry_and_material_sciences-pilot_plants_for_process_testing",
+    "name": "Pilot Plants for Process Testing",
+    "description": "Plants where processes in biological or chemical systems, including bioenergy/biorefinery research and food processing research, are tested on a pilot level scale. Biology, Chemistry.",
+    "parentId": "provider_meril_scientific_domain-chemistry_and_material_sciences",
+    "type": "Provider meril scientific subdomain",
+    "extras": {}
+  },
+  {
+    "id": "provider_meril_scientific_subdomain-chemistry_and_material_sciences-reference_material_repositories",
+    "name": "Reference Material Repositories",
+    "description": "Facilities providing materials with at least one standardised and fully described property that can be used in measurements e.g. as a standard for calibration of instruments or as reference for measuring other materials.",
+    "parentId": "provider_meril_scientific_domain-chemistry_and_material_sciences",
+    "type": "Provider meril scientific subdomain",
+    "extras": {}
+  },
+  {
+    "id": "provider_meril_scientific_subdomain-earth_and_environmental_sciences-acoustic_monitoring_stations",
+    "name": "Acoustic Monitoring Stations",
+    "description": "Non audible very low frequency waves infrasound stations, (volcano meteors monitoring, avalanches, landslides) ; audible frequency stations and hydro acoustic stations (marine mammals, multi-beam, acoustic tomography, echosounders, sodar); high frequency stations ( T-phase stations).",
+    "parentId": "provider_meril_scientific_domain-earth_and_environmental_sciences",
+    "type": "Provider meril scientific subdomain",
+    "extras": {}
+  },
+  {
+    "id": "provider_meril_scientific_subdomain-earth_and_environmental_sciences-atmospheric_measurement_facilities",
+    "name": "Atmospheric Measurement Facilities",
+    "description": "Meteorological stations (all physical parameters that can be observed) ; Global Atmospheric Watch (GAW); Airglow; Ionospheric stations (all sky cameras, ionospheric radar); brewers; lidars; chemical compositions, pollution and radionuclides facilities; This includes atmospheric test chambers, used to conduct controlled experiments for climate change research and atmosphere related problems.",
+    "parentId": "provider_meril_scientific_domain-earth_and_environmental_sciences",
+    "type": "Provider meril scientific subdomain",
+    "extras": {}
+  },
+  {
+    "id": "provider_meril_scientific_subdomain-earth_and_environmental_sciences-earth_observation_satellites",
+    "name": "Earth Observation Satellites",
+    "description": "Including Optical-IR Earth Observation satellites and Radar Earth Observation satellites.",
+    "parentId": "provider_meril_scientific_domain-earth_and_environmental_sciences",
+    "type": "Provider meril scientific subdomain",
+    "extras": {}
+  },
+  {
+    "id": "provider_meril_scientific_subdomain-earth_and_environmental_sciences-earth_ocean_marine_freshwater_and_atmosphere_data_centres",
+    "name": "Earth, Ocean, Marine, Freshwater, & Atmosphere Data Centres",
+    "description": "Platforms for the exchange of earth, oceanographic, marine, freshwater and atmospheric data and information, and for advisory services in the field of earth, ocean, marine, freshwater and atmospheric data management. National Data Centres, Designated National Agencies for international data exchange and Satellite Data Centres represent the backbone of the data and information infrastructure. National networks are usually put in place to interconnect the data centres of major national institutes. The overall objective is to significantly improve the overview and access to data and data analysis from government and research institutes.",
+    "parentId": "provider_meril_scientific_domain-earth_and_environmental_sciences",
+    "type": "Provider meril scientific subdomain",
+    "extras": {}
+  },
+  {
+    "id": "provider_meril_scientific_subdomain-earth_and_environmental_sciences-earthquake_simulation_laboratories",
+    "name": "Earthquake Simulation Laboratories",
+    "description": "Facilities that are equipped to do computer-assisted earthquake simulation.",
+    "parentId": "provider_meril_scientific_domain-earth_and_environmental_sciences",
+    "type": "Provider meril scientific subdomain",
+    "extras": {}
+  },
+  {
+    "id": "provider_meril_scientific_subdomain-earth_and_environmental_sciences-environmental_management_infrastructures",
+    "name": "Environmental Management Infrastructures",
+    "description": "Pilot facilities and experimental infrastructures for management, ecological restoration and environmental mitigation of terrestrial and aquatic ecosystems in natural or degraded conditions (including hydrological and soil management field facilities; decontamination and bioremediation facilities and pilot plants).",
+    "parentId": "provider_meril_scientific_domain-earth_and_environmental_sciences",
+    "type": "Provider meril scientific subdomain",
+    "extras": {}
+  },
+  {
+    "id": "provider_meril_scientific_subdomain-earth_and_environmental_sciences-geothermal_research_facilities",
+    "name": "Geothermal Research Facilities",
+    "description": "Facilities that enable research, development, and demonstration of technologies to advance the use of geothermal energy as a clean, renewable, domestic power source.",
+    "parentId": "provider_meril_scientific_domain-earth_and_environmental_sciences",
+    "type": "Provider meril scientific subdomain",
+    "extras": {}
+  },
+  {
+    "id": "provider_meril_scientific_subdomain-earth_and_environmental_sciences-in_situ_earth_observatories",
+    "name": "In Situ Earth Observatories",
+    "description": "Platforms and sensor technologies deployed in situ to collect environmental data (including physical, chemical and biological observations) in support of terrestrial environmental research and management activities. These facilities, including ecological habitat field stations, provide a base for trans-disciplinary research and training, with access to terrestrial field sites for survey and experimental opportunities and often supporting environmental observations and the collection of long-term time series data sets (a.o. on biodiversity).",
+    "parentId": "provider_meril_scientific_domain-earth_and_environmental_sciences",
+    "type": "Provider meril scientific subdomain",
+    "extras": {}
+  },
+  {
+    "id": "provider_meril_scientific_subdomain-earth_and_environmental_sciences-in_situ_marine_freshwater_observatories",
+    "name": "In Situ Marine/Freshwater Observatories",
+    "description": "Platforms and sensor technologies deployed in situ to collect environmental data (including physical, chemical and biological observations) in support of aquatic environmental research and management activities. These facilities, including marine/freshwater research centres, provide a base for trans-disciplinary research and training, with access to marine and freshwater field sites, and equipment (including research vessels that may carry large exchangeable underwater equipment/instruments ) for survey and experimental opportunities and often supporting environmental observations and the collection of long-term time series data sets (a.o. on biodiversity). Typical equipment includes: Buoys; Argo; gliders; autonomous underwater vehicles; remotely operated vehicle (Victor); Tide gauges; deep sea laboratories. Ship-time for stock assessments, polar supply, naval research, and educational courses and non- academic research are not considered in this context. For this inventory the atmospheric measurement facilities are kept as a separate subdomain. This implies that some marine research centres will also fall under this subdomain if they host an atmospheric measurement site.",
+    "parentId": "provider_meril_scientific_domain-earth_and_environmental_sciences",
+    "type": "Provider meril scientific subdomain",
+    "extras": {}
+  },
+  {
+    "id": "provider_meril_scientific_subdomain-earth_and_environmental_sciences-natural_history_collections",
+    "name": "Natural History Collections",
+    "description": "Facilities that serve as a library of organisms have lived and/or are living on Earth and curation sites for materials relevant for planetary exploration. They contribute to specific research and public education in an easily accessible venue.",
+    "parentId": "provider_meril_scientific_domain-earth_and_environmental_sciences",
+    "type": "Provider meril scientific subdomain",
+    "extras": {}
+  },
+  {
+    "id": "provider_meril_scientific_subdomain-earth_and_environmental_sciences-other_earth_and_environmental_sciences",
+    "name": "Other",
+    "description": null,
+    "parentId": "provider_meril_scientific_domain-earth_and_environmental_sciences",
+    "type": "Provider meril scientific subdomain",
+    "extras": {}
+  },
+  {
+    "id": "provider_meril_scientific_subdomain-earth_and_environmental_sciences-polar_and_cryospheric_research_infrastructures",
+    "name": "Polar and Cryospheric Research Infrastructures",
+    "description": "Arctic and Antarctic stations; high altitude and mountain stations; heavy icebreakers; International Partnerships in Ice Core Sciences (IPICS); ANDRILL; Polar Ionospheric stations.",
+    "parentId": "provider_meril_scientific_domain-earth_and_environmental_sciences",
+    "type": "Provider meril scientific subdomain",
+    "extras": {}
+  },
+  {
+    "id": "provider_meril_scientific_subdomain-earth_and_environmental_sciences-research_aircraft",
+    "name": "Research Aircraft",
+    "description": null,
+    "parentId": "provider_meril_scientific_domain-earth_and_environmental_sciences",
+    "type": "Provider meril scientific subdomain",
+    "extras": {}
+  },
+  {
+    "id": "provider_meril_scientific_subdomain-earth_and_environmental_sciences-solid_earth_observatories",
+    "name": "Solid Earth Observatories, including Seismological Monitoring Stations",
+    "description": "Drilling platforms and sensor technologies deployed to collect solid earth data and material in support of solid earth research and management activities. This includes facilities that collect seismological data to be added to the European Integrated Data Archive (EIDA) and made available to the scientific community. Integrated Ocean Drilling Programme (IODP) and Integrated Continental Drilling Programme (ICDP); Sediment Coring Archives; VLBI stations.",
+    "parentId": "provider_meril_scientific_domain-earth_and_environmental_sciences",
+    "type": "Provider meril scientific subdomain",
+    "extras": {}
+  },
+  {
+    "id": "provider_meril_scientific_subdomain-engineering_and_energy-aerospace_and_aerodynamics_research_facilities",
+    "name": "Aerospace & Aerodynamics Research Facilities",
+    "description": "Single-sited facilities providing a controlled wind stream in which objects (aircrafts, vehicles, buildings) are placed in order to measure their aerodynamic properties, using for instance lasers and/or simulate an operation and control during flight/ drive; includes wind tunnels.",
+    "parentId": "provider_meril_scientific_domain-engineering_and_energy",
+    "type": "Provider meril scientific subdomain",
+    "extras": {}
+  },
+  {
+    "id": "provider_meril_scientific_subdomain-engineering_and_energy-civil_engineering_research_infrastructures",
+    "name": "Civil Engineering Research Infrastructures",
+    "description": "Single-sited, distributed or virtual facilities for the design, construction, testing (including the use of shaking tables) and maintenance of non-military, non-aerospace or non-mechanical large structures, typically including large buildings, transport infrastructures, bridges, dams, tunnels, sewers, plus river, coastal and public health engineering.",
+    "parentId": "provider_meril_scientific_domain-engineering_and_energy",
+    "type": "Provider meril scientific subdomain",
+    "extras": {}
+  },
+  {
+    "id": "provider_meril_scientific_subdomain-engineering_and_energy-electrical_and_optical_engineering_facilities",
+    "name": "Electrical & Optical Engineering Facilities",
+    "description": "Single- or multi-sited facilities that offer scientists and engineers access to devices for handling light, utilizing properties of light, and detecting light or access to infrastructure for research and development in the fields of electricity, electronics, and electromagnetism. These infrastructures may either broadly deal with electrical or electronic engineering, or be focused specifically on some of the numerous subtopics, like electronics, electric power, telecommunications, control systems, or other.",
+    "parentId": "provider_meril_scientific_domain-engineering_and_energy",
+    "type": "Provider meril scientific subdomain",
+    "extras": {}
+  },
+  {
+    "id": "provider_meril_scientific_subdomain-engineering_and_energy-energy_engineering_facilities",
+    "name": "Energy Engineering Facilities (non-nuclear)",
+    "description": "Combustion, solar, wind, production & distribution, includes, combustion test facilities and associated technologies.",
+    "parentId": "provider_meril_scientific_domain-engineering_and_energy",
+    "type": "Provider meril scientific subdomain",
+    "extras": {}
+  },
+  {
+    "id": "provider_meril_scientific_subdomain-engineering_and_energy-marine_and_maritime_engineering_facilities",
+    "name": "Marine & Maritime Engineering Facilities",
+    "description": "Experimental facilities in the fields of hydraulics, geophysical fluid dynamics, ship dynamics and ice engineering research. These include: Basins (both for marine research with waves and/or (tidal) currents and research on inland water issues); multi-directional wave basins; flumes (both for marine research and for research on inland water issues); towing tanks for ship dynamics research; cavitation tunnels; rotation basins for research on Coriolis-dominated issues; facilities for ice research; other hydraulic facilities. The facilities are relevant for the scientific domains Engineering, Earth and Environmental Sciences, Marine and Polar Sciences.",
+    "parentId": "provider_meril_scientific_domain-engineering_and_energy",
+    "type": "Provider meril scientific subdomain",
+    "extras": {}
+  },
+  {
+    "id": "provider_meril_scientific_subdomain-engineering_and_energy-mechanical_engineering_facilities",
+    "name": "Mechanical Engineering Facilities",
+    "description": "Facilities dedicated to manufacturing, assembly and testing of components and systems offering services related to control, integration and realization of products and processes including modelling and simulation tools. Processing technology, road-transport vehicle development and testing are included.",
+    "parentId": "provider_meril_scientific_domain-engineering_and_energy",
+    "type": "Provider meril scientific subdomain",
+    "extras": {}
+  },
+  {
+    "id": "provider_meril_scientific_subdomain-engineering_and_energy-other_engineering_and_energy",
+    "name": "Other",
+    "description": null,
+    "parentId": "provider_meril_scientific_domain-engineering_and_energy",
+    "type": "Provider meril scientific subdomain",
+    "extras": {}
+  },
+  {
+    "id": "provider_meril_scientific_subdomain-humanities_and_arts-collections",
+    "name": "Collections",
+    "description": "Sets of often unique objects and items of different types collected usually to be exhibited. Collections normally include a collecting policy for new acquisitions, so only objects and items in certain categories and of a certain quality are accepted into the collection. Objects in a collection are normally catalogued, traditionally in a card index, but nowadays this is being replaced by computerized database also for physical collections. These type of RIs are particularly relevant for the humanities, which often deal with the study of unique artefacts, but they can be relevant for other domains, such as social sciences, life and environmental sciences. PHYSICAL: Museums, Galleries, Analogue audio/visual/multimedia collections, Archaeology, Anthropology and Ethnology Collections, Arts & Art History Collections, Music and Instrument Collections, Datasets (e.g. analogue audio/visual/multimedia datasets). DIGITAL: Archaeology, Anthropology and Ethnology Collections, Arts & Art History Collections, Digitised Manuscript Collections, Music and Instrument Collections, Virtual museums, Virtual galleries, Datasets.",
+    "parentId": "provider_meril_scientific_domain-humanities_and_arts",
+    "type": "Provider meril scientific subdomain",
+    "extras": {}
+  },
+  {
+    "id": "provider_meril_scientific_subdomain-humanities_and_arts-conceptual_models",
+    "name": "Conceptual Models",
+    "description": "Explicit formalisations that map a concept to its intended semantics. Conceptual models are adopted in every research domain (e.g. economic models, mathematical models). In the humanities, however, some conceptual models have developed into RIs indispensable to structure a certain knowledge domain, such as is the case for thesauri and taxonomies (also very much used in life sciences) which have a long tradition in supporting analytical efforts especially in linguistics. Increasingly, digital models built around conceptual ontologies and networks are being developed for modelling specific research domain or for cross-referencing purposes in the Humanities.",
+    "parentId": "provider_meril_scientific_domain-humanities_and_arts",
+    "type": "Provider meril scientific subdomain",
+    "extras": {}
+  },
+  {
+    "id": "provider_meril_scientific_subdomain-humanities_and_arts-databases",
+    "name": "Databases",
+    "description": "Structured sets of data for one or more purposes, usually in digital form. The term database applies to the data and their supporting data structures. The utilisation of databases is spread across all scientific disciplines. Databases are therefore RIs relevant to all scientific domains. Databases in the form of structured meta-data as well as analytical data organised usually within a relational model have been extensively developed as RIs in the Humanities with increasing uptake in all its disciplines: Archaeology, Anthropology and Ethnology Databases, Arts & Art History Databases, History Databases, Digitised Manuscript Databases.",
+    "parentId": "provider_meril_scientific_domain-humanities_and_arts",
+    "type": "Provider meril scientific subdomain",
+    "extras": {}
+  },
+  {
+    "id": "provider_meril_scientific_subdomain-humanities_and_arts-other_humanities_and_arts",
+    "name": "Other",
+    "description": null,
+    "parentId": "provider_meril_scientific_domain-humanities_and_arts",
+    "type": "Provider meril scientific subdomain",
+    "extras": {}
+  },
+  {
+    "id": "provider_meril_scientific_subdomain-humanities_and_arts-repositories",
+    "name": "Repositories",
+    "description": "Locations for storage of often unique objects and items of different nature, in general for preservation purposes. Repositories not only have the function to store objects and items but they also guarantee access for future retrieval and study. This type of RI in its general definition is relevant to all scientific domains (for instance as far as physical or virtual facility for the deposit of academic publications such as academic journal articles are concerned); however, some humanities disciplines strongly rely on specific repositories for its analysis. PHYSICAL: Analogue audio/visual/multimedia repositories, Archaeology, Anthropology and Ethnology Repositories, Arts & Art History Repositories. DIGITAL: Data repositories (e.g. digital library), Archaeology, Anthropology and Ethnology Repositories, Arts & Art History Repositories, Digitised Manuscript Repositories.",
+    "parentId": "provider_meril_scientific_domain-humanities_and_arts",
+    "type": "Provider meril scientific subdomain",
+    "extras": {}
+  },
+  {
+    "id": "provider_meril_scientific_subdomain-humanities_and_arts-research_archives",
+    "name": "Research Archives",
+    "description": "Accounting normally for organised sets of unpublished and almost always unique historical records, or the physical place they are located, archives contain primary source documents (texts, maps, pictures etc.) in physical but also increasingly digital form (e.g. text archives structured in databases) that have accumulated over the course of an individual or organisation's lifetime. In general, archives consist of records that have been selected for permanent or long-term preservation on grounds of their enduring cultural, historical, or evidentiary value. Archives are thus particularly relevant to the Humanities, chiefly to historians but also to many other Humanities researchers dealing with primary sources of various kinds. A scientific discipline called archival science, dedicated to the study and practice of organising, preserving, and providing access to information and materials in archives, has established itself within the Humanities: History Archives, Literature and Text Archives.",
+    "parentId": "provider_meril_scientific_domain-humanities_and_arts",
+    "type": "Provider meril scientific subdomain",
+    "extras": {}
+  },
+  {
+    "id": "provider_meril_scientific_subdomain-humanities_and_arts-research_bibliographies",
+    "name": "Research Bibliographies",
+    "description": "Large-scale systematic lists of books and other works such as journal articles, reference and access resources. They can be physical publications (i.e. bound volumes) or digital (indexes and catalogues usually in the form of databases). They can be generally divided into enumerative bibliography, which results in an overview of publications in a particular subdomain, and analytical, or critical, bibliography, which studies the production of research material (in the form of books as well as other formats, including recordings, motion pictures, videos, graphic objects, databases, CD-ROMs and websites). As a bibliography can be produced in any field, it could be considered a transversal subdomain; however it is Humanities research especially that has traditionally relied on such tools to systematise its fields of enquiry – spanning centuries of relevant publications for many humanities disciplines – and circumscribe its research domain.",
+    "parentId": "provider_meril_scientific_domain-humanities_and_arts",
+    "type": "Provider meril scientific subdomain",
+    "extras": {}
+  },
+  {
+    "id": "provider_meril_scientific_subdomain-humanities_and_arts-research_libraries",
+    "name": "Research Libraries",
+    "description": "Traditionally, large collections of books, or the place in which the collection is housed. However, the term library has extended its meaning to refer to any collection, including digital sources, resources, and services. The collections can be of print, audio, and visual materials in numerous formats, including maps, prints, documents, microform (microfilm/microfiche), CDs, cassettes, videotapes, DVDs, video games, e-books, audiobooks and many other electronic resources. A research library is a collection of useful material for research use. A library is organised for use and maintained by a public body, an institution, a corporation, or a private individual. In addition to providing materials, libraries also provide the services of librarians who are experts at finding and organising information and at interpreting information needs. Modern libraries are increasingly being redefined as places to get unrestricted access to information in many formats and from many sources. They are extending services beyond the physical walls of a building, by providing material accessible by electronic means, and by providing the assistance of librarians in navigating and analysing tremendous amounts of information with a variety of digital tools. Libraries are valuable to all scientific domains; however, they are of specific relevance to Humanities research which relies on access to historical and rare collections of unique artefacts (e.g. primary sources such as ancient manuscripts) and other sources to study those artefacts and works (secondary and tertiary sources) usually held within libraries and otherwise hardly accessible. A scientific discipline called library and information science, an interdisciplinary or multidisciplinary field dedicated to the analysis, collection, organisation, classification, manipulation, preservation, retrieval and dissemination of information resources, has established itself at the crossroads between social sciences, humanities and computer sciences. Historically, library science has also included archival science.",
+    "parentId": "provider_meril_scientific_domain-humanities_and_arts",
+    "type": "Provider meril scientific subdomain",
+    "extras": {}
+  },
+  {
+    "id": "provider_meril_scientific_subdomain-information_science_and_technology-centralised_computing_facilities",
+    "name": "Centralised Computing Facilities",
+    "description": "Single-sited facilities with a centralised control that enable high performance computing through supercomputers. These are relevant to all scientific domains.",
+    "parentId": "provider_meril_scientific_domain-information_science_and_technology",
+    "type": "Provider meril scientific subdomain",
+    "extras": {}
+  },
+  {
+    "id": "provider_meril_scientific_subdomain-information_science_and_technology-communication_networks",
+    "name": "Communication Networks",
+    "description": "Facilities responsible, at national or international levels, for the provision of data communications networks, capacity and services to the research and education community in all scientific domains. The networks typically connect other networks at international, regional or metropolitan level.",
+    "parentId": "provider_meril_scientific_domain-information_science_and_technology",
+    "type": "Provider meril scientific subdomain",
+    "extras": {}
+  },
+  {
+    "id": "provider_meril_scientific_subdomain-information_science_and_technology-complex_data_facilities",
+    "name": "Complex Data Facilities",
+    "description": "Facilities to store huge and high dimensional data volumes and apply statistical methods to classify or cluster the data in order to extract valuable information. The facilities are relevant to Bio-Medical Sciences; Earth and Environmental Sciences; Physics; Astrophysics; Social Sciences.",
+    "parentId": "provider_meril_scientific_domain-information_science_and_technology",
+    "type": "Provider meril scientific subdomain",
+    "extras": {}
+  },
+  {
+    "id": "provider_meril_scientific_subdomain-information_science_and_technology-distributed_computing_facilities",
+    "name": "Distributed Computing Facilities",
+    "description": "Facilities for virtualisation, grid and cloud computing, or capability computing that are loosely coupled, heterogeneous, and geographically dispersed distributed system with non-interactive workloads that involve a large number of files. They federate, share and coordinate distributed resources from different organisations that are not subject to centralized control, using open, general-purpose and in some cases standard protocols and interfaces to deliver non-trivial qualities of service relevant to all scientific domains.",
+    "parentId": "provider_meril_scientific_domain-information_science_and_technology",
+    "type": "Provider meril scientific subdomain",
+    "extras": {}
+  },
+  {
+    "id": "provider_meril_scientific_subdomain-information_science_and_technology-other_information_science_and_technology",
+    "name": "Other",
+    "description": null,
+    "parentId": "provider_meril_scientific_domain-information_science_and_technology",
+    "type": "Provider meril scientific subdomain",
+    "extras": {}
+  },
+  {
+    "id": "provider_meril_scientific_subdomain-information_science_and_technology-software_service_facilities",
+    "name": "Software Service Facilities",
+    "description": "Facilities that provide access to well fabricated software for modelling, simulation, development, control and optimization, including software libraries/ repositories or support services for the implementation of the software, their maintenance and adaptation to new hardware platforms as well consultation regarding proper use of the software as well as training facilities for users. These are relevant to all scientific domains.",
+    "parentId": "provider_meril_scientific_domain-information_science_and_technology",
+    "type": "Provider meril scientific subdomain",
+    "extras": {}
+  },
+  {
+    "id": "provider_meril_scientific_subdomain-other-other",
+    "name": "Other",
+    "description": null,
+    "parentId": "provider_meril_scientific_domain-other",
+    "type": "Provider meril scientific subdomain",
+    "extras": {}
+  },
+  {
+    "id": "provider_meril_scientific_subdomain-physics_astronomy_astrophysics_and_mathematics-astro_particle_and_neutrino_detectors_and_observatories",
+    "name": "Astro-Particle & Neutrino Detectors & Observatories",
+    "description": "Range of detectors/observatories, using interactions in water or ice for detecting astrophysical neutrinos, interactions in liquid noble gases or solids for searching for dark matter particles, and light emission in the atmosphere for the detection of gamma rays from astrophysical sources.",
+    "parentId": "provider_meril_scientific_domain-physics_astronomy_astrophysics_and_mathematics",
+    "type": "Provider meril scientific subdomain",
+    "extras": {}
+  },
+  {
+    "id": "provider_meril_scientific_subdomain-physics_astronomy_astrophysics_and_mathematics-centres_for_advanced_research_in_mathematics",
+    "name": "Centres for Advanced Research in Mathematics",
+    "description": "Research Centres hosting researchers and organizing scientific events at a high level. Three different types of centres can be distinguished according to their aim: a) centres organizing high level one week conferences in mathematics or their interface with sciences and industry; b) centres organizing, over three or more months, targeted advanced scientific programmes at doctoral level or on specific research challenges; c) high-level research institutes with few permanent positions and a highly developed visitor’s programme. (High level mathematics, interface between mathematics and other sciences).",
+    "parentId": "provider_meril_scientific_domain-physics_astronomy_astrophysics_and_mathematics",
+    "type": "Provider meril scientific subdomain",
+    "extras": {}
+  },
+  {
+    "id": "provider_meril_scientific_subdomain-physics_astronomy_astrophysics_and_mathematics-centres_for_development_of_industrial_mathematics",
+    "name": "Centres for Development of Industrial Mathematics",
+    "description": "Centres devoted to the development of the interface between mathematics and industry. Their research groups offer a wide range of mathematical expertise and are able to interact with scientists from other disciplines (life sciences, bio-medicine, material sciences, engineering, computer sciences, physics, social sciences, etc.) both in the academic or industrial frameworks. (Industrial mathematics, applied mathematics).",
+    "parentId": "provider_meril_scientific_domain-physics_astronomy_astrophysics_and_mathematics",
+    "type": "Provider meril scientific subdomain",
+    "extras": {}
+  },
+  {
+    "id": "provider_meril_scientific_subdomain-physics_astronomy_astrophysics_and_mathematics-cross_disciplinary_centres_in_mathematics",
+    "name": "Cross-Disciplinary Centres in Mathematics",
+    "description": "Specialised structures devoted to the interaction of mathematics with other sciences (e.g. biology, genomics, chemistry, computer sciences …). These structures strive at developing new areas of research where mathematics is known to play a founding role as it did in the development of physics. (Cross-disciplinary centres; mathematical sciences; interaction of mathematics).",
+    "parentId": "provider_meril_scientific_domain-physics_astronomy_astrophysics_and_mathematics",
+    "type": "Provider meril scientific subdomain",
+    "extras": {}
+  },
+  {
+    "id": "provider_meril_scientific_subdomain-physics_astronomy_astrophysics_and_mathematics-extreme_conditions_facilities",
+    "name": "Extreme Conditions Facilities",
+    "description": "All facilities where materials are studied under extreme physical conditions as in High Magnetic Field Laboratories, High Pressure Laboratories, Low Temperature Laboratories, High Radiation Facilities, and Microgravity platforms.",
+    "parentId": "provider_meril_scientific_domain-physics_astronomy_astrophysics_and_mathematics",
+    "type": "Provider meril scientific subdomain",
+    "extras": {}
+  },
+  {
+    "id": "provider_meril_scientific_subdomain-physics_astronomy_astrophysics_and_mathematics-gravitational_wave_detectors_and_observatories",
+    "name": "Gravitational Wave Detectors & Observatories",
+    "description": "Instruments using laser interferometry between freely hung test masses up to several km apart in vacuum. The lengths of two perpendicular arms, defined by the test masses, are compared and fluctuations in the arm length differences are recorded and analysed for potential GW signals. Links to earth observation.",
+    "parentId": "provider_meril_scientific_domain-physics_astronomy_astrophysics_and_mathematics",
+    "type": "Provider meril scientific subdomain",
+    "extras": {}
+  },
+  {
+    "id": "provider_meril_scientific_subdomain-physics_astronomy_astrophysics_and_mathematics-high_energy_physics_facilities",
+    "name": "High Energy Physics Facilities",
+    "description": "High Energy Physics Facilities include accelerators, colliders, targets, light sources and detectors of high energy particles through electrostatic or oscillating fields accelerating particles to speeds sufficient to cause nuclear and particle reactions.",
+    "parentId": "provider_meril_scientific_domain-physics_astronomy_astrophysics_and_mathematics",
+    "type": "Provider meril scientific subdomain",
+    "extras": {}
+  },
+  {
+    "id": "provider_meril_scientific_subdomain-physics_astronomy_astrophysics_and_mathematics-mathematics_centres_of_competence",
+    "name": "Mathematics Centres of Competence",
+    "description": "Mathematics centres of competence develop mathematical models for applications in all sciences and engineering, including social sciences, and medicine. They analyse the models, develop and implement algorithms for the simulation of the models as well as for the optimization and control of the involved processes. They provide transversal competences which allow transferring concepts and methods from one specific science to another and they also provide consulting concerning the use of methods and their implementation for specific applications. When needed, they generate the basic mathematical theory that is needed to perform the described tasks. (Mathematical modelling; numerical and statistical simulation; control theory; optimization; mathematical algorithm repository).",
+    "parentId": "provider_meril_scientific_domain-physics_astronomy_astrophysics_and_mathematics",
+    "type": "Provider meril scientific subdomain",
+    "extras": {}
+  },
+  {
+    "id": "provider_meril_scientific_subdomain-physics_astronomy_astrophysics_and_mathematics-micro_and_nanotechnology_facilities",
+    "name": "Micro & Nanotechnology Facilities",
+    "description": "Micro and nanotechnology facilities deals with the understanding and control of matter at the nanoscale and microscales, at dimensions between approximately 1 and 1000 nanometres, involving imaging, measuring, modelling, and manipulating matter at this length scale.",
+    "parentId": "provider_meril_scientific_domain-physics_astronomy_astrophysics_and_mathematics",
+    "type": "Provider meril scientific subdomain",
+    "extras": {}
+  },
+  {
+    "id": "provider_meril_scientific_subdomain-physics_astronomy_astrophysics_and_mathematics-nuclear_research_facilities",
+    "name": "Nuclear Research Facilities",
+    "description": "Nuclear Physics facilities include accelerators, colliders, targets and detectors to study the atomic nucleus, the nuclear matter including its fusion and fission. The facilities can be classified according to their objects of study (hadrons, nuclei, applications), the probes that are used to investigate them (lepton/ photon or hadron/heavy ion beams), or simply by the size of the facility and the type of reactions involved in the various nuclear processes.",
+    "parentId": "provider_meril_scientific_domain-physics_astronomy_astrophysics_and_mathematics",
+    "type": "Provider meril scientific subdomain",
+    "extras": {}
+  },
+  {
+    "id": "provider_meril_scientific_subdomain-physics_astronomy_astrophysics_and_mathematics-other_physics_astronomy_astrophysics_and_mathematics",
+    "name": "Other",
+    "description": null,
+    "parentId": "provider_meril_scientific_domain-physics_astronomy_astrophysics_and_mathematics",
+    "type": "Provider meril scientific subdomain",
+    "extras": {}
+  },
+  {
+    "id": "provider_meril_scientific_subdomain-physics_astronomy_astrophysics_and_mathematics-safety_handling_facilities",
+    "name": "Safety Handling Facilities",
+    "description": "Facilities that are required to handle materials that potentially cause biosafety, chemical, radioactive, explosive, or engineering hazards. Also clean rooms and Actinide Handling Facilities would be included. Includes Biosecurity Level-4 Laboratories.",
+    "parentId": "provider_meril_scientific_domain-physics_astronomy_astrophysics_and_mathematics",
+    "type": "Provider meril scientific subdomain",
+    "extras": {}
+  },
+  {
+    "id": "provider_meril_scientific_subdomain-physics_astronomy_astrophysics_and_mathematics-space_environment_test_facilities",
+    "name": "Space Environment Test Facilities",
+    "description": "Includes planetary/space environment simulation chambers and space environment exposure facilities as well as space plasma physics facilities",
+    "parentId": "provider_meril_scientific_domain-physics_astronomy_astrophysics_and_mathematics",
+    "type": "Provider meril scientific subdomain",
+    "extras": {}
+  },
+  {
+    "id": "provider_meril_scientific_subdomain-physics_astronomy_astrophysics_and_mathematics-telescopes",
+    "name": "Telescopes",
+    "description": "Includes ground-based telescopes with (1) optical and/or near infrared telescopes, interferometers or (2) reflector telescopes with mirrors of different diameters, operating at radio frequencies, or infrared and/or optical wavelengths and (3) Space-borne telescopes orbiting the earth including a wide range of wavelengths, from gamma-rays to the radio.",
+    "parentId": "provider_meril_scientific_domain-physics_astronomy_astrophysics_and_mathematics",
+    "type": "Provider meril scientific subdomain",
+    "extras": {}
+  },
+  {
+    "id": "provider_meril_scientific_subdomain-physics_astronomy_astrophysics_and_mathematics-underground_laboratories",
+    "name": "Underground Laboratories",
+    "description": "Underground spaces providing experimental areas of reduced cosmic ray background, reduced seismic noise etc. for a range of experiments in physics and particle astrophysics. Open to members of collaborations involved in installing and running experiments. These facilities also have relevance to ICT and Material Sciences, Environment, Biological and Medical Sciences, Physics.",
+    "parentId": "provider_meril_scientific_domain-physics_astronomy_astrophysics_and_mathematics",
+    "type": "Provider meril scientific subdomain",
+    "extras": {}
+  },
+  {
+    "id": "provider_meril_scientific_subdomain-social_sciences-data_archives_data_repositories_and_collections",
+    "name": "Data Archives, Data Repositories & Collections",
+    "description": "A digital data archive is a centre of expertise in data acquisition, preservation, management, dissemination and promotion of an access to the national and international collections and repositories of digital data. These type of RIs are particularly acute to the social sciences, which often rely on the aggregation of longitudinal data, and to the humanities, which often rely on preservation, but they can be relevant for other domains, particularly, the life and environmental sciences and the medical sciences.",
+    "parentId": "provider_meril_scientific_domain-social_sciences",
+    "type": "Provider meril scientific subdomain",
+    "extras": {}
+  },
+  {
+    "id": "provider_meril_scientific_subdomain-social_sciences-data_mining_and_analysis_centres",
+    "name": "Data mining & Analysis (Methodological) Centres, including statistical analysis",
+    "description": "Centres of expertise or methodological resources for extracting patterns from large data sets by combining methods from statistics and artificial intelligence. These RIs enable researchers to overcome the challenge of working with increasingly larger data-sets. Data-mining and statistical techniques populate every scientific domain but what counts as data is domain specific. Therefore, this subdomain should be understood as specific to social sciences because it refers to data in the social sciences.",
+    "parentId": "provider_meril_scientific_domain-social_sciences",
+    "type": "Provider meril scientific subdomain",
+    "extras": {}
+  },
+  {
+    "id": "provider_meril_scientific_subdomain-social_sciences-national_statistical_facilities",
+    "name": "National Statistical Facilities (offices)",
+    "description": "Centres of expertise responsible for the collection and publication of statistics related to the economy, population and society at international, national and regional levels. These infrastructures have been traditionally created by the states but constitute as well powerful resources for the social scientists in particular.",
+    "parentId": "provider_meril_scientific_domain-social_sciences",
+    "type": "Provider meril scientific subdomain",
+    "extras": {}
+  },
+  {
+    "id": "provider_meril_scientific_subdomain-social_sciences-other_social_sciences",
+    "name": "Other",
+    "description": null,
+    "parentId": "provider_meril_scientific_domain-social_sciences",
+    "type": "Provider meril scientific subdomain",
+    "extras": {}
+  },
+  {
+    "id": "provider_meril_scientific_subdomain-social_sciences-registers_and_survey_led_studies_databases",
+    "name": "Registers & Survey-led Studies/Databases",
+    "description": "Organized and systematic collection of data (time or spatial series) for one or more purposes (research, evidence-based policy, non-governmental organisations) in digital form or not. These type of RIs are particularly acute to the social sciences, which often rely on the aggregation of masses of longitudinal data but they can be relevant for all the other domains, that is, the humanities, the life and environmental sciences, the physical sciences and engineering, and the medical sciences.",
+    "parentId": "provider_meril_scientific_domain-social_sciences",
+    "type": "Provider meril scientific subdomain",
+    "extras": {}
+  },
+  {
+    "id": "provider_meril_scientific_subdomain-social_sciences-research_data_service_facilities",
+    "name": "Research Data Service Facilities",
+    "description": "Facilities for clustering research data and making it permanently accessible, as well as facilities for the provision of all sorts of data services. These often include meta-infrastructures. These types of RIs are particularly relevant to Humanities and Arts; Social Sciences, Medical sciences.",
+    "parentId": "provider_meril_scientific_domain-social_sciences",
+    "type": "Provider meril scientific subdomain",
+    "extras": {}
+  }
+]

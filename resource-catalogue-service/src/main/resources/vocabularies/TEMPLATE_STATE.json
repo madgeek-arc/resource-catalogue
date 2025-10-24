@@ -1,0 +1,34 @@
+[
+  {
+    "id": "approved template",
+    "name": "Approved Template",
+    "description": "Approved Template",
+    "parentId": null,
+    "type": "Template state",
+    "extras": {}
+  },
+  {
+    "id": "no template status",
+    "name": "No Template Status",
+    "description": "No Template Status",
+    "parentId": null,
+    "type": "Template state",
+    "extras": {}
+  },
+  {
+    "id": "pending template",
+    "name": "Pending Template",
+    "description": "Pending Template",
+    "parentId": null,
+    "type": "Template state",
+    "extras": {}
+  },
+  {
+    "id": "rejected template",
+    "name": "Rejected Template",
+    "description": "Rejected Template",
+    "parentId": null,
+    "type": "Template state",
+    "extras": {}
+  }
+]

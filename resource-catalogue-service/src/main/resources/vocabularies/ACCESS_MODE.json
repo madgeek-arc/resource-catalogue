@@ -1,0 +1,42 @@
+[
+  {
+    "id": "access_mode-free",
+    "name": "Free",
+    "description": "Users can freely access the Resource provided, registration may be needed.",
+    "parentId": null,
+    "type": "Access mode",
+    "extras": {}
+  },
+  {
+    "id": "access_mode-free_conditionally",
+    "name": "Free Conditionally",
+    "description": "Users are granted access based on defined policies; such policies usually apply to Resources being offered with “sponsored use” to meet some national or EU level objective; for instance, a country may offer Resources with “sponsored use” to support national researchers involved in international collaborations.",
+    "parentId": null,
+    "type": "Access mode",
+    "extras": {}
+  },
+  {
+    "id": "access_mode-other",
+    "name": "Other",
+    "description": null,
+    "parentId": null,
+    "type": "Access mode",
+    "extras": {}
+  },
+  {
+    "id": "access_mode-paid",
+    "name": "Paid",
+    "description": "Users need to pay a fee to access the Resource",
+    "parentId": null,
+    "type": "Access mode",
+    "extras": {}
+  },
+  {
+    "id": "access_mode-peer_reviewed",
+    "name": "Peer Reviewed",
+    "description": "Users are selected based on scientific excellence evaluation, originality, quality and technical and ethical feasibility of an application evaluated through peer review conducted by internal or external experts of the activity to be supported by the Resource.",
+    "parentId": null,
+    "type": "Access mode",
+    "extras": {}
+  }
+]

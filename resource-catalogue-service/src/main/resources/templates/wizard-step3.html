@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Step 3 - Create Catalogue</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 900px;
+            margin: 20px auto;
+        }
+
+        fieldset {
+            border: 1px solid #ccc;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+        }
+
+        legend {
+            font-weight: bold;
+            padding: 0 10px;
+        }
+
+        .form-row {
+            display: flex;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .form-row label {
+            width: 200px;
+            font-weight: bold;
+        }
+
+        .form-row input,
+        .form-row textarea,
+        .form-row select {
+            flex: 1;
+            padding: 6px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        textarea {
+            resize: vertical;
+        }
+
+        .button-row {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 20px;
+        }
+
+        button {
+            padding: 8px 16px;
+            font-size: 1rem;
+            border-radius: 5px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        a {
+            display: inline-block;
+            margin-top: 15px;
+            text-decoration: none;
+            color: #007BFF;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        .disabled {
+            background-color: #f5f5f5;
+            color: #888;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body>
+
+<h2>Step 3: Create Default Catalogue</h2>
+
+<p class="description">
+    Please fill all the fields.
+</p>
+
+<p th:if="${successMessage}" th:text="${successMessage}" style="color: green; font-weight: bold;"></p>
+<p th:if="${errorMessage}" th:text="${errorMessage}" style="color: red; font-weight: bold;"></p>
+
+<form th:action="@{/wizard/step3/loadCatalogue}" th:object="${catalogue}" method="post" id="catalogueForm">
+
+    <!-- Basic Information -->
+    <fieldset>
+        <legend>Basic Information</legend>
+        <div class="form-row">
+            <label>ID:</label>
+            <input type="text" th:field="*{id}" readonly
+                   style="background-color: #f0f0f0; color: #555; cursor: not-allowed;"/>
+        </div>
+        <div class="form-row">
+            <label>Abbreviation (String):</label>
+            <input type="text" th:field="*{abbreviation}" required/>
+        </div>
+        <div class="form-row">
+            <label>Name (String):</label>
+            <input type="text" th:field="*{name}" required/>
+        </div>
+        <div class="form-row">
+            <label>Website (URL):</label>
+            <input type="url" th:field="*{website}" required/>
+        </div>
+        <div class="form-row">
+            <label>Legal Entity:</label>
+            <div>
+                <label><input type="radio" th:field="*{legalEntity}" value="true"/> Yes</label>
+                <label style="margin-left: 20px;"><input type="radio" th:field="*{legalEntity}" value="false"/>
+                    No</label>
+            </div>
+        </div>
+        <div class="form-row">
+            <label>Inclusion Criteria (URL):</label>
+            <input type="url" th:field="*{inclusionCriteria}" required/>
+        </div>
+        <div class="form-row">
+            <label>Validation Process (URL):</label>
+            <input type="url" th:field="*{validationProcess}" required/>
+        </div>
+        <div class="form-row">
+            <label>End of Life (String):</label>
+            <input type="text" th:field="*{endOfLife}" required/>
+        </div>
+    </fieldset>
+
+    <!-- Marketing Information -->
+    <fieldset>
+        <legend>Marketing Information</legend>
+        <div class="form-row">
+            <label>Description (String):</label>
+            <textarea th:field="*{description}" rows="4" required></textarea>
+        </div>
+        <div class="form-row">
+            <label>Scope (String):</label>
+            <input type="text" th:field="*{scope}" required/>
+        </div>
+        <div class="form-row">
+            <label>Logo (URL):</label>
+            <input type="url" th:field="*{logo}" required/>
+        </div>
+    </fieldset>
+
+    <!-- Location Information -->
+    <fieldset>
+        <legend>Location Information</legend>
+        <div class="form-row">
+            <label>Street Name and Number (String):</label>
+            <input type="text" th:field="*{location.streetNameAndNumber}" required/>
+        </div>
+        <div class="form-row">
+            <label>Postal Code (String):</label>
+            <input type="text" th:field="*{location.postalCode}" required/>
+        </div>
+        <div class="form-row">
+            <label>City (String):</label>
+            <input type="text" th:field="*{location.city}" required/>
+        </div>
+        <div class="form-row">
+            <label>Country:</label>
+            <select th:field="*{location.country}" required>
+                <option value="">-- Select a country --</option>
+                <option th:each="c : ${countries}" th:value="${c}" th:text="${c}"></option>
+            </select>
+        </div>
+    </fieldset>
+
+    <!-- Contact Information -->
+    <fieldset>
+        <legend>Contact Information</legend>
+        <div class="form-row">
+            <label>Main Contact First Name (String):</label>
+            <input type="text" th:field="*{mainContact.firstName}" required/>
+        </div>
+        <div class="form-row">
+            <label>Main Contact Email (String):</label>
+            <input type="email" th:field="*{mainContact.email}" required/>
+        </div>
+        <div class="form-row">
+            <label>Public Contact Email (String):</label>
+            <input type="email" th:field="*{publicContacts[0].email}" required/>
+        </div>
+    </fieldset>
+
+    <!-- Catalogue Admin Information -->
+    <fieldset>
+        <legend>Catalogue Admin Information</legend>
+        <div class="form-row">
+            <label>Admin Name (String):</label>
+            <input type="text" th:field="*{users[0].name}" required/>
+        </div>
+        <div class="form-row">
+            <label>Admin Surname (String):</label>
+            <input type="text" th:field="*{users[0].surname}" required/>
+        </div>
+        <div class="form-row">
+            <label>Admin Email (String):</label>
+            <input type="email" th:field="*{users[0].email}" required/>
+        </div>
+    </fieldset>
+
+    <div class="button-row">
+        <button type="submit"
+                th:if="${successMessage == null}">
+            Submit
+        </button>
+
+        <button type="button"
+                th:if="${successMessage != null}"
+                th:attr="data-homepage=${homepage}"
+                onclick="window.location.href=this.getAttribute('data-homepage')">
+            Finish
+        </button>
+    </div>
+
+    <div>
+        <button type="button" onclick="window.location.href='/api/wizard/step2'">
+            << Back
+        </button>
+    </div>
+
+    <script th:if="${successMessage != null}">
+        document.addEventListener('DOMContentLoaded', function () {
+            document.querySelectorAll('#catalogueForm input, #catalogueForm textarea, #catalogueForm select')
+                .forEach(el => {
+                    el.disabled = true;
+                    el.classList.add('disabled');
+                });
+        });
+    </script>
+
+</body>
+</html>

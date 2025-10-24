@@ -1,0 +1,210 @@
+[
+  {
+    "id": "category-access_physical_and_eInfrastructures-compute",
+    "name": "Compute",
+    "description": "High-performance computing resources and scalable cloud compute capacity for demanding job processes.",
+    "parentId": "supercategory-access_physical_and_eInfrastructures",
+    "type": "Category",
+    "extras": {
+      "icon": "ic_compute.svg",
+      "icon_active": "ic_compute_active.svg"
+    }
+  },
+  {
+    "id": "category-access_physical_and_eInfrastructures-data_storage",
+    "name": "Data Storage",
+    "description": "Reliable, secure and scalable cloud storage for scientific data, apps and workloads.",
+    "parentId": "supercategory-access_physical_and_eInfrastructures",
+    "type": "Category",
+    "extras": {
+      "icon": "ic_storage.svg",
+      "icon_active": "ic_storage_active.svg"
+    }
+  },
+  {
+    "id": "category-access_physical_and_eInfrastructures-instrument_and_equipment",
+    "name": "Instrument & Equipment",
+    "description": "Access to instruments and equipment.",
+    "parentId": "supercategory-access_physical_and_eInfrastructures",
+    "type": "Category",
+    "extras": {}
+  },
+  {
+    "id": "category-access_physical_and_eInfrastructures-material_storage",
+    "name": "Material Storage",
+    "description": "Access to biological, chemical, historical, archeological, cultural, etc. storage. Includes the acquisition, preparation and processing of samples and materials in view of their preservation.",
+    "parentId": "supercategory-access_physical_and_eInfrastructures",
+    "type": "Category",
+    "extras": {
+      "icon": "ic_storage.svg",
+      "icon_active": "ic_storage_active.svg"
+    }
+  },
+  {
+    "id": "category-access_physical_and_eInfrastructures-network",
+    "name": "Network",
+    "description": "Ultra-fast connectivity and ubiquitous access to eInfrastructures' resources and services.",
+    "parentId": "supercategory-access_physical_and_eInfrastructures",
+    "type": "Category",
+    "extras": {
+      "icon": "ic_networking.svg",
+      "icon_active": "ic_networking_active.svg"
+    }
+  },
+  {
+    "id": "category-aggregators_and_integrators-aggregators_and_integrators",
+    "name": "Aggregators & Integrators",
+    "description": "Thematic, Regional and other Aggregators & Integrators.",
+    "parentId": "supercategory-aggregators_and_integrators",
+    "type": "Category",
+    "extras": {
+      "icon": "ic_aggregator.svg",
+      "icon_active": "ic_aggregator_active.svg"
+    }
+  },
+  {
+    "id": "category-other-other",
+    "name": "Other",
+    "description": null,
+    "parentId": "supercategory-other",
+    "type": "Category",
+    "extras": {
+      "icon": "ic_other.svg",
+      "icon_active": "ic_other_active.svg"
+    }
+  },
+  {
+    "id": "category-processing_and_analysis-data_analysis",
+    "name": "Data Analysis",
+    "description": "Processes for data with the goal of discovering useful information, informing conclusions, and supporting decision-making.",
+    "parentId": "supercategory-processing_and_analysis",
+    "type": "Category",
+    "extras": {
+      "icon": "ic_analytics.svg",
+      "icon_active": "ic_analytics_active.svg"
+    }
+  },
+  {
+    "id": "category-processing_and_analysis-data_management",
+    "name": "Data Management",
+    "description": "Robust, feature-rich and user-friendly data management services.",
+    "parentId": "supercategory-processing_and_analysis",
+    "type": "Category",
+    "extras": {
+      "icon": "ic_data.svg",
+      "icon_active": "ic_data_active.svg"
+    }
+  },
+  {
+    "id": "category-processing_and_analysis-measurement_and_materials_analysis",
+    "name": "Measurement & Materials Analysis",
+    "description": "Processess and techiques for material analysis, characterisation and monitoring.",
+    "parentId": "supercategory-processing_and_analysis",
+    "type": "Category",
+    "extras": {
+      "icon": "ic_analytics.svg",
+      "icon_active": "ic_analytics_active.svg"
+    }
+  },
+  {
+    "id": "category-security_and_operations-operations_and_infrastructure_management_services",
+    "name": "Operations & Infrastructure Management Services",
+    "description": "Services for monitoring, scaling, creating, tracking and automating operations on infrastructures and services.",
+    "parentId": "supercategory-security_and_operations",
+    "type": "Category",
+    "extras": {
+      "icon": "ic_operations.svg",
+      "icon_active": "ic_operations_active.svg"
+    }
+  },
+  {
+    "id": "category-security_and_operations-security_and_identity",
+    "name": "Security & Identity",
+    "description": "Protect infrastructure and manage user identities and access against advanced threats across devices, data, apps, etc.",
+    "parentId": "supercategory-security_and_operations",
+    "type": "Category",
+    "extras": {
+      "icon": "ic_security.svg",
+      "icon_active": "ic_security_active.svg"
+    }
+  },
+  {
+    "id": "category-sharing_and_discovery-applications",
+    "name": "Applications",
+    "description": "End-user applications offered-as-a-service or deployed-on-demand.",
+    "parentId": "supercategory-sharing_and_discovery",
+    "type": "Category",
+    "extras": {
+      "icon": "ic_application.svg",
+      "icon_active": "ic_application_active.svg"
+    }
+  },
+  {
+    "id": "category-sharing_and_discovery-data",
+    "name": "Data",
+    "description": "Vast range of datasets to facilitate research and scientific activities.",
+    "parentId": "supercategory-sharing_and_discovery",
+    "type": "Category",
+    "extras": {
+      "icon": "ic_data.svg",
+      "icon_active": "ic_data_active.svg"
+    }
+  },
+  {
+    "id": "category-sharing_and_discovery-development_resources",
+    "name": "Development Resources",
+    "description": "Developer tools, development kits, libraries, APIs.",
+    "parentId": "supercategory-sharing_and_discovery",
+    "type": "Category",
+    "extras": {}
+  },
+  {
+    "id": "category-sharing_and_discovery-samples",
+    "name": "Samples",
+    "description": "Collection, preparation and delivery of biological, chemical, environmental or other samples.",
+    "parentId": "supercategory-sharing_and_discovery",
+    "type": "Category",
+    "extras": {}
+  },
+  {
+    "id": "category-sharing_and_discovery-scholarly_communication",
+    "name": "Scholarly Communication",
+    "description": "Research findings available to the wider academic community and beyond.",
+    "parentId": "supercategory-sharing_and_discovery",
+    "type": "Category",
+    "extras": {}
+  },
+  {
+    "id": "category-sharing_and_discovery-software",
+    "name": "Software",
+    "description": "Software, platforms and tools offered-as-a-service or deployed-on-demand.",
+    "parentId": "supercategory-sharing_and_discovery",
+    "type": "Category",
+    "extras": {
+      "icon": "ic_software.svg",
+      "icon_active": "ic_software_active.svg"
+    }
+  },
+  {
+    "id": "category-training_and_support-consultancy_and_support",
+    "name": "Consultancy & Support",
+    "description": "Dedicated professional support for a wide range of scientific disciplines and research activities.",
+    "parentId": "supercategory-training_and_support",
+    "type": "Category",
+    "extras": {
+      "icon": "ic_consulting.svg",
+      "icon_active": "ic_consulting_active.svg"
+    }
+  },
+  {
+    "id": "category-training_and_support-education_and_training",
+    "name": "Education & Training",
+    "description": "Highly-specialized seminars and courses to help advance research knowledge and sharpen scientific skills.",
+    "parentId": "supercategory-training_and_support",
+    "type": "Category",
+    "extras": {
+      "icon": "ic_training.svg",
+      "icon_active": "ic_training_active.svg"
+    }
+  }
+]

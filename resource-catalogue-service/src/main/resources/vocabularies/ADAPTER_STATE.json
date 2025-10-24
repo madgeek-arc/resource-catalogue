@@ -1,0 +1,26 @@
+[
+  {
+    "id": "approved adapter",
+    "name": "Approved Adapter",
+    "description": "Approved Adapter",
+    "parentId": null,
+    "type": "Adapter state",
+    "extras": {}
+  },
+  {
+    "id": "pending adapter",
+    "name": "Pending Adapter",
+    "description": "Pending Adapter",
+    "parentId": null,
+    "type": "Adapter state",
+    "extras": {}
+  },
+  {
+    "id": "rejected adapter",
+    "name": "Rejected Adapter",
+    "description": "Rejected Adapter",
+    "parentId": null,
+    "type": "Adapter state",
+    "extras": {}
+  }
+]

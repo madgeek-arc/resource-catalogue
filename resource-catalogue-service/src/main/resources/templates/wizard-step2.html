@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Step 2 - Load Models</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 20px auto;
+        }
+
+        h2 {
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        p.description {
+            font-size: 0.9rem;
+            color: #555;
+            margin-bottom: 15px;
+        }
+
+        ul {
+            list-style-type: none;
+            padding-left: 0;
+            max-height: 400px;
+            overflow-y: auto;
+            font-size: 0.85rem;
+        }
+
+        li {
+            padding: 6px 10px;
+            background-color: #f0f0f0;
+            margin-bottom: 4px;
+            border-radius: 4px;
+        }
+
+        button {
+            padding: 8px 16px;
+            font-size: 1rem;
+            border-radius: 5px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            cursor: pointer;
+            margin-top: 15px;
+        }
+
+        button:hover:not(:disabled) {
+            background-color: #0056b3;
+        }
+
+        button:disabled {
+            background-color: #ccc;
+            color: #666;
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+
+        a {
+            display: inline-block;
+            margin-top: 15px;
+            text-decoration: none;
+            color: #007BFF;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        p.message {
+            color: green;
+            font-weight: bold;
+        }
+
+        .navigation {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 25px;
+        }
+    </style>
+</head>
+<body>
+
+<h2>Step 2: Load Models</h2>
+
+<p class="description">
+    The following models are going to be loaded:
+</p>
+
+<form th:action="@{step2/loadModels}" method="post" id="modelsForm">
+    <ul>
+        <li th:each="entry : ${modelStatus}">
+            <input type="checkbox" th:id="${entry.key}" th:value="${entry.key}"
+                   th:checked="${entry.value}" disabled/>
+            <label th:for="${entry.key}" th:text="${entry.key}"></label>
+        </li>
+    </ul>
+
+    <div>
+        <div style="display: inline-block">
+            <button type="submit" id="loadBtn" th:disabled="${allModelsLoading || allModelsLoaded}">
+                Load Models
+            </button>
+        </div>
+
+        <div id="loadingDiv" style="display: none;">
+            <span>Loading Models...</span>
+        </div>
+    </div>
+</form>
+
+<script>
+    var form = document.getElementById('modelsForm');
+
+    if (form) {
+        form.addEventListener('submit', function () {
+            var loadBtn = document.getElementById('loadBtn');
+            var loadingDiv = document.getElementById('loadingDiv');
+
+            if (loadBtn) {
+                loadBtn.disabled = true;
+            }
+
+            if (loadingDiv) {
+                loadingDiv.style.display = 'inline-block';
+            }
+        });
+    }
+</script>
+
+<p class="message" th:if="${message}" th:text="${message}"></p>
+
+<!--<div class="navigation">-->
+<!--    <a th:href="@{/wizard/step1}"><< Back</a>-->
+<!--    <a th:href="@{/wizard/step3}">Next >></a>-->
+<!--</div>-->
+
+<div class="navigation">
+    <button type="button" onclick="window.location.href='/api/wizard/step1'">
+        << Back
+    </button>
+    <button type="button" onclick="window.location.href='/api/wizard/step3'"
+            th:disabled="${!allModelsLoaded}">
+        Next >>
+    </button>
+</div>
+
+</body>
+</html>

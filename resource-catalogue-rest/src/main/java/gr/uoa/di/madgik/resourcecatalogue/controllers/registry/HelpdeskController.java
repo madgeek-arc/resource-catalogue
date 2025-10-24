@@ -27,12 +27,15 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.authentication.InsufficientAuthenticationException;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientService;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
+import org.springframework.web.util.UriBuilder;
 
 import java.util.Map;
 
@@ -42,18 +45,14 @@ import java.util.Map;
 @Tag(name = "helpdesk")
 public class HelpdeskController {
 
-    //TODO: check pre-auth roles for all api calls
-
     private static final Logger logger = LoggerFactory.getLogger(HelpdeskController.class);
 
-    private final HelpdeskProperties helpdeskProperties;
     private final WebClient webClient;
     private final OAuth2AuthorizedClientService authorizedClientService;
 
     public HelpdeskController(HelpdeskProperties helpdeskProperties,
                               OAuth2AuthorizedClientService authorizedClientService,
                               WebClient.Builder webClientBuilder) {
-        this.helpdeskProperties = helpdeskProperties;
         this.authorizedClientService = authorizedClientService;
         if (helpdeskProperties.isEnabled()) {
             this.webClient = webClientBuilder
@@ -64,17 +63,35 @@ public class HelpdeskController {
         }
     }
 
-    @Operation(summary = "Returns a specific ticket.")
+    private String getAccessToken(Authentication authentication) {
+        if (authentication instanceof OAuth2AuthenticationToken token) {
+            OAuth2AuthorizedClient authorizedClient =
+                    authorizedClientService.loadAuthorizedClient(
+                            token.getAuthorizedClientRegistrationId(),
+                            token.getName());
+            return authorizedClient.getAccessToken().getTokenValue();
+        } else {
+            throw new InsufficientAuthenticationException("Insufficient authentication");
+        }
+    }
+
+    @Operation(summary = "Returns a specific ticket for the authenticated user.")
     @GetMapping(path = "tickets/{ticketId}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Object> getTicket(@PathVariable("ticketId") String ticketId) {
+    @PreAuthorize("hasRole('ROLE_USER')")
+    public ResponseEntity<Object> getTicket(@PathVariable("ticketId") String ticketId,
+                                            @Parameter(hidden = true) Authentication authentication) {
         if (webClient == null) {
             throw new UnsupportedOperationException("Helpdesk service is not enabled.");
         }
+
+        String accessToken = getAccessToken(authentication);
+
         try {
             Object ticket = webClient.get()
                     .uri(uriBuilder -> uriBuilder
-                            .path("/tickets/{ticketId}")
-                            .build(ticketId))
+                            .queryParam("ticket_id", ticketId)
+                            .build())
+                    .headers(headers -> headers.setBearerAuth(accessToken))
                     .retrieve()
                     .bodyToMono(Object.class)
                     .block();
@@ -87,20 +104,43 @@ public class HelpdeskController {
         }
     }
 
-    @Operation(summary = "Submit a ticket.")
-    @PostMapping(produces = MediaType.APPLICATION_JSON_VALUE)
+
+    @Operation(summary = "Returns all tickets for the authenticated user.")
+    @GetMapping(path = "tickets", produces = MediaType.APPLICATION_JSON_VALUE)
     @PreAuthorize("hasRole('ROLE_USER')")
-    public ResponseEntity<Object> submitTicket(@RequestBody Map<String, Object> ticketData,
-                                               @Parameter(hidden = true) OAuth2AuthenticationToken token) {
+    public ResponseEntity<Object> getAllTickets(@Parameter(hidden = true) Authentication authentication) {
         if (webClient == null) {
             throw new UnsupportedOperationException("Helpdesk service is not enabled.");
         }
 
-        OAuth2AuthorizedClient authorizedClient =
-                authorizedClientService.loadAuthorizedClient(
-                        token.getAuthorizedClientRegistrationId(),
-                        token.getName());
-        String accessToken = authorizedClient.getAccessToken().getTokenValue();
+        String accessToken = getAccessToken(authentication);
+
+        try {
+            Object tickets = webClient.get()
+                    .uri(UriBuilder::build)
+                    .headers(headers -> headers.setBearerAuth(accessToken))
+                    .retrieve()
+                    .bodyToMono(Object.class)
+                    .block();
+
+            return ResponseEntity.ok(tickets);
+        } catch (WebClientResponseException e) {
+            return ResponseEntity.status(e.getStatusCode()).body(e.getResponseBodyAsString());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+        }
+    }
+
+
+    @Operation(summary = "Submit a ticket.")
+    @PostMapping(produces = MediaType.APPLICATION_JSON_VALUE)
+    @PreAuthorize("hasRole('ROLE_USER')")
+    public ResponseEntity<Object> submitTicket(@RequestBody Map<String, Object> ticketData,
+                                               @Parameter(hidden = true) Authentication authentication) {
+        if (webClient == null) {
+            throw new UnsupportedOperationException("Helpdesk service is not enabled.");
+        }
+        String accessToken = getAccessToken(authentication);
         ticketData.put("accessToken", accessToken);
 
         try {
@@ -120,35 +160,31 @@ public class HelpdeskController {
         }
     }
 
-    @Operation(summary = "Submit articles in a ticket.")
-    @PostMapping(path = "tickets/{ticketId}/articles", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "Update a ticket.")
+    @PutMapping(path = "tickets/{ticketId}", produces = MediaType.APPLICATION_JSON_VALUE)
     @PreAuthorize("hasRole('ROLE_USER')")
-    public ResponseEntity<Object> submitArticles(@PathVariable String ticketId,
-                                                 @RequestBody Map<String, Object> articleData,
-                                                 @Parameter(hidden = true) OAuth2AuthenticationToken token) {
+    public ResponseEntity<Object> updateTicket(@PathVariable("ticketId") String ticketId,
+                                               @RequestBody Map<String, Object> ticketData,
+                                               @Parameter(hidden = true) Authentication authentication) {
         if (webClient == null) {
             throw new UnsupportedOperationException("Helpdesk service is not enabled.");
         }
-
-        OAuth2AuthorizedClient authorizedClient =
-                authorizedClientService.loadAuthorizedClient(
-                        token.getAuthorizedClientRegistrationId(),
-                        token.getName());
-        String accessToken = authorizedClient.getAccessToken().getTokenValue();
-        articleData.put("accessToken", accessToken);
+        String accessToken = getAccessToken(authentication);
+        ticketData.put("accessToken", accessToken);
 
         try {
-            Object response = webClient.post()
+            Object ticket = webClient.put()
                     .uri(uriBuilder -> uriBuilder
-                            .path("/tickets/{ticketId}/articles")
-                            .build(ticketId))
-                    .bodyValue(articleData)
+                            .queryParam("ticket_id", ticketId)
+                            .build())
+                    .headers(headers -> headers.setBearerAuth(accessToken))
+                    .bodyValue(ticketData)
                     .retrieve()
                     .bodyToMono(Object.class)
                     .block();
 
-            logger.info("Articles submitted successfully");
-            return ResponseEntity.ok(response);
+            logger.info("Ticket with id [{}] updated successfully", ticketId);
+            return ResponseEntity.ok(ticket);
         } catch (WebClientResponseException e) {
             return ResponseEntity.status(e.getStatusCode()).body(e.getResponseBodyAsString());
         } catch (Exception e) {
