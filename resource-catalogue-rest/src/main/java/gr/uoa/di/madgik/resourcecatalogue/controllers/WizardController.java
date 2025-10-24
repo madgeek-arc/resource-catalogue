@@ -22,8 +22,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import gr.uoa.di.madgik.catalogue.service.ModelService;
 import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
-import gr.uoa.di.madgik.resourcecatalogue.service.CatalogueService;
+import gr.uoa.di.madgik.resourcecatalogue.service.GenericResourceService;
 import gr.uoa.di.madgik.resourcecatalogue.service.VocabularyService;
+import gr.uoa.di.madgik.resourcecatalogue.utils.Auditable;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.slf4j.Logger;
@@ -41,6 +42,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Profile("beyond")
 @Controller
@@ -58,12 +61,14 @@ public class WizardController {
 
     private final VocabularyService vocabularyService;
     private final ModelService modelService;
-    private final CatalogueService catalogueService;
+    private final GenericResourceService genericService;
 
-    public WizardController(VocabularyService vocabularyService, ModelService modelService, CatalogueService catalogueService) {
+    public WizardController(VocabularyService vocabularyService,
+                            ModelService modelService,
+                            GenericResourceService genericService) {
         this.vocabularyService = vocabularyService;
         this.modelService = modelService;
-        this.catalogueService = catalogueService;
+        this.genericService = genericService;
     }
 
     @Operation(summary = "Check Vocabularies Existence")
@@ -240,7 +245,7 @@ public class WizardController {
     public String loadCatalogue(@ModelAttribute Catalogue catalogue, Model model) {
         try {
             logger.info("Loading main Catalogue with ID [{}]", catalogue.getId());
-            catalogueService.addCatalogueForStartupWizard(new CatalogueBundle(catalogue));
+            addCatalogue(new CatalogueBundle(catalogue));
             model.addAttribute("successMessage", "Catalogue saved successfully!");
         } catch (Exception e) {
             logger.error("Failed to save Catalogue [{}]: {}", catalogue.getId(), e.getMessage());
@@ -251,5 +256,39 @@ public class WizardController {
         model.addAttribute("id", catalogue.getId());
         model.addAttribute("homepage", homepage);
         return "wizard-step3";
+    }
+
+    private void addCatalogue(CatalogueBundle catalogue) {
+
+        catalogue.setMetadata(Metadata.createMetadata("system", "system"));
+        List<LoggingInfo> loggingInfoList = createLoggingInfoList();
+        catalogue.setLoggingInfo(loggingInfoList);
+        catalogue.setActive(true);
+        catalogue.setStatus(vocabularyService.get("approved catalogue").getId());
+        catalogue.setAuditState(Auditable.NOT_AUDITED);
+
+        // latestOnboardingInfo
+        catalogue.setLatestOnboardingInfo(loggingInfoList.getFirst());
+
+        genericService.add("catalogue", catalogue);
+    }
+
+    private static List<LoggingInfo> createLoggingInfoList() {
+        String currentTime = String.valueOf(System.currentTimeMillis());
+        String system = "system";
+        String type = LoggingInfo.Types.ONBOARD.getKey();
+
+        return Stream.of(LoggingInfo.ActionType.REGISTERED, LoggingInfo.ActionType.APPROVED)
+                .map(action -> {
+                    LoggingInfo info = new LoggingInfo();
+                    info.setDate(currentTime);
+                    info.setType(type);
+                    info.setActionType(action.getKey());
+                    info.setUserEmail(system);
+                    info.setUserFullName(system);
+                    info.setUserRole(system);
+                    return info;
+                })
+                .collect(Collectors.toList());
     }
 }

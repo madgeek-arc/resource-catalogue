@@ -185,22 +185,6 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
         return ret;
     }
 
-    @Override
-    public void addCatalogueForStartupWizard(CatalogueBundle catalogue) {
-
-        catalogue.setMetadata(Metadata.createMetadata("system", "system"));
-        List<LoggingInfo> loggingInfoList = commonMethods.createLoggingInfoForStartupWizard();
-        catalogue.setLoggingInfo(loggingInfoList);
-        catalogue.setActive(true);
-        catalogue.setStatus(vocabularyService.get("approved catalogue").getId());
-        catalogue.setAuditState(Auditable.NOT_AUDITED);
-
-        // latestOnboardingInfo
-        catalogue.setLatestOnboardingInfo(loggingInfoList.getFirst());
-
-        super.add(catalogue, null);
-    }
-
     public CatalogueBundle update(CatalogueBundle catalogueBundle, String comment, Authentication auth) {
         logger.trace("Attempting to update the Catalogue with id '{}'", catalogueBundle.getId());
 

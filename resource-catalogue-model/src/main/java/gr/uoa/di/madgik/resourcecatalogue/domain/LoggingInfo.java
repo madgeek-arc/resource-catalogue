@@ -145,26 +145,6 @@ public class LoggingInfo {
         return ret;
     }
 
-    public static List<LoggingInfo> createLoggingInfoListForStartupWizard() {
-        String currentTime = String.valueOf(System.currentTimeMillis());
-        String system = "system";
-        String type = Types.ONBOARD.getKey();
-
-        return Stream.of(ActionType.REGISTERED, ActionType.APPROVED)
-                .map(action -> {
-                    LoggingInfo info = new LoggingInfo();
-                    info.setDate(currentTime);
-                    info.setType(type);
-                    info.setActionType(action.getKey());
-                    info.setUserEmail(system);
-                    info.setUserFullName(system);
-                    info.setUserRole(system);
-                    return info;
-                })
-                .collect(Collectors.toList());
-    }
-
-
     private static void validateLoggingInfoEnums(String type, String actionType) {
         if (type == null || actionType == null) {
             throw new IllegalArgumentException("LoggingInfo Type and ActionType cannot be null");
