@@ -45,7 +45,13 @@ public class AccountingManager implements AccountingService {
     public AccountingManager(AccountingProperties accountingProperties,
                              WebClient.Builder webClientBuilder) {
         this.accountingProperties = accountingProperties;
-        this.webClient = webClientBuilder.build();
+        if (accountingProperties.isEnabled()) {
+            this.webClient = webClientBuilder
+                    .baseUrl(accountingProperties.getEndpoint())
+                    .build();
+        } else {
+            this.webClient = null;
+        }
     }
 
     private synchronized String getAccessToken() {
