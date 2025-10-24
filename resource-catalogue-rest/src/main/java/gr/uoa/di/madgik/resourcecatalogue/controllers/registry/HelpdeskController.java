@@ -27,6 +27,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.authentication.InsufficientAuthenticationException;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientService;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
@@ -45,14 +47,12 @@ public class HelpdeskController {
 
     private static final Logger logger = LoggerFactory.getLogger(HelpdeskController.class);
 
-    private final HelpdeskProperties helpdeskProperties;
     private final WebClient webClient;
     private final OAuth2AuthorizedClientService authorizedClientService;
 
     public HelpdeskController(HelpdeskProperties helpdeskProperties,
                               OAuth2AuthorizedClientService authorizedClientService,
                               WebClient.Builder webClientBuilder) {
-        this.helpdeskProperties = helpdeskProperties;
         this.authorizedClientService = authorizedClientService;
         if (helpdeskProperties.isEnabled()) {
             this.webClient = webClientBuilder
@@ -63,20 +63,28 @@ public class HelpdeskController {
         }
     }
 
+    private String getAccessToken(Authentication authentication) {
+        if (authentication instanceof OAuth2AuthenticationToken token) {
+            OAuth2AuthorizedClient authorizedClient =
+                    authorizedClientService.loadAuthorizedClient(
+                            token.getAuthorizedClientRegistrationId(),
+                            token.getName());
+            return authorizedClient.getAccessToken().getTokenValue();
+        } else {
+            throw new InsufficientAuthenticationException("Insufficient authentication");
+        }
+    }
+
     @Operation(summary = "Returns a specific ticket for the authenticated user.")
     @GetMapping(path = "tickets/{ticketId}", produces = MediaType.APPLICATION_JSON_VALUE)
     @PreAuthorize("hasRole('ROLE_USER')")
     public ResponseEntity<Object> getTicket(@PathVariable("ticketId") String ticketId,
-                                            @Parameter(hidden = true) OAuth2AuthenticationToken token) {
+                                            @Parameter(hidden = true) Authentication authentication) {
         if (webClient == null) {
             throw new UnsupportedOperationException("Helpdesk service is not enabled.");
         }
 
-        OAuth2AuthorizedClient authorizedClient =
-                authorizedClientService.loadAuthorizedClient(
-                        token.getAuthorizedClientRegistrationId(),
-                        token.getName());
-        String accessToken = authorizedClient.getAccessToken().getTokenValue();
+        String accessToken = getAccessToken(authentication);
 
         try {
             Object ticket = webClient.get()
@@ -100,16 +108,12 @@ public class HelpdeskController {
     @Operation(summary = "Returns all tickets for the authenticated user.")
     @GetMapping(path = "tickets", produces = MediaType.APPLICATION_JSON_VALUE)
     @PreAuthorize("hasRole('ROLE_USER')")
-    public ResponseEntity<Object> getAllTickets(@Parameter(hidden = true) OAuth2AuthenticationToken token) {
+    public ResponseEntity<Object> getAllTickets(@Parameter(hidden = true) Authentication authentication) {
         if (webClient == null) {
             throw new UnsupportedOperationException("Helpdesk service is not enabled.");
         }
 
-        OAuth2AuthorizedClient authorizedClient =
-                authorizedClientService.loadAuthorizedClient(
-                        token.getAuthorizedClientRegistrationId(),
-                        token.getName());
-        String accessToken = authorizedClient.getAccessToken().getTokenValue();
+        String accessToken = getAccessToken(authentication);
 
         try {
             Object tickets = webClient.get()
@@ -132,16 +136,11 @@ public class HelpdeskController {
     @PostMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     @PreAuthorize("hasRole('ROLE_USER')")
     public ResponseEntity<Object> submitTicket(@RequestBody Map<String, Object> ticketData,
-                                               @Parameter(hidden = true) OAuth2AuthenticationToken token) {
+                                               @Parameter(hidden = true) Authentication authentication) {
         if (webClient == null) {
             throw new UnsupportedOperationException("Helpdesk service is not enabled.");
         }
-
-        OAuth2AuthorizedClient authorizedClient =
-                authorizedClientService.loadAuthorizedClient(
-                        token.getAuthorizedClientRegistrationId(),
-                        token.getName());
-        String accessToken = authorizedClient.getAccessToken().getTokenValue();
+        String accessToken = getAccessToken(authentication);
         ticketData.put("accessToken", accessToken);
 
         try {
@@ -166,16 +165,11 @@ public class HelpdeskController {
     @PreAuthorize("hasRole('ROLE_USER')")
     public ResponseEntity<Object> updateTicket(@PathVariable("ticketId") String ticketId,
                                                @RequestBody Map<String, Object> ticketData,
-                                               @Parameter(hidden = true) OAuth2AuthenticationToken token) {
+                                               @Parameter(hidden = true) Authentication authentication) {
         if (webClient == null) {
             throw new UnsupportedOperationException("Helpdesk service is not enabled.");
         }
-
-        OAuth2AuthorizedClient authorizedClient =
-                authorizedClientService.loadAuthorizedClient(
-                        token.getAuthorizedClientRegistrationId(),
-                        token.getName());
-        String accessToken = authorizedClient.getAccessToken().getTokenValue();
+        String accessToken = getAccessToken(authentication);
         ticketData.put("accessToken", accessToken);
 
         try {
