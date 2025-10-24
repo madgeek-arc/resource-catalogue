@@ -16,11 +16,25 @@
 
 package gr.uoa.di.madgik.resourcecatalogue.service;
 
+import org.springframework.http.ResponseEntity;
+
+import java.time.LocalDate;
+
 public interface AccountingService {
 
-    /**
-     *
-     * @return
-     */
-    String getAccessToken();
+    ResponseEntity<Object> getAllProjectProvidersAndInstallations();
+
+    ResponseEntity<Object> getAllProjectInstallations(int page, int size);
+
+    ResponseEntity<Object> getProjectReport(LocalDate start, LocalDate end);
+
+    ResponseEntity<Object> getProviderReport(String prefix, String suffix, LocalDate start, LocalDate end);
+
+    ResponseEntity<Object> getInstallationReport(String prefix, String suffix, LocalDate start, LocalDate end);
+
+    ResponseEntity<Object> getProviderMetrics(String prefix, String suffix, LocalDate start, LocalDate end,
+                              String metricDefinitionId, int page, int size);
+
+    ResponseEntity<Object> getInstallationMetrics(String prefix, String suffix, LocalDate start, LocalDate end,
+                                  String metricDefinitionId, int page, int size);
 }

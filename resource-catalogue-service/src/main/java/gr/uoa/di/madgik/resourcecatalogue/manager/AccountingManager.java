@@ -19,12 +19,18 @@ package gr.uoa.di.madgik.resourcecatalogue.manager;
 import gr.uoa.di.madgik.resourcecatalogue.config.AccountingProperties;
 import gr.uoa.di.madgik.resourcecatalogue.service.AccountingService;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
+import org.springframework.web.util.UriBuilder;
 
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.Map;
 
 @Service("accountingManager")
@@ -42,7 +48,7 @@ public class AccountingManager implements AccountingService {
         this.webClient = webClientBuilder.build();
     }
 
-    public synchronized String getAccessToken() {
+    private synchronized String getAccessToken() {
         if (accessToken == null || Instant.now().isAfter(expiryTime)) {
             refreshToken();
         }
@@ -66,4 +72,227 @@ public class AccountingManager implements AccountingService {
         Integer expiresIn = (Integer) response.get("expires_in");
         this.expiryTime = Instant.now().plusSeconds(expiresIn - 60); // refresh 1 min earlier
     }
+
+    private void ensureAccountingIsEnabled() {
+        if (!accountingProperties.isEnabled() || webClient == null) {
+            throw new UnsupportedOperationException("Accounting service is not enabled.");
+        }
+    }
+
+    //region Project
+    public ResponseEntity<Object> getAllProjectProvidersAndInstallations() {
+        ensureAccountingIsEnabled();
+        try {
+            String token = getAccessToken();
+            Object projectInfo = webClient.get()
+                    .uri(uriBuilder -> uriBuilder
+                            .path("/projects/" + accountingProperties.getProjectId())
+                            .build())
+                    .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
+                    .retrieve()
+                    .bodyToMono(Object.class)
+                    .block();
+            return ResponseEntity.ok(projectInfo);
+        } catch (WebClientResponseException e) {
+            return ResponseEntity.status(e.getStatusCode()).body(e.getResponseBodyAsString());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+        }
+    }
+
+    public ResponseEntity<Object> getAllProjectInstallations(int page, int size) {
+        ensureAccountingIsEnabled();
+        try {
+            String token = getAccessToken();
+            Object installations = webClient.get()
+                    .uri(uriBuilder -> uriBuilder
+                            .path("/projects/" + accountingProperties.getProjectId() + "/installations")
+                            .queryParam("page", page)
+                            .queryParam("size", size)
+                            .build())
+                    .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
+                    .retrieve()
+                    .bodyToMono(Object.class)
+                    .block();
+            return ResponseEntity.ok(installations);
+        } catch (WebClientResponseException e) {
+            return ResponseEntity.status(e.getStatusCode()).body(e.getResponseBodyAsString());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+        }
+    }
+
+    public ResponseEntity<Object> getProjectReport(LocalDate start, LocalDate end) {
+        ensureAccountingIsEnabled();
+        try {
+            String token = getAccessToken();
+            Object projectReport = webClient.get()
+                    .uri(uriBuilder -> uriBuilder
+                            .path("/projects/" + accountingProperties.getProjectId() + "/report")
+                            .queryParam("start", start.toString())
+                            .queryParam("end", end.toString())
+                            .build())
+                    .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
+                    .retrieve()
+                    .bodyToMono(Object.class)
+                    .block();
+            return ResponseEntity.ok(projectReport);
+        } catch (WebClientResponseException e) {
+            return ResponseEntity.status(e.getStatusCode()).body(e.getResponseBodyAsString());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+        }
+    }
+    //endregion
+
+    //region Provider
+    public ResponseEntity<Object> getProviderReport(String prefix, String suffix, LocalDate start, LocalDate end) {
+        ensureAccountingIsEnabled();
+        String providerId = prefix + "/" + suffix;
+        try {
+            String token = getAccessToken();
+            Object providerReport = webClient.get()
+                    .uri(uriBuilder -> uriBuilder
+                            .path("/projects/" + accountingProperties.getProjectId() + "/providers/external/report")
+                            .queryParam("externalProviderId", providerId)
+                            .queryParam("start", start.toString())
+                            .queryParam("end", end.toString())
+                            .build())
+                    .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
+                    .retrieve()
+                    .bodyToMono(Object.class)
+                    .block();
+            return ResponseEntity.ok(providerReport);
+        } catch (WebClientResponseException e) {
+            if (e.getStatusCode() == HttpStatus.NOT_FOUND) {
+                return ResponseEntity.ok(Map.of("message", String.format("Provider with ID [%s] is not yet registered" +
+                        " in the accounting service", providerId)));
+            } else {
+                return ResponseEntity.status(e.getStatusCode()).body(e.getResponseBodyAsString());
+            }
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+        }
+    }
+    //endregion
+
+    //region Installation
+    public ResponseEntity<Object> getInstallationReport(String prefix, String suffix, LocalDate start, LocalDate end) {
+        ensureAccountingIsEnabled();
+        String serviceId = prefix + "/" + suffix;
+        try {
+            String token = getAccessToken();
+            Object installationReport = webClient.get()
+                    .uri(uriBuilder -> uriBuilder
+                            .path("installations/external/report")
+                            .queryParam("externalId", serviceId)
+                            .queryParam("start", start.toString())
+                            .queryParam("end", end.toString())
+                            .build())
+                    .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
+                    .retrieve()
+                    .bodyToMono(Object.class)
+                    .block();
+            return ResponseEntity.ok(installationReport);
+        } catch (WebClientResponseException e) {
+            if (e.getStatusCode() == HttpStatus.NOT_FOUND) {
+                return ResponseEntity.ok(Map.of("message", String.format("Service with ID [%s] is not yet registered" +
+                        " in the accounting service", serviceId)));
+            } else {
+                return ResponseEntity.status(e.getStatusCode()).body(e.getResponseBodyAsString());
+            }
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+        }
+    }
+    //endregion
+
+    //region Metric
+    public ResponseEntity<Object> getProviderMetrics(String prefix, String suffix, LocalDate start, LocalDate end,
+                                     String metricDefinitionId, int page, int size) {
+        ensureAccountingIsEnabled();
+        String providerId = prefix + "/" + suffix;
+        try {
+            String token = getAccessToken();
+            Object metrics = webClient.get()
+                    .uri(uriBuilder -> {
+                        UriBuilder builder = uriBuilder
+                                .path("/projects/{projectId}/providers/external/metrics")
+                                .queryParam("externalProviderId", providerId)
+                                .queryParam("page", page)
+                                .queryParam("size", size);
+
+                        if (start != null) {
+                            builder.queryParam("start", start);
+                        }
+                        if (end != null) {
+                            builder.queryParam("end", end);
+                        }
+                        if (metricDefinitionId != null) {
+                            builder.queryParam("metricDefinitionId", metricDefinitionId);
+                        }
+
+                        return builder.build(accountingProperties.getProjectId());
+                    })
+                    .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
+                    .retrieve()
+                    .bodyToMono(Object.class)
+                    .block();
+            return ResponseEntity.ok(metrics);
+        } catch (WebClientResponseException e) {
+            if (e.getStatusCode() == HttpStatus.NOT_FOUND) {
+                return ResponseEntity.ok(Map.of("message", String.format("Provider with ID [%s] is not yet registered" +
+                        " in the accounting service", providerId)));
+            } else {
+                return ResponseEntity.status(e.getStatusCode()).body(e.getResponseBodyAsString());
+            }
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+        }
+    }
+
+
+    public ResponseEntity<Object> getInstallationMetrics(String prefix, String suffix, LocalDate start, LocalDate end,
+                                         String metricDefinitionId, int page, int size) {
+        ensureAccountingIsEnabled();
+        String serviceId = prefix + "/" + suffix;
+        try {
+            String token = getAccessToken();
+            Object metrics = webClient.get()
+                    .uri(uriBuilder -> {
+                        UriBuilder builder = uriBuilder
+                                .path("/installations/external/metrics")
+                                .queryParam("externalId", serviceId)
+                                .queryParam("page", page)
+                                .queryParam("size", size);
+
+                        if (start != null) {
+                            builder.queryParam("start", start);
+                        }
+                        if (end != null) {
+                            builder.queryParam("end", end);
+                        }
+                        if (metricDefinitionId != null) {
+                            builder.queryParam("metricDefinitionId", metricDefinitionId);
+                        }
+
+                        return builder.build(accountingProperties.getProjectId());
+                    })
+                    .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
+                    .retrieve()
+                    .bodyToMono(Object.class)
+                    .block();
+            return ResponseEntity.ok(metrics);
+        } catch (WebClientResponseException e) {
+            if (e.getStatusCode() == HttpStatus.NOT_FOUND) {
+                return ResponseEntity.ok(Map.of("message", String.format("Service with ID [%s] is not yet registered" +
+                        " in the accounting service", serviceId)));
+            } else {
+                return ResponseEntity.status(e.getStatusCode()).body(e.getResponseBodyAsString());
+            }
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+        }
+    }
+    //endregion
 }
