@@ -141,7 +141,6 @@ public class HelpdeskController {
             throw new UnsupportedOperationException("Helpdesk service is not enabled.");
         }
         String accessToken = getAccessToken(authentication);
-        ticketData.put("accessToken", accessToken);
 
         try {
             Object response = webClient.post()
@@ -170,7 +169,6 @@ public class HelpdeskController {
             throw new UnsupportedOperationException("Helpdesk service is not enabled.");
         }
         String accessToken = getAccessToken(authentication);
-        ticketData.put("accessToken", accessToken);
 
         try {
             Object ticket = webClient.put()
