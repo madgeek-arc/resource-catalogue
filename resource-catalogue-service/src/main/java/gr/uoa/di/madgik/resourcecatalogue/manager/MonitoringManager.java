@@ -248,7 +248,7 @@ public class MonitoringManager extends ResourceCatalogueManager<MonitoringBundle
             Map<String, String> extras = new HashMap<>();
             extras.put("date", date);
             extras.put("tags", tagsString);
-            Vocabulary vocabulary = new Vocabulary(name, title, description, null,
+            Vocabulary vocabulary = new Vocabulary(name, description, description, null,
                     "external-monitoring_service_type", extras);
             serviceTypeList.add(vocabulary);
         }

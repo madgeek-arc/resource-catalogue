@@ -232,8 +232,15 @@ public class WizardController {
         catalogue.setPublicContacts(new ArrayList<>(List.of(new ProviderPublicContact())));
         catalogue.setUsers(new ArrayList<>(List.of(new User())));
 
-        // add country vocabularies
-        List<String> countries = vocabularyService.getByType(Vocabulary.Type.COUNTRY).stream().map(Vocabulary::getId).toList();
+        // Get countries as Map (ID -> Name)
+        Map<String, String> countries = vocabularyService.getByType(Vocabulary.Type.COUNTRY)
+                .stream()
+                .collect(Collectors.toMap(
+                        Vocabulary::getId,
+                        Vocabulary::getName,
+                        (existing, replacement) -> existing,
+                        LinkedHashMap::new
+                ));
 
         model.addAttribute("countries", countries);
         model.addAttribute("catalogue", catalogue);
@@ -246,7 +253,9 @@ public class WizardController {
         try {
             logger.info("Loading main Catalogue with ID [{}]", catalogue.getId());
             addCatalogue(new CatalogueBundle(catalogue));
-            model.addAttribute("successMessage", "Catalogue saved successfully!");
+            model.addAttribute("successMessage", "Catalogue saved successfully! You can now close the tab!");
+
+//            return "redirect:/wizard/step4";
         } catch (Exception e) {
             logger.error("Failed to save Catalogue [{}]: {}", catalogue.getId(), e.getMessage());
             model.addAttribute("errorMessage", "Error saving catalogue: " + e.getMessage());

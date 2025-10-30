@@ -48,6 +48,7 @@
         .button-row {
             display: flex;
             justify-content: flex-end;
+            align-items: center;
             margin-top: 20px;
         }
 
@@ -87,7 +88,7 @@
 
 <h2>Step 3: Create Default Catalogue</h2>
 
-<p class="description">
+<p class="description" th:if="${successMessage == null}">
     Please fill all the fields.
 </p>
 
@@ -174,7 +175,10 @@
             <label>Country:</label>
             <select th:field="*{location.country}" required>
                 <option value="">-- Select a country --</option>
-                <option th:each="c : ${countries}" th:value="${c}" th:text="${c}"></option>
+                <option th:each="entry : ${countries}"
+                        th:value="${entry.key}"
+                        th:text="${entry.value}">
+                </option>
             </select>
         </div>
     </fieldset>
@@ -218,30 +222,18 @@
                 th:if="${successMessage == null}">
             Submit
         </button>
-
-        <button type="button"
-                th:if="${successMessage != null}"
-                th:attr="data-homepage=${homepage}"
-                onclick="window.location.href=this.getAttribute('data-homepage')">
-            Finish
-        </button>
     </div>
+</form>
 
-    <div>
-        <button type="button" onclick="window.location.href='/api/wizard/step2'">
-            << Back
-        </button>
-    </div>
-
-    <script th:if="${successMessage != null}">
-        document.addEventListener('DOMContentLoaded', function () {
-            document.querySelectorAll('#catalogueForm input, #catalogueForm textarea, #catalogueForm select')
-                .forEach(el => {
-                    el.disabled = true;
-                    el.classList.add('disabled');
-                });
-        });
-    </script>
+<script th:if="${successMessage != null}">
+    document.addEventListener('DOMContentLoaded', function () {
+        document.querySelectorAll('#catalogueForm input, #catalogueForm textarea, #catalogueForm select')
+            .forEach(el => {
+                el.disabled = true;
+                el.classList.add('disabled');
+            });
+    });
+</script>
 
 </body>
 </html>

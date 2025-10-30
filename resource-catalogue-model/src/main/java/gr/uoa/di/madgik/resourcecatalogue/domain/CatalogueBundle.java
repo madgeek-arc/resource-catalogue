@@ -42,6 +42,16 @@ public class CatalogueBundle extends Bundle<Catalogue> {
         this.setMetadata(metadata);
     }
 
+    @Override
+    public String getId() {
+        return super.getId();
+    }
+
+    @Override
+    public void setId(String id) {
+        super.setId(id);
+    }
+
     public Catalogue getCatalogue() {
         return this.getPayload();
     }
