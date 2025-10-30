@@ -174,7 +174,11 @@
             <label>Country:</label>
             <select th:field="*{location.country}" required>
                 <option value="">-- Select a country --</option>
-                <option th:each="c : ${countries}" th:value="${c}" th:text="${c}"></option>
+                <!--                <option th:each="c : ${countries}" th:value="${c}" th:text="${c}"></option>-->
+                <option th:each="entry : ${countries}"
+                        th:value="${entry.key}"
+                        th:text="${entry.value}">
+                </option>
             </select>
         </div>
     </fieldset>

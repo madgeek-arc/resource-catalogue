@@ -233,9 +233,23 @@ public class WizardController {
         catalogue.setUsers(new ArrayList<>(List.of(new User())));
 
         // add country vocabularies
-        List<String> countries = vocabularyService.getByType(Vocabulary.Type.COUNTRY).stream().map(Vocabulary::getId).toList();
+//        List<String> countries = vocabularyService.getByType(Vocabulary.Type.COUNTRY).stream().map(Vocabulary::getId).toList();
 
-        model.addAttribute("countries", countries);
+        // Get full vocabulary objects (not just IDs)
+        List<Vocabulary> countries = vocabularyService.getByType(Vocabulary.Type.COUNTRY);
+
+        // Create map: id -> name
+        Map<String, String> countryMap = new LinkedHashMap<>();
+        for (Vocabulary vocab : countries) {
+            String displayName = vocab.getName() != null && !vocab.getName().isEmpty()
+                    ? vocab.getName()
+                    : vocab.getId();
+            countryMap.put(vocab.getId(), displayName);
+        }
+
+        model.addAttribute("countries", countryMap);
+
+//        model.addAttribute("countries", countries);
         model.addAttribute("catalogue", catalogue);
         model.addAttribute("id", catalogueId);
         return "wizard-step3";
