@@ -48,6 +48,7 @@
         .button-row {
             display: flex;
             justify-content: flex-end;
+            align-items: center;
             margin-top: 20px;
         }
 
@@ -174,7 +175,6 @@
             <label>Country:</label>
             <select th:field="*{location.country}" required>
                 <option value="">-- Select a country --</option>
-                <!--                <option th:each="c : ${countries}" th:value="${c}" th:text="${c}"></option>-->
                 <option th:each="entry : ${countries}"
                         th:value="${entry.key}"
                         th:text="${entry.value}">
@@ -221,19 +221,6 @@
         <button type="submit"
                 th:if="${successMessage == null}">
             Submit
-        </button>
-
-<!--        <button type="button"-->
-<!--                th:if="${successMessage != null}"-->
-<!--                th:attr="data-homepage=${homepage}"-->
-<!--                onclick="window.location.href=this.getAttribute('data-homepage')">-->
-<!--            Finish-->
-<!--        </button>-->
-    </div>
-
-    <div>
-        <button type="button" onclick="window.location.href='/api/wizard/step2'">
-            << Back
         </button>
     </div>
 </form>

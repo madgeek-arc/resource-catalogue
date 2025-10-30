@@ -73,11 +73,11 @@
             font-weight: bold;
         }
 
-        .navigation {
+        .button-row {
             display: flex;
             justify-content: flex-end;
             align-items: center;
-            margin-top: 25px;
+            margin-top: 20px;
         }
     </style>
 </head>
@@ -99,14 +99,10 @@
     </ul>
 
     <div>
-        <div style="display: inline-block">
+        <div style="display: block">
             <button type="submit" id="loadBtn" th:disabled="${allVocabLoaded}">
                 Load Vocabularies
             </button>
-        </div>
-
-        <div id="loadingDiv" style="display: none;">
-            <span>Loading Vocabularies...</span>
         </div>
     </div>
 </form>
@@ -132,15 +128,18 @@
 
 <p class="message" th:if="${message}" th:text="${message}"></p>
 
-<!--<div class="navigation">-->
-<!--    <a th:href="@{/wizard/step2}">Next >></a>-->
-<!--</div>-->
-
-<div class="navigation">
+<div class="button-row">
     <button type="button" onclick="window.location.href='/api/wizard/step2'"
             th:disabled="${!allVocabLoaded}">
         Next >>
     </button>
+</div>
+
+<div id="loadingDiv" style="display: none;">
+    <span>
+        Loading Vocabularies, please wait.<br>
+        This process may take a few moments. Please do not refresh the page.
+    </span>
 </div>
 
 </body>
