@@ -87,7 +87,7 @@
 
 <h2>Step 3: Create Default Catalogue</h2>
 
-<p class="description">
+<p class="description" th:if="${successMessage == null}">
     Please fill all the fields.
 </p>
 
@@ -223,12 +223,12 @@
             Submit
         </button>
 
-        <button type="button"
-                th:if="${successMessage != null}"
-                th:attr="data-homepage=${homepage}"
-                onclick="window.location.href=this.getAttribute('data-homepage')">
-            Finish
-        </button>
+<!--        <button type="button"-->
+<!--                th:if="${successMessage != null}"-->
+<!--                th:attr="data-homepage=${homepage}"-->
+<!--                onclick="window.location.href=this.getAttribute('data-homepage')">-->
+<!--            Finish-->
+<!--        </button>-->
     </div>
 
     <div>
@@ -236,16 +236,17 @@
             << Back
         </button>
     </div>
+</form>
 
-    <script th:if="${successMessage != null}">
-        document.addEventListener('DOMContentLoaded', function () {
-            document.querySelectorAll('#catalogueForm input, #catalogueForm textarea, #catalogueForm select')
-                .forEach(el => {
-                    el.disabled = true;
-                    el.classList.add('disabled');
-                });
-        });
-    </script>
+<script th:if="${successMessage != null}">
+    document.addEventListener('DOMContentLoaded', function () {
+        document.querySelectorAll('#catalogueForm input, #catalogueForm textarea, #catalogueForm select')
+            .forEach(el => {
+                el.disabled = true;
+                el.classList.add('disabled');
+            });
+    });
+</script>
 
 </body>
 </html>
