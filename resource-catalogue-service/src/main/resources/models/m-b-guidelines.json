@@ -1,0 +1,1892 @@
+{
+  "id": "m-b-guidelines",
+  "name": "Guidelines",
+  "description": "EOSC Interoperability Record",
+  "notice": "Fields with (*) are mandatory and must be completed in order to submit this form.",
+  "vocabulary": null,
+  "subType": null,
+  "series": null,
+  "resourceType": null,
+  "creationDate": null,
+  "createdBy": null,
+  "modificationDate": null,
+  "modifiedBy": null,
+  "sections": [
+    {
+      "id": "Guidelines",
+      "name": "Guidelines",
+      "description": null,
+      "subType": null,
+      "order": null,
+      "subSections": [
+        {
+          "id": "Information",
+          "name": "Information",
+          "description": null,
+          "subType": null,
+          "order": 1,
+          "subSections": null,
+          "fields": [
+              {
+                "id": "id",
+                "name": "id",
+                "label": {
+                  "cssClasses": null,
+                  "showLess": false,
+                  "style": null,
+                  "text": "Id"
+                },
+                "kind": null,
+                "typeInfo": {
+                  "multiplicity": false,
+                  "prefill": null,
+                  "type": "string",
+                  "values": null,
+                  "vocabulary": null
+                },
+                "deprecated": false,
+                "form": {
+                  "affects": null,
+                  "dependsOn": null,
+                  "description": {
+                    "cssClasses": null,
+                    "showLess": false,
+                    "style": null,
+                    "text": null
+                  },
+                  "display": {
+                    "cssClasses": "uk-disabled",
+                    "hasBorder": false,
+                    "order": 0,
+                    "placement": null,
+                    "style": null,
+                    "visible": false
+                  },
+                  "immutable": true,
+                  "mandatory": false,
+                  "placeholder": null,
+                  "suggestion": {
+                    "cssClasses": null,
+                    "showLess": false,
+                    "style": null,
+                    "text": null
+                  }
+                },
+                "subFields": []
+              },
+              {
+                "id": "catalogueId",
+                "name": "catalogueId",
+                "label": {
+                  "cssClasses": null,
+                  "showLess": false,
+                  "style": null,
+                  "text": "catalogueId"
+                },
+                "kind": null,
+                "typeInfo": {
+                  "multiplicity": false,
+                  "prefill": null,
+                  "type": "string",
+                  "values": null,
+                  "vocabulary": null
+                },
+                "deprecated": false,
+                "form": {
+                  "affects": null,
+                  "dependsOn": null,
+                  "description": {
+                    "cssClasses": null,
+                    "showLess": false,
+                    "style": null,
+                    "text": null
+                  },
+                  "display": {
+                    "cssClasses": "uk-disabled",
+                    "hasBorder": false,
+                    "order": 0,
+                    "placement": null,
+                    "style": null,
+                    "visible": false
+                  },
+                  "immutable": true,
+                  "mandatory": true,
+                  "placeholder": null,
+                  "suggestion": {
+                    "cssClasses": null,
+                    "showLess": false,
+                    "style": null,
+                    "text": null
+                  }
+                },
+                "subFields": []
+              },
+              {
+                "id": "providerId",
+                "name": "providerId",
+                "label": {
+                  "cssClasses": null,
+                  "showLess": false,
+                  "style": null,
+                  "text": "providerId"
+                },
+                "kind": null,
+                "typeInfo": {
+                  "multiplicity": false,
+                  "prefill": null,
+                  "type": "string",
+                  "values": null,
+                  "vocabulary": null
+                },
+                "deprecated": false,
+                "form": {
+                  "affects": null,
+                  "dependsOn": null,
+                  "description": {
+                    "cssClasses": null,
+                    "showLess": false,
+                    "style": null,
+                    "text": null
+                  },
+                  "display": {
+                    "cssClasses": "uk-disabled",
+                    "hasBorder": false,
+                    "order": 1,
+                    "placement": null,
+                    "style": null,
+                    "visible": false
+                  },
+                  "immutable": true,
+                  "mandatory": true,
+                  "placeholder": null,
+                  "suggestion": {
+                    "cssClasses": null,
+                    "showLess": false,
+                    "style": null,
+                    "text": null
+                  }
+                },
+                "subFields": []
+              },
+              {
+              "id": "identifierInfo",
+              "name": "identifierInfo",
+              "label": {
+                "text": "Identifier Info",
+                "cssClasses": null,
+                "style": null,
+                "showLess": false
+              },
+              "kind": null,
+              "typeInfo": {
+                "type": "composite",
+                "values": null,
+                "vocabulary": null,
+                "multiplicity": false,
+                "prefill": null
+              },
+              "deprecated": false,
+              "form": {
+                "dependsOn": null,
+                "affects": null,
+                "description": {
+                  "text": null,
+                  "cssClasses": null,
+                  "style": null,
+                  "showLess": false
+                },
+                "suggestion": {
+                  "text": null,
+                  "cssClasses": null,
+                  "style": null,
+                  "showLess": false
+                },
+                "placeholder": null,
+                "mandatory": true,
+                "immutable": true,
+                "display": {
+                  "placement": null,
+                  "order": 2,
+                  "visible": true,
+                  "hasBorder": false,
+                  "cssClasses": null,
+                  "style": null
+                }
+              },
+              "subFields": [
+                {
+                  "id": "identifier",
+                  "name": "identifier",
+                  "label": {
+                    "cssClasses": null,
+                    "showLess": false,
+                    "style": null,
+                    "text": "Identifier"
+                  },
+                  "kind": null,
+                  "typeInfo": {
+                    "multiplicity": false,
+                    "prefill": null,
+                    "type": "string",
+                    "values": null,
+                    "vocabulary": null
+                  },
+                  "deprecated": false,
+                  "form": {
+                    "affects": null,
+                    "dependsOn": null,
+                    "description": {
+                      "cssClasses": null,
+                      "showLess": false,
+                      "style": null,
+                      "text": "The Identifier is a unique string that identifies a resource. For software, determine whether the identifier is for a specific version of a piece of software, (per the Force11 Software Citation Principles), or for all versions. For publications, this should be a URI or DOI. This is the record's primary key for locating it in the EOSC-IF database."
+                    },
+                    "display": {
+                      "cssClasses": null,
+                      "hasBorder": false,
+                      "order": 1,
+                      "placement": null,
+                      "style": null,
+                      "visible": true
+                    },
+                    "immutable": true,
+                    "mandatory": true,
+                    "placeholder": null,
+                    "suggestion": {
+                      "cssClasses": null,
+                      "showLess": false,
+                      "style": null,
+                      "text": null
+                    }
+                  },
+                  "subFields": []
+                },
+                {
+                  "id": "identifierType",
+                  "name": "identifierType",
+                  "label": {
+                    "cssClasses": null,
+                    "showLess": false,
+                    "style": null,
+                    "text": "Identifier Type"
+                  },
+                  "kind": null,
+                  "typeInfo": {
+                    "multiplicity": false,
+                    "prefill": null,
+                    "type": "vocabulary",
+                    "values": null,
+                    "vocabulary": "IR_IDENTIFIER_TYPE"
+                  },
+                  "deprecated": false,
+                  "form": {
+                    "affects": null,
+                    "dependsOn": null,
+                    "description": {
+                      "cssClasses": null,
+                      "showLess": false,
+                      "style": null,
+                      "text": "The type of Identifier."
+                    },
+                    "display": {
+                      "cssClasses": null,
+                      "hasBorder": false,
+                      "order": 2,
+                      "placement": null,
+                      "style": null,
+                      "visible": true
+                    },
+                    "immutable": true,
+                    "mandatory": true,
+                    "placeholder": null,
+                    "suggestion": {
+                      "cssClasses": null,
+                      "showLess": false,
+                      "style": null,
+                      "text": null
+                    }
+                  },
+                  "subFields": []
+                }
+              ]
+            },
+              {
+                "id": "title",
+                "name": "title",
+                "label": {
+                  "cssClasses": null,
+                  "showLess": false,
+                  "style": null,
+                  "text": "Title"
+                },
+                "kind": null,
+                "typeInfo": {
+                  "multiplicity": false,
+                  "prefill": null,
+                  "type": "string",
+                  "values": null,
+                  "vocabulary": null
+                },
+                "deprecated": false,
+                "form": {
+                  "affects": null,
+                  "dependsOn": null,
+                  "description": {
+                    "cssClasses": null,
+                    "showLess": false,
+                    "style": null,
+                    "text": "A name or title by which a resource is known. May be the title of a dataset or the name of a piece of software."
+                  },
+                  "display": {
+                    "cssClasses": null,
+                    "hasBorder": false,
+                    "order": 3,
+                    "placement": null,
+                    "style": null,
+                    "visible": true
+                  },
+                  "immutable": true,
+                  "mandatory": true,
+                  "placeholder": null,
+                  "suggestion": {
+                    "cssClasses": null,
+                    "showLess": false,
+                    "style": null,
+                    "text": null
+                  }
+                },
+                "subFields": []
+              },
+              {
+              "id": "node",
+              "name": "node",
+              "label": {
+                "cssClasses": null,
+                "showLess": false,
+                "style": null,
+                "text": "Node"
+              },
+              "kind": null,
+              "typeInfo": {
+                "multiplicity": false,
+                "prefill": null,
+                "type": "vocabulary",
+                "values": null,
+                "vocabulary": "NODE"
+              },
+              "deprecated": false,
+              "form": {
+                "affects": null,
+                "dependsOn": null,
+                "description": {
+                  "cssClasses": null,
+                  "showLess": false,
+                  "style": null,
+                  "text": "The node in which the Interoperability Record belongs to."
+                },
+                "display": {
+                  "cssClasses": null,
+                  "hasBorder": false,
+                  "order": 4,
+                  "placement": null,
+                  "style": null,
+                  "visible": true
+                },
+                "immutable": true,
+                "mandatory": false,
+                "placeholder": null,
+                "suggestion": {
+                  "cssClasses": null,
+                  "showLess": false,
+                  "style": null,
+                  "text": null
+                }
+              },
+              "subFields": []
+            },
+              {
+                "id": "publicationYear",
+                "name": "publicationYear",
+                "label": {
+                  "cssClasses": null,
+                  "showLess": false,
+                  "style": null,
+                  "text": "Publication Year"
+                },
+                "kind": null,
+                "typeInfo": {
+                  "multiplicity": false,
+                  "prefill": null,
+                  "type": "number",
+                  "values": null,
+                  "vocabulary": null
+                },
+                "deprecated": false,
+                "form": {
+                  "affects": null,
+                  "dependsOn": null,
+                  "description": {
+                    "cssClasses": null,
+                    "showLess": false,
+                    "style": null,
+                    "text": "The year when the guideline was or will be made publicly available. If an embargo period has been in effect, use the date when the embargo period ends. In the case of datasets, 'publish' is understood to mean making the data available on a specific date to the community of researchers. If there is no standard publication year value, use the date that would be preferred from a citation perspective."
+                  },
+                  "display": {
+                    "cssClasses": null,
+                    "hasBorder": false,
+                    "order": 5,
+                    "placement": null,
+                    "style": null,
+                    "visible": true
+                  },
+                  "immutable": true,
+                  "mandatory": true,
+                  "placeholder": null,
+                  "suggestion": {
+                    "cssClasses": null,
+                    "showLess": false,
+                    "style": null,
+                    "text": null
+                  }
+                },
+                "subFields": []
+              },
+              {
+              "id": "resourceTypesInfo",
+              "name": "resourceTypesInfo",
+              "label": {
+                "text": "Resource Types Info",
+                "cssClasses": null,
+                "style": null,
+                "showLess": false
+              },
+              "kind": null,
+              "typeInfo": {
+                "type": "composite",
+                "values": null,
+                "vocabulary": null,
+                "multiplicity": true,
+                "prefill": null
+              },
+              "deprecated": false,
+              "form": {
+                "dependsOn": null,
+                "affects": null,
+                "description": {
+                  "text": null,
+                  "cssClasses": null,
+                  "style": null,
+                  "showLess": false
+                },
+                "suggestion": {
+                  "text": null,
+                  "cssClasses": null,
+                  "style": null,
+                  "showLess": false
+                },
+                "placeholder": null,
+                "mandatory": true,
+                "immutable": true,
+                "display": {
+                  "placement": null,
+                  "order": 6,
+                  "visible": true,
+                  "hasBorder": true,
+                  "cssClasses": null,
+                  "style": null
+                }
+              },
+              "subFields": [
+                {
+                  "id": "resourceType",
+                  "name": "resourceType",
+                  "label": {
+                    "cssClasses": null,
+                    "showLess": false,
+                    "style": null,
+                    "text": "Resource Type"
+                  },
+                  "kind": null,
+                  "typeInfo": {
+                    "multiplicity": false,
+                    "prefill": null,
+                    "type": "string",
+                    "values": null,
+                    "vocabulary": null
+                  },
+                  "deprecated": false,
+                  "form": {
+                    "affects": null,
+                    "dependsOn": null,
+                    "description": {
+                      "cssClasses": null,
+                      "showLess": false,
+                      "style": null,
+                      "text": "A description of the resource. The recommended content is a single term of some detail so that a pair can be formed with the Resource Type General property. For example, 'API', 'Configuration Template', 'Policy', 'Metadata Schema'. Text inserted here will inform a controlled vocabulary to be provided in future versions of this UI."
+                    },
+                    "display": {
+                      "cssClasses": null,
+                      "hasBorder": false,
+                      "order": 1,
+                      "placement": null,
+                      "style": null,
+                      "visible": true
+                    },
+                    "immutable": true,
+                    "mandatory": true,
+                    "placeholder": null,
+                    "suggestion": {
+                      "cssClasses": null,
+                      "showLess": false,
+                      "style": null,
+                      "text": null
+                    }
+                  },
+                  "subFields": []
+                },
+                {
+                  "id": "resourceTypeGeneral",
+                  "name": "resourceTypeGeneral",
+                  "label": {
+                    "cssClasses": null,
+                    "showLess": false,
+                    "style": null,
+                    "text": "Resource Type General"
+                  },
+                  "kind": null,
+                  "typeInfo": {
+                    "multiplicity": false,
+                    "prefill": null,
+                    "type": "vocabulary",
+                    "values": null,
+                    "vocabulary": "IR_RESOURCE_TYPE_GENERAL"
+                  },
+                  "deprecated": false,
+                  "form": {
+                    "affects": null,
+                    "dependsOn": null,
+                    "description": {
+                      "cssClasses": null,
+                      "showLess": false,
+                      "style": null,
+                      "text": "The general type of a resource."
+                    },
+                    "display": {
+                      "cssClasses": null,
+                      "hasBorder": false,
+                      "order": 2,
+                      "placement": null,
+                      "style": null,
+                      "visible": true
+                    },
+                    "immutable": true,
+                    "mandatory": true,
+                    "placeholder": null,
+                    "suggestion": {
+                      "cssClasses": null,
+                      "showLess": false,
+                      "style": null,
+                      "text": null
+                    }
+                  },
+                  "subFields": []
+                }
+              ]
+            },
+              {
+              "id": "created",
+              "name": "created",
+              "label": {
+                "cssClasses": null,
+                "showLess": false,
+                "style": null,
+                "text": "Created"
+              },
+              "kind": null,
+              "typeInfo": {
+                "multiplicity": false,
+                "prefill": null,
+                "type": "string",
+                "values": null,
+                "vocabulary": null
+              },
+              "deprecated": false,
+              "form": {
+                "affects": null,
+                "dependsOn": null,
+                "description": {
+                  "cssClasses": null,
+                  "showLess": false,
+                  "style": null,
+                  "text": "Time/date the record was created."
+                },
+                "display": {
+                  "cssClasses": "uk-disabled",
+                  "hasBorder": false,
+                  "order": 7,
+                  "placement": null,
+                  "style": null,
+                  "visible": true
+                },
+                "immutable": true,
+                "mandatory": false,
+                "placeholder": "Generated automatically",
+                "suggestion": {
+                  "cssClasses": null,
+                  "showLess": false,
+                  "style": null,
+                  "text": null
+                }
+              },
+              "subFields": []
+            },
+            {
+              "id": "updated",
+              "name": "updated",
+              "label": {
+                "cssClasses": null,
+                "showLess": false,
+                "style": null,
+                "text": "Updated"
+              },
+              "kind": null,
+              "typeInfo": {
+                "multiplicity": false,
+                "prefill": null,
+                "type": "string",
+                "values": null,
+                "vocabulary": null
+              },
+              "deprecated": false,
+              "form": {
+                "affects": null,
+                "dependsOn": null,
+                "description": {
+                  "cssClasses": null,
+                  "showLess": false,
+                  "style": null,
+                  "text": "Time/date the record was last saved, with or without modifications."
+                },
+                "display": {
+                  "cssClasses": "uk-disabled",
+                  "hasBorder": false,
+                  "order": 8,
+                  "placement": null,
+                  "style": null,
+                  "visible": true
+                },
+                "immutable": true,
+                "mandatory": false,
+                "placeholder": "Generated automatically",
+                "suggestion": {
+                  "cssClasses": null,
+                  "showLess": false,
+                  "style": null,
+                  "text": null
+                }
+              },
+              "subFields": []
+            },
+              {
+              "id": "relatedStandards",
+              "name": "relatedStandards",
+              "label": {
+                "text": "Related Standards",
+                "cssClasses": null,
+                "style": null,
+                "showLess": false
+              },
+              "kind": null,
+              "typeInfo": {
+                "type": "composite",
+                "values": null,
+                "vocabulary": null,
+                "multiplicity": true,
+                "prefill": null
+              },
+              "deprecated": false,
+              "form": {
+                "dependsOn": null,
+                "affects": null,
+                "description": {
+                  "text": null,
+                  "cssClasses": null,
+                  "style": null,
+                  "showLess": false
+                },
+                "suggestion": {
+                  "text": null,
+                  "cssClasses": null,
+                  "style": null,
+                  "showLess": false
+                },
+                "placeholder": null,
+                "mandatory": false,
+                "immutable": true,
+                "display": {
+                  "placement": null,
+                  "order": 9,
+                  "visible": true,
+                  "hasBorder": true,
+                  "cssClasses": null,
+                  "style": null
+                }
+              },
+              "subFields": [
+                {
+                  "id": "relatedStandardURI",
+                  "name": "relatedStandardURI",
+                  "label": {
+                    "cssClasses": null,
+                    "showLess": false,
+                    "style": null,
+                    "text": "Related Standard URI"
+                  },
+                  "kind": null,
+                  "typeInfo": {
+                    "multiplicity": false,
+                    "prefill": null,
+                    "type": "url",
+                    "values": null,
+                    "vocabulary": null
+                  },
+                  "deprecated": false,
+                  "form": {
+                    "affects": null,
+                    "dependsOn": null,
+                    "description": {
+                      "cssClasses": null,
+                      "showLess": false,
+                      "style": null,
+                      "text": "Standards related to the guideline. This should point out to related standards only when it is a prerequisitite/depenendency, and likely to influence a Provider's design towards interoperability based on the guideline."
+                    },
+                    "display": {
+                      "cssClasses": null,
+                      "hasBorder": false,
+                      "order": 1,
+                      "placement": null,
+                      "style": null,
+                      "visible": true
+                    },
+                    "immutable": true,
+                    "mandatory": false,
+                    "placeholder": "use http:// or https://",
+                    "suggestion": {
+                      "cssClasses": null,
+                      "showLess": false,
+                      "style": null,
+                      "text": null
+                    }
+                  },
+                  "subFields": []
+                },
+                {
+                  "id": "relatedStandardIdentifier",
+                  "name": "relatedStandardIdentifier",
+                  "label": {
+                    "cssClasses": null,
+                    "showLess": false,
+                    "style": null,
+                    "text": "Related Standard Identifier"
+                  },
+                  "kind": null,
+                  "typeInfo": {
+                    "multiplicity": false,
+                    "prefill": null,
+                    "type": "string",
+                    "values": null,
+                    "vocabulary": null
+                  },
+                  "deprecated": false,
+                  "form": {
+                    "affects": null,
+                    "dependsOn": null,
+                    "description": {
+                      "cssClasses": null,
+                      "showLess": false,
+                      "style": null,
+                      "text": "The name of the related standard."
+                    },
+                    "display": {
+                      "cssClasses": null,
+                      "hasBorder": false,
+                      "order": 2,
+                      "placement": null,
+                      "style": null,
+                      "visible": true
+                    },
+                    "immutable": true,
+                    "mandatory": false,
+                    "placeholder": null,
+                    "suggestion": {
+                      "cssClasses": null,
+                      "showLess": false,
+                      "style": null,
+                      "text": "Suggested length is 250 characters"
+                    }
+                  },
+                  "subFields": []
+                }
+              ]
+            },
+              {
+              "id": "rights",
+              "name": "rights",
+              "label": {
+                "text": "Rights",
+                "cssClasses": null,
+                "style": null,
+                "showLess": false
+              },
+              "kind": null,
+              "typeInfo": {
+                "type": "composite",
+                "values": null,
+                "vocabulary": null,
+                "multiplicity": true,
+                "prefill": null
+              },
+              "deprecated": false,
+              "form": {
+                "dependsOn": null,
+                "affects": null,
+                "description": {
+                  "text": null,
+                  "cssClasses": null,
+                  "style": null,
+                  "showLess": false
+                },
+                "suggestion": {
+                  "text": null,
+                  "cssClasses": null,
+                  "style": null,
+                  "showLess": false
+                },
+                "placeholder": null,
+                "mandatory": true,
+                "immutable": true,
+                "display": {
+                  "placement": null,
+                  "order": 10,
+                  "visible": true,
+                  "hasBorder": true,
+                  "cssClasses": null,
+                  "style": null
+                }
+              },
+              "subFields": [
+                {
+                  "id": "rightTitle",
+                  "name": "rightTitle",
+                  "label": {
+                    "cssClasses": null,
+                    "showLess": false,
+                    "style": null,
+                    "text": "Rights"
+                  },
+                  "kind": null,
+                  "typeInfo": {
+                    "multiplicity": false,
+                    "prefill": null,
+                    "type": "string",
+                    "values": null,
+                    "vocabulary": null
+                  },
+                  "deprecated": false,
+                  "form": {
+                    "affects": null,
+                    "dependsOn": null,
+                    "description": {
+                      "cssClasses": null,
+                      "showLess": false,
+                      "style": null,
+                    "text":"Any rights information for this resource. The property may be repeated to record complex rights characteristics. Provide a rights management statement for the resource or reference a service providing such information. Include embargo information if applicable. Use the complete title of a license and include version information if applicable. May be used for software licenses.Examples: Creative Commons Attribution, 3.0 Germany License, Apache License, Version 2.026"                 },
+                    "display": {
+                      "cssClasses": null,
+                      "hasBorder": false,
+                      "order": 1,
+                      "placement": null,
+                      "style": null,
+                      "visible": true
+                    },
+                    "immutable": true,
+                    "mandatory": true,
+                    "placeholder": null,
+                    "suggestion": {
+                      "cssClasses": null,
+                      "showLess": false,
+                      "style": null,
+                      "text": null
+                    }
+                  },
+                  "subFields": []
+                },
+                {
+                  "id": "rightURI",
+                  "name": "rightURI",
+                  "label": {
+                    "cssClasses": null,
+                    "showLess": false,
+                    "style": null,
+                    "text": "Rights URI"
+                  },
+                  "kind": null,
+                  "typeInfo": {
+                    "multiplicity": false,
+                    "prefill": null,
+                    "type": "url",
+                    "values": null,
+                    "vocabulary": null
+                  },
+                  "deprecated": false,
+                  "form": {
+                    "affects": null,
+                    "dependsOn": null,
+                    "description": {
+                      "cssClasses": null,
+                      "showLess": false,
+                      "style": null,
+                      "text": "The URI of the license."
+                    },
+                    "display": {
+                      "cssClasses": null,
+                      "hasBorder": false,
+                      "order": 2,
+                      "placement": null,
+                      "style": null,
+                      "visible": true
+                    },
+                    "immutable": true,
+                    "mandatory": true,
+                    "placeholder": "use http:// or https://",
+                    "suggestion": {
+                      "cssClasses": null,
+                      "showLess": false,
+                      "style": null,
+                      "text": null
+                    }
+                  },
+                  "subFields": []
+                },
+                {
+                  "id": "rightIdentifier",
+                  "name": "rightIdentifier",
+                  "label": {
+                    "cssClasses": null,
+                    "showLess": false,
+                    "style": null,
+                    "text": "Rights Identifier"
+                  },
+                  "kind": null,
+                  "typeInfo": {
+                    "multiplicity": false,
+                    "prefill": null,
+                    "type": "string",
+                    "values": null,
+                    "vocabulary": null
+                  },
+                  "deprecated": false,
+                  "form": {
+                    "affects": null,
+                    "dependsOn": null,
+                    "description": {
+                      "cssClasses": null,
+                      "showLess": false,
+                      "style": null,
+                      "text": "A short, standardized version of the license name. (Example: CC-BY-3.0) A list of identifiers for commonly-used licenses may be found here: https://spdx.org/licenses/"
+                    },
+                    "display": {
+                      "cssClasses": null,
+                      "hasBorder": false,
+                      "order": 3,
+                      "placement": null,
+                      "style": null,
+                      "visible": true
+                    },
+                    "immutable": true,
+                    "mandatory": true,
+                    "placeholder": null,
+                    "suggestion": {
+                      "cssClasses": null,
+                      "showLess": false,
+                      "style": null,
+                      "text": null
+                    }
+                  },
+                  "subFields": []
+                }
+              ]
+            },
+              {
+              "id": "description",
+              "name": "description",
+              "label": {
+                "cssClasses": null,
+                "showLess": false,
+                "style": null,
+                "text": "Description"
+              },
+              "kind": null,
+              "typeInfo": {
+                "multiplicity": false,
+                "prefill": null,
+                "type": "richText",
+                "values": null,
+                "vocabulary": null
+              },
+              "deprecated": false,
+              "form": {
+                "affects": null,
+                "dependsOn": null,
+                "description": {
+                  "cssClasses": null,
+                  "showLess": false,
+                  "style": null,
+                  "text": "All additional information that does not fit in any of the other categories. May be used for technical information."
+                },
+                "display": {
+                  "cssClasses": null,
+                  "hasBorder": false,
+                  "order": 11,
+                  "placement": null,
+                  "style": null,
+                  "visible": true
+                },
+                "immutable": true,
+                "mandatory": true,
+                "placeholder": null,
+                "suggestion": {
+                  "cssClasses": null,
+                  "showLess": false,
+                  "style": null,
+                  "text": null
+                }
+              },
+              "subFields": []
+            },
+              {
+              "id": "status",
+              "name": "status",
+              "label": {
+                "cssClasses": null,
+                "showLess": false,
+                "style": null,
+                "text": "Status"
+              },
+              "kind": null,
+              "typeInfo": {
+                "multiplicity": false,
+                "prefill": null,
+                "type": "vocabulary",
+                "values": null,
+                "vocabulary": "IR_STATUS"
+              },
+              "deprecated": false,
+              "form": {
+                "affects": null,
+                "dependsOn": null,
+                "description": {
+                  "cssClasses": null,
+                  "showLess": false,
+                  "style": null,
+                  "text": "Status of the resource."
+                },
+                "display": {
+                  "cssClasses": null,
+                  "hasBorder": false,
+                  "order": 12,
+                  "placement": null,
+                  "style": null,
+                  "visible": true
+                },
+                "immutable": true,
+                "mandatory": true,
+                "placeholder": null,
+                "suggestion": {
+                  "cssClasses": null,
+                  "showLess": false,
+                  "style": null,
+                  "text": null
+                }
+              },
+              "subFields": []
+            },
+              {
+              "id": "domain",
+              "name": "domain",
+              "label": {
+                "cssClasses": null,
+                "showLess": false,
+                "style": null,
+                "text": "Domain"
+              },
+              "kind": null,
+              "typeInfo": {
+                "multiplicity": false,
+                "prefill": null,
+                "type": "vocabulary",
+                "values": null,
+                "vocabulary": "SCIENTIFIC_DOMAIN"
+              },
+              "deprecated": false,
+              "form": {
+                "affects": null,
+                "dependsOn": null,
+                "description": {
+                  "cssClasses": null,
+                  "showLess": false,
+                  "style": null,
+                  "text": "Intended Audience for the Guideline."
+                },
+                "display": {
+                  "cssClasses": null,
+                  "hasBorder": false,
+                  "order": 13,
+                  "placement": null,
+                  "style": null,
+                  "visible": true
+                },
+                "immutable": true,
+                "mandatory": false,
+                "placeholder": null,
+                "suggestion": {
+                  "cssClasses": null,
+                  "showLess": false,
+                  "style": null,
+                  "text": null
+                }
+              },
+              "subFields": []
+            },
+              {
+              "id": "eoscGuidelineType",
+              "name": "eoscGuidelineType",
+              "label": {
+                "cssClasses": null,
+                "showLess": false,
+                "style": null,
+                "text": "EOSC Guideline Type"
+              },
+              "kind": null,
+              "typeInfo": {
+                "multiplicity": false,
+                "prefill": null,
+                "type": "vocabulary",
+                "values": null,
+                "vocabulary": "IR_EOSC_GUIDELINE_TYPE"
+              },
+              "deprecated": false,
+              "form": {
+                "affects": null,
+                "dependsOn": null,
+                "description": {
+                  "cssClasses": null,
+                  "showLess": false,
+                  "style": null,
+                  "text": "The type of record within the registry."
+                },
+                "display": {
+                  "cssClasses": null,
+                  "hasBorder": false,
+                  "order": 14,
+                  "placement": null,
+                  "style": null,
+                  "visible": true
+                },
+                "immutable": true,
+                "mandatory": true,
+                "placeholder": null,
+                "suggestion": {
+                  "cssClasses": null,
+                  "showLess": false,
+                  "style": null,
+                  "text": null
+                }
+              },
+              "subFields": []
+            },
+              {
+              "id": "eoscIntegrationOptions",
+              "name": "eoscIntegrationOptions",
+              "label": {
+                "cssClasses": null,
+                "showLess": false,
+                "style": null,
+                "text": "EOSC Integration Options"
+              },
+              "kind": null,
+              "typeInfo": {
+                "multiplicity": true,
+                "prefill": null,
+                "type": "string",
+                "values": null,
+                "vocabulary": null
+              },
+              "deprecated": false,
+              "form": {
+                "affects": null,
+                "dependsOn": null,
+                "description": {
+                  "cssClasses": null,
+                  "showLess": false,
+                  "style": null,
+                  "text": "A short summary of any options to integrate this guideline (if applicable)."
+                },
+                "display": {
+                  "cssClasses": null,
+                  "hasBorder": false,
+                  "order": 15,
+                  "placement": null,
+                  "style": null,
+                  "visible": true
+                },
+                "immutable": true,
+                "mandatory": false,
+                "placeholder": null,
+                "suggestion": {
+                  "cssClasses": null,
+                  "showLess": false,
+                  "style": null,
+                  "text": null
+                }
+              },
+              "subFields": []
+            },
+              {
+              "id": "alternativeIdentifiers",
+              "name": "alternativeIdentifiers",
+              "label": {
+                "text": "Alternative Identifiers",
+                "cssClasses": null,
+                "style": null,
+                "showLess": false
+              },
+              "kind": null,
+              "typeInfo": {
+                "type": "composite",
+                "values": null,
+                "vocabulary": null,
+                "multiplicity": true,
+                "prefill": null
+              },
+              "deprecated": false,
+              "form": {
+                "dependsOn": null,
+                "affects": null,
+                "description": {
+                  "text": null,
+                  "cssClasses": null,
+                  "style": null,
+                  "showLess": false
+                },
+                "suggestion": {
+                  "text": null,
+                  "cssClasses": null,
+                  "style": null,
+                  "showLess": false
+                },
+                "placeholder": null,
+                "mandatory": false,
+                "immutable": true,
+                "display": {
+                  "placement": null,
+                  "order": 16,
+                  "visible": true,
+                  "hasBorder": true,
+                  "cssClasses": null,
+                  "style": null
+                }
+              },
+              "subFields": [
+                {
+                  "id": "type",
+                  "name": "type",
+                  "label": {
+                    "cssClasses": null,
+                    "showLess": false,
+                    "style": null,
+                    "text": "Type"
+                  },
+                  "kind": null,
+                  "typeInfo": {
+                    "multiplicity": false,
+                    "prefill": null,
+                    "type": "string",
+                    "values": null,
+                    "vocabulary": null
+                  },
+                  "deprecated": false,
+                  "form": {
+                    "affects": null,
+                    "dependsOn": null,
+                    "description": {
+                      "cssClasses": null,
+                      "showLess": false,
+                      "style": null,
+                      "text": null
+                    },
+                    "display": {
+                      "cssClasses": null,
+                      "hasBorder": false,
+                      "order": 1,
+                      "placement": null,
+                      "style": null,
+                      "visible": true
+                    },
+                    "immutable": true,
+                    "mandatory": false,
+                    "placeholder": null,
+                    "suggestion": {
+                      "cssClasses": null,
+                      "showLess": false,
+                      "style": null,
+                      "text": null
+                    }
+                  },
+                  "subFields": []
+                },
+                {
+                  "id": "value",
+                  "name": "value",
+                  "label": {
+                    "cssClasses": null,
+                    "showLess": false,
+                    "style": null,
+                    "text": "value"
+                  },
+                  "kind": null,
+                  "typeInfo": {
+                    "multiplicity": false,
+                    "prefill": null,
+                    "type": "string",
+                    "values": null,
+                    "vocabulary": null
+                  },
+                  "deprecated": false,
+                  "form": {
+                    "affects": null,
+                    "dependsOn": null,
+                    "description": {
+                      "cssClasses": null,
+                      "showLess": false,
+                      "style": null,
+                      "text": null
+                    },
+                    "display": {
+                      "cssClasses": null,
+                      "hasBorder": false,
+                      "order": 2,
+                      "placement": null,
+                      "style": null,
+                      "visible": true
+                    },
+                    "immutable": true,
+                    "mandatory": false,
+                    "placeholder": null,
+                    "suggestion": {
+                      "cssClasses": null,
+                      "showLess": false,
+                      "style": null,
+                      "text": null
+                    }
+                  },
+                  "subFields": []
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "Creators",
+          "name": "Creators",
+          "description": null,
+          "subType": null,
+          "order": 2,
+          "subSections": null,
+          "fields": [
+            {
+              "id": "creators",
+              "name": "creators",
+              "label": {
+                "text": "Creators",
+                "cssClasses": null,
+                "style": null,
+                "showLess": false
+              },
+              "kind": null,
+              "typeInfo": {
+                "type": "composite",
+                "values": null,
+                "vocabulary": null,
+                "multiplicity": true,
+                "prefill": null
+              },
+              "deprecated": false,
+              "form": {
+                "dependsOn": null,
+                "affects": null,
+                "description": {
+                  "text": null,
+                  "cssClasses": null,
+                  "style": null,
+                  "showLess": false
+                },
+                "suggestion": {
+                  "text": null,
+                  "cssClasses": null,
+                  "style": null,
+                  "showLess": false
+                },
+                "placeholder": null,
+                "mandatory": true,
+                "immutable": true,
+                "display": {
+                  "placement": null,
+                  "order": 1,
+                  "visible": true,
+                  "hasBorder": true,
+                  "cssClasses": null,
+                  "style": null
+                }
+              },
+              "subFields": [
+                {
+                "id": "creatorNameTypeInfo",
+                "name": "creatorNameTypeInfo",
+                "label": {
+                  "cssClasses": null,
+                  "showLess": false,
+                  "style": null,
+                  "text": "creatorNameTypeInfo"
+                },
+                "kind": null,
+                "typeInfo": {
+                  "multiplicity": false,
+                  "prefill": null,
+                  "type": "composite",
+                  "values": null,
+                  "vocabulary": null
+                },
+                "deprecated": false,
+                "form": {
+                  "affects": null,
+                  "dependsOn": null,
+                  "description": {
+                    "cssClasses": null,
+                    "showLess": false,
+                    "style": null,
+                    "text": null
+                  },
+                  "display": {
+                    "cssClasses": null,
+                    "hasBorder": false,
+                    "order": 1,
+                    "placement": null,
+                    "style": null,
+                    "visible": true
+                  },
+                  "immutable": true,
+                  "mandatory": true,
+                  "placeholder": null,
+                  "suggestion": {
+                    "cssClasses": null,
+                    "showLess": false,
+                    "style": null,
+                    "text": null
+                  }
+                },
+                "subFields": [
+                {
+                  "id": "creatorName",
+                  "name": "creatorName",
+                  "label": {
+                    "cssClasses": null,
+                    "showLess": false,
+                    "style": null,
+                    "text": "Creator Name"
+                  },
+                  "kind": null,
+                  "typeInfo": {
+                    "multiplicity": false,
+                    "prefill": null,
+                    "type": "string",
+                    "values": null,
+                    "vocabulary": null
+                  },
+                  "deprecated": false,
+                  "form": {
+                    "affects": null,
+                    "dependsOn": null,
+                    "description": {
+                      "cssClasses": null,
+                      "showLess": false,
+                      "style": null,
+                      "text": "The full name of the creator. Can be organisation or personal name. Examples: Charpy, Antoine; Jemison, Mae; Foo Data Center. Names in non-roman scripts may be transliterated according to the ALA-LC tables."
+                    },
+                    "display": {
+                      "cssClasses": null,
+                      "hasBorder": false,
+                      "order": 1,
+                      "placement": null,
+                      "style": null,
+                      "visible": true
+                    },
+                    "immutable": true,
+                    "mandatory": true,
+                    "placeholder": null,
+                    "suggestion": {
+                      "cssClasses": null,
+                      "showLess": false,
+                      "style": null,
+                      "text": null
+                    }
+                  },
+                  "subFields": []
+                },
+                {
+                  "id": "nameType",
+                  "name": "nameType",
+                  "label": {
+                    "cssClasses": null,
+                    "showLess": false,
+                    "style": null,
+                    "text": "Name Type"
+                  },
+                  "kind": null,
+                  "typeInfo": {
+                    "multiplicity": false,
+                    "prefill": null,
+                    "type": "vocabulary",
+                    "values": null,
+                    "vocabulary": "IR_NAME_TYPE"
+                  },
+                  "deprecated": false,
+                  "form": {
+                    "affects": null,
+                    "dependsOn": null,
+                    "description": {
+                      "cssClasses": null,
+                      "showLess": false,
+                      "style": null,
+                      "text": "The type of name."
+                    },
+                    "display": {
+                      "cssClasses": null,
+                      "hasBorder": false,
+                      "order": 2,
+                      "placement": null,
+                      "style": null,
+                      "visible": true
+                    },
+                    "immutable": true,
+                    "mandatory": true,
+                    "placeholder": null,
+                    "suggestion": {
+                      "cssClasses": null,
+                      "showLess": false,
+                      "style": null,
+                      "text": null
+                    }
+                  },
+                  "subFields": []
+                }
+              ]
+              },
+                {
+                  "id": "givenName",
+                  "name": "givenName",
+                  "label": {
+                    "cssClasses": null,
+                    "showLess": false,
+                    "style": null,
+                    "text": "Given Name"
+                  },
+                  "kind": null,
+                  "typeInfo": {
+                    "multiplicity": false,
+                    "prefill": null,
+                    "type": "string",
+                    "values": null,
+                    "vocabulary": null
+                  },
+                  "deprecated": false,
+                  "form": {
+                    "affects": null,
+                    "dependsOn": null,
+                    "description": {
+                      "cssClasses": null,
+                      "showLess": false,
+                      "style": null,
+                      "text": "The personal or first name of the creator."
+                    },
+                    "display": {
+                      "cssClasses": null,
+                      "hasBorder": false,
+                      "order": 2,
+                      "placement": null,
+                      "style": null,
+                      "visible": true
+                    },
+                    "immutable": true,
+                    "mandatory": false,
+                    "placeholder": null,
+                    "suggestion": {
+                      "cssClasses": null,
+                      "showLess": false,
+                      "style": null,
+                      "text": null
+                    }
+                  },
+                  "subFields": []
+                },
+                {
+                  "id": "familyName",
+                  "name": "familyName",
+                  "label": {
+                    "cssClasses": null,
+                    "showLess": false,
+                    "style": null,
+                    "text": "Family Name"
+                  },
+                  "kind": null,
+                  "typeInfo": {
+                    "multiplicity": false,
+                    "prefill": null,
+                    "type": "string",
+                    "values": null,
+                    "vocabulary": null
+                  },
+                  "deprecated": false,
+                  "form": {
+                    "affects": null,
+                    "dependsOn": null,
+                    "description": {
+                      "cssClasses": null,
+                      "showLess": false,
+                      "style": null,
+                      "text": "The surname or last name of the creator."
+                    },
+                    "display": {
+                      "cssClasses": null,
+                      "hasBorder": false,
+                      "order": 3,
+                      "placement": null,
+                      "style": null,
+                      "visible": true
+                    },
+                    "immutable": true,
+                    "mandatory": false,
+                    "placeholder": null,
+                    "suggestion": {
+                      "cssClasses": null,
+                      "showLess": false,
+                      "style": null,
+                      "text": null
+                    }
+                  },
+                  "subFields": []
+                },
+{
+                  "id": "nameIdentifier",
+                  "name": "nameIdentifier",
+                  "label": {
+                    "cssClasses": null,
+                    "showLess": false,
+                    "style": null,
+                    "text": "Name Identifier"
+                  },
+                  "kind": null,
+                  "typeInfo": {
+                    "multiplicity": false,
+                    "prefill": null,
+                    "type": "string",
+                    "values": null,
+                    "vocabulary": null
+                  },
+                  "deprecated": false,
+                  "form": {
+                    "affects": null,
+                    "dependsOn": null,
+                    "description": {
+                      "cssClasses": null,
+                      "showLess": false,
+                      "style": null,
+                      "text": "Uniquely identifies an individual or legal entity, according to various schemes."
+                    },
+                    "display": {
+                      "cssClasses": null,
+                      "hasBorder": false,
+                      "order": 4,
+                      "placement": null,
+                      "style": null,
+                      "visible": true
+                    },
+                    "immutable": true,
+                    "mandatory": false,
+                    "placeholder": null,
+                    "suggestion": {
+                      "cssClasses": null,
+                      "showLess": false,
+                      "style": null,
+                      "text": null
+                    }
+                  },
+                  "subFields": []
+                },
+{
+                "id": "creatorAffiliationInfo",
+                "name": "creatorAffiliationInfo",
+                "label": {
+                  "cssClasses": null,
+                  "showLess": false,
+                  "style": null,
+                  "text": null
+                },
+                "kind": null,
+                "typeInfo": {
+                  "multiplicity": false,
+                  "prefill": null,
+                  "type": "composite",
+                  "values": null,
+                  "vocabulary": null
+                },
+                "deprecated": false,
+                "form": {
+                  "affects": null,
+                  "dependsOn": null,
+                  "description": {
+                    "cssClasses": null,
+                    "showLess": false,
+                    "style": null,
+                    "text": null
+                  },
+                  "display": {
+                    "cssClasses": null,
+                    "hasBorder": false,
+                    "order": 1,
+                    "placement": null,
+                    "style": null,
+                    "visible": true
+                  },
+                  "immutable": true,
+                  "mandatory": false,
+                  "placeholder": null,
+                  "suggestion": {
+                    "cssClasses": null,
+                    "showLess": false,
+                    "style": null,
+                    "text": null
+                  }
+                },
+                "subFields": [
+                {
+                  "id": "affiliation",
+                  "name": "affiliation",
+                  "label": {
+                    "cssClasses": null,
+                    "showLess": false,
+                    "style": null,
+                    "text": "Affiliation"
+                  },
+                  "kind": null,
+                  "typeInfo": {
+                    "multiplicity": false,
+                    "prefill": null,
+                    "type": "string",
+                    "values": null,
+                    "vocabulary": null
+                  },
+                  "deprecated": false,
+                  "form": {
+                    "affects": null,
+                    "dependsOn": null,
+                    "description": {
+                      "cssClasses": null,
+                      "showLess": false,
+                      "style": null,
+                      "text": "The organizational or institutional affiliation of the creator. The creator’s nameType may be Organizational or Personal. In the case of an organizational creator, e.g., a research group, this will often be the name of the institution to which that organization belongs."
+                    },
+                    "display": {
+                      "cssClasses": null,
+                      "hasBorder": false,
+                      "order": 1,
+                      "placement": null,
+                      "style": null,
+                      "visible": true
+                    },
+                    "immutable": true,
+                    "mandatory": true,
+                    "placeholder": null,
+                    "suggestion": {
+                      "cssClasses": null,
+                      "showLess": false,
+                      "style": null,
+                      "text": null
+                    }
+                  },
+                  "subFields": []
+                },
+                {
+                  "id": "affiliationIdentifier",
+                  "name": "affiliationIdentifier",
+                  "label": {
+                    "cssClasses": null,
+                    "showLess": false,
+                    "style": null,
+                    "text": "Affiliation Identifier"
+                  },
+                  "kind": null,
+                  "typeInfo": {
+                    "multiplicity": false,
+                    "prefill": null,
+                    "type": "string",
+                    "values": null,
+                    "vocabulary": null
+                  },
+                  "deprecated": false,
+                  "form": {
+                    "affects": null,
+                    "dependsOn": null,
+                    "description": {
+                      "cssClasses": null,
+                      "showLess": false,
+                      "style": null,
+                      "text": "Uniquely identifies the organizational affiliation of the creator. The format is dependent upon scheme. Examples: https://ror.org/04aj4c181 grid.461819.3"
+                    },
+                    "display": {
+                      "cssClasses": null,
+                      "hasBorder": false,
+                      "order": 2,
+                      "placement": null,
+                      "style": null,
+                      "visible": true
+                    },
+                    "immutable": true,
+                    "mandatory": false,
+                    "placeholder": null,
+                    "suggestion": {
+                      "cssClasses": null,
+                      "showLess": false,
+                      "style": null,
+                      "text": null
+                    }
+                  },
+                  "subFields": []
+                }
+              ]
+              }
+              ]
+            }
+          ]
+        }
+      ],
+      "fields": null
+    }
+  ],
+  "configuration": {
+    "prefillable": false,
+    "importFrom": null
+  },
+  "locked": true,
+  "active": true
+}

@@ -1,0 +1,594 @@
+[
+  {
+    "id": "related_platform-ands",
+    "name": "ANDS",
+    "description": null,
+    "parentId": null,
+    "type": "Related platform",
+    "extras": {}
+  },
+  {
+    "id": "related_platform-artportalen",
+    "name": "ArtPortalen",
+    "description": null,
+    "parentId": null,
+    "type": "Related platform",
+    "extras": {}
+  },
+  {
+    "id": "related_platform-arxiv",
+    "name": "arXiv",
+    "description": null,
+    "parentId": null,
+    "type": "Related platform",
+    "extras": {}
+  },
+  {
+    "id": "related_platform-ala",
+    "name": "Atlas of Living Australia",
+    "description": null,
+    "parentId": null,
+    "type": "Related platform",
+    "extras": {}
+  },
+  {
+    "id": "related_platform-avp",
+    "name": "AV-Portal",
+    "description": null,
+    "parentId": null,
+    "type": "Related platform",
+    "extras": {}
+  },
+  {
+    "id": "related_platform-aws",
+    "name": "AWS",
+    "description": null,
+    "parentId": null,
+    "type": "Related platform",
+    "extras": {}
+  },
+  {
+    "id": "related_platform-bluecloud",
+    "name": "Blue-Cloud",
+    "description": null,
+    "parentId": null,
+    "type": "Related platform",
+    "extras": {}
+  },
+  {
+    "id": "related_platform-cdl",
+    "name": "California Digital Library",
+    "description": null,
+    "parentId": null,
+    "type": "Related platform",
+    "extras": {}
+  },
+  {
+    "id": "related_platform-ccdc",
+    "name": "CCDC",
+    "description": null,
+    "parentId": null,
+    "type": "Related platform",
+    "extras": {}
+  },
+  {
+    "id": "related_platform-cessda",
+    "name": "CESSDA",
+    "description": null,
+    "parentId": null,
+    "type": "Related platform",
+    "extras": {}
+  },
+  {
+    "id": "related_platform-collabwith",
+    "name": "COLLABWITH",
+    "description": null,
+    "parentId": null,
+    "type": "Related platform",
+    "extras": {}
+  },
+  {
+    "id": "related_platform-cccs",
+    "name": "Copernicus Climate Change Service",
+    "description": null,
+    "parentId": null,
+    "type": "Related platform",
+    "extras": {}
+  },
+  {
+    "id": "related_platform-crossref",
+    "name": "Crossref",
+    "description": null,
+    "parentId": null,
+    "type": "Related platform",
+    "extras": {}
+  },
+  {
+    "id": "related_platform-dariahteach",
+    "name": "dariahTeach",
+    "description": null,
+    "parentId": null,
+    "type": "Related platform",
+    "extras": {}
+  },
+  {
+    "id": "related_platform-dice",
+    "name": "Data Infrastructure Capacity for EOSC (DICE)",
+    "description": null,
+    "parentId": null,
+    "type": "Related platform",
+    "extras": {}
+  },
+  {
+    "id": "related_platform-datacite",
+    "name": "DataCite",
+    "description": null,
+    "parentId": null,
+    "type": "Related platform",
+    "extras": {}
+  },
+  {
+    "id": "related_platform-ds",
+    "name": "Digital Science",
+    "description": null,
+    "parentId": null,
+    "type": "Related platform",
+    "extras": {}
+  },
+  {
+    "id": "related_platform-doab",
+    "name": "DOAB",
+    "description": null,
+    "parentId": null,
+    "type": "Related platform",
+    "extras": {}
+  },
+  {
+    "id": "related_platform-einfracz",
+    "name": "e-INFRA CZ",
+    "description": null,
+    "parentId": null,
+    "type": "Related platform",
+    "extras": {}
+  },
+  {
+    "id": "related_platform-eirgspp",
+    "name": "e-IRGSP projects",
+    "description": null,
+    "parentId": null,
+    "type": "Related platform",
+    "extras": {}
+  },
+  {
+    "id": "related_platform-edugain",
+    "name": "eduGAIN",
+    "description": null,
+    "parentId": null,
+    "type": "Related platform",
+    "extras": {}
+  },
+  {
+    "id": "related_platform-eduteams",
+    "name": "eduTEAMS",
+    "description": null,
+    "parentId": null,
+    "type": "Related platform",
+    "extras": {}
+  },
+  {
+    "id": "related_platform-egi",
+    "name": "EGI",
+    "description": null,
+    "parentId": null,
+    "type": "Related platform",
+    "extras": {}
+  },
+  {
+    "id": "related_platform-egifc",
+    "name": "EGI Federated Cloud",
+    "description": null,
+    "parentId": null,
+    "type": "Related platform",
+    "extras": {}
+  },
+  {
+    "id": "related_platform-egiace",
+    "name": "EGI-ACE",
+    "description": null,
+    "parentId": null,
+    "type": "Related platform",
+    "extras": {}
+  },
+  {
+    "id": "related_platform-elixir",
+    "name": "ELIXIR",
+    "description": null,
+    "parentId": null,
+    "type": "Related platform",
+    "extras": {}
+  },
+  {
+    "id": "related_platform-emodnetc",
+    "name": "EMODnet Chemistry",
+    "description": null,
+    "parentId": null,
+    "type": "Related platform",
+    "extras": {}
+  },
+  {
+    "id": "related_platform-eol",
+    "name": "Encyclopedia of Life",
+    "description": null,
+    "parentId": null,
+    "type": "Related platform",
+    "extras": {}
+  },
+  {
+    "id": "related_platform-enc",
+    "name": "Endemia New Caledonia",
+    "description": null,
+    "parentId": null,
+    "type": "Related platform",
+    "extras": {}
+  },
+  {
+    "id": "related_platform-envri",
+    "name": "ENVRI Hub",
+    "description": null,
+    "parentId": null,
+    "type": "Related platform",
+    "extras": {}
+  },
+  {
+    "id": "related_platform-eoscl",
+    "name": "EOSC-Life",
+    "description": null,
+    "parentId": null,
+    "type": "Related platform",
+    "extras": {}
+  },
+  {
+    "id": "related_platform-eoscn",
+    "name": "EOSC-Nordic",
+    "description": null,
+    "parentId": null,
+    "type": "Related platform",
+    "extras": {}
+  },
+  {
+    "id": "related_platform-eoscp",
+    "name": "EOSC-Pillar",
+    "description": null,
+    "parentId": null,
+    "type": "Related platform",
+    "extras": {}
+  },
+  {
+    "id": "related_platform-eudatcdi",
+    "name": "EUDAT CDI",
+    "description": null,
+    "parentId": null,
+    "type": "Related platform",
+    "extras": {}
+  },
+  {
+    "id": "related_platform-elg",
+    "name": "European Language Grid",
+    "description": null,
+    "parentId": null,
+    "type": "Related platform",
+    "extras": {}
+  },
+  {
+    "id": "related_platform-evs",
+    "name": "European Values Study (EVS)",
+    "description": null,
+    "parentId": null,
+    "type": "Related platform",
+    "extras": {}
+  },
+  {
+    "id": "related_platform-garrcp",
+    "name": "GARR Container Platform",
+    "description": null,
+    "parentId": null,
+    "type": "Related platform",
+    "extras": {}
+  },
+  {
+    "id": "related_platform-gatep",
+    "name": "GATE platform",
+    "description": null,
+    "parentId": null,
+    "type": "Related platform",
+    "extras": {}
+  },
+  {
+    "id": "related_platform-gbif",
+    "name": "GBIF",
+    "description": null,
+    "parentId": null,
+    "type": "Related platform",
+    "extras": {}
+  },
+  {
+    "id": "related_platform-geonames",
+    "name": "GeoNames",
+    "description": null,
+    "parentId": null,
+    "type": "Related platform",
+    "extras": {}
+  },
+  {
+    "id": "related_platform-grin",
+    "name": "Germplasm Resources Information Network (GRIN)",
+    "description": null,
+    "parentId": null,
+    "type": "Related platform",
+    "extras": {}
+  },
+  {
+    "id": "related_platform-geoss",
+    "name": "Global Earth Observation system of Systems (GEOSS)",
+    "description": null,
+    "parentId": null,
+    "type": "Related platform",
+    "extras": {}
+  },
+  {
+    "id": "related_platform-hal",
+    "name": "HAL",
+    "description": null,
+    "parentId": null,
+    "type": "Related platform",
+    "extras": {}
+  },
+  {
+    "id": "related_platform-hamelin",
+    "name": "Hamelin",
+    "description": null,
+    "parentId": null,
+    "type": "Related platform",
+    "extras": {}
+  },
+  {
+    "id": "related_platform-infnc",
+    "name": "INFN-Cloud",
+    "description": null,
+    "parentId": null,
+    "type": "Related platform",
+    "extras": {}
+  },
+  {
+    "id": "related_platform-ispot",
+    "name": "iSpot",
+    "description": null,
+    "parentId": null,
+    "type": "Related platform",
+    "extras": {}
+  },
+  {
+    "id": "related_platform-jisc",
+    "name": "JISC",
+    "description": null,
+    "parentId": null,
+    "type": "Related platform",
+    "extras": {}
+  },
+  {
+    "id": "related_platform-metacentrum",
+    "name": "MetaCentrum",
+    "description": null,
+    "parentId": null,
+    "type": "Related platform",
+    "extras": {}
+  },
+  {
+    "id": "related_platform-natusfera",
+    "name": "Natusfera",
+    "description": null,
+    "parentId": null,
+    "type": "Related platform",
+    "extras": {}
+  },
+  {
+    "id": "related_platform-openairee",
+    "name": "OpenAIRE EXPLORE",
+    "description": null,
+    "parentId": null,
+    "type": "Related platform",
+    "extras": {}
+  },
+  {
+    "id": "related_platform-openairem",
+    "name": "OpenAIRE MONITOR",
+    "description": null,
+    "parentId": null,
+    "type": "Related platform",
+    "extras": {}
+  },
+  {
+    "id": "related_platform-openairerg",
+    "name": "OpenAIRE research graph",
+    "description": null,
+    "parentId": null,
+    "type": "Related platform",
+    "extras": {}
+  },
+  {
+    "id": "related_platform-oc",
+    "name": "OpenCitations",
+    "description": null,
+    "parentId": null,
+    "type": "Related platform",
+    "extras": {}
+  },
+  {
+    "id": "related_platform-pogo",
+    "name": "Partnership for Observation of the Global Oceans (POGO)",
+    "description": null,
+    "parentId": null,
+    "type": "Related platform",
+    "extras": {}
+  },
+  {
+    "id": "related_platform-pnp",
+    "name": "Pl@ntNet platform",
+    "description": null,
+    "parentId": null,
+    "type": "Related platform",
+    "extras": {}
+  },
+  {
+    "id": "related_platform-pc",
+    "name": "PolicyCloud",
+    "description": null,
+    "parentId": null,
+    "type": "Related platform",
+    "extras": {}
+  },
+  {
+    "id": "related_platform-rjb",
+    "name": "Real Jardín Botánico",
+    "description": null,
+    "parentId": null,
+    "type": "Related platform",
+    "extras": {}
+  },
+  {
+    "id": "related_platform-scopus",
+    "name": "Scopus",
+    "description": null,
+    "parentId": null,
+    "type": "Related platform",
+    "extras": {}
+  },
+  {
+    "id": "related_platform-seadatanet",
+    "name": "SeaDataNet",
+    "description": null,
+    "parentId": null,
+    "type": "Related platform",
+    "extras": {}
+  },
+  {
+    "id": "related_platform-tsd",
+    "name": "Service for Sensitive Data (TSD)",
+    "description": null,
+    "parentId": null,
+    "type": "Related platform",
+    "extras": {}
+  },
+  {
+    "id": "related_platform-sshom",
+    "name": "SSH Open Marketplace",
+    "description": null,
+    "parentId": null,
+    "type": "Related platform",
+    "extras": {}
+  },
+  {
+    "id": "related_platform-surf",
+    "name": "SURF",
+    "description": null,
+    "parentId": null,
+    "type": "Related platform",
+    "extras": {}
+  },
+  {
+    "id": "related_platform-share",
+    "name": "Survey of Health, Ageing and Retirement in Europe (SHARE)",
+    "description": null,
+    "parentId": null,
+    "type": "Related platform",
+    "extras": {}
+  },
+  {
+    "id": "related_platform-tf",
+    "name": "Taylor&Francis",
+    "description": null,
+    "parentId": null,
+    "type": "Related platform",
+    "extras": {}
+  },
+  {
+    "id": "related_platform-tb",
+    "name": "Tela Botanica",
+    "description": null,
+    "parentId": null,
+    "type": "Related platform",
+    "extras": {}
+  },
+  {
+    "id": "related_platform-tdp",
+    "name": "The Dataverse Project",
+    "description": null,
+    "parentId": null,
+    "type": "Related platform",
+    "extras": {}
+  },
+  {
+    "id": "related_platform-tnomadl",
+    "name": "The NOMAD Laboratory",
+    "description": null,
+    "parentId": null,
+    "type": "Related platform",
+    "extras": {}
+  },
+  {
+    "id": "related_platform-tpg",
+    "name": "The Plant Game",
+    "description": null,
+    "parentId": null,
+    "type": "Related platform",
+    "extras": {}
+  },
+  {
+    "id": "related_platform-tibp",
+    "name": "TIB Portal",
+    "description": null,
+    "parentId": null,
+    "type": "Related platform",
+    "extras": {}
+  },
+  {
+    "id": "related_platform-tripleh",
+    "name": "TRIPLE H2020 project",
+    "description": null,
+    "parentId": null,
+    "type": "Related platform",
+    "extras": {}
+  },
+  {
+    "id": "related_platform-tubitakcc",
+    "name": "TÜBITAK cloud compute",
+    "description": null,
+    "parentId": null,
+    "type": "Related platform",
+    "extras": {}
+  },
+  {
+    "id": "related_platform-vlab",
+    "name": "Virtual Earth Laboratory (VLab)",
+    "description": null,
+    "parentId": null,
+    "type": "Related platform",
+    "extras": {}
+  },
+  {
+    "id": "related_platform-zbwice",
+    "name": "ZBW Information Centre for Economics",
+    "description": null,
+    "parentId": null,
+    "type": "Related platform",
+    "extras": {}
+  },
+  {
+    "id": "related_platform-zenodo",
+    "name": "Zenodo",
+    "description": null,
+    "parentId": null,
+    "type": "Related platform",
+    "extras": {}
+  }
+]

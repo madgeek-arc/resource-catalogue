@@ -1,0 +1,74 @@
+[
+  {
+    "id": "trl-1",
+    "name": "1 - basic principles observed",
+    "description": "Scientific research has led to observation and reports of basic principles which has evolved to applied research and development.",
+    "parentId": null,
+    "type": "Technology readiness level",
+    "extras": {}
+  },
+  {
+    "id": "trl-2",
+    "name": "2 - technology concept formulated",
+    "description": "Practical applications for the observed basic physical principles is found and reported.",
+    "parentId": null,
+    "type": "Technology readiness level",
+    "extras": {}
+  },
+  {
+    "id": "trl-3",
+    "name": "3 - experimental proof of concept",
+    "description": "The most critical functions of the new technology is validated by using both analytical and experimental methods.",
+    "parentId": null,
+    "type": "Technology readiness level",
+    "extras": {}
+  },
+  {
+    "id": "trl-4",
+    "name": "4 - technology validated in lab",
+    "description": "The concept is tested to assure that the technical elements can be integrated together and achieve the desired performance, at a component and/or breadboard level.",
+    "parentId": null,
+    "type": "Technology readiness level",
+    "extras": {}
+  },
+  {
+    "id": "trl-5",
+    "name": "5 - technology validated in relevant environment",
+    "description": "The components making up the concept is tested individually in realistic environment.",
+    "parentId": null,
+    "type": "Technology readiness level",
+    "extras": {}
+  },
+  {
+    "id": "trl-6",
+    "name": "6 - technology demonstrated in relevant environment",
+    "description": "A model or prototype of the concept, not individual components, is tested in a relevant environment.",
+    "parentId": null,
+    "type": "Technology readiness level",
+    "extras": {}
+  },
+  {
+    "id": "trl-7",
+    "name": "7 - system prototype demonstration in operational environment",
+    "description": "A prototype is tested in the environment in which the final product will operate, e.g. in the original NASA framework this meant to test the technology in space.",
+    "parentId": null,
+    "type": "Technology readiness level",
+    "extras": {}
+  },
+  {
+    "id": "trl-8",
+    "name": "8 - system complete and qualified",
+    "description": "The technology is built to the specifications of the final product and is tested in the operational environment alongside all systems it will interact with.",
+    "parentId": null,
+    "type": "Technology readiness level",
+    "extras": {}
+  },
+  {
+    "id": "trl-9",
+    "name": "9 - actual system proven in operational environment",
+    "description": "At this level the all technology development has been completed and the technology is performing as intended in the real-world environment.",
+    "parentId": null,
+    "type": "Technology readiness level",
+    "extras": {}
+  }
+]

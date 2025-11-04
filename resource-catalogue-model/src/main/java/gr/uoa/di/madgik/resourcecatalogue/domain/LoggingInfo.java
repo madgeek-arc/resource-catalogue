@@ -19,8 +19,12 @@ package gr.uoa.di.madgik.resourcecatalogue.domain;
 
 import org.springframework.security.core.Authentication;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class LoggingInfo {
 

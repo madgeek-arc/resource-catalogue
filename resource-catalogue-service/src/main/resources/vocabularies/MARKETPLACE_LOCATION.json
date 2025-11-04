@@ -1,0 +1,90 @@
+[
+  {
+    "id": "marketplace_location-discover_research_outputs",
+    "name": "Discover Research Outputs",
+    "description": null,
+    "parentId": null,
+    "type": "Marketplace location",
+    "extras": {}
+  },
+  {
+    "id": "marketplace_location-process_and_analyze",
+    "name": "Process and Analyze",
+    "description": null,
+    "parentId": null,
+    "type": "Marketplace location",
+    "extras": {}
+  },
+  {
+    "id": "marketplace_location-manage_research_data",
+    "name": "Manage Research Data",
+    "description": null,
+    "parentId": null,
+    "type": "Marketplace location",
+    "extras": {}
+  },
+  {
+    "id": "marketplace_location-access_computing_and_storage_resources",
+    "name": "Access Computing and Storage Resources",
+    "description": null,
+    "parentId": null,
+    "type": "Marketplace location",
+    "extras": {}
+  },
+  {
+    "id": "marketplace_location-access_research_infrastructures",
+    "name": "Access Research Infrastructures",
+    "description": null,
+    "parentId": null,
+    "type": "Marketplace location",
+    "extras": {}
+  },
+  {
+    "id": "marketplace_location-publish_research_outputs",
+    "name": "Publish Research Outputs",
+    "description": null,
+    "parentId": null,
+    "type": "Marketplace location",
+    "extras": {}
+  },
+  {
+    "id": "marketplace_location-access_training_material",
+    "name": "Access Training Material",
+    "description": null,
+    "parentId": null,
+    "type": "Marketplace location",
+    "extras": {}
+  },
+  {
+    "id": "marketplace_location-find_instruments_and_equipment",
+    "name": "Find Instruments and Equipment",
+    "description": null,
+    "parentId": null,
+    "type": "Marketplace location",
+    "extras": {}
+  },
+  {
+    "id": "marketplace_location-build_analysis_environment",
+    "name": "Build analysis environment",
+    "description": null,
+    "parentId": null,
+    "type": "Marketplace location",
+    "extras": {}
+  },
+  {
+    "id": "marketplace_location-find_supporting_services_for_eInfras",
+    "name": "Find supporting services for eInfras and research institutions",
+    "description": null,
+    "parentId": null,
+    "type": "Marketplace location",
+    "extras": {}
+  },
+  {
+    "id": "marketplace_location-explore_other_research_catalogues",
+    "name": "Explore other research catalogues",
+    "description": null,
+    "parentId": null,
+    "type": "Marketplace location",
+    "extras": {}
+  }
+]

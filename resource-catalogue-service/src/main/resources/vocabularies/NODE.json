@@ -1,0 +1,98 @@
+[
+  {
+    "id": "node-cessda",
+    "name": "CESSDA",
+    "description": "CESSDA",
+    "parentId": null,
+    "type": "Node",
+    "extras": {}
+  },
+  {
+    "id": "node-cnb_csic",
+    "name": "CNB-CSIC",
+    "description": "CNB-CSIC",
+    "parentId": null,
+    "type": "Node",
+    "extras": {}
+  },
+  {
+    "id": "node-egi",
+    "name": "EGI",
+    "description": "EGI",
+    "parentId": null,
+    "type": "Node",
+    "extras": {}
+  },
+  {
+    "id": "node-enes",
+    "name": "ENES",
+    "description": "ENES",
+    "parentId": null,
+    "type": "Node",
+    "extras": {}
+  },
+  {
+    "id": "node-eosc_pl",
+    "name": "EOSC PL",
+    "description": "EOSC PL",
+    "parentId": null,
+    "type": "Node",
+    "extras": {}
+  },
+  {
+    "id": "node-e_infra_cz",
+    "name": "e-INFRA CZ",
+    "description": "e-INFRA CZ",
+    "parentId": null,
+    "type": "Node",
+    "extras": {}
+  },
+  {
+    "id": "node-instruct_eric",
+    "name": "Instruct-ERIC",
+    "description": "Instruct-ERIC",
+    "parentId": null,
+    "type": "Node",
+    "extras": {}
+  },
+  {
+    "id": "node-lifewatch",
+    "name": "LifeWatch",
+    "description": "LifeWatch",
+    "parentId": null,
+    "type": "Node",
+    "extras": {}
+  },
+  {
+    "id": "node-metrofood_ri",
+    "name": "METROFOOD-RI",
+    "description": "METROFOOD-RI",
+    "parentId": null,
+    "type": "Node",
+    "extras": {}
+  },
+  {
+    "id": "node-nfdi",
+    "name": "NFDI",
+    "description": "NFDI",
+    "parentId": null,
+    "type": "Node",
+    "extras": {}
+  },
+  {
+    "id": "node-ni4os",
+    "name": "NI4OS",
+    "description": "NI4OS",
+    "parentId": null,
+    "type": "Node",
+    "extras": {}
+  },
+  {
+    "id": "node-sandbox",
+    "name": "Sandbox",
+    "description": "Sandbox",
+    "parentId": null,
+    "type": "Node",
+    "extras": {}
+  }
+]

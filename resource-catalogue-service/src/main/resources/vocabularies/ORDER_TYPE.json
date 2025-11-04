@@ -1,0 +1,34 @@
+[
+  {
+    "id": "order_type-fully_open_access",
+    "name": "Fully Open Access",
+    "description": "No ordering procedure necessary to access the resource and no user authentication required.",
+    "parentId": null,
+    "type": "Order type",
+    "extras": {}
+  },
+  {
+    "id": "order_type-open_access",
+    "name": "Open Access",
+    "description": "No ordering procedure necessary to access the resource but requires user authentication.",
+    "parentId": null,
+    "type": "Order type",
+    "extras": {}
+  },
+  {
+    "id": "order_type-order_required",
+    "name": "Order Required",
+    "description": "Resource requires an ordering procedure.",
+    "parentId": null,
+    "type": "Order type",
+    "extras": {}
+  },
+  {
+    "id": "order_type-other",
+    "name": "Other",
+    "description": null,
+    "parentId": null,
+    "type": "Order type",
+    "extras": {}
+  }
+]

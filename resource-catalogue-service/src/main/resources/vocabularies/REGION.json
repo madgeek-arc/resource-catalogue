@@ -1,0 +1,42 @@
+[
+  {
+    "id": "AH",
+    "name": "Schengen Area",
+    "description": "All Schengen Area countries.",
+    "parentId": "geographic_location",
+    "type": "Region",
+    "extras": {}
+  },
+  {
+    "id": "EO",
+    "name": "Europe",
+    "description": "All European Countries.",
+    "parentId": "geographic_location",
+    "type": "Region",
+    "extras": {}
+  },
+  {
+    "id": "EU",
+    "name": "European Union",
+    "description": "All Countries of the European Union.",
+    "parentId": "geographic_location",
+    "type": "Region",
+    "extras": {}
+  },
+  {
+    "id": "EZ",
+    "name": "Euro Zone",
+    "description": "All Countries of the Eurozone.",
+    "parentId": "geographic_location",
+    "type": "Region",
+    "extras": {}
+  },
+  {
+    "id": "WW",
+    "name": "Worldwide",
+    "description": "All Countries.",
+    "parentId": "geographic_location",
+    "type": "Region",
+    "extras": {}
+  }
+]

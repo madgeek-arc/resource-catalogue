@@ -5,13 +5,13 @@
         <Property name="app">resource-catalogue</Property>
 
         <Property name="LOG_TRANSACTION">
-            %style{%notEmpty{transaction_id=%X{transaction_id}, remote_ip=%X{remote_ip}\n}}{magenta}
+            %style{%notEmpty{traceId=%X{traceId}, remoteIp=%X{remoteIp}\n}}{magenta}
         </Property>
         <Property name="LOG_USER">
-            %style{%notEmpty{user_info=%X{user_info}\n}}{yellow}
+            %style{%notEmpty{user=%X{user}\n}}{yellow}
         </Property>
         <Property name="LOG_PATTERN">
-            %d{yyyy-MM-dd HH:mm:ss.SSS} %highlight{%-5level} [%t] %style{%C}{bright,blue}: %m%n%throwable${sys:LOG_TRANSACTION}${sys:LOG_USER}
+            %d{yyyy-MM-dd'T'HH:mm:ss.SSSX}{UTC} %highlight{%-5level} [%t] %notEmpty{- %X{traceId,spanId,user,remoteIp} }- %style{%C}{bright,blue}: %m%n%throwable
         </Property>
     </Properties>
     <Appenders>

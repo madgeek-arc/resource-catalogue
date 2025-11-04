@@ -1,0 +1,90 @@
+[
+  {
+    "id": "scientific_domain-agricultural_sciences",
+    "name": "Agricultural Sciences",
+    "description": "Sciences dealing with food and fibre production and processing. They include the technologies of soil cultivation, crop cultivation and harvesting, animal production, and the processing of plant and animal products for human consumption and use.",
+    "parentId": null,
+    "type": "Scientific domain",
+    "extras": {
+      "icon": "ic_analytics.svg",
+      "icon_active": "ic_analytics_active.svg"
+    }
+  },
+  {
+    "id": "scientific_domain-engineering_and_technology",
+    "name": "Engineering & Technology",
+    "description": "The application of science and mathematics by which the properties of matter and the sources of energy in nature are made useful to people.",
+    "parentId": null,
+    "type": "Scientific domain",
+    "extras": {
+      "icon": "ic_application.svg",
+      "icon_active": "ic_application_active.svg"
+    }
+  },
+  {
+    "id": "scientific_domain-generic",
+    "name": "Generic",
+    "description": "Generic, Not targetting a specific domain.",
+    "parentId": null,
+    "type": "Scientific domain",
+    "extras": {
+      "icon": "ic_aggregator.svg",
+      "icon_active": "ic_aggregator_active.svg"
+    }
+  },
+  {
+    "id": "scientific_domain-humanities",
+    "name": "Humanities",
+    "description": "The branches of learning that investigate human constructs and concerns as opposed to natural processes (as in physics or chemistry) and social relations (as in anthropology or economics).",
+    "parentId": null,
+    "type": "Scientific domain",
+    "extras": {
+      "icon": "ic_consulting.svg",
+      "icon_active": "ic_consulting_active.svg"
+    }
+  },
+  {
+    "id": "scientific_domain-medical_and_health_sciences",
+    "name": "Medical & Health Sciences",
+    "description": "The science of dealing with the maintenance of health and the prevention and treatment of disease.",
+    "parentId": null,
+    "type": "Scientific domain",
+    "extras": {
+      "icon": "ic_training.svg",
+      "icon_active": "ic_training_active.svg"
+    }
+  },
+  {
+    "id": "scientific_domain-natural_sciences",
+    "name": "Natural Sciences",
+    "description": "Any of the sciences (such as physics, chemistry, or biology) that deal with matter, energy, and their interrelations and transformations or with objectively measurable phenomena.",
+    "parentId": null,
+    "type": "Scientific domain",
+    "extras": {
+      "icon": "ic_networking.svg",
+      "icon_active": "ic_networking_active.svg"
+    }
+  },
+  {
+    "id": "scientific_domain-other",
+    "name": "Other",
+    "description": null,
+    "parentId": null,
+    "type": "Scientific domain",
+    "extras": {
+      "icon": "ic_software.svg",
+      "icon_active": "ic_software_active.svg"
+    }
+  },
+  {
+    "id": "scientific_domain-social_sciences",
+    "name": "Social Sciences",
+    "description": "A branch of science that deals with the institutions and functioning of human society and with the interpersonal relationships of individuals as members of society.",
+    "parentId": null,
+    "type": "Scientific domain",
+    "extras": {
+      "icon": "ic_consulting.svg",
+      "icon_active": "ic_consulting_active.svg"
+    }
+  }
+]

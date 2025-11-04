@@ -1,0 +1,66 @@
+[
+  {
+    "id": "provider_societal_grand_challenge-energy",
+    "name": "Energy",
+    "description": "Secure, clean and efficient energy.",
+    "parentId": null,
+    "type": "Provider societal grand challenge",
+    "extras": {}
+  },
+  {
+    "id": "provider_societal_grand_challenge-environment",
+    "name": "Environment",
+    "description": "Climate action, environment, resource efficiency and raw materials.",
+    "parentId": null,
+    "type": "Provider societal grand challenge",
+    "extras": {}
+  },
+  {
+    "id": "provider_societal_grand_challenge-europe_in_a_changing_world",
+    "name": "Europe in a changing world",
+    "description": "Europe in a changing world – inclusive, innovative and reflective societies.",
+    "parentId": null,
+    "type": "Provider societal grand challenge",
+    "extras": {}
+  },
+  {
+    "id": "provider_societal_grand_challenge-natural_resources",
+    "name": "Natural Resources",
+    "description": "Food security, sustainable agriculture and forestry, marine and maritime and inland water research, and the Bioeconomy.",
+    "parentId": null,
+    "type": "Provider societal grand challenge",
+    "extras": {}
+  },
+  {
+    "id": "provider_societal_grand_challenge-other",
+    "name": "Other",
+    "description": null,
+    "parentId": null,
+    "type": "Provider societal grand challenge",
+    "extras": {}
+  },
+  {
+    "id": "provider_societal_grand_challenge-secure_societies",
+    "name": "Secure Societies",
+    "description": "Secure societies – protecting freedom and security of Europe and its citizens.",
+    "parentId": null,
+    "type": "Provider societal grand challenge",
+    "extras": {}
+  },
+  {
+    "id": "provider_societal_grand_challenge-transport",
+    "name": "Transport",
+    "description": "Smart, green and integrated transport.",
+    "parentId": null,
+    "type": "Provider societal grand challenge",
+    "extras": {}
+  },
+  {
+    "id": "provider_societal_grand_challenge-wellbeing",
+    "name": "Wellbeing",
+    "description": "Health, demographic change and wellbeing.",
+    "parentId": null,
+    "type": "Provider societal grand challenge",
+    "extras": {}
+  }
+]

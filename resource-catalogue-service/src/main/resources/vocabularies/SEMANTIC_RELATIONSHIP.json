@@ -1,0 +1,10 @@
+[
+  {
+    "id": "semantic_relationship-cw",
+    "name": "Complies With",
+    "description": null,
+    "parentId": null,
+    "type": "Semantic relationship",
+    "extras": {}
+  }
+]

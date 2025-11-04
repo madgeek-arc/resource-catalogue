@@ -69,7 +69,7 @@ public class ConfigurationTemplateInstanceController {
                                                              @Parameter(description = "The right part of the ID after the '/'")
                                                              @PathVariable("suffix") String suffix) {
         String id = prefix + "/" + suffix;
-        ConfigurationTemplateInstance ret = ctiService.get(id).getConfigurationTemplateInstance();
+        ConfigurationTemplateInstance ret = ctiService.get(id, null, false).getConfigurationTemplateInstance();
         return new ResponseEntity<>(ret, HttpStatus.OK);
     }
 
@@ -155,7 +155,7 @@ public class ConfigurationTemplateInstanceController {
             "or @securityService.isResourceAdmin(#auth,#configurationTemplateInstance.resourceId)")
     public ResponseEntity<ConfigurationTemplateInstance> update(@RequestBody ConfigurationTemplateInstance configurationTemplateInstance,
                                                                 @Parameter(hidden = true) Authentication auth) {
-        ConfigurationTemplateInstanceBundle configurationTemplateInstanceBundle = ctiService.get(configurationTemplateInstance.getId());
+        ConfigurationTemplateInstanceBundle configurationTemplateInstanceBundle = ctiService.get(configurationTemplateInstance.getId(), null, false);
         configurationTemplateInstanceBundle.setConfigurationTemplateInstance(configurationTemplateInstance);
         configurationTemplateInstanceBundle = ctiService.update(configurationTemplateInstanceBundle, auth);
         return new ResponseEntity<>(configurationTemplateInstanceBundle.getConfigurationTemplateInstance(), HttpStatus.OK);
@@ -169,7 +169,7 @@ public class ConfigurationTemplateInstanceController {
                                                                 @Parameter(description = "The right part of the ID after the '/'")
                                                                 @PathVariable("suffix") String suffix) {
         String id = prefix + "/" + suffix;
-        ConfigurationTemplateInstanceBundle configurationTemplateInstanceBundle = ctiService.get(id);
+        ConfigurationTemplateInstanceBundle configurationTemplateInstanceBundle = ctiService.get(id, null, false);
         if (configurationTemplateInstanceBundle == null) {
             return new ResponseEntity<>(HttpStatus.GONE);
         }
@@ -186,7 +186,7 @@ public class ConfigurationTemplateInstanceController {
                                                                          @Parameter(description = "The right part of the ID after the '/'")
                                                                          @PathVariable("suffix") String suffix) {
         String id = prefix + "/" + suffix;
-        return new ResponseEntity<>(ctiService.get(id), HttpStatus.OK);
+        return new ResponseEntity<>(ctiService.get(id, null, false), HttpStatus.OK);
     }
 
     @Hidden

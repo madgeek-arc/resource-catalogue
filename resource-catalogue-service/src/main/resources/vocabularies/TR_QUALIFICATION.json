@@ -1,0 +1,26 @@
+[
+  {
+    "id": "tr_qualification-badge",
+    "name": "Badge",
+    "description": null,
+    "parentId": null,
+    "type": "Training Resource qualification",
+    "extras": {}
+  },
+  {
+    "id": "tr_qualification-certification",
+    "name": "Certification",
+    "description": null,
+    "parentId": null,
+    "type": "Training Resource qualification",
+    "extras": {}
+  },
+  {
+    "id": "tr_qualification-accreditation",
+    "name": "Accreditation",
+    "description": null,
+    "parentId": null,
+    "type": "Training Resource qualification",
+    "extras": {}
+  }
+]

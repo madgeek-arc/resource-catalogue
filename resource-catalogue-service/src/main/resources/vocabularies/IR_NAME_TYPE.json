@@ -1,0 +1,18 @@
+[
+  {
+    "id": "ir_name_type-organizational",
+    "name": "Organizational",
+    "description": null,
+    "parentId": null,
+    "type": "Interoperability Record name type",
+    "extras": {}
+  },
+  {
+    "id": "ir_name_type-personal",
+    "name": "Personal",
+    "description": null,
+    "parentId": null,
+    "type": "Interoperability Record name type",
+    "extras": {}
+  }
+]

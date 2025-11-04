@@ -1,0 +1,10 @@
+[
+  {
+    "id": "ct_protocol-oai",
+    "name": "OAI",
+    "description": "Configuration Template protocol",
+    "parentId": null,
+    "type": "Configuration Template protocol",
+    "extras": {}
+  }
+]

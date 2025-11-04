@@ -139,10 +139,7 @@ public class VocabularyController extends ResourceController<Vocabulary> {
     @DeleteMapping(path = "/deleteByType/{type}", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public void deleteByType(@PathVariable(value = "type") Vocabulary.Type type, @Parameter(hidden = true) Authentication auth) {
-        List<Vocabulary> toBeDeleted = vocabularyService.getByType(type);
-        for (Vocabulary vocabulary : toBeDeleted) {
-            super.delete(vocabulary, auth);
-        }
+        vocabularyService.deleteByType(type);
     }
 
     @GetMapping(path = "getSimilarHLEVocabularies", produces = {MediaType.APPLICATION_JSON_VALUE})

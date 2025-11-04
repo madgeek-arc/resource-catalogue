@@ -23,18 +23,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
-import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.util.HashSet;
 import java.util.Set;
 
-@ControllerAdvice
+@RestControllerAdvice
 public class CatalogueExceptionController extends GenericExceptionController {
-
-    private static final Logger logger = LoggerFactory.getLogger(CatalogueExceptionController.class);
 
     /**
      * Transforms every thrown exception to a {@link ServerError} response.
@@ -43,7 +42,7 @@ public class CatalogueExceptionController extends GenericExceptionController {
      * @param ex  the thrown exception
      * @return {@link ServerError}
      */
-    @ExceptionHandler(HttpMessageNotReadableException.class)
+    @ExceptionHandler(value = HttpMessageNotReadableException.class, produces = MediaType.APPLICATION_JSON_VALUE)
     protected ResponseEntity<ServerError> handleException(HttpServletRequest req, Exception ex) {
         HttpStatusCode status = HttpStatus.BAD_REQUEST;
 

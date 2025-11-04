@@ -1,0 +1,34 @@
+[
+  {
+    "id": "ct_compatibility-driver",
+    "name": "Driver",
+    "description": "Configuration Template compatibility",
+    "parentId": null,
+    "type": "Configuration Template compatibility",
+    "extras": {}
+  },
+  {
+    "id": "ct_compatibility-openaire_2_0_data",
+    "name": "Openaire 2.0 Data",
+    "description": "Configuration Template compatibility",
+    "parentId": null,
+    "type": "Configuration Template compatibility",
+    "extras": {}
+  },
+  {
+    "id": "ct_compatibility-openaire_4_0",
+    "name": "Openaire 4.0",
+    "description": "Configuration Template compatibility",
+    "parentId": null,
+    "type": "Configuration Template compatibility",
+    "extras": {}
+  },
+  {
+    "id": "ct_compatibility-unknown",
+    "name": "Unknown",
+    "description": "Configuration Template compatibility",
+    "parentId": null,
+    "type": "Configuration Template compatibility",
+    "extras": {}
+  }
+]

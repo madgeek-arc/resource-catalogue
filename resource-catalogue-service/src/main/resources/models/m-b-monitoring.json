@@ -1,0 +1,532 @@
+{
+  "id": "m-b-monitoring",
+  "name": "Monitoring extension",
+  "description": null,
+  "notice": "Τhis is the place where you start monitoring your service. You can add multiple service configurations based on the type of your service.",
+  "vocabulary": null,
+  "subType": null,
+  "series": null,
+  "resourceType": "monitoring",
+  "creationDate": null,
+  "createdBy": null,
+  "modificationDate": null,
+  "modifiedBy": null,
+  "sections": [
+    {
+      "id": "Monitoring",
+      "name": "Monitoring",
+      "description": null,
+      "subType": null,
+      "order": null,
+      "subSections": [
+        {
+          "id": "Monitoring Extension",
+          "name": "Monitoring Extension",
+          "description": null,
+          "subType": null,
+          "order": 1,
+          "subSections": null,
+          "fields": [
+              {
+              "deprecated": false,
+              "form": {
+                "affects": null,
+                "dependsOn": null,
+                "description": {
+                  "cssClasses": null,
+                  "showLess": false,
+                  "style": null,
+                  "text": null
+                },
+                "display": {
+                  "cssClasses": "uk-disabled",
+                  "hasBorder": false,
+                  "order": 0,
+                  "placement": null,
+                  "style": null,
+                  "visible": false
+                },
+                "group": null,
+                "immutable": true,
+                "mandatory": false,
+                "placeholder": null,
+                "suggestion": {
+                  "cssClasses": null,
+                  "showLess": false,
+                  "style": null,
+                  "text": null
+                }
+              },
+              "id": "id",
+              "includedInSnippet": true,
+              "kind": null,
+              "label": {
+                "cssClasses": null,
+                "showLess": false,
+                "style": null,
+                "text": "Id"
+              },
+              "name": "id",
+              "subFields": [],
+              "typeInfo": {
+                "multiplicity": false,
+                "prefill": null,
+                "type": "string",
+                "values": null,
+                "vocabulary": null
+              }
+            },
+            {
+              "deprecated": false,
+              "form": {
+                "affects": null,
+                "dependsOn": null,
+                "description": {
+                  "cssClasses": null,
+                  "showLess": false,
+                  "style": null,
+                  "text": null
+                },
+                "display": {
+                  "cssClasses": "uk-disabled",
+                  "hasBorder": false,
+                  "order": 1,
+                  "placement": null,
+                  "style": null,
+                  "visible": false
+                },
+                "group": null,
+                "immutable": true,
+                "mandatory": false,
+                "placeholder": null,
+                "suggestion": {
+                  "cssClasses": null,
+                  "showLess": false,
+                  "style": null,
+                  "text": null
+                }
+              },
+              "id": "serviceId",
+              "includedInSnippet": true,
+              "kind": null,
+              "label": {
+                "cssClasses": null,
+                "showLess": false,
+                "style": null,
+                "text": "Service Id"
+              },
+              "name": "serviceId",
+              "subFields": [],
+              "typeInfo": {
+                "multiplicity": false,
+                "prefill": null,
+                "type": "string",
+                "values": null,
+                "vocabulary": null
+              }
+            },
+            {
+              "id": "node",
+              "name": "node",
+              "label": {
+                "cssClasses": null,
+                "showLess": false,
+                "style": null,
+                "text": "Node"
+              },
+              "kind": null,
+              "typeInfo": {
+                "multiplicity": false,
+                "prefill": null,
+                "type": "vocabulary",
+                "values": null,
+                "vocabulary": "NODE"
+              },
+              "deprecated": false,
+              "form": {
+                "affects": null,
+                "dependsOn": null,
+                "description": {
+                  "cssClasses": null,
+                  "showLess": false,
+                  "style": null,
+                  "text": "The node in which the Monitoring extension belongs to."
+                },
+                "display": {
+                  "cssClasses": null,
+                  "hasBorder": false,
+                  "order": 2,
+                  "placement": null,
+                  "style": null,
+                  "visible": true
+                },
+                "immutable": true,
+                "mandatory": false,
+                "placeholder": null,
+                "suggestion": {
+                  "cssClasses": null,
+                  "showLess": false,
+                  "style": null,
+                  "text": null
+                }
+              },
+              "subFields": []
+            },
+            {
+              "deprecated": false,
+              "form": {
+                "affects": null,
+                "dependsOn": null,
+                "description": {
+                  "cssClasses": null,
+                  "showLess": false,
+                  "style": null,
+                  "text": null
+                },
+                "display": {
+                  "cssClasses": null,
+                  "hasBorder": false,
+                  "order": 3,
+                  "placement": null,
+                  "style": null,
+                  "visible": false
+                },
+                "group": null,
+                "immutable": true,
+                "mandatory": false,
+                "placeholder": null,
+                "suggestion": {
+                  "cssClasses": null,
+                  "showLess": false,
+                  "style": null,
+                  "text": null
+                }
+              },
+              "id": "monitoredBy",
+              "includedInSnippet": true,
+              "kind": null,
+              "label": {
+                "cssClasses": null,
+                "showLess": false,
+                "style": null,
+                "text": "Monitored By"
+              },
+              "name": "monitoredBy",
+              "subFields": [],
+              "typeInfo": {
+                "multiplicity": false,
+                "prefill": null,
+                "type": "string",
+                "values": null,
+                "vocabulary": null
+              }
+            },
+            {
+              "id": "monitoringGroups",
+              "name": "monitoringGroups",
+              "label": {
+                "text": "Service Check",
+                "cssClasses": null,
+                "style": null,
+                "showLess": false
+              },
+              "kind": null,
+              "typeInfo": {
+                "type": "composite",
+                "values": null,
+                "vocabulary": null,
+                "multiplicity": true,
+                "prefill": null
+              },
+              "includedInSnippet": false,
+              "deprecated": false,
+              "form": {
+                "dependsOn": null,
+                "affects": null,
+                "group": null,
+                "description": {
+                  "text": "Fill in the details about the service you want to monitor.",
+                  "cssClasses": null,
+                  "style": null,
+                  "showLess": false
+                },
+                "suggestion": {
+                  "text": null,
+                  "cssClasses": null,
+                  "style": null,
+                  "showLess": false
+                },
+                "placeholder": null,
+                "mandatory": false,
+                "immutable": true,
+                "display": {
+                  "placement": null,
+                  "order": 4,
+                  "visible": true,
+                  "hasBorder": true,
+                  "cssClasses": null,
+                  "style": null
+                }
+              },
+              "subFields": [
+                {
+                  "id": "serviceType",
+                  "name": "serviceType",
+                  "label": {
+                    "cssClasses": null,
+                    "showLess": false,
+                    "style": null,
+                    "text": "Type"
+                  },
+                  "kind": null,
+                  "typeInfo": {
+                    "multiplicity": false,
+                    "prefill": null,
+                    "type": "vocabulary",
+                    "values": null,
+                    "vocabulary": "serviceTypesVoc"
+                  },
+                  "includedInSnippet": false,
+                  "deprecated": false,
+                  "form": {
+                    "affects": null,
+                    "dependsOn": null,
+                    "description": {
+                      "cssClasses": null,
+                      "showLess": false,
+                      "style": null,
+                      "text": "Select the Type that matches the service that you want to monitor."
+                    },
+                    "display": {
+                      "cssClasses": null,
+                      "hasBorder": false,
+                      "order": 1,
+                      "placement": null,
+                      "style": null,
+                      "visible": true
+                    },
+                    "group": null,
+                    "immutable": true,
+                    "mandatory": true,
+                    "placeholder": null,
+                    "suggestion": {
+                      "cssClasses": null,
+                      "showLess": false,
+                      "style": null,
+                      "text": null
+                    }
+                  },
+                  "subFields": []
+                },
+                {
+                  "id": "endpoint",
+                  "name": "endpoint",
+                  "label": {
+                    "cssClasses": null,
+                    "showLess": false,
+                    "style": null,
+                    "text": "URL"
+                  },
+                  "kind": null,
+                  "typeInfo": {
+                    "multiplicity": false,
+                    "prefill": null,
+                    "type": "string",
+                    "values": null,
+                    "vocabulary": null
+                  },
+                  "includedInSnippet": false,
+                  "deprecated": false,
+                  "form": {
+                    "affects": null,
+                    "dependsOn": null,
+                    "description": {
+                      "cssClasses": null,
+                      "showLess": false,
+                      "style": null,
+                      "text": "Enter the URL that will be used to check the service."
+                    },
+                    "display": {
+                      "cssClasses": null,
+                      "hasBorder": false,
+                      "order": 2,
+                      "placement": null,
+                      "style": null,
+                      "visible": true
+                    },
+                    "group": null,
+                    "immutable": true,
+                    "mandatory": true,
+                    "placeholder": "use http:// or https://",
+                    "suggestion": {
+                      "cssClasses": null,
+                      "showLess": false,
+                      "style": null,
+                      "text": null
+                    }
+                  },
+                  "subFields": []
+                },
+                {
+                  "id": "metrics",
+                  "name": "metrics",
+                  "label": {
+                    "cssClasses": null,
+                    "showLess": false,
+                    "style": null,
+                    "text": "Metrics"
+                  },
+                  "kind": null,
+                  "typeInfo": {
+                    "multiplicity": true,
+                    "prefill": null,
+                    "type": "composite",
+                    "values": null,
+                    "vocabulary": null
+                  },
+                  "includedInSnippet": false,
+                  "deprecated": false,
+                  "form": {
+                    "affects": null,
+                    "dependsOn": null,
+                    "description": {
+                      "cssClasses": null,
+                      "showLess": false,
+                      "style": null,
+                      "text": null
+                    },
+                    "display": {
+                      "cssClasses": null,
+                      "hasBorder": true,
+                      "order": 3,
+                      "placement": null,
+                      "style": null,
+                      "visible": false
+                    },
+                    "group": null,
+                    "immutable": true,
+                    "mandatory": false,
+                    "placeholder": null,
+                    "suggestion": {
+                      "cssClasses": null,
+                      "showLess": false,
+                      "style": null,
+                      "text": null
+                    }
+                  },
+                  "subFields": [
+                    {
+                  "id": "probe",
+                  "name": "probe",
+                  "label": {
+                    "cssClasses": null,
+                    "showLess": false,
+                    "style": null,
+                    "text": "Probe"
+                  },
+                  "kind": null,
+                  "typeInfo": {
+                    "multiplicity": false,
+                    "prefill": null,
+                    "type": "string",
+                    "values": null,
+                    "vocabulary": null
+                  },
+                  "includedInSnippet": false,
+                  "deprecated": false,
+                  "form": {
+                    "affects": null,
+                    "dependsOn": null,
+                    "description": {
+                      "cssClasses": null,
+                      "showLess": false,
+                      "style": null,
+                      "text": null
+                    },
+                    "display": {
+                      "cssClasses": null,
+                      "hasBorder": false,
+                      "order": 4,
+                      "placement": null,
+                      "style": null,
+                      "visible": false
+                    },
+                    "group": null,
+                    "immutable": true,
+                    "mandatory": false,
+                    "placeholder": null,
+                    "suggestion": {
+                      "cssClasses": null,
+                      "showLess": false,
+                      "style": null,
+                      "text": null
+                    }
+                  },
+                  "subFields": []
+                },
+                {
+                  "id": "metric",
+                  "name": "metric",
+                  "label": {
+                    "cssClasses": null,
+                    "showLess": false,
+                    "style": null,
+                    "text": "Metric"
+                  },
+                  "kind": null,
+                  "typeInfo": {
+                    "multiplicity": false,
+                    "prefill": null,
+                    "type": "string",
+                    "values": null,
+                    "vocabulary": null
+                  },
+                  "includedInSnippet": false,
+                  "deprecated": false,
+                  "form": {
+                    "affects": null,
+                    "dependsOn": null,
+                    "description": {
+                      "cssClasses": null,
+                      "showLess": false,
+                      "style": null,
+                      "text": null
+                    },
+                    "display": {
+                      "cssClasses": null,
+                      "hasBorder": false,
+                      "order": 5,
+                      "placement": null,
+                      "style": null,
+                      "visible": false
+                    },
+                    "group": null,
+                    "immutable": true,
+                    "mandatory": false,
+                    "placeholder": null,
+                    "suggestion": {
+                      "cssClasses": null,
+                      "showLess": false,
+                      "style": null,
+                      "text": null
+                    }
+                  },
+                  "subFields": []
+                }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "fields": null
+    }
+  ],
+  "configuration": {
+    "prefillable": false,
+    "importFrom": null
+  },
+  "locked": true,
+  "active": true
+}

@@ -1,0 +1,354 @@
+[
+  {
+    "id": "scientific_subdomain-agricultural_sciences-agricultural_biotechnology",
+    "name": "Agricultural Biotechnology",
+    "description": null,
+    "parentId": "scientific_domain-agricultural_sciences",
+    "type": "Scientific subdomain",
+    "extras": {}
+  },
+  {
+    "id": "scientific_subdomain-agricultural_sciences-agriculture_forestry_and_fisheries",
+    "name": "Agriculture, Forestry & Fisheries",
+    "description": null,
+    "parentId": "scientific_domain-agricultural_sciences",
+    "type": "Scientific subdomain",
+    "extras": {}
+  },
+  {
+    "id": "scientific_subdomain-agricultural_sciences-animal_and_dairy_sciences",
+    "name": "Animal & Dairy Sciences",
+    "description": null,
+    "parentId": "scientific_domain-agricultural_sciences",
+    "type": "Scientific subdomain",
+    "extras": {}
+  },
+  {
+    "id": "scientific_subdomain-agricultural_sciences-other_agricultural_sciences",
+    "name": "Other Agricultural Sciences",
+    "description": null,
+    "parentId": "scientific_domain-agricultural_sciences",
+    "type": "Scientific subdomain",
+    "extras": {}
+  },
+  {
+    "id": "scientific_subdomain-agricultural_sciences-veterinary_sciences",
+    "name": "Veterinary Sciences",
+    "description": null,
+    "parentId": "scientific_domain-agricultural_sciences",
+    "type": "Scientific subdomain",
+    "extras": {}
+  },
+  {
+    "id": "scientific_subdomain-engineering_and_technology-chemical_engineering",
+    "name": "Chemical Engineering",
+    "description": null,
+    "parentId": "scientific_domain-engineering_and_technology",
+    "type": "Scientific subdomain",
+    "extras": {}
+  },
+  {
+    "id": "scientific_subdomain-engineering_and_technology-civil_engineering",
+    "name": "Civil Engineering",
+    "description": null,
+    "parentId": "scientific_domain-engineering_and_technology",
+    "type": "Scientific subdomain",
+    "extras": {}
+  },
+  {
+    "id": "scientific_subdomain-engineering_and_technology-electrical_electronic_and_information_engineering",
+    "name": "Electrical, Electronic & Information Engineering",
+    "description": null,
+    "parentId": "scientific_domain-engineering_and_technology",
+    "type": "Scientific subdomain",
+    "extras": {}
+  },
+  {
+    "id": "scientific_subdomain-engineering_and_technology-environmental_biotechnology",
+    "name": "Environmental Biotechnology",
+    "description": null,
+    "parentId": "scientific_domain-engineering_and_technology",
+    "type": "Scientific subdomain",
+    "extras": {}
+  },
+  {
+    "id": "scientific_subdomain-engineering_and_technology-environmental_engineering",
+    "name": "Environmental Engineering",
+    "description": null,
+    "parentId": "scientific_domain-engineering_and_technology",
+    "type": "Scientific subdomain",
+    "extras": {}
+  },
+  {
+    "id": "scientific_subdomain-engineering_and_technology-industrial_biotechnology",
+    "name": "Industrial Biotechnology",
+    "description": null,
+    "parentId": "scientific_domain-engineering_and_technology",
+    "type": "Scientific subdomain",
+    "extras": {}
+  },
+  {
+    "id": "scientific_subdomain-engineering_and_technology-materials_engineering",
+    "name": "Materials Engineering",
+    "description": null,
+    "parentId": "scientific_domain-engineering_and_technology",
+    "type": "Scientific subdomain",
+    "extras": {}
+  },
+  {
+    "id": "scientific_subdomain-engineering_and_technology-mechanical_engineering",
+    "name": "Mechanical Engineering",
+    "description": null,
+    "parentId": "scientific_domain-engineering_and_technology",
+    "type": "Scientific subdomain",
+    "extras": {}
+  },
+  {
+    "id": "scientific_subdomain-engineering_and_technology-medical_engineering",
+    "name": "Medical Engineering",
+    "description": null,
+    "parentId": "scientific_domain-engineering_and_technology",
+    "type": "Scientific subdomain",
+    "extras": {}
+  },
+  {
+    "id": "scientific_subdomain-engineering_and_technology-nanotechnology",
+    "name": "Nanotechnology",
+    "description": null,
+    "parentId": "scientific_domain-engineering_and_technology",
+    "type": "Scientific subdomain",
+    "extras": {}
+  },
+  {
+    "id": "scientific_subdomain-engineering_and_technology-other_engineering_and_technology_sciences",
+    "name": "Other Engineering & Technology Sciences",
+    "description": null,
+    "parentId": "scientific_domain-engineering_and_technology",
+    "type": "Scientific subdomain",
+    "extras": {}
+  },
+  {
+    "id": "scientific_subdomain-generic-generic",
+    "name": "Generic",
+    "description": null,
+    "parentId": "scientific_domain-generic",
+    "type": "Scientific subdomain",
+    "extras": {}
+  },
+  {
+    "id": "scientific_subdomain-humanities-arts",
+    "name": "Arts",
+    "description": null,
+    "parentId": "scientific_domain-humanities",
+    "type": "Scientific subdomain",
+    "extras": {}
+  },
+  {
+    "id": "scientific_subdomain-humanities-history_and_archaeology",
+    "name": "History & Archaeology",
+    "description": null,
+    "parentId": "scientific_domain-humanities",
+    "type": "Scientific subdomain",
+    "extras": {}
+  },
+  {
+    "id": "scientific_subdomain-humanities-languages_and_literature",
+    "name": "Languages & Literature",
+    "description": null,
+    "parentId": "scientific_domain-humanities",
+    "type": "Scientific subdomain",
+    "extras": {}
+  },
+  {
+    "id": "scientific_subdomain-humanities-other_humanities",
+    "name": "Other Humanities",
+    "description": null,
+    "parentId": "scientific_domain-humanities",
+    "type": "Scientific subdomain",
+    "extras": {}
+  },
+  {
+    "id": "scientific_subdomain-humanities-philosophy_ethics_and_religion",
+    "name": "Philosophy, Ethics & Religion",
+    "description": null,
+    "parentId": "scientific_domain-humanities",
+    "type": "Scientific subdomain",
+    "extras": {}
+  },
+  {
+    "id": "scientific_subdomain-medical_and_health_sciences-basic_medicine",
+    "name": "Basic Medicine",
+    "description": null,
+    "parentId": "scientific_domain-medical_and_health_sciences",
+    "type": "Scientific subdomain",
+    "extras": {}
+  },
+  {
+    "id": "scientific_subdomain-medical_and_health_sciences-clinical_medicine",
+    "name": "Clinical Medicine",
+    "description": null,
+    "parentId": "scientific_domain-medical_and_health_sciences",
+    "type": "Scientific subdomain",
+    "extras": {}
+  },
+  {
+    "id": "scientific_subdomain-medical_and_health_sciences-health_sciences",
+    "name": "Health Sciences",
+    "description": null,
+    "parentId": "scientific_domain-medical_and_health_sciences",
+    "type": "Scientific subdomain",
+    "extras": {}
+  },
+  {
+    "id": "scientific_subdomain-medical_and_health_sciences-medical_biotechnology",
+    "name": "Medical Biotechnology",
+    "description": null,
+    "parentId": "scientific_domain-medical_and_health_sciences",
+    "type": "Scientific subdomain",
+    "extras": {}
+  },
+  {
+    "id": "scientific_subdomain-medical_and_health_sciences-other_medical_sciences",
+    "name": "Other Medical Sciences",
+    "description": null,
+    "parentId": "scientific_domain-medical_and_health_sciences",
+    "type": "Scientific subdomain",
+    "extras": {}
+  },
+  {
+    "id": "scientific_subdomain-natural_sciences-biological_sciences",
+    "name": "Biological Sciences",
+    "description": null,
+    "parentId": "scientific_domain-natural_sciences",
+    "type": "Scientific subdomain",
+    "extras": {}
+  },
+  {
+    "id": "scientific_subdomain-natural_sciences-chemical_sciences",
+    "name": "Chemical Sciences",
+    "description": null,
+    "parentId": "scientific_domain-natural_sciences",
+    "type": "Scientific subdomain",
+    "extras": {}
+  },
+  {
+    "id": "scientific_subdomain-natural_sciences-computer_and_information_sciences",
+    "name": "Computer & Information Sciences",
+    "description": null,
+    "parentId": "scientific_domain-natural_sciences",
+    "type": "Scientific subdomain",
+    "extras": {}
+  },
+  {
+    "id": "scientific_subdomain-natural_sciences-earth_and_related_environmental_sciences",
+    "name": "Earth & Related Environmental Sciences",
+    "description": null,
+    "parentId": "scientific_domain-natural_sciences",
+    "type": "Scientific subdomain",
+    "extras": {}
+  },
+  {
+    "id": "scientific_subdomain-natural_sciences-mathematics",
+    "name": "Mathematics",
+    "description": null,
+    "parentId": "scientific_domain-natural_sciences",
+    "type": "Scientific subdomain",
+    "extras": {}
+  },
+  {
+    "id": "scientific_subdomain-natural_sciences-other_natural_sciences",
+    "name": "Other Natural Sciences",
+    "description": null,
+    "parentId": "scientific_domain-natural_sciences",
+    "type": "Scientific subdomain",
+    "extras": {}
+  },
+  {
+    "id": "scientific_subdomain-natural_sciences-physical_sciences",
+    "name": "Physical Sciences",
+    "description": null,
+    "parentId": "scientific_domain-natural_sciences",
+    "type": "Scientific subdomain",
+    "extras": {}
+  },
+  {
+    "id": "scientific_subdomain-other-other",
+    "name": "Other",
+    "description": null,
+    "parentId": "scientific_domain-other",
+    "type": "Scientific subdomain",
+    "extras": {}
+  },
+  {
+    "id": "scientific_subdomain-social_sciences-economics_and_business",
+    "name": "Economics & Business",
+    "description": null,
+    "parentId": "scientific_domain-social_sciences",
+    "type": "Scientific subdomain",
+    "extras": {}
+  },
+  {
+    "id": "scientific_subdomain-social_sciences-educational_sciences",
+    "name": "Educational Sciences",
+    "description": null,
+    "parentId": "scientific_domain-social_sciences",
+    "type": "Scientific subdomain",
+    "extras": {}
+  },
+  {
+    "id": "scientific_subdomain-social_sciences-law",
+    "name": "Law",
+    "description": null,
+    "parentId": "scientific_domain-social_sciences",
+    "type": "Scientific subdomain",
+    "extras": {}
+  },
+  {
+    "id": "scientific_subdomain-social_sciences-media_and_communications",
+    "name": "Media & Communications",
+    "description": null,
+    "parentId": "scientific_domain-social_sciences",
+    "type": "Scientific subdomain",
+    "extras": {}
+  },
+  {
+    "id": "scientific_subdomain-social_sciences-other_social_sciences",
+    "name": "Other Social Sciences",
+    "description": null,
+    "parentId": "scientific_domain-social_sciences",
+    "type": "Scientific subdomain",
+    "extras": {}
+  },
+  {
+    "id": "scientific_subdomain-social_sciences-political_sciences",
+    "name": "Political Sciences",
+    "description": null,
+    "parentId": "scientific_domain-social_sciences",
+    "type": "Scientific subdomain",
+    "extras": {}
+  },
+  {
+    "id": "scientific_subdomain-social_sciences-psychology",
+    "name": "Psychology",
+    "description": null,
+    "parentId": "scientific_domain-social_sciences",
+    "type": "Scientific subdomain",
+    "extras": {}
+  },
+  {
+    "id": "scientific_subdomain-social_sciences-social_and_economic_geography",
+    "name": "Social & Economic Geography",
+    "description": null,
+    "parentId": "scientific_domain-social_sciences",
+    "type": "Scientific subdomain",
+    "extras": {}
+  },
+  {
+    "id": "scientific_subdomain-social_sciences-sociology",
+    "name": "Sociology",
+    "description": null,
+    "parentId": "scientific_domain-social_sciences",
+    "type": "Scientific subdomain",
+    "extras": {}
+  }
+]

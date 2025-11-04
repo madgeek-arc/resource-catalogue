@@ -1,0 +1,66 @@
+[
+  {
+    "id": "ds_classification-repository",
+    "name": "Repository",
+    "description": "",
+    "parentId": null,
+    "type": "Classification",
+    "extras": {}
+  },
+  {
+    "id": "ds_classification-catalogue_of_research_products",
+    "name": "Catalogue of Research Products",
+    "description": "",
+    "parentId": null,
+    "type": "Classification",
+    "extras": {}
+  },
+  {
+    "id": "ds_classification-scientific_database",
+    "name": "Scientific Database",
+    "description": "",
+    "parentId": null,
+    "type": "Classification",
+    "extras": {}
+  },
+  {
+    "id": "ds_classification-aggregators",
+    "name": "Aggregators",
+    "description": "",
+    "parentId": null,
+    "type": "Classification",
+    "extras": {}
+  },
+  {
+    "id": "ds_classification-journal_archive",
+    "name": "Journal Archive",
+    "description": "",
+    "parentId": null,
+    "type": "Classification",
+    "extras": {}
+  },
+  {
+    "id": "ds_classification-publisher_archive",
+    "name": "Publisher Archive",
+    "description": "",
+    "parentId": null,
+    "type": "Classification",
+    "extras": {}
+  },
+  {
+    "id": "ds_classification-cris_system",
+    "name": "CRIS System",
+    "description": "",
+    "parentId": null,
+    "type": "Classification",
+    "extras": {}
+  },
+  {
+    "id": "ds_classification-research_entity_registry",
+    "name": "Research Entity Registry",
+    "description": "",
+    "parentId": null,
+    "type": "Classification",
+    "extras": {}
+  }
+]

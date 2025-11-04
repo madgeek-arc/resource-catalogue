@@ -250,7 +250,7 @@ public class ConfigurationTemplateInstanceManager extends ResourceCatalogueManag
         Set<String> ctKeys = ct.getConfigurationTemplate().getFormModel().keySet();
         Set<String> ctiKeys = bundle.getConfigurationTemplateInstance().getPayload().keySet();
 
-        if (!ctKeys.equals(ctiKeys)) {
+        if (!ctKeys.containsAll(ctiKeys)) {
             throw new ValidationException("Configuration Template Instance does not contain the required model in its payload");
         }
     }

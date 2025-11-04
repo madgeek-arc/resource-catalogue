@@ -1,0 +1,34 @@
+[
+  {
+    "id": "provider_life_cycle_status-being_upgraded",
+    "name": "Being Upgraded",
+    "description": "The Research Infrastructure is currently being upgraded. It is probable that many services are in containment or unavailable. Please add the projected year of completion of upgrades.",
+    "parentId": null,
+    "type": "Provider life cycle status",
+    "extras": {}
+  },
+  {
+    "id": "provider_life_cycle_status-operational",
+    "name": "Operational",
+    "description": "Τhe Research Infrastructure is constructed and all operations are being offered. Please add the beginning year of the operations.",
+    "parentId": null,
+    "type": "Provider life cycle status",
+    "extras": {}
+  },
+  {
+    "id": "provider_life_cycle_status-other",
+    "name": "Other",
+    "description": null,
+    "parentId": null,
+    "type": "Provider life cycle status",
+    "extras": {}
+  },
+  {
+    "id": "provider_life_cycle_status-under_construction",
+    "name": "Under Construction",
+    "description": "The Research Infrastructure is under construction. Please add the projected start date of user operation.",
+    "parentId": null,
+    "type": "Provider life cycle status",
+    "extras": {}
+  }
+]

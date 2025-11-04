@@ -1,0 +1,18 @@
+[
+  {
+    "id": "ir_identifier_type-doi",
+    "name": "DOI",
+    "description": null,
+    "parentId": null,
+    "type": "Interoperability Record identifier type",
+    "extras": {}
+  },
+  {
+    "id": "ir_identifier_type-uri",
+    "name": "URI",
+    "description": null,
+    "parentId": null,
+    "type": "Interoperability Record identifier type",
+    "extras": {}
+  }
+]
