@@ -338,6 +338,10 @@ openaire.ds.api=https://beta.services.openaire.eu/
 Refer to [pid.yml](resource-catalogue-service/src/main/resources/pid.yml)
 for the complete set of configuration options.
 
+Resource Catalogue supports both Mutual TLS (mTLS) and Basic Authentication.
+For Basic Authentication, provide a password; otherwise, provide all necessary
+configurations under the auth block.
+
 ```yaml
 ## PID Properties ##
 catalogue:
@@ -409,12 +413,6 @@ catalogue:
           client-key:
           client-cert:
 ```
-
-#### Important note
-
-Resource Catalogue supports both Mutual TLS (mTLS) and Basic Authentication.
-For Basic Authentication, provide a password; otherwise, provide all necessary
-configurations under the auth block.
 
 [eosc-logo]: https://eosc.eu/wp-content/uploads/2024/02/EOSC-Beyond-logo.png
 [license-badge]: https://img.shields.io/badge/license-Apache%202.0-blue.svg
