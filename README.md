@@ -1,13 +1,10 @@
-<div align="center">
-  <img src='https://eosc.eu/wp-content/uploads/2024/02/EOSC-Beyond-logo.png'></img>
-</div>
+[![EOSC Beyond Logo](https://eosc.eu/wp-content/uploads/2024/02/EOSC-Beyond-logo.png)]()
 
 # Resource Catalogue
 
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
 [![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-2.1-4baaaa.svg)](CODE_OF_CONDUCT.md)
-<a href="https://confluence.egi.eu/display/EOSCBeyond/Software+and+Services+Quality+Assurance+%28SQA%29+guidelines">
-<img src="https://img.shields.io/badge/SQAaaS-Bronze-CD7F32"/></a>
+[![SQAaaS badge shields.io](https://img.shields.io/badge/sqaaas%20software-bronze-e6ae77)](https://api.eu.badgr.io/public/assertions/odpAhWUqTNCyZpOYupboVg "SQAaaS bronze badge achieved")
 
 ---
 
@@ -380,6 +377,8 @@ catalogue:
           client-cert:
 ```
 
-##### Important note: </br>
-Resource Catalogue supports both Mutual TLS (mTLS) and Basic Authentication. </br>
+##### Important note:
+Resource Catalogue supports both Mutual TLS (mTLS) and Basic Authentication.
+
+
 For Basic Authentication, provide a password; otherwise, provide all necessary configurations under the auth block.
