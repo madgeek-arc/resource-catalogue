@@ -1,29 +1,35 @@
-[![EOSC Beyond Logo](https://eosc.eu/wp-content/uploads/2024/02/EOSC-Beyond-logo.png)]()
+[![EOSC Beyond Logo][eosc-logo]]()
 
 # Resource Catalogue
 
-[![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
-[![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-2.1-4baaaa.svg)](CODE_OF_CONDUCT.md)
-[![SQAaaS badge shields.io](https://img.shields.io/badge/sqaaas%20software-bronze-e6ae77)](https://api.eu.badgr.io/public/assertions/odpAhWUqTNCyZpOYupboVg "SQAaaS bronze badge achieved")
+[![License][license-badge]][license-link]
+[![Contributor Covenant][coc-badge]][coc-link]
+[![SQAaaS badge shields.io][sqaaas-badge]][sqaaas-link]
 
 ---
 
 ## Description
-The Resource Catalogue is a Java-based platform designed to manage and organize a diverse range of resources. 
-It provides a comprehensive collection of research services developed collaboratively by various research communities 
-and IT service providers. 
 
-The project operates under the EOSC Beyond initiative, which aims to promote Open Science 
-and foster innovation within the framework of the European Open Science Cloud (EOSC).
-EOSC Beyond overall objective is to advance Open Science and innovation in research in the context of the European Open Science Cloud (EOSC) by providing new EOSC Core capabilities allowing scientific applications to find, compose and access multiple Open Science resources and offer them as integrated capabilities to researchers.
+The Resource Catalogue is a Java-based platform designed to manage and organize
+a diverse range of resources. It provides a comprehensive collection of research
+services developed collaboratively by various research communities and IT
+service providers.
+
+The project operates under the EOSC Beyond initiative, which aims to promote
+Open Science and foster innovation within the framework of the European Open
+Science Cloud (EOSC). EOSC Beyond overall objective is to advance Open Science
+and innovation in research in the context of the European Open Science Cloud
+(EOSC) by providing new EOSC Core capabilities allowing scientific applications
+to find, compose and access multiple Open Science resources and offer them as
+integrated capabilities to researchers.
 
 ---
 
-## Getting Started:
+## Getting Started
 
 Follow these steps to set up a development environment for Resource Catalogue:
 
-### Prerequisites:
+### Prerequisites
 
 * Java 21
 * Maven 3.9+
@@ -34,54 +40,73 @@ Follow these steps to set up a development environment for Resource Catalogue:
 ### Installation
 
 1. **Create Database and necessary extension**
+
    ```sql
    USER <user> WITH PASSWORD 'your-password'; -- or use an existing user
    CREATE DATABASE <db> WITH OWNER <user>;
    ```
+
 2. **Clone the repository**:
+
    ```bash
    git clone https://github.com/madgeek-arc/resource-catalogue.git
    ```
+
 3. **Create the necessary configuration files**
-   1. `application.properties` – Add the required settings. 
-      See the [Application Properties Example](#Application-Properties-Example) for reference.
-   2. `pid.yml` – Create this file only if you plan to use the PID Service. 
-      See the [PID Properties Example](#PID-Properties-Example) for details.
+    1. `application.properties` – Add the required settings.
+       See the [Application Properties Example](#Application-Properties-Example)
+       for reference.
+    2. `pid.yml` – Create this file only if you plan to use the PID Service.
+       See the [PID Properties Example](#PID-Properties-Example) for details.
 4. **Build and Package**  
-   To build the project and package the code into an executable .jar file with an embedded Tomcat server:
-   1. Navigate to the project directory
-   2. Execute the following Maven command
+   To build the project and package the code into an executable .jar file with
+   an embedded Tomcat server:
+    1. Navigate to the project directory
+    2. Execute the following Maven command
+
    ```bash
    mvn clean package
    ```
 
 5. **Run**
-   1. without PID Service
+    1. without PID Service
+
    ```bash
-   java -jar resource-catalogue-service/target/resource-catalogue-service-X.X.X-SNAPSHOT.jar \
+   java -jar \
+   resource-catalogue-service/target/resource-catalogue-service-X.X.X.jar \
    --spring.config.additional-location=file:/path/to/application.properties
    ```
-   2. with PID Service
+
+    2. with PID Service
+
    ```bash
-   java -jar resource-catalogue-service/target/resource-catalogue-service-X.X.X-SNAPSHOT.jar \
-   --spring.config.additional-location=file:/path/to/application.properties,file:/path/to/pid.yml
+   java -jar \
+   resource-catalogue-service/target/resource-catalogue-service-X.X.X.jar \
+   --spring.config.additional-location= \
+   file:/path/to/application.properties,file:/path/to/pid.yml
    ```
 
 ---
 
 ### Initial Setup Wizard
+
 Before using the application, you **must run the Setup Wizard** once.  
-This step populates the database with essential resources required for the smooth operation of the service.
+This step populates the database with essential resources required for the
+smooth operation of the service.
 
 #### Purpose
-- Loads necessary controlled vocabularies.
-- Loads required resource models.
-- Creates the default Catalogue.
 
-The Setup Wizard should be executed **only once**, immediately after the first successful startup.
+* Loads necessary controlled vocabularies.
+* Loads required resource models.
+* Creates the default Catalogue.
+
+The Setup Wizard should be executed **only once**, immediately after the first
+successful startup.
 
 #### How to Run
-Once the application is up and running, open the following URL in your browser or via an API client:
+
+Once the application is up and running, open the following URL in your browser
+or via an API client:
 
 ```
 http://localhost:8080/api/wizard/step1
@@ -91,44 +116,53 @@ The Setup Wizard will guide you through each step of the initialization process.
 
 ---
 
-## Test execution:
+## Test execution
+
 ```bash
   mvn clean verify
 ```
+
 Test results will be displayed in the terminal.
 
 ---
 
 ## Documentation Links
+
 For extensive and detailed documentation, please refer to
-[Resource Catalogue Documentation](https://madgeek-arc.github.io/resource-catalogue-docs/).
+[Documentation](https://madgeek-arc.github.io/resource-catalogue-docs/).
 
 ---
 
-## Versioning:
-This project adheres to [Semantic Versioning](https://semver.org/). For the available versions, see the 
+## Versioning
+
+This project adheres to [Semantic Versioning](https://semver.org/).
+For the available versions, see the
 [tags](https://github.com/madgeek-arc/resource-catalogue/tags).
 
 ---
 
 ## Authors
-- **Konstantinos Spyrou** - Development - [GitHub](https://github.com/spyroukostas)
-- **Michael Zouros** - Development - [GitHub](https://github.com/mzouros)
 
-See the [contributors list](https://github.com/madgeek-arc/resource-catalogue/graphs/contributors) 
-for a full list of contributors.
+* **Konstantinos Spyrou** - Development - 
+[GitHub](https://github.com/spyroukostas)
+* **Michael Zouros** - Development -
+[GitHub](https://github.com/mzouros)
+
+See the [contributors list][contrib] for a full list of contributors.
 
 ---
 
 ## Acknowledgements
 
-Special thanks to all contributors, testers and the open-source community for their invaluable support and resources.
+Special thanks to all contributors, testers and the open-source community for
+their invaluable support and resources.
 
 ---
 
-##### Application Properties Example
-Refer to [application.properties](resource-catalogue-service/src/main/resources/application.properties) 
-for the complete set of configuration options.
+### Application Properties Example
+
+Refer to [application.properties][prop] for the complete set of
+configuration options.
 
 ```properties
 #########################
@@ -301,7 +335,8 @@ pid.service.enabled=false
 openaire.ds.api=https://beta.services.openaire.eu/
 ```
 
-##### PID Properties Example
+### PID Properties Example
+
 Refer to [pid.yml](resource-catalogue-service/src/main/resources/pid.yml)
 for the complete set of configuration options.
 
@@ -377,8 +412,18 @@ catalogue:
           client-cert:
 ```
 
-##### Important note:
+#### Important note
+
 Resource Catalogue supports both Mutual TLS (mTLS) and Basic Authentication.
+For Basic Authentication, provide a password; otherwise, provide all necessary
+configurations under the auth block.
 
-
-For Basic Authentication, provide a password; otherwise, provide all necessary configurations under the auth block.
+[eosc-logo]: https://eosc.eu/wp-content/uploads/2024/02/EOSC-Beyond-logo.png
+[license-badge]: https://img.shields.io/badge/license-Apache%202.0-blue.svg
+[license-link]: LICENSE
+[coc-badge]: https://img.shields.io/badge/Contributor%20Covenant-2.1-4baaaa.svg
+[coc-link]: CODE_OF_CONDUCT.md
+[sqaaas-badge]: https://img.shields.io/badge/sqaaas%20software-bronze-e6ae77
+[sqaaas-link]: https://api.eu.badgr.io/public/assertions/odpAhWUqTNCyZpOYupboVg
+[contrib]: https://github.com/madgeek-arc/resource-catalogue/graphs/contributors
+[prop]:resource-catalogue-service/src/main/resources/application.properties
