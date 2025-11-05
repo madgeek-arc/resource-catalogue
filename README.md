@@ -39,28 +39,28 @@ Follow these steps to set up a development environment for Resource Catalogue:
 
 ### Installation
 
-1. **Create Database and necessary extension**
+1. Create Database and necessary extension
 
    ```sql
    USER <user> WITH PASSWORD 'your-password'; -- or use an existing user
    CREATE DATABASE <db> WITH OWNER <user>;
    ```
 
-2. **Clone the repository**:
+2. Clone the repository:
 
    ```bash
    git clone https://github.com/madgeek-arc/resource-catalogue.git
    ```
 
-3. **Create the necessary configuration files**
+3. Create the necessary configuration files
     1. `application.properties` – Add the required settings.
        See the [Application Properties Example](#Application-Properties-Example)
        for reference.
     2. `pid.yml` – Create this file only if you plan to use the PID Service.
        See the [PID Properties Example](#PID-Properties-Example) for details.
-4. **Build and Package**  
-   To build the project and package the code into an executable .jar file with
-   an embedded Tomcat server:
+4. Build and Package
+    To build the project and package the code into an executable .jar file with
+    an embedded Tomcat server:
     1. Navigate to the project directory
     2. Execute the following Maven command
 
@@ -68,7 +68,7 @@ Follow these steps to set up a development environment for Resource Catalogue:
    mvn clean package
    ```
 
-5. **Run**
+5. Run
     1. without PID Service
 
    ```bash
@@ -143,10 +143,8 @@ For the available versions, see the
 
 ## Authors
 
-* **Konstantinos Spyrou** - Development - 
-[GitHub](https://github.com/spyroukostas)
-* **Michael Zouros** - Development -
-[GitHub](https://github.com/mzouros)
+* Konstantinos Spyrou - Development - [GitHub](https://github.com/spyroukostas)
+* Michael Zouros - Development - [GitHub](https://github.com/mzouros)
 
 See the [contributors list][contrib] for a full list of contributors.
 
