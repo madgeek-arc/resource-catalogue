@@ -5,6 +5,31 @@
     ".": {
       "changelog-path": "CHANGELOG.md",
       "release-type": "maven",
+      "extra-files": [
+        { "type": "xml", "path": "pom.xml", "xpath": "/project/version" },
+        { "type": "xml", "path": "pom.xml", "xpath": "/project/parent/version" },
+
+        { "type": "xml", "path": "resource-catalogue-api/pom.xml", "xpath": "/project/version" },
+        { "type": "xml", "path": "resource-catalogue-api/pom.xml", "xpath": "/project/parent/version" },
+
+        { "type": "xml", "path": "resource-catalogue-elastic/pom.xml", "xpath": "/project/version" },
+        { "type": "xml", "path": "resource-catalogue-elastic/pom.xml", "xpath": "/project/parent/version" },
+
+        { "type": "xml", "path": "resource-catalogue-jms/pom.xml", "xpath": "/project/version" },
+        { "type": "xml", "path": "resource-catalogue-jms/pom.xml", "xpath": "/project/parent/version" },
+
+        { "type": "xml", "path": "resource-catalogue-model/pom.xml", "xpath": "/project/version" },
+        { "type": "xml", "path": "resource-catalogue-model/pom.xml", "xpath": "/project/parent/version" },
+
+        { "type": "xml", "path": "resource-catalogue-model-lot1/pom.xml", "xpath": "/project/version" },
+        { "type": "xml", "path": "resource-catalogue-model-lot1/pom.xml", "xpath": "/project/parent/version" },
+
+        { "type": "xml", "path": "resource-catalogue-rest/pom.xml", "xpath": "/project/version" },
+        { "type": "xml", "path": "resource-catalogue-rest/pom.xml", "xpath": "/project/parent/version" },
+
+        { "type": "xml", "path": "resource-catalogue-service/pom.xml", "xpath": "/project/version" },
+        { "type": "xml", "path": "resource-catalogue-service/pom.xml", "xpath": "/project/parent/version" }
+      ],
       "bump-minor-pre-major": false,
       "bump-patch-for-minor-pre-major": false,
       "draft": false,
