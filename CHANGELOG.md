@@ -30,6 +30,27 @@
 * Revert "chore(api-docs): add annotations to group endpoints in OpenAPI - used in horizontal-adapters project" ([5315df4](https://github.com/madgeek-arc/resource-catalogue/commit/5315df41cea3a5652ba5a49d36ee4745f1b28475))
 
 
+## [5.3.0](https://github.com/madgeek-arc/resource-catalogue/compare/v5.2.0...v5.3.0) (2025-11-06)
+
+
+### Features
+
+* accounting service functionality ([0e4640c](https://github.com/madgeek-arc/resource-catalogue/commit/0e4640cc3d232541fbe9145f429fad0e86454509))
+* helpdesk functionallity ([547e34c](https://github.com/madgeek-arc/resource-catalogue/commit/547e34cbc6db79cec8a17d532805f69eb7dbff09))
+* **logging:** replace logging pattern and use 'request-logging' lib to display rich access logs respecting user privacy ([5153816](https://github.com/madgeek-arc/resource-catalogue/commit/5153816196af080655149200f936406eccbaa281))
+* **wizard:** basic wizard functionality ([cc02723](https://github.com/madgeek-arc/resource-catalogue/commit/cc0272381b1b3b3a5ad11eb3038d14e627176f41))
+
+
+### Bug Fixes
+
+* ensures the return of non-public Configuration Template Instances through the controller ([36c8d92](https://github.com/madgeek-arc/resource-catalogue/commit/36c8d927c58c275bb934eefa7ce84b6ec7d29457))
+* inits web client ([429224f](https://github.com/madgeek-arc/resource-catalogue/commit/429224fd6f20b696c78aa45dbf9d2580087693f4))
+* set base image back to OpenJDK 21 ([ba2e7d1](https://github.com/madgeek-arc/resource-catalogue/commit/ba2e7d1ae4d983f5588f86f0ed8c7782d41d5073))
+* sets specific maven version for java 21 ([9d47a64](https://github.com/madgeek-arc/resource-catalogue/commit/9d47a64239e564d515ef78b951f4853b643242c4))
+* sets specific maven version for java 21 ([bfdff04](https://github.com/madgeek-arc/resource-catalogue/commit/bfdff04e97202433e6634861a3ff685976f30521))
+* token in headers when submitting a ticket ([a1597b7](https://github.com/madgeek-arc/resource-catalogue/commit/a1597b7a6150831171397ddc355a3a39a686d7a3))
+* token in headers when submitting a ticket ([de32231](https://github.com/madgeek-arc/resource-catalogue/commit/de322315e15e62f0e595fb846c9f194c0e9a1b2e))
+
 ## [5.2.0](https://github.com/madgeek-arc/resource-catalogue/compare/v5.1.0...v5.2.0) (2025-09-15)
 
 
