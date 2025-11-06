@@ -18,10 +18,8 @@
 * minor fixes in broken email templates. rename of portal -> beyond. enable Openaire Datasource registration ([b7331a0](https://github.com/madgeek-arc/resource-catalogue/commit/b7331a0dd975d1a02e661f3827810e1ce38e05f6))
 * re-introduce deleted method ([726445c](https://github.com/madgeek-arc/resource-catalogue/commit/726445ce66d99c364d20fe47aa358ea257109010))
 * remove 'Beyond' word from emails as it is problematic for other projects/catalogues ([d7c7bcb](https://github.com/madgeek-arc/resource-catalogue/commit/d7c7bcb7bb721f4650e2f5bda88ebe697e288dce))
-* remove 'Beyond' word from emails as it is problematic for other projects/catalogues ([9bd56bd](https://github.com/madgeek-arc/resource-catalogue/commit/9bd56bd0a812461312d219ba1c20427098b2395c))
 * skip Matomo update when host is not configured and warn on failure ([ab84d54](https://github.com/madgeek-arc/resource-catalogue/commit/ab84d549e3170cf24a3fa772dee27cd98b45fb4a))
 * update on public adapter resource ([a802488](https://github.com/madgeek-arc/resource-catalogue/commit/a8024885cd1525075e41d318b88a7a3c4b91415b))
-* update on public adapter resource ([d38b635](https://github.com/madgeek-arc/resource-catalogue/commit/d38b635d257c424f6b0fcd0018e77ab6f1ffc68d))
 * **verify:** reintroduce method ([1cfa30f](https://github.com/madgeek-arc/resource-catalogue/commit/1cfa30fc351fffa967c95d3852ae6cfdc9d07a0f))
 
 ### Reverts
