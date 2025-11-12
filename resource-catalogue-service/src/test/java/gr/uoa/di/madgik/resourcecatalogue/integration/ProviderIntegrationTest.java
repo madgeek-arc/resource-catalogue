@@ -32,8 +32,8 @@ import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.security.authentication.InsufficientAuthenticationException;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 
 import java.util.List;
 
@@ -51,7 +51,7 @@ class ProviderIntegrationTest extends BaseIntegrationTest {
     private CatalogueService catalogueService;
     @Autowired
     private SecurityService securityService;
-    @SpyBean
+    @MockitoSpyBean
     private ProviderResourcesCommonMethods commonMethods;
     @Mock
     private ServiceBundleService<ServiceBundle> serviceBundleService;
