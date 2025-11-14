@@ -860,7 +860,7 @@ public class ProviderManager extends ResourceCatalogueManager<ProviderBundle> im
     }
 
     @Override
-    public Paging<ProviderBundle> getRandomResources(FacetFilter ff, String auditingInterval, Authentication auth) {
+    public Paging<ProviderBundle> getRandomResourcesForAuditing(int quantity, int auditingInterval, Authentication auth) {
         FacetFilter facetFilter = new FacetFilter();
         facetFilter.setQuantity(maxQuantity);
         facetFilter.addFilter("status", "approved provider");
@@ -872,7 +872,7 @@ public class ProviderManager extends ResourceCatalogueManager<ProviderBundle> im
         long todayEpochMillis = System.currentTimeMillis();
         long intervalEpochSeconds = Instant.ofEpochMilli(todayEpochMillis)
                 .atZone(ZoneId.systemDefault())
-                .minusMonths(Integer.parseInt(auditingInterval))
+                .minusMonths(auditingInterval)
                 .toEpochSecond();
 
         for (ProviderBundle providerBundle : providersBrowsing.getResults()) {
@@ -896,7 +896,6 @@ public class ProviderManager extends ResourceCatalogueManager<ProviderBundle> im
         Collections.shuffle(providersToBeAudited);
 
         // Limit the list to the requested quantity
-        int quantity = ff.getQuantity();
         if (providersToBeAudited.size() > quantity) {
             providersToBeAudited = providersToBeAudited.subList(0, quantity);
         }

@@ -16,6 +16,7 @@
 
 package gr.uoa.di.madgik.resourcecatalogue.controllers.registry;
 
+import gr.uoa.di.madgik.catalogue.service.GenericResourceService;
 import gr.uoa.di.madgik.registry.annotation.BrowseParameters;
 import gr.uoa.di.madgik.registry.domain.Browsing;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
@@ -25,7 +26,6 @@ import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.annotations.BrowseCatalogue;
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
 import gr.uoa.di.madgik.resourcecatalogue.service.DraftResourceService;
-import gr.uoa.di.madgik.resourcecatalogue.service.GenericResourceService;
 import gr.uoa.di.madgik.resourcecatalogue.service.ProviderService;
 import gr.uoa.di.madgik.resourcecatalogue.service.TrainingResourceService;
 import io.swagger.v3.oas.annotations.Hidden;
@@ -66,7 +66,7 @@ public class TrainingResourceController {
     private final GenericResourceService genericResourceService;
 
     @Value("${auditing.interval:6}")
-    private String auditingInterval;
+    private int auditingInterval;
 
     @Value("${catalogue.id}")
     private String catalogueId;
@@ -205,7 +205,7 @@ public class TrainingResourceController {
     public ResponseEntity<Map<String, List<TrainingResource>>> getTrainingResourcesBy(@PathVariable(value = "field") Service.Field field,
                                                                                       @Parameter(hidden = true) Authentication auth) throws NoSuchFieldException {
         Map<String, List<TrainingResourceBundle>> results;
-        results = trainingResourceService.getBy(field.getKey(), auth);
+        results = trainingResourceService.getBy(field.getKey());
         Map<String, List<TrainingResource>> trainingResourceResults = new TreeMap<>();
         for (Map.Entry<String, List<TrainingResourceBundle>> trainingResourceBundles : results.entrySet()) {
             List<TrainingResource> items = trainingResourceBundles.getValue()
@@ -318,16 +318,12 @@ public class TrainingResourceController {
     }
 
 
-    @Parameters({
-            @Parameter(name = "quantity", description = "Quantity to be fetched", content = @Content(schema = @Schema(type = "string", defaultValue = "10")))
-    })
     @GetMapping(path = "randomResources", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
-    public ResponseEntity<Paging<TrainingResourceBundle>> getRandomResources(@Parameter(hidden = true) @RequestParam MultiValueMap<String, Object> allRequestParams, @Parameter(hidden = true) Authentication auth) {
-        FacetFilter ff = FacetFilter.from(allRequestParams);
-        ff.addFilter("status", "approved resource");
-        ff.addFilter("published", false);
-        Paging<TrainingResourceBundle> trainingResourceBundlePaging = trainingResourceService.getRandomResources(ff, auditingInterval, auth);
+    public ResponseEntity<Paging<TrainingResourceBundle>> getRandomResources(@Parameter(name = "quantity", description = "Quantity to be fetched", content = @Content(schema = @Schema(type = "string", defaultValue = "10")))
+                                                                              @RequestParam(defaultValue = "10") int quantity,
+                                                                              @Parameter(hidden = true) Authentication auth) {
+        Paging<TrainingResourceBundle> trainingResourceBundlePaging = trainingResourceService.getRandomResourcesForAuditing(quantity, auditingInterval, auth);
         return new ResponseEntity<>(trainingResourceBundlePaging, HttpStatus.OK);
     }
 

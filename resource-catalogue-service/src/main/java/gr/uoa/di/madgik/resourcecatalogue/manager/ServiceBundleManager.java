@@ -17,6 +17,7 @@
 package gr.uoa.di.madgik.resourcecatalogue.manager;
 
 import gr.uoa.di.madgik.catalogue.exception.ValidationException;
+import gr.uoa.di.madgik.catalogue.service.GenericResourceService;
 import gr.uoa.di.madgik.registry.domain.*;
 import gr.uoa.di.madgik.registry.exception.ResourceException;
 import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
@@ -540,13 +541,7 @@ public class ServiceBundleManager extends ResourceCatalogueManager<ServiceBundle
 
     @Override
     public List<ServiceBundle> getResourceBundles(String providerId, Authentication auth) {
-        FacetFilter ff = new FacetFilter();
-        ff.addFilter("resource_organisation", providerId);
-        ff.addFilter("catalogue_id", catalogueId);
-        ff.addFilter("published", false);
-        ff.setQuantity(maxQuantity);
-        ff.addOrderBy("name", "asc");
-        return this.getAll(ff, auth).getResults();
+        return getResourceBundles(catalogueId, providerId, auth).getResults();
     }
 
     @Override
@@ -878,7 +873,7 @@ public class ServiceBundleManager extends ResourceCatalogueManager<ServiceBundle
     }
 
     @Override
-    public Paging<ServiceBundle> getRandomResources(FacetFilter ff, String auditingInterval, Authentication auth) {
+    public Paging<ServiceBundle> getRandomResourcesForAuditing(int quantity, int auditingInterval, Authentication auth) {
         FacetFilter facetFilter = new FacetFilter();
         facetFilter.setQuantity(maxQuantity);
         facetFilter.addFilter("status", "approved resource");
@@ -890,7 +885,7 @@ public class ServiceBundleManager extends ResourceCatalogueManager<ServiceBundle
         long todayEpochMillis = System.currentTimeMillis();
         long intervalEpochSeconds = Instant.ofEpochMilli(todayEpochMillis)
                 .atZone(ZoneId.systemDefault())
-                .minusMonths(Integer.parseInt(auditingInterval))
+                .minusMonths(auditingInterval)
                 .toEpochSecond();
 
         for (ServiceBundle serviceBundle : serviceBrowsing.getResults()) {
@@ -914,7 +909,6 @@ public class ServiceBundleManager extends ResourceCatalogueManager<ServiceBundle
         Collections.shuffle(servicesToBeAudited);
 
         // Limit the list to the requested quantity
-        int quantity = ff.getQuantity();
         if (servicesToBeAudited.size() > quantity) {
             servicesToBeAudited = servicesToBeAudited.subList(0, quantity);
         }

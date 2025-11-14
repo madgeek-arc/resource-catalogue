@@ -23,7 +23,7 @@ import gr.uoa.di.madgik.registry.exception.ResourceException;
 import gr.uoa.di.madgik.resourcecatalogue.annotations.BrowseCatalogue;
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
 import gr.uoa.di.madgik.resourcecatalogue.dto.MonitoringStatus;
-import gr.uoa.di.madgik.resourcecatalogue.service.GenericResourceService;
+import gr.uoa.di.madgik.catalogue.service.GenericResourceService;
 import gr.uoa.di.madgik.resourcecatalogue.service.HelpdeskService;
 import gr.uoa.di.madgik.resourcecatalogue.service.MonitoringService;
 import gr.uoa.di.madgik.resourcecatalogue.service.ServiceBundleService;

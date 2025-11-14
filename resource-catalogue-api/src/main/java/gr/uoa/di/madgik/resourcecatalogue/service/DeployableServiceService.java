@@ -1,6 +1,5 @@
 package gr.uoa.di.madgik.resourcecatalogue.service;
 
-import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.domain.DeployableService;
@@ -8,7 +7,6 @@ import gr.uoa.di.madgik.resourcecatalogue.domain.DeployableServiceBundle;
 import org.springframework.security.core.Authentication;
 
 import java.util.List;
-import java.util.Map;
 
 public interface DeployableServiceService extends ResourceCatalogueService<DeployableServiceBundle>,
         BundleOperations<DeployableServiceBundle> {
@@ -57,16 +55,6 @@ public interface DeployableServiceService extends ResourceCatalogueService<Deplo
     DeployableServiceBundle getCatalogueResource(String catalogueId, String resourceId, Authentication auth);
 
     /**
-     * Get Deployable Service Bundles by a specific field.
-     *
-     * @param field Field of Deployable Service
-     * @param auth  Authentication
-     * @return {@link Map}&lt;{@link String},{@link List}&lt;{@link   DeployableServiceBundle}&gt;&gt;
-     * @throws NoSuchFieldException The field does not exist
-     */
-    Map<String, List<DeployableServiceBundle>> getBy(String field, Authentication auth) throws NoSuchFieldException;
-
-    /**
      * Get Deployable Services with the specified ids.
      *
      * @param authentication Authentication
@@ -74,16 +62,6 @@ public interface DeployableServiceService extends ResourceCatalogueService<Deplo
      * @return {@link List}&lt;{@link DeployableService}&gt;
      */
     List<DeployableService> getByIds(Authentication authentication, String... ids);
-
-    /**
-     * Get a paging of random Deployable Services
-     *
-     * @param ff               FacetFilter
-     * @param auditingInterval Auditing Interval (in months)
-     * @param auth             Authentication
-     * @return {@link Paging}&lt;{@link   DeployableServiceBundle}&gt;
-     */
-    Paging<DeployableServiceBundle> getRandomResources(FacetFilter ff, String auditingInterval, Authentication auth);
 
     /**
      * Get a list of Deployable Service Bundles of a specific Provider of the EOSC Catalogue

@@ -364,6 +364,11 @@ public class InteroperabilityRecordManager extends ResourceCatalogueManager<Inte
         return super.update(interoperabilityRecordBundle, auth);
     }
 
+    @Override
+    public Paging<InteroperabilityRecordBundle> getRandomResourcesForAuditing(int quantity, int auditingInterval, Authentication auth) {
+        throw new UnsupportedOperationException("Not implemented.");
+    }
+
     public InteroperabilityRecordBundle createPublicInteroperabilityRecord(InteroperabilityRecordBundle interoperabilityRecordBundle, Authentication auth) {
         publicInteroperabilityRecordManager.add(interoperabilityRecordBundle, auth);
         return interoperabilityRecordBundle;

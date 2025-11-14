@@ -24,7 +24,6 @@ import gr.uoa.di.madgik.resourcecatalogue.domain.TrainingResourceBundle;
 import org.springframework.security.core.Authentication;
 
 import java.util.List;
-import java.util.Map;
 
 public interface TrainingResourceService extends ResourceCatalogueService<TrainingResourceBundle>, BundleOperations<TrainingResourceBundle> {
 
@@ -73,16 +72,6 @@ public interface TrainingResourceService extends ResourceCatalogueService<Traini
     TrainingResourceBundle getCatalogueResource(String catalogueId, String resourceId, Authentication auth);
 
     /**
-     * Get Training Resource Bundles by a specific field.
-     *
-     * @param field Field of Training Resource
-     * @param auth  Authentication
-     * @return {@link Map}&lt;{@link String},{@link List}&lt;{@link   TrainingResourceBundle}&gt;&gt;
-     * @throws NoSuchFieldException The field does not exist
-     */
-    Map<String, List<TrainingResourceBundle>> getBy(String field, Authentication auth) throws NoSuchFieldException;
-
-    /**
      * Get Training Resources with the specified ids.
      *
      * @param authentication Authentication
@@ -90,16 +79,6 @@ public interface TrainingResourceService extends ResourceCatalogueService<Traini
      * @return {@link List}&lt;{@link TrainingResource}&gt;
      */
     List<TrainingResource> getByIds(Authentication authentication, String... ids);
-
-    /**
-     * Get a paging of random Training Resources
-     *
-     * @param ff               FacetFilter
-     * @param auditingInterval Auditing Interval (in months)
-     * @param auth             Authentication
-     * @return {@link Paging}&lt;{@link   TrainingResourceBundle}&gt;
-     */
-    Paging<TrainingResourceBundle> getRandomResources(FacetFilter ff, String auditingInterval, Authentication auth);
 
     /**
      * Get a list of Training Resource Bundles of a specific Provider of the EOSC Catalogue

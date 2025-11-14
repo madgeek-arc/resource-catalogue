@@ -19,6 +19,7 @@ package gr.uoa.di.madgik.resourcecatalogue.manager;
 import gr.uoa.di.madgik.catalogue.exception.ValidationException;
 import gr.uoa.di.madgik.registry.domain.Browsing;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
+import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.registry.domain.Resource;
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
@@ -297,6 +298,11 @@ public class AdapterManager extends ResourceCatalogueManager<AdapterBundle> impl
                 adapterBundle.getAdapter().getId(),
                 adapterBundle.getAdapter().getName(), actionType);
         return super.update(adapterBundle, auth);
+    }
+
+    @Override
+    public Paging<AdapterBundle> getRandomResourcesForAuditing(int quantity, int auditingInterval, Authentication auth) {
+        throw new UnsupportedOperationException("Not implemented.");
     }
 
     @Override
