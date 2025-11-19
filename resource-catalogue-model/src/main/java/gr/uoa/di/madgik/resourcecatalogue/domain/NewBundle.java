@@ -16,17 +16,12 @@
 
 package gr.uoa.di.madgik.resourcecatalogue.domain;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.beans.Transient;
+import java.util.*;
 
-public class NewBundle<T extends HashMap<String, Object>> implements Map<String, T> {
+public class NewBundle {
 
-    //    @Schema(hidden = true)
-//    @XmlTransient
-//    @FieldValidation
-    private Map<String, T> payload = new HashMap<String, T>();
+    private LinkedHashMap<String, Object> payload = new LinkedHashMap<>();
 
     private Metadata metadata;
 
@@ -53,16 +48,6 @@ public class NewBundle<T extends HashMap<String, Object>> implements Map<String,
     public NewBundle() {
     }
 
-    @Override
-    public T get(Object key) {
-        return this.payload.get(key);
-    }
-
-    @Override
-    public T put(String key, T value) {
-       return this.payload.put(key, value);
-    }
-
 //    @Override
 //    public String getId() {
 //        return (String) payload.get("id");
@@ -75,15 +60,15 @@ public class NewBundle<T extends HashMap<String, Object>> implements Map<String,
 //        }
 //    }
 
-//    //    @Transient
-//    public T getPayload() {
-//        return payload;
-//    }
-//
-//    //    @Transient
-//    public void setPayload(T payload) {
-//        this.payload = payload;
-//    }
+    @Transient
+    public LinkedHashMap<String, Object> getPayload() {
+        return payload;
+    }
+
+    @Transient
+    public void setPayload(LinkedHashMap<String, Object> payload) {
+        this.payload = payload;
+    }
 
     public Metadata getMetadata() {
         return metadata;
@@ -179,35 +164,5 @@ public class NewBundle<T extends HashMap<String, Object>> implements Map<String,
 
     public void setAuditState(String auditState) {
         this.auditState = auditState;
-    }
-
-    @Override
-    public String toString() {
-        return "Rapper{" +
-                ", metadata=" + metadata +
-                ", active=" + active +
-                ", suspended=" + suspended +
-                ", draft=" + draft +
-                ", identifiers=" + identifiers +
-                ", loggingInfo=" + loggingInfo +
-                ", latestAuditInfo=" + latestAuditInfo +
-                ", latestOnboardingInfo=" + latestOnboardingInfo +
-                ", latestUpdateInfo=" + latestUpdateInfo +
-                ", status='" + status + '\'' +
-                ", templateStatus='" + templateStatus + '\'' +
-                ", auditState='" + auditState + '\'' +
-                '}';
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (o == null || getClass() != o.getClass()) return false;
-        NewBundle<?> bundle = (NewBundle<?>) o;
-        return active == bundle.active && suspended == bundle.suspended && draft == bundle.draft && Objects.equals(metadata, bundle.metadata) && Objects.equals(identifiers, bundle.identifiers) && Objects.equals(loggingInfo, bundle.loggingInfo) && Objects.equals(latestAuditInfo, bundle.latestAuditInfo) && Objects.equals(latestOnboardingInfo, bundle.latestOnboardingInfo) && Objects.equals(latestUpdateInfo, bundle.latestUpdateInfo) && Objects.equals(status, bundle.status) && Objects.equals(templateStatus, bundle.templateStatus) && Objects.equals(auditState, bundle.auditState);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(metadata, active, suspended, draft, identifiers, loggingInfo, latestAuditInfo, latestOnboardingInfo, latestUpdateInfo, status, templateStatus, auditState);
     }
 }

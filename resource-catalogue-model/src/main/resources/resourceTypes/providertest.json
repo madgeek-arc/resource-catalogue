@@ -339,7 +339,7 @@
   "name": "providertest",
   "payloadType": "json",
   "properties": {
-    "class": "gr.uoa.di.madgik.resourcecatalogue.domain.Rapper"
+    "class": "gr.uoa.di.madgik.resourcecatalogue.domain.NewProviderBundle"
   },
   "schema": "{\n\t\"$schema\": \"https://json-schema.org/draft/2019-09/schema\"\n}"
 }
