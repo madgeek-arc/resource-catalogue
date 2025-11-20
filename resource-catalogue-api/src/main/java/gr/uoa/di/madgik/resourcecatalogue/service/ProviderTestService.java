@@ -28,8 +28,21 @@ import gr.uoa.di.madgik.resourcecatalogue.dto.MapValues;
 import org.springframework.security.core.Authentication;
 
 import java.util.List;
+import java.util.Map;
 
+//TODO: extend ResourceCRUDService<NewProviderBundle, Authentication>
 public interface ProviderTestService extends NewBundleOperations<NewProviderBundle> {
+
+     /**
+     * Get a Provider of the Project's Catalogue providing the Provider's ID.
+     *
+     * @param ff FacetFilter
+     * @param auth Authentication
+     * @return {@link NewProviderBundle}
+     */
+     NewProviderBundle get(FacetFilter ff, Authentication auth);
+
+
 
 //    /**
 //     * Add a new Provider on the Project's Catalogue.
@@ -197,17 +210,19 @@ public interface ProviderTestService extends NewBundleOperations<NewProviderBund
 //    /**
 //     * Return true if Provider User Admin has accepted registration terms
 //     *
-//     * @param providerId Provider's ID
+//     * @param id Provider's ID
+//     * @param ff FacetFilter
 //     * @param auth       Authentication
 //     * @return True/False
 //     */
-//    boolean hasAdminAcceptedTerms(String providerId, Authentication auth);
+//    boolean hasAdminAcceptedTerms(String id, FacetFilter ff, Authentication auth);
 //
 //    /**
 //     * Update the Provider's list of Users that have accepted the Provider's registration terms
 //     *
-//     * @param providerId Provider's ID
+//     * @param id Provider's ID
+//     * @param ff FacetFilter
 //     * @param auth       Authentication
 //     */
-//    void adminAcceptedTerms(String providerId, Authentication auth);
+//    void adminAcceptedTerms(String id, FacetFilter ff, Authentication auth);
 }

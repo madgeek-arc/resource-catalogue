@@ -16,45 +16,36 @@
 
 package gr.uoa.di.madgik.resourcecatalogue.manager;
 
-import gr.uoa.di.madgik.catalogue.exception.ValidationException;
 import gr.uoa.di.madgik.catalogue.service.GenericResourceService;
-import gr.uoa.di.madgik.registry.domain.*;
-import gr.uoa.di.madgik.registry.exception.ResourceException;
-import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
-import gr.uoa.di.madgik.registry.service.ResourceCRUDService;
+import gr.uoa.di.madgik.registry.domain.Browsing;
+import gr.uoa.di.madgik.registry.domain.FacetFilter;
+import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.registry.service.VersionService;
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
-import gr.uoa.di.madgik.resourcecatalogue.dto.CatalogueValue;
-import gr.uoa.di.madgik.resourcecatalogue.dto.MapValues;
 import gr.uoa.di.madgik.resourcecatalogue.exceptions.CatalogueResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
-import gr.uoa.di.madgik.resourcecatalogue.utils.Auditable;
 import gr.uoa.di.madgik.resourcecatalogue.utils.AuthenticationInfo;
-import gr.uoa.di.madgik.resourcecatalogue.utils.ObjectUtils;
 import gr.uoa.di.madgik.resourcecatalogue.utils.ProviderResourcesCommonMethods;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 
-import java.time.Instant;
-import java.time.ZoneId;
-import java.util.*;
-import java.util.stream.Collectors;
-
-import static gr.uoa.di.madgik.resourcecatalogue.utils.VocabularyValidationUtils.validateMerilScientificDomains;
-import static gr.uoa.di.madgik.resourcecatalogue.utils.VocabularyValidationUtils.validateScientificDomains;
+import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
+import java.util.List;
 
 @org.springframework.stereotype.Service("providerTestManager")
 public class ProviderTestManager implements ProviderTestService {
 
-    private static final
-    Logger logger = LoggerFactory.getLogger(ProviderManager.class);
+    private static final Logger logger = LoggerFactory.getLogger(ProviderTestManager.class);
+    private final String resourceTypeName = "providertest";
+    @Value("${elastic.index.max_result_window:10000}")
+    protected int maxQuantity;
+
     private final ServiceBundleService<ServiceBundle> serviceBundleService;
     private final TrainingResourceService trainingResourceService;
     private final DeployableServiceService deployableServiceService;
@@ -117,7 +108,7 @@ public class ProviderTestManager implements ProviderTestService {
     }
 
 
-//    @Override
+    //    @Override
 //    public String getResourceTypeName() {
 //        return "provider";
 //    }
@@ -446,7 +437,7 @@ public class ProviderTestManager implements ProviderTestService {
 //            throw new ValidationException(String.format("Vocabulary %s does not consist a Provider State!", status));
 //        }
 //        logger.trace("verifyProvider with id: '{}' | status: '{}' | active: '{}'", id, status, active);
-//        ProviderBundle provider = get(id, catalogueId, false);
+//        NewProviderBundle provider = genericResourceService.get(resourceTypeName, id);
 //        Resource existingResource = getResource(provider.getId(), provider.getProvider().getCatalogueId(), false);
 //        ProviderBundle existingProvider = deserialize(existingResource);
 //
@@ -544,7 +535,7 @@ public class ProviderTestManager implements ProviderTestService {
         }
         if (ff == null) {
             ff = new FacetFilter();
-            ff.setQuantity(10000); //FIXME: why maxQuantity fails
+            ff.setQuantity(maxQuantity);
         }
         if (!ff.getFilter().containsKey("published")) {
             ff.addFilter("published", false);
@@ -553,7 +544,8 @@ public class ProviderTestManager implements ProviderTestService {
         ff.addOrderBy("name", "asc");
         return genericResourceService.getResults(ff);
     }
-//
+
+    //
 //    @Override
 //    public List<ProviderBundle> getInactive() {
 //        FacetFilter ff = new FacetFilter();
@@ -738,48 +730,43 @@ public class ProviderTestManager implements ProviderTestService {
 //        }
 //    }
 //
-//    @Override
-//    public boolean hasAdminAcceptedTerms(String id, Authentication auth) {
-//        ProviderBundle bundle = get(id, catalogueId, false);
-//        String userEmail = AuthenticationInfo.getEmail(auth).toLowerCase();
-//
-//        List<String> providerAdmins = bundle.getProvider().getUsers().stream()
-//                .map(user -> user.getEmail().toLowerCase())
-//                .toList();
-//
-//        List<String> acceptedTerms = bundle.getMetadata().getTerms();
-//
-//        if (acceptedTerms == null || acceptedTerms.isEmpty()) {
-//            return !providerAdmins.contains(userEmail); // false -> show modal, true -> no modal
-//        }
-//
-//        if (providerAdmins.contains(userEmail) && !acceptedTerms.contains(userEmail)) {
-//            return false; // Show modal
-//        }
-//        return true; // No modal
-//    }
-//
-//    @Override
-//    public void adminAcceptedTerms(String id, Authentication auth) {
-//        ProviderBundle bundle = get(id, catalogueId, false);
-//        String userEmail = AuthenticationInfo.getEmail(auth);
-//
-//        List<String> existingTerms = bundle.getMetadata().getTerms();
-//        if (existingTerms == null) {
-//            existingTerms = new ArrayList<>();
-//        }
-//
-//        if (!existingTerms.contains(userEmail)) {
-//            existingTerms.add(userEmail);
-//            bundle.getMetadata().setTerms(existingTerms);
-//
-//            try {
-//                update(bundle, auth);
-//            } catch (ResourceException | ResourceNotFoundException e) {
-//                logger.info("Could not update terms for Provider with id: '{}'", id);
-//            }
-//        }
-//    }
+    @Override
+    public boolean hasAdminAcceptedTerms(FacetFilter ff, Authentication auth) {
+        NewProviderBundle bundle = get(ff, auth);
+        List<User> admins = (List<User>) bundle.getProvider().get("users");
+        String userEmail = AuthenticationInfo.getEmail(auth).toLowerCase();
+
+        List<String> acceptedTerms = bundle.getMetadata().getTerms();
+        if (acceptedTerms == null || acceptedTerms.isEmpty()) {
+            return !admins.contains(userEmail); // false -> show modal, true -> no modal
+        }
+        if (admins.contains(userEmail) && !acceptedTerms.contains(userEmail)) {
+            return false; // Show modal
+        }
+        return true; // No modal
+    }
+
+    @Override
+    public void adminAcceptedTerms(FacetFilter ff, Authentication auth) {
+        NewProviderBundle bundle = get(ff, auth);
+        String userEmail = AuthenticationInfo.getEmail(auth);
+
+        List<String> existingTerms = bundle.getMetadata().getTerms();
+        if (existingTerms == null) {
+            existingTerms = new ArrayList<>();
+        }
+
+        if (!existingTerms.contains(userEmail)) {
+            existingTerms.add(userEmail);
+            bundle.getMetadata().setTerms(existingTerms);
+
+            try {
+                genericResourceService.update(resourceTypeName, ff.getFilter().get("resource_internal_id").toString(), bundle);
+            } catch (NoSuchFieldException | InvocationTargetException | NoSuchMethodException e) {
+                logger.warn("Could not update terms for Provider with id: '{}'", ff.getFilter().get("resource_internal_id"));
+            }
+        }
+    }
 //
 //    public void adminDifferences(ProviderBundle updatedProvider, ProviderBundle existingProvider) {
 //        List<String> existingAdmins = new ArrayList<>();
@@ -839,7 +826,8 @@ public class ProviderTestManager implements ProviderTestService {
 //        resourceService.updateResource(existingResource);
 //        return existingProvider;
     }
-//
+
+    //
 //    @Override
 //    public Paging<ProviderBundle> getRandomResources(FacetFilter ff, String auditingInterval, Authentication auth) {
 //        FacetFilter facetFilter = new FacetFilter();
@@ -1083,4 +1071,32 @@ public class ProviderTestManager implements ProviderTestService {
 //        mapValues.setValues(valueList);
 //        mapValuesList.add(mapValues);
 //    }
+
+    public NewProviderBundle get(FacetFilter ff, Authentication auth) {
+        List<NewProviderBundle> providers = genericResourceService.getResults(ff).getResults()
+                .stream()
+                .map(obj -> (NewProviderBundle) obj)
+                .toList();
+        if (providers.isEmpty()) {
+            throw new CatalogueResourceNotFoundException(
+                    String.format("Could not find provider with id: %s and catalogueId: %s",
+                            ff.getFilter().get("resource_internal_id"), ff.getFilter().get("catalogue_id")));
+        }
+        if (canView(providers.getFirst(), auth)) {
+            return providers.getFirst();
+        }
+        throw new InsufficientAuthenticationException("You cannot view the specific Provider");
+    }
+
+    private boolean canView(NewProviderBundle bundle, Authentication auth) {
+        if (securityService.hasRole(auth, "ROLE_ADMIN") ||
+                securityService.hasRole(auth, "ROLE_EPOT") ||
+                bundle.getStatus().equals(vocabularyService.get("approved provider").getId()))
+            return true;
+        if (auth != null && auth.isAuthenticated()) {
+            User user = User.of(auth);
+            return securityService.userHasAdminAccess(user, bundle.getProvider().get("id").toString());
+        }
+        return false;
+    }
 }

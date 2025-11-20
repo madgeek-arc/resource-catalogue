@@ -50,28 +50,23 @@ public interface NewBundleOperations<T extends NewBundle> {
      */
     T publish(String id, Boolean active, Authentication auth);
 
+    //TODO: do we need isDraft param for terms?
     /**
      * Has an Authenticated User accepted the Terms & Conditions
      *
-     * @param id             resource ID
-     * @param isDraft        boolean
-     * @param authentication Authentication
+     * @param ff FacetFilter
+     * @param auth Authentication
      * @return <code>True</code> if Authenticated User has accepted Terms; <code>False</code> otherwise.
      */
-    default boolean hasAdminAcceptedTerms(String id, boolean isDraft, Authentication authentication) {
-        return false;
-    }
+    boolean hasAdminAcceptedTerms(FacetFilter ff, Authentication auth);
 
     /**
      * Update a resource's list of Users that has accepted the Terms & Conditions
      *
-     * @param id             resource ID
-     * @param isDraft        boolean
-     * @param authentication Authentication
+     * @param ff FacetFilter
+     * @param auth Authentication
      */
-    default void adminAcceptedTerms(String id, boolean isDraft, Authentication authentication) {
-        throw new UnsupportedOperationException("Not implemented");
-    }
+    void adminAcceptedTerms(FacetFilter ff, Authentication auth);
 
     /**
      * Suspend the resource
