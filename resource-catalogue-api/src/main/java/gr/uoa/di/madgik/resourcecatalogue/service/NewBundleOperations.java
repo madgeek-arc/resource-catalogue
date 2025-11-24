@@ -19,9 +19,8 @@ package gr.uoa.di.madgik.resourcecatalogue.service;
 import gr.uoa.di.madgik.registry.domain.Browsing;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.domain.Paging;
-import gr.uoa.di.madgik.resourcecatalogue.domain.Bundle;
-import gr.uoa.di.madgik.resourcecatalogue.domain.LoggingInfo;
-import gr.uoa.di.madgik.resourcecatalogue.domain.NewBundle;
+import gr.uoa.di.madgik.registry.domain.Resource;
+import gr.uoa.di.madgik.resourcecatalogue.domain.*;
 import org.springframework.security.core.Authentication;
 
 import java.util.Comparator;
@@ -113,4 +112,30 @@ public interface NewBundleOperations<T extends NewBundle> {
      * @return {@link Browsing<T>}
      */
     Browsing<T> getMy(FacetFilter filter, Authentication authentication);
+
+    /**
+     * Get the History of the resource with the specified id.
+     *
+     * @param id          ID
+     * @param catalogueId Catalogue ID
+     * @return {@link Paging}&lt;{@link ResourceHistory}&gt;
+     */
+    Paging<ResourceHistory> getHistory(String id, String catalogueId);
+
+    /**
+     * Get a paging of random resources
+     *
+     * @param ff               FacetFilter
+     * @param auditingInterval Auditing Interval (in months)
+     * @return {@link Paging}&lt;{@link T}&gt;
+     */
+    Paging<T> getRandomResources(FacetFilter ff, String auditingInterval);
+
+    /**
+     * Validate a resource
+     *
+     * @param t resource
+     * @return {@link T}
+     */
+    T validate(T t);
 }

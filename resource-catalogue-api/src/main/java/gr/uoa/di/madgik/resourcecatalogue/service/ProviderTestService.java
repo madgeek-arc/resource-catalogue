@@ -19,6 +19,7 @@ package gr.uoa.di.madgik.resourcecatalogue.service;
 import gr.uoa.di.madgik.catalogue.service.GenericResourceService;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.domain.Paging;
+import gr.uoa.di.madgik.registry.service.ParserService;
 import gr.uoa.di.madgik.registry.service.ResourceCRUDService;
 import gr.uoa.di.madgik.resourcecatalogue.domain.NewProviderBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.ProviderBundle;
@@ -109,13 +110,13 @@ public interface ProviderTestService extends NewBundleOperations<NewProviderBund
 //     */
 //    void adminDifferences(ProviderBundle updatedProvider, ProviderBundle existingProvider);
 //
-//    /**
-//     * Send email to Portal Admins requesting a Provider's deletion
-//     *
-//     * @param providerId Provider's ID
-//     * @param auth       Authentication
-//     */
-//    void requestProviderDeletion(String providerId, Authentication auth);
+    /**
+     * Send email to Portal Admins requesting a Provider's deletion
+     *
+     * @param ff FacetFilter
+     * @param auth       Authentication
+     */
+    void requestProviderDeletion(FacetFilter ff, Authentication auth);
 //
 //    /**
 //     * Get a list of Inactive Providers
@@ -124,12 +125,6 @@ public interface ProviderTestService extends NewBundleOperations<NewProviderBund
 //     */
 //    List<ProviderBundle> getInactive();
 //
-//    /**
-//     * Delete User's Info from his Providers. Also deletes any user Event actions
-//     *
-//     * @param authentication Authentication
-//     */
-//    void deleteUserInfo(Authentication authentication);
 //
 //    /**
 //     * Get the History of the Provider with the specified id.
@@ -181,31 +176,32 @@ public interface ProviderTestService extends NewBundleOperations<NewProviderBund
 //     */
 //    Paging<?> getRejectedResources(final FacetFilter ff, String resourceType, Authentication auth);
 //
-//    /**
-//     * Create Public Provider
-//     *
-//     * @param providerBundle Provider Bundle
-//     * @param auth           Authentication
-//     * @return {@link ProviderBundle}
-//     */
-//    ProviderBundle createPublicProvider(ProviderBundle providerBundle, Authentication auth);
-//
-//    /**
-//     * Given a Provider Name, return the corresponding HLE Vocabulary if exists, else return null
-//     *
-//     * @param providerName Provider's Name
-//     * @return {@link String}
-//     */
-//    String determineHostingLegalEntity(String providerName);
-//
-//    /**
-//     * Return a List of triplets {ID, Name, Catalogue ID} given a specific HLE Vocabulary ID
-//     *
-//     * @param hle  Hosting Legal Entity ID
-//     * @param auth Authentication
-//     * @return {@link List}&lt;{@link MapValues}&lt;{@link CatalogueValue}&gt;&gt;
-//     */
-//    List<MapValues<CatalogueValue>> getAllResourcesUnderASpecificHLE(String hle, Authentication auth);
+    /**
+     * Create Public Provider
+     *
+     * @param bundle Provider Bundle
+     * @param auth           Authentication
+     * @return {@link ProviderBundle}
+     */
+    NewProviderBundle createPublicProvider(NewProviderBundle bundle, Authentication auth);
+
+    /**
+     * Given a Provider Name, return the corresponding HLE Vocabulary if exists, else return null
+     *
+     * @param providerName Provider's Name
+     * @return {@link String}
+     */
+    String determineHostingLegalEntity(String providerName);
+
+    /**
+     * Return a List of triplets {ID, Name, Catalogue ID} given a specific HLE Vocabulary ID
+     *
+     * @param hle  Hosting Legal Entity ID
+     * @param auth Authentication
+     * @return {@link List}&lt;{@link MapValues}&lt;{@link CatalogueValue}&gt;&gt;
+     */
+    List<MapValues<CatalogueValue>> getAllResourcesUnderASpecificHLE(String hle, Authentication auth);
+
 //
 //    /**
 //     * Return true if Provider User Admin has accepted registration terms

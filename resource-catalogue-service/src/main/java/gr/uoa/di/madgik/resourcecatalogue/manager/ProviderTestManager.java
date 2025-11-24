@@ -17,11 +17,12 @@
 package gr.uoa.di.madgik.resourcecatalogue.manager;
 
 import gr.uoa.di.madgik.catalogue.service.GenericResourceService;
-import gr.uoa.di.madgik.registry.domain.Browsing;
-import gr.uoa.di.madgik.registry.domain.FacetFilter;
-import gr.uoa.di.madgik.registry.domain.Paging;
+import gr.uoa.di.madgik.registry.domain.*;
+import gr.uoa.di.madgik.registry.service.SearchService;
 import gr.uoa.di.madgik.registry.service.VersionService;
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
+import gr.uoa.di.madgik.resourcecatalogue.dto.CatalogueValue;
+import gr.uoa.di.madgik.resourcecatalogue.dto.MapValues;
 import gr.uoa.di.madgik.resourcecatalogue.exceptions.CatalogueResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
 import gr.uoa.di.madgik.resourcecatalogue.utils.AuthenticationInfo;
@@ -35,8 +36,12 @@ import org.springframework.security.authentication.InsufficientAuthenticationExc
 import org.springframework.security.core.Authentication;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.List;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.util.*;
+
+import static gr.uoa.di.madgik.resourcecatalogue.utils.VocabularyValidationUtils.validateMerilScientificDomains;
+import static gr.uoa.di.madgik.resourcecatalogue.utils.VocabularyValidationUtils.validateScientificDomains;
 
 @org.springframework.stereotype.Service("providerTestManager")
 public class ProviderTestManager implements ProviderTestService {
@@ -275,11 +280,12 @@ public class ProviderTestManager implements ProviderTestService {
 //        throw new InsufficientAuthenticationException("You cannot view the specific Provider");
 //    }
 //
-//    @Override
-//    public Paging<ResourceHistory> getHistory(String id, String catalogueId) {
+    @Override
+    public Paging<ResourceHistory> getHistory(String id, String catalogueId) {
+        return null;
 //        Map<String, ResourceHistory> historyMap = new TreeMap<>();
 //
-//        Resource resource = getResource(id, catalogueId, false);
+//        Resource resource = getResource(id, catalogueId, "false");
 //        List<Version> versions = versionService.getVersionsByResource(resource.getId());
 //        versions.sort((version, t1) -> {
 //            if (version.getCreationDate().getTime() < t1.getCreationDate().getTime()) {
@@ -297,7 +303,7 @@ public class ProviderTestManager implements ProviderTestService {
 //
 //        // create version entries
 //        for (Version version : versions) {
-//            resource = (version.getResource() == null ? getResource(version.getParentId()) : version.getResource());
+//            resource = (version.getResource() == null ? getResource(version.getParentId(), catalogueId, "false") : version.getResource());
 //            resource.setPayload(version.getPayload());
 //            providerBundle = deserialize(resource);
 //            if (providerBundle != null) {
@@ -319,7 +325,7 @@ public class ProviderTestManager implements ProviderTestService {
 //        });
 //
 //        return new Browsing<>(history.size(), 0, history.size(), history, null);
-//    }
+    }
 //
 //    @Override
 //    public Browsing<ProviderBundle> getAll(FacetFilter ff, Authentication auth) {
@@ -682,53 +688,27 @@ public class ProviderTestManager implements ProviderTestService {
 //        }
 //    }
 //
-//    @Override
-//    public ProviderBundle validate(ProviderBundle provider) {
-//        logger.debug("Validating Provider with id: '{}'", provider.getId());
-//        if (provider.getProvider().getScientificDomains() != null && !provider.getProvider().getScientificDomains().isEmpty()) {
-//            validateScientificDomains(provider.getProvider().getScientificDomains());
-//        }
-//        if (provider.getProvider().getMerilScientificDomains() != null && !provider.getProvider().getMerilScientificDomains().isEmpty()) {
-//            validateMerilScientificDomains(provider.getProvider().getMerilScientificDomains());
-//        }
+    @Override
+    public NewProviderBundle validate(NewProviderBundle provider) {
+        logger.debug("Validating Provider with id: '{}'", provider.getProvider().get("id"));
+//        Object scientificDomains = provider.getProvider().get("scientificDomains");
+//        if (scientificDomains instanceof List<?> scientificDomainsList) {
+//            if (!scientificDomainsList.isEmpty()) {
+//                validateScientificDomains(scientificDomainsList); //FIXME
+//                +
 //
-//        return super.validate(provider);
-//    }
-//
-//    @Override
-//    public void deleteUserInfo(Authentication authentication) {
-//        logger.trace("Attempting to delete User Info '{}'", authentication);
-//        User authenticatedUser = User.of(authentication);
-//        List<Event> allUserEvents = new ArrayList<>();
-//        allUserEvents.addAll(eventService.getUserEvents(Event.UserActionType.FAVOURITE.getKey(), authentication));
-//        allUserEvents.addAll(eventService.getUserEvents(Event.UserActionType.RATING.getKey(), authentication));
-//        List<ProviderBundle> allUserProviders = getMy(null, authentication).getResults();
-//        for (ProviderBundle providerBundle : allUserProviders) {
-//            if (providerBundle.getProvider().getUsers().size() == 1) {
-//                throw new ValidationException(String.format("Your user info cannot be deleted, because you are the solely Admin of the Provider [%s]. " +
-//                        "You need to delete your Provider first or add more Admins.", providerBundle.getProvider().getName()));
 //            }
 //        }
-//        logger.info("Attempting to delete all user events");
-//        eventService.deleteEvents(allUserEvents);
-//        for (ProviderBundle providerBundle : allUserProviders) {
-//            List<User> updatedUsers = new ArrayList<>();
-//            for (User user : providerBundle.getProvider().getUsers()) {
-//                if (user.getId() != null && !"".equals(user.getId())) {
-//                    if (!user.getId().equals(authenticatedUser.getId())) {
-//                        updatedUsers.add(user);
-//                    }
-//                } else {
-//                    if (!user.getEmail().isEmpty() &&
-//                            !user.getEmail().equalsIgnoreCase(Objects.requireNonNull(authenticatedUser).getEmail())) {
-//                        updatedUsers.add(user);
-//                    }
-//                }
+//        Object merilScientificDomains = provider.getProvider().get("merilScientificDomains");
+//        if (merilScientificDomains instanceof List<?> merilScientificDomainsList) {
+//            if (!merilScientificDomainsList.isEmpty()) {
+//                validateScientificDomains(merilScientificDomainsList); //FIXME
 //            }
-//            providerBundle.getProvider().setUsers(updatedUsers);
-//            update(providerBundle, authentication);
 //        }
-//    }
+
+        return validate(provider);
+    }
+//
 //
     @Override
     public boolean hasAdminAcceptedTerms(FacetFilter ff, Authentication auth) {
@@ -789,15 +769,15 @@ public class ProviderTestManager implements ProviderTestService {
 //        }
 //    }
 //
-//    @Override
-//    public void requestProviderDeletion(String providerId, Authentication auth) {
-//        ProviderBundle provider = get(providerId, catalogueId, false);
-//        for (User user : provider.getProvider().getUsers()) {
-//            if (user.getEmail().equalsIgnoreCase(AuthenticationInfo.getEmail(auth).toLowerCase())) {
+    @Override
+    public void requestProviderDeletion(FacetFilter ff, Authentication auth) {
+        NewProviderBundle provider = get(ff, auth);
+        for (User user : (List<User>) provider.getProvider().get("users")) {
+            if (user.getEmail().equalsIgnoreCase(AuthenticationInfo.getEmail(auth).toLowerCase())) {
 //                registrationMailService.informPortalAdminsForProviderDeletion(provider, User.of(auth));
-//            }
-//        }
-//    }
+            }
+        }
+    }
 //
     @Override
     public NewProviderBundle audit(String providerId, String catalogueId, String comment, LoggingInfo.ActionType actionType, Authentication auth) {
@@ -827,52 +807,52 @@ public class ProviderTestManager implements ProviderTestService {
 //        return existingProvider;
     }
 
-    //
-//    @Override
-//    public Paging<ProviderBundle> getRandomResources(FacetFilter ff, String auditingInterval, Authentication auth) {
-//        FacetFilter facetFilter = new FacetFilter();
-//        facetFilter.setQuantity(maxQuantity);
-//        facetFilter.addFilter("status", "approved provider");
-//        facetFilter.addFilter("published", false);
-//
-//        Browsing<ProviderBundle> providersBrowsing = getAll(facetFilter, auth);
-//        List<ProviderBundle> providersToBeAudited = new ArrayList<>();
-//
-//        long todayEpochMillis = System.currentTimeMillis();
-//        long intervalEpochSeconds = Instant.ofEpochMilli(todayEpochMillis)
-//                .atZone(ZoneId.systemDefault())
-//                .minusMonths(Integer.parseInt(auditingInterval))
-//                .toEpochSecond();
-//
-//        for (ProviderBundle providerBundle : providersBrowsing.getResults()) {
-//            LoggingInfo auditInfo = providerBundle.getLatestAuditInfo();
-//            if (auditInfo == null) {
-//                // Include providers that have never been audited
-//                providersToBeAudited.add(providerBundle);
-//            } else {
-//                try {
-//                    long auditEpochSeconds = Long.parseLong(auditInfo.getDate());
-//                    if (auditEpochSeconds < intervalEpochSeconds) {
-//                        // Include providers that were last audited before the threshold
-//                        providersToBeAudited.add(providerBundle);
-//                    }
-//                } catch (NumberFormatException e) {
-//                }
-//            }
-//        }
-//
-//        // Shuffle the list randomly
-//        Collections.shuffle(providersToBeAudited);
-//
-//        // Limit the list to the requested quantity
-//        int quantity = ff.getQuantity();
-//        if (providersToBeAudited.size() > quantity) {
-//            providersToBeAudited = providersToBeAudited.subList(0, quantity);
-//        }
-//
-//        return new Browsing<>(providersToBeAudited.size(), 0, providersToBeAudited.size(), providersToBeAudited,
-//                providersBrowsing.getFacets());
-//    }
+
+    @Override
+    public Paging<NewProviderBundle> getRandomResources(FacetFilter ff, String auditingInterval) {
+        FacetFilter facetFilter = new FacetFilter();
+        facetFilter.setQuantity(maxQuantity);
+        facetFilter.addFilter("status", "approved provider");
+        facetFilter.addFilter("published", false);
+
+        Browsing<NewProviderBundle> providersBrowsing = genericResourceService.getResults(facetFilter);
+        List<NewProviderBundle> providersToBeAudited = new ArrayList<>();
+
+        long todayEpochMillis = System.currentTimeMillis();
+        long intervalEpochSeconds = Instant.ofEpochMilli(todayEpochMillis)
+                .atZone(ZoneId.systemDefault())
+                .minusMonths(Integer.parseInt(auditingInterval))
+                .toEpochSecond();
+
+        for (NewProviderBundle providerBundle : providersBrowsing.getResults()) {
+            LoggingInfo auditInfo = providerBundle.getLatestAuditInfo();
+            if (auditInfo == null) {
+                // Include providers that have never been audited
+                providersToBeAudited.add(providerBundle);
+            } else {
+                try {
+                    long auditEpochSeconds = Long.parseLong(auditInfo.getDate());
+                    if (auditEpochSeconds < intervalEpochSeconds) {
+                        // Include providers that were last audited before the threshold
+                        providersToBeAudited.add(providerBundle);
+                    }
+                } catch (NumberFormatException e) {
+                }
+            }
+        }
+
+        // Shuffle the list randomly
+        Collections.shuffle(providersToBeAudited);
+
+        // Limit the list to the requested quantity
+        int quantity = ff.getQuantity();
+        if (providersToBeAudited.size() > quantity) {
+            providersToBeAudited = providersToBeAudited.subList(0, quantity);
+        }
+
+        return new Browsing<>(providersToBeAudited.size(), 0, providersToBeAudited.size(), providersToBeAudited,
+                providersBrowsing.getFacets());
+    }
 //
 //    private ProviderBundle onboard(ProviderBundle provider, String catalogueId, Authentication auth) {
 //        // create LoggingInfo
@@ -949,11 +929,12 @@ public class ProviderTestManager implements ProviderTestService {
 //        return service.getAll(filter, auth);
 //    }
 //
-//    @Override
-//    public ProviderBundle createPublicProvider(ProviderBundle providerBundle, Authentication auth) {
+    @Override
+    public NewProviderBundle createPublicProvider(NewProviderBundle providerBundle, Authentication auth) {
 //        publicProviderService.add(providerBundle, auth);
 //        return providerBundle;
-//    }
+        return null;
+    }
 //
 //
     @Override
@@ -993,84 +974,87 @@ public class ProviderTestManager implements ProviderTestService {
 //
 //        return providerBundle;
     }
-//
-//    @Override
-//    public String determineHostingLegalEntity(String providerName) {
-//        List<Vocabulary> hostingLegalEntityList = vocabularyService.getByType(Vocabulary.Type.PROVIDER_HOSTING_LEGAL_ENTITY);
-//        for (Vocabulary hle : hostingLegalEntityList) {
-//            if (hle.getName().equalsIgnoreCase(providerName)) {
-//                return hle.getId();
-//            }
-//        }
-//        return null;
-//    }
-//
-//    @Override
-//    public List<MapValues<CatalogueValue>> getAllResourcesUnderASpecificHLE(String hle, Authentication auth) {
-//        FacetFilter ff = new FacetFilter();
-//        ff.setQuantity(10000);
-//        ff.addFilter("hosting_legal_entity", hle);
-//        ff.addFilter("published", false);
-//        List<MapValues<CatalogueValue>> mapValuesList = new ArrayList<>();
-//        List<ProviderBundle> providers = getAll(ff, auth).getResults();
-//        List<ServiceBundle> services = new ArrayList<>();
-//        List<TrainingResourceBundle> trainingResources = new ArrayList<>();
-//        List<InteroperabilityRecordBundle> interoperabilityRecords = new ArrayList<>();
-//        createMapValuesForHLE(providers, "provider", mapValuesList);
-//        for (ProviderBundle providerBundle : providers) {
-//            services.addAll(serviceBundleService.getResourceBundles(providerBundle.getProvider().getCatalogueId(),
-//                    providerBundle.getId(), auth).getResults());
-//            trainingResources.addAll(trainingResourceService.getResourceBundles(providerBundle.getProvider().
-//                    getCatalogueId(), providerBundle.getId(), auth).getResults());
-//            interoperabilityRecords.addAll(interoperabilityRecordService.getInteroperabilityRecordBundles(providerBundle.
-//                    getProvider().getCatalogueId(), providerBundle.getId(), auth).getResults());
-//        }
-//        createMapValuesForHLE(services, "service", mapValuesList);
-//        createMapValuesForHLE(trainingResources, "training_resource", mapValuesList);
-//        createMapValuesForHLE(interoperabilityRecords, "interoperability_record", mapValuesList);
-//        return mapValuesList;
-//    }
-//
-//    private void createMapValuesForHLE(List<?> resources, String resourceType,
-//                                       List<MapValues<CatalogueValue>> mapValuesList) {
-//        MapValues<CatalogueValue> mapValues = new MapValues<>();
-//        mapValues.setKey(resourceType);
-//        List<CatalogueValue> valueList = new ArrayList<>();
-//        for (Object obj : resources) {
-//            CatalogueValue value = new CatalogueValue();
-//            switch (resourceType) {
-//                case "provider":
-//                    ProviderBundle providerBundle = (ProviderBundle) obj;
-//                    value.setId(providerBundle.getId());
-//                    value.setName(providerBundle.getProvider().getName());
-//                    value.setCatalogue(providerBundle.getProvider().getCatalogueId());
-//                    break;
-//                case "service":
-//                    ServiceBundle serviceBundle = (ServiceBundle) obj;
-//                    value.setId(serviceBundle.getId());
-//                    value.setName(serviceBundle.getService().getName());
-//                    value.setCatalogue(serviceBundle.getService().getCatalogueId());
-//                    break;
-//                case "training_resource":
-//                    TrainingResourceBundle trainingResourceBundle = (TrainingResourceBundle) obj;
-//                    value.setId(trainingResourceBundle.getId());
-//                    value.setName(trainingResourceBundle.getTrainingResource().getTitle());
-//                    value.setCatalogue(trainingResourceBundle.getTrainingResource().getCatalogueId());
-//                    break;
-//                case "interoperability_record":
-//                    InteroperabilityRecordBundle interoperabilityRecordBundle = (InteroperabilityRecordBundle) obj;
-//                    value.setId(interoperabilityRecordBundle.getId());
-//                    value.setName(interoperabilityRecordBundle.getInteroperabilityRecord().getTitle());
-//                    value.setCatalogue(interoperabilityRecordBundle.getInteroperabilityRecord().getCatalogueId());
-//                    break;
-//                default:
-//                    break;
-//            }
-//            valueList.add(value);
-//        }
-//        mapValues.setValues(valueList);
-//        mapValuesList.add(mapValues);
-//    }
+
+    @Override
+    public String determineHostingLegalEntity(String providerName) {
+        List<Vocabulary> hostingLegalEntityList = vocabularyService.getByType(Vocabulary.Type.PROVIDER_HOSTING_LEGAL_ENTITY);
+        for (Vocabulary hle : hostingLegalEntityList) {
+            if (hle.getName().equalsIgnoreCase(providerName)) {
+                return hle.getId();
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public List<MapValues<CatalogueValue>> getAllResourcesUnderASpecificHLE(String hle, Authentication auth) {
+        FacetFilter ff = new FacetFilter();
+        ff.setQuantity(10000);
+        ff.addFilter("hosting_legal_entity", hle);
+        ff.addFilter("published", false);
+        List<MapValues<CatalogueValue>> mapValuesList = new ArrayList<>();
+        List<NewProviderBundle> providers = genericResourceService.getResults(ff).getResults()
+                .stream()
+                .map(obj -> (NewProviderBundle) obj)
+                .toList();;
+        List<ServiceBundle> services = new ArrayList<>();
+        List<TrainingResourceBundle> trainingResources = new ArrayList<>();
+        List<InteroperabilityRecordBundle> interoperabilityRecords = new ArrayList<>();
+        createMapValuesForHLE(providers, "provider", mapValuesList);
+        for (NewProviderBundle bundle : providers) {
+//            services.addAll(serviceBundleService.getResourceBundles(bundle.getProvider().getCatalogueId(),
+//                    bundle.getId(), auth).getResults());
+//            trainingResources.addAll(trainingResourceService.getResourceBundles(bundle.getProvider().
+//                    getCatalogueId(), bundle.getId(), auth).getResults());
+//            interoperabilityRecords.addAll(interoperabilityRecordService.getInteroperabilityRecordBundles(bundle.
+//                    getProvider().getCatalogueId(), bundle.getId(), auth).getResults());
+        }
+        createMapValuesForHLE(services, "service", mapValuesList);
+        createMapValuesForHLE(trainingResources, "training_resource", mapValuesList);
+        createMapValuesForHLE(interoperabilityRecords, "interoperability_record", mapValuesList);
+        return mapValuesList;
+    }
+
+    private void createMapValuesForHLE(List<?> resources, String resourceType,
+                                       List<MapValues<CatalogueValue>> mapValuesList) {
+        MapValues<CatalogueValue> mapValues = new MapValues<>();
+        mapValues.setKey(resourceType);
+        List<CatalogueValue> valueList = new ArrayList<>();
+        for (Object obj : resources) {
+            CatalogueValue value = new CatalogueValue();
+            switch (resourceType) {
+                case "provider":
+                    ProviderBundle providerBundle = (ProviderBundle) obj;
+                    value.setId(providerBundle.getId());
+                    value.setName(providerBundle.getProvider().getName());
+                    value.setCatalogue(providerBundle.getProvider().getCatalogueId());
+                    break;
+                case "service":
+                    ServiceBundle serviceBundle = (ServiceBundle) obj;
+                    value.setId(serviceBundle.getId());
+                    value.setName(serviceBundle.getService().getName());
+                    value.setCatalogue(serviceBundle.getService().getCatalogueId());
+                    break;
+                case "training_resource":
+                    TrainingResourceBundle trainingResourceBundle = (TrainingResourceBundle) obj;
+                    value.setId(trainingResourceBundle.getId());
+                    value.setName(trainingResourceBundle.getTrainingResource().getTitle());
+                    value.setCatalogue(trainingResourceBundle.getTrainingResource().getCatalogueId());
+                    break;
+                case "interoperability_record":
+                    InteroperabilityRecordBundle interoperabilityRecordBundle = (InteroperabilityRecordBundle) obj;
+                    value.setId(interoperabilityRecordBundle.getId());
+                    value.setName(interoperabilityRecordBundle.getInteroperabilityRecord().getTitle());
+                    value.setCatalogue(interoperabilityRecordBundle.getInteroperabilityRecord().getCatalogueId());
+                    break;
+                default:
+                    break;
+            }
+            valueList.add(value);
+        }
+        mapValues.setValues(valueList);
+        mapValuesList.add(mapValues);
+    }
 
     public NewProviderBundle get(FacetFilter ff, Authentication auth) {
         List<NewProviderBundle> providers = genericResourceService.getResults(ff).getResults()
@@ -1098,5 +1082,15 @@ public class ProviderTestManager implements ProviderTestService {
             return securityService.userHasAdminAccess(user, bundle.getProvider().get("id").toString());
         }
         return false;
+    }
+
+    private Resource getResource(String id, String catalogueId, String published) {
+        Map<String, String> fields = new HashMap<>();
+        fields.put("resource_internal_id", id);
+        if (catalogueId != null) {
+            fields.put("catalogue_id", catalogueId);
+        }
+        fields.put("published", published);
+        return genericResourceService.get(resourceTypeName, fields, false);
     }
 }
