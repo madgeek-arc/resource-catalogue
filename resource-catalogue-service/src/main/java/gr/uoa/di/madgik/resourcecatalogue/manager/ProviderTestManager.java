@@ -1084,13 +1084,13 @@ public class ProviderTestManager implements ProviderTestService {
         return false;
     }
 
-    private Resource getResource(String id, String catalogueId, String published) {
-        Map<String, String> fields = new HashMap<>();
-        fields.put("resource_internal_id", id);
-        if (catalogueId != null) {
-            fields.put("catalogue_id", catalogueId);
-        }
-        fields.put("published", published);
-        return genericResourceService.get(resourceTypeName, fields, false);
-    }
+//    private Resource getResource(String id, String catalogueId, String published) {
+//        Map<String, String> fields = new HashMap<>();
+//        fields.put("resource_internal_id", id);
+//        if (catalogueId != null) {
+//            fields.put("catalogue_id", catalogueId);
+//        }
+//        fields.put("published", published);
+//        return genericResourceService.get(resourceTypeName, fields, false);
+//    }
 }

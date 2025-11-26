@@ -17,17 +17,17 @@
 package gr.uoa.di.madgik.resourcecatalogue.domain;
 
 import gr.uoa.di.madgik.resourcecatalogue.annotation.FieldValidation;
+import gr.uoa.di.madgik.resourcecatalogue.dto.UserInfo;
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.xml.bind.annotation.XmlTransient;
 
 import java.beans.Transient;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
 public abstract class Bundle<T extends Identifiable> implements Identifiable {
 
     @Schema(hidden = true)
-    @XmlTransient
     @FieldValidation
     private T payload;
 
@@ -39,11 +39,13 @@ public abstract class Bundle<T extends Identifiable> implements Identifiable {
 
     private boolean draft;
 
+    private boolean legacy;
+
     private Identifiers identifiers;
 
     private MigrationStatus migrationStatus;
 
-    private List<LoggingInfo> loggingInfo;
+    private List<LoggingInfo> loggingInfo = new ArrayList<>();
 
     private LoggingInfo latestAuditInfo;
 
@@ -51,8 +53,48 @@ public abstract class Bundle<T extends Identifiable> implements Identifiable {
 
     private LoggingInfo latestUpdateInfo;
 
+    private String status;
+
+    private String auditState;
+
     public Bundle() {
     }
+
+    public void markOnboard(String status, UserInfo user, String comment) {
+        this.setStatus(status);
+        LoggingInfo onboardingInfo = null;
+        if (status.toLowerCase().contains("pending")) {
+            onboardingInfo = LoggingInfo.createLoggingInfoEntry(
+                    user, LoggingInfo.Types.ONBOARD.getKey(),
+                    LoggingInfo.ActionType.REGISTERED.getKey(), comment
+            );
+        } else if (status.toLowerCase().contains("approved")) {
+            onboardingInfo = LoggingInfo.createLoggingInfoEntry(
+                    user, LoggingInfo.Types.ONBOARD.getKey(),
+                    LoggingInfo.ActionType.APPROVED.getKey(), comment
+            );
+        } else if (status.toLowerCase().contains("rejected")) {
+            onboardingInfo = LoggingInfo.createLoggingInfoEntry(
+                    user, LoggingInfo.Types.ONBOARD.getKey(),
+                    LoggingInfo.ActionType.REJECTED.getKey(), comment
+            );
+        }
+        this.setLatestOnboardingInfo(onboardingInfo);
+        this.getLoggingInfo().add(onboardingInfo);
+    }
+
+    public void markUpdate(String status, UserInfo user, String comment) {
+        this.setStatus(status);
+        LoggingInfo updateInfo;
+        String type = status.split(" ")[0]; // get status prefix to find ActionType.fromString(type)
+            updateInfo = LoggingInfo.createLoggingInfoEntry(
+                    user, LoggingInfo.Types.UPDATE.getKey(),
+                    LoggingInfo.ActionType.fromString(type).getKey(), comment
+            );
+        this.setLatestUpdateInfo(updateInfo);
+        this.getLoggingInfo().add(updateInfo);
+    }
+
 
     @Override
     public String getId() {
@@ -72,7 +114,7 @@ public abstract class Bundle<T extends Identifiable> implements Identifiable {
     }
 
     @Transient
-    protected void setPayload(T payload) {
+    public void setPayload(T payload) {
         this.payload = payload;
     }
 
@@ -108,6 +150,14 @@ public abstract class Bundle<T extends Identifiable> implements Identifiable {
         this.draft = draft;
     }
 
+    public boolean isLegacy() {
+        return legacy;
+    }
+
+    public void setLegacy(boolean legacy) {
+        this.legacy = legacy;
+    }
+
     public Identifiers getIdentifiers() {
         return identifiers;
     }
@@ -125,6 +175,9 @@ public abstract class Bundle<T extends Identifiable> implements Identifiable {
     }
 
     public List<LoggingInfo> getLoggingInfo() {
+        if (loggingInfo == null) {
+            loggingInfo = new ArrayList<>();
+        }
         return loggingInfo;
     }
 
@@ -156,6 +209,23 @@ public abstract class Bundle<T extends Identifiable> implements Identifiable {
         this.latestUpdateInfo = latestUpdateInfo;
     }
 
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public String getAuditState() {
+        return auditState;
+    }
+
+    public void setAuditState(String auditState) {
+        this.auditState = auditState;
+    }
+
+
     @Override
     public String toString() {
         return "Bundle{" +
@@ -164,12 +234,15 @@ public abstract class Bundle<T extends Identifiable> implements Identifiable {
                 ", active=" + active +
                 ", suspended=" + suspended +
                 ", draft=" + draft +
+                ", legacy=" + legacy +
                 ", identifiers=" + identifiers +
                 ", migrationStatus=" + migrationStatus +
                 ", loggingInfo=" + loggingInfo +
                 ", latestAuditInfo=" + latestAuditInfo +
                 ", latestOnboardingInfo=" + latestOnboardingInfo +
                 ", latestUpdateInfo=" + latestUpdateInfo +
+                ", status='" + status + '\'' +
+                ", auditState='" + auditState + '\'' +
                 '}';
     }
 
@@ -177,11 +250,11 @@ public abstract class Bundle<T extends Identifiable> implements Identifiable {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof Bundle<?> bundle)) return false;
-        return active == bundle.active && suspended == bundle.suspended && draft == bundle.draft && Objects.equals(payload, bundle.payload) && Objects.equals(metadata, bundle.metadata) && Objects.equals(identifiers, bundle.identifiers) && Objects.equals(migrationStatus, bundle.migrationStatus) && Objects.equals(loggingInfo, bundle.loggingInfo) && Objects.equals(latestAuditInfo, bundle.latestAuditInfo) && Objects.equals(latestOnboardingInfo, bundle.latestOnboardingInfo) && Objects.equals(latestUpdateInfo, bundle.latestUpdateInfo);
+        return active == bundle.active && suspended == bundle.suspended && draft == bundle.draft && legacy == bundle.legacy && Objects.equals(payload, bundle.payload) && Objects.equals(metadata, bundle.metadata) && Objects.equals(identifiers, bundle.identifiers) && Objects.equals(migrationStatus, bundle.migrationStatus) && Objects.equals(loggingInfo, bundle.loggingInfo) && Objects.equals(latestAuditInfo, bundle.latestAuditInfo) && Objects.equals(latestOnboardingInfo, bundle.latestOnboardingInfo) && Objects.equals(latestUpdateInfo, bundle.latestUpdateInfo) && Objects.equals(status, bundle.status) && Objects.equals(auditState, bundle.auditState);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(payload, metadata, active, suspended, draft, identifiers, migrationStatus, loggingInfo, latestAuditInfo, latestOnboardingInfo, latestUpdateInfo);
+        return Objects.hash(payload, metadata, active, suspended, draft, legacy, identifiers, migrationStatus, loggingInfo, latestAuditInfo, latestOnboardingInfo, latestUpdateInfo, status, auditState);
     }
 }

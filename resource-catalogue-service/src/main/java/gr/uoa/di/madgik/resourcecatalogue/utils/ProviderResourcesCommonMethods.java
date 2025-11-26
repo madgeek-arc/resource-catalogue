@@ -20,6 +20,7 @@ import gr.uoa.di.madgik.catalogue.exception.ValidationException;
 import gr.uoa.di.madgik.registry.exception.ResourceException;
 import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
+import gr.uoa.di.madgik.resourcecatalogue.dto.UserInfo;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,7 +48,6 @@ public class ProviderResourcesCommonMethods {
     private final MonitoringService monitoringService;
     private final ResourceInteroperabilityRecordService resourceInteroperabilityRecordService;
     private final VocabularyService vocabularyService;
-    private final SecurityService securityService;
     private final IdCreator idCreator;
 
     public ProviderResourcesCommonMethods(@Lazy CatalogueService catalogueService,
@@ -58,7 +58,6 @@ public class ProviderResourcesCommonMethods {
                                           @Lazy ResourceInteroperabilityRecordService
                                                   resourceInteroperabilityRecordService,
                                           @Lazy VocabularyService vocabularyService,
-                                          @Lazy SecurityService securityService,
                                           @Lazy IdCreator idCreator) {
         this.catalogueService = catalogueService;
         this.providerService = providerService;
@@ -67,7 +66,6 @@ public class ProviderResourcesCommonMethods {
         this.monitoringService = monitoringService;
         this.resourceInteroperabilityRecordService = resourceInteroperabilityRecordService;
         this.vocabularyService = vocabularyService;
-        this.securityService = securityService;
         this.idCreator = idCreator;
     }
 
@@ -181,7 +179,7 @@ public class ProviderResourcesCommonMethods {
     public void auditResource(Bundle<?> bundle, String comment, LoggingInfo.ActionType actionType, Authentication auth) {
         LoggingInfo loggingInfo;
         List<LoggingInfo> loggingInfoList = returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(bundle, auth);
-        loggingInfo = LoggingInfo.createLoggingInfoEntry(auth, securityService.getRoleName(auth), LoggingInfo.Types.AUDIT.getKey(),
+        loggingInfo = LoggingInfo.createLoggingInfoEntry(UserInfo.of(auth), LoggingInfo.Types.AUDIT.getKey(),
                 actionType.getKey(), comment);
         loggingInfoList.add(loggingInfo);
         bundle.setLoggingInfo(loggingInfoList);
@@ -202,11 +200,11 @@ public class ProviderResourcesCommonMethods {
     }
 
     public LoggingInfo createLoggingInfo(Authentication auth, String type, String actionType) {
-        return LoggingInfo.createLoggingInfoEntry(auth, securityService.getRoleName(auth), type, actionType);
+        return createLoggingInfo(auth, type, actionType, null);
     }
 
     public LoggingInfo createLoggingInfo(Authentication auth, String type, String actionType, String comment) {
-        return LoggingInfo.createLoggingInfoEntry(auth, securityService.getRoleName(auth), type, actionType, comment);
+        return LoggingInfo.createLoggingInfoEntry(UserInfo.of(auth), type, actionType, comment);
     }
 
     public List<LoggingInfo> createActivationLoggingInfo(Bundle<?> bundle, boolean active, Authentication auth) {

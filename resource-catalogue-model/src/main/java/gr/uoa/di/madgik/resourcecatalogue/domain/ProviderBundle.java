@@ -21,13 +21,8 @@ import java.util.Objects;
 
 public class ProviderBundle extends Bundle<Provider> {
 
-//    @VocabularyValidation(type = Vocabulary.Type.PROVIDER_STATE)
-    private String status;
-
 //    @VocabularyValidation(type = Vocabulary.Type.TEMPLATE_STATE)
     private String templateStatus;
-
-    private String auditState;
 
     private List<ContactInfoTransfer> transferContactInformation;
 
@@ -63,28 +58,12 @@ public class ProviderBundle extends Bundle<Provider> {
         this.setPayload(provider);
     }
 
-    public String getStatus() {
-        return status;
-    }
-
-    public void setStatus(String status) {
-        this.status = status;
-    }
-
     public String getTemplateStatus() {
         return templateStatus;
     }
 
     public void setTemplateStatus(String templateStatus) {
         this.templateStatus = templateStatus;
-    }
-
-    public String getAuditState() {
-        return auditState;
-    }
-
-    public void setAuditState(String auditState) {
-        this.auditState = auditState;
     }
 
     public List<ContactInfoTransfer> getTransferContactInformation() {
@@ -101,11 +80,11 @@ public class ProviderBundle extends Bundle<Provider> {
         if (o == null || getClass() != o.getClass()) return false;
         if (!super.equals(o)) return false;
         ProviderBundle that = (ProviderBundle) o;
-        return Objects.equals(status, that.status) && Objects.equals(templateStatus, that.templateStatus) && Objects.equals(auditState, that.auditState) && Objects.equals(transferContactInformation, that.transferContactInformation);
+        return Objects.equals(templateStatus, that.templateStatus) && Objects.equals(transferContactInformation, that.transferContactInformation);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), status, templateStatus, auditState, transferContactInformation);
+        return Objects.hash(super.hashCode(), templateStatus, transferContactInformation);
     }
 }
