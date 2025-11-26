@@ -80,13 +80,13 @@ public class OIDCSecurityService implements SecurityService {
     public String getRoleName(Authentication authentication) {
         String role;
         if (hasRole(authentication, "ROLE_ADMIN")) {
-            role = "admin";
+            role = "ADMIN";
         } else if (hasRole(authentication, "ROLE_EPOT")) {
             role = "EPOT";
         } else if (hasRole(authentication, "ROLE_PROVIDER")) {
-            role = "provider";
+            role = "PROVIDER";
         } else {
-            role = "user";
+            role = "USER";
         }
         return role;
     }
