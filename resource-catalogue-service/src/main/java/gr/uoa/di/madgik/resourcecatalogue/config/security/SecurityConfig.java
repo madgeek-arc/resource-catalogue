@@ -145,7 +145,7 @@ public class SecurityConfig {
                         }
                     }
                     mappedAuthorities.addAll(authoritiesMapper.getAuthorities(email));
-                    logger.info("User '{}' with email '{}' mapped as '{}'", sub, email, mappedAuthorities);
+                    logger.info("User mapped as '{}'", mappedAuthorities);
 
                 } else if (authority instanceof OAuth2UserAuthority) {
                     // Map the attributes found in userAttributes
@@ -160,7 +160,7 @@ public class SecurityConfig {
                         email = userAttributes.get("email").toString();
                     }
                     mappedAuthorities.addAll(authoritiesMapper.getAuthorities(email));
-                    logger.info("User '{}' with email '{}' mapped as '{}'", sub, email, mappedAuthorities);
+                    logger.info("User mapped as '{}'", mappedAuthorities);
 
                 }
             });

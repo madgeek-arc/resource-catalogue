@@ -311,7 +311,7 @@ public class ProviderController {
                                                     @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
         ProviderBundle provider = providerService.publish(id, active, auth);
-        logger.info("User '{}-{}' attempts to save Provider with id '{}' as '{}'", User.of(auth).getFullName(), User.of(auth).getEmail().toLowerCase(), id, active);
+        logger.info("Attempt to save Provider with id '{}' as '{}'", id, active);
         return new ResponseEntity<>(provider, HttpStatus.OK);
     }
 
@@ -337,9 +337,8 @@ public class ProviderController {
             metadata.setModifiedBy("system");
             metadata.setModifiedAt(String.valueOf(System.currentTimeMillis()));
             serviceBundleService.update(service, auth);
-            logger.info("User '{}' published(updated) all Services of the Provider with name '{}'",
-                    User.of(auth).getEmail().toLowerCase(), provider.getProvider().getName());
         }
+        logger.info("Published(updated) all Services of the Provider with name '{}'", provider.getProvider().getName());
         return new ResponseEntity<>(services, HttpStatus.OK);
     }
 
@@ -401,11 +400,11 @@ public class ProviderController {
 
     // Get all modification details of a specific Provider based on id.
     @GetMapping(path = {"loggingInfoHistory/{prefix}/{suffix}"}, produces = {MediaType.APPLICATION_JSON_VALUE})
-    public ResponseEntity<Paging<LoggingInfo>> loggingInfoHistory(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
+    public ResponseEntity<List<LoggingInfo>> loggingInfoHistory(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
                                                                   @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix) {
         String id = prefix + "/" + suffix;
         ProviderBundle bundle = providerService.get(id, catalogueId, false);
-        Paging<LoggingInfo> loggingInfoHistory = providerService.getLoggingInfoHistory(bundle);
+        List<LoggingInfo> loggingInfoHistory = providerService.getLoggingInfoHistory(bundle);
         return ResponseEntity.ok(loggingInfoHistory);
     }
 
@@ -469,8 +468,9 @@ public class ProviderController {
     @PostMapping(path = "createPublicProvider", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<ProviderBundle> createPublicProvider(@RequestBody ProviderBundle providerBundle, @Parameter(hidden = true) Authentication auth) {
-        logger.info("User '{}-{}' attempts to create a Public Provider from Provider '{}'-'{}' of the '{}' Catalogue", User.of(auth).getFullName(),
-                User.of(auth).getEmail().toLowerCase(), providerBundle.getId(), providerBundle.getProvider().getName(), providerBundle.getProvider().getCatalogueId());
+        logger.info("Attempt to create a Public Provider from Provider '{}'-'{}' of the '{}' Catalogue",
+                providerBundle.getId(), providerBundle.getProvider().getName(),
+                providerBundle.getProvider().getCatalogueId());
         return ResponseEntity.ok(providerService.createPublicProvider(providerBundle, auth));
     }
 
@@ -526,8 +526,7 @@ public class ProviderController {
     @PreAuthorize("hasRole('ROLE_USER')")
     public ResponseEntity<Provider> addDraftProvider(@RequestBody Provider provider, @Parameter(hidden = true) Authentication auth) {
         ProviderBundle providerBundle = draftProviderService.add(new ProviderBundle(provider), auth);
-        logger.info("User '{}' added the Draft Provider with name '{}' and id '{}'", User.of(auth).getEmail().toLowerCase(),
-                provider.getName(), provider.getId());
+        logger.info("Added Draft Provider with name '{}' and id '{}'", provider.getName(), provider.getId());
         return new ResponseEntity<>(providerBundle.getProvider(), HttpStatus.CREATED);
     }
 
@@ -537,8 +536,7 @@ public class ProviderController {
         ProviderBundle providerBundle = draftProviderService.get(provider.getId(), catalogueId, false);
         providerBundle.setProvider(provider);
         providerBundle = draftProviderService.update(providerBundle, auth);
-        logger.info("User '{}' updated the Draft Provider with name '{}' and id '{}'", User.of(auth).getEmail().toLowerCase(),
-                provider.getName(), provider.getId());
+        logger.info("Updated the Draft Provider with name '{}' and id '{}'", provider.getName(), provider.getId());
         return new ResponseEntity<>(providerBundle.getProvider(), HttpStatus.OK);
     }
 
@@ -556,8 +554,7 @@ public class ProviderController {
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
         draftProviderService.delete(providerBundle);
-        logger.info("User '{}' deleted the Draft Provider '{}'-'{}'", User.of(auth).getEmail().toLowerCase(),
-                id, providerBundle.getProvider().getName());
+        logger.info("Deleted Draft Provider '{}'-'{}'", id, providerBundle.getProvider().getName());
         return new ResponseEntity<>(providerBundle.getProvider(), HttpStatus.OK);
     }
 

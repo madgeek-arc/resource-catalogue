@@ -181,7 +181,7 @@ public class DatasourceController {
     // Accept/Reject a Datasource.
     @PatchMapping(path = "verifyDatasource/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
-    public ResponseEntity<DatasourceBundle> verifyDatasource(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
+    public ResponseEntity<DatasourceBundle> verify(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
                                                              @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix,
                                                              @RequestParam(required = false) Boolean active,
                                                              @RequestParam(required = false) String status,

@@ -147,9 +147,7 @@ public class ProviderResourcesCommonMethods {
             // latestOnboardingInfo
             bundle.setLatestUpdateInfo(loggingInfo);
 
-            logger.info("User [{}] set 'suspended' of {} '{}' to '{}'",
-                    Objects.requireNonNull(AuthenticationInfo.getEmail(auth).toLowerCase()),
-                    bundle.getPayload().getClass().getSimpleName(),
+            logger.info("User set 'suspended' of {} '{}' to '{}'", bundle.getPayload().getClass().getSimpleName(),
                     bundle.getId(), suspend);
         }
     }
@@ -176,17 +174,17 @@ public class ProviderResourcesCommonMethods {
         }
     }
 
-    public void auditResource(Bundle<?> bundle, String comment, LoggingInfo.ActionType actionType, Authentication auth) {
-        LoggingInfo loggingInfo;
-        List<LoggingInfo> loggingInfoList = returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(bundle, auth);
-        loggingInfo = LoggingInfo.createLoggingInfoEntry(UserInfo.of(auth), LoggingInfo.Types.AUDIT.getKey(),
-                actionType.getKey(), comment);
-        loggingInfoList.add(loggingInfo);
-        bundle.setLoggingInfo(loggingInfoList);
-
-        // latestAuditInfo
-        bundle.setLatestAuditInfo(loggingInfo);
-    }
+//    public void auditResource(Bundle<?> bundle, String comment, LoggingInfo.ActionType actionType, Authentication auth) {
+//        LoggingInfo loggingInfo;
+//        List<LoggingInfo> loggingInfoList = returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(bundle, auth);
+//        loggingInfo = LoggingInfo.createLoggingInfoEntry(UserInfo.of(auth), LoggingInfo.Types.AUDIT.getKey(),
+//                actionType.getKey(), comment);
+//        loggingInfoList.add(loggingInfo);
+//        bundle.setLoggingInfo(loggingInfoList);
+//
+//        // latestAuditInfo
+//        bundle.setLatestAuditInfo(loggingInfo);
+//    }
 
     public List<LoggingInfo> returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(Bundle<?> bundle, Authentication auth) {
         List<LoggingInfo> loggingInfoList = new ArrayList<>();
@@ -207,29 +205,29 @@ public class ProviderResourcesCommonMethods {
         return LoggingInfo.createLoggingInfoEntry(UserInfo.of(auth), type, actionType, comment);
     }
 
-    public List<LoggingInfo> createActivationLoggingInfo(Bundle<?> bundle, boolean active, Authentication auth) {
-        List<LoggingInfo> loggingInfoList = returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(bundle, auth);
-        LoggingInfo loggingInfo;
-
-        // distinction between system's (onboarding stage) and user's activation
-        if (active) {
-            try {
-                loggingInfo = createLoggingInfo(auth, LoggingInfo.Types.UPDATE.getKey(),
-                        LoggingInfo.ActionType.ACTIVATED.getKey());
-            } catch (InsufficientAuthenticationException e) {
-                loggingInfo = LoggingInfo.systemUpdateLoggingInfo(LoggingInfo.ActionType.ACTIVATED.getKey());
-            }
-        } else {
-            try {
-                loggingInfo = createLoggingInfo(auth, LoggingInfo.Types.UPDATE.getKey(),
-                        LoggingInfo.ActionType.DEACTIVATED.getKey());
-            } catch (InsufficientAuthenticationException e) {
-                loggingInfo = LoggingInfo.systemUpdateLoggingInfo(LoggingInfo.ActionType.DEACTIVATED.getKey());
-            }
-        }
-        loggingInfoList.add(loggingInfo);
-        return loggingInfoList;
-    }
+//    public List<LoggingInfo> createActivationLoggingInfo(Bundle<?> bundle, boolean active, Authentication auth) {
+//        List<LoggingInfo> loggingInfoList = returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(bundle, auth);
+//        LoggingInfo loggingInfo;
+//
+//        // distinction between system's (onboarding stage) and user's activation
+//        if (active) {
+//            try {
+//                loggingInfo = createLoggingInfo(auth, LoggingInfo.Types.UPDATE.getKey(),
+//                        LoggingInfo.ActionType.ACTIVATED.getKey());
+//            } catch (InsufficientAuthenticationException e) {
+//                loggingInfo = LoggingInfo.systemUpdateLoggingInfo(LoggingInfo.ActionType.ACTIVATED.getKey());
+//            }
+//        } else {
+//            try {
+//                loggingInfo = createLoggingInfo(auth, LoggingInfo.Types.UPDATE.getKey(),
+//                        LoggingInfo.ActionType.DEACTIVATED.getKey());
+//            } catch (InsufficientAuthenticationException e) {
+//                loggingInfo = LoggingInfo.systemUpdateLoggingInfo(LoggingInfo.ActionType.DEACTIVATED.getKey());
+//            }
+//        }
+//        loggingInfoList.add(loggingInfo);
+//        return loggingInfoList;
+//    }
 
     public void createIdentifiers(Bundle<?> bundle, String resourceType, boolean external) {
         Identifiers identifiers = new Identifiers();

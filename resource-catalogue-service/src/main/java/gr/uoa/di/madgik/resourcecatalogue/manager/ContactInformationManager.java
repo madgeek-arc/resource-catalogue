@@ -104,8 +104,7 @@ public class ContactInformationManager implements ContactInformationService {
         List<ProviderBundle> providerList = providerService.getMy(ff, auth).getResults();
         updateCatalogueContactInfoTransfer(contactInfoTransfer, catalogueList);
         updateProviderContactInfoTransfer(contactInfoTransfer, providerList);
-        logger.info("User [{}] set his contact info transfer for all his/her Catalogues/Providers to [{}]",
-                email, acceptedTransfer);
+        logger.info("User set his contact info transfer for all his/her Catalogues/Providers to [{}]", acceptedTransfer);
     }
 
     private ContactInfoTransfer createContactInfoTransfer(boolean acceptedTransfer, String email) {

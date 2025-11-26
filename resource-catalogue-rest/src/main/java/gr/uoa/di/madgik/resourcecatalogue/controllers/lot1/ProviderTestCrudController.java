@@ -383,8 +383,7 @@ public class ProviderTestCrudController {
                                                        @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
         NewProviderBundle provider = providerTestService.publish(id, active, auth);
-        logger.info("User '{}-{}' attempts to save Provider with id '{}' as '{}'",
-                User.of(auth).getFullName(), User.of(auth).getEmail().toLowerCase(), id, active);
+        logger.info("Attempt to save Provider with id '{}' as '{}'", id, active);
         return new ResponseEntity<>(provider, HttpStatus.OK);
     }
 
@@ -545,8 +544,7 @@ public class ProviderTestCrudController {
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<NewProviderBundle> createPublicProvider(@RequestBody NewProviderBundle providerBundle,
                                                                   @Parameter(hidden = true) Authentication auth) {
-        logger.info("User '{}-{}' attempts to create a Public Provider from Provider '{}'-'{}' of the '{}' Catalogue",
-                User.of(auth).getFullName(), User.of(auth).getEmail().toLowerCase(),
+        logger.info("Attempt to create a Public Provider from Provider '{}'-'{}' of the '{}' Catalogue",
                 providerBundle.getProvider().get("id"), providerBundle.getProvider().get("name"),
                 providerBundle.getProvider().get("catalogueId"));
         return ResponseEntity.ok(providerTestService.createPublicProvider(providerBundle, auth));
@@ -630,7 +628,7 @@ public class ProviderTestCrudController {
 //        ProviderBundle providerBundle = draftProviderService.get(provider.getId(), catalogueId, false);
 //        providerBundle.setProvider(provider);
 //        providerBundle = draftProviderService.update(providerBundle, auth);
-//        logger.info("User '{}' updated the Draft Provider with name '{}' and id '{}'", User.of(auth).getEmail().toLowerCase(),
+//        logger.info("Updated the Draft Provider with name '{}' and id '{}'",
 //                provider.getName(), provider.getId());
 //        return new ResponseEntity<>(providerBundle.getProvider(), HttpStatus.OK);
 //    }

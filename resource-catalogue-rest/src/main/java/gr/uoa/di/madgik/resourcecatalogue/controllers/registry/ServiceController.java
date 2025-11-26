@@ -121,7 +121,7 @@ public class ServiceController {
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.providerCanAddResources(#auth, #service)")
     public ResponseEntity<Service> addService(@RequestBody Service service, @Parameter(hidden = true) Authentication auth) {
         ServiceBundle ret = this.serviceBundleService.addResource(new ServiceBundle(service), auth);
-        logger.info("User '{}' created a new Resource with name '{}' and id '{}'", User.of(auth).getEmail().toLowerCase(), service.getName(), service.getId());
+        logger.info("Created a new Resource with name '{}' and id '{}'", service.getName(), service.getId());
         return new ResponseEntity<>(ret.getService(), HttpStatus.CREATED);
     }
 
@@ -262,7 +262,7 @@ public class ServiceController {
                                                    @RequestParam Boolean active,
                                                    @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
-        logger.info("User '{}-{}' attempts to save Resource with id '{}' as '{}'", User.of(auth).getFullName(), User.of(auth).getEmail().toLowerCase(), id, active);
+        logger.info("Attempt to save Resource with id '{}' as '{}'", id, active);
         return ResponseEntity.ok(serviceBundleService.publish(id, active, auth));
     }
 
@@ -330,12 +330,12 @@ public class ServiceController {
     // Get all modification details of a specific Resource based on id.
     @Tag(name = "ServiceRead")
     @GetMapping(path = {"loggingInfoHistory/{prefix}/{suffix}"}, produces = {MediaType.APPLICATION_JSON_VALUE})
-    public ResponseEntity<Paging<LoggingInfo>> loggingInfoHistory(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
+    public ResponseEntity<List<LoggingInfo>> loggingInfoHistory(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
                                                                   @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix,
                                                                   @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId) {
         String id = prefix + "/" + suffix;
         ServiceBundle bundle = serviceBundleService.get(id, catalogueId, false);
-        Paging<LoggingInfo> loggingInfoHistory = serviceBundleService.getLoggingInfoHistory(bundle);
+        List<LoggingInfo> loggingInfoHistory = serviceBundleService.getLoggingInfoHistory(bundle);
         return ResponseEntity.ok(loggingInfoHistory);
     }
 
@@ -442,8 +442,8 @@ public class ServiceController {
     @PostMapping(path = "createPublicService", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<ServiceBundle> createPublicService(@RequestBody ServiceBundle serviceBundle, @Parameter(hidden = true) Authentication auth) {
-        logger.info("User '{}-{}' attempts to create a Public Service from Service '{}'-'{}' of the '{}' Catalogue", User.of(auth).getFullName(),
-                User.of(auth).getEmail().toLowerCase(), serviceBundle.getId(), serviceBundle.getService().getName(), serviceBundle.getService().getCatalogueId());
+        logger.info("Attempt to create a Public Service from Service '{}'-'{}' of the '{}' Catalogue",
+                serviceBundle.getId(), serviceBundle.getService().getName(), serviceBundle.getService().getCatalogueId());
         return ResponseEntity.ok(serviceBundleService.createPublicResource(serviceBundle, auth));
     }
 
@@ -479,7 +479,7 @@ public class ServiceController {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
         serviceBundleService.delete(service);
-        logger.info("User '{}' deleted ServiceBundle '{}' with id: '{}' of the Catalogue: '{}'", authentication, service.getService().getName(),
+        logger.info("Deleted ServiceBundle '{}' with id: '{}' of the Catalogue: '{}'", service.getService().getName(),
                 service.getService().getId(), service.getService().getCatalogueId());
         return new ResponseEntity<>(HttpStatus.GONE);
     }
@@ -500,8 +500,8 @@ public class ServiceController {
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<ServiceBundle> addBundle(@RequestBody ServiceBundle service, Authentication authentication) {
         ResponseEntity<ServiceBundle> ret = new ResponseEntity<>(serviceBundleService.add(service, authentication), HttpStatus.OK);
-        logger.info("User '{}' added ServiceBundle {} with id: '{}' and version: '{}'",
-                authentication, service.getService().getName(), service.getService().getId(), service.getService().getVersion());
+        logger.info("Added ServiceBundle {} with id: '{}' and version: '{}'", service.getService().getName(),
+                service.getService().getId(), service.getService().getVersion());
         return ret;
     }
 
@@ -510,8 +510,7 @@ public class ServiceController {
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<ServiceBundle> updateBundle(@RequestBody ServiceBundle service, @Parameter(hidden = true) Authentication authentication) {
         ResponseEntity<ServiceBundle> ret = new ResponseEntity<>(serviceBundleService.update(service, authentication), HttpStatus.OK);
-        logger.info("User '{}' updated ServiceBundle {} with id: '{}'",
-                authentication, service.getService().getName(), service.getService().getId());
+        logger.info("Updated ServiceBundle {} with id: '{}'", service.getService().getName(), service.getService().getId());
         return ret;
     }
 
@@ -571,8 +570,7 @@ public class ServiceController {
     @PreAuthorize("hasRole('ROLE_USER')")
     public ResponseEntity<Service> addDraftService(@RequestBody Service service, @Parameter(hidden = true) Authentication auth) {
         ServiceBundle serviceBundle = draftServiceService.add(new ServiceBundle(service), auth);
-        logger.info("User '{}' added the Draft Service with name '{}' and id '{}'", User.of(auth).getEmail().toLowerCase(),
-                service.getName(), service.getId());
+        logger.info("Added Draft Service with name '{}' and id '{}'", service.getName(), service.getId());
         return new ResponseEntity<>(serviceBundle.getService(), HttpStatus.CREATED);
     }
 
@@ -583,8 +581,7 @@ public class ServiceController {
         ServiceBundle serviceBundle = draftServiceService.get(service.getId(), catalogueId, false);
         serviceBundle.setService(service);
         serviceBundle = draftServiceService.update(serviceBundle, auth);
-        logger.info("User '{}' updated the Draft Service with name '{}' and id '{}'", User.of(auth).getEmail().toLowerCase(),
-                service.getName(), service.getId());
+        logger.info("Updated the Draft Service with name '{}' and id '{}'", service.getName(), service.getId());
         return new ResponseEntity<>(serviceBundle.getService(), HttpStatus.OK);
     }
 
@@ -603,8 +600,7 @@ public class ServiceController {
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
         draftServiceService.delete(serviceBundle);
-        logger.info("User '{}' deleted the Draft Service '{}'-'{}'", User.of(auth).getEmail().toLowerCase(),
-                id, serviceBundle.getService().getName());
+        logger.info("Deleted Draft Service '{}'-'{}'", id, serviceBundle.getService().getName());
         return new ResponseEntity<>(serviceBundle.getService(), HttpStatus.OK);
     }
 

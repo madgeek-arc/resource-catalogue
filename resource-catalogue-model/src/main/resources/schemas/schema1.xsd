@@ -1606,6 +1606,110 @@ versions. The record's primary key for locating it in the EOSC-IF database.]]></
       
   </xs:complexType>
     
+  <xs:complexType name="newBundle">
+        
+    <xs:sequence>
+            
+      <xs:element name="active" type="xs:boolean"/>
+            
+      <xs:element minOccurs="0" name="auditState" type="xs:string"/>
+            
+      <xs:element name="draft" type="xs:boolean"/>
+            
+      <xs:element minOccurs="0" name="identifiers" type="identifiers"/>
+            
+      <xs:element minOccurs="0" name="latestAuditInfo" type="loggingInfo"/>
+            
+      <xs:element minOccurs="0" name="latestOnboardingInfo" type="loggingInfo"/>
+            
+      <xs:element minOccurs="0" name="latestUpdateInfo" type="loggingInfo"/>
+            
+      <xs:element maxOccurs="unbounded" minOccurs="0" name="loggingInfo" nillable="true" type="loggingInfo"/>
+            
+      <xs:element minOccurs="0" name="metadata" type="metadata"/>
+            
+      <xs:element name="payload">
+                
+        <xs:complexType>
+                    
+          <xs:sequence>
+                        
+            <xs:element maxOccurs="unbounded" minOccurs="0" name="entry">
+                            
+              <xs:complexType>
+                                
+                <xs:sequence>
+                                    
+                  <xs:element minOccurs="0" name="key" type="xs:string"/>
+                                    
+                  <xs:element minOccurs="0" name="value" type="xs:anyType"/>
+                                  
+                </xs:sequence>
+                              
+              </xs:complexType>
+                          
+            </xs:element>
+                      
+          </xs:sequence>
+                  
+        </xs:complexType>
+              
+      </xs:element>
+            
+      <xs:element minOccurs="0" name="status" type="xs:string"/>
+            
+      <xs:element name="suspended" type="xs:boolean"/>
+            
+      <xs:element minOccurs="0" name="templateStatus" type="xs:string"/>
+          
+    </xs:sequence>
+      
+  </xs:complexType>
+    
+  <xs:complexType name="newProviderBundle">
+        
+    <xs:complexContent>
+            
+      <xs:extension base="newBundle">
+                
+        <xs:sequence>
+                    
+          <xs:element name="provider">
+                        
+            <xs:complexType>
+                            
+              <xs:sequence>
+                                
+                <xs:element maxOccurs="unbounded" minOccurs="0" name="entry">
+                                    
+                  <xs:complexType>
+                                        
+                    <xs:sequence>
+                                            
+                      <xs:element minOccurs="0" name="key" type="xs:string"/>
+                                            
+                      <xs:element minOccurs="0" name="value" type="xs:anyType"/>
+                                          
+                    </xs:sequence>
+                                      
+                  </xs:complexType>
+                                  
+                </xs:element>
+                              
+              </xs:sequence>
+                          
+            </xs:complexType>
+                      
+          </xs:element>
+                  
+        </xs:sequence>
+              
+      </xs:extension>
+          
+    </xs:complexContent>
+      
+  </xs:complexType>
+    
   <xs:complexType name="provider">
         
     <xs:sequence>

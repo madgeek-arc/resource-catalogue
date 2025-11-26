@@ -83,8 +83,7 @@ public class MigrationManager implements MigrationService {
     }
 
     public ProviderBundle changeProviderCatalogue(String providerId, String catalogueId, String newCatalogueId, Authentication authentication) {
-        logger.info("User [{}] is updating the catalogueId of the Provider [{}] and all its Resources to [{}]",
-                AuthenticationInfo.getFullName(authentication), providerId, newCatalogueId);
+        logger.info("Updating the catalogueId of the Provider [{}] and all its Resources to [{}]", providerId, newCatalogueId);
         // Provider
         ProviderBundle providerBundle = providerService.get(catalogueId, providerId, authentication);
         providerBundle.getProvider().setCatalogueId(newCatalogueId);

@@ -18,7 +18,10 @@ package gr.uoa.di.madgik.resourcecatalogue.domain;
 
 import gr.uoa.di.madgik.resourcecatalogue.annotation.FieldValidation;
 import gr.uoa.di.madgik.resourcecatalogue.dto.UserInfo;
+import gr.uoa.di.madgik.resourcecatalogue.utils.Auditable;
 import io.swagger.v3.oas.annotations.media.Schema;
+import org.springframework.security.authentication.InsufficientAuthenticationException;
+import org.springframework.security.core.Authentication;
 
 import java.beans.Transient;
 import java.util.ArrayList;
@@ -60,20 +63,26 @@ public abstract class Bundle<T extends Identifiable> implements Identifiable {
     public Bundle() {
     }
 
-    public void markOnboard(String status, UserInfo user, String comment) {
+    public void onboard(String status, Authentication auth, String comment) {
+        UserInfo user = UserInfo.of(auth);
         this.setStatus(status);
+        this.setMetadata(Metadata.updateMetadata(this.getMetadata(), user.fullName(), user.email()));
         LoggingInfo onboardingInfo = null;
         if (status.toLowerCase().contains("pending")) {
+            this.setMetadata(Metadata.createMetadata(user.fullName(), user.email().toLowerCase()));
+            this.setActive(false);
             onboardingInfo = LoggingInfo.createLoggingInfoEntry(
                     user, LoggingInfo.Types.ONBOARD.getKey(),
                     LoggingInfo.ActionType.REGISTERED.getKey(), comment
             );
         } else if (status.toLowerCase().contains("approved")) {
+            this.setActive(true);
             onboardingInfo = LoggingInfo.createLoggingInfoEntry(
                     user, LoggingInfo.Types.ONBOARD.getKey(),
                     LoggingInfo.ActionType.APPROVED.getKey(), comment
             );
         } else if (status.toLowerCase().contains("rejected")) {
+            this.setActive(false);
             onboardingInfo = LoggingInfo.createLoggingInfoEntry(
                     user, LoggingInfo.Types.ONBOARD.getKey(),
                     LoggingInfo.ActionType.REJECTED.getKey(), comment
@@ -85,14 +94,79 @@ public abstract class Bundle<T extends Identifiable> implements Identifiable {
 
     public void markUpdate(String status, UserInfo user, String comment) {
         this.setStatus(status);
+        this.setMetadata(Metadata.updateMetadata(this.getMetadata(), user.fullName(), user.email()));
         LoggingInfo updateInfo;
         String type = status.split(" ")[0]; // get status prefix to find ActionType.fromString(type)
-            updateInfo = LoggingInfo.createLoggingInfoEntry(
-                    user, LoggingInfo.Types.UPDATE.getKey(),
-                    LoggingInfo.ActionType.fromString(type).getKey(), comment
-            );
+        updateInfo = LoggingInfo.createLoggingInfoEntry(
+                user, LoggingInfo.Types.UPDATE.getKey(),
+                LoggingInfo.ActionType.fromString(type).getKey(), comment
+        );
         this.setLatestUpdateInfo(updateInfo);
         this.getLoggingInfo().add(updateInfo);
+    }
+
+    public void markActive(boolean active, Authentication auth) {
+        UserInfo user = UserInfo.of(auth);
+        this.setActive(active);
+        this.setMetadata(Metadata.updateMetadata(this.getMetadata(), user.fullName(), user.email()));
+
+        LoggingInfo loggingInfo;
+        LoggingInfo.ActionType type = LoggingInfo.ActionType.DEACTIVATED;
+        if (active) {
+            type = LoggingInfo.ActionType.ACTIVATED;
+        }
+        try {
+            loggingInfo = LoggingInfo.createLoggingInfoEntry(
+                    UserInfo.of(auth),
+                    LoggingInfo.Types.UPDATE.getKey(),
+                    type.getKey(),
+                    null
+            );
+        } catch (InsufficientAuthenticationException e) {
+            loggingInfo = LoggingInfo.systemUpdateLoggingInfo(LoggingInfo.ActionType.ACTIVATED.getKey());
+        }
+        this.loggingInfo.add(loggingInfo);
+        this.latestUpdateInfo = loggingInfo;
+    }
+
+    public void audit(String comment, LoggingInfo.ActionType actionType, Authentication auth) {
+        String state;
+        UserInfo user = UserInfo.of(auth);
+        switch (actionType) {
+            case VALID -> state = Auditable.VALID;
+            case INVALID -> state = Auditable.INVALID_AND_NOT_UPDATED;
+            default -> throw new IllegalArgumentException("Unhandled action type " + actionType.getKey());
+        }
+        this.setAuditState(state);
+        this.setMetadata(Metadata.updateMetadata(this.getMetadata(), user.fullName(), user.email()));
+
+        LoggingInfo loggingInfo;
+
+        loggingInfo = LoggingInfo.createLoggingInfoEntry(
+                user,
+                LoggingInfo.Types.AUDIT.getKey(),
+                actionType.getKey(),
+                comment
+        );
+        this.loggingInfo.add(loggingInfo);
+
+        // latestAuditInfo
+        this.setLatestAuditInfo(loggingInfo);
+    }
+
+    public List<LoggingInfo> createRegistrationInfoIfEmpty(Authentication auth) {
+        List<LoggingInfo> loggingInfoList = new ArrayList<>();
+        if (this.getLoggingInfo() != null && !this.getLoggingInfo().isEmpty()) {
+            loggingInfoList = this.getLoggingInfo();
+        } else {
+            loggingInfoList.add(LoggingInfo.createLoggingInfoEntry(
+                    UserInfo.of(auth),
+                    LoggingInfo.Types.ONBOARD.getKey(),
+                    LoggingInfo.ActionType.REGISTERED.getKey(),
+                    null)
+            );
+        }
+        return loggingInfoList;
     }
 
 

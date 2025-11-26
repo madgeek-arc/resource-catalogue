@@ -198,9 +198,7 @@ public class HelpdeskManager extends ResourceCatalogueManager<HelpdeskBundle> im
     }
 
     public HelpdeskBundle createPublicResource(HelpdeskBundle helpdeskBundle, Authentication auth) {
-        logger.info("User '{}-{}' attempts to create a Public Helpdesk from Helpdesk '{}' of the '{}' Catalogue",
-                AuthenticationInfo.getFullName(auth),
-                AuthenticationInfo.getEmail(auth).toLowerCase(),
+        logger.info("Attempt to create a Public Helpdesk from Helpdesk '{}' of the '{}' Catalogue",
                 helpdeskBundle.getId(), helpdeskBundle.getHelpdesk().getCatalogueId());
         publicHelpdeskManager.add(helpdeskBundle, auth);
         return helpdeskBundle;

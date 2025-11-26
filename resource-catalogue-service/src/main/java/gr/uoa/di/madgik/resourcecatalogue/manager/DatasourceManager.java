@@ -226,38 +226,7 @@ public class DatasourceManager extends ResourceCatalogueManager<DatasourceBundle
             throw new ValidationException("You cannot approve a Datasource when its Service is in Pending or Rejected state");
         }
 
-        datasourceBundle.setStatus(vocabularyService.get(status).getId());
-
-        List<LoggingInfo> loggingInfoList = commonMethods.returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(datasourceBundle, auth);
-        LoggingInfo loggingInfo;
-
-        switch (status) {
-            case "approved datasource":
-                datasourceBundle.setActive(active);
-                loggingInfo = commonMethods.createLoggingInfo(auth, LoggingInfo.Types.ONBOARD.getKey(),
-                        LoggingInfo.ActionType.APPROVED.getKey());
-                loggingInfoList.add(loggingInfo);
-                loggingInfoList.sort(Comparator.comparing(LoggingInfo::getDate));
-                datasourceBundle.setLoggingInfo(loggingInfoList);
-
-                // latestOnboardingInfo
-                datasourceBundle.setLatestOnboardingInfo(loggingInfo);
-                break;
-            case "rejected datasource":
-                datasourceBundle.setActive(false);
-                loggingInfo = commonMethods.createLoggingInfo(auth, LoggingInfo.Types.ONBOARD.getKey(),
-                        LoggingInfo.ActionType.REJECTED.getKey());
-                loggingInfoList.add(loggingInfo);
-                loggingInfoList.sort(Comparator.comparing(LoggingInfo::getDate));
-                datasourceBundle.setLoggingInfo(loggingInfoList);
-
-                // latestOnboardingInfo
-                datasourceBundle.setLatestOnboardingInfo(loggingInfo);
-                break;
-            case "pending datasource":
-            default:
-                break;
-        }
+        datasourceBundle.onboard(vocabularyService.get(status).getId(), auth, null);
 
         logger.info("Verifying Datasource with id: '{}' | status: '{}' | active: '{}'", datasourceBundle.getId(), status, active);
         return super.update(datasourceBundle, auth);

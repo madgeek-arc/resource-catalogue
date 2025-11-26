@@ -797,8 +797,7 @@ public class ProviderTestManager implements ProviderTestService {
 //        // send notification emails to Provider Admins
 //        registrationMailService.notifyProviderAdminsForBundleAuditing(existingProvider, existingProvider.getProvider().getUsers());
 //
-//        logger.info("User '{}-{}' audited Provider '{}'-'{}' with [actionType: {}]",
-//                AuthenticationInfo.getFullName(auth), AuthenticationInfo.getEmail(auth).toLowerCase(),
+//        logger.info("Audited Provider '{}'-'{}' with [actionType: {}]",
 //                existingProvider.getProvider().getId(), existingProvider.getProvider().getName(), actionType);
 //
 //        existingResource.setPayload(serialize(existingProvider));

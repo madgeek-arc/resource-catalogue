@@ -61,6 +61,7 @@ public class DeployableServiceManager extends ResourceCatalogueManager<Deployabl
     private final ProviderResourcesCommonMethods commonMethods;
     private final PublicDeployableServiceService publicDeployableServiceService;
     private final GenericManager genericManager;
+    private final RegistrationMailService registrationMailService;
 
     @Autowired
     private FacetLabelService facetLabelService;
@@ -78,6 +79,7 @@ public class DeployableServiceManager extends ResourceCatalogueManager<Deployabl
                                     CatalogueService catalogueService,
                                     PublicDeployableServiceService publicDeployableServiceService,
                                     @Lazy ProviderResourcesCommonMethods commonMethods,
+                                    RegistrationMailService registrationMailService,
                                     GenericManager genericManager) {
         super(DeployableServiceBundle.class);
         this.providerService = providerService;
@@ -87,6 +89,7 @@ public class DeployableServiceManager extends ResourceCatalogueManager<Deployabl
         this.catalogueService = catalogueService;
         this.publicDeployableServiceService = publicDeployableServiceService;
         this.commonMethods = commonMethods;
+        this.registrationMailService = registrationMailService;
         this.genericManager = genericManager;
     }
 
@@ -206,7 +209,7 @@ public class DeployableServiceManager extends ResourceCatalogueManager<Deployabl
         // update existing DeployableService Metadata, Identifiers, MigrationStatus
         ret.setMetadata(Metadata.updateMetadata(existingDeployableService.getMetadata(), AuthenticationInfo.getFullName(auth)));
         ret.setIdentifiers(existingDeployableService.getIdentifiers());
-        ret.setMigrationStatus(existingDeployableService.getMigrationStatus());
+//        ret.setMigrationStatus(existingDeployableService.getMigrationStatus());
 
         List<LoggingInfo> loggingInfoList = commonMethods.returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(existingDeployableService, auth);
         LoggingInfo loggingInfo = commonMethods.createLoggingInfo(auth, LoggingInfo.Types.UPDATE.getKey(),
@@ -300,55 +303,18 @@ public class DeployableServiceManager extends ResourceCatalogueManager<Deployabl
         }
         logger.trace("verifyResource with id: '{}' | status: '{}' | active: '{}'", id, status, active);
         DeployableServiceBundle deployableServiceBundle = get(id, catalogueId, false);
-        deployableServiceBundle.setStatus(vocabularyService.get(status).getId());
+        deployableServiceBundle.onboard(vocabularyService.get(status).getId(), auth, null);
         ProviderBundle resourceProvider = providerService.get(deployableServiceBundle.getDeployableService().getResourceOrganisation(),
                 deployableServiceBundle.getDeployableService().getCatalogueId(), false);
-        List<LoggingInfo> loggingInfoList = commonMethods.returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(deployableServiceBundle, auth);
-        LoggingInfo loggingInfo;
 
         switch (status) {
-            case "pending resource":
-                // update Provider's templateStatus
-                resourceProvider.setTemplateStatus("pending template");
-                break;
-            case "approved resource":
-                deployableServiceBundle.setActive(active);
-                loggingInfo = commonMethods.createLoggingInfo(auth, LoggingInfo.Types.ONBOARD.getKey(),
-                        LoggingInfo.ActionType.APPROVED.getKey());
-                loggingInfoList.add(loggingInfo);
-                loggingInfoList.sort(Comparator.comparing(LoggingInfo::getDate));
-                deployableServiceBundle.setLoggingInfo(loggingInfoList);
-
-                // latestOnboardingInfo
-                deployableServiceBundle.setLatestOnboardingInfo(loggingInfo);
-
-                // update Provider's templateStatus
-                resourceProvider.setTemplateStatus("approved template");
-                break;
-            case "rejected resource":
-                deployableServiceBundle.setActive(false);
-                loggingInfo = commonMethods.createLoggingInfo(auth, LoggingInfo.Types.ONBOARD.getKey(),
-                        LoggingInfo.ActionType.REJECTED.getKey());
-                loggingInfoList.add(loggingInfo);
-                loggingInfoList.sort(Comparator.comparing(LoggingInfo::getDate));
-                deployableServiceBundle.setLoggingInfo(loggingInfoList);
-
-                // latestOnboardingInfo
-                deployableServiceBundle.setLatestOnboardingInfo(loggingInfo);
-
-                // update Provider's templateStatus
-                resourceProvider.setTemplateStatus("rejected template");
-                break;
-            default:
-                break;
+            case "pending resource" -> resourceProvider.setTemplateStatus("pending template");
+            case "approved resource" -> resourceProvider.setTemplateStatus("approved template");
+            case "rejected resource" -> resourceProvider.setTemplateStatus("rejected template");
         }
+        providerService.update(resourceProvider, auth);
 
         logger.info("Verifying Deployable Service: {}", deployableServiceBundle);
-        try {
-            providerService.update(resourceProvider, auth);
-        } catch (gr.uoa.di.madgik.registry.exception.ResourceNotFoundException e) {
-            throw new ResourceNotFoundException(e.getMessage());
-        }
         return update(deployableServiceBundle, auth);
     }
 
@@ -389,16 +355,7 @@ public class DeployableServiceManager extends ResourceCatalogueManager<Deployabl
         if (active && activeProvider.isEmpty()) {
             throw new ResourceException("Deployable Service does not have active Providers", HttpStatus.CONFLICT);
         }
-        deployableServiceBundle.setActive(active);
-
-        List<LoggingInfo> loggingInfoList = commonMethods.createActivationLoggingInfo(deployableServiceBundle, active, auth);
-        loggingInfoList.sort(Comparator.comparing(LoggingInfo::getDate));
-        deployableServiceBundle.setLoggingInfo(loggingInfoList);
-
-        // latestLoggingInfo
-        deployableServiceBundle.setLatestUpdateInfo(commonMethods.setLatestLoggingInfo(loggingInfoList, LoggingInfo.Types.UPDATE.getKey()));
-        deployableServiceBundle.setLatestOnboardingInfo(commonMethods.setLatestLoggingInfo(loggingInfoList, LoggingInfo.Types.ONBOARD.getKey()));
-        deployableServiceBundle.setLatestAuditInfo(commonMethods.setLatestLoggingInfo(loggingInfoList, LoggingInfo.Types.AUDIT.getKey()));
+        deployableServiceBundle.markActive(active, auth);
 
         update(deployableServiceBundle, auth);
         return deployableServiceBundle;
@@ -408,18 +365,13 @@ public class DeployableServiceManager extends ResourceCatalogueManager<Deployabl
     public DeployableServiceBundle audit(String deployableServiceId, String catalogueId, String comment,
                                          LoggingInfo.ActionType actionType, Authentication auth) {
         DeployableServiceBundle deployableService = get(deployableServiceId, catalogueId, false);
+        deployableService.audit(comment, actionType, auth);
+
         ProviderBundle provider = providerService.get(deployableService.getDeployableService().getResourceOrganisation(),
                 deployableService.getDeployableService().getCatalogueId(), false);
-        commonMethods.auditResource(deployableService, comment, actionType, auth);
-        if (actionType.getKey().equals(LoggingInfo.ActionType.VALID.getKey())) {
-            deployableService.setAuditState(Auditable.VALID);
-        }
-        if (actionType.getKey().equals(LoggingInfo.ActionType.INVALID.getKey())) {
-            deployableService.setAuditState(Auditable.INVALID_AND_NOT_UPDATED);
-        }
+        registrationMailService.notifyProviderAdminsForBundleAuditing(deployableService, provider.getProvider().getUsers());
 
-        logger.info("User '{}-{}' audited Deployable Service '{}'-'{}' with [actionType: {}]",
-                AuthenticationInfo.getFullName(auth), AuthenticationInfo.getEmail(auth).toLowerCase(),
+        logger.info("Audited Deployable Service '{}'-'{}' with [actionType: {}]",
                 deployableService.getDeployableService().getId(), deployableService.getDeployableService().getName(), actionType);
         return super.update(deployableService, auth);
     }

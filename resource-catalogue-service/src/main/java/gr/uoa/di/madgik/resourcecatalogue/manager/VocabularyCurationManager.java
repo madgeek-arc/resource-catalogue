@@ -289,8 +289,8 @@ public class VocabularyCurationManager extends ResourceManager<VocabularyCuratio
             String parentFormed = vocabularyCuration.getParent().replaceAll(" ", "_").toLowerCase();
             vocabulary.setParentId(parentFormed);
         }
-        logger.info("User [{}] is adding a new Vocabulary by resolving the vocabulary request '{}'",
-                AuthenticationInfo.getEmail(authentication).toLowerCase(), vocabularyCuration.getId());
+        logger.info("User is adding a new Vocabulary by resolving the vocabulary request '{}'",
+                vocabularyCuration.getId());
         vocabularyService.add(vocabulary, authentication);
     }
 

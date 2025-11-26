@@ -128,8 +128,8 @@ public class DeployableServiceController {
     public ResponseEntity<DeployableService> addDeployableService(@RequestBody DeployableService deployableService,
                                                                                   @Parameter(hidden = true) Authentication auth) {
         DeployableServiceBundle ret = this.service.add(new DeployableServiceBundle(deployableService), auth);
-        logger.info("User '{}' created a new Deployable Service with name '{}' and id '{}'",
-                User.of(auth).getEmail().toLowerCase(), deployableService.getName(), deployableService.getId());
+        logger.info("Created a new Deployable Service with name '{}' and id '{}'",
+                deployableService.getName(), deployableService.getId());
         return new ResponseEntity<>(ret.getDeployableService(), HttpStatus.CREATED);
     }
 
@@ -247,7 +247,7 @@ public class DeployableServiceController {
                                                              @RequestParam Boolean active,
                                                              @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
-        logger.info("User '{}-{}' attempts to save Deployable Service with id '{}' as '{}'", User.of(auth).getFullName(), User.of(auth).getEmail().toLowerCase(), id, active);
+        logger.info("Attempt to save Deployable Service with id '{}' as '{}'", id, active);
         return ResponseEntity.ok(service.publish(id, active, auth));
     }
 
@@ -311,12 +311,12 @@ public class DeployableServiceController {
     }
 
     @GetMapping(path = {"loggingInfoHistory/{prefix}/{suffix}"}, produces = {MediaType.APPLICATION_JSON_VALUE})
-    public ResponseEntity<Paging<LoggingInfo>> loggingInfoHistory(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
+    public ResponseEntity<List<LoggingInfo>> loggingInfoHistory(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
                                                                   @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix,
                                                                   @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId) {
         String id = prefix + "/" + suffix;
         DeployableServiceBundle bundle = service.get(id, catalogueId, false);
-        Paging<LoggingInfo> loggingInfoHistory = service.getLoggingInfoHistory(bundle);
+        List<LoggingInfo> loggingInfoHistory = service.getLoggingInfoHistory(bundle);
         return ResponseEntity.ok(loggingInfoHistory);
     }
 
@@ -335,8 +335,8 @@ public class DeployableServiceController {
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<DeployableServiceBundle> createPublicDeployableService(@RequestBody DeployableServiceBundle bundle,
                                                                                  @Parameter(hidden = true) Authentication auth) {
-        logger.info("User '{}-{}' attempts to create a Public Deployable Service from Deployable Service '{}'-'{}' of the '{}' Catalogue", User.of(auth).getFullName(),
-                User.of(auth).getEmail().toLowerCase(), bundle.getId(), bundle.getDeployableService().getName(), bundle.getDeployableService().getCatalogueId());
+        logger.info("Attempt to create a Public Deployable Service from Deployable Service '{}'-'{}' of the '{}' Catalogue",
+                bundle.getId(), bundle.getDeployableService().getName(), bundle.getDeployableService().getCatalogueId());
         return ResponseEntity.ok(service.createPublicResource(bundle, auth));
     }
 

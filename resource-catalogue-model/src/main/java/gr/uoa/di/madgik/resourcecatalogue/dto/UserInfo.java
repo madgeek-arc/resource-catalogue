@@ -23,4 +23,8 @@ public record UserInfo(String sub, String email, String name, String surname, Li
                         .toList()
         );
     }
+
+    public String fullName() {
+        return "%s %s".formatted(name(), surname());
+    }
 }

@@ -172,15 +172,4 @@ public interface TrainingResourceService extends ResourceCatalogueService<Traini
      * @return {@link   TrainingResourceBundle}
      */
     TrainingResourceBundle createPublicResource(TrainingResourceBundle resource, Authentication auth);
-
-    /**
-     * Publish Training Resource's related resources
-     *
-     * @param id          Training Resource ID
-     * @param catalogueId Catalogue ID
-     * @param active      True/False
-     * @param auth        Authentication
-     */
-    void publishTrainingResourceRelatedResources(String id, String catalogueId, Boolean active,
-                                                 Authentication auth);
 }

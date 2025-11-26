@@ -167,7 +167,7 @@ public class InteroperabilityRecordManager extends ResourceCatalogueManager<Inte
         // update existing InteroperabilityRecord Metadata, MigrationStatus
         ret.setMetadata(Metadata.updateMetadata(existingInteroperabilityRecord.getMetadata(), AuthenticationInfo.getFullName(auth)));
         ret.setIdentifiers(existingInteroperabilityRecord.getIdentifiers());
-        ret.setMigrationStatus(existingInteroperabilityRecord.getMigrationStatus());
+//        ret.setMigrationStatus(existingInteroperabilityRecord.getMigrationStatus());
 
         List<LoggingInfo> loggingInfoList = commonMethods.returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(existingInteroperabilityRecord, auth);
         LoggingInfo loggingInfo = commonMethods.createLoggingInfo(auth, LoggingInfo.Types.UPDATE.getKey(),
@@ -231,41 +231,10 @@ public class InteroperabilityRecordManager extends ResourceCatalogueManager<Inte
         }
         logger.trace("verifyResource with id: '{}' | status: '{}' | active: '{}'", id, status, active);
         InteroperabilityRecordBundle interoperabilityRecordBundle = get(id, catalogueId, false);
-        interoperabilityRecordBundle.setStatus(vocabularyService.get(status).getId());
+        interoperabilityRecordBundle.onboard(vocabularyService.get(status).getId(), auth, null);
 
-        List<LoggingInfo> loggingInfoList = commonMethods.returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(interoperabilityRecordBundle, auth);
-        LoggingInfo loggingInfo;
-
-        switch (status) {
-            case "approved interoperability record":
-                interoperabilityRecordBundle.setActive(active);
-                loggingInfo = commonMethods.createLoggingInfo(auth, LoggingInfo.Types.ONBOARD.getKey(),
-                        LoggingInfo.ActionType.APPROVED.getKey());
-                loggingInfoList.add(loggingInfo);
-                loggingInfoList.sort(Comparator.comparing(LoggingInfo::getDate));
-                interoperabilityRecordBundle.setLoggingInfo(loggingInfoList);
-
-                // latestOnboardingInfo
-                interoperabilityRecordBundle.setLatestOnboardingInfo(loggingInfo);
-                break;
-            case "rejected interoperability record":
-                interoperabilityRecordBundle.setActive(false);
-                loggingInfo = commonMethods.createLoggingInfo(auth, LoggingInfo.Types.ONBOARD.getKey(),
-                        LoggingInfo.ActionType.REJECTED.getKey());
-                loggingInfoList.add(loggingInfo);
-                loggingInfoList.sort(Comparator.comparing(LoggingInfo::getDate));
-                interoperabilityRecordBundle.setLoggingInfo(loggingInfoList);
-
-                // latestOnboardingInfo
-                interoperabilityRecordBundle.setLatestOnboardingInfo(loggingInfo);
-                break;
-            case "pending interoperability record":
-            default:
-                break;
-        }
-
-        logger.info("User '{}' verified Interoperability Record with id: '{}' | status: '{}' | active: '{}'",
-                auth, interoperabilityRecordBundle.getId(), status, active);
+        logger.info("Verified Interoperability Record with id: '{}' | status: '{}' | active: '{}'",
+                interoperabilityRecordBundle.getId(), status, active);
         registrationMailService.sendInteroperabilityRecordOnboardingEmailsToPortalAdmins(interoperabilityRecordBundle,
                 User.of(auth));
         return super.update(interoperabilityRecordBundle, auth);
@@ -284,23 +253,10 @@ public class InteroperabilityRecordManager extends ResourceCatalogueManager<Inte
         if (active && activeProvider.isEmpty()) {
             throw new ResourceException("Interoperability Record does not have active Providers", HttpStatus.CONFLICT);
         }
-        interoperabilityRecordBundle.setActive(active);
-
-        List<LoggingInfo> loggingInfoList = commonMethods.createActivationLoggingInfo(interoperabilityRecordBundle, active, auth);
-        loggingInfoList.sort(Comparator.comparing(LoggingInfo::getDate));
-        interoperabilityRecordBundle.setLoggingInfo(loggingInfoList);
-
-        // latestLoggingInfo
-        interoperabilityRecordBundle.setLatestUpdateInfo(commonMethods.setLatestLoggingInfo(loggingInfoList, LoggingInfo.Types.UPDATE.getKey()));
-        interoperabilityRecordBundle.setLatestOnboardingInfo(commonMethods.setLatestLoggingInfo(loggingInfoList, LoggingInfo.Types.ONBOARD.getKey()));
-        interoperabilityRecordBundle.setLatestAuditInfo(commonMethods.setLatestLoggingInfo(loggingInfoList, LoggingInfo.Types.AUDIT.getKey()));
-
+        interoperabilityRecordBundle.markActive(active, auth);
 
         super.update(interoperabilityRecordBundle, auth);
-        logger.info("User '{}-{}' saved Interoperability Record with id '{}' as '{}'",
-                AuthenticationInfo.getFullName(auth),
-                AuthenticationInfo.getEmail(auth).toLowerCase(),
-                id, active);
+        logger.info("Saved Interoperability Record with id '{}' as '{}'", id, active);
         return interoperabilityRecordBundle;
     }
 
@@ -344,21 +300,14 @@ public class InteroperabilityRecordManager extends ResourceCatalogueManager<Inte
 
     public InteroperabilityRecordBundle audit(String id, String catalogueId, String comment, LoggingInfo.ActionType actionType, Authentication auth) {
         InteroperabilityRecordBundle interoperabilityRecordBundle = get(id, catalogueId, false);
-        ProviderBundle provider = providerService.get(interoperabilityRecordBundle.getInteroperabilityRecord().getCatalogueId(),
-                interoperabilityRecordBundle.getInteroperabilityRecord().getProviderId(), auth);
-        commonMethods.auditResource(interoperabilityRecordBundle, comment, actionType, auth);
-        if (actionType.getKey().equals(LoggingInfo.ActionType.VALID.getKey())) {
-            interoperabilityRecordBundle.setAuditState(Auditable.VALID);
-        }
-        if (actionType.getKey().equals(LoggingInfo.ActionType.INVALID.getKey())) {
-            interoperabilityRecordBundle.setAuditState(Auditable.INVALID_AND_NOT_UPDATED);
-        }
+        interoperabilityRecordBundle.audit(comment, actionType, auth);
 
         // send notification emails to Provider Admins
+        ProviderBundle provider = providerService.get(interoperabilityRecordBundle.getInteroperabilityRecord().getCatalogueId(),
+                interoperabilityRecordBundle.getInteroperabilityRecord().getProviderId(), auth);
         registrationMailService.notifyProviderAdminsForBundleAuditing(interoperabilityRecordBundle, provider.getProvider().getUsers());
 
-        logger.info("User '{}-{}' audited Interoperability Record '{}'-'{}' with [actionType: {}]",
-                AuthenticationInfo.getFullName(auth), AuthenticationInfo.getEmail(auth).toLowerCase(),
+        logger.info("Audited Interoperability Record '{}'-'{}' with [actionType: {}]",
                 interoperabilityRecordBundle.getInteroperabilityRecord().getId(),
                 interoperabilityRecordBundle.getInteroperabilityRecord().getTitle(), actionType);
         return super.update(interoperabilityRecordBundle, auth);

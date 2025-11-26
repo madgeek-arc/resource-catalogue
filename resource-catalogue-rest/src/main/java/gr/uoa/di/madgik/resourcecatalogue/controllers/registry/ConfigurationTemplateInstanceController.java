@@ -214,8 +214,8 @@ public class ConfigurationTemplateInstanceController {
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<ConfigurationTemplateInstanceBundle> createPublicConfigurationTemplateInstance(@RequestBody ConfigurationTemplateInstanceBundle configurationTemplateInstanceBundle,
                                                                                                          @Parameter(hidden = true) Authentication auth) {
-        logger.info("User '{}-{}' attempts to create a Public Configuration Template Instance from Configuration Template Instance '{}' of the '{}' Catalogue",
-                User.of(auth).getFullName(), User.of(auth).getEmail().toLowerCase(), configurationTemplateInstanceBundle.getId(),
+        logger.info("Attempth to create a Public Configuration Template Instance from Configuration Template Instance '{}' of the '{}' Catalogue",
+                configurationTemplateInstanceBundle.getId(),
                 configurationTemplateInstanceBundle.getConfigurationTemplateInstance().getCatalogueId());
         return ResponseEntity.ok(configurationTemplateInstanceService.createPublicConfigurationTemplateInstance(configurationTemplateInstanceBundle, auth));
     }

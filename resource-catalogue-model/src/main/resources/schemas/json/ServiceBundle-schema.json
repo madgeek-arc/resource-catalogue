@@ -85,30 +85,6 @@
       },
       "additionalProperties" : false
     },
-    "MigrationStatus" : {
-      "type" : "object",
-      "properties" : {
-        "comments" : {
-          "type" : "array",
-          "items" : {
-            "type" : "string"
-          }
-        },
-        "migrationDate" : {
-          "type" : "string"
-        },
-        "modelVersion" : {
-          "type" : "string"
-        },
-        "modified" : {
-          "type" : "string"
-        },
-        "resolutionDate" : {
-          "type" : "string"
-        }
-      },
-      "additionalProperties" : false
-    },
     "ResourceExtras" : {
       "type" : "object",
       "properties" : {
@@ -169,6 +145,9 @@
     "latestUpdateInfo" : {
       "$ref" : "#/$defs/LoggingInfo"
     },
+    "legacy" : {
+      "type" : "boolean"
+    },
     "loggingInfo" : {
       "type" : "array",
       "items" : {
@@ -177,9 +156,6 @@
     },
     "metadata" : {
       "$ref" : "#/$defs/Metadata"
-    },
-    "migrationStatus" : {
-      "$ref" : "#/$defs/MigrationStatus"
     },
     "resourceExtras" : {
       "$ref" : "#/$defs/ResourceExtras"

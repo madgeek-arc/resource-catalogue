@@ -177,8 +177,9 @@ public class ResourceInteroperabilityRecordController {
     @PostMapping(path = "createPublicResourceInteroperabilityRecord", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<ResourceInteroperabilityRecordBundle> createPublicRIR(@RequestBody ResourceInteroperabilityRecordBundle bundle, @Parameter(hidden = true) Authentication auth) {
-        logger.info("User '{}-{}' attempts to create a Public Resource Interoperability Record from Resource Interoperability Record '{}' of the '{}' Catalogue", User.of(auth).getFullName(),
-                User.of(auth).getEmail().toLowerCase(), bundle.getId(), bundle.getResourceInteroperabilityRecord().getCatalogueId());
+        logger.info("Attempt to create a Public Resource Interoperability Record from " +
+                        "Resource Interoperability Record '{}' of the '{}' Catalogue",
+                bundle.getId(), bundle.getResourceInteroperabilityRecord().getCatalogueId());
         return ResponseEntity.ok(service.createPublicResourceInteroperabilityRecord(bundle, auth));
     }
 

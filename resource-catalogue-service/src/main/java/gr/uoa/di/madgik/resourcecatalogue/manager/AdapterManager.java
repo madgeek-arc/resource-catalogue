@@ -203,62 +203,21 @@ public class AdapterManager extends ResourceCatalogueManager<AdapterBundle> impl
             throw new ValidationException(String.format("Vocabulary %s does not consist a Adapter State!", status));
         }
         logger.trace("verify adapter with id: '{}' | status: '{}' | active: '{}'", id, status, active);
-        AdapterBundle adapter = get(id, catalogueId, false);
-        Resource existingResource = getResource(adapter.getId(), adapter.getAdapter().getCatalogueId(), false);
-        AdapterBundle existingAdapter = deserialize(existingResource);
+        AdapterBundle existingAdapter = get(id, catalogueId, false);
+        existingAdapter.onboard(status, auth, null);
 
-        existingAdapter.setStatus(vocabularyService.get(status).getId());
-        List<LoggingInfo> loggingInfoList = commonMethods.returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(existingAdapter, auth);
-        LoggingInfo loggingInfo = null;
-
-        switch (status) {
-            case "approved adapter":
-                existingAdapter.setActive(active);
-                loggingInfo = commonMethods.createLoggingInfo(auth, LoggingInfo.Types.ONBOARD.getKey(),
-                        LoggingInfo.ActionType.APPROVED.getKey());
-                break;
-            case "rejected adapter":
-                existingAdapter.setActive(false);
-                loggingInfo = commonMethods.createLoggingInfo(auth, LoggingInfo.Types.ONBOARD.getKey(),
-                        LoggingInfo.ActionType.REJECTED.getKey());
-                break;
-            default:
-                break;
-        }
-        loggingInfoList.add(loggingInfo);
-        loggingInfoList.sort(Comparator.comparing(LoggingInfo::getDate));
-        existingAdapter.setLoggingInfo(loggingInfoList);
-
-        // latestOnboardingInfo
-        existingAdapter.setLatestOnboardingInfo(loggingInfo);
-
-        logger.info("Verifying ADapter: {}", existingAdapter);
-        existingResource.setPayload(serialize(existingAdapter));
-        existingResource.setResourceType(getResourceType());
-        resourceService.updateResource(existingResource);
+        logger.info("Verifying Adapter: {}", existingAdapter);
+        super.update(existingAdapter, null);
         return existingAdapter;
     }
 
     @Override
     public AdapterBundle publish(String id, Boolean active, Authentication auth) {
         AdapterBundle adapterBundle = get(id, catalogueId, false);
-        adapterBundle.setActive(active);
-
-        List<LoggingInfo> loggingInfoList = commonMethods.createActivationLoggingInfo(adapterBundle, active, auth);
-        loggingInfoList.sort(Comparator.comparing(LoggingInfo::getDate));
-        adapterBundle.setLoggingInfo(loggingInfoList);
-
-        // latestLoggingInfo
-        adapterBundle.setLatestUpdateInfo(commonMethods.setLatestLoggingInfo(loggingInfoList, LoggingInfo.Types.UPDATE.getKey()));
-        adapterBundle.setLatestOnboardingInfo(commonMethods.setLatestLoggingInfo(loggingInfoList, LoggingInfo.Types.ONBOARD.getKey()));
-        adapterBundle.setLatestAuditInfo(commonMethods.setLatestLoggingInfo(loggingInfoList, LoggingInfo.Types.AUDIT.getKey()));
-
+        adapterBundle.markActive(active, auth);
 
         super.update(adapterBundle, auth);
-        logger.info("User '{}-{}' saved Adapter with id '{}' as '{}'",
-                AuthenticationInfo.getFullName(auth),
-                AuthenticationInfo.getEmail(auth).toLowerCase(),
-                id, active);
+        logger.info("Saved Adapter with id '{}' as '{}'", id, active);
         return adapterBundle;
     }
 
@@ -284,16 +243,9 @@ public class AdapterManager extends ResourceCatalogueManager<AdapterBundle> impl
     @Override
     public AdapterBundle audit(String id, String catalogueId, String comment, LoggingInfo.ActionType actionType, Authentication auth) {
         AdapterBundle adapterBundle = get(id, catalogueId, false);
-        commonMethods.auditResource(adapterBundle, comment, actionType, auth);
-        if (actionType.getKey().equals(LoggingInfo.ActionType.VALID.getKey())) {
-            adapterBundle.setAuditState(Auditable.VALID);
-        }
-        if (actionType.getKey().equals(LoggingInfo.ActionType.INVALID.getKey())) {
-            adapterBundle.setAuditState(Auditable.INVALID_AND_NOT_UPDATED);
-        }
+        adapterBundle.audit(comment, actionType, auth);
 
-        logger.info("User '{}-{}' audited Adapter '{}'-'{}' with [actionType: {}]",
-                AuthenticationInfo.getFullName(auth), AuthenticationInfo.getEmail(auth).toLowerCase(),
+        logger.info("Audited Adapter '{}'-'{}' with [actionType: {}]",
                 adapterBundle.getAdapter().getId(),
                 adapterBundle.getAdapter().getName(), actionType);
         return super.update(adapterBundle, auth);

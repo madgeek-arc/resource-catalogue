@@ -25,6 +25,7 @@ import gr.uoa.di.madgik.registry.service.VersionService;
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
 import gr.uoa.di.madgik.resourcecatalogue.dto.CatalogueValue;
 import gr.uoa.di.madgik.resourcecatalogue.dto.MapValues;
+import gr.uoa.di.madgik.resourcecatalogue.dto.UserInfo;
 import gr.uoa.di.madgik.resourcecatalogue.exceptions.CatalogueResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
 import gr.uoa.di.madgik.resourcecatalogue.utils.Auditable;
@@ -442,86 +443,30 @@ public class ProviderManager extends ResourceCatalogueManager<ProviderBundle> im
             throw new ValidationException(String.format("Vocabulary %s does not consist a Provider State!", status));
         }
         logger.trace("verifyProvider with id: '{}' | status: '{}' | active: '{}'", id, status, active);
-        ProviderBundle provider = get(id, catalogueId, false);
-        Resource existingResource = getResource(provider.getId(), provider.getProvider().getCatalogueId(), false);
-        ProviderBundle existingProvider = deserialize(existingResource);
-
-        existingProvider.setStatus(vocabularyService.get(status).getId());
-        List<LoggingInfo> loggingInfoList = commonMethods.returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(existingProvider, auth);
-        LoggingInfo loggingInfo = null;
+        ProviderBundle existingProvider = get(id, catalogueId, false);
+        existingProvider.onboard(status, auth, null);
 
         switch (status) {
-            case "approved provider":
-                if (active == null) {
-                    active = true;
-                }
-                existingProvider.setActive(active);
-                loggingInfo = commonMethods.createLoggingInfo(auth, LoggingInfo.Types.ONBOARD.getKey(),
-                        LoggingInfo.ActionType.APPROVED.getKey());
-
-                // add Provider's Name as a HLE Vocabulary
-                checkAndAddProviderToHLEVocabulary(existingProvider);
-                break;
-            case "rejected provider":
-                existingProvider.setActive(false);
-                loggingInfo = commonMethods.createLoggingInfo(auth, LoggingInfo.Types.ONBOARD.getKey(),
-                        LoggingInfo.ActionType.REJECTED.getKey());
-                break;
-            default:
-                break;
+            case "approved provider" -> checkAndAddProviderToHLEVocabulary(existingProvider);
         }
-        loggingInfoList.add(loggingInfo);
-        loggingInfoList.sort(Comparator.comparing(LoggingInfo::getDate));
-        existingProvider.setLoggingInfo(loggingInfoList);
-
-        // latestOnboardingInfo
-        existingProvider.setLatestOnboardingInfo(loggingInfo);
 
         logger.info("Verifying Provider: {}", existingProvider);
-        existingResource.setPayload(serialize(existingProvider));
-        existingResource.setResourceType(getResourceType());
-        resourceService.updateResource(existingResource);
+        super.update(existingProvider, auth);
         return existingProvider;
     }
 
     @Override
     public ProviderBundle publish(String id, Boolean active, Authentication auth) {
-        ProviderBundle provider = getWithCatalogue(id, catalogueId);
-        Resource existingResource = getResource(provider.getId(), provider.getProvider().getCatalogueId(), false);
-        ProviderBundle existingProvider = deserialize(existingResource);
+        ProviderBundle existingProvider = getWithCatalogue(id, catalogueId);
 
         if ((existingProvider.getStatus().equals(vocabularyService.get("pending provider").getId()) ||
                 existingProvider.getStatus().equals(vocabularyService.get("rejected provider").getId())) && !existingProvider.isActive()) {
             throw new ValidationException(String.format("You cannot activate this Provider, because it's Inactive with status = [%s]", existingProvider.getStatus()));
         }
-        List<LoggingInfo> loggingInfoList = commonMethods.returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(existingProvider, auth);
-        LoggingInfo loggingInfo;
 
-        if (active == null) {
-            active = false;
-        }
-        existingProvider.setActive(active);
-        if (active) {
-            loggingInfo = commonMethods.createLoggingInfo(auth, LoggingInfo.Types.UPDATE.getKey(),
-                    LoggingInfo.ActionType.ACTIVATED.getKey());
-            logger.info("Activating Provider: {}", existingProvider);
-        } else {
-            loggingInfo = commonMethods.createLoggingInfo(auth, LoggingInfo.Types.UPDATE.getKey(),
-                    LoggingInfo.ActionType.DEACTIVATED.getKey());
-            logger.info("Deactivating Provider: {}", existingProvider);
-        }
+        existingProvider.markActive(active, auth);
         activateProviderResources(existingProvider.getId(), active, auth);
-        loggingInfoList.add(loggingInfo);
-        existingProvider.setLoggingInfo(loggingInfoList);
-
-        // latestLoggingInfo
-        existingProvider.setLatestUpdateInfo(loggingInfo);
-        existingProvider.setLatestOnboardingInfo(commonMethods.setLatestLoggingInfo(loggingInfoList, LoggingInfo.Types.ONBOARD.getKey()));
-        existingProvider.setLatestAuditInfo(commonMethods.setLatestLoggingInfo(loggingInfoList, LoggingInfo.Types.AUDIT.getKey()));
-
-        existingResource.setPayload(serialize(existingProvider));
-        existingResource.setResourceType(getResourceType());
-        resourceService.updateResource(existingResource);
+        super.update(existingProvider, auth);
         return existingProvider;
     }
 
@@ -604,13 +549,7 @@ public class ProviderManager extends ResourceCatalogueManager<ProviderBundle> im
     private void activateProviderServices(List<ServiceBundle> services, Boolean active, Authentication auth) {
         for (ServiceBundle service : services) {
             if (service.getStatus().equals("approved resource")) {
-                ServiceBundle lowerLevelService = ObjectUtils.clone(service);
-                List<LoggingInfo> loggingInfoList = commonMethods.createActivationLoggingInfo(service, active, auth);
-
-                // update Service's fields
-                service.setLoggingInfo(loggingInfoList);
-                service.setLatestUpdateInfo(loggingInfoList.getLast());
-                service.setActive(active);
+                service.markActive(active, auth);
 
                 try {
                     logger.debug("Setting Service '{}'-'{}' of the '{}' Catalogue to active: '{}'", service.getId(),
@@ -624,8 +563,8 @@ public class ProviderManager extends ResourceCatalogueManager<ProviderBundle> im
                 }
 
                 // Activate/Deactivate Service's Extensions && Subprofiles
-                serviceBundleService.publishServiceRelatedResources(lowerLevelService.getId(),
-                        lowerLevelService.getService().getCatalogueId(), active, auth);
+                serviceBundleService.publishServiceRelatedResources(service.getId(),
+                        service.getService().getCatalogueId(), active, auth);
             }
         }
     }
@@ -633,13 +572,7 @@ public class ProviderManager extends ResourceCatalogueManager<ProviderBundle> im
     private void activateProviderTrainingResources(List<TrainingResourceBundle> trainingResources, Boolean active, Authentication auth) {
         for (TrainingResourceBundle trainingResourceBundle : trainingResources) {
             if (trainingResourceBundle.getStatus().equals("approved resource")) {
-                TrainingResourceBundle lowerLevelTrainingResource = ObjectUtils.clone(trainingResourceBundle);
-                List<LoggingInfo> loggingInfoList = commonMethods.createActivationLoggingInfo(trainingResourceBundle, active, auth);
-
-                // update Service's fields
-                trainingResourceBundle.setLoggingInfo(loggingInfoList);
-                trainingResourceBundle.setLatestUpdateInfo(loggingInfoList.getLast());
-                trainingResourceBundle.setActive(active);
+                trainingResourceBundle.markActive(active, auth);
 
                 try {
                     logger.debug("Setting Training Resource '{}'-'{}' of the '{}' Catalogue to active: '{}'", trainingResourceBundle.getId(),
@@ -652,10 +585,6 @@ public class ProviderManager extends ResourceCatalogueManager<ProviderBundle> im
                     logger.error("Could not update Training Resource '{}'-'{}' of the '{}' Catalogue", trainingResourceBundle.getId(),
                             trainingResourceBundle.getTrainingResource().getTitle(), trainingResourceBundle.getTrainingResource().getCatalogueId());
                 }
-
-                // Activate/Deactivate Training Resource's Extensions
-                trainingResourceService.publishTrainingResourceRelatedResources(lowerLevelTrainingResource.getId(),
-                        lowerLevelTrainingResource.getTrainingResource().getCatalogueId(), active, auth);
             }
         }
     }
@@ -663,12 +592,7 @@ public class ProviderManager extends ResourceCatalogueManager<ProviderBundle> im
     private void activateProviderDeployableServices(List<DeployableServiceBundle> deployableServices, Boolean active, Authentication auth) {
         for (DeployableServiceBundle bundle : deployableServices) {
             if (bundle.getStatus().equals("approved resource")) {
-                List<LoggingInfo> loggingInfoList = commonMethods.createActivationLoggingInfo(bundle, active, auth);
-
-                // update Service's fields
-                bundle.setLoggingInfo(loggingInfoList);
-                bundle.setLatestUpdateInfo(loggingInfoList.getLast());
-                bundle.setActive(active);
+                bundle.markActive(active, auth);
 
                 try {
                     logger.debug("Setting Deployable Service '{}'-'{}' of the '{}' Catalogue to active: '{}'", bundle.getId(),
@@ -688,12 +612,7 @@ public class ProviderManager extends ResourceCatalogueManager<ProviderBundle> im
     private void activateProviderInteroperabilityRecords(List<InteroperabilityRecordBundle> interoperabilityRecords, Boolean active, Authentication auth) {
         for (InteroperabilityRecordBundle interoperabilityRecordBundle : interoperabilityRecords) {
             if (interoperabilityRecordBundle.getStatus().equals("approved interoperability record")) {
-                List<LoggingInfo> loggingInfoList = commonMethods.createActivationLoggingInfo(interoperabilityRecordBundle, active, auth);
-
-                // update Service's fields
-                interoperabilityRecordBundle.setLoggingInfo(loggingInfoList);
-                interoperabilityRecordBundle.setLatestUpdateInfo(loggingInfoList.getLast());
-                interoperabilityRecordBundle.setActive(active);
+                interoperabilityRecordBundle.markActive(active, auth);
 
                 try {
                     logger.debug("Setting Interoperability Record '{}'-'{}' of the '{}' Catalogue to active: '{}'", interoperabilityRecordBundle.getId(),
@@ -725,7 +644,7 @@ public class ProviderManager extends ResourceCatalogueManager<ProviderBundle> im
 
     @Override
     public void deleteUserInfo(Authentication authentication) {
-        logger.trace("Attempting to delete User Info '{}'", authentication);
+        logger.trace("Attempting to delete User Info");
         User authenticatedUser = User.of(authentication);
         List<Event> allUserEvents = new ArrayList<>();
         allUserEvents.addAll(eventService.getUserEvents(Event.UserActionType.FAVOURITE.getKey(), authentication));
@@ -733,8 +652,9 @@ public class ProviderManager extends ResourceCatalogueManager<ProviderBundle> im
         List<ProviderBundle> allUserProviders = getMy(null, authentication).getResults();
         for (ProviderBundle providerBundle : allUserProviders) {
             if (providerBundle.getProvider().getUsers().size() == 1) {
-                throw new ValidationException(String.format("Your user info cannot be deleted, because you are the solely Admin of the Provider [%s]. " +
-                        "You need to delete your Provider first or add more Admins.", providerBundle.getProvider().getName()));
+                throw new ValidationException(String.format("Your user info cannot be deleted, because you are the " +
+                        "solely Admin of the Provider [%s]. You need to delete your Provider first or add more Admins.",
+                        providerBundle.getProvider().getName()));
             }
         }
         logger.info("Attempting to delete all user events");
@@ -834,28 +754,16 @@ public class ProviderManager extends ResourceCatalogueManager<ProviderBundle> im
 
     @Override
     public ProviderBundle audit(String providerId, String catalogueId, String comment, LoggingInfo.ActionType actionType, Authentication auth) {
-        ProviderBundle provider = get(providerId, catalogueId, false);
-        Resource existingResource = getResource(provider.getId(), provider.getProvider().getCatalogueId(), false);
-        ProviderBundle existingProvider = deserialize(existingResource);
-
-        commonMethods.auditResource(existingProvider, comment, actionType, auth);
-        if (actionType.getKey().equals(LoggingInfo.ActionType.VALID.getKey())) {
-            existingProvider.setAuditState(Auditable.VALID);
-        }
-        if (actionType.getKey().equals(LoggingInfo.ActionType.INVALID.getKey())) {
-            existingProvider.setAuditState(Auditable.INVALID_AND_NOT_UPDATED);
-        }
+        ProviderBundle existingProvider = get(providerId, catalogueId, false);
+        existingProvider.audit(comment, actionType, auth);
 
         // send notification emails to Provider Admins
         registrationMailService.notifyProviderAdminsForBundleAuditing(existingProvider, existingProvider.getProvider().getUsers());
 
-        logger.info("User '{}-{}' audited Provider '{}'-'{}' with [actionType: {}]",
-                AuthenticationInfo.getFullName(auth), AuthenticationInfo.getEmail(auth).toLowerCase(),
+        logger.info("Audited Provider '{}'-'{}' with [actionType: {}]",
                 existingProvider.getProvider().getId(), existingProvider.getProvider().getName(), actionType);
 
-        existingResource.setPayload(serialize(existingProvider));
-        existingResource.setResourceType(getResourceType());
-        resourceService.updateResource(existingResource);
+        this.update(existingProvider, auth);
         return existingProvider;
     }
 

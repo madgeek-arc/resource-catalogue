@@ -99,11 +99,11 @@ public interface BundleOperations<T extends Bundle<?>> {
      * @param bundle
      * @return
      */
-    default Paging<LoggingInfo> getLoggingInfoHistory(T bundle) {
+    default List<LoggingInfo> getLoggingInfoHistory(T bundle) {
         if (bundle != null && bundle.getLoggingInfo() != null) {
             List<LoggingInfo> loggingInfoList = bundle.getLoggingInfo();
             loggingInfoList.sort(Comparator.comparing(LoggingInfo::getDate).reversed());
-            return new Browsing<>(loggingInfoList.size(), 0, loggingInfoList.size(), loggingInfoList, null);
+            return loggingInfoList;
         }
         return null;
     }

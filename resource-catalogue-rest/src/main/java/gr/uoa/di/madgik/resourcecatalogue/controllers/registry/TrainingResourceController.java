@@ -134,8 +134,8 @@ public class TrainingResourceController {
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.providerCanAddResources(#auth, #trainingResource)")
     public ResponseEntity<TrainingResource> addTrainingResource(@RequestBody TrainingResource trainingResource, @Parameter(hidden = true) Authentication auth) {
         TrainingResourceBundle ret = this.trainingResourceService.add(new TrainingResourceBundle(trainingResource), auth);
-        logger.info("User '{}' created a new Training Resource with title '{}' and id '{}'",
-                User.of(auth).getEmail().toLowerCase(), trainingResource.getTitle(), trainingResource.getId());
+        logger.info("Created a new Training Resource with title '{}' and id '{}'",
+                trainingResource.getTitle(), trainingResource.getId());
         return new ResponseEntity<>(ret.getTrainingResource(), HttpStatus.CREATED);
     }
 
@@ -270,7 +270,7 @@ public class TrainingResourceController {
                                                             @RequestParam Boolean active,
                                                             @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
-        logger.info("User '{}-{}' attempts to save Training Resource with id '{}' as '{}'", User.of(auth).getFullName(), User.of(auth).getEmail().toLowerCase(), id, active);
+        logger.info("Attempts to save Training Resource with id '{}' as '{}'", id, active);
         return ResponseEntity.ok(trainingResourceService.publish(id, active, auth));
     }
 
@@ -333,12 +333,12 @@ public class TrainingResourceController {
 
     // Get all modification details of a specific Resource based on id.
     @GetMapping(path = {"loggingInfoHistory/{prefix}/{suffix}"}, produces = {MediaType.APPLICATION_JSON_VALUE})
-    public ResponseEntity<Paging<LoggingInfo>> loggingInfoHistory(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
+    public ResponseEntity<List<LoggingInfo>> loggingInfoHistory(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
                                                                   @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix,
                                                                   @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId) {
         String id = prefix + "/" + suffix;
         TrainingResourceBundle bundle = trainingResourceService.get(id, catalogueId, false);
-        Paging<LoggingInfo> loggingInfoHistory = trainingResourceService.getLoggingInfoHistory(bundle);
+        List<LoggingInfo> loggingInfoHistory = trainingResourceService.getLoggingInfoHistory(bundle);
         return ResponseEntity.ok(loggingInfoHistory);
     }
 
@@ -377,8 +377,10 @@ public class TrainingResourceController {
     @PostMapping(path = "createPublicTrainingResource", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<TrainingResourceBundle> createPublicTrainingResource(@RequestBody TrainingResourceBundle trainingResourceBundle, @Parameter(hidden = true) Authentication auth) {
-        logger.info("User '{}-{}' attempts to create a Public Training Resource from Training Resource '{}'-'{}' of the '{}' Catalogue", User.of(auth).getFullName(),
-                User.of(auth).getEmail().toLowerCase(), trainingResourceBundle.getId(), trainingResourceBundle.getTrainingResource().getTitle(), trainingResourceBundle.getTrainingResource().getCatalogueId());
+        logger.info("Attempts to create a Public Training Resource from Training Resource '{}'-'{}' of the '{}' Catalogue",
+                trainingResourceBundle.getId(),
+                trainingResourceBundle.getTrainingResource().getTitle(),
+                trainingResourceBundle.getTrainingResource().getCatalogueId());
         return ResponseEntity.ok(trainingResourceService.createPublicResource(trainingResourceBundle, auth));
     }
 
@@ -438,7 +440,7 @@ public class TrainingResourceController {
     public ResponseEntity<TrainingResource> addDraftTrainingResource(@RequestBody TrainingResource trainingResource,
                                                                      @Parameter(hidden = true) Authentication auth) {
         TrainingResourceBundle trainingResourceBundle = draftTrainingResourceService.add(new TrainingResourceBundle(trainingResource), auth);
-        logger.info("User '{}' added the Draft Training Resource with name '{}' and id '{}'", User.of(auth).getEmail().toLowerCase(),
+        logger.info("Added the Draft Training Resource with name '{}' and id '{}'",
                 trainingResource.getTitle(), trainingResource.getId());
         return new ResponseEntity<>(trainingResourceBundle.getTrainingResource(), HttpStatus.CREATED);
     }
@@ -450,7 +452,7 @@ public class TrainingResourceController {
         TrainingResourceBundle trainingResourceBundle = draftTrainingResourceService.get(trainingResource.getId(), catalogueId, false);
         trainingResourceBundle.setTrainingResource(trainingResource);
         trainingResourceBundle = draftTrainingResourceService.update(trainingResourceBundle, auth);
-        logger.info("User '{}' updated the Draft Training Resource with name '{}' and id '{}'", User.of(auth).getEmail().toLowerCase(),
+        logger.info("Updated the Draft Training Resource with name '{}' and id '{}'",
                 trainingResource.getTitle(), trainingResource.getId());
         return new ResponseEntity<>(trainingResourceBundle.getTrainingResource(), HttpStatus.OK);
     }
@@ -469,8 +471,7 @@ public class TrainingResourceController {
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
         draftTrainingResourceService.delete(trainingResourceBundle);
-        logger.info("User '{}' deleted the Draft Training Resource '{}'-'{}'", User.of(auth).getEmail().toLowerCase(),
-                id, trainingResourceBundle.getTrainingResource().getTitle());
+        logger.info("Deleted the Draft Training Resource '{}'-'{}'", id, trainingResourceBundle.getTrainingResource().getTitle());
         return new ResponseEntity<>(trainingResourceBundle.getTrainingResource(), HttpStatus.OK);
     }
 

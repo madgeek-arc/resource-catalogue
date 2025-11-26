@@ -23,6 +23,7 @@ import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.registry.service.SearchService;
 import gr.uoa.di.madgik.registry.service.ServiceException;
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
+import gr.uoa.di.madgik.resourcecatalogue.dto.UserInfo;
 import gr.uoa.di.madgik.resourcecatalogue.exceptions.CatalogueResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
 import gr.uoa.di.madgik.resourcecatalogue.utils.*;
@@ -250,7 +251,7 @@ public class ServiceBundleManager extends ResourceCatalogueManager<ServiceBundle
         ret.setMetadata(Metadata.updateMetadata(existingService.getMetadata(), AuthenticationInfo.getFullName(auth)));
         ret.setResourceExtras(existingService.getResourceExtras());
         ret.setIdentifiers(existingService.getIdentifiers());
-        ret.setMigrationStatus(existingService.getMigrationStatus());
+//        ret.setMigrationStatus(existingService.getMigrationStatus());
 
         List<LoggingInfo> loggingInfoList = commonMethods.returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(existingService, auth);
         LoggingInfo loggingInfo;
@@ -349,54 +350,25 @@ public class ServiceBundleManager extends ResourceCatalogueManager<ServiceBundle
         }
         logger.trace("verifyResource with id: '{}' | status: '{}' | active: '{}'", id, status, active);
         ServiceBundle serviceBundle = get(id, catalogueId, false);
-        serviceBundle.setStatus(vocabularyService.get(status).getId());
-        ProviderBundle resourceProvider = providerService.get(serviceBundle.getService().getCatalogueId(), serviceBundle.getService().getResourceOrganisation(), auth);
-        List<LoggingInfo> loggingInfoList = commonMethods.returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(serviceBundle, auth);
-        LoggingInfo loggingInfo;
+        serviceBundle.onboard(vocabularyService.get(status).getId(), auth, null);
 
+        ProviderBundle resourceProvider = providerService.get(serviceBundle.getService().getCatalogueId(), serviceBundle.getService().getResourceOrganisation(), auth);
         switch (status) {
             case "pending resource":
-                // update Provider's templateStatus
                 resourceProvider.setTemplateStatus("pending template");
                 break;
             case "approved resource":
-                serviceBundle.setActive(active);
-                loggingInfo = commonMethods.createLoggingInfo(auth, LoggingInfo.Types.ONBOARD.getKey(),
-                        LoggingInfo.ActionType.APPROVED.getKey());
-                loggingInfoList.add(loggingInfo);
-                loggingInfoList.sort(Comparator.comparing(LoggingInfo::getDate));
-                serviceBundle.setLoggingInfo(loggingInfoList);
-
-                // latestOnboardingInfo
-                serviceBundle.setLatestOnboardingInfo(loggingInfo);
-
-                // update Provider's templateStatus
                 resourceProvider.setTemplateStatus("approved template");
                 break;
             case "rejected resource":
-                serviceBundle.setActive(false);
-                loggingInfo = commonMethods.createLoggingInfo(auth, LoggingInfo.Types.ONBOARD.getKey(),
-                        LoggingInfo.ActionType.REJECTED.getKey());
-                loggingInfoList.add(loggingInfo);
-                loggingInfoList.sort(Comparator.comparing(LoggingInfo::getDate));
-                serviceBundle.setLoggingInfo(loggingInfoList);
-
-                // latestOnboardingInfo
-                serviceBundle.setLatestOnboardingInfo(loggingInfo);
-
-                // update Provider's templateStatus
                 resourceProvider.setTemplateStatus("rejected template");
                 break;
             default:
                 break;
         }
+        providerService.update(resourceProvider, auth);
 
         logger.info("Verifying Service: {}", serviceBundle);
-        try {
-            providerService.update(resourceProvider, auth);
-        } catch (gr.uoa.di.madgik.registry.exception.ResourceNotFoundException e) {
-            throw new ResourceNotFoundException(e.getMessage());
-        }
         return super.update(serviceBundle, auth);
     }
 
@@ -418,16 +390,7 @@ public class ServiceBundleManager extends ResourceCatalogueManager<ServiceBundle
         if (active && activeProvider.isEmpty()) {
             throw new ResourceException("Service does not have active Providers", HttpStatus.CONFLICT);
         }
-        service.setActive(active);
-
-        List<LoggingInfo> loggingInfoList = commonMethods.createActivationLoggingInfo(service, active, auth);
-        loggingInfoList.sort(Comparator.comparing(LoggingInfo::getDate));
-        service.setLoggingInfo(loggingInfoList);
-
-        // latestLoggingInfo
-        service.setLatestUpdateInfo(commonMethods.setLatestLoggingInfo(loggingInfoList, LoggingInfo.Types.UPDATE.getKey()));
-        service.setLatestOnboardingInfo(commonMethods.setLatestLoggingInfo(loggingInfoList, LoggingInfo.Types.ONBOARD.getKey()));
-        service.setLatestAuditInfo(commonMethods.setLatestLoggingInfo(loggingInfoList, LoggingInfo.Types.AUDIT.getKey()));
+        service.markActive(active, auth);
 
         // active Service's related resources (ServiceExtensions && Subprofiles)
         publishServiceRelatedResources(service.getId(), service.getService().getCatalogueId(), active, auth);
@@ -437,82 +400,24 @@ public class ServiceBundleManager extends ResourceCatalogueManager<ServiceBundle
     }
 
     public void publishServiceRelatedResources(String serviceId, String catalogueId, Boolean active, Authentication auth) {
-        HelpdeskBundle helpdeskBundle = helpdeskService.get(serviceId, catalogueId);
-        MonitoringBundle monitoringBundle = monitoringService.get(serviceId, catalogueId);
-        DatasourceBundle datasourceBundle = datasourceService.get(serviceId, catalogueId);
-        if (active) {
-            logger.info("Activating all related resources of the Service with id: '{}'", serviceId);
-        } else {
-            logger.info("Deactivating all related resources of the Service with id: '{}'", serviceId);
-        }
-        if (helpdeskBundle != null) {
-            publishServiceExtensionsAndSubprofiles(helpdeskBundle, active, auth);
-        }
-        if (monitoringBundle != null) {
-            publishServiceExtensionsAndSubprofiles(monitoringBundle, active, auth);
-        }
-        if (datasourceBundle != null && datasourceBundle.getStatus().equals("approved datasource")) {
-            publishServiceExtensionsAndSubprofiles(datasourceBundle, active, auth);
-        }
-    }
+        DatasourceBundle bundle = datasourceService.get(serviceId, catalogueId);
+        logger.info("{} all related resources of the Service with id: '{}'", active ? "Activating" : "Deactivating", serviceId);
+        if (bundle != null && bundle.getStatus().equals("approved datasource")) {
+            bundle.markActive(active, auth);
 
-    private void publishServiceExtensionsAndSubprofiles(Bundle<?> bundle, boolean active, Authentication auth) {
-        List<LoggingInfo> loggingInfoList = commonMethods.createActivationLoggingInfo(bundle, active, auth);
-
-        // update Bundle's fields
-        bundle.setLoggingInfo(loggingInfoList);
-        bundle.setLatestUpdateInfo(loggingInfoList.getLast());
-        bundle.setActive(active);
-
-        if (bundle instanceof HelpdeskBundle) {
-            try {
-                logger.debug("Setting Helpdesk '{}' of the Service '{}' of the '{}' Catalogue to active: '{}'",
-                        bundle.getId(), ((HelpdeskBundle) bundle).getHelpdesk().getServiceId(),
-                        ((HelpdeskBundle) bundle).getHelpdesk().getCatalogueId(), bundle.isActive());
-                helpdeskService.updateBundle((HelpdeskBundle) bundle, auth);
-                HelpdeskBundle publicHelpdeskBundle =
-                        publicHelpdeskManager.getOrElseReturnNull(bundle.getIdentifiers().getPid(),
-                                ((HelpdeskBundle) bundle).getHelpdesk().getCatalogueId());
-                if (publicHelpdeskBundle != null) {
-                    publicHelpdeskManager.update((HelpdeskBundle) bundle, auth);
-                }
-            } catch (ResourceNotFoundException e) {
-                logger.error("Could not update Helpdesk '{}' of the Service '{}' of the '{}' Catalogue",
-                        bundle.getId(), ((HelpdeskBundle) bundle).getHelpdesk().getServiceId(),
-                        ((HelpdeskBundle) bundle).getHelpdesk().getCatalogueId());
-            }
-        } else if (bundle instanceof MonitoringBundle) {
-            try {
-                logger.debug("Setting Monitoring '{}' of the Service '{}' of the '{}' Catalogue to active: '{}'",
-                        bundle.getId(), ((MonitoringBundle) bundle).getMonitoring().getServiceId(),
-                        ((MonitoringBundle) bundle).getMonitoring().getCatalogueId(), bundle.isActive());
-                monitoringService.updateBundle((MonitoringBundle) bundle, auth);
-                MonitoringBundle publicMonitoringBundle =
-                        publicMonitoringManager.getOrElseReturnNull(bundle.getIdentifiers().getPid(),
-                                ((MonitoringBundle) bundle).getMonitoring().getCatalogueId());
-                if (publicMonitoringBundle != null) {
-                    publicMonitoringManager.update((MonitoringBundle) bundle, auth);
-                }
-            } catch (ResourceNotFoundException e) {
-                logger.error("Could not update Monitoring '{}' of the Service '{}' of the '{}' Catalogue",
-                        bundle.getId(), ((MonitoringBundle) bundle).getMonitoring().getServiceId(),
-                        ((MonitoringBundle) bundle).getMonitoring().getCatalogueId());
-            }
-        } else {
             try {
                 logger.debug("Setting Datasource '{}' of the Service '{}' of the '{}' Catalogue to active: '{}'",
-                        bundle.getId(), ((DatasourceBundle) bundle).getDatasource().getServiceId(),
-                        ((DatasourceBundle) bundle).getDatasource().getCatalogueId(), bundle.isActive());
-                datasourceService.updateBundle((DatasourceBundle) bundle, auth);
+                        bundle.getId(), bundle.getDatasource().getServiceId(),
+                        bundle.getDatasource().getCatalogueId(), bundle.isActive());
+                datasourceService.updateBundle(bundle, auth);
                 DatasourceBundle publicDatasourceBundle =
-                        publicDatasourceManager.getOrElseReturnNull(bundle.getIdentifiers().getPid(), ((DatasourceBundle) bundle).getDatasource().getCatalogueId());
+                        publicDatasourceManager.getOrElseReturnNull(bundle.getIdentifiers().getPid(), bundle.getDatasource().getCatalogueId());
                 if (publicDatasourceBundle != null) {
-                    publicDatasourceManager.update((DatasourceBundle) bundle, auth);
+                    publicDatasourceManager.update(bundle, auth);
                 }
             } catch (ResourceNotFoundException e) {
                 logger.error("Could not update Datasource '{}' of the Service '{}' of the '{}' Catalogue",
-                        bundle.getId(), ((DatasourceBundle) bundle).getDatasource().getServiceId(),
-                        ((DatasourceBundle) bundle).getDatasource().getCatalogueId());
+                        bundle.getId(), bundle.getDatasource().getServiceId(), bundle.getDatasource().getCatalogueId());
             }
         }
     }
@@ -521,19 +426,13 @@ public class ServiceBundleManager extends ResourceCatalogueManager<ServiceBundle
     public ServiceBundle audit(String serviceId, String catalogueId, String comment, LoggingInfo.ActionType actionType, Authentication auth) {
         ServiceBundle service = get(serviceId, catalogueId, false);
         ProviderBundle provider = providerService.get(service.getService().getCatalogueId(), service.getService().getResourceOrganisation(), auth);
-        commonMethods.auditResource(service, comment, actionType, auth);
-        if (actionType.getKey().equals(LoggingInfo.ActionType.VALID.getKey())) {
-            service.setAuditState(Auditable.VALID);
-        }
-        if (actionType.getKey().equals(LoggingInfo.ActionType.INVALID.getKey())) {
-            service.setAuditState(Auditable.INVALID_AND_NOT_UPDATED);
-        }
+        service.audit(comment, actionType, auth);
+
 
         // send notification emails to Provider Admins
         registrationMailService.notifyProviderAdminsForBundleAuditing(service, provider.getProvider().getUsers());
 
-        logger.info("User '{}-{}' audited Service '{}'-'{}' with [actionType: {}]",
-                AuthenticationInfo.getFullName(auth), AuthenticationInfo.getEmail(auth).toLowerCase(),
+        logger.info("Audited Service '{}'-'{}' with [actionType: {}]",
                 service.getService().getId(), service.getService().getName(), actionType);
         return super.update(service, auth);
     }
@@ -941,8 +840,7 @@ public class ServiceBundleManager extends ResourceCatalogueManager<ServiceBundle
         createLoggingInfoEntriesForResourceExtraUpdates(bundle, auth);
         validate(bundle);
         update(bundle, auth);
-        logger.info("User '{}'-'{}' updated field eoscIFGuidelines of the Resource '{}'",
-                AuthenticationInfo.getFullName(auth), AuthenticationInfo.getEmail(auth).toLowerCase(), resourceId);
+        logger.info("Updated field eoscIFGuidelines of the Resource '{}'", resourceId);
         return bundle;
     }
 
@@ -1004,8 +902,8 @@ public class ServiceBundleManager extends ResourceCatalogueManager<ServiceBundle
         // if user is Unauthorized, return active ONLY
         if (auth == null || !auth.isAuthenticated() || (
                 !securityService.hasRole(auth, "ROLE_PROVIDER") &&
-                !securityService.hasRole(auth, "ROLE_EPOT") &&
-                !securityService.hasRole(auth, "ROLE_ADMIN"))) {
+                        !securityService.hasRole(auth, "ROLE_EPOT") &&
+                        !securityService.hasRole(auth, "ROLE_ADMIN"))) {
             filter.addFilter("active", true);
             filter.addFilter("published", false);
         }

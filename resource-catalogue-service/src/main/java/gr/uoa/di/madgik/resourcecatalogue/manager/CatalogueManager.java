@@ -450,15 +450,14 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
 
     public CatalogueBundle audit(String id, String catalogueId, String comment, LoggingInfo.ActionType actionType, Authentication auth) {
         CatalogueBundle catalogue = get(id);
-        commonMethods.auditResource(catalogue, comment, actionType, auth);
+        catalogue.audit(comment, actionType, auth);
         if (actionType.getKey().equals(LoggingInfo.ActionType.VALID.getKey())) {
             catalogue.setAuditState(Auditable.VALID);
         }
         if (actionType.getKey().equals(LoggingInfo.ActionType.INVALID.getKey())) {
             catalogue.setAuditState(Auditable.INVALID_AND_NOT_UPDATED);
         }
-        logger.info("User '{}-{}' audited Catalogue '{}'-'{}' with [actionType: {}]",
-                AuthenticationInfo.getFullName(auth), AuthenticationInfo.getEmail(auth).toLowerCase(),
+        logger.info("Audited Catalogue '{}'-'{}' with [actionType: {}]",
                 catalogue.getCatalogue().getId(), catalogue.getCatalogue().getName(), actionType);
         return super.update(catalogue, auth);
     }
