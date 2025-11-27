@@ -210,7 +210,6 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
         ret.setActive(existingCatalogue.isActive());
         ret.setStatus(existingCatalogue.getStatus());
         ret.setSuspended(existingCatalogue.isSuspended());
-        ret.setAuditState(commonMethods.determineAuditState(ret.getLoggingInfo()));
         existingResource.setPayload(serialize(ret));
         existingResource.setResourceType(getResourceType());
         resourceService.updateResource(existingResource);
@@ -365,101 +364,46 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
             throw new ValidationException(String.format("Vocabulary %s does not consist a Catalogue State!", status));
         }
         logger.trace("verifyCatalogue with id: '{}' | status: '{}' | active: '{}'", id, status, active);
-        CatalogueBundle catalogue = get(id);
-        catalogue.setStatus(vocabularyService.get(status).getId());
-        List<LoggingInfo> loggingInfoList = commonMethods.returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(catalogue, auth);
-        LoggingInfo loggingInfo = null;
+        CatalogueBundle existingCatalogue = get(id);
+        existingCatalogue.markOnboard(status, auth, null);
 
-        switch (status) {
-            case "approved catalogue":
-                if (active == null) {
-                    active = true;
-                }
-                catalogue.setActive(active);
-                loggingInfo = commonMethods.createLoggingInfo(auth, LoggingInfo.Types.ONBOARD.getKey(),
-                        LoggingInfo.ActionType.APPROVED.getKey());
-                break;
-            case "rejected catalogue":
-                catalogue.setActive(false);
-                loggingInfo = commonMethods.createLoggingInfo(auth, LoggingInfo.Types.ONBOARD.getKey(),
-                        LoggingInfo.ActionType.REJECTED.getKey());
-                break;
-            default:
-                break;
-        }
-        loggingInfoList.add(loggingInfo);
-        loggingInfoList.sort(Comparator.comparing(LoggingInfo::getDate));
-        catalogue.setLoggingInfo(loggingInfoList);
-
-        // latestOnboardingInfo
-        catalogue.setLatestOnboardingInfo(loggingInfo);
-
-        logger.info("Verifying Catalogue: {}", catalogue);
-        return super.update(catalogue, auth);
+        logger.info("Verifying Catalogue: {}", existingCatalogue);
+        return super.update(existingCatalogue, auth);
     }
 
     @Override
     public CatalogueBundle publish(String id, Boolean active, Authentication auth) {
-        CatalogueBundle catalogue = get(id);
-        if ((catalogue.getStatus().equals(vocabularyService.get("pending catalogue").getId()) ||
-                catalogue.getStatus().equals(vocabularyService.get("rejected catalogue").getId())) && !catalogue.isActive()) {
+        CatalogueBundle existingCatalogue = get(id);
+        if ((existingCatalogue.getStatus().equals(vocabularyService.get("pending catalogue").getId()) ||
+                existingCatalogue.getStatus().equals(vocabularyService.get("rejected catalogue").getId())) && !existingCatalogue.isActive()) {
             throw new ResourceException(String.format("You cannot activate this Catalogue, because it's Inactive with status = [%s]",
-                    catalogue.getStatus()), HttpStatus.CONFLICT);
+                    existingCatalogue.getStatus()), HttpStatus.CONFLICT);
         }
-        List<LoggingInfo> loggingInfoList = commonMethods.returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(catalogue, auth);
-        LoggingInfo loggingInfo;
-
-        if (active == null) {
-            active = false;
-        }
-        catalogue.setActive(active);
-        if (!active) {
-            loggingInfo = LoggingInfo.systemUpdateLoggingInfo(LoggingInfo.ActionType.DEACTIVATED.getKey());
-        } else {
-            loggingInfo = LoggingInfo.systemUpdateLoggingInfo(LoggingInfo.ActionType.ACTIVATED.getKey());
-        }
-        loggingInfoList.add(loggingInfo);
-        catalogue.setLoggingInfo(loggingInfoList);
-
-        // latestLoggingInfo
-        catalogue.setLatestUpdateInfo(loggingInfo);
-        catalogue.setLatestOnboardingInfo(commonMethods.setLatestLoggingInfo(loggingInfoList, LoggingInfo.Types.ONBOARD.getKey()));
-        catalogue.setLatestAuditInfo(commonMethods.setLatestLoggingInfo(loggingInfoList, LoggingInfo.Types.AUDIT.getKey()));
-
-        return super.update(catalogue, auth);
+        existingCatalogue.markActive(active, auth);
+        return super.update(existingCatalogue, auth);
     }
 
     public CatalogueBundle suspend(String id, String catalogueId, boolean suspend, Authentication auth) {
-        CatalogueBundle catalogueBundle = get(id, auth);
-
-        // Suspend Catalogue
-        commonMethods.suspendResource(catalogueBundle, suspend, auth);
-        super.update(catalogueBundle, auth);
+        CatalogueBundle existingCatalogue = get(id, auth);
+        existingCatalogue.markSuspend(suspend, auth);
 
         // Suspend Catalogue's resources
         List<ProviderBundle> providers = providerService.getAll(createFacetFilter(id), auth).getResults();
-
         if (providers != null && !providers.isEmpty()) {
             for (ProviderBundle providerBundle : providers) {
                 providerService.suspend(providerBundle.getId(), id, suspend, auth);
             }
         }
 
-        return catalogueBundle;
+        return super.update(existingCatalogue, auth);
     }
 
     public CatalogueBundle audit(String id, String catalogueId, String comment, LoggingInfo.ActionType actionType, Authentication auth) {
-        CatalogueBundle catalogue = get(id);
-        catalogue.audit(comment, actionType, auth);
-        if (actionType.getKey().equals(LoggingInfo.ActionType.VALID.getKey())) {
-            catalogue.setAuditState(Auditable.VALID);
-        }
-        if (actionType.getKey().equals(LoggingInfo.ActionType.INVALID.getKey())) {
-            catalogue.setAuditState(Auditable.INVALID_AND_NOT_UPDATED);
-        }
+        CatalogueBundle existingCatalogue = get(id);
+        existingCatalogue.markAudit(comment, actionType, auth);
         logger.info("Audited Catalogue '{}'-'{}' with [actionType: {}]",
-                catalogue.getCatalogue().getId(), catalogue.getCatalogue().getName(), actionType);
-        return super.update(catalogue, auth);
+                existingCatalogue.getCatalogue().getId(), existingCatalogue.getCatalogue().getName(), actionType);
+        return super.update(existingCatalogue, auth);
     }
 
     private FacetFilter createFacetFilter(String catalogueId) {

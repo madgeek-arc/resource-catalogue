@@ -226,7 +226,6 @@ public class DeployableServiceManager extends ResourceCatalogueManager<Deployabl
         ret.setActive(existingDeployableService.isActive());
         ret.setStatus(existingDeployableService.getStatus());
         ret.setSuspended(existingDeployableService.isSuspended());
-        ret.setAuditState(commonMethods.determineAuditState(ret.getLoggingInfo()));
 
         // if Resource's status = "rejected resource", update to "pending resource" & Provider templateStatus to "pending template"
         if (existingDeployableService.getStatus().equals(vocabularyService.get("rejected resource").getId())) {
@@ -291,7 +290,7 @@ public class DeployableServiceManager extends ResourceCatalogueManager<Deployabl
     public void delete(DeployableServiceBundle deployableServiceBundle) {
         String catalogueId = deployableServiceBundle.getDeployableService().getCatalogueId();
         commonMethods.blockResourceDeletion(deployableServiceBundle.getStatus(), deployableServiceBundle.getMetadata().isPublished());
-        commonMethods.deleteResourceRelatedServiceExtensionsAndResourceInteroperabilityRecords(deployableServiceBundle.getId(), catalogueId, "deployable_service");
+        commonMethods.deleteResourceInteroperabilityRecords(deployableServiceBundle.getId(), "deployable_service");
         logger.info("Deleting Deployable Service: {}", deployableServiceBundle);
         super.delete(deployableServiceBundle);
     }
@@ -303,7 +302,7 @@ public class DeployableServiceManager extends ResourceCatalogueManager<Deployabl
         }
         logger.trace("verifyResource with id: '{}' | status: '{}' | active: '{}'", id, status, active);
         DeployableServiceBundle deployableServiceBundle = get(id, catalogueId, false);
-        deployableServiceBundle.onboard(vocabularyService.get(status).getId(), auth, null);
+        deployableServiceBundle.markOnboard(vocabularyService.get(status).getId(), auth, null);
         ProviderBundle resourceProvider = providerService.get(deployableServiceBundle.getDeployableService().getResourceOrganisation(),
                 deployableServiceBundle.getDeployableService().getCatalogueId(), false);
 
@@ -365,7 +364,7 @@ public class DeployableServiceManager extends ResourceCatalogueManager<Deployabl
     public DeployableServiceBundle audit(String deployableServiceId, String catalogueId, String comment,
                                          LoggingInfo.ActionType actionType, Authentication auth) {
         DeployableServiceBundle deployableService = get(deployableServiceId, catalogueId, false);
-        deployableService.audit(comment, actionType, auth);
+        deployableService.markAudit(comment, actionType, auth);
 
         ProviderBundle provider = providerService.get(deployableService.getDeployableService().getResourceOrganisation(),
                 deployableService.getDeployableService().getCatalogueId(), false);
@@ -612,10 +611,10 @@ public class DeployableServiceManager extends ResourceCatalogueManager<Deployabl
 
     @Override
     public DeployableServiceBundle suspend(String deployableServiceId, String catalogueId, boolean suspend, Authentication auth) {
-        DeployableServiceBundle deployableServiceBundle = get(deployableServiceId, catalogueId, false);
-        commonMethods.suspensionValidation(deployableServiceBundle, deployableServiceBundle.getDeployableService().getCatalogueId(),
-                deployableServiceBundle.getDeployableService().getResourceOrganisation(), suspend, auth);
-        commonMethods.suspendResource(deployableServiceBundle, suspend, auth);
-        return super.update(deployableServiceBundle, auth);
+        DeployableServiceBundle existingDS = get(deployableServiceId, catalogueId, false);
+        commonMethods.suspensionValidation(existingDS, existingDS.getDeployableService().getCatalogueId(),
+                existingDS.getDeployableService().getResourceOrganisation(), suspend, auth);
+        existingDS.markSuspend(suspend, auth);
+        return super.update(existingDS, auth);
     }
 }

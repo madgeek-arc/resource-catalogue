@@ -22,7 +22,6 @@ import gr.uoa.di.madgik.registry.service.ResourceService;
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
 import gr.uoa.di.madgik.resourcecatalogue.service.MigrationService;
 import gr.uoa.di.madgik.resourcecatalogue.service.SecurityService;
-import gr.uoa.di.madgik.resourcecatalogue.utils.AuthenticationInfo;
 import gr.uoa.di.madgik.resourcecatalogue.utils.JmsService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,8 +46,6 @@ public class MigrationManager implements MigrationService {
     private final ResourceService resourceService;
     private final ResourceInteroperabilityRecordManager resourceInteroperabilityRecordManager;
     private final PublicResourceInteroperabilityRecordService publicResourceInteroperabilityRecordManager;
-    private final HelpdeskManager helpdeskManager;
-    private final MonitoringManager monitoringManager;
     private final JmsService jmsService;
     private final SecurityService securityService;
 
@@ -64,7 +61,6 @@ public class MigrationManager implements MigrationService {
                             ProviderManager providerService, ResourceService resourceService,
                             ResourceInteroperabilityRecordManager resourceInteroperabilityRecordManager,
                             PublicResourceInteroperabilityRecordService publicResourceInteroperabilityRecordManager,
-                            HelpdeskManager helpdeskManager, MonitoringManager monitoringManager,
                             JmsService jmsService, SecurityService securityService) {
         this.serviceBundleManager = serviceBundleManager;
         this.publicServiceManager = publicServiceManager;
@@ -76,8 +72,6 @@ public class MigrationManager implements MigrationService {
         this.resourceService = resourceService;
         this.resourceInteroperabilityRecordManager = resourceInteroperabilityRecordManager;
         this.publicResourceInteroperabilityRecordManager = publicResourceInteroperabilityRecordManager;
-        this.helpdeskManager = helpdeskManager;
-        this.monitoringManager = monitoringManager;
         this.jmsService = jmsService;
         this.securityService = securityService;
     }
@@ -199,8 +193,6 @@ public class MigrationManager implements MigrationService {
         List<TrainingResourceBundle> allTrainingResources = trainingResourceManager.getAll(ff, securityService.getAdminAccess()).getResults();
         List<DatasourceBundle> allDatasourceBundles = datasourceManager.getAll(ff, securityService.getAdminAccess()).getResults();
         List<ResourceInteroperabilityRecordBundle> allResourceInteroperabilityRecords = resourceInteroperabilityRecordManager.getAll(ff, securityService.getAdminAccess()).getResults();
-        List<HelpdeskBundle> allHelpdeskBundles = helpdeskManager.getAll(ff, securityService.getAdminAccess()).getResults();
-        List<MonitoringBundle> allMonitoringBundles = monitoringManager.getAll(ff, securityService.getAdminAccess()).getResults();
 
         for (ServiceBundle serviceBundle : allServices) {
             boolean entered = false;
@@ -257,28 +249,6 @@ public class MigrationManager implements MigrationService {
                 resourceService.updateResource(resource);
                 // update Public Resource Interoperability Record
                 publicResourceInteroperabilityRecordManager.update(resourceInteroperabilityRecordBundle, securityService.getAdminAccess());
-            }
-        }
-
-        for (HelpdeskBundle helpdeskBundle : allHelpdeskBundles) {
-            if (helpdeskBundle.getHelpdesk().getServiceId().equals(oldResourceId)) {
-                helpdeskBundle.getHelpdesk().setServiceId(newResourceId);
-                Resource resource = helpdeskManager.getResource(helpdeskBundle.getId(),
-                        helpdeskBundle.getHelpdesk().getCatalogueId(), false);
-                resource.setPayload(helpdeskManager.serialize(helpdeskBundle));
-                resourceService.updateResource(resource);
-                jmsService.convertAndSendTopic("helpdesk.update", helpdeskBundle);
-            }
-        }
-
-        for (MonitoringBundle monitoringBundle : allMonitoringBundles) {
-            if (monitoringBundle.getMonitoring().getServiceId().equals(oldResourceId)) {
-                monitoringBundle.getMonitoring().setServiceId(newResourceId);
-                Resource resource = monitoringManager.getResource(monitoringBundle.getId(),
-                        monitoringBundle.getMonitoring().getCatalogueId(), false);
-                resource.setPayload(monitoringManager.serialize(monitoringBundle));
-                resourceService.updateResource(resource);
-                jmsService.convertAndSendTopic("monitoring.update", monitoringBundle);
             }
         }
     }

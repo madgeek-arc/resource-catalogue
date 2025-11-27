@@ -25,7 +25,6 @@ import gr.uoa.di.madgik.registry.service.VersionService;
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
 import gr.uoa.di.madgik.resourcecatalogue.dto.CatalogueValue;
 import gr.uoa.di.madgik.resourcecatalogue.dto.MapValues;
-import gr.uoa.di.madgik.resourcecatalogue.dto.UserInfo;
 import gr.uoa.di.madgik.resourcecatalogue.exceptions.CatalogueResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
 import gr.uoa.di.madgik.resourcecatalogue.utils.Auditable;
@@ -155,72 +154,54 @@ public class ProviderManager extends ResourceCatalogueManager<ProviderBundle> im
     public ProviderBundle update(ProviderBundle providerBundle, String catalogueId, String comment, Authentication auth) {
         logger.trace("Attempting to update the Provider with id '{}' of the Catalogue '{}'", providerBundle, providerBundle.getProvider().getCatalogueId());
 
-        ProviderBundle ret = ObjectUtils.clone(providerBundle);
-        Resource existingResource = getResource(ret.getId(), ret.getProvider().getCatalogueId(), false);
-        ProviderBundle existingProvider = deserialize(existingResource);
+        ProviderBundle existingProvider = get(providerBundle.getId(), providerBundle.getProvider().getCatalogueId(), false);
         // check if there are actual changes in the Provider
-        if (ret.getTemplateStatus().equals(existingProvider.getTemplateStatus()) && ret.getProvider().equals(existingProvider.getProvider())) {
-            if (ret.isSuspended() == existingProvider.isSuspended()) {
-                return ret;
+        if (providerBundle.getTemplateStatus().equals(existingProvider.getTemplateStatus()) && providerBundle.getProvider().equals(existingProvider.getProvider())) {
+            if (providerBundle.isSuspended() == existingProvider.isSuspended()) {
+                return providerBundle;
             }
         }
 
         if (catalogueId == null || catalogueId.isEmpty()) {
-            ret.getProvider().setCatalogueId(this.catalogueId);
+            providerBundle.getProvider().setCatalogueId(this.catalogueId);
         } else {
-            commonMethods.checkCatalogueIdConsistency(ret, catalogueId);
+            commonMethods.checkCatalogueIdConsistency(providerBundle, catalogueId);
         }
 
         // block Public Provider update
-        if (ret.getMetadata().isPublished()) {
+        if (providerBundle.getMetadata().isPublished()) {
             throw new ValidationException("You cannot directly update a Public Provider");
         }
 
-        validate(ret);
-        ret.setMetadata(Metadata.updateMetadata(ret.getMetadata(), AuthenticationInfo.getFullName(auth), AuthenticationInfo.getEmail(auth).toLowerCase()));
-        List<LoggingInfo> loggingInfoList = commonMethods.returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(ret, auth);
-        LoggingInfo loggingInfo = commonMethods.createLoggingInfo(auth, LoggingInfo.Types.UPDATE.getKey(),
-                LoggingInfo.ActionType.UPDATED.getKey(), comment);
-        loggingInfoList.add(loggingInfo);
-        ret.setLoggingInfo(loggingInfoList);
-
-        // latestLoggingInfo
-        ret.setLatestUpdateInfo(loggingInfo);
-        ret.setLatestOnboardingInfo(commonMethods.setLatestLoggingInfo(loggingInfoList, LoggingInfo.Types.ONBOARD.getKey()));
-        ret.setLatestAuditInfo(commonMethods.setLatestLoggingInfo(loggingInfoList, LoggingInfo.Types.AUDIT.getKey()));
+        validate(providerBundle);
+        providerBundle.markUpdate(auth, comment);
 
         // block catalogueId updates from Provider Admins
-        if (!securityService.hasRole(auth, "ROLE_ADMIN") && !existingProvider.getProvider().getCatalogueId().equals(ret.getProvider().getCatalogueId())) {
+        if (!securityService.hasRole(auth, "ROLE_ADMIN") && !existingProvider.getProvider().getCatalogueId().equals(providerBundle.getProvider().getCatalogueId())) {
             throw new ValidationException("You cannot change catalogueId");
         }
-        ret.setIdentifiers(existingProvider.getIdentifiers());
-        ret.setActive(existingProvider.isActive());
-        ret.setStatus(existingProvider.getStatus());
-        ret.setSuspended(existingProvider.isSuspended());
-        ret.setAuditState(commonMethods.determineAuditState(ret.getLoggingInfo()));
-        existingResource.setPayload(serialize(ret));
-        existingResource.setResourceType(getResourceType());
-        resourceService.updateResource(existingResource);
-        logger.debug("Updating Provider: {} of Catalogue: {}", ret, ret.getProvider().getCatalogueId());
+
+        super.update(providerBundle, auth);
+        logger.debug("Updating Provider: {} of Catalogue: {}", providerBundle, providerBundle.getProvider().getCatalogueId());
 
         // check if Provider has become a Legal Entity
-        checkAndAddProviderToHLEVocabulary(ret);
+        checkAndAddProviderToHLEVocabulary(providerBundle);
 
         // Send emails to newly added or deleted Admins
-        adminDifferences(ret, existingProvider);
+        adminDifferences(providerBundle, existingProvider);
 
         // send notification emails to Portal Admins
-        if (ret.getLatestAuditInfo() != null && ret.getLatestUpdateInfo() != null) {
-            long latestAudit = Long.parseLong(ret.getLatestAuditInfo().getDate());
-            long latestUpdate = Long.parseLong(ret.getLatestUpdateInfo().getDate());
-            if (latestAudit < latestUpdate && ret.getLatestAuditInfo().getActionType().equals(LoggingInfo.ActionType.INVALID.getKey())) {
-                registrationMailService.notifyPortalAdminsForInvalidProviderUpdate(ret);
+        if (providerBundle.getLatestAuditInfo() != null && providerBundle.getLatestUpdateInfo() != null) {
+            long latestAudit = Long.parseLong(providerBundle.getLatestAuditInfo().getDate());
+            long latestUpdate = Long.parseLong(providerBundle.getLatestUpdateInfo().getDate());
+            if (latestAudit < latestUpdate && providerBundle.getLatestAuditInfo().getActionType().equals(LoggingInfo.ActionType.INVALID.getKey())) {
+                registrationMailService.notifyPortalAdminsForInvalidProviderUpdate(providerBundle);
             }
         }
 
-        synchronizerService.syncUpdate(ret.getProvider());
+        synchronizerService.syncUpdate(providerBundle.getProvider());
 
-        return ret;
+        return providerBundle;
     }
 
     /**
@@ -444,15 +425,14 @@ public class ProviderManager extends ResourceCatalogueManager<ProviderBundle> im
         }
         logger.trace("verifyProvider with id: '{}' | status: '{}' | active: '{}'", id, status, active);
         ProviderBundle existingProvider = get(id, catalogueId, false);
-        existingProvider.onboard(status, auth, null);
+        existingProvider.markOnboard(status, auth, null);
 
-        switch (status) {
-            case "approved provider" -> checkAndAddProviderToHLEVocabulary(existingProvider);
+        if (status.equals("approved provider")) {
+            checkAndAddProviderToHLEVocabulary(existingProvider);
         }
 
         logger.info("Verifying Provider: {}", existingProvider);
-        super.update(existingProvider, auth);
-        return existingProvider;
+        return super.update(existingProvider, auth);
     }
 
     @Override
@@ -466,8 +446,7 @@ public class ProviderManager extends ResourceCatalogueManager<ProviderBundle> im
 
         existingProvider.markActive(active, auth);
         activateProviderResources(existingProvider.getId(), active, auth);
-        super.update(existingProvider, auth);
-        return existingProvider;
+        return super.update(existingProvider, auth);
     }
 
     @Override
@@ -563,7 +542,7 @@ public class ProviderManager extends ResourceCatalogueManager<ProviderBundle> im
                 }
 
                 // Activate/Deactivate Service's Extensions && Subprofiles
-                serviceBundleService.publishServiceRelatedResources(service.getId(),
+                serviceBundleService.publishServiceSubprofiles(service.getId(),
                         service.getService().getCatalogueId(), active, auth);
             }
         }
@@ -755,7 +734,7 @@ public class ProviderManager extends ResourceCatalogueManager<ProviderBundle> im
     @Override
     public ProviderBundle audit(String providerId, String catalogueId, String comment, LoggingInfo.ActionType actionType, Authentication auth) {
         ProviderBundle existingProvider = get(providerId, catalogueId, false);
-        existingProvider.audit(comment, actionType, auth);
+        existingProvider.markAudit(comment, actionType, auth);
 
         // send notification emails to Provider Admins
         registrationMailService.notifyProviderAdminsForBundleAuditing(existingProvider, existingProvider.getProvider().getUsers());
@@ -814,30 +793,24 @@ public class ProviderManager extends ResourceCatalogueManager<ProviderBundle> im
     }
 
     private ProviderBundle onboard(ProviderBundle provider, String catalogueId, Authentication auth) {
-        // create LoggingInfo
-        List<LoggingInfo> loggingInfoList = commonMethods.returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(provider, auth);
-        provider.setLoggingInfo(loggingInfoList);
         if (catalogueId == null || catalogueId.isEmpty() || catalogueId.equals(this.catalogueId)) {
             // set catalogueId = eosc
+            provider.markOnboard(vocabularyService.get("pending provider").getId(), auth, null);
             provider.getProvider().setCatalogueId(this.catalogueId);
-            provider.setActive(false);
-            provider.setStatus(vocabularyService.get("pending provider").getId());
             provider.setTemplateStatus(vocabularyService.get("no template status").getId());
             provider.setId(idCreator.generate(getResourceTypeName()));
             commonMethods.createIdentifiers(provider, getResourceTypeName(), false);
         } else {
+            List<LoggingInfo> loggingInfoList = provider.createRegistrationLoggingInfo(auth);
+            provider.setLoggingInfo(loggingInfoList);
+            provider.markOnboard(vocabularyService.get("approved provider").getId(), auth, null);
             commonMethods.checkCatalogueIdConsistency(provider, catalogueId);
-            provider.setActive(true);
-            provider.setStatus(vocabularyService.get("approved provider").getId());
             provider.setTemplateStatus(vocabularyService.get("approved template").getId());
-            loggingInfoList.add(commonMethods.createLoggingInfo(auth, LoggingInfo.Types.ONBOARD.getKey(),
-                    LoggingInfo.ActionType.APPROVED.getKey()));
             // check that external source has provided its own ID
             idCreator.validateId(provider.getId());
             commonMethods.createIdentifiers(provider, getResourceTypeName(), true);
         }
         provider.setAuditState(Auditable.NOT_AUDITED);
-        provider.setLatestOnboardingInfo(loggingInfoList.getLast());
 
         return provider;
     }
@@ -897,16 +870,10 @@ public class ProviderManager extends ResourceCatalogueManager<ProviderBundle> im
 
     @Override
     public ProviderBundle suspend(String providerId, String catalogueId, boolean suspend, Authentication auth) {
-        ProviderBundle providerBundle = get(providerId, catalogueId, false);
-        Resource existingResource = getResource(providerBundle.getId(), providerBundle.getProvider().getCatalogueId(), false);
-        ProviderBundle existingProvider = deserialize(existingResource);
+        ProviderBundle existingProvider = get(providerId, catalogueId, false);
         commonMethods.suspensionValidation(existingProvider, catalogueId, providerId, suspend, auth);
 
-        // Suspend Provider
-        commonMethods.suspendResource(existingProvider, suspend, auth);
-        existingResource.setPayload(serialize(existingProvider));
-        existingResource.setResourceType(getResourceType());
-        resourceService.updateResource(existingResource);
+        existingProvider.markSuspend(suspend, auth);
 
         // Suspend Provider's resources
         List<ServiceBundle> services = serviceBundleService.getResourceBundles(catalogueId, providerId, auth).getResults();
@@ -929,7 +896,7 @@ public class ProviderManager extends ResourceCatalogueManager<ProviderBundle> im
             }
         }
 
-        return providerBundle;
+        return super.update(existingProvider, auth);
     }
 
     @Override

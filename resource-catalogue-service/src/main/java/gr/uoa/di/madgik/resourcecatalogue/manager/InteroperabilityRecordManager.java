@@ -185,7 +185,6 @@ public class InteroperabilityRecordManager extends ResourceCatalogueManager<Inte
         ret.setActive(existingInteroperabilityRecord.isActive());
         ret.setStatus(existingInteroperabilityRecord.getStatus());
         ret.setSuspended(existingInteroperabilityRecord.isSuspended());
-        ret.setAuditState(commonMethods.determineAuditState(ret.getLoggingInfo()));
 
         // updated && created
         ret.getInteroperabilityRecord().setCreated(existingInteroperabilityRecord.getInteroperabilityRecord().getCreated());
@@ -231,7 +230,7 @@ public class InteroperabilityRecordManager extends ResourceCatalogueManager<Inte
         }
         logger.trace("verifyResource with id: '{}' | status: '{}' | active: '{}'", id, status, active);
         InteroperabilityRecordBundle interoperabilityRecordBundle = get(id, catalogueId, false);
-        interoperabilityRecordBundle.onboard(vocabularyService.get(status).getId(), auth, null);
+        interoperabilityRecordBundle.markOnboard(vocabularyService.get(status).getId(), auth, null);
 
         logger.info("Verified Interoperability Record with id: '{}' | status: '{}' | active: '{}'",
                 interoperabilityRecordBundle.getId(), status, active);
@@ -300,7 +299,7 @@ public class InteroperabilityRecordManager extends ResourceCatalogueManager<Inte
 
     public InteroperabilityRecordBundle audit(String id, String catalogueId, String comment, LoggingInfo.ActionType actionType, Authentication auth) {
         InteroperabilityRecordBundle interoperabilityRecordBundle = get(id, catalogueId, false);
-        interoperabilityRecordBundle.audit(comment, actionType, auth);
+        interoperabilityRecordBundle.markAudit(comment, actionType, auth);
 
         // send notification emails to Provider Admins
         ProviderBundle provider = providerService.get(interoperabilityRecordBundle.getInteroperabilityRecord().getCatalogueId(),
@@ -320,11 +319,11 @@ public class InteroperabilityRecordManager extends ResourceCatalogueManager<Inte
 
 
     public InteroperabilityRecordBundle suspend(String interoperabilityRecordId, String catalogueId, boolean suspend, Authentication auth) {
-        InteroperabilityRecordBundle interoperabilityRecordBundle = get(interoperabilityRecordId, catalogueId, false);
-        commonMethods.suspensionValidation(interoperabilityRecordBundle, interoperabilityRecordBundle.getInteroperabilityRecord().getCatalogueId(),
-                interoperabilityRecordBundle.getInteroperabilityRecord().getProviderId(), suspend, auth);
-        commonMethods.suspendResource(interoperabilityRecordBundle, suspend, auth);
-        return super.update(interoperabilityRecordBundle, auth);
+        InteroperabilityRecordBundle existingIG = get(interoperabilityRecordId, catalogueId, false);
+        commonMethods.suspensionValidation(existingIG, existingIG.getInteroperabilityRecord().getCatalogueId(),
+                existingIG.getInteroperabilityRecord().getProviderId(), suspend, auth);
+        existingIG.markSuspend(suspend, auth);
+        return super.update(existingIG, auth);
     }
 
     //FIXME: find a better way to get EOSC Monitoring IG - title is not unique

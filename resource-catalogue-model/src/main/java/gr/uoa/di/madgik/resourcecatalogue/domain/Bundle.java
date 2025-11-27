@@ -25,6 +25,7 @@ import org.springframework.security.core.Authentication;
 
 import java.beans.Transient;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 
@@ -63,13 +64,12 @@ public abstract class Bundle<T extends Identifiable> implements Identifiable {
     public Bundle() {
     }
 
-    public void onboard(String status, Authentication auth, String comment) {
+    public void markOnboard(String status, Authentication auth, String comment) {
         UserInfo user = UserInfo.of(auth);
         this.setStatus(status);
         this.setMetadata(Metadata.updateMetadata(this.getMetadata(), user.fullName(), user.email()));
         LoggingInfo onboardingInfo = null;
         if (status.toLowerCase().contains("pending")) {
-            this.setMetadata(Metadata.createMetadata(user.fullName(), user.email().toLowerCase()));
             this.setActive(false);
             onboardingInfo = LoggingInfo.createLoggingInfoEntry(
                     user, LoggingInfo.Types.ONBOARD.getKey(),
@@ -92,17 +92,19 @@ public abstract class Bundle<T extends Identifiable> implements Identifiable {
         this.getLoggingInfo().add(onboardingInfo);
     }
 
-    public void markUpdate(String status, UserInfo user, String comment) {
-        this.setStatus(status);
+    public void markUpdate(Authentication auth, String comment) {
+        UserInfo user = UserInfo.of(auth);
         this.setMetadata(Metadata.updateMetadata(this.getMetadata(), user.fullName(), user.email()));
         LoggingInfo updateInfo;
-        String type = status.split(" ")[0]; // get status prefix to find ActionType.fromString(type)
         updateInfo = LoggingInfo.createLoggingInfoEntry(
-                user, LoggingInfo.Types.UPDATE.getKey(),
-                LoggingInfo.ActionType.fromString(type).getKey(), comment
+                user,
+                LoggingInfo.Types.UPDATE.getKey(),
+                LoggingInfo.ActionType.UPDATED.getKey(),
+                comment
         );
         this.setLatestUpdateInfo(updateInfo);
         this.getLoggingInfo().add(updateInfo);
+        this.determineAuditState();
     }
 
     public void markActive(boolean active, Authentication auth) {
@@ -129,7 +131,7 @@ public abstract class Bundle<T extends Identifiable> implements Identifiable {
         this.latestUpdateInfo = loggingInfo;
     }
 
-    public void audit(String comment, LoggingInfo.ActionType actionType, Authentication auth) {
+    public void markAudit(String comment, LoggingInfo.ActionType actionType, Authentication auth) {
         String state;
         UserInfo user = UserInfo.of(auth);
         switch (actionType) {
@@ -154,7 +156,7 @@ public abstract class Bundle<T extends Identifiable> implements Identifiable {
         this.setLatestAuditInfo(loggingInfo);
     }
 
-    public List<LoggingInfo> createRegistrationInfoIfEmpty(Authentication auth) {
+    public List<LoggingInfo> createRegistrationLoggingInfo(Authentication auth) {
         List<LoggingInfo> loggingInfoList = new ArrayList<>();
         if (this.getLoggingInfo() != null && !this.getLoggingInfo().isEmpty()) {
             loggingInfoList = this.getLoggingInfo();
@@ -169,6 +171,71 @@ public abstract class Bundle<T extends Identifiable> implements Identifiable {
         return loggingInfoList;
     }
 
+    public void markSuspend(boolean suspend, Authentication auth) {
+        UserInfo user = UserInfo.of(auth);
+        this.setSuspended(suspend);
+        this.setMetadata(Metadata.updateMetadata(this.getMetadata(), user.fullName(), user.email()));
+
+        LoggingInfo loggingInfo;
+        if (suspend) {
+            loggingInfo = LoggingInfo.createLoggingInfoEntry(
+                    user,
+                    LoggingInfo.Types.UPDATE.getKey(),
+                    LoggingInfo.ActionType.SUSPENDED.getKey(),
+                    null
+            );
+        } else {
+            loggingInfo = LoggingInfo.createLoggingInfoEntry(
+                    user,
+                    LoggingInfo.Types.UPDATE.getKey(),
+                    LoggingInfo.ActionType.UNSUSPENDED.getKey(),
+                    null
+            );
+        }
+        this.loggingInfo.add(loggingInfo);
+        this.setLatestUpdateInfo(loggingInfo);
+    }
+
+    private void determineAuditState() {
+        List<LoggingInfo> sorted = new ArrayList<>(this.loggingInfo);
+        sorted.sort(Comparator.comparing(LoggingInfo::getDate).reversed());
+        boolean hasBeenAudited = false;
+        boolean hasBeenUpdatedAfterAudit = false;
+        String auditActionType = "";
+        int auditIndex = -1;
+        for (LoggingInfo loggingInfo : sorted) {
+            auditIndex++;
+            if (loggingInfo.getType().equals(LoggingInfo.Types.AUDIT.getKey())) {
+                hasBeenAudited = true;
+                auditActionType = loggingInfo.getActionType();
+                break;
+            }
+        }
+        // update after audit
+        if (hasBeenAudited) {
+            for (int i = 0; i < auditIndex; i++) {
+                if (sorted.get(i).getType().equals(LoggingInfo.Types.UPDATE.getKey())) {
+                    hasBeenUpdatedAfterAudit = true;
+                    break;
+                }
+            }
+        }
+
+        String auditState;
+        if (!hasBeenAudited) {
+            auditState = Auditable.NOT_AUDITED;
+        } else if (!hasBeenUpdatedAfterAudit) {
+            auditState = auditActionType.equals(LoggingInfo.ActionType.INVALID.getKey()) ?
+                    Auditable.INVALID_AND_NOT_UPDATED :
+                    Auditable.VALID;
+        } else {
+            auditState = auditActionType.equals(LoggingInfo.ActionType.INVALID.getKey()) ?
+                    Auditable.INVALID_AND_UPDATED :
+                    Auditable.VALID;
+        }
+
+        this.auditState = auditState;
+    }
 
     @Override
     public String getId() {

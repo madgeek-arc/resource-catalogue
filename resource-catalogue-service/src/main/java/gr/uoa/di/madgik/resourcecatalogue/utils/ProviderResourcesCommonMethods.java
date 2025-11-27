@@ -27,7 +27,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
@@ -44,8 +43,6 @@ public class ProviderResourcesCommonMethods {
     private final CatalogueService catalogueService;
     private final ProviderService providerService;
     private final DatasourceService datasourceService;
-    private final HelpdeskService helpdeskService;
-    private final MonitoringService monitoringService;
     private final ResourceInteroperabilityRecordService resourceInteroperabilityRecordService;
     private final VocabularyService vocabularyService;
     private final IdCreator idCreator;
@@ -53,8 +50,6 @@ public class ProviderResourcesCommonMethods {
     public ProviderResourcesCommonMethods(@Lazy CatalogueService catalogueService,
                                           @Lazy ProviderService providerService,
                                           @Lazy DatasourceService datasourceService,
-                                          @Lazy HelpdeskService helpdeskService,
-                                          @Lazy MonitoringService monitoringService,
                                           @Lazy ResourceInteroperabilityRecordService
                                                   resourceInteroperabilityRecordService,
                                           @Lazy VocabularyService vocabularyService,
@@ -62,8 +57,6 @@ public class ProviderResourcesCommonMethods {
         this.catalogueService = catalogueService;
         this.providerService = providerService;
         this.datasourceService = datasourceService;
-        this.helpdeskService = helpdeskService;
-        this.monitoringService = monitoringService;
         this.resourceInteroperabilityRecordService = resourceInteroperabilityRecordService;
         this.vocabularyService = vocabularyService;
         this.idCreator = idCreator;
@@ -129,29 +122,7 @@ public class ProviderResourcesCommonMethods {
         }
     }
 
-    public void suspendResource(Bundle<?> bundle, boolean suspend, Authentication auth) {
-        if (bundle != null) {
-            bundle.setSuspended(suspend);
-
-            LoggingInfo loggingInfo;
-            List<LoggingInfo> loggingInfoList = returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(bundle, auth);
-
-            // Create SUSPEND LoggingInfo
-            if (suspend) {
-                loggingInfo = createLoggingInfo(auth, LoggingInfo.Types.UPDATE.getKey(), LoggingInfo.ActionType.SUSPENDED.getKey());
-            } else {
-                loggingInfo = createLoggingInfo(auth, LoggingInfo.Types.UPDATE.getKey(), LoggingInfo.ActionType.UNSUSPENDED.getKey());
-            }
-            loggingInfoList.add(loggingInfo);
-            bundle.setLoggingInfo(loggingInfoList);
-            // latestOnboardingInfo
-            bundle.setLatestUpdateInfo(loggingInfo);
-
-            logger.info("User set 'suspended' of {} '{}' to '{}'", bundle.getPayload().getClass().getSimpleName(),
-                    bundle.getId(), suspend);
-        }
-    }
-
+    //TODO: move to Resource Catalogue specific validation file
     public void suspensionValidation(Bundle<?> bundle, String catalogueId, String providerId, boolean suspend, Authentication auth) {
         if (bundle.getMetadata().isPublished()) {
             throw new ResourceException("You cannot directly suspend a Public resource", HttpStatus.FORBIDDEN);
@@ -174,17 +145,6 @@ public class ProviderResourcesCommonMethods {
         }
     }
 
-//    public void auditResource(Bundle<?> bundle, String comment, LoggingInfo.ActionType actionType, Authentication auth) {
-//        LoggingInfo loggingInfo;
-//        List<LoggingInfo> loggingInfoList = returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(bundle, auth);
-//        loggingInfo = LoggingInfo.createLoggingInfoEntry(UserInfo.of(auth), LoggingInfo.Types.AUDIT.getKey(),
-//                actionType.getKey(), comment);
-//        loggingInfoList.add(loggingInfo);
-//        bundle.setLoggingInfo(loggingInfoList);
-//
-//        // latestAuditInfo
-//        bundle.setLatestAuditInfo(loggingInfo);
-//    }
 
     public List<LoggingInfo> returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(Bundle<?> bundle, Authentication auth) {
         List<LoggingInfo> loggingInfoList = new ArrayList<>();
@@ -204,30 +164,6 @@ public class ProviderResourcesCommonMethods {
     public LoggingInfo createLoggingInfo(Authentication auth, String type, String actionType, String comment) {
         return LoggingInfo.createLoggingInfoEntry(UserInfo.of(auth), type, actionType, comment);
     }
-
-//    public List<LoggingInfo> createActivationLoggingInfo(Bundle<?> bundle, boolean active, Authentication auth) {
-//        List<LoggingInfo> loggingInfoList = returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(bundle, auth);
-//        LoggingInfo loggingInfo;
-//
-//        // distinction between system's (onboarding stage) and user's activation
-//        if (active) {
-//            try {
-//                loggingInfo = createLoggingInfo(auth, LoggingInfo.Types.UPDATE.getKey(),
-//                        LoggingInfo.ActionType.ACTIVATED.getKey());
-//            } catch (InsufficientAuthenticationException e) {
-//                loggingInfo = LoggingInfo.systemUpdateLoggingInfo(LoggingInfo.ActionType.ACTIVATED.getKey());
-//            }
-//        } else {
-//            try {
-//                loggingInfo = createLoggingInfo(auth, LoggingInfo.Types.UPDATE.getKey(),
-//                        LoggingInfo.ActionType.DEACTIVATED.getKey());
-//            } catch (InsufficientAuthenticationException e) {
-//                loggingInfo = LoggingInfo.systemUpdateLoggingInfo(LoggingInfo.ActionType.DEACTIVATED.getKey());
-//            }
-//        }
-//        loggingInfoList.add(loggingInfo);
-//        return loggingInfoList;
-//    }
 
     public void createIdentifiers(Bundle<?> bundle, String resourceType, boolean external) {
         Identifiers identifiers = new Identifiers();
@@ -262,27 +198,7 @@ public class ProviderResourcesCommonMethods {
         }
     }
 
-    public void deleteResourceRelatedServiceExtensionsAndResourceInteroperabilityRecords(String resourceId, String catalogueId, String resourceType) {
-        // service extensions
-        HelpdeskBundle helpdeskBundle = helpdeskService.get(resourceId, catalogueId);
-        if (helpdeskBundle != null) {
-            try {
-                logger.info("Deleting Helpdesk of {} with id: '{}'", resourceType, resourceId);
-                helpdeskService.delete(helpdeskBundle);
-            } catch (ResourceNotFoundException e) {
-                logger.error(e.getMessage(), e);
-            }
-        }
-        MonitoringBundle monitoringBundle = monitoringService.get(resourceId, catalogueId);
-        if (monitoringBundle != null) {
-            try {
-                logger.info("Deleting Monitoring of {} with id: '{}'", resourceType, resourceId);
-                monitoringService.delete(monitoringBundle);
-            } catch (ResourceNotFoundException e) {
-                logger.error(e.getMessage(), e);
-            }
-        }
-        // resource interoperability records
+    public void deleteResourceInteroperabilityRecords(String resourceId, String resourceType) {
         ResourceInteroperabilityRecordBundle resourceInteroperabilityRecordBundle = resourceInteroperabilityRecordService.getWithResourceId(resourceId);
         if (resourceInteroperabilityRecordBundle != null) {
             try {
@@ -304,46 +220,46 @@ public class ProviderResourcesCommonMethods {
         return null;
     }
 
-    public String determineAuditState(List<LoggingInfo> loggingInfoList) {
-        List<LoggingInfo> sorted = new ArrayList<>(loggingInfoList);
-        sorted.sort(Comparator.comparing(LoggingInfo::getDate).reversed());
-        boolean hasBeenAudited = false;
-        boolean hasBeenUpdatedAfterAudit = false;
-        String auditActionType = "";
-        int auditIndex = -1;
-        for (LoggingInfo loggingInfo : sorted) {
-            auditIndex++;
-            if (loggingInfo.getType().equals(LoggingInfo.Types.AUDIT.getKey())) {
-                hasBeenAudited = true;
-                auditActionType = loggingInfo.getActionType();
-                break;
-            }
-        }
-        // update after audit
-        if (hasBeenAudited) {
-            for (int i = 0; i < auditIndex; i++) {
-                if (sorted.get(i).getType().equals(LoggingInfo.Types.UPDATE.getKey())) {
-                    hasBeenUpdatedAfterAudit = true;
-                    break;
-                }
-            }
-        }
-
-        String auditState;
-        if (!hasBeenAudited) {
-            auditState = Auditable.NOT_AUDITED;
-        } else if (!hasBeenUpdatedAfterAudit) {
-            auditState = auditActionType.equals(LoggingInfo.ActionType.INVALID.getKey()) ?
-                    Auditable.INVALID_AND_NOT_UPDATED :
-                    Auditable.VALID;
-        } else {
-            auditState = auditActionType.equals(LoggingInfo.ActionType.INVALID.getKey()) ?
-                    Auditable.INVALID_AND_UPDATED :
-                    Auditable.VALID;
-        }
-
-        return auditState;
-    }
+//    public String determineAuditState(List<LoggingInfo> loggingInfoList) {
+//        List<LoggingInfo> sorted = new ArrayList<>(loggingInfoList);
+//        sorted.sort(Comparator.comparing(LoggingInfo::getDate).reversed());
+//        boolean hasBeenAudited = false;
+//        boolean hasBeenUpdatedAfterAudit = false;
+//        String auditActionType = "";
+//        int auditIndex = -1;
+//        for (LoggingInfo loggingInfo : sorted) {
+//            auditIndex++;
+//            if (loggingInfo.getType().equals(LoggingInfo.Types.AUDIT.getKey())) {
+//                hasBeenAudited = true;
+//                auditActionType = loggingInfo.getActionType();
+//                break;
+//            }
+//        }
+//        // update after audit
+//        if (hasBeenAudited) {
+//            for (int i = 0; i < auditIndex; i++) {
+//                if (sorted.get(i).getType().equals(LoggingInfo.Types.UPDATE.getKey())) {
+//                    hasBeenUpdatedAfterAudit = true;
+//                    break;
+//                }
+//            }
+//        }
+//
+//        String auditState;
+//        if (!hasBeenAudited) {
+//            auditState = Auditable.NOT_AUDITED;
+//        } else if (!hasBeenUpdatedAfterAudit) {
+//            auditState = auditActionType.equals(LoggingInfo.ActionType.INVALID.getKey()) ?
+//                    Auditable.INVALID_AND_NOT_UPDATED :
+//                    Auditable.VALID;
+//        } else {
+//            auditState = auditActionType.equals(LoggingInfo.ActionType.INVALID.getKey()) ?
+//                    Auditable.INVALID_AND_UPDATED :
+//                    Auditable.VALID;
+//        }
+//
+//        return auditState;
+//    }
 
     public void addAuthenticatedUser(Object object, Authentication auth) {
         User authUser = User.of(auth);

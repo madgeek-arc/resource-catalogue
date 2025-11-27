@@ -221,5 +221,5 @@ public interface ServiceBundleService<T extends Bundle<?>> extends ResourceCatal
      * @param active      True/False
      * @param auth        Authentication
      */
-    void publishServiceRelatedResources(String serviceId, String catalogueId, Boolean active, Authentication auth);
+    void publishServiceSubprofiles(String serviceId, String catalogueId, Boolean active, Authentication auth);
 }

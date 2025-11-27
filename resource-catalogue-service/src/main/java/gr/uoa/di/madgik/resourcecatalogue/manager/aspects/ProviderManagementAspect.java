@@ -24,8 +24,10 @@ import gr.uoa.di.madgik.resourcecatalogue.manager.*;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
 import gr.uoa.di.madgik.resourcecatalogue.utils.ObjectUtils;
 import org.aspectj.lang.JoinPoint;
+import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.After;
 import org.aspectj.lang.annotation.AfterReturning;
+import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -183,16 +185,20 @@ public class ProviderManagementAspect {
         }
     }
 
-    @Async
-    @AfterReturning(pointcut = "execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ProviderManager.update(..)) " +
-            "&& args(providerBundle,..)", returning = "ret", argNames = "providerBundle,ret")
-    public void updatePublicProvider(ProviderBundle providerBundle, ProviderBundle ret) {
+    @Around("execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ProviderManager.update(..)) && args(providerBundle, ..)")
+    public Object updatePublicProvider(ProceedingJoinPoint pjp, ProviderBundle providerBundle) {
+        ProviderBundle init = ObjectUtils.clone(providerBundle);
+        ProviderBundle ret = null;
         try {
-            if (!ret.equals(providerBundle)) {
+            ret = (ProviderBundle) pjp.proceed();
+            if (!ret.equals(init)) {
                 publicProviderService.update(ObjectUtils.clone(ret), null);
             }
         } catch (ResourceException | ResourceNotFoundException ignore) {
+        } catch (Throwable e) {
+            throw new RuntimeException(e);
         }
+        return ret;
     }
 
     @Async
@@ -310,16 +316,20 @@ public class ProviderManagementAspect {
         }
     }
 
-    @Async
-    @AfterReturning(pointcut = "execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ServiceBundleManager.updateResource(..)) " +
-            "&& args(serviceBundle,..)", returning = "ret", argNames = "serviceBundle,ret")
-    public void updatePublicResource(ServiceBundle serviceBundle, ServiceBundle ret) {
+    @Around("execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ServiceBundleManager.updateResource(..)) && args(serviceBundle, ..)")
+    public Object updatePublicResource(ProceedingJoinPoint pjp, ServiceBundle serviceBundle) {
+        ServiceBundle init = ObjectUtils.clone(serviceBundle);
+        ServiceBundle ret = null;
         try {
-            if (!ret.equals(serviceBundle)) {
+            ret = (ServiceBundle) pjp.proceed();
+            if (!ret.equals(init)) {
                 publicServiceManager.update(ObjectUtils.clone(ret), null);
             }
         } catch (ResourceException | ResourceNotFoundException ignore) {
+        } catch (Throwable e) {
+            throw new RuntimeException(e);
         }
+        return ret;
     }
 
     @Async
@@ -335,16 +345,21 @@ public class ProviderManagementAspect {
         }
     }
 
-    @Async
-    @AfterReturning(pointcut = "execution(* gr.uoa.di.madgik.resourcecatalogue.manager.TrainingResourceManager.update(..)) " +
-            "&& args(trainingResourceBundle,..)", returning = "ret", argNames = "trainingResourceBundle,ret")
-    public void updatePublicResource(TrainingResourceBundle trainingResourceBundle, TrainingResourceBundle ret) {
+    @Around("execution(* gr.uoa.di.madgik.resourcecatalogue.manager.TrainingResourceManager.update(..)) " +
+            "&& args(trainingResourceBundle,..)")
+    public Object updatePublicResource(ProceedingJoinPoint pjp, TrainingResourceBundle trainingResourceBundle) {
+        TrainingResourceBundle init = ObjectUtils.clone(trainingResourceBundle);
+        TrainingResourceBundle ret = null;
         try {
-            if (!ret.equals(trainingResourceBundle)) {
+            ret = (TrainingResourceBundle) pjp.proceed();
+            if (!ret.equals(init)) {
                 publicTrainingResourceManager.update(ObjectUtils.clone(ret), null);
             }
         } catch (ResourceException | ResourceNotFoundException ignore) {
+        } catch (Throwable e) {
+            throw new RuntimeException(e);
         }
+        return ret;
     }
 
     @Async
@@ -360,16 +375,21 @@ public class ProviderManagementAspect {
         }
     }
 
-    @Async
-    @AfterReturning(pointcut = "execution(* gr.uoa.di.madgik.resourcecatalogue.manager.DeployableServiceManager.update(..)) " +
-            "&& args(deployableServiceBundle,..)", returning = "ret", argNames = "deployableServiceBundle,ret")
-    public void updatePublicResource(DeployableServiceBundle deployableServiceBundle, DeployableServiceBundle ret) {
+    @Around("execution(* gr.uoa.di.madgik.resourcecatalogue.manager.DeployableServiceManager.update(..)) " +
+            "&& args(deployableServiceBundle,..)")
+    public Object updatePublicResource(ProceedingJoinPoint pjp, DeployableServiceBundle deployableServiceBundle) {
+        DeployableServiceBundle init = ObjectUtils.clone(deployableServiceBundle);
+        DeployableServiceBundle ret = null;
         try {
-            if (!ret.equals(deployableServiceBundle)) {
+            ret = (DeployableServiceBundle) pjp.proceed();
+            if (!ret.equals(init)) {
                 publicDeployableServiceManager.update(ObjectUtils.clone(ret), null);
             }
         } catch (ResourceException | ResourceNotFoundException ignore) {
+        } catch (Throwable e) {
+            throw new RuntimeException(e);
         }
+        return ret;
     }
 
     @Async
@@ -385,16 +405,21 @@ public class ProviderManagementAspect {
         }
     }
 
-    @Async
-    @AfterReturning(pointcut = "execution(* gr.uoa.di.madgik.resourcecatalogue.manager.InteroperabilityRecordManager.update(..)) " +
-            "&& args(interoperabilityRecordBundle,..)", returning = "ret", argNames = "interoperabilityRecordBundle,ret")
-    public void updatePublicResource(InteroperabilityRecordBundle interoperabilityRecordBundle, InteroperabilityRecordBundle ret) {
+    @Around("execution(* gr.uoa.di.madgik.resourcecatalogue.manager.InteroperabilityRecordManager.update(..)) " +
+            "&& args(interoperabilityRecordBundle,..)")
+    public Object updatePublicResource(ProceedingJoinPoint pjp, InteroperabilityRecordBundle interoperabilityRecordBundle) {
+        InteroperabilityRecordBundle init = ObjectUtils.clone(interoperabilityRecordBundle);
+        InteroperabilityRecordBundle ret = null;
         try {
-            if (!ret.equals(interoperabilityRecordBundle)) {
+            ret = (InteroperabilityRecordBundle) pjp.proceed();
+            if (!ret.equals(init)) {
                 publicInteroperabilityRecordManager.update(ObjectUtils.clone(ret), null);
             }
         } catch (ResourceException | ResourceNotFoundException ignore) {
+        } catch (Throwable e) {
+            throw new RuntimeException(e);
         }
+        return ret;
     }
 
     @Async
@@ -513,16 +538,21 @@ public class ProviderManagementAspect {
         }
     }
 
-    @Async
-    @AfterReturning(pointcut = "execution(* gr.uoa.di.madgik.resourcecatalogue.manager.DatasourceManager.update(..)) " +
-            "&& args(datasourceBundle,..)", returning = "ret", argNames = "datasourceBundle,ret")
-    public void updatePublicResource(DatasourceBundle datasourceBundle, DatasourceBundle ret) {
+    @Around("execution(* gr.uoa.di.madgik.resourcecatalogue.manager.DatasourceManager.update(..)) " +
+            "&& args(datasourceBundle,..)")
+    public Object updatePublicResource(ProceedingJoinPoint pjp, DatasourceBundle datasourceBundle) {
+        DatasourceBundle init = ObjectUtils.clone(datasourceBundle);
+        DatasourceBundle ret = null;
         try {
-            if (!ret.equals(datasourceBundle)) {
+            ret = (DatasourceBundle) pjp.proceed();
+            if (!ret.equals(init)) {
                 publicDatasourceManager.update(ObjectUtils.clone(ret), null);
             }
         } catch (ResourceException | ResourceNotFoundException ignore) {
+        } catch (Throwable e) {
+            throw new RuntimeException(e);
         }
+        return ret;
     }
 
     @Async
@@ -556,16 +586,21 @@ public class ProviderManagementAspect {
         }
     }
 
-    @Async
-    @AfterReturning(pointcut = "execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ResourceInteroperabilityRecordManager.update(..)) " +
-            "&& args(resourceInteroperabilityRecordBundle,..)", returning = "ret", argNames = "resourceInteroperabilityRecordBundle,ret")
-    public void updatePublicResourceInteroperabilityRecord(ResourceInteroperabilityRecordBundle resourceInteroperabilityRecordBundle, ResourceInteroperabilityRecordBundle ret) {
+    @Around("execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ResourceInteroperabilityRecordManager.update(..)) " +
+            "&& args(resourceInteroperabilityRecordBundle,..)")
+    public Object updatePublicResource(ProceedingJoinPoint pjp, ResourceInteroperabilityRecordBundle resourceInteroperabilityRecordBundle) {
+        ResourceInteroperabilityRecordBundle init = ObjectUtils.clone(resourceInteroperabilityRecordBundle);
+        ResourceInteroperabilityRecordBundle ret = null;
         try {
-            if (!ret.equals(resourceInteroperabilityRecordBundle)) {
+            ret = (ResourceInteroperabilityRecordBundle) pjp.proceed();
+            if (!ret.equals(init)) {
                 publicResourceInteroperabilityRecordManager.update(ObjectUtils.clone(ret), null);
             }
         } catch (ResourceException | ResourceNotFoundException ignore) {
+        } catch (Throwable e) {
+            throw new RuntimeException(e);
         }
+        return ret;
     }
 
     @Async
@@ -588,16 +623,21 @@ public class ProviderManagementAspect {
         }
     }
 
-    @Async
-    @AfterReturning(pointcut = "execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ConfigurationTemplateManager.update(..)) " +
-            "&& args(configurationTemplateBundle,..)", returning = "ret", argNames = "configurationTemplateBundle,ret")
-    public void updatePublicConfigurationTemplate(ConfigurationTemplateBundle configurationTemplateBundle, ConfigurationTemplateBundle ret) {
+    @Around("execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ConfigurationTemplateManager.update(..)) " +
+            "&& args(configurationTemplateBundle,..)")
+    public Object updatePublicResource(ProceedingJoinPoint pjp, ConfigurationTemplateBundle configurationTemplateBundle) {
+        ConfigurationTemplateBundle init = ObjectUtils.clone(configurationTemplateBundle);
+        ConfigurationTemplateBundle ret = null;
         try {
-            if (!ret.equals(configurationTemplateBundle)) {
+            ret = (ConfigurationTemplateBundle) pjp.proceed();
+            if (!ret.equals(init)) {
                 publicConfigurationTemplateManager.update(ObjectUtils.clone(ret), null);
             }
         } catch (ResourceException | ResourceNotFoundException ignore) {
+        } catch (Throwable e) {
+            throw new RuntimeException(e);
         }
+        return ret;
     }
 
     @Async
@@ -620,16 +660,21 @@ public class ProviderManagementAspect {
         }
     }
 
-    @Async
-    @AfterReturning(pointcut = "execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ConfigurationTemplateInstanceManager.update(..)) " +
-            "&& args(configurationTemplateInstanceBundle,..)", returning = "ret", argNames = "configurationTemplateInstanceBundle,ret")
-    public void updatePublicConfigurationTemplateInstance(ConfigurationTemplateInstanceBundle configurationTemplateInstanceBundle, ConfigurationTemplateInstanceBundle ret) {
+    @Around("execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ConfigurationTemplateInstanceManager.update(..)) " +
+            "&& args(configurationTemplateInstanceBundle,..)")
+    public Object updatePublicResource(ProceedingJoinPoint pjp, ConfigurationTemplateInstanceBundle configurationTemplateInstanceBundle) {
+        ConfigurationTemplateInstanceBundle init = ObjectUtils.clone(configurationTemplateInstanceBundle);
+        ConfigurationTemplateInstanceBundle ret = null;
         try {
-            if (!ret.equals(configurationTemplateInstanceBundle)) {
+            ret = (ConfigurationTemplateInstanceBundle) pjp.proceed();
+            if (!ret.equals(init)) {
                 publicConfigurationTemplateInstanceManager.update(ObjectUtils.clone(ret), null);
             }
         } catch (ResourceException | ResourceNotFoundException ignore) {
+        } catch (Throwable e) {
+            throw new RuntimeException(e);
         }
+        return ret;
     }
 
     @Async
@@ -652,16 +697,21 @@ public class ProviderManagementAspect {
         }
     }
 
-    @Async
-    @AfterReturning(pointcut = "execution(* gr.uoa.di.madgik.resourcecatalogue.manager.AdapterManager.update(..)) " +
-            "&& args(adapterBundle,..)", returning = "ret", argNames = "adapterBundle,ret")
-    public void updatePublicAdapter(AdapterBundle adapterBundle, AdapterBundle ret) {
+    @Around("execution(* gr.uoa.di.madgik.resourcecatalogue.manager.AdapterManager.update(..)) " +
+            "&& args(adapterBundle,..)")
+    public Object updatePublicResource(ProceedingJoinPoint pjp, AdapterBundle adapterBundle) {
+        AdapterBundle init = ObjectUtils.clone(adapterBundle);
+        AdapterBundle ret = null;
         try {
-            if (!ret.equals(adapterBundle)) {
+            ret = (AdapterBundle) pjp.proceed();
+            if (!ret.equals(init)) {
                 publicAdapterManager.update(ObjectUtils.clone(ret), null);
             }
         } catch (ResourceException | ResourceNotFoundException ignore) {
+        } catch (Throwable e) {
+            throw new RuntimeException(e);
         }
+        return ret;
     }
 
     @Async

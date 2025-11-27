@@ -23,7 +23,6 @@ import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.registry.service.SearchService;
 import gr.uoa.di.madgik.registry.service.ServiceException;
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
-import gr.uoa.di.madgik.resourcecatalogue.dto.UserInfo;
 import gr.uoa.di.madgik.resourcecatalogue.exceptions.CatalogueResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
 import gr.uoa.di.madgik.resourcecatalogue.utils.*;
@@ -59,10 +58,6 @@ public class ServiceBundleManager extends ResourceCatalogueManager<ServiceBundle
     private final PublicServiceService publicServiceManager;
     private final MigrationService migrationService;
     private final DatasourceService datasourceService;
-    private final HelpdeskService helpdeskService;
-    private final MonitoringService monitoringService;
-    private final PublicHelpdeskService publicHelpdeskManager;
-    private final PublicMonitoringService publicMonitoringManager;
     private final PublicDatasourceService publicDatasourceManager;
     private final ResourceInteroperabilityRecordService rirService;
     private final ProviderResourcesCommonMethods commonMethods;
@@ -83,10 +78,6 @@ public class ServiceBundleManager extends ResourceCatalogueManager<ServiceBundle
                                 @Lazy PublicServiceService publicServiceManager,
                                 @Lazy MigrationService migrationService,
                                 @Lazy DatasourceService datasourceService,
-                                @Lazy HelpdeskService helpdeskService,
-                                @Lazy MonitoringService monitoringService,
-                                @Lazy PublicHelpdeskService publicHelpdeskManager,
-                                @Lazy PublicMonitoringService publicMonitoringManager,
                                 @Lazy PublicDatasourceService publicDatasourceManager,
                                 @Lazy ResourceInteroperabilityRecordService rirService,
                                 @Lazy ProviderResourcesCommonMethods commonMethods,
@@ -105,10 +96,6 @@ public class ServiceBundleManager extends ResourceCatalogueManager<ServiceBundle
         this.publicServiceManager = publicServiceManager;
         this.migrationService = migrationService;
         this.datasourceService = datasourceService;
-        this.helpdeskService = helpdeskService;
-        this.monitoringService = monitoringService;
-        this.publicHelpdeskManager = publicHelpdeskManager;
-        this.publicMonitoringManager = publicMonitoringManager;
         this.publicDatasourceManager = publicDatasourceManager;
         this.rirService = rirService;
         this.commonMethods = commonMethods;
@@ -278,7 +265,6 @@ public class ServiceBundleManager extends ResourceCatalogueManager<ServiceBundle
         ret.setActive(existingService.isActive());
         ret.setStatus(existingService.getStatus());
         ret.setSuspended(existingService.isSuspended());
-        ret.setAuditState(commonMethods.determineAuditState(ret.getLoggingInfo()));
 
         // if Resource's status = "rejected resource", update to "pending resource" & Provider templateStatus to "pending template"
         if (existingService.getStatus().equals(vocabularyService.get("rejected resource").getId())) {
@@ -328,7 +314,7 @@ public class ServiceBundleManager extends ResourceCatalogueManager<ServiceBundle
         String catalogue = serviceBundle.getService().getCatalogueId();
         commonMethods.blockResourceDeletion(serviceBundle.getStatus(), serviceBundle.getMetadata().isPublished());
         commonMethods.deleteResourceRelatedServiceSubprofiles(serviceBundle.getId(), catalogue);
-        commonMethods.deleteResourceRelatedServiceExtensionsAndResourceInteroperabilityRecords(serviceBundle.getId(), catalogue, "Service");
+        commonMethods.deleteResourceInteroperabilityRecords(serviceBundle.getId(), "Service");
         logger.info("Deleting Service: {}", serviceBundle);
         super.delete(serviceBundle);
         synchronizerService.syncDelete(serviceBundle.getPayload());
@@ -350,7 +336,7 @@ public class ServiceBundleManager extends ResourceCatalogueManager<ServiceBundle
         }
         logger.trace("verifyResource with id: '{}' | status: '{}' | active: '{}'", id, status, active);
         ServiceBundle serviceBundle = get(id, catalogueId, false);
-        serviceBundle.onboard(vocabularyService.get(status).getId(), auth, null);
+        serviceBundle.markOnboard(vocabularyService.get(status).getId(), auth, null);
 
         ProviderBundle resourceProvider = providerService.get(serviceBundle.getService().getCatalogueId(), serviceBundle.getService().getResourceOrganisation(), auth);
         switch (status) {
@@ -391,15 +377,13 @@ public class ServiceBundleManager extends ResourceCatalogueManager<ServiceBundle
             throw new ResourceException("Service does not have active Providers", HttpStatus.CONFLICT);
         }
         service.markActive(active, auth);
-
-        // active Service's related resources (ServiceExtensions && Subprofiles)
-        publishServiceRelatedResources(service.getId(), service.getService().getCatalogueId(), active, auth);
+        publishServiceSubprofiles(service.getId(), service.getService().getCatalogueId(), active, auth);
 
         this.update(service, auth);
         return service;
     }
 
-    public void publishServiceRelatedResources(String serviceId, String catalogueId, Boolean active, Authentication auth) {
+    public void publishServiceSubprofiles(String serviceId, String catalogueId, Boolean active, Authentication auth) {
         DatasourceBundle bundle = datasourceService.get(serviceId, catalogueId);
         logger.info("{} all related resources of the Service with id: '{}'", active ? "Activating" : "Deactivating", serviceId);
         if (bundle != null && bundle.getStatus().equals("approved datasource")) {
@@ -426,7 +410,7 @@ public class ServiceBundleManager extends ResourceCatalogueManager<ServiceBundle
     public ServiceBundle audit(String serviceId, String catalogueId, String comment, LoggingInfo.ActionType actionType, Authentication auth) {
         ServiceBundle service = get(serviceId, catalogueId, false);
         ProviderBundle provider = providerService.get(service.getService().getCatalogueId(), service.getService().getResourceOrganisation(), auth);
-        service.audit(comment, actionType, auth);
+        service.markAudit(comment, actionType, auth);
 
 
         // send notification emails to Provider Admins
@@ -571,50 +555,22 @@ public class ServiceBundleManager extends ResourceCatalogueManager<ServiceBundle
 
     @Override
     public ServiceBundle suspend(String serviceId, String catalogueId, boolean suspend, Authentication auth) {
-        ServiceBundle serviceBundle = get(serviceId, catalogueId, false);
-        commonMethods.suspensionValidation(serviceBundle, serviceBundle.getService().getCatalogueId(),
-                serviceBundle.getService().getResourceOrganisation(), suspend, auth);
-        commonMethods.suspendResource(serviceBundle, suspend, auth);
-        // suspend Service's sub-profiles
+        ServiceBundle existingService = get(serviceId, catalogueId, false);
+        commonMethods.suspensionValidation(existingService, existingService.getService().getCatalogueId(),
+                existingService.getService().getResourceOrganisation(), suspend, auth);
+        existingService.markSuspend(suspend, auth);
+
+        // Suspend Service's sub-profiles
         DatasourceBundle datasourceBundle = datasourceService.get(serviceId, catalogueId);
         if (datasourceBundle != null) {
             try {
-                commonMethods.suspendResource(datasourceBundle, suspend, auth);
+                datasourceBundle.markSuspend(suspend, auth);
                 datasourceService.update(datasourceBundle, auth);
             } catch (gr.uoa.di.madgik.registry.exception.ResourceNotFoundException e) {
                 throw new RuntimeException(e);
             }
         }
-        // suspend Service's extensions
-        HelpdeskBundle helpdeskBundle = helpdeskService.get(serviceId, serviceBundle.getService().getCatalogueId());
-        if (helpdeskBundle != null) {
-            try {
-                commonMethods.suspendResource(helpdeskBundle, suspend, auth);
-                helpdeskService.update(helpdeskBundle, auth);
-            } catch (gr.uoa.di.madgik.registry.exception.ResourceNotFoundException e) {
-                throw new RuntimeException(e);
-            }
-        }
-        MonitoringBundle monitoringBundle = monitoringService.get(serviceId, serviceBundle.getService().getCatalogueId());
-        if (monitoringBundle != null) {
-            try {
-                commonMethods.suspendResource(monitoringBundle, suspend, auth);
-                monitoringService.update(monitoringBundle, auth);
-            } catch (gr.uoa.di.madgik.registry.exception.ResourceNotFoundException e) {
-                throw new RuntimeException(e);
-            }
-        }
-        // suspend ResourceInteroperabilityRecord
-        ResourceInteroperabilityRecordBundle resourceInteroperabilityRecordBundle = rirService.getWithResourceId(serviceId);
-        if (resourceInteroperabilityRecordBundle != null) {
-            try {
-                commonMethods.suspendResource(resourceInteroperabilityRecordBundle, suspend, auth);
-                rirService.update(resourceInteroperabilityRecordBundle, auth);
-            } catch (gr.uoa.di.madgik.registry.exception.ResourceNotFoundException e) {
-                throw new RuntimeException(e);
-            }
-        }
-        return super.update(serviceBundle, auth);
+        return super.update(existingService, auth);
     }
 
     @Override

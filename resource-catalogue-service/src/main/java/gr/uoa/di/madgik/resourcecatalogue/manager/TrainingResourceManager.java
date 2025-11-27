@@ -58,8 +58,6 @@ public class TrainingResourceManager extends ResourceCatalogueManager<TrainingRe
     private final SecurityService securityService;
     private final RegistrationMailService registrationMailService;
     private final VocabularyService vocabularyService;
-    private final HelpdeskService helpdeskService;
-    private final MonitoringService monitoringService;
     private final ResourceInteroperabilityRecordService resourceInteroperabilityRecordService;
     private final CatalogueService catalogueService;
     private final PublicTrainingResourceService publicTrainingResourceManager;
@@ -84,8 +82,6 @@ public class TrainingResourceManager extends ResourceCatalogueManager<TrainingRe
                                    IdCreator idCreator, @Lazy SecurityService securityService,
                                    @Lazy RegistrationMailService registrationMailService,
                                    @Lazy VocabularyService vocabularyService,
-                                   @Lazy HelpdeskService helpdeskService,
-                                   @Lazy MonitoringService monitoringService,
                                    @Lazy ResourceInteroperabilityRecordService resourceInteroperabilityRecordService,
                                    CatalogueService catalogueService,
                                    PublicTrainingResourceService publicTrainingResourceManager,
@@ -100,8 +96,6 @@ public class TrainingResourceManager extends ResourceCatalogueManager<TrainingRe
         this.securityService = securityService;
         this.registrationMailService = registrationMailService;
         this.vocabularyService = vocabularyService;
-        this.helpdeskService = helpdeskService;
-        this.monitoringService = monitoringService;
         this.resourceInteroperabilityRecordService = resourceInteroperabilityRecordService;
         this.catalogueService = catalogueService;
         this.publicTrainingResourceManager = publicTrainingResourceManager;
@@ -249,7 +243,6 @@ public class TrainingResourceManager extends ResourceCatalogueManager<TrainingRe
         ret.setActive(existingTrainingResource.isActive());
         ret.setStatus(existingTrainingResource.getStatus());
         ret.setSuspended(existingTrainingResource.isSuspended());
-        ret.setAuditState(commonMethods.determineAuditState(ret.getLoggingInfo()));
 
         // if Resource's status = "rejected resource", update to "pending resource" & Provider templateStatus to "pending template"
         if (existingTrainingResource.getStatus().equals(vocabularyService.get("rejected resource").getId())) {
@@ -325,7 +318,7 @@ public class TrainingResourceManager extends ResourceCatalogueManager<TrainingRe
     public void delete(TrainingResourceBundle trainingResourceBundle) {
         String catalogueId = trainingResourceBundle.getTrainingResource().getCatalogueId();
         commonMethods.blockResourceDeletion(trainingResourceBundle.getStatus(), trainingResourceBundle.getMetadata().isPublished());
-        commonMethods.deleteResourceRelatedServiceExtensionsAndResourceInteroperabilityRecords(trainingResourceBundle.getId(), catalogueId, "TrainingResource");
+        commonMethods.deleteResourceInteroperabilityRecords(trainingResourceBundle.getId(), "TrainingResource");
         logger.info("Deleting Training Resource: {}", trainingResourceBundle);
         super.delete(trainingResourceBundle);
         synchronizerService.syncDelete(trainingResourceBundle.getTrainingResource());
@@ -338,7 +331,7 @@ public class TrainingResourceManager extends ResourceCatalogueManager<TrainingRe
         }
         logger.trace("verifyResource with id: '{}' | status: '{}' | active: '{}'", id, status, active);
         TrainingResourceBundle trainingResourceBundle = getCatalogueResource(catalogueId, id, auth);
-        trainingResourceBundle.onboard(vocabularyService.get(status).getId(), auth, null);
+        trainingResourceBundle.markOnboard(vocabularyService.get(status).getId(), auth, null);
         ProviderBundle resourceProvider = providerService.get(trainingResourceBundle.getTrainingResource().getCatalogueId(),
                 trainingResourceBundle.getTrainingResource().getResourceOrganisation(), auth);
 
@@ -349,7 +342,7 @@ public class TrainingResourceManager extends ResourceCatalogueManager<TrainingRe
         }
 
         logger.info("Verifying Training Resource: {}", trainingResourceBundle);
-            providerService.update(resourceProvider, auth);
+        providerService.update(resourceProvider, auth);
         return update(trainingResourceBundle, auth);
     }
 
@@ -400,7 +393,7 @@ public class TrainingResourceManager extends ResourceCatalogueManager<TrainingRe
     @Override
     public TrainingResourceBundle audit(String trainingResourceId, String catalogueId, String comment, LoggingInfo.ActionType actionType, Authentication auth) {
         TrainingResourceBundle trainingResource = get(trainingResourceId, catalogueId, false);
-        trainingResource.audit(comment, actionType, auth);
+        trainingResource.markAudit(comment, actionType, auth);
 
         // send notification emails to Provider Admins
         ProviderBundle provider = providerService.get(trainingResource.getTrainingResource().getCatalogueId(),
@@ -676,40 +669,10 @@ public class TrainingResourceManager extends ResourceCatalogueManager<TrainingRe
 
     @Override
     public TrainingResourceBundle suspend(String trainingResourceId, String catalogueId, boolean suspend, Authentication auth) {
-        TrainingResourceBundle trainingResourceBundle = get(trainingResourceId, catalogueId, false);
-        commonMethods.suspensionValidation(trainingResourceBundle, trainingResourceBundle.getTrainingResource().getCatalogueId(),
-                trainingResourceBundle.getTrainingResource().getResourceOrganisation(), suspend, auth);
-        commonMethods.suspendResource(trainingResourceBundle, suspend, auth);
-        // suspend Service's extensions
-        HelpdeskBundle helpdeskBundle = helpdeskService.get(trainingResourceId, trainingResourceBundle.getTrainingResource().getCatalogueId());
-        if (helpdeskBundle != null) {
-            try {
-                commonMethods.suspendResource(helpdeskBundle, suspend, auth);
-                helpdeskService.update(helpdeskBundle, auth);
-            } catch (gr.uoa.di.madgik.registry.exception.ResourceNotFoundException e) {
-                throw new RuntimeException(e);
-            }
-        }
-        MonitoringBundle monitoringBundle = monitoringService.get(trainingResourceId, trainingResourceBundle.getTrainingResource().getCatalogueId());
-        if (monitoringBundle != null) {
-            try {
-                commonMethods.suspendResource(monitoringBundle, suspend, auth);
-                monitoringService.update(monitoringBundle, auth);
-            } catch (gr.uoa.di.madgik.registry.exception.ResourceNotFoundException e) {
-                throw new RuntimeException(e);
-            }
-        }
-        // suspend ResourceInteroperabilityRecord
-        ResourceInteroperabilityRecordBundle resourceInteroperabilityRecordBundle = resourceInteroperabilityRecordService.getWithResourceId(trainingResourceId);
-        if (resourceInteroperabilityRecordBundle != null) {
-            try {
-                commonMethods.suspendResource(resourceInteroperabilityRecordBundle, suspend, auth);
-                resourceInteroperabilityRecordService.update(resourceInteroperabilityRecordBundle, auth);
-            } catch (gr.uoa.di.madgik.registry.exception.ResourceNotFoundException e) {
-                throw new RuntimeException(e);
-            }
-        }
-        return super.update(trainingResourceBundle, auth);
+        TrainingResourceBundle existingTR = get(trainingResourceId, catalogueId, false);
+        commonMethods.suspensionValidation(existingTR, existingTR.getTrainingResource().getCatalogueId(),
+                existingTR.getTrainingResource().getResourceOrganisation(), suspend, auth);
+        existingTR.markSuspend(suspend, auth);
+        return super.update(existingTR, auth);
     }
-
 }

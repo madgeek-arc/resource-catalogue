@@ -35,7 +35,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.core.Authentication;
 
-import java.util.Comparator;
 import java.util.List;
 
 @org.springframework.stereotype.Service
@@ -226,7 +225,7 @@ public class DatasourceManager extends ResourceCatalogueManager<DatasourceBundle
             throw new ValidationException("You cannot approve a Datasource when its Service is in Pending or Rejected state");
         }
 
-        datasourceBundle.onboard(vocabularyService.get(status).getId(), auth, null);
+        datasourceBundle.markOnboard(vocabularyService.get(status).getId(), auth, null);
 
         logger.info("Verifying Datasource with id: '{}' | status: '{}' | active: '{}'", datasourceBundle.getId(), status, active);
         return super.update(datasourceBundle, auth);

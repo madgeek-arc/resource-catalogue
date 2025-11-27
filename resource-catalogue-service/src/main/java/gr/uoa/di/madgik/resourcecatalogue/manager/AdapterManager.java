@@ -145,7 +145,6 @@ public class AdapterManager extends ResourceCatalogueManager<AdapterBundle> impl
         ret.setActive(existingAdapter.isActive());
         ret.setStatus(existingAdapter.getStatus());
         ret.setSuspended(existingAdapter.isSuspended());
-        ret.setAuditState(commonMethods.determineAuditState(ret.getLoggingInfo()));
         existingResource.setPayload(serialize(ret));
         existingResource.setResourceType(getResourceType());
         resourceService.updateResource(existingResource);
@@ -204,7 +203,7 @@ public class AdapterManager extends ResourceCatalogueManager<AdapterBundle> impl
         }
         logger.trace("verify adapter with id: '{}' | status: '{}' | active: '{}'", id, status, active);
         AdapterBundle existingAdapter = get(id, catalogueId, false);
-        existingAdapter.onboard(status, auth, null);
+        existingAdapter.markOnboard(status, auth, null);
 
         logger.info("Verifying Adapter: {}", existingAdapter);
         super.update(existingAdapter, null);
@@ -233,17 +232,17 @@ public class AdapterManager extends ResourceCatalogueManager<AdapterBundle> impl
 
     @Override
     public AdapterBundle suspend(String id, String catalogueId, boolean suspend, Authentication auth) {
-        AdapterBundle adapterBundle = get(id, catalogueId, false);
-        commonMethods.suspensionValidation(adapterBundle, adapterBundle.getAdapter().getCatalogueId(),
+        AdapterBundle existingAdapter = get(id, catalogueId, false);
+        commonMethods.suspensionValidation(existingAdapter, existingAdapter.getAdapter().getCatalogueId(),
                 null, suspend, auth);
-        commonMethods.suspendResource(adapterBundle, suspend, auth);
-        return super.update(adapterBundle, auth);
+        existingAdapter.markSuspend(suspend, auth);
+        return super.update(existingAdapter, auth);
     }
 
     @Override
     public AdapterBundle audit(String id, String catalogueId, String comment, LoggingInfo.ActionType actionType, Authentication auth) {
         AdapterBundle adapterBundle = get(id, catalogueId, false);
-        adapterBundle.audit(comment, actionType, auth);
+        adapterBundle.markAudit(comment, actionType, auth);
 
         logger.info("Audited Adapter '{}'-'{}' with [actionType: {}]",
                 adapterBundle.getAdapter().getId(),

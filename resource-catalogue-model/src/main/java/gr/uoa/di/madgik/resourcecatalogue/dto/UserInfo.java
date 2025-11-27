@@ -13,7 +13,7 @@ public record UserInfo(String sub, String email, String name, String surname, Li
         User user = Objects.requireNonNull(User.of(authentication));
         return new UserInfo(
                 user.getId(),
-                user.getEmail(),
+                user.getEmail().toLowerCase(),
                 user.getName(),
                 user.getSurname(),
                 authentication.getAuthorities()
