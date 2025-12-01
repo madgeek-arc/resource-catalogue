@@ -58,7 +58,6 @@ public class TrainingResourceManager extends ResourceCatalogueManager<TrainingRe
     private final SecurityService securityService;
     private final RegistrationMailService registrationMailService;
     private final VocabularyService vocabularyService;
-    private final ResourceInteroperabilityRecordService resourceInteroperabilityRecordService;
     private final CatalogueService catalogueService;
     private final PublicTrainingResourceService publicTrainingResourceManager;
     private final MigrationService migrationService;
@@ -82,7 +81,6 @@ public class TrainingResourceManager extends ResourceCatalogueManager<TrainingRe
                                    IdCreator idCreator, @Lazy SecurityService securityService,
                                    @Lazy RegistrationMailService registrationMailService,
                                    @Lazy VocabularyService vocabularyService,
-                                   @Lazy ResourceInteroperabilityRecordService resourceInteroperabilityRecordService,
                                    CatalogueService catalogueService,
                                    PublicTrainingResourceService publicTrainingResourceManager,
                                    SynchronizerService<TrainingResource> synchronizerService,
@@ -96,7 +94,6 @@ public class TrainingResourceManager extends ResourceCatalogueManager<TrainingRe
         this.securityService = securityService;
         this.registrationMailService = registrationMailService;
         this.vocabularyService = vocabularyService;
-        this.resourceInteroperabilityRecordService = resourceInteroperabilityRecordService;
         this.catalogueService = catalogueService;
         this.publicTrainingResourceManager = publicTrainingResourceManager;
         this.synchronizerService = synchronizerService;
@@ -331,7 +328,7 @@ public class TrainingResourceManager extends ResourceCatalogueManager<TrainingRe
         }
         logger.trace("verifyResource with id: '{}' | status: '{}' | active: '{}'", id, status, active);
         TrainingResourceBundle trainingResourceBundle = getCatalogueResource(catalogueId, id, auth);
-        trainingResourceBundle.markOnboard(vocabularyService.get(status).getId(), auth, null);
+        trainingResourceBundle.markOnboard(vocabularyService.get(status).getId(), active, auth, null);
         ProviderBundle resourceProvider = providerService.get(trainingResourceBundle.getTrainingResource().getCatalogueId(),
                 trainingResourceBundle.getTrainingResource().getResourceOrganisation(), auth);
 

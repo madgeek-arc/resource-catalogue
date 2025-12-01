@@ -54,12 +54,10 @@ public class ServiceBundleManager extends ResourceCatalogueManager<ServiceBundle
     private final SecurityService securityService;
     private final RegistrationMailService registrationMailService;
     private final VocabularyService vocabularyService;
-    private final CatalogueService catalogueService;
     private final PublicServiceService publicServiceManager;
     private final MigrationService migrationService;
     private final DatasourceService datasourceService;
     private final PublicDatasourceService publicDatasourceManager;
-    private final ResourceInteroperabilityRecordService rirService;
     private final ProviderResourcesCommonMethods commonMethods;
     private final SynchronizerService<Service> synchronizerService;
     private final Validator serviceValidator;
@@ -74,12 +72,10 @@ public class ServiceBundleManager extends ResourceCatalogueManager<ServiceBundle
                                 IdCreator idCreator, @Lazy SecurityService securityService,
                                 @Lazy RegistrationMailService registrationMailService,
                                 @Lazy VocabularyService vocabularyService,
-                                CatalogueService catalogueService,
                                 @Lazy PublicServiceService publicServiceManager,
                                 @Lazy MigrationService migrationService,
                                 @Lazy DatasourceService datasourceService,
                                 @Lazy PublicDatasourceService publicDatasourceManager,
-                                @Lazy ResourceInteroperabilityRecordService rirService,
                                 @Lazy ProviderResourcesCommonMethods commonMethods,
                                 SynchronizerService<Service> synchronizerService,
                                 @Qualifier("serviceValidator") Validator serviceValidator,
@@ -92,12 +88,10 @@ public class ServiceBundleManager extends ResourceCatalogueManager<ServiceBundle
         this.securityService = securityService;
         this.registrationMailService = registrationMailService;
         this.vocabularyService = vocabularyService;
-        this.catalogueService = catalogueService;
         this.publicServiceManager = publicServiceManager;
         this.migrationService = migrationService;
         this.datasourceService = datasourceService;
         this.publicDatasourceManager = publicDatasourceManager;
-        this.rirService = rirService;
         this.commonMethods = commonMethods;
         this.synchronizerService = synchronizerService;
         this.serviceValidator = serviceValidator;
@@ -336,7 +330,7 @@ public class ServiceBundleManager extends ResourceCatalogueManager<ServiceBundle
         }
         logger.trace("verifyResource with id: '{}' | status: '{}' | active: '{}'", id, status, active);
         ServiceBundle serviceBundle = get(id, catalogueId, false);
-        serviceBundle.markOnboard(vocabularyService.get(status).getId(), auth, null);
+        serviceBundle.markOnboard(vocabularyService.get(status).getId(), active, auth, null);
 
         ProviderBundle resourceProvider = providerService.get(serviceBundle.getService().getCatalogueId(), serviceBundle.getService().getResourceOrganisation(), auth);
         switch (status) {

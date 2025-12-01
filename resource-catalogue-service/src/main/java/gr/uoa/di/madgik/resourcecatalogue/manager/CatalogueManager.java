@@ -365,7 +365,7 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
         }
         logger.trace("verifyCatalogue with id: '{}' | status: '{}' | active: '{}'", id, status, active);
         CatalogueBundle existingCatalogue = get(id);
-        existingCatalogue.markOnboard(status, auth, null);
+        existingCatalogue.markOnboard(status, active, auth, null);
 
         logger.info("Verifying Catalogue: {}", existingCatalogue);
         return super.update(existingCatalogue, auth);

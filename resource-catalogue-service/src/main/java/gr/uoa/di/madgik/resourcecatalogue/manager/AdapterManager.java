@@ -155,25 +155,30 @@ public class AdapterManager extends ResourceCatalogueManager<AdapterBundle> impl
 
     //TODO: revisit if we want Adapters for external Catalogues
     private AdapterBundle onboard(AdapterBundle adapter, Authentication auth) {
-        // create LoggingInfo
-        List<LoggingInfo> loggingInfoList = commonMethods.returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(adapter, auth);
-        adapter.setLoggingInfo(loggingInfoList);
+
         adapter.getAdapter().setCatalogueId(this.catalogueId);
+        String status;
+        boolean active;
 
         if (securityService.hasRole(auth, "ROLE_ADMIN") || securityService.hasRole(auth, "ROLE_EPOT") ||
                 getProviderUserEmails().contains(AuthenticationInfo.getEmail(auth).toLowerCase())) {
-            adapter.setActive(true);
-            adapter.setStatus(vocabularyService.get("approved adapter").getId());
+//            adapter.setActive(true);
+//            adapter.setStatus(vocabularyService.get("approved adapter").getId());
+            active = true;
+            status = vocabularyService.get("approved adapter").getId();
         } else if (securityService.hasRole(auth, "ROLE_USER")) {
-            adapter.setActive(false);
-            adapter.setStatus(vocabularyService.get("pending adapter").getId());
+//            adapter.setActive(false);
+//            adapter.setStatus(vocabularyService.get("pending adapter").getId());
+            active = false;
+            status = vocabularyService.get("pending adapter").getId();
         } else {
             throw new AccessDeniedException("You do not have permission to perform this action");
         }
+        adapter.markOnboard(status, active, auth, null);
         adapter.setId(idCreator.generate(getResourceTypeName()));
         commonMethods.createIdentifiers(adapter, getResourceTypeName(), false);
         adapter.setAuditState(Auditable.NOT_AUDITED);
-        adapter.setLatestOnboardingInfo(loggingInfoList.getLast());
+//        adapter.setLatestOnboardingInfo(loggingInfoList.getLast());
 
         return adapter;
     }
@@ -203,7 +208,7 @@ public class AdapterManager extends ResourceCatalogueManager<AdapterBundle> impl
         }
         logger.trace("verify adapter with id: '{}' | status: '{}' | active: '{}'", id, status, active);
         AdapterBundle existingAdapter = get(id, catalogueId, false);
-        existingAdapter.markOnboard(status, auth, null);
+        existingAdapter.markOnboard(status, active, auth, null);
 
         logger.info("Verifying Adapter: {}", existingAdapter);
         super.update(existingAdapter, null);

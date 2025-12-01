@@ -29,7 +29,6 @@ import gr.uoa.di.madgik.resourcecatalogue.exceptions.CatalogueResourceNotFoundEx
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
 import gr.uoa.di.madgik.resourcecatalogue.utils.Auditable;
 import gr.uoa.di.madgik.resourcecatalogue.utils.AuthenticationInfo;
-import gr.uoa.di.madgik.resourcecatalogue.utils.ObjectUtils;
 import gr.uoa.di.madgik.resourcecatalogue.utils.ProviderResourcesCommonMethods;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,6 +39,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 
 import java.time.Instant;
 import java.time.ZoneId;
@@ -140,7 +140,7 @@ public class ProviderManager extends ResourceCatalogueManager<ProviderBundle> im
 
         registrationMailService.sendEmailsToNewlyAddedProviderAdmins(provider, null);
 
-        synchronizerService.syncAdd(provider.getProvider());
+//        synchronizerService.syncAdd(provider.getProvider()); // TODO: remove this?
 
         return ret;
     }
@@ -168,18 +168,18 @@ public class ProviderManager extends ResourceCatalogueManager<ProviderBundle> im
             commonMethods.checkCatalogueIdConsistency(providerBundle, catalogueId);
         }
 
-        // block Public Provider update
-        if (providerBundle.getMetadata().isPublished()) {
-            throw new ValidationException("You cannot directly update a Public Provider");
-        }
+//        // block Public Provider update // TODO: is this necessary? the metadata can be altered only by admins
+//        if (providerBundle.getMetadata().isPublished()) {
+//            throw new ValidationException("You cannot directly update a Public Provider");
+//        }
 
         validate(providerBundle);
         providerBundle.markUpdate(auth, comment);
 
-        // block catalogueId updates from Provider Admins
-        if (!securityService.hasRole(auth, "ROLE_ADMIN") && !existingProvider.getProvider().getCatalogueId().equals(providerBundle.getProvider().getCatalogueId())) {
-            throw new ValidationException("You cannot change catalogueId");
-        }
+//        // block catalogueId updates from Provider Admins // TODO: is this necessary? the metadata can be altered only by admins
+//        if (!securityService.hasRole(auth, "ROLE_ADMIN") && !existingProvider.getProvider().getCatalogueId().equals(providerBundle.getProvider().getCatalogueId())) {
+//            throw new ValidationException("You cannot change catalogueId");
+//        }
 
         super.update(providerBundle, auth);
         logger.debug("Updating Provider: {} of Catalogue: {}", providerBundle, providerBundle.getProvider().getCatalogueId());
@@ -187,21 +187,26 @@ public class ProviderManager extends ResourceCatalogueManager<ProviderBundle> im
         // check if Provider has become a Legal Entity
         checkAndAddProviderToHLEVocabulary(providerBundle);
 
+        sendEmailsAfterProviderUpdate(providerBundle, existingProvider);
+
+//        synchronizerService.syncUpdate(providerBundle.getProvider()); // TODO: remove this?
+
+        return providerBundle;
+    }
+
+    private void sendEmailsAfterProviderUpdate(ProviderBundle providerBundle, ProviderBundle existingProvider) {
         // Send emails to newly added or deleted Admins
         adminDifferences(providerBundle, existingProvider);
 
         // send notification emails to Portal Admins
-        if (providerBundle.getLatestAuditInfo() != null && providerBundle.getLatestUpdateInfo() != null) {
+        if (providerBundle.getLatestAuditInfo() != null &&
+                providerBundle.getLatestAuditInfo().getActionType().equals(LoggingInfo.ActionType.INVALID.getKey())) {
             long latestAudit = Long.parseLong(providerBundle.getLatestAuditInfo().getDate());
             long latestUpdate = Long.parseLong(providerBundle.getLatestUpdateInfo().getDate());
-            if (latestAudit < latestUpdate && providerBundle.getLatestAuditInfo().getActionType().equals(LoggingInfo.ActionType.INVALID.getKey())) {
+            if (latestAudit < latestUpdate) {
                 registrationMailService.notifyPortalAdminsForInvalidProviderUpdate(providerBundle);
             }
         }
-
-        synchronizerService.syncUpdate(providerBundle.getProvider());
-
-        return providerBundle;
     }
 
     /**
@@ -425,7 +430,7 @@ public class ProviderManager extends ResourceCatalogueManager<ProviderBundle> im
         }
         logger.trace("verifyProvider with id: '{}' | status: '{}' | active: '{}'", id, status, active);
         ProviderBundle existingProvider = get(id, catalogueId, false);
-        existingProvider.markOnboard(status, auth, null);
+        existingProvider.markOnboard(status, active, auth, null);
 
         if (status.equals("approved provider")) {
             checkAndAddProviderToHLEVocabulary(existingProvider);
@@ -795,15 +800,15 @@ public class ProviderManager extends ResourceCatalogueManager<ProviderBundle> im
     private ProviderBundle onboard(ProviderBundle provider, String catalogueId, Authentication auth) {
         if (catalogueId == null || catalogueId.isEmpty() || catalogueId.equals(this.catalogueId)) {
             // set catalogueId = eosc
-            provider.markOnboard(vocabularyService.get("pending provider").getId(), auth, null);
+            provider.markOnboard(vocabularyService.get("pending provider").getId(), /*TODO: check this*/false, auth, null);
             provider.getProvider().setCatalogueId(this.catalogueId);
             provider.setTemplateStatus(vocabularyService.get("no template status").getId());
             provider.setId(idCreator.generate(getResourceTypeName()));
             commonMethods.createIdentifiers(provider, getResourceTypeName(), false);
         } else {
-            List<LoggingInfo> loggingInfoList = provider.createRegistrationLoggingInfo(auth);
-            provider.setLoggingInfo(loggingInfoList);
-            provider.markOnboard(vocabularyService.get("approved provider").getId(), auth, null);
+//            List<LoggingInfo> loggingInfoList = provider.createRegistrationLoggingInfo(auth);
+//            provider.setLoggingInfo(loggingInfoList);
+            provider.markOnboard(vocabularyService.get("approved provider").getId(), true, auth, null);
             commonMethods.checkCatalogueIdConsistency(provider, catalogueId);
             provider.setTemplateStatus(vocabularyService.get("approved template").getId());
             // check that external source has provided its own ID
@@ -816,6 +821,8 @@ public class ProviderManager extends ResourceCatalogueManager<ProviderBundle> im
     }
 
     private void checkAndAddProviderToHLEVocabulary(ProviderBundle providerBundle) {
+        // FIXME: This method is faulty. Adds new HLE voc every time the name of a Provider changes.
+        //  replace with "checkAndAddProviderToHLEVocabulary_fixed" but hle vocabulary migration is needed (id changes)
         if (providerBundle.getStatus().equals("approved provider") && providerBundle.getProvider().isLegalEntity()) {
             List<String> allHLENames = vocabularyService.getByType(Vocabulary.Type.PROVIDER_HOSTING_LEGAL_ENTITY)
                     .stream().map(Vocabulary::getName).toList();
@@ -836,6 +843,45 @@ public class ProviderManager extends ResourceCatalogueManager<ProviderBundle> im
         logger.info("Creating a new Hosting Legal Entity Vocabulary with id: [{}] and name: [{}]",
                 hle.getId(), hle.getName());
         vocabularyService.add(hle, null);
+    }
+
+    /**
+     * Replace {@link #checkAndAddProviderToHLEVocabulary(ProviderBundle bundle)} with this method.
+    **/
+    private void checkAndAddProviderToHLEVocabulary_fixed(ProviderBundle providerBundle) {
+        if (providerBundle.getStatus().toLowerCase().contains("approved") && providerBundle.getProvider().isLegalEntity()) {
+            addUpdateProviderHLEVocabulary(providerBundle);
+        }
+    }
+
+    private void addUpdateProviderHLEVocabulary(ProviderBundle providerBundle) {
+        String hleId = createProviderHleId(providerBundle);
+        Vocabulary hle = vocabularyService.get();
+        if (hle != null) {
+            if (!hle.getName().equals(providerBundle.getProvider().getName())) { // update name
+                hle.setName(providerBundle.getProvider().getName());
+                vocabularyService.update(hle, null);
+            }
+        } else { // create new entry
+            hle = new Vocabulary();
+            hle.setId(hleId);
+            hle.setName(providerBundle.getProvider().getName());
+            hle.setType(Vocabulary.Type.PROVIDER_HOSTING_LEGAL_ENTITY.getKey());
+            hle.setExtras(new HashMap<>() {{
+                put("catalogueId", providerBundle.getProvider().getCatalogueId());
+            }});
+            logger.info("Creating a new Hosting Legal Entity Vocabulary with id: [{}] and name: [{}]",
+                    hle.getId(), hle.getName());
+            vocabularyService.add(hle, null);
+        }
+    }
+
+    private String createProviderHleId(ProviderBundle providerBundle) {
+        return "%s-%s".formatted(
+                Vocabulary.Type.PROVIDER_HOSTING_LEGAL_ENTITY.getKey().toLowerCase().replace(" ", "_"),
+//                idCreator.sanitizeString(providerBundle.getProvider().getId())
+                providerBundle.getProvider().getId()
+        );
     }
 
     @Override

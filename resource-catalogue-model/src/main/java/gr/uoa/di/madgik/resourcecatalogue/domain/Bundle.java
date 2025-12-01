@@ -64,9 +64,10 @@ public abstract class Bundle<T extends Identifiable> implements Identifiable {
     public Bundle() {
     }
 
-    public void markOnboard(String status, Authentication auth, String comment) {
+    public void markOnboard(String status, boolean active, Authentication auth, String comment) {
         UserInfo user = UserInfo.of(auth);
         this.setStatus(status);
+        this.setActive(active); // TODO: use this or markActive() to create logging info?
         this.setMetadata(Metadata.updateMetadata(this.getMetadata(), user.fullName(), user.email()));
         LoggingInfo onboardingInfo = null;
         if (status.toLowerCase().contains("pending")) {

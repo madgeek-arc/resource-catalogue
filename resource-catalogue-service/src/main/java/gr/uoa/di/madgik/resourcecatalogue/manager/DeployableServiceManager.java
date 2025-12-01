@@ -302,7 +302,7 @@ public class DeployableServiceManager extends ResourceCatalogueManager<Deployabl
         }
         logger.trace("verifyResource with id: '{}' | status: '{}' | active: '{}'", id, status, active);
         DeployableServiceBundle deployableServiceBundle = get(id, catalogueId, false);
-        deployableServiceBundle.markOnboard(vocabularyService.get(status).getId(), auth, null);
+        deployableServiceBundle.markOnboard(vocabularyService.get(status).getId(), active, auth, null);
         ProviderBundle resourceProvider = providerService.get(deployableServiceBundle.getDeployableService().getResourceOrganisation(),
                 deployableServiceBundle.getDeployableService().getCatalogueId(), false);
 

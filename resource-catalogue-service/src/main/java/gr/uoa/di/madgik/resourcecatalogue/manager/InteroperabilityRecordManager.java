@@ -230,7 +230,7 @@ public class InteroperabilityRecordManager extends ResourceCatalogueManager<Inte
         }
         logger.trace("verifyResource with id: '{}' | status: '{}' | active: '{}'", id, status, active);
         InteroperabilityRecordBundle interoperabilityRecordBundle = get(id, catalogueId, false);
-        interoperabilityRecordBundle.markOnboard(vocabularyService.get(status).getId(), auth, null);
+        interoperabilityRecordBundle.markOnboard(vocabularyService.get(status).getId(), active, auth, null);
 
         logger.info("Verified Interoperability Record with id: '{}' | status: '{}' | active: '{}'",
                 interoperabilityRecordBundle.getId(), status, active);

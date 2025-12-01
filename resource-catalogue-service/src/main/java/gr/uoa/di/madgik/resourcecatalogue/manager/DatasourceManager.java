@@ -225,7 +225,7 @@ public class DatasourceManager extends ResourceCatalogueManager<DatasourceBundle
             throw new ValidationException("You cannot approve a Datasource when its Service is in Pending or Rejected state");
         }
 
-        datasourceBundle.markOnboard(vocabularyService.get(status).getId(), auth, null);
+        datasourceBundle.markOnboard(vocabularyService.get(status).getId(), active, auth, null);
 
         logger.info("Verifying Datasource with id: '{}' | status: '{}' | active: '{}'", datasourceBundle.getId(), status, active);
         return super.update(datasourceBundle, auth);
