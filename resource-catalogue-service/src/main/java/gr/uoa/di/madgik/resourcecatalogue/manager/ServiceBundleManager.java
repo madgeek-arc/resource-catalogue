@@ -389,7 +389,7 @@ public class ServiceBundleManager extends ResourceCatalogueManager<ServiceBundle
                         bundle.getDatasource().getCatalogueId(), bundle.isActive());
                 datasourceService.updateBundle(bundle, auth);
                 DatasourceBundle publicDatasourceBundle =
-                        publicDatasourceManager.getOrElseReturnNull(bundle.getIdentifiers().getPid(), bundle.getDatasource().getCatalogueId());
+                        publicDatasourceManager.getOrElseReturnNull(bundle.getIdentifiers().getPid());
                 if (publicDatasourceBundle != null) {
                     publicDatasourceManager.update(bundle, auth);
                 }

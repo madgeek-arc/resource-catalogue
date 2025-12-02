@@ -25,13 +25,14 @@ import java.lang.reflect.Method;
 
 public class ObjectUtils {
 
+    private static final ObjectMapper objectMapper = new ObjectMapper();
+
     private ObjectUtils() {
     }
 
     private static final Logger logger = LoggerFactory.getLogger(ObjectUtils.class);
 
     public static <T> T clone(T object) {
-        ObjectMapper objectMapper = new ObjectMapper();
         T deepCopy = null;
         try {
             String json = objectMapper.writeValueAsString(object);

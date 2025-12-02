@@ -16,39 +16,31 @@
 
 package gr.uoa.di.madgik.resourcecatalogue.manager;
 
-import gr.uoa.di.madgik.registry.domain.Browsing;
-import gr.uoa.di.madgik.registry.domain.FacetFilter;
-import gr.uoa.di.madgik.registry.exception.ResourceException;
-import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Bundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.ConfigurationTemplateInstanceBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.ServiceBundle;
 import gr.uoa.di.madgik.resourcecatalogue.exceptions.CatalogueResourceNotFoundException;
+import gr.uoa.di.madgik.resourcecatalogue.manager.pids.PidIssuer;
 import gr.uoa.di.madgik.resourcecatalogue.service.ServiceBundleService;
 import gr.uoa.di.madgik.resourcecatalogue.service.TrainingResourceService;
+import gr.uoa.di.madgik.resourcecatalogue.utils.FacetLabelService;
 import gr.uoa.di.madgik.resourcecatalogue.utils.JmsService;
-import org.apache.commons.beanutils.BeanUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
-import java.lang.reflect.InvocationTargetException;
-
 @Service("publicConfigurationTemplateInstanceManager")
-public class PublicConfigurationTemplateInstanceService extends ResourceCatalogueManager<ConfigurationTemplateInstanceBundle>
+public class PublicConfigurationTemplateInstanceService
+        extends AbstractPublicResourceManager<ConfigurationTemplateInstanceBundle>
         implements PublicResourceService<ConfigurationTemplateInstanceBundle> {
 
-    private static final Logger logger = LoggerFactory.getLogger(PublicConfigurationTemplateInstanceService.class);
-    private final JmsService jmsService;
     private final ServiceBundleService<ServiceBundle> serviceBundleService;
     private final TrainingResourceService trainingResourceService;
 
     public PublicConfigurationTemplateInstanceService(JmsService jmsService,
+                                                      PidIssuer pidIssuer,
+                                                      FacetLabelService facetLabelService,
                                                       ServiceBundleService<ServiceBundle> serviceBundleService,
                                                       TrainingResourceService trainingResourceService) {
-        super(ConfigurationTemplateInstanceBundle.class);
-        this.jmsService = jmsService;
+        super(ConfigurationTemplateInstanceBundle.class, jmsService, pidIssuer, facetLabelService);
         this.serviceBundleService = serviceBundleService;
         this.trainingResourceService = trainingResourceService;
     }
@@ -56,70 +48,6 @@ public class PublicConfigurationTemplateInstanceService extends ResourceCatalogu
     @Override
     public String getResourceTypeName() {
         return "configuration_template_instance";
-    }
-
-    @Override
-    public Browsing<ConfigurationTemplateInstanceBundle> getAll(FacetFilter facetFilter, Authentication authentication) {
-        return super.getAll(facetFilter, authentication);
-    }
-
-    // TODO: Refactor id, resourceId, payload's interoperabilityRecordId creations when more Catalogues are supported
-    @Override
-    public ConfigurationTemplateInstanceBundle add(ConfigurationTemplateInstanceBundle configurationTemplateInstanceBundle, Authentication authentication) {
-        String lowerLevelResourceId = configurationTemplateInstanceBundle.getId();
-        configurationTemplateInstanceBundle.setId(configurationTemplateInstanceBundle.getIdentifiers().getPid());
-        configurationTemplateInstanceBundle.getMetadata().setPublished(true);
-
-        // set public id to resourceId
-        updateIdsToPublic(configurationTemplateInstanceBundle);
-        ConfigurationTemplateInstanceBundle ret;
-        logger.info("ConfigurationTemplateInstanceBundle '{}' is being published with id '{}'",
-                lowerLevelResourceId, configurationTemplateInstanceBundle.getId());
-        ret = super.add(configurationTemplateInstanceBundle, null);
-        jmsService.convertAndSendTopic("configuration_template_instance.create", configurationTemplateInstanceBundle);
-        return ret;
-    }
-
-    @Override
-    public ConfigurationTemplateInstanceBundle update(ConfigurationTemplateInstanceBundle configurationTemplateInstanceBundle, Authentication authentication) {
-        ConfigurationTemplateInstanceBundle published = super.get(
-                configurationTemplateInstanceBundle.getIdentifiers().getPid(),
-                configurationTemplateInstanceBundle.getConfigurationTemplateInstance().getCatalogueId(), true);
-        ConfigurationTemplateInstanceBundle ret = super.get(
-                configurationTemplateInstanceBundle.getIdentifiers().getPid(),
-                configurationTemplateInstanceBundle.getConfigurationTemplateInstance().getCatalogueId(), true);
-        try {
-            BeanUtils.copyProperties(ret, configurationTemplateInstanceBundle);
-        } catch (IllegalAccessException | InvocationTargetException e) {
-            logger.info("Could not copy properties.");
-        }
-
-        // set public id to resourceId
-        updateIdsToPublic(ret);
-        ret.setIdentifiers(published.getIdentifiers());
-        ret.getConfigurationTemplateInstance().setPayload(published.getConfigurationTemplateInstance().getPayload());
-        ret.setId(published.getId());
-        ret.getMetadata().setPublished(true);
-        logger.info("Updating public ConfigurationTemplateInstance with id '{}'", ret.getId());
-        ret = super.update(ret, null);
-        jmsService.convertAndSendTopic("configuration_template_instance.update", ret);
-        return ret;
-    }
-
-    @Override
-    public void delete(ConfigurationTemplateInstanceBundle configurationTemplateInstanceBundle) {
-        try {
-            ConfigurationTemplateInstanceBundle publicConfigurationTemplateInstanceBundle =
-                    get(configurationTemplateInstanceBundle.getIdentifiers().getPid(),
-                            configurationTemplateInstanceBundle.getConfigurationTemplateInstance().getCatalogueId(),
-                            true);
-            logger.info("Deleting public ConfigurationTemplateInstanceBundle with id '{}'",
-                    publicConfigurationTemplateInstanceBundle.getId());
-            super.delete(publicConfigurationTemplateInstanceBundle);
-            jmsService.convertAndSendTopic("configuration_template_instance.delete",
-                    publicConfigurationTemplateInstanceBundle);
-        } catch (ResourceException | ResourceNotFoundException ignore) {
-        }
     }
 
     //TODO: Refactor if CTIs can belong to a different from the Project's Catalogue

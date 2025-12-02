@@ -42,13 +42,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service("publicTrainingResourceManager")
-public class PublicTrainingResourceService extends ResourceCatalogueManager<TrainingResourceBundle>
+public class PublicTrainingResourceService
+        extends AbstractPublicResourceManager<TrainingResourceBundle>
         implements PublicResourceService<TrainingResourceBundle> {
 
-    private static final Logger logger = LoggerFactory.getLogger(PublicTrainingResourceService.class);
-    private final JmsService jmsService;
-    private final PidIssuer pidIssuer;
-    private final FacetLabelService facetLabelService;
     private final ProviderService providerService;
     private final ServiceBundleService<ServiceBundle> serviceBundleService;
     private final TrainingResourceService trainingResourceService;
@@ -62,10 +59,7 @@ public class PublicTrainingResourceService extends ResourceCatalogueManager<Trai
                                          ProviderService providerService,
                                          @Lazy ServiceBundleService<ServiceBundle> serviceBundleService,
                                          @Lazy TrainingResourceService trainingResourceService) {
-        super(TrainingResourceBundle.class);
-        this.jmsService = jmsService;
-        this.pidIssuer = pidIssuer;
-        this.facetLabelService = facetLabelService;
+        super(TrainingResourceBundle.class, jmsService, pidIssuer, facetLabelService);
         this.providerService = providerService;
         this.serviceBundleService = serviceBundleService;
         this.trainingResourceService = trainingResourceService;
@@ -74,72 +68,6 @@ public class PublicTrainingResourceService extends ResourceCatalogueManager<Trai
     @Override
     public String getResourceTypeName() {
         return "training_resource";
-    }
-
-    @Override
-    public Browsing<TrainingResourceBundle> getAll(FacetFilter facetFilter, Authentication authentication) {
-        Browsing<TrainingResourceBundle> browsing = super.getAll(facetFilter, authentication);
-        if (!browsing.getResults().isEmpty() && !browsing.getFacets().isEmpty()) {
-            browsing.setFacets(facetLabelService.generateLabels(browsing.getFacets()));
-        }
-        return browsing;
-    }
-
-    @Override
-    public TrainingResourceBundle add(TrainingResourceBundle trainingResourceBundle, Authentication authentication) {
-        String lowerLevelResourceId = trainingResourceBundle.getId();
-        trainingResourceBundle.setId(trainingResourceBundle.getIdentifiers().getPid());
-        trainingResourceBundle.getMetadata().setPublished(true);
-
-        // sets public ids to resource organisation, resource providers and EOSC related services
-        updateIdsToPublic(trainingResourceBundle);
-
-        if (pidServiceEnabled) {
-            logger.info("Posting TrainingResource with id {} to PID service", trainingResourceBundle.getId());
-            pidIssuer.postPID(trainingResourceBundle.getId(), null);
-        }
-
-        TrainingResourceBundle ret;
-        logger.info("Training Resource '{}' is being published with id '{}'", lowerLevelResourceId, trainingResourceBundle.getId());
-        ret = super.add(trainingResourceBundle, null);
-        jmsService.convertAndSendTopic("training_resource.create", trainingResourceBundle);
-        return ret;
-    }
-
-    @Override
-    public TrainingResourceBundle update(TrainingResourceBundle trainingResourceBundle, Authentication authentication) {
-        TrainingResourceBundle published = super.get(trainingResourceBundle.getIdentifiers().getPid(),
-                trainingResourceBundle.getTrainingResource().getCatalogueId(), true);
-        TrainingResourceBundle ret = super.get(trainingResourceBundle.getIdentifiers().getPid(),
-                trainingResourceBundle.getTrainingResource().getCatalogueId(), true);
-        try {
-            BeanUtils.copyProperties(ret, trainingResourceBundle);
-        } catch (IllegalAccessException | InvocationTargetException e) {
-            logger.info("Could not copy properties.");
-        }
-
-        // sets public ids to resource organisation, resource providers and EOSC related services
-        updateIdsToPublic(ret);
-
-        ret.setIdentifiers(published.getIdentifiers());
-        ret.setId(published.getId());
-        ret.getMetadata().setPublished(true);
-        logger.info("Updating public Training Resource with id '{}'", ret.getId());
-        ret = super.update(ret, null);
-        jmsService.convertAndSendTopic("training_resource.update", ret);
-        return ret;
-    }
-
-    @Override
-    public void delete(TrainingResourceBundle trainingResourceBundle) {
-        try {
-            TrainingResourceBundle publicTrainingResourceBundle = get(trainingResourceBundle.getIdentifiers().getPid(),
-                    trainingResourceBundle.getTrainingResource().getCatalogueId(), true);
-            logger.info("Deleting public Training Resource with id '{}'", publicTrainingResourceBundle.getId());
-            super.delete(publicTrainingResourceBundle);
-            jmsService.convertAndSendTopic("training_resource.delete", publicTrainingResourceBundle);
-        } catch (CatalogueResourceNotFoundException ignore) {
-        }
     }
 
     @Override

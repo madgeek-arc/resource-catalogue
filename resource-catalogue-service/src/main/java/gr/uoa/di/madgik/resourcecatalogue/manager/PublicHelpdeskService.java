@@ -25,11 +25,9 @@ import gr.uoa.di.madgik.resourcecatalogue.exceptions.CatalogueResourceNotFoundEx
 import gr.uoa.di.madgik.resourcecatalogue.service.ServiceBundleService;
 import gr.uoa.di.madgik.resourcecatalogue.service.TrainingResourceService;
 import gr.uoa.di.madgik.resourcecatalogue.utils.JmsService;
-import gr.uoa.di.madgik.resourcecatalogue.utils.ProviderResourcesCommonMethods;
 import org.apache.commons.beanutils.BeanUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
@@ -42,20 +40,14 @@ public class PublicHelpdeskService extends ResourceCatalogueManager<HelpdeskBund
 
     private static final Logger logger = LoggerFactory.getLogger(PublicHelpdeskService.class);
     private final JmsService jmsService;
-    private final ProviderResourcesCommonMethods commonMethods;
     private final ServiceBundleService<ServiceBundle> serviceBundleService;
     private final TrainingResourceService trainingResourceService;
 
-    @Value("${catalogue.id}")
-    private String catalogueId;
-
     public PublicHelpdeskService(JmsService jmsService,
-                                 ProviderResourcesCommonMethods commonMethods,
                                  @Lazy ServiceBundleService<ServiceBundle> serviceBundleService,
                                  @Lazy TrainingResourceService trainingResourceService) {
         super(HelpdeskBundle.class);
         this.jmsService = jmsService;
-        this.commonMethods = commonMethods;
         this.serviceBundleService = serviceBundleService;
         this.trainingResourceService = trainingResourceService;
     }
@@ -70,10 +62,10 @@ public class PublicHelpdeskService extends ResourceCatalogueManager<HelpdeskBund
         return super.getAll(facetFilter, authentication);
     }
 
-    public HelpdeskBundle getOrElseReturnNull(String id, String catalogueId) {
+    public HelpdeskBundle getOrElseReturnNull(String id) {
         HelpdeskBundle helpdeskBundle;
         try {
-            helpdeskBundle = get(id, catalogueId, true);
+            helpdeskBundle = get(id, true);
         } catch (CatalogueResourceNotFoundException e) {
             return null;
         }

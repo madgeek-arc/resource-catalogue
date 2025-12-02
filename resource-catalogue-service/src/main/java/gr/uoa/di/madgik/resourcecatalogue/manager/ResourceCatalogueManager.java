@@ -143,6 +143,15 @@ public abstract class ResourceCatalogueManager<T extends Identifiable> extends R
         return ret;
     }
 
+    public T get(String id, boolean published) {
+        Resource resource = getResource(id, published);
+        if (resource == null) {
+            throw new CatalogueResourceNotFoundException(String.format("Could not find %s with id: %s",
+                    typeParameterClass.getSimpleName(), id));
+        }
+        return deserialize(resource);
+    }
+
     public T get(String id, String catalogueId, boolean published) {
         Resource resource = getResource(id, catalogueId, published);
         if (resource == null) {
@@ -150,6 +159,14 @@ public abstract class ResourceCatalogueManager<T extends Identifiable> extends R
                     typeParameterClass.getSimpleName(), id, catalogueId));
         }
         return deserialize(resource);
+    }
+
+    public Resource getResource(String id, boolean published) {
+        return searchService.searchFields(
+                getResourceTypeName(),
+                new SearchService.KeyValue("resource_internal_id", id),
+                new SearchService.KeyValue("published", String.valueOf(published))
+        );
     }
 
     public Resource getResource(String id, String catalogueId, boolean published) {

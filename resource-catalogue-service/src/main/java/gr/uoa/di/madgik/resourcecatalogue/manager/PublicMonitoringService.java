@@ -25,11 +25,9 @@ import gr.uoa.di.madgik.resourcecatalogue.exceptions.CatalogueResourceNotFoundEx
 import gr.uoa.di.madgik.resourcecatalogue.service.ServiceBundleService;
 import gr.uoa.di.madgik.resourcecatalogue.service.TrainingResourceService;
 import gr.uoa.di.madgik.resourcecatalogue.utils.JmsService;
-import gr.uoa.di.madgik.resourcecatalogue.utils.ProviderResourcesCommonMethods;
 import org.apache.commons.beanutils.BeanUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
@@ -37,26 +35,21 @@ import org.springframework.stereotype.Service;
 import java.lang.reflect.InvocationTargetException;
 
 @Service("publicMonitoringManager")
-public class PublicMonitoringService extends ResourceCatalogueManager<MonitoringBundle>
+public class PublicMonitoringService
+        extends ResourceCatalogueManager<MonitoringBundle>
         implements PublicResourceService<MonitoringBundle> {
 
     private static final Logger logger = LoggerFactory.getLogger(PublicMonitoringService.class);
     private final JmsService jmsService;
-    private final ProviderResourcesCommonMethods commonMethods;
     private final ServiceBundleService<ServiceBundle> serviceBundleService;
     private final TrainingResourceService trainingResourceService;
 
-    @Value("${catalogue.id}")
-    private String catalogueId;
-
     public PublicMonitoringService(JmsService jmsService,
-                                   ProviderResourcesCommonMethods commonMethods,
                                    @Lazy ServiceBundleService<ServiceBundle> serviceBundleService,
                                    @Lazy TrainingResourceService trainingResourceService
-                                   ) {
+    ) {
         super(MonitoringBundle.class);
         this.jmsService = jmsService;
-        this.commonMethods = commonMethods;
         this.serviceBundleService = serviceBundleService;
         this.trainingResourceService = trainingResourceService;
     }
@@ -71,10 +64,10 @@ public class PublicMonitoringService extends ResourceCatalogueManager<Monitoring
         return super.getAll(facetFilter, authentication);
     }
 
-    public MonitoringBundle getOrElseReturnNull(String id, String catalogueId) {
+    public MonitoringBundle getOrElseReturnNull(String id) {
         MonitoringBundle monitoringBundle;
         try {
-            monitoringBundle = get(id, catalogueId, true);
+            monitoringBundle = get(id, true);
         } catch (CatalogueResourceNotFoundException e) {
             return null;
         }
