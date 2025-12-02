@@ -20,16 +20,13 @@ import gr.uoa.di.madgik.catalogue.exception.ValidationException;
 import gr.uoa.di.madgik.registry.domain.Browsing;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.domain.Paging;
-import gr.uoa.di.madgik.registry.domain.Resource;
 import gr.uoa.di.madgik.registry.exception.ResourceException;
 import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
-import gr.uoa.di.madgik.registry.service.SearchService;
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
 import gr.uoa.di.madgik.resourcecatalogue.exceptions.CatalogueResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
 import gr.uoa.di.madgik.resourcecatalogue.utils.*;
 import gr.uoa.di.madgik.resourcecatalogue.validators.FieldValidator;
-import jakarta.validation.constraints.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,7 +40,6 @@ import org.springframework.stereotype.Service;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static gr.uoa.di.madgik.resourcecatalogue.utils.VocabularyValidationUtils.validateScientificDomains;
 import static java.util.stream.Collectors.toList;
@@ -60,15 +56,12 @@ public class DeployableServiceManager extends ResourceCatalogueManager<Deployabl
     private final CatalogueService catalogueService;
     private final ProviderResourcesCommonMethods commonMethods;
     private final PublicDeployableServiceService publicDeployableServiceService;
-    private final GenericManager genericManager;
     private final RegistrationMailService registrationMailService;
 
     @Autowired
     private FacetLabelService facetLabelService;
     @Autowired
     private FieldValidator fieldValidator;
-    @Autowired
-    private SearchService searchService;
 
     @Value("${catalogue.id}")
     private String catalogueId;
@@ -78,9 +71,8 @@ public class DeployableServiceManager extends ResourceCatalogueManager<Deployabl
                                     @Lazy VocabularyService vocabularyService,
                                     CatalogueService catalogueService,
                                     PublicDeployableServiceService publicDeployableServiceService,
-                                    @Lazy ProviderResourcesCommonMethods commonMethods,
                                     RegistrationMailService registrationMailService,
-                                    GenericManager genericManager) {
+                                    @Lazy ProviderResourcesCommonMethods commonMethods) {
         super(DeployableServiceBundle.class);
         this.providerService = providerService;
         this.idCreator = idCreator;
@@ -90,7 +82,6 @@ public class DeployableServiceManager extends ResourceCatalogueManager<Deployabl
         this.publicDeployableServiceService = publicDeployableServiceService;
         this.commonMethods = commonMethods;
         this.registrationMailService = registrationMailService;
-        this.genericManager = genericManager;
     }
 
     @Override
@@ -377,13 +368,7 @@ public class DeployableServiceManager extends ResourceCatalogueManager<Deployabl
 
     @Override
     public List<DeployableServiceBundle> getResourceBundles(String providerId, Authentication auth) {
-        FacetFilter ff = new FacetFilter();
-        ff.addFilter("resource_organisation", providerId);
-        ff.addFilter("catalogue_id", catalogueId);
-        ff.addFilter("published", false);
-        ff.setQuantity(maxQuantity);
-        ff.addOrderBy("name", "asc");
-        return this.getAll(ff, auth).getResults();
+        return getResourceBundles(catalogueId, providerId, auth).getResults();
     }
 
     @Override
@@ -437,8 +422,6 @@ public class DeployableServiceManager extends ResourceCatalogueManager<Deployabl
     public Browsing<DeployableServiceBundle> getAll(FacetFilter ff, Authentication auth) {
         updateFacetFilterConsideringTheAuthorization(ff, auth);
 
-        ff.setBrowseBy(genericManager.getBrowseBy(getResourceTypeName()));
-        ff.setResourceType(getResourceTypeName());
         Browsing<DeployableServiceBundle> resources;
         resources = getResults(ff);
         if (!resources.getResults().isEmpty() && !resources.getFacets().isEmpty()) {
@@ -459,24 +442,7 @@ public class DeployableServiceManager extends ResourceCatalogueManager<Deployabl
     }
 
     @Override
-    protected Browsing<DeployableServiceBundle> getResults(FacetFilter filter) {
-        Browsing<DeployableServiceBundle> browsing;
-        filter.setResourceType(getResourceTypeName());
-        browsing = convertToBrowsingEIC(searchService.search(filter));
-
-        return browsing;
-    }
-
-    private Browsing<DeployableServiceBundle> convertToBrowsingEIC(@NotNull Paging<Resource> paging) {
-        List<DeployableServiceBundle> results = paging.getResults()
-                .stream()
-                .map(res -> parserPool.deserialize(res, typeParameterClass))
-                .collect(Collectors.toList());
-        return new Browsing<>(paging, results, genericManager.getLabels(getResourceTypeName()));
-    }
-
-    @Override
-    public Paging<DeployableServiceBundle> getRandomResources(FacetFilter ff, String auditingInterval, Authentication auth) {
+    public Paging<DeployableServiceBundle> getRandomResourcesForAuditing(int quantity, int auditingInterval, Authentication auth) {
         FacetFilter facetFilter = new FacetFilter();
         facetFilter.setQuantity(maxQuantity);
         facetFilter.addFilter("status", "approved resource");
@@ -488,7 +454,7 @@ public class DeployableServiceManager extends ResourceCatalogueManager<Deployabl
         long todayEpochMillis = System.currentTimeMillis();
         long intervalEpochSeconds = Instant.ofEpochMilli(todayEpochMillis)
                 .atZone(ZoneId.systemDefault())
-                .minusMonths(Integer.parseInt(auditingInterval))
+                .minusMonths(auditingInterval)
                 .toEpochSecond();
 
         for (DeployableServiceBundle deployableServiceBundle : dsBrowsing.getResults()) {
@@ -512,7 +478,6 @@ public class DeployableServiceManager extends ResourceCatalogueManager<Deployabl
         Collections.shuffle(dsToBeAudited);
 
         // Limit the list to the requested quantity
-        int quantity = ff.getQuantity();
         if (dsToBeAudited.size() > quantity) {
             dsToBeAudited = dsToBeAudited.subList(0, quantity);
         }
@@ -534,11 +499,6 @@ public class DeployableServiceManager extends ResourceCatalogueManager<Deployabl
             }
         }
         return null;
-    }
-
-    @Override
-    public Map<String, List<DeployableServiceBundle>> getBy(String field, Authentication auth) throws NoSuchFieldException {
-        throw new UnsupportedOperationException("Not yet Implemented");
     }
 
     @Override

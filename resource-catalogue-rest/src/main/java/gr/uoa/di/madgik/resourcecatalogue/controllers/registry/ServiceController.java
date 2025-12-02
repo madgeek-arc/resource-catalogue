@@ -24,7 +24,7 @@ import gr.uoa.di.madgik.registry.exception.ResourceException;
 import gr.uoa.di.madgik.resourcecatalogue.annotations.BrowseCatalogue;
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
 import gr.uoa.di.madgik.resourcecatalogue.service.DraftResourceService;
-import gr.uoa.di.madgik.resourcecatalogue.service.GenericResourceService;
+import gr.uoa.di.madgik.catalogue.service.GenericResourceService;
 import gr.uoa.di.madgik.resourcecatalogue.service.ProviderService;
 import gr.uoa.di.madgik.resourcecatalogue.service.ServiceBundleService;
 import io.swagger.v3.oas.annotations.Hidden;
@@ -62,7 +62,7 @@ public class ServiceController {
     private final GenericResourceService genericResourceService;
 
     @Value("${auditing.interval:6}")
-    private String auditingInterval;
+    private int auditingInterval;
 
     @Value("${catalogue.id}")
     private String catalogueId;
@@ -312,18 +312,12 @@ public class ServiceController {
 
 
     @Tag(name = "ServiceAdmin")
-    @Parameters({
-            @Parameter(name = "quantity", description = "Quantity to be fetched", schema = @Schema(type = "string"))
-    })
     @GetMapping(path = "randomResources", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
-    public ResponseEntity<Paging<ServiceBundle>> getRandomResources(@Parameter(hidden = true) @RequestParam MultiValueMap<String, Object> allRequestParams,
-                                                                    @Parameter(hidden = true) Authentication auth) {
-        FacetFilter ff = FacetFilter.from(allRequestParams);
-        ff.setResourceType("service");
-        ff.addFilter("status", "approved resource");
-        ff.addFilter("published", false);
-        Paging<ServiceBundle> serviceBundlePaging = serviceBundleService.getRandomResources(ff, auditingInterval, auth);
+    public ResponseEntity<Paging<ServiceBundle>> getRandomResources(@Parameter(name = "quantity", description = "Quantity to be fetched", content = @Content(schema = @Schema(type = "string", defaultValue = "10")))
+                                                                              @RequestParam(defaultValue = "10") int quantity,
+                                                                              @Parameter(hidden = true) Authentication auth) {
+        Paging<ServiceBundle> serviceBundlePaging = serviceBundleService.getRandomResourcesForAuditing(quantity, auditingInterval, auth);
         return new ResponseEntity<>(serviceBundlePaging, HttpStatus.OK);
     }
 
@@ -368,24 +362,24 @@ public class ServiceController {
         // fetch catalogueId related non-public Resources
 
         List<gr.uoa.di.madgik.resourcecatalogue.dto.Value> catalogueRelatedServices = genericResourceService
-                .getResultsWithoutFacets(createFacetFilter(catalogueId, false, "service")).getResults()
+                .getResults(createFacetFilter(catalogueId, false, "service")).getResults()
                 .stream().map(serviceBundle -> (ServiceBundle) serviceBundle)
                 .map(c -> new gr.uoa.di.madgik.resourcecatalogue.dto.Value(c.getId(), c.getService().getName()))
                 .toList();
         List<gr.uoa.di.madgik.resourcecatalogue.dto.Value> catalogueRelatedTrainingResources = genericResourceService
-                .getResultsWithoutFacets(createFacetFilter(catalogueId, false, "training_resource")).getResults()
+                .getResults(createFacetFilter(catalogueId, false, "training_resource")).getResults()
                 .stream().map(trainingResourceBundle -> (TrainingResourceBundle) trainingResourceBundle)
                 .map(c -> new gr.uoa.di.madgik.resourcecatalogue.dto.Value(c.getId(), c.getTrainingResource().getTitle()))
                 .toList();
         // fetch non-catalogueId related public Resources
         List<gr.uoa.di.madgik.resourcecatalogue.dto.Value> publicServices = genericResourceService
-                .getResultsWithoutFacets(createFacetFilter(catalogueId, true, "service")).getResults()
+                .getResults(createFacetFilter(catalogueId, true, "service")).getResults()
                 .stream().map(serviceBundle -> (ServiceBundle) serviceBundle)
                 .filter(c -> !c.getService().getCatalogueId().equals(catalogueId))
                 .map(c -> new gr.uoa.di.madgik.resourcecatalogue.dto.Value(c.getId(), c.getService().getName()))
                 .toList();
         List<gr.uoa.di.madgik.resourcecatalogue.dto.Value> publicTrainingResources = genericResourceService
-                .getResultsWithoutFacets(createFacetFilter(catalogueId, true, "training_resource")).getResults()
+                .getResults(createFacetFilter(catalogueId, true, "training_resource")).getResults()
                 .stream().map(trainingResourceBundle -> (TrainingResourceBundle) trainingResourceBundle)
                 .filter(c -> !c.getTrainingResource().getCatalogueId().equals(catalogueId))
                 .map(c -> new gr.uoa.di.madgik.resourcecatalogue.dto.Value(c.getId(), c.getTrainingResource().getTitle()))

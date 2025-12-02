@@ -20,7 +20,6 @@ import gr.uoa.di.madgik.catalogue.exception.ValidationException;
 import gr.uoa.di.madgik.registry.domain.Browsing;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.domain.Paging;
-import gr.uoa.di.madgik.registry.domain.Resource;
 import gr.uoa.di.madgik.registry.exception.ResourceException;
 import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.registry.service.SearchService;
@@ -29,7 +28,6 @@ import gr.uoa.di.madgik.resourcecatalogue.exceptions.CatalogueResourceNotFoundEx
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
 import gr.uoa.di.madgik.resourcecatalogue.utils.*;
 import gr.uoa.di.madgik.resourcecatalogue.validators.FieldValidator;
-import jakarta.validation.constraints.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -62,7 +60,6 @@ public class TrainingResourceManager extends ResourceCatalogueManager<TrainingRe
     private final PublicTrainingResourceService publicTrainingResourceManager;
     private final MigrationService migrationService;
     private final ProviderResourcesCommonMethods commonMethods;
-    private final GenericManager genericManager;
     private final RelationshipValidator relationshipValidator;
     @Autowired
     private FacetLabelService facetLabelService;
@@ -85,7 +82,6 @@ public class TrainingResourceManager extends ResourceCatalogueManager<TrainingRe
                                    PublicTrainingResourceService publicTrainingResourceManager,
                                    SynchronizerService<TrainingResource> synchronizerService,
                                    @Lazy ProviderResourcesCommonMethods commonMethods,
-                                   GenericManager genericManager,
                                    @Lazy MigrationService migrationService,
                                    @Lazy RelationshipValidator relationshipValidator) {
         super(TrainingResourceBundle.class);
@@ -98,7 +94,6 @@ public class TrainingResourceManager extends ResourceCatalogueManager<TrainingRe
         this.publicTrainingResourceManager = publicTrainingResourceManager;
         this.synchronizerService = synchronizerService;
         this.commonMethods = commonMethods;
-        this.genericManager = genericManager;
         this.migrationService = migrationService;
         this.relationshipValidator = relationshipValidator;
     }
@@ -404,13 +399,7 @@ public class TrainingResourceManager extends ResourceCatalogueManager<TrainingRe
 
     @Override
     public List<TrainingResourceBundle> getResourceBundles(String providerId, Authentication auth) {
-        FacetFilter ff = new FacetFilter();
-        ff.addFilter("resource_organisation", providerId);
-        ff.addFilter("catalogue_id", catalogueId);
-        ff.addFilter("published", false);
-        ff.setQuantity(maxQuantity);
-        ff.addOrderBy("title", "asc");
-        return this.getAll(ff, auth).getResults();
+        return getResourceBundles(catalogueId, providerId, auth).getResults();
     }
 
     @Override
@@ -478,7 +467,6 @@ public class TrainingResourceManager extends ResourceCatalogueManager<TrainingRe
     public Browsing<TrainingResourceBundle> getAll(FacetFilter ff, Authentication auth) {
         updateFacetFilterConsideringTheAuthorization(ff, auth);
 
-        ff.setBrowseBy(genericManager.getBrowseBy(getResourceTypeName()));
         ff.setResourceType(getResourceTypeName());
         Browsing<TrainingResourceBundle> resources;
         resources = getResults(ff);
@@ -500,24 +488,7 @@ public class TrainingResourceManager extends ResourceCatalogueManager<TrainingRe
     }
 
     @Override
-    protected Browsing<TrainingResourceBundle> getResults(FacetFilter filter) {
-        Browsing<TrainingResourceBundle> browsing;
-        filter.setResourceType(getResourceTypeName());
-        browsing = convertToBrowsingEIC(searchService.search(filter));
-
-        return browsing;
-    }
-
-    private Browsing<TrainingResourceBundle> convertToBrowsingEIC(@NotNull Paging<Resource> paging) {
-        List<TrainingResourceBundle> results = paging.getResults()
-                .stream()
-                .map(res -> parserPool.deserialize(res, typeParameterClass))
-                .collect(Collectors.toList());
-        return new Browsing<>(paging, results, genericManager.getLabels(getResourceTypeName()));
-    }
-
-    @Override
-    public Paging<TrainingResourceBundle> getRandomResources(FacetFilter ff, String auditingInterval, Authentication auth) {
+    public Paging<TrainingResourceBundle> getRandomResourcesForAuditing(int quantity, int auditingInterval, Authentication auth) {
         FacetFilter facetFilter = new FacetFilter();
         facetFilter.setQuantity(maxQuantity);
         facetFilter.addFilter("status", "approved resource");
@@ -529,7 +500,7 @@ public class TrainingResourceManager extends ResourceCatalogueManager<TrainingRe
         long todayEpochMillis = System.currentTimeMillis();
         long intervalEpochSeconds = Instant.ofEpochMilli(todayEpochMillis)
                 .atZone(ZoneId.systemDefault())
-                .minusMonths(Integer.parseInt(auditingInterval))
+                .minusMonths(auditingInterval)
                 .toEpochSecond();
 
         for (TrainingResourceBundle trainingResourceBundle : trainingsBrowsing.getResults()) {
@@ -553,7 +524,6 @@ public class TrainingResourceManager extends ResourceCatalogueManager<TrainingRe
         Collections.shuffle(trainingsToBeAudited);
 
         // Limit the list to the requested quantity
-        int quantity = ff.getQuantity();
         if (trainingsToBeAudited.size() > quantity) {
             trainingsToBeAudited = trainingsToBeAudited.subList(0, quantity);
         }
@@ -575,11 +545,6 @@ public class TrainingResourceManager extends ResourceCatalogueManager<TrainingRe
             }
         }
         return null;
-    }
-
-    @Override
-    public Map<String, List<TrainingResourceBundle>> getBy(String field, Authentication auth) throws NoSuchFieldException {
-        throw new UnsupportedOperationException("Not yet Implemented");
     }
 
     @Override
